@@ -171,14 +171,13 @@ PLATFORMS
 DEPENDENCIES
   capistrano (~> 3.2.0)
   capybara
-  coffee-rails (~> 4.0.0)
   cucumber
-  jbuilder (~> 2.0)
+  jbuilder
   jquery-rails
   rails (= 4.1.6)
   rspec-rails
-  sass-rails (~> 4.0.3)
-  sdoc (~> 0.4.0)
+  sass-rails
+  sdoc
   selenium-webdriver
   spring
   sqlite3
