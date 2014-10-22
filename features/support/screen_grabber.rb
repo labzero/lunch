@@ -1,4 +1,4 @@
-require 'active_support'
+require 'active_support/inflector'
 
 module ScreenGrabber
   DO_GRAB = (ENV['SCREENS'] && ENV['SCREENS'] == 'true') || true #my_config['screens']
