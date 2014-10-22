@@ -7,7 +7,7 @@ default: <%= std_opts %> features
 wip: --tags @wip:3 --wip features
 rerun: <%= rerun_opts %> --format rerun --out rerun.txt --strict --tags ~@wip
 
-local: <%= std_opts %> APP_HOST="http://localhost:8080/" SCREENS=true ENVIRONMENT=dev
+local: <%= std_opts %> APP_HOST="http://localhost:3000/" SCREENS=true ENVIRONMENT=dev
 
 dev: <%= std_opts %> APP_HOST="http://YOUR_SERVER/" SCREENS=true ENVIRONMENT=dev REMOTE=true
 dev-smoke:  <%= std_opts %> -p dev --tags @smoke BROWSER=sauce_chrome_win7

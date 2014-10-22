@@ -1,3 +1,5 @@
+require 'active_support'
+
 module ScreenGrabber
   DO_GRAB = (ENV['SCREENS'] && ENV['SCREENS'] == 'true') || true #my_config['screens']
 
@@ -19,7 +21,7 @@ module ScreenGrabber
   private
 
   def filename name, ext='png'
-    "#{Time.new.to_i}-#{name.to_slug}.#{ext}"
+    "#{Time.new.to_i}-#{name.parameterize}.#{ext}"
   end
 
   def screens_path

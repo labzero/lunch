@@ -1,6 +1,5 @@
 When /^I visit the root path$/ do
   visit "/?buster=#{Time.now.to_i}"
-  grab_screen("visiting the root path")
 end
 
 Then(/^I should see "([^"]*)"$/) do |text|
@@ -19,6 +18,10 @@ end
 
 When(/^I press the back button$/) do
   page.evaluate_script('window.history.back()')
+end
+
+Then(/^I take a screen grab of "(.*?)"$/) do |text|
+  grab_screen("I take a screen grab of #{text}")
 end
 
 def links_from_frame frame_name, opts={limit: 20}

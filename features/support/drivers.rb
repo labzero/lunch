@@ -35,15 +35,6 @@ base_opts = {:username => SAUCE_USERNAME, :access_key => SAUCE_ACCESS_KEY, :buil
 SAUCE_CONNECT_URL = ENV['REMOTE'] == 'true' ? "http://#{SAUCE_USERNAME}:#{SAUCE_ACCESS_KEY}@ondemand.saucelabs.com:80/wd/hub" : "http://localhost:#{SAUCE_PORT}/wd/hub"
 
 
-Capybara.register_driver :sauce_ie_8_win7 do |app|
-  caps = base_opts.merge({:platform => 'Windows 7', :version => '8'})
-
-  Capybara::Selenium::Driver.new(app,
-                                 :browser => :remote,
-                                 :url => SAUCE_CONNECT_URL,
-                                 :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.internet_explorer(caps))
-end
-
 Capybara.register_driver :sauce_ie_9_win7 do |app|
   caps = base_opts.merge({:platform => 'Windows 7', :version => '9'})
 
@@ -53,8 +44,17 @@ Capybara.register_driver :sauce_ie_9_win7 do |app|
                                  :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.internet_explorer(caps))
 end
 
-Capybara.register_driver :sauce_ie_10_vista do |app|
-  caps = base_opts.merge({:platform => 'vista', :version => '10'})
+Capybara.register_driver :sauce_ie_10_win7 do |app|
+  caps = base_opts.merge({:platform => 'Windows 7', :version => '10'})
+
+  Capybara::Selenium::Driver.new(app,
+                                 :browser => :remote,
+                                 :url => SAUCE_CONNECT_URL,
+                                 :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.internet_explorer(caps))
+end
+
+Capybara.register_driver :sauce_ie_11_win7 do |app|
+  caps = base_opts.merge({:platform => 'Windows 7', :version => '11'})
 
   Capybara::Selenium::Driver.new(app,
                                  :browser => :remote,
@@ -68,40 +68,4 @@ Capybara.register_driver :sauce_chrome_win7 do |app|
                                  :browser => :remote,
                                  :url => SAUCE_CONNECT_URL,
                                  :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.chrome(caps))
-end
-
-Capybara.register_driver :sauce_firefox_15_vista do |app|
-  caps = base_opts.merge({:platform => 'vista', :version => '15'})
-
-  Capybara::Selenium::Driver.new(app,
-                                 :browser => :remote,
-                                 :url => SAUCE_CONNECT_URL,
-                                 :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.firefox(caps))
-end
-
-Capybara.register_driver :sauce_firefox_23_vista do |app|
-  caps = base_opts.merge({:platform => 'vista', :version => '23'})
-
-  Capybara::Selenium::Driver.new(app,
-                                 :browser => :remote,
-                                 :url => SAUCE_CONNECT_URL,
-                                 :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.firefox(caps))
-end
-
-Capybara.register_driver :sauce_android_4_0 do |app|
-  caps = base_opts.merge({:platform => 'linux', :version => '4.0'})
-
-  Capybara::Selenium::Driver.new(app,
-                                 :browser => :remote,
-                                 :url => SAUCE_CONNECT_URL,
-                                 :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.android(caps))
-end
-
-Capybara.register_driver :sauce_iphone_6 do |app|
-  caps = base_opts.merge({:platform => 'OS X 10.8', :version => '6'})
-
-  Capybara::Selenium::Driver.new(app,
-                                 :browser => :remote,
-                                 :url => SAUCE_CONNECT_URL,
-                                 :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.iphone(caps))
 end
