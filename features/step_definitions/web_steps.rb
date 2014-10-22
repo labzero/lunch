@@ -1,5 +1,5 @@
 When /^I visit the root path$/ do
-  visit "/?buster=#{Time.now.to_i}"
+  visit "/"
 end
 
 Then(/^I should see "([^"]*)"$/) do |text|
