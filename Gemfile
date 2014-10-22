@@ -29,8 +29,13 @@ gem 'spring',        group: :development
 # Fix for 'No source of timezone data could be found.'
 gem 'tzinfo-data'
 
+#
+
 group :development, :test do
   gem 'rspec-rails'
+  gem 'cucumber'
+  gem 'capybara'
+  gem 'selenium-webdriver'
 end
 
 # Use ActiveModel has_secure_password
