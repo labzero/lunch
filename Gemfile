@@ -34,6 +34,10 @@ group :development, :test do
   gem 'cucumber'
   gem 'capybara'
   gem 'selenium-webdriver'
+  gem 'foreman'
+  gem 'sinatra'
+  gem 'swagger-blocks'
+  gem 'rerun'
 end
 
 # Use ActiveModel has_secure_password
