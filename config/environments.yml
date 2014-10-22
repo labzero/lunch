@@ -1,0 +1,26 @@
+---
+
+dev:
+  app_host: 'http://localhost:3000/'
+  user1:
+    username:
+    password:
+
+# insert configs once known
+#qa:
+#  app_host: 'qa.foo.com'
+#  user1:
+#    username:
+#    password:
+#
+#staging:
+#  app_host: 'stg.foo.com'
+#  user1:
+#    username:
+#    password:
+#
+#production:
+#  app_host: 'www.foo.com'
+#  user1:
+#    username:
+#    password:

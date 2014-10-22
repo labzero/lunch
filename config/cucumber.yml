@@ -1,0 +1,19 @@
+<%
+rerun = File.file?('rerun.txt') ? IO.read('rerun.txt') : ""
+rerun_opts = rerun.to_s.strip.empty? ? "--format #{ENV['CUCUMBER_FORMAT'] || 'progress'} features" : "--format #{ENV['CUCUMBER_FORMAT'] || 'pretty'} #{rerun}"
+std_opts = "--format #{ENV['CUCUMBER_FORMAT'] || 'pretty'} --tags ~@wip"
+%>
+default: <%= std_opts %> features
+wip: --tags @wip:3 --wip features
+rerun: <%= rerun_opts %> --format rerun --out rerun.txt --strict --tags ~@wip
+
+local: <%= std_opts %> APP_HOST="http://localhost:8080/" SCREENS=true ENVIRONMENT=dev
+
+dev: <%= std_opts %> APP_HOST="http://YOUR_SERVER/" SCREENS=true ENVIRONMENT=dev REMOTE=true
+dev-smoke:  <%= std_opts %> -p dev --tags @smoke BROWSER=sauce_chrome_win7
+
+qa1: <%= std_opts %> APP_HOST="http://YOUR_SERVER/" SCREENS=true ENVIRONMENT=qa1 REMOTE=true
+qa1-smoke:  <%= std_opts %> -p qa1 --tags @smoke BROWSER=sauce_chrome_win7
+
+production: <%= std_opts %> APP_HOST="http://PRODSURVUR/" SCREENS=true ENVIRONMENT=production REMOTE=true
+production-smoke:  <%= std_opts %> -p production --tags @smoke BROWSER=sauce_chrome_win7
