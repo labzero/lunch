@@ -8,6 +8,7 @@ body {
   font-size: $default-font-size;
   color: $text-color;
   @include default-font;
+  background-color: $light-gray;
 }
 
 $heading-margin: 0.75rem;
