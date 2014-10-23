@@ -1,0 +1,7 @@
+// import the parts of compass that you want
+@import 'compass/reset'; // we may want to use a different reset, just throwing this here for now
+
+// base styles
+@import 'sizes';
+@import 'grid';
+@import 'base';

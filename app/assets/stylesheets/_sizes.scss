@@ -1,0 +1,7 @@
+$max-row-width: 960px;
+$grid-column-width: 6.25%; // 12 columns
+$gutter-width: 2.0833%; // 11 gutters
+$row-padding: 1.04166%; // 1 each on outside of row
+
+$column-1-width: ($grid-column-width * 12) + ($gutter-width * 11);
+$column-3-width: ($grid-column-width * 4) + ($gutter-width * 3);
