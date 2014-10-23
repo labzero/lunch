@@ -37,8 +37,8 @@ group :development, :test do
   gem 'swagger-blocks'
   gem 'rerun'
   gem 'sass-rails'
-  gem 'compass-rails'
   gem 'brakeman'
+  gem "autoprefixer-rails" # automatically adds vendor prefixes to all applicable css
 end
 
 # Use ActiveModel has_secure_password
