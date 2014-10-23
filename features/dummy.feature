@@ -6,4 +6,4 @@ Feature: Visiting Homepage
 
   Scenario: Visit homepage
     When I visit the root path
-    Then I should see "Welcome aboard You’re riding Ruby on Rails!"
+    Then I should see "A demonstration of our grid layout."
