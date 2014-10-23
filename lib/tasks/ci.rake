@@ -1,4 +1,7 @@
 namespace :ci do
+  desc "Sets up the test environment and runs the tests and static analysis"
+  task :build => ['spec', 'ci:brakeman']
+  
   desc "Run Brakeman"
   task :brakeman do
     require 'brakeman'
