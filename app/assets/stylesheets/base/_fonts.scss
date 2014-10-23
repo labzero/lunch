@@ -1,0 +1,12 @@
+$light-weight: 200;
+$normal-weight: 400;
+$bold-weight: 700;
+
+$default-font-family: 'SourceSansPro', 'Segoe UI', 'Myriad Pro', sans-serif;
+$default-font-size: 16px;
+
+@mixin default-font {
+  font-family: $default-font-family;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

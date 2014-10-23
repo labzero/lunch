@@ -198,6 +198,8 @@ GEM
     slim (2.1.0)
       temple (~> 0.6.9)
       tilt (>= 1.3.3, < 2.1)
+    source-sans-pro-rails (0.6.1)
+      railties (>= 3.2, < 5.0)
     sprockets (2.11.0)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -255,6 +257,7 @@ DEPENDENCIES
   sdoc
   selenium-webdriver
   sinatra
+  source-sans-pro-rails
   sqlite3
   swagger-blocks
   turbolinks
