@@ -1,11 +1,13 @@
 @import "base/normalize";
+@import "base/fonts";
 @import "base/sizes";
 @import "base/colors";
 @import "base/grid";
 
 body {
-  font-size: 16px; // 1 rem
+  font-size: $default-font-size;
   color: $text-color;
+  @include default-font;
 }
 
 $heading-margin: 0.75rem;

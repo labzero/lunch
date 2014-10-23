@@ -27,6 +27,9 @@ gem 'tzinfo-data'
 
 gem 'haml-rails'
 
+#source-sans-pro font
+gem 'source-sans-pro-rails'
+
 group :development, :test do
   gem 'rspec-rails'
   gem 'cucumber'
