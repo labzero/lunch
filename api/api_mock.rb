@@ -68,7 +68,7 @@ class APIMockRates < Sinatra::Base
       halt 400, 'Invalid term supplied'
     end
     {
-      rate: params[:term].to_i * 0.127
+      rate: params[:term].to_i * 0.122
     }.to_json
   end
 end
