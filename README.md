@@ -7,6 +7,6 @@ We use [Foreman](https://github.com/ddollar/foreman) to manage all the various l
 Follow these steps to get up and running (they assume you have [RVM](http://rvm.io/) installed):
 
 1. `bundle install`
-2. `cp .evn.example .env`
+2. `cp .env.example .env`
 3. `foreman start`
 4. Navigate over to [http://localhost:3000](http://localhost:3000)
