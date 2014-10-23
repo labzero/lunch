@@ -38,6 +38,7 @@ group :development, :test do
   gem 'rerun'
   gem 'sass-rails'
   gem 'compass-rails'
+  gem 'brakeman'
 end
 
 # Use ActiveModel has_secure_password
