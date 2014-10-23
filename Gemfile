@@ -5,8 +5,6 @@ source 'https://rubygems.org'
 gem 'rails', '4.1.6'
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3'
-# Use SCSS for stylesheets
-gem 'sass-rails'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
 # See https://github.com/sstephenson/execjs#readme for more supported runtimes
@@ -27,7 +25,7 @@ gem 'sdoc',          group: :doc
 # Fix for 'No source of timezone data could be found.'
 gem 'tzinfo-data'
 
-#
+gem 'haml-rails'
 
 group :development, :test do
   gem 'rspec-rails'
@@ -38,6 +36,8 @@ group :development, :test do
   gem 'sinatra'
   gem 'swagger-blocks'
   gem 'rerun'
+  gem 'sass-rails'
+  gem 'compass-rails'
 end
 
 # Use ActiveModel has_secure_password
