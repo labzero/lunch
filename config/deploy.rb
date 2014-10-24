@@ -4,9 +4,6 @@ lock '3.2.1'
 set :application, 'member'
 set :repo_url, 'git@github.com:labzero/fhlb-member.git'
 
-# Default branch is :master
-# ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
-
 set :deploy_to, '/usr/local/member'
 
 set :log_level, :debug
