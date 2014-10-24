@@ -86,6 +86,8 @@ GEM
     dotenv-deployment (0.0.2)
     erubis (2.7.0)
     execjs (2.2.1)
+    faker (1.4.3)
+      i18n (~> 0.5)
     fastercsv (1.5.5)
     ffi (1.9.6)
     foreman (0.75.0)
@@ -251,6 +253,7 @@ DEPENDENCIES
   capistrano-rvm
   capybara
   cucumber
+  faker
   foreman
   haml-rails
   jbuilder

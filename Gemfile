@@ -41,8 +41,9 @@ group :development, :test do
   gem 'rerun'
   gem 'sass-rails'
   gem 'brakeman'
-  gem "autoprefixer-rails" # automatically adds vendor prefixes to all applicable css
-  gem "rails-sass-images" # allows us to measure native image dimensions in our scss
+  gem 'autoprefixer-rails' # automatically adds vendor prefixes to all applicable css
+  gem 'rails-sass-images' # allows us to measure native image dimensions in our scss
+  gem 'faker' #Faker library that generates fake data.
 end
 
 # Use ActiveModel has_secure_password
