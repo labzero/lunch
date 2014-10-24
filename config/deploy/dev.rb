@@ -1,4 +1,5 @@
 set :rails_env, 'production'
+set :branch, fetch(:branch, "develop")
 
 server '10.250.6.20', user: 'ubuntu', roles: %w{web app db}, primary: true
 
