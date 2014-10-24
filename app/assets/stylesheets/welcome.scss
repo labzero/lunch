@@ -1,6 +1,4 @@
 $logo: 'logo-color.png'; // we'll want to replace this with an SVG and also take retina into account
-$logo-width: image_width($logo);
-$logo-height: image_height($logo);
 
 .welcome {
   margin-top: 30px;
