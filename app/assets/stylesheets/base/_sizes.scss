@@ -5,3 +5,5 @@ $row-padding: 1.04166%; // 1 each on outside of row
 
 $column-1-width: ($grid-column-width * 12) + ($gutter-width * 11);
 $column-3-width: ($grid-column-width * 4) + ($gutter-width * 3);
+
+$column-4x8-right-width: ($grid-column-width * 8) + ($gutter-width * 7);

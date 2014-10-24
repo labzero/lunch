@@ -18,6 +18,13 @@
 #
 # To learn more, please read the Rails Internationalization guide
 # available at http://guides.rubyonrails.org/i18n.html.
-
 en:
-  hello: "Hello world"
+  welcome:
+    meta_title: FHLB - Welcome
+    title: Welcome!
+    intro: Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sit amet placerat odio, a ornare nibh. Integer sagittis, ex eu dignissim commodo, dui dui maximus massa, sit amet rutrum dolor dui et tellus.
+    logo: FHLBank San Francisco
+    questions:
+      p: Questions about access
+      phone: 415.555.7283
+

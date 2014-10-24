@@ -1,10 +1,10 @@
 class WelcomeController < ApplicationController
 
-  def logon
+  def index
 
   end
 
-  def layout_demo
+  def grid_demo
 
   end
 

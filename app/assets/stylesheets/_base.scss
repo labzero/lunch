@@ -3,34 +3,11 @@
 @import "base/sizes";
 @import "base/colors";
 @import "base/grid";
+@import "base/utils";
 
 body {
   font-size: $default-font-size;
   color: $text-color;
   @include default-font;
   background-color: $light-gray;
-}
-
-$heading-margin: 0.75rem;
-
-%heading-style {
-  margin: $heading-margin 0;
-  text-align: center;
-}
-
-h1 {
-  @extend %heading-style;
-  font-size: 3rem;
-}
-h2 {
-  @extend %heading-style;
-  font-size: 2.5rem;
-}
-h3 {
-  @extend %heading-style;
-  font-size: 2rem;
-}
-
-section {
-  margin-bottom: 60px;
 }
