@@ -6,4 +6,4 @@ Feature: Visiting Homepage
 
   Scenario: Visit homepage
     When I visit the root path
-    Then I should see "A demonstration of our grid layout."
+    Then I should see "Welcome!"

@@ -1,5 +1,10 @@
 class WelcomeController < ApplicationController
+
   def index
+
+  end
+
+  def grid_demo
 
   end
 

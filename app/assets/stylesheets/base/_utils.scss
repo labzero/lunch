@@ -1,0 +1,10 @@
+%absolute-psuedoelement {
+  content: '';
+  position: absolute;
+}
+
+%hide-text {
+  text-indent: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+}
