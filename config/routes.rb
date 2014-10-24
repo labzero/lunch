@@ -10,6 +10,8 @@ Rails.application.routes.draw do
 
   get 'grid_demo' => 'welcome#grid_demo'
 
+  get '/dashboard' => 'dashboard#index'
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 

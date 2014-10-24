@@ -27,4 +27,9 @@ en:
     questions:
       p: Questions about access
       phone: 415.555.7283
-
+  dashboard:
+    meta_title: FHLB - Dashboard
+    actions:
+      more: More
+      edit: Edit
+      calendar: Calendar

@@ -1,0 +1,15 @@
+%button {
+  padding: 5px 10px;
+  text-transform: uppercase;
+  font-size: $small-font-size;
+  border-radius: $default-border-radius;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.primary-button {
+  @extend %button;
+  color: $white;
+  background-color: $actionable-blue;
+}
