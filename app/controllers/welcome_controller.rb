@@ -9,6 +9,6 @@ class WelcomeController < ApplicationController
   end
 
   def details
-    render text: `cat ./REVISION || echo 'No REVISION found!'`
+    render text: `cat ./REVISION 2>/dev/null || echo 'No REVISION found!'`
   end
 end
