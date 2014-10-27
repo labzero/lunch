@@ -18,3 +18,4 @@ This is a summary of the options supported in our .env files:
 
 * `PORT`: The base port for foreman.
 * `SECRET_KEY_BASE`: The secret key used to sign cookies for this environment. You can get a value from [Fourmilab](https://www.fourmilab.ch/cgi-bin/Hotbits?nbytes=128&fmt=password&npass=1&lpass=30&pwtype=2).
+* `DATABASE_URL`: Optional URL that overrides `config/database.yml` configuration for the current environment.
