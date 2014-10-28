@@ -4,3 +4,10 @@
 require File.expand_path('../config/application', __FILE__)
 
 Rails.application.load_tasks
+
+namespace :db do
+  desc "db:migration fakes"
+  task :migrate => :environment do
+    p 'No DB, clobber migrate.'
+  end
+end
