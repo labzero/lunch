@@ -84,6 +84,8 @@ GEM
     dotenv (0.11.1)
       dotenv-deployment (~> 0.0.2)
     dotenv-deployment (0.0.2)
+    dotenv-rails (0.11.1)
+      dotenv (= 0.11.1)
     erubis (2.7.0)
     execjs (2.2.1)
     faker (1.4.3)
@@ -252,6 +254,7 @@ DEPENDENCIES
   capistrano-rvm
   capybara
   cucumber
+  dotenv-rails
   faker
   foreman
   haml-rails

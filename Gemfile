@@ -25,6 +25,8 @@ gem 'tzinfo-data'
 
 gem 'haml-rails'
 
+gem 'dotenv-rails'
+
 # Below are gems needed for the asset pipeline
 gem 'sass-rails'
 gem 'autoprefixer-rails' # automatically adds vendor prefixes to all applicable css
