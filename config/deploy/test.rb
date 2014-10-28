@@ -1,5 +1,5 @@
 set :rails_env, 'production'
-set :branch, fetch(:branch, "develop")
+set :branch, ENV['CAP_BRANCH'] || "develop"
 
 server 'example.com', user: 'ubuntu', roles: %w{web app db}, primary: true
 
