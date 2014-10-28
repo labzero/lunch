@@ -25,7 +25,10 @@ gem 'tzinfo-data'
 
 gem 'haml-rails'
 
-#source-sans-pro font
+# Below are gems needed for the asset pipeline
+gem 'sass-rails'
+gem 'autoprefixer-rails' # automatically adds vendor prefixes to all applicable css
+gem 'rails-sass-images' # allows us to measure native image dimensions in our scss
 gem 'source-sans-pro-rails'
 
 group :development, :test do
@@ -37,10 +40,7 @@ group :development, :test do
   gem 'sinatra'
   gem 'swagger-blocks'
   gem 'rerun'
-  gem 'sass-rails'
   gem 'brakeman'
-  gem 'autoprefixer-rails' # automatically adds vendor prefixes to all applicable css
-  gem 'rails-sass-images' # allows us to measure native image dimensions in our scss
   gem 'faker' #Faker library that generates fake data.
 end
 
