@@ -22,11 +22,19 @@ Oracle Instant Client is needed for the Oracle DB adapter used by ActiveRecord. 
 1. [Download](http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html) the Oracle Instant Client (11g release 2, currently 11.2.0.4.0) for your platform, as well as the SDK package and SQL*Plus package for your platform (found on the same page).
 2. Extract all three zip files into the same directory.
 3. Place that directory somewhere in your system in a path that **contains no spaces**. If there are any spaces anywhere in the path the gem install will not work. You will get an obtuse error saying that `DYLD_LIBRARY_PATH` needs to be defined.
-4. `cd` into the Oracle Instant Client directory in your shell and run `ln -s libclntsh.dylib.11.1 libclntsh.dylib`, which creates a needed symlink. This may vary between OSes, so if you don't have a `.dylib` try it with `.so` instead.
+4. `cd` into the Oracle Instant Client directory in your shell and run `ln -s libclntsh.dylib.11.1 libclntsh.dylib` (OS X) or `ln -s libclntsh.so.11.1 libclntsh.so` (Linux), which creates a needed symlink.
 5. Open `~/.bashrc` and add the following lines (replacing `YOUR_PATH` with the absolute path to the Oracle Instant Client directory):
 
+   OS X:
    ```
    export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:YOUR_PATH
+   export NLS_LANG="AMERICAN_AMERICA.UTF8"
+   export PATH=$PATH:YOUR_PATH
+   ```
+
+   Linux:
+   ```
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:YOUR_PATH
    export NLS_LANG="AMERICAN_AMERICA.UTF8"
    export PATH=$PATH:YOUR_PATH
    ```
