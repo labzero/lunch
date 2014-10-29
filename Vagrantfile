@@ -172,16 +172,28 @@ export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH
 export PATH=$ORACLE_HOME/bin:$PATH
 EOS
 
+  sql_seed = <<EOS
+CREATE USER member_development IDENTIFIED BY notthatsecret;
+GRANT CONNECT TO member_development;
+CREATE USER member_test IDENTIFIED BY notthatsecret;
+GRANT CONNECT TO member_test;
+CREATE USER member_production IDENTIFIED BY notthatsecret;
+GRANT CONNECT TO member_production;
+EOS
+
   provision_script = <<EOS
   sudo /etc/init.d/oracle-xe status 2>/dev/null && exit
-  test -f /vagrant_oracle_installer/#{oracle_rpm_name} || (echo 'Oracle Installer NOT FOUND' 1>&2 && exit 1)
+  if [[ ! -f /vagrant_oracle_installer/#{oracle_rpm_name} ]]; then
+    echo 'Oracle Installer NOT FOUND! Make sure you exported ORACLE_INSTALLER with a path to the directory containing the RPM' 1>&2
+    exit 1
+  fi
   sudo apt-get update
   sudo apt-get -q -y --force-yes install alien libaio1 unixodbc openjdk-7-jre
   echo 'export JAVA_HOME=/usr/lib/jvm/java-7-oracle
-export PATH=$JAVA_HOME/bin:$PATH' | sudo tee -a /etc/bash.bashrc
+export PATH=$JAVA_HOME/bin:$PATH' | cat - /etc/bash.bashrc | sudo tee /etc/bash.bashrc > /dev/null
   source /etc/bash.bashrc
   cd /vagrant_oracle_installer
-  sudo alien --scripts -d #{oracle_rpm_name}
+  test -f /vagrant_oracle_installer/#{oracle_deb_name} || sudo alien --scripts -d #{oracle_rpm_name}
   echo #{Shellwords.escape(chkconfig_script)} | sudo tee -a /sbin/chkconfig
   sudo chmod 755 /sbin/chkconfig
   echo '# Oracle 11g XE kernel parameters
@@ -208,8 +220,10 @@ kernel.shmmax=536870912' | sudo tee -a /etc/sysctl.d/60-oracle.conf
   echo #{Shellwords.escape(oracle_xe_response_file)} > ~/xe.rsp
   sudo /etc/init.d/oracle-xe configure responseFile=~/xe.rsp
 
-  echo #{Shellwords.escape(bashrc_changes)} | sudo tee -a /etc/bash.bashrc
+  echo #{Shellwords.escape(bashrc_changes)} | cat - /etc/bash.bashrc | sudo tee /etc/bash.bashrc > /dev/null
   source /etc/bash.bashrc
+
+  echo #{Shellwords.escape(sql_seed)} | sqlplus SYSTEM/password@localhost:1521
 EOS
 
   config.vm.provision "shell", inline: provision_script, privileged: false
