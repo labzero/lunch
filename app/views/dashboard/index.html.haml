@@ -12,9 +12,18 @@
         %p This is content that should be yielded inside the dashboard module.
         %p This will give us flexibility to put whatever we want inside.
     .row
-      =render layout: 'dashboard/dashboard_module', locals: {title: 'Example Module 3', action_type: 'more-button'} do
-        %p This is content that should be yielded inside the dashboard module.
-        %p This will give us flexibility to put whatever we want inside.
+      =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), action_type: 'more-button'} do
+        %table.table-striped
+          %tbody
+            - @previous_activity.each_with_index do |row, i|
+              %tr
+                %td
+                  #{row[0]}
+                  %div.dashboard-module-content-light #{row[2].strftime('%^b %d %Y')}
+                - if i == 0
+                  %td #{number_to_currency(row[1], precision: 0)}
+                - else
+                  %td #{number_with_delimiter(row[1], precision: 0)}
   .column-3
     =render layout: 'dashboard/dashboard_module', locals: {title: 'Example Module 4', action_type: 'edit-button'} do
       %p This is content that should be yielded inside the dashboard module.
