@@ -157,7 +157,7 @@ start) mkdir /var/lock/subsys 2>/dev/null
 touch /var/lock/subsys/listener
 rm /dev/shm 2>/dev/null
 mkdir /dev/shm 2>/dev/null
-mount -t tmpfs shmfs -o size=4096m /dev/shm ;;
+mount -t tmpfs shmfs -o size=#{ram_allocation}m /dev/shm ;;
 *) echo error
 exit 1 ;;
 esac
