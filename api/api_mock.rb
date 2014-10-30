@@ -114,8 +114,8 @@ class APIMockMembers < Sinatra::Base
       member:
         {
           id: params[:id],
-            name: Faker::Company.name,
-            address: Faker::Address.street_address
+          name: Faker::Company.name,
+          address: Faker::Address.street_address
         }
     }.to_json
   end
