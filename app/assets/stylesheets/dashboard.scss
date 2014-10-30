@@ -38,7 +38,7 @@
       }
       tr:nth-child(odd) td,
       tr:nth-child(odd) th {
-        background: #e5eff9;
+        background: $lightest-blue;
         height: 46px;
       }
       td {
