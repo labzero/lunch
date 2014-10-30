@@ -1,0 +1,75 @@
+{
+	"metadata": {
+		"name": "FHLBSF",
+		"lastOpened": 1414702617317,
+		"created": 1414699606900
+	},
+	"iconSets": [
+		{
+			"selection": [
+				{
+					"order": 3,
+					"id": 302,
+					"prevSize": 32,
+					"code": 58881,
+					"name": "chevron",
+					"tempChar": ""
+				}
+			],
+			"id": 0,
+			"metadata": {
+				"name": "Icons"
+			},
+			"height": 1024,
+			"prevSize": 32,
+			"icons": [
+				{
+					"id": 2,
+					"paths": [
+						"M512 930.909l502.691-502.691-130.327-139.636-372.364 381.673-372.364-381.673-130.327 139.636 502.691 502.691z"
+					],
+					"attrs": [
+						{
+							"opacity": 1,
+							"visibility": false
+						}
+					],
+					"grid": 32,
+					"tags": [
+						"chevron"
+					]
+				}
+			]
+		}
+	],
+	"externalSets": [],
+	"preferences": {
+		"showGlyphs": true,
+		"showQuickUse": true,
+		"showQuickUse2": true,
+		"showSVGs": true,
+		"fontPref": {
+			"prefix": "icon-",
+			"metadata": {
+				"fontFamily": "fhlbsf-icons",
+				"majorVersion": 1,
+				"minorVersion": 0
+			},
+			"metrics": {
+				"emSize": 1024,
+				"baseline": 6.25,
+				"whitespace": 50
+			}
+		},
+		"imagePref": {
+			"prefix": "icon-",
+			"png": true,
+			"useClassSelector": true
+		},
+		"historySize": 100,
+		"showCodes": true,
+		"search": "",
+		"gridSize": 16,
+		"showGrid": true
+	}
+}

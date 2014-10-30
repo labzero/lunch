@@ -1,0 +1,31 @@
+@font-face {
+  font-family: 'fhlbsf-icons';
+  src:font-url('fhlbsf-icons.eot?-s1srtn');
+  src:font-url('fhlbsf-icons.eot?#iefix-s1srtn') format('embedded-opentype'),
+    font-url('fhlbsf-icons.woff?-s1srtn') format('woff'),
+    font-url('fhlbsf-icons.ttf?-s1srtn') format('truetype'),
+    font-url('fhlbsf-icons.svg?-s1srtn#fhlbsf-icons') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+%icon-font {
+  font-family: 'fhlbsf-icons';
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+$icon-chevron: "\e601";
+
+.icon-chevron-before:before, .icon-chevron-after:after {
+  @extend %icon-font;
+  content: "#{$icon-chevron}";
+}
