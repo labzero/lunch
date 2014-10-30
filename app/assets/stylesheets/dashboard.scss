@@ -29,4 +29,36 @@
 
 .dashboard-module-content {
   padding: $column-3-gutter;
+  .table-striped {
+    width: 100%;
+    tbody {
+      tr:nth-child(even) td,
+      tr:nth-child(even) th {
+        height: 46px;
+      }
+      tr:nth-child(odd) td,
+      tr:nth-child(odd) th {
+        background: #e5eff9;
+        height: 46px;
+      }
+      td {
+        padding-top: 11px;
+        padding-right: 10px;
+        text-align: right;
+        vertical-align: top;
+      }
+
+      td:first-child {
+        padding-top: 11px;
+        padding-left: 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+    }
+  }
+}
+
+.dashboard-module-content-light {
+  font-family: $light-font-family;
+  font-size: $light-font-size;
 }

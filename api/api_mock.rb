@@ -111,12 +111,12 @@ class APIMockMembers < Sinatra::Base
 
   get '/:id' do
     {
-        member:
-            {
-                id: params[:id],
-                name: Faker::Company.name,
-                address: Faker::Address.street_address
-            }
+      member:
+        {
+          id: params[:id],
+            name: Faker::Company.name,
+            address: Faker::Address.street_address
+        }
     }.to_json
   end
 end
