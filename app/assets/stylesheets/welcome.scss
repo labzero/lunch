@@ -28,7 +28,7 @@
   }
   .logo {
     @extend %hide-text;
-    background: $logo-color right center no-repeat;
+    background: $logo-black right center no-repeat;
     background-size: 140px 50px; //not sure yet if this is going to be a standard logo size and should be pulled into a variable
   }
 }
