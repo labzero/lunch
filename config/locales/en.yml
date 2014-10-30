@@ -19,6 +19,8 @@
 # To learn more, please read the Rails Internationalization guide
 # available at http://guides.rubyonrails.org/i18n.html.
 en:
+  global:
+    na: N/A
   welcome:
     meta_title: FHLB - Welcome
     title: Welcome!

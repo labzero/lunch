@@ -30,7 +30,7 @@
           %tbody
             - @anticipated_activity.each_with_index do |row, i|
               - if row[1].nil?
-                - sgn = 'N/A'
+                - sgn = t('global.na')
               - elsif row[1] > 0
                 - sgn = '+'
               - else
