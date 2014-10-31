@@ -1,0 +1,76 @@
+@mixin typography-level-1 {
+  font-size: 1.2rem;
+  font-weight: $semibold-weight;
+}
+
+@mixin typography-level-2 {
+  font-size: 1rem;
+  font-weight: $normal-weight;
+}
+
+@mixin typography-level-3 {
+  font-size: 0.8667rem;
+  font-weight: $normal-weight;
+}
+
+@mixin typography-level-4 {
+  font-size: 1rem;
+  font-weight: $light-weight;
+}
+
+@mixin typography-level-5 {
+  font-size: 0.8667rem;
+  font-weight: $light-weight;
+}
+
+@mixin typography-level-6 {
+  font-size: 0.8667rem;
+  font-weight: $semibold-weight;
+  text-transform: uppercase;
+}
+
+@mixin typography-level-7 {
+  font-size: 0.8rem;
+  font-weight: $normal-weight;
+}
+
+@mixin typography-table-date {
+  font-size: 0.7333rem;
+  font-weight: $light-weight;
+}
+
+%typography-level-1 {
+  @include typography-level-1;
+}
+
+%typography-level-2 {
+  @include typography-level-2;
+}
+
+%typography-level-3 {
+  @include typography-level-3;
+}
+
+%typography-level-4 {
+  @include typography-level-4;
+}
+
+%typography-level-5 {
+  @include typography-level-5;
+}
+
+%typography-level-6 {
+  @include typography-level-6;
+}
+
+%typography-level-7 {
+  @include typography-level-7;
+}
+
+%typography-level-7 {
+  @include typography-level-7;
+}
+
+%typography-table-date {
+  @include typography-table-date;
+}

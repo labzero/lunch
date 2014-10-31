@@ -23,9 +23,27 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+$icon-gear: "\e600";
 $icon-chevron: "\e601";
+$icon-envelope: "\e602";
+$icon-magnify: "\e603";
+
+.icon-gear-before:before, .icon-gear-after:after {
+  @extend %icon-font;
+  content: "#{$icon-gear}";
+}
 
 .icon-chevron-before:before, .icon-chevron-after:after {
   @extend %icon-font;
   content: "#{$icon-chevron}";
+}
+
+.icon-envelope-before:before, .icon-envelope-after:after {
+  @extend %icon-font;
+  content: "#{$icon-envelope}";
+}
+
+.icon-magnify-before:before, .icon-magnify-after:after {
+  @extend %icon-font;
+  content: "#{$icon-magnify}";
 }
