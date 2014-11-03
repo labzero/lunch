@@ -1,2 +1,19 @@
 .main-nav
+  .row
+    = link_to(t('welcome.logo'), dashboard_url, class: 'logo')
+    %ul
+      %li= t('nav.primary.welcome', name: 'Alma')
+      %li.nav-logout= link_to(t('nav.primary.logout'), root_url)
+      %li.nav-settings= link_to('', '#', class: 'icon-gear-after')
+      %li.nav-mail= link_to('', '#', class: 'icon-envelope-after')
+      %li
+        %span.input-container.icon-magnify-before
+          %input.nav-search{placeholder: t('nav.primary.search')}
 .secondary-nav
+  %nav.row
+    %ul
+      %li= link_to(t('nav.secondary.advances'), '#', class: 'nav-menu')
+      %li= link_to(t('nav.secondary.letters_of_credit'), '#', class: 'nav-menu')
+      %li= link_to(t('nav.secondary.mortgages'), '#', class: 'nav-menu')
+      %li= link_to(t('nav.secondary.securities'), '#', class: 'nav-menu')
+      %li= link_to(t('nav.secondary.reports'), '#')

@@ -4,6 +4,7 @@
   margin: 0 auto;
   padding: 0 $row-padding;
   display: block;
+  box-sizing: border-box;
 }
 
 @mixin column {

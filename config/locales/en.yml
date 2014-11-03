@@ -21,6 +21,17 @@
 en:
   global:
     na: N/A
+  nav:
+    primary:
+      welcome: Hi %{name}
+      logout: Logout
+      search: Search
+    secondary:
+      advances: Advances
+      letters_of_credit: Letters of Credit
+      mortgages: Mortgages
+      securities: Securities
+      reports: Reports
   welcome:
     meta_title: FHLB - Welcome
     title: Welcome!

@@ -4,10 +4,101 @@
 
 .main-nav {
   min-height: 60px;
+  line-height: 60px;
   background-color: $brand-blue;
+  .logo {
+    @extend %hide-text;
+    background: $logo-white no-repeat;
+    background-size: contain;
+    height: 40px;
+    width: round($logo-aspect-ratio * 40px);
+    vertical-align: middle;
+    display: inline-block;
+    margin: 9px 0 11px;
+  }
+  ul {
+    @extend %typography-level-2;
+    float: right;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: $white;
+  }
+  li {
+    display: inline-block;
+  }
+  a {
+    text-decoration: none;
+    color: $white;
+  }
+  .nav-logout a:before {
+    content: "|";
+    display: inline-block;
+    margin: 0 15px;
+  }
+  .nav-settings, .nav-mail {
+    font-size: 1.25rem;
+    a:after {
+      vertical-align: middle;
+    }
+  }
+  .nav-logout, .nav-settings, .nav-mail {
+    margin-right: 30px;
+  }
+  .nav-search {
+    border: 1px solid $white;
+    border-radius: $default-border-radius;
+    // height: 28px;
+    color: $text-color;
+    padding: 4px 0 2px 30px;
+    width: 136px;
+    box-sizing: border-box;
+    @include input-placeholder {
+      color: $brand-blue;
+    }
+  }
+  .input-container {
+    position: relative;
+    display: inline-block;
+    line-height: 28px;
+    &:before {
+      position: absolute;
+      top: 9px;
+      left: 8px;
+      z-index: 1;
+      color: $brand-blue;
+      font-size: 0.75rem;
+    }
+  }
 }
 
 .secondary-nav {
   min-height: 30px;
+  line-height: 30px;
   background-color: $white;
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    @extend %typography-level-3;
+  }
+  li {
+    display: inline-block;
+    vertical-align: middle;
+    border-left: 1px solid $light-gray;
+    display: inline-block;
+    padding: 0 20px;
+    &:last-child {
+      border-right: 1px solid $light-gray;
+    }
+  }
+  a {
+    text-decoration: none;
+    color: $text-color;
+    &.nav-menu:after {
+      @extend %icon-font;
+      content: " #{$icon-chevron}";
+      font-size: 0.625rem;
+    }
+  }
 }
