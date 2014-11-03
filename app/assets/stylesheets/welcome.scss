@@ -1,6 +1,6 @@
 .welcome {
   margin-top: 30px;
-  h1, .logo {
+  h1, .logo-container {
     font-size: 5rem;
     font-weight: $light-weight;
     color: $actionable-blue;
@@ -27,7 +27,10 @@
   }
   .logo {
     @extend %hide-text;
-    background: $logo-black right center no-repeat;
-    background-size: round($logo-aspect-ratio * 50px) 50px; //not sure yet if this is going to be a standard logo size and should be pulled into a variable
+    height: 50px;
+    width: round($logo-aspect-ratio * 50px);
+    display: inline-block;
+    background: $logo-black no-repeat;
+    background-size: contain;
   }
 }
