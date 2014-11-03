@@ -27,6 +27,7 @@ $icon-gear: "\e600";
 $icon-chevron: "\e601";
 $icon-envelope: "\e602";
 $icon-magnify: "\e603";
+$icon-arrow-right: "\e604";
 
 .icon-gear-before:before, .icon-gear-after:after {
   @extend %icon-font;
@@ -46,4 +47,9 @@ $icon-magnify: "\e603";
 .icon-magnify-before:before, .icon-magnify-after:after {
   @extend %icon-font;
   content: "#{$icon-magnify}";
+}
+
+.icon-arrow-right-before:before, .icon-arrow-right-after:after {
+  @extend %icon-font;
+  content: "#{$icon-arrow-right}";
 }

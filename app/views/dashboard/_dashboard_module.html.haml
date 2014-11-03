@@ -5,7 +5,7 @@
   %header
     %h1= title
     - if action && action[:type].include?('button')
-      %button.primary-button= t("dashboard.actions.#{action[:type].gsub('-button', '')}")
+      %button.primary-button{class: action[:type]}= t("dashboard.actions.#{action[:type].gsub('-button', '')}")
     - elsif action && action[:icon]
       .icon= t("dashboard.actions.#{action[:type].gsub('-icon', '')}")
   .dashboard-module-content
