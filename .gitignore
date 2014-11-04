@@ -9,3 +9,4 @@
 .env
 brakeman.tabs
 brakeman.html
+.vagrant
