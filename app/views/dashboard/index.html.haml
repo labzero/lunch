@@ -25,7 +25,7 @@
                 - else
                   %td #{number_with_delimiter(row[1], precision: 0)}
     .row
-      =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.anticipated_activity.title'), action_type: 'more-button'} do
+      =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.anticipated_activity.title'), action_type: 'calendar-icon'} do
         %table.table-striped
           %tbody
             - @anticipated_activity.each_with_index do |row, i|
