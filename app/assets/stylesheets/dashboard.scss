@@ -25,6 +25,16 @@
       float: right;
     }
   }
+  .icon-alt-text {
+    overflow: hidden;
+    width: 0;
+    height: 0;
+  }
+  .icon {
+    @extend %large-icon-font;
+    color: $actionable-blue;
+    float: right;
+  }
 }
 
 .dashboard-module-content {

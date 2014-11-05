@@ -1,22 +1,30 @@
 {
 	"metadata": {
 		"name": "FHLBSF",
-		"lastOpened": 1415041795377,
+		"lastOpened": 1415056914733,
 		"created": 1414699606900
 	},
 	"iconSets": [
 		{
 			"selection": [
 				{
-					"order": 6,
-					"id": 308,
+					"order": 7,
+					"id": 309,
 					"prevSize": 32,
-					"code": 58884,
-					"name": "",
+					"code": 58885,
+					"name": "calendar",
 					"tempChar": ""
 				},
 				{
-					"order": 2,
+					"order": 8,
+					"id": 308,
+					"prevSize": 32,
+					"code": 58884,
+					"name": "arrow-right",
+					"tempChar": ""
+				},
+				{
+					"order": 9,
 					"id": 307,
 					"prevSize": 32,
 					"code": 58882,
@@ -24,7 +32,7 @@
 					"tempChar": ""
 				},
 				{
-					"order": 3,
+					"order": 12,
 					"id": 306,
 					"prevSize": 32,
 					"code": 58883,
@@ -32,7 +40,7 @@
 					"tempChar": ""
 				},
 				{
-					"order": 4,
+					"order": 11,
 					"id": 304,
 					"prevSize": 32,
 					"code": 58880,
@@ -40,7 +48,7 @@
 					"tempChar": ""
 				},
 				{
-					"order": 5,
+					"order": 10,
 					"id": 302,
 					"prevSize": 32,
 					"code": 58881,
@@ -55,6 +63,52 @@
 			"height": 1024,
 			"prevSize": 32,
 			"icons": [
+				{
+					"id": 9,
+					"paths": [
+						"M776.6 102.2v-70.2h-151.4v70.2h-225.8v-70.2h-151.4v70.2h-191.4v889.8h911.4v-889.8h-191.4zM674.2 81.2h53v319h-53v-319zM625 151.4v186.4h-225.6v-186.4h225.6zM297.2 81.2h53v319h-53v-319zM105.8 151.4h142.2v186.4h-142.2v-186.4zM918.8 942.8h-813v-555.8h142.2v62.4h151.4v-62.4h225.6v62.4h151.4v-62.4h142.2v555.8zM776.6 337.8v-186.4h142.2v186.4h-142.2z",
+						"M246 549.2h98.4v98.4h-98.4v-98.4z",
+						"M464.6 549.2h98.4v98.4h-98.4v-98.4z",
+						"M683 549.2h98.4v98.4h-98.4v-98.4z",
+						"M246 723.4h98.4v98.4h-98.4v-98.4z",
+						"M464.6 723.4h98.4v98.4h-98.4v-98.4z",
+						"M683 723.4h98.4v98.4h-98.4v-98.4z"
+					],
+					"attrs": [
+						{
+							"opacity": 1,
+							"visibility": false
+						},
+						{
+							"opacity": 1,
+							"visibility": false
+						},
+						{
+							"opacity": 1,
+							"visibility": false
+						},
+						{
+							"opacity": 1,
+							"visibility": false
+						},
+						{
+							"opacity": 1,
+							"visibility": false
+						},
+						{
+							"opacity": 1,
+							"visibility": false
+						},
+						{
+							"opacity": 1,
+							"visibility": false
+						}
+					],
+					"grid": 32,
+					"tags": [
+						"calendar"
+					]
+				},
 				{
 					"id": 8,
 					"paths": [
