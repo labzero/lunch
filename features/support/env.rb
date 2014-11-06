@@ -4,6 +4,9 @@ require 'capybara/cucumber'
 require_relative 'custom_config'
 include CustomConfig
 
+require 'i18n'
+I18n.load_path += Dir.glob('config/locales/*.yml')
+
 Capybara.app_host = ENV['APP_HOST'] || env_config['app_host'] || 'http://localhost:3000'
 puts "Capybara.app_host: #{Capybara.app_host}"
 

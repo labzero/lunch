@@ -1,0 +1,4 @@
+- alt_text ||= ''
+.icon{class: "icon-#{icon}-before"}
+  - if alt_text.length > 0
+    .icon-alt-text= alt_text

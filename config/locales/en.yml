@@ -56,3 +56,10 @@ en:
       collateral_rebalancing: Collateral Rebalancing
       stock_purchase: Stock Purchase
       estimated: Estimated
+    contacts:
+      title: Contacts
+      icon_alt_text: Contact
+      search_placeholder: 'Search for FHLB contact'
+      type:
+        general: General Inquiries
+        nonstandard_advance: Nonstandard Advances

@@ -34,9 +34,26 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-subtitle {
+  font-size: 1rem;
+  font-weight: $semibold-weight;
+  line-height: $tight-line-height;
+}
+
+@mixin typography-data {
+  font-size: 1rem;
+  font-weight: $normal-weight;
+  line-height: $tight-line-height;
+}
+
 @mixin typography-table-date {
   font-size: 0.7333rem;
   font-weight: $light-weight;
+}
+
+@mixin typography-field-placeholder {
+  font-size: 1rem;
+  font-weight: $normal-weight;
 }
 
 %typography-level-1 {
@@ -73,4 +90,16 @@
 
 %typography-table-date {
   @include typography-table-date;
+}
+
+%typography-subtitle {
+  @include typography-subtitle;
+}
+
+%typography-data {
+  @include typography-data;
+}
+
+%typography-field-placeholder {
+  @include typography-field-placeholder;
 }

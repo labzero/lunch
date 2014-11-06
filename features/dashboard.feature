@@ -6,3 +6,7 @@ Feature: Visiting the Dashboard
   Scenario: Visit dashboard
     When I visit the dashboard
     Then I should see dashboard modules
+
+  Scenario: See dashboard contacts
+    When I visit the dashboard
+    Then I should see 2 contacts
