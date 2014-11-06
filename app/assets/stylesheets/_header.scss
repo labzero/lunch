@@ -46,28 +46,10 @@
     margin-right: 30px;
   }
   .nav-search {
-    border: 1px solid $white;
-    border-radius: $default-border-radius;
-    // height: 28px;
-    color: $text-color;
-    padding: 4px 0 2px 30px;
     width: 136px;
-    box-sizing: border-box;
+    border-color: $brand-blue;
     @include input-placeholder {
       color: $brand-blue;
-    }
-  }
-  .input-container {
-    position: relative;
-    display: inline-block;
-    line-height: 28px;
-    &:before {
-      position: absolute;
-      top: 9px;
-      left: 8px;
-      z-index: 1;
-      color: $brand-blue;
-      font-size: 0.75rem;
     }
   }
 }

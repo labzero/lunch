@@ -1,0 +1,27 @@
+.input-field-container {
+  position: relative;
+  display: inline-block;
+  line-height: 30px;
+  width: 100%;
+  &:before {
+    position: absolute;
+    top: 10px;
+    left: 8px;
+    z-index: 1;
+    color: $brand-blue;
+    font-size: 0.75rem;
+  }
+  input {
+    border: 1px solid $actionable-blue;
+    border-radius: $default-border-radius;
+    color: $text-color;
+    padding: 5px 0 3px 30px;
+    box-sizing: border-box;
+    width: 100%;
+    display: inline-block;
+    @include input-placeholder {
+      color: $medium-gray;
+      @include typography-field-placeholder;
+    }
+  }
+}

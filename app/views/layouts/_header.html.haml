@@ -7,8 +7,7 @@
       %li.nav-settings= link_to('', '#', class: 'icon-gear-after')
       %li.nav-mail= link_to('', '#', class: 'icon-envelope-after')
       %li
-        %span.input-container.icon-magnify-before
-          %input.nav-search{placeholder: t('nav.primary.search')}
+        = render 'shared/input_field', icon: :magnify, placeholder: t('nav.primary.search'), field_class: :'nav-search'
 .secondary-nav
   %nav.row
     %ul

@@ -7,47 +7,49 @@
       %p Sed sollicitudin auctor semper. Integer risus mauris, feugiat at consectetur non, blandit sed metus. Nunc at turpis interdum, gravida neque eu, bibendum libero. In at nunc vel ipsum interdum molestie sed a tellus. Morbi commodo enim sit amet hendrerit aliquet. Cras arcu tellus, ornare at viverra at, semper at elit. Nam elementum a tellus eget elementum. Nullam in felis ut urna venenatis bibendum at at nunc.
       %p Nullam faucibus iaculis odio eu efficitur. Cras ut lorem lorem. Vestibulum eget tincidunt metus. Ut ac quam eget neque elementum commodo. Donec gravida interdum odio. Nam tortor erat, pellentesque eu tincidunt a, tempus id orci. Integer ac lacus eu ante consectetur pulvinar in nec lacus. Maecenas lobortis erat a tellus pellentesque, commodo varius mi tristique.
   .column-3
-    .row
-      =render layout: 'dashboard/dashboard_module', locals: {title: 'Example Module 2', action_type: 'more-button'} do
-        %p This is content that should be yielded inside the dashboard module.
-        %p This will give us flexibility to put whatever we want inside.
-    .row
-      =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), action_type: 'more-button'} do
-        %table.table-striped
-          %tbody
-            - @previous_activity.each_with_index do |row, i|
-              %tr
-                %td
-                  #{row[0]}
-                  %div.dashboard-module-content-light #{row[2].strftime('%^b %d %Y')}
-                - if i == 0
-                  %td #{number_to_currency(row[1], precision: 0)}
-                - else
-                  %td #{number_with_delimiter(row[1], precision: 0)}
-    .row
-      =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.anticipated_activity.title'), action_type: 'calendar-icon'} do
-        %table.table-striped
-          %tbody
-            - @anticipated_activity.each_with_index do |row, i|
-              - if row[1].nil?
-                - sgn = t('global.na')
-              - elsif row[1] > 0
-                - sgn = '+'
+    =render layout: 'dashboard/dashboard_module', locals: {title: 'Example Module 2', action_type: 'more-button'} do
+      %p This is content that should be yielded inside the dashboard module.
+      %p This will give us flexibility to put whatever we want inside.
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), action_type: 'more-button'} do
+      %table.table-striped
+        %tbody
+          - @previous_activity.each_with_index do |row, i|
+            %tr
+              %td
+                #{row[0]}
+                %div.dashboard-module-content-light #{row[2].strftime('%^b %d %Y')}
+              - if i == 0
+                %td #{number_to_currency(row[1], precision: 0)}
               - else
-                - sgn = ''
-              %tr
+                %td #{number_with_delimiter(row[1], precision: 0)}
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.anticipated_activity.title'), action_type: 'calendar-icon'} do
+      %table.table-striped
+        %tbody
+          - @anticipated_activity.each_with_index do |row, i|
+            - if row[1].nil?
+              - sgn = t('global.na')
+            - elsif row[1] > 0
+              - sgn = '+'
+            - else
+              - sgn = ''
+            %tr
+              %td
+                #{row[0]}
+                %div.dashboard-module-content-light #{row[2].strftime('%^b %d %Y')}
+              - if i == 0
                 %td
-                  #{row[0]}
-                  %div.dashboard-module-content-light #{row[2].strftime('%^b %d %Y')}
-                - if i == 0
-                  %td
-                    #{sgn}#{number_to_currency(row[1], precision: 0)}
-                    %div.dashboard-module-content-light #{row[3].upcase}
-                - else
-                  %td
-                    #{sgn}#{number_with_delimiter(row[1], precision: 0)}
-                    %div.dashboard-module-content-light #{row[3].upcase}
+                  #{sgn}#{number_to_currency(row[1], precision: 0)}
+                  %div.dashboard-module-content-light #{row[3].upcase}
+              - else
+                %td
+                  #{sgn}#{number_with_delimiter(row[1], precision: 0)}
+                  %div.dashboard-module-content-light #{row[3].upcase}
   .column-3
     =render layout: 'dashboard/dashboard_module', locals: {title: 'Example Module 4', action_type: 'edit-button'} do
       %p This is content that should be yielded inside the dashboard module.
       %p This will give us flexibility to put whatever we want inside.
+    = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
+      %ul
+        %li= render 'dashboard/dashboard_contact', email: 'user@example.com', title: t('dashboard.contacts.type.nonstandard_advance'), name: 'Bob – RM', phone_number: '415–555–7283'
+        %li= render 'dashboard/dashboard_contact', email: 'otheruser@example.com', title: t('dashboard.contacts.type.general'), name: 'Teresa – FHLB Desk', phone_number: '415–555–7283'
+      = render 'shared/input_field', icon: :magnify, placeholder: t('dashboard.contacts.search_placeholder')

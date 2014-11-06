@@ -39,6 +39,7 @@ $icon-envelope: "\e602";
 $icon-magnify: "\e603";
 $icon-arrow-right: "\e604";
 $icon-calendar: "\e605";
+$icon-phone: "\e606";
 
 .icon-gear-before:before, .icon-gear-after:after {
   @extend %icon-font;
@@ -68,5 +69,10 @@ $icon-calendar: "\e605";
 .icon-calendar-before:before, .icon-calendar-after:after {
   @extend %icon-font;
   content: "#{$icon-calendar}";
+}
+
+.icon-phone-before:before, .icon-phone-after:after {
+  @extend %icon-font;
+  content: "#{$icon-phone}";
 }
 
