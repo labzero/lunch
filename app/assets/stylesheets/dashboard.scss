@@ -108,3 +108,44 @@
   background-size: contain;
   background-repeat: no-repeat;
 }
+
+.dashboard-module-advances {
+  p {
+    font-weight: $semibold-weight;
+    margin-bottom: 5px;
+    &:after {
+      @extend %icon-font;
+      content: " #{$icon-chevron}";
+      font-size: 0.8rem;
+    }
+  }
+  .icon-dollar-before:before {
+    font-size: 0.8rem;
+    left: 11px;
+    top: 9px;
+  }
+  .input-field-container {
+    input {
+      padding-left: 25px;
+    }
+  }
+  .dashboard-module-content {
+    color: $actionable-blue;
+  }
+  p, .dashboard-advances-rate {
+    padding-left: 12px;
+  }
+}
+
+.dashboard-advances-rate {
+  font-weight: $extralight-weight;
+  font-size: 5rem;
+  line-height: 1;
+  margin-bottom: -17px; // UGH. Design doesn't account for descender spacing
+  span {
+    vertical-align: top;
+    font-size: 3rem;
+    display: inline-block;
+    margin-top: 3px;
+  }
+}

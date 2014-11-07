@@ -7,9 +7,12 @@
       %p Sed sollicitudin auctor semper. Integer risus mauris, feugiat at consectetur non, blandit sed metus. Nunc at turpis interdum, gravida neque eu, bibendum libero. In at nunc vel ipsum interdum molestie sed a tellus. Morbi commodo enim sit amet hendrerit aliquet. Cras arcu tellus, ornare at viverra at, semper at elit. Nam elementum a tellus eget elementum. Nullam in felis ut urna venenatis bibendum at at nunc.
       %p Nullam faucibus iaculis odio eu efficitur. Cras ut lorem lorem. Vestibulum eget tincidunt metus. Ut ac quam eget neque elementum commodo. Donec gravida interdum odio. Nam tortor erat, pellentesque eu tincidunt a, tempus id orci. Integer ac lacus eu ante consectetur pulvinar in nec lacus. Maecenas lobortis erat a tellus pellentesque, commodo varius mi tristique.
   .column-3
-    =render layout: 'dashboard/dashboard_module', locals: {title: 'Example Module 2', action_type: 'more-button'} do
-      %p This is content that should be yielded inside the dashboard module.
-      %p This will give us flexibility to put whatever we want inside.
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances'} do
+      = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder')
+      %p= t('global.vrc_overnight')
+      .dashboard-advances-rate
+        0.14
+        %span<> %
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), action_type: 'more-button'} do
       %table.table-striped
         %tbody

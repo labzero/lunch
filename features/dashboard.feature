@@ -10,3 +10,8 @@ Feature: Visiting the Dashboard
   Scenario: See dashboard contacts
     When I visit the dashboard
     Then I should see 2 contacts
+
+  Scenario: See dashboard quick advance module
+    When I visit the dashboard
+    Then I should see a dollar amount field
+    And I should see an advance rate.
