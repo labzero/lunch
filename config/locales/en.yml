@@ -21,6 +21,7 @@
 en:
   global:
     na: N/A
+    vrc_overnight: VRC Overnight
   nav:
     primary:
       welcome: Hi %{name}
@@ -63,3 +64,6 @@ en:
       type:
         general: General Inquiries
         nonstandard_advance: Nonstandard Advances
+    quick_advance:
+      title: Quick Advances
+      advance_placeholder: Enter Dollar Amount
