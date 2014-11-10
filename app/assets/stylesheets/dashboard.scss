@@ -35,6 +35,17 @@
   }
 }
 
+%dashboard-module-chromeless {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  header {
+    border: none;
+    padding-bottom: 0;
+  }
+}
+
 .dashboard-module-content {
   padding: $column-3-gutter;
   .table-striped {
