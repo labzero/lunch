@@ -121,7 +121,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #   chef.validation_client_name = "ORGNAME-validator"
 
   oracle_rpm_name = ENV['ORACLE_INSTALLER_NAME'] || 'oracle-xe-11.2.0-1.0.x86_64.rpm'
-  oracle_deb_name = File.basename(oracle_rpm_name, '.rpm') + '.deb'
 
   chkconfig_script = <<EOS
 #!/bin/bash
@@ -193,7 +192,8 @@ EOS
 export PATH=$JAVA_HOME/bin:$PATH' | cat - /etc/bash.bashrc | sudo tee /etc/bash.bashrc > /dev/null
   source /etc/bash.bashrc
   cd /vagrant_oracle_installer
-  test -f /vagrant_oracle_installer/#{oracle_deb_name} || sudo alien --scripts -d #{oracle_rpm_name}
+  test -f `ls *.deb` || (echo "Building .deb, this will take A LONG TIME..."; sudo alien --scripts -k -d #{oracle_rpm_name})
+  DEB_NAME=`ls *.deb`
   echo #{Shellwords.escape(chkconfig_script)} | sudo tee -a /sbin/chkconfig
   sudo chmod 755 /sbin/chkconfig
   echo '# Oracle 11g XE kernel parameters
@@ -207,7 +207,7 @@ kernel.shmmax=536870912' | sudo tee -a /etc/sysctl.d/60-oracle.conf
   mkdir /var/lock/subsys
   touch /var/lock/subsys/listener
 
-  sudo dpkg --install #{oracle_deb_name}
+  sudo dpkg --install $DEB_NAME
 
   sudo rm -rf /dev/shm
   sudo mkdir /dev/shm
