@@ -15,26 +15,26 @@ class DashboardController < ApplicationController
     ]
 
     @account_overview = [
-      [t('dashboard.your_account.balance'), 1973179.93],
-      [t('dashboard.your_account.credit_outstanding'), 105000000]
+      [t('dashboard.your_account.table.balance'), 1973179.93],
+      [t('dashboard.your_account.table.credit_outstanding'), 105000000]
     ]
 
     remaining = [
-      [t('dashboard.your_account.remaining.available'), 105000000],
-      [t('dashboard.your_account.remaining.leverage'), 12400000]
+      [t('dashboard.your_account.table.remaining.available'), 105000000],
+      [t('dashboard.your_account.table.remaining.leverage'), 12400000]
     ]
 
     market_value = [
-      [t('dashboard.your_account.market_value.agency'), 0],
-      [t('dashboard.your_account.market_value.aaa'), 0],
-      [t('dashboard.your_account.market_value.aa'), 0]
+      [t('dashboard.your_account.table.market_value.agency'), 0],
+      [t('dashboard.your_account.table.market_value.aaa'), 0],
+      [t('dashboard.your_account.table.market_value.aa'), 0]
     ]
 
     borrowing_capacity = [
-      [t('dashboard.your_account.borrowing_capacity.standard'), 65000000],
-      [t('dashboard.your_account.borrowing_capacity.agency'), 0],
-      [t('dashboard.your_account.borrowing_capacity.aaa'), 0],
-      [t('dashboard.your_account.borrowing_capacity.aa'), 0]
+      [t('dashboard.your_account.table.borrowing_capacity.standard'), 65000000],
+      [t('dashboard.your_account.table.borrowing_capacity.agency'), 0],
+      [t('dashboard.your_account.table.borrowing_capacity.aaa'), 0],
+      [t('dashboard.your_account.table.borrowing_capacity.aa'), 0]
     ]
 
     @sub_tables = {remaining: remaining, market_value: market_value, borrowing_capacity: borrowing_capacity}

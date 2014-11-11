@@ -1,9 +1,14 @@
-@mixin typography-level-1 {
+@mixin typography-dashboard-module-heading {
   font-size: 1.2rem;
   font-weight: $semibold-weight;
 }
 
-@mixin typography-level-2 {
+@mixin typography-dashboard-module-subheading {
+  font-size: 1rem;
+  font-weight: $semibold-weight;
+}
+
+@mixin typography-header-nav {
   font-size: 1rem;
   font-weight: $normal-weight;
 }
@@ -66,12 +71,16 @@
   font-weight: $semibold-weight;
 }
 
-%typography-level-1 {
-  @include typography-level-1;
+%typography-dashboard-module-heading {
+  @include typography-dashboard-module-heading;
 }
 
-%typography-level-2 {
-  @include typography-level-2;
+%typography-dashboard-module-subheading {
+  @include typography-dashboard-module-subheading;
+}
+
+%typography-header-nav {
+  @include typography-header-nav ;
 }
 
 %typography-level-3 {
