@@ -160,3 +160,46 @@
     margin-top: 3px;
   }
 }
+
+.dashboard-module-your-account {
+  @extend %dashboard-module-chromeless;
+  .dashboard-module-content, header {
+    padding: 0;
+  }
+}
+
+$breakdown-table-inner-width: 297px; // you can replace this with a standard sizing once you switch from a fluid layout to a fixed layout
+$breakdown-table-label-width: 195px;
+$breakdown-table-currency-width: 10px;
+$breakdown-table-value-width: $breakdown-table-inner-width - ($breakdown-table-label-width + $breakdown-table-currency-width);
+.account-breakdown-table {
+  @extend %typography-level-7;
+  th {
+    @extend %typography-level-7;
+    text-align: left;
+  }
+  th, .label, .currency, .value {
+    padding: 5px 0;
+    box-sizing: border-box;
+  }
+  .label {
+    width: $breakdown-table-label-width;
+    padding-left: 20px;
+  }
+  .currency {
+    width: $breakdown-table-currency-width;
+    text-align: right;
+  }
+  .value {
+    width: $breakdown-table-value-width;
+    text-align: right;
+    padding-right: 20px; // replace with standard sizing once we move to fixed layout
+  }
+  th {
+    background: $white;
+    border-top: 1px solid $secondary-gray;
+  }
+  .sub-table td.label {
+    padding-left: 30px;
+  }
+}
