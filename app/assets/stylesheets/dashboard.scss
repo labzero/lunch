@@ -9,8 +9,11 @@
   box-shadow: 0px 0px 6px rgba(0,0,0, .09);
   margin-bottom: $column-3-gutter;
   h1 {
-    @extend %typography-level-1;
+    @extend %typography-dashboard-module-heading;
     margin: 0;
+  }
+  h2 {
+    @extend %typography-dashboard-module-subheading;
   }
   header {
     border-bottom: 1px solid $light-blue;
@@ -207,4 +210,10 @@ $breakdown-table-currency-width: 10px;
 
 .dashboard-market-graph {
   height: 50px;
+}
+
+.anticipated-activity {
+  img {
+    width: 100%; // don't worry about this styling, it will be removed once we add the real graph
+  }
 }

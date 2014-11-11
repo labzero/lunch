@@ -4,6 +4,9 @@
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.market_overview.title'), classes: 'dashboard-module-market'} do
       .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account']} do
+      .anticipated-activity
+        %h2= t('dashboard.your_account.anticipated_activity.title')
+        =image_tag('anticipated-activity.png', alt: 'Anticipated Activity Graph')
       %table.account-breakdown-table
         %tbody
           - @account_overview.each do |row|
@@ -17,7 +20,7 @@
                 %table.sub-table
                   %thead
                     %tr
-                      %th.label{colspan: '3'}= t("dashboard.your_account.#{sub_table_name}.title") #note that the key names in our locale/en.yml file must match the key names in the @sub_tables hash
+                      %th.label{colspan: '3'}= t("dashboard.your_account.table.#{sub_table_name}.title") #note that the key names in our locale/en.yml file must match the key names in the @sub_tables hash
                   %tbody
                     - sub_table.each do |row|
                       %tr

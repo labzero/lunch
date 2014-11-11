@@ -86,5 +86,25 @@ en:
         agency: 'SBC:Agency'
         aaa: 'SBC:AAA'
         aa: 'SBC:AA'
+      anticipated_activity:
+        title: Anticipated Activity
+      table:
+        balance: Sta Balance
+        credit_outstanding: Credit Outstanding
+        remaining:
+          title: Remaining
+          available: Financial Available
+          leverage: Stock Leverage
+        market_value:
+          title: Collateral Market Value
+          agency: 'SBC:Agency'
+          aaa: 'SBC:AAA'
+          aa: 'SBC:AA'
+        borrowing_capacity:
+          title: Collateral borrowing capacity
+          standard: Standard credit program
+          agency: 'SBC:Agency'
+          aaa: 'SBC:AAA'
+          aa: 'SBC:AA'
     market_overview:
       title: Market Overview
