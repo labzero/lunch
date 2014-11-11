@@ -25,3 +25,16 @@ Then(/^I should see a market overview graph$/) do
   mod = page.find('.dashboard-module', :text => I18n.t('dashboard.market_overview.title'))
   mod.assert_selector('.dashboard-market-graph', :visible => true)
 end
+
+Then(/^I should see the Your Account table breakdown$/) do
+  mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
+  mod.assert_selector('td', :text => I18n.t('dashboard.your_account.table.balance'))
+  mod.assert_selector('td', :text => I18n.t('dashboard.your_account.table.credit_outstanding'))
+  mod.assert_selector('td', :text => I18n.t('dashboard.your_account.table.market_value.title'))
+  mod.assert_selector('td', :text => I18n.t('dashboard.your_account.table.borrowing_capacity.title'))
+end
+
+Then(/^I should see the Anticipated Activity graph$/) do
+  mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
+  mod.assert_selector('.anticipated-activity')
+end
