@@ -15,3 +15,11 @@ Feature: Visiting the Dashboard
     When I visit the dashboard
     Then I should see a dollar amount field
     And I should see an advance rate.
+
+  Scenario: See dashboard Your Account breakdown
+    When I visit the dashboard
+    Then I should see "Your Account"
+    And I should see "Sta Balance"
+    And I should see "Credit Outstanding"
+    And I should see "Collateral Market Value"
+    And I should see "Collateral borrowing capacity"

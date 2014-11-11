@@ -4,8 +4,27 @@
     =render layout: 'dashboard/dashboard_module', locals: {title: 'Example Module 1', classes: ['some-additional-class']} do
       %p This is content that should be yielded inside the dashboard module.
       %p This will give us flexibility to put whatever we want inside.
-      %p Sed sollicitudin auctor semper. Integer risus mauris, feugiat at consectetur non, blandit sed metus. Nunc at turpis interdum, gravida neque eu, bibendum libero. In at nunc vel ipsum interdum molestie sed a tellus. Morbi commodo enim sit amet hendrerit aliquet. Cras arcu tellus, ornare at viverra at, semper at elit. Nam elementum a tellus eget elementum. Nullam in felis ut urna venenatis bibendum at at nunc.
-      %p Nullam faucibus iaculis odio eu efficitur. Cras ut lorem lorem. Vestibulum eget tincidunt metus. Ut ac quam eget neque elementum commodo. Donec gravida interdum odio. Nam tortor erat, pellentesque eu tincidunt a, tempus id orci. Integer ac lacus eu ante consectetur pulvinar in nec lacus. Maecenas lobortis erat a tellus pellentesque, commodo varius mi tristique.
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account']} do
+      %table.account-breakdown-table
+        %tbody
+          - @account_overview.each do |row|
+            %tr
+              %td.label #{row[0]}
+              %td.currency $
+              %td.value #{number_with_delimiter(row[1], precision: 0)}
+          - @sub_tables.each do |sub_table_name, sub_table|
+            %tr
+              %td{colspan: '3'}
+                %table.sub-table
+                  %thead
+                    %tr
+                      %th.label{colspan: '3'}= t("dashboard.your_account.#{sub_table_name}.title") #note that the key names in our locale/en.yml file must match the key names in the @sub_tables hash
+                  %tbody
+                    - sub_table.each do |row|
+                      %tr
+                        %td.label #{row[0]}
+                        %td.currency $
+                        %td.value #{number_with_delimiter(row[1], precision: 0)}
   .column-3
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances'} do
       = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder')
