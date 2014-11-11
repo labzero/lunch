@@ -40,9 +40,9 @@
   background: transparent;
   box-shadow: none;
   padding: 0;
-  header {
+  header, .dashboard-module-content {
     border: none;
-    padding-bottom: 0;
+    padding: 0 0 20px 0;
   }
 }
 
@@ -163,9 +163,6 @@
 
 .dashboard-module-your-account {
   @extend %dashboard-module-chromeless;
-  .dashboard-module-content, header {
-    padding: 0;
-  }
   table {
     width: 100%;
   }
@@ -202,4 +199,12 @@ $breakdown-table-currency-width: 10px;
   .sub-table td.label {
     padding-left: 30px;
   }
+}
+
+.dashboard-module-market {
+  @extend %dashboard-module-chromeless;
+}
+
+.dashboard-market-graph {
+  height: 50px;
 }
