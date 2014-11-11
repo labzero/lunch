@@ -27,3 +27,7 @@ Feature: Visiting the Dashboard
   Scenario: See dashboard market overview graph
     When I visit the dashboard
     Then I should see a market overview graph
+
+  Scenario: See anticipated activity graph
+    When I visit the dashboard
+    Then I should see "Anticipated Activity"
