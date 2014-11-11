@@ -166,16 +166,17 @@
   .dashboard-module-content, header {
     padding: 0;
   }
+  table {
+    width: 100%;
+  }
 }
 
-$breakdown-table-inner-width: 297px; // you can replace this with a standard sizing once you switch from a fluid layout to a fixed layout
 $breakdown-table-label-width: 195px;
 $breakdown-table-currency-width: 10px;
-$breakdown-table-value-width: $breakdown-table-inner-width - ($breakdown-table-label-width + $breakdown-table-currency-width);
 .account-breakdown-table {
-  @extend %typography-level-7;
+  @extend %typography-table-data;
   th {
-    @extend %typography-level-7;
+    @extend %typography-table-data;
     text-align: left;
   }
   th, .label, .currency, .value {
@@ -191,7 +192,6 @@ $breakdown-table-value-width: $breakdown-table-inner-width - ($breakdown-table-l
     text-align: right;
   }
   .value {
-    width: $breakdown-table-value-width;
     text-align: right;
     padding-right: 20px; // replace with standard sizing once we move to fixed layout
   }

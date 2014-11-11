@@ -29,7 +29,7 @@
   text-transform: uppercase;
 }
 
-@mixin typography-level-7 {
+@mixin typography-table-data{
   font-size: 0.8rem;
   font-weight: $normal-weight;
 }
@@ -80,12 +80,8 @@
   @include typography-level-6;
 }
 
-%typography-level-7 {
-  @include typography-level-7;
-}
-
-%typography-level-7 {
-  @include typography-level-7;
+%typography-table-data {
+  @include typography-table-data;
 }
 
 %typography-table-date {
@@ -103,3 +99,4 @@
 %typography-field-placeholder {
   @include typography-field-placeholder;
 }
+
