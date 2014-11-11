@@ -20,3 +20,8 @@ Then(/^I should see an advance rate\.$/) do
   mod = page.find('.dashboard-module', :text => I18n.t('dashboard.quick_advance.title'))
   mod.assert_selector('.dashboard-advances-rate', :text => /\d+\.\d+\%/)
 end
+
+Then(/^I should see a market overview graph$/) do
+  mod = page.find('.dashboard-module', :text => I18n.t('dashboard.market_overview.title'))
+  mod.assert_selector('.dashboard-market-graph', :visible => true)
+end

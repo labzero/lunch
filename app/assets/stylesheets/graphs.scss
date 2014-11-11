@@ -1,0 +1,8 @@
+.graph-tooltip-label {
+  @extend %typography-graph-label;
+  padding-right: 5px;
+}
+
+.graph-tooltip-value {
+  @extend %typography-graph-data;
+}

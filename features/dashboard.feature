@@ -23,3 +23,7 @@ Feature: Visiting the Dashboard
     And I should see "Credit Outstanding"
     And I should see "Collateral Market Value"
     And I should see "Collateral borrowing capacity"
+
+  Scenario: See dashboard market overview graph
+    When I visit the dashboard
+    Then I should see a market overview graph
