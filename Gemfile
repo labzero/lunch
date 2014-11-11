@@ -35,6 +35,7 @@ gem 'autoprefixer-rails' # automatically adds vendor prefixes to all applicable 
 gem 'rails-sass-images' # allows us to measure native image dimensions in our scss
 gem 'source-sans-pro-rails'
 gem 'highcharts-rails'
+gem 'jquery-placeholder-rails'
 
 group :development, :test do
   gem 'rspec-rails'
