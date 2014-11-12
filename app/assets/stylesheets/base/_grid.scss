@@ -1,10 +1,14 @@
-.row {
-  max-width: $max-row-width;
+%row {
+  width: $row-width;
   overflow: hidden;
   margin: 0 auto;
   padding: 0 $row-padding;
   display: block;
   box-sizing: border-box;
+}
+
+.row {
+  @extend %row;
 }
 
 @mixin column {

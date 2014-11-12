@@ -1,13 +1,11 @@
-$max-row-width: 960px;
-$grid-column-width: 6.25%; // 12 columns
-$gutter-width: 2.0833%; // 11 gutters
-$row-padding: 1.04166%; // 1 each on outside of row
+$row-width: 960px;
+$grid-column-width: 60px; // 12 columns
+$gutter-width: 20px; // 11 gutters
+$row-padding: 10px; // 1 each on outside of row
 
-$column-1-width: ($grid-column-width * 12) + ($gutter-width * 11) + ($row-padding * 2);
-$column-3-width: ($grid-column-width * 4) + ($gutter-width * 3) + ($row-padding * 2/3);
+$column-1-width: ($grid-column-width * 12) + ($gutter-width * 11);
+$column-3-width: ($grid-column-width * 4) + ($gutter-width * 3);
 
 $column-4x8-right-width: ($grid-column-width * 8) + ($gutter-width * 7);
-
-$column-3-gutter: ($gutter-width / $column-3-width) * 100%;
 
 $default-border-radius: 3px;
