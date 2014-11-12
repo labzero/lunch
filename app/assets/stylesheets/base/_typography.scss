@@ -64,11 +64,15 @@
 @mixin typography-graph-label {
   font-size: 0.7333rem;
   font-weight: $normal-weight;
+  font-family: $default-font-family;
+  color: $text-color;
 }
 
 @mixin typography-graph-data {
   font-size: 1rem;
   font-weight: $semibold-weight;
+  font-family: $default-font-family;
+  color: $text-color;
 }
 
 %typography-dashboard-module-heading {

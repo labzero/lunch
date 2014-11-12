@@ -1,0 +1,47 @@
+%tooltip {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 9px;
+  padding: 4px 4px;
+  background: $white;
+  border: 1px solid $light-blue;
+  border-radius: 3px;
+  box-shadow: 0px 0px 6px rgba(0,0,0, .09);
+  white-space: nowrap;
+  @extend %horizontal-center;
+  span {
+    @extend %typography-graph-data;
+  }
+  span:first-child {
+    margin-right: 10px;
+  }
+  &:before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -9px;
+    width: 0;
+    height: 0;
+    border-top: 9px solid $light-blue;
+    border-right: 9px solid transparent;
+    border-left: 9px solid transparent;
+  }
+  &:after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -8px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid $white;
+    border-right: 8px solid transparent;
+    border-left: 8px solid transparent;
+  }
+}
+
+.tooltip {
+  @extend %tooltip;
+}

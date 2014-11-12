@@ -4,10 +4,42 @@
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.market_overview.title'), classes: 'dashboard-module-market'} do
       .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account']} do
-      .anticipated-activity
+      .dashboard-pledged-collateral
+        %h2= t('dashboard.your_account.pledged_collateral.title')
+        .dashboard-bar-graph
+          - mortgage_percentage = number_to_percentage(@pledged_collateral[:mortgages][:percentage], precision: 1)
+          - agency_percentage = number_to_percentage(@pledged_collateral[:agency][:percentage], precision: 1)
+          - aaa_percentage = number_to_percentage(@pledged_collateral[:aaa][:percentage], precision: 1)
+          - aa_percentage = number_to_percentage(@pledged_collateral[:aa][:percentage], precision: 1)
+          .mortgages-bar.bar-graph-section{style: "width: #{mortgage_percentage}"}
+            .inner-bar
+            .tooltip
+              %span= number_to_human(@pledged_collateral[:mortgages][:absolute], units: 'global.currency')
+              %span= mortgage_percentage
+          .agency-bar.bar-graph-section{style: "width: #{agency_percentage};"}
+            .inner-bar
+            .tooltip
+              %span= number_to_human(@pledged_collateral[:agency][:absolute], units: 'global.currency')
+              %span= agency_percentage
+          .aaa-bar.bar-graph-section{style: "width: #{aaa_percentage};"}
+            .inner-bar
+            .tooltip
+              %span= number_to_human(@pledged_collateral[:aaa][:absolute], units: 'global.currency')
+              %span= aaa_percentage
+          .aa-bar.bar-graph-section{style: "width: #{aa_percentage};"}
+            .inner-bar
+            .tooltip
+              %span= number_to_human(@pledged_collateral[:aa][:absolute], units: 'global.currency')
+              %span= aa_percentage
+        .labels
+          %span.mortgages-label= t('dashboard.your_account.pledged_collateral.mortgages')
+          %span.securities-label= t('dashboard.your_account.pledged_collateral.securities')
+      .dashboard-total-securities-graph
+      .dashboard-effective-borrowing-capacity-graph
+      .dashboard-anticipated-activity-graph
         %h2= t('dashboard.your_account.anticipated_activity.title')
         =image_tag('anticipated-activity.png', alt: 'Anticipated Activity Graph')
-      %table.account-breakdown-table
+      %table.dashboard-account-breakdown-table
         %tbody
           - @account_overview.each do |row|
             %tr

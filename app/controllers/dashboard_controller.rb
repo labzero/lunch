@@ -44,6 +44,21 @@ class DashboardController < ApplicationController
       data: RatesService.new.overnight_vrc
     }];
 
+    # this info will likely be coming from the model layer, which will query the CDB.  Just throwing fake data in here for now
+    mortgages = 67574000 #probably be something like "mortgages = user.pledged_collateral.mortgages"
+    agency = 3000000
+    aaa = 15000000
+    aa = 5000000
+    total_collateral = mortgages + agency + aaa + aa
+
+
+    @pledged_collateral = {
+        mortgages: {absolute: mortgages, percentage: mortgages.fdiv(total_collateral)*100},
+        agency: {absolute: agency, percentage: agency.fdiv(total_collateral)*100},
+        aaa: {absolute: aaa, percentage: aaa.fdiv(total_collateral)*100},
+        aa: {absolute: aa, percentage: aa.fdiv(total_collateral)*100}
+    }
+
   end
 
 

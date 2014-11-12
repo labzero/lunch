@@ -173,7 +173,7 @@
 
 $breakdown-table-label-width: 195px;
 $breakdown-table-currency-width: 10px;
-.account-breakdown-table {
+.dashboard-account-breakdown-table {
   @extend %typography-table-data;
   th {
     @extend %typography-table-data;
@@ -212,8 +212,58 @@ $breakdown-table-currency-width: 10px;
   height: 50px;
 }
 
-.anticipated-activity {
+.dashboard-anticipated-activity-graph {
   img {
     width: 100%; // don't worry about this styling, it will be removed once we add the real graph
   }
+}
+
+.dashboard-pledged-collateral {
+  .bar-graph-section {
+    position: relative;
+    height: 100%;
+    float: left;
+    padding-left: 2px;
+    cursor: pointer;
+    box-sizing: border-box;
+    &:hover {
+      .tooltip {
+        display: block;
+      }
+    }
+  }
+  .inner-bar {
+    width: 100%;
+    height: 100%;
+    border-radius: 3px;
+  }
+  .mortgages-bar .inner-bar {
+    background: $light-green;
+  }
+  .agency-bar, .aaa-bar, .aa-bar {
+    .inner-bar {
+      background: $dark-green;
+    }
+  }
+  .labels {
+    @extend %typography-level-3;
+  }
+  .mortgages-label {
+    color: $light-green;
+    float: left;
+  }
+  .securities-label {
+    color: $dark-green;
+    float: right;
+  }
+}
+
+.dashboard-bar-graph {
+  position: relative;
+  height: 25px;
+  background: $white;
+  border-radius: 3px;
+  padding: 4px 4px 4px 2px;
+  border: 1px solid $light-blue;
+  box-sizing: border-box;
 }

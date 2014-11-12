@@ -22,6 +22,9 @@ en:
   global:
     na: N/A
     vrc_overnight: VRC Overnight
+    currency:
+      thousand: T
+      million: MM
   nav:
     primary:
       welcome: Hi %{name}
@@ -69,23 +72,17 @@ en:
       advance_placeholder: Enter Dollar Amount
     your_account:
       title: Your Account
-      balance: Sta Balance
-      credit_outstanding: Credit Outstanding
-      remaining:
-        title: Remaining
-        available: Financial Available
-        leverage: Stock Leverage
-      market_value:
-        title: Collateral Market Value
-        agency: 'SBC:Agency'
-        aaa: 'SBC:AAA'
-        aa: 'SBC:AA'
-      borrowing_capacity:
-        title: Collateral borrowing capacity
-        standard: Standard credit program
-        agency: 'SBC:Agency'
-        aaa: 'SBC:AAA'
-        aa: 'SBC:AA'
+      pledged_collateral:
+        title: Pledged Collateral
+        mortgages: Mortgages
+        securities: Securities
+      total_securities:
+        title: Total Securities
+        pledged: Pledged
+        safekept: Safekept
+      effective_borrowing_capacity:
+        used: Used
+        unused: Unused
       anticipated_activity:
         title: Anticipated Activity
       table:
