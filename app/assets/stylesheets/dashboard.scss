@@ -7,7 +7,7 @@
   border-radius: $default-border-radius;
   background: $white;
   box-shadow: 0px 0px 6px rgba(0,0,0, .09);
-  margin-bottom: $column-3-gutter;
+  margin-bottom: 20px;
   h1 {
     @extend %typography-dashboard-module-heading;
     margin: 0;
@@ -17,7 +17,7 @@
   }
   header {
     border-bottom: 1px solid $light-blue;
-    padding: ($column-3-gutter * .75) $column-3-gutter;
+    padding: 15px 20px;
     @extend %clearfix;
     h1 {
       float: left;
@@ -50,7 +50,7 @@
 }
 
 .dashboard-module-content {
-  padding: $column-3-gutter;
+  padding: 20px;
   .table-striped {
     width: 100%;
     tbody {
