@@ -31,11 +31,28 @@
             .tooltip
               %span= number_to_human(@pledged_collateral[:aa][:absolute], units: 'global.currency')
               %span= aa_percentage
-        .labels
+        .dashboard-bar-graph-labels
           %span.mortgages-label= t('dashboard.your_account.pledged_collateral.mortgages')
           %span.securities-label= t('dashboard.your_account.pledged_collateral.securities')
-      .dashboard-total-securities-graph
-      .dashboard-effective-borrowing-capacity-graph
+      .dashboard-total-securities
+        %h2= t('dashboard.your_account.total_securities.title')
+        .dashboard-bar-graph
+          .pledged-securities-bar.bar-graph-section{style: "width: #{number_to_percentage(@total_securities[:pledged_securities][:percentage], precision: 1)};"}
+            .inner-bar
+        .dashboard-bar-graph-labels
+          %span.pledged-label= t('dashboard.your_account.total_securities.pledged') + ": #{@total_securities[:pledged_securities][:absolute]}"
+          %span.safekept-label= t('dashboard.your_account.total_securities.safekept') + ": #{@total_securities[:safekept_securities][:absolute]}"
+      .dashboard-effective-borrowing-capacity
+        %h2= t('dashboard.your_account.effective_borrowing_capacity.title')
+        .dashboard-bar-graph
+          .used-capacity-bar.bar-graph-section{style: "width: #{number_to_percentage(@effective_borrowing_capacity[:used_capacity][:percentage], precision: 1)};"}
+            .inner-bar
+          .threshold-capacity{style: "left: #{@effective_borrowing_capacity[:threshold_capacity]}%"}
+            .tooltip
+              %span= "#{@effective_borrowing_capacity[:threshold_capacity]}%"
+        .dashboard-bar-graph-labels
+          %span.used-capacity-label= t('dashboard.your_account.effective_borrowing_capacity.used') + ": #{number_to_human(@effective_borrowing_capacity[:used_capacity][:absolute], units: 'global.currency')}"
+          %span.unused-capacity-label= t('dashboard.your_account.effective_borrowing_capacity.unused') + ": #{number_to_human(@effective_borrowing_capacity[:unused_capacity][:absolute], units: 'global.currency')}"
       .dashboard-anticipated-activity-graph
         %h2= t('dashboard.your_account.anticipated_activity.title')
         =image_tag('anticipated-activity.png', alt: 'Anticipated Activity Graph')
