@@ -170,6 +170,12 @@
   table {
     width: 100%;
   }
+  header {
+    padding-bottom: 10px;
+  }
+  h2 {
+    margin: 0;
+  }
 }
 
 $breakdown-table-label-width: 195px;
@@ -207,6 +213,9 @@ $breakdown-table-currency-width: 10px;
 
 .dashboard-module-market {
   @extend %dashboard-module-chromeless;
+  .dashboard-module-content {
+    padding-bottom: 0;
+  }
 }
 
 .dashboard-market-graph {
@@ -214,6 +223,9 @@ $breakdown-table-currency-width: 10px;
 }
 
 .dashboard-anticipated-activity-graph {
+  h2 {
+    margin-bottom: 5px;
+  }
   img {
     width: 100%; // don't worry about this styling, it will be removed once we add the real graph
   }
@@ -221,6 +233,10 @@ $breakdown-table-currency-width: 10px;
 
 .dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-effective-borrowing-capacity, .dashboard-anticipated-activity-graph {
   clear: both; // using instead of extending %clearfix, because we want overflow to be visible for tooltip
+}
+
+.dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-effective-borrowing-capacity {
+  margin-bottom: 8px;
 }
 
 .dashboard-bar-graph {
@@ -252,6 +268,7 @@ $breakdown-table-currency-width: 10px;
 
 .dashboard-bar-graph-labels {
   @extend %typography-level-3;
+  @extend %clearfix;
   span:first-child {
     float: left;
   }
