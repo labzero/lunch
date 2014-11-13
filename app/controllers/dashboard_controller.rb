@@ -41,37 +41,7 @@ class DashboardController < ApplicationController
 
     @market_overview = [{
       name: 'Test',
-      data: [
-        [DateTime.new(2014, 2, 10), 0.11],
-        [DateTime.new(2014, 2, 11), 0.12],
-        [DateTime.new(2014, 2, 12), 0.11],
-        [DateTime.new(2014, 2, 13), 0.12],
-        [DateTime.new(2014, 2, 14), 0.11],
-        [DateTime.new(2014, 2, 18), 0.11],
-        [DateTime.new(2014, 2, 19), 0.11],
-        [DateTime.new(2014, 2, 20), 0.11],
-        [DateTime.new(2014, 2, 21), 0.11],
-        [DateTime.new(2014, 2, 24), 0.12],
-        [DateTime.new(2014, 2, 25), 0.12],
-        [DateTime.new(2014, 2, 26), 0.12],
-        [DateTime.new(2014, 2, 27), 0.12],
-        [DateTime.new(2014, 2, 28), 0.12],
-        [DateTime.new(2014, 3, 3), 0.12],
-        [DateTime.new(2014, 3, 4), 0.12],
-        [DateTime.new(2014, 3, 5), 0.12],
-        [DateTime.new(2014, 3, 6), 0.12],
-        [DateTime.new(2014, 3, 7), 0.13],
-        [DateTime.new(2014, 3, 10), 0.13],
-        [DateTime.new(2014, 3, 11), 0.12],
-        [DateTime.new(2014, 3, 12), 0.12],
-        [DateTime.new(2014, 3, 13), 0.12],
-        [DateTime.new(2014, 3, 14), 0.12],
-        [DateTime.new(2014, 3, 17), 0.13],
-        [DateTime.new(2014, 3, 18), 0.13],
-        [DateTime.new(2014, 3, 19), 0.13],
-        [DateTime.new(2014, 3, 20), 0.13],
-        [DateTime.new(2014, 3, 21), 0.13],
-        [DateTime.new(2014, 4, 17), 0.08]]
+      data: RatesService.new.overnight_vrc
     }];
 
   end
