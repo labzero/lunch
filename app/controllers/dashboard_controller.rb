@@ -52,6 +52,7 @@ class DashboardController < ApplicationController
     @pledged_collateral = client_balances.pledged_collateral
     @total_securities = client_balances.total_securities
     @effective_borrowing_capacity = client_balances.effective_borrowing_capacity.merge!({threshold_capacity: THRESHOLD_CAPACITY}) # we'll be pulling threshold capacity from a different source than the ClientBalanceService
+    @total_maturing_today = 46500000
 
   end
 

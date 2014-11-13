@@ -54,6 +54,7 @@
   padding: 20px;
   .table-striped {
     width: 100%;
+    margin-bottom: 25px;
     tbody {
       tr:nth-child(even) td,
       tr:nth-child(even) th {
@@ -74,6 +75,27 @@
       td:first-child {
         padding-top: 11px;
         padding-left: 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+    }
+  }
+  .table-striped-reports {
+    width: 100%;
+    margin-top: 22px;
+    margin-bottom: 25px;
+    tbody {
+      tr:nth-child(even) td,
+      tr:nth-child(even) th {
+        height: 12px;
+      }
+      tr:nth-child(odd) td,
+      tr:nth-child(odd) th {
+        background: $lightest-blue;
+        height: 12px;
+      }
+      td {
+        padding: 10px;
         text-align: left;
         vertical-align: top;
       }
@@ -331,4 +353,10 @@ $breakdown-table-currency-width: 10px;
 
 .borrowing-capacity-label-used {
   color: $accent-green;
+}
+
+.dashboard-module-reports {
+  .input-field-container {
+    width: 165px;
+  }
 }

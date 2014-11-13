@@ -17,6 +17,19 @@
   background-color: $actionable-blue;
 }
 
+
+.total-button {
+  @extend .primary-button;
+  text-transform: none;
+  width: 100%;
+  text-align: justify;
+}
+
+.edit-button {
+  @extend %button;
+  background-color: $secondary-gray;
+}
+
 .more-button {
   &:after {
     @extend %icon-font;
