@@ -16,7 +16,7 @@ SQL
       cursor = @connection.execute(connection_string)
       rows = []
       while row = cursor.fetch()
-        rows.push([row[0].to_date, row[1].to_f])
+        rows.push([row[0], row[1]])
       end
       rows
     else
@@ -26,7 +26,9 @@ SQL
       end
     end
 
-    data.reverse
+    data.reverse.collect do |row|
+      [row[0].to_date, row[1].to_f]
+    end
   end
 
 end
