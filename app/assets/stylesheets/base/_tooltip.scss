@@ -12,6 +12,8 @@
   @extend %horizontal-center;
   span {
     @extend %typography-graph-data;
+    font-family: $default-font-family;
+    color: $text-color;
   }
   span:first-child {
     margin-right: 10px;

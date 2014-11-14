@@ -18,6 +18,11 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-dashboard-gauge-label {
+  font-size: 0.8667rem;
+  font-weight: $normal-weight;
+}
+
 @mixin typography-level-4 {
   font-size: 1rem;
   font-weight: $light-weight;
@@ -64,15 +69,11 @@
 @mixin typography-graph-label {
   font-size: 0.7333rem;
   font-weight: $normal-weight;
-  font-family: $default-font-family;
-  color: $text-color;
 }
 
 @mixin typography-graph-data {
   font-size: 1rem;
   font-weight: $semibold-weight;
-  font-family: $default-font-family;
-  color: $text-color;
 }
 
 %typography-dashboard-module-heading {
@@ -85,6 +86,10 @@
 
 %typography-header-nav {
   @include typography-header-nav ;
+}
+
+%typography-dashboard-gauge-label {
+  @include typography-dashboard-gauge-label;
 }
 
 %typography-level-3 {

@@ -267,7 +267,7 @@ $breakdown-table-currency-width: 10px;
 }
 
 .dashboard-gauge-labels {
-  @extend %typography-level-3;
+  @extend %typography-dashboard-gauge-label;
   @extend %clearfix;
   span:first-child {
     float: left;
@@ -278,10 +278,10 @@ $breakdown-table-currency-width: 10px;
 }
 
 .dashboard-pledged-collateral {
-  .mortgages-bar .inner-gauge-section {
+  .gauge-mortgages .inner-gauge-section {
     background: $light-green;
   }
-  .agency-bar, .aaa-bar, .aa-bar {
+  .gauge-agency, .gauge-aaa, .gauge-aa {
     .inner-gauge-section {
       background: $dark-green;
     }
@@ -292,10 +292,13 @@ $breakdown-table-currency-width: 10px;
   .securities-label {
     color: $dark-green;
   }
+  .dashboard-gauge {
+    @extend %clearfix;
+  }
 }
 
 .dashboard-total-securities {
-  .pledged-securities-bar .inner-gauge-section {
+  .gauge-pledged-securities .inner-gauge-section {
     background: $dark-green;
   }
   .pledged-label {
@@ -305,7 +308,7 @@ $breakdown-table-currency-width: 10px;
 
 .dashboard-effective-borrowing-capacity {
   position: relative;
-  .used-capacity-bar .inner-gauge-section {
+  .gauge-used-capacity .inner-gauge-section {
     background: $accent-green;
   }
   .used-capacity-label {

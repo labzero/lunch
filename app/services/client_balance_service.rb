@@ -3,6 +3,7 @@ class ClientBalanceService
   def initialize(member_id)
     @connection = ActiveRecord::Base.establish_connection('cdb').connection if Rails.env == 'production'
     @member_id = member_id
+    raise ArgumentError, 'member_id must not be blank' if member_id.blank?
   end
 
   def pledged_collateral
