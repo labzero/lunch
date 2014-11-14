@@ -18,6 +18,11 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-dashboard-gauge-label {
+  font-size: 0.8667rem;
+  font-weight: $normal-weight;
+}
+
 @mixin typography-level-4 {
   font-size: 1rem;
   font-weight: $light-weight;
@@ -81,6 +86,10 @@
 
 %typography-header-nav {
   @include typography-header-nav ;
+}
+
+%typography-dashboard-gauge-label {
+  @include typography-dashboard-gauge-label;
 }
 
 %typography-level-3 {

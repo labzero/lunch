@@ -1,5 +1,8 @@
 class DashboardController < ApplicationController
 
+  MEMBER_ID = 750 #this is the hard-coded fhlb client id number we're using for the time-being
+  THRESHOLD_CAPACITY = 35 #this will be set by each client, probably with a default value of 35, and be stored in some as-yet-unnamed db
+
   def index
     @previous_activity = [
       [t('dashboard.previous_activity.overnight_vrc'), 44503000, DateTime.new(2014,9,3)],
@@ -43,6 +46,12 @@ class DashboardController < ApplicationController
       name: 'Test',
       data: RatesService.new.overnight_vrc
     }];
+
+    client_balances = ClientBalanceService.new(MEMBER_ID)
+
+    @pledged_collateral = client_balances.pledged_collateral
+    @total_securities = client_balances.total_securities
+    @effective_borrowing_capacity = client_balances.effective_borrowing_capacity.merge!({threshold_capacity: THRESHOLD_CAPACITY}) # we'll be pulling threshold capacity from a different source than the ClientBalanceService
 
   end
 

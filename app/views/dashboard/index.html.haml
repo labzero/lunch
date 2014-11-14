@@ -4,10 +4,50 @@
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.market_overview.title'), classes: 'dashboard-module-market'} do
       .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account']} do
-      .anticipated-activity
+      .dashboard-pledged-collateral
+        %h2= t('dashboard.your_account.pledged_collateral.title')
+        .dashboard-gauge
+          - mortgage_percentage = number_to_percentage(@pledged_collateral[:mortgages][:percentage], precision: 1)
+          - agency_percentage = number_to_percentage(@pledged_collateral[:agency][:percentage], precision: 1)
+          - aaa_percentage = number_to_percentage(@pledged_collateral[:aaa][:percentage], precision: 1)
+          - aa_percentage = number_to_percentage(@pledged_collateral[:aa][:percentage], precision: 1)
+          .gauge-mortgages.gauge-section{style: "width: #{mortgage_percentage}"}
+            .inner-gauge-section
+            = render 'shared/tooltip', :first_value => number_to_human(@pledged_collateral[:mortgages][:absolute], units: 'global.currency'), :second_value => mortgage_percentage
+          .gauge-agency.gauge-section{style: "width: #{agency_percentage};"}
+            .inner-gauge-section
+            = render 'shared/tooltip', :first_value => number_to_human(@pledged_collateral[:agency][:absolute], units: 'global.currency'), :second_value => agency_percentage
+          .gauge-aaa.gauge-section{style: "width: #{aaa_percentage};"}
+            .inner-gauge-section
+            = render 'shared/tooltip', :first_value => number_to_human(@pledged_collateral[:aaa][:absolute], units: 'global.currency'), :second_value => aaa_percentage
+          .gauge-aa.gauge-section{style: "width: #{aa_percentage};"}
+            .inner-gauge-section
+            = render 'shared/tooltip', :first_value => number_to_human(@pledged_collateral[:aa][:absolute], units: 'global.currency'), :second_value => aa_percentage
+        .dashboard-gauge-labels
+          %span.mortgages-label= t('dashboard.your_account.pledged_collateral.mortgages')
+          %span.securities-label= t('dashboard.your_account.pledged_collateral.securities')
+      .dashboard-total-securities
+        %h2= t('dashboard.your_account.total_securities.title')
+        .dashboard-gauge
+          .gauge-pledged-securities.gauge-section{style: "width: #{number_to_percentage(@total_securities[:pledged_securities][:percentage], precision: 1)};"}
+            .inner-gauge-section
+        .dashboard-gauge-labels
+          %span.pledged-label= t('dashboard.your_account.total_securities.pledged') + ": #{@total_securities[:pledged_securities][:absolute]}"
+          %span.safekept-label= t('dashboard.your_account.total_securities.safekept') + ": #{@total_securities[:safekept_securities][:absolute]}"
+      .dashboard-effective-borrowing-capacity
+        %h2= t('dashboard.your_account.effective_borrowing_capacity.title')
+        .dashboard-gauge
+          .gauge-used-capacity.gauge-section{style: "width: #{number_to_percentage(@effective_borrowing_capacity[:used_capacity][:percentage], precision: 1)};"}
+            .inner-gauge-section
+          .threshold-capacity{style: "left: #{@effective_borrowing_capacity[:threshold_capacity]}%"}
+            = render 'shared/tooltip', :first_value => "#{@effective_borrowing_capacity[:threshold_capacity]}%"
+        .dashboard-gauge-labels
+          %span.used-capacity-label= t('dashboard.your_account.effective_borrowing_capacity.used') + ": #{number_to_human(@effective_borrowing_capacity[:used_capacity][:absolute], units: 'global.currency')}"
+          %span.unused-capacity-label= t('dashboard.your_account.effective_borrowing_capacity.unused') + ": #{number_to_human(@effective_borrowing_capacity[:unused_capacity][:absolute], units: 'global.currency')}"
+      .dashboard-anticipated-activity-graph
         %h2= t('dashboard.your_account.anticipated_activity.title')
         =image_tag('anticipated-activity.png', alt: 'Anticipated Activity Graph')
-      %table.account-breakdown-table
+      %table.dashboard-account-breakdown-table
         %tbody
           - @account_overview.each do |row|
             %tr

@@ -1,5 +1,6 @@
 .dashboard {
   margin-top: $gutter-width;
+  overflow: visible;
 }
 
 .dashboard-module {
@@ -169,11 +170,17 @@
   table {
     width: 100%;
   }
+  header {
+    padding-bottom: 10px;
+  }
+  h2 {
+    margin: 0;
+  }
 }
 
 $breakdown-table-label-width: 195px;
 $breakdown-table-currency-width: 10px;
-.account-breakdown-table {
+.dashboard-account-breakdown-table {
   @extend %typography-table-data;
   th {
     @extend %typography-table-data;
@@ -206,14 +213,130 @@ $breakdown-table-currency-width: 10px;
 
 .dashboard-module-market {
   @extend %dashboard-module-chromeless;
+  .dashboard-module-content {
+    padding-bottom: 0;
+  }
 }
 
 .dashboard-market-graph {
   height: 50px;
 }
 
-.anticipated-activity {
+.dashboard-anticipated-activity-graph {
+  h2 {
+    margin-bottom: 5px;
+  }
   img {
     width: 100%; // don't worry about this styling, it will be removed once we add the real graph
+  }
+}
+
+.dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-effective-borrowing-capacity, .dashboard-anticipated-activity-graph {
+  clear: both; // using instead of extending %clearfix, because we want overflow to be visible for tooltip
+}
+
+.dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-effective-borrowing-capacity {
+  margin-bottom: 8px;
+}
+
+.dashboard-gauge {
+  position: relative;
+  height: 25px;
+  background: $white;
+  border-radius: 3px;
+  padding: 4px 4px 4px 2px;
+  border: 1px solid $light-blue;
+  box-sizing: border-box;
+  .gauge-section {
+    position: relative;
+    height: 100%;
+    float: left;
+    padding-left: 2px;
+    box-sizing: border-box;
+    &:hover {
+      .tooltip {
+        display: block;
+      }
+    }
+  }
+  .inner-gauge-section {
+    width: 100%;
+    height: 100%;
+    border-radius: 3px;
+  }
+}
+
+.dashboard-gauge-labels {
+  @extend %typography-dashboard-gauge-label;
+  @extend %clearfix;
+  span:first-child {
+    float: left;
+  }
+  span:last-child {
+    float: right;
+  }
+}
+
+.dashboard-pledged-collateral {
+  .gauge-mortgages .inner-gauge-section {
+    background: $light-green;
+  }
+  .gauge-agency, .gauge-aaa, .gauge-aa {
+    .inner-gauge-section {
+      background: $dark-green;
+    }
+  }
+  .mortgages-label {
+    color: $light-green;
+  }
+  .securities-label {
+    color: $dark-green;
+  }
+  .dashboard-gauge {
+    @extend %clearfix;
+  }
+}
+
+.dashboard-total-securities {
+  .gauge-pledged-securities .inner-gauge-section {
+    background: $dark-green;
+  }
+  .pledged-label {
+    color: $dark-green;
+  }
+}
+
+.dashboard-effective-borrowing-capacity {
+  position: relative;
+  .gauge-used-capacity .inner-gauge-section {
+    background: $accent-green;
+  }
+  .used-capacity-label {
+    color: $accent-green;
+  }
+  .threshold-capacity {
+    position: absolute;
+    top: 0;
+    margin-left: -5.5px;
+    width: 11px;
+    height: 100%;
+    background: $actionable-blue;
+    z-index: 1;
+    &:before {
+      @extend %absolute-psuedoelement;
+      left: 4.5px;
+      width: 1px;
+      height: 100%;
+      background: $brand-blue;
+      z-index: 0;
+    }
+    &:hover {
+      .tooltip {
+        display: block;
+        span:first-child {
+          margin-right: 0;
+        }
+      }
+    }
   }
 }
