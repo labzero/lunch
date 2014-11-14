@@ -51,6 +51,9 @@ en:
       more: More
       edit: Edit
       calendar: Calendar
+      view: View
+      download: Download
+      xml: XML
     previous_activity:
       title: Previous Activity
       overnight_vrc: Overnight VRC Open
@@ -60,6 +63,7 @@ en:
       collateral_rebalancing: Collateral Rebalancing
       stock_purchase: Stock Purchase
       estimated: Estimated
+      total_maturing_today: Total Maturing Today
     contacts:
       title: Contacts
       icon_alt_text: Contact
@@ -70,6 +74,14 @@ en:
     quick_advance:
       title: Quick Advances
       advance_placeholder: Enter Dollar Amount
+    reports:
+      title: Reports
+      as_of_yesterday: As of yesterday
+      daily: Daily
+      weekly: Weekly
+      monthly: Monthly
+      quarterly: Quarterly
+      annually: Annually
     your_account:
       title: Your Account
       pledged_collateral:

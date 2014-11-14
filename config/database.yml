@@ -8,7 +8,7 @@ default: &default
   adapter: oracle_enhanced
   pool: 5
   timeout: 5000
-  database: //localhost:1521/xe
+  database: <%= ENV['DATABASE_CONNECT_URL'] || '//localhost:1521/xe' %>
 
 development:
   <<: *default

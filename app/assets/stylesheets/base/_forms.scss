@@ -11,6 +11,18 @@
     color: $actionable-blue;
     font-size: 0.75rem;
   }
+  &:after {
+    position: absolute;
+    top: 0px;
+    left: 135px;
+    padding: 5px 8px;
+    z-index: 1;
+    background: $actionable-blue;
+    color: white;
+    font-size: 1.35rem;
+    border-bottom-right-radius: $default-border-radius;
+    border-top-right-radius: $default-border-radius;
+  }
   input {
     border: 1px solid $actionable-blue;
     border-radius: $default-border-radius;
