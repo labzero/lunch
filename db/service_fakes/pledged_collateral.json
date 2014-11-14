@@ -9,10 +9,10 @@
     },
     "aaa" : {
         "absolute" : 0,
-        "percentage": 0
+        "percentage": 0.0
     },
     "aa" : {
         "absolute" : 0,
-        "percentage": 0
+        "percentage": 0.0
     }
 }

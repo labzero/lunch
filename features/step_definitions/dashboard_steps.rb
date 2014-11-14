@@ -36,5 +36,23 @@ end
 
 Then(/^I should see the Anticipated Activity graph$/) do
   mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
-  mod.assert_selector('.anticipated-activity')
+  mod.assert_selector('.dashboard-anticipated-activity-graph')
+end
+
+Then(/^I should see a pledged collateral gauge$/) do
+  mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
+  mod.assert_selector('.dashboard-pledged-collateral')
+  mod.assert_selector('.dashboard-gauge')
+end
+
+Then(/^I should see a total securities gauge$/) do
+  mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
+  mod.assert_selector('.dashboard-total-securities')
+  mod.assert_selector('.dashboard-gauge')
+end
+
+Then(/^I should see an effective borrwoing capacity gauge$/) do
+  mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
+  mod.assert_selector('.dashboard-effective-borrowing-capacity')
+  mod.assert_selector('.dashboard-gauge')
 end
