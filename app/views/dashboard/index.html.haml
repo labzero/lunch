@@ -11,7 +11,7 @@
           - agency_percentage = number_to_percentage(@pledged_collateral[:agency][:percentage], precision: 1)
           - aaa_percentage = number_to_percentage(@pledged_collateral[:aaa][:percentage], precision: 1)
           - aa_percentage = number_to_percentage(@pledged_collateral[:aa][:percentage], precision: 1)
-          .collateral-gauge-mortgages.gauge-section{style: "width: #{mortgage_percentage}"}
+          .collateral-gauge-mortgages.gauge-section{style: "width: #{mortgage_percentage}; #{'display: none' unless mortgage_percentage.to_f > 0}"}
             .inner-gauge-section
             = render 'shared/tooltip', :first_value => number_to_human(@pledged_collateral[:mortgages][:absolute], units: 'global.currency'), :second_value => mortgage_percentage
           .collateral-gauge-securities.gauge-section{style: "width: #{agency_percentage}; #{'display: none' unless agency_percentage.to_f > 0}"}
