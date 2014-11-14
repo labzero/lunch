@@ -1,0 +1,10 @@
+{
+    "used_capacity" : {
+        "absolute": 15000000,
+        "percentage": 14.8
+    },
+    "unused_capacity" : {
+        "absolute" : 86316828,
+        "percentage" : 85.2
+    }
+}

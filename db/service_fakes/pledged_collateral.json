@@ -1,0 +1,18 @@
+{
+    "mortgages" : {
+        "absolute" : 132304735,
+        "percentage" : 89.2
+    },
+    "agency" : {
+        "absolute" : 16041690,
+        "percentage": 10.8
+    },
+    "aaa" : {
+        "absolute" : 0,
+        "percentage": 0
+    },
+    "aa" : {
+        "absolute" : 0,
+        "percentage": 0
+    }
+}
