@@ -11,39 +11,39 @@
           - agency_percentage = number_to_percentage(@pledged_collateral[:agency][:percentage], precision: 1)
           - aaa_percentage = number_to_percentage(@pledged_collateral[:aaa][:percentage], precision: 1)
           - aa_percentage = number_to_percentage(@pledged_collateral[:aa][:percentage], precision: 1)
-          .gauge-mortgages.gauge-section{style: "width: #{mortgage_percentage}"}
+          .collateral-gauge-mortgages.gauge-section{style: "width: #{mortgage_percentage}"}
             .inner-gauge-section
             = render 'shared/tooltip', :first_value => number_to_human(@pledged_collateral[:mortgages][:absolute], units: 'global.currency'), :second_value => mortgage_percentage
-          .gauge-agency.gauge-section{style: "width: #{agency_percentage};"}
+          .collateral-gauge-securities.gauge-section{style: "width: #{agency_percentage}; #{'display: none' unless agency_percentage.to_f > 0}"}
             .inner-gauge-section
             = render 'shared/tooltip', :first_value => number_to_human(@pledged_collateral[:agency][:absolute], units: 'global.currency'), :second_value => agency_percentage
-          .gauge-aaa.gauge-section{style: "width: #{aaa_percentage};"}
+          .collateral-gauge-securities.gauge-section{style: "width: #{aaa_percentage}; #{'display: none' unless aaa_percentage.to_f > 0}"}
             .inner-gauge-section
             = render 'shared/tooltip', :first_value => number_to_human(@pledged_collateral[:aaa][:absolute], units: 'global.currency'), :second_value => aaa_percentage
-          .gauge-aa.gauge-section{style: "width: #{aa_percentage};"}
+          .collateral-gauge-securities.gauge-section{style: "width: #{aa_percentage}; #{'display: none' unless aa_percentage.to_f > 0}"}
             .inner-gauge-section
             = render 'shared/tooltip', :first_value => number_to_human(@pledged_collateral[:aa][:absolute], units: 'global.currency'), :second_value => aa_percentage
         .dashboard-gauge-labels
-          %span.mortgages-label= t('dashboard.your_account.pledged_collateral.mortgages')
-          %span.securities-label= t('dashboard.your_account.pledged_collateral.securities')
+          %span.collateral-gauge-label-mortgages= t('dashboard.your_account.pledged_collateral.mortgages')
+          %span.collateral-gauge-label-securities= t('dashboard.your_account.pledged_collateral.securities')
       .dashboard-total-securities
         %h2= t('dashboard.your_account.total_securities.title')
         .dashboard-gauge
-          .gauge-pledged-securities.gauge-section{style: "width: #{number_to_percentage(@total_securities[:pledged_securities][:percentage], precision: 1)};"}
+          .total-securities-gauge-pledged.gauge-section{style: "width: #{number_to_percentage(@total_securities[:pledged_securities][:percentage], precision: 1)};"}
             .inner-gauge-section
         .dashboard-gauge-labels
-          %span.pledged-label= t('dashboard.your_account.total_securities.pledged') + ": #{@total_securities[:pledged_securities][:absolute]}"
-          %span.safekept-label= t('dashboard.your_account.total_securities.safekept') + ": #{@total_securities[:safekept_securities][:absolute]}"
+          %span.total-securities-label-pledged= t('dashboard.your_account.total_securities.pledged') + ": #{@total_securities[:pledged_securities][:absolute]}"
+          %span= t('dashboard.your_account.total_securities.safekept') + ": #{@total_securities[:safekept_securities][:absolute]}"
       .dashboard-effective-borrowing-capacity
         %h2= t('dashboard.your_account.effective_borrowing_capacity.title')
         .dashboard-gauge
-          .gauge-used-capacity.gauge-section{style: "width: #{number_to_percentage(@effective_borrowing_capacity[:used_capacity][:percentage], precision: 1)};"}
+          .borrowing-capacity-gauge-used.gauge-section{style: "width: #{number_to_percentage(@effective_borrowing_capacity[:used_capacity][:percentage], precision: 1)};"}
             .inner-gauge-section
-          .threshold-capacity{style: "left: #{@effective_borrowing_capacity[:threshold_capacity]}%"}
+          .borrowing-capacity-gauge-threshold{style: "left: #{@effective_borrowing_capacity[:threshold_capacity]}%"}
             = render 'shared/tooltip', :first_value => "#{@effective_borrowing_capacity[:threshold_capacity]}%"
         .dashboard-gauge-labels
-          %span.used-capacity-label= t('dashboard.your_account.effective_borrowing_capacity.used') + ": #{number_to_human(@effective_borrowing_capacity[:used_capacity][:absolute], units: 'global.currency')}"
-          %span.unused-capacity-label= t('dashboard.your_account.effective_borrowing_capacity.unused') + ": #{number_to_human(@effective_borrowing_capacity[:unused_capacity][:absolute], units: 'global.currency')}"
+          %span.borrowing-capacity-label-used= t('dashboard.your_account.effective_borrowing_capacity.used') + ": #{number_to_human(@effective_borrowing_capacity[:used_capacity][:absolute], units: 'global.currency')}"
+          %span= t('dashboard.your_account.effective_borrowing_capacity.unused') + ": #{number_to_human(@effective_borrowing_capacity[:unused_capacity][:absolute], units: 'global.currency')}"
       .dashboard-anticipated-activity-graph
         %h2= t('dashboard.your_account.anticipated_activity.title')
         =image_tag('anticipated-activity.png', alt: 'Anticipated Activity Graph')
