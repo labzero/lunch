@@ -277,66 +277,58 @@ $breakdown-table-currency-width: 10px;
   }
 }
 
-.dashboard-pledged-collateral {
-  .gauge-mortgages .inner-gauge-section {
-    background: $light-green;
-  }
-  .gauge-agency, .gauge-aaa, .gauge-aa {
-    .inner-gauge-section {
-      background: $dark-green;
-    }
-  }
-  .mortgages-label {
-    color: $light-green;
-  }
-  .securities-label {
-    color: $dark-green;
-  }
-  .dashboard-gauge {
-    @extend %clearfix;
-  }
+.collateral-gauge-label-mortgages {
+  color: $light-green;
 }
 
-.dashboard-total-securities {
-  .gauge-pledged-securities .inner-gauge-section {
+.collateral-gauge-label-securities, .total-securities-label-pledged  {
+  color: $dark-green;
+}
+
+.collateral-gauge-mortgages .inner-gauge-section {
+  background: $light-green;
+}
+
+.collateral-gauge-securities, .total-securities-gauge-pledged {
+  .inner-gauge-section {
     background: $dark-green;
-  }
-  .pledged-label {
-    color: $dark-green;
   }
 }
 
 .dashboard-effective-borrowing-capacity {
   position: relative;
-  .gauge-used-capacity .inner-gauge-section {
-    background: $accent-green;
-  }
-  .used-capacity-label {
-    color: $accent-green;
-  }
-  .threshold-capacity {
-    position: absolute;
-    top: 0;
-    margin-left: -5.5px;
-    width: 11px;
+}
+
+.borrowing-capacity-gauge-threshold {
+  position: absolute;
+  top: 0;
+  margin-left: -5.5px;
+  width: 11px;
+  height: 100%;
+  background: $actionable-blue;
+  z-index: 1;
+  &:before {
+    @extend %absolute-psuedoelement;
+    left: 5px;
+    width: 1px;
     height: 100%;
-    background: $actionable-blue;
-    z-index: 1;
-    &:before {
-      @extend %absolute-psuedoelement;
-      left: 4.5px;
-      width: 1px;
-      height: 100%;
-      background: $brand-blue;
-      z-index: 0;
-    }
-    &:hover {
-      .tooltip {
-        display: block;
-        span:first-child {
-          margin-right: 0;
-        }
+    background: $brand-blue;
+    z-index: 0;
+  }
+  &:hover {
+    .tooltip {
+      display: block;
+      span:first-child {
+        margin-right: 0;
       }
     }
   }
+}
+
+.borrowing-capacity-gauge-used .inner-gauge-section {
+  background: $accent-green;
+}
+
+.borrowing-capacity-label-used {
+  color: $accent-green;
 }
