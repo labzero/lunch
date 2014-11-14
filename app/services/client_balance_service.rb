@@ -70,8 +70,8 @@ SQL
       end
       total_securities = pledged_securities + safekept_securities
       {
-          pledged_securities: {absolute: pledged_securities, percentage: pledged_securities.fdiv(total_securities)*100},
-          safekept_securities: {absolute: safekept_securities, percentage: safekept_securities.fdiv(total_securities)*100}
+          pledged_securities: {absolute: pledged_securities.to_i, percentage: pledged_securities.fdiv(total_securities)*100},
+          safekept_securities: {absolute: safekept_securities.to_i, percentage: safekept_securities.fdiv(total_securities)*100}
       }.with_indifferent_access
     else
       JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'total_securities.json'))).with_indifferent_access
