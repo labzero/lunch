@@ -41,6 +41,7 @@ $icon-arrow-right: "\e604";
 $icon-calendar: "\e605";
 $icon-phone: "\e606";
 $icon-dollar: "$";
+$icon-edit: "\e607";
 
 .icon-gear-before:before, .icon-gear-after:after {
   @extend %icon-font;
@@ -82,5 +83,10 @@ $icon-dollar: "$";
   font-family: $default-font-family;
   font-weight: $bold-weight;
   content: "#{$icon-dollar}";
+}
+
+.icon-edit-before:before, .icon-edit-after:after {
+  @extend %icon-font;
+  content: "#{$icon-edit}";
 }
 

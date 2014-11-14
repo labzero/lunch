@@ -111,33 +111,35 @@
       %button.total-button #{t('dashboard.anticipated_activity.total_maturing_today')} #{number_to_currency(@total_maturing_today, precision: 0)}
   .column-3
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.reports.title'), classes: 'dashboard-module-reports'} do
-      = render 'shared/input_field_after', icon: :calendar, placeholder: t('dashboard.reports.as_of_yesterday')
+      = render 'shared/input_field', icon: :calendar, placeholder: t('dashboard.reports.as_of_yesterday'), location: :after
       %button.edit-button #{t('dashboard.actions.edit')}
       %table.table-striped-reports
         %tbody
           %tr
             %td
               = check_box_tag t('dashboard.reports.daily')
-              %label= t('dashboard.reports.daily')
+              %label= t('dashboard.reports.daily') + ' (2)'
           %tr
             %td
               = check_box_tag t('dashboard.reports.weekly')
-              %label= t('dashboard.reports.weekly')
+              %label= t('dashboard.reports.weekly') + ' (1)'
           %tr
             %td
               = check_box_tag t('dashboard.reports.monthly')
-              %label= t('dashboard.reports.monthly')
+              %label= t('dashboard.reports.monthly') + ' (4)'
           %tr
             %td
               = check_box_tag t('dashboard.reports.quarterly')
-              %label= t('dashboard.reports.quarterly')
+              %label= t('dashboard.reports.quarterly') + ' (2)'
           %tr
             %td
               = check_box_tag t('dashboard.reports.annually')
               %label= t('dashboard.reports.annually')
-      %button.primary-button #{t('dashboard.actions.view')}
-      %button.primary-button #{t('dashboard.actions.download')}
-      %button.primary-button #{t('dashboard.actions.xml')}
+      %a #{t('dashboard.actions.more')}
+      %button.report-button-left #{t('dashboard.actions.view')}
+      %span.report-split-button
+        %button.report-button-right #{t('dashboard.actions.download')}
+        %button.report-drop-down-right #{t('dashboard.actions.xml')}
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
       %ul
         %li= render 'dashboard/dashboard_contact', email: 'user@example.com', title: t('dashboard.contacts.type.nonstandard_advance'), name: 'Bob – RM', phone_number: '415–555–7283'

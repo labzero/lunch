@@ -356,7 +356,56 @@ $breakdown-table-currency-width: 10px;
 }
 
 .dashboard-module-reports {
+  .dashboard-module-content {
+    position: relative;
+    height: 504px;
+    .report-button-left {
+      @extend .primary-button;
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+    }
+    .report-split-button {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      .report-button-right {
+        @extend .primary-button;
+        border-bottom-left-radius: $default-border-radius;
+        border-top-left-radius: $default-border-radius;
+        border-bottom-right-radius: 0;
+        border-top-right-radius: 0;
+      }
+      .report-drop-down-right {
+        @extend .down-button;
+        border-bottom-right-radius: $default-border-radius;
+        border-top-right-radius: $default-border-radius;
+        border-bottom-left-radius: 0;
+        border-top-left-radius: 0;
+        vertical-align: bottom;
+        border: 1px solid $actionable-blue;
+        float:right;
+        padding-bottom: $button-vertical-padding - 1px;
+        padding-top: $button-vertical-padding - 1px;
+      }
+    }
+  }
   .input-field-container {
+    input {
+      padding-left: 10px;
+    }
     width: 165px;
+  }
+  a {
+    text-transform: uppercase;
+    font-size: 0.867rem;
+    color: $actionable-blue;
+    border: none;
+    background-color: white;
+    float: right;
+    &:after {
+      @extend %icon-font;
+      content: " #{$icon-arrow-right}";
+    }
   }
 }
