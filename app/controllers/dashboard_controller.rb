@@ -47,7 +47,9 @@ class DashboardController < ApplicationController
       data: RatesService.new.overnight_vrc
     }];
 
+
     client_balances = ClientBalanceService.new(MEMBER_ID)
+
 
     @pledged_collateral = client_balances.pledged_collateral
     @total_securities = client_balances.total_securities
@@ -60,7 +62,4 @@ class DashboardController < ApplicationController
     @reports_quarterly = 2
 
   end
-
-
-
 end

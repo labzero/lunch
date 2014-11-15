@@ -82,6 +82,8 @@ en:
       monthly: Monthly
       quarterly: Quarterly
       annually: Annually
+      advances_detail: Advances Detail
+      forward_commitments: Forward Commitments
     your_account:
       title: Your Account
       pledged_collateral:

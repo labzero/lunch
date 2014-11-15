@@ -117,23 +117,30 @@
         %tbody
           %tr
             %td
-              = check_box_tag t('dashboard.reports.daily')
+              = render 'shared/check_box', id: t('dashboard.reports.daily')
+            %td
               %label= t('dashboard.reports.daily') + ' (2)'
+              %div.dashboard-module-content-light #{t('dashboard.reports.advances_detail')}
+              %div.dashboard-module-content-light #{t('dashboard.reports.forward_commitments')}
           %tr
             %td
-              = check_box_tag t('dashboard.reports.weekly')
+              = render 'shared/check_box', id: t('dashboard.reports.weekly')
+            %td
               %label= t('dashboard.reports.weekly') + ' (1)'
           %tr
             %td
-              = check_box_tag t('dashboard.reports.monthly')
+              = render 'shared/check_box', id: t('dashboard.reports.monthly')
+            %td
               %label= t('dashboard.reports.monthly') + ' (4)'
           %tr
             %td
-              = check_box_tag t('dashboard.reports.quarterly')
+              = render 'shared/check_box', id: t('dashboard.reports.quarterly')
+            %td
               %label= t('dashboard.reports.quarterly') + ' (2)'
           %tr
             %td
-              = check_box_tag t('dashboard.reports.annually')
+              = render 'shared/check_box', id: t('dashboard.reports.annually')
+            %td
               %label= t('dashboard.reports.annually')
       %a #{t('dashboard.actions.more')}
       %button.report-button-left #{t('dashboard.actions.view')}
