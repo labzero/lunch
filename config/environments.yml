@@ -1,7 +1,6 @@
 ---
 
 dev:
-  app_host: 'http://localhost:3000/'
   user1:
     username:
     password:

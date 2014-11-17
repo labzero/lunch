@@ -7,7 +7,15 @@ include CustomConfig
 require 'i18n'
 I18n.load_path += Dir.glob('config/locales/*.yml')
 
-Capybara.app_host = ENV['APP_HOST'] || env_config['app_host'] || 'http://localhost:3000'
+custom_host = ENV['APP_HOST'] || env_config['app_host']
+
+if !custom_host
+  require ::File.expand_path('../../../config/environment',  __FILE__)
+  require 'capybara/rails'
+else
+  Capybara.app_host = custom_host
+end
+
 puts "Capybara.app_host: #{Capybara.app_host}"
 
 AfterConfiguration do
