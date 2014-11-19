@@ -1,7 +1,7 @@
 {
 	"metadata": {
-		"name": "FHLBSF 1",
-		"lastOpened": 1415901797414,
+		"name": "FHLBSF",
+		"lastOpened": 1416359396296,
 		"created": 1414699606900
 	},
 	"iconSets": [
@@ -9,72 +9,92 @@
 			"selection": [
 				{
 					"order": 9,
-					"id": 311
-				},
-				{
-					"order": 10,
-					"id": 310,
+					"id": 312,
 					"prevSize": 32,
-					"code": 58886,
-					"name": "",
+					"code": 58882,
+					"name": "envelope",
 					"tempChar": ""
 				},
 				{
-					"order": 11,
-					"id": 309,
+					"order": 1,
+					"id": 311,
 					"prevSize": 32,
-					"code": 58885,
-					"name": "",
+					"code": 58887,
+					"name": "edit",
 					"tempChar": ""
 				},
 				{
-					"order": 12,
-					"id": 308,
+					"order": 2,
+					"id": 310,
 					"prevSize": 32,
-					"code": 58884,
-					"name": "",
-					"tempChar": ""
-				},
-				{
-					"order": 13,
-					"id": 307,
-					"prevSize": 32,
-					"code": 58882,
-					"name": "",
+					"code": 58886,
+					"name": "phone",
 					"tempChar": ""
 				},
 				{
-					"order": 14,
-					"id": 306,
+					"order": 3,
+					"id": 309,
 					"prevSize": 32,
-					"code": 58883,
-					"name": "",
+					"code": 58885,
+					"name": "calendar",
 					"tempChar": ""
 				},
 				{
-					"order": 15,
-					"id": 304,
+					"order": 7,
+					"id": 308,
 					"prevSize": 32,
-					"code": 58880,
-					"name": "",
+					"code": 58884,
+					"name": "arrow-right",
+					"tempChar": ""
+				},
+				{
+					"order": 4,
+					"id": 306,
+					"prevSize": 32,
+					"code": 58883,
+					"name": "magnify",
 					"tempChar": ""
 				},
 				{
-					"order": 16,
+					"order": 5,
+					"id": 304,
+					"prevSize": 32,
+					"code": 58880,
+					"name": "gear",
+					"tempChar": ""
+				},
+				{
+					"order": 6,
 					"id": 302,
 					"prevSize": 32,
 					"code": 58881,
-					"name": "",
-					"tempChar": ""
+					"name": "chevron",
+					"tempChar": ""
 				}
 			],
 			"id": 0,
 			"metadata": {
-				"name": "Icons"
+				"name": "Icons",
+				"importSize": 512
 			},
 			"height": 1024,
 			"prevSize": 32,
 			"icons": [
+				{
+					"id": 12,
+					"paths": [
+						"M50 154v768h922v-768h-922zM872.6 204l-358.2 359.8-363.2-359.8h721.4zM102 870v-642.4l410 398.8 408-396.8v640.4h-818z"
+					],
+					"attrs": [
+						{
+							"visibility": false
+						}
+					],
+					"grid": 20,
+					"tags": [
+						"envelope"
+					]
+				},
 				{
 					"id": 11,
 					"paths": [
@@ -177,23 +197,6 @@
 					"grid": 24
 				},
 				{
-					"id": 7,
-					"paths": [
-						"M64 192v640h768v-640h-768zM736 256l-288 260-288-260h576zM128 768v-448l320 288 320-288v448h-640z"
-					],
-					"attrs": [
-						{
-							"opacity": 1,
-							"visibility": false
-						}
-					],
-					"width": 896,
-					"grid": 32,
-					"tags": [
-						"envelope"
-					]
-				},
-				{
 					"id": 6,
 					"paths": [
 						"M925.2 993.4l-254.8-254.6c-69 53.8-153.8 83.6-243.4 83.6-105.2 0-204.4-41.2-279.4-115.6-74.4-74.6-115.6-173.8-115.6-279.6 0-106 41.2-205.2 115.6-279.6 75-74.4 174.2-115.6 279.4-115.6 106 0 205.2 41.2 279.6 115.6 75 74.4 116.2 173.8 116.2 279.6 0 89.6-30.4 174.2-84.2 243.4l254.6 254.6-68 68.2zM427 726.2c79.8 0 155-31 211.8-87.8 56.4-56.4 87.2-131.4 87.2-211.2s-31-155-87.2-211.8c-57-56.2-132-87.2-211.8-87.2s-154.8 31-211 87.2c-56.8 56.8-87.6 132-87.6 211.8s30.8 155 87.2 211.2c56.6 56.8 131.6 87.8 211.4 87.8z"
@@ -246,7 +249,8 @@
 						"chevron"
 					]
 				}
-			]
+			],
+			"invisible": false
 		}
 	],
 	"externalSets": [],
