@@ -162,6 +162,16 @@
   background-image: image-url('placeholder-usericon.svg');
 }
 
+%dashboard-module-advances-icon-dollar {
+  font-size: 0.8rem;
+  left: 11px;
+  top: 9px;
+}
+
+%dashboard-module-advances-input {
+  padding-left: 25px;
+}
+
 .dashboard-module-advances {
   p {
     font-weight: $semibold-weight;
@@ -173,13 +183,11 @@
     }
   }
   .icon-dollar-before:before {
-    font-size: 0.8rem;
-    left: 11px;
-    top: 9px;
+    @extend %dashboard-module-advances-icon-dollar;
   }
   .input-field-container {
     input {
-      padding-left: 25px;
+      @extend %dashboard-module-advances-input;
     }
   }
   .dashboard-module-content {

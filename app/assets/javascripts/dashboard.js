@@ -5,7 +5,7 @@ $(function () {
     if ($this.data('flyout-trigger') == 'active') {
       $this.data('flyout-trigger', 'inactive');
       $('.flyout').addClass('dashboard-quick-advance-flyout');
-      var topContent = $('.dashboard-module-advances header, .dashboard-module-advances .input-field-container').clone();
+      var topContent = [$('.dashboard-module-advances header').clone(), $('<div class="flyout-top-section-body"></div>').append($('.dashboard-module-advances .input-field-container').clone())];
       $('.dashboard-module-advances').flyout(topContent);
     }
   });
