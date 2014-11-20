@@ -1,7 +1,8 @@
 .input-field-container {
   position: relative;
   display: inline-block;
-  line-height: 30px;
+  line-height: $input-field-height;
+  height: $input-field-height; // fixes a phantom 1px whitespace occurring under input-field-containers
   width: 100%;
   &:before {
     position: absolute;

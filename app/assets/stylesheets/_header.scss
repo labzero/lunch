@@ -3,8 +3,8 @@
 }
 
 .main-nav {
-  min-height: 60px;
-  line-height: 60px;
+  height: $header-main-nav-height;
+  line-height: $header-main-nav-height;
   background-color: $brand-blue;
   .logo {
     @extend %hide-text;
@@ -58,8 +58,8 @@
 }
 
 .secondary-nav {
-  min-height: 30px;
-  line-height: 30px;
+  height: $header-secondary-nav-height;
+  line-height: $header-secondary-nav-height;
   background-color: $white;
   ul {
     list-style: none;
