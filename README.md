@@ -63,3 +63,5 @@ This is a summary of the options supported in our .env files:
 * `SECRET_KEY_BASE`: The secret key used to sign cookies for this environment. You can get a value from [Fourmilab](https://www.fourmilab.ch/cgi-bin/Hotbits?nbytes=128&fmt=password&npass=1&lpass=30&pwtype=2).
 * `DATABASE_USERNAME`: The username to use to connect to the DB (overrides the values found in database.yml).
 * `DATABASE_PASSWORD`: The password to use to connect to the DB (overrides the values found in database.yml).
+* `SAUCE_USERNAME`: The username of the SauceLabs user, used when cucumber tests are run via SauceLabs.
+* `SAUCE_ACCESS_KEY`: The access key associated with the SauceLabs user (`SAUCE_USERNAME`). Only used when running cucumber tests via SauceLabs.

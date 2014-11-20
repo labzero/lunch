@@ -14,8 +14,8 @@ Capybara.register_driver :firefox do |app|
   Capybara::Selenium::Driver.new(app, :browser => :firefox)
 end
 
-SAUCE_USERNAME = ENV['SAUCE_USERNAME'] || 'TODO_REPLACE_ME'
-SAUCE_ACCESS_KEY = ENV['SAUCE_ACCESS_KEY'] || 'TODO_REPLACE_ME'
+SAUCE_USERNAME = ENV['SAUCE_USERNAME']
+SAUCE_ACCESS_KEY = ENV['SAUCE_ACCESS_KEY']
 SAUCE_PORT = ENV['SAUCE_ONDEMAND_PORT'] || '4445'
 
 def sauce_build

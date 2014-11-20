@@ -1,3 +1,6 @@
+require 'dotenv'
+Dotenv.load
+
 require 'capybara/rspec'
 require 'capybara/cucumber'
 
