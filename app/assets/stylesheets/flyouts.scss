@@ -10,6 +10,7 @@
 }
 
 .flyout-row {
+  @extend %row;
   @extend %horizontal-center;
   top: $header-height;
   z-index: 100;
