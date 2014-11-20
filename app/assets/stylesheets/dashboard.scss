@@ -10,11 +10,11 @@
   box-shadow: 0px 0px 6px rgba(0,0,0, .09);
   margin-bottom: 20px;
   h1 {
-    @extend %typography-dashboard-module-heading;
+    @extend %typography-section-title;
     margin: 0;
   }
   h2 {
-    @extend %typography-dashboard-module-subheading;
+    @extend %typography-subtitle;
   }
   header {
     border-bottom: 1px solid $light-blue;
@@ -55,6 +55,7 @@
   .table-striped {
     width: 100%;
     margin-bottom: 25px;
+    @extend %typography-paragraph-tight;
     tbody {
       tr:nth-child(even) td,
       tr:nth-child(even) th {
@@ -83,6 +84,7 @@
     width: 100%;
     margin-top: 22px;
     margin-bottom: 25px;
+    @extend %typography-paragraph-tight;
     tbody {
       tr:nth-child(even) td,
       tr:nth-child(even) th {
@@ -108,7 +110,7 @@
 }
 
 .dashboard-module-content-light {
-  @extend %typography-table-date;
+  @extend %typography-table-annotation;
 }
 
 .dashboard-module-contact {
@@ -134,7 +136,7 @@
     margin: 0;
   }
   p {
-    @extend %typography-data;
+    @extend %typography-paragraph-tight;
     margin: 0;
   }
 }
@@ -208,9 +210,9 @@
 $breakdown-table-label-width: 195px;
 $breakdown-table-currency-width: 10px;
 .dashboard-account-breakdown-table {
-  @extend %typography-table-data;
+  @extend %typography-dashboard-account-summary;
   th {
-    @extend %typography-table-data;
+    @extend %typography-dashboard-account-summary;
     text-align: left;
   }
   th, .label, .currency, .value {
