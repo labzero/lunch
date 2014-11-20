@@ -28,7 +28,7 @@
     margin-bottom: 20px;
   }
   h1 {
-    @extend %typography-dashboard-module-heading;
+    @extend %typography-section-title;
     margin: 0;
   }
 }
