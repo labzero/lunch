@@ -16,6 +16,10 @@ Then(/^I should not see "(.*?)"$/) do |text|
   page.should_not have_content(text)
 end
 
+When(/^I enter "(.*?)" into the "(.*?)" input field$/) do |input_text, input_selector|
+  page.find(input_selector).set(input_text)
+end
+
 When(/^I press the back button$/) do
   page.evaluate_script('window.history.back()')
 end
