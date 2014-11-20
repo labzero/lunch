@@ -1,6 +1,7 @@
 - placeholder ||= nil
 - icon ||= nil
 - field_class ||= []
+- field_data ||= {}
 - location ||= 'before'
 %span.input-field-container{class: icon ? "icon-#{icon}-#{location}" : nil}
-  %input{placeholder: placeholder, class: field_class}
+  %input{placeholder: placeholder, class: field_class, data: field_data}

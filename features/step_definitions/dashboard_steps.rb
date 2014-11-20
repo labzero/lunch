@@ -56,3 +56,25 @@ Then(/^I should see an effective borrwoing capacity gauge$/) do
   mod.assert_selector('.dashboard-effective-borrowing-capacity')
   mod.assert_selector('.dashboard-gauge')
 end
+
+Then(/^I should see a flyout$/) do
+  page.assert_selector('.flyout', visible: true)
+end
+
+Then(/^I should see "(.*?)" in the quick advance flyout input field$/) do |text|
+  expect(page.find('.flyout-top-section input').value()).to eq(text)
+end
+
+
+When(/^I open the quick advance flyout$/) do
+  step "I enter \"44503000\" into the \".dashboard-module-advances input\" input field"
+  step "I should see a flyout"
+end
+
+When(/^I click on the flyout close button$/) do
+  page.find('.flyout-close-button').click
+end
+
+Then(/^I should not see a flyout$/) do
+  page.assert_selector('.flyout', visible: false)
+end

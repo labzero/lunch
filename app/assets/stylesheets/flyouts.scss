@@ -1,0 +1,81 @@
+.flyout-background {
+  display: none;
+  position: fixed;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0,0,0,0.6);
+}
+
+.flyout-row {
+  @extend %row;
+  @extend %horizontal-center;
+  top: $header-height;
+  z-index: 100;
+  margin-top: 20px;
+  overflow: visible;
+}
+
+.flyout {
+  display: none;
+  position: absolute;
+  &.open {
+    display: block;
+  }
+  header {
+    @extend %dashboard-module-header;
+    margin-bottom: 20px;
+  }
+  h1 {
+    @extend %typography-section-title;
+    margin: 0;
+  }
+}
+
+.flyout-top-section, .flyout-bottom-section {
+  @extend %dashboard-module-base-styling;
+  float: none;
+  margin-bottom: 0;
+}
+.flyout-top-section {
+  position: relative;
+  z-index: 1;
+  border-bottom: none;
+  box-shadow: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.flyout-bottom-section {
+  position: relative;
+  z-index: 0;
+  margin-top: -1px;
+  margin-left: 0;
+  border-top-left-radius: 0;
+  padding: 15px 20px;
+}
+
+.flyout-top-section-body {
+  padding: 0 20px;
+}
+
+.flyout-close-button {
+  position: absolute;
+  right: 20px;
+  top: 18px;
+  font-size: 1.2rem;
+  color: $actionable-blue;
+  cursor: pointer;
+}
+
+.dashboard-quick-advance-flyout {
+  .icon-dollar-before:before {
+    @extend %dashboard-module-advances-icon-dollar;
+  }
+  .input-field-container {
+    input {
+      @extend %dashboard-module-advances-input;
+    }
+  }
+}
