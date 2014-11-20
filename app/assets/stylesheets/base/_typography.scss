@@ -1,19 +1,35 @@
-@mixin typography-dashboard-module-heading {
+@mixin typography-page-title {
+  font-size: 1.2rem;
+  font-weight: $bold-weight;
+}
+
+@mixin typography-section-title {
   font-size: 1.2rem;
   font-weight: $semibold-weight;
 }
 
-@mixin typography-dashboard-module-subheading {
+@mixin typography-subtitle {
   font-size: 1rem;
   font-weight: $semibold-weight;
+  line-height: $tight-line-height;
 }
 
-@mixin typography-header-nav {
+@mixin typography-paragraph {
+  font-size: 1rem;
+  font-weight: $normal-weight;
+  line-height: $loose-line-height;
+}
+
+@mixin typography-default-text {
+  @include typography-paragraph;
+}
+
+@mixin typography-header-text {
   font-size: 1rem;
   font-weight: $normal-weight;
 }
 
-@mixin typography-level-3 {
+@mixin typography-header-nav {
   font-size: 0.8667rem;
   font-weight: $normal-weight;
 }
@@ -23,40 +39,17 @@
   font-weight: $normal-weight;
 }
 
-@mixin typography-level-4 {
-  font-size: 1rem;
-  font-weight: $light-weight;
-}
-
-@mixin typography-level-5 {
-  font-size: 0.8667rem;
-  font-weight: $light-weight;
-}
-
-@mixin typography-level-6 {
-  font-size: 0.8667rem;
-  font-weight: $semibold-weight;
-  text-transform: uppercase;
-}
-
-@mixin typography-table-data{
+@mixin typography-dashboard-account-summary {
   font-size: 0.8rem;
   font-weight: $normal-weight;
 }
 
-@mixin typography-subtitle {
-  font-size: 1rem;
-  font-weight: $semibold-weight;
+@mixin typography-paragraph-tight {
+  @include typography-paragraph;
   line-height: $tight-line-height;
 }
 
-@mixin typography-data {
-  font-size: 1rem;
-  font-weight: $normal-weight;
-  line-height: $tight-line-height;
-}
-
-@mixin typography-table-date {
+@mixin typography-table-annotation {
   font-size: 0.7333rem;
   font-weight: $light-weight;
 }
@@ -76,52 +69,44 @@
   font-weight: $semibold-weight;
 }
 
-%typography-dashboard-module-heading {
-  @include typography-dashboard-module-heading;
+%typography-page-title {
+  @include typography-page-title;
 }
 
-%typography-dashboard-module-subheading {
-  @include typography-dashboard-module-subheading;
+%typography-section-title {
+  @include typography-section-title;
 }
 
 %typography-header-nav {
-  @include typography-header-nav ;
+  @include typography-header-nav;
+}
+
+%typography-paragraph {
+  @include typography-paragraph;
+}
+
+%typography-paragraph-tight {
+  @include typography-paragraph-tight;
+}
+
+%typography-default-text {
+  @include typography-default-text;
 }
 
 %typography-dashboard-gauge-label {
   @include typography-dashboard-gauge-label;
 }
 
-%typography-level-3 {
-  @include typography-level-3;
+%typography-dashboard-account-summary {
+  @include typography-dashboard-account-summary;
 }
 
-%typography-level-4 {
-  @include typography-level-4;
-}
-
-%typography-level-5 {
-  @include typography-level-5;
-}
-
-%typography-level-6 {
-  @include typography-level-6;
-}
-
-%typography-table-data {
-  @include typography-table-data;
-}
-
-%typography-table-date {
-  @include typography-table-date;
+%typography-table-annotation {
+  @include typography-table-annotation;
 }
 
 %typography-subtitle {
   @include typography-subtitle;
-}
-
-%typography-data {
-  @include typography-data;
 }
 
 %typography-field-placeholder {
