@@ -54,6 +54,16 @@
   font-weight: $light-weight;
 }
 
+@mixin typography-table-heading {
+  font-size: 0.8667rem;
+  font-weight: $semibold-weight;
+}
+
+@mixin typography-table-cell {
+  font-size: 0.8rem;
+  font-weight: $normal-weight;
+}
+
 @mixin typography-field-placeholder {
   font-size: 1rem;
   font-weight: $normal-weight;
@@ -103,6 +113,18 @@
 
 %typography-table-annotation {
   @include typography-table-annotation;
+}
+
+%typography-table-heading {
+  @include typography-table-heading;
+}
+
+%typography-table-cell {
+  @include typography-table-cell;
+}
+
+%typography-table-cells {
+
 }
 
 %typography-subtitle {

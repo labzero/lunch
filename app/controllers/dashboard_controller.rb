@@ -66,4 +66,9 @@ class DashboardController < ApplicationController
   def quick_advance_rates
     render json: RatesService.new.quick_advance_rates(MEMBER_ID)
   end
+
+  def initiate_quick_advance
+    # TODO: hit the RatesService object to verify the quick advance
+    render nothing: true
+  end
 end

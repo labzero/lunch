@@ -51,4 +51,8 @@ RSpec.describe DashboardController, :type => :controller do
       expect(assigns[:effective_borrowing_capacity][:threshold_capacity]).to be_present
     end
   end
+
+  describe "GET quick_advance_rates" do
+
+  end
 end

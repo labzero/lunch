@@ -1,13 +1,20 @@
 (function( $ ) {
   $.fn.quickAdvanceTable = function(){
-    var table = this;
+    var $table = this;
+    var $initiateButton = $(".dashboard-quick-advance-flyout .initiate-quick-advance");
+    var selected_rate = {};
 
     var $flyoutTableCells = $('.dashboard-quick-advance-flyout td');
     $flyoutTableCells.on('click', function(){
+      var $this = $(this);
       $('.dashboard-quick-advance-flyout td, .dashboard-quick-advance-flyout th').removeClass('cell-selected cell-hovered');
       var col = $(this).index();
-      $(this).addClass('cell-selected').closest('tr').find('td:first-child').addClass('cell-selected');
-      $(table.find('th')[col]).addClass('cell-selected');
+      $this.addClass('cell-selected').closest('tr').find('td:first-child').addClass('cell-selected');
+      $($table.find('th')[col]).addClass('cell-selected');
+      selected_rate['term'] = $this.data('term');
+      selected_rate['loan_type'] = $this.data('loan-type');
+      selected_rate['rate'] = parseFloat($this.text());
+      $initiateButton.hasClass('active') ? '' : $initiateButton.addClass('active');
     });
 
     $flyoutTableCells.hover( function(){
@@ -15,8 +22,22 @@
       var col = $this.index();
       if (!$this.hasClass('cell-selected') && col != 0) {
         $this.toggleClass('cell-hovered').closest('tr').find('td:first-child').toggleClass('cell-hovered');
-        $(table.find('th')[col]).toggleClass('cell-hovered');
+        $($table.find('th')[col]).toggleClass('cell-hovered');
       }
     });
+
+    // quick advance trigger
+    $initiateButton.on('click', function(){
+      if ($initiateButton.hasClass('active') && !$.isEmptyObject(selected_rate)) {
+        initiateQuickAdvance(JSON.stringify(selected_rate));
+      };
+    });
+
+    function initiateQuickAdvance(rate_data) {
+      $.post('/dashboard/initiate_quick_advance', rate_data, function(status){
+        // probably want to receive some html from the server and render it in place of the table
+      });
+    };
+
   };
 }( jQuery ));

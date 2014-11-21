@@ -80,6 +80,7 @@ en:
         agency: Agency
         aaa: AAA
         aa: AA
+      initiate_advance: Initiate the selected advance
     reports:
       title: Reports
       as_of_yesterday: As of yesterday

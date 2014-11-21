@@ -7,7 +7,7 @@ $(function () {
       $('.flyout').addClass('dashboard-quick-advance-flyout');
       $('.flyout-bottom-section').addClass('column-3-span-2');
       var topContent = [$('.dashboard-module-advances header').clone(), $('<div class="flyout-top-section-body"></div>').append($('.dashboard-module-advances .input-field-container').clone())];
-      var bottomContent = $('.dashboard-module-advances table').clone();
+      var bottomContent = $('.dashboard-module-advances table, .dashboard-module-advances .initiate-quick-advance').clone();
       $('.dashboard-module-advances').flyout(topContent, bottomContent);
       getQuickAdvanceRates();
     }
@@ -32,7 +32,7 @@ $(function () {
     for (var term in rates) {
       var $row = $("<tr><td>" + term.replace(/_/g, " ") + "</td></tr>");
       loan_types.map(function(loan_type){
-        var $cell = $("<td>" + rates[term][loan_type] + "</td>");
+        var $cell = $("<td data-term=\"" + term + "  \" data-loan-type=\"" + loan_type + "  \">" + rates[term][loan_type] + "</td>");
         $row.append($cell);
       });
       table.append($row);

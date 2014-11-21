@@ -14,6 +14,8 @@ Rails.application.routes.draw do
 
   get '/dashboard/quick_advance_rates' => 'dashboard#quick_advance_rates'
 
+  post '/dashboard/initiate_quick_advance' => 'dashboard#initiate_quick_advance'
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 
