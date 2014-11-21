@@ -4,6 +4,7 @@
   line-height: $input-field-height;
   height: $input-field-height; // fixes a phantom 1px whitespace occurring under input-field-containers
   width: 100%;
+  @extend %typography-field-value;
   &:before {
     position: absolute;
     top: 10px;
