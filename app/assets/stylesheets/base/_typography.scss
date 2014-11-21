@@ -96,6 +96,10 @@
   @include typography-header-nav;
 }
 
+%typography-header-text {
+  @include typography-header-text;
+}
+
 %typography-paragraph {
   @include typography-paragraph;
 }
