@@ -62,4 +62,8 @@ class DashboardController < ApplicationController
     @reports_quarterly = 2
 
   end
+
+  def quick_advance_rates
+    render json: RatesService.new.quick_advance_rates(MEMBER_ID)
+  end
 end

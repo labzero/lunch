@@ -69,6 +69,16 @@
   cursor: pointer;
 }
 
+%quick-advance-cell-selected {
+  background: $actionable-blue;
+  color: $white;
+}
+
+%quick-advance-cell-hovered {
+  background: $brand-blue;
+  color: $white;
+}
+
 .dashboard-quick-advance-flyout {
   .icon-dollar-before:before {
     @extend %dashboard-module-advances-icon-dollar;
@@ -76,6 +86,65 @@
   .input-field-container {
     input {
       @extend %dashboard-module-advances-input;
+    }
+  }
+  table {
+    width: 100%;
+    text-align: center;
+    td, th {
+      border: 1px solid $light-blue;
+      width: 20%;
+      padding: 5px 0;
+      &.cell-selected {
+        @extend %quick-advance-cell-selected;
+      }
+      &.cell-hovered {
+        @extend %quick-advance-cell-hovered;
+      }
+    }
+    th {
+      color: $white;
+      background: $table-header-gray;
+      &:first-child {
+        background: $table-alt-header-gray;
+      }
+    }
+    tr:nth-child(odd) {
+      td {
+        background: $table-content-light-blue;
+        &.cell-selected {
+          @extend %quick-advance-cell-selected;
+        }
+        &.cell-hovered {
+          @extend %quick-advance-cell-hovered;
+        }
+      }
+      td:first-child {
+        background: $table-alt-header-light-gray;
+        &.cell-selected {
+          @extend %quick-advance-cell-selected;
+        }
+        &.cell-hovered {
+          @extend %quick-advance-cell-hovered;
+        }
+      }
+    }
+    tr {
+      td {
+        background: $table-content-dark-blue;
+        cursor: pointer;
+      }
+      td:first-child {
+        background: $table-alt-header-dark-gray;
+        cursor: auto;
+        text-transform: capitalize;
+        &.cell-selected {
+          @extend %quick-advance-cell-selected;
+        }
+        &.cell-hovered {
+          @extend %quick-advance-cell-hovered;
+        }
+      }
     }
   }
 }

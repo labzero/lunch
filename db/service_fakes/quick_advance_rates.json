@@ -1,0 +1,74 @@
+{
+  "overnight" : {
+    "whole_loan" : 0.17,
+    "agency" : 0.15,
+    "aaa" : 0.16,
+    "aa" : 0.16
+  },
+  "open" : {
+    "whole_loan" : 0.17,
+    "agency" : 0.15,
+    "aaa" : 0.16,
+    "aa" : 0.16
+  },
+  "1_week" : {
+    "whole_loan" : 0.20,
+    "agency" : 0.18,
+    "aaa" : 0.19,
+    "aa" : 0.19
+  },
+  "2_weeks" : {
+    "whole_loan" : 0.20,
+    "agency" : 0.21,
+    "aaa" : 0.20,
+    "aa" : 0.20
+  },
+  "3_weeks" : {
+    "whole_loan" : 0.20,
+    "agency" : 0.21,
+    "aaa" : 0.20,
+    "aa" : 0.20
+  },
+  "1_month" : {
+    "whole_loan" : 0.21,
+    "agency" : 0.18,
+    "aaa" : 0.19,
+    "aa" : 0.19
+  },
+  "2_months" : {
+    "whole_loan" : 0.21,
+    "agency" : 0.19,
+    "aaa" : 0.20,
+    "aa" : 0.20
+  },
+  "3_months" : {
+    "whole_loan" : 0.22,
+    "agency" : 0.20,
+    "aaa" : 0.21,
+    "aa" : 0.20
+  },
+  "6_months" : {
+    "whole_loan" : 0.23,
+    "agency" : 0.21,
+    "aaa" : 0.22,
+    "aa" : 0.21
+  },
+  "1_year" : {
+    "whole_loan" : 0.34,
+    "agency" : 0.33,
+    "aaa" : 0.34,
+    "aa" : 0.34
+  },
+  "2_years" : {
+    "whole_loan" : 0.78,
+    "agency" : 0.77,
+    "aaa" : 0.78,
+    "aa" : 0.78
+  },
+  "3_years" : {
+    "whole_loan" : 1.29,
+    "agency" : 1.27,
+    "aaa" : 1.28,
+    "aa" : 1.28
+  }
+}

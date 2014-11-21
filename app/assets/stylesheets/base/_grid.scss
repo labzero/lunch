@@ -34,6 +34,11 @@
   width: $column-3-width;
 }
 
+.column-3-span-2 {
+  @extend %column;
+  width: ($grid-column-width * 8) + ($gutter-width * 7);
+}
+
 .column-2-left {
   @extend %column;
   width: ($grid-column-width * 2) + $gutter-width;

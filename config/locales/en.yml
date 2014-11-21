@@ -74,6 +74,12 @@ en:
     quick_advance:
       title: Quick Advances
       advance_placeholder: Enter Dollar Amount
+      table:
+        term: Term
+        whole_loan: Whole Loan
+        agency: Agency
+        aaa: AAA
+        aa: AA
     reports:
       title: Reports
       as_of_yesterday: As of yesterday
