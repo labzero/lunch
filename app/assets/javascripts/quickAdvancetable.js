@@ -12,7 +12,7 @@
       $this.addClass('cell-selected').closest('tr').find('td:first-child').addClass('cell-selected');
       $($table.find('th')[col]).addClass('cell-selected');
       selected_rate['term'] = $this.data('term');
-      selected_rate['loan_type'] = $this.data('loan-type');
+      selected_rate['advance_type'] = $this.data('advance-type');
       selected_rate['rate'] = parseFloat($this.text());
       $initiateButton.hasClass('active') ? '' : $initiateButton.addClass('active');
     });

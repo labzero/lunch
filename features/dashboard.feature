@@ -40,3 +40,17 @@ Feature: Visiting the Dashboard
     And I click on the flyout close button
     Then I should not see a flyout
 
+  Scenario: Quick Advance flyout table
+    When I visit the dashboard
+    And I open the quick advance flyout
+    Then I should see the quick advance table
+    And I should see a rate for the "overnight" term with a type of "whole_loan"
+
+  Scenario: Select rate from Quick Advance flyout table
+    When I visit the dashboard
+    And I open the quick advance flyout
+    And I see the unselected state for the cell with a term of "overnight" and a type of "whole_loan"
+    And I see the deactivated state for the initiate advance button
+    When I select the rate with a term of "overnight" and a type of "whole_loan"
+    Then I should see the selected state for the cell with a term of "overnight" and a type of "whole_loan"
+    And the initiate advance button should be active

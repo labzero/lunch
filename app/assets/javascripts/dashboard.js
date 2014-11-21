@@ -28,11 +28,11 @@ $(function () {
 
   function showQuickAdvanceRates(rates) {
     var table = $('.dashboard-quick-advance-flyout table');
-    var loan_types = ["whole_loan", "agency", "aaa", "aa"];
+    var advance_types = ["whole_loan", "agency", "aaa", "aa"];
     for (var term in rates) {
       var $row = $("<tr><td>" + term.replace(/_/g, " ") + "</td></tr>");
-      loan_types.map(function(loan_type){
-        var $cell = $("<td data-term=\"" + term + "  \" data-loan-type=\"" + loan_type + "  \">" + rates[term][loan_type] + "</td>");
+      advance_types.map(function(advance_type){
+        var $cell = $("<td data-term=\"" + term + "\" data-advance-type=\"" + advance_type + "\">" + rates[term][advance_type] + "</td>");
         $row.append($cell);
       });
       table.append($row);
