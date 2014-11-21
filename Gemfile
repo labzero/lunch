@@ -44,6 +44,7 @@ group :development, :test do
   gem 'selenium-webdriver'
   gem 'foreman'
   gem 'sinatra'
+  gem 'sinatra-activerecord'
   gem 'swagger-blocks'
   gem 'rerun'
   gem 'brakeman'

@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'bundler'
 
-Bundler.require
+Bundler.setup # don't auto require all gems
 
-require './api_mock'
-run Rack::URLMap.new("/" => APIDocs, "/rates" => APIMockRates,  "/members" => APIMockMembers)
+require_relative 'mapi'
+run Rack::URLMap.new("/" => MAPI::DocApp, "/mapi" => MAPI::ServiceApp)
