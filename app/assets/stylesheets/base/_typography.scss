@@ -69,6 +69,11 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-field-value {
+  font-size: 1rem;
+  font-weight: $normal-weight;
+}
+
 @mixin typography-graph-label {
   font-size: 0.7333rem;
   font-weight: $normal-weight;
@@ -129,6 +134,10 @@
 
 %typography-field-placeholder {
   @include typography-field-placeholder;
+}
+
+%typography-field-value {
+  @include typography-field-value;
 }
 
 %typography-graph-label {
