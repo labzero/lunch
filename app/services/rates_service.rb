@@ -31,4 +31,18 @@ SQL
     end
   end
 
+  def quick_advance_rates(member_id)
+    @member_id = member_id
+    raise ArgumentError, 'member_id must not be blank' if member_id.blank?
+
+    # TODO: hit the proper MAPI endpoint, once it exists! In the meantime, always return the fake.
+    # if @connection
+    #   # hit the proper MAPI endpoint
+    # else
+    #   JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_rates.json'))).with_indifferent_access
+    # end
+
+    JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_rates.json'))).with_indifferent_access
+  end
+
 end

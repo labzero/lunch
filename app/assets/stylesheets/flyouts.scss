@@ -48,6 +48,7 @@
   border-bottom-right-radius: 0;
 }
 .flyout-bottom-section {
+  @extend %clearfix;
   position: relative;
   z-index: 0;
   margin-top: -1px;
@@ -69,6 +70,16 @@
   cursor: pointer;
 }
 
+%quick-advance-cell-selected {
+  background: $actionable-blue;
+  color: $white;
+}
+
+%quick-advance-cell-hovered {
+  background: $brand-blue;
+  color: $white;
+}
+
 .dashboard-quick-advance-flyout {
   .icon-dollar-before:before {
     @extend %dashboard-module-advances-icon-dollar;
@@ -77,5 +88,94 @@
     input {
       @extend %dashboard-module-advances-input;
     }
+  }
+  table {
+    @extend %typography-paragraph-tight;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+    td, th {
+      border: 1px solid $light-blue;
+      width: 20%;
+      height: 30px;
+      box-sizing: border-box;
+      &.cell-selected {
+        @extend %quick-advance-cell-selected;
+      }
+      &.cell-hovered {
+        @extend %quick-advance-cell-hovered;
+      }
+    }
+    th {
+      @extend %typography-table-heading;
+      color: $white;
+      background: $medium-gray;
+      &:first-child {
+        background: $secondary-gray;
+        color: $text-color;
+      }
+    }
+    td {
+      @extend %typography-table-cell;
+      &:first-child {
+        background: $light-gray;
+      }
+      &:nth-child(2) {
+        border-right: 1px solid $dark-gray;
+      }
+    }
+    tr {
+      td {
+        background: $lightest-blue;
+        cursor: pointer;
+      }
+      td:first-child {
+        background: $light-gray;
+        cursor: auto;
+        text-transform: capitalize;
+        &.cell-selected {
+          @extend %quick-advance-cell-selected;
+        }
+        &.cell-hovered {
+          @extend %quick-advance-cell-hovered;
+        }
+      }
+      &:nth-child(odd) {
+        td {
+          background: $white;
+          &.cell-selected {
+            @extend %quick-advance-cell-selected;
+          }
+          &.cell-hovered {
+            @extend %quick-advance-cell-hovered;
+          }
+        }
+        td:first-child {
+          background: $light-gray;
+          &.cell-selected {
+            @extend %quick-advance-cell-selected;
+          }
+          &.cell-hovered {
+            @extend %quick-advance-cell-hovered;
+          }
+        }
+      }
+      &:nth-child(2) {
+        td {
+          border-bottom: 1px solid $dark-gray;
+        }
+      }
+    }
+  }
+}
+
+.initiate-quick-advance {
+  float: right;
+  opacity: 0.4;
+  width: 280px; // probably want to calculate this somehow
+  cursor: auto;
+  &.active {
+    opacity: 1;
+    cursor: pointer;
   }
 }

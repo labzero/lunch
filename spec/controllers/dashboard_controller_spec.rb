@@ -51,4 +51,17 @@ RSpec.describe DashboardController, :type => :controller do
       expect(assigns[:effective_borrowing_capacity][:threshold_capacity]).to be_present
     end
   end
+
+  describe "GET quick_advance_rates" do
+    let(:json_response) { {some: "json"}.to_json }
+    let(:RatesService) {class_double(RatesService)}
+    let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
+    it "calls the RatesService object with quick_advance_rates and returns json" do
+      expect(RatesService).to receive(:new).and_return(rate_service_instance)
+      expect(rate_service_instance).to receive(:quick_advance_rates).and_return(json_response)
+      get :quick_advance_rates
+      expect(response.body).to eq(json_response)
+    end
+
+  end
 end

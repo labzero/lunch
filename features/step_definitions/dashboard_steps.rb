@@ -78,3 +78,31 @@ end
 Then(/^I should not see a flyout$/) do
   page.assert_selector('.flyout', visible: false)
 end
+
+Then(/^I should see the quick advance table$/) do
+  page.assert_selector('.dashboard-quick-advance-flyout table', visible: true)
+end
+
+Then(/^I should see a rate for the "(.*?)" term with a type of "(.*?)"$/) do |term, type|
+  page.find(".dashboard-quick-advance-flyout table td[data-term='#{term}'][data-advance-type='#{type}']").text.should_not eql("")
+end
+
+When(/^I select the rate with a term of "(.*?)" and a type of "(.*?)"$/) do |term, type|
+  page.find(".dashboard-quick-advance-flyout table td[data-term='#{term}'][data-advance-type='#{type}']").click
+end
+
+When(/^I see the unselected state for the cell with a term of "(.*?)" and a type of "(.*?)"$/) do |term, type|
+  page.assert_no_selector(".dashboard-quick-advance-flyout table td.cell-selected[data-term='#{term}'][data-advance-type='#{type}']")
+end
+
+When(/^I see the deactivated state for the initiate advance button$/) do
+  page.assert_no_selector(".dashboard-quick-advance-flyout .initiate-quick-advance.active")
+end
+
+Then(/^I should see the selected state for the cell with a term of "(.*?)" and a type of "(.*?)"$/) do |term, type|
+  page.assert_selector(".dashboard-quick-advance-flyout table td.cell-selected[data-term='#{term}'][data-advance-type='#{type}']")
+end
+
+Then(/^the initiate advance button should be active$/) do
+  page.assert_selector(".dashboard-quick-advance-flyout .initiate-quick-advance.active")
+end
