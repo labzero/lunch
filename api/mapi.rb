@@ -5,6 +5,7 @@ require_relative 'services/base'
 require_relative 'services/health_check'
 require_relative 'services/mock_rates'
 require_relative 'services/mock_members'
+require_relative 'services/rates'
 
 require_relative 'models/member'
 
@@ -21,6 +22,7 @@ module MAPI
     register MAPI::Services::HealthCheck
     register MAPI::Services::MockRates
     register MAPI::Services::MockMembers
+    register MAPI::Services::Rates
   end
 
   class DocApp < Sinatra::Base
@@ -33,16 +35,20 @@ module MAPI
         key :title, 'FHLBSF Member Site Swagger App'
       end
       api do
-        key :path, '/rates'
-        key :description, 'Operations about rates'
+        key :path, '/mock_rates'
+        key :description, 'Operations about dummy rates'
       end
       api do
         key :path, '/healthy'
         key :description, 'Operations on node health'
       end
       api do
-        key :path, '/members'
-        key :description, 'Operations about members'
+        key :path, '/mock_members'
+        key :description, 'Operations about dummy members'
+      end
+      api do
+        key :path, '/rates'
+        key :description, 'Operations about rates'
       end
     end
 

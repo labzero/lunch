@@ -4,8 +4,8 @@ module MAPI
       include MAPI::Services::Base
 
       def self.registered(app)
-        service_root '/rates', app
-        swagger_api_root :rates do
+        service_root '/mock_rates', app
+        swagger_api_root :mock_rates do
           api do
             key :path, "/{term}"
             operation do

@@ -18,6 +18,7 @@ gem 'turbolinks'
 gem 'jbuilder'
 # bundle exec rake doc:rails generates the API under doc/api.
 gem 'sdoc',          group: :doc
+gem 'rest-client'
 
 # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
 # gem 'spring',        group: :development
@@ -49,6 +50,11 @@ group :development, :test do
   gem 'rerun'
   gem 'brakeman'
   gem 'faker' #Faker library that generates fake data.
+end
+
+group :test do
+  gem 'vcr'
+  gem 'webmock'
 end
 
 # Use ActiveModel has_secure_password

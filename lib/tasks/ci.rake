@@ -1,6 +1,6 @@
 namespace :ci do
   desc "Sets up the test environment and runs the tests and static analysis"
-  task :build => ['spec', 'ci:brakeman']
+  task :build => ['spec', 'spec:api', 'ci:brakeman']
   
   desc "Run Brakeman"
   task :brakeman do
@@ -12,3 +12,28 @@ namespace :ci do
     File.unlink('brakeman.txt')
   end
 end
+
+namespace :spec do
+  desc "Runs the API specs"
+  task :api  do
+    orig_dir = Dir.pwd
+    Dir.chdir('api')
+    command = 'rspec'
+    begin
+      puts command if verbose
+      success = system(command)
+    rescue
+      puts failure_message if failure_message
+    ensure
+      Dir.chdir(orig_dir)
+    end
+
+    unless success
+      $stderr.puts "#{command} failed"
+      exit $?.exitstatus
+    end
+  end
+end
+# RSpec::Core::RakeTask.new("spec:api") do |t|
+#   t.pattern = File.join('api', RSpec::Core::RakeTask::DEFAULT_PATTERN)
+# end
