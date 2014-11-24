@@ -2,6 +2,11 @@ $(function () {
   var graphElement = $('.dashboard-market-graph');
   var graphWidth = graphElement.width();
   var graphData = graphElement.data('graph-series');
+  var graphSmallestY = 100;
+  $.each(graphData[0].data, function(i, v) {
+    graphSmallestY = Math.min(v[1], graphSmallestY);
+  });
+  
   graphElement.highcharts({
     chart: {
       type: 'area',
@@ -95,7 +100,8 @@ $(function () {
       tickPositions: [0],
       lineWidth: 0,
       gridLineWidth: 0,
-      lineColor: 'transparent'
+      lineColor: 'transparent',
+      min: graphSmallestY
     },
     series: graphData,
     credits: {
