@@ -1,43 +1,51 @@
 {
 	"metadata": {
 		"name": "FHLBSF",
-		"lastOpened": 1416432237727,
+		"lastOpened": 1416853348105,
 		"created": 1414699606900
 	},
 	"iconSets": [
 		{
 			"selection": [
 				{
-					"order": 3,
+					"order": 2,
+					"id": 320,
+					"prevSize": 32,
+					"code": 58889,
+					"name": "alert",
+					"tempChar": ""
+				},
+				{
+					"order": 1,
 					"id": 319,
 					"prevSize": 32,
 					"code": 58885,
 					"name": "calendar",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 4,
+					"order": 3,
 					"id": 318,
 					"prevSize": 32,
 					"code": 58881,
 					"name": "chevron",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 5,
+					"order": 4,
 					"id": 317,
 					"prevSize": 32,
 					"code": 58888,
 					"name": "close",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 7,
+					"order": 5,
 					"id": 316,
 					"prevSize": 32,
 					"code": 58887,
 					"name": "edit",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 6,
@@ -45,39 +53,39 @@
 					"prevSize": 32,
 					"code": 58880,
 					"name": "gear",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 8,
+					"order": 7,
 					"id": 314,
 					"prevSize": 32,
 					"code": 58883,
 					"name": "magnify",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 9,
+					"order": 8,
 					"id": 313,
 					"prevSize": 32,
 					"code": 58886,
 					"name": "phone",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 2,
+					"order": 9,
 					"id": 312,
 					"prevSize": 32,
 					"code": 58882,
 					"name": "envelope",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 1,
+					"order": 10,
 					"id": 308,
 					"prevSize": 32,
 					"code": 58884,
 					"name": "arrow-right",
-					"tempChar": ""
+					"tempChar": ""
 				}
 			],
 			"id": 0,
@@ -88,6 +96,25 @@
 			"height": 1024,
 			"prevSize": 32,
 			"icons": [
+				{
+					"id": 20,
+					"paths": [
+						"M1017.173 959.147h-1010.347l505.173-894.293 505.173 894.293zM95.573 907.947h836.267l-419.84-737.28-416.427 737.28z",
+						"M474.453 791.893c0-13.653 3.413-23.893 13.653-34.133s20.48-13.653 34.133-13.653c13.653 0 23.893 3.413 30.72 13.653s13.653 20.48 13.653 34.133-3.413 23.893-13.653 34.133c-6.827 10.24-20.48 13.653-30.72 13.653-13.653 0-23.893-3.413-34.133-13.653-10.24-6.827-13.653-20.48-13.653-34.133zM484.693 467.627l-3.413-68.267h71.68l-3.413 68.267-10.24 208.213h-47.787l-6.827-208.213z"
+					],
+					"attrs": [
+						{
+							"visibility": false
+						},
+						{
+							"visibility": false
+						}
+					],
+					"grid": 20,
+					"tags": [
+						"alert"
+					]
+				},
 				{
 					"id": 19,
 					"paths": [
@@ -285,7 +312,8 @@
 				"emSize": 1024,
 				"baseline": 6.25,
 				"whitespace": 50
-			}
+			},
+			"resetPoint": 58880
 		},
 		"imagePref": {
 			"prefix": "icon-",
