@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe RatesService do
+  let(:member_id) {double(MEMBER_ID)}
   subject { RatesService.new }
   it { expect(subject).to respond_to(:overnight_vrc) }
   it { expect(subject).to respond_to(:quick_advance_rates) }
@@ -30,7 +31,6 @@ describe RatesService do
     end 
   end
   describe "`quick_advance_rates` method" do
-    let(:member_id) {double(MEMBER_ID)}
     let(:quick_advance_rates) {subject.quick_advance_rates(member_id)}
     it "should return a hash of hashes containing pledged collateral values" do
       expect(quick_advance_rates.length).to be >= 1
@@ -41,11 +41,10 @@ describe RatesService do
     end
   end
   describe "`quick_advance_preview` method" do
-    let(:member_id) {double(MEMBER_ID)}
-    let(:advance_type) {double(MEMBER_ID)}
-    let(:advance_term) {double(MEMBER_ID)}
-    let(:rate) {double(MEMBER_ID)}
-    let(:quick_advance_preview) {subject.quick_advance_preview(member_id, advance_type, advance_term, rate)}
+    let(:advance_type) {double('advance_type')}
+    let(:advance_term) {double('advance_term')}
+    let(:advance_rate) {double('advance_rate')}
+    let(:quick_advance_preview) {subject.quick_advance_preview(member_id, advance_type, advance_term, advance_rate)}
     it "should return a hash of hashes containing info relevant to the requested preview" do
       expect(quick_advance_preview.length).to be >= 1
       expect(quick_advance_preview[:status]).to be_kind_of(String)
