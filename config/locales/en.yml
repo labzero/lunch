@@ -88,11 +88,11 @@ en:
           title: Confirm Advance
           p: FHLB-SF will hedge the advance once you initiate it. It cannot be changed without a fee. Please read the details below and ensure they are correct before you confirm the advance.
         field_headings:
-          amount: Amount
-          rate_type: Program
+          advance_amount: Amount
+          advance_type: Program
           interest_day_count: "Int Day #"
           payment_on: Payment
-          rate_term: Term
+          advance_term: Term
           funding_date: Funding
           maturity_date: Maturity
     reports:
