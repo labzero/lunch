@@ -84,6 +84,16 @@
   font-weight: $semibold-weight;
 }
 
+@mixin typography-confirmation-label {
+  font-size: 1.2rem;
+  font-weight: $normal-weight;
+}
+
+@mixin typography-confirmation-data {
+  font-size: 1.2rem;
+  font-weight: $semibold-weight;
+}
+
 %typography-page-title {
   @include typography-page-title;
 }
@@ -150,4 +160,12 @@
 
 %typography-graph-data {
   @include typography-graph-data;
+}
+
+%typography-confirmation-label {
+  @include typography-confirmation-label;
+}
+
+%typography-confirmation-data {
+  @include typography-confirmation-data;
 }

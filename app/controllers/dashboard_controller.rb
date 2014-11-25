@@ -67,8 +67,12 @@ class DashboardController < ApplicationController
     render json: RatesService.new.quick_advance_rates(MEMBER_ID)
   end
 
-  def initiate_quick_advance
-    # TODO: hit the RatesService object to verify the quick advance
-    render nothing: true
+  def quick_advance_preview
+    rate_data = JSON.parse(params[:rate_data]).with_indifferent_access
+    advance_type = rate_data[:advance_type]
+    advance_term = rate_data[:advance_term]
+    advance_rate = rate_data[:advance_rate].to_f
+    preview = RatesService.new.quick_advance_preview(MEMBER_ID, advance_type, advance_term, advance_rate)
+    render partial: 'quick_advance_preview', locals: preview # key names received from RatesService.new.quick_advance_preview must match variable names in partial
   end
 end

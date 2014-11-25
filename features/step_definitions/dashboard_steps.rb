@@ -83,6 +83,10 @@ Then(/^I should see the quick advance table$/) do
   page.assert_selector('.dashboard-quick-advance-flyout table', visible: true)
 end
 
+Then(/^I should not see the quick advance table$/) do
+  page.assert_selector('.dashboard-quick-advance-flyout table', visible: false)
+end
+
 Then(/^I should see a rate for the "(.*?)" term with a type of "(.*?)"$/) do |term, type|
   page.find(".dashboard-quick-advance-flyout table td[data-term='#{term}'][data-advance-type='#{type}']").text.should_not eql("")
 end
@@ -105,4 +109,20 @@ end
 
 Then(/^the initiate advance button should be active$/) do
   page.assert_selector(".dashboard-quick-advance-flyout .initiate-quick-advance.active")
+end
+
+When(/^I click on the initiate advance button$/) do
+  page.find(".dashboard-quick-advance-flyout .initiate-quick-advance.active").click
+end
+
+Then(/^I should see a preview of the quick advance$/) do
+  page.assert_selector(".quick-advance-preview", visible: true)
+end
+
+Then(/^I should not see a preview of the quick advance$/) do
+  page.assert_no_selector(".quick-advance-preview")
+end
+
+When(/^I click on the back button for the quick advance preview$/) do
+  page.find(".quick-advance-back-button").click
 end

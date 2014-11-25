@@ -44,6 +44,7 @@ $icon-dollar: "$";
 $icon-edit: "\e607";
 $icon-close: "\e608";
 $icon-alert: "\e609";
+$icon-arrow-left: "\e610";
 
 .icon-gear-before:before, .icon-gear-after:after {
   @extend %icon-font;
@@ -68,6 +69,11 @@ $icon-alert: "\e609";
 .icon-arrow-right-before:before, .icon-arrow-right-after:after {
   @extend %icon-font;
   content: "#{$icon-arrow-right}";
+}
+
+.icon-arrow-left-before:before, .icon-arrow-left-after:after {
+  @extend %icon-font;
+  content: "#{$icon-arrow-left}";
 }
 
 .icon-calendar-before:before, .icon-calendar-after:after {
