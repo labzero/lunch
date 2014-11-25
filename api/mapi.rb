@@ -2,7 +2,6 @@ require 'sinatra/base'
 require 'swagger/blocks'
 
 require_relative 'services/base'
-require_relative 'services/health_check'
 require_relative 'services/mock_rates'
 require_relative 'services/mock_members'
 require_relative 'services/rates'
@@ -19,7 +18,6 @@ module MAPI
       ActiveRecord::Base.connection
     end
 
-    register MAPI::Services::HealthCheck
     register MAPI::Services::MockRates
     register MAPI::Services::MockMembers
     register MAPI::Services::Rates
@@ -64,6 +62,12 @@ module MAPI
     get '/apidocs/:id' do
       json = Swagger::Blocks.build_api_json(params[:id], SWAGGER_CLASSES)
       json.to_json
+    end
+  end
+
+  class HealthApp < Sinatra::Base
+    get '/' do
+      'OK'
     end
   end
 end
