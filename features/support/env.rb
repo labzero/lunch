@@ -15,6 +15,16 @@ custom_host = ENV['APP_HOST'] || env_config['app_host']
 if !custom_host
   require ::File.expand_path('../../../config/environment',  __FILE__)
   require 'capybara/rails'
+  require_relative '../../api/mapi'
+
+  Capybara.app = Rack::Builder.new do
+    map '/' do
+      run Capybara.app
+    end
+    map '/mapi' do
+      run MAPI::ServiceApp
+    end
+  end.to_app
 else
   Capybara.app_host = custom_host
 end
@@ -25,6 +35,7 @@ AfterConfiguration do
   if Capybara.app_host.nil?
     Capybara.app_host = "#{Capybara.app_host || ('http://' + Capybara.current_session.server.host)}:#{Capybara.server_port || (Capybara.current_session.server ? Capybara.current_session.server.port : false) || 80}"
   end
+  Rails.configuration.mapi.endpoint = Capybara.app_host + '/mapi' unless custom_host
   url = Capybara.app_host
   puts url
   result = nil
