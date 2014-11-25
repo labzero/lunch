@@ -11,9 +11,9 @@
       var col = $(this).index();
       $this.addClass('cell-selected').closest('tr').find('td:first-child').addClass('cell-selected');
       $($table.find('th')[col]).addClass('cell-selected');
-      selected_rate['term'] = $this.data('term');
+      selected_rate['advance_term'] = $this.data('term');
       selected_rate['advance_type'] = $this.data('advance-type');
-      selected_rate['rate'] = parseFloat($this.text());
+      selected_rate['advance_rate'] = parseFloat($this.text());
       $initiateButton.hasClass('active') ? '' : $initiateButton.addClass('active');
     });
 
@@ -34,8 +34,25 @@
     });
 
     function initiateQuickAdvance(rate_data) {
-      $.post('/dashboard/initiate_quick_advance', rate_data, function(status){
-        // probably want to receive some html from the server and render it in place of the table
+      $.post('/dashboard/quick_advance_preview', {rate_data: rate_data}, function(htmlResponse){
+        var $flyoutBottomSection = $('.flyout-bottom-section');
+        var $oldNodes = $('.flyout-top-section-body span, .flyout-bottom-section table, .flyout-bottom-section .initiate-quick-advance');
+
+        // append the html response, hide old nodes and show the new ones
+        $flyoutBottomSection.append($(htmlResponse));
+        $oldNodes.hide();
+        $('.flyout-top-section-body').append($flyoutBottomSection.find('.quick-advance-preview-subheading')); // this part of the html response must get appended to top-section
+
+        // event listener and handler for back button click
+        $('.quick-advance-back-button').on('click', function() {
+          $('.quick-advance-preview-subheading, .quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
+          $oldNodes.show();
+        });
+
+        // event listener and handler for .confirm-quick-advance button click
+        $('.confirm-quick-advance').on('click', function(){
+          // TODO add ajax POST to route that will execute the advance
+        });
       });
     };
 

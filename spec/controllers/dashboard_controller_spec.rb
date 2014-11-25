@@ -56,12 +56,31 @@ RSpec.describe DashboardController, :type => :controller do
     let(:json_response) { {some: "json"}.to_json }
     let(:RatesService) {class_double(RatesService)}
     let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
-    it "calls the RatesService object with quick_advance_rates and returns json" do
+    it "should call the RatesService object with quick_advance_rates and returns json" do
       expect(RatesService).to receive(:new).and_return(rate_service_instance)
       expect(rate_service_instance).to receive(:quick_advance_rates).and_return(json_response)
       get :quick_advance_rates
       expect(response.body).to eq(json_response)
     end
-
   end
+
+  describe "GET quick_advance_preview" do
+    let(:RatesService) {class_double(RatesService)}
+    let(:rate_service_instance) {double("rate service instance", quick_advance_preview: nil)}
+    let(:member_id) {double(MEMBER_ID)}
+    let(:advance_term) {'some term'}
+    let(:advance_type) {'some type'}
+    let(:advance_rate) {'0.17'}
+    it "should render the quick_advance_preview partial" do
+      post :quick_advance_preview, rate_data: {advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate}.to_json
+      expect(response.body).to render_template(partial: 'dashboard/_quick_advance_preview')
+    end
+    it "should call the RatesService object's `quick_advance_preview` method with the POSTed advance_type, advance_term and rate" do
+      stub_const("MEMBER_ID", 750)
+      expect(RatesService).to receive(:new).and_return(rate_service_instance)
+      expect(rate_service_instance).to receive(:quick_advance_preview).with(MEMBER_ID, advance_type, advance_term, advance_rate.to_f)
+      post :quick_advance_preview, rate_data: {advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate}.to_json
+    end
+  end
+
 end
