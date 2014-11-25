@@ -14,5 +14,4 @@
 //= require jquery_ujs
 //= require jquery-placeholder
 //= require highcharts
-//= require flyouts
 //= require_tree .
