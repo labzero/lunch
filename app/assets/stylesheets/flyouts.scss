@@ -16,11 +16,12 @@
   z-index: 100;
   margin-top: 20px;
   overflow: visible;
+  padding-right: 0;
+  padding-left: 0;
 }
 
 .flyout {
   display: none;
-  position: absolute;
   &.open {
     display: block;
   }
