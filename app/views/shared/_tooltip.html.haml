@@ -1,6 +1,5 @@
-- first_value
-- second_value ||= nil
 .tooltip
-  %span= first_value
-  - if second_value
-    %span= second_value
+  - tooltip_data.each do |term, description|
+    %span= term
+    - if description
+      %span= description
