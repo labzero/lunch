@@ -111,6 +111,9 @@ en:
         title: Pledged Collateral
         mortgages: Mortgages
         securities: Securities
+        agency: Agency
+        aaa: AAA
+        aa: AA
       total_securities:
         title: Total Securities
         pledged: Pledged
