@@ -1,8 +1,11 @@
 set :rails_env, 'production'
 set :branch, ENV['CAP_BRANCH'] || "develop"
 
-server '10.250.6.20', user: 'ubuntu', roles: %w{web app db}, primary: true
-server '10.250.7.20', user: 'ubuntu', roles: %w{web app}
+nodes = JSON.parse(ENV['MEMBER_DEV_NODES'])
+
+nodes.each do |ip, details|
+  server ip, user: 'ubuntu', roles: details['roles'], primary: !!details['primary']
+end
 
 set :ssh_options, {
     keys: %w(~/.ssh/fhlbsf-dev.pem),
