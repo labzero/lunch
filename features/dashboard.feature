@@ -46,6 +46,12 @@ Feature: Visiting the Dashboard
     Then I should see the quick advance table
       And I should see a rate for the "overnight" term with a type of "whole_loan"
 
+  Scenario: Quick Advance flyout tooltip
+    Given I visit the dashboard
+      And I open the quick advance flyout
+    When I hover on the cell with a term of "overnight" and a type of "whole_loan"
+    Then I should see the quick advance table tooltip for the cell with a term of "overnight" and a type of "whole_loan"
+
   Scenario: Select rate from Quick Advance flyout table
     Given I visit the dashboard
       And I open the quick advance flyout

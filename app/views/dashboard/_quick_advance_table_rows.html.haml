@@ -1,0 +1,7 @@
+- rate_data.keys.each do |advance_term|
+  %tr
+    %td= advance_term.gsub('_', ' ')
+    -advance_types.each do |advance_type|
+      %td{data: {'advance-type' => advance_type, 'advance-term' => advance_term}}
+        = sprintf( "%0.02f", rate_data[advance_term][advance_type].to_f)
+        = render 'shared/tooltip', tooltip_data: {t('dashboard.quick_advance.preview.field_headings.payment_on') => rate_data[advance_term]['payment_on'], t('dashboard.quick_advance.preview.field_headings.interest_day_count') => rate_data[advance_term]['interest_day_count'], t('dashboard.quick_advance.preview.field_headings.maturity_date') => rate_data[advance_term]['maturity_date']}

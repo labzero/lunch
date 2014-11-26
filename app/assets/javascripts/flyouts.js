@@ -14,8 +14,8 @@
     // give flyout appropriate width and position relative to its reference element
     $flyoutTopSection.width(this.width());
     $flyout.css({
-      'top': this.position()['top'],
-      'left': this.position()['left']
+      'margin-top': this.position()['top'],
+      'margin-left': this.position()['left']
     });
 
     // fade in the background and show the flyout
@@ -34,8 +34,8 @@
         $flyoutBottomSection.attr('class', 'flyout-bottom-section').children().remove();
         $flyoutTopSection.width('');
         $flyout.removeClass().addClass('flyout').css({
-          'top': '',
-          'left': ''
+          'margin-top': '',
+          'margin-left': ''
         });
         $flyoutCloseButton.off();
       });

@@ -1,5 +1,6 @@
 .tooltip
   - tooltip_data.each do |term, description|
-    %span= term
-    - if description
-      %span= description
+    .tooltip-pair
+      %span= term
+      - if description
+        %span= description

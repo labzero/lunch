@@ -5,6 +5,7 @@ puts "my_driver:  #{my_driver}"
 
 Capybara.default_driver = my_driver
 Capybara.javascript_driver = my_driver
+Capybara.default_wait_time = 10
 
 Capybara.register_driver :chrome do |app|
   Capybara::Selenium::Driver.new(app, :browser => :chrome, :switches => %w[--disable-popup-blocking])

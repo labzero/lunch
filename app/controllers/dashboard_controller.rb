@@ -2,6 +2,7 @@ class DashboardController < ApplicationController
 
   MEMBER_ID = 750 #this is the hard-coded fhlb client id number we're using for the time-being
   THRESHOLD_CAPACITY = 35 #this will be set by each client, probably with a default value of 35, and be stored in some as-yet-unnamed db
+  ADVANCE_TYPES = ['whole_loan', 'agency', 'aaa', 'aa'];
 
   def index
     @previous_activity = [
@@ -64,7 +65,8 @@ class DashboardController < ApplicationController
   end
 
   def quick_advance_rates
-    render json: RatesService.new.quick_advance_rates(MEMBER_ID)
+    rate_data = RatesService.new.quick_advance_rates(MEMBER_ID)
+    render partial: 'quick_advance_table_rows', locals: {rate_data: rate_data, advance_types: ADVANCE_TYPES}
   end
 
   def quick_advance_preview

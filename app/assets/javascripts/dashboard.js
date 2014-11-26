@@ -28,16 +28,7 @@ $(function () {
 
   function showQuickAdvanceRates(rates) {
     var table = $('.dashboard-quick-advance-flyout table');
-    var advance_types = ["whole_loan", "agency", "aaa", "aa"];
-    for (var term in rates) {
-      var $row = $("<tr><td>" + term.replace(/_/g, " ") + "</td></tr>");
-      advance_types.map(function(advance_type){
-        var $cell = $("<td data-term=\"" + term + "\" data-advance-type=\"" + advance_type + "\">" + rates[term][advance_type].toFixed(2) + "</td>");
-        $row.append($cell);
-      });
-      table.append($row);
-    };
-    table.quickAdvanceTable();
+    table.append($(rates)).quickAdvanceTable();
   };
 
 });
