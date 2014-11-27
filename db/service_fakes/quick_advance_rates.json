@@ -5,7 +5,7 @@
     "aaa" : 0.16,
     "aa" : 0.16,
     "payment_on" : "Maturity",
-    "interest_day_count" : "Actual/AC.",
+    "interest_day_count" : "Actual/Actual",
     "maturity_date" : "22-Mar-15"
   },
   "open" : {
@@ -14,7 +14,7 @@
     "aaa" : 0.16,
     "aa" : 0.16,
     "payment_on" : "Maturity",
-    "interest_day_count" : "Actual/AC.",
+    "interest_day_count" : "Actual/Actual",
     "maturity_date" : "22-Mar-15"
   },
   "1_week" : {
@@ -23,7 +23,7 @@
     "aaa" : 0.19,
     "aa" : 0.19,
     "payment_on" : "Maturity",
-    "interest_day_count" : "Actual/AC.",
+    "interest_day_count" : "Actual/Actual",
     "maturity_date" : "29-Mar-15"
   },
   "2_weeks" : {
@@ -32,7 +32,7 @@
     "aaa" : 0.20,
     "aa" : 0.20,
     "payment_on" : "Maturity",
-    "interest_day_count" : "Actual/AC.",
+    "interest_day_count" : "Actual/Actual",
     "maturity_date" : "5-Apr-15"
   },
   "3_weeks" : {
@@ -41,7 +41,7 @@
     "aaa" : 0.20,
     "aa" : 0.20,
     "payment_on" : "Maturity",
-    "interest_day_count" : "Actual/AC.",
+    "interest_day_count" : "Actual/Actual",
     "maturity_date" : "12-Apr-15"
   },
   "1_month" : {
@@ -50,7 +50,7 @@
     "aaa" : 0.19,
     "aa" : 0.19,
     "payment_on" : "Maturity",
-    "interest_day_count" : "Actual/AC.",
+    "interest_day_count" : "Actual/Actual",
     "maturity_date" : "22-Apr-15"
   },
   "2_months" : {
@@ -59,7 +59,7 @@
     "aaa" : 0.20,
     "aa" : 0.20,
     "payment_on" : "Maturity",
-    "interest_day_count" : "Actual/AC.",
+    "interest_day_count" : "Actual/Actual",
     "maturity_date" : "22-May-15"
   },
   "3_months" : {
@@ -68,7 +68,7 @@
     "aaa" : 0.21,
     "aa" : 0.20,
     "payment_on" : "Maturity",
-    "interest_day_count" : "Actual/AC.",
+    "interest_day_count" : "Actual/Actual",
     "maturity_date" : "22-June-15"
   },
   "6_months" : {
@@ -77,7 +77,7 @@
     "aaa" : 0.22,
     "aa" : 0.21,
     "payment_on" : "Maturity",
-    "interest_day_count" : "Actual/AC.",
+    "interest_day_count" : "Actual/Actual",
     "maturity_date" : "22-Sep-15"
   },
   "1_year" : {

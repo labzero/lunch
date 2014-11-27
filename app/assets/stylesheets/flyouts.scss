@@ -80,6 +80,13 @@
   color: $white;
 }
 
+%quick-advance-row-label {
+  border-right: 1px solid $light-blue;
+  background: $light-gray;
+  text-transform: capitalize;
+  cursor: auto;
+}
+
 .dashboard-quick-advance-flyout {
   .icon-dollar-before:before {
     @extend %dashboard-module-advances-icon-dollar;
@@ -94,9 +101,16 @@
     width: 100%;
     text-align: center;
     margin-bottom: 20px;
+    thead {
+      tr:first-child {
+        th {
+          font-size: 0.7333rem; // leaving this as a one-off typography style until we receive confirmation of this design
+          height: 20px;
+        }
+      }
+    }
     td, th {
       border: 1px solid $light-blue;
-      width: 20%;
       height: 30px;
       box-sizing: border-box;
       &.cell-selected {
@@ -120,6 +134,9 @@
       position: relative;
       &:first-child {
         background: $light-gray;
+      }
+      &:not(:first-child) {
+        width: 110px;
       }
       &:nth-child(2) {
         border-right: 1px solid $dark-gray;
@@ -157,9 +174,7 @@
         cursor: pointer;
       }
       td:first-child {
-        background: $light-gray;
-        cursor: auto;
-        text-transform: capitalize;
+        @extend %quick-advance-row-label;
         &.cell-selected {
           @extend %quick-advance-cell-selected;
         }
@@ -192,6 +207,32 @@
           border-bottom: 1px solid $dark-gray;
         }
       }
+      &:first-child {
+        th:first-child {
+          background: transparent;
+          border: none;
+        }
+      }
+    }
+    // special styling to accommodate labels for axes
+    tr.quick-advance-table-label-row {
+      td:nth-child(2) {
+        @extend %quick-advance-row-label;
+        &.cell-selected {
+          @extend %quick-advance-cell-selected;
+        }
+        &.cell-hovered {
+          @extend %quick-advance-cell-hovered;
+        }
+      }
+      td:nth-child(3) {
+        border-right: 1px solid $dark-gray;
+      }
+      &:first-child {
+        .quick-advance-table-horz-axes-label {
+          border-bottom: 1px solid $dark-gray;
+        }
+      }
     }
   }
 }
@@ -199,7 +240,7 @@
 .initiate-quick-advance {
   float: right;
   opacity: 0.4;
-  width: 280px; // probably want to calculate this somehow
+  width: 280px;
   cursor: auto;
   &.active {
     opacity: 1;
@@ -246,7 +287,6 @@
     &:last-child {
       padding-left: 30px;
     }
-
   }
   dt {
     @extend %typography-confirmation-label;
@@ -270,5 +310,16 @@
   }
   span {
     @extend %typography-confirmation-data;
+  }
+}
+
+.quick-advance-table-horz-axes-label {
+  width: 20px;
+  vertical-align: top;
+  padding-top: 8px;
+  span {
+    display: inline-block;
+    transform: rotate(270deg);
+    font-size: 0.7333rem; // leaving this as a one-off typography style until we receive confirmation of this design
   }
 }
