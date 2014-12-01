@@ -80,6 +80,11 @@ en:
         agency: Agency
         aaa: AAA
         aa: AA
+        axes_labels:
+          standard: Standard
+          securities_backed: SBC
+          variable_rate: VRC
+          fixed_rate: FRC
       buttons:
         back: Back
         initiate: Initiate the selected advance

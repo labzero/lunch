@@ -4,13 +4,13 @@
     var $initiateButton = $(".dashboard-quick-advance-flyout .initiate-quick-advance");
     var selected_rate = {};
 
-    var $flyoutTableCells = $('.dashboard-quick-advance-flyout td');
+    var $flyoutTableCells = $('.dashboard-quick-advance-flyout td.selectable-cell');
     $flyoutTableCells.on('click', function(){
       var $this = $(this);
       $('.dashboard-quick-advance-flyout td, .dashboard-quick-advance-flyout th').removeClass('cell-selected cell-hovered');
-      var col = $(this).index();
-      $this.addClass('cell-selected').closest('tr').find('td:first-child').addClass('cell-selected');
-      $($table.find('th')[col]).addClass('cell-selected');
+      var col = getColumnIndex($this);
+      $this.addClass('cell-selected').closest('tr').find('td.row-label').addClass('cell-selected');
+      $($table.find('tr.quick-advance-column-labels th')[col]).addClass('cell-selected');
       selected_rate['advance_term'] = $this.data('advance-term');
       selected_rate['advance_type'] = $this.data('advance-type');
       selected_rate['advance_rate'] = parseFloat($this.text());
@@ -19,10 +19,10 @@
 
     $flyoutTableCells.hover( function(){
       var $this = $(this);
-      var col = $this.index();
-      if (!$this.hasClass('cell-selected') && col != 0) {
-        $this.toggleClass('cell-hovered').closest('tr').find('td:first-child').toggleClass('cell-hovered');
-        $($table.find('th')[col]).toggleClass('cell-hovered');
+      var col = getColumnIndex($this);
+      if (!$this.hasClass('cell-selected') && $this.hasClass('selectable-cell')) {
+        $this.toggleClass('cell-hovered').closest('tr').find('td.row-label').toggleClass('cell-hovered');
+        $($table.find('tr.quick-advance-column-labels th')[col]).toggleClass('cell-hovered');
       }
     });
 
@@ -32,6 +32,14 @@
         initiateQuickAdvance(JSON.stringify(selected_rate));
       };
     });
+
+    function getColumnIndex($cell) {
+      if ($cell.closest('tr').hasClass('quick-advance-table-label-row')) {
+        return $cell.index() - 1;
+      } else {
+        return $cell.index();
+      }
+    }
 
     function initiateQuickAdvance(rate_data) {
       $.post('/dashboard/quick_advance_preview', {rate_data: rate_data}, function(htmlResponse){
