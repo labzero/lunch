@@ -40,7 +40,7 @@ AfterConfiguration do
   puts url
   result = nil
   10.times do |i|
-    result = %x[curl -w "%{http_code}" -m 3 -sL #{url} -o /dev/null]
+    result = %x[curl -w "%{http_code}" -m 3 -skL #{url} -o /dev/null]
     if result == '200'
       break
     end
