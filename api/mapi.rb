@@ -37,10 +37,6 @@ module MAPI
         key :description, 'Operations about dummy rates'
       end
       api do
-        key :path, '/healthy'
-        key :description, 'Operations on node health'
-      end
-      api do
         key :path, '/mock_members'
         key :description, 'Operations about dummy members'
       end
