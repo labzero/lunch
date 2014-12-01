@@ -344,6 +344,12 @@ $breakdown-table-currency-width: 10px;
   }
 }
 
+.total-safekept-gauge-pledged {
+  .inner-gauge-section {
+    background: $medium-gray;
+  }
+}
+
 .dashboard-effective-borrowing-capacity {
   position: relative;
 }
