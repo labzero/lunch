@@ -38,15 +38,17 @@ gem 'source-sans-pro-rails'
 gem 'highcharts-rails'
 gem 'jquery-placeholder-rails'
 
+# for MAPI
+gem 'sinatra', require: false
+gem 'sinatra-activerecord', require: false
+gem 'swagger-blocks', require: false
+
 group :development, :test do
   gem 'rspec-rails'
   gem 'cucumber'
   gem 'capybara'
   gem 'selenium-webdriver'
   gem 'foreman'
-  gem 'sinatra'
-  gem 'sinatra-activerecord'
-  gem 'swagger-blocks'
   gem 'rerun'
   gem 'brakeman'
   gem 'faker' #Faker library that generates fake data.
