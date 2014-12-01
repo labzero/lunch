@@ -8,7 +8,7 @@ module MAPI
   end
 
   def self.base_path
-    ENV['MAPI_BASE_PATH'] || 'http://localhost:3100/mapi'
+    ENV['MAPI_ENDPOINT'] || 'http://localhost:3100/mapi'
   end
 
   def self.root
