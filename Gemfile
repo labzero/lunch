@@ -18,6 +18,7 @@ gem 'turbolinks'
 gem 'jbuilder'
 # bundle exec rake doc:rails generates the API under doc/api.
 gem 'sdoc',          group: :doc
+gem 'rest-client'
 
 # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
 # gem 'spring',        group: :development
@@ -37,18 +38,25 @@ gem 'source-sans-pro-rails'
 gem 'highcharts-rails'
 gem 'jquery-placeholder-rails'
 
+# for MAPI
+gem 'sinatra', require: false
+gem 'sinatra-activerecord', require: false
+gem 'swagger-blocks', require: false
+
 group :development, :test do
   gem 'rspec-rails'
   gem 'cucumber'
   gem 'capybara'
   gem 'selenium-webdriver'
   gem 'foreman'
-  gem 'sinatra'
-  gem 'sinatra-activerecord'
-  gem 'swagger-blocks'
   gem 'rerun'
   gem 'brakeman'
   gem 'faker' #Faker library that generates fake data.
+end
+
+group :test do
+  gem 'vcr'
+  gem 'webmock'
 end
 
 # Use ActiveModel has_secure_password

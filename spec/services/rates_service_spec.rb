@@ -5,7 +5,7 @@ describe RatesService do
   subject { RatesService.new }
   it { expect(subject).to respond_to(:overnight_vrc) }
   it { expect(subject).to respond_to(:quick_advance_rates) }
-  describe "`overnight_vrc` method" do
+  describe "`overnight_vrc` method", :vcr do
     let(:rates) {subject.overnight_vrc}
     it "should return an array of rates" do
       expect(rates.length).to be >= 1
@@ -20,15 +20,6 @@ describe RatesService do
     it "should allow the number of rates returned to be overridden" do
       expect(subject.overnight_vrc(5).length).to eq(5)
     end
-    it "should return the rates in ascending date order" do
-      last_date = nil
-      rates.each do |rate|
-        if last_date
-          expect(rate.first).to be > last_date
-        end
-        last_date = rate.first
-      end
-    end 
   end
   describe "`quick_advance_rates` method" do
     let(:quick_advance_rates) {subject.quick_advance_rates(member_id)}

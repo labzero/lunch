@@ -11,6 +11,14 @@ module MAPI
     ENV['MAPI_BASE_PATH'] || 'http://localhost:3100/mapi'
   end
 
+  def self.root
+    File.expand_path(File.join(File.dirname(__FILE__), '..'))
+  end
+
+  def self.env
+    ENV['RAILS_ENV'] || 'development'
+  end
+
   module Services
     module Base
       def self.included(mod)
