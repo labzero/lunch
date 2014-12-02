@@ -11,9 +11,7 @@
       var col = getColumnIndex($this);
       $this.addClass('cell-selected').closest('tr').find('td.row-label').addClass('cell-selected');
       $($table.find('tr.quick-advance-column-labels th')[col]).addClass('cell-selected');
-      selected_rate['advance_term'] = $this.data('advance-term');
-      selected_rate['advance_type'] = $this.data('advance-type');
-      selected_rate['advance_rate'] = parseFloat($this.text());
+      setRateFromElementData($this);
       $initiateButton.hasClass('active') ? '' : $initiateButton.addClass('active');
     });
 
@@ -39,7 +37,7 @@
       } else {
         return $cell.index();
       }
-    }
+    };
 
     function initiateQuickAdvance(rate_data) {
       $.post('/dashboard/quick_advance_preview', {rate_data: rate_data}, function(htmlResponse){
@@ -59,9 +57,32 @@
 
         // event listener and handler for .confirm-quick-advance button click
         $('.confirm-quick-advance').on('click', function(){
-          // TODO add ajax POST to route that will execute the advance
+          setRateFromElementData($(this));
+          confirmQuickAdvance(JSON.stringify(selected_rate)); //
         });
       });
+    };
+
+    function confirmQuickAdvance(rate_data) {
+      $.post('/dashboard/quick_advance_confirmation', {rate_data: rate_data}, function(jsonResponse){
+        // we're going to render a partial here once we get the designs for this confirmation
+        // in the meantime, just replacing some nodes in .quick-advance-preview to display confirmation number and allow flyout close
+        $('.quick-advance-preview').addClass('quick-advance-confirmation');
+        $('.quick-advance-preview-message, .quick-advance-back-button, .confirm-quick-advance').remove();
+        $('.quick-advance-summary')
+          .prepend("<p>Advance Number: <span>" + jsonResponse['confirmation_number'] +"</span></p>");
+        $('.flyout-bottom-section')
+          .append('<button class = "primary-button quick-advance-confirmation-button">Close</button>');
+        $('.quick-advance-confirmation-button').on('click', function(){
+          $('.flyout-close-button').click(); // again, definitely not how we want to handle this, but waiting until designs are finalized to build out
+        });
+      });
+    };
+
+    function setRateFromElementData($element) {
+      selected_rate['advance_term'] = $element.data('advance-term');
+      selected_rate['advance_type'] = $element.data('advance-type');
+      selected_rate['advance_rate'] = $element.data('advance-rate');
     };
 
   };

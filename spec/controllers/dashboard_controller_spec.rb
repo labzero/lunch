@@ -64,7 +64,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
   end
 
-  describe "GET quick_advance_preview" do
+  describe "POST quick_advance_preview" do
     let(:RatesService) {class_double(RatesService)}
     let(:rate_service_instance) {double("rate service instance", quick_advance_preview: nil)}
     let(:member_id) {double(MEMBER_ID)}
@@ -80,6 +80,23 @@ RSpec.describe DashboardController, :type => :controller do
       expect(RatesService).to receive(:new).and_return(rate_service_instance)
       expect(rate_service_instance).to receive(:quick_advance_preview).with(MEMBER_ID, advance_type, advance_term, advance_rate.to_f)
       post :quick_advance_preview, rate_data: {advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate}.to_json
+    end
+  end
+
+  describe "POST quick_advance_confirmation" do
+    let(:RatesService) {class_double(RatesService)}
+    let(:rate_service_instance) {double("rate service instance", quick_advance_confirmation: nil)}
+    let(:member_id) {double(MEMBER_ID)}
+    let(:advance_term) {'some term'}
+    let(:advance_type) {'some type'}
+    let(:advance_rate) {'0.17'}
+    let(:json_response) {{json: "response"}.to_json}
+    it "should call the RatesService object's `quick_advance_confirmation` method with the POSTed advance_type, advance_term and rate and return a json response" do
+      stub_const("MEMBER_ID", 750)
+      expect(RatesService).to receive(:new).and_return(rate_service_instance)
+      expect(rate_service_instance).to receive(:quick_advance_confirmation).with(MEMBER_ID, advance_type, advance_term, advance_rate.to_f).and_return(json_response)
+      post :quick_advance_confirmation, rate_data: {advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate}.to_json
+      expect(response.body).to eq(json_response)
     end
   end
 

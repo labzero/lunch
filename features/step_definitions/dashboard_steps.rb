@@ -134,3 +134,35 @@ end
 When(/^I click on the back button for the quick advance preview$/) do
   page.find(".quick-advance-back-button").click
 end
+
+When(/^I click on the quick advance confirm button$/) do
+  page.find(".confirm-quick-advance").click
+end
+
+Then(/^I should see confirmation number for the advance$/) do
+  page.assert_selector('.quick-advance-summary p', text: "Advance Number:", visible: true)
+end
+
+Then(/^I should not see the quick advance preview message$/) do
+  page.assert_no_selector('.quick-advance-preview-message');
+end
+
+Then(/^I should see the quick advance confirmation close button$/) do
+  page.assert_selector('.quick-advance-confirmation-button', visible: true)
+end
+
+Then(/^I successfully execute a quick advance$/) do
+  step "I open the quick advance flyout"
+  step "I select the rate with a term of \"overnight\" and a type of \"whole_loan\""
+  step "I click on the initiate advance button"
+  step "I should not see the quick advance table"
+  step "I should see a preview of the quick advance"
+  step "I click on the quick advance confirm button"
+  step "I should see confirmation number for the advance"
+  step "I should not see the quick advance preview message"
+  step "I should see the quick advance confirmation close button"
+end
+
+When(/^I click on the quick advance confirmation close button$/) do
+  page.find(".quick-advance-confirmation-button").click
+end

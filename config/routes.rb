@@ -16,6 +16,8 @@ Rails.application.routes.draw do
 
   post '/dashboard/quick_advance_preview' => 'dashboard#quick_advance_preview'
 
+  post '/dashboard/quick_advance_confirmation' => 'dashboard#quick_advance_confirmation'
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 

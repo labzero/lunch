@@ -48,4 +48,22 @@ describe RatesService do
       expect(quick_advance_preview["maturity_date"]).to be_kind_of(String)
     end
   end
+  describe "`quick_advance_confirmation` method" do
+    let(:advance_type) {double('advance_type')}
+    let(:advance_term) {double('advance_term')}
+    let(:advance_rate) {double('advance_rate')}
+    let(:quick_advance_confirmation) {subject.quick_advance_confirmation(member_id, advance_type, advance_term, advance_rate)}
+    it "should return a hash of hashes containing info relevant to the requested preview" do
+      expect(quick_advance_confirmation.length).to be >= 1
+      expect(quick_advance_confirmation[:status]).to be_kind_of(String)
+      expect(quick_advance_confirmation[:confirmation_number]).to be_kind_of(Integer)
+      expect(quick_advance_confirmation[:advance_amount]).to be_kind_of(Integer)
+      expect(quick_advance_confirmation["advance_term"]).to be_kind_of(String)
+      expect(quick_advance_confirmation["advance_type"]).to be_kind_of(String)
+      expect(quick_advance_confirmation["interest_day_count"]).to be_kind_of(String)
+      expect(quick_advance_confirmation["payment_on"]).to be_kind_of(String)
+      expect(quick_advance_confirmation["funding_date"]).to be_kind_of(String)
+      expect(quick_advance_confirmation["maturity_date"]).to be_kind_of(String)
+    end
+  end
 end
