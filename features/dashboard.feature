@@ -84,3 +84,22 @@ Feature: Visiting the Dashboard
     Then I should see the quick advance table
       And I should see the selected state for the cell with a term of "1_week" and a type of "aaa"
       And I should not see a preview of the quick advance
+
+  Scenario: Confirm rate from Quick Advance preview dialog
+    Given I visit the dashboard
+      And I open the quick advance flyout
+      And I select the rate with a term of "overnight" and a type of "whole_loan"
+      And I click on the initiate advance button
+      And I should not see the quick advance table
+      And I should see a preview of the quick advance
+    When I click on the quick advance confirm button
+    Then I should see confirmation number for the advance
+      And I should not see the quick advance preview message
+      And I should see the quick advance confirmation close button
+
+  Scenario: Close flyout after finishing quick advance
+    Given I visit the dashboard
+      And I successfully execute a quick advance
+      And I should see a flyout
+    When I click on the quick advance confirmation close button
+      Then I should not see a flyout

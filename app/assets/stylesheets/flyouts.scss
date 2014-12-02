@@ -306,7 +306,7 @@
 .quick-advance-summary {
   p {
     @extend %typography-confirmation-label;
-    margin-bottom: 0;
+    margin: 0.5rem 0 0;
   }
   span {
     @extend %typography-confirmation-data;
@@ -322,4 +322,15 @@
     transform: rotate(270deg);
     font-size: 0.7333rem; // leaving this as a one-off typography style until we receive confirmation of this design
   }
+}
+
+.quick-advance-confirmation {
+  &:before {
+    content: none;
+  }
+}
+
+.quick-advance-confirmation-button {
+  @extend %horizontal-center;
+  position: relative;
 }
