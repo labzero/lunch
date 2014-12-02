@@ -30,8 +30,20 @@ namespace :deploy do
       # Your restart mechanism here, for example:
       execute :touch, release_path.join('tmp/restart.txt')
     end
+    on roles(:api), in: :sequence, wait: 5 do
+      # Your restart mechanism here, for example:
+      execute :touch, release_path.join('api/tmp/restart.txt')
+    end
   end
 
+  desc 'Creates API directories'
+  task :missing_dirs do
+    on roles(:api) do
+      execute :mkdir, '-p', release_path.join('api/tmp')
+    end
+  end
+
+  before :publishing, :missing_dirs
   after :publishing, :restart
 
   after :restart, :clear_cache do

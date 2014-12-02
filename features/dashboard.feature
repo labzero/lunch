@@ -3,6 +3,7 @@ Feature: Visiting the Dashboard
   I want to use visit the dashboard for the FHLB Member Portal
   In order to find information
 
+  @smoke
   Scenario: Visit dashboard
     When I visit the dashboard
     Then I should see dashboard modules
@@ -11,11 +12,13 @@ Feature: Visiting the Dashboard
     When I visit the dashboard
     Then I should see 2 contacts
 
+  @smoke
   Scenario: See dashboard quick advance module
     When I visit the dashboard
     Then I should see a dollar amount field
       And I should see an advance rate.
 
+  @smoke
   Scenario: See Your Account module
     When I visit the dashboard
     Then I should see the Your Account table breakdown
@@ -24,6 +27,7 @@ Feature: Visiting the Dashboard
       And I should see a total securities gauge
       And I should see an effective borrwoing capacity gauge
 
+  @smoke
   Scenario: See dashboard market overview graph
     When I visit the dashboard
     Then I should see a market overview graph
@@ -34,6 +38,7 @@ Feature: Visiting the Dashboard
     Then I should see a flyout
       And I should see "44503000" in the quick advance flyout input field
 
+  @smoke
   Scenario: Quick Advance flyout closes
     When I visit the dashboard
       And I open the quick advance flyout
@@ -69,6 +74,7 @@ Feature: Visiting the Dashboard
     Then I should not see the quick advance table
       And I should see a preview of the quick advance
 
+  @smoke
   Scenario: Go back to rate table from preview in Quick Advance flyout
     Given I visit the dashboard
       And I open the quick advance flyout
