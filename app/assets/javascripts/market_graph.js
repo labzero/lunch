@@ -3,9 +3,11 @@ $(function () {
   var graphWidth = graphElement.width();
   var graphData = graphElement.data('graph-series');
   var graphSmallestY = 100;
-  $.each(graphData[0].data, function(i, v) {
-    graphSmallestY = Math.min(v[1], graphSmallestY);
-  });
+  if (graphData && graphData.length) {
+    $.each(graphData[0].data, function(i, v) {
+      graphSmallestY = Math.min(v[1], graphSmallestY);
+    });
+  };
   
   graphElement.highcharts({
     chart: {
