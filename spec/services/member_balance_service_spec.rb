@@ -6,7 +6,7 @@ describe MemberBalanceService do
   it { expect(subject).to respond_to(:pledged_collateral) }
   it { expect(subject).to respond_to(:total_securities) }
   it { expect(subject).to respond_to(:effective_borrowing_capacity) }
-  describe "`pledged_collateral` method" do
+  describe "`pledged_collateral` method", :vcr do
     let(:pledged_collateral) {subject.pledged_collateral}
     it "should return a hash of hashes containing pledged collateral values" do
       expect(pledged_collateral.length).to be >= 1
