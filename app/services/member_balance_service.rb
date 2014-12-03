@@ -1,15 +1,15 @@
 class MemberBalanceService
 
   def initialize(member_id)
-    # TODO change connection to MAPI once all methods below have been switched over
-    @connection = ActiveRecord::Base.establish_connection('cdb').connection if Rails.env == 'production'
+    @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint
+    @db_connection = ActiveRecord::Base.establish_connection('cdb').connection if Rails.env == 'production'
     @member_id = member_id
     raise ArgumentError, 'member_id must not be blank' if member_id.blank?
   end
 
   def pledged_collateral
-    connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint
-    response = connection["member/#{@member_id}/balance/pledged_collateral"].get
+
+    response = @connection["member/#{@member_id}/balance/pledged_collateral"].get
     data = JSON.parse(response.body)
 
     mortgage_mv = data['mortgages']
@@ -38,7 +38,7 @@ SQL
       FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
       WHERE account_type = 'U' AND fhlb_id = #{@member_id}
 SQL
-    if @connection
+    if @db_connection
       pledged_securities_cursor = @connection.execute(pledged_securities_string)
       safekept_securities_cursor = @connection.execute(safekept_securities_string)
       pledged_securities, safekept_securities = 0
@@ -70,7 +70,7 @@ SQL
       FROM CR_MEASURES.FINAN_SUMMARY_DATA_INTRADAY_V
       WHERE fhlb_id = #{@member_id}
 SQL
-    if @connection
+    if @db_connection
       total_capacity_cursor = @connection.execute(total_capacity_string)
       unused_capacity_cursor = @connection.execute(unused_capacity_string)
       total_capacity, unused_capacity = 0
