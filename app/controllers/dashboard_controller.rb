@@ -49,12 +49,12 @@ class DashboardController < ApplicationController
     }];
 
 
-    client_balances = ClientBalanceService.new(MEMBER_ID)
+    member_balances = MemberBalanceService.new(MEMBER_ID)
 
 
-    @pledged_collateral = client_balances.pledged_collateral
-    @total_securities = client_balances.total_securities
-    @effective_borrowing_capacity = client_balances.effective_borrowing_capacity.merge!({threshold_capacity: THRESHOLD_CAPACITY}) # we'll be pulling threshold capacity from a different source than the ClientBalanceService
+    @pledged_collateral = member_balances.pledged_collateral
+    @total_securities = member_balances.total_securities
+    @effective_borrowing_capacity = member_balances.effective_borrowing_capacity.merge!({threshold_capacity: THRESHOLD_CAPACITY}) # we'll be pulling threshold capacity from a different source than the MemberBalanceService
     @total_maturing_today = 46500000
 
     @reports_daily = 2

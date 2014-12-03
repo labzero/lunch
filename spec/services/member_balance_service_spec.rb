@@ -1,26 +1,26 @@
 require 'spec_helper'
 
-describe ClientBalanceService do
+describe MemberBalanceService do
   MEMBER_ID = 750
-  subject { ClientBalanceService.new(MEMBER_ID) }
+  subject { MemberBalanceService.new(MEMBER_ID) }
   it { expect(subject).to respond_to(:pledged_collateral) }
   it { expect(subject).to respond_to(:total_securities) }
   it { expect(subject).to respond_to(:effective_borrowing_capacity) }
-  describe "`pledged_collateral` method" do
+  describe "`pledged_collateral` method", :vcr do
     let(:pledged_collateral) {subject.pledged_collateral}
     it "should return a hash of hashes containing pledged collateral values" do
       expect(pledged_collateral.length).to be >= 1
       expect(pledged_collateral[:mortgages]).to be_kind_of(Hash)
-      expect(pledged_collateral[:mortgages][:absolute]).to be_kind_of(Integer)
+      expect(pledged_collateral[:mortgages][:absolute]).to be_kind_of(Numeric)
       expect(pledged_collateral[:mortgages][:percentage]).to be_kind_of(Float)
       expect(pledged_collateral[:agency]).to be_kind_of(Hash)
-      expect(pledged_collateral[:agency][:absolute]).to be_kind_of(Integer)
+      expect(pledged_collateral[:agency][:absolute]).to be_kind_of(Numeric)
       expect(pledged_collateral[:agency][:percentage]).to be_kind_of(Float)
       expect(pledged_collateral[:aaa]).to be_kind_of(Hash)
-      expect(pledged_collateral[:aaa][:absolute]).to be_kind_of(Integer)
+      expect(pledged_collateral[:aaa][:absolute]).to be_kind_of(Numeric)
       expect(pledged_collateral[:aaa][:percentage]).to be_kind_of(Float)
       expect(pledged_collateral[:aa]).to be_kind_of(Hash)
-      expect(pledged_collateral[:aa][:absolute]).to be_kind_of(Integer)
+      expect(pledged_collateral[:aa][:absolute]).to be_kind_of(Numeric)
       expect(pledged_collateral[:aa][:percentage]).to be_kind_of(Float)
     end
     describe "`total_securities` method" do
