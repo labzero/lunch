@@ -1,50 +1,29 @@
-class ClientBalanceService
+class MemberBalanceService
 
   def initialize(member_id)
+    # TODO change connection to MAPI once all methods below have been switched over
     @connection = ActiveRecord::Base.establish_connection('cdb').connection if Rails.env == 'production'
     @member_id = member_id
     raise ArgumentError, 'member_id must not be blank' if member_id.blank?
   end
 
   def pledged_collateral
-    mortgages_connection_string = <<SQL
-    SELECT SUM(NVL(STD_MARKET_VALUE,0))
-    FROM V_CONFIRM_DETAIL@COLAPROD_LINK.WORLD
-    WHERE fhlb_id = #{@member_id}
-    GROUP BY fhlb_id
-SQL
+    connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint
+    response = connection["member/#{@member_id}/balance/pledged_collateral"].get
+    data = JSON.parse(response.body)
 
-    securities_connection_string = <<SQL
-    SELECT
-          NVL(V_CONFIRM_SUMMARY_INTRADAY.SBC_MV_AG,0) AS agency_mv,
-          NVL(V_CONFIRM_SUMMARY_INTRADAY.SBC_MV_AAA,0) AS aaa_mv,
-          NVL(V_CONFIRM_SUMMARY_INTRADAY.SBC_MV_AA,0) AS aa_mv
-    FROM V_CONFIRM_SUMMARY_INTRADAY@COLAPROD_LINK.WORLD
-    WHERE fhlb_id =  #{@member_id}
-SQL
+    mortgage_mv = data['mortgages']
+    agency_mv = data['agency']
+    aaa_mv = data['aaa']
+    aa_mv = data['aa']
 
-    if @connection
-       mortages_cursor = @connection.execute(mortgages_connection_string)
-       securities_cursor = @connection.execute(securities_connection_string)
-       mortgage_mv, agency_mv, aaa_mv, aa_mv = 0
-       while row = mortages_cursor.fetch()
-         mortgage_mv = row[0]
-       end
-       while row = securities_cursor.fetch()
-         agency_mv = row[0]
-         aaa_mv = row[1]
-         aa_mv = row[2]
-       end
-       total_collateral = mortgage_mv + agency_mv + aaa_mv + aa_mv
-       {
-           mortgages: {absolute: mortgage_mv, percentage: mortgage_mv.fdiv(total_collateral)*100},
-           agency: {absolute: agency_mv, percentage: agency_mv.fdiv(total_collateral)*100},
-           aaa: {absolute: aaa_mv, percentage: aaa_mv.fdiv(total_collateral)*100},
-           aa: {absolute: aa_mv, percentage: aa_mv.fdiv(total_collateral)*100}
-       }.with_indifferent_access
-     else
-       JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'pledged_collateral.json'))).with_indifferent_access
-     end
+    total_collateral = mortgage_mv + agency_mv + aaa_mv + aa_mv
+    {
+      mortgages: {absolute: mortgage_mv, percentage: mortgage_mv.fdiv(total_collateral)*100},
+      agency: {absolute: agency_mv, percentage: agency_mv.fdiv(total_collateral)*100},
+      aaa: {absolute: aaa_mv, percentage: aaa_mv.fdiv(total_collateral)*100},
+      aa: {absolute: aa_mv, percentage: aa_mv.fdiv(total_collateral)*100}
+    }.with_indifferent_access
   end
 
   def total_securities

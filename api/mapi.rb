@@ -5,8 +5,10 @@ require_relative 'services/base'
 require_relative 'services/mock_rates'
 require_relative 'services/mock_members'
 require_relative 'services/rates'
+require_relative 'services/member_balance'
 
 require_relative 'models/member'
+require_relative 'models/member_balance'
 
 module MAPI
 
@@ -21,6 +23,7 @@ module MAPI
     register MAPI::Services::MockRates
     register MAPI::Services::MockMembers
     register MAPI::Services::Rates
+    register MAPI::Services::MemberBalance
   end
 
   class DocApp < Sinatra::Base
@@ -43,6 +46,10 @@ module MAPI
       api do
         key :path, '/rates'
         key :description, 'Operations about rates'
+      end
+      api do
+        key :path, '/member'
+        key :description, 'Operations about members'
       end
     end
 
