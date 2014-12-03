@@ -39,8 +39,8 @@ SQL
       WHERE account_type = 'U' AND fhlb_id = #{@member_id}
 SQL
     if @db_connection
-      pledged_securities_cursor = @connection.execute(pledged_securities_string)
-      safekept_securities_cursor = @connection.execute(safekept_securities_string)
+      pledged_securities_cursor = @db_connection.execute(pledged_securities_string)
+      safekept_securities_cursor = @db_connection.execute(safekept_securities_string)
       pledged_securities, safekept_securities = 0
       while row = pledged_securities_cursor.fetch()
         pledged_securities = row[0]
@@ -71,8 +71,8 @@ SQL
       WHERE fhlb_id = #{@member_id}
 SQL
     if @db_connection
-      total_capacity_cursor = @connection.execute(total_capacity_string)
-      unused_capacity_cursor = @connection.execute(unused_capacity_string)
+      total_capacity_cursor = @db_connection.execute(total_capacity_string)
+      unused_capacity_cursor = @db_connection.execute(unused_capacity_string)
       total_capacity, unused_capacity = 0
       while row = total_capacity_cursor.fetch()
         total_capacity = row[0]
