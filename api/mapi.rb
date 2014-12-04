@@ -10,6 +10,7 @@ require_relative 'services/member_balance'
 require_relative 'models/member'
 require_relative 'models/member_balance_pledged_collateral'
 require_relative 'models/member_balance_total_securities'
+require_relative 'models/realtime_rate'
 
 module MAPI
 
