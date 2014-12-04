@@ -39,35 +39,17 @@ class MemberBalanceService
   end
 
   def effective_borrowing_capacity
-    total_capacity_string = <<SQL
-      SELECT (REG_BORR_CAP +  SBC_BORR_CAP)
-      FROM CR_MEASURES.FINAN_SUMMARY_DATA_INTRADAY_V
-      WHERE fhlb_id = #{@member_id}
-SQL
 
-    unused_capacity_string = <<SQL
-      SELECT (EXCESS_REG_BORR_CAP + EXCESS_SBC_BORR_CAP) AS unused_BC
-      FROM CR_MEASURES.FINAN_SUMMARY_DATA_INTRADAY_V
-      WHERE fhlb_id = #{@member_id}
-SQL
-    if @db_connection
-      total_capacity_cursor = @db_connection.execute(total_capacity_string)
-      unused_capacity_cursor = @db_connection.execute(unused_capacity_string)
-      total_capacity, unused_capacity = 0
-      while row = total_capacity_cursor.fetch()
-        total_capacity = row[0]
-      end
-      while row = unused_capacity_cursor.fetch()
-        unused_capacity = row[0]
-      end
-      used_capacity = total_capacity - unused_capacity
-      {
-          used_capacity: {absolute: used_capacity, percentage: used_capacity.fdiv(total_capacity)*100},
-          unused_capacity: {absolute: unused_capacity, percentage: unused_capacity.fdiv(total_capacity)*100}
-      }.with_indifferent_access
-    else
-      JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'effective_borrowing_capacity.json'))).with_indifferent_access
-    end
+    response = @connection["member/#{@member_id}/balance/effective_borrowing_capacity"].get
+    data = JSON.parse(response.body)
+
+    total_capacity = data['total_capacity']
+    unused_capacity= data['unused_capacity']
+
+    used_capacity = total_capacity - unused_capacity
+    {
+        used_capacity: {absolute: used_capacity, percentage: used_capacity.fdiv(total_capacity)*100},
+        unused_capacity: {absolute: unused_capacity, percentage: unused_capacity.fdiv(total_capacity)*100}
+    }.with_indifferent_access
   end
-
 end

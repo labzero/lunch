@@ -54,6 +54,27 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/balance/effective_borrowing_capacity'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve effective borrowing capacity for member'
+              key :notes, 'Returns total and unused effective borrowing capacity for a member'
+              key :type, :MemberBalanceBorrowingCapacity
+              key :nickname, :memberBalanceEffectiveBorrowingCapacity
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -98,6 +119,7 @@ module MAPI
           end
         end
 
+
         # total securities route
         relative_get "/:id/balance/total_securities" do
           member_id = params[:id]
@@ -125,7 +147,30 @@ module MAPI
           else
             File.read(File.join(MAPI.root, 'fakes', 'member_balance_total_securities.json'))
           end
+      end
+        relative_get "/:id/balance/effective_borrowing_capacity" do
+          member_id = params[:id]
+          borrowing_capacity_connection_string = <<-SQL
+            SELECT (NVL(REG_BORR_CAP,0) +  NVL(SBC_BORR_CAP,0) AS total_BC,
+            (NVL(EXCESS_REG_BORR_CAP,0) + NVL(EXCESS_SBC_BORR_CAP,0) AS unused_BC
+            FROM CR_MEASURES.FINAN_SUMMARY_DATA_INTRADAY_V
+            WHERE fhlb_id = #{member_id}
+          SQL
 
+          if @connection
+            borrowing_capacity_cursor = @connection.execute(borrowing_capacity_connection_string)
+            total_capacity, unused_capacity = 0
+            while row = borrowing_capacity_cursor.fetch()
+              total_capacity = row[0]
+              unused_capacity = row[1]
+            end
+            {
+                total_capacity: total_capacity,
+                unused_capacity: unused_capacity
+            }.to_json
+          else
+            File.read(File.join(MAPI.root, 'fakes', 'member_balance_effective_borrowing_capacity.json'))
+          end
         end
       end
     end
