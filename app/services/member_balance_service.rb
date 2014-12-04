@@ -10,12 +10,12 @@ class MemberBalanceService
   def pledged_collateral
 
     response = @connection["member/#{@member_id}/balance/pledged_collateral"].get
-    data = JSON.parse(response.body)
+    data = JSON.parse(response.body).with_indifferent_access
 
-    mortgage_mv = data['mortgages']
-    agency_mv = data['agency']
-    aaa_mv = data['aaa']
-    aa_mv = data['aa']
+    mortgage_mv = data[:mortgages]
+    agency_mv = data[:agency]
+    aaa_mv = data[:aaa]
+    aa_mv = data[:aa]
 
     total_collateral = mortgage_mv + agency_mv + aaa_mv + aa_mv
     {
@@ -27,35 +27,15 @@ class MemberBalanceService
   end
 
   def total_securities
-    pledged_securities_string = <<SQL
-      SELECT COUNT(*)
-      FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
-      WHERE account_type = 'P' AND fhlb_id = #{@member_id}
-SQL
-
-    safekept_securities_string = <<SQL
-      SELECT COUNT(*)
-      FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
-      WHERE account_type = 'U' AND fhlb_id = #{@member_id}
-SQL
-    if @db_connection
-      pledged_securities_cursor = @db_connection.execute(pledged_securities_string)
-      safekept_securities_cursor = @db_connection.execute(safekept_securities_string)
-      pledged_securities, safekept_securities = 0
-      while row = pledged_securities_cursor.fetch()
-        pledged_securities = row[0]
-      end
-      while row = safekept_securities_cursor.fetch()
-        safekept_securities = row[0]
-      end
-      total_securities = pledged_securities + safekept_securities
-      {
-          pledged_securities: {absolute: pledged_securities.to_i, percentage: pledged_securities.fdiv(total_securities)*100},
-          safekept_securities: {absolute: safekept_securities.to_i, percentage: safekept_securities.fdiv(total_securities)*100}
-      }.with_indifferent_access
-    else
-      JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'total_securities.json'))).with_indifferent_access
-    end
+    response = @connection["member/#{@member_id}/balance/total_securities"].get
+    data = JSON.parse(response.body).with_indifferent_access
+    pledged_securities = data[:pledged_securities]
+    safekept_securities = data[:safekept_securities]
+    total_securities = pledged_securities + safekept_securities
+    {
+      pledged_securities: {absolute: pledged_securities, percentage: pledged_securities.fdiv(total_securities)*100},
+      safekept_securities: {absolute: safekept_securities, percentage: safekept_securities.fdiv(total_securities)*100}
+    }.with_indifferent_access
   end
 
   def effective_borrowing_capacity

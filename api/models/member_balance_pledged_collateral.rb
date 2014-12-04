@@ -1,8 +1,8 @@
 module MAPI
   module Models
-    class MemberBalance
+    class MemberBalancePledgedCollateral
       include Swagger::Blocks
-      swagger_model :MemberBalance do
+      swagger_model :MemberBalancePledgedCollateral do
         property :mortgages do
           key :type, :numeric
         end

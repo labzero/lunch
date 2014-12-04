@@ -8,6 +8,7 @@ module MAPI
 
         service_root '/member', app
         swagger_api_root :member do
+
           # pledged collateral endpoint
           api do
             key :path, '/{id}/balance/pledged_collateral'
@@ -15,8 +16,31 @@ module MAPI
               key :method, 'GET'
               key :summary, 'Retrieve pledged collateral for member'
               key :notes, 'Returns an array of collateral pledged by a member broken down by security type'
-              key :type, :MemberBalance
-              key :nickname, :memberBalancePledgedCollateral
+              key :type, :MemberBalancePledgedCollateral
+              key :nickname, :getPledgedCollateralForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
+
+          # total securities endpoint
+          api do
+            key :path, '/{id}/balance/total_securities'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieves counts of pledged and safekept securities for a member'
+              key :notes, 'Returns an array containing a count of pledged and safekept securities'
+              key :type, :MemberBalanceTotalSecurities
+              key :nickname, :getTotalSecuritiesCountForMember
               parameter do
                 key :paramType, :path
                 key :name, :id
@@ -32,6 +56,7 @@ module MAPI
           end
         end
 
+        # pledged collateral route
         relative_get "/:id/balance/pledged_collateral" do
           member_id = params[:id]
           mortgages_connection_string = <<-SQL
@@ -71,6 +96,36 @@ module MAPI
           else
             File.read(File.join(MAPI.root, 'fakes', 'member_balance_pledged_collateral.json'))
           end
+        end
+
+        # total securities route
+        relative_get "/:id/balance/total_securities" do
+          member_id = params[:id]
+          pledged_securities_string = <<-SQL
+            SELECT COUNT(*)
+            FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
+            WHERE account_type = 'P' AND fhlb_id = #{@member_id}
+          SQL
+
+          safekept_securities_string = <<-SQL
+            SELECT COUNT(*)
+            FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
+            WHERE account_type = 'U' AND fhlb_id = #{@member_id}
+          SQL
+
+          if @connection
+            pledged_securities, safekept_securities = 0
+            while row = pledged_securities_cursor.fetch()
+              pledged_securities = row[0]
+            end
+            while row = safekept_securities_cursor.fetch()
+              safekept_securities = row[0]
+            end
+            {pledged_securities: pledged_securities, safekept_securities: safekept_securities}.to_json
+          else
+            File.read(File.join(MAPI.root, 'fakes', 'member_balance_total_securities.json'))
+          end
+
         end
       end
     end
