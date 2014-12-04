@@ -15,10 +15,6 @@ module MAPI
     File.expand_path(File.join(File.dirname(__FILE__), '..'))
   end
 
-  def self.env
-    ENV['RAILS_ENV'] || 'development'
-  end
-
   module Services
     module Base
       def self.included(mod)
