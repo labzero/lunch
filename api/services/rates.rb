@@ -4,7 +4,7 @@ module MAPI
       include MAPI::Services::Base
 
       def self.registered(app)
-        @connection = ActiveRecord::Base.establish_connection('cdb').connection if MAPI.env == 'production'
+        @connection = ActiveRecord::Base.establish_connection('cdb').connection if app.environment == 'production'
 
         service_root '/rates', app
         swagger_api_root :rates do
