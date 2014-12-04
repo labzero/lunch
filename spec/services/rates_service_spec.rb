@@ -66,4 +66,14 @@ describe RatesService do
       expect(quick_advance_confirmation["maturity_date"]).to be_kind_of(String)
     end
   end
+
+  describe "`current_overnight_vrc` method", :vcr do
+    let(:rate) {subject.current_overnight_vrc}
+    it "should return a hash with a rate and a timestamp" do
+      expect(rate[:rate]).to be_kind_of(Float)
+      expect(rate[:rate]).to be >= 0
+      expect(rate[:updated_at]).to be_kind_of(DateTime)
+      expect(rate[:updated_at]).to be <= DateTime.now
+    end
+  end
 end

@@ -31,4 +31,20 @@ $(function () {
     table.append($(rates)).quickAdvanceTable();
   };
 
+  if (('.dashboard-module-advances').length > 0) {
+    var isCheckingRate = false;
+    var $rate_element = $('.dashboard-advances-rate');
+    var $rate_element_children = $rate_element.children();
+    setInterval(function() {
+      if (!isCheckingRate) {
+        isCheckingRate = true;
+        $.get('/dashboard/current_overnight_vrc').done(function(data) {
+          $rate_element.html(data.rate).append($rate_element_children);
+        }).always(function() {
+          isCheckingRate = false;
+        });
+      };
+    }, 30000);
+  };
+
 });

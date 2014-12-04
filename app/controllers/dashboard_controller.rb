@@ -5,6 +5,8 @@ class DashboardController < ApplicationController
   ADVANCE_TYPES = ['whole_loan', 'agency', 'aaa', 'aa'];
 
   def index
+    rate_service = RatesService.new
+
     @previous_activity = [
       [t('dashboard.previous_activity.overnight_vrc'), 44503000, DateTime.new(2014,9,3)],
       [t('dashboard.previous_activity.overnight_vrc'), 39097000, DateTime.new(2014,9,2)],
@@ -45,7 +47,7 @@ class DashboardController < ApplicationController
 
     @market_overview = [{
       name: 'Test',
-      data: RatesService.new.overnight_vrc
+      data: rate_service.overnight_vrc
     }];
 
 
@@ -61,6 +63,8 @@ class DashboardController < ApplicationController
     @reports_weekly = 1
     @reports_monthly = 4
     @reports_quarterly = 2
+
+    @current_overnight_vrc = rate_service.current_overnight_vrc[:rate]
 
   end
 
@@ -85,5 +89,9 @@ class DashboardController < ApplicationController
     advance_rate = rate_data[:advance_rate].to_f
     confirmation = RatesService.new.quick_advance_confirmation(MEMBER_ID, advance_type, advance_term, advance_rate)
     render json: confirmation # this will likely become a partial once we have designs for the confirmation dialog
+  end
+
+  def current_overnight_vrc
+    render json: RatesService.new.current_overnight_vrc
   end
 end

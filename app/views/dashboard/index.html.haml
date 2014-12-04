@@ -80,7 +80,7 @@
       = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}
       %p= t('global.vrc_overnight')
       .dashboard-advances-rate
-        0.14
+        = @current_overnight_vrc
         %span<> %
       %table
         %thead

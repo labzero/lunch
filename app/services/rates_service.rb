@@ -11,6 +11,12 @@ class RatesService
     end
   end
 
+  def current_overnight_vrc
+    response = @connection['rates/whole/overnight'].get
+    data = JSON.parse(response.body)
+    {rate: data['rate'], updated_at: DateTime.parse(data['updated_at'])}
+  end
+
   def quick_advance_rates(member_id)
     raise ArgumentError, 'member_id must not be blank' if member_id.blank?
 
