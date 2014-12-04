@@ -12,4 +12,12 @@ describe MAPI::ServiceApp do
       end
     end
   end
+  describe "member balance total securities" do
+    let(:total_securities) { get "/member/#{MEMBER_ID}/balance/total_securities"; JSON.parse(last_response.body) }
+    it "should return json with keys martgages, agency, aaa, aa" do
+      expect(total_securities.length).to be >= 1
+      expect(total_securities['pledged_securities']).to be_kind_of(Integer)
+      expect(total_securities['safekept_securities']).to be_kind_of(Integer)
+    end
+  end
 end

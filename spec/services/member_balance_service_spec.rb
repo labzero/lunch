@@ -10,16 +10,12 @@ describe MemberBalanceService do
     let(:pledged_collateral) {subject.pledged_collateral}
     it "should return a hash of hashes containing pledged collateral values" do
       expect(pledged_collateral.length).to be >= 1
-      expect(pledged_collateral[:mortgages]).to be_kind_of(Hash)
       expect(pledged_collateral[:mortgages][:absolute]).to be_kind_of(Numeric)
       expect(pledged_collateral[:mortgages][:percentage]).to be_kind_of(Float)
-      expect(pledged_collateral[:agency]).to be_kind_of(Hash)
       expect(pledged_collateral[:agency][:absolute]).to be_kind_of(Numeric)
       expect(pledged_collateral[:agency][:percentage]).to be_kind_of(Float)
-      expect(pledged_collateral[:aaa]).to be_kind_of(Hash)
       expect(pledged_collateral[:aaa][:absolute]).to be_kind_of(Numeric)
       expect(pledged_collateral[:aaa][:percentage]).to be_kind_of(Float)
-      expect(pledged_collateral[:aa]).to be_kind_of(Hash)
       expect(pledged_collateral[:aa][:absolute]).to be_kind_of(Numeric)
       expect(pledged_collateral[:aa][:percentage]).to be_kind_of(Float)
     end
@@ -27,10 +23,8 @@ describe MemberBalanceService do
       let(:total_securities) {subject.total_securities}
       it "should return a hash of hashes containing total security values" do
         expect(total_securities.length).to be >= 1
-        expect(total_securities[:pledged_securities]).to be_kind_of(Hash)
         expect(total_securities[:pledged_securities][:absolute]).to be_kind_of(Integer)
         expect(total_securities[:pledged_securities][:percentage]).to be_kind_of(Float)
-        expect(total_securities[:safekept_securities]).to be_kind_of(Hash)
         expect(total_securities[:safekept_securities][:absolute]).to be_kind_of(Integer)
         expect(total_securities[:safekept_securities][:percentage]).to be_kind_of(Float)
       end
