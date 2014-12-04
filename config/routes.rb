@@ -18,6 +18,8 @@ Rails.application.routes.draw do
 
   post '/dashboard/quick_advance_confirmation' => 'dashboard#quick_advance_confirmation'
 
+  get '/dashboard/current_overnight_vrc' => 'dashboard#current_overnight_vrc'
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 

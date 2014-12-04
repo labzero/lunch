@@ -50,6 +50,10 @@ RSpec.describe DashboardController, :type => :controller do
       expect(assigns[:effective_borrowing_capacity][:unused_capacity][:percentage]).to be_present
       expect(assigns[:effective_borrowing_capacity][:threshold_capacity]).to be_present
     end
+    it 'should assign @current_overnight_vrc' do
+      get :index
+      expect(assigns[:current_overnight_vrc]).to be_kind_of(Float)
+    end
   end
 
   describe "GET quick_advance_rates" do
@@ -100,4 +104,26 @@ RSpec.describe DashboardController, :type => :controller do
     end
   end
 
+  describe "GET current_overnight_vrc", :vcr do
+    let(:service_instance) {double('RatesService')}
+    let(:RatesService) {class_double(RatesService)}
+    it 'calls `current_overnight_vrc` on the rate service' do
+      allow(RatesService).to receive(:new).and_return(service_instance)
+      expect(service_instance).to receive(:current_overnight_vrc)
+      get :current_overnight_vrc
+    end
+    it 'returns a rate' do
+      get :current_overnight_vrc
+      hash = JSON.parse(response.body)
+      expect(hash['rate']).to be_kind_of(Float)
+      expect(hash['rate']).to be >= 0
+    end
+    it 'returns a time stamp for when the rate was last updated' do
+      get :current_overnight_vrc
+      hash = JSON.parse(response.body)
+      date = DateTime.parse(hash['updated_at'])
+      expect(date).to be_kind_of(DateTime)
+      expect(date).to be <= DateTime.now
+    end
+  end
 end
