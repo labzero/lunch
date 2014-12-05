@@ -4,8 +4,6 @@ module MAPI
       include MAPI::Services::Base
 
       def self.registered(app)
-        @connection = ActiveRecord::Base.establish_connection('cdb').connection if app.environment == 'production'
-
         service_root '/member', app
         swagger_api_root :member do
 
@@ -96,9 +94,9 @@ module MAPI
             WHERE fhlb_id =  #{member_id}
           SQL
 
-          if @connection
-            mortages_cursor = @connection.execute(mortgages_connection_string)
-            securities_cursor = @connection.execute(securities_connection_string)
+          if settings.environment == :production
+            mortages_cursor = ActiveRecord::Base.connection.execute(mortgages_connection_string)
+            securities_cursor = ActiveRecord::Base.connection.execute(securities_connection_string)
             mortgage_mv, agency_mv, aaa_mv, aa_mv = 0
             while row = mortages_cursor.fetch()
               mortgage_mv = row[0]
@@ -126,16 +124,18 @@ module MAPI
           pledged_securities_string = <<-SQL
             SELECT COUNT(*)
             FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
-            WHERE account_type = 'P' AND fhlb_id = #{@member_id}
+            WHERE account_type = 'P' AND fhlb_id = #{member_id}
           SQL
 
           safekept_securities_string = <<-SQL
             SELECT COUNT(*)
             FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
-            WHERE account_type = 'U' AND fhlb_id = #{@member_id}
+            WHERE account_type = 'U' AND fhlb_id = #{member_id}
           SQL
 
-          if @connection
+          if settings.environment == :production
+            pledged_securities_cursor = ActiveRecord::Base.connection.execute(pledged_securities_string)
+            safekept_securities_cursor = ActiveRecord::Base.connection.execute(safekept_securities_string)
             pledged_securities, safekept_securities = 0
             while row = pledged_securities_cursor.fetch()
               pledged_securities = row[0]

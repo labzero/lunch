@@ -18,8 +18,10 @@ module MAPI
     require 'sinatra/activerecord'
     register Sinatra::ActiveRecordExtension
 
+    ActiveRecord::Base.establish_connection(:cdb) if environment == :production
+
     get '/' do
-      ActiveRecord::Base.connection
+      settings.environment.to_s
     end
 
     register MAPI::Services::MockRates

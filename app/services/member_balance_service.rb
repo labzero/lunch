@@ -12,10 +12,10 @@ class MemberBalanceService
     response = @connection["member/#{@member_id}/balance/pledged_collateral"].get
     data = JSON.parse(response.body).with_indifferent_access
 
-    mortgage_mv = data[:mortgages]
-    agency_mv = data[:agency]
-    aaa_mv = data[:aaa]
-    aa_mv = data[:aa]
+    mortgage_mv = data[:mortgages].to_f
+    agency_mv = data[:agency].to_f
+    aaa_mv = data[:aaa].to_f
+    aa_mv = data[:aa].to_f
 
     total_collateral = mortgage_mv + agency_mv + aaa_mv + aa_mv
     {
@@ -29,8 +29,8 @@ class MemberBalanceService
   def total_securities
     response = @connection["member/#{@member_id}/balance/total_securities"].get
     data = JSON.parse(response.body).with_indifferent_access
-    pledged_securities = data[:pledged_securities]
-    safekept_securities = data[:safekept_securities]
+    pledged_securities = data[:pledged_securities].to_i
+    safekept_securities = data[:safekept_securities].to_i
     total_securities = pledged_securities + safekept_securities
     {
       pledged_securities: {absolute: pledged_securities, percentage: pledged_securities.fdiv(total_securities)*100},
@@ -45,8 +45,8 @@ class MemberBalanceService
 
     total_capacity = data['total_capacity']
     unused_capacity= data['unused_capacity']
-
     used_capacity = total_capacity - unused_capacity
+    
     {
         used_capacity: {absolute: used_capacity, percentage: used_capacity.fdiv(total_capacity)*100},
         unused_capacity: {absolute: unused_capacity, percentage: unused_capacity.fdiv(total_capacity)*100}
