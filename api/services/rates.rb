@@ -1,12 +1,32 @@
 require 'date'
+require 'savon'
 
 module MAPI
   module Services
     module Rates
       include MAPI::Services::Base
 
+      LOAN_MAPPING = {
+        whole: 'FRC_WL'
+      }.with_indifferent_access
+
+      TERM_MAPPING = {
+        overnight: {
+          frequency: '1',
+          frequency_unit: 'D',
+        }
+      }.with_indifferent_access
+
       def self.registered(app)
         @connection = ActiveRecord::Base.establish_connection('cdb').connection if app.environment == 'production'
+        @mds_connection = Savon.client(
+            wsdl: 'http://appservices/MarketDataServicesNoAuth/MarketDataService.svc?wsdl',
+            env_namespace: :soapenv,
+            namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1', 'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'},
+            element_form_default: :qualified,
+            namespace_identifier: :v1,
+            pretty_print_xml: true
+        ) if app.environment == 'production'
 
         service_root '/rates', app
         swagger_api_root :rates do
@@ -113,12 +133,53 @@ module MAPI
           if params[:term] != 'overnight'
             halt 404, 'Term Not Found'
           end
+          data = if @mds_connection
+            lookup_term = TERM_MAPPING[params[:term]]
+            @mds_connection.operations
+            message = {
+              'v11:caller' => [{ 'v11:id' => 'FHLBSF\\svcsys_fobo_mdtest'}],
+                'v1:requests' => [{
+                  'v1:fhlbsfMarketDataRequest' => [{
+                    'v1:caller' => [{'v11:id' => 'FHLBSF\\kalimanb'}],
+                    'v1:marketData' =>  [{
+                      'v12:customRollingDay' => '0',
+                      'v12:name' => LOAN_MAPPING[params[:loan]],
+                      'v12:pricingGroup' => [{'v12:id' => 'Live'}],
+                      'v12:data' => [{
+                        'v12:FhlbsfDataPoint' => [{
+                        'v12:tenor' => [{
+                          'v12:interval' => [{
+                            'v13:frequency' => lookup_term[:frequency],
+                            'v13:frequencyUnit' => lookup_term[:frequency_unit]
+                          }],
+                          'v12:maturityDate' => '0001-01-01T00:00:00'
+                        }]
+                      }]
+                    }]
+                  }]
+                }]
+              }]
+            }
+            response = client.call(:get_market_data, message_tag: 'marketDataRequest', message: message )
+            namespaces = {'a' => 'http://fhlbsf.com/schema/canonical/marketdata/v1'}
+            if response.success?
+              # @name = response.doc.search('//a:name', namespaces).text
+              # @pricingenv = pricingenv
+              # @snaptime = response.doc.search('//a:snapTime', namespaces).text
+              # @rate = response.doc.search('//a:value', namespaces).text
+              {rate: response.doc.search('//a:value', namespaces).text.to_f, updated_at: DateTime.parse(response.doc.search('//a:snapTime', namespaces).text).to_time}
+            else
+              halt 503, 'Service Unavailable'
+            end
+          else
+            # We have no real data source yet.
+            rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_current_overnight.json')))
+            rate = rows.sample
+            now = Time.now
+            {rate: rate, updated_at: Time.mktime(now.year, now.month, now.day, now.hour, now.min).to_s}
+          end
 
-          # We have no real data source yet.
-          rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_current_overnight.json')))
-          rate = rows.sample
-          now = Time.now
-          {rate: rate, updated_at: Time.mktime(now.year, now.month, now.day, now.hour, now.min).to_s}.to_json
+          data.to_json
         end
       end
     end

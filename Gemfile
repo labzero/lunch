@@ -42,6 +42,8 @@ gem 'jquery-placeholder-rails'
 gem 'sinatra', require: false
 gem 'sinatra-activerecord', require: false
 gem 'swagger-blocks', require: false
+gem 'savon', require: false
+gem 'nokogiri', require: false
 
 group :development, :test do
   gem 'rspec-rails'
