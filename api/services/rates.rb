@@ -1,5 +1,6 @@
 require 'date'
 require 'savon'
+require 'active_support/core_ext/hash/indifferent_access'
 
 module MAPI
   module Services
