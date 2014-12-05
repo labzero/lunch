@@ -124,16 +124,18 @@ module MAPI
           pledged_securities_string = <<-SQL
             SELECT COUNT(*)
             FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
-            WHERE account_type = 'P' AND fhlb_id = #{@member_id}
+            WHERE account_type = 'P' AND fhlb_id = #{member_id}
           SQL
 
           safekept_securities_string = <<-SQL
             SELECT COUNT(*)
             FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
-            WHERE account_type = 'U' AND fhlb_id = #{@member_id}
+            WHERE account_type = 'U' AND fhlb_id = #{member_id}
           SQL
 
           if settings.environment == :production
+            pledged_securities_cursor = ActiveRecord::Base.connection.execute(pledged_securities_string)
+            safekept_securities_cursor = ActiveRecord::Base.connection.execute(safekept_securities_string)
             pledged_securities, safekept_securities = 0
             while row = pledged_securities_cursor.fetch()
               pledged_securities = row[0]
