@@ -19,15 +19,18 @@ module MAPI
       }.with_indifferent_access
 
       def self.registered(app)
-        @connection = ActiveRecord::Base.establish_connection('cdb').connection if app.environment == 'production'
-        @mds_connection = Savon.client(
-            wsdl: 'http://appservices/MarketDataServicesNoAuth/MarketDataService.svc?wsdl',
-            env_namespace: :soapenv,
-            namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1', 'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'},
-            element_form_default: :qualified,
-            namespace_identifier: :v1,
-            pretty_print_xml: true
-        ) if app.environment == 'production'
+        if app.environment == :production
+          @@mds_connection = Savon.client(
+              wsdl: 'http://appservices/MarketDataServicesNoAuth/MarketDataService.svc?wsdl',
+              env_namespace: :soapenv,
+              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1', 'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'},
+              element_form_default: :qualified,
+              namespace_identifier: :v1,
+              pretty_print_xml: true
+          )
+        else
+          @@mds_connection = nil
+        end
 
         service_root '/rates', app
         swagger_api_root :rates do
@@ -106,8 +109,8 @@ module MAPI
               ORDER BY TRX_EFFECTIVE_DATE DESC) WHERE ROWNUM <= #{days}
           SQL
 
-          data = if @connection
-            cursor = @connection.execute(connection_string)
+          data = if settings.environment == :production
+            cursor = ActiveRecord::Base.connection.execute(connection_string)
             rows = []
             while row = cursor.fetch()
               rows.push([row[0], row[1]])
@@ -134,9 +137,9 @@ module MAPI
           if params[:term] != 'overnight'
             halt 404, 'Term Not Found'
           end
-          data = if @mds_connection
+          data = if @@mds_connection
             lookup_term = TERM_MAPPING[params[:term]]
-            @mds_connection.operations
+            @@mds_connection.operations
             message = {
               'v11:caller' => [{ 'v11:id' => 'FHLBSF\\svcsys_fobo_mdtest'}],
                 'v1:requests' => [{
