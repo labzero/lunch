@@ -138,8 +138,8 @@ module MAPI
             halt 404, 'Term Not Found'
           end
           data = if @@mds_connection
-            lookup_term = TERM_MAPPING[params[:term]]
             @@mds_connection.operations
+            lookup_term = TERM_MAPPING[params[:term]]
             message = {
               'v11:caller' => [{ 'v11:id' => 'FHLBSF\\svcsys_fobo_mdtest'}],
                 'v1:requests' => [{
@@ -164,7 +164,7 @@ module MAPI
                 }]
               }]
             }
-            response = client.call(:get_market_data, message_tag: 'marketDataRequest', message: message )
+            response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message )
             namespaces = {'a' => 'http://fhlbsf.com/schema/canonical/marketdata/v1'}
             if response.success?
               # @name = response.doc.search('//a:name', namespaces).text
