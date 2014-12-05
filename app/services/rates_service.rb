@@ -18,16 +18,11 @@ class RatesService
   end
 
   def quick_advance_rates(member_id)
+    # we're not doing anything with member id right now, but presumably will need to use it at some point to check if
+    # certain rates are available (e.g. member has enough collateral)
     raise ArgumentError, 'member_id must not be blank' if member_id.blank?
-
-    # TODO: hit the proper MAPI endpoint, once it exists! In the meantime, always return the fake.
-    # if @connection
-    #   # hit the proper MAPI endpoint
-    # else
-    #   JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_rates.json'))).with_indifferent_access
-    # end
-
-    JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_rates.json'))).with_indifferent_access
+    response = @connection['rates/summary'].get
+    JSON.parse(response.body).with_indifferent_access
   end
 
   def quick_advance_preview(member_id, advance_type, advance_term, rate)

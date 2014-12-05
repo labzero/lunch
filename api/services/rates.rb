@@ -6,6 +6,8 @@ module MAPI
   module Services
     module Rates
       include MAPI::Services::Base
+      LOAN_TYPES = [:whole, :agency, :aaa, :aa]
+      LOAN_TERMS = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
 
       LOAN_MAPPING = {
         whole: 'FRC_WL'
@@ -31,6 +33,7 @@ module MAPI
         else
           @@mds_connection = nil
         end
+
 
         service_root '/rates', app
         swagger_api_root :rates do
@@ -72,7 +75,7 @@ module MAPI
                 key :name, :loan
                 key :required, true
                 key :type, :string
-                key :enum, [:whole, :agency, :aaa, :aa]
+                key :enum, LOAN_TYPES
                 key :description, 'The type of loan. Describes the collateral behind the loan.'
               end
               parameter do
@@ -80,7 +83,7 @@ module MAPI
                 key :name, :term
                 key :required, true
                 key :type, :string
-                key :enum, [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
+                key :enum, LOAN_TERMS
                 key :description, 'The term of the loan.'
               end
               response_message do
@@ -94,6 +97,24 @@ module MAPI
               response_message do
                 key :code, 404
                 key :message, 'Loan Not Found'
+              end
+            end
+          end
+
+          # This is ambiguous right now as we wait to see what we can get back from Calypso in a single request.
+          # We'll probably pull all the rates we can get (assuming no performance hit) and handle the logic of which we
+          # want to show in app/services/rates_service.rb
+          api do
+            key :path, "/summary"
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve current rates for standard loan types and terms.'
+              key :notes, 'Returns an object containing rate data for each loan type of a given term, as well as a timestamp to indicate when the rates were fetched'
+              key :type, :SummaryRates
+              key :nickname, :SummaryRates
+              response_message do
+                key :code, 200
+                key :message, 'OK'
               end
             end
           end
@@ -184,6 +205,18 @@ module MAPI
           end
 
           data.to_json
+        end
+
+        relative_get "/summary" do
+          # We have no real data source yet and are not yet aware of the format in which we'll get data back. We know for
+          # sure we'll need to hit the CDB when calculating maturity date (to account for weekends, holidays and other checks).
+          hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_summary.json'))).with_indifferent_access
+          now = Time.now
+          # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
+          LOAN_TERMS.each do |term|
+            hash[term][:maturity_date] = (Time.mktime(now.year, now.month, now.day, now.hour, now.min) + hash[term][:days_to_maturity].days).to_s
+          end
+          hash.to_json
         end
       end
     end

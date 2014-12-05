@@ -78,11 +78,11 @@ Feature: Visiting the Dashboard
   Scenario: Go back to rate table from preview in Quick Advance flyout
     Given I visit the dashboard
       And I open the quick advance flyout
-      And I select the rate with a term of "1_week" and a type of "aaa"
+      And I select the rate with a term of "1week" and a type of "aaa"
       And I click on the initiate advance button
     When I click on the back button for the quick advance preview
     Then I should see the quick advance table
-      And I should see the selected state for the cell with a term of "1_week" and a type of "aaa"
+      And I should see the selected state for the cell with a term of "1week" and a type of "aaa"
       And I should not see a preview of the quick advance
 
   Scenario: Confirm rate from Quick Advance preview dialog

@@ -27,8 +27,8 @@ describe RatesService do
       expect(quick_advance_rates.length).to be >= 1
       expect(quick_advance_rates[:overnight][:whole_loan]).to be_kind_of(Float)
       expect(quick_advance_rates[:open][:agency]).to be_kind_of(Float)
-      expect(quick_advance_rates["1_week"][:aaa]).to be_kind_of(Float)
-      expect(quick_advance_rates["2_weeks"][:aa]).to be_kind_of(Float)
+      expect(quick_advance_rates["1week"][:aaa]).to be_kind_of(Float)
+      expect(quick_advance_rates["2week"][:aa]).to be_kind_of(Float)
     end
   end
   describe "`quick_advance_preview` method" do
