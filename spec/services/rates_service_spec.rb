@@ -21,7 +21,7 @@ describe RatesService do
       expect(subject.overnight_vrc(5).length).to eq(5)
     end
   end
-  describe "`quick_advance_rates` method" do
+  describe "`quick_advance_rates` method", :vcr do
     let(:quick_advance_rates) {subject.quick_advance_rates(member_id)}
     it "should return a hash of hashes containing pledged collateral values" do
       expect(quick_advance_rates.length).to be >= 1
