@@ -120,7 +120,7 @@ Then(/^the initiate advance button should be active$/) do
 end
 
 When(/^I click on the initiate advance button$/) do
-  page.find(".dashboard-quick-advance-flyout .initiate-quick-advance.active").click
+  page.find(".dashboard-quick-advance-flyout .initiate-quick-advance.active", visible: true).click
 end
 
 Then(/^I should see a preview of the quick advance$/) do
@@ -132,7 +132,7 @@ Then(/^I should not see a preview of the quick advance$/) do
 end
 
 When(/^I click on the back button for the quick advance preview$/) do
-  page.find(".quick-advance-back-button").click
+  page.find(".quick-advance-back-button", visible: true).click
 end
 
 When(/^I click on the quick advance confirm button$/) do

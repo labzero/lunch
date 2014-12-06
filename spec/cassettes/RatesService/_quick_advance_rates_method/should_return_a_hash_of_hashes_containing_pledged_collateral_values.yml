@@ -1,0 +1,54 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/rates/summary
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '2486'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      Date:
+      - Fri, 05 Dec 2014 17:59:47 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"overnight":{"label":"Overnight","whole_loan":0.17,"agency":0.15,"aaa":0.16,"aa":0.16,"payment_on":"Maturity","interest_day_count":"Actual/Actual","days_to_maturity":1,"maturity_date":"2014-12-06
+        09:59:00 -0800"},"open":{"label":"Open","whole_loan":0.17,"agency":0.15,"aaa":0.16,"aa":0.16,"payment_on":"Maturity","interest_day_count":"Actual/Actual","days_to_maturity":1,"maturity_date":"2014-12-06
+        09:59:00 -0800"},"1week":{"label":"1 Week","whole_loan":0.2,"agency":0.18,"aaa":0.19,"aa":0.19,"payment_on":"Maturity","interest_day_count":"Actual/Actual","days_to_maturity":7,"maturity_date":"2014-12-12
+        09:59:00 -0800"},"2week":{"label":"2 Weeks","whole_loan":0.2,"agency":0.21,"aaa":0.2,"aa":0.2,"payment_on":"Maturity","interest_day_count":"Actual/Actual","days_to_maturity":14,"maturity_date":"2014-12-19
+        09:59:00 -0800"},"3week":{"label":"3 Weeks","whole_loan":0.2,"agency":0.21,"aaa":0.2,"aa":0.2,"payment_on":"Maturity","interest_day_count":"Actual/Actual","days_to_maturity":21,"maturity_date":"2014-12-26
+        09:59:00 -0800"},"1month":{"label":"1 Month","whole_loan":0.21,"agency":0.18,"aaa":0.19,"aa":0.19,"payment_on":"Maturity","interest_day_count":"Actual/Actual","days_to_maturity":30,"maturity_date":"2015-01-04
+        09:59:00 -0800"},"2month":{"label":"2 Months","whole_loan":0.21,"agency":0.19,"aaa":0.2,"aa":0.2,"payment_on":"Maturity","interest_day_count":"Actual/Actual","days_to_maturity":60,"maturity_date":"2015-02-03
+        09:59:00 -0800"},"3month":{"label":"3 Months","whole_loan":0.22,"agency":0.2,"aaa":0.21,"aa":0.2,"payment_on":"Maturity","interest_day_count":"Actual/Actual","days_to_maturity":90,"maturity_date":"2015-03-05
+        09:59:00 -0800"},"6month":{"label":"6 Months","whole_loan":0.23,"agency":0.21,"aaa":0.22,"aa":0.21,"payment_on":"Maturity","interest_day_count":"Actual/Actual","days_to_maturity":182,"maturity_date":"2015-06-05
+        09:59:00 -0700"},"1year":{"label":"1 Year","whole_loan":0.34,"agency":0.33,"aaa":0.34,"aa":0.34,"payment_on":"Maturity","interest_day_count":"Actual/360","days_to_maturity":365,"maturity_date":"2015-12-05
+        09:59:00 -0800"},"2year":{"label":"2 Years","whole_loan":0.78,"agency":0.77,"aaa":0.78,"aa":0.78,"payment_on":"Maturity","interest_day_count":"Actual/360","days_to_maturity":730,"maturity_date":"2016-12-04
+        09:59:00 -0800"},"3year":{"label":"3 Years","whole_loan":1.29,"agency":1.27,"aaa":1.28,"aa":1.28,"payment_on":"Maturity","interest_day_count":"Actual/360","days_to_maturity":1095,"maturity_date":"2017-12-04
+        09:59:00 -0800"}}'
+    http_version: 
+  recorded_at: Fri, 05 Dec 2014 17:59:47 GMT
+recorded_with: VCR 2.9.3
