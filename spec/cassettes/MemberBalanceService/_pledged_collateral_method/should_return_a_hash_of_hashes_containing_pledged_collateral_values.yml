@@ -11,6 +11,8 @@ http_interactions:
       - "*/*; q=0.5, application/xml"
       Accept-Encoding:
       - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       User-Agent:
       - Ruby
   response:
@@ -21,7 +23,7 @@ http_interactions:
       Content-Type:
       - text/html;charset=utf-8
       Content-Length:
-      - '93'
+      - '88'
       X-Xss-Protection:
       - 1; mode=block
       X-Content-Type-Options:
@@ -31,18 +33,18 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
       Date:
-      - Wed, 03 Dec 2014 22:10:26 GMT
+      - Mon, 08 Dec 2014 23:41:42 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: |-
         {
-          "mortgages" :  132304735,
-          "agency" :  16041690.1,
-          "aaa" : 2345345,
-          "aa" :  234532
+          "mortgages" :  "132304735",
+          "agency" :  "16041690",
+          "aaa" : "0",
+          "aa" :  "0"
         }
     http_version: 
-  recorded_at: Wed, 03 Dec 2014 22:10:26 GMT
+  recorded_at: Mon, 08 Dec 2014 23:41:42 GMT
 recorded_with: VCR 2.9.3

@@ -1,6 +1,6 @@
 class RatesService
   def initialize
-    @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint
+    @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint, headers: {:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""}
   end
 
   def overnight_vrc(days=30)

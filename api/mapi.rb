@@ -23,6 +23,16 @@ module MAPI
     require 'sinatra/activerecord'
     register Sinatra::ActiveRecordExtension
 
+    require 'rack/token_auth'
+    use Rack::TokenAuth do |token, options, env|
+      if token != ENV['MAPI_SECRET_TOKEN']
+        req = Rack::Request.new(env)
+        req.params['api_key'] == ENV['MAPI_SECRET_TOKEN']
+      else
+        true
+      end
+    end
+
     ActiveRecord::Base.establish_connection(:cdb) if environment == :production
 
     get '/' do
@@ -44,6 +54,11 @@ module MAPI
       key :apiVersion, MAPI.api_version
       info do
         key :title, 'FHLBSF Member Site Swagger App'
+      end
+      authorization :apiKey do
+        key :type, 'apiKey'
+        key :name, 'Authorization'
+        key :in, 'header'
       end
       api do
         key :path, '/mock_rates'

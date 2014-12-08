@@ -1,7 +1,7 @@
 class MemberBalanceService
 
   def initialize(member_id)
-    @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint
+    @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint, headers: {:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""}
     @db_connection = ActiveRecord::Base.establish_connection('cdb').connection if Rails.env == 'production'
     @member_id = member_id
     raise ArgumentError, 'member_id must not be blank' if member_id.blank?
