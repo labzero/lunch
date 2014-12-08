@@ -20,7 +20,7 @@ describe RatesService do
     it "should allow the number of rates returned to be overridden" do
       expect(subject.overnight_vrc(5).length).to eq(5)
     end
-    it "should return an empty array if there was an error" do
+    it "should return nil if there was an error" do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
       expect(rates).to eq(nil)
     end

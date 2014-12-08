@@ -7,6 +7,10 @@ class RatesService
     begin
       response = @connection['rates/historic/overnight'].get params: {limit: days}
     rescue RestClient::Exception => e
+      Rails.logger.warn("RatesService.overnight_vrc encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("RatesService.overnight_vrc encountered a connection error: #{e.class.name}")
       return nil
     end
     data ||= JSON.parse(response.body)
@@ -19,6 +23,10 @@ class RatesService
     begin
       response = @connection['rates/whole/overnight'].get
     rescue RestClient::Exception => e
+      Rails.logger.warn("RatesService.current_overnight_vrc encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("RatesService.overnight_vrc encountered a connection error: #{e.class.name}")
       return nil
     end
     data ||= JSON.parse(response.body)
