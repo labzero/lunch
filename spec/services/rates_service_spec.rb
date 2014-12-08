@@ -20,6 +20,10 @@ describe RatesService do
     it "should allow the number of rates returned to be overridden" do
       expect(subject.overnight_vrc(5).length).to eq(5)
     end
+    it "should return an empty array if there was an error" do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(rates).to eq(nil)
+    end
   end
   describe "`quick_advance_rates` method", :vcr do
     let(:quick_advance_rates) {subject.quick_advance_rates(member_id)}
@@ -74,6 +78,10 @@ describe RatesService do
       expect(rate[:rate]).to be >= 0
       expect(rate[:updated_at]).to be_kind_of(DateTime)
       expect(rate[:updated_at]).to be <= DateTime.now
+    end
+    it "should return an empty array if there was an error" do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(rate).to eq(nil)
     end
   end
 end

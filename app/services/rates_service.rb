@@ -4,16 +4,24 @@ class RatesService
   end
 
   def overnight_vrc(days=30)
-    response = @connection['rates/historic/overnight'].get params: {limit: days}
-    data = JSON.parse(response.body)
+    begin
+      response = @connection['rates/historic/overnight'].get params: {limit: days}
+    rescue RestClient::Exception => e
+      return nil
+    end
+    data ||= JSON.parse(response.body)
     data.collect! do |row|
       [Date.parse(row[0]), row[1].to_f]
     end
   end
 
   def current_overnight_vrc
-    response = @connection['rates/whole/overnight'].get
-    data = JSON.parse(response.body)
+    begin
+      response = @connection['rates/whole/overnight'].get
+    rescue RestClient::Exception => e
+      return nil
+    end
+    data ||= JSON.parse(response.body)
     {rate: data['rate'], updated_at: DateTime.parse(data['updated_at'])}
   end
 

@@ -54,6 +54,15 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(assigns[:current_overnight_vrc]).to be_kind_of(Float)
     end
+    describe "RateService failures" do
+      let(:RatesService) {class_double(RatesService)}
+      let(:rate_service_instance) {double("rate service instance", current_overnight_vrc: nil, overnight_vrc: nil)}
+      it 'should assign @current_overnight_vrc as nil if the rate could not be retrieved' do
+        expect(RatesService).to receive(:new).and_return(rate_service_instance)
+        get :index
+        expect(assigns[:current_overnight_vrc]).to eq(nil)
+      end
+    end
   end
 
   describe "GET quick_advance_rates" do
