@@ -6,12 +6,16 @@ require_relative 'services/mock_rates'
 require_relative 'services/mock_members'
 require_relative 'services/rates'
 require_relative 'services/member_balance'
+require_relative 'services/etransact_advances'
 
 require_relative 'models/member'
 require_relative 'models/member_balance_pledged_collateral'
 require_relative 'models/member_balance_total_securities'
+require_relative 'models/member_balance_effective_borrowing_capacity'
 require_relative 'models/realtime_rate'
 require_relative 'models/summary_rates'
+require_relative 'models/etransact_advances'
+
 
 module MAPI
 
@@ -29,6 +33,7 @@ module MAPI
     register MAPI::Services::MockMembers
     register MAPI::Services::Rates
     register MAPI::Services::MemberBalance
+    register MAPI::Services::EtransactAdvances
   end
 
   class DocApp < Sinatra::Base
@@ -55,6 +60,10 @@ module MAPI
       api do
         key :path, '/member'
         key :description, 'Operations about members'
+      end
+      api do
+        key :path, '/etransact_advances'
+        key :description, 'Operations about etransact advances'
       end
     end
 

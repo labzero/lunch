@@ -1,0 +1,5 @@
+{
+    "etransact_advances_status" :  true,
+    "etransact_bucket_status" : true,
+    "wl_vrc_status" : false
+}
