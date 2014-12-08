@@ -2,9 +2,9 @@ module MAPI
   module Services
     module EtransactAdvances
       include MAPI::Services::Base
-      wl_vrc_term_bucket_id = 1 # ao_term_bucket_id = 1 is for whole loan overnight in the table
-      record_found_count = 1
-      
+      WL_VRC_TERM_BUCKET_ID = 1 # ao_term_bucket_id = 1 is for whole loan overnight in the table
+      STATUS_ON_RECORD_FOUND_COUNT = 1
+
       def self.registered(app)
         @connection = ActiveRecord::Base.establish_connection('cdb').connection if app.environment == 'production'
 
@@ -52,7 +52,7 @@ module MAPI
             etransact_bucket_status = false
             wl_vrc_status = false
             while row = etransact_status_on_cursor.fetch()
-              if row[0].to_i == record_found_count
+              if row[0].to_i == STATUS_ON_RECORD_FOUND_COUNT
                 etransact_status = true
               end
             end
@@ -66,7 +66,7 @@ module MAPI
               etransact_b_status_on_cursor = @connection.execute(etransact_advances_bucket_on_string)
               while row = etransact_b_status_on_cursor.fetch()
                 etransact_bucket_status = true # there is some bucket available
-                if row[0].to_i == wl_vrc_term_bucket_id
+                if row[0].to_i == WL_VRC_TERM_BUCKET_ID
                    if row[1] == 'Y'
                      wl_vrc_status = true #wl_vrc_status = 1
                      break
