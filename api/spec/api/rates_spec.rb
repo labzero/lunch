@@ -61,6 +61,27 @@ describe MAPI::ServiceApp do
       date = DateTime.parse(rate['updated_at'])
       expect(date).to be <= DateTime.now
     end
+    let(:rate) { get '/rates/agency/1week'; JSON.parse(last_response.body) }
+    it "should return a realtime rate" do
+      expect(rate['rate']).to be_kind_of(Float)
+      expect(rate['updated_at']).to match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01]) ([01]\d|2[0-3]):[0-5]\d:[0-5]\d [+-](0\d|1[012])[0-5][0-5]\Z/)
+      date = DateTime.parse(rate['updated_at'])
+      expect(date).to be <= DateTime.now
+    end
+    let(:rate) { get '/rates/aaa/2month'; JSON.parse(last_response.body) }
+    it "should return a realtime rate" do
+      expect(rate['rate']).to be_kind_of(Float)
+      expect(rate['updated_at']).to match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01]) ([01]\d|2[0-3]):[0-5]\d:[0-5]\d [+-](0\d|1[012])[0-5][0-5]\Z/)
+      date = DateTime.parse(rate['updated_at'])
+      expect(date).to be <= DateTime.now
+    end
+    let(:rate) { get '/rates/aa/3year'; JSON.parse(last_response.body) }
+    it "should return a realtime rate" do
+      expect(rate['rate']).to be_kind_of(Float)
+      expect(rate['updated_at']).to match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01]) ([01]\d|2[0-3]):[0-5]\d:[0-5]\d [+-](0\d|1[012])[0-5][0-5]\Z/)
+      date = DateTime.parse(rate['updated_at'])
+      expect(date).to be <= DateTime.now
+    end
   end
 
   describe "rate summary" do
