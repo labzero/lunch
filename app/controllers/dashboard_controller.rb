@@ -64,7 +64,12 @@ class DashboardController < ApplicationController
     @reports_monthly = 4
     @reports_quarterly = 2
 
-    @current_overnight_vrc = rate_service.current_overnight_vrc[:rate]
+    current_rate = rate_service.current_overnight_vrc
+    @current_overnight_vrc = if current_rate
+      current_rate[:rate]
+    else
+      nil
+    end
 
   end
 

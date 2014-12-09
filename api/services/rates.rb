@@ -186,8 +186,8 @@ module MAPI
               }]
             }
             response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message )
-            namespaces = {'a' => 'http://fhlbsf.com/schema/canonical/marketdata/v1'}
-            if response.success?
+            namespaces = {'a' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns' => 'http://fhlbsf.com/schema/msg/marketdata/v1'}
+            if response.success? && response.doc.search('//xmlns:transactionResult', namespaces).text != 'Error'
               # @name = response.doc.search('//a:name', namespaces).text
               # @pricingenv = pricingenv
               # @snaptime = response.doc.search('//a:snapTime', namespaces).text
