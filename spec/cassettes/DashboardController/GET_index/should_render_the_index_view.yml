@@ -11,6 +11,8 @@ http_interactions:
       - "*/*; q=0.5, application/xml"
       Accept-Encoding:
       - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       User-Agent:
       - Ruby
   response:
@@ -31,14 +33,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
       Date:
-      - Thu, 04 Dec 2014 23:56:00 GMT
+      - Mon, 08 Dec 2014 23:41:42 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: '[["2014-02-10",0.11],["2014-02-11",0.12],["2014-02-12",0.11],["2014-02-13",0.12],["2014-02-14",0.11],["2014-02-18",0.11],["2014-02-19",0.11],["2014-02-20",0.11],["2014-02-21",0.11],["2014-02-24",0.12],["2014-02-25",0.12],["2014-02-26",0.12],["2014-02-27",0.12],["2014-02-28",0.12],["2014-03-03",0.12],["2014-03-04",0.12],["2014-03-05",0.12],["2014-03-06",0.12],["2014-03-07",0.13],["2014-03-10",0.13],["2014-03-11",0.12],["2014-03-12",0.12],["2014-03-13",0.12],["2014-03-14",0.12],["2014-03-17",0.13],["2014-03-18",0.13],["2014-03-19",0.13],["2014-03-20",0.13],["2014-03-21",0.13],["2014-04-17",0.08]]'
     http_version: 
-  recorded_at: Thu, 04 Dec 2014 23:56:00 GMT
+  recorded_at: Mon, 08 Dec 2014 23:41:42 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/balance/pledged_collateral
@@ -50,6 +52,8 @@ http_interactions:
       - "*/*; q=0.5, application/xml"
       Accept-Encoding:
       - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       User-Agent:
       - Ruby
   response:
@@ -60,7 +64,7 @@ http_interactions:
       Content-Type:
       - text/html;charset=utf-8
       Content-Length:
-      - '93'
+      - '88'
       X-Xss-Protection:
       - 1; mode=block
       X-Content-Type-Options:
@@ -70,20 +74,20 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
       Date:
-      - Thu, 04 Dec 2014 23:56:00 GMT
+      - Mon, 08 Dec 2014 23:41:42 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: |-
         {
-          "mortgages" :  132304735,
-          "agency" :  16041690.1,
-          "aaa" : 2345345,
-          "aa" :  234532
+          "mortgages" :  "132304735",
+          "agency" :  "16041690",
+          "aaa" : "0",
+          "aa" :  "0"
         }
     http_version: 
-  recorded_at: Thu, 04 Dec 2014 23:56:00 GMT
+  recorded_at: Mon, 08 Dec 2014 23:41:42 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/balance/total_securities
@@ -95,6 +99,8 @@ http_interactions:
       - "*/*; q=0.5, application/xml"
       Accept-Encoding:
       - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       User-Agent:
       - Ruby
   response:
@@ -105,7 +111,7 @@ http_interactions:
       Content-Type:
       - text/html;charset=utf-8
       Content-Length:
-      - '60'
+      - '64'
       X-Xss-Protection:
       - 1; mode=block
       X-Content-Type-Options:
@@ -115,18 +121,18 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
       Date:
-      - Thu, 04 Dec 2014 23:56:00 GMT
+      - Mon, 08 Dec 2014 23:41:42 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: |-
         {
-          "pledged_securities" : 7,
-          "safekept_securities" : 83
+          "pledged_securities" : "7",
+          "safekept_securities" : "83"
         }
     http_version: 
-  recorded_at: Thu, 04 Dec 2014 23:56:00 GMT
+  recorded_at: Mon, 08 Dec 2014 23:41:42 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/balance/effective_borrowing_capacity
@@ -138,6 +144,8 @@ http_interactions:
       - "*/*; q=0.5, application/xml"
       Accept-Encoding:
       - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       User-Agent:
       - Ruby
   response:
@@ -158,7 +166,7 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
       Date:
-      - Thu, 04 Dec 2014 23:56:00 GMT
+      - Mon, 08 Dec 2014 23:41:42 GMT
       Connection:
       - Keep-Alive
     body:
@@ -169,7 +177,7 @@ http_interactions:
             "unused_capacity" :  86316828
         }
     http_version: 
-  recorded_at: Thu, 04 Dec 2014 23:56:00 GMT
+  recorded_at: Mon, 08 Dec 2014 23:41:42 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/rates/whole/overnight
@@ -181,6 +189,8 @@ http_interactions:
       - "*/*; q=0.5, application/xml"
       Accept-Encoding:
       - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       User-Agent:
       - Ruby
   response:
@@ -201,12 +211,12 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
       Date:
-      - Thu, 04 Dec 2014 23:56:00 GMT
+      - Mon, 08 Dec 2014 23:41:42 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
-      string: '{"rate":0.13,"updated_at":"2014-12-04 15:56:00 -0800"}'
+      string: '{"rate":0.15,"updated_at":"2014-12-08 15:41:00 -0800"}'
     http_version: 
-  recorded_at: Thu, 04 Dec 2014 23:56:00 GMT
+  recorded_at: Mon, 08 Dec 2014 23:41:42 GMT
 recorded_with: VCR 2.9.3

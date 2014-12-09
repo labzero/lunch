@@ -11,6 +11,8 @@ http_interactions:
       - "*/*; q=0.5, application/xml"
       Accept-Encoding:
       - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       User-Agent:
       - Ruby
   response:
@@ -31,12 +33,12 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
       Date:
-      - Thu, 04 Dec 2014 23:15:09 GMT
+      - Mon, 08 Dec 2014 23:41:42 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
-      string: '{"rate":0.15,"updated_at":"2014-12-04 15:15:00 -0800"}'
+      string: '{"rate":0.14,"updated_at":"2014-12-08 15:41:00 -0800"}'
     http_version: 
-  recorded_at: Thu, 04 Dec 2014 23:15:09 GMT
+  recorded_at: Mon, 08 Dec 2014 23:41:42 GMT
 recorded_with: VCR 2.9.3

@@ -2,6 +2,9 @@ require 'spec_helper'
 
 describe MAPI::ServiceApp do
   MEMBER_ID = 750
+  before do
+    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
+  end
   describe "member balance pledged collateral" do
     let(:pledged_collateral) { get "/member/#{MEMBER_ID}/balance/pledged_collateral"; JSON.parse(last_response.body) }
     it "should return json with keys martgages, agency, aaa, aa" do

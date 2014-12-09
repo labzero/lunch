@@ -160,6 +160,8 @@ GEM
       rack
     rack-test (0.6.2)
       rack (>= 1.0)
+    rack-token_auth (0.1.0)
+      rack
     rails (4.1.6)
       actionmailer (= 4.1.6)
       actionpack (= 4.1.6)
@@ -317,6 +319,7 @@ DEPENDENCIES
   jquery-placeholder-rails
   jquery-rails
   nokogiri
+  rack-token_auth
   rails (= 4.1.6)
   rails-sass-images
   rerun

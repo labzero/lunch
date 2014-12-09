@@ -49,11 +49,12 @@ Follow these steps to get up and running:
 1. `bundle install`
 2. `cp .env.example .env`
 3. Edit `.env` and set `SECRET_KEY_BASE` to some long cryptographic string. If you change this, old cookies will become unusable.
-4. `export ORACLE_INSTALLER=PATH_TO_INSTALLER` with `PATH_TO_INSTALLER` replaced with the path to the directory containing the Oracle DB 11g RPM.
-5. `vagrant up` -- This will take 15-30 minutes, and will generate a `.deb` version of the 11g RPM in the same directory was the RPM. Save this file if you want to be able to rebuild your Vagrant system more quickly.
-6. `rake db:setup` -- You will be asked for the SYSTEM password twice, which is `password`.
-7. `foreman start`
-8. Navigate over to [http://localhost:3000](http://localhost:3000)
+4. Edit `.env` and set `MAPI_SECRET_TOKEN` to some long cryptographic string. If you change this, old cookies will become unusable.
+5. `export ORACLE_INSTALLER=PATH_TO_INSTALLER` with `PATH_TO_INSTALLER` replaced with the path to the directory containing the Oracle DB 11g RPM.
+6. `vagrant up` -- This will take 15-30 minutes, and will generate a `.deb` version of the 11g RPM in the same directory was the RPM. Save this file if you want to be able to rebuild your Vagrant system more quickly.
+7. `rake db:setup` -- You will be asked for the SYSTEM password twice, which is `password`.
+8. `foreman start`
+9. Navigate over to [http://localhost:3000](http://localhost:3000)
 
 # .env Details
 
@@ -65,3 +66,4 @@ This is a summary of the options supported in our .env files:
 * `DATABASE_PASSWORD`: The password to use to connect to the DB (overrides the values found in database.yml).
 * `SAUCE_USERNAME`: The username of the SauceLabs user, used when cucumber tests are run via SauceLabs.
 * `SAUCE_ACCESS_KEY`: The access key associated with the SauceLabs user (`SAUCE_USERNAME`). Only used when running cucumber tests via SauceLabs.
+* `MAPI_SECRET_TOKEN`: The shared secret between MAPI and Rails.
