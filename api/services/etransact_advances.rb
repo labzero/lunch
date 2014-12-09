@@ -67,10 +67,10 @@ module MAPI
               while row = etransact_b_status_on_cursor.fetch()
                 etransact_bucket_status = true # there is some bucket available
                 if row[0].to_i == WL_VRC_TERM_BUCKET_ID
-                   if row[1] == 'Y'
-                     wl_vrc_status = true #wl_vrc_status = 1
-                     break
-                   end
+                  if row[1] == 'Y'
+                    wl_vrc_status = true #wl_vrc_status = 1
+                    break
+                  end
                 end
               end
               {
@@ -80,7 +80,7 @@ module MAPI
               }.to_json
             end
           else
-              File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_status.json'))
+            File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_status.json'))
           end
         end
       end

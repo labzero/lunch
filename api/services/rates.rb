@@ -8,15 +8,61 @@ module MAPI
       include MAPI::Services::Base
       LOAN_TYPES = [:whole, :agency, :aaa, :aa]
       LOAN_TERMS = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
-
       LOAN_MAPPING = {
-        whole: 'FRC_WL'
+        whole: 'FRC_WL',
+        agency: 'FRC_AGCY',
+        aaa: 'FRC_AAA',
+        aa: 'FRC_AA'
       }.with_indifferent_access
 
       TERM_MAPPING = {
-        overnight: {
-          frequency: '1',
-          frequency_unit: 'D',
+          :overnight => {
+              frequency: '1',
+              frequency_unit: 'D',
+          },
+        :open => {
+            frequency: '1',
+            frequency_unit: 'D'
+        },
+        '1week'=> {
+            frequency: '1',
+            frequency_unit: 'W'
+        },
+        '2week'=> {
+            frequency: '2',
+            frequency_unit: 'W'
+        },
+        '3week'=> {
+            frequency: '3',
+            frequency_unit: 'W'
+        },
+        '1month'=> {
+            frequency: '1',
+            frequency_unit: 'M'
+        },
+        '2month'=> {
+            frequency: '2',
+            frequency_unit: 'M'
+        },
+        '3month'=> {
+            frequency: '3',
+            frequency_unit: 'M'
+        },
+        '6month'=> {
+            frequency: '6',
+            frequency_unit: 'M'
+        },
+        '1year'=> {
+            frequency: '1',
+            frequency_unit: 'Y'
+        },
+        '2year'=> {
+            frequency: '2',
+            frequency_unit: 'Y'
+        },
+        '3year'=> {
+            frequency: '3',
+            frequency_unit: 'Y'
         }
       }.with_indifferent_access
 
@@ -152,10 +198,24 @@ module MAPI
         end
 
         relative_get "/:loan/:term" do
-          if params[:loan] != 'whole'
-            halt 404, 'Loan Not Found'
+          loan_type_found = false
+          LOAN_TYPES.each do |type|
+            if params[:loan] == type.to_s
+              loan_type_found = true
+              break
+            end
           end
-          if params[:term] != 'overnight'
+          if !loan_type_found
+             halt 404, 'Loan Not Found'
+          end
+          loan_term_found = false
+          LOAN_TERMS.each do |term|
+            if params[:term] == term.to_s
+              loan_term_found = true
+              break
+            end
+          end
+          if !loan_term_found
             halt 404, 'Term Not Found'
           end
           data = if @@mds_connection
