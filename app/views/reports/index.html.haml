@@ -1,0 +1,24 @@
+- @page_title = t('dashboard.meta_title')
+.reports.row
+  %h1= t('reports.title')
+  .setup-quick-reports
+    %h2= t('reports.setup_quick_advance.title')
+    %p= t('reports.setup_quick_advance.content_html', url: '/#')
+  -t('reports.tables').each do |key, value|
+    %table.reports-table.table-striped
+      %thead
+        %tr
+          %th= value[:title]
+          %th= t('reports.shared_table_values.updated_th')
+          %th= t('reports.shared_table_values.available_history_th')
+          %th
+      %tbody
+        -t("reports.tables.#{key.to_s}.rows").each do |key, value|
+          %tr
+            %td.description-cell
+              %h3= value[:description][:title]
+              %p= value[:description][:summary]
+            %td.updated-cell= value[:updated]
+            %td.history-cell= value[:available_history]
+            %td
+              =link_to t('reports.shared_table_values.link_td'), ''

@@ -62,17 +62,8 @@
 .dashboard-module-content {
   padding: 20px;
   .table-striped {
-    width: 100%;
-    margin-bottom: 25px;
-    @extend %typography-paragraph-tight;
     tbody {
-      tr:nth-child(even) td,
-      tr:nth-child(even) th {
-        height: 46px;
-      }
-      tr:nth-child(odd) td,
-      tr:nth-child(odd) th {
-        background: $lightest-blue;
+      td, th {
         height: 46px;
       }
       td {
@@ -89,24 +80,16 @@
       }
     }
   }
-  .table-striped-reports {
-    width: 100%;
+  .table-dashboard-quick-reports {
     margin-top: 22px;
-    margin-bottom: 25px;
-    @extend %typography-paragraph-tight;
     tbody {
-      tr:nth-child(even) td,
-      tr:nth-child(even) th {
-        height: 12px;
-      }
-      tr:nth-child(odd) td,
-      tr:nth-child(odd) th {
-        background: $lightest-blue;
+      td, th {
         height: 12px;
       }
       td {
         padding-top: 10px;
         padding-bottom: 10px;
+        padding-right: 0;
         text-align: left;
         vertical-align: top;
       }

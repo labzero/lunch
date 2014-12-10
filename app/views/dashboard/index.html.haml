@@ -135,7 +135,7 @@
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.reports.title'), classes: 'dashboard-module-reports'} do
       = render 'shared/input_field', icon: :calendar, placeholder: t('dashboard.reports.as_of_yesterday'), location: :after
       %button.edit-button #{t('dashboard.actions.edit')}
-      %table.table-striped-reports
+      %table.table-dashboard-quick-reports.table-striped
         %tbody
           %tr
             %td

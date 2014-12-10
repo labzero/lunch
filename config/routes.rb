@@ -20,6 +20,8 @@ Rails.application.routes.draw do
 
   get '/dashboard/current_overnight_vrc' => 'dashboard#current_overnight_vrc'
 
+  get '/reports' => 'reports#index'
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 
