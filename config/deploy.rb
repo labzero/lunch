@@ -43,6 +43,16 @@ namespace :deploy do
     end
   end
 
+  desc 'Clear the tmp directory'
+  task :clear_tmp do
+    on roles(:web) do
+      within release_path do
+        execute :rake, 'tmp:clear'
+      end
+    end
+  end
+
+  before :compile_assets, :clear_tmp
   before :publishing, :missing_dirs
   after :publishing, :restart
 
