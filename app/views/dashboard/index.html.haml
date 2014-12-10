@@ -97,7 +97,7 @@
         %tbody
       %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.initiate')
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), action_type: 'more-button'} do
-      %table.table-striped
+      %table.table-dashboard-previous-activity
         %tbody
           - @previous_activity.each_with_index do |row, i|
             %tr
@@ -109,7 +109,7 @@
               - else
                 %td #{number_with_delimiter(row[1], precision: 0)}
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.anticipated_activity.title'), action_type: 'calendar-icon'} do
-      %table.table-striped
+      %table.table-dashboard-anticipated-activity
         %tbody
           - @anticipated_activity.each_with_index do |row, i|
             - if row[1].nil?
@@ -135,7 +135,7 @@
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.reports.title'), classes: 'dashboard-module-reports'} do
       = render 'shared/input_field', icon: :calendar, placeholder: t('dashboard.reports.as_of_yesterday'), location: :after
       %button.edit-button #{t('dashboard.actions.edit')}
-      %table.table-dashboard-quick-reports.table-striped
+      %table.table-dashboard-quick-reports
         %tbody
           %tr
             %td
