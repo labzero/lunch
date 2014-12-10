@@ -49,13 +49,13 @@ Feature: Visiting the Dashboard
     When I visit the dashboard
       And I open the quick advance flyout
     Then I should see the quick advance table
-      And I should see a rate for the "overnight" term with a type of "whole_loan"
+      And I should see a rate for the "overnight" term with a type of "whole"
 
   Scenario: Quick Advance flyout tooltip
     Given I visit the dashboard
       And I open the quick advance flyout
-    When I hover on the cell with a term of "overnight" and a type of "whole_loan"
-    Then I should see the quick advance table tooltip for the cell with a term of "overnight" and a type of "whole_loan"
+    When I hover on the cell with a term of "overnight" and a type of "whole"
+    Then I should see the quick advance table tooltip for the cell with a term of "overnight" and a type of "whole"
 
   Scenario: Select rate from Quick Advance flyout table
     Given I visit the dashboard
@@ -68,7 +68,7 @@ Feature: Visiting the Dashboard
   Scenario: Preview rate from Quick Advance flyout table
     Given I visit the dashboard
       And I open the quick advance flyout
-      And I select the rate with a term of "overnight" and a type of "whole_loan"
+      And I select the rate with a term of "overnight" and a type of "whole"
     When I click on the initiate advance button
     Then I should not see the quick advance table
       And I should see a preview of the quick advance
@@ -88,7 +88,7 @@ Feature: Visiting the Dashboard
   Scenario: Confirm rate from Quick Advance preview dialog
     Given I visit the dashboard
       And I open the quick advance flyout
-      And I select the rate with a term of "overnight" and a type of "whole_loan"
+      And I select the rate with a term of "overnight" and a type of "whole"
       And I click on the initiate advance button
       And I should not see the quick advance table
       And I should see a preview of the quick advance

@@ -155,7 +155,7 @@ module MAPI
             operation do
               key :method, 'GET'
               key :summary, 'Retrieve current rates for standard loan types and terms.'
-              key :notes, 'Returns an object containing rate data for each loan type of a given term, as well as a timestamp to indicate when the rates were fetched'
+              key :notes, 'Returns an object containing rate data for each loan term of a given loan type, as well as a timestamp to indicate when the rates were fetched'
               key :type, :SummaryRates
               key :nickname, :SummaryRates
               response_message do
@@ -253,14 +253,15 @@ module MAPI
         end
 
         relative_get "/summary" do
-          # We have no real data source yet and are not yet aware of the format in which we'll get data back. We know for
-          # sure we'll need to hit the CDB when calculating maturity date (to account for weekends, holidays and other checks).
           hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_summary.json'))).with_indifferent_access
           now = Time.now
           # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
-          LOAN_TERMS.each do |term|
-            hash[term][:maturity_date] = (Time.mktime(now.year, now.month, now.day, now.hour, now.min) + hash[term][:days_to_maturity].days).to_s
+          LOAN_TYPES.each do |type|
+            LOAN_TERMS.each do |term|
+              hash[type][term][:maturity_date] = (Time.mktime(now.year, now.month, now.day, now.hour, now.min) + hash[type][term][:days_to_maturity].to_i.days).to_s
+            end
           end
+          hash[:timestamp] = now
           hash.to_json
         end
       end
