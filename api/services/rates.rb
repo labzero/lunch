@@ -198,26 +198,13 @@ module MAPI
         end
 
         relative_get "/:loan/:term" do
-          loan_type_found = false
-          LOAN_TYPES.each do |type|
-            if params[:loan] == type.to_s
-              loan_type_found = true
-              break
-            end
+          if !LOAN_TYPES[params[:loan].to_i]
+            halt 404, 'Loan Not Found'
           end
-          if !loan_type_found
-             halt 404, 'Loan Not Found'
-          end
-          loan_term_found = false
-          LOAN_TERMS.each do |term|
-            if params[:term] == term.to_s
-              loan_term_found = true
-              break
-            end
-          end
-          if !loan_term_found
+          if !LOAN_TERMS[params[:term].to_i]
             halt 404, 'Term Not Found'
           end
+
           data = if @@mds_connection
             @@mds_connection.operations
             lookup_term = TERM_MAPPING[params[:term]]
@@ -228,7 +215,7 @@ module MAPI
                     'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
                     'v1:marketData' =>  [{
                       'v12:customRollingDay' => '0',
-                      'v12:name' => LOAN_MAPPING[params[:loan]],
+                      'v12:name' => LOAN_MAPPING[params[:loan].to_s],
                       'v12:pricingGroup' => [{'v12:id' => 'Live'}],
                       'v12:data' => [{
                         'v12:FhlbsfDataPoint' => [{
@@ -262,7 +249,6 @@ module MAPI
             now = Time.now
             {rate: rate, updated_at: Time.mktime(now.year, now.month, now.day, now.hour, now.min).to_s}
           end
-
           data.to_json
         end
 
