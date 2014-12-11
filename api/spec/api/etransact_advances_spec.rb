@@ -9,7 +9,6 @@ describe MAPI::ServiceApp do
     it "should return 3 etransact advances status" do
       expect(etransact_advances_status.length).to be >=1
       expect(etransact_advances_status['etransact_advances_status'] == true || false)
-      expect(etransact_advances_status['etransact_bucket_status'] == true || false)
       expect(etransact_advances_status['wl_vrc_status'] == true || false)
     end
   end
