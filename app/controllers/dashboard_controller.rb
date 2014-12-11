@@ -2,7 +2,7 @@ class DashboardController < ApplicationController
 
   MEMBER_ID = 750 #this is the hard-coded fhlb client id number we're using for the time-being
   THRESHOLD_CAPACITY = 35 #this will be set by each client, probably with a default value of 35, and be stored in some as-yet-unnamed db
-  ADVANCE_TYPES = ['whole', 'agency', 'aaa', 'aa']
+  ADVANCE_TYPES = [:whole, :agency, :aaa, :aa]
   ADVANCE_TERMS = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
 
   def index
