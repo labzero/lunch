@@ -51,9 +51,9 @@ module MAPI
           SQL
 
           if @connection
-            etransact_eod_status_on_cursor = @connection.execute(etransact_advances_eod_on_string)
             etransact_status = false  #indicat if etransact is turn on and at least one product has not reach End Time
             wl_vrc_status = false   #indicate if WL VRC is enabled regardless of if etransact is turn on
+            etransact_eod_status_on_cursor = @connection.execute(etransact_advances_eod_on_string)
             while row = etransact_eod_status_on_cursor.fetch()
               if row[0].to_i > STATUS_ON_RECORD_NOTFOUND_COUNT
                 etransact_status = true
