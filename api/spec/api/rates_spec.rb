@@ -62,7 +62,6 @@ describe MAPI::ServiceApp do
     it "should return other data relevant to each loan_term" do
       loan_types.each do |loan_type|
         loan_terms.each do |loan_term|
-          expect(rate_summary[loan_type][loan_term][:label]).to be_kind_of(String)
           expect(rate_summary[loan_type][loan_term][:payment_on]).to be_kind_of(String)
           expect(rate_summary[loan_type][loan_term][:interest_day_count]).to be_kind_of(String)
           expect(rate_summary[loan_type][loan_term][:maturity_date]).to be_kind_of(String)

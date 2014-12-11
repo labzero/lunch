@@ -10,8 +10,9 @@
     -advance_types.each_with_index do |advance_type, j|
       - advance_rate = sprintf( "%0.02f", rate_data[advance_type][advance_term][:rate].to_f)
       - if j == 0
-        %td.row-label= rate_data[advance_type][advance_term][:label]
+        %td.row-label= t("dashboard.quick_advance.table.axes_labels.#{advance_term}")
       %td.selectable-cell{data: {'advance-type' => advance_type, 'advance-term' => advance_term, 'advance-rate' => advance_rate}}
         = advance_rate
         - date = rate_data[advance_type][advance_term][:maturity_date].to_date
-        = render 'shared/tooltip', tooltip_data: {t('dashboard.quick_advance.preview.field_headings.payment_on') => rate_data[advance_type][advance_term][:payment_on], t('dashboard.quick_advance.preview.field_headings.interest_day_count') => rate_data[advance_type][advance_term][:interest_day_count], t('dashboard.quick_advance.preview.field_headings.maturity_date') => date.strftime("%-d-%b-%y")}
+        - interest_day_count = rate_data[advance_type][advance_term][:interest_day_count].to_s.gsub('/', '')
+        = render 'shared/tooltip', tooltip_data: {t('dashboard.quick_advance.preview.field_headings.payment_on') => rate_data[advance_type][advance_term][:payment_on], t('dashboard.quick_advance.preview.field_headings.interest_day_count') => t("dashboard.quick_advance.table.#{interest_day_count}"), t('dashboard.quick_advance.preview.field_headings.maturity_date') => date.strftime("%-d-%b-%y")}
