@@ -162,10 +162,10 @@ module MAPI
             @@mds_connection.operations
             lookup_term = TERM_MAPPING[params[:term]]
             message = {
-              'v11:caller' => [{ 'v11:id' => 'FHLBSF\\svcsys_fobo_mdtest'}],
+              'v11:caller' => [{ 'v11:id' => ENV['MAPI_COF_ACCOUNT']}],
                 'v1:requests' => [{
                   'v1:fhlbsfMarketDataRequest' => [{
-                    'v1:caller' => [{'v11:id' => 'FHLBSF\\kalimanb'}],
+                    'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
                     'v1:marketData' =>  [{
                       'v12:customRollingDay' => '0',
                       'v12:name' => LOAN_MAPPING[params[:loan]],
@@ -176,8 +176,7 @@ module MAPI
                           'v12:interval' => [{
                             'v13:frequency' => lookup_term[:frequency],
                             'v13:frequencyUnit' => lookup_term[:frequency_unit]
-                          }],
-                          'v12:maturityDate' => '0001-01-01T00:00:00'
+                          }]
                         }]
                       }]
                     }]
