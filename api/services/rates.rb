@@ -198,10 +198,10 @@ module MAPI
         end
 
         relative_get "/:loan/:term" do
-          if !LOAN_TYPES[params[:loan].to_i]
+          if !LOAN_MAPPING[params[:loan]]
             halt 404, 'Loan Not Found'
           end
-          if !LOAN_TERMS[params[:term].to_i]
+          if !TERM_MAPPING[params[:term]]
             halt 404, 'Term Not Found'
           end
 
