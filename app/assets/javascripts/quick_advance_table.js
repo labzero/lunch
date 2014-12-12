@@ -7,12 +7,14 @@
     var $flyoutTableCells = $('.dashboard-quick-advance-flyout td.selectable-cell');
     $flyoutTableCells.on('click', function(){
       var $this = $(this);
-      $('.dashboard-quick-advance-flyout td, .dashboard-quick-advance-flyout th').removeClass('cell-selected cell-hovered');
-      var col = getColumnIndex($this);
-      $this.addClass('cell-selected').closest('tr').find('td.row-label').addClass('cell-selected');
-      $($table.find('tr.quick-advance-column-labels th')[col]).addClass('cell-selected');
-      setRateFromElementData($this);
-      $initiateButton.hasClass('active') ? '' : $initiateButton.addClass('active');
+      if (!$this.hasClass('disabled-cell')) {
+        $('.dashboard-quick-advance-flyout td, .dashboard-quick-advance-flyout th').removeClass('cell-selected cell-hovered');
+        var col = getColumnIndex($this);
+        $this.addClass('cell-selected').closest('tr').find('td.row-label').addClass('cell-selected');
+        $($table.find('tr.quick-advance-column-labels th')[col]).addClass('cell-selected');
+        setRateFromElementData($this);
+        $initiateButton.hasClass('active') ? '' : $initiateButton.addClass('active');
+      };
     });
 
     $flyoutTableCells.hover( function(){

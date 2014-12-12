@@ -11,7 +11,7 @@
       - advance_rate = sprintf( "%0.02f", rate_data[advance_type][advance_term][:rate].to_f)
       - if j == 0
         %td.row-label= t("dashboard.quick_advance.table.axes_labels.#{advance_term}")
-      %td.selectable-cell{data: {'advance-type' => advance_type, 'advance-term' => advance_term, 'advance-rate' => advance_rate}}
+      %td.selectable-cell{data: {'advance-type' => advance_type, 'advance-term' => advance_term, 'advance-rate' => advance_rate}, class: "#{'disabled-cell' if !@quick_advances_active}"}
         = advance_rate
         - date = rate_data[advance_type][advance_term][:maturity_date].to_date
         - interest_day_count = rate_data[advance_type][advance_term][:interest_day_count].to_s.gsub('/', '')

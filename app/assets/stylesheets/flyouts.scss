@@ -78,6 +78,10 @@
 %quick-advance-cell-hovered {
   color: $white;
   @include pseudo-background-cover($brand-blue);
+  &.disabled-cell {
+    background: $secondary-gray;
+    cursor: auto;
+  }
 }
 
 %quick-advance-row-label {
@@ -88,6 +92,28 @@
 }
 
 .dashboard-quick-advance-flyout {
+  .quick-advance-desk-closed-message {
+    font-weight: $bold-weight;
+    margin-top: 35px;
+    a {
+      display: none;
+    }
+  }
+  .quick-advance-last-updated-message {
+    display: block;
+    margin-top: 15px;
+    font-weight: $semibold-weight;
+    p {
+      margin: 0;
+      &:last-child {
+        margin-bottom: 30px;
+      }
+    }
+    a {
+      color: $actionable-blue;
+      text-decoration: none;
+    }
+  }
   .icon-dollar-before:before {
     @extend %dashboard-module-advances-icon-dollar;
   }

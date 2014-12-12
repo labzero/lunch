@@ -158,14 +158,12 @@
 }
 
 .dashboard-module-advances {
+  a {
+    color: $actionable-blue;
+    text-decoration: none;
+  }
   p {
-    font-weight: $semibold-weight;
-    margin-bottom: 5px;
-    &:after {
-      @extend %icon-font;
-      content: " #{$icon-chevron}";
-      font-size: 0.8rem;
-    }
+    color: $text-color;
   }
   .icon-dollar-before:before {
     @extend %dashboard-module-advances-icon-dollar;
@@ -178,11 +176,27 @@
   .dashboard-module-content {
     color: $actionable-blue;
   }
-  p, .dashboard-advances-rate {
-    padding-left: 12px;
-  }
   table, .initiate-quick-advance {
     display: none;
+  }
+}
+
+.quick-advance-desk-closed-message {
+  margin-bottom: 0;
+}
+
+.quick-advance-last-updated-message {
+  display: none;
+}
+
+p.dashboard-vrc-overnight-message {
+  font-weight: $semibold-weight;
+  margin-bottom: 5px;
+  color: $actionable-blue;
+  &:after {
+    @extend %icon-font;
+    content: " #{$icon-chevron}";
+    font-size: 0.8rem;
   }
 }
 

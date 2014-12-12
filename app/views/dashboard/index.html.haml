@@ -77,11 +77,20 @@
                         %td.value #{number_with_delimiter(row[1], precision: 0)}
   .column-3
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances'} do
-      = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}
-      %p= t('global.vrc_overnight')
+      - if @quick_advances_active
+        = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}
+      -else
+        %p.quick-advance-desk-closed-message
+          = t('dashboard.quick_advance.advances_desk_closed')
+          = link_to t('dashboard.quick_advance.advances_desk_closed_link'), '', data: {'flyout-trigger' => 'active'}
+      %p.dashboard-vrc-overnight-message= t('global.vrc_overnight')
       .dashboard-advances-rate
         = @current_overnight_vrc
         %span<> %
+      - if !@quick_advances_active
+        .quick-advance-last-updated-message
+          %p= t('dashboard.quick_advance.advance_last_updated', last_updated: @quick_advance_last_updated)
+          %p= t('dashboard.quick_advance.hours_of_operation_html', url: '')
       %table
         %thead
           %tr
@@ -95,7 +104,8 @@
             %th= t('dashboard.quick_advance.table.aaa')
             %th= t('dashboard.quick_advance.table.aa')
         %tbody
-      %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.initiate')
+      - if @quick_advances_active
+        %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.initiate')
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), action_type: 'more-button'} do
       %table.table-dashboard-previous-activity
         %tbody
