@@ -69,7 +69,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
   end
 
-  describe "GET quick_advance_rates" do
+  describe "GET quick_advance_rates", :vcr do
     let(:json_response) { {some: "json"}.to_json }
     let(:RatesService) {class_double(RatesService)}
     let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
