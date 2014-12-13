@@ -71,20 +71,29 @@
 }
 
 %quick-advance-cell-selected {
-  background: $actionable-blue;
   color: $white;
+  &:before {
+    @extend %pseudo-background-cover;
+    background: $actionable-blue;
+  }
 }
 
 %quick-advance-cell-hovered {
-  background: $brand-blue;
   color: $white;
+  &:before {
+    @extend %pseudo-background-cover;
+    background: $brand-blue;
+  }
 }
 
 %quick-advance-row-label {
   border-right: 1px solid $light-blue;
-  background: $light-gray;
   text-transform: capitalize;
   cursor: auto;
+  &:before {
+    @extend %pseudo-background-cover;
+    background: $light-gray;
+  }
 }
 
 .dashboard-quick-advance-flyout {
@@ -109,7 +118,12 @@
         }
       }
     }
+    tbody {
+      background: $light-gray; // fix for IE11 incongruity in the way height is measured for cells with rowspan
+    }
     td, th {
+      position: relative;
+      z-index: 1;
       border: 1px solid $light-blue;
       height: 30px;
       line-height: 30px;
@@ -124,17 +138,26 @@
     th {
       @extend %typography-table-heading;
       color: $white;
-      background: $medium-gray;
+      &:before {
+        @extend %pseudo-background-cover;
+        background: $medium-gray;
+      }
       &:first-child {
-        background: $secondary-gray;
         color: $text-color;
+        &:before {
+          @extend %pseudo-background-cover;
+          background: $secondary-gray;
+        }
       }
     }
     td {
       @extend %typography-table-cell;
       position: relative;
       &:first-child {
-        background: $light-gray;
+        &:before {
+          @extend %pseudo-background-cover;
+          background: $light-gray;;
+        }
       }
       &:not(:first-child) {
         width: 110px;
@@ -171,8 +194,11 @@
     }
     tr {
       td {
-        background: $lightest-blue;
         cursor: pointer;
+        &:before {
+          @extend %pseudo-background-cover;
+          background: $lightest-blue;
+        }
       }
       td:first-child {
         @extend %quick-advance-row-label;
@@ -185,7 +211,10 @@
       }
       &:nth-child(odd) {
         td {
-          background: $white;
+          &:before {
+            @extend %pseudo-background-cover;
+            background: $white;
+          }
           &.cell-selected {
             @extend %quick-advance-cell-selected;
           }
@@ -194,7 +223,10 @@
           }
         }
         td:first-child {
-          background: $light-gray;
+          &:before {
+            @extend %pseudo-background-cover;
+            background: $light-gray;
+          }
           &.cell-selected {
             @extend %quick-advance-cell-selected;
           }
@@ -210,8 +242,11 @@
       }
       &:first-child {
         th:first-child {
-          background: transparent;
           border: none;
+          &:before {
+            @extend %pseudo-background-cover;
+            background: transparent;
+          }
         }
       }
     }

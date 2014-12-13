@@ -1,6 +1,6 @@
 $(function () {
 
-  $('.dashboard-module-advances input').on('input', function(event){
+  $('.dashboard-module-advances input').on('keydown', function(event){
     var $this = $(this);
     if ($this.data('flyout-trigger') == 'active') {
       $this.data('flyout-trigger', 'inactive');
