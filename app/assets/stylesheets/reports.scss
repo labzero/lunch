@@ -19,6 +19,7 @@
   }
 }
 .reports-table {
+  @extend %table-striped;
   thead {
     border-bottom: 1px solid $light-blue;
   }

@@ -348,7 +348,7 @@ $breakdown-table-currency-width: 10px;
   background: $actionable-blue;
   z-index: 1;
   &:before {
-    @extend %absolute-psuedoelement;
+    @extend %absolute-pseudoelement;
     left: 5px;
     width: 1px;
     height: 100%;

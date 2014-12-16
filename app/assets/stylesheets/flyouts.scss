@@ -49,7 +49,7 @@
   border-bottom-right-radius: 0;
 }
 .flyout-bottom-section {
-  @extend %psuedoelement-clearfix;
+  @extend %pseudoelement-clearfix;
   position: relative;
   margin-top: -1px;
   margin-left: 0;
@@ -73,16 +73,14 @@
 %quick-advance-cell-selected {
   color: $white;
   &:before {
-    @extend %pseudo-background-cover;
-    background: $actionable-blue;
+    @include pseudo-background-cover($actionable-blue);
   }
 }
 
 %quick-advance-cell-hovered {
   color: $white;
   &:before {
-    @extend %pseudo-background-cover;
-    background: $brand-blue;
+    @include pseudo-background-cover($brand-blue);
   }
 }
 
@@ -139,14 +137,12 @@
       @extend %typography-table-heading;
       color: $white;
       &:before {
-        @extend %pseudo-background-cover;
-        background: $medium-gray;
+        @include pseudo-background-cover($medium-gray);
       }
       &:first-child {
         color: $text-color;
         &:before {
-          @extend %pseudo-background-cover;
-          background: $secondary-gray;
+          @include pseudo-background-cover($secondary-gray);
         }
       }
     }
@@ -155,8 +151,7 @@
       position: relative;
       &:first-child {
         &:before {
-          @extend %pseudo-background-cover;
-          background: $light-gray;;
+          @include pseudo-background-cover($light-gray);
         }
       }
       &:not(:first-child) {
@@ -196,8 +191,7 @@
       td {
         cursor: pointer;
         &:before {
-          @extend %pseudo-background-cover;
-          background: $lightest-blue;
+          @include pseudo-background-cover($lightest-blue);
         }
       }
       td:first-child {
@@ -212,8 +206,7 @@
       &:nth-child(odd) {
         td {
           &:before {
-            @extend %pseudo-background-cover;
-            background: $white;
+            @include pseudo-background-cover($white);
           }
           &.cell-selected {
             @extend %quick-advance-cell-selected;
@@ -224,8 +217,7 @@
         }
         td:first-child {
           &:before {
-            @extend %pseudo-background-cover;
-            background: $light-gray;
+            @include pseudo-background-cover($light-gray);
           }
           &.cell-selected {
             @extend %quick-advance-cell-selected;
@@ -244,8 +236,7 @@
         th:first-child {
           border: none;
           &:before {
-            @extend %pseudo-background-cover;
-            background: transparent;
+            @include pseudo-background-cover;
           }
         }
       }
