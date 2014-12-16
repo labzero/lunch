@@ -72,26 +72,19 @@
 
 %quick-advance-cell-selected {
   color: $white;
-  &:before {
-    @include pseudo-background-cover($actionable-blue);
-  }
+  @include pseudo-background-cover($actionable-blue);
 }
 
 %quick-advance-cell-hovered {
   color: $white;
-  &:before {
-    @include pseudo-background-cover($brand-blue);
-  }
+  @include pseudo-background-cover($brand-blue);
 }
 
 %quick-advance-row-label {
   border-right: 1px solid $light-blue;
   text-transform: capitalize;
   cursor: auto;
-  &:before {
-    @extend %pseudo-background-cover;
-    background: $light-gray;
-  }
+  @include pseudo-background-cover($light-gray);
 }
 
 .dashboard-quick-advance-flyout {
@@ -136,23 +129,17 @@
     th {
       @extend %typography-table-heading;
       color: $white;
-      &:before {
-        @include pseudo-background-cover($medium-gray);
-      }
+      @include pseudo-background-cover($medium-gray);
       &:first-child {
         color: $text-color;
-        &:before {
-          @include pseudo-background-cover($secondary-gray);
-        }
+        @include pseudo-background-cover($secondary-gray);
       }
     }
     td {
       @extend %typography-table-cell;
       position: relative;
       &:first-child {
-        &:before {
-          @include pseudo-background-cover($light-gray);
-        }
+        @include pseudo-background-cover($light-gray);
       }
       &:not(:first-child) {
         width: 110px;
@@ -190,9 +177,7 @@
     tr {
       td {
         cursor: pointer;
-        &:before {
-          @include pseudo-background-cover($lightest-blue);
-        }
+        @include pseudo-background-cover($lightest-blue);
       }
       td:first-child {
         @extend %quick-advance-row-label;
@@ -205,9 +190,7 @@
       }
       &:nth-child(odd) {
         td {
-          &:before {
-            @include pseudo-background-cover($white);
-          }
+          @include pseudo-background-cover($white);
           &.cell-selected {
             @extend %quick-advance-cell-selected;
           }
@@ -216,9 +199,7 @@
           }
         }
         td:first-child {
-          &:before {
-            @include pseudo-background-cover($light-gray);
-          }
+          @include pseudo-background-cover($light-gray);
           &.cell-selected {
             @extend %quick-advance-cell-selected;
           }
@@ -235,9 +216,7 @@
       &:first-child {
         th:first-child {
           border: none;
-          &:before {
-            @include pseudo-background-cover;
-          }
+          @include pseudo-background-cover;
         }
       }
     }

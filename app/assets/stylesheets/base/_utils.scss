@@ -60,6 +60,8 @@
 }
 
 @mixin pseudo-background-cover($background-color: transparent) {
-  @extend %pseudo-background-cover;
-  background-color: $background-color;
+  &:before {
+    @extend %pseudo-background-cover;
+    background-color: $background-color;
+  }
 }
