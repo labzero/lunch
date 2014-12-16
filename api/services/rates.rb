@@ -24,43 +24,43 @@ module MAPI
             frequency: '1',
             frequency_unit: 'D'
         },
-        '1week'=> {
+        :'1week'=> {
             frequency: '1',
             frequency_unit: 'W'
         },
-        '2week'=> {
+        :'2week'=> {
             frequency: '2',
             frequency_unit: 'W'
         },
-        '3week'=> {
+        :'3week'=> {
             frequency: '3',
             frequency_unit: 'W'
         },
-        '1month'=> {
+        :'1month'=> {
             frequency: '1',
             frequency_unit: 'M'
         },
-        '2month'=> {
+        :'2month'=> {
             frequency: '2',
             frequency_unit: 'M'
         },
-        '3month'=> {
+        :'3month'=> {
             frequency: '3',
             frequency_unit: 'M'
         },
-        '6month'=> {
+        :'6month'=> {
             frequency: '6',
             frequency_unit: 'M'
         },
-        '1year'=> {
+        :'1year'=> {
             frequency: '1',
             frequency_unit: 'Y'
         },
-        '2year'=> {
+        :'2year'=> {
             frequency: '2',
             frequency_unit: 'Y'
         },
-        '3year'=> {
+        :'3year'=> {
             frequency: '3',
             frequency_unit: 'Y'
         }
@@ -215,7 +215,7 @@ module MAPI
                     'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
                     'v1:marketData' =>  [{
                       'v12:customRollingDay' => '0',
-                      'v12:name' => LOAN_MAPPING[params[:loan].to_s],
+                      'v12:name' => LOAN_MAPPING[params[:loan]],
                       'v12:pricingGroup' => [{'v12:id' => 'Live'}],
                       'v12:data' => [{
                         'v12:FhlbsfDataPoint' => [{

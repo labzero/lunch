@@ -57,6 +57,7 @@ module MAPI
             while row = etransact_eod_status_on_cursor.fetch()
               if row[0].to_i > STATUS_ON_RECORD_NOTFOUND_COUNT
                 etransact_status = true
+                break
               end
             end
             if etransact_status
@@ -64,6 +65,7 @@ module MAPI
               while row = etransact_status_on_cursor.fetch()
                 if row[0].to_i = STATUS_ON_RECORD_NOTFOUND_COUNT
                   etransact_status = false
+                  break
                 end
               end
             end
@@ -71,6 +73,7 @@ module MAPI
             while row = etransact_wl_status_on_cursor.fetch()
               if row[0].to_i == STATUS_ON_RECORD_FOUND_COUNT
                 wl_vrc_status = true
+                break
               end
             end
             {
