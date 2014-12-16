@@ -112,6 +112,7 @@
     td, th {
       border: 1px solid $light-blue;
       height: 30px;
+      line-height: 30px;
       box-sizing: border-box;
       &.cell-selected {
         @extend %quick-advance-cell-selected;
