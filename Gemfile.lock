@@ -246,6 +246,8 @@ GEM
       multi_json (~> 1.0)
       simplecov-html (~> 0.8.0)
     simplecov-html (0.8.0)
+    simplecov-rcov (0.2.3)
+      simplecov (>= 0.4.1)
     sinatra (1.4.5)
       rack (~> 1.4)
       rack-protection (~> 1.4)
@@ -336,7 +338,7 @@ DEPENDENCIES
   savon
   sdoc
   selenium-webdriver
-  simplecov
+  simplecov-rcov
   sinatra
   sinatra-activerecord
   source-sans-pro-rails
