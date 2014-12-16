@@ -5,11 +5,7 @@ module MAPI
       swagger_model :etransactAdvancesStatus do
         property :etransact_advances_status do
           key :type, :boolean
-          key :description, 'indicate etransact advances is turn on '
-        end
-        property :etransact_bucket_status do
-          key :type, :boolean
-          key :description, 'indicate there is at least one term product still not reaching end time for the day'
+          key :description, 'indicate etransact advances is turn on and at least one proudct/term not reach End Time for today'
         end
         property :wl_vrc_status do
           key :type, :boolean

@@ -2,8 +2,7 @@ module MAPI
   module Services
     module EtransactAdvances
       include MAPI::Services::Base
-      WL_VRC_TERM_BUCKET_ID = 1 # ao_term_bucket_id = 1 is for whole loan overnight in the table
-      STATUS_ON_RECORD_FOUND_COUNT = 1
+      STATUS_ON_RECORD_NOTFOUND_COUNT = 0
 
       def self.registered(app)
         @connection = ActiveRecord::Base.establish_connection('cdb').connection if app.environment == 'production'
@@ -37,50 +36,52 @@ module MAPI
             AND trunc(to_date(SETTING_VALUE, 'MM/dd/yyyy')) = trunc(sysdate)
           SQL
 
-          etransact_advances_bucket_on_string = <<-SQL
-            SELECT AO_TERM_BUCKET_ID, WHOLE_LOAN_ENABLED AS WL_VRC_status
+          etransact_advances_eod_on_string = <<-SQL
+            SELECT count(*)
             FROM WEB_ADM.AO_TERM_BUCKETS
-            WHERE (END_TIME || '00' > to_char(sysdate, 'HH24MISS') OR
+            WHERE (END_TIME || '00' > to_char(sysdate, 'HH24MISS')) OR
             ((trunc(OVERRIDE_END_DATE) = trunc(sysdate))
             AND (OVERRIDE_END_TIME || '00' > TO_CHAR(SYSDATE, 'HH24MISS')))
-            AND (WHOLE_LOAN_ENABLED = 'Y' OR SBC_AGENCY_ENABLED = 'Y' OR SBC_AAA_ENABLED = 'Y' OR SBC_AA_ENABLED = 'Y')
+          SQL
+
+          etransact_advances_WLVRC_on_string = <<-SQL
+            SELECT count(*) AS WL_VRC_status
+            FROM WEB_ADM.AO_TERM_BUCKETS
+            WHERE WHOLE_LOAN_ENABLED = 'Y' AND AO_TERM_BUCKET_ID = 1
           SQL
 
           if @connection
-            etransact_status_on_cursor = @connection.execute(etransact_advances_turn_on_string)
-            etransact_status = false
-            etransact_bucket_status = false
-            wl_vrc_status = false
-            while row = etransact_status_on_cursor.fetch()
-              if row[0].to_i == STATUS_ON_RECORD_FOUND_COUNT
+            etransact_status = false  #indicat if etransact is turn on and at least one product has not reach End Time
+            wl_vrc_status = false   #indicate if WL VRC is enabled regardless of if etransact is turn on
+            etransact_eod_status_on_cursor = @connection.execute(etransact_advances_eod_on_string)
+            while row = etransact_eod_status_on_cursor.fetch()
+              if row[0].to_i > STATUS_ON_RECORD_NOTFOUND_COUNT
                 etransact_status = true
+                break
               end
             end
-            if etransact_status == false # no need to check term bucket as etransact has not turn on for the day
-              {
-                etransact_status: etransact_status,
-                etransact_bucket_status: etransact_bucket_status,
-                wl_vrc_status: wl_vrc_status
-              }.to_json
-            else
-              etransact_b_status_on_cursor = @connection.execute(etransact_advances_bucket_on_string)
-              while row = etransact_b_status_on_cursor.fetch()
-                etransact_bucket_status = true # there is some bucket available
-                if row[0].to_i == WL_VRC_TERM_BUCKET_ID
-                   if row[1] == 'Y'
-                     wl_vrc_status = true #wl_vrc_status = 1
-                     break
-                   end
+            if etransact_status
+              etransact_status_on_cursor = @connection.execute(etransact_advances_turn_on_string)
+              while row = etransact_status_on_cursor.fetch()
+                if row[0].to_i = STATUS_ON_RECORD_NOTFOUND_COUNT
+                  etransact_status = false
+                  break
                 end
               end
-              {
-                etransact_status: etransact_status,
-                etransact_bucket_status: etransact_bucket_status,
-                wl_vrc_status: wl_vrc_status
-              }.to_json
             end
+            etransact_wl_status_on_cursor = @connection.execute(etransact_advances_WLVRC_on_string)
+            while row = etransact_wl_status_on_cursor.fetch()
+              if row[0].to_i == STATUS_ON_RECORD_FOUND_COUNT
+                wl_vrc_status = true
+                break
+              end
+            end
+            {
+              etransact_status: etransact_status,
+              wl_vrc_status: wl_vrc_status
+            }.to_json
           else
-              File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_status.json'))
+            File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_status.json'))
           end
         end
       end

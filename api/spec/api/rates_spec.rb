@@ -33,12 +33,18 @@ describe MAPI::ServiceApp do
   end
 
   describe "current rates" do
-    let(:rate) { get '/rates/whole/overnight'; JSON.parse(last_response.body) }
-    it "should return a realtime rate" do
-      expect(rate['rate']).to be_kind_of(Float)
-      expect(rate['updated_at']).to match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01]) ([01]\d|2[0-3]):[0-5]\d:[0-5]\d [+-](0\d|1[012])[0-5][0-5]\Z/)
-      date = DateTime.parse(rate['updated_at'])
-      expect(date).to be <= DateTime.now
+
+    MAPI::Services::Rates::LOAN_TYPES.each do |loan|
+      MAPI::Services::Rates::LOAN_TERMS.each do |term|
+        it "should return a #{loan}:#{term} rate" do
+          get "/rates/#{loan}/#{term}"
+          rate = JSON.parse(last_response.body)
+          expect(rate['rate']).to be_kind_of(Float)
+          expect(rate['updated_at']).to match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01]) ([01]\d|2[0-3]):[0-5]\d:[0-5]\d [+-](0\d|1[012])[0-5][0-5]\Z/)
+          date = DateTime.parse(rate['updated_at'])
+          expect(date).to be <= DateTime.now
+        end
+      end
     end
   end
 
