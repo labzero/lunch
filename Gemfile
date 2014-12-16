@@ -55,7 +55,7 @@ group :development, :test do
   gem 'rerun'
   gem 'brakeman'
   gem 'faker' #Faker library that generates fake data.
-  gem 'simplecov', require: false
+  gem 'simplecov-rcov', require: false
 end
 
 group :test do
