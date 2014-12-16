@@ -51,21 +51,25 @@ describe MAPI::ServiceApp do
   describe "rate summary" do
     let(:rate_summary) { get '/rates/summary'; JSON.parse(last_response.body).with_indifferent_access }
     let(:loan_terms) { [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year'] }
-    let (:loan_types) { [:whole_loan, :agency, :aaa, :aa] }
+    let (:loan_types) { [:whole, :agency, :aaa, :aa] }
     it "should return rates for default loan_types at default loan_terms" do
-      loan_terms.each do |loan_term|
-        loan_types.each do |loan_type|
-          expect(rate_summary[loan_term][loan_type]).to be_kind_of(Float)
+      loan_terms.each do |loan_type|
+        loan_types.each do |loan_term|
+          expect(rate_summary[loan_term][loan_type][:rate]).to be_kind_of(String)
         end
       end
     end
     it "should return other data relevant to each loan_term" do
-      loan_terms.each do |loan_term|
-        expect(rate_summary[loan_term][:label]).to be_kind_of(String)
-        expect(rate_summary[loan_term][:payment_on]).to be_kind_of(String)
-        expect(rate_summary[loan_term][:interest_day_count]).to be_kind_of(String)
-        expect(rate_summary[loan_term][:maturity_date]).to be_kind_of(String)
+      loan_types.each do |loan_type|
+        loan_terms.each do |loan_term|
+          expect(rate_summary[loan_type][loan_term][:payment_on]).to be_kind_of(String)
+          expect(rate_summary[loan_type][loan_term][:interest_day_count]).to be_kind_of(String)
+          expect(rate_summary[loan_type][loan_term][:maturity_date]).to be_kind_of(String)
+        end
       end
+    end
+    it "should return a timestamp" do
+      expect(rate_summary[:timestamp]).to be_kind_of(String)
     end
   end
 end

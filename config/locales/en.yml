@@ -80,11 +80,25 @@ en:
         agency: Agency
         aaa: AAA
         aa: AA
+        ACTACT: Actual/Actual
+        ACT360: Actual/360
         axes_labels:
           standard: Standard
           securities_backed: SBC
           variable_rate: VRC
           fixed_rate: FRC
+          overnight: Overnight
+          open: Open
+          1week: 1 Week
+          2week: 2 Weeks
+          3week: 3 Weeks
+          1month: 1 Month
+          2month: 2 Months
+          3month: 3 Months
+          6month: 6 Months
+          1year: 1 Year
+          2year: 2 Years
+          3year: 3 Years
       buttons:
         back: Back
         initiate: Initiate the selected advance

@@ -29,7 +29,7 @@ $(function () {
   function showQuickAdvanceRates(rates) {
     var table = $('.dashboard-quick-advance-flyout table');
     table.append($(rates)).quickAdvanceTable();
-    $('.dashboard-quick-advance-flyout td.selectable-cell[data-advance-term=\'overnight\'][data-advance-type=\'whole_loan\']').click();
+    $('.dashboard-quick-advance-flyout td.selectable-cell[data-advance-term=\'overnight\'][data-advance-type=\'whole\']').click();
   };
 
   if (('.dashboard-module-advances').length > 0) {
