@@ -60,9 +60,9 @@ Feature: Visiting the Dashboard
   Scenario: Select rate from Quick Advance flyout table
     Given I visit the dashboard
       And I open the quick advance flyout
-      And I see the unselected state for the cell with a term of "open" and a type of "whole_loan"
-    When I select the rate with a term of "open" and a type of "whole_loan"
-    Then I should see the selected state for the cell with a term of "open" and a type of "whole_loan"
+      And I see the unselected state for the cell with a term of "open" and a type of "whole"
+    When I select the rate with a term of "open" and a type of "whole"
+    Then I should see the selected state for the cell with a term of "open" and a type of "whole"
       And the initiate advance button should be active
 
   Scenario: Preview rate from Quick Advance flyout table
@@ -107,4 +107,4 @@ Feature: Visiting the Dashboard
   Scenario: Default selection in Quick Advance flyout
     Given I visit the dashboard
     When I open the quick advance flyout
-    Then I should see the selected state for the cell with a term of "overnight" and a type of "whole_loan"
+    Then I should see the selected state for the cell with a term of "overnight" and a type of "whole"
