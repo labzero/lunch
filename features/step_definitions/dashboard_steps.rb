@@ -69,6 +69,7 @@ end
 When(/^I open the quick advance flyout$/) do
   step "I enter \"44503000\" into the \".dashboard-module-advances input\" input field"
   step "I should see a flyout"
+  sleep 0.5 # we select a rate after the flyout opens, but in some cases selenium does its checks before that JS fires
 end
 
 When(/^I click on the flyout close button$/) do
