@@ -10,3 +10,4 @@
 brakeman.tabs
 brakeman.html
 .vagrant
+coverage

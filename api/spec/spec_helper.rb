@@ -18,6 +18,9 @@
 
 require 'rack/test'
 
+require 'simplecov'
+SimpleCov.start
+
 require File.expand_path '../../mapi.rb', __FILE__
 
 ENV['RACK_ENV'] = 'test'
