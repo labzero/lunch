@@ -49,7 +49,7 @@
   border-bottom-right-radius: 0;
 }
 .flyout-bottom-section {
-  @extend %psuedoelement-clearfix;
+  @extend %pseudoelement-clearfix;
   position: relative;
   margin-top: -1px;
   margin-left: 0;
@@ -71,20 +71,20 @@
 }
 
 %quick-advance-cell-selected {
-  background: $actionable-blue;
   color: $white;
+  @include pseudo-background-cover($actionable-blue);
 }
 
 %quick-advance-cell-hovered {
-  background: $brand-blue;
   color: $white;
+  @include pseudo-background-cover($brand-blue);
 }
 
 %quick-advance-row-label {
   border-right: 1px solid $light-blue;
-  background: $light-gray;
   text-transform: capitalize;
   cursor: auto;
+  @include pseudo-background-cover($light-gray);
 }
 
 .dashboard-quick-advance-flyout {
@@ -109,7 +109,12 @@
         }
       }
     }
+    tbody {
+      background: $light-gray; // fix for IE11 incongruity in the way height is measured for cells with rowspan
+    }
     td, th {
+      position: relative;
+      z-index: 1;
       border: 1px solid $light-blue;
       height: 30px;
       line-height: 30px;
@@ -124,17 +129,17 @@
     th {
       @extend %typography-table-heading;
       color: $white;
-      background: $medium-gray;
+      @include pseudo-background-cover($medium-gray);
       &:first-child {
-        background: $secondary-gray;
         color: $text-color;
+        @include pseudo-background-cover($secondary-gray);
       }
     }
     td {
       @extend %typography-table-cell;
       position: relative;
       &:first-child {
-        background: $light-gray;
+        @include pseudo-background-cover($light-gray);
       }
       &:not(:first-child) {
         width: 110px;
@@ -171,8 +176,8 @@
     }
     tr {
       td {
-        background: $lightest-blue;
         cursor: pointer;
+        @include pseudo-background-cover($lightest-blue);
       }
       td:first-child {
         @extend %quick-advance-row-label;
@@ -185,7 +190,7 @@
       }
       &:nth-child(odd) {
         td {
-          background: $white;
+          @include pseudo-background-cover($white);
           &.cell-selected {
             @extend %quick-advance-cell-selected;
           }
@@ -194,7 +199,7 @@
           }
         }
         td:first-child {
-          background: $light-gray;
+          @include pseudo-background-cover($light-gray);
           &.cell-selected {
             @extend %quick-advance-cell-selected;
           }
@@ -210,8 +215,8 @@
       }
       &:first-child {
         th:first-child {
-          background: transparent;
           border: none;
+          @include pseudo-background-cover;
         }
       }
     }

@@ -19,6 +19,9 @@
   }
 }
 .reports-table {
+  @extend %table-striped;
+  border-bottom: 1px solid $light-blue;
+  margin-bottom: 70px;
   thead {
     border-bottom: 1px solid $light-blue;
   }

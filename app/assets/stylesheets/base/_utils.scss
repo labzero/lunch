@@ -1,4 +1,4 @@
-%absolute-psuedoelement {
+%absolute-pseudoelement {
   content: '';
   position: absolute;
 }
@@ -19,7 +19,7 @@
   overflow: hidden;
 }
 
-%psuedoelement-clearfix {
+%pseudoelement-clearfix {
   &:before, &:after {
     content: " ";
     display: table;
@@ -47,5 +47,21 @@
   }
   &.placeholder {
     @content;
+  }
+}
+
+%pseudo-background-cover {
+  @extend %absolute-pseudoelement;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+@mixin pseudo-background-cover($background-color: transparent) {
+  &:before {
+    @extend %pseudo-background-cover;
+    background-color: $background-color;
   }
 }
