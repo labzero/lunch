@@ -63,6 +63,34 @@ RSpec.describe DashboardController, :type => :controller do
         expect(assigns[:current_overnight_vrc]).to eq(nil)
       end
     end
+    describe "MemberBalanceService failures" do
+      let(:MemberBalanceService) {class_double(MemberBalanceService)}
+      let(:member_balance_instance) do 
+        service = MemberBalanceService.new(DashboardController::MEMBER_ID)
+        allow(service).to receive(:effective_borrowing_capacity).and_call_original
+        allow(service).to receive(:pledged_collateral).and_call_original
+        allow(service).to receive(:total_securities).and_call_original
+        service
+      end
+      before do
+        expect(MemberBalanceService).to receive(:new).and_return(member_balance_instance)
+      end
+      it 'should assign @effective_borrowing_capacity as nil if the balance could not be retrieved' do
+        expect(member_balance_instance).to receive(:effective_borrowing_capacity).and_return(nil)
+        get :index
+        expect(assigns[:effective_borrowing_capacity]).to eq(nil)
+      end
+      it 'should assign @total_securities as nil if the balance could not be retrieved' do
+        expect(member_balance_instance).to receive(:total_securities).and_return(nil)
+        get :index
+        expect(assigns[:total_securities]).to eq(nil)
+      end
+      it 'should assign @pledged_collateral as nil if the balance could not be retrieved' do
+        expect(member_balance_instance).to receive(:pledged_collateral).and_return(nil)
+        get :index
+        expect(assigns[:pledged_collateral]).to eq(nil)
+      end
+    end
   end
 
   describe "GET quick_advance_rates" do

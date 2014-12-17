@@ -8,8 +8,15 @@ class MemberBalanceService
   end
 
   def pledged_collateral
-
-    response = @connection["member/#{@member_id}/balance/pledged_collateral"].get
+    begin
+      response = @connection["member/#{@member_id}/balance/pledged_collateral"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.pledged_collateral encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.pledged_collateral encountered a connection error: #{e.class.name}")
+      return nil
+    end
     data = JSON.parse(response.body).with_indifferent_access
 
     mortgage_mv = data[:mortgages].to_f
@@ -27,7 +34,15 @@ class MemberBalanceService
   end
 
   def total_securities
-    response = @connection["member/#{@member_id}/balance/total_securities"].get
+    begin
+      response = @connection["member/#{@member_id}/balance/total_securities"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.total_securities encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.total_securities encountered a connection error: #{e.class.name}")
+      return nil
+    end
     data = JSON.parse(response.body).with_indifferent_access
     pledged_securities = data[:pledged_securities].to_i
     safekept_securities = data[:safekept_securities].to_i
@@ -39,8 +54,15 @@ class MemberBalanceService
   end
 
   def effective_borrowing_capacity
-
-    response = @connection["member/#{@member_id}/balance/effective_borrowing_capacity"].get
+    begin
+      response = @connection["member/#{@member_id}/balance/effective_borrowing_capacity"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.total_securities encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.total_securities encountered a connection error: #{e.class.name}")
+      return nil
+    end
     data = JSON.parse(response.body)
 
     total_capacity = data['total_capacity']
