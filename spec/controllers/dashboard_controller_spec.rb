@@ -56,11 +56,22 @@ RSpec.describe DashboardController, :type => :controller do
     end
     describe "RateService failures" do
       let(:RatesService) {class_double(RatesService)}
-      let(:rate_service_instance) {double("rate service instance", current_overnight_vrc: nil, overnight_vrc: nil)}
-      it 'should assign @current_overnight_vrc as nil if the rate could not be retrieved' do
+      let(:rate_service_instance) do
+        service = RatesService.new
+        allow(service).to receive(:current_overnight_vrc).and_call_original
+        allow(service).to receive(:overnight_vrc).and_call_original
+        service
+      end
+      before do
         expect(RatesService).to receive(:new).and_return(rate_service_instance)
+      end
+      it 'should assign @current_overnight_vrc as nil if the rate could not be retrieved' do
         get :index
         expect(assigns[:current_overnight_vrc]).to eq(nil)
+      end
+      it 'should assign @market_overview rate data as nil if the rates could not be retrieved' do
+        get :index
+        expect(assigns[:market_overview][0][:data]).to eq(nil)
       end
     end
     describe "MemberBalanceService failures" do
