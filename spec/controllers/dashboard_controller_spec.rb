@@ -56,12 +56,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
     describe "RateService failures" do
       let(:RatesService) {class_double(RatesService)}
-      let(:rate_service_instance) do
-        service = RatesService.new
-        allow(service).to receive(:current_overnight_vrc).and_call_original
-        allow(service).to receive(:overnight_vrc).and_call_original
-        service
-      end
+      let(:rate_service_instance) {RatesService.new}
       before do
         expect(RatesService).to receive(:new).and_return(rate_service_instance)
       end
@@ -76,13 +71,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
     describe "MemberBalanceService failures" do
       let(:MemberBalanceService) {class_double(MemberBalanceService)}
-      let(:member_balance_instance) do 
-        service = MemberBalanceService.new(DashboardController::MEMBER_ID)
-        allow(service).to receive(:effective_borrowing_capacity).and_call_original
-        allow(service).to receive(:pledged_collateral).and_call_original
-        allow(service).to receive(:total_securities).and_call_original
-        service
-      end
+      let(:member_balance_instance) {MemberBalanceService.new(DashboardController::MEMBER_ID)}
       before do
         expect(MemberBalanceService).to receive(:new).and_return(member_balance_instance)
       end
