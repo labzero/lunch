@@ -19,27 +19,51 @@ describe MemberBalanceService do
       expect(pledged_collateral[:aa][:absolute]).to be_kind_of(Numeric)
       expect(pledged_collateral[:aa][:percentage]).to be_kind_of(Float)
     end
-    describe "`total_securities` method" do
-      let(:total_securities) {subject.total_securities}
-      it "should return a hash of hashes containing total security values" do
-        expect(total_securities.length).to be >= 1
-        expect(total_securities[:pledged_securities][:absolute]).to be_kind_of(Integer)
-        expect(total_securities[:pledged_securities][:percentage]).to be_kind_of(Float)
-        expect(total_securities[:safekept_securities][:absolute]).to be_kind_of(Integer)
-        expect(total_securities[:safekept_securities][:percentage]).to be_kind_of(Float)
-      end
+    it "should return nil if there was an API error" do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(pledged_collateral).to eq(nil)
     end
-    describe "`effective_borrowing_capacity` method" do
-      let(:effective_borrowing_capacity) {subject.effective_borrowing_capacity}
-      it "should return a hash of hashes containing effective borrowing capacity values" do
-        expect(effective_borrowing_capacity.length).to be >= 1
-        expect(effective_borrowing_capacity[:used_capacity]).to be_kind_of(Hash)
-        expect(effective_borrowing_capacity[:used_capacity][:absolute]).to be_kind_of(Integer)
-        expect(effective_borrowing_capacity[:used_capacity][:percentage]).to be_kind_of(Float)
-        expect(effective_borrowing_capacity[:unused_capacity]).to be_kind_of(Hash)
-        expect(effective_borrowing_capacity[:unused_capacity][:absolute]).to be_kind_of(Integer)
-        expect(effective_borrowing_capacity[:unused_capacity][:percentage]).to be_kind_of(Float)
-      end
+    it "should return nil if there was a connection error" do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(pledged_collateral).to eq(nil)
+    end
+  end
+  describe "`total_securities` method", :vcr do
+    let(:total_securities) {subject.total_securities}
+    it "should return a hash of hashes containing total security values" do
+      expect(total_securities.length).to be >= 1
+      expect(total_securities[:pledged_securities][:absolute]).to be_kind_of(Integer)
+      expect(total_securities[:pledged_securities][:percentage]).to be_kind_of(Float)
+      expect(total_securities[:safekept_securities][:absolute]).to be_kind_of(Integer)
+      expect(total_securities[:safekept_securities][:percentage]).to be_kind_of(Float)
+    end
+    it "should return nil if there was an API error" do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(total_securities).to eq(nil)
+    end
+    it "should return nil if there was a connection error" do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(total_securities).to eq(nil)
+    end
+  end
+  describe "`effective_borrowing_capacity` method", :vcr do
+    let(:effective_borrowing_capacity) {subject.effective_borrowing_capacity}
+    it "should return a hash of hashes containing effective borrowing capacity values" do
+      expect(effective_borrowing_capacity.length).to be >= 1
+      expect(effective_borrowing_capacity[:used_capacity]).to be_kind_of(Hash)
+      expect(effective_borrowing_capacity[:used_capacity][:absolute]).to be_kind_of(Integer)
+      expect(effective_borrowing_capacity[:used_capacity][:percentage]).to be_kind_of(Float)
+      expect(effective_borrowing_capacity[:unused_capacity]).to be_kind_of(Hash)
+      expect(effective_borrowing_capacity[:unused_capacity][:absolute]).to be_kind_of(Integer)
+      expect(effective_borrowing_capacity[:unused_capacity][:percentage]).to be_kind_of(Float)
+    end
+    it "should return nil if there was an API error" do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(effective_borrowing_capacity).to eq(nil)
+    end
+    it "should return nil if there was a connection error" do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(effective_borrowing_capacity).to eq(nil)
     end
   end
 end

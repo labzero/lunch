@@ -60,11 +60,39 @@ RSpec.describe DashboardController, :type => :controller do
     end
     describe "RateService failures" do
       let(:RatesService) {class_double(RatesService)}
-      let(:rate_service_instance) {double("rate service instance", current_overnight_vrc: nil, overnight_vrc: nil)}
-      it 'should assign @current_overnight_vrc as nil if the rate could not be retrieved' do
+      let(:rate_service_instance) {RatesService.new}
+      before do
         expect(RatesService).to receive(:new).and_return(rate_service_instance)
+      end
+      it 'should assign @current_overnight_vrc as nil if the rate could not be retrieved' do
         get :index
         expect(assigns[:current_overnight_vrc]).to eq(nil)
+      end
+      it 'should assign @market_overview rate data as nil if the rates could not be retrieved' do
+        get :index
+        expect(assigns[:market_overview][0][:data]).to eq(nil)
+      end
+    end
+    describe "MemberBalanceService failures" do
+      let(:MemberBalanceService) {class_double(MemberBalanceService)}
+      let(:member_balance_instance) {MemberBalanceService.new(DashboardController::MEMBER_ID)}
+      before do
+        expect(MemberBalanceService).to receive(:new).and_return(member_balance_instance)
+      end
+      it 'should assign @effective_borrowing_capacity as nil if the balance could not be retrieved' do
+        expect(member_balance_instance).to receive(:effective_borrowing_capacity).and_return(nil)
+        get :index
+        expect(assigns[:effective_borrowing_capacity]).to eq(nil)
+      end
+      it 'should assign @total_securities as nil if the balance could not be retrieved' do
+        expect(member_balance_instance).to receive(:total_securities).and_return(nil)
+        get :index
+        expect(assigns[:total_securities]).to eq(nil)
+      end
+      it 'should assign @pledged_collateral as nil if the balance could not be retrieved' do
+        expect(member_balance_instance).to receive(:pledged_collateral).and_return(nil)
+        get :index
+        expect(assigns[:pledged_collateral]).to eq(nil)
       end
     end
   end

@@ -20,8 +20,12 @@ describe RatesService do
     it "should allow the number of rates returned to be overridden" do
       expect(subject.overnight_vrc(5).length).to eq(5)
     end
-    it "should return nil if there was an error" do
+    it "should return nil if there was an API error" do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(rates).to eq(nil)
+    end
+    it "should return nil if there was a connection error" do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
       expect(rates).to eq(nil)
     end
   end
@@ -79,8 +83,12 @@ describe RatesService do
       expect(rate[:updated_at]).to be_kind_of(DateTime)
       expect(rate[:updated_at]).to be <= DateTime.now
     end
-    it "should return an empty array if there was an error" do
+    it "should return nil if there was an error" do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(rate).to eq(nil)
+    end
+    it "should return nil if there was a connection error" do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
       expect(rate).to eq(nil)
     end
   end
