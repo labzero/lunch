@@ -75,9 +75,13 @@
   @include pseudo-background-cover($actionable-blue);
 }
 
-%quick-advance-cell-hovered {
+@mixin quick-advance-cell-hovered {
   color: $white;
   @include pseudo-background-cover($brand-blue);
+  &.disabled-cell {
+    @include pseudo-background-cover($secondary-gray);
+    cursor: auto;
+  }  
 }
 
 %quick-advance-row-label {
@@ -88,6 +92,31 @@
 }
 
 .dashboard-quick-advance-flyout {
+  .quick-advance-desk-closed-message {
+    font-weight: $bold-weight;
+    margin-top: 35px;
+    a {
+      display: none;
+    }
+  }
+  .quick-advance-last-updated-message {
+    display: none;
+    margin-top: 15px;
+    font-weight: $semibold-weight;
+    &.show-message {
+      display: block;
+    }
+    p {
+      margin: 0;
+      &:last-child {
+        margin-bottom: 30px;
+      }
+    }
+    a {
+      color: $actionable-blue;
+      text-decoration: none;
+    }
+  }
   .icon-dollar-before:before {
     @extend %dashboard-module-advances-icon-dollar;
   }
@@ -123,7 +152,7 @@
         @extend %quick-advance-cell-selected;
       }
       &.cell-hovered {
-        @extend %quick-advance-cell-hovered;
+        @include quick-advance-cell-hovered;
       }
     }
     th {
@@ -185,7 +214,7 @@
           @extend %quick-advance-cell-selected;
         }
         &.cell-hovered {
-          @extend %quick-advance-cell-hovered;
+          @include quick-advance-cell-hovered;
         }
       }
       &:nth-child(odd) {
@@ -195,7 +224,7 @@
             @extend %quick-advance-cell-selected;
           }
           &.cell-hovered {
-            @extend %quick-advance-cell-hovered;
+            @include quick-advance-cell-hovered;
           }
         }
         td:first-child {
@@ -204,7 +233,7 @@
             @extend %quick-advance-cell-selected;
           }
           &.cell-hovered {
-            @extend %quick-advance-cell-hovered;
+            @include quick-advance-cell-hovered;
           }
         }
       }
@@ -228,7 +257,7 @@
           @extend %quick-advance-cell-selected;
         }
         &.cell-hovered {
-          @extend %quick-advance-cell-hovered;
+          @include quick-advance-cell-hovered;
         }
       }
       td:nth-child(3) {

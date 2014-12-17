@@ -7,6 +7,7 @@ class DashboardController < ApplicationController
 
   def index
     rate_service = RatesService.new
+    etransact_service = EtransactAdvancesService.new
 
     @previous_activity = [
       [t('dashboard.previous_activity.overnight_vrc'), 44503000, DateTime.new(2014,9,3)],
@@ -72,9 +73,15 @@ class DashboardController < ApplicationController
       nil
     end
 
+    @quick_advances_active = etransact_service.etransact_active?
+    # TODO replace this with the timestamp from the cached quick advance rates timestamp
+    date = DateTime.now - 2.hours
+    @quick_advance_last_updated = date.strftime("%d %^b %Y, %l:%M %p")
   end
 
   def quick_advance_rates
+    etransact_service = EtransactAdvancesService.new
+    @quick_advances_active = etransact_service.etransact_active?
     rate_data = RatesService.new.quick_advance_rates(MEMBER_ID)
     render partial: 'quick_advance_table_rows', locals: {rate_data: rate_data, advance_terms: ADVANCE_TERMS, advance_types: ADVANCE_TYPES}
   end
@@ -98,6 +105,9 @@ class DashboardController < ApplicationController
   end
 
   def current_overnight_vrc
-    render json: RatesService.new.current_overnight_vrc
+    etransact_service = EtransactAdvancesService.new
+    response = RatesService.new.current_overnight_vrc
+    response[:quick_advances_active] = etransact_service.etransact_active?
+    render json: response
   end
 end

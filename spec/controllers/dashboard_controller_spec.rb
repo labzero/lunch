@@ -54,6 +54,10 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(assigns[:current_overnight_vrc]).to be_kind_of(Float)
     end
+    it 'should assign @quick_advances_active' do
+      get :index
+      expect(assigns[:quick_advances_active]).to be_present
+    end
     describe "RateService failures" do
       let(:RatesService) {class_double(RatesService)}
       let(:rate_service_instance) {double("rate service instance", current_overnight_vrc: nil, overnight_vrc: nil)}
@@ -65,7 +69,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
   end
 
-  describe "GET quick_advance_rates" do
+  describe "GET quick_advance_rates", :vcr do
     let(:json_response) { {some: "json"}.to_json }
     let(:RatesService) {class_double(RatesService)}
     let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
@@ -114,11 +118,15 @@ RSpec.describe DashboardController, :type => :controller do
   end
 
   describe "GET current_overnight_vrc", :vcr do
-    let(:service_instance) {double('RatesService')}
+    let(:rate_service_instance) {double('RatesService')}
+    let(:etransact_service_instance) {double('EtransactAdvancesService')}
+    let(:response_hash) { {} }
     let(:RatesService) {class_double(RatesService)}
-    it 'calls `current_overnight_vrc` on the rate service' do
-      allow(RatesService).to receive(:new).and_return(service_instance)
-      expect(service_instance).to receive(:current_overnight_vrc)
+    it 'calls `current_overnight_vrc` on the rate service and `etransact_active?` on the etransact service' do
+      allow(RatesService).to receive(:new).and_return(rate_service_instance)
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
+      expect(etransact_service_instance).to receive(:etransact_active?)
+      expect(rate_service_instance).to receive(:current_overnight_vrc).and_return(response_hash)
       get :current_overnight_vrc
     end
     it 'returns a rate' do
