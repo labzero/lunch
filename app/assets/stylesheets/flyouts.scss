@@ -75,13 +75,13 @@
   @include pseudo-background-cover($actionable-blue);
 }
 
-%quick-advance-cell-hovered {
+@mixin quick-advance-cell-hovered {
   color: $white;
   @include pseudo-background-cover($brand-blue);
   &.disabled-cell {
-    background: $secondary-gray;
+    @include pseudo-background-cover($secondary-gray);
     cursor: auto;
-  }
+  }  
 }
 
 %quick-advance-row-label {
@@ -149,7 +149,7 @@
         @extend %quick-advance-cell-selected;
       }
       &.cell-hovered {
-        @extend %quick-advance-cell-hovered;
+        @include quick-advance-cell-hovered;
       }
     }
     th {
@@ -211,7 +211,7 @@
           @extend %quick-advance-cell-selected;
         }
         &.cell-hovered {
-          @extend %quick-advance-cell-hovered;
+          @include quick-advance-cell-hovered;
         }
       }
       &:nth-child(odd) {
@@ -221,7 +221,7 @@
             @extend %quick-advance-cell-selected;
           }
           &.cell-hovered {
-            @extend %quick-advance-cell-hovered;
+            @include quick-advance-cell-hovered;
           }
         }
         td:first-child {
@@ -230,7 +230,7 @@
             @extend %quick-advance-cell-selected;
           }
           &.cell-hovered {
-            @extend %quick-advance-cell-hovered;
+            @include quick-advance-cell-hovered;
           }
         }
       }
@@ -254,7 +254,7 @@
           @extend %quick-advance-cell-selected;
         }
         &.cell-hovered {
-          @extend %quick-advance-cell-hovered;
+          @include quick-advance-cell-hovered;
         }
       }
       td:nth-child(3) {
