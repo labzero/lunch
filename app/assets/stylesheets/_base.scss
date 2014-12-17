@@ -20,7 +20,13 @@ html, body {
   font-size: $default-font-size;
   color: $text-color;
   @include default-font;
+}
+
+html {
   background-color: $light-gray;
+  &.white-background {
+    background: $white;
+  }
 }
 
 body {
