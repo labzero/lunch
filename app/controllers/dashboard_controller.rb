@@ -105,6 +105,9 @@ class DashboardController < ApplicationController
   end
 
   def current_overnight_vrc
-    render json: RatesService.new.current_overnight_vrc
+    etransact_service = EtransactAdvancesService.new
+    response = RatesService.new.current_overnight_vrc
+    response[:quick_advances_active] = etransact_service.etransact_active?
+    render json: response
   end
 end

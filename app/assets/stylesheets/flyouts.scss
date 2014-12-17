@@ -100,9 +100,12 @@
     }
   }
   .quick-advance-last-updated-message {
-    display: block;
+    display: none;
     margin-top: 15px;
     font-weight: $semibold-weight;
+    &.show-message {
+      display: block;
+    }
     p {
       margin: 0;
       &:last-child {

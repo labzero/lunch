@@ -45,6 +45,14 @@ $(function () {
     $('.dashboard-quick-advance-flyout td.selectable-cell[data-advance-term=\'overnight\'][data-advance-type=\'whole\']').click();
   };
 
+  function showQuickAdvanceClosedState() {
+    $('.primary-button.initiate-quick-advance, .dashboard-module-advances .input-field-container, .flyout .input-field-container').remove();
+    $('.quick-advance-desk-closed-message').show();
+    $('.quick-advance-last-updated-message').addClass('show-message');
+    $('.dashboard-quick-advance-flyout td, .dashboard-quick-advance-flyout th').removeClass('cell-selected');
+    $('.dashboard-quick-advance-flyout .selectable-cell').addClass('disabled-cell');
+  };
+
   if (('.dashboard-module-advances').length > 0) {
     var isCheckingRate = false;
     var $rate_element = $('.dashboard-advances-rate');
@@ -54,6 +62,9 @@ $(function () {
         isCheckingRate = true;
         $.get('/dashboard/current_overnight_vrc').done(function(data) {
           $rate_element.html(data.rate).append($rate_element_children);
+          if (!data.quick_advances_active) {
+            showQuickAdvanceClosedState();
+          }
         }).always(function() {
           isCheckingRate = false;
         });
