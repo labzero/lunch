@@ -234,10 +234,6 @@ module MAPI
             response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message )
             namespaces = {'a' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns' => 'http://fhlbsf.com/schema/msg/marketdata/v1'}
             if response.success? && response.doc.search('//xmlns:transactionResult', namespaces).text != 'Error'
-              # @name = response.doc.search('//a:name', namespaces).text
-              # @pricingenv = pricingenv
-              # @snaptime = response.doc.search('//a:snapTime', namespaces).text
-              # @rate = response.doc.search('//a:value', namespaces).text
               {rate: response.doc.search('//a:value', namespaces).text.to_f, updated_at: DateTime.parse(response.doc.search('//a:snapTime', namespaces).text).to_time}
             else
               halt 503, 'Service Unavailable'
@@ -253,16 +249,62 @@ module MAPI
         end
 
         relative_get "/summary" do
-          hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_summary.json'))).with_indifferent_access
-          now = Time.now
-          # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
-          LOAN_TYPES.each do |type|
-            LOAN_TERMS.each do |term|
-              hash[type][term][:maturity_date] = (Time.mktime(now.year, now.month, now.day, now.hour, now.min) + hash[type][term][:days_to_maturity].to_i.days).to_s
+          data = if @@mds_connection
+            @@mds_connection.operations
+            request = LOAN_TYPES.collect do |type|
+            {
+              'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
+              'v1:marketData' => [{
+                'v12:name' => LOAN_MAPPING[type.to_s],
+                'v12:pricingGroup' => [{'v12:id' => 'Live'}],
+                'v12:data' => ''
+              }]
+            }
             end
+            message = {
+              'v11:caller' => [{ 'v11:id' => ENV['MAPI_COF_ACCOUNT']}],
+              'v1:requests' =>  [{'v1:fhlbsfMarketDataRequest' => request}]
+            }
+            response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message )
+            namespaces = {'a' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns' => 'http://fhlbsf.com/schema/msg/marketdata/v1'}
+            if response.success? && response.doc.search('//xmlns:transactionResult', namespaces).text != 'Error'
+              hash = {}
+              response.doc.remove_namespaces!
+              fhlbsfresponse = response.doc.xpath('//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse')
+              LOAN_TYPES.each_with_index do |type, ctr_type|
+                hash[type] ||= {}
+                fhlbsfdatapoints = fhlbsfresponse[ctr_type].css('marketData FhlbsfMarketData data FhlbsfDataPoint')
+                LOAN_TERMS.each_with_index do |term, ctr_term|
+                  if ctr_term == 0
+                    ctr_term = 1
+                  end
+                  hash[type][term] = {
+                    'payment_on' => 'Maturity',
+                    'interest_day_count' => fhlbsfresponse[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
+                    'rate' => fhlbsfdatapoints[ctr_term-1].at_css('value').content,
+                    'maturity_date' => DateTime.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content)
+                  }
+                end
+              end
+              hash['timestamp'] = Time.now
+              hash
+            else
+              halt 503, 'Service Unavailable'
+            end
+          else
+            # We have no real data source yet.
+            hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_summary.json'))).with_indifferent_access
+            now = Time.now
+            # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
+            LOAN_TYPES.each do |type|
+              LOAN_TERMS.each do |term|
+                hash[type][term][:maturity_date] = (Time.mktime(now.year, now.month, now.day, now.hour, now.min) + hash[type][term][:days_to_maturity].to_i.days).to_s
+              end
+            end
+            hash[:timestamp] = now
+            hash
           end
-          hash[:timestamp] = now
-          hash.to_json
+          data.to_json
         end
       end
     end
