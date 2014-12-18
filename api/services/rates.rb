@@ -282,7 +282,8 @@ module MAPI
                     'payment_on' => 'Maturity',
                     'interest_day_count' => fhlbsfresponse[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
                     'day_to _maturity' => (Date.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content) - Date.today).to_i,
-                    'rate' => fhlbsfdatapoints[ctr_term-1].at_css('value').content}
+                    'rate' => fhlbsfdatapoints[ctr_term-1].at_css('value').content
+                  }
                 end
               end
               hash
