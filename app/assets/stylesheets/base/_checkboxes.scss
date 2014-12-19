@@ -1,0 +1,38 @@
+.dashboard-checkbox {
+  display: none;
+}
+
+.dashboard-checkbox + label {
+  background-color: white;
+  border: 1px solid $secondary-gray;
+  padding: 9px;
+  border-radius: 3px;
+  display: inline-block;
+  position: relative;
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.dashboard-checkbox:checked + label {
+  background-color: $actionable-blue;
+}
+
+.settings-item-required .dashboard-checkbox + label {
+  &:hover {
+    cursor: auto;
+  }
+}
+
+.settings-item-required .dashboard-checkbox:checked + label {
+  background-color: $secondary-gray;
+}
+
+.dashboard-checkbox:checked + label:after {
+  content: '\2714';
+  font-size: 15px;
+  position: absolute;
+  top: 0px;
+  left: 3px;
+  color: white;
+}

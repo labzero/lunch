@@ -36,6 +36,44 @@ en:
       mortgages: Mortgages
       securities: Securities
       reports: Reports
+  settings:
+    title: Settings
+    save: Save
+    save_message: Last auto-saved
+    account:
+      title: Accounts
+    password:
+      title: Passwords
+    quick_advance:
+      title: Quick Advances
+    quick_report:
+      title: Quick Reports
+    email:
+      title: Emails
+      header: Choose which email messages to receive
+      selected_item_message: "(Be sure to include fhlbsf.com in your Safe Senders list)"
+      required_item_message_html: "You are assigned to receive these emails. For more information, <a href=\"%{url}\">contact us</a>."
+      reports:
+        title: Reports
+        description_html: "Send me reports as defined in <a href=\"%{url}\">Quick Reports Settings</a>"
+      investor_relations:
+        title: Investor Relations/Disclosure
+        description_html: Earnings releases, Annual and Quarterly financial reports, FHLBank System Combined Financial Reports, special attention bulletins like dividends, stock repurchases, etc.
+      miscellaneous :
+        title: Miscellaneous Corporate
+        description_html: These annual holiday schedule, business continuity announcements, FHFA regulations, Regulatory proposals, etc.
+      products:
+        title: Products and Services
+        description_html: New product & services offered by FHL-SF, new member announcements, annual member conference information, education meeeting announcements
+      credit:
+        title: Credit and Collateral
+        description_html: Special attention bulletings, special attention announcements sych as cganges to credit or collateral policies, borrowing cacpacity updates
+      technical:
+        title: Technical and Operational
+        description_html: Announcements of credit guide or collateral guide updates, holiday-limited pricing, operational changes, changes to reports, changes to member website, online secuirty bulletins
+      community:
+        title: Community Programs
+        description_html: Program announcements and news releases for AHP, IDEA, & WISH, AHEAD, CIP, ACE, and HPA; AHAC annual report, community works newsletter, program workshops and webinars, implementation plan updates, community investment notices.
   welcome:
     meta_title: FHLB - Welcome
     title: Welcome!
