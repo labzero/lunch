@@ -1,4 +1,6 @@
 - id ||= nil
 - id = id.parameterize if id
-%input.dashboard-checkbox{type: :'checkbox', id:"#{id}"}
+- disabled ||= false
+- checked ||=false
+%input.dashboard-checkbox{type: :'checkbox', id:"#{id}", checked: checked, disabled: disabled}
 %label{for:"#{id}"}

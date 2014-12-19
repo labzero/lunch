@@ -22,6 +22,8 @@ Rails.application.routes.draw do
 
   get '/reports' => 'reports#index'
 
+  get '/settings' => 'settings#index'
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 

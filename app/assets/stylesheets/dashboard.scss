@@ -387,32 +387,6 @@ $breakdown-table-currency-width: 10px;
   color: $accent-green;
 }
 
-.dashboard-checkbox {
-  display: none;
-}
-
-.dashboard-checkbox + label {
-  background-color: white;
-  border: 1px solid $secondary-gray;
-  padding: 9px;
-  border-radius: 3px;
-  display: inline-block;
-  position: relative;
-}
-
-.dashboard-checkbox:checked + label {
-  background-color: $actionable-blue;
-}
-
-.dashboard-checkbox:checked + label:after {
-  content: '\2714';
-  font-size: 15px;
-  position: absolute;
-  top: 0px;
-  left: 3px;
-  color: white;
-}
-
 .dashboard-module-reports {
   .dashboard-module-content {
     position: relative;
@@ -467,4 +441,3 @@ $breakdown-table-currency-width: 10px;
     }
   }
 }
-

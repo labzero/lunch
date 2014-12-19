@@ -22,6 +22,9 @@
     $flyoutBackground.fadeIn();
     $flyout.fadeIn();
 
+    // height of html must be set to auto
+    $('html').css('height', 'auto');
+
     this.trigger('flyout-initialized');
 
     var that = this;
@@ -29,6 +32,7 @@
     $flyoutCloseButton.on('click', function(event){
       that.trigger('flyout-reset-initiated');
       $flyoutBackground.fadeOut();
+      $('html').css('height', '100%'); // set html height back to 100%
       $flyout.fadeOut(function(){
         $flyoutTopSection.attr('class', 'flyout-top-section').children().not(event.target).remove();
         $flyoutBottomSection.attr('class', 'flyout-bottom-section').children().remove();

@@ -65,3 +65,15 @@
     background-color: $background-color;
   }
 }
+
+@mixin full-bleed-background($bg_color: transparent) {
+  &:after {
+    content: '';
+    background-color: $bg_color;
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    z-index: -1;
+    top: 0;
+  }
+}

@@ -56,3 +56,11 @@ $button-vertical-padding: 7px;
     content: " #{$icon-arrow-right}";
   }
 }
+
+.save-button {
+  @extend %button;
+  font-size: 1rem;
+  padding: 10px 0;
+  width: 2 * $grid-column-width + $gutter-width;
+  float: right;
+}

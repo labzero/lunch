@@ -77,7 +77,7 @@ When(/^I click on the flyout close button$/) do
 end
 
 Then(/^I should not see a flyout$/) do
-  page.assert_selector('.flyout', visible: false)
+  page.assert_selector('.flyout', :visible => :hidden)
 end
 
 Then(/^I should see the quick advance table$/) do
@@ -85,7 +85,7 @@ Then(/^I should see the quick advance table$/) do
 end
 
 Then(/^I should not see the quick advance table$/) do
-  page.assert_selector('.dashboard-quick-advance-flyout table', visible: false)
+  page.assert_selector('.dashboard-quick-advance-flyout table', :visible => :hidden)
 end
 
 Then(/^I should see a rate for the "(.*?)" term with a type of "(.*?)"$/) do |term, type|

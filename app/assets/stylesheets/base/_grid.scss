@@ -58,3 +58,14 @@
   @extend %column;
   width: $column-4x8-right-width;
 }
+
+.column-2x10-left {
+  @extend %column;
+  width:($grid-column-width * 2) + ($gutter-width * 1.5);
+}
+
+.column-2x10-right {
+  @extend %column;
+  width:($grid-column-width * 10) + ($gutter-width * 9.5);
+  margin-left: 0;
+}

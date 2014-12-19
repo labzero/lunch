@@ -1,0 +1,104 @@
+.settings-page-row {
+  .sidebar {
+    ul {
+      margin: 0 10px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    li {
+      a, &.sidebar-label {
+        padding: 10px;
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        font-weight: $semibold-weight;
+        &.active {
+          background-color: $actionable-blue;
+          color: $white;
+          border-radius: $default-border-radius;
+        }
+      }
+      &.sidebar-label {
+        padding-top: 0;
+        color: $medium-gray;
+      }
+    }
+  }
+  .column-2x10-right {
+    @include full-bleed-background($white);
+  }
+
+  a {
+    color: $actionable-blue;
+    text-decoration: none;
+  }
+}
+
+.settings-save-message {
+  display: none;
+  float: right;
+  margin: 0 $gutter-width 0;
+  line-height: 35px; // height of the button with which it's supposed to align
+}
+
+.settings-page-row .sidebar, .settings-page-main-content {
+  margin-top: 30px;
+}
+
+.settings-page-main-content {
+  @extend %pseudoelement-clearfix;
+  h1 {
+    @extend %typography-page-title;
+    margin: 0 0 25px;
+  }
+  section {
+    padding-left: $gutter-width;
+  }
+}
+
+.settings-selected-item-message, .settings-required-item-message {
+  display: none;
+  color: $medium-gray;
+  margin: 0;
+}
+
+.settings-email table {
+  border: 1px solid $light-blue;
+  border-radius: $default-border-radius;
+  margin-bottom: 30px;
+  td {
+    padding-bottom: 10px;
+    vertical-align: top;
+  }
+  td:first-child {
+    @extend %typography-subtitle;
+    width: (3 * $grid-column-width) + (1.5 * $gutter-width);
+    text-align: right;
+  }
+  td:nth-child(2) {
+    padding-left: $gutter-width;
+    padding-right: .5 * $gutter-width;
+  }
+  td:last-child {
+    @extend %typography-paragraph-tight;
+    padding-right: $gutter-width;
+  }
+  tr:first-child td{
+    padding-top: 30px;
+  }
+  tr:last-child td{
+    padding-bottom: 30px;
+  }
+}
+
+.settings-item-required {
+  .settings-required-item-message {
+    display: block;
+  }
+}
+
+.settings-item-checked {
+  .settings-selected-item-message {
+    display: block;
+  }
+}
