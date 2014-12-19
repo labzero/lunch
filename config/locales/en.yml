@@ -25,6 +25,14 @@ en:
     currency:
       thousand: T
       million: MM
+    updated: Updated
+    view: View
+    available_history: Available History
+    daily: Daily
+    monthly: Monthly
+    all: All
+    current_day: Current Day
+    quarterly: Quarterly
   nav:
     primary:
       welcome: Hi %{name}
@@ -35,7 +43,6 @@ en:
       letters_of_credit: Letters of Credit
       mortgages: Mortgages
       securities: Securities
-      reports: Reports
   settings:
     title: Settings
     save: Save
@@ -215,6 +222,77 @@ en:
       updated_th: Updated
       available_history_th: Available History
       link_td: View
+    continuously: Continuously
+    twice_daily: Twice Daily
+    history:
+      months18: 18 months
+      months36: 36 months
+      months12: 12 months
+      present2007: 2007-present
+    credit:
+      title: Credit
+      advances_detail:
+        title: Advances Detail
+        summary: Your institution’s outstanding advances such as maturity, date, estimated next payment, and prepayment fee indications. The data is downloadable, and the columns can be sorted in ascending and descending order.
+      historical_advances_detail:
+        title: Historical Advances Detail
+        summary: Provides details about your outstanding advances as of a specific date. The data is downloadable, and the columns can be sorted in ascending and descending order.
+      interest_rate:
+        title: Interest Rate Resets
+        summary: Shows advances with an interest rate reset on the effective date.
+      letters_of_credit:
+        title: Letters of Credit Detail
+        summary: Details any outstanding letters of credit.
+      forward_commitments:
+        title: Forward Commitments
+        summary: Shows all committed advances and their future funding.
+      parallel_shift:
+        title: Putable Advance Parallel Shift Sensitivity
+        summary: A measure of held assets’ price-sesitivity given a specified shift in rates.
+    collateral:
+      title: Collateral
+      borrowing_capacity:
+        title: Confirmation of Borrowing Capacity
+        summary: Covers both the Standard Credit Program and the Securities-Backed Credit Program. The loan collateral data in the Standard Credit section of the report is updated during the day to reflect the processing of new MCUs.
+      mcu:
+        title: MCU Status
+        summary: Shows data from the most recently processed MCU from your institution, including summary information and detailed information on rejected loans and loan data inconsistencies.
+    capital_stock:
+      title: Capital Stock
+      trial_balance:
+        title: Capital Stock Trial Balance
+        summary: Shows all shares owned as of a specific day.
+      activity:
+        title: Capital Stock Activity Statement
+        summary: Shows all stock activity for a specified period.
+      dividend_transaction:
+        title: Dividend Transaction Statement
+        summary: Includes the date the last dividend was paid, the dividend rate, the number and amount of shares received, and the amount of each cash dividend paid.
+      dividend_statement:
+        title: Capital Stock Dividend Statement
+        summary: Shows a detailed dividend calculation for each certificate owned during the dividend period.
+    settlement:
+      title: Settlement/Transaction Account (STA)
+      account:
+        title: Settlement/Transaction Account (STA)
+        summary: The monthly interest earned on the STA account posts on the first business day of the following month.
+    securities:
+      title: Securities
+      transactions:
+        title: Securities Transaction Report
+        summary: Reflects transactions that have settled as of 11:30 a.m. and is generally available at approximately 1:00 p.m. on the settlement day. The final report reflects all transactions that have settled that day and is generally available at the end of the business day.
+      cash_projections:
+        title: Cash Projections Detail Report
+        summary: Lists securities transactions that the custodian anticipates posting to your account over the next five days. The report reflects estimated information as of the close of business on the previous business day and is available at the beginning of the current business day.
+      current:
+        title: Current Securities Position
+        summary: Provides totals and summaries for pledged and unpledged securities as of the current day. The report is updated throughout the day and reflects changes in your securities position.
+      monthly:
+        title: Monthly Securities Position
+        summary: Provides totals and summaries for pledged and unpledged securities as of the prior monthend. The report reflects securities information as of the close of business on the last business day of the month and is generally available one business day following monthend.
+      services_monthly:
+        title: Securities Services Monthly Statement
+        summary: Provides a breakdown of the securities services fees that will be debited from your institution’s Settlement/Transaction Account on the last business day of the month. It is updated for the prior month approximately five to seven days before monthend.
     tables:
       credit:
         title: Credit
@@ -222,37 +300,31 @@ en:
           row_1:
             description:
               title: Advances Detail
-              summary: Your institution’s outstanding advances such as maturity, date, estimated next payment, and prepayment fee indications. The data is downloadable, and the columns can be sorted in ascending and descending order.
             updated: Daily
             available_history: All
           row_2:
             description:
               title: Historical Advances Detail
-              summary: Provides details about your outstanding advances as of a specific date. The data is downloadable, and the columns can be sorted in ascending and descending order.
             updated: Daily
             available_history: 18 months
           row_3:
             description:
               title: Interest Rate Resets
-              summary: Shows advances with an interest rate reset on the effective date.
             updated: Daily
             available_history: 12 months
           row_4:
             description:
               title: Letters of Credit Detail
-              summary: Details any outstanding letters of credit.
             updated: Daily
             available_history: All
           row_5:
             description:
               title: Forward Commitments
-              summary: Shows all committed advances and their future funding.
             updated: Daily
             available_history: All
           row_6:
             description:
               title: Putable Advance Parellel Shift Sensitivity Analysis
-              summary: A measure of held assets’ price-sesitivity given a specified shift in rates.
             updated: Monthly
             available_history: All
       collateral:
@@ -261,13 +333,11 @@ en:
           row_1:
             description:
               title: Confirmation of Borrowing Capacity 
-              summary: Covers both the Standard Credit Program and the Securities-Backed Credit Program. The loan collateral data in the Standard Credit section of the report is updated during the day to reflect the processing of new MCUs.
             updated: Daily
             available_history: All
           row_2:
             description:
               title: MCU Status
-              summary: Shows data from the most recently processed MCU from your institution, including summary information and detailed information on rejected loans and loan data inconsistencies.
             updated: Daily
             available_history: All
       capital_stock:
@@ -276,25 +346,20 @@ en:
           row_1:
             description:
               title: Capital Stock Trial Balance
-              summary: Shows all shares owned as of a specific day.
             updated: Daily
             available_history: All
           row_2:
             description:
-              title: Capital Stock Activity Statement
-              summary: Shows all stock activity for a specified period.
             updated: Daily
             available_history: 12 months
           row_3:
             description:
               title: Dividend Transaction Statement
-              summary: Includes the date the last dividend was paid, the dividend rate, the number and amount of shares received, and the amount of each cash dividend paid.
             updated: Quarterly
             available_history: 36 months
           row_4:
             description:
               title: Capital Stock Dividend Statement
-              summary: Shows a detailed dividend calculation for each certificate owned during the dividend period.
             updated: Quarterly
             available_history: 2007-present
       settlement_transaction_account:
@@ -303,7 +368,6 @@ en:
           row_1:
             description:
               title: Settlement/Transaction Account (STA)
-              summary: The monthly interest earned on the STA account posts on the first business day of the following month.
             updated: Daily
             available_history: All
       securities:
@@ -312,30 +376,25 @@ en:
           row_1:
             description:
               title: Securities Transaction Report
-              summary: Reflects transactions that have settled as of 11:30 a.m. and is generally available at approximately 1:00 p.m. on the settlement day. The final report reflects all transactions that have settled that day and is generally available at the end of the business day.
             updated: Twice Daily
             available_history: All
           row_2:
             description:
               title: Cash Projections Detail Report
-              summary: Lists securities transactions that the custodian anticipates posting to your account over the next five days. The report reflects estimated information as of the close of business on the previous business day and is available at the beginning of the current business day.
             updated: Daily
             available_history: Current Day
           row_3:
             description:
               title: Current Securities Position
-              summary: Provides totals and summaries for pledged and unpledged securities as of the current day. The report is updated throughout the day and reflects changes in your securities position.
             updated: Continuously
             available_history: Current Day
           row_4:
             description:
               title: Monthly Securities Position
-              summary: Provides totals and summaries for pledged and unpledged securities as of the prior monthend. The report reflects securities information as of the close of business on the last business day of the month and is generally available one business day following monthend.
             updated: Monthly
             available_history: 18 months
           row_5:
             description:
               title: Securities Services Monthly Statement
-              summary: Provides a breakdown of the securities services fees that will be debited from your institution’s Settlement/Transaction Account on the last business day of the month. It is updated for the prior month approximately five to seven days before monthend.
             updated: Monthly
             available_history: 18 months
