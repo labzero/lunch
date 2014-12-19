@@ -56,31 +56,24 @@ en:
       reports:
         title: Reports
         description_html: "Send me reports as defined in <a href=\"%{url}\">Quick Reports Settings</a>"
-        url: '#'
       investor_relations:
         title: Investor Relations/Disclosure
         description_html: Earnings releases, Annual and Quarterly financial reports, FHLBank System Combined Financial Reports, special attention bulletins like dividends, stock repurchases, etc.
-        url: '#'
       miscellaneous :
         title: Miscellaneous Corporate
         description_html: These annual holiday schedule, business continuity announcements, FHFA regulations, Regulatory proposals, etc.
-        url: '#'
       products:
         title: Products and Services
         description_html: New product & services offered by FHL-SF, new member announcements, annual member conference information, education meeeting announcements
-        url: '#'
       credit:
         title: Credit and Collateral
         description_html: Special attention bulletings, special attention announcements sych as cganges to credit or collateral policies, borrowing cacpacity updates
-        url: '#'
       technical:
         title: Technical and Operational
         description_html: Announcements of credit guide or collateral guide updates, holiday-limited pricing, operational changes, changes to reports, changes to member website, online secuirty bulletins
-        url: '#'
       community:
         title: Community Programs
         description_html: Program announcements and news releases for AHP, IDEA, & WISH, AHEAD, CIP, ACE, and HPA; AHAC annual report, community works newsletter, program workshops and webinars, implementation plan updates, community investment notices.
-        url: '#'
   welcome:
     meta_title: FHLB - Welcome
     title: Welcome!

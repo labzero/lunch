@@ -13,7 +13,6 @@
         %h1= t('settings.email.header')
         %table
           - email_options.each_with_index do |email_option, index|
-            - url = t("settings.email.#{email_option}.url") if t("settings.email.#{email_option}.url")
             %tr{class: "settings-email-#{email_option}-row #{'settings-item-required' if index == 1}"}
               %td= t("settings.email.#{email_option}.title")
               - if index == 1
@@ -21,7 +20,7 @@
               - else
                 %td= render 'shared/check_box', id: "settings_email_options_#{email_option}"
               %td
-                =t("settings.email.#{email_option}.description_html", url: url)
+                =t("settings.email.#{email_option}.description_html", url: "#")
                 %p.settings-selected-item-message= t('settings.email.selected_item_message', url: '#')
                 %p.settings-required-item-message= t('settings.email.required_item_message_html', url: '#')
         %button.primary-button.save-button= t('settings.save')
