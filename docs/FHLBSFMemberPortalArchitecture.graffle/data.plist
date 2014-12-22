@@ -53,6 +53,84 @@
 	<array>
 		<dict>
 			<key>Bounds</key>
+			<string>{{14.999992370605469, 706.93064880371094}, {270, 14}}</string>
+			<key>Class</key>
+			<string>ShapedGraphic</string>
+			<key>FitText</key>
+			<string>YES</string>
+			<key>Flow</key>
+			<string>Resize</string>
+			<key>ID</key>
+			<integer>520</integer>
+			<key>Shape</key>
+			<string>Rectangle</string>
+			<key>Style</key>
+			<dict>
+				<key>fill</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+				<key>shadow</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+				<key>stroke</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+			</dict>
+			<key>Text</key>
+			<dict>
+				<key>Pad</key>
+				<integer>0</integer>
+				<key>Text</key>
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1344\cocoasubrtf290
+\cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
+
+\f0\fs24 \cf0 This symbol indicates a managed service on AWS.}</string>
+				<key>VerticalPad</key>
+				<integer>0</integer>
+			</dict>
+			<key>Wrap</key>
+			<string>NO</string>
+		</dict>
+		<dict>
+			<key>Bounds</key>
+			<string>{{288, 704.45885467529297}, {31.493600193923779, 18.943663276556247}}</string>
+			<key>Class</key>
+			<string>ShapedGraphic</string>
+			<key>ID</key>
+			<integer>518</integer>
+			<key>ImageID</key>
+			<integer>4</integer>
+			<key>Shape</key>
+			<string>Rectangle</string>
+			<key>Style</key>
+			<dict>
+				<key>fill</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+				<key>shadow</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+				<key>stroke</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>Bounds</key>
 			<string>{{279.06800117301475, 538.12637571208199}, {17, 24}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
@@ -148,7 +226,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{16.999992370605469, 687}, {273, 14}}</string>
+			<string>{{14.999992370605469, 687}, {277, 14}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -187,7 +265,7 @@
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 Note: Shaded boxes indicate on-premise resources}</string>
+\f0\fs24 \cf0 Note: Shaded boxes indicate on-premise resources.}</string>
 				<key>VerticalPad</key>
 				<integer>0</integer>
 			</dict>
@@ -860,7 +938,7 @@ extranet DC}</string>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{394.66666666666663, 152.66666666666666}, {52, 14}}</string>
+			<string>{{394.66666666666663, 152.66666666666666}, {52, 28}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -899,7 +977,8 @@ extranet DC}</string>
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 Authoring}</string>
+\f0\fs24 \cf0 Content\
+Authoring}</string>
 				<key>VerticalPad</key>
 				<integer>0</integer>
 			</dict>
@@ -1575,7 +1654,7 @@ extranet DC}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{30.444110234578432, 369.90719795227051}, {107.55735778808594, 28}}</string>
+					<string>{{47.917007446289062, 373.22329902648926}, {107.55735778808594, 28}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -3312,7 +3391,7 @@ extranet DC}</string>
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \f0\fs24 \cf0 Attachments:\
-images?}</string>
+image?}</string>
 								<key>VerticalPad</key>
 								<integer>0</integer>
 							</dict>
@@ -3355,38 +3434,6 @@ images?}</string>
 			</array>
 			<key>ID</key>
 			<integer>169</integer>
-		</dict>
-		<dict>
-			<key>Bounds</key>
-			<string>{{481, 274}, {76.561637878417969, 28.586477279663086}}</string>
-			<key>Class</key>
-			<string>ShapedGraphic</string>
-			<key>ID</key>
-			<integer>111</integer>
-			<key>ImageID</key>
-			<integer>2</integer>
-			<key>IsLocked</key>
-			<string>YES</string>
-			<key>Shape</key>
-			<string>Rectangle</string>
-			<key>Style</key>
-			<dict>
-				<key>fill</key>
-				<dict>
-					<key>Draws</key>
-					<string>NO</string>
-				</dict>
-				<key>shadow</key>
-				<dict>
-					<key>Draws</key>
-					<string>NO</string>
-				</dict>
-				<key>stroke</key>
-				<dict>
-					<key>Draws</key>
-					<string>NO</string>
-				</dict>
-			</dict>
 		</dict>
 		<dict>
 			<key>Class</key>
@@ -3597,13 +3644,11 @@ images?}</string>
 	<array>
 		<dict/>
 		<dict/>
-		<dict/>
 	</array>
 	<key>ImageList</key>
 	<array>
 		<string>image6.tiff</string>
 		<string>image4.tiff</string>
-		<string>image2.tiff</string>
 	</array>
 	<key>KeepToScale</key>
 	<false/>
@@ -3642,7 +3687,7 @@ images?}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-11-26 19:02:48 +0000</string>
+	<string>2014-11-27 00:16:22 +0000</string>
 	<key>Modifier</key>
 	<string>Matthew Wilson</string>
 	<key>NotesVisible</key>
@@ -3733,7 +3778,7 @@ images?}</string>
 			</dict>
 		</array>
 		<key>Frame</key>
-		<string>{{1199, 427}, {1246, 990}}</string>
+		<string>{{951, 323}, {1246, 990}}</string>
 		<key>ListView</key>
 		<true/>
 		<key>OutlineWidth</key>
