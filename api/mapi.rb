@@ -22,6 +22,7 @@ require_relative 'models/capital_stock_activities'
 module MAPI
 
   class ServiceApp < Sinatra::Base
+    set :show_exceptions, ENV['MAPI_SHOW_EXCEPTIONS'] == 'true'
     require 'sinatra/activerecord'
     register Sinatra::ActiveRecordExtension
 
