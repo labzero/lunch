@@ -40,7 +40,7 @@ module MAPI
             FROM WEB_ADM.AO_TERM_BUCKETS
             WHERE (END_TIME || '00' > to_char(sysdate, 'HH24MISS')) OR
             ((trunc(OVERRIDE_END_DATE) = trunc(sysdate))
-            AND (OVERRIDE_END_TIME || '00' > TO_CHAR(SYSDATE, 'HH24MISS')))
+            AND (OVERRIDE_END_TIME || '00' > TO_CHAR(SYSDATE, 'HH24MISS'))
           SQL
 
           etransact_advances_WLVRC_on_string = <<-SQL
