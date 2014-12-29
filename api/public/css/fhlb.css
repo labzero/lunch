@@ -1,0 +1,12 @@
+.swagger-section #header {
+  background-color: #3c5db3;
+}
+
+.swagger-section #header form#api_selector .input a#explore {
+  background-color: #5ea2e3;
+}
+
+.swagger-section #header a#logo {
+  background: transparent url(../images/logo-white.png) no-repeat left center;
+  padding-left: 94px;
+}
