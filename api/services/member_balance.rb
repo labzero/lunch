@@ -157,8 +157,8 @@ module MAPI
             WHERE fhlb_id = #{member_id}
           SQL
 
-          if @connection
-            borrowing_capacity_cursor = @connection.execute(borrowing_capacity_connection_string)
+          if settings.environment == :production
+            borrowing_capacity_cursor = ActiveRecord::Base.connection.execute(borrowing_capacity_connection_string)
             total_capacity, unused_capacity = 0
             while row = borrowing_capacity_cursor.fetch()
               total_capacity = row[0]
