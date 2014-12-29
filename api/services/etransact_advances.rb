@@ -62,7 +62,7 @@ module MAPI
             if etransact_status
               etransact_status_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_turn_on_string)
               while row = etransact_status_on_cursor.fetch()
-                if row[0].to_i = STATUS_ON_RECORD_NOTFOUND_COUNT
+                if row[0].to_i == STATUS_ON_RECORD_NOTFOUND_COUNT
                   etransact_status = false
                   break
                 end

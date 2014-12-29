@@ -147,12 +147,12 @@ module MAPI
           else
             File.read(File.join(MAPI.root, 'fakes', 'member_balance_total_securities.json'))
           end
-      end
+        end
         relative_get "/:id/balance/effective_borrowing_capacity" do
           member_id = params[:id]
           borrowing_capacity_connection_string = <<-SQL
-            SELECT (NVL(REG_BORR_CAP,0) +  NVL(SBC_BORR_CAP,0) AS total_BC,
-            (NVL(EXCESS_REG_BORR_CAP,0) + NVL(EXCESS_SBC_BORR_CAP,0) AS unused_BC
+            SELECT (NVL(REG_BORR_CAP,0) +  NVL(SBC_BORR_CAP,0)) AS total_BC,
+            (NVL(EXCESS_REG_BORR_CAP,0) + NVL(EXCESS_SBC_BORR_CAP,0)) AS unused_BC
             FROM CR_MEASURES.FINAN_SUMMARY_DATA_INTRADAY_V
             WHERE fhlb_id = #{member_id}
           SQL
