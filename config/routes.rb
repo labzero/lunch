@@ -24,6 +24,8 @@ Rails.application.routes.draw do
 
   get '/settings' => 'settings#index'
 
+  post '/settings/save' => 'settings#save'
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 
