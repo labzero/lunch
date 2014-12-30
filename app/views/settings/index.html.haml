@@ -13,12 +13,13 @@
         %h1= t('settings.email.header')
         %table
           - email_options.each_with_index do |email_option, index|
-            %tr{class: "settings-email-#{email_option}-row #{'settings-item-required' if index == 1}"}
+            - checked = cookies["settings_email_options_#{email_option}"] == 'true'
+            %tr{class: "settings-email-#{email_option}-row #{'settings-item-required' if index == 1} #{'settings-item-checked' if checked}"}
               %td= t("settings.email.#{email_option}.title")
               - if index == 1
                 %td= render 'shared/check_box', id: "settings_email_options_#{email_option}", checked: true, disabled: true
               - else
-                %td= render 'shared/check_box', id: "settings_email_options_#{email_option}"
+                %td= render 'shared/check_box', id: "settings_email_options_#{email_option}", checked: checked
               %td
                 =t("settings.email.#{email_option}.description_html", url: "#")
                 %p.settings-selected-item-message= t('settings.email.selected_item_message', url: '#')
