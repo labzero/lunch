@@ -20,6 +20,7 @@ require_relative 'models/etransact_advances'
 module MAPI
 
   class ServiceApp < Sinatra::Base
+    set :show_exceptions, ENV['MAPI_SHOW_EXCEPTIONS'] == 'true'
     require 'sinatra/activerecord'
     register Sinatra::ActiveRecordExtension
 
