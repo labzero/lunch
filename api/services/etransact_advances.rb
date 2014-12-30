@@ -5,7 +5,6 @@ module MAPI
       STATUS_ON_RECORD_NOTFOUND_COUNT = 0
 
       def self.registered(app)
-        @connection = ActiveRecord::Base.establish_connection('cdb').connection if app.environment == 'production'
 
         service_root '/etransact_advances', app
         swagger_api_root :etransact_advances do
@@ -50,10 +49,10 @@ module MAPI
             WHERE WHOLE_LOAN_ENABLED = 'Y' AND AO_TERM_BUCKET_ID = 1
           SQL
 
-          if @connection
+          if settings.environment == :production
             etransact_status = false  #indicat if etransact is turn on and at least one product has not reach End Time
             wl_vrc_status = false   #indicate if WL VRC is enabled regardless of if etransact is turn on
-            etransact_eod_status_on_cursor = @connection.execute(etransact_advances_eod_on_string)
+            etransact_eod_status_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_eod_on_string)
             while row = etransact_eod_status_on_cursor.fetch()
               if row[0].to_i > STATUS_ON_RECORD_NOTFOUND_COUNT
                 etransact_status = true
@@ -61,28 +60,29 @@ module MAPI
               end
             end
             if etransact_status
-              etransact_status_on_cursor = @connection.execute(etransact_advances_turn_on_string)
+              etransact_status_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_turn_on_string)
               while row = etransact_status_on_cursor.fetch()
-                if row[0].to_i = STATUS_ON_RECORD_NOTFOUND_COUNT
+                if row[0].to_i == STATUS_ON_RECORD_NOTFOUND_COUNT
                   etransact_status = false
                   break
                 end
               end
             end
-            etransact_wl_status_on_cursor = @connection.execute(etransact_advances_WLVRC_on_string)
+            etransact_wl_status_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_WLVRC_on_string)
             while row = etransact_wl_status_on_cursor.fetch()
-              if row[0].to_i == STATUS_ON_RECORD_FOUND_COUNT
+              if row[0].to_i > STATUS_ON_RECORD_NOTFOUND_COUNT
                 wl_vrc_status = true
                 break
               end
             end
-            {
-              etransact_status: etransact_status,
-              wl_vrc_status: wl_vrc_status
-            }.to_json
           else
-            File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_status.json'))
+            results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_status.json'))).with_indifferent_access
+            etransact_status = results[:etransact_advances_status]
+            wl_vrc_status = results[:wl_vrc_status]
           end
+          { etransact_advances_status: etransact_status,
+            wl_vrc_status: wl_vrc_status
+          }.to_json
         end
       end
     end
