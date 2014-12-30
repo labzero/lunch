@@ -1,13 +1,16 @@
 $(function () {
   $('.settings-email input[type="checkbox"]').on('click', function(event){
-    $(this).closest('tr').toggleClass('settings-item-checked');
-    // imitate auto-save
-    var dateOptions = {
-      weekday: "short", year: "numeric", month: "short",
-      day: "numeric", hour: "2-digit", minute: "2-digit"
-    };
-    var now = new Date();
-    $('.settings-save-message-timestamp').html(now.toLocaleTimeString("en-us", dateOptions));
-    $('.settings-save-message').show();
+    var $this = $(this);
+    var id = $this.attr('id');
+    var checked = $this[0].checked;
+    var data = {};
+
+    $this.closest('tr').toggleClass('settings-item-checked');
+    data['cookies'] = {};
+    data['cookies'][id] = checked;
+    $.post('/settings/save', data, function(response){
+      $('.settings-save-message-timestamp').html(response['timestamp']);
+      $('.settings-save-message').show();
+    });
   });
 });
