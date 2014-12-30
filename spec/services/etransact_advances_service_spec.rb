@@ -16,5 +16,9 @@ describe EtransactAdvancesService do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
       expect(status).to be false
     end
+    it "should return false if the service was unreachable" do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(status).to be false
+    end
   end
 end
