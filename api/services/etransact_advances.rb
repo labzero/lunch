@@ -75,13 +75,14 @@ module MAPI
                 break
               end
             end
-            {
-              etransact_status: etransact_status,
-              wl_vrc_status: wl_vrc_status
-            }.to_json
           else
-            File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_status.json'))
+            results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_status.json'))).with_indifferent_access
+            etransact_status = results[:etransact_advances_status]
+            wl_vrc_status = results[:wl_vrc_status]
           end
+          { etransact_advances_status: etransact_status,
+            wl_vrc_status: wl_vrc_status
+          }.to_json
         end
       end
     end

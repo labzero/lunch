@@ -65,10 +65,12 @@ RSpec.describe DashboardController, :type => :controller do
         expect(RatesService).to receive(:new).and_return(rate_service_instance)
       end
       it 'should assign @current_overnight_vrc as nil if the rate could not be retrieved' do
+        expect(rate_service_instance).to receive(:current_overnight_vrc).and_return(nil)
         get :index
         expect(assigns[:current_overnight_vrc]).to eq(nil)
       end
       it 'should assign @market_overview rate data as nil if the rates could not be retrieved' do
+        expect(rate_service_instance).to receive(:overnight_vrc).and_return(nil)
         get :index
         expect(assigns[:market_overview][0][:data]).to eq(nil)
       end
