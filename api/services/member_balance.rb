@@ -99,12 +99,12 @@ module MAPI
             securities_cursor = ActiveRecord::Base.connection.execute(securities_connection_string)
             mortgage_mv, agency_mv, aaa_mv, aa_mv = 0
             while row = mortages_cursor.fetch()
-              mortgage_mv = row[0]
+              mortgage_mv = row[0].to_i
             end
             while row = securities_cursor.fetch()
-              agency_mv = row[0]
-              aaa_mv = row[1]
-              aa_mv = row[2]
+              agency_mv = row[0].to_i
+              aaa_mv = row[1].to_i
+              aa_mv = row[2].to_i
             end
             {
               mortgages: mortgage_mv,
@@ -138,10 +138,10 @@ module MAPI
             safekept_securities_cursor = ActiveRecord::Base.connection.execute(safekept_securities_string)
             pledged_securities, safekept_securities = 0
             while row = pledged_securities_cursor.fetch()
-              pledged_securities = row[0]
+              pledged_securities = row[0].to_i
             end
             while row = safekept_securities_cursor.fetch()
-              safekept_securities = row[0]
+              safekept_securities = row[0].to_i
             end
             {pledged_securities: pledged_securities, safekept_securities: safekept_securities}.to_json
           else
@@ -161,8 +161,8 @@ module MAPI
             borrowing_capacity_cursor = ActiveRecord::Base.connection.execute(borrowing_capacity_connection_string)
             total_capacity, unused_capacity = 0
             while row = borrowing_capacity_cursor.fetch()
-              total_capacity = row[0]
-              unused_capacity = row[1]
+              total_capacity = row[0].to_i
+              unused_capacity = row[1].to_i
             end
             {
                 total_capacity: total_capacity,
