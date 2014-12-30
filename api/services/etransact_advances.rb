@@ -70,7 +70,7 @@ module MAPI
             end
             etransact_wl_status_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_WLVRC_on_string)
             while row = etransact_wl_status_on_cursor.fetch()
-              if row[0].to_i == STATUS_ON_RECORD_FOUND_COUNT
+              if row[0].to_i == STATUS_ON_RECORD_NOTFOUND_COUNT
                 wl_vrc_status = true
                 break
               end
