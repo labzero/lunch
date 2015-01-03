@@ -2,6 +2,9 @@ require 'spec_helper'
 
 describe MAPI::ServiceApp do
   MEMBER_ID = 750
+  FROM_DATE = '2014-01-01'
+  TO_DATE = '2014-12-31'
+  CAPSTOCK_DATE_FORMAT = /\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/
   before do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
   end
@@ -32,6 +35,27 @@ describe MAPI::ServiceApp do
       effective_borrowing_capacity_type = ['total_capacity', 'unused_capacity']
       effective_borrowing_capacity_type.each do |effective_borrowing_capacity_type|
         expect(effective_borrowing_capacity[effective_borrowing_capacity_type]).to be_kind_of(Numeric)
+      end
+    end
+  end
+
+  describe "Capital Stock balances" do
+    let(:capital_stock_balance) { get "/member/#{MEMBER_ID}/capital_stock_balance/#{FROM_DATE}"; JSON.parse(last_response.body) }
+    it "header data should have value" do
+      expect(capital_stock_balance.length).to be >= 1
+      expect(capital_stock_balance['balance']).to be_kind_of(String)
+      expect(capital_stock_balance['balance_date']).to match(CAPSTOCK_DATE_FORMAT)
+    end
+  end
+  describe "Capital Stock Activities" do
+    let(:capital_stock_activities) { get "/member/#{MEMBER_ID}/capital_stock_activities/#{FROM_DATE}/#{TO_DATE}"; JSON.parse(last_response.body) }
+    it "activities data should have value" do
+      capital_stock_activities['activities'].each do |activity|
+        expect(activity['cert_id']).to be_kind_of(String)
+        expect(activity['share_number']).to be_kind_of(String)
+        expect(activity['trans_date']).to match(CAPSTOCK_DATE_FORMAT)
+        expect(activity['trans_type']).to be_kind_of(String)
+        expect(activity['dr_cr']) == ('C' || 'D')
       end
     end
   end

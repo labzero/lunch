@@ -73,8 +73,73 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, "/{id}/capital_stock_balance/{from_date}"
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve Capital Stock Balance for a specific date for a member'
+              key :notes, 'Returns Capital Stock Balance and Open/Close balance for the selected date.'
+              key :type, :CapitalStockBalance
+              key :nickname, :getCapitalStockBalanceForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :defaultValue, (Date.today-1).to_s
+                key :name, :from_date
+                key :required, true
+                key :type, :string
+                key :description, 'Start date yyyy-mm-dd for the Capital Stock Activities Report.'
+              end
+          end
+          end
+          api do
+            key :path, "/{id}/capital_stock_activities/{from_date}/{to_date}"
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve Capital Stock Activities transactions.'
+              key :notes, 'Returns Capital Stock Activities for the selected periord.'
+              key :type, :CapitalStockActivities
+              key :nickname, :getCapitalStockActivitiesForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :from_date
+                key :defaultValue, (Date.today-7).to_s
+                key :required, true
+                key :type, :string
+                key :description, 'Start date yyyy-mm-dd for the Capital Stock Activities Report.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :to_date
+                key :defaultValue, (Date.today-1).to_s
+                key :required, true
+                key :type, :string
+                key :description, 'End date yyyy-mm-dd for the Capital Stock Activities Report.'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 404
+                key :message, 'Invalid input'
+              end
+            end
+          end
         end
-
         # pledged collateral route
         relative_get "/:id/balance/pledged_collateral" do
           member_id = params[:id]
@@ -116,8 +181,6 @@ module MAPI
             File.read(File.join(MAPI.root, 'fakes', 'member_balance_pledged_collateral.json'))
           end
         end
-
-
         # total securities route
         relative_get "/:id/balance/total_securities" do
           member_id = params[:id]
@@ -171,6 +234,92 @@ module MAPI
           else
             File.read(File.join(MAPI.root, 'fakes', 'member_balance_effective_borrowing_capacity.json'))
           end
+        end
+        # capital stock activities
+        relative_get "/:id/capital_stock_balance/:from_date" do
+          member_id = params[:id]
+          from_date = params[:from_date]
+          m = /\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/
+
+          #1.check that input for from and to dates are valid date and expected format
+          check_date_format = from_date.match(m)
+          if !check_date_format
+            halt 404, "Invalid Start Date format of yyyy-mm-dd"
+          end
+
+          capstock_balance_start_connection_string = <<-SQL
+          SELECT sum(no_share_holding) as open_balance_cf
+          FROM capstock.capstock_shareholding
+          WHERE fhlb_id = #{member_id}
+          AND (sold_date is null or sold_date >= to_date(#{from_date}, 'yyyy-mm-dd') )
+          AND purchase_date < to_date(#{from_date}, 'yyyy-mm-dd')
+          GROUP BY fhlb_id
+          SQL
+
+
+          if settings.environment == :production
+            cp_start_cursor = ActiveRecord::Base.connection.execute(capstock_balance_start_connection_string)
+
+            while row = cp_start_cursor.fetch()
+              open_balance = row[0]
+            end
+          else
+            results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'capital_stock_balances.json'))).with_indifferent_access
+            open_balance = results[:open_balance]
+          end
+          {
+              balance: open_balance,
+              balance_date: from_date
+          }.to_json
+        end
+        # capital stock activities
+        relative_get "/:id/capital_stock_activities/:from_date/:to_date" do
+          member_id = params[:id]
+          from_date = params[:from_date]
+          to_date = params[:to_date]
+          m = /\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/
+
+          check_date_format = from_date.match(m)
+          if !check_date_format
+            halt 404, "Invalid Start Date format of yyyy-mm-dd"
+          end
+
+          capstockactivities_transactions_connection_string = <<-SQL
+          SELECT CERT_ID, NO_SHARE, to_char(TRAN_DATE, 'yyyy-mm-dd') as TRAN_DATE, NVL(TRAN_TYPE, '-') TRAN_TYPE, NVL(DR_CR, '-') DR_CR
+          FROM CAPSTOCK.ACCOUNT_ACTIVITY_V Vw
+          WHERE fhlb_id = #{member_id}
+          AND tran_date >= to_date(#{from_date}, 'yyyy-mm-dd')
+          AND tran_date <= to_date(#{to_date}, 'yyyy-mm-dd')
+          SQL
+
+          if settings.environment == :production
+            cp_trans_cursor = ActiveRecord::Base.connection.execute(capstockactivities_transactions_connection_string)
+            activities = Array.new
+            while row = cp_trans_cursor.fetch()
+              hash = {"cert_id" => row[0],
+                      "share_number" => row[1],
+                      "trans_date" => row[2],
+                      "trans_type" => row[3],
+                      "dr_cr" => row[4]}
+              activities.push(hash)
+            end
+          else
+            results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'capital_stock_activities.json')))
+            activities = Array.new
+            results["Activities"].each do |activity|
+              formatteddate = Date.parse(activity["trans_date"])
+                  hash = {"cert_id" => activity["cert_id"],
+                      "share_number" => activity["share_number"],
+                      "trans_date" => formatteddate.to_s,
+                      "trans_type" => activity["trans_type"],
+                      "dr_cr" => activity["dr_cr"]
+              }
+              activities.push(hash)
+            end
+          end
+          {
+            activities: activities
+          }.to_json
         end
       end
     end
