@@ -37,6 +37,7 @@ gem 'rails-sass-images' # allows us to measure native image dimensions in our sc
 gem 'source-sans-pro-rails'
 gem 'highcharts-rails'
 gem 'jquery-placeholder-rails'
+gem 'jquery-datatables-rails'
 
 # for MAPI
 gem 'sinatra', require: false
