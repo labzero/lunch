@@ -64,3 +64,29 @@ $button-vertical-padding: 7px;
   width: 2 * $grid-column-width + $gutter-width;
   float: right;
 }
+
+.report-button-left {
+  @extend .primary-button;
+}
+
+.report-split-button {
+  font-size: 0; // get rid of whitespace between buttons
+  .report-button-right {
+    @extend .primary-button;
+    border-bottom-left-radius: $default-border-radius;
+    border-top-left-radius: $default-border-radius;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+  }
+  .report-drop-down-right {
+    @extend .down-button;
+    border-bottom-right-radius: $default-border-radius;
+    border-top-right-radius: $default-border-radius;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    vertical-align: bottom;
+    border: 1px solid $actionable-blue;
+    padding-bottom: $button-vertical-padding - 1px;
+    padding-top: $button-vertical-padding - 1px;
+  }
+}

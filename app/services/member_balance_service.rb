@@ -74,4 +74,28 @@ class MemberBalanceService
         unused_capacity: {absolute: unused_capacity, percentage: unused_capacity.fdiv(total_capacity)*100}
     }.with_indifferent_access
   end
+
+  def capital_stock_activity(start_date, end_date)
+    # TODO rewrite this once the MAPI endpoint is done (MEM-228) and you have a better idea of what you'll be hitting and what you'll be getting back
+    data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'capital_stock_activity.json'))).with_indifferent_access
+    data[:total_credits] = 0
+    data[:total_debits] = 0
+    data[:activities].each_with_index do |row, i|
+      data[:activities][i][:credit_shares] = 0
+      data[:activities][i][:debit_shares] = 0
+      data[:activities][i][:trans_date]= Date.parse(data[:activities][i][:trans_date]).strftime('%m/%d/%Y')
+      puts data[:activities][i][:trans_date]
+      shares = data[:activities][i][:share_number].to_i
+      if row[:dr_cr] == 'C'
+        data[:activities][i][:credit_shares] = shares
+        data[:total_credits] += shares
+      elsif row[:dr_cr] == 'D'
+        data[:activities][i][:debit_shares] = shares
+        data[:total_debits] += shares
+      else
+        Rails.logger.warn("MemberBalanceService.capital_stock_activity returned #{data[:dr_cr]} for share type on row number #{i}. Share type should be either 'C' for Credit or 'D' for Debit.")
+      end
+    end
+    data
+  end
 end

@@ -99,6 +99,7 @@ en:
       view: View
       download: Download
       xml: XML
+      print: Print
     previous_activity:
       title: Previous Activity
       overnight_vrc: Overnight VRC Open
@@ -398,3 +399,17 @@ en:
               title: Securities Services Monthly Statement
             updated: Monthly
             available_history: 18 months
+    pages:
+      capital_stock_activity:
+        title: Capital Stock Activity Statement
+        balance_heading: Opening balance of Class B Shares as of
+        table_title: Class B stock at $100 per share
+        table_headings:
+          list: trans_date cert_id debit_shares credit_shares trans_type
+          trans_date: Date
+          cert_id: Certificate Sequence
+          debit_shares: "Debits: Number of Shares"
+          credit_shares: "Credits: Number of Shares"
+          trans_type: Transaction Type
+          total: Totals
+        notes_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at (415) 616-2634 or (415) 616-2913.

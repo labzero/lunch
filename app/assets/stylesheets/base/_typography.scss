@@ -1,6 +1,6 @@
 @mixin typography-page-title {
-  font-size: 1.2rem;
-  font-weight: $bold-weight;
+  font-size: 1.4667rem;
+  font-weight: $semibold-weight;
 }
 
 @mixin typography-section-title {
@@ -94,6 +94,11 @@
   font-weight: $semibold-weight;
 }
 
+@mixin typography-report-summary {
+  font-size: 2.4rem;
+  font-weight: $light-weight;
+}
+
 %typography-page-title {
   @include typography-page-title;
 }
@@ -168,4 +173,8 @@
 
 %typography-confirmation-data {
   @include typography-confirmation-data;
+}
+
+%typography-report-summary {
+  @include typography-report-summary;
 }

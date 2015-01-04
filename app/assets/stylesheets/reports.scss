@@ -69,3 +69,51 @@
     width: ( 2 * $grid-column-width) + (2 * $gutter-width);
   }
 }
+
+.report-header-buttons {
+  float: right;
+  margin-top: 32px;
+}
+
+.report {
+  h1 {
+    @extend %typography-page-title;
+    margin: 32px 0 17px;
+  }
+}
+
+.report-header {
+  @extend %clearfix;
+  margin-bottom: 50px;
+  h1 {
+    float: left;
+  }
+}
+
+.report-datepicker {
+  width: (3 * $grid-column-width) + (2 * $gutter-width);
+}
+
+.report-main-body {
+  h3 {
+    @extend %typography-subtitle;
+    margin: 0;
+  }
+}
+
+.report-summary-data {
+  display: inline-block;
+  width: (3 * $grid-column-width) + (2 * $gutter-width);
+  margin-right: $grid-column-width + (2 * $gutter-width);
+  margin-bottom: 40px;
+  p {
+    @extend %typography-report-summary;
+    color: $actionable-blue;
+    margin: 0;
+  }
+}
+
+.report-table-title {
+  @extend %typography-section-title;
+  margin: 0 0 15px;
+}
