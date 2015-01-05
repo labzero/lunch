@@ -22,4 +22,4 @@
             %td.updated-cell= details[:updated]
             %td.history-cell= details[:available_history]
             %td
-              =link_to t('global.view'), ''
+              =link_to t('global.view'), details[:route] || '#'

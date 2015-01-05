@@ -48,7 +48,8 @@ class ReportsController < ApplicationController
         },
         activity: {
           updated: t('global.daily'),
-          available_history: t('reports.history.months12')
+          available_history: t('reports.history.months12'),
+          route: reports_capital_stock_activity_path
         },
         dividend_transaction: {
           updated: t('global.quarterly'),
