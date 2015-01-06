@@ -96,6 +96,14 @@ module MAPI
                 key :type, :string
                 key :description, 'Start date yyyy-mm-dd for the Capital Stock Activities Report.'
               end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 404
+                key :message, 'Invalid input'
+              end
           end
           end
           api do
@@ -256,32 +264,31 @@ module MAPI
           GROUP BY fhlb_id
           SQL
 
-
           if settings.environment == :production
             cp_start_cursor = ActiveRecord::Base.connection.execute(capstock_balance_start_connection_string)
 
-            while row = cp_start_cursor.fetch()
-              open_balance = row[0]
-            end
+            open_balance = (cp_start_cursor.fetch() || [nil])[0]
           else
             results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'capital_stock_balances.json'))).with_indifferent_access
             open_balance = results[:open_balance]
           end
           {
-              balance: open_balance,
-              balance_date: from_date
+              balance: (open_balance || 0).to_f,
+              balance_date: from_date.to_date
           }.to_json
         end
+
         # capital stock activities
         relative_get "/:id/capital_stock_activities/:from_date/:to_date" do
           member_id = params[:id]
           from_date = params[:from_date]
           to_date = params[:to_date]
           m = /\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/
-
-          check_date_format = from_date.match(m)
-          if !check_date_format
-            halt 404, "Invalid Start Date format of yyyy-mm-dd"
+          [from_date, to_date].each do |date|
+            check_date_format = date.match(m)
+            if !check_date_format
+              halt 404, "Invalid Start Date format of yyyy-mm-dd"
+            end
           end
 
           capstockactivities_transactions_connection_string = <<-SQL
@@ -294,23 +301,23 @@ module MAPI
 
           if settings.environment == :production
             cp_trans_cursor = ActiveRecord::Base.connection.execute(capstockactivities_transactions_connection_string)
-            activities = Array.new
+            activities = []
             while row = cp_trans_cursor.fetch()
-              hash = {"cert_id" => row[0],
-                      "share_number" => row[1],
+              hash = {"cert_id" => row[0].to_s,
+                      "share_number" => row[1].to_f,
                       "trans_date" => row[2],
-                      "trans_type" => row[3],
-                      "dr_cr" => row[4]}
+                      "trans_type" => row[3].to_s,
+                      "dr_cr" => row[4].to_s}
               activities.push(hash)
             end
           else
             results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'capital_stock_activities.json')))
-            activities = Array.new
+            activities = []
             results["Activities"].each do |activity|
-              formatteddate = Date.parse(activity["trans_date"])
+              formatted_date = Date.parse(activity["trans_date"])
                   hash = {"cert_id" => activity["cert_id"],
-                      "share_number" => activity["share_number"],
-                      "trans_date" => formatteddate.to_s,
+                      "share_number" => activity["share_number"].to_f,
+                      "trans_date" => formatted_date,
                       "trans_type" => activity["trans_type"],
                       "dr_cr" => activity["dr_cr"]
               }
