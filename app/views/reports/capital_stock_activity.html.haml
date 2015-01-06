@@ -12,29 +12,33 @@
   .report-main-body
     .report-summary-data
       %h3
-        = t('reports.pages.capital_stock_activity.balance_heading')
-        %span= @capital_stock_activity[:start_date]
-      %p= number_with_delimiter(@capital_stock_activity[:start_balance]) + ' shares'
+        = t('reports.pages.capital_stock_activity.balance_heading', date: @start_date.strftime('%B %-d, %Y'))
+      %p= t('reports.share_count', count: number_with_delimiter(@capital_stock_activity[:start_balance]))
     .report-summary-data
       %h3
-        = t('reports.pages.capital_stock_activity.balance_heading')
-        %span= @capital_stock_activity[:end_date]
-      %p= number_with_delimiter(@capital_stock_activity[:end_balance]) + ' shares'
+        = t('reports.pages.capital_stock_activity.balance_heading', date: @end_date.strftime('%B %-d, %Y'))
+      %p= t('reports.share_count', count: number_with_delimiter(@capital_stock_activity[:end_balance]))
     %h2.report-table-title= t('reports.pages.capital_stock_activity.table_title')
-    %table.report-table
+    %table.report-table{data: {sortable: true}}
       %thead
         %tr
-          -@table_keys.each do |key|
-            %th= t("reports.pages.capital_stock_activity.table_headings.#{key}")
+          %th.report-cell-narrow= t("global.date")
+          %th= t('reports.pages.capital_stock_activity.certificate_sequence')
+          %th= t('reports.pages.capital_stock_activity.debit_shares')
+          %th= t('reports.pages.capital_stock_activity.credit_shares')
+          %th.report-cell-expanding= t('global.transaction_type')
       %tbody
         -@capital_stock_activity[:activities].each do |row|
           %tr
-            -@table_keys.each do |key|
-              %td{data: {'column-type' => key, 'sort-value' => row[key]}}= row[key]
+            %td.report-cell-narrow= row['trans_date']
+            %td= row['cert_id']
+            %td.report-cell-right= number_with_delimiter row['debit_shares']
+            %td.report-cell-right= number_with_delimiter row['credit_shares']
+            %td.report-cell-expanding= row['trans_type']
       %tfoot
         %tr
-          %td{colspan: 2}= t('reports.pages.capital_stock_activity.table_headings.total')
-          %td= @capital_stock_activity[:total_debits]
-          %td= @capital_stock_activity[:total_credits]
-        %td
-    %small= t('reports.pages.capital_stock_activity.notes_html', url: '/#')
+          %td.report-cell-total.report-cell-narrow{colspan: 2}= t('global.totals')
+          %td.report-cell-right= number_with_delimiter @capital_stock_activity[:total_debits]
+          %td.report-cell-right= number_with_delimiter @capital_stock_activity[:total_credits]
+          %td.report-cell-expanding
+    %small= t('reports.accuracy_notice_html', url: '#')

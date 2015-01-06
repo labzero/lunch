@@ -64,6 +64,11 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-table-total {
+  font-size: 0.8rem;
+  font-weight: $semibold-weight;
+}
+
 @mixin typography-field-placeholder {
   font-size: 1rem;
   font-weight: $normal-weight;
@@ -145,6 +150,10 @@
 
 %typography-table-cell {
   @include typography-table-cell;
+}
+
+%typography-table-total {
+  @include typography-table-total;
 }
 
 %typography-subtitle {

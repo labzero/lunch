@@ -99,6 +99,13 @@
     @extend %typography-subtitle;
     margin: 0;
   }
+  small {
+    width: 540px;
+    display: block;
+    a {
+      color: $actionable-blue;
+    }
+  }
 }
 
 .report-summary-data {
@@ -116,4 +123,81 @@
 .report-table-title {
   @extend %typography-section-title;
   margin: 0 0 15px;
+}
+
+.report-table {
+  margin-bottom: 50px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid $light-blue;
+  border-collapse: collapse;
+  line-height: 1;
+
+  td, th {
+    border: solid $light-blue;
+    border-width: 0 1px 1px 0;
+    padding: 10px 15px 10px 15px;
+    font-weight: inherit;
+    width: 1px; // Causes the table cell to shrink to fit
+    white-space: nowrap;
+  }
+
+  thead {
+    @extend %typography-table-heading;
+    background-color: $light-gray;
+  }
+
+  tbody {
+    @extend %typography-table-cell;
+    tr:nth-child(odd) {
+      background-color: $lightest-blue;
+    }
+  }
+
+  tfoot {
+    @extend %typography-table-total;
+    background-color: $medium-gray;
+    color: $white;
+  }
+
+  .report-cell-right {
+    text-align: right;
+  }
+
+  .report-cell-total {
+    border-right-width: 0px;
+  }
+
+  .report-cell-narrow {
+    padding-left: 10px;
+  }
+
+  .report-cell-expanding {
+    width: auto;
+  }
+
+  .sorting, .sorting_asc, .sorting_desc {
+    &:after {
+      @extend %icon-font;
+      content: "";
+      display: inline-block;
+      padding-left: 23px;
+      color: $actionable-blue;
+      vertical-align: middle;
+    }
+  }
+
+  .sorting_asc, .sorting_desc {
+    &:after {
+      padding-left: 10px;
+    }
+  }
+
+  .sorting_asc:after {
+    content: "#{$icon-chevron}";
+  }
+
+  .sorting_desc:after {
+    content: "#{$icon-caret}";
+  }
 }

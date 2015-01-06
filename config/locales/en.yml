@@ -33,6 +33,10 @@ en:
     all: All
     current_day: Current Day
     quarterly: Quarterly
+    date: Date
+    total: Total
+    totals: Totals
+    transaction_type: Transaction Type
   nav:
     primary:
       welcome: Hi %{name}
@@ -225,6 +229,9 @@ en:
       link_td: View
     continuously: Continuously
     twice_daily: Twice Daily
+    share_count: # supports all CLDR rules
+      one: "%{count} share"
+      other: "%{count} shares"
     history:
       months18: 18 months
       months36: 36 months
@@ -294,122 +301,12 @@ en:
       services_monthly:
         title: Securities Services Monthly Statement
         summary: Provides a breakdown of the securities services fees that will be debited from your institution’s Settlement/Transaction Account on the last business day of the month. It is updated for the prior month approximately five to seven days before monthend.
-    tables:
-      credit:
-        title: Credit
-        rows:
-          row_1:
-            description:
-              title: Advances Detail
-            updated: Daily
-            available_history: All
-          row_2:
-            description:
-              title: Historical Advances Detail
-            updated: Daily
-            available_history: 18 months
-          row_3:
-            description:
-              title: Interest Rate Resets
-            updated: Daily
-            available_history: 12 months
-          row_4:
-            description:
-              title: Letters of Credit Detail
-            updated: Daily
-            available_history: All
-          row_5:
-            description:
-              title: Forward Commitments
-            updated: Daily
-            available_history: All
-          row_6:
-            description:
-              title: Putable Advance Parellel Shift Sensitivity Analysis
-            updated: Monthly
-            available_history: All
-      collateral:
-        title: Collateral
-        rows:
-          row_1:
-            description:
-              title: Confirmation of Borrowing Capacity 
-            updated: Daily
-            available_history: All
-          row_2:
-            description:
-              title: MCU Status
-            updated: Daily
-            available_history: All
-      capital_stock:
-        title: Capital Stock
-        rows:
-          row_1:
-            description:
-              title: Capital Stock Trial Balance
-            updated: Daily
-            available_history: All
-          row_2:
-            description:
-            updated: Daily
-            available_history: 12 months
-          row_3:
-            description:
-              title: Dividend Transaction Statement
-            updated: Quarterly
-            available_history: 36 months
-          row_4:
-            description:
-              title: Capital Stock Dividend Statement
-            updated: Quarterly
-            available_history: 2007-present
-      settlement_transaction_account:
-        title: Settlement/Transaction Account (STA)
-        rows:
-          row_1:
-            description:
-              title: Settlement/Transaction Account (STA)
-            updated: Daily
-            available_history: All
-      securities:
-        title: Securities
-        rows:
-          row_1:
-            description:
-              title: Securities Transaction Report
-            updated: Twice Daily
-            available_history: All
-          row_2:
-            description:
-              title: Cash Projections Detail Report
-            updated: Daily
-            available_history: Current Day
-          row_3:
-            description:
-              title: Current Securities Position
-            updated: Continuously
-            available_history: Current Day
-          row_4:
-            description:
-              title: Monthly Securities Position
-            updated: Monthly
-            available_history: 18 months
-          row_5:
-            description:
-              title: Securities Services Monthly Statement
-            updated: Monthly
-            available_history: 18 months
     pages:
       capital_stock_activity:
         title: Capital Stock Activity Statement
-        balance_heading: Opening balance of Class B Shares as of
+        balance_heading: "Opening balance of Class B Shares as of %{date}:"
         table_title: Class B stock at $100 per share
-        table_headings:
-          list: trans_date cert_id debit_shares credit_shares trans_type
-          trans_date: Date
-          cert_id: Certificate Sequence
-          debit_shares: "Debits: Number of Shares"
-          credit_shares: "Credits: Number of Shares"
-          trans_type: Transaction Type
-          total: Totals
-        notes_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at (415) 616-2634 or (415) 616-2913.
+        certificate_sequence: Certificate Sequence
+        debit_shares: "Debits: Number of Shares"
+        credit_shares: "Credits: Number of Shares"
+    accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at (415) 616-2634 or (415) 616-2913.

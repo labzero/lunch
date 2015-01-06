@@ -93,10 +93,9 @@ class ReportsController < ApplicationController
 
   def capital_stock_activity
     member_balances = MemberBalanceService.new(MEMBER_ID)
-    start_date = Time.now - 1.month
-    end_date = Time.now
-    @capital_stock_activity = member_balances.capital_stock_activity(start_date, end_date)
-    @table_keys = t('reports.pages.capital_stock_activity.table_headings.list').split(' ')
+    @start_date = Date.today - 1.month
+    @end_date = Date.today
+    @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
   end
 
 end
