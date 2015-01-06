@@ -247,10 +247,9 @@ module MAPI
         relative_get "/:id/capital_stock_balance/:from_date" do
           member_id = params[:id]
           from_date = params[:from_date]
-          m = /\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/
 
           #1.check that input for from and to dates are valid date and expected format
-          check_date_format = from_date.match(m)
+          check_date_format = from_date.match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/)
           if !check_date_format
             halt 404, "Invalid Start Date format of yyyy-mm-dd"
           end
@@ -283,16 +282,15 @@ module MAPI
           member_id = params[:id]
           from_date = params[:from_date]
           to_date = params[:to_date]
-          m = /\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/
           [from_date, to_date].each do |date|
-            check_date_format = date.match(m)
+            check_date_format = date.match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/)
             if !check_date_format
               halt 404, "Invalid Start Date format of yyyy-mm-dd"
             end
           end
 
           capstockactivities_transactions_connection_string = <<-SQL
-          SELECT CERT_ID, NO_SHARE, to_char(TRAN_DATE, 'yyyy-mm-dd') as TRAN_DATE, NVL(TRAN_TYPE, '-') TRAN_TYPE, NVL(DR_CR, '-') DR_CR
+          SELECT CERT_ID, NO_SHARE, TRAN_DATE, NVL(TRAN_TYPE, '-') TRAN_TYPE, NVL(DR_CR, '-') DR_CR
           FROM CAPSTOCK.ACCOUNT_ACTIVITY_V Vw
           WHERE fhlb_id = #{member_id}
           AND tran_date >= to_date(#{from_date}, 'yyyy-mm-dd')
@@ -305,7 +303,7 @@ module MAPI
             while row = cp_trans_cursor.fetch()
               hash = {"cert_id" => row[0].to_s,
                       "share_number" => row[1].to_f,
-                      "trans_date" => row[2],
+                      "trans_date" => row[2].to_s,
                       "trans_type" => row[3].to_s,
                       "dr_cr" => row[4].to_s}
               activities.push(hash)
@@ -314,18 +312,28 @@ module MAPI
             results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'capital_stock_activities.json')))
             activities = []
             results["Activities"].each do |activity|
-              formatted_date = Date.parse(activity["trans_date"])
                   hash = {"cert_id" => activity["cert_id"],
                       "share_number" => activity["share_number"].to_f,
-                      "trans_date" => formatted_date,
+                      "trans_date" => activity["trans_date"],
                       "trans_type" => activity["trans_type"],
                       "dr_cr" => activity["dr_cr"]
-              }
+                      }
               activities.push(hash)
             end
           end
+          activities_formatted = []
+          activities.each do |row|
+            formatted_date = Date.parse(row["trans_date"].to_s).strftime("%F")
+            hash = {"cert_id" => row["cert_id"],
+                    "share_number" => row["share_number"].to_f,
+                    "trans_date" => formatted_date,
+                    "trans_type" => row["trans_type"],
+                    "dr_cr" => row["dr_cr"]
+            }
+             activities_formatted.push(hash)
+          end
           {
-            activities: activities
+            activities: activities_formatted
           }.to_json
         end
       end
