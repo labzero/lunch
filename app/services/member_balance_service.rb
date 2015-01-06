@@ -84,7 +84,6 @@ class MemberBalanceService
       data[:activities][i][:credit_shares] = 0
       data[:activities][i][:debit_shares] = 0
       data[:activities][i][:trans_date]= Date.parse(data[:activities][i][:trans_date]).strftime('%m/%d/%Y')
-      puts data[:activities][i][:trans_date]
       shares = data[:activities][i][:share_number].to_i
       if row[:dr_cr] == 'C'
         data[:activities][i][:credit_shares] = shares
