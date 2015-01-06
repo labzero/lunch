@@ -39,7 +39,7 @@ describe MAPI::ServiceApp do
     end
   end
 
-  describe "capital stock balances" do
+  describe 'capital stock balances' do
     let(:capital_stock_balance) { get "/member/#{MEMBER_ID}/capital_stock_balance/#{FROM_DATE}"; JSON.parse(last_response.body) }
     RSpec.shared_examples 'a capital stock balance endpoint' do
       it 'should return a number for the balance' do
@@ -49,7 +49,7 @@ describe MAPI::ServiceApp do
         expect(capital_stock_balance['balance_date']).to match(CAPSTOCK_DATE_FORMAT)
       end
     end
-    describe "in the production environment" do
+    describe 'in the production environment' do
       let!(:some_balance) {123.4}
       let(:result_set) {double('Oracle Result Set', fetch: nil)}
       before do
@@ -58,24 +58,24 @@ describe MAPI::ServiceApp do
         expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
         allow(result_set).to receive(:fetch).and_return([some_balance], nil)
       end
-      it "should return zero for balance if no balance was found" do
+      it 'should return zero for balance if no balance was found' do
         expect(result_set).to receive(:fetch).and_return(nil)
         expect(capital_stock_balance['balance']).to eq(0)
       end
-      it "should return the first balance found (first column of first row)" do
+      it 'should return the first balance found (first column of first row)' do
         expect(capital_stock_balance['balance']).to eq(some_balance)
       end
-      it "should not return the second column found" do
+      it 'should not return the second column found' do
         expect(result_set).to receive(:fetch).and_return([124.5, some_balance], nil).at_least(1).times
         expect(capital_stock_balance['balance']).not_to eq(some_balance)
       end
-      it "should not return the second row found" do
+      it 'should not return the second row found' do
         expect(result_set).to receive(:fetch).and_return([124.5], [some_balance], nil).at_least(1).times
         expect(capital_stock_balance['balance']).not_to eq(some_balance)
       end
       it_behaves_like 'a capital stock balance endpoint'
     end
-    describe "in the development environment" do
+    describe 'in the development environment' do
       it_behaves_like 'a capital stock balance endpoint'
     end
     it 'invalid param result in 404 error message' do

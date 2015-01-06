@@ -243,7 +243,7 @@ module MAPI
             File.read(File.join(MAPI.root, 'fakes', 'member_balance_effective_borrowing_capacity.json'))
           end
         end
-        # capital stock activities
+        # capital stock balance
         relative_get "/:id/capital_stock_balance/:from_date" do
           member_id = params[:id]
           from_date = params[:from_date]
