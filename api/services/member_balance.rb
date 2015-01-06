@@ -301,11 +301,11 @@ module MAPI
             cp_trans_cursor = ActiveRecord::Base.connection.execute(capstockactivities_transactions_connection_string)
             activities = []
             while row = cp_trans_cursor.fetch()
-              hash = {"cert_id" => row[0].to_s,
-                      "share_number" => row[1].to_f,
-                      "trans_date" => row[2].to_s,
-                      "trans_type" => row[3].to_s,
-                      "dr_cr" => row[4].to_s}
+              hash = {"cert_id" => row[0],
+                      "share_number" => row[1],
+                      "trans_date" => row[2],
+                      "trans_type" => row[3],
+                      "dr_cr" => row[4]}
               activities.push(hash)
             end
           else
@@ -313,7 +313,7 @@ module MAPI
             activities = []
             results["Activities"].each do |activity|
                   hash = {"cert_id" => activity["cert_id"],
-                      "share_number" => activity["share_number"].to_f,
+                      "share_number" => activity["share_number"],
                       "trans_date" => activity["trans_date"],
                       "trans_type" => activity["trans_type"],
                       "dr_cr" => activity["dr_cr"]
@@ -324,11 +324,11 @@ module MAPI
           activities_formatted = []
           activities.each do |row|
             formatted_date = Date.parse(row["trans_date"].to_s).strftime("%F")
-            hash = {"cert_id" => row["cert_id"],
+            hash = {"cert_id" => row["cert_id"].to_s,
                     "share_number" => row["share_number"].to_f,
                     "trans_date" => formatted_date,
-                    "trans_type" => row["trans_type"],
-                    "dr_cr" => row["dr_cr"]
+                    "trans_type" => row["trans_type"].to_s,
+                    "dr_cr" => row["dr_cr"].to_s
             }
              activities_formatted.push(hash)
           end

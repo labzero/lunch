@@ -5,7 +5,7 @@ module MAPI
       swagger_model :CapitalStockBalance do
         property :balance do
           key :type, :number
-          key :description, 'Capital Stock balance at close of business day of the selected start date'
+          key :description, 'Capital Stock Open balance of the selected start date'
         end
         property :balance_date do
           key :type, :date
