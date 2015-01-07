@@ -123,7 +123,6 @@ module MAPI
               parameter do
                 key :paramType, :path
                 key :name, :from_date
-                key :defaultValue, (Date.today-7).to_s
                 key :required, true
                 key :type, :string
                 key :description, 'Start date yyyy-mm-dd for the Capital Stock Activities Report.'
@@ -131,7 +130,6 @@ module MAPI
               parameter do
                 key :paramType, :path
                 key :name, :to_date
-                key :defaultValue, (Date.today-1).to_s
                 key :required, true
                 key :type, :string
                 key :description, 'End date yyyy-mm-dd for the Capital Stock Activities Report.'
@@ -334,14 +332,14 @@ module MAPI
           end
           activities_formatted = []
           activities.each do |row|
-            formatted_date = Date.parse(row["trans_date"].to_s).strftime("%F")
+            formatted_date = Date.parse(row["trans_date"])
             hash = {"cert_id" => row["cert_id"].to_s,
                     "share_number" => row["share_number"].to_f,
                     "trans_date" => formatted_date,
                     "trans_type" => row["trans_type"].to_s,
                     "dr_cr" => row["dr_cr"].to_s
             }
-             activities_formatted.push(hash)
+            activities_formatted.push(hash)
           end
           {
             activities: activities_formatted
