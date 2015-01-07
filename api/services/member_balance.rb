@@ -74,7 +74,7 @@ module MAPI
             end
           end
           api do
-            key :path, "/{id}/capital_stock_balance/{from_date}"
+            key :path, "/{id}/capital_stock_balance/{balance_date}"
             operation do
               key :method, 'GET'
               key :summary, 'Retrieve Capital Stock Balance for a specific date for a member'
@@ -90,8 +90,7 @@ module MAPI
               end
               parameter do
                 key :paramType, :path
-                key :defaultValue, (Date.today-1).to_s
-                key :name, :from_date
+                key :name, :balance_date
                 key :required, true
                 key :type, :string
                 key :description, 'Start date yyyy-mm-dd for the Capital Stock Activities Report.'
@@ -244,36 +243,48 @@ module MAPI
           end
         end
         # capital stock balance
-        relative_get "/:id/capital_stock_balance/:from_date" do
+        relative_get "/:id/capital_stock_balance/:balance_date" do
           member_id = params[:id]
-          from_date = params[:from_date]
+          balance_date = params[:balance_date]
 
           #1.check that input for from and to dates are valid date and expected format
-          check_date_format = from_date.match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/)
+          check_date_format = balance_date.match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/)
           if !check_date_format
             halt 404, "Invalid Start Date format of yyyy-mm-dd"
           end
 
-          capstock_balance_start_connection_string = <<-SQL
+          capstock_balance_open_connection_string = <<-SQL
           SELECT sum(no_share_holding) as open_balance_cf
           FROM capstock.capstock_shareholding
           WHERE fhlb_id = #{member_id}
-          AND (sold_date is null or sold_date >= to_date(#{from_date}, 'yyyy-mm-dd') )
-          AND purchase_date < to_date(#{from_date}, 'yyyy-mm-dd')
+          AND (sold_date is null or sold_date >= to_date(#{balance_date}, 'yyyy-mm-dd') )
+          AND purchase_date < to_date(#{balance_date}, 'yyyy-mm-dd')
+          GROUP BY fhlb_id
+          SQL
+
+          capstock_balance_close_connection_string = <<-SQL
+          SELECT sum(no_share_holding) as open_balance_cf
+          FROM capstock.capstock_shareholding
+          WHERE fhlb_id = #{member_id}
+          AND (sold_date is null or sold_date > to_date(#{balance_date}, 'yyyy-mm-dd') )
+          AND purchase_date <= to_date(#{balance_date}, 'yyyy-mm-dd')
           GROUP BY fhlb_id
           SQL
 
           if settings.environment == :production
-            cp_start_cursor = ActiveRecord::Base.connection.execute(capstock_balance_start_connection_string)
-
-            open_balance = (cp_start_cursor.fetch() || [nil])[0]
+            cp_open_cursor = ActiveRecord::Base.connection.execute(capstock_balance_open_connection_string)
+            cp_close_cursor = ActiveRecord::Base.connection.execute(capstock_balance_close_connection_string)
+            open_balance = (cp_open_cursor.fetch() || [nil])[0]
+            close_balance = (cp_close_cursor.fetch() || [nil])[0]
           else
             results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'capital_stock_balances.json'))).with_indifferent_access
             open_balance = results[:open_balance]
+            close_balance = results[:close_balance]
           end
           {
-              balance: (open_balance || 0).to_f,
-              balance_date: from_date.to_date
+              open_balance: (open_balance || 0).to_f,
+              close_balance: (close_balance || 0).to_f,
+              balance_date: balance_date.to_date
           }.to_json
         end
 

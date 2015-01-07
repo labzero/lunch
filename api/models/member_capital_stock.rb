@@ -3,13 +3,17 @@ module MAPI
     class CapitalStockBalance
       include Swagger::Blocks
       swagger_model :CapitalStockBalance do
-        property :balance do
+        property :open_balance do
           key :type, :number
           key :description, 'Capital Stock Open balance of the selected start date'
         end
+        property :close_balance do
+          key :type, :number
+          key :description, 'Capital Stock Close balance of the selected start date'
+        end
         property :balance_date do
           key :type, :date
-          key :description, 'Date for the Capital Stock balance'
+          key :description, 'Date for the Capital Stock balances'
         end
       end
     end

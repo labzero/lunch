@@ -43,7 +43,8 @@ describe MAPI::ServiceApp do
     let(:capital_stock_balance) { get "/member/#{MEMBER_ID}/capital_stock_balance/2014-01-01"; JSON.parse(last_response.body) }
     RSpec.shared_examples 'a capital stock balance endpoint' do
       it 'should return a number for the balance' do
-        expect(capital_stock_balance['balance']).to be_kind_of(Numeric)
+        expect(capital_stock_balance['open_balance']).to be_kind_of(Numeric)
+        expect(capital_stock_balance['close_balance']).to be_kind_of(Numeric)
       end
       it 'should return a date for the balance_date' do
         expect(capital_stock_balance['balance_date']).to match(CAPSTOCK_DATE_FORMAT)
@@ -51,27 +52,38 @@ describe MAPI::ServiceApp do
     end
     describe 'in the production environment' do
       let!(:some_balance) {123.4}
+      let!(:close_balance) {456.4}
       let(:result_set) {double('Oracle Result Set', fetch: nil)}
+      let(:result_set2) {double('Oracle Result Set', fetch: nil)}
       before do
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
         allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
         expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set2)
         allow(result_set).to receive(:fetch).and_return([some_balance], nil)
+        allow(result_set2).to receive(:fetch).and_return([close_balance], nil)
       end
       it 'should return zero for balance if no balance was found' do
         expect(result_set).to receive(:fetch).and_return(nil)
-        expect(capital_stock_balance['balance']).to eq(0)
+        expect(result_set2).to receive(:fetch).and_return(nil)
+        expect(capital_stock_balance['open_balance']).to eq(0)
+        expect(capital_stock_balance['close_balance']).to eq(0)
       end
       it 'should return the first balance found (first column of first row)' do
-        expect(capital_stock_balance['balance']).to eq(some_balance)
+        expect(capital_stock_balance['open_balance']).to eq(some_balance)
+        expect(capital_stock_balance['close_balance']).to eq(close_balance)
       end
       it 'should not return the second column found' do
         expect(result_set).to receive(:fetch).and_return([124.5, some_balance], nil).at_least(1).times
-        expect(capital_stock_balance['balance']).not_to eq(some_balance)
+        expect(result_set2).to receive(:fetch).and_return([224.5, close_balance], nil).at_least(1).times
+        expect(capital_stock_balance['open_balance']).not_to eq(some_balance)
+        expect(capital_stock_balance['close_balance']).not_to eq(close_balance)
       end
       it 'should not return the second row found' do
         expect(result_set).to receive(:fetch).and_return([124.5], [some_balance], nil).at_least(1).times
-        expect(capital_stock_balance['balance']).not_to eq(some_balance)
+        expect(result_set2).to receive(:fetch).and_return([224.5], [close_balance], nil).at_least(1).times
+        expect(capital_stock_balance['open_balance']).not_to eq(some_balance)
+        expect(capital_stock_balance['close_balance']).not_to eq(close_balance)
       end
       it_behaves_like 'a capital stock balance endpoint'
     end
