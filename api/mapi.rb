@@ -15,6 +15,7 @@ require_relative 'models/member_balance_effective_borrowing_capacity'
 require_relative 'models/realtime_rate'
 require_relative 'models/summary_rates'
 require_relative 'models/etransact_advances'
+require_relative 'models/member_capital_stock'
 
 
 module MAPI

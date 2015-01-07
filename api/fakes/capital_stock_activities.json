@@ -1,0 +1,246 @@
+{"Activities": [
+    {
+        "cert_id": "47983",
+        "share_number": "895",
+        "amount": "89500",
+        "class": "B",
+        "full_partial_ind": "-",
+        "tran_id": "44585",
+        "trans_date": "15-May-2008",
+        "trans_type": "Dividend",
+        "dr_cr": "C"
+    },
+    {
+        "cert_id": "49390",
+        "share_number": "549",
+        "amount": "54900",
+        "class": "B",
+        "full_partial_ind": "-",
+        "tran_id": "47024",
+        "trans_date": "17-NOV-2008",
+        "trans_type": "Dividend",
+        "dr_cr": "C"
+    },
+    {
+        "cert_id": "45985",
+        "share_number": "2147",
+        "amount": "214700",
+        "class": "B",
+        "full_partial_ind": "P",
+        "tran_id": "54576",
+        "trans_date": "14-MAY-2010",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45985",
+        "share_number": "2142",
+        "amount": "214200",
+        "class": "B",
+        "full_partial_ind": "P",
+        "tran_id": "56101",
+        "trans_date": "13-AUG-2010",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45985",
+        "share_number": "1538",
+        "amount": "153800",
+        "class": "B",
+        "full_partial_ind": "P",
+        "tran_id": "58288",
+        "trans_date": "15-NOV-2008",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45985",
+        "share_number": "2228",
+        "amount": "222800",
+        "class": "B",
+        "full_partial_ind": "P",
+        "tran_id": "60987",
+        "trans_date": "16-MAY-2011",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45985",
+        "share_number": "65",
+        "amount": "6500",
+        "class": "B",
+        "full_partial_ind": "F",
+        "tran_id": "62342",
+        "trans_date": "15-AUG-2011",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45979",
+        "share_number": "1781",
+        "amount": "178100",
+        "class": "B",
+        "full_partial_ind": "F",
+        "tran_id": "62341",
+        "trans_date": "15-AUG-2011",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45960",
+        "share_number": "168",
+        "amount": "16800",
+        "class": "B",
+        "full_partial_ind": "F",
+        "tran_id": "62340",
+        "trans_date": "15-AUG-2011",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45965",
+        "share_number": "3",
+        "amount": "300",
+        "class": "B",
+        "full_partial_ind": "F",
+        "tran_id": "62339",
+        "trans_date": "15-AUG-2011",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45706",
+        "share_number": "193",
+        "amount": "19300",
+        "class": "B",
+        "full_partial_ind": "P",
+        "tran_id": "62343",
+        "trans_date": "15-AUG-2011",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45662",
+        "share_number": "1608",
+        "amount": "160800",
+        "class": "B",
+        "full_partial_ind": "P",
+        "tran_id": "63616",
+        "trans_date": "14-NOV-2011",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45662",
+        "share_number": "2166",
+        "amount": "216600",
+        "class": "B",
+        "full_partial_ind": "P",
+        "tran_id": "64757",
+        "trans_date": "16-MAR-2012",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45662",
+        "share_number": "2129",
+        "amount": "212900",
+        "class": "B",
+        "full_partial_ind": "P",
+        "tran_id": "65961",
+        "trans_date": "15-MAY-2011",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45662",
+        "share_number": "2115",
+        "amount": "211500",
+        "class": "B",
+        "full_partial_ind": "P",
+        "tran_id": "67106",
+        "trans_date": "14-AUG-2012",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45646",
+        "share_number": "2970",
+        "amount": "297000",
+        "class": "B",
+        "full_partial_ind": "P",
+        "tran_id": "68497",
+        "trans_date": "14-NOV-2012",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45662",
+        "share_number": "640",
+        "amount": "64000",
+        "class": "B",
+        "full_partial_ind": "F",
+        "tran_id": "68496",
+        "trans_date": "14-NOV-2012",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "38136",
+        "share_number": "933",
+        "amount": "93300",
+        "class": "B",
+        "full_partial_ind": "P",
+        "tran_id": "69882",
+        "trans_date": "26-MAR-2013",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "39455",
+        "share_number": "859",
+        "amount": "85900",
+        "class": "B",
+        "full_partial_ind": "F",
+        "tran_id": "69883",
+        "trans_date": "26-MAR-2011",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "45646",
+        "share_number": "1751",
+        "amount": "175100",
+        "class": "B",
+        "full_partial_ind": "F",
+        "tran_id": "69884",
+        "trans_date": "26-MAR-2013",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "51113",
+        "share_number": "5864",
+        "amount": "586400",
+        "class": "B",
+        "full_partial_ind": "-",
+        "tran_id": "70221",
+        "trans_date": "26-APR-2013",
+        "trans_type": "Purchase",
+        "dr_cr": "C"
+    },
+    {
+        "cert_id": "51113",
+        "share_number": "3040",
+        "amount": "304000",
+        "class": "B",
+        "full_partial_ind": "P",
+        "tran_id": "78053",
+        "trans_date": "16-MAY-2014",
+        "trans_type": "Repurchase",
+        "dr_cr": "D"
+    }
+]
+}
+
