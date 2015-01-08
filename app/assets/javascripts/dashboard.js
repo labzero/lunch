@@ -53,7 +53,7 @@ $(function () {
     $('.dashboard-quick-advance-flyout .selectable-cell').addClass('disabled-cell');
   };
 
-  if (('.dashboard-module-advances').length > 0) {
+  if ($('.dashboard-module-advances').length > 0) {
     var isCheckingRate = false;
     var $rate_element = $('.dashboard-advances-rate');
     var $rate_element_children = $rate_element.children();
