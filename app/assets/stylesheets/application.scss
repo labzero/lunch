@@ -4,6 +4,7 @@
  *= require source-sans-pro/bold
  *= require source-sans-pro/light
  *= require source-sans-pro/extralight
+ *= require daterangepicker-bs3
  */
 
 // base styles
@@ -17,4 +18,4 @@
 @import 'flyouts';
 @import 'reports';
 @import 'settings';
-
+@import 'datepicker';

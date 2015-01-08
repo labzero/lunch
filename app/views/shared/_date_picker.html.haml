@@ -1,0 +1,10 @@
+- placeholder ||= nil
+- icon ||= nil
+- field_class ||= []
+- field_data ||= {}
+- location ||= 'before'
+- labels = { this_month: t('datepicker.range.this_month', month: Date.today.strftime("%B")), last_month: (Date.today - 1.month).strftime("%B"), custom: t('datepicker.range.custom'), apply: t('global.apply'), cancel: t('global.cancel')}
+
+%span.input-field-container.pull-right{class: icon ? "icon-#{icon}-#{location}" : nil, id: "reportrange"}
+  %input{placeholder: placeholder, class: field_class, data: field_data, disabled: true}
+.datepicker-wrapper{data: {options: {labels: labels}}}
