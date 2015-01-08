@@ -2,7 +2,6 @@ class MemberBalanceService
 
   def initialize(member_id)
     @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint, headers: {:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""}
-    @db_connection = ActiveRecord::Base.establish_connection('cdb').connection if Rails.env == 'production'
     @member_id = member_id
     raise ArgumentError, 'member_id must not be blank' if member_id.blank?
   end
@@ -76,14 +75,46 @@ class MemberBalanceService
   end
 
   def capital_stock_activity(start_date, end_date)
-    # TODO rewrite this once the MAPI endpoint is done (MEM-228) and you have a better idea of what you'll be hitting and what you'll be getting back
-    data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'capital_stock_activity.json'))).with_indifferent_access
+    # get open balance from start date and closing balance from end date
+    begin
+      opening_balance_response = @connection["member/#{@member_id}/capital_stock_balance/#{start_date}"].get
+      closing_balance_response = @connection["member/#{@member_id}/capital_stock_balance/#{end_date}"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.capital_stock_activity encountered a RestClient error while hitting the /member/{id}/capital_stock_balance/{balance_date} MAPI endpoint: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.capital_stock_balance encountered a connection error while hitting the /member/{id}/capital_stock_balance/{balance_date} MAPI endpoint: #{e.class.name}")
+      return nil
+    end
+
+    # get activities from date range
+    begin
+      activities_response = @connection["member/#{@member_id}/capital_stock_activities/#{start_date}/#{end_date}"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.capital_stock_activity encountered a RestClient error while hitting the /member/{id}/capital_stock_activities/{from_date}/{to_date} MAPI endpoint: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.capital_stock_balance encountered a connection error while hitting the /member/{id}/capital_stock_activities/{from_date}/{to_date} MAPI endpoint: #{e.class.name}")
+      return nil
+    end
+
+    data = {}
+    opening_balance = JSON.parse(opening_balance_response.body).with_indifferent_access
+    closing_balance = JSON.parse(closing_balance_response.body).with_indifferent_access
+    activities = JSON.parse(activities_response.body).with_indifferent_access
+    data[:start_date] = opening_balance[:balance_date].to_date
+    data[:start_balance] = opening_balance[:open_balance].to_i
+    data[:end_date] = closing_balance[:balance_date].to_date
+    data[:end_balance] = closing_balance[:close_balance].to_i
+    data[:activities] = activities[:activities]
+
+    # Tally credits and debits, as the distinction is not made by MAPI. Also format date.
     data[:total_credits] = 0
     data[:total_debits] = 0
     data[:activities].each_with_index do |row, i|
       data[:activities][i][:credit_shares] = 0
       data[:activities][i][:debit_shares] = 0
-      data[:activities][i][:trans_date]= Date.parse(data[:activities][i][:trans_date]).strftime('%m/%d/%Y')
+      data[:activities][i][:trans_date]= data[:activities][i][:trans_date].to_date
       shares = data[:activities][i][:share_number].to_i
       if row[:dr_cr] == 'C'
         data[:activities][i][:credit_shares] = shares

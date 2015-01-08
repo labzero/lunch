@@ -304,7 +304,8 @@ en:
     pages:
       capital_stock_activity:
         title: Capital Stock Activity Statement
-        balance_heading: "Opening balance of Class B Shares as of %{date}:"
+        opening_balance_heading: "Opening balance of Class B Shares as of %{date}:"
+        closing_balance_heading: "Closing balance of Class B Shares as of %{date}:"
         table_title: Class B stock at $100 per share
         certificate_sequence: Certificate Sequence
         debit_shares: "Debits: Number of Shares"

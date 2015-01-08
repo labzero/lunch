@@ -6,6 +6,7 @@ describe MemberBalanceService do
   it { expect(subject).to respond_to(:pledged_collateral) }
   it { expect(subject).to respond_to(:total_securities) }
   it { expect(subject).to respond_to(:effective_borrowing_capacity) }
+  it { expect(subject).to respond_to(:capital_stock_activity) }
   describe "`pledged_collateral` method", :vcr do
     let(:pledged_collateral) {subject.pledged_collateral}
     it "should return a hash of hashes containing pledged collateral values" do
@@ -64,6 +65,79 @@ describe MemberBalanceService do
     it "should return nil if there was a connection error" do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
       expect(effective_borrowing_capacity).to eq(nil)
+    end
+  end
+
+  describe "`capital_stock_activity` method", :vcr do
+    let(:start_date) {Date.today - 1.month}
+    let(:end_date) {Date.today}
+    let(:capital_stock_activity) {subject.capital_stock_activity(start_date, end_date)}
+    let(:activities) { File.read(File.join(Rails.root, 'spec', 'fixtures', 'capital_stock_activities.json')) }
+    let(:activities_response) { double('Response', body: activities) }
+    let(:activities_request) {double('Request')}
+    let(:balance_request) {double('Request')}
+    it "should return nil if there was an API error for the capital_stock_balance MAPI endpoint" do
+      expect(balance_request).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{end_date}").and_return(balance_request)
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_call_original
+      expect(capital_stock_activity).to eq(nil)
+    end
+    it "should return nil if there was a connection error for the capital_stock_balance MAPI endpoint" do
+      expect(balance_request).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{end_date}").and_return(balance_request)
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_call_original
+      expect(capital_stock_activity).to eq(nil)
+    end
+    it "should return nil if there was an API error for the capital_stock_activities MAPI endpoint" do
+      expect(activities_request).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{end_date}").and_call_original
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_call_original
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_activities/#{start_date}/#{end_date}").and_return(activities_request)
+      expect(capital_stock_activity).to eq(nil)
+    end
+    it "should return nil if there was a connection error for the capital_stock_activities MAPI endpoint" do
+      expect(activities_request).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{end_date}").and_call_original
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_call_original
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_activities/#{start_date}/#{end_date}").and_return(activities_request)
+      expect(capital_stock_activity).to eq(nil)
+    end
+    it 'should return a start_date and a start_balance' do
+      expect(capital_stock_activity[:start_date]).to be_kind_of(Date)
+      expect(capital_stock_activity[:start_balance]).to be_kind_of(Integer)
+    end
+    it 'should return an end_date and an end_balance' do
+      expect(capital_stock_activity[:end_date]).to be_kind_of(Date)
+      expect(capital_stock_activity[:end_balance]).to be_kind_of(Integer)
+    end
+    it 'should return an array of activity hashes' do
+      expect(capital_stock_activity[:activities]).to be_kind_of(Array)
+    end
+    it 'should classify the shares for a given activity as either debit or credit' do
+      expect(activities_request).to receive(:get).and_return(activities_response)
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{end_date}").and_call_original
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_call_original
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_activities/#{start_date}/#{end_date}").and_return(activities_request)
+      expect(capital_stock_activity[:activities][0][:debit_shares]).to eq(0)
+      expect(capital_stock_activity[:activities][0][:credit_shares]).to eq(895)
+      expect(capital_stock_activity[:activities][2][:debit_shares]).to eq(2147)
+      expect(capital_stock_activity[:activities][2][:credit_shares]).to eq(0)
+    end
+    it 'should return total_credits and total_debits from the array of activities for the given date range' do
+      expect(activities_request).to receive(:get).and_return(activities_response)
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{end_date}").and_call_original
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_call_original
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_activities/#{start_date}/#{end_date}").and_return(activities_request)
+      expect(capital_stock_activity[:total_credits]).to eq(1444)
+      expect(capital_stock_activity[:total_debits]).to eq(4289)
+    end
+    it 'should log a warning if an activity is not classified as a credit or debit' do # mock data includes an activity that is improperly classified
+      expect(activities_request).to receive(:get).and_return(activities_response)
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{end_date}").and_call_original
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_call_original
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_activities/#{start_date}/#{end_date}").and_return(activities_request)
+      expect(Rails.logger).to receive(:warn)
+      capital_stock_activity
     end
   end
 end
