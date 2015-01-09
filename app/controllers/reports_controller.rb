@@ -93,9 +93,10 @@ class ReportsController < ApplicationController
 
   def capital_stock_activity
     member_balances = MemberBalanceService.new(MEMBER_ID)
-    @start_date = Date.today - 1.month
-    @end_date = Date.today
-    @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
+    start_date = params[:start_date] || Date.today - 1.month
+    end_date = params[:end_date] || Date.today
+    @capital_stock_activity = member_balances.capital_stock_activity(start_date.to_date, end_date.to_date)
+    raise StandardError, "There has been an error and ReportsController#capital_stock_activity has returned nil. Check error logs." if @capital_stock_activity.blank?
   end
 
 end

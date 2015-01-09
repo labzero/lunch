@@ -3,6 +3,7 @@
     {"cert_id":"47983","share_number":895.0,"trans_date":"2008-05-15","trans_type":"Dividend","dr_cr":"C"},
     {"cert_id":"49390","share_number":549.0,"trans_date":"2008-11-17","trans_type":"Dividend","dr_cr":"C"},
     {"cert_id":"45985","share_number":2147.0,"trans_date":"2010-05-14","trans_type":"Repurchase","dr_cr":"D"},
-    {"cert_id":"45985","share_number":2142.0,"trans_date":"2010-08-13","trans_type":"Repurchase","dr_cr":"D"}
+    {"cert_id":"45985","share_number":2142.0,"trans_date":"2010-08-13","trans_type":"Repurchase","dr_cr":"D"},
+    {"cert_id":"45985","share_number":2142.0,"trans_date":"2010-08-13","trans_type":"Repurchase","dr_cr":"Z"}
   ]
 }

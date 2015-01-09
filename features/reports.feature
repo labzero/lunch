@@ -22,3 +22,19 @@ Scenario: Member sees Capital Stock Activity Statement
   When I select "Capital Stock Activity Statement" from the reports dropdown
   Then I should see report summary data
     And I should see a report table with multiple data rows
+
+Scenario: Member sorts the Capital Stock Activity Statement by date
+  Given I am on the Capital Stock Activity Statement page
+    And I should see the "Date" column values in "ascending" order
+  When I click the Date column heading
+  Then I should see the "Date" column values in "descending" order
+
+
+Scenario: Member sorts the Capital Stock Activity Statement
+  Given I am on the Capital Stock Activity Statement page
+  When I click the Certificate Sequence column heading
+  Then I should see the "Certificate Sequence" column values in "ascending" order
+  And I click the Certificate Sequence column heading
+  Then I should see the "Certificate Sequence" column values in "descending" order
+
+
