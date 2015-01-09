@@ -1,6 +1,6 @@
 @mixin typography-page-title {
-  font-size: 1.2rem;
-  font-weight: $bold-weight;
+  font-size: 1.4667rem;
+  font-weight: $semibold-weight;
 }
 
 @mixin typography-section-title {
@@ -64,6 +64,11 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-table-total {
+  font-size: 0.8rem;
+  font-weight: $semibold-weight;
+}
+
 @mixin typography-field-placeholder {
   font-size: 1rem;
   font-weight: $normal-weight;
@@ -92,6 +97,11 @@
 @mixin typography-confirmation-data {
   font-size: 1.2rem;
   font-weight: $semibold-weight;
+}
+
+@mixin typography-report-summary {
+  font-size: 2.4rem;
+  font-weight: $light-weight;
 }
 
 %typography-page-title {
@@ -142,6 +152,10 @@
   @include typography-table-cell;
 }
 
+%typography-table-total {
+  @include typography-table-total;
+}
+
 %typography-subtitle {
   @include typography-subtitle;
 }
@@ -168,4 +182,8 @@
 
 %typography-confirmation-data {
   @include typography-confirmation-data;
+}
+
+%typography-report-summary {
+  @include typography-report-summary;
 }

@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   get '/dashboard/current_overnight_vrc' => 'dashboard#current_overnight_vrc'
 
   get '/reports' => 'reports#index'
+  get '/reports/capital-stock-activity' => 'reports#capital_stock_activity'
 
   get '/settings' => 'settings#index'
 

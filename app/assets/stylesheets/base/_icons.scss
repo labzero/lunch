@@ -45,6 +45,7 @@ $icon-edit: "\e607";
 $icon-close: "\e608";
 $icon-alert: "\e609";
 $icon-arrow-left: "\e610";
+$icon-caret: "\e60a";
 
 .icon-gear-before:before, .icon-gear-after:after {
   @extend %icon-font;
@@ -106,4 +107,9 @@ $icon-arrow-left: "\e610";
 .icon-alert-before:before, .icon-alert-after:after {
   @extend %icon-font;
   content: "#{$icon-alert}";
+}
+
+.icon-caret-before:before, .icon-caret-after:after {
+  @extend %icon-font;
+  content: "#{$icon-caret}";
 }

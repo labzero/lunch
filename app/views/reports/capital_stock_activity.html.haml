@@ -1,0 +1,44 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.row
+  .report-header
+    %h1= t('reports.pages.capital_stock_activity.title')
+    .report-header-buttons
+      %button.report-button-left #{t('dashboard.actions.print')}
+      %span.report-split-button
+        %button.report-button-right #{t('dashboard.actions.download')}
+        %button.report-drop-down-right #{t('dashboard.actions.xml')}
+    .report-datepicker= render 'shared/input_field', icon: :calendar, placeholder: t('dashboard.reports.as_of_yesterday'), location: :after
+  .report-main-body
+    .report-summary-data
+      %h3
+        = t('reports.pages.capital_stock_activity.opening_balance_heading', date: @capital_stock_activity[:start_date].strftime('%B %-d, %Y'))
+      %p= t('reports.share_count', count: number_with_delimiter(@capital_stock_activity[:start_balance]))
+    .report-summary-data
+      %h3
+        = t('reports.pages.capital_stock_activity.closing_balance_heading', date: @capital_stock_activity[:end_date].strftime('%B %-d, %Y'))
+      %p= t('reports.share_count', count: number_with_delimiter(@capital_stock_activity[:end_balance]))
+    %h2.report-table-title= t('reports.pages.capital_stock_activity.table_title')
+    %table.report-table{data: {sortable: true}}
+      %thead
+        %tr
+          %th.report-cell-narrow= t("global.date")
+          %th= t('reports.pages.capital_stock_activity.certificate_sequence')
+          %th= t('reports.pages.capital_stock_activity.debit_shares')
+          %th= t('reports.pages.capital_stock_activity.credit_shares')
+          %th.report-cell-expanding= t('global.transaction_type')
+      %tbody
+        -@capital_stock_activity[:activities].each do |row|
+          %tr
+            %td.report-cell-narrow= row[:trans_date].strftime('%m/%d/%Y')
+            %td= row['cert_id']
+            %td.report-cell-right= number_with_delimiter row[:debit_shares]
+            %td.report-cell-right= number_with_delimiter row[:credit_shares]
+            %td.report-cell-expanding= row[:trans_type]
+      %tfoot
+        %tr
+          %td.report-cell-total.report-cell-narrow{colspan: 2}= t('global.totals')
+          %td.report-cell-right= number_with_delimiter @capital_stock_activity[:total_debits]
+          %td.report-cell-right= number_with_delimiter @capital_stock_activity[:total_credits]
+          %td.report-cell-expanding
+    %small= t('reports.accuracy_notice_html', url: '#')

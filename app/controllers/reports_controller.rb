@@ -1,5 +1,8 @@
 class ReportsController < ApplicationController
 
+  MEMBER_ID = 750 #this is the hard-coded fhlb client id number we're using for the time-being
+
+
   def index
     @reports = {
       credit: {
@@ -45,7 +48,8 @@ class ReportsController < ApplicationController
         },
         activity: {
           updated: t('global.daily'),
-          available_history: t('reports.history.months12')
+          available_history: t('reports.history.months12'),
+          route: reports_capital_stock_activity_path
         },
         dividend_transaction: {
           updated: t('global.quarterly'),
@@ -85,6 +89,14 @@ class ReportsController < ApplicationController
         }
       }
     }
+  end
+
+  def capital_stock_activity
+    member_balances = MemberBalanceService.new(MEMBER_ID)
+    start_date = params[:start_date] || Date.today - 1.month
+    end_date = params[:end_date] || Date.today
+    @capital_stock_activity = member_balances.capital_stock_activity(start_date.to_date, end_date.to_date)
+    raise StandardError, "There has been an error and ReportsController#capital_stock_activity has returned nil. Check error logs." if @capital_stock_activity.blank?
   end
 
 end

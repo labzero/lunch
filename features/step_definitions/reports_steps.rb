@@ -24,3 +24,59 @@ Then(/^I should see the reports dropdown$/) do
   report_menu = page.find('.nav-menu', text: I18n.t('reports.title'))
   report_menu.parent.assert_selector('.nav-dropdown', visible: true)
 end
+
+Given(/^I am on the reports summary page$/) do
+  visit "/reports"
+end
+
+When(/^I select "(.*?)" from the reports dropdown$/) do |report|
+  step 'I hover on the reports link in the header'
+  page.click_link(report)
+end
+
+Then(/^I should see report summary data$/) do
+  page.assert_selector('.report-summary-data', visible: true)
+end
+
+Then(/^I should see a report table with multiple data rows$/) do
+  page.assert_selector('.report-table')
+  expect(page.all('.report-table tbody tr').length).to be > 0
+end
+
+Given(/^I am on the Capital Stock Activity Statement page$/) do
+  visit '/reports/capital-stock-activity'
+end
+
+When(/^I click the Certificate Sequence column heading$/) do
+  page.find('th', text: I18n.t('reports.pages.capital_stock_activity.certificate_sequence')).click
+end
+
+When(/^I click the Date column heading$/) do
+  page.find('th', text: I18n.t('global.date')).click
+end
+
+Then(/^I should see the "(.*?)" column values in "(.*?)" order$/) do |column_name, sort_order|
+  column_index = page.evaluate_script("$('thead th:contains(#{column_name})').index()") + 1 # will throw error if column name not present, which is good
+  first_row_text = page.find("tbody tr:first-child td:nth-child(#{column_index})").text
+  last_row_text = page.find("tbody tr:last-child td:nth-child(#{column_index})").text
+
+  case column_name
+  when "Date"
+    top_val = Date.strptime(first_row_text, '%m/%d/%Y')
+    bottom_val = Date.strptime(last_row_text, '%m/%d/%Y')
+  when "Certificate Sequence"
+    top_val = first_row_text.to_i
+    bottom_val = last_row_text.to_i
+  else
+    raise "column_name not recognized"
+  end
+  
+  if sort_order == 'ascending'
+    expect(top_val < bottom_val).to eq(true)
+  elsif sort_order == 'descending'
+    expect(top_val > bottom_val).to eq(true)
+  else
+    raise 'sort_order not recognized'
+  end
+end
+

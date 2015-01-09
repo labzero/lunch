@@ -1,14 +1,17 @@
 $(function() {
-  $('.report-table[data-sortable]').DataTable({
-    paging: false,
-    info: false,
-    searching: false,
-    order: [],
-    columnDefs: [
-      {
-        targets: 'report-column-nosort',
-        orderable: false
-      }
-    ]
-  })
+  $('.report-table[data-sortable]').each(function(ele) {
+    var $this = $(this);
+    $this.DataTable({
+        paging: false,
+        info: false,
+        searching: false,
+        order: $this.data('default-sort') || [[0, 'asc']],
+        columnDefs: [
+          {
+            targets: 'report-column-nosort',
+            orderable: false
+          }
+        ]
+      })
+  });
 }); 
