@@ -3,6 +3,7 @@ Feature: Visiting the Reports Summary Page
   I want to use visit the reports summary page for the FHLB Member Portal
   In order to view reports
 
+@smoke
 Scenario: Visit reports summary page from header link
   Given I visit the dashboard
   When I click on the reports link in the header
@@ -17,6 +18,7 @@ Scenario: Member sees reports dropdown
   When I hover on the reports link in the header
   Then I should see the reports dropdown
 
+@smoke
 Scenario: Member sees Capital Stock Activity Statement
   Given I visit the dashboard
   When I select "Capital Stock Activity Statement" from the reports dropdown
