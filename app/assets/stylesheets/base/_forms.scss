@@ -45,6 +45,7 @@
   input {
     @extend %input-field-styling;
   }
+
   &[class*=" icon-"], &[class^="icon-"] {
     &[class$="-before"], &[class*="-before "] {
       input {
@@ -52,4 +53,15 @@
       }
     }
   }
+}
+
+fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+label {
+  @extend %typography-field-value;
+  color: $medium-gray;
 }

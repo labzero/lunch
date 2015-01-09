@@ -55,6 +55,7 @@ en:
     beginning_balance: Beginning Balance
     messages: Messages
     categories: Categories
+    login: Log In
   nav:
     primary:
       welcome: Hi %{name}
@@ -118,7 +119,7 @@ en:
     questions:
       p: Questions about access
       phone: 415.555.7283
-    cta: Check it out
+    forgot_password: Forgot Password
   dashboard:
     meta_title: FHLB - Dashboard
     actions:

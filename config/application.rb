@@ -22,5 +22,7 @@ module FhlbMember
 
     config.mapi = ActiveSupport::OrderedOptions.new
     config.mapi.endpoint = ENV['MAPI_ENDPOINT'] || 'http://localhost:3100/mapi'
+
+    config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
   end
 end

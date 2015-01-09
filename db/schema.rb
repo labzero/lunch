@@ -23,4 +23,20 @@ ActiveRecord::Schema.define(version: 20150128002218) do
 
   add_index "corporate_communications", ["category"], name: "i_cor_com_cat"
 
+  create_table "users", force: true do |t|
+    t.string   "username",                                        default: "", null: false
+    t.string   "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.integer  "sign_in_count",          precision: 38, scale: 0, default: 0,  null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string   "current_sign_in_ip"
+    t.string   "last_sign_in_ip"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "users", ["reset_password_token"], name: "i_users_reset_password_token", unique: true
+  add_index "users", ["username"], name: "index_users_on_username", unique: true
+
 end
