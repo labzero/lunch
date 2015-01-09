@@ -33,14 +33,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
       Date:
-      - Fri, 09 Jan 2015 00:21:47 GMT
+      - Fri, 09 Jan 2015 03:25:31 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: '{"open_balance":55460.0,"close_balance":56355.0,"balance_date":"2014-12-08"}'
     http_version: 
-  recorded_at: Fri, 09 Jan 2015 00:21:47 GMT
+  recorded_at: Fri, 09 Jan 2015 03:25:31 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/capital_stock_balance/2015-01-08
@@ -74,12 +74,12 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
       Date:
-      - Fri, 09 Jan 2015 00:21:47 GMT
+      - Fri, 09 Jan 2015 03:25:31 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: '{"open_balance":55460.0,"close_balance":56355.0,"balance_date":"2015-01-08"}'
     http_version: 
-  recorded_at: Fri, 09 Jan 2015 00:21:47 GMT
+  recorded_at: Fri, 09 Jan 2015 03:25:31 GMT
 recorded_with: VCR 2.9.3
