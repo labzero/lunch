@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  devise_for :users, controllers: { sessions: 'users/sessions' }
+  devise_for :users, controllers: { sessions: 'users/sessions' }, :skip => [:sessions]
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -31,8 +31,12 @@ Rails.application.routes.draw do
   post '/settings/save' => 'settings#save'
 
   devise_scope :user do
-    root 'users/sessions#new'
+    get '/' => 'users/sessions#new', :as => :new_user_session
+    post '/' => 'users/sessions#create', :as => :user_session
+    delete 'logout' => 'users/sessions#destroy', :as => :destroy_user_session
   end
+
+  root 'users/sessions#new'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
