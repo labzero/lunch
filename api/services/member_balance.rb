@@ -151,7 +151,7 @@ module MAPI
           mortgages_connection_string = <<-SQL
             SELECT SUM(NVL(STD_MARKET_VALUE,0))
             FROM V_CONFIRM_DETAIL@COLAPROD_LINK.WORLD
-            WHERE fhlb_id = #{member_id}
+            WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
             GROUP BY fhlb_id
           SQL
 
@@ -161,7 +161,7 @@ module MAPI
             NVL(V_CONFIRM_SUMMARY_INTRADAY.SBC_MV_AAA,0) AS aaa_mv,
             NVL(V_CONFIRM_SUMMARY_INTRADAY.SBC_MV_AA,0) AS aa_mv
             FROM V_CONFIRM_SUMMARY_INTRADAY@COLAPROD_LINK.WORLD
-            WHERE fhlb_id =  #{member_id}
+            WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
           SQL
 
           if settings.environment == :production
@@ -198,7 +198,7 @@ module MAPI
           safekept_securities_string = <<-SQL
             SELECT COUNT(*)
             FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
-            WHERE account_type = 'U' AND fhlb_id = #{member_id}
+            WHERE account_type = 'U' AND fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
           SQL
 
           if settings.environment == :production
@@ -222,7 +222,7 @@ module MAPI
             SELECT (NVL(REG_BORR_CAP,0) +  NVL(SBC_BORR_CAP,0)) AS total_BC,
             (NVL(EXCESS_REG_BORR_CAP,0) + NVL(EXCESS_SBC_BORR_CAP,0)) AS unused_BC
             FROM CR_MEASURES.FINAN_SUMMARY_DATA_INTRADAY_V
-            WHERE fhlb_id = #{member_id}
+            WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
           SQL
 
           if settings.environment == :production
@@ -251,29 +251,29 @@ module MAPI
             halt 404, "Invalid Start Date format of yyyy-mm-dd"
           end
 
+
           capstock_balance_open_connection_string = <<-SQL
-          SELECT sum(no_share_holding) as open_balance_cf
-          FROM capstock.capstock_shareholding
-          WHERE fhlb_id = #{member_id}
-          AND (sold_date is null or sold_date >= to_date(#{balance_date}, 'yyyy-mm-dd') )
-          AND purchase_date < to_date(#{balance_date}, 'yyyy-mm-dd')
-          GROUP BY fhlb_id
+            SELECT sum(no_share_holding) as open_balance_cf FROM capstock.capstock_shareholding
+            WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+            AND (sold_dateis null or sold_date >= to_date(#{ActiveRecord::Base.connection.quote(balance_date)}, 'yyyy-mm-dd') )
+            AND purchase_date < to_date(#{ActiveRecord::Base.connection.quote(balance_date)}, 'yyyy-mm-dd')
+            GROUP BY fhlb_id
           SQL
 
-          capstock_balance_close_connection_string = <<-SQL
-          SELECT sum(no_share_holding) as open_balance_cf
-          FROM capstock.capstock_shareholding
-          WHERE fhlb_id = #{member_id}
-          AND (sold_date is null or sold_date > to_date(#{balance_date}, 'yyyy-mm-dd') )
-          AND purchase_date <= to_date(#{balance_date}, 'yyyy-mm-dd')
-          GROUP BY fhlb_id
-          SQL
+           capstock_balance_close_connection_string = <<-SQL
+             SELECT sum(no_share_holding) as open_balance_cf FROM capstock.capstock_shareholding
+             WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+             AND (sold_date is null or sold_date > to_date(#{ ActiveRecord::Base.connection.quote(balance_date)}, 'yyyy-mm-dd') )
+             AND purchase_date <= to_date(#{ ActiveRecord::Base.connection.quote(balance_date)}, 'yyyy-mm-dd')
+             GROUP BY fhlb_id
+           SQL
 
           if settings.environment == :production
             cp_open_cursor = ActiveRecord::Base.connection.execute(capstock_balance_open_connection_string)
             cp_close_cursor = ActiveRecord::Base.connection.execute(capstock_balance_close_connection_string)
             open_balance = (cp_open_cursor.fetch() || [nil])[0]
             close_balance = (cp_close_cursor.fetch() || [nil])[0]
+
           else
             results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'capital_stock_balances.json'))).with_indifferent_access
             open_balance = results[:open_balance]
@@ -298,12 +298,14 @@ module MAPI
             end
           end
 
+
+
           capstockactivities_transactions_connection_string = <<-SQL
           SELECT CERT_ID, NO_SHARE, TRAN_DATE, NVL(TRAN_TYPE, '-') TRAN_TYPE, NVL(DR_CR, '-') DR_CR
           FROM CAPSTOCK.ACCOUNT_ACTIVITY_V Vw
-          WHERE fhlb_id = #{member_id}
-          AND tran_date >= to_date(#{from_date}, 'yyyy-mm-dd')
-          AND tran_date <= to_date(#{to_date}, 'yyyy-mm-dd')
+          WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+          AND tran_date >= to_date(#{ActiveRecord::Base.connection.quote(from_date)}, 'yyyy-mm-dd')
+          AND tran_date <= to_date(#{ActiveRecord::Base.connection.quote(to_date)}, 'yyyy-mm-dd')
           SQL
 
           if settings.environment == :production
