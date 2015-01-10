@@ -1,62 +1,82 @@
 $(function () {
-  var $wrapper = $('.datepicker-wrapper');
-  var lastMonthLabel = $wrapper.data('options-labels-last-month');
-  var thisMonthLabel = $wrapper.data('options-labels-this-month');
-  var customLabel = $wrapper.data('options-labels-custom');
-  var startOfThisMonth = moment().startOf('month');
-  var today = moment();
-  var startOfLastMonth = moment().subtract('month', 1).startOf('month');
-  var endOfLastMonth = moment().subtract('month', 1).endOf('month')
 
-  var ranges = {};
-  ranges[thisMonthLabel] = [moment().startOf('month'), moment()];
-  ranges[lastMonthLabel] = [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
-  $('#reportrange').daterangepicker(
-    {
-      ranges: ranges,
-      parentEl: '.datepicker-wrapper',
-      locale: {
-        customRangeLabel: customLabel
+  // set up all date-pickers on the page
+  $('.datepicker-trigger').each(function(i, datePickerTrigger) {
+
+    var $datepickerTrigger = $(datePickerTrigger);
+    var $wrapper = $($datepickerTrigger.siblings('.datepicker-wrapper'));
+    var presets = $wrapper.data('date-picker-presets');
+    var ranges = {};
+    var lastCustomLabel;
+    $.each(presets, function(index, preset) {
+      if (preset.start_date) {
+        preset.start_date = moment(preset.start_date);
+      };
+      if (preset.end_date) {
+        preset.end_date = moment(preset.end_date);
+      };
+      if (!preset.is_custom) {
+        ranges[preset.label] = [preset.start_date, preset.end_date]
+      } else {
+        lastCustomLabel = preset.label;
+      };
+    });
+
+    initializeDatePicker($datepickerTrigger, $wrapper, {ranges: ranges, customLabel: lastCustomLabel});
+    datePickerSelectionHandler($datepickerTrigger, $wrapper, presets);
+    setDatePickerApplyListener($datepickerTrigger);
+  });
+
+  function initializeDatePicker($datePickerTrigger, $datePickerWrapper, options) {
+    $datePickerTrigger.daterangepicker(
+      {
+        ranges: options.ranges,
+        parentEl: $datePickerWrapper,
+        locale: {
+          customRangeLabel: options.customLabel,
+          cancelLabel: ''
+        }
       }
-    }
-  );
-
-  // add code to restructure the html of the datepicker - hacky, but the html is hardcoded in Grossman's code
-  $('.daterangepicker .ranges').insertBefore('.calendar.first');
-  $('.range_inputs').html($('.range_inputs').html().replace(/&nbsp;/g, '')); // get rid of whitespace added between hidden buttons
-
-  // default to "Last Month" when first opening
-  $($wrapper.find('.ranges li')[1]).click();
+    );
+    $datePickerWrapper.find('.daterangepicker .ranges').insertBefore($datePickerWrapper.find('.calendar.first'));
+    $datePickerWrapper.find('.range_inputs').html($datePickerWrapper.find('.range_inputs').html().replace(/&nbsp;/g, '')); // get rid of whitespace added between hidden buttons
+    $($datePickerWrapper.find('.ranges li')[1]).click(); // default to "Last Month" when first opening
+  };
 
   // Choosing "This Month" or "Last Month" shouldn't close the datepicker until the apply button is pressed
-  $('.ranges ul li').each(function(i, label) {
-    var $label = $(label);
-    var index = i;
-    $(label).on('click', function(event){
-      event.stopPropagation();
-      $('.ranges ul li').removeClass('active');
-      $label.addClass('active');
-      if (index === 0) {
-        // this month
-        $('.daterangepicker .calendar').hide();
-        $('#reportrange').data('daterangepicker').setStartDate(startOfThisMonth);
-        $('#reportrange').data('daterangepicker').setEndDate(today);
-      } else if (index === 1) {
-        // last month
-        $('.daterangepicker .calendar').hide();
-        $('#reportrange').data('daterangepicker').setStartDate(startOfLastMonth);
-        $('#reportrange').data('daterangepicker').setEndDate(endOfLastMonth);
-      } else if (index === 2) {
-        // custom
-        $('.daterangepicker .calendar').show(); // you've hit the custom range flow
-      }
+  function datePickerSelectionHandler($datePickerTrigger, $datePickerWrapper, presets){
+    $datePickerWrapper.find('.ranges ul li').each(function(index, label) {
+      var $label = $(label);
+      $(label).on('click', function(event){
+        event.stopPropagation();
+        $('.ranges ul li').removeClass('active');
+        $label.addClass('active');
+        if (presets[index]) {
+          var preset = presets[index];
+          if (!preset.is_custom) {
+            $datePickerWrapper.find('.calendar').hide();
+          } else {
+            $datePickerWrapper.find('.calendar').show();
+          };
+
+          if (preset.start_date) {
+            $datePickerTrigger.data('daterangepicker').setStartDate(preset.start_date);
+          };
+
+          if (preset.end_date) {
+            $datePickerTrigger.data('daterangepicker').setEndDate(preset.end_date);
+          };
+        };
+      });
     });
-  });
+  };
 
   // accessing the start and end dates once the apply button is pressed
-  $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
-    $('#reportrange input').attr('placeholder', picker.startDate.format('MMMM D, YYYY') + ' - ' + picker.endDate.format('MMMM D, YYYY'));
-  });
+  function setDatePickerApplyListener($datePickerTrigger){
+    $datePickerTrigger.on('apply.daterangepicker', function(ev, picker) {
+      ev.stopPropagation();
+      $datePickerTrigger.find('input').attr('placeholder', picker.startDate.format('MMMM D, YYYY') + ' - ' + picker.endDate.format('MMMM D, YYYY'));
+    });
+  };
 
-  // What happens when there is more than one datepicker on a given page? Need to initialize each one and have it refer to itself
 });

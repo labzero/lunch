@@ -1,15 +1,19 @@
 .datepicker-wrapper {
-//  margin-top: -2px;
   position: relative;
 }
 
 .daterangepicker {
   display: none;
-  width: 485px; // check where this magic number comes from
+  width: 433px;
   border: 1px solid $actionable-blue;
   padding: 0 0 30px 0;
+  &.opensleft, &.opensright {
+    .calendar {
+      margin: 0;
+    }
+  }
   &.opensleft:after, &.opensleft:before {
-    display: none; // overwrite
+    display: none;
   }
   .prev.available {
     transform: rotate(90deg);
@@ -21,11 +25,16 @@
     &.available i:before {
       @extend %icon-font;
       content: "#{$icon-chevron}";
+      color: $actionable-blue;
+      font-size: .8667rem;
     }
   }
   td.in-range {
     background: $actionable-blue;
     color: $white;
+  }
+  td.start-date, td.end-date {
+    border-radius: 0;
   }
   td.active, td.active:hover {
     background: $actionable-blue;
@@ -42,6 +51,7 @@
 
   .ranges {
     width: 100%;
+    border-bottom: 1px solid $secondary-gray;
     ul {
       display: table;
       width: 100%;
@@ -49,6 +59,39 @@
     }
     li {
       display: table-cell;
+      @extend %typography-default-text;
+      color: $text-color;
+      text-align: center;
+      border: none;
+      border-radius: 0;
+      background: $white;
+      padding: 10px 0;
+      position: relative;
+      &.active, &:hover {
+        background: $secondary-gray;
+        border: none;
+        color: $text-color;
+        &:before {
+          border: none;
+        }
+      }
+      &:before {
+        content: '';
+        border-left: 1px solid #dbdbdb;
+        position: absolute;
+        left: -1px;
+        top: 6px;
+        height: 30px;
+      }
+      &:first-child:before {
+        border: none;
+      }
+      &:first-child {
+        border-top-left-radius: 4px;
+      }
+      &:last-child {
+        border-top-right-radius: 4px;
+      }
     }
   }
 
@@ -69,12 +112,49 @@
   .cancelBtn {
     left: 0;
     width: 30px;
-    @extend %hide-text;
+    border-bottom-left-radius: 4px;
+    &:before {
+      @extend %absolute-pseudoelement;
+      @extend %center-both;
+      @extend %icon-font;
+      content: "#{$icon-close}";
+    }
   }
   .applyBtn {
+    @extend %typography-table-heading;
+    text-transform: uppercase;
     margin-left: 30px;
     right: 0;
     background: #5ea2e3;
     width: 100%;
+    border-bottom-right-radius: 4px;
+    color: $white;
   }
+
+  .calendar-date {
+    border: none;
+    border-radius: 0;
+    padding: 6px;
+  }
+
+  .calendar {
+    &.first {
+      border-right: 1px solid $secondary-gray;
+    }
+    td, th {
+      font-family: $default-font-family;
+    }
+    .month {
+      @extend %typography-table-heading;
+      padding: 10px;
+    }
+    thead tr:last-child {
+      display: none;
+    }
+    tbody td {
+      @extend %typography-calendar-day;
+      min-width: 28px;
+    }
+  }
+
 }
