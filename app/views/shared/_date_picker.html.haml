@@ -1,0 +1,6 @@
+- placeholder ||= nil
+- presets ||= []
+
+%span.input-field-container.pull-right.icon-calendar-after.datepicker-trigger
+  %input{placeholder: placeholder, disabled: true}
+.datepicker-wrapper{data: {:'date-picker-presets' => presets.to_json}}

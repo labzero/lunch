@@ -37,6 +37,8 @@ en:
     total: Total
     totals: Totals
     transaction_type: Transaction Type
+    apply: Apply
+    cancel: Cancel
   nav:
     primary:
       welcome: Hi %{name}
@@ -47,6 +49,13 @@ en:
       letters_of_credit: Letters of Credit
       mortgages: Mortgages
       securities: Securities
+  datepicker:
+    range:
+      this_month: "%{month} to date"
+      custom: Custom date range
+    single:
+      this_month: As of Today
+      custom: Custom date
   settings:
     title: Settings
     save: Save

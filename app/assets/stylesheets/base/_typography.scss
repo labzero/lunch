@@ -39,6 +39,11 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-calendar-day {
+  font-size: 0.8667rem;
+  font-weight: $normal-weight;
+}
+
 @mixin typography-dashboard-account-summary {
   font-size: 0.8rem;
   font-weight: $normal-weight;
@@ -186,4 +191,8 @@
 
 %typography-report-summary {
   @include typography-report-summary;
+}
+
+%typography-calendar-day {
+  @include typography-calendar-day;
 }

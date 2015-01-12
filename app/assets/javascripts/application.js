@@ -15,4 +15,6 @@
 //= require dataTables/jquery.dataTables
 //= require jquery-placeholder
 //= require highcharts
+//= require moment
+//= require daterangepicker
 //= require_tree .
