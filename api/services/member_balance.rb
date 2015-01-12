@@ -255,7 +255,7 @@ module MAPI
           capstock_balance_open_connection_string = <<-SQL
             SELECT sum(no_share_holding) as open_balance_cf FROM capstock.capstock_shareholding
             WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
-            AND (sold_dateis null or sold_date >= to_date(#{ActiveRecord::Base.connection.quote(balance_date)}, 'yyyy-mm-dd') )
+            AND (sold_date is null or sold_date >= to_date(#{ActiveRecord::Base.connection.quote(balance_date)}, 'yyyy-mm-dd') )
             AND purchase_date < to_date(#{ActiveRecord::Base.connection.quote(balance_date)}, 'yyyy-mm-dd')
             GROUP BY fhlb_id
           SQL
