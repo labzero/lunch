@@ -325,7 +325,7 @@ module MAPI
             results["Activities"].each do |activity|
                   hash = {"cert_id" => activity["cert_id"],
                       "share_number" => activity["share_number"],
-                      "trans_date" => activity["trans_date"],
+                      "trans_date" => Date.parse(activity["trans_date"]),
                       "trans_type" => activity["trans_type"],
                       "dr_cr" => activity["dr_cr"]
                       }
@@ -334,10 +334,9 @@ module MAPI
           end
           activities_formatted = []
           activities.each do |row|
-            formatted_date = Date.parse(row["trans_date"])
             hash = {"cert_id" => row["cert_id"].to_s,
                     "share_number" => row["share_number"].to_f,
-                    "trans_date" => formatted_date,
+                    "trans_date" => row["trans_date"].to_date,
                     "trans_type" => row["trans_type"].to_s,
                     "dr_cr" => row["dr_cr"].to_s
             }
