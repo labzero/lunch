@@ -57,7 +57,6 @@ describe MAPI::ServiceApp do
       let(:result_set2) {double('Oracle Result Set', fetch: nil)}
       before do
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
-        allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
         expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
         expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set2)
         allow(result_set).to receive(:fetch).and_return([some_balance], nil)
@@ -119,7 +118,6 @@ describe MAPI::ServiceApp do
       let(:result_set) {double('Oracle Result Set', fetch: nil)}
       before do
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
-        allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
         expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
         allow(result_set).to receive(:fetch).and_return(some_activity, nil)
       end
