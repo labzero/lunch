@@ -8,7 +8,11 @@
       %span.report-split-button
         %button.report-button-right #{t('dashboard.actions.download')}
         %button.report-drop-down-right #{t('dashboard.actions.xml')}
-    .report-datepicker= render 'shared/input_field', icon: :calendar, placeholder: t('dashboard.reports.as_of_yesterday'), location: :after
+    .report-datepicker
+      = form_tag(reports_capital_stock_activity_url, method: 'GET') do
+        = text_field_tag :start_date, @start_date
+        = text_field_tag :end_date, @end_date
+      = render 'shared/date_picker', presets: @picker_presets, form: '.report-datepicker form'
   .report-main-body
     .report-summary-data
       %h3

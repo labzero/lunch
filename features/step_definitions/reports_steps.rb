@@ -44,6 +44,12 @@ Then(/^I should see a report table with multiple data rows$/) do
 end
 
 Given(/^I am on the Capital Stock Activity Statement page$/) do
+  now = DateTime.now
+  seconds_till_tomorrow = (now.tomorrow.beginning_of_day - now) * 1.days
+  if seconds_till_tomorrow <= 30
+    sleep(seconds_till_tomorrow + 1)
+  end
+  @today = Date.today
   visit '/reports/capital-stock-activity'
 end
 
@@ -55,28 +61,38 @@ When(/^I click the Date column heading$/) do
   page.find('th', text: I18n.t('global.date')).click
 end
 
-Then(/^I should see the "(.*?)" column values in "(.*?)" order$/) do |column_name, sort_order|
-  column_index = page.evaluate_script("$('thead th:contains(#{column_name})').index()") + 1 # will throw error if column name not present, which is good
-  first_row_text = page.find("tbody tr:first-child td:nth-child(#{column_index})").text
-  last_row_text = page.find("tbody tr:last-child td:nth-child(#{column_index})").text
-
-  case column_name
-  when "Date"
-    top_val = Date.strptime(first_row_text, '%m/%d/%Y')
-    bottom_val = Date.strptime(last_row_text, '%m/%d/%Y')
-  when "Certificate Sequence"
-    top_val = first_row_text.to_i
-    bottom_val = last_row_text.to_i
-  else
-    raise "column_name not recognized"
-  end
-  
-  if sort_order == 'ascending'
-    expect(top_val < bottom_val).to eq(true)
-  elsif sort_order == 'descending'
-    expect(top_val > bottom_val).to eq(true)
-  else
-    raise 'sort_order not recognized'
-  end
+Then(/^I should see a Capital Stock Activity Statement for the current month to date$/) do
+  start_date = @today.beginning_of_month.strftime('%B %-d, %Y')
+  end_date = @today.strftime('%B %-d, %Y')
+  step %{I should see a Capital Stock Activity Statement starting on "#{start_date}" and ending on "#{end_date}"}
 end
 
+Then(/^I should see a Capital Stock Activity Statement for the last month$/) do
+  last_month = (@today.beginning_of_month - 1.months)
+  start_date = last_month.strftime('%B %-d, %Y')
+  end_date = last_month.end_of_month.strftime('%B %-d, %Y')
+  step %{I should see a Capital Stock Activity Statement starting on "#{start_date}" and ending on "#{end_date}"}
+end
+
+Then(/^I should see a Capital Stock Activity Statement for the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of this month$/) do |start_day, end_day|
+  start_date = Date.new(@today.year, @today.month, start_day.to_i).strftime('%B %-d, %Y')
+  end_date = Date.new(@today.year, @today.month, end_day.to_i).strftime('%B %-d, %Y')
+  step %{I should see a Capital Stock Activity Statement starting on "#{start_date}" and ending on "#{end_date}"}
+end
+
+Then(/^I should see a Capital Stock Activity Statement starting on "(.*?)" and ending on "(.*?)"$/) do |start_date, end_date|
+  page.assert_selector(".datepicker-trigger input[placeholder='#{start_date} - #{end_date}']")
+  opening_balance = I18n.t('reports.pages.capital_stock_activity.opening_balance_heading', date: start_date)
+  closing_balance = I18n.t('reports.pages.capital_stock_activity.closing_balance_heading', date: end_date)
+  step %{I should see "#{opening_balance}"}
+  step %{I should see "#{closing_balance}"}
+  start_date_obj = start_date.to_date
+  end_date_obj = end_date.to_date
+  page.all('.report-table tbody td:first-child').each do |element|
+    if element['class'].split(' ').include?('dataTables_empty')
+      next
+    end
+    date = Date.strptime(element.text, "%m/%d/%Y")
+    raise Capybara::ExpectationNotMet, "date #{date} out of range [#{start_date_obj}, #{end_date_obj}]" unless date >= start_date_obj && date <= end_date_obj
+  end
+end

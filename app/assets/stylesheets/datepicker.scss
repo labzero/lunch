@@ -44,9 +44,11 @@
     display: none;
   }
 
-  &.opensleft .ranges {
-    float: none;
-    margin: 0;
+  &.opensleft, &.opensright, &.openscenter {
+    .ranges {
+      float: none;
+      margin: 0;
+    }
   }
 
   .ranges {

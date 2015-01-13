@@ -93,10 +93,38 @@ class ReportsController < ApplicationController
 
   def capital_stock_activity
     member_balances = MemberBalanceService.new(MEMBER_ID)
-    start_date = params[:start_date] || Date.today - 1.month
-    end_date = params[:end_date] || Date.today
-    @capital_stock_activity = member_balances.capital_stock_activity(start_date.to_date, end_date.to_date)
+    this_month_start = Date.today.beginning_of_month
+    this_month_end = Date.today
+    last_month_start = this_month_start - 1.month
+    last_month_end = last_month_start.end_of_month
+    @start_date = (params[:start_date] || last_month_start).to_date
+    @end_date = (params[:end_date] || last_month_end).to_date
+    @capital_stock_activity = member_balances.capital_stock_activity(@start_date.to_date, @end_date.to_date)
     raise StandardError, "There has been an error and ReportsController#capital_stock_activity has returned nil. Check error logs." if @capital_stock_activity.blank?
+    @picker_presets = [
+      {
+        label: t('datepicker.range.this_month', month: this_month_start.strftime('%B')),
+        start_date: this_month_start,
+        end_date: this_month_end
+      },
+      {
+        label: last_month_start.strftime('%B'),
+        start_date: last_month_start,
+        end_date: last_month_end
+      },
+      {
+        label: t('datepicker.range.custom'),
+        start_date: @start_date,
+        end_date: @end_date,
+        is_custom: true
+      }
+    ]
+    @picker_presets.each do |preset|
+      if preset[:start_date] == @start_date && preset[:end_date] == @end_date
+        preset[:is_default] = true
+        break
+      end
+    end
   end
 
 end

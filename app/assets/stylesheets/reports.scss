@@ -83,7 +83,6 @@
 }
 
 .report-header {
-  @extend %clearfix;
   margin-bottom: 50px;
   h1 {
     float: left;
@@ -92,6 +91,9 @@
 
 .report-datepicker {
   width: (3 * $grid-column-width) + (2 * $gutter-width);
+  form {
+    display: none;
+  }
 }
 
 .report-main-body {
