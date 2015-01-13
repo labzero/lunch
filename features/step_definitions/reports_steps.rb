@@ -88,10 +88,11 @@ Then(/^I should see a Capital Stock Activity Statement starting on "(.*?)" and e
   step %{I should see "#{closing_balance}"}
   start_date_obj = start_date.to_date
   end_date_obj = end_date.to_date
-  if !page.has_css?('.report-table tbody .dataTables_empty')
-    page.all('.report-table tbody td:first-child').each do |element|
-      date = Date.strptime(element.text, "%m/%d/%Y")
-      raise Capybara::ExpectationNotMet, "date #{date} out of range [#{start_date_obj}, #{end_date_obj}]" unless date >= start_date_obj && date <= end_date_obj
+  page.all('.report-table tbody td:first-child').each do |element|
+    if element['class'].split(' ').include?('dataTables_empty')
+      next
     end
+    date = Date.strptime(element.text, "%m/%d/%Y")
+    raise Capybara::ExpectationNotMet, "date #{date} out of range [#{start_date_obj}, #{end_date_obj}]" unless date >= start_date_obj && date <= end_date_obj
   end
 end
