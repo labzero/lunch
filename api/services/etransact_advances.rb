@@ -48,27 +48,12 @@ module MAPI
         },
         :'2year'=> {
             term_bucket_id: 12,
-            term_bucket_label: '1 Year'
+            term_bucket_label: '2 Years'
         },
         :'3year'=> {
             term_bucket_id: 13,
-            term_bucket_label: '1 Year'
+            term_bucket_label: '3 Years'
         }
-      }
-
-      TYPE_BUCKET_COLUMN_NO_MAPPING = {
-          :whole => {
-              colunn_no: 2
-          },
-          :agency => {
-              colunn_no: 3
-          },
-          :aaa=> {
-              colunn_no: 4
-          },
-          :aa=> {
-              colunn_no: 5
-          }
       }
 
 
