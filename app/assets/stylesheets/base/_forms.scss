@@ -29,13 +29,20 @@
     border: 1px solid $actionable-blue;
     border-radius: $default-border-radius;
     color: $text-color;
-    padding: 5px 0 3px 30px;
+    padding: 5px 0 3px 10px;
     box-sizing: border-box;
     width: 100%;
     display: inline-block;
     @include input-placeholder {
       color: $medium-gray;
       @include typography-field-placeholder;
+    }
+  }
+  &[class*=" icon-"], &[class^="icon-"] {
+    &[class$="-before"], &[class*="-before "] {
+      input {
+        padding-left: 30px;
+      }
     }
   }
 }

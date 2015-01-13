@@ -1,6 +1,8 @@
 - placeholder ||= nil
+- open_direction ||= 'right'
 - presets ||= []
+- form ||= nil
 
 %span.input-field-container.pull-right.icon-calendar-after.datepicker-trigger
   %input{placeholder: placeholder, disabled: true}
-.datepicker-wrapper{data: {:'date-picker-presets' => presets.to_json}}
+.datepicker-wrapper{data: {:'date-picker-presets' => presets.to_json, :'date-picker-open-direction' => open_direction, :'date-picker-form' => form}}

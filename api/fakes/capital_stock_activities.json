@@ -231,7 +231,7 @@
         "dr_cr": "C"
     },
     {
-        "cert_id": "51113",
+        "cert_id": "51114",
         "share_number": "3040",
         "amount": "304000",
         "class": "B",
@@ -240,6 +240,39 @@
         "trans_date": "16-MAY-2014",
         "trans_type": "Repurchase",
         "dr_cr": "D"
+    },
+    {
+        "cert_id": "51115",
+        "share_number": "5864",
+        "amount": "586400",
+        "class": "B",
+        "full_partial_ind": "-",
+        "tran_id": "70222",
+        "trans_date": "15-DEC-2014",
+        "trans_type": "Purchase",
+        "dr_cr": "C"
+    },
+    {
+        "cert_id": "51116",
+        "share_number": "5864",
+        "amount": "586400",
+        "class": "B",
+        "full_partial_ind": "-",
+        "tran_id": "70223",
+        "trans_date": "01-JAN-2015",
+        "trans_type": "Purchase",
+        "dr_cr": "D"
+    },
+    {
+        "cert_id": "51117",
+        "share_number": "5864",
+        "amount": "586400",
+        "class": "B",
+        "full_partial_ind": "-",
+        "tran_id": "70224",
+        "trans_date": "16-JAN-2015",
+        "trans_type": "Purchase",
+        "dr_cr": "C"
     }
 ]
 }

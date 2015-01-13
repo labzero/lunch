@@ -322,6 +322,8 @@ module MAPI
           else
             results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'capital_stock_activities.json')))
             activities = []
+            to_date_obj = Date.parse(to_date)
+            from_date_obj = Date.parse(from_date)
             results["Activities"].each do |activity|
                   hash = {"cert_id" => activity["cert_id"],
                       "share_number" => activity["share_number"],
@@ -329,7 +331,7 @@ module MAPI
                       "trans_type" => activity["trans_type"],
                       "dr_cr" => activity["dr_cr"]
                       }
-              activities.push(hash)
+              activities.push(hash) if hash["trans_date"] >= from_date_obj && hash["trans_date"] <= to_date_obj
             end
           end
           activities_formatted = []
