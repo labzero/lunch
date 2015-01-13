@@ -81,7 +81,7 @@ Then(/^I should see a Capital Stock Activity Statement for the (\d+)(?:st|rd|th)
 end
 
 Then(/^I should see a Capital Stock Activity Statement starting on "(.*?)" and ending on "(.*?)"$/) do |start_date, end_date|
-  page.assert_selector(".datepicker-trigger input[placeholder='#{start_date} - #{end_date}']")
+  expect(page.find(".datepicker-trigger input").value).to eq("#{start_date} - #{end_date}")
   opening_balance = I18n.t('reports.pages.capital_stock_activity.opening_balance_heading', date: start_date)
   closing_balance = I18n.t('reports.pages.capital_stock_activity.closing_balance_heading', date: end_date)
   step %{I should see "#{opening_balance}"}
