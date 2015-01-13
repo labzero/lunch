@@ -103,7 +103,7 @@ $(function () {
   };
 
   function setDatePickerPlaceholder($datePickerTrigger, startDate, endDate) {
-    $datePickerTrigger.find('input').attr('placeholder', startDate.format('MMMM D, YYYY') + ' - ' + endDate.format('MMMM D, YYYY'));
+    $datePickerTrigger.find('input').val(startDate.format('MMMM D, YYYY') + ' - ' + endDate.format('MMMM D, YYYY'));
   }
 
 });

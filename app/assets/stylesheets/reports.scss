@@ -80,6 +80,10 @@
     @extend %typography-page-title;
     margin: 32px 0 17px;
   }
+  input {
+    color: $medium-gray;
+    @include typography-field-placeholder;
+  }
 }
 
 .report-header {

@@ -25,14 +25,15 @@ Scenario: Member sees Capital Stock Activity Statement
   Then I should see report summary data
     And I should see a report table with multiple data rows
 
+@smoke
 Scenario: Member sorts the Capital Stock Activity Statement by date
   Given I am on the Capital Stock Activity Statement page
     And I should see the "Date" column values in "ascending" order
   When I click the Date column heading
   Then I should see the "Date" column values in "descending" order
 
-
-Scenario: Member sorts the Capital Stock Activity Statement
+@smoke
+Scenario: Member sorts the Capital Stock Activity Statement by certificate sequence
   Given I am on the Capital Stock Activity Statement page
   When I click the Certificate Sequence column heading
   Then I should see the "Certificate Sequence" column values in "ascending" order
@@ -44,6 +45,7 @@ Scenario: Member sees date picker when interacting with date field
   When I click the datepicker field
   Then I should see the datepicker
 
+@smoke
 Scenario: Member chooses the current month to date preset on Capital Stock Activity Statement
   Given I am on the Capital Stock Activity Statement page
   And I click the datepicker field
@@ -52,6 +54,7 @@ Scenario: Member chooses the current month to date preset on Capital Stock Activ
   When I click the datepicker apply button
   Then I should see a Capital Stock Activity Statement for the current month to date
 
+@smoke
 Scenario: Member chooses the last month preset on Capital Stock Activity Statement
   Given I am on the Capital Stock Activity Statement page
   And I click the datepicker field
@@ -60,6 +63,7 @@ Scenario: Member chooses the last month preset on Capital Stock Activity Stateme
   When I click the datepicker apply button
   Then I should see a Capital Stock Activity Statement for the last month
 
+@smoke
 Scenario: Member chooses a custom date range on Capital Stock Activity Statement
   Given I am on the Capital Stock Activity Statement page
   And I click the datepicker field
