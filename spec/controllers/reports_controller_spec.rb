@@ -41,7 +41,6 @@ RSpec.describe ReportsController, :type => :controller do
       expect(member_balance_service_instance).to receive(:capital_stock_activity).and_return(nil)
       expect{get :capital_stock_activity}.to raise_error(StandardError)
     end
-
     describe "view instance variables" do
       before {
         allow(member_balance_service_instance).to receive(:capital_stock_activity).with(kind_of(Date), kind_of(Date)).and_return(response_hash)
@@ -75,6 +74,12 @@ RSpec.describe ReportsController, :type => :controller do
         expect(assigns[:end_date]).to eq(end_date)
       end
     end
+  end
 
+  describe 'GET borrowing_capacity' do
+    it 'should render the borrowing_capacity view' do
+      get :borrowing_capacity
+      expect(response.body).to render_template('borrowing_capacity')
+    end
   end
 end

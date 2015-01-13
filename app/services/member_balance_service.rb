@@ -161,4 +161,45 @@ class MemberBalanceService
     end
     data
   end
+
+  def borrowing_capacity_summary(date)
+
+    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
+    begin
+      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'borrowing_capacity_summary.json'))).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.borrowing_capacity_summary encountered a JSON parsing error: #{e}")
+      return nil
+    end
+
+    # first table - Standard Collateral
+    data[:standard_credit_totals] = {}
+    standard_collateral_fields = [:count, :original_amount, :unpaid_principal, :market_value, :bc_upb, :borrowing_capacity]
+    standard_collateral_fields.each do |key|
+      data[:standard_credit_totals][key] ||= 0
+      data[:standard][:collateral].each do |row|
+        data[:standard_credit_totals][key] += row[key]
+      end
+    end
+    data[:net_loan_collateral] = data[:standard_credit_totals][:borrowing_capacity] - data[:standard][:excluded].values.reduce(:+)
+    data[:standard_excess_capacity] = data[:net_loan_collateral] - data[:standard][:less_other].values.reduce(:+)
+
+    # second table - Securities Backed Collateral
+    data[:sbc_totals] = {}
+    securities_backed_collateral_fields = [:total_market_value, :total_borrowing_capacity, :advances, :standard_credit, :remaining_market_value, :remaining_borrowing_capacity]
+    securities_backed_collateral_fields.each do |key|
+      data[:sbc_totals][key] ||= 0
+      data[:sbc][:collateral].each do |row|
+        data[:sbc_totals][key] += row[key]
+      end
+    end
+    data[:sbc_excess_capacity] = data[:sbc_totals][:remaining_borrowing_capacity] - data[:sbc][:less_other].values.reduce(:+)
+
+    # TODO this doesn't make sense, check with Siew
+    data[:total_borrowing_capacity] = data[:standard_credit_totals][:borrowing_capacity] + data[:sbc_totals][:remaining_borrowing_capacity]
+    data[:remaining_borrowing_capacity] = data[:standard_excess_capacity] + data[:sbc_excess_capacity]
+
+    data
+  end
+
 end

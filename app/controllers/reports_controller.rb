@@ -34,7 +34,8 @@ class ReportsController < ApplicationController
       collateral: {
         borrowing_capacity: {
           updated: t('global.daily'),
-          available_history: t('global.all')
+          available_history: t('global.all'),
+          route: reports_borrowing_capacity_path
         },
         mcu: {
           updated: t('global.daily'),
@@ -125,6 +126,13 @@ class ReportsController < ApplicationController
         break
       end
     end
+  end
+
+  def borrowing_capacity
+    member_balances = MemberBalanceService.new(MEMBER_ID)
+    date = params[:end_date] || Date.today
+    @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(date)
+    raise StandardError, "There has been an error and ReportsController#borrowing_capacity has returned nil. Check error logs." if @borrowing_capacity_summary.blank?
   end
 
 end
