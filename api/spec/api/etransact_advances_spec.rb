@@ -3,7 +3,7 @@ require 'spec_helper'
 describe MAPI::ServiceApp do
   RSpec::Matchers.define :be_boolean do
     match do |actual|
-      actual.should satisfy { |x| x == true || x == false }
+      expect(actual).to satisfy { |x| x == true || x == false }
     end
   end
   before do
@@ -157,7 +157,7 @@ describe MAPI::ServiceApp do
         expect(result_set).to receive(:fetch).and_return(1, nil).at_least(1).times
         expect(result_set2).to receive(:fetch).and_return(0, nil).at_least(1).times
         expect(result_set3).to receive(:fetch).and_return(1, nil).at_least(1).times
-        expect(result_set4).to receive(:fetch).and_return([3, '2 Week', 'Y', 'Y', 'Y', 'Y', '0600', DateTime.now.to_date, '0700'], nil).at_least(1).times
+        expect(result_set4).to receive(:fetch).and_return([3, '2 Week', 'Y', 'Y', 'Y', 'Y', '0600', Date.today, '0700'], nil).at_least(1).times
         expect(etransact_advances_status['etransact_advances_status']).to be false
         expect(etransact_advances_status['wl_vrc_status']).to be true
       end
@@ -165,7 +165,7 @@ describe MAPI::ServiceApp do
         expect(result_set).to receive(:fetch).and_return(1, nil).at_least(1).times
         expect(result_set2).to receive(:fetch).and_return(0, nil).at_least(1).times
         expect(result_set3).to receive(:fetch).and_return(1, nil).at_least(1).times
-        expect(result_set4).to receive(:fetch).and_return([3, '2 Week', 'Y', 'Y', 'Y', 'Y', '0600', DateTime.now.to_date, '0700'], nil).at_least(1).times
+        expect(result_set4).to receive(:fetch).and_return([3, '2 Week', 'Y', 'Y', 'Y', 'Y', '0600', Date.today, '0700'], nil).at_least(1).times
         result = etransact_advances_status['all_loan_status']
         MAPI::Services::Rates::LOAN_TERMS.each do |term|
           MAPI::Services::Rates::LOAN_TYPES.each do |type|
