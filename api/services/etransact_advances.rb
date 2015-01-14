@@ -2,7 +2,6 @@ module MAPI
   module Services
     module EtransactAdvances
       include MAPI::Services::Base
-      include MAPI::Services::Rates
       STATUS_ON_RECORD_NOTFOUND_COUNT = 0
 
       TERM_BUCKET_MAPPING = {
@@ -56,6 +55,20 @@ module MAPI
         }
       }
 
+      TYPE_BUCKET_COLUMN_NO_MAPPING = {
+        :whole => {
+          column_no: 2
+        },
+        :agency => {
+          column_no: 3
+        },
+        :aaa => {
+          column_no: 4
+        },
+        :aa => {
+          column_no: 5
+        }
+      }
 
       def self.registered(app)
 
@@ -135,52 +148,44 @@ module MAPI
                 break
               end
             end
-            results2 = []
-            hash = []
+            term_bucket_data_array = []
+            row_array = []
             etransct_all_product_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_all_product_on_string)
             while row = etransct_all_product_on_cursor.fetch()
-              hash = [row[0], row[1], row[2], row[3], row[4], row[5], row[6] , row[7], row[8]]
-              results2.push(hash)
+              row_array = [row[0], row[1], row[2], row[3], row[4], row[5], row[6] , row[7], row[8]]
+              term_bucket_data_array.push(row_array)
             end
           else
-            results2 = []
+            term_bucket_data_array = []
             results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_status.json'))).with_indifferent_access
             etransact_status = results[:etransact_advances_status]
             wl_vrc_status = results[:wl_vrc_status]
             result_jason = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_term_buckets_info.json')))
             result_jason.each do |row|
-              hash = [row[0], row[1], row[2], row[3], row[4], row[5], row[6] , Date.parse(row[7]), row[8]]
-              results2.push(hash)
+              row_array = [row[0], row[1], row[2], row[3], row[4], row[5], row[6] , Date.parse(row[7]), row[8]]
+              term_bucket_data_array.push(row_array)
             end
            end
           # # loop thru to get status for each of the type and term
           loan_status = {}
-          LOAN_TERMS.each do |term|
+          MAPI::Services::Rates::LOAN_TERMS.each do |term|
             lookup_term = TERM_BUCKET_MAPPING[term] || 0  #default to 0 if not found
             if lookup_term.to_s != '0' then
               lookup_term_id = TERM_BUCKET_MAPPING[term][:term_bucket_id] || 0
             end
             loan_status[term] ||= {}
-            LOAN_TYPES.each do |type|
+            MAPI::Services::Rates::LOAN_TYPES.each do |type|
               trade_status = false
               display_status = false
               bucket_label = 'NotFound'
-              results2.each do |row|
+              term_bucket_data_array.each do |row|
                 if lookup_term_id == row[0] then
                   bucket_label = row[1].to_s
                   # logic to check if manually turn off regardless of end time
                   # based on Types, will read different column
-                  lookup_column = 99 # a dummy number which has no matching column
-                 case type.to_s
-                  when 'whole'
-                    lookup_column = 2
-                  when 'agency'
-                    lookup_column = 3
-                  when 'aaa'
-                    lookup_column = 4
-                  when 'aa'
-                    lookup_column = 5
-                 end
+                  lookup_column = nil # a dummy number which has no matching column
+                  lookup_column= TYPE_BUCKET_COLUMN_NO_MAPPING[type][:column_no]
+
                   if row[lookup_column.to_i].to_s == 'Y' then
                     display_status = true
                   else

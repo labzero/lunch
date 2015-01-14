@@ -1,15 +1,21 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
+  RSpec::Matchers.define :be_boolean do
+    match do |actual|
+      actual.should satisfy { |x| x == true || x == false }
+    end
+  end
   before do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
   end
+
   describe "etransact advances status" do
     let(:etransact_advances_status) { get '/etransact_advances/status'; JSON.parse(last_response.body) }
     it "should return 2 etransact advances status" do
       expect(etransact_advances_status.length).to be >=1
-      expect(etransact_advances_status['etransact_advances_status'] == true || false)
-      expect(etransact_advances_status['wl_vrc_status'] == true || false)
+      expect(etransact_advances_status['etransact_advances_status']).to be_boolean
+      expect(etransact_advances_status['wl_vrc_status']).to be_boolean
     end
     it 'should return all_loan_status hash' do
       expect(etransact_advances_status['all_loan_status'].length).to be >=1
@@ -18,8 +24,8 @@ describe MAPI::ServiceApp do
       result = etransact_advances_status['all_loan_status']
       MAPI::Services::Rates::LOAN_TERMS.each do |term|
          MAPI::Services::Rates::LOAN_TYPES.each do |type|
-             expect(result[term.to_s][type.to_s]['trade_status']== true || false)
-             expect(result[term.to_s][type.to_s]['display_status']== true || false)
+             expect(result[term.to_s][type.to_s]['trade_status']).to be_boolean
+             expect(result[term.to_s][type.to_s]['display_status']).to be_boolean
              expect(result[term.to_s][type.to_s]['bucket_label']).to be_kind_of(String)
          end
        end
@@ -41,13 +47,13 @@ describe MAPI::ServiceApp do
       end
       it 'should still return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
         expect(etransact_advances_status.length).to be >=1
-        expect(etransact_advances_status['etransact_advances_status'] ==  true||false)
-        expect(etransact_advances_status['wl_vrc_status'] == true||false)
+        expect(etransact_advances_status['etransact_advances_status']).to be_boolean
+        expect(etransact_advances_status['wl_vrc_status']).to be_boolean
         result = etransact_advances_status['all_loan_status']
         MAPI::Services::Rates::LOAN_TERMS.each do |term|
           MAPI::Services::Rates::LOAN_TYPES.each do |type|
-            expect(result[term.to_s][type.to_s]['trade_status']==  true||false)
-            expect(result[term.to_s][type.to_s]['display_status']== true||false)
+            expect(result[term.to_s][type.to_s]['trade_status']).to be_boolean
+            expect(result[term.to_s][type.to_s]['display_status']).to be_boolean
             expect(result[term.to_s][type.to_s]['bucket_label']).to be_kind_of(String)
           end
         end
@@ -100,8 +106,8 @@ describe MAPI::ServiceApp do
         result = etransact_advances_status['all_loan_status']
         MAPI::Services::Rates::LOAN_TERMS.each do |term|
           MAPI::Services::Rates::LOAN_TYPES.each do |type|
-            expect(result[term.to_s][type.to_s]['trade_status'] == true || false)
-            expect(result[term.to_s][type.to_s]['display_status'] == true || false)
+            expect(result[term.to_s][type.to_s]['trade_status']).to be_boolean
+            expect(result[term.to_s][type.to_s]['display_status']).to be_boolean
             expect(result[term.to_s][type.to_s]['bucket_label']).to be_kind_of(String)
           end
         end
