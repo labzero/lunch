@@ -1,4 +1,5 @@
 {
+  "date" : "",
   "standard" : {
     "collateral" : [
       {
@@ -7,7 +8,6 @@
         "original_amount" : 1684961602,
         "unpaid_principal" : 1621269967,
         "market_value" : 1668470539,
-        "bc_upb" : 95,
         "borrowing_capacity" : 1534992054
       },
       {
@@ -16,7 +16,6 @@
         "original_amount" : 187391836,
         "unpaid_principal" : 169336131,
         "market_value" : 170490197,
-        "bc_upb" : 93,
         "borrowing_capacity" : 156850842
       },
       {
@@ -25,7 +24,6 @@
         "original_amount" : 805835151,
         "unpaid_principal" : 665244590,
         "market_value" : 640129758,
-        "bc_upb" : 79,
         "borrowing_capacity" : 524906064
       },
       {
@@ -34,7 +32,6 @@
         "original_amount" : 112323440,
         "unpaid_principal" : 91601422,
         "market_value" : 89641644,
-        "bc_upb" : 80,
         "borrowing_capacity" : 73506124
       },
       {
@@ -43,7 +40,6 @@
         "original_amount" : 13769580,
         "unpaid_principal" : 7924170,
         "market_value" : 6298338,
-        "bc_upb" : 65,
         "borrowing_capacity" : 5164581
       },
       {
@@ -52,7 +48,6 @@
         "original_amount" : 671578359,
         "unpaid_principal" : 521158356,
         "market_value" : 510355716,
-        "bc_upb" : 78,
         "borrowing_capacity" : 408284430
       },
       {
@@ -61,7 +56,6 @@
         "original_amount" : 4530550,
         "unpaid_principal" : 2649441,
         "market_value" : 2800835,
-        "bc_upb" : 97,
         "borrowing_capacity" : 2576753
       },
       {
@@ -70,7 +64,6 @@
         "original_amount" : 2059938430,
         "unpaid_principal" : 1858647736,
         "market_value" : 1858644908,
-        "bc_upb" : 60,
         "borrowing_capacity" : 1115184662
       },
       {
@@ -79,7 +72,6 @@
         "original_amount" : 462913294,
         "unpaid_principal" : 332653512,
         "market_value" : 332650969,
-        "bc_upb" : 60,
         "borrowing_capacity" : 199588533
       },
       {
@@ -88,7 +80,6 @@
         "original_amount" : 2309802176,
         "unpaid_principal" : 2309802176,
         "market_value" : 2309802176,
-        "bc_upb" : 60,
         "borrowing_capacity" : 1385881305
       },
       {
@@ -97,7 +88,6 @@
         "original_amount" : 89742880,
         "unpaid_principal" : 89742880,
         "market_value" : 89742880,
-        "bc_upb" : 60,
         "borrowing_capacity" : 53845728
       },
       {
@@ -106,7 +96,6 @@
         "original_amount" : 903488373,
         "unpaid_principal" : 846731274,
         "market_value" : 783985114,
-        "bc_upb" : 81,
         "borrowing_capacity" : 681822163
       }
     ],
@@ -115,7 +104,7 @@
       "bank" : 0,
       "regulatory" : 0
     },
-    "less_other" : {
+    "utilized" : {
       "advances" : 3363500000,
       "letters_of_credit" : 6025000,
       "swap_collateral" : 0,
@@ -155,7 +144,7 @@
         "remaining_borrowing_capacity" : 100332
       }
     ],
-    "less_other" : {
+    "utilized" : {
       "other_collateral" : 0,
       "excluded_regulatory" : 0
     }

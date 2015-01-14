@@ -269,7 +269,7 @@ en:
     collateral:
       title: Collateral
       borrowing_capacity:
-        title: Confirmation of Borrowing Capacity
+        title: Borrowing Capacity
         summary: Covers both the Standard Credit Program and the Securities-Backed Credit Program. The loan collateral data in the Standard Credit section of the report is updated during the day to reflect the processing of new MCUs.
       mcu:
         title: MCU Status

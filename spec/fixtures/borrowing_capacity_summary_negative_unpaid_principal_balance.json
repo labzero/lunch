@@ -1,0 +1,80 @@
+{
+  "date" : "",
+  "standard" : {
+    "collateral" : [
+      {
+        "type" : "RESIDENTIAL - ARMs",
+        "count" : 1739,
+        "original_amount" : 1684961602,
+        "unpaid_principal" : -1621269967,
+        "market_value" : 1668470539,
+        "borrowing_capacity" : 1534992054
+      },
+      {
+        "type" : "RESIDENTIAL - FIXED",
+        "count" : 280,
+        "original_amount" : 187391836,
+        "unpaid_principal" : 169336131,
+        "market_value" : 170490197,
+        "borrowing_capacity" : 156850842
+      },
+      {
+        "type" : "MULTIFAMILY - ARMs",
+        "count" : 680,
+        "original_amount" : 805835151,
+        "unpaid_principal" : 665244590,
+        "market_value" : 640129758,
+        "borrowing_capacity" : 524906064
+      }
+    ],
+    "excluded" : {
+      "blanket_lien" : 0,
+      "bank" : 180000,
+      "regulatory" : 0
+    },
+    "utilized" : {
+      "advances" : 3363500,
+      "letters_of_credit" : 6025000,
+      "swap_collateral" : 0,
+      "sbc_type_deficiencies" : 0,
+      "payment_fees" : 0,
+      "other_collateral" : 0,
+      "mpf_ce_collateral" : 0
+    }
+  },
+  "sbc" : {
+    "collateral" : [
+      {
+        "type" : "AA",
+        "total_market_value" : 0,
+        "total_borrowing_capacity" : 0,
+        "advances" : 0,
+        "standard_credit" : 0,
+        "remaining_market_value" : 0,
+        "remaining_borrowing_capacity" : 0
+      },
+      {
+        "type" : "AAA",
+        "total_market_value" : 0,
+        "total_borrowing_capacity" : 0,
+        "advances" : 0,
+        "standard_credit" : 0,
+        "remaining_market_value" : 0,
+        "remaining_borrowing_capacity" : 0
+      },
+      {
+        "type" : "Agency",
+        "total_market_value" : 105613,
+        "total_borrowing_capacity" : 100332,
+        "advances" : 0,
+        "standard_credit" : 0,
+        "remaining_market_value" : 105613,
+        "remaining_borrowing_capacity" : 100332
+      }
+    ],
+    "utilized" : {
+      "other_collateral" : 14756,
+      "excluded_regulatory" : 8942
+    }
+  }
+}

@@ -174,15 +174,20 @@ class MemberBalanceService
 
     # first table - Standard Collateral
     data[:standard_credit_totals] = {}
-    standard_collateral_fields = [:count, :original_amount, :unpaid_principal, :market_value, :bc_upb, :borrowing_capacity]
-    standard_collateral_fields.each do |key|
-      data[:standard_credit_totals][key] ||= 0
-      data[:standard][:collateral].each do |row|
+    standard_collateral_fields = [:count, :original_amount, :unpaid_principal, :market_value, :borrowing_capacity]
+    data[:standard][:collateral].each_with_index do |row, i|
+      standard_collateral_fields.each do |key|
+        data[:standard_credit_totals][key] ||= 0
         data[:standard_credit_totals][key] += row[key]
+      end
+      if row[:borrowing_capacity] > 0 && row[:unpaid_principal] > 0
+        data[:standard][:collateral][i][:bc_upb] = ((row[:borrowing_capacity].to_f / row[:unpaid_principal].to_f) * 100).round
+      else
+        data[:standard][:collateral][i][:bc_upb] = 0
       end
     end
     data[:net_loan_collateral] = data[:standard_credit_totals][:borrowing_capacity] - data[:standard][:excluded].values.reduce(:+)
-    data[:standard_excess_capacity] = data[:net_loan_collateral] - data[:standard][:less_other].values.reduce(:+)
+    data[:standard_excess_capacity] = data[:net_loan_collateral] - data[:standard][:utilized].values.reduce(:+)
 
     # second table - Securities Backed Collateral
     data[:sbc_totals] = {}
@@ -193,13 +198,14 @@ class MemberBalanceService
         data[:sbc_totals][key] += row[key]
       end
     end
-    data[:sbc_excess_capacity] = data[:sbc_totals][:remaining_borrowing_capacity] - data[:sbc][:less_other].values.reduce(:+)
+    data[:sbc_excess_capacity] = data[:sbc_totals][:remaining_borrowing_capacity] - data[:sbc][:utilized].values.reduce(:+)
 
-    # TODO this doesn't make sense, check with Siew
     data[:total_borrowing_capacity] = data[:standard_credit_totals][:borrowing_capacity] + data[:sbc_totals][:remaining_borrowing_capacity]
     data[:remaining_borrowing_capacity] = data[:standard_excess_capacity] + data[:sbc_excess_capacity]
 
     data
+
+  #   what sort of error checks do we want?  need to think through null checks if various things do not get returned
   end
 
 end

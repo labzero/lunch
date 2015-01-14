@@ -173,6 +173,135 @@ describe MemberBalanceService do
 
   end
 
+  # TODO add vcr once MAPI endpoint is rigged up
+  describe '`borrowing_capacity_summary` method' do
+    let(:today) {Date.new(2014,12,1)}
+    let(:borrowing_capacity_summary) {subject.borrowing_capacity_summary(today)}
+    it 'should return an array of standard collateral objects' do
+      expect(borrowing_capacity_summary[:standard][:collateral].length).to be >= 1
+      borrowing_capacity_summary[:standard][:collateral].each do |collateral_object|
+        expect(collateral_object[:type]).to be_kind_of(String)
+        expect(collateral_object[:count]).to be_kind_of(Integer)
+        expect(collateral_object[:original_amount]).to be_kind_of(Integer)
+        expect(collateral_object[:unpaid_principal]).to be_kind_of(Integer)
+        expect(collateral_object[:market_value]).to be_kind_of(Integer)
+        expect(collateral_object[:borrowing_capacity]).to be_kind_of(Integer)
+        expect(collateral_object[:bc_upb]).to be_kind_of(Integer)
+      end
+    end
+    it 'should return a hash of excluded standard collateral line items' do
+      expect(borrowing_capacity_summary[:standard][:excluded][:blanket_lien]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:standard][:excluded][:bank]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:standard][:excluded][:regulatory]).to be_kind_of(Integer)
+    end
+    it 'should return a hash of utilized standard collateral line items' do
+      expect(borrowing_capacity_summary[:standard][:utilized][:advances]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:standard][:utilized][:letters_of_credit]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:standard][:utilized][:swap_collateral]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:standard][:utilized][:sbc_type_deficiencies]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:standard][:utilized][:payment_fees]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:standard][:utilized][:other_collateral]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:standard][:utilized][:mpf_ce_collateral]).to be_kind_of(Integer)
+    end
+    it 'should return an array of securities-backed collateral objects' do
+      expect(borrowing_capacity_summary[:sbc][:collateral].length).to be >= 1
+      borrowing_capacity_summary[:sbc][:collateral].each do |collateral_object|
+        expect(collateral_object[:type]).to be_kind_of(String)
+        expect(collateral_object[:total_market_value]).to be_kind_of(Integer)
+        expect(collateral_object[:total_borrowing_capacity]).to be_kind_of(Integer)
+        expect(collateral_object[:advances]).to be_kind_of(Integer)
+        expect(collateral_object[:standard_credit]).to be_kind_of(Integer)
+        expect(collateral_object[:remaining_market_value]).to be_kind_of(Integer)
+        expect(collateral_object[:remaining_borrowing_capacity]).to be_kind_of(Integer)
+      end
+    end
+    it 'should return a hash of utilized securities-backed line items' do
+      expect(borrowing_capacity_summary[:sbc][:utilized][:other_collateral]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:sbc][:utilized][:excluded_regulatory]).to be_kind_of(Integer)
+    end
+    it 'should return values for standard credit field totals' do
+      expect(borrowing_capacity_summary[:standard_credit_totals][:count]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:standard_credit_totals][:original_amount]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:standard_credit_totals][:unpaid_principal]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:standard_credit_totals][:market_value]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:standard_credit_totals][:borrowing_capacity]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:net_loan_collateral]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:standard_excess_capacity]).to be_kind_of(Integer)
+    end
+    it 'should return values for securities-backed field totals' do
+      expect(borrowing_capacity_summary[:sbc_totals][:total_market_value]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:sbc_totals][:total_borrowing_capacity]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:sbc_totals][:advances]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:sbc_totals][:standard_credit]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:sbc_totals][:remaining_market_value]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:sbc_totals][:remaining_borrowing_capacity]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:sbc_excess_capacity]).to be_kind_of(Integer)
+    end
+    it 'should return total borrowing capacity and remaining borrowing capacity across all security types' do
+      expect(borrowing_capacity_summary[:total_borrowing_capacity]).to be_kind_of(Integer)
+      expect(borrowing_capacity_summary[:remaining_borrowing_capacity]).to be_kind_of(Integer)
+    end
+
+    describe 'mathematical operations' do
+      describe 'with normal data' do
+        let(:response_data) { JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary.json'))) }
+        before do
+          # TODO stub out MAPI response instead of JSON.parse once the endpoint is rigged up
+          expect(JSON).to receive(:parse).and_return(response_data)
+        end
+        it 'should total all of the standard collateral fields' do
+          expect(borrowing_capacity_summary[:standard_credit_totals][:count]).to eq(2699)
+          expect(borrowing_capacity_summary[:standard_credit_totals][:original_amount]).to eq(2678188589)
+          expect(borrowing_capacity_summary[:standard_credit_totals][:unpaid_principal]).to eq(2455850688)
+          expect(borrowing_capacity_summary[:standard_credit_totals][:market_value]).to eq(2479090494)
+          expect(borrowing_capacity_summary[:standard_credit_totals][:borrowing_capacity]).to eq(2216748960)
+          expect(borrowing_capacity_summary[:net_loan_collateral]).to eq(2216568960)
+          expect(borrowing_capacity_summary[:standard_excess_capacity]).to eq(2207180460)
+        end
+        it 'should total all of the securities-backed collateral fields' do
+          expect(borrowing_capacity_summary[:sbc_totals][:total_market_value]).to eq(105613)
+          expect(borrowing_capacity_summary[:sbc_totals][:total_borrowing_capacity]).to eq(100332)
+          expect(borrowing_capacity_summary[:sbc_totals][:advances]).to eq(0)
+          expect(borrowing_capacity_summary[:sbc_totals][:standard_credit]).to eq(0)
+          expect(borrowing_capacity_summary[:sbc_totals][:remaining_market_value]).to eq(105613)
+          expect(borrowing_capacity_summary[:sbc_totals][:remaining_borrowing_capacity]).to eq(100332)
+          expect(borrowing_capacity_summary[:sbc_excess_capacity]).to eq(76634)
+        end
+        it 'should calculate total borrowing capacity and remaining borrowing capacity across all security types' do
+          expect(borrowing_capacity_summary[:total_borrowing_capacity]).to eq(2216849292)
+          expect(borrowing_capacity_summary[:remaining_borrowing_capacity]).to eq(2207257094)
+        end
+        it 'should calculate `borrowing_capacity`/`unpaid_principal_balance` as a rounded, whole-number percentage' do
+          expect(borrowing_capacity_summary[:standard][:collateral][0][:bc_upb]).to eq(95)
+          expect(borrowing_capacity_summary[:standard][:collateral][1][:bc_upb]).to eq(93)
+          expect(borrowing_capacity_summary[:standard][:collateral][2][:bc_upb]).to eq(79)
+        end
+      end
+      it 'should set bc_upb to zero if borrowing_capacity is negative' do
+        expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary_negative_borrowing_capacity.json'))))
+        expect(borrowing_capacity_summary[:standard][:collateral][0][:bc_upb]).to eq(0)
+      end
+      it 'should set bc_upb to zero if borrowing_capacity is zero' do
+        expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary_zero_borrowing_capacity.json'))))
+        expect(borrowing_capacity_summary[:standard][:collateral][0][:bc_upb]).to eq(0)
+      end
+      it 'should set bc_upb to zero if unpaid_principal_balance is negative' do
+        expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary_negative_unpaid_principal_balance.json'))))
+        expect(borrowing_capacity_summary[:standard][:collateral][0][:bc_upb]).to eq(0)
+      end
+      it 'should set bc_upb to zero if unpaid_principal_balance is zero' do
+        expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary_zero_unpaid_principal_balance.json'))))
+        expect(borrowing_capacity_summary[:standard][:collateral][0][:bc_upb]).to eq(0)
+      end
+    end
+    it 'returns nil if there is a JSON parsing error' do
+      # TODO change this stub once you implement the MAPI endpoint
+      expect(File).to receive(:read).and_return('some malformed json!')
+      expect(Rails.logger).to receive(:warn)
+      expect(borrowing_capacity_summary).to be(nil)
+    end
+  end
+
   # Helper Methods
   def override_start_balance_endpoint(start_date, end_date, request_object)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_return(request_object)

@@ -170,6 +170,8 @@
   tfoot {
     @extend %typography-table-total;
     background-color: $medium-gray;
+    border-left: 1px solid $medium-gray;
+    border-right: 1px solid $medium-gray;
     color: $white;
   }
 
@@ -225,7 +227,6 @@
     width: (4 * $grid-column-width) + (5 * $gutter-width);
   }
   &:last-of-type {
-    @extend %clearfix;
     margin-bottom: 50px;
   }
 }

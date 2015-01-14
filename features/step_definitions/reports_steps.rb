@@ -53,6 +53,10 @@ Given(/^I am on the Capital Stock Activity Statement page$/) do
   visit '/reports/capital-stock-activity'
 end
 
+Given(/I am on the Borrowing Capacity Statement page$/) do
+  visit '/reports/borrowing-capacity'
+end
+
 When(/^I click the Certificate Sequence column heading$/) do
   page.find('th', text: I18n.t('reports.pages.capital_stock_activity.certificate_sequence')).click
 end
