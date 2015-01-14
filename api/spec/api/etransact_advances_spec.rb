@@ -76,9 +76,9 @@ describe MAPI::ServiceApp do
       end
     end
     describe 'in the production enviroment for cases when etransact is turned on' do
-      let!(:some_status_data) {[1, 'Open and O/N', 'Y', 'Y', 'Y', 'Y', '0600', '01-JAN-2006 12:00 AM', '0700']}
+      let!(:some_status_data) {[1, 'Open and O/N', 'Y', 'Y', 'Y', 'Y', '0001', '01-JAN-2006 12:00 AM', '0700']}
       let!(:some_status_data2) {[2, '1 Week', 'Y', 'Y', 'Y', 'N', '2000', '01-JAN-2006 12:00 AM', '0700']}
-      let!(:some_status_data3) {[3, '2 Week', 'Y', 'Y', 'Y', 'Y', '0600', DateTime.now.to_date, '2000']}
+      let!(:some_status_data3) {[3, '2 Week', 'Y', 'Y', 'Y', 'Y', '0600', Date.today, '2000']}
       let(:result_set) {double('Oracle Result Set', fetch: nil)}
       let(:result_set2) {double('Oracle Result Set', fetch: nil)}
       let(:result_set3) {double('Oracle Result Set', fetch: nil)}
@@ -165,7 +165,7 @@ describe MAPI::ServiceApp do
         expect(result_set).to receive(:fetch).and_return(1, nil).at_least(1).times
         expect(result_set2).to receive(:fetch).and_return(0, nil).at_least(1).times
         expect(result_set3).to receive(:fetch).and_return(1, nil).at_least(1).times
-        expect(result_set4).to receive(:fetch).and_return([3, '2 Week', 'Y', 'Y', 'Y', 'Y', '0600', Date.today, '0700'], nil).at_least(1).times
+        expect(result_set4).to receive(:fetch).and_return([3, '2 Week', 'Y', 'Y', 'Y', 'Y', '0600', Date.today, '0001'], nil).at_least(1).times
         result = etransact_advances_status['all_loan_status']
         MAPI::Services::Rates::LOAN_TERMS.each do |term|
           MAPI::Services::Rates::LOAN_TYPES.each do |type|
