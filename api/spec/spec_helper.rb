@@ -20,6 +20,7 @@ require 'rack/test'
 
 require 'simplecov'
 require 'simplecov-rcov'
+require 'timecop'
 class SimpleCov::Formatter::MergedFormatter
   def format(result)
      SimpleCov::Formatter::HTMLFormatter.new.format(result)

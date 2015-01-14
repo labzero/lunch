@@ -76,14 +76,16 @@ describe MAPI::ServiceApp do
       end
     end
     describe 'in the production enviroment for cases when etransact is turned on' do
-      let!(:some_status_data) {[1, 'Open and O/N', 'Y', 'Y', 'Y', 'Y', '0001', '01-JAN-2006 12:00 AM', '0700']}
-      let!(:some_status_data2) {[2, '1 Week', 'Y', 'Y', 'Y', 'N', '2000', '01-JAN-2006 12:00 AM', '0700']}
-      let!(:some_status_data3) {[3, '2 Week', 'Y', 'Y', 'Y', 'Y', '0600', Date.today, '2000']}
+      let(:today_date) { Time.now.in_time_zone(MAPI::Services::EtransactAdvances::ETRANSACT_TIME_ZONE) }
+      let(:some_status_data) {[1, 'Open and O/N', 'Y', 'Y', 'Y', 'Y', '0001', '01-JAN-2006 12:00 AM', '2000']}
+      let(:some_status_data2) {[2, '1 Week', 'Y', 'Y', 'Y', 'N', '2000', '01-JAN-2006 12:00 AM', '0700']}
+      let(:some_status_data3) {[3, '2 Week', 'Y', 'Y', 'Y', 'Y', '0001', today_date, '2359']}
       let(:result_set) {double('Oracle Result Set', fetch: nil)}
       let(:result_set2) {double('Oracle Result Set', fetch: nil)}
       let(:result_set3) {double('Oracle Result Set', fetch: nil)}
       let(:result_set4) {double('Oracle Result Set', fetch: nil)}
       before do
+        Timecop.travel Time.now.in_time_zone(MAPI::Services::EtransactAdvances::ETRANSACT_TIME_ZONE).at_noon
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
         allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
         expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
@@ -94,6 +96,9 @@ describe MAPI::ServiceApp do
         allow(result_set2).to receive(:fetch).and_return(1, nil)
         allow(result_set3).to receive(:fetch).and_return(1, nil)
         allow(result_set4).to receive(:fetch).and_return(some_status_data, some_status_data2, some_status_data3, nil)
+      end
+      after do
+        Timecop.return
       end
       it 'should return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
         expect(etransact_advances_status.length).to be >=1
@@ -157,7 +162,7 @@ describe MAPI::ServiceApp do
         expect(result_set).to receive(:fetch).and_return(1, nil).at_least(1).times
         expect(result_set2).to receive(:fetch).and_return(0, nil).at_least(1).times
         expect(result_set3).to receive(:fetch).and_return(1, nil).at_least(1).times
-        expect(result_set4).to receive(:fetch).and_return([3, '2 Week', 'Y', 'Y', 'Y', 'Y', '0600', Date.today, '0700'], nil).at_least(1).times
+        expect(result_set4).to receive(:fetch).and_return([3, '2 Week', 'Y', 'Y', 'Y', 'Y', '1200', '01-JAN-2006 12:00 AM', '0700'], nil).at_least(1).times
         expect(etransact_advances_status['etransact_advances_status']).to be false
         expect(etransact_advances_status['wl_vrc_status']).to be true
       end
@@ -165,7 +170,7 @@ describe MAPI::ServiceApp do
         expect(result_set).to receive(:fetch).and_return(1, nil).at_least(1).times
         expect(result_set2).to receive(:fetch).and_return(0, nil).at_least(1).times
         expect(result_set3).to receive(:fetch).and_return(1, nil).at_least(1).times
-        expect(result_set4).to receive(:fetch).and_return([3, '2 Week', 'Y', 'Y', 'Y', 'Y', '0600', Date.today, '0001'], nil).at_least(1).times
+        expect(result_set4).to receive(:fetch).and_return([3, '2 Week', 'Y', 'Y', 'Y', 'Y', '2359', today_date, '0001'], nil).at_least(1).times
         result = etransact_advances_status['all_loan_status']
         MAPI::Services::Rates::LOAN_TERMS.each do |term|
           MAPI::Services::Rates::LOAN_TYPES.each do |type|

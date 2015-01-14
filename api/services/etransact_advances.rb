@@ -2,6 +2,9 @@ module MAPI
   module Services
     module EtransactAdvances
       include MAPI::Services::Base
+
+      ETRANSACT_TIME_ZONE = 'Pacific Time (US & Canada)'
+
       STATUS_ON_RECORD_NOTFOUND_COUNT = 0
 
       TERM_BUCKET_MAPPING = {
@@ -168,6 +171,9 @@ module MAPI
            end
           # # loop thru to get status for each of the type and term
           loan_status = {}
+          today_date = Time.now.in_time_zone(ETRANSACT_TIME_ZONE)
+          now_string = today_date.strftime("%H%M%S")
+
           MAPI::Services::Rates::LOAN_TERMS.each do |term|
             lookup_term = TERM_BUCKET_MAPPING[term] || 0  #default to 0 if not found
             if lookup_term.to_s != '0' then
@@ -198,10 +204,10 @@ module MAPI
                   end_time = row[6].to_s
                   override_date = row[7].to_s
                   override_end_time = row[8]
-                  if (Date.parse(override_date) == DateTime.now.to_date) then
+                  if (Date.parse(override_date) == today_date.to_date) then
                     #check with override_end_time
                     override_end_time += "00"  #add seconds values
-                    if (override_end_time >  DateTime.now.strftime("%H%M%S")) then
+                    if (override_end_time >  now_string) then
                       trade_status = true
                     else
                       trade_status = false
@@ -209,7 +215,7 @@ module MAPI
                   else
                    #check with end_time
                     end_time +=  "00"  #add seconds values
-                    if (end_time >  DateTime.now.strftime("%H%M%S")) then
+                    if (end_time >  now_string) then
                       trade_status = true
                     else
                       trade_status = false
