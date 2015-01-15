@@ -18,7 +18,7 @@
         %h3
           = t('reports.pages.borrowing_capacity_summary.remaining_borrowing_capacity_heading')
         %p= number_to_currency(@borrowing_capacity_summary[:remaining_borrowing_capacity], precision: 0)
-    %section.standard-credit-borrowing-capacity-tables
+    %section.standard-credit-borrowing-capacity-tables.report-tables-section
       %h2.report-table-title= t('reports.pages.borrowing_capacity_summary.standard_credit_program')
       %table.report-table.report-parent-table{data: {sortable: true, :'default-sort' => [[1, 'desc']]}}
         %thead
@@ -30,68 +30,70 @@
             %th.report-cell-narrow.report-cell-right= t('reports.pages.borrowing_capacity_summary.market_value')
             %th.report-cell-narrow.report-cell-right= t('reports.pages.borrowing_capacity_summary.bc_upb')
             %th.report-cell-narrow.report-cell-expanding= t('reports.pages.borrowing_capacity_summary.borrowing_capacity')
-        %tbody
-          -@borrowing_capacity_summary[:standard][:collateral].each do |row|
+        - if @borrowing_capacity_summary[:standard].length > 0
+          %tbody
+            -@borrowing_capacity_summary[:standard][:collateral].each do |row|
+              %tr
+                %td.report-cell-narrow.report-cell-narrow= row[:type]
+                %td.report-cell-narrow.report-cell-right= row[:count]
+                %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(row[:original_amount])
+                %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(row[:unpaid_principal])
+                %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(row[:market_value])
+                %td.report-cell-narrow.report-cell-right= number_to_percentage(row[:bc_upb], precision: 0)
+                %td.report-cell-narrow.report-cell-right.report-cell-expanding= fhlb_formatted_currency(row[:borrowing_capacity])
+          %tfoot
             %tr
-              %td.report-cell-narrow.report-cell-narrow= row[:type]
-              %td.report-cell-narrow.report-cell-right= row[:count]
-              %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(row[:original_amount])
-              %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(row[:unpaid_principal])
-              %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(row[:market_value])
-              %td.report-cell-narrow.report-cell-right= number_to_percentage(row[:bc_upb], precision: 0)
-              %td.report-cell-narrow.report-cell-right.report-cell-expanding= fhlb_formatted_currency(row[:borrowing_capacity])
-        %tfoot
-          %tr
-            %td.report-cell-narrow= t('global.totals')
-            %td.report-cell-narrow.report-cell-right= @borrowing_capacity_summary[:standard_credit_totals][:count]
-            %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:standard_credit_totals][:original_amount])
-            %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:standard_credit_totals][:unpaid_principal])
-            %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:standard_credit_totals][:market_value])
-            %td
-            %td.report-cell-narrow.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard_credit_totals][:borrowing_capacity])
-      %table.report-table.report-sub-table{data: {sortable: false}}
-        %tbody
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.less_line_items.blanket_lien')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:excluded][:blanket_lien])
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.less_line_items.bank_borrowing_capacity')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:excluded][:bank])
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.less_line_items.excluded_regulatory')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:excluded][:regulatory])
-        %tfoot
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.net_loan_collateral')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:net_loan_collateral])
-      %table.report-table.report-sub-table{data: {sortable: false}}
-        %tbody
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.less_line_items.advances')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:advances])
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.less_line_items.letters_of_credit')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:letters_of_credit])
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.less_line_items.swap_collateral')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:swap_collateral])
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.less_line_items.cover_sbc_type')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:sbc_type_deficiencies])
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.less_line_items.payment_fees')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:payment_fees])
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.less_line_items.other_collateral')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:other_collateral])
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.less_line_items.mpf_ce_collateral')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:mpf_ce_collateral])
-        %tfoot
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.excess_capacity')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard_excess_capacity])
-    %section.sbc-borrowing-capacity-tables
+              %td.report-cell-narrow= t('global.totals')
+              %td.report-cell-narrow.report-cell-right= @borrowing_capacity_summary[:standard_credit_totals][:count]
+              %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:standard_credit_totals][:original_amount])
+              %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:standard_credit_totals][:unpaid_principal])
+              %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:standard_credit_totals][:market_value])
+              %td
+              %td.report-cell-narrow.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard_credit_totals][:borrowing_capacity])
+      - if @borrowing_capacity_summary[:standard].length > 0
+        %table.report-table.report-sub-table{data: {sortable: false}}
+          %tbody
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.blanket_lien')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:excluded][:blanket_lien])
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.bank_borrowing_capacity')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:excluded][:bank])
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.excluded_regulatory')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:excluded][:regulatory])
+          %tfoot
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.net_loan_collateral')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:net_loan_collateral])
+        %table.report-table.report-sub-table{data: {sortable: false}}
+          %tbody
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.advances')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:advances])
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.letters_of_credit')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:letters_of_credit])
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.swap_collateral')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:swap_collateral])
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.cover_sbc_type')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:sbc_type_deficiencies])
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.payment_fees')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:payment_fees])
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.other_collateral')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:other_collateral])
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.mpf_ce_collateral')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard][:utilized][:mpf_ce_collateral])
+          %tfoot
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.excess_capacity')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:standard_excess_capacity])
+    %section.sbc-borrowing-capacity-tables.report-tables-section
       %h2.report-table-title= t('reports.pages.borrowing_capacity_summary.sbc_program')
       %table.report-table.report-parent-table.table-allow-wrapping{data: {sortable: false}}
         %thead
@@ -103,38 +105,39 @@
             %th= t('reports.pages.borrowing_capacity_summary.standard_credit')
             %th= t('reports.pages.borrowing_capacity_summary.remaining_market_value')
             %th= t('reports.pages.borrowing_capacity_summary.remaining_borrowing_capacity')
-        -# TODO: check to see what the format of the number zero should be here.  It's different between the two charts.
-        %tbody
-          -@borrowing_capacity_summary[:sbc][:collateral].each do |row|
+        - if @borrowing_capacity_summary[:sbc].length > 0
+          %tbody
+            -@borrowing_capacity_summary[:sbc][:collateral].each do |row|
+              %tr
+                %td.report-cell-narrow= row[:type]
+                %td.report-cell-right= fhlb_formatted_currency(row[:total_market_value])
+                %td.report-cell-right= fhlb_formatted_currency(row[:total_borrowing_capacity])
+                %td.report-cell-right= fhlb_formatted_currency(row[:advances])
+                %td.report-cell-right= fhlb_formatted_currency(row[:standard_credit])
+                %td.report-cell-right= fhlb_formatted_currency(row[:remaining_market_value])
+                %td.report-cell-right= fhlb_formatted_currency(row[:remaining_borrowing_capacity])
+          %tfoot
             %tr
-              %td.report-cell-narrow= row[:type]
-              %td.report-cell-right= fhlb_formatted_currency(row[:total_market_value])
-              %td.report-cell-right= fhlb_formatted_currency(row[:total_borrowing_capacity])
-              %td.report-cell-right= fhlb_formatted_currency(row[:advances])
-              %td.report-cell-right= fhlb_formatted_currency(row[:standard_credit])
-              %td.report-cell-right= fhlb_formatted_currency(row[:remaining_market_value])
-              %td.report-cell-right= fhlb_formatted_currency(row[:remaining_borrowing_capacity])
-        %tfoot
-          %tr
-            %td.report-cell-narrow= t('global.totals')
-            %td.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_totals][:total_market_value])
-            %td.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_totals][:total_borrowing_capacity])
-            %td.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_totals][:advances])
-            %td.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_totals][:standard_credit])
-            %td.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_totals][:remaining_market_value])
-            %td.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_totals][:remaining_borrowing_capacity])
-      %table.report-table.report-sub-table{data: {sortable: false}}
-        %tbody
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.less_line_items.other_collateral')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc][:utilized][:other_collateral])
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.less_line_items.excluded_regulatory')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc][:utilized][:excluded_regulatory])
-        %tfoot
-          %tr
-            %td= t('reports.pages.borrowing_capacity_summary.excess_capacity')
-            %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_excess_capacity])
+              %td.report-cell-narrow= t('global.totals')
+              %td.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_totals][:total_market_value])
+              %td.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_totals][:total_borrowing_capacity])
+              %td.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_totals][:advances])
+              %td.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_totals][:standard_credit])
+              %td.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_totals][:remaining_market_value])
+              %td.report-cell-right= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_totals][:remaining_borrowing_capacity])
+      - if @borrowing_capacity_summary[:sbc].length > 0
+        %table.report-table.report-sub-table{data: {sortable: false}}
+          %tbody
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.other_collateral')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc][:utilized][:other_collateral])
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.excluded_regulatory')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc][:utilized][:excluded_regulatory])
+          %tfoot
+            %tr
+              %td= t('reports.pages.borrowing_capacity_summary.excess_capacity')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency(@borrowing_capacity_summary[:sbc_excess_capacity])
     %section
       .report-summary-data.report-table-summary-data
         %h3

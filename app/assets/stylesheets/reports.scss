@@ -226,9 +226,6 @@
   td:first-child {
     width: (4 * $grid-column-width) + (5 * $gutter-width);
   }
-  &:last-of-type {
-    margin-bottom: 50px;
-  }
 }
 
 .table-allow-wrapping {
@@ -244,6 +241,11 @@
       right: 10px;
     }
   }
+}
+
+.report-tables-section {
+  @extend %clearfix;
+  margin-bottom: 50px;
 }
 
 .report-table-summary-data {

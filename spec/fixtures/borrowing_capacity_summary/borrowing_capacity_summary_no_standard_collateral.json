@@ -1,0 +1,55 @@
+{
+  "date" : "",
+  "standard" : {
+    "collateral" : [ ],
+    "excluded" : {
+      "blanket_lien" : 0,
+      "bank" : 180000,
+      "regulatory" : 0
+    },
+    "utilized" : {
+      "advances" : 3363500,
+      "letters_of_credit" : 6025000,
+      "swap_collateral" : 0,
+      "sbc_type_deficiencies" : 0,
+      "payment_fees" : 0,
+      "other_collateral" : 0,
+      "mpf_ce_collateral" : 0
+    }
+  },
+  "sbc" : {
+    "collateral" : [
+      {
+        "type" : "AA",
+        "total_market_value" : 0,
+        "total_borrowing_capacity" : 0,
+        "advances" : 0,
+        "standard_credit" : 0,
+        "remaining_market_value" : 0,
+        "remaining_borrowing_capacity" : 0
+      },
+      {
+        "type" : "AAA",
+        "total_market_value" : 0,
+        "total_borrowing_capacity" : 0,
+        "advances" : 0,
+        "standard_credit" : 0,
+        "remaining_market_value" : 0,
+        "remaining_borrowing_capacity" : 0
+      },
+      {
+        "type" : "Agency",
+        "total_market_value" : 105613,
+        "total_borrowing_capacity" : 100332,
+        "advances" : 0,
+        "standard_credit" : 0,
+        "remaining_market_value" : 105613,
+        "remaining_borrowing_capacity" : 100332
+      }
+    ],
+    "utilized" : {
+      "other_collateral" : 14756,
+      "excluded_regulatory" : 8942
+    }
+  }
+}

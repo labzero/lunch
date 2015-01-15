@@ -30,6 +30,7 @@ Given(/^I am on the reports summary page$/) do
 end
 
 When(/^I select "(.*?)" from the reports dropdown$/) do |report|
+  step 'I don\'t see the reports dropdown'
   step 'I hover on the reports link in the header'
   page.click_link(report)
 end
