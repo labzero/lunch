@@ -31,31 +31,23 @@ def get_selector_for_table_section(table_type)
   selector
 end
 
-def compare_sort_order(column_name, sort_order, table_selector=nil)
+def compare_sort_order(column_name, sort_order, table_selector='.report-table')
   column_index = page.evaluate_script("$('#{table_selector} thead th:contains(#{column_name})').index()") + 1 # will throw error if column name not present, which is good
 
-  last_value = nil
-  page.all("#{table_selector} tbody tr td:nth-child(#{column_index})").each do |element|
-    case column_name
-    when "Date"
-      value = Date.strptime(element.text, '%m/%d/%Y')
-    when "Certificate Sequence"
-      value = element.text.to_i
-    when "Original Amount"
-      value = element.text.delete('$,').to_i
-    when "Borrowing Capacity Remaining"
-      value = element.text.delete('$,').to_i
-    else
-      raise "column_name not recognized"
-    end
-
-    if last_value
-      if sort_order == 'ascending'
-        expect(last_value <= value).to eq(true)
-      elsif sort_order == 'descending'
-        expect(last_value >= value).to eq(true)
-      else
-        raise "column_name not recognized"
+  if !page.find("#{table_selector} tbody tr:first-child td:first-child")['class'].split(' ').include?('dataTables_empty')
+    last_value = nil
+    page.all("#{table_selector} tbody tr td:nth-child(#{column_index})").each do |element|
+      case column_name
+        when "Date"
+          value = Date.strptime(element.text, '%m/%d/%Y')
+        when "Certificate Sequence"
+          value = element.text.to_i
+        when "Original Amount"
+          value = element.text.delete('$,').to_i
+        when "Borrowing Capacity Remaining"
+          value = element.text.delete('$,').to_i
+        else
+          raise "column_name not recognized"
       end
 
       if last_value
@@ -64,10 +56,21 @@ def compare_sort_order(column_name, sort_order, table_selector=nil)
         elsif sort_order == 'descending'
           expect(last_value >= value).to eq(true)
         else
-          raise 'sort_order not recognized'
+          raise "column_name not recognized"
         end
+
+        if last_value
+          if sort_order == 'ascending'
+            expect(last_value <= value).to eq(true)
+          elsif sort_order == 'descending'
+            expect(last_value >= value).to eq(true)
+          else
+            raise 'sort_order not recognized'
+          end
+        end
+        last_value = value
       end
-      last_value = value
     end
   end
+
 end
