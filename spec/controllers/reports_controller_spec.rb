@@ -41,7 +41,6 @@ RSpec.describe ReportsController, :type => :controller do
       expect(member_balance_service_instance).to receive(:capital_stock_activity).and_return(nil)
       expect{get :capital_stock_activity}.to raise_error(StandardError)
     end
-
     describe "view instance variables" do
       before {
         allow(member_balance_service_instance).to receive(:capital_stock_activity).with(kind_of(Date), kind_of(Date)).and_return(response_hash)
@@ -75,6 +74,27 @@ RSpec.describe ReportsController, :type => :controller do
         expect(assigns[:end_date]).to eq(end_date)
       end
     end
+  end
 
+  describe 'GET borrowing_capacity' do
+    let(:member_balance_service_instance) { double('MemberBalanceServiceInstance') }
+    let(:response_hash) { double('MemberBalanceHash') }
+    before do
+      expect(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
+    end
+    it 'should render the borrowing_capacity view' do
+      expect(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(response_hash)
+      get :borrowing_capacity
+      expect(response.body).to render_template('borrowing_capacity')
+    end
+    it 'should set @borrowing_capacity_summary to the hash returned from MemberBalanceService' do
+      expect(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(response_hash)
+      get :borrowing_capacity
+      expect(assigns[:borrowing_capacity_summary]).to eq(response_hash)
+    end
+    it 'should raise an error if @borrowing_capacity_summary is nil' do
+      expect(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(nil)
+      expect{get :borrowing_capacity}.to raise_error(StandardError)
+    end
   end
 end

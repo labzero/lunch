@@ -102,6 +102,9 @@
 
 .report-main-body {
   margin-bottom: 100px;
+  section {
+    clear: both;
+  }
   h3 {
     @extend %typography-subtitle;
     margin: 0;
@@ -111,6 +114,9 @@
     display: block;
     a {
       color: $actionable-blue;
+    }
+    p {
+      margin: 0;
     }
   }
 }
@@ -164,6 +170,8 @@
   tfoot {
     @extend %typography-table-total;
     background-color: $medium-gray;
+    border-left: 1px solid $medium-gray;
+    border-right: 1px solid $medium-gray;
     color: $white;
   }
 
@@ -207,4 +215,42 @@
   .sorting_desc:after {
     content: "#{$icon-caret}";
   }
+}
+.report-parent-table {
+  margin-bottom: 5px;
+}
+.report-sub-table {
+  float: right;
+  width: (7 * $grid-column-width) + (7 * $gutter-width);
+  margin-bottom: 0;
+  td:first-child {
+    width: (4 * $grid-column-width) + (5 * $gutter-width);
+  }
+}
+
+.table-allow-wrapping {
+  td, th {
+    white-space: normal;
+  }
+  th {
+    position: relative;
+    vertical-align: top;
+    &:after {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+  }
+}
+
+.report-tables-section {
+  @extend %clearfix;
+  margin-bottom: 50px;
+}
+
+.report-table-summary-data {
+  display: block;
+  float: right;
+  margin-right: 0;
+  text-align: right;
 }

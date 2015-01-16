@@ -22,6 +22,7 @@ Rails.application.routes.draw do
 
   get '/reports' => 'reports#index'
   get '/reports/capital-stock-activity' => 'reports#capital_stock_activity'
+  get '/reports/borrowing-capacity' => 'reports#borrowing_capacity'
 
   get '/settings' => 'settings#index'
 

@@ -39,6 +39,13 @@ en:
     transaction_type: Transaction Type
     apply: Apply
     cancel: Cancel
+    borrowing_capacity: Borrowing Capacity
+    advances: Advances
+    total_market_value: Total Market Value
+    collateral_type: Collateral Type
+    count: Count
+    original_amount: Original Amount
+    unpaid_principal: Unpaid Principal
   nav:
     primary:
       welcome: Hi %{name}
@@ -269,7 +276,7 @@ en:
     collateral:
       title: Collateral
       borrowing_capacity:
-        title: Confirmation of Borrowing Capacity
+        title: Borrowing Capacity
         summary: Covers both the Standard Credit Program and the Securities-Backed Credit Program. The loan collateral data in the Standard Credit section of the report is updated during the day to reflect the processing of new MCUs.
       mcu:
         title: MCU Status
@@ -319,4 +326,30 @@ en:
         certificate_sequence: Certificate Sequence
         debit_shares: "Debits: Number of Shares"
         credit_shares: "Credits: Number of Shares"
+      borrowing_capacity_summary:
+        total_borrowing_capacity_heading: "Total Borrowing Capacity:"
+        remaining_borrowing_capacity_heading: "Remaining Borrowing Capacity:"
+        standard_credit_program: Standard Credit Program
+        sbc_program: Securities-Backed Credit (SBC) Program
+        market_value: Market Val
+        total_borrowing_capacity: Total Borrowing Capacity
+        standard_credit: Covered by Standard Credit
+        remaining_market_value: Market Value Remaining
+        remaining_borrowing_capacity: Borrowing Capacity Remaining
+        bc_upb: BC/UPB
+        net_loan_collateral: Net Loan Collateral Borrowing Capacity
+        excess_capacity: Excess Borrowing Capacity
+        less_line_items:
+          blanket_lien: Less Excluded Blanket Lien Borrowing Capacity
+          bank_borrowing_capacity: Less Excluded Bank Borrowing Capacity
+          excluded_regulatory: Less Excluded Regulatory Borrowing Capacity
+          advances: Less Advances
+          letters_of_credit: Less Letters of Credit
+          swap_collateral: Less SWAP Collateral Required
+          cover_sbc_type: Less Cover SBC Type Deficiencies
+          payment_fees: Less Potential Payment Fees
+          other_collateral: Less Other Collateral Required
+          mpf_ce_collateral: Less MPF CE Collateral Required
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at (415) 616-2634 or (415) 616-2913.
+    intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
+    close_of_business_processing_notice: Other data as of Close of Business on the prior business day.

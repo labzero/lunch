@@ -74,4 +74,17 @@ Scenario: Member chooses a custom date range on Capital Stock Activity Statement
   And I click the datepicker apply button
   Then I should see a Capital Stock Activity Statement for the 15th through the 20th of this month
 
+@smoke
+Scenario: Member sees Borrowing Capacity Statement
+  Given I visit the dashboard
+  When I select "Borrowing Capacity" from the reports dropdown
+  Then I should see report summary data
+    And I should see the "Standard Credit Program" table and "2" subtables
+    And I should see the "Securities-Backed Credit Program" table and "1" subtable
 
+Scenario: Member sorts the Standard Credit Program table on the Borrowing Capacity Statement by original amount
+  Given I am on the Borrowing Capacity Statement page
+  When I click the "Original Amount" column heading on the "Standard Credit Program" parent table
+  Then I should see the "Original Amount" column values in "ascending" order on the "Standard Credit Program" parent table
+  When I click the "Original Amount" column heading on the "Standard Credit Program" parent table
+  Then I should see the "Original Amount" column values in "descending" order on the "Standard Credit Program" parent table
