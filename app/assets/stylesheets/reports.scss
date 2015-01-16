@@ -155,6 +155,10 @@
     white-space: nowrap;
   }
 
+  th {
+    text-align: left;
+  }
+
   thead {
     @extend %typography-table-heading;
     background-color: $light-gray;
