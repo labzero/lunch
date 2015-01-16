@@ -69,3 +69,5 @@ This is a summary of the options supported in our .env files:
 * `MAPI_SECRET_TOKEN`: The shared secret between MAPI and Rails.
 * `MAPI_COF_ACCOUNT`: FHLBSF account for getting COF data.
 * `MAPI_FHLBSF_ACCOUNT`: FHLBSF account for getting Calypso data.
+* `SOAP_SECRET_KEY`: FHLBSF password for Market Data Service.
+* `MAPI_MDS_ENDPOINT`: FHLBSF endpoint for Market Data Service.
