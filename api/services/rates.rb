@@ -69,9 +69,9 @@ module MAPI
       def self.registered(app)
         if app.environment == :production
           @@mds_connection = Savon.client(
-              wsdl: 'http://appservices/MarketDataServicesNoAuth/MarketDataService.svc?wsdl',
+              wsdl: ENV['MAPI_MDS_ENDPOINT'],
               env_namespace: :soapenv,
-              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1', 'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'},
+              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1', 'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'},
               element_form_default: :qualified,
               namespace_identifier: :v1,
               pretty_print_xml: true
@@ -231,7 +231,7 @@ module MAPI
                 }]
               }]
             }
-            response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message )
+            response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
             namespaces = {'a' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns' => 'http://fhlbsf.com/schema/msg/marketdata/v1'}
             if response.success? && response.doc.search('//xmlns:transactionResult', namespaces).text != 'Error'
               {rate: response.doc.search('//a:value', namespaces).text.to_f, updated_at: DateTime.parse(response.doc.search('//a:snapTime', namespaces).text).to_time}
@@ -265,7 +265,7 @@ module MAPI
               'v11:caller' => [{ 'v11:id' => ENV['MAPI_COF_ACCOUNT']}],
               'v1:requests' =>  [{'v1:fhlbsfMarketDataRequest' => request}]
             }
-            response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message )
+            response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
             namespaces = {'a' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns' => 'http://fhlbsf.com/schema/msg/marketdata/v1'}
             if response.success? && response.doc.search('//xmlns:transactionResult', namespaces).text != 'Error'
               hash = {}
