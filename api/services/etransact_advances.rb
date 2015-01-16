@@ -3,8 +3,6 @@ module MAPI
     module EtransactAdvances
       include MAPI::Services::Base
 
-      ETRANSACT_TIME_ZONE = 'Pacific Time (US & Canada)'
-
       STATUS_ON_RECORD_NOTFOUND_COUNT = 0
 
       TERM_BUCKET_MAPPING = {
@@ -154,9 +152,12 @@ module MAPI
             term_bucket_data_array = []
             row_array = []
             etransct_all_product_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_all_product_on_string)
-            while row = etransct_all_product_on_cursor.fetch()
-              row_array = [row[0], row[1], row[2], row[3], row[4], row[5], row[6] , row[7], row[8]]
-              term_bucket_data_array.push(row_array)
+
+            while row = etransct_all_product_on_cursor.fetch_hash()
+               row_array = [row['AO_TERM_BUCKET_ID'], row['TERM_BUCKET_LABEL'], row['WHOLE_LOAN_ENABLED'], row['SBC_AGENCY_ENABLED'],
+                            row['SBC_AAA_ENABLED'], row['SBC_AA_ENABLED'], row['END_TIME'] , row['OVERRIDE_END_DATE'], row['OVERRIDE_END_TIME']]
+
+               term_bucket_data_array.push(row_array)
             end
           else
             term_bucket_data_array = []
@@ -164,23 +165,24 @@ module MAPI
             etransact_status = results[:etransact_advances_status]
             wl_vrc_status = results[:wl_vrc_status]
             result_jason = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_term_buckets_info.json')))
-            result_jason.each do |row|
-              row_array = [row[0], row[1], row[2], row[3], row[4], row[5], row[6] , Date.parse(row[7]), row[8]]
+           result_jason.each do |row|
+              row_array = [row['AO_TERM_BUCKET_ID'], row['TERM_BUCKET_LABEL'], row['WHOLE_LOAN_ENABLED'], row['SBC_AGENCY_ENABLED'],
+                           row['SBC_AAA_ENABLED'], row['SBC_AA_ENABLED'], row['END_TIME'] , row['OVERRIDE_END_DATE'], row['OVERRIDE_END_TIME']]
               term_bucket_data_array.push(row_array)
-            end
+           end
            end
           # # loop thru to get status for each of the type and term
           loan_status = {}
-          today_date = Time.now.in_time_zone(ETRANSACT_TIME_ZONE)
+          today_date = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE)
           now_string = today_date.strftime("%H%M%S")
 
-          MAPI::Services::Rates::LOAN_TERMS.each do |term|
+          MAPI::Shared::Constants::LOAN_TERMS.each do |term|
             lookup_term = TERM_BUCKET_MAPPING[term] || 0  #default to 0 if not found
             if lookup_term.to_s != '0' then
               lookup_term_id = TERM_BUCKET_MAPPING[term][:term_bucket_id] || 0
             end
             loan_status[term] ||= {}
-            MAPI::Services::Rates::LOAN_TYPES.each do |type|
+            MAPI::Shared::Constants::LOAN_TYPES.each do |type|
               trade_status = false
               display_status = false
               bucket_label = 'NotFound'
