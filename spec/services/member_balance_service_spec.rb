@@ -69,8 +69,8 @@ describe MemberBalanceService do
   end
 
   describe "`capital_stock_activity` method", :vcr do
-    let(:start_date) {Date.today - 1.month}
-    let(:end_date) {Date.today}
+    let(:start_date) {Date.new(2014,12,01)}
+    let(:end_date) {Date.new(2014,12,31)}
     let(:capital_stock_activity) {subject.capital_stock_activity(start_date, end_date)}
     let(:activities) { File.read(File.join(Rails.root, 'spec', 'fixtures', 'capital_stock_activities.json')) }
     let(:malformed_activities) { File.read(File.join(Rails.root, 'spec', 'fixtures', 'capital_stock_activities_malformed.json')) }
