@@ -2,12 +2,12 @@
 - @page_title = t('reports.meta_title')
 .report.row
   .report-header
-    %h1= t('reports.pages.borrowing_capacity_summary.borrowing_capacity')
+    %h1= t('global.borrowing_capacity')
     .report-header-buttons
-      %button.report-button-left #{t('dashboard.actions.print')}
+      %button.report-button-left= t('dashboard.actions.print')
       %span.report-split-button
-        %button.report-button-right #{t('dashboard.actions.download')}
-        %button.report-drop-down-right #{t('dashboard.actions.xml')}
+        %button.report-button-right=  t('dashboard.actions.download')
+        %button.report-drop-down-right= t('dashboard.actions.xml')
   .report-main-body
     %section
       .report-summary-data
@@ -23,13 +23,13 @@
       %table.report-table.report-parent-table{data: {sortable: true, :'default-sort' => [[1, 'desc']]}}
         %thead
           %tr
-            %th.report-cell-narrow= t('reports.pages.borrowing_capacity_summary.collateral_type')
-            %th.report-cell-narrow.report-cell-right= t('reports.pages.borrowing_capacity_summary.count')
-            %th.report-cell-narrow.report-cell-right= t('reports.pages.borrowing_capacity_summary.original_amount')
-            %th.report-cell-narrow.report-cell-right= t('reports.pages.borrowing_capacity_summary.unpaid_principal')
+            %th.report-cell-narrow= t('global.collateral_type')
+            %th.report-cell-narrow.report-cell-right= t('global.count')
+            %th.report-cell-narrow.report-cell-right= t('global.original_amount')
+            %th.report-cell-narrow.report-cell-right= t('global.unpaid_principal')
             %th.report-cell-narrow.report-cell-right= t('reports.pages.borrowing_capacity_summary.market_value')
             %th.report-cell-narrow.report-cell-right= t('reports.pages.borrowing_capacity_summary.bc_upb')
-            %th.report-cell-narrow.report-cell-expanding= t('reports.pages.borrowing_capacity_summary.borrowing_capacity')
+            %th.report-cell-narrow.report-cell-expanding= t('global.borrowing_capacity')
         - if @borrowing_capacity_summary[:standard].length > 0
           %tbody
             -@borrowing_capacity_summary[:standard][:collateral].each do |row|
@@ -98,10 +98,10 @@
       %table.report-table.report-parent-table.table-allow-wrapping{data: {sortable: false}}
         %thead
           %tr
-            %th.report-cell-narrow= t('reports.pages.borrowing_capacity_summary.collateral_type')
-            %th= t('reports.pages.borrowing_capacity_summary.total_market_value')
+            %th.report-cell-narrow= t('global.collateral_type')
+            %th= t('global.total_market_value')
             %th= t('reports.pages.borrowing_capacity_summary.total_borrowing_capacity')
-            %th= t('reports.pages.borrowing_capacity_summary.advances')
+            %th= t('global.advances')
             %th= t('reports.pages.borrowing_capacity_summary.standard_credit')
             %th= t('reports.pages.borrowing_capacity_summary.remaining_market_value')
             %th= t('reports.pages.borrowing_capacity_summary.remaining_borrowing_capacity')

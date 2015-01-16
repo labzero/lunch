@@ -87,6 +87,11 @@ RSpec.describe ReportsController, :type => :controller do
       get :borrowing_capacity
       expect(response.body).to render_template('borrowing_capacity')
     end
+    it 'should set @borrowing_capacity_summary to the hash returned from MemberBalanceService' do
+      expect(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(response_hash)
+      get :borrowing_capacity
+      expect(assigns[:borrowing_capacity_summary]).to eq(response_hash)
+    end
     it 'should raise an error if @borrowing_capacity_summary is nil' do
       expect(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(nil)
       expect{get :borrowing_capacity}.to raise_error(StandardError)

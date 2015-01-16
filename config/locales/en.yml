@@ -39,6 +39,13 @@ en:
     transaction_type: Transaction Type
     apply: Apply
     cancel: Cancel
+    borrowing_capacity: Borrowing Capacity
+    advances: Advances
+    total_market_value: Total Market Value
+    collateral_type: Collateral Type
+    count: Count
+    original_amount: Original Amount
+    unpaid_principal: Unpaid Principal
   nav:
     primary:
       welcome: Hi %{name}
@@ -320,18 +327,11 @@ en:
         debit_shares: "Debits: Number of Shares"
         credit_shares: "Credits: Number of Shares"
       borrowing_capacity_summary:
-        borrowing_capacity: Borrowing Capacity
         total_borrowing_capacity_heading: "Total Borrowing Capacity:"
         remaining_borrowing_capacity_heading: "Remaining Borrowing Capacity:"
         standard_credit_program: Standard Credit Program
         sbc_program: Securities-Backed Credit (SBC) Program
-        collateral_type: Collateral Type
-        count: Count
-        original_amount: Original Amount
-        unpaid_principal: Unpaid Principal
         market_value: Market Val
-        total_market_value: Total Market Value
-        advances: Advances
         total_borrowing_capacity: Total Borrowing Capacity
         standard_credit: Covered by Standard Credit
         remaining_market_value: Market Value Remaining

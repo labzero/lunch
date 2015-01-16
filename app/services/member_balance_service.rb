@@ -174,53 +174,47 @@ class MemberBalanceService
 
     if data[:standard].length > 0 && data[:sbc].length > 0
       # first table - Standard Collateral
-      standard_collateral_fields = [:count, :original_amount, :unpaid_principal, :market_value, :borrowing_capacity]
-      data[:standard_credit_totals] = {}
-      # build data[:standard_credit_totals] object here to account for the case where data[:standard][:collateral] comes back empty
-      standard_collateral_fields.each do |field_name|
-        data[:standard_credit_totals][field_name] = 0
-      end
-      data[:standard][:collateral].each_with_index do |row, i|
-        standard_collateral_fields.each do |key|
-          data[:standard_credit_totals][key] += row[key].to_i
-        end
-        if row[:borrowing_capacity].to_i > 0 && row[:unpaid_principal].to_i > 0
-          data[:standard][:collateral][i][:bc_upb] = ((row[:borrowing_capacity].to_f / row[:unpaid_principal].to_f) * 100).round
-        else
-          data[:standard][:collateral][i][:bc_upb] = 0
-        end
-      end
       begin
-        data[:net_loan_collateral] = data[:standard_credit_totals][:borrowing_capacity].to_i - data[:standard][:excluded].values.reduce(:+)
-      rescue => e
-        Rails.logger.warn("The data[:standard][:excluded] hash in MemberBalanceService.borrowing_capacity_summary is malformed. It returned #{data[:standard][:excluded]} and threw the following error: #{e}")
-        return nil
-      end
-      begin
+        standard_collateral_fields = [:count, :original_amount, :unpaid_principal, :market_value, :borrowing_capacity]
+        data[:standard_credit_totals] = {}
+        # build data[:standard_credit_totals] object here to account for the case where data[:standard][:collateral] comes back empty
+        standard_collateral_fields.each do |field_name|
+          data[:standard_credit_totals][field_name] = 0
+        end
+        data[:standard][:collateral].each_with_index do |row, i|
+          standard_collateral_fields.each do |key|
+            data[:standard_credit_totals][key] += row[key].to_i
+          end
+          if row[:borrowing_capacity].to_i > 0 && row[:unpaid_principal].to_i > 0
+            data[:standard][:collateral][i][:bc_upb] = ((row[:borrowing_capacity].to_f / row[:unpaid_principal].to_f) * 100).round
+          else
+            data[:standard][:collateral][i][:bc_upb] = 0
+          end
+        end
+        data[:net_loan_collateral] = data[:standard_credit_totals][:borrowing_capacity].to_i - data[:standard][:excluded].values.sum
         data[:standard_excess_capacity] = data[:net_loan_collateral].to_i - data[:standard][:utilized].values.reduce(:+)
       rescue => e
-        Rails.logger.warn("The data[:standard][:utilized] hash in MemberBalanceService.borrowing_capacity_summary is malformed. It returned #{data[:standard][:utilized]} and threw the following error: #{e}")
+        Rails.logger.warn("The data[:standard] hash in MemberBalanceService.borrowing_capacity_summary is malformed in some way. It returned #{data[:standard]} and threw the following error: #{e}")
         return nil
       end
 
       # second table - Securities Backed Collateral
-      data[:sbc_totals] = {}
-      securities_backed_collateral_fields = [:total_market_value, :total_borrowing_capacity, :advances, :standard_credit, :remaining_market_value, :remaining_borrowing_capacity]
-      securities_backed_collateral_fields.each do |key|
-        data[:sbc_totals][key] ||= 0
-        data[:sbc][:collateral].each do |row|
-          data[:sbc_totals][key] += row[key].to_i
-        end
-      end
       begin
-        data[:sbc_excess_capacity] = data[:sbc_totals][:remaining_borrowing_capacity].to_i - data[:sbc][:utilized].values.reduce(:+)
+        data[:sbc_totals] = {}
+        securities_backed_collateral_fields = [:total_market_value, :total_borrowing_capacity, :advances, :standard_credit, :remaining_market_value, :remaining_borrowing_capacity]
+        securities_backed_collateral_fields.each do |key|
+          data[:sbc_totals][key] ||= 0
+          data[:sbc][:collateral].each do |row|
+            data[:sbc_totals][key] += row[key].to_i
+          end
+        end
+        data[:sbc_excess_capacity] = data[:sbc_totals][:remaining_borrowing_capacity].to_i - data[:sbc][:utilized].values.sum
+        data[:total_borrowing_capacity] = data[:standard_credit_totals][:borrowing_capacity].to_i + data[:sbc_totals][:remaining_borrowing_capacity].to_i
+        data[:remaining_borrowing_capacity] = data[:standard_excess_capacity].to_i + data[:sbc_excess_capacity].to_i
       rescue => e
-        Rails.logger.warn("The data[:sbc][:utilized] hash in MemberBalanceService.borrowing_capacity_summary is malformed. It returned #{data[:sbc][:utilized]} and threw the following error: #{e}")
+        Rails.logger.warn("The data[:sbc] hash in MemberBalanceService.borrowing_capacity_summary is malformed in some way. It returned #{data[:sbc]} and threw the following error: #{e}")
         return nil
       end
-
-      data[:total_borrowing_capacity] = data[:standard_credit_totals][:borrowing_capacity].to_i + data[:sbc_totals][:remaining_borrowing_capacity].to_i
-      data[:remaining_borrowing_capacity] = data[:standard_excess_capacity].to_i + data[:sbc_excess_capacity].to_i
     else
       data[:total_borrowing_capacity] = 0
       data[:remaining_borrowing_capacity] = 0

@@ -340,21 +340,15 @@ describe MemberBalanceService do
         expect(Rails.logger).to receive(:warn)
         expect(borrowing_capacity_summary).to be(nil)
       end
-      it 'returns nil if there is malformed data in the standard excluded object' do
+      it 'returns nil if there is malformed data in the standard object' do
         # TODO change this stub once you implement the MAPI endpoint
-        expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary', 'borrowing_capacity_summary_malformed_standard_excluded.json'))))
+        expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary', 'borrowing_capacity_summary_malformed_standard.json'))))
         expect(Rails.logger).to receive(:warn)
         expect(borrowing_capacity_summary).to be(nil)
       end
-      it 'returns nil if there is malformed data in the standard utilized object' do
+      it 'returns nil if there is malformed data in the sbc object' do
         # TODO change this stub once you implement the MAPI endpoint
-        expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary', 'borrowing_capacity_summary_malformed_standard_utilized.json'))))
-        expect(Rails.logger).to receive(:warn)
-        expect(borrowing_capacity_summary).to be(nil)
-      end
-      it 'returns nil if there is malformed data in the sbc utilized object' do
-        # TODO change this stub once you implement the MAPI endpoint
-        expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary', 'borrowing_capacity_summary_malformed_sbc_utilized.json'))))
+        expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary', 'borrowing_capacity_summary_malformed_sbc.json'))))
         expect(Rails.logger).to receive(:warn)
         expect(borrowing_capacity_summary).to be(nil)
       end
