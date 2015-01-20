@@ -18,6 +18,7 @@ if !custom_host
   require 'open3'
   require ::File.expand_path('../../../config/environment',  __FILE__)
   require 'capybara/rails'
+  require 'net/ping/tcp'
   require_relative '../../api/mapi'
 
   Capybara.app = Rack::Builder.new do
@@ -40,7 +41,14 @@ if !custom_host
   ldap_port = find_available_port
   ldap_server = File.expand_path('../../../ldap/run-server',  __FILE__) + " --port #{ldap_port} --root-dir #{ldap_root}"
   ldap_stdin, ldap_stdout, ldap_stderr, ldap_thr = Open3.popen3(ldap_server)
-  sleep(2) # let LDAP start
+  ldap_ping = Net::Ping::TCP.new 'localhost', ldap_port, 1
+  now = Time.now
+  while !ldap_ping.ping
+    if Time.now - now > 10
+      raise "LDAP failed to start"
+    end
+    sleep(1)
+  end
   puts "LDAP Started: localhost:#{ldap_thr.pid}"
   at_exit do
     Process.kill('INT', ldap_thr.pid) rescue Errno::ESRCH

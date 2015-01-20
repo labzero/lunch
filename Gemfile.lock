@@ -175,6 +175,7 @@ GEM
     multi_json (1.10.1)
     multi_test (0.1.1)
     net-ldap (0.5.1)
+    net-ping (1.7.6)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (2.9.1)
@@ -365,6 +366,7 @@ DEPENDENCIES
   jquery-placeholder-rails
   jquery-rails
   momentjs-rails
+  net-ping
   nokogiri
   rack-token_auth
   rails (= 4.1.6)

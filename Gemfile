@@ -68,6 +68,7 @@ group :test do
   gem 'timecop'
   gem 'shoulda-matchers', require: false
   gem 'factory_girl_rails'
+  gem 'net-ping'
 end
 
 # Use ActiveModel has_secure_password
