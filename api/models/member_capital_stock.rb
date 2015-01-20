@@ -20,9 +20,15 @@ module MAPI
     class CapitalStockActivities
       include Swagger::Blocks
       swagger_model :CapitalStockActivities do
+        property :activities do
+          key :type, :Capstockactivitiesobject
+          key :description, 'An object containing capital stock activities for specified period'
+        end
+      end
+      swagger_model :Capstockactivitiesobject do
         property :cert_id do
-          key :type, :string
-          key :description, 'Cert ID'
+            key :type, :string
+            key :description, 'Cert ID'
         end
         property :share_number do
           key :type, :number
