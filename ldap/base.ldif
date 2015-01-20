@@ -1,0 +1,72 @@
+# ldapadd -x -h localhost -p 3389 -D "cn=admin,dc=fhlbsf-i,dc=com" -w secret -f base.ldif
+
+dn: dc=fhlbsf-i,dc=com
+objectClass: dcObject
+objectClass: organizationalUnit
+dc: fhlbsf-i
+ou: fhlbsf-i
+
+# local user
+dn: sAMAccountName=local,dc=fhlbsf-i,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Local User
+sn: Local
+sAMAccountName: local
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+
+#dn: ou=people,dc=fhlbsf-i,dc=com
+#objectClass: organizationalUnit
+#ou: people
+#
+#dn: ou=others,dc=test,dc=com
+#objectClass: organizationalUnit
+#ou: others
+#
+#dn: ou=groups,dc=test,dc=com
+#objectClass: organizationalUnit
+#ou: groups
+#
+
+# other.user@test.com
+#dn: cn=other.user@test.com,ou=others,dc=test,dc=com
+#objectClass: inetOrgPerson
+#objectClass: authorizations
+#objectClass: organizationalPerson
+#objectClass: person
+#objectClass: top
+#sn: Other
+#uid: other_user
+#cn: other.user@test.com
+#authorizationRole: blogUser
+#userPassword:: e1NIQX1IQXdtdk13RGF1ZUpyZDhwakxXMzZ6Yi9jTUU9
+
+# example.admin@test.com, people, test.com
+#dn: cn=example.admin@test.com,ou=people,dc=test,dc=com
+#objectClass: inetOrgPerson
+#objectClass: authorizations
+#objectClass: organizationalPerson
+#objectClass: person
+#objectClass: top
+#sn: Admin
+#uid: example_admin
+#cn: example.admin@test.com
+#authorizationRole: blogAdmin
+#userPassword:: e1NIQX0wcUNXaERISGFwWmc3ekJxZWRRanBzNW1EUDA9
+
+# users, groups, test.com
+#dn: cn=users,ou=groups,dc=test,dc=com
+#objectClass: authorizations
+#objectClass: groupOfUniqueNames
+#objectClass: top
+#uniqueMember: cn=example.user@test.com,ou=people,dc=test,dc=com
+#authorizationRole: cn=example.admin@test.com,ou=people,dc=test,dc=com
+#cn: users
+
+# users, groups, test.com
+#dn: cn=admins,ou=groups,dc=test,dc=com
+#objectClass: groupOfUniqueNames
+#objectClass: top
+#uniqueMember: cn=example.admin@test.com,ou=people,dc=test,dc=com
+#cn: admins

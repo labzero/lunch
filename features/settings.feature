@@ -3,6 +3,9 @@ Feature: Visiting the Settings Page
   I want to use visit the settings page
   In order to change my settings
 
+Background:
+  Given I am logged in as "local" with password "development"
+
 Scenario: Navigate to settings page
   Given I visit the dashboard
   When I click on the gear icon in the header

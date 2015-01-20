@@ -1,8 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe ReportsController, :type => :controller do
+  login_user
 
   describe 'GET index' do
+    it_behaves_like 'a user required action', :get, :index
     it 'should render the index view' do
       get :index
       expect(response.body).to render_template('index')
@@ -16,10 +18,12 @@ RSpec.describe ReportsController, :type => :controller do
     let(:start_date) {Date.new(2014,12,01)}
     let(:end_date) {Date.new(2014,12,31)}
     before do
-      expect(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
+      allow(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
     end
 
     describe 'GET capital_stock_activity' do
+      it_behaves_like 'a user required action', :get, :capital_stock_activity
+
       it 'should render the capital_stock_activity view' do
         expect(member_balance_service_instance).to receive(:capital_stock_activity).and_return(response_hash)
         get :capital_stock_activity
@@ -66,6 +70,7 @@ RSpec.describe ReportsController, :type => :controller do
     end
 
     describe 'GET borrowing_capacity' do
+      it_behaves_like 'a user required action', :get, :borrowing_capacity
       it 'should render the borrowing_capacity view' do
         expect(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(response_hash)
         get :borrowing_capacity
@@ -88,6 +93,7 @@ RSpec.describe ReportsController, :type => :controller do
 
     describe 'GET settlement_transaction_account' do
       let(:filter) {'some filter'}
+      it_behaves_like 'a user required action', :get, :settlement_transaction_account
       describe 'with activities array stubbed' do
         before do
           allow(response_hash).to receive(:[]).with(:activities)
@@ -154,8 +160,9 @@ RSpec.describe ReportsController, :type => :controller do
             get :settlement_transaction_account
             expect(assigns[:filter_options]).to eq(options_array)
           end
+        end
       end
-      describe 'with activities array mocked'
+      describe 'with activities array mocked' do
         before {
           allow(member_balance_service_instance).to receive(:settlement_transaction_account).with(kind_of(Date), kind_of(Date), kind_of(String)).and_return(response_hash)
         }
@@ -192,5 +199,4 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
   end
-
 end

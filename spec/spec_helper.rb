@@ -28,6 +28,11 @@ VCR.configure do |c|
   c.default_cassette_options = {record: :new_episodes}
 end
 
+require 'devise'
+require 'factory_girl_rails'
+
+Dir[File.join(File.dirname(__FILE__), 'support', '*.rb')].each {|file| require file }
+
 require 'simplecov'
 require 'simplecov-rcov'
 class SimpleCov::Formatter::MergedFormatter
@@ -62,6 +67,10 @@ RSpec.configure do |config|
     # `true` in RSpec 4.
     mocks.verify_partial_doubles = true
   end
+
+  config.include Devise::TestHelpers, :type => :controller
+  config.include FactoryGirl::Syntax::Methods
+  config.extend AuthenticationHelpers, :type => :controller
 
 # The settings below are suggested to provide a good initial experience
 # with RSpec, but feel free to customize to your heart's content.

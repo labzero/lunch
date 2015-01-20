@@ -3,49 +3,46 @@
 # You can also just copy and paste the tree (do not include the "authorizations") to each
 # environment if you need something different per enviornment.
 authorizations: &AUTHORIZATIONS
-  group_base: ou=groups,dc=test,dc=com
+  group_base: dc=fhlbsf-i,dc=com
   ## Requires config.ldap_check_group_membership in devise.rb be true
   # Can have multiple values, must match all to be authorized
   required_groups:
     # If only a group name is given, membership will be checked against "uniqueMember"
-    - cn=admins,ou=groups,dc=test,dc=com
-    - cn=users,ou=groups,dc=test,dc=com
+    #- cn=admins,ou=groups,dc=test,dc=com
+    #- cn=users,ou=groups,dc=test,dc=com
     # If an array is given, the first element will be the attribute to check against, the second the group name
-    - ["moreMembers", "cn=users,ou=groups,dc=test,dc=com"]
+    #- ["moreMembers", "cn=users,ou=groups,dc=test,dc=com"]
   ## Requires config.ldap_check_attributes in devise.rb to be true
   ## Can have multiple attributes and values, must match all to be authorized
   require_attribute:
-    objectClass: inetOrgPerson
-    authorizationRole: postsAdmin
+    objectClass: user
+    objectCategory: person
 
 ## Environment
 
-development:
+development: &development
   host: localhost
-  port: 389
-  attribute: cn
-  base: ou=people,dc=test,dc=com
-  admin_user: cn=admin,dc=test,dc=com
+  port: 3389
+  attribute: sAMAccountName
+  base: dc=fhlbsf-i,dc=com
+  admin_user: admin
   admin_password: admin_password
   ssl: false
   <<: *AUTHORIZATIONS
 
 test:
-  host: localhost
-  port: 3389
-  attribute: cn
-  base: ou=people,dc=test,dc=com
-  admin_user: cn=admin,dc=test,dc=com
-  admin_password: admin_password
-  ssl: simple_tls
+  <<: *development
   <<: *AUTHORIZATIONS
+<% if ENV['LDAP_PORT_TEST'] %>
+  port: <%= ENV['LDAP_PORT_TEST'] %>
+<% end %>
 
 production:
   host: localhost
-  port: 636
-  attribute: cn
-  base: ou=people,dc=test,dc=com
-  admin_user: cn=admin,dc=test,dc=com
+  port: 389
+  attribute: sAMAccountName
+  base: dc=fhlbsf-i,dc=com
+  admin_user: admin
   admin_password: admin_password
   ssl: start_tls
   <<: *AUTHORIZATIONS

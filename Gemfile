@@ -67,6 +67,7 @@ group :test do
   gem 'webmock'
   gem 'timecop'
   gem 'shoulda-matchers', require: false
+  gem 'factory_girl_rails'
 end
 
 # Use ActiveModel has_secure_password

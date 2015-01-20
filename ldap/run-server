@@ -1,0 +1,66 @@
+#!/usr/bin/env ruby
+
+require 'erb'
+require 'fileutils'
+require 'optparse'
+
+options = {
+  port: 3389,
+  dir: 'openldap-data'
+}
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{__FILE__} [options]"
+
+  opts.on('-s', '--ssl', 'Enables SSL transport on the LDAP server') do |v|
+    options[:ssl] = v
+  end
+
+  opts.on('-p', '--port PORT', 'Sets the port the LDAP server listens on') do |port|
+    options[:port] = port
+  end
+
+  opts.on('--reseed', 'Deletes the current LDAP DB and reseeds it.') do |v|
+    options[:reseed] = v
+  end
+
+  opts.on('--root-dir DIR', 'The root directory to store the LDAP DB, pid, etc. in.') do |dir|
+    options[:dir] = dir
+  end
+end.parse!
+
+FileUtils.chdir(File.dirname(__FILE__))
+
+## For OSX:
+ENV['PATH'] = "#{ENV['PATH']}:/usr/libexec"
+
+template = File.read('slapd-test.conf.erb')
+normal_out = 'slapd-test.conf'
+ssl_out = 'slapd-ssl-test.conf'
+
+
+@root_dir = File.expand_path options[:dir]
+FileUtils.mkdir_p File.join(@root_dir, 'run')
+File.open(normal_out, 'w') do |f|
+  @ssl = false
+  f.write ERB.new(template).result(binding)
+end
+File.open(ssl_out, 'w') do |f|
+  @ssl = true
+  f.write ERB.new(template).result(binding)
+end
+
+if options[:ssl]
+  cmd = "slapd -d 1 -f #{ssl_out} -h ldaps://localhost"
+else
+  cmd = "slapd -d 1 -f #{normal_out} -h ldap://localhost"
+end
+
+cmd += ":#{options[:port]}"
+
+if options[:reseed]
+  puts `ldapadd -x -h localhost -p #{options[:port]} -D "cn=admin,dc=fhlbsf-i,dc=com" -w secret -f clear.ldif`
+  puts `ldapadd -x -h localhost -p #{options[:port]} -D "cn=admin,dc=fhlbsf-i,dc=com" -w secret -f base.ldif`
+else
+  puts(cmd)
+  exec(cmd)
+end

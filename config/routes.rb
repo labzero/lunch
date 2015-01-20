@@ -7,7 +7,7 @@ Rails.application.routes.draw do
 
   get '/details' => 'welcome#details'
 
-  get 'grid_demo' => 'welcome#grid_demo'
+  get '/grid_demo' => 'welcome#grid_demo'
 
   get '/dashboard' => 'dashboard#index'
 

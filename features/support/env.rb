@@ -15,6 +15,7 @@ require 'active_support/all'
 custom_host = ENV['APP_HOST'] || env_config['app_host']
 
 if !custom_host
+  require 'open3'
   require ::File.expand_path('../../../config/environment',  __FILE__)
   require 'capybara/rails'
   require_relative '../../api/mapi'
@@ -27,6 +28,35 @@ if !custom_host
       run MAPI::ServiceApp
     end
   end.to_app
+
+  def find_available_port
+    server = TCPServer.new('127.0.0.1', 0)
+    server.addr[1]
+  ensure
+    server.close if server
+  end
+
+  ldap_root = Rails.root.join('tmp', "openldap-data-#{Process.pid}")
+  ldap_port = find_available_port
+  ldap_server = File.expand_path('../../../ldap/run-server',  __FILE__) + " --port #{ldap_port} --root-dir #{ldap_root}"
+  ldap_stdin, ldap_stdout, ldap_stderr, ldap_thr = Open3.popen3(ldap_server)
+  sleep(2) # let LDAP start
+  puts "LDAP Started: localhost:#{ldap_thr.pid}"
+  at_exit do
+    Process.kill('INT', ldap_thr.pid) rescue Errno::ESRCH
+    if ENV['VERBOSE']
+      IO.copy_stream(ldap_stdout, STDOUT)
+      IO.copy_stream(ldap_stderr, STDERR)
+    end
+    ldap_stdin.close
+    ldap_stdout.close
+    ldap_stderr.close
+    ldap_thr.value # wait for the thread to finish
+    FileUtils.rm_rf(ldap_root)
+  end
+
+  puts `#{ldap_server} --reseed`
+  ENV['LDAP_PORT_TEST'] = ldap_port.to_s
 else
   Capybara.app_host = custom_host
 end
