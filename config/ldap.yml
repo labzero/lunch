@@ -33,16 +33,16 @@ development: &development
 test:
   <<: *development
   <<: *AUTHORIZATIONS
-<% if ENV['LDAP_PORT_TEST'] %>
-  port: <%= ENV['LDAP_PORT_TEST'] %>
+<% if ENV['LDAP_PORT'] %>
+  port: <%= ENV['LDAP_PORT'] %>
 <% end %>
 
 production:
-  host: localhost
-  port: 389
+  host: <%= ENV['LDAP_HOST'] || 'localhost' %>
+  port: <%= ENV['LDAP_PORT'] || '389' %>
   attribute: sAMAccountName
   base: dc=fhlbsf-i,dc=com
-  admin_user: admin
-  admin_password: admin_password
-  ssl: start_tls
+  admin_user: <%= ENV['LDAP_ADMIN_USERNAME'] %>
+  admin_password: <%= ENV['LDAP_ADMIN_PASSWORD'] %>
+  ssl: false
   <<: *AUTHORIZATIONS

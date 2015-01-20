@@ -56,7 +56,7 @@ if !custom_host
   end
 
   puts `#{ldap_server} --reseed`
-  ENV['LDAP_PORT_TEST'] = ldap_port.to_s
+  ENV['LDAP_PORT'] = ldap_port.to_s
 else
   Capybara.app_host = custom_host
 end
