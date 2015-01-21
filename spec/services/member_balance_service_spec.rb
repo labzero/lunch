@@ -356,6 +356,64 @@ describe MemberBalanceService do
     end
   end
 
+  # TODO add vcr once MAPI endpoint is rigged up
+  describe '`settlement_transaction_account` method' do
+    let(:start_date) {Date.new(2015,1,1)}
+    let(:end_date) {Date.new(2015,1,20)}
+    let(:settlement_transaction_account) {subject.settlement_transaction_account(start_date, end_date)}
+    it 'should return a hash of STA values' do
+      expect(settlement_transaction_account[:start_balance]).to be_kind_of(Float)
+      expect(settlement_transaction_account[:end_balance]).to be_kind_of(Float)
+      expect(settlement_transaction_account[:start_date]).to be_kind_of(Date)
+      expect(settlement_transaction_account[:start_date]).to eq(start_date)
+      expect(settlement_transaction_account[:end_date]).to be_kind_of(Date)
+      expect(settlement_transaction_account[:end_date]).to eq(end_date)
+      expect(settlement_transaction_account[:activities]).to be_kind_of(Array)
+    end
+    it 'should sort activities from newest date to oldest date' do
+      last_date = end_date
+      settlement_transaction_account[:activities].each do |activity|
+        expect(activity[:trans_date]).to be <= last_date
+        last_date = activity[:trans_date]
+      end
+    end
+    it 'should not include any activities that are not in the given range' do
+      settlement_transaction_account[:activities].each do |activity|
+        expect(activity[:trans_date].between?(start_date, end_date)).to eq(true)
+      end
+    end
+    it 'should return nil if there is a JSON parsing error' do
+      # TODO change this stub once you implement the MAPI endpoint
+      expect(File).to receive(:read).and_return('some malformed json!')
+      expect(Rails.logger).to receive(:warn)
+      expect(settlement_transaction_account).to be(nil)
+    end
+    it 'should log a warning if two `end of day balance`s are given for a single date' do
+      expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'settlement_transaction_account', 'sta_double_balance_entry_for_day.json'))))
+      expect(Rails.logger).to receive(:warn)
+      settlement_transaction_account
+    end
+    # TODO remove this test once MAPI endpoint is added and we just receive start_balance and end_balance from MAPI.
+    it 'should include the correct start_balance and end_balance' do
+      expect(settlement_transaction_account[:start_balance]).to eq(57242.39)
+      expect(settlement_transaction_account[:end_balance]).to eq(106062.47)
+    end
+    it 'should find closest start date in the set to one given, with priority for the first date that is older than the one given, and calculate the start_balance using that date' do
+      expect(subject.settlement_transaction_account(Date.new(2015,1,5), end_date)[:start_balance]).to be(57242.39)
+    end
+    it 'should calculate the starting balance by reversing debits and credits on a given day\'s balance' do
+      expect(subject.settlement_transaction_account(Date.new(2015,1,15), end_date)[:start_balance].round(2)).to be(57242.39)
+    end
+    it 'should find closest end date in the set to one given and calculate the end_balance using that date' do
+      expect(subject.settlement_transaction_account(start_date, Date.new(2015,1,21))[:start_balance].round(2)).to be(57242.39)
+    end
+    it 'should return the balance for the last available day for both start_balance and end_balance if the start_date and end_date occur in the future. The activities array should be empty.' do
+      expect(subject.settlement_transaction_account(Date.new(2016,1,1), Date.new(2016,1,21))[:end_balance].round(2)).to be(27438.81)
+      expect(subject.settlement_transaction_account(Date.new(2016,1,1), Date.new(2016,1,21))[:start_balance].round(2)).to be(27438.81)
+      expect(subject.settlement_transaction_account(Date.new(2016,1,1), Date.new(2016,1,21))[:activities]).to eq([])
+    end
+  end
+
   # Helper Methods
   def override_start_balance_endpoint(start_date, end_date, request_object)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_return(request_object)

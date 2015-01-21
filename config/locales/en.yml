@@ -46,6 +46,13 @@ en:
     count: Count
     original_amount: Original Amount
     unpaid_principal: Unpaid Principal
+    balance_as_of_close_of_business: Balance as of close of business
+    reference_number: Reference Number
+    description: Description
+    debits: Debits
+    credits: Credits
+    balance: Balance
+    beginning_balance: Beginning Balance
   nav:
     primary:
       welcome: Hi %{name}
@@ -350,6 +357,13 @@ en:
           payment_fees: Less Potential Payment Fees
           other_collateral: Less Other Collateral Required
           mpf_ce_collateral: Less MPF CE Collateral Required
+      settlement_transaction_account:
+        title: Settlement/Transaction Account (STA) Statement
+        opening_balance_heading: "Beginning balance of as of %{date}:"
+        closing_balance_heading: "Balance as of close of business %{date}:"
+        table_title: Settlement/Transaction Account (STA) Detail
+        closing_balance: Balance as of close of business
+    change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at (415) 616-2945.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at (415) 616-2634 or (415) 616-2913.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
     close_of_business_processing_notice: Other data as of Close of Business on the prior business day.

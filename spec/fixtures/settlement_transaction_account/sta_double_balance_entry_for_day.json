@@ -1,0 +1,342 @@
+{
+  "start_balance" : null,
+  "start_date" : null,
+  "end_balance" : null,
+  "end_date" : null,
+  "activities" : [
+    {
+      "trans_date":"01-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":57242.39
+    },
+    {
+      "trans_date": "03-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":57242.39
+    },
+    {
+      "trans_date":"09-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":57242.39
+    },
+    {
+      "trans_date":"09-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":57242.39
+    },
+    {
+      "trans_date":"15-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":55449.6
+    },
+    {
+      "trans_date":"16-JAN-2015",
+      "refnumber":796337,
+      "descr":"SECURITY SAFEKEEPING",
+      "debit":null,
+      "credit":50612.87,
+      "rate":0.01,
+      "balance":null
+    },
+    {
+      "trans_date":"22-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":50953.9
+    },
+    {
+      "trans_date":"23-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":50953.9
+    },
+    {
+      "trans_date":"29-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":50261.24
+    },
+    {
+      "trans_date":"06-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":57242.39
+    },
+    {
+      "trans_date":"10-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":57242.39
+    },
+    {
+      "trans_date":"16-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":106062.47
+    },
+    {
+      "trans_date":"17-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":106062.47
+    },
+    {
+      "trans_date":"24-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":50953.9
+    },
+    {
+      "trans_date":"30-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":50261.24
+    },
+    {
+      "trans_date":"01-FEB-2015",
+      "refnumber" :null,
+      "descr":"INTEREST",
+      "debit":null,
+      "credit":0.55,
+      "rate":0.01,
+      "balance":null
+    },
+    {
+      "trans_date":"01-FEB-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":27438.81
+    },
+    {
+      "trans_date":"07-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":57242.39
+    },
+    {
+      "trans_date":"13-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":57242.39
+    },
+    {
+      "trans_date":"14-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":57242.39
+    },
+    {
+      "trans_date":"21-JAN-2015",
+      "refnumber":20150210028200,
+      "descr":"WIRE TRANSFER",
+      "debit":446000,
+      "credit":null,
+      "rate":0.01,
+      "balance":null
+    },
+    {
+      "trans_date":"21-JAN-2015",
+      "refnumber":797292,
+      "descr":"SECURITY SAFEKEEPING",
+      "debit":null,
+      "credit":390891.43,
+      "rate":0.01,
+      "balance":null
+    },
+    {
+      "trans_date":"27-JAN-2015",
+      "refnumber":799030,
+      "descr":"SECURITY SAFEKEEPING",
+      "debit":null,
+      "credit":1079307.34,
+      "rate":0.01,
+      "balance":null
+    },
+    {
+      "trans_date":"27-JAN-2015",
+      "refnumber":20150270025400,
+      "descr":"WIRE TRANSFER",
+      "debit":1080000,
+      "credit":null,
+      "rate":0.01,
+      "balance":null
+    },
+    {
+      "trans_date":"27-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":50261.24
+    },
+    {
+      "trans_date":"31-JAN-2015",
+      "refnumber":39844,
+      "descr":"SECURITY SAFEKEEPING FEE",
+      "debit":503,
+      "credit":null,
+      "rate":0.01,
+      "balance":null
+    },
+    {
+      "trans_date":"31-JAN-2015",
+      "refnumber":330112,
+      "descr":"ADVANCE INTEREST PAYMENT",
+      "debit":6981.36,
+      "credit":null,
+      "rate":0.01,
+      "balance":null
+    },
+    {
+      "trans_date":"31-JAN-2015",
+      "refnumber":330111,
+      "descr":"ADVANCE INTEREST PAYMENT",
+      "debit":11176.97,
+      "credit":null,
+      "rate":0.01,
+      "balance":null
+    },
+    {
+      "trans_date":"31-JAN-2015",
+      "refnumber":330110,
+      "descr":"ADVANCE INTEREST PAYMENT",
+      "debit":4161.65,
+      "credit":null,
+      "rate":0.01,
+      "balance":null
+    },
+    {
+      "trans_date":"02-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":57242.39
+    },
+    {
+      "trans_date":"08-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":57242.39
+    },
+    {
+      "trans_date":"15-JAN-2015",
+      "refnumber":795521,
+      "descr":"SECURITY SAFEKEEPING",
+      "debit":null,
+      "credit":898297.21,
+      "rate":0.01,
+      "balance":null
+    },
+    {
+      "trans_date":"15-JAN-2015",
+      "refnumber":20150150023900,
+      "descr":"WIRE TRANSFER",
+      "debit":900000,
+      "credit":null,
+      "rate":0.01,
+      "balance":null
+    },
+    {
+      "trans_date":"15-JAN-2015",
+      "refnumber":9940000074,
+      "descr":"SERVICE CHARGE",
+      "debit":90,
+      "credit":null,
+      "rate":0.01,
+      "balance":null
+    },
+    {
+      "trans_date":"21-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":50953.9
+    },
+    {
+      "trans_date":"28-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":50261.24
+    },
+    {
+      "trans_date":"31-JAN-2015",
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":27438.26
+    }
+  ]
+}
+

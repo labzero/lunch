@@ -1,7 +1,12 @@
 class ReportsController < ApplicationController
+  include ControllerHelper
 
   MEMBER_ID = 750 #this is the hard-coded fhlb client id number we're using for the time-being
-
+  THIS_MONTH_START = Date.today.beginning_of_month
+  THIS_MONTH_END = Date.today
+  LAST_MONTH_START = THIS_MONTH_START - 1.month
+  LAST_MONTH_END = LAST_MONTH_START.end_of_month
+  DAILY_BALANCE_KEY = 'Interest Rate / Daily Balance' # the key returned by us from MAPI to let us know a row represents balance at close of business
 
   def index
     @reports = {
@@ -64,7 +69,8 @@ class ReportsController < ApplicationController
       settlement: {
         account: {
           updated: t('global.daily'),
-          available_history: t('global.all')
+          available_history: t('global.all'),
+          route: reports_settlement_transaction_account_path
         }
       },
       securities: {
@@ -94,38 +100,11 @@ class ReportsController < ApplicationController
 
   def capital_stock_activity
     member_balances = MemberBalanceService.new(MEMBER_ID)
-    this_month_start = Date.today.beginning_of_month
-    this_month_end = Date.today
-    last_month_start = this_month_start - 1.month
-    last_month_end = last_month_start.end_of_month
-    @start_date = (params[:start_date] || last_month_start).to_date
-    @end_date = (params[:end_date] || last_month_end).to_date
-    @capital_stock_activity = member_balances.capital_stock_activity(@start_date.to_date, @end_date.to_date)
+    @start_date = ((params[:start_date] || LAST_MONTH_START)).to_date
+    @end_date = ((params[:end_date] || LAST_MONTH_END)).to_date
+    @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
     raise StandardError, "There has been an error and ReportsController#capital_stock_activity has returned nil. Check error logs." if @capital_stock_activity.blank?
-    @picker_presets = [
-      {
-        label: t('datepicker.range.this_month', month: this_month_start.strftime('%B')),
-        start_date: this_month_start,
-        end_date: this_month_end
-      },
-      {
-        label: last_month_start.strftime('%B'),
-        start_date: last_month_start,
-        end_date: last_month_end
-      },
-      {
-        label: t('datepicker.range.custom'),
-        start_date: @start_date,
-        end_date: @end_date,
-        is_custom: true
-      }
-    ]
-    @picker_presets.each do |preset|
-      if preset[:start_date] == @start_date && preset[:end_date] == @end_date
-        preset[:is_default] = true
-        break
-      end
-    end
+    @picker_presets = range_picker_default_presets(@start_date, @end_date)
   end
 
   def borrowing_capacity
@@ -133,6 +112,16 @@ class ReportsController < ApplicationController
     date = params[:end_date] || Date.today
     @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(date.to_date)
     raise StandardError, "There has been an error and ReportsController#borrowing_capacity has returned nil. Check error logs." if @borrowing_capacity_summary.blank?
+  end
+
+  def settlement_transaction_account
+    member_balances = MemberBalanceService.new(MEMBER_ID)
+    @start_date = ((params[:start_date] || LAST_MONTH_START)).to_date
+    @end_date = ((params[:end_date] || LAST_MONTH_END)).to_date
+    @settlement_transaction_account = member_balances.settlement_transaction_account(@start_date, @end_date)
+    @daily_balance_key = DAILY_BALANCE_KEY
+    @picker_presets = range_picker_default_presets(@start_date, @end_date)
+    raise StandardError, "There has been an error and ReportsController#settlement_transaction_account has returned nil. Check error logs." if @settlement_transaction_account.blank?
   end
 
 end
