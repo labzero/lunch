@@ -26,6 +26,10 @@ OptionParser.new do |opts|
   opts.on('--root-dir DIR', 'The root directory to store the LDAP DB, pid, etc. in.') do |dir|
     options[:dir] = dir
   end
+
+  opts.on('-v', '--verbose', 'Enables verbose output.') do |v|
+    options[:verbose] = v
+  end
 end.parse!
 
 FileUtils.chdir(File.dirname(__FILE__))
@@ -49,10 +53,13 @@ File.open(ssl_out, 'w') do |f|
   f.write ERB.new(template).result(binding)
 end
 
+
+cmd = "slapd -d #{options[:verbose] ? 1 : 0} "
+
 if options[:ssl]
-  cmd = "slapd -d 1 -f #{ssl_out} -h ldaps://localhost"
+  cmd += "-f #{ssl_out} -h ldaps://localhost"
 else
-  cmd = "slapd -d 1 -f #{normal_out} -h ldap://localhost"
+  cmd += "-f #{normal_out} -h ldap://localhost"
 end
 
 cmd += ":#{options[:port]}"

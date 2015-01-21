@@ -71,6 +71,10 @@ This is a summary of the options supported in our .env files:
 * `MAPI_FHLBSF_ACCOUNT`: FHLBSF account for getting Calypso data.
 * `SOAP_SECRET_KEY`: FHLBSF password for Market Data Service.
 * `MAPI_MDS_ENDPOINT`: FHLBSF endpoint for Market Data Service.
+* `LDAP_HOST`: Hostname of the LDAP server.
+* `LDAP_PORT`: Port of the LDAP server.
+* `LDAP_ADMIN_USERNAME`: Username of the LDAP service account.
+* `LDAP_ADMIN_PASSWORD`: Password for the LDAP service account.
 
 ## Running the Tests
 
