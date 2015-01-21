@@ -130,6 +130,11 @@
   font-weight: $light-weight;
 }
 
+@mixin typography-error-message {
+  font-size: 1rem;
+  font-weight: $normal-weight;
+}
+
 %typography-page-title {
   @include typography-page-title;
 }
@@ -232,4 +237,8 @@
 
 %typography-table-cell-heading {
   @include typography-table-cell-heading;
+}
+
+%typography-error-message {
+  @include typography-error-message;
 }

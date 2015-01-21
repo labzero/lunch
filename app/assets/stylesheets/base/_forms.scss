@@ -65,3 +65,9 @@ label {
   @extend %typography-field-value;
   color: $medium-gray;
 }
+
+.form-error {
+  color: $alert-red;
+  @extend %typography-error-message;
+  margin-bottom: 30px;
+}
