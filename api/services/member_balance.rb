@@ -100,7 +100,7 @@ module MAPI
                 key :message, 'OK'
               end
               response_message do
-                key :code, 404
+                key :code, 400
                 key :message, 'Invalid input'
               end
           end
@@ -139,8 +139,38 @@ module MAPI
                 key :message, 'OK'
               end
               response_message do
-                key :code, 404
+                key :code, 400
                 key :message, 'Invalid input'
+              end
+            end
+          end
+
+          api do
+            key :path, "/{id}/borrowing_capacity_details/{as_of_date}"
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve Borrowing Capacity details for both Standard and SBC'
+              key :notes, 'Returns Borrowing Capacity details values for Standard (which also include collateral type breakdown) and SBC.'
+              key :type, :BorrowingCapacityDetails
+              key :nickname, :getBorrowingCapactityDetailsForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :integer
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :as_of_date
+                key :defaultValue,  Date.today()
+                key :required, true
+                key :type, :date
+                key :description, 'As of date for the Borrowing Capacity data.  If not provided, will retrieve intraday position.'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
               end
             end
           end
@@ -170,11 +200,13 @@ module MAPI
             mortgage_mv, agency_mv, aaa_mv, aa_mv = 0
             while row = mortages_cursor.fetch()
               mortgage_mv = row[0].to_i
+              break
             end
             while row = securities_cursor.fetch()
               agency_mv = row[0].to_i
               aaa_mv = row[1].to_i
               aa_mv = row[2].to_i
+              break
             end
             {
               mortgages: mortgage_mv,
@@ -207,15 +239,18 @@ module MAPI
             pledged_securities, safekept_securities = 0
             while row = pledged_securities_cursor.fetch()
               pledged_securities = row[0].to_i
+              break
             end
             while row = safekept_securities_cursor.fetch()
               safekept_securities = row[0].to_i
+              break
             end
             {pledged_securities: pledged_securities, safekept_securities: safekept_securities}.to_json
           else
             File.read(File.join(MAPI.root, 'fakes', 'member_balance_total_securities.json'))
           end
         end
+
         relative_get "/:id/balance/effective_borrowing_capacity" do
           member_id = params[:id]
           borrowing_capacity_connection_string = <<-SQL
@@ -231,6 +266,7 @@ module MAPI
             while row = borrowing_capacity_cursor.fetch()
               total_capacity = row[0].to_i
               unused_capacity = row[1].to_i
+              break
             end
             {
                 total_capacity: total_capacity,
@@ -246,9 +282,9 @@ module MAPI
           balance_date = params[:balance_date]
 
           #1.check that input for from and to dates are valid date and expected format
-          check_date_format = balance_date.match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/)
+          check_date_format = balance_date.match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
           if !check_date_format
-            halt 404, "Invalid Start Date format of yyyy-mm-dd"
+            halt 400, "Invalid Start Date format of yyyy-mm-dd"
           end
 
 
@@ -292,9 +328,9 @@ module MAPI
           from_date = params[:from_date]
           to_date = params[:to_date]
           [from_date, to_date].each do |date|
-            check_date_format = date.match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/)
+            check_date_format = date.match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
             if !check_date_format
-              halt 404, "Invalid Start Date format of yyyy-mm-dd"
+              halt 400, "Invalid Start Date format of yyyy-mm-dd"
             end
           end
 
@@ -347,6 +383,126 @@ module MAPI
           {
             activities: activities_formatted
           }.to_json
+        end
+
+        # Borrowing Capacity Details
+        relative_get "/:id/borrowing_capacity_details/:as_of_date" do
+          member_id = params[:id]
+          as_of_date = params[:as_of_date]
+
+          #1.check that input date if provided to be valid date and expected format.
+          if as_of_date.length > 0
+            check_date_format = as_of_date.match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+            if !check_date_format
+              halt 400, "Invalid Start Date format of yyyy-mm-dd"
+            end
+          end
+
+          # ASSUMPTION is always get current position.  The Date param is for future use when allow historical data
+
+          bc_balances_connection_string = <<-SQL
+            SELECT UPDATE_DATE, STD_EXCL_BL_BC, STD_EXCL_BANK_BC, STD_EXCL_REG_BC, STD_SECURITIES_BC, STD_ADVANCES, STD_LETTERS_CDT_USED,
+            STD_SWAP_COLL_REQ, STD_COVER_OTHER_PT_DEF, STD_PREPAY_FEES, STD_OTHER_COLL_REQ, STD_MPF_CE_COLL_REQ, STD_COLL_EXCESS_DEF,
+            SBC_MV_AA, SBC_BC_AA, SBC_ADVANCES_AA, SBC_COVER_OTHER_AA, SBC_MV_COLL_EXCESS_DEF_AA, SBC_COLL_EXCESS_DEF_AA,
+            SBC_MV_AAA, SBC_BC_AAA, SBC_ADVANCES_AAA, SBC_COVER_OTHER_AAA, SBC_MV_COLL_EXCESS_DEF_AAA, SBC_COLL_EXCESS_DEF_AAA,
+            SBC_MV_AG, SBC_BC_AG, SBC_ADVANCES_AG, SBC_COVER_OTHER_AG, SBC_MV_COLL_EXCESS_DEF_AG, SBC_COLL_EXCESS_DEF_AG,
+            SBC_OTHER_COLL_REQ, SBC_COLL_EXCESS_DEF, STD_TOTAL_BC, SBC_BC, SBC_MV, SBC_ADVANCES, SBC_MV_COLL_EXCESS_DEF
+            FROM V_CONFIRM_SUMMARY_INTRADAY@COLAPROD_LINK.WORLD
+            WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+          SQL
+
+          bc_std_breakdown_string = <<-SQL
+            SELECT COLLATERAL_TYPE, STD_COUNT, STD_UNPAID_BALANCE, STD_BORROWING_CAPACITY,
+            STD_ORIGINAL_AMOUNT, STD_MARKET_VALUE, COLLATERAL_SORT_ID
+            FROM V_CONFIRM_DETAIL@COLAPROD_LINK.WORLD
+            WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+            ORDER BY COLLATERAL_SORT_ID
+          SQL
+
+          # set the expected balances value to 0 just in case it is not found, want to return 0 values
+          balance_hash = {}
+          std_breakdown= []
+          if settings.environment == :production
+            bc_balances_cursor = ActiveRecord::Base.connection.execute(bc_balances_connection_string)
+            while row = bc_balances_cursor.fetch_hash()
+              balance_hash = row
+              break
+            end
+            bc_std_breakdown_cursor = ActiveRecord::Base.connection.execute(bc_std_breakdown_string)
+            while row = bc_std_breakdown_cursor.fetch_hash()
+              std_breakdown.push(row)
+            end
+          else
+            balance_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'borrowing_capacity_balances.json')))
+            std_breakdown = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'borrowing_capacity_std_breakdown.json')))
+          end
+          standard_breakdown_formatted = []
+
+          std_breakdown.each do |row|
+            reformat_hash = {'type' => row['COLLATERAL_TYPE'],
+                    'count' => row['STD_COUNT'],
+                    'original_amount' => (row['STD_ORIGINAL_AMOUNT'] || 0).to_f.round,
+                    'unpaid_principal' => (row['STD_UNPAID_BALANCE'] || 0).to_f.round,
+                    'market_value' => (row['STD_MARKET_VALUE'] || 0).to_f.round,
+                    'borrowing_capacity' => (row['STD_BORROWING_CAPACITY'] || 0).to_f.round
+            }
+            standard_breakdown_formatted.push(reformat_hash)
+          end
+          # format the SBC into an array of hash
+          sbc_breakdown = [
+            { type: 'AA',
+              total_market_value: (balance_hash['SBC_MV_AA'] || 0).to_f.round,
+              total_borrowing_capacity: (balance_hash['SBC_BC_AA'] || 0).to_f.round,
+              advances: (balance_hash['SBC_ADVANCES_AA'] || 0).to_f.round,
+              standard_credit: (balance_hash['SBC_COVER_OTHER_AA'] || 0).to_f.round,
+              remaining_market_value: (balance_hash['SBC_MV_COLL_EXCESS_DEF_AA'] || 0).to_f.round,
+              remaining_borrowing_capacity: (balance_hash['SBC_COLL_EXCESS_DEF_AA'] || 0).to_f.round
+            },
+            { type: 'AAA',
+              total_market_value: (balance_hash['SBC_MV_AAA'] || 0).to_f.round,
+              total_borrowing_capacity: (balance_hash['SBC_BC_AAA'] || 0).to_f.round,
+              advances: (balance_hash['SBC_ADVANCES_AAA'] || 0).to_f.round,
+              standard_credit: (balance_hash['SBC_COVER_OTHER_AAA'] || 0).to_f.round,
+              remaining_market_value: (balance_hash['SBC_MV_COLL_EXCESS_DEF_AAA'] || 0).to_f.round,
+              remaining_borrowing_capacity: (balance_hash['SBC_COLL_EXCESS_DEF_AAA'] || 0).to_f.round
+            },
+            { type: 'Agency',
+              total_market_value: (balance_hash['SBC_MV_AG'] || 0).to_f.round,
+              total_borrowing_capacity: (balance_hash['SBC_BC_AG'] || 0).to_f.round,
+              advances: (balance_hash['SBC_ADVANCES_AG'] || 0).to_f.round,
+              standard_credit: (balance_hash['SBC_COVER_OTHER_AG'] || 0).to_f.round,
+              remaining_market_value: (balance_hash['SBC_MV_COLL_EXCESS_DEF_AG'] || 0).to_f.round,
+              remaining_borrowing_capacity: (balance_hash['SBC_COLL_EXCESS_DEF_AG'] || 0).to_f.round
+            }
+          ]
+
+          {  date: as_of_date.to_date,
+             standard: {
+               collateral: standard_breakdown_formatted,
+               excluded: {
+                 blanket_lien: (balance_hash['STD_EXCL_BL_BC'] || 0).to_f.round,
+                 bank: (balance_hash['STD_EXCL_BANK_BC'] || 0).to_f.round,
+                 regulatory: (balance_hash['STD_EXCL_REG_BC'] || 0).to_f.round
+                },
+               utilized: {
+                 advances: (balance_hash['STD_ADVANCES'] || 0).to_f.round,
+                 letters_of_credit: (balance_hash['STD_LETTERS_CDT_USED'] || 0).to_f.round,
+                 swap_collateral: (balance_hash['STD_SWAP_COLL_REQ'] || 0).to_f.round,
+                 sbc_type_deficiencies: (balance_hash['STD_COVER_OTHER_PT_DEF'] || 0).to_f.round,
+                 payment_fees: (balance_hash['STD_PREPAY_FEES'] || 0).to_f.round,
+                 other_collateral: (balance_hash['STD_OTHER_COLL_REQ'] || 0).to_f.round,
+                 mpf_ce_collateral: (balance_hash['STD_MPF_CE_COLL_REQ'] || 0).to_f.round
+              }
+             },
+             sbc: {
+                collateral: sbc_breakdown,
+                utilized: {
+                  other_collateral: (balance_hash['SBC_OTHER_COLL_REQ'] || 0).to_f.round,
+                  excluded_regulatory: 0   # no matching data column in database
+                }
+              }
+            }.to_json
+
         end
       end
     end
