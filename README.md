@@ -54,7 +54,9 @@ Follow these steps to get up and running:
 6. `vagrant up` -- This will take 15-30 minutes, and will generate a `.deb` version of the 11g RPM in the same directory was the RPM. Save this file if you want to be able to rebuild your Vagrant system more quickly.
 7. `rake db:setup` -- You will be asked for the SYSTEM password twice, which is `password`.
 8. `foreman start`
-9. Navigate over to [http://localhost:3000](http://localhost:3000)
+9. `./ldap/run-server --reseed --port 3200`
+10. Navigate over to [http://localhost:3000](http://localhost:3000).
+11. The login details are 'local' (username) and 'development' (password).
 
 # .env Details
 
