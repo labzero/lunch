@@ -15,6 +15,7 @@ cn: Local User
 sn: Local
 sAMAccountName: local
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
 
 #dn: ou=people,dc=fhlbsf-i,dc=com
 #objectClass: organizationalUnit

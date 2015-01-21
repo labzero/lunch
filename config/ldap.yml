@@ -17,6 +17,7 @@ authorizations: &AUTHORIZATIONS
   require_attribute:
     objectClass: user
     objectCategory: person
+    primaryGroupID: 513 # magic number that means 'Domain Users'
 
 ## Environment
 
