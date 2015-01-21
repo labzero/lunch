@@ -144,9 +144,9 @@ describe MAPI::ServiceApp do
     describe 'in the development environment' do
       it_behaves_like 'a capital stock balance endpoint'
     end
-    it 'invalid param result in 404 error message' do
+    it 'invalid param result in 400 error message' do
       get "/member/#{MEMBER_ID}/capital_stock_balance/12-12-2014"
-      expect(last_response.status).to eq(404)
+      expect(last_response.status).to eq(400)
     end
   end
   describe 'capital stock Activities' do
@@ -162,11 +162,11 @@ describe MAPI::ServiceApp do
         expect(activity['dr_cr']) == ('C' || 'D')
       end
     end
-    it 'invalid param result in 404 error message' do
+    it 'invalid param result in 400 error message' do
       get "/member/#{MEMBER_ID}/capital_stock_activities/12-12-2014/#{to_date}"
-      expect(last_response.status).to eq(404)
+      expect(last_response.status).to eq(400)
       get "/member/#{MEMBER_ID}/capital_stock_activities/#{from_date}/12-12-2014"
-      expect(last_response.status).to eq(404)
+      expect(last_response.status).to eq(400)
     end
     describe 'in the production environment' do
       let!(:some_activity) {['12345','549','2014-12-24 12:00:00','-','D']}
@@ -205,9 +205,9 @@ describe MAPI::ServiceApp do
     let(:as_of_date) {'2015-01-14'}
     let(:borrowing_capacity_details) { get "/member/#{MEMBER_ID}/borrowing_capacity_details/#{as_of_date}"; JSON.parse(last_response.body) }
 
-    it 'invalid param result in 404 error message' do
+    it 'invalid param result in 400 error message' do
       get "/member/#{MEMBER_ID}/borrowing_capacity_details/12-12-2014"
-      expect(last_response.status).to eq(404)
+      expect(last_response.status).to eq(400)
     end
 
     RSpec.shared_examples 'a borrowing capacity detail endpoint' do
@@ -240,7 +240,6 @@ describe MAPI::ServiceApp do
         expect(result_standard_utilized['mpf_ce_collateral']).to be_a_kind_of(Integer)
 
         result_sbc_collateral = borrowing_capacity_details['sbc']['collateral']
-
         result_sbc_collateral.each do |row|
           expect(row['type']).to be_kind_of(String)
           expect(row['total_market_value']).to be_a_kind_of(Integer)
@@ -356,12 +355,50 @@ describe MAPI::ServiceApp do
         end
       end
 
-      it 'should return date and empty hash for standard and sbc if no data returned' do
+      it 'should return date and 0 values with empty hash for collateral for standard and sbc if no data returned' do
         expect(result_set1).to receive(:fetch_hash).and_return(nil)
         expect(result_set2).to receive(:fetch_hash).and_return(nil)
         expect(borrowing_capacity_details['date'].to_s).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
-        expect(borrowing_capacity_details['standard']).to eq({})
-        expect(borrowing_capacity_details['sbc']).to eq({})
+        expect(borrowing_capacity_details['standard']['collateral']).to eq([])
+        result_standard_excluded = borrowing_capacity_details['standard']['excluded']
+        expect(result_standard_excluded['blanket_lien']).to eq(0)
+        expect(result_standard_excluded['bank']).to eq(0)
+        expect(result_standard_excluded['regulatory']).to eq(0)
+        result_standard_utilized = borrowing_capacity_details['standard']['utilized']
+        expect(result_standard_utilized['advances']).to eq(0)
+        expect(result_standard_utilized['letters_of_credit']).to eq(0)
+        expect(result_standard_utilized['swap_collateral']).to eq(0)
+        expect(result_standard_utilized['sbc_type_deficiencies']).to eq(0)
+        expect(result_standard_utilized['payment_fees']).to eq(0)
+        expect(result_standard_utilized['other_collateral']).to eq(0)
+        expect(result_standard_utilized['mpf_ce_collateral']).to eq(0)
+        expect(borrowing_capacity_details['sbc']['utilized']['other_collateral']).to eq(0)
+        expect(borrowing_capacity_details['sbc']['utilized']['excluded_regulatory']).to eq(0)
+        result_sbc_collateral = borrowing_capacity_details['sbc']['collateral']
+        result_sbc_collateral.each do |row|
+          if  row['type'] == 'AA'
+            expect(row['total_market_value']).to eq(0)
+            expect(row['total_borrowing_capacity']).to eq(0)
+            expect(row['advances']).to eq(0)
+            expect(row['standard_credit']).to eq(0)
+            expect(row['remaining_market_value']).to eq(0)
+            expect(row['remaining_borrowing_capacity']).to eq(0)
+          elsif row['type'] == 'AAA'
+            expect(row['total_market_value']).to eq(0)
+            expect(row['total_borrowing_capacity']).to eq(0)
+            expect(row['advances']).to eq(0)
+            expect(row['standard_credit']).to eq(0)
+            expect(row['remaining_market_value']).to eq(0)
+            expect(row['remaining_borrowing_capacity']).to eq(0)
+          elsif row['type'] == 'Agency'
+            expect(row['total_market_value']).to eq(0)
+            expect(row['total_borrowing_capacity']).to eq(0)
+            expect(row['advances']).to eq(0)
+            expect(row['standard_credit']).to eq(0)
+            expect(row['remaining_market_value']).to eq(0)
+            expect(row['remaining_borrowing_capacity']).to eq(0)
+          end
+        end
       end
 
     end
