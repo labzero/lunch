@@ -80,20 +80,21 @@
     @extend %typography-page-title;
     margin: 32px 0 17px;
   }
-  input {
+  input, .dropdown-selection {
     color: $medium-gray;
     @include typography-field-placeholder;
   }
 }
 
 .report-header {
+  @extend %pseudoelement-clearfix;
   margin-bottom: 50px;
   h1 {
     float: left;
   }
 }
 
-.report-datepicker {
+.report-datepicker, .report-filter {
   width: (3 * $grid-column-width) + (2 * $gutter-width);
   form {
     display: none;
@@ -257,4 +258,15 @@
   float: right;
   margin-right: 0;
   text-align: right;
+}
+
+.report-inputs {
+  clear: both;
+  .report-datepicker, .report-filter {
+    float: left;
+  }
+}
+
+.report-filter {
+  margin-left: 10px;
 }
