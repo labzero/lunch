@@ -174,6 +174,45 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, "/{id}/sta_activities/{from_date}/{to_date}"
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve STA Activities transactions.'
+              key :notes, 'Returns STA Activities for the selected periord.'
+              key :type, :STAActivities
+              key :nickname, :getSTAActivitiesForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :from_date
+                key :required, true
+                key :type, :string
+                key :description, 'Start date yyyy-mm-dd for the STA Activities Report.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :to_date
+                key :required, true
+                key :type, :string
+                key :description, 'End date yyyy-mm-dd for the STA Activities Report.'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 400
+                key :message, 'Invalid input'
+              end
+            end
+          end
         end
         # pledged collateral route
         relative_get "/:id/balance/pledged_collateral" do
@@ -503,6 +542,165 @@ module MAPI
               }
             }.to_json
 
+        end
+
+        # STA activities
+        relative_get "/:id/sta_activities/:from_date/:to_date" do
+          member_id = params[:id]
+          from_date = params[:from_date]
+          to_date = params[:to_date]
+          [from_date, to_date].each do |date|
+            check_date_format = date.match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+            if !check_date_format
+              halt 400, "Invalid Start Date format of yyyy-mm-dd"
+            end
+          end
+
+          sta_open_balance_connection_string = <<-SQL
+          SELECT ACCOUNT_NUMBER, (SUM(BALANCE) - SUM(CREDIT) - SUM(DEBIT)) OPEN_BALANCE, TRANS_DATE
+          FROM PORTFOLIOS.STA_WEB_DETAIL
+          WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+          AND TRANS_DATE =
+            ( select min(trans_date) from portfolios.sta_web_detail
+              WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+              AND DESCR = 'Interest Rate / Daily Balance'
+              AND trans_date >= to_date(#{ActiveRecord::Base.connection.quote(from_date)}, 'yyyy-mm-dd')
+              AND trans_date <= to_date(#{ActiveRecord::Base.connection.quote(to_date)}, 'yyyy-mm-dd')
+            )
+          GROUP BY ACCOUNT_NUMBER, TRANS_DATE
+          SQL
+
+          sta_open_adjustment_connection_string = <<-SQL
+          SELECT ACCOUNT_NUMBER, count(*) ADJUST_TRANS_COUNT, MIN(TRANS_DATE) MIN_DATE,
+          (SUM(CREDIT) - SUM(DEBIT)) AMOUNT_TO_ADJUST
+          FROM PORTFOLIOS.STA_WEB_DETAIL
+          WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+          AND TRANS_DATE >= to_date(#{ActiveRecord::Base.connection.quote(from_date)}, 'yyyy-mm-dd')
+          AND TRANS_DATE <
+            ( select min(trans_date) from portfolios.sta_web_detail
+              WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+              AND DESCR = 'Interest Rate / Daily Balance'
+              AND trans_date >= to_date(#{ActiveRecord::Base.connection.quote(from_date)}, 'yyyy-mm-dd')
+              AND trans_date <= to_date(#{ActiveRecord::Base.connection.quote(to_date)}, 'yyyy-mm-dd')
+              GROUP BY ACCOUNT_NUMBER
+            )
+          AND DESCR != 'Interest Rate / Daily Balance'
+          GROUP BY ACCOUNT_NUMBER
+          SQL
+
+          sta_close_balance_connection_string = <<-SQL
+          SELECT ACCOUNT_NUMBER, BALANCE, TRANS_DATE
+          FROM PORTFOLIOS.STA_WEB_DETAIL
+          WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+          AND DESCR = 'Interest Rate / Daily Balance'
+          AND TRANS_DATE =
+            ( select max(trans_date) from portfolios.sta_web_detail
+              WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+              AND DESCR = 'Interest Rate / Daily Balance'
+              AND trans_date <= to_date(#{ActiveRecord::Base.connection.quote(to_date)}, 'yyyy-mm-dd')
+            )
+          SQL
+
+          sta_activities_connection_string = <<-SQL
+          SELECT TRANS_DATE, REFNUMBER, DESCR, DEBIT, CREDIT, RATE, BALANCE
+          FROM PORTFOLIOS.STA_WEB_DETAIL
+          WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+          AND DESCR <> 'Interest Rate / Daily Balance'
+          AND trans_date >= to_date(#{ActiveRecord::Base.connection.quote(from_date)}, 'yyyy-mm-dd')
+          AND trans_date <= to_date(#{ActiveRecord::Base.connection.quote(to_date)}, 'yyyy-mm-dd')
+          UNION
+          SELECT TRANS_DATE, REFNUMBER, DESCR, DEBIT, CREDIT, RATE, BALANCE
+          FROM PORTFOLIOS.STA_WEB_DETAIL
+          WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+          AND DESCR = 'Interest Rate / Daily Balance'
+          AND TRANS_DATE IN
+            ( select TRANS_DATE FROM portfolios.sta_web_detail
+              WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+              AND DESCR <>'Interest Rate / Daily Balance'
+              AND trans_date >= to_date(#{ActiveRecord::Base.connection.quote(from_date)}, 'yyyy-mm-dd')
+              AND trans_date <= to_date(#{ActiveRecord::Base.connection.quote(to_date)}, 'yyyy-mm-dd')
+            )
+          SQL
+
+          open_balance_hash = {}
+          open_balance_adjust_hash  = {}
+          close_balance_hash  = {}
+          activities_array = []
+          if settings.environment == :production
+            sta_open_cursor = ActiveRecord::Base.connection.execute(sta_open_balance_connection_string)
+            while row = sta_open_cursor.fetch_hash()
+              open_balance_hash  = row
+              break
+            end
+
+            sta_open_adjust_cursor = ActiveRecord::Base.connection.execute(sta_open_adjustment_connection_string)
+            while row = sta_open_adjust_cursor.fetch_hash()
+              open_balance_adjust_hash  = row
+              break
+            end
+            sta_close_cursor = ActiveRecord::Base.connection.execute(sta_close_balance_connection_string)
+            while row = sta_close_cursor.fetch_hash()
+              close_balance_hash  = row
+              break
+            end
+            sta_activities_cursor = ActiveRecord::Base.connection.execute(sta_activities_connection_string)
+            while row = sta_activities_cursor.fetch_hash()
+              activities_array.push(row)
+            end
+
+          else
+            open_balance_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_open_balance_earliest.json')))
+            open_balance_adjust_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_open_balance_adjust_value.json')))
+            close_balance_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_close_balance.json')))
+            activities_array = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities.json')))
+          end
+
+          open_balance = open_balance_hash['OPEN_BALANCE'] || 0
+          open_balance_date = (open_balance_hash['TRANS_DATE'] || from_date).to_date # adjust to earliest date with transaction records or balances
+          close_balance = close_balance_hash['BALANCE'] || 0
+          close_balance_date = (close_balance_hash['TRANS_DATE'] || to_date).to_date  # adjust to the latest date with transaction records or balances
+
+          # adjusting open balance final where the between from date and 1st balance date has transaction
+          if open_balance_adjust_hash.count() > 0
+            open_balance_adjust = open_balance_adjust_hash['AMOUNT_TO_ADJUST']|| 0
+            open_balance_date_adjust = (open_balance_adjust_hash['MIN_DATE'] || from_date).to_date
+            open_balance = open_balance - open_balance_adjust
+            open_balance_date = open_balance_date_adjust
+          end
+
+          activities_formatted = []
+          # caller expect end point to return null instead of 0 value for credit, debit and balances
+          activities_array.each do |row|
+            credit = row['CREDIT']
+            if credit == 0
+              credit = nil
+            end
+            debit = row['DEBIT']
+            if debit == 0
+              debit = nil
+            end
+            balance_temp = row['BALANCE']
+            description = row['DESCR']
+            if (balance_temp == 0 && description != 'Interest Rate / Daily Balance')
+              balance_temp = nil
+            end
+            hash = {'trans_date' => row['TRANS_DATE'].to_date,
+                    'refnumber' => row['REFNUMBER'],
+                    'descr' => description,
+                    'debit' => debit,
+                    'credit' => credit,
+                    'rate' => row['RATE'],
+                    'balance' => balance_temp
+            }
+            activities_formatted.push(hash)
+          end
+          {
+            start_balance: open_balance.to_f.round(4),
+            start_date: open_balance_date,
+            end_balance: close_balance,
+            end_date: close_balance_date,
+            activities: activities_formatted
+          }.to_json
         end
       end
     end

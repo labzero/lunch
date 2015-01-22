@@ -1,0 +1,35 @@
+[
+    {
+        "TRANS_DATE" : "01-JAN-2011 12:00 AM",
+        "REFNUMBER" : null,
+        "DESCR" : "INTEREST",
+        "DEBIT": 0,
+        "CREDIT" : 0.63,
+        "RATE" : 0,
+        "BALANCE" : 0,
+        "DATE_RECORD_UPDATED": "01-JAN-2011 12:00 AM",
+        "SEQ": 2
+    },
+    {
+        "TRANS_DATE" : "14-JAN-2011 12:00 AM",
+        "REFNUMBER" : "9940000087",
+        "DESCR" : "SERVICE CHARGE",
+        "DEBIT": 78,
+        "CREDIT" : 0,
+        "RATE" : 0,
+        "BALANCE" : 0,
+        "DATE_RECORD_UPDATED": "01-JAN-2011 12:00 AM",
+        "SEQ": 2
+    },
+    {
+        "TRANS_DATE" : "14-JAN-2011 12:00 AM",
+        "REFNUMBER" : null,
+        "DESCR" : "Interest Rate / Daily Balance",
+        "DEBIT": 0,
+        "CREDIT" : 0,
+        "RATE" : 0.01,
+        "BALANCE" : 48963,
+        "DATE_RECORD_UPDATED": "01-JAN-2011 12:00 AM",
+        "SEQ": 1
+    }
+]
