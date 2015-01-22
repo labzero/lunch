@@ -1,12 +1,8 @@
 class ReportsController < ApplicationController
-  include ControllerHelper
+  include DatePickerHelper
 
   MEMBER_ID = 750 #this is the hard-coded fhlb client id number we're using for the time-being
-  THIS_MONTH_START = Date.today.beginning_of_month
-  THIS_MONTH_END = Date.today
-  LAST_MONTH_START = THIS_MONTH_START - 1.month
-  LAST_MONTH_END = LAST_MONTH_START.end_of_month
-  DAILY_BALANCE_KEY = 'Interest Rate / Daily Balance' # the key returned by us from MAPI to let us know a row represents balance at close of business
+
 
   def index
     @reports = {
@@ -99,9 +95,10 @@ class ReportsController < ApplicationController
   end
 
   def capital_stock_activity
+    default_dates = default_dates_hash
     member_balances = MemberBalanceService.new(MEMBER_ID)
-    @start_date = ((params[:start_date] || LAST_MONTH_START)).to_date
-    @end_date = ((params[:end_date] || LAST_MONTH_END)).to_date
+    @start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
+    @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
     @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
     raise StandardError, "There has been an error and ReportsController#capital_stock_activity has returned nil. Check error logs." if @capital_stock_activity.blank?
     @picker_presets = range_picker_default_presets(@start_date, @end_date)
@@ -115,11 +112,12 @@ class ReportsController < ApplicationController
   end
 
   def settlement_transaction_account
+    default_dates = default_dates_hash
     member_balances = MemberBalanceService.new(MEMBER_ID)
-    @start_date = ((params[:start_date] || LAST_MONTH_START)).to_date
-    @end_date = ((params[:end_date] || LAST_MONTH_END)).to_date
+    @start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
+    @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
     @settlement_transaction_account = member_balances.settlement_transaction_account(@start_date, @end_date)
-    @daily_balance_key = DAILY_BALANCE_KEY
+    @daily_balance_key = MemberBalanceService::DAILY_BALANCE_KEY
     @picker_presets = range_picker_default_presets(@start_date, @end_date)
     raise StandardError, "There has been an error and ReportsController#settlement_transaction_account has returned nil. Check error logs." if @settlement_transaction_account.blank?
   end

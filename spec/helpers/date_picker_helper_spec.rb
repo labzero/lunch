@@ -1,18 +1,32 @@
 require 'spec_helper'
 
-describe ControllerHelper do
+describe DatePickerHelper do
+  describe '`default_dates_hash` method' do
+    let(:today) { Date.new(2013,1,1) }
+    it 'returns a hash with keys for `today`, `this_month_start`, `last_month_start`, and `last_month_end`' do
+      allow(Date).to receive(:today).at_least(:once).and_return(today)
+      expect(helper.default_dates_hash[:today]).to eq(today)
+      expect(helper.default_dates_hash[:this_month_start]).to eq(today.beginning_of_month)
+      expect(helper.default_dates_hash[:last_month_start]).to eq(today.beginning_of_month - 1.month)
+      expect(helper.default_dates_hash[:last_month_end]).to eq((today.beginning_of_month - 1.month).end_of_month)
+    end
+  end
+
   describe '`range_picker_default_presets` method' do
     let(:custom_start_date) { Date.new(2013,1,1) }
     let(:custom_end_date) { Date.new(2015,12,16) }
     let(:this_month_start_date) { Date.new(2015,1,1) }
-    let(:this_month_end_date) { Date.new(2015,1,16) }
+    let(:today) { Date.new(2015,1,16) }
     let(:last_month_start_date) { Date.new(2014,12,1) }
     let(:last_month_end_date) { Date.new(2014,12,31) }
+    let(:default_dates) {{
+      this_month_start: this_month_start_date,
+      today: today,
+      last_month_start: last_month_start_date,
+      last_month_end: last_month_end_date
+    }}
     before do
-      stub_const('ControllerHelper::THIS_MONTH_START', this_month_start_date)
-      stub_const('ControllerHelper::THIS_MONTH_END', this_month_end_date)
-      stub_const('ControllerHelper::LAST_MONTH_START', last_month_start_date)
-      stub_const('ControllerHelper::LAST_MONTH_END', last_month_end_date)
+      expect(helper).to receive(:default_dates_hash).at_least(:once).and_return(default_dates)
     end
     it 'should build a presets array' do
       expect(helper.range_picker_default_presets(last_month_start_date, last_month_end_date).length).to eq(3)
@@ -23,7 +37,7 @@ describe ControllerHelper do
       end
     end
     it 'should flag the first preset as the default if the start and end args match the current month to date' do
-      expect(helper.range_picker_default_presets(this_month_start_date, this_month_end_date).first[:is_default]).to eq(true)
+      expect(helper.range_picker_default_presets(this_month_start_date, today).first[:is_default]).to eq(true)
     end
     it 'should flag the second preset as the default if the start and end args match the start and end of last month' do
       expect(helper.range_picker_default_presets(last_month_start_date, last_month_end_date)[1][:is_default]).to eq(true)

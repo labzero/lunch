@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ViewHelper do
+describe CustomFormattingHelper do
   describe '`fhlb_formatted_currency` method' do
     it 'converts a number into the approved FHLB currency format' do
       expect(helper.fhlb_formatted_currency(465465465)).to eq('$465,465,465')

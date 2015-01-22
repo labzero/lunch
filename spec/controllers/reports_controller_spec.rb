@@ -57,7 +57,7 @@ RSpec.describe ReportsController, :type => :controller do
           get :capital_stock_activity, start_date: start_date, end_date: end_date
           expect(assigns[:end_date]).to eq(end_date)
         end
-        it 'should pass @start_date and @end_date to ControllerHelper#range_picker_default_presets and set @picker_presets to its outcome' do
+        it 'should pass @start_date and @end_date to DatePickerHelper#range_picker_default_presets and set @picker_presets to its outcome' do
           expect(controller).to receive(:range_picker_default_presets).with(start_date, end_date).and_return(picker_preset_hash)
           get :capital_stock_activity, start_date: start_date, end_date: end_date
           expect(assigns[:picker_presets]).to eq(picker_preset_hash)
@@ -109,14 +109,14 @@ RSpec.describe ReportsController, :type => :controller do
           get :settlement_transaction_account, start_date: start_date, end_date: end_date
           expect(assigns[:end_date]).to eq(end_date)
         end
-        it 'should pass @start_date and @end_date to ControllerHelper#range_picker_default_presets and set @picker_presets to its outcome' do
+        it 'should pass @start_date and @end_date to DatePickerHelper#range_picker_default_presets and set @picker_presets to its outcome' do
           expect(controller).to receive(:range_picker_default_presets).with(start_date, end_date).and_return(picker_preset_hash)
           get :settlement_transaction_account, start_date: start_date, end_date: end_date
           expect(assigns[:picker_presets]).to eq(picker_preset_hash)
         end
-        it 'sets @daily_balance_key to the constant DAILY_BALANCE_KEY found in the controller' do
+        it 'sets @daily_balance_key to the constant DAILY_BALANCE_KEY found in MemberBalanceService' do
           my_const = double('Some Constant')
-          stub_const('ReportsController::DAILY_BALANCE_KEY', my_const)
+          stub_const('MemberBalanceService::DAILY_BALANCE_KEY', my_const)
           get :settlement_transaction_account
           expect(assigns[:daily_balance_key]).to eq(my_const)
         end

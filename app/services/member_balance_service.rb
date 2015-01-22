@@ -1,4 +1,5 @@
 class MemberBalanceService
+  DAILY_BALANCE_KEY = 'Interest Rate / Daily Balance' # the key returned by us from MAPI to let us know a row represents balance at close of business
 
   def initialize(member_id)
     @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint, headers: {:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""}
@@ -224,7 +225,6 @@ class MemberBalanceService
   end
 
   def settlement_transaction_account(start_date, end_date)
-    daily_balance_key = ReportsController::DAILY_BALANCE_KEY # the key returned by us from MAPI to let us know a row represents balance at close of business
     start_date = start_date.to_date
     end_date = end_date.to_date
 
@@ -243,9 +243,9 @@ class MemberBalanceService
     # sort the activities array by description and then by date to wind up with the proper order
     data[:activities] = data[:activities].sort do |a, b|
       if a[:trans_date] == b[:trans_date]
-        if a[:descr] == daily_balance_key && b[:descr] != daily_balance_key
+        if a[:descr] == DAILY_BALANCE_KEY && b[:descr] != DAILY_BALANCE_KEY
           -1
-        elsif a[:descr] == daily_balance_key && b[:descr] == daily_balance_key
+        elsif a[:descr] == DAILY_BALANCE_KEY && b[:descr] == DAILY_BALANCE_KEY
           Rails.logger.warn("MemberBalanceService.settlement_transaction_account returned an activities array that contains duplicate `end of day balance` entries for the date: #{a[:trans_date]}")
           0
         else
@@ -284,7 +284,7 @@ class MemberBalanceService
     starting_balance = 0
     data[:activities].each do |activity|
       if activity[:trans_date] == closest_start_date
-        if activity[:descr] == daily_balance_key
+        if activity[:descr] == DAILY_BALANCE_KEY
           starting_balance = activity[:balance]
         elsif activity[:credit]
           starting_balance -= activity[:credit] unless start_date_in_future
@@ -300,10 +300,10 @@ class MemberBalanceService
       activity_date = activity[:trans_date]
       if activity_date > end_date
         # just continue
-      elsif activity_date == end_date && activity[:descr] == daily_balance_key
+      elsif activity_date == end_date && activity[:descr] == DAILY_BALANCE_KEY
         data[:end_balance] = activity[:balance]
         break
-      elsif activity[:descr] == daily_balance_key
+      elsif activity[:descr] == DAILY_BALANCE_KEY
         # find the next closest one, then break
         data[:end_balance] = activity[:balance]
         break

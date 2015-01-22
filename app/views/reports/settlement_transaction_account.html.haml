@@ -4,10 +4,10 @@
   .report-header
     %h1= t('reports.pages.settlement_transaction_account.title')
     .report-header-buttons
-      %button.report-button-left #{t('dashboard.actions.print')}
+      %button.report-button-left= t('dashboard.actions.print')
       %span.report-split-button
-        %button.report-button-right #{t('dashboard.actions.download')}
-        %button.report-drop-down-right #{t('dashboard.actions.xml')}
+        %button.report-button-right= t('dashboard.actions.download')
+        %button.report-drop-down-right= t('dashboard.actions.xml')
     .report-datepicker
       = form_tag(reports_settlement_transaction_account_url, method: 'GET') do
         = text_field_tag :start_date, @start_date

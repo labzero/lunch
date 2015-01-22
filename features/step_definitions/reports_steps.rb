@@ -45,13 +45,13 @@ Then(/^I should see a report table with multiple data rows$/) do
 end
 
 Given(/^I am on the Capital Stock Activity Statement page$/) do
-  sleep_until_tomorrow
+  sleep_if_close_to_midnight
   @today = Date.today
   visit '/reports/capital-stock-activity'
 end
 
 Given(/^I am on the Settlement Transaction Account Statement page$/) do
-  sleep_until_tomorrow
+  sleep_if_close_to_midnight
   @today = Date.today
   visit '/reports/settlement-transaction-account'
 end
@@ -111,7 +111,7 @@ Then(/^I should see a "(.*?)" starting on "(.*?)" and ending on "(.*?)"$/) do |r
   end
 end
 
-def sleep_until_tomorrow
+def sleep_if_close_to_midnight
   now = DateTime.now
   seconds_till_tomorrow = (now.tomorrow.beginning_of_day - now) * 1.days
   if seconds_till_tomorrow <= 30
