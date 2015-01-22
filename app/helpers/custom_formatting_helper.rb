@@ -1,4 +1,4 @@
-module ViewHelper
+module CustomFormattingHelper
   def fhlb_formatted_currency number
     if number.to_i == 0
       '0'
