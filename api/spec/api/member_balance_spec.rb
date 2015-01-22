@@ -260,7 +260,7 @@ describe MAPI::ServiceApp do
 
     describe 'in the development environment' do
       let(:as_of_date) {'2015-01-14'}
-       let(:bc_balances) {{"UPDATE_DATE"=> "12-JAN-2015 03:18 PM", "STD_EXCL_BL_BC"=> 20.5, "STD_EXCL_BANK_BC"=> 30.4, "STD_EXCL_REG_BC"=> 40, "STD_SECURITIES_BC"=> 0,
+      let(:bc_balances) {{"UPDATE_DATE"=> "12-JAN-2015 03:18 PM", "STD_EXCL_BL_BC"=> 20.5, "STD_EXCL_BANK_BC"=> 30.4, "STD_EXCL_REG_BC"=> 40, "STD_SECURITIES_BC"=> 0,
                          "STD_ADVANCES"=> 15000099, "STD_LETTERS_CDT_USED"=> 20, "STD_SWAP_COLL_REQ"=> 10, "STD_COVER_OTHER_PT_DEF"=> 99, "STD_PREPAY_FEES"=> 260,
                          "STD_OTHER_COLL_REQ"=> 70, "STD_MPF_CE_COLL_REQ"=> 155, "STD_COLL_EXCESS_DEF"=> 82911718, "SBC_MV_AA"=> 1, "SBC_BC_AA"=> 2, "SBC_ADVANCES_AA"=> 3,
                          "SBC_COVER_OTHER_AA"=> 4, "SBC_MV_COLL_EXCESS_DEF_AA"=> 5, "SBC_COLL_EXCESS_DEF_AA"=> 6, "SBC_MV_AAA"=> 7, "SBC_BC_AAA"=> 8, "SBC_ADVANCES_AAA"=> 9,
@@ -401,6 +401,142 @@ describe MAPI::ServiceApp do
         end
       end
 
+    end
+  end
+
+  describe 'STA activities' do
+    let(:from_date) {'2014-01-01'}
+    let(:to_date) {'2014-12-31'}
+    let(:sta_activities) { get "/member/#{MEMBER_ID}/sta_activities/#{from_date}/#{to_date}"; JSON.parse(last_response.body) }
+    RSpec.shared_examples 'a STA activities endpoint' do
+      it 'should return a number for the balance' do
+        expect(sta_activities['start_balance']).to be_kind_of(Numeric)
+        expect(sta_activities['end_balance']).to be_kind_of(Numeric)
+      end
+      it 'should return a date for the balance_date' do
+        expect(sta_activities['start_date']).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+        expect(sta_activities['end_date']).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+      end
+      it 'should return expected hash and data type or nil in development' do
+        sta_activities['activities'].each do |activity|
+          expect(activity['trans_date'].to_s).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+          if (activity['refnumber'] != nil )
+           expect(activity['refnumber']).to be_kind_of(String)
+          end
+          if (activity['descr'] != nil )
+            expect(activity['descr']).to be_kind_of(String)
+          end
+          if (activity['debit'] != nil )
+            expect(activity['debit']).to be_kind_of(Numeric)
+          end
+          if (activity['credit'] != nil )
+            expect(activity['credit']).to be_kind_of(Numeric)
+          end
+          if (activity['balance'] != nil )
+            expect(activity['balance']).to be_kind_of(Numeric)
+          end
+          expect(activity['rate']).to be_kind_of(Numeric)
+        end
+      end
+    end
+    it 'invalid param result in 400 error message' do
+      get "/member/#{MEMBER_ID}/sta_activities/12-12-2014/#{to_date}"
+      expect(last_response.status).to eq(400)
+      get "/member/#{MEMBER_ID}/sta_activities/#{from_date}/12-12-2014"
+      expect(last_response.status).to eq(400)
+    end
+    describe 'in the development environment' do
+      it_behaves_like 'a STA activities endpoint'
+
+      it 'should has 2 rows of activities based on the fake data' do
+        expect(sta_activities['activities'].count).to eq(3)
+      end
+    end
+    describe 'in the production environment' do
+      let(:from_date) {'2015-01-01'}
+      let(:to_date) {'2015-01-21'}
+
+      let(:sta_open_balances) {{"ACCOUNT_NUMBER"=> '020022', "OPEN_BALANCE"=> 10000.00, "TRANS_DATE"=>"09-Jan-2015 12:00 AM"}}
+      let(:sta_open_to_adjust_value) {{"ACCCOUNT_NUMBER"=> '022011', "ADJUST_TRANS_COUNT"=> 1, "MIN_DATE"=>"01-Jan-2015 12:00 AM","AMOUNT_TO_ADJUST"=> 0.63}}
+      let(:sta_close_balances) {{"ACCOUNT_NUMBER"=> '022011', "BALANCE"=> 9499.99, "TRANS_DATE"=>"21-Jan-2015 12:00 AM"}}
+      let(:sta_breakdown1) {{"TRANS_DATE" =>"21-Jan-2015 12:00 AM",  "REFNUMBER"=> nil,"DESCR"=> 'Interest Rate / Daily Balance',
+                            "DEBIT" => 0, "CREDIT" => 0, "RATE" =>0.12,
+                            "BALANCE"=> 9499.99}}
+      let(:sta_breakdown2) {{"TRANS_DATE" =>"21-Jan-2015 12:00 AM",  "REFNUMBER"=> "F99999","DESCR"=> 'SECURITIES SAFEKEEPING FEE',
+                             "DEBIT" => 500.01, "CREDIT" => 0, "RATE" =>0,
+                             "BALANCE"=> 0}}
+      let(:sta_breakdown3) {{"TRANS_DATE" =>"01-Jan-2015 12:00 AM",  "REFNUMBER"=> nil, "DESCR"=> 'INTEREST',
+                             "DEBIT" => 0, "CREDIT" => 0.63, "RATE" =>0,
+                             "BALANCE"=> 0}}
+      let(:result_set1) {double('Oracle Result Set', fetch_hash: nil)}
+      let(:result_set2) {double('Oracle Result Set', fetch_hash: nil)}
+      let(:result_set3) {double('Oracle Result Set', fetch_hash: nil)}
+      let(:result_set4) {double('Oracle Result Set', fetch_hash: nil)}
+      before do
+        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set1)
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set2)
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set3)
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set4)
+        allow(result_set1).to receive(:fetch_hash).and_return(sta_open_balances, nil)
+        allow(result_set2).to receive(:fetch_hash).and_return(sta_open_to_adjust_value, nil)
+        allow(result_set3).to receive(:fetch_hash).and_return(sta_close_balances, nil)
+        allow(result_set4).to receive(:fetch_hash).and_return(sta_breakdown1, sta_breakdown2, sta_breakdown3, nil)
+      end
+
+      it_behaves_like 'a STA activities endpoint'
+
+      it 'should has 3 rows of activities based on the fake data' do
+        expect(sta_activities['activities'].count).to eq(3)
+      end
+      it 'should return expected balance value and date for Opening balance to be adjusted' do
+        expect(sta_activities['start_balance']).to eq(10000.00 - 0.63)
+        expect(sta_activities['start_date'].to_s).to eq('2015-01-01')
+      end
+      it 'should return the expected close balance and date' do
+        expect(sta_activities['end_balance']).to eq(9499.99)
+        expect(sta_activities['end_date'].to_s).to eq('2015-01-21')
+      end
+      it 'should return expected activities values' do
+        sta_activities['activities'].each do |activity|
+          case  activity['descr']
+          when 'Interest Rate / Daily Balance'
+            expect(activity['trans_date'].to_s).to eq('2015-01-21')
+            expect(activity['refnumber']).to eq(nil)
+            expect(activity['debit']).to eq(nil)
+            expect(activity['credit']).to eq(nil)
+            expect(activity['balance']).to eq(9499.99)
+            expect(activity['rate']).to eq(0.12)
+          when 'SECURITIES SAFEKEEPING FEE'
+            expect(activity['trans_date'].to_s).to eq('2015-01-21')
+            expect(activity['refnumber']).to eq('F99999')
+            expect(activity['debit']).to eq(500.01)
+            expect(activity['credit']).to eq(nil)
+            expect(activity['balance']).to eq(nil)
+            expect(activity['rate']).to eq(0)
+          else
+            expect(activity['trans_date'].to_s).to eq('2015-01-01')
+            expect(activity['refnumber']).to eq(nil)
+            expect(activity['debit']).to eq(nil)
+            expect(activity['credit']).to eq(0.63)
+            expect(activity['balance']).to eq(nil)
+            expect(activity['rate']).to eq(0)
+          end
+        end
+
+      end
+
+      it 'should return date and 0 values with empty hash for collateral for standard and sbc if no data returned' do
+        expect(result_set1).to receive(:fetch_hash).and_return(nil)
+        expect(result_set2).to receive(:fetch_hash).and_return(nil)
+        expect(result_set3).to receive(:fetch_hash).and_return(nil)
+        expect(result_set4).to receive(:fetch_hash).and_return(nil)
+        expect(sta_activities['start_balance']).to eq(0)
+        expect(sta_activities['end_balance']).to eq(0)
+        expect(sta_activities['start_date'].to_s).to eq(from_date)
+        expect(sta_activities['end_date'].to_s).to eq(to_date)
+        expect(sta_activities['activities'].count).to eq(0)
+      end
     end
   end
 end
