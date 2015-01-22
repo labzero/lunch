@@ -15,8 +15,7 @@
           = text_field_tag :end_date, @end_date
         = render 'shared/date_picker', presets: @picker_presets, form: '.report-datepicker form'
       .report-filter
-        .input-field-container.icon-chevron-after.single-choice-dropdown.dropdown{data: {dropdown: {name: "sta-statement-filter", value: t('global.all').parameterize}}}
-          .dropdown-selector= t('global.all')
+        = render layout: 'shared/dropdown', locals: {dropdown_name: 'sta-statement-filter', dropdown_value: t('global.all').parameterize, input_value: t('global.all')} do
           %ul
             %li{data: {dropdown: {value: t('global.all').parameterize}}}= t('global.all')
             %li{data: {dropdown: {value: t('global.debits').parameterize}}}= t('global.debits')

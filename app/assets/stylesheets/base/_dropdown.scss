@@ -2,13 +2,13 @@
   position: relative;
   overflow: visible;
   font-size: .8667rem;
-  &:hover {
-    cursor: pointer;
-  }
   &.single-choice-dropdown {
     &:after {
       @extend %very-small-icon-font;
       padding: 8px 11px;
+    }
+    input {
+      font-size: 0.8667rem;
     }
   }
   &.open {
@@ -40,13 +40,6 @@
       font-weight: $semibold-weight;
     }
   }
-}
-
-.dropdown-selector {
-  @extend %form-input-style;
-  display: table-cell;
-  vertical-align: middle;
-  width: (3 * $grid-column-width) + (2 * $gutter-width);
 }
 
 

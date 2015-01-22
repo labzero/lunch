@@ -1,0 +1,6 @@
+- dropdown_name ||= ''
+- dropdown_value ||= ''
+- input_value ||= ''
+.input-field-container.icon-chevron-after.single-choice-dropdown.dropdown{data: {dropdown: {name: dropdown_name, value: dropdown_value}}}
+  %input{value: input_value, disabled: true}
+  =yield
