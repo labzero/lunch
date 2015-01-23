@@ -53,7 +53,7 @@ if !custom_host
   # we close the LDAP server's STDIN and STDOUT immediately to avoid a ruby buffer depth issue.
   ldap_stdout.close
   ldap_stderr.close
-  puts "LDAP Started: localhost:#{ldap_thr.pid}"
+  puts "LDAP Started: localhost:#{ldap_port}"
   at_exit do
     Process.kill('INT', ldap_thr.pid) rescue Errno::ESRCH
     ldap_stdin.close

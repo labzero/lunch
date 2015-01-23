@@ -52,11 +52,12 @@ Follow these steps to get up and running:
 4. Edit `.env` and set `MAPI_SECRET_TOKEN` to some long cryptographic string. If you change this, old cookies will become unusable.
 5. `export ORACLE_INSTALLER=PATH_TO_INSTALLER` with `PATH_TO_INSTALLER` replaced with the path to the directory containing the Oracle DB 11g RPM.
 6. `vagrant up` -- This will take 15-30 minutes, and will generate a `.deb` version of the 11g RPM in the same directory was the RPM. Save this file if you want to be able to rebuild your Vagrant system more quickly.
-7. `rake db:setup` -- You will be asked for the SYSTEM password twice, which is `password`.
-8. `foreman start`
-9. `./ldap/run-server --reseed --port 3200`
-10. Navigate over to [http://localhost:3000](http://localhost:3000).
-11. The login details are 'local' (username) and 'development' (password).
+7. If you want to be able to work offline, [follow these steps](http://chaos667.tumblr.com/post/20006357466/ora-21561-and-oracle-instant-client-11-2) to add a needed host entry to `/etc/hosts`.
+8. `rake db:setup` -- You will be asked for the SYSTEM password twice, which is `password`.
+9. `foreman start`
+10. `./ldap/run-server --reseed --port 3200`
+11. Navigate over to [http://localhost:3000](http://localhost:3000).
+12. The login details are 'local' (username) and 'development' (password).
 
 # .env Details
 
