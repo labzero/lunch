@@ -40,11 +40,31 @@ if !custom_host
   ldap_root = Rails.root.join('tmp', "openldap-data-#{Process.pid}")
   ldap_port = find_available_port
   ldap_server = File.expand_path('../../../ldap/run-server',  __FILE__) + " --port #{ldap_port} --root-dir #{ldap_root}"
+  if ENV['VERBOSE']
+    ldap_server += ' --verbose'
+  end
+  puts "LDAP starting, ldap://localhost:#{ldap_port}"
   ldap_stdin, ldap_stdout, ldap_stderr, ldap_thr = Open3.popen3(ldap_server)
+  at_exit do
+    Process.kill('INT', ldap_thr.pid) rescue Errno::ESRCH
+    ldap_stdin.close
+    ldap_thr.value # wait for the thread to finish
+    FileUtils.rm_rf(ldap_root)
+  end
   ldap_ping = Net::Ping::TCP.new 'localhost', ldap_port, 1
   now = Time.now
   while !ldap_ping.ping
     if Time.now - now > 10
+      if ENV['VERBOSE']
+        ldap_stdout.autoclose = false
+        ldap_stderr.autoclose = false
+        Process.kill('INT', ldap_thr.pid) rescue Errno::ESRCH
+        ldap_thr.value
+        IO.copy_stream(ldap_stdout, STDOUT)
+        IO.copy_stream(ldap_stderr, STDERR)
+      end
+      ldap_stdout.close
+      ldap_stderr.close
       raise "LDAP failed to start"
     end
     sleep(1)
@@ -53,13 +73,7 @@ if !custom_host
   # we close the LDAP server's STDIN and STDOUT immediately to avoid a ruby buffer depth issue.
   ldap_stdout.close
   ldap_stderr.close
-  puts "LDAP Started: localhost:#{ldap_port}"
-  at_exit do
-    Process.kill('INT', ldap_thr.pid) rescue Errno::ESRCH
-    ldap_stdin.close
-    ldap_thr.value # wait for the thread to finish
-    FileUtils.rm_rf(ldap_root)
-  end
+  puts 'LDAP Started.'
 
   puts `#{ldap_server} --reseed`
   ENV['LDAP_PORT'] = ldap_port.to_s
