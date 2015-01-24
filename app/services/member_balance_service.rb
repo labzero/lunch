@@ -224,9 +224,10 @@ class MemberBalanceService
     data
   end
 
-  def settlement_transaction_account(start_date, end_date)
+  def settlement_transaction_account(start_date, end_date, filter='all')
     start_date = start_date.to_date
     end_date = end_date.to_date
+    filter = filter.to_sym
 
     # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
     begin
@@ -314,6 +315,10 @@ class MemberBalanceService
       activity[:trans_date] < start_date.to_date || activity[:trans_date] > end_date.to_date
     end
     # **************** END CODE THAT WILL BE REMOVED ****************
+
+    data[:activities].delete_if do |activity|
+      activity[filter].nil? unless filter == :all
+    end
 
     data
   end

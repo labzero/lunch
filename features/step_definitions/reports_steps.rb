@@ -111,6 +111,30 @@ Then(/^I should see a "(.*?)" starting on "(.*?)" and ending on "(.*?)"$/) do |r
   end
 end
 
+Given(/^I'm showing Settlement Transaction Account activities from the last year$/) do
+  start_date = (Date.today - 1.year).strftime('%B %-d, %Y')
+  end_date = Date.today.strftime('%B %-d, %Y')
+  sleep_if_close_to_midnight
+  step 'I click the datepicker field'
+  step 'I select all of last year including today'
+  step 'I click the datepicker apply button'
+  step %{I should see a "Settlement Transaction Account Statement" starting on "#{start_date}" and ending on "#{end_date}"}
+end
+
+When(/^I filter the Settlement Transaction Account Statement by "(.*?)"$/) do |text|
+  page.find('.dropdown-selection').click
+  page.find('li', text: text).click
+end
+
+Then(/^I should only see "(.*?)" rows in the Settlement Transaction Account Statement table$/) do |text|
+  column_index = page.evaluate_script("$('.report-table thead th:contains(#{text})').index()") + 1
+  if !page.find(".report-table tbody tr:first-child td:first-child")['class'].split(' ').include?('dataTables_empty')
+    page.all(".report-table tbody tr:not(.beginning-balance-row) td:nth-child(#{column_index})").each do |element|
+      expect(element.text.to_i).to be > 0
+    end
+  end
+end
+
 def sleep_if_close_to_midnight
   now = DateTime.now
   seconds_till_tomorrow = (now.tomorrow.beginning_of_day - now) * 1.days

@@ -2,6 +2,9 @@
   position: relative;
   overflow: visible;
   font-size: .8667rem;
+  select {
+    display: none;
+  }
   &.single-choice-dropdown {
     &:after {
       @extend %very-small-icon-font;
@@ -42,4 +45,7 @@
   }
 }
 
+.dropdown-selection {
+  @extend %input-field-styling;
+}
 

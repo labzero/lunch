@@ -9,17 +9,13 @@
         %button.report-button-right= t('dashboard.actions.download')
         %button.report-drop-down-right= t('dashboard.actions.xml')
     .report-inputs
-      .report-datepicker
-        = form_tag(reports_settlement_transaction_account_url, method: 'GET') do
-          = text_field_tag :start_date, @start_date
-          = text_field_tag :end_date, @end_date
-        = render 'shared/date_picker', presets: @picker_presets, form: '.report-datepicker form'
-      .report-filter
-        = render layout: 'shared/dropdown', locals: {dropdown_name: 'sta-statement-filter', dropdown_value: t('global.all').parameterize, input_value: t('global.all')} do
-          %ul
-            %li{data: {dropdown: {value: t('global.all').parameterize}}}= t('global.all')
-            %li{data: {dropdown: {value: t('global.debits').parameterize}}}= t('global.debits')
-            %li{data: {dropdown: {value: t('global.credits').parameterize}}}= t('global.credits')
+      = form_tag(reports_settlement_transaction_account_url, method: 'GET') do
+        = text_field_tag :start_date, @start_date, class: 'datepicker-input-field'
+        = text_field_tag :end_date, @end_date, class: 'datepicker-input-field'
+        .report-datepicker
+          = render 'shared/date_picker', presets: @picker_presets, form: '.report-inputs form'
+        .report-filter
+          = render 'shared/dropdown', dropdown_name: 'sta_filter', default_value: @filter, default_text: @filter_text, dropdown_options: @filter_options
   .report-main-body
     .report-summary-data
       %h3
@@ -48,7 +44,7 @@
             %td.report-cell-right= number_to_currency(row[:debit]) || '-'
             %td.report-cell-right= number_to_currency(row[:credit]) || '-'
             %td.report-cell-right= number_to_currency(row[:balance]) || '-'
-        %tr
+        %tr.beginning-balance-row
           %td.report-cell-narrow= @settlement_transaction_account[:start_date].strftime('%m/%d/%Y')
           %td.report-cell-expanding
           %td.report-cell-expanding= t('global.beginning_balance')

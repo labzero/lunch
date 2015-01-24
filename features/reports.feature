@@ -106,3 +106,12 @@ Scenario: Member chooses a custom date range on the Settlement Transaction Accou
   And I select the 20th of this month in the right calendar
   And I click the datepicker apply button
   Then I should see a "Settlement Transaction Account Statement" for the 15th through the 20th of this month
+
+@smoke
+Scenario: Member filters the Settlement Transaction Account Statement
+  Given I am on the Settlement Transaction Account Statement page
+    And I'm showing Settlement Transaction Account activities from the last year
+  When I filter the Settlement Transaction Account Statement by "Credits"
+  Then I should only see "credit" rows in the Settlement Transaction Account Statement table
+  When I filter the Settlement Transaction Account Statement by "Debits"
+  Then I should only see "debit" rows in the Settlement Transaction Account Statement table

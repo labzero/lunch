@@ -8,30 +8,40 @@ $(function(){
       $('.dropdown').removeClass('open');
     } else {
       var $target = $(event.target);
-      var $parentDropdown;
-      if ($target.hasClass('dropdown')) {
-        $parentDropdown = $target;
-      } else {
-        $parentDropdown = $target.parents('.dropdown') || [];
-      };
-      var selectedValue = $target.data('dropdown-value');
-      if ($parentDropdown.length > 0 || $target.hasClass('dropdown')) {
+      var $parentDropdown = getDropdownEl($target);
+      if ( $parentDropdown.length > 0 ) {
         if ($parentDropdown.hasClass('open')) {
-          $dropdown.removeClass('open');
-          // if there is a value for the item you selected and it differs from the current selection, trigger event and DOM changes
-          if ( selectedValue && selectedValue !== $parentDropdown.data('dropdown-value') ) {
-            $parentDropdown.data('dropdown-value', selectedValue);
-            $($parentDropdown.find('input')).val($target.text());
-            var eventName = $($parentDropdown).data('dropdown-name') + '-dropdown-event';
-            var dropdownEvent = {type: eventName, value: selectedValue};
-            $parentDropdown.trigger(dropdownEvent);
-          }
+          openDropdownClicked($target, $parentDropdown);
         } else {
-          $dropdown.removeClass('open');
-          $parentDropdown.addClass('open');
+          closedDropdownClicked($parentDropdown);
         }
       }
     }
   });
+
+  function getDropdownEl($el) {
+    if ($el.hasClass('dropdown')) {
+      return $el;
+    } else {
+      return $el.parents('.dropdown') || [];
+    };
+  };
+
+  function closedDropdownClicked($dropdownEl) {
+    $dropdown.removeClass('open');
+    $dropdownEl.addClass('open');
+  };
+
+  function openDropdownClicked($targetEl, $dropdownEl) {
+    var $selectEl = $dropdownEl.find('select');
+    $dropdown.removeClass('open'); // close all dropdowns
+    // if there is a value for the item you selected and it differs from the current selection, change DOM and trigger change event
+    var selectedValue = $targetEl.data('dropdown-value');
+    if ( selectedValue && selectedValue !== $selectEl.val() ) {
+      $selectEl.val(selectedValue);
+      $dropdownEl.find('.dropdown-selection').text($targetEl.text());
+      $selectEl.trigger('change');
+    };
+  };
 
 });

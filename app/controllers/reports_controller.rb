@@ -116,9 +116,26 @@ class ReportsController < ApplicationController
     member_balances = MemberBalanceService.new(MEMBER_ID)
     @start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
-    @settlement_transaction_account = member_balances.settlement_transaction_account(@start_date, @end_date)
     @daily_balance_key = MemberBalanceService::DAILY_BALANCE_KEY
     @picker_presets = range_picker_default_presets(@start_date, @end_date)
+    @filter_options = [
+        [t('global.all'), 'all'],
+        [t('global.debits'), 'debit'],
+        [t('global.credits'), 'credit']
+    ]
+    filter_param = params[:sta_filter]
+    case filter_param
+      when 'debit'
+        @filter = filter_param
+        @filter_text = t('global.debits')
+      when 'credit'
+        @filter = filter_param
+        @filter_text = t('global.credits')
+      else
+        @filter = 'all'
+        @filter_text = t('global.all')
+    end
+    @settlement_transaction_account = member_balances.settlement_transaction_account(@start_date, @end_date, @filter)
     raise StandardError, "There has been an error and ReportsController#settlement_transaction_account has returned nil. Check error logs." if @settlement_transaction_account.blank?
   end
 

@@ -87,6 +87,7 @@ RSpec.describe ReportsController, :type => :controller do
     end
 
     describe 'GET settlement_transaction_account' do
+      let(:filter) {'some filter'}
       it 'should render the settlement_transaction_account view' do
         expect(member_balance_service_instance).to receive(:settlement_transaction_account).and_return(response_hash)
         get :settlement_transaction_account
@@ -99,7 +100,7 @@ RSpec.describe ReportsController, :type => :controller do
       describe "view instance variables" do
         let(:picker_preset_hash) {double(Hash)}
         before {
-          allow(member_balance_service_instance).to receive(:settlement_transaction_account).with(kind_of(Date), kind_of(Date)).and_return(response_hash)
+          allow(member_balance_service_instance).to receive(:settlement_transaction_account).with(kind_of(Date), kind_of(Date), kind_of(String)).and_return(response_hash)
         }
         it 'should set @start_date to the start_date param' do
           get :settlement_transaction_account, start_date: start_date, end_date: end_date
@@ -111,7 +112,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'should pass @start_date and @end_date to DatePickerHelper#range_picker_default_presets and set @picker_presets to its outcome' do
           expect(controller).to receive(:range_picker_default_presets).with(start_date, end_date).and_return(picker_preset_hash)
-          get :settlement_transaction_account, start_date: start_date, end_date: end_date
+          get :settlement_transaction_account, start_date: start_date, end_date: end_date, sta_filter: filter
           expect(assigns[:picker_presets]).to eq(picker_preset_hash)
         end
         it 'sets @daily_balance_key to the constant DAILY_BALANCE_KEY found in MemberBalanceService' do
@@ -119,6 +120,35 @@ RSpec.describe ReportsController, :type => :controller do
           stub_const('MemberBalanceService::DAILY_BALANCE_KEY', my_const)
           get :settlement_transaction_account
           expect(assigns[:daily_balance_key]).to eq(my_const)
+        end
+        it 'should set @filter to `debit` and @filter_text to the proper i18next translation for `debit` if debit is passed as the sta_filter param' do
+          get :settlement_transaction_account, sta_filter: 'debit'
+          expect(assigns[:filter]).to eq('debit')
+          expect(assigns[:filter_text]).to eq(I18n.t('global.debits'))
+        end
+        it 'should set @filter to `credit` and @filter_text to the proper i18next translation for `credit` if credit is passed as the sta_filter param' do
+          get :settlement_transaction_account, sta_filter: 'credit'
+          expect(assigns[:filter]).to eq('credit')
+          expect(assigns[:filter_text]).to eq(I18n.t('global.credits'))
+        end
+        it 'should set @filter to `all` and @filter_text to the proper i18next translation for `all` if nothing is passed for the sta_filter param' do
+          get :settlement_transaction_account
+          expect(assigns[:filter]).to eq('all')
+          expect(assigns[:filter_text]).to eq(I18n.t('global.all'))
+        end
+        it 'should set @filter to `all` and @filter_text to the proper i18next translation for `all` if anything besides debit or credit is passed as the sta_filter param' do
+          get :settlement_transaction_account, sta_filter: 'some nonsense param'
+          expect(assigns[:filter]).to eq('all')
+          expect(assigns[:filter_text]).to eq(I18n.t('global.all'))
+        end
+        it 'should set @filter_options to an array of arrays containing the appropriate values and labels for credit, debit and all' do
+          options_array = [
+              [I18n.t('global.all'), 'all'],
+              [I18n.t('global.debits'), 'debit'],
+              [I18n.t('global.credits'), 'credit']
+          ]
+          get :settlement_transaction_account
+          expect(assigns[:filter_options]).to eq(options_array)
         end
       end
     end

@@ -84,6 +84,9 @@
     color: $medium-gray;
     @include typography-field-placeholder;
   }
+  .datepicker-input-field {
+    display: none;
+  }
 }
 
 .report-header {
