@@ -4,7 +4,7 @@ Feature: Visiting the Settings Page
   In order to change my settings
 
 Background:
-  Given I am logged in as "local" with password "development"
+  Given I am logged in
 
 Scenario: Navigate to settings page
   Given I visit the dashboard

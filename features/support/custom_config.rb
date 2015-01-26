@@ -1,7 +1,7 @@
 module CustomConfig
   unless defined? @@env_config
     puts 'loading environments.yml...'
-    env = (ENV['ENVIRONMENT'] && ENV['ENVIRONMENT'].to_sym) || :dev
+    env = (ENV['ENVIRONMENT'] && ENV['ENVIRONMENT'].to_sym) || :local
     environments = YAML.load(ERB.new(File.read(File.expand_path('../../../config/environments.yml', __FILE__))).result)
     puts environments.inspect
     @@env_config = environments[env.to_s]

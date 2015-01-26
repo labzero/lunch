@@ -1,9 +1,9 @@
 ---
 
-dev:
-  user1:
-    username:
-    password:
+local:
+  primary_user:
+    username: local
+    password: development
 
 # insert configs once known
 #qa:

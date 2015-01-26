@@ -5,11 +5,11 @@ Feature: Logging in to the Member Site
 
 Scenario: User logs in
   Given I visit the root path
-  When I log in as "local" with password "development"
+  When I log in
   Then I should see dashboard modules
 
 Scenario: User logs out
-  Given I am logged in as "local" with password "development"
+  Given I am logged in
   When I log out
   Then I should see the login form
   When I visit the dashboard
@@ -17,10 +17,10 @@ Scenario: User logs out
 
 Scenario: User has wrong password
   Given I visit the root path
-  When I log in as "local" with password "badpassword"
+  When I log in with a bad password
   Then I should see a bad login error
 
 Scenario: User has wrong username
   Given I visit the root path
-  When I log in as "baduser" with password "development"
+  When I log in with a bad username
   Then I should see a bad login error

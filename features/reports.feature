@@ -4,7 +4,7 @@ Feature: Visiting the Reports Summary Page
   In order to view reports
 
 Background:
-  Given I am logged in as "local" with password "development"
+  Given I am logged in
 
 @smoke
 Scenario: Visit reports summary page from header link

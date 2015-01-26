@@ -4,7 +4,7 @@ Feature: Visiting the Dashboard
   In order to find information
 
 Background:
-  Given I am logged in as "local" with password "development"
+  Given I am logged in
 
   @smoke
   Scenario: Visit dashboard
