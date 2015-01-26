@@ -1,6 +1,6 @@
 - @html_class = 'white-background'
 - @page_title = t('reports.meta_title')
-.report.row
+.report.sta-statement.row
   .report-header
     %h1= t('reports.pages.settlement_transaction_account.title')
     .report-header-buttons
@@ -36,6 +36,14 @@
           %th= t("global.credits")
           %th= t('global.balance')
       %tbody
+        - if @show_ending_balance
+          %tr.ending-balance-row
+            %td.report-cell-narrow= @settlement_transaction_account[:end_date].strftime('%m/%d/%Y')
+            %td.report-cell-expanding
+            %td.report-cell-expanding= t('reports.pages.settlement_transaction_account.closing_balance')
+            %td.report-cell-right= '-'
+            %td.report-cell-right= '-'
+            %td.report-cell-right= number_to_currency(@settlement_transaction_account[:end_balance]) || '-'
         -@settlement_transaction_account[:activities].each do |row|
           %tr
             %td.report-cell-narrow= row[:trans_date].strftime('%m/%d/%Y')

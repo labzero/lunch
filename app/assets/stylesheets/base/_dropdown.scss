@@ -1,7 +1,7 @@
 .dropdown {
+  @extend %typography-dropdown-selector;
   position: relative;
   overflow: visible;
-  font-size: .8667rem;
   select {
     display: none;
   }
@@ -11,7 +11,7 @@
       padding: 8px 11px;
     }
     input {
-      font-size: 0.8667rem;
+      @extend %typography-dropdown-selector;
     }
   }
   &.open {
@@ -47,5 +47,9 @@
 
 .dropdown-selection {
   @extend %input-field-styling;
+  color: $medium-gray;
+  display: table-cell;
+  vertical-align: middle;
+  width: (3 * $grid-column-width) + (2 * $gutter-width);
 }
 

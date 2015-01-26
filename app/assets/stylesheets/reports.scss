@@ -80,7 +80,7 @@
     @extend %typography-page-title;
     margin: 32px 0 17px;
   }
-  input, .dropdown-selection {
+  input {
     color: $medium-gray;
     @include typography-field-placeholder;
   }
@@ -272,4 +272,19 @@
 
 .report-filter {
   margin-left: 10px;
+}
+
+.sta-statement {
+  .report-table {
+    th {
+      box-sizing: border-box;
+    }
+    th:nth-child(2) {
+      width: 160px;
+    }
+
+    th:nth-child(4), th:nth-child(5), th:nth-child(6) {
+      width: 105px;
+    }
+  }
 }

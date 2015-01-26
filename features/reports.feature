@@ -112,6 +112,6 @@ Scenario: Member filters the Settlement Transaction Account Statement
   Given I am on the Settlement Transaction Account Statement page
     And I'm showing Settlement Transaction Account activities from the last year
   When I filter the Settlement Transaction Account Statement by "Credits"
-  Then I should only see "credit" rows in the Settlement Transaction Account Statement table
+  Then I should only see "Credits" rows in the Settlement Transaction Account Statement table
   When I filter the Settlement Transaction Account Statement by "Debits"
-  Then I should only see "debit" rows in the Settlement Transaction Account Statement table
+  Then I should only see "Debits" rows in the Settlement Transaction Account Statement table
