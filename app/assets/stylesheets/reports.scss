@@ -280,11 +280,11 @@
       box-sizing: border-box;
     }
     th:nth-child(2) {
-      width: 160px;
+      min-width: 160px;
     }
 
     th:nth-child(4), th:nth-child(5), th:nth-child(6) {
-      width: 105px;
+      min-width: 105px;
     }
   }
 }
