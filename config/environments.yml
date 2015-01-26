@@ -1,9 +1,21 @@
 ---
 
-local:
+default: &default
   primary_user:
-    username: local
-    password: development
+    username: <%= ENV['CUCUMBER_PRIMARY_USERNAME'] || 'local' %>
+    password: <%= ENV['CUCUMBER_PRIMARY_PASSWORD'] || 'development' %>
+
+local:
+  <<: *default
+
+dev:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default
 
 # insert configs once known
 #qa:
