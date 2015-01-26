@@ -69,6 +69,7 @@ group :test do
   gem 'shoulda-matchers', require: false
   gem 'factory_girl_rails'
   gem 'net-ping'
+  gem 'database_cleaner'
 end
 
 # Use ActiveModel has_secure_password

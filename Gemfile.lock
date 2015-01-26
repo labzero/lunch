@@ -94,6 +94,7 @@ GEM
       gherkin (~> 2.12)
       multi_json (>= 1.7.5, < 2.0)
       multi_test (>= 0.1.1)
+    database_cleaner (1.4.0)
     debugger-linecache (1.2.0)
     devise (3.4.1)
       bcrypt (~> 3.0)
@@ -354,6 +355,7 @@ DEPENDENCIES
   capistrano-rvm
   capybara
   cucumber
+  database_cleaner
   devise_ldap_authenticatable
   dotenv-rails
   factory_girl_rails

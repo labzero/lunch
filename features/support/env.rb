@@ -15,11 +15,16 @@ require 'active_support/all'
 custom_host = ENV['APP_HOST'] || env_config['app_host']
 
 if !custom_host
+  ENV['RAILS_ENV'] ||= 'test' # for some reason we default to development in some cases
+  ENV['RACK_ENV'] ||= 'test'
+
   require 'open3'
   require ::File.expand_path('../../../config/environment',  __FILE__)
   require 'capybara/rails'
   require 'net/ping/tcp'
   require_relative '../../api/mapi'
+
+  WebMock.allow_net_connect! # allow all Net connections
 
   Capybara.app = Rack::Builder.new do
     map '/' do
@@ -29,6 +34,14 @@ if !custom_host
       run MAPI::ServiceApp
     end
   end.to_app
+
+  AfterConfiguration do
+    DatabaseCleaner.clean_with :truncation
+  end
+
+  Before('@clean') do
+    DatabaseCleaner.clean_with :truncation
+  end
 
   def find_available_port
     server = TCPServer.new('127.0.0.1', 0)
@@ -50,6 +63,7 @@ if !custom_host
     ldap_stdin.close
     ldap_thr.value # wait for the thread to finish
     FileUtils.rm_rf(ldap_root)
+    DatabaseCleaner.clean_with :truncation
   end
   ldap_ping = Net::Ping::TCP.new 'localhost', ldap_port, 1
   now = Time.now
