@@ -128,6 +128,7 @@ class ReportsController < ApplicationController
       if option[1] == filter_param
         @filter = filter_param
         @filter_text = option[0]
+        break
       end
     end
     # default filter to 'all' if invalid filter param was passed
