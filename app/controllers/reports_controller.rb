@@ -135,11 +135,11 @@ class ReportsController < ApplicationController
     @filter ||= @filter_options[0][1]
     @filter_text ||= @filter_options[0][0]
     @settlement_transaction_account = member_balances.settlement_transaction_account(@start_date, @end_date, @filter)
+    raise StandardError, "There has been an error and ReportsController#settlement_transaction_account has returned nil. Check error logs." if @settlement_transaction_account.blank?
     @show_ending_balance = false
     if @settlement_transaction_account[:activities] && @settlement_transaction_account[:activities].length > 0
       @show_ending_balance = @end_date != @settlement_transaction_account[:activities][0][:trans_date].to_date || @settlement_transaction_account[:activities][0][:balance].blank?
     end
-    raise StandardError, "There has been an error and ReportsController#settlement_transaction_account has returned nil. Check error logs." if @settlement_transaction_account.blank?
   end
 
 end

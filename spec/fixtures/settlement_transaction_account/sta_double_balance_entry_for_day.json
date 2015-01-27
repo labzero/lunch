@@ -1,8 +1,8 @@
 {
   "start_balance" : null,
-  "start_date" : null,
+  "start_date" : "01-JAN-2015",
   "end_balance" : null,
-  "end_date" : null,
+  "end_date" : "15-FEB-2015",
   "activities" : [
     {
       "trans_date":"01-JAN-2015",
