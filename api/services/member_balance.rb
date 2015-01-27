@@ -556,9 +556,6 @@ module MAPI
             end
           end
 
-          from_date = from_date.to_date
-          to_date = to_date.to_date
-
           sta_open_balance_connection_string = <<-SQL
           SELECT ACCOUNT_NUMBER, (SUM(BALANCE) - SUM(CREDIT) - SUM(DEBIT)) OPEN_BALANCE, TRANS_DATE
           FROM PORTFOLIOS.STA_WEB_DETAIL
@@ -624,6 +621,9 @@ module MAPI
               AND trans_date <= to_date(#{ActiveRecord::Base.connection.quote(to_date)}, 'yyyy-mm-dd')
             )
           SQL
+
+          from_date = from_date.to_date
+          to_date = to_date.to_date
 
           open_balance_hash = {}
           open_balance_adjust_hash  = {}
