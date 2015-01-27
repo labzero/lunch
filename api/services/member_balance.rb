@@ -556,6 +556,9 @@ module MAPI
             end
           end
 
+          from_date = from_date.to_date
+          to_date = to_date.to_date
+
           sta_open_balance_connection_string = <<-SQL
           SELECT ACCOUNT_NUMBER, (SUM(BALANCE) - SUM(CREDIT) - SUM(DEBIT)) OPEN_BALANCE, TRANS_DATE
           FROM PORTFOLIOS.STA_WEB_DETAIL
@@ -653,6 +656,19 @@ module MAPI
             open_balance_adjust_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_open_balance_adjust_value.json')))
             close_balance_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_close_balance.json')))
             activities_array = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities.json')))
+            open_balance_hash['TRANS_DATE'] = from_date
+            close_balance_hash['TRANS_DATE'] = to_date
+            open_balance_adjust_hash['MIN_DATE'] = from_date
+            count = 0
+            activities_array.collect! do |activity|
+              new_date = from_date.to_date + count.days
+              if new_date > to_date
+                new_date = to_date
+              end
+              activity['TRANS_DATE'] = new_date
+              count += 1
+              activity
+            end
           end
 
           open_balance = open_balance_hash['OPEN_BALANCE'] || 0

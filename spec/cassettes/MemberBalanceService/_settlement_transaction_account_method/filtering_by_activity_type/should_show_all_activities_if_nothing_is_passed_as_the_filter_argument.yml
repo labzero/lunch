@@ -1,0 +1,46 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/sta_activities/2000-01-01/2020-01-20
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '498'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      Date:
+      - Tue, 27 Jan 2015 19:07:31 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"start_balance":49040.3767,"start_date":"2000-01-01","end_balance":49909.42,"end_date":"2020-01-20","activities":[{"trans_date":"2000-01-01","refnumber":null,"descr":"INTEREST","debit":null,"credit":0.63,"rate":0,"balance":null},{"trans_date":"2000-01-02","refnumber":"9940000087","descr":"SERVICE
+        CHARGE","debit":78,"credit":null,"rate":0,"balance":null},{"trans_date":"2000-01-03","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":48963}]}'
+    http_version: 
+  recorded_at: Tue, 27 Jan 2015 19:07:31 GMT
+recorded_with: VCR 2.9.3

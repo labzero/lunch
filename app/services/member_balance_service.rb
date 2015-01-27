@@ -229,9 +229,18 @@ class MemberBalanceService
     end_date = end_date.to_date
     filter = filter.to_sym
 
-    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
     begin
-      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'settlement_transaction_account.json'))).with_indifferent_access
+      response = @connection["member/#{@member_id}/sta_activities/#{start_date.iso8601}/#{end_date.iso8601}"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.settlement_transaction_account encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.settlement_transaction_account encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
     rescue JSON::ParserError => e
       Rails.logger.warn("MemberBalanceService.settlement_transaction_account encountered a JSON parsing error: #{e}")
       return nil
@@ -240,6 +249,9 @@ class MemberBalanceService
     data[:activities].each_with_index do |activity, i|
       data[:activities][i][:trans_date] = activity[:trans_date].to_date
     end
+
+    data[:start_date] = data[:start_date].to_date
+    data[:end_date] = data[:end_date].to_date
 
     # sort the activities array by description and then by date to wind up with the proper order
     data[:activities] = data[:activities].sort do |a, b|
@@ -256,65 +268,6 @@ class MemberBalanceService
         b[:trans_date] <=> a[:trans_date]
       end
     end
-
-    # TODO: remove these lines once MAPI is rigged up - they are just used to mimic the date range functionality that will eventually be handled by MAPI
-    # **************** BEGIN CODE THAT WILL BE REMOVED ****************
-    # This is separated out from the above code as this whole block is going to disappear once MAPI is rigged up
-    # The following all depends on the sorting above (i.e. most recent activities to oldest)
-    data[:start_date] = start_date
-    data[:end_date] = end_date
-
-    # find the closest start date to in your set, with priority given to dates older than the start_date arg
-    closest_start_date = nil
-    start_date_in_future = false
-    data[:activities].each do |activity|
-      activity_date = activity[:trans_date]
-      if activity_date > start_date
-        closest_start_date = activity_date
-      elsif activity_date == start_date
-        closest_start_date = activity_date
-        break
-      else
-        # find the next closest one, then break
-        closest_start_date = activity_date
-        start_date_in_future = true
-        break
-      end
-    end
-
-    starting_balance = 0
-    data[:activities].each do |activity|
-      if activity[:trans_date] == closest_start_date
-        if activity[:descr] == DAILY_BALANCE_KEY
-          starting_balance = activity[:balance]
-        elsif activity[:credit]
-          starting_balance -= activity[:credit] unless start_date_in_future
-        elsif activity[:debit]
-          starting_balance += activity[:debit] unless start_date_in_future
-        end
-      end
-    end
-    data[:start_balance] = starting_balance
-
-    # Need to calculate ending balance - just choose the ending balance that is closest in date to the end_date arg
-    data[:activities].each do |activity|
-      activity_date = activity[:trans_date]
-      if activity_date > end_date
-        # just continue
-      elsif activity_date == end_date && activity[:descr] == DAILY_BALANCE_KEY
-        data[:end_balance] = activity[:balance]
-        break
-      elsif activity[:descr] == DAILY_BALANCE_KEY
-        # find the next closest one, then break
-        data[:end_balance] = activity[:balance]
-        break
-      end
-    end
-    # Need to get rid of rows that don't fall in the date range
-    data[:activities].delete_if do |activity|
-      activity[:trans_date] < start_date.to_date || activity[:trans_date] > end_date.to_date
-    end
-    # **************** END CODE THAT WILL BE REMOVED ****************
 
     data[:activities].delete_if do |activity|
       activity[filter].nil? unless filter == :all
