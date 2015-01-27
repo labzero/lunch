@@ -1,59 +1,8 @@
-.settings-page-row {
-  .sidebar {
-    ul {
-      margin: 0 10px 0 0;
-      padding: 0;
-      list-style: none;
-    }
-    li {
-      a, &.sidebar-label {
-        padding: 10px;
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-        font-weight: $semibold-weight;
-        &.active {
-          background-color: $actionable-blue;
-          color: $white;
-          border-radius: $default-border-radius;
-        }
-      }
-      &.sidebar-label {
-        padding-top: 0;
-        color: $medium-gray;
-      }
-    }
-  }
-  .column-2x10-right {
-    @include full-bleed-background($white);
-  }
-
-  a {
-    color: $actionable-blue;
-    text-decoration: none;
-  }
-}
-
 .settings-save-message {
   display: none;
   float: right;
   margin: 0 $gutter-width 0;
   line-height: 35px; // height of the button with which it's supposed to align
-}
-
-.settings-page-row .sidebar, .settings-page-main-content {
-  margin-top: 30px;
-}
-
-.settings-page-main-content {
-  @extend %pseudoelement-clearfix;
-  h1 {
-    @extend %typography-page-title;
-    margin: 0 0 25px;
-  }
-  section {
-    padding-left: $gutter-width;
-  }
 }
 
 .settings-selected-item-message, .settings-required-item-message {

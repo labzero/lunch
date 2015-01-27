@@ -27,6 +27,8 @@ Rails.application.routes.draw do
 
   get '/settings' => 'settings#index'
 
+  get '/messages' => 'messages#index'
+
   post '/settings/save' => 'settings#save'
 
   # Example of regular route:

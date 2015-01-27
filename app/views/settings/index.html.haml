@@ -1,13 +1,9 @@
 - setting_types = %w(account password quick_advance quick_report email)
 - email_options = %w(reports investor_relations miscellaneous products credit technical community)
-.row.settings-page-row
+.row.sidebar-row
   %aside.sidebar.column-2x10-left
-    %ul
-      %li.sidebar-label= t('settings.title')
-      - setting_types.each do |setting_type|
-        %li
-          =link_to t("settings.#{setting_type}.title"), '#', class: "#{'active' if setting_type == 'email'}"
-  .settings-page-main-content
+    = render 'shared/sidebar', sidebar_label: t('settings.title'), sidebar_options: @sidebar_options, sidebar_name: 'settings_nav', default_value: t('settings.email.title'), sidebar_type: 'nav'
+  .sidebar-row-main-content
     .column-2x10-right
       %section.settings-email
         %h1= t('settings.email.header')

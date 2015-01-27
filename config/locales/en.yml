@@ -53,6 +53,8 @@ en:
     credits: Credits
     balance: Balance
     beginning_balance: Beginning Balance
+    messages: Messages
+    categories: Categories
   nav:
     primary:
       welcome: Hi %{name}
@@ -367,3 +369,15 @@ en:
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at (415) 616-2634 or (415) 616-2913.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
     close_of_business_processing_notice: Other data as of Close of Business on the prior business day.
+  messages:
+    meta_title: FHLB - Messages
+    receive_via_email: Receiving messages via email
+    edit_email_settings_html: Edit your <a href=%{url}>Email Settings</a> to choose which messages you want to receive via email.
+    categories:
+      all: All Messages
+      investor_relations: Investor Relations & Disclosure
+      misc: Misc Corporate
+      products: Products and Services
+      credit: Credit & Collateral
+      technical_updates: Technical & Operational Updates
+      community: Community Programs

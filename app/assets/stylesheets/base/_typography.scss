@@ -64,6 +64,11 @@
   font-weight: $light-weight;
 }
 
+@mixin typography-table-cell-heading {
+  font-size: 1rem;
+  font-weight: $light-weight;
+}
+
 @mixin typography-table-heading {
   font-size: 0.8667rem;
   font-weight: $semibold-weight;
@@ -204,4 +209,8 @@
 
 %typography-dropdown-selector {
   @include typography-dropdown-selector;
+}
+
+%typography-table-cell-heading {
+  @include typography-table-cell-heading;
 }
