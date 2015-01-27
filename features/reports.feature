@@ -96,7 +96,6 @@ Scenario: Member sees Settlement Transaction Account Statement
   Then I should see report summary data
     And I should see a report table with multiple data rows
 
-@smoke
 Scenario: Member chooses a custom date range on the Settlement Transaction Account Statement
   Given I am on the Settlement Transaction Account Statement page
   And I click the datepicker field
@@ -107,7 +106,6 @@ Scenario: Member chooses a custom date range on the Settlement Transaction Accou
   And I click the datepicker apply button
   Then I should see a "Settlement Transaction Account Statement" for the 15th through the 20th of this month
 
-@smoke
 Scenario: Member filters the Settlement Transaction Account Statement
   Given I am on the Settlement Transaction Account Statement page
     And I'm showing Settlement Transaction Account activities from the last year
