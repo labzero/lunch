@@ -52,4 +52,18 @@ When(/^I select the (\d+)(?:st|rd|th) of this month in the (left|right) calendar
   calendar.find("td.available", text: day).click
 end
 
+When(/^I select all of last year including today$/) do
+  step 'I choose the month to date preset in the datepicker'
+  step  'I choose the custom date range in the datepicker'
+  calendar = page.find(".daterangepicker .calendar.left")
+  day = @today.day
+  target_month = (@today - 1.year).strftime("%b %Y")
+  while calendar.find('.month').text != target_month
+    calendar.find('.fa-arrow-left').click
+  end
+  calendar.find("td.available", text: day).click
+end
+
+
+
 

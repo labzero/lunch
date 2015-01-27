@@ -1,3 +1,19 @@
+%input-field-styling {
+  border: 1px solid $actionable-blue;
+  border-radius: $default-border-radius;
+  color: $text-color;
+  padding: 5px 0 3px 10px;
+  box-sizing: border-box;
+  width: 100%;
+  display: inline-block;
+  height: 30px;
+  line-height: normal;
+  @include input-placeholder {
+    color: $medium-gray;
+    @include typography-field-placeholder;
+  }
+}
+
 .input-field-container {
   position: relative;
   display: inline-block;
@@ -27,17 +43,7 @@
     border-top-right-radius: $default-border-radius;
   }
   input {
-    border: 1px solid $actionable-blue;
-    border-radius: $default-border-radius;
-    color: $text-color;
-    padding: 5px 0 3px 10px;
-    box-sizing: border-box;
-    width: 100%;
-    display: inline-block;
-    @include input-placeholder {
-      color: $medium-gray;
-      @include typography-field-placeholder;
-    }
+    @extend %input-field-styling;
   }
   &[class*=" icon-"], &[class^="icon-"] {
     &[class$="-before"], &[class*="-before "] {

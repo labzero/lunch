@@ -360,6 +360,7 @@ describe MemberBalanceService do
   describe '`settlement_transaction_account` method' do
     let(:start_date) {Date.new(2015,1,1)}
     let(:end_date) {Date.new(2015,1,20)}
+    let(:filter) { double('filter param') }
     let(:settlement_transaction_account) {subject.settlement_transaction_account(start_date, end_date)}
     it 'should return a hash of STA values' do
       expect(settlement_transaction_account[:start_balance]).to be_kind_of(Float)
@@ -411,6 +412,36 @@ describe MemberBalanceService do
       expect(subject.settlement_transaction_account(Date.new(2016,1,1), Date.new(2016,1,21))[:end_balance].round(2)).to be(27438.81)
       expect(subject.settlement_transaction_account(Date.new(2016,1,1), Date.new(2016,1,21))[:start_balance].round(2)).to be(27438.81)
       expect(subject.settlement_transaction_account(Date.new(2016,1,1), Date.new(2016,1,21))[:activities]).to eq([])
+    end
+    describe 'filtering by activity type' do
+      # set start_date and end_date wide just to catch all activities in your mocked dataset
+      let(:start_date) {Date.new(2000,1,1)}
+      let(:end_date) {Date.new(2020,1,20)}
+      before do
+        expect(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'settlement_transaction_account', 'settlement_transaction_account.json'))))
+      end
+      it 'should only show `credit` activities if `credit` is passed in as the filter' do
+        subject.settlement_transaction_account(start_date, end_date, 'credit')[:activities].each do |activity|
+          expect(activity[:credit]).to be > 0
+          expect(activity[:debit]).to be(nil)
+          expect(activity[:balance]).to be(nil)
+        end
+        expect(subject.settlement_transaction_account(start_date, end_date, 'credit')[:activities].length).to eq(6)
+      end
+      it 'should only show `debit` activities if `debit` is passed in as the filter' do
+        subject.settlement_transaction_account(start_date, end_date, 'debit')[:activities].each do |activity|
+          expect(activity[:credit]).to be(nil)
+          expect(activity[:debit]).to be > 0
+          expect(activity[:balance]).to be(nil)
+        end
+        expect(subject.settlement_transaction_account(start_date, end_date, 'debit')[:activities].length).to eq(10)
+      end
+      it 'should show all activities if `all` is passed as the filter' do
+        expect(subject.settlement_transaction_account(start_date, end_date, 'all')[:activities].length).to eq(23)
+      end
+      it 'should show all activities if nothing is passed as the filter argument' do
+        expect(subject.settlement_transaction_account(start_date, end_date)[:activities].length).to eq(23)
+      end
     end
   end
 

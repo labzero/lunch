@@ -84,16 +84,20 @@
     color: $medium-gray;
     @include typography-field-placeholder;
   }
+  .datepicker-input-field {
+    display: none;
+  }
 }
 
 .report-header {
+  @extend %pseudoelement-clearfix;
   margin-bottom: 50px;
   h1 {
     float: left;
   }
 }
 
-.report-datepicker {
+.report-datepicker, .report-filter {
   width: (3 * $grid-column-width) + (2 * $gutter-width);
   form {
     display: none;
@@ -257,4 +261,30 @@
   float: right;
   margin-right: 0;
   text-align: right;
+}
+
+.report-inputs {
+  clear: both;
+  .report-datepicker, .report-filter {
+    float: left;
+  }
+}
+
+.report-filter {
+  margin-left: 10px;
+}
+
+.sta-statement {
+  .report-table {
+    th {
+      box-sizing: border-box;
+    }
+    th:nth-child(2) {
+      min-width: 160px;
+    }
+
+    th:nth-child(4), th:nth-child(5), th:nth-child(6) {
+      min-width: 105px;
+    }
+  }
 }

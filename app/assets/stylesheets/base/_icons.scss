@@ -23,6 +23,11 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+%very-small-icon-font {
+  @extend %icon-font;
+  font-size: 0.8667rem;;
+}
+
 %small-icon-font {
   @extend %icon-font;
   font-size: 1rem;

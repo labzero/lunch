@@ -44,6 +44,11 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-dropdown-selector {
+  font-size: 0.8667rem;
+  font-weight: $normal-weight;
+}
+
 @mixin typography-dashboard-account-summary {
   font-size: 0.8rem;
   font-weight: $normal-weight;
@@ -195,4 +200,8 @@
 
 %typography-calendar-day {
   @include typography-calendar-day;
+}
+
+%typography-dropdown-selector {
+  @include typography-dropdown-selector;
 }
