@@ -25,6 +25,18 @@ require_relative 'models/member_sta_activities'
 module MAPI
 
   class ServiceApp < Sinatra::Base
+    configure do
+      enable :logging
+      file = File.new("#{settings.root}/../log/mapi-#{settings.environment}.log", 'a+')
+      file.sync = true
+      use Rack::CommonLogger, file
+    end
+
+    error do
+      logger.error env['sinatra.error']
+      'Unexpected Server Error'
+    end
+
     set :show_exceptions, ENV['MAPI_SHOW_EXCEPTIONS'] == 'true'
     require 'sinatra/activerecord'
     register Sinatra::ActiveRecordExtension
@@ -33,7 +45,9 @@ module MAPI
     use Rack::TokenAuth do |token, options, env|
       if token != ENV['MAPI_SECRET_TOKEN']
         req = Rack::Request.new(env)
-        req.params['api_key'] == ENV['MAPI_SECRET_TOKEN']
+        is_valid = req.params['api_key'] == ENV['MAPI_SECRET_TOKEN']
+        env['QUERY_STRING'].gsub! /(^|&)api_key=([^&]*)(&|$)/, '\1api_key=[SANITIZED]\3' # mask the API token after checking it
+        is_valid
       else
         true
       end
