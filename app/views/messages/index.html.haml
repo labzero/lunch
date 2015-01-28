@@ -1,6 +1,7 @@
 .row.sidebar-row.corporate-communications
-  %aside.sidebar.column-2x10-left.column-2x10-extended
-    = render 'shared/sidebar', sidebar_label: t('global.categories'), sidebar_options: @sidebar_options, sidebar_name: 'messages_filter', default_value: 'all', sidebar_type: 'filter'
+  %aside.sidebar.sidebar-filter.column-2x10-left.column-2x10-extended
+    = form_tag(messages_url, method: 'GET') do
+      = render 'shared/sidebar', sidebar_label: t('global.categories'), sidebar_options: @sidebar_options, sidebar_name: 'messages_filter', default_value: @filter, sidebar_type: 'filter'
   .sidebar-row-main-content
     .column-2x10-right.column-2x10-extended
       %section
@@ -9,8 +10,8 @@
         %p= t('messages.edit_email_settings_html', url: settings_path)
         %table.table-striped
           - @messages.each do |message|
-            %tr
+            %tr{data: {category: message[:category]}}
               %td
                 %a{href: ''}
                   %h3= message[:title]
-                  %small= message[:date].strftime('%d %b %Y')
+                  %small= message[:date_sent].strftime('%d %b %Y')

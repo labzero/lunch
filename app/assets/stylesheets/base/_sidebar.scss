@@ -18,6 +18,9 @@
           border-radius: $default-border-radius;
         }
       }
+      a, span {
+        cursor: pointer;
+      }
       &.sidebar-label {
         padding-top: 0;
         color: $medium-gray;

@@ -1,3 +1,7 @@
+Given(/^I am on the Messages Page$/) do
+  visit '/messages'
+end
+
 When(/^I click on the messages icon in the header$/) do
   page.find('.main-nav a.icon-envelope-after').click
 end
@@ -10,4 +14,19 @@ end
 
 Then(/^I should see "(.*?)" as the page's title$/) do |text|
   page.assert_selector('h1', text: text)
+end
+
+When(/^I select the "(.*?)" filter in the sidebar$/) do |text|
+  page.find('.sidebar-filter span', text: text).click
+end
+
+Then(/^I should see the active state for the "(.*?)" sidebar item$/) do |text|
+  page.assert_selector('.sidebar-filter span.active', text: text)
+end
+
+Then(/^I should only see "(.*?)" messages$/) do |text|
+  category = page.find('.sidebar-filter span', text: text)['data-sidebar-value']
+  page.all('table tr').each do |row|
+    expect(row['data-category']).to eq(category)
+  end
 end

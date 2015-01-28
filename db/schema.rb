@@ -11,6 +11,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 0) do
+ActiveRecord::Schema.define(version: 20150128002218) do
+
+  create_table "corporate_communications", force: true do |t|
+    t.string   "email_id"
+    t.string   "title"
+    t.datetime "date_sent"
+    t.string   "category"
+    t.text     "body"
+  end
+
+  add_index "corporate_communications", ["category"], name: "i_cor_com_cat"
 
 end
