@@ -250,6 +250,8 @@ GEM
       rubyzip (~> 1.0)
       websocket (~> 1.0)
     sexp_processor (4.4.4)
+    shoulda-matchers (2.7.0)
+      activesupport (>= 3.0.0)
     simplecov (0.9.1)
       docile (~> 1.1.0)
       multi_json (~> 1.0)
@@ -351,6 +353,7 @@ DEPENDENCIES
   savon
   sdoc
   selenium-webdriver
+  shoulda-matchers
   simplecov-rcov
   sinatra
   sinatra-activerecord

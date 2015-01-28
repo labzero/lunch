@@ -65,6 +65,7 @@ group :test do
   gem 'vcr'
   gem 'webmock'
   gem 'timecop'
+  gem 'shoulda-matchers', require: false
 end
 
 # Use ActiveModel has_secure_password

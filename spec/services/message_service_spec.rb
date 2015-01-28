@@ -5,7 +5,6 @@ describe MessageService do
   it { expect(subject).to respond_to(:corporate_communications) }
 
   describe '`corporate_communications` method' do
-    let(:valid_filters) { %w(misc investor_relations products credit technical_updates community) }
     let(:invalid_filter) { 'some_invalid_filter' }
     it 'returns all CorporateCommunications if no filter argument is passed' do
       expect(CorporateCommunication).to receive(:all)
@@ -19,8 +18,8 @@ describe MessageService do
       expect(CorporateCommunication).to receive(:all)
       subject.corporate_communications(invalid_filter)
     end
-    it 'filters CorporateCommunications by `category` if a valid filter argument is passed' do
-      valid_filters.each do |filter|
+    CorporateCommunication::VALID_CATEGORIES.each do |filter|
+      it "filters CorporateCommunications by the #{filter} category" do
         expect(CorporateCommunication).to receive(:where).with(category: filter)
         subject.corporate_communications(filter)
       end

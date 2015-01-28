@@ -5,7 +5,6 @@ RSpec.describe MessagesController, :type => :controller do
   describe 'GET index' do
     let(:message_service_instance) { double('MessageServiceInstance') }
     let(:messages) { double('Array of Messages') }
-    let(:valid_categories) { %w(all investor_relations misc products credit technical_updates community) }
     it 'should render the index view' do
       get :index
       expect(response.body).to render_template('index')
@@ -18,8 +17,8 @@ RSpec.describe MessagesController, :type => :controller do
         expect(option.last).to be_kind_of(String)
       end
     end
-    it 'should set @filter to the `messages_filter` param if it is valid based on the values in @sidebar_options' do
-      valid_categories.each do |category|
+    CorporateCommunication::VALID_CATEGORIES.each do |category|
+      it "should set @filter to #{category} if that is passed in as the `messages_filter` param" do
         get :index, messages_filter: category
         expect(assigns[:filter]).to eq(category)
       end
