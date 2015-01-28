@@ -1,12 +1,16 @@
 require 'rails_helper'
 
 describe CorporateCommunication do
-  it {should validate_presence_of(:email_id)}
-  it {should validate_presence_of(:date_sent)}
-  it {should validate_presence_of(:category)}
-  it {should validate_presence_of(:title)}
-  it {should validate_presence_of(:body)}
-  it {should validate_inclusion_of(:category).in_array(CorporateCommunication::VALID_CATEGORIES)}
-  it {should validate_uniqueness_of(:email_id)}
+  [:email_id, :date_sent, :category, :title, :body].each do |attr|
+    it "should validate the presence of `#{attr}`" do
+      expect(subject).to validate_presence_of attr
+    end
+  end
+  it 'should validate that the `category` attribute is one of the valid categories' do
+    expect(subject).to validate_inclusion_of(:category).in_array(CorporateCommunication::VALID_CATEGORIES)
+  end
+  it 'should validate the uniqueness of `email_id`' do
+    expect(subject).to validate_uniqueness_of(:email_id)
+  end
 
 end
