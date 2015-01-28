@@ -5,7 +5,7 @@
       %li= t('nav.primary.welcome', name: 'Alma')
       %li.nav-logout= link_to(t('nav.primary.logout'), root_url)
       %li.nav-settings= link_to('', '/settings', class: 'icon-gear-after')
-      %li.nav-mail= link_to('', '#', class: 'icon-envelope-after')
+      %li.nav-mail= link_to('', messages_path, class: 'icon-envelope-after')
       %li
         = render 'shared/input_field', icon: :magnify, placeholder: t('nav.primary.search'), field_class: :'nav-search'
 .secondary-nav

@@ -1,7 +1,13 @@
 class SettingsController < ApplicationController
 
   def index
-
+    @sidebar_options = [
+        [t("settings.account.title"), '#'],
+        [t("settings.password.title"), '#'],
+        [t("settings.quick_advance.title"), '#'],
+        [t("settings.quick_report.title"), '#'],
+        [t("settings.email.title"), '#']
+    ]
   end
 
   # POST
