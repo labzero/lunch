@@ -383,17 +383,23 @@ describe MemberBalanceService do
       end
     end
     it 'should return nil if there is a JSON parsing error' do
-      # TODO change this stub once you implement the MAPI endpoint
       expect(JSON).to receive(:parse).and_raise(JSON::ParserError)
       expect(Rails.logger).to receive(:warn)
       expect(settlement_transaction_account).to be(nil)
+    end
+    it "should return nil if there was an API error" do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(settlement_transaction_account).to eq(nil)
+    end
+    it "should return nil if there was a connection error" do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(settlement_transaction_account).to eq(nil)
     end
     it 'should log a warning if two `end of day balance`s are given for a single date' do
       expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'settlement_transaction_account', 'sta_double_balance_entry_for_day.json'))))
       expect(Rails.logger).to receive(:warn)
       settlement_transaction_account
     end
-    # TODO remove this test once MAPI endpoint is added and we just receive start_balance and end_balance from MAPI.
     it 'should include the correct start_balance and end_balance' do
       expect(settlement_transaction_account[:start_balance]).to be_kind_of(Float)
       expect(settlement_transaction_account[:end_balance]).to be_kind_of(Float)

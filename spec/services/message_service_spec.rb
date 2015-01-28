@@ -5,21 +5,26 @@ describe MessageService do
   it { expect(subject).to respond_to(:corporate_communications) }
 
   describe '`corporate_communications` method' do
-    let(:messages) { subject.corporate_communications }
-    it "should return an array of messages" do
-      expect(messages.length).to be >= 1
-      expect(messages).to be_kind_of(Array)
-      messages.each do |message|
-        expect(message[:date]).to be_kind_of(Date)
-        expect(message[:category]).to be_kind_of(String)
-        expect(message[:title]).to be_kind_of(String)
-        expect(message[:body]).to be_kind_of(String)
+    let(:valid_filters) { %w(misc investor_relations products credit technical_updates community) }
+    let(:invalid_filter) { 'some_invalid_filter' }
+    it 'returns all CorporateCommunications if no filter argument is passed' do
+      expect(CorporateCommunication).to receive(:all)
+      subject.corporate_communications
+    end
+    it 'returns all CorporateCommunications if `all` is passed as a filter argument' do
+      expect(CorporateCommunication).to receive(:all)
+      subject.corporate_communications('all')
+    end
+    it 'returns all CorporateCommunications if an invalid filter argument is passed' do
+      expect(CorporateCommunication).to receive(:all)
+      subject.corporate_communications(invalid_filter)
+    end
+    it 'filters CorporateCommunications by `category` if a valid filter argument is passed' do
+      valid_filters.each do |filter|
+        expect(CorporateCommunication).to receive(:where).with(category: filter)
+        subject.corporate_communications(filter)
       end
     end
-    it 'returns nil if there is a JSON parsing error' do
-      expect(File).to receive(:read).and_return('some malformed json!')
-      expect(Rails.logger).to receive(:warn)
-      expect(messages).to be(nil)
-    end
   end
+
 end

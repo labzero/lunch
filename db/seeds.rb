@@ -1,7 +1,13 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
-#
-# Examples:
-#
-#   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
-#   Mayor.create(name: 'Emanuel', city: cities.first)
+# Corporate Communications Seeds
+messages = JSON.parse(File.read(File.join(Rails.root, 'db', 'corporate_communications.json')))
+existing_email_ids = CorporateCommunication.pluck(:email_id)
+messages.each_with_index do |message, index|
+  break if existing_email_ids.include?(message['email_id'])
+  corp_com = CorporateCommunication.new
+  corp_com.date_sent = message['date'].to_datetime
+  corp_com.title = message['title']
+  corp_com.body = message['body']
+  corp_com.category = message['category']
+  corp_com.email_id = message['email_id']
+  corp_com.save!
+end

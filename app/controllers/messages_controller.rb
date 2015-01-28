@@ -10,8 +10,11 @@ class MessagesController < ApplicationController
         [t('messages.categories.technical_updates'), 'technical_updates'],
         [t('messages.categories.community'), 'community']
     ]
+    @filter = params[:messages_filter]
+    valid_categories = @sidebar_options.map { |option| option.last }
+    @filter = 'all' unless valid_categories.include?(@filter)
     message_service = MessageService.new
-    @messages = message_service.corporate_communications
+    @messages = message_service.corporate_communications(@filter)
   end
 
 end
