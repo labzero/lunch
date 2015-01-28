@@ -25,19 +25,41 @@ require_relative 'models/member_sta_activities'
 module MAPI
 
   class ServiceApp < Sinatra::Base
+    configure do
+      enable :logging
+      file = File.new("#{settings.root}/../log/mapi-#{settings.environment}.log", 'a+')
+      file.sync = true
+      use Rack::CommonLogger, file
+    end
+
+    error do
+      error_handler env['sinatra.error']
+    end
+
+    def error_handler(error)
+      logger.error error
+      'Unexpected Server Error'
+    end
+
     set :show_exceptions, ENV['MAPI_SHOW_EXCEPTIONS'] == 'true'
     require 'sinatra/activerecord'
     register Sinatra::ActiveRecordExtension
 
-    require 'rack/token_auth'
-    use Rack::TokenAuth do |token, options, env|
-      if token != ENV['MAPI_SECRET_TOKEN']
-        req = Rack::Request.new(env)
-        req.params['api_key'] == ENV['MAPI_SECRET_TOKEN']
-      else
-        true
+    def self.authentication_block
+      Proc.new do |token, options, env|
+        if token != ENV['MAPI_SECRET_TOKEN']
+          req = Rack::Request.new(env)
+          is_valid = req.params['api_key'] == ENV['MAPI_SECRET_TOKEN']
+          env['QUERY_STRING'].gsub! /(^|&)api_key=([^&]*)(&|$)/, '\1api_key=[SANITIZED]\3' # mask the API token after checking it
+          is_valid
+        else
+          true
+        end
       end
     end
+
+    require 'rack/token_auth'
+    use Rack::TokenAuth, &authentication_block
 
     ActiveRecord::Base.establish_connection(:cdb) if environment == :production
 
