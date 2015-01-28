@@ -30,9 +30,9 @@ end
 SimpleCov.formatter = SimpleCov::Formatter::MergedFormatter
 SimpleCov.start
 
-require File.expand_path '../../mapi.rb', __FILE__
-
 ENV['RACK_ENV'] = 'test'
+
+require File.expand_path '../../mapi.rb', __FILE__
 
 module RSpecMixin
   include Rack::Test::Methods

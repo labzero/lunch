@@ -33,7 +33,11 @@ module MAPI
     end
 
     error do
-      logger.error env['sinatra.error']
+      error_handler env['sinatra.error']
+    end
+
+    def error_handler(error)
+      logger.error error
       'Unexpected Server Error'
     end
 
@@ -41,17 +45,21 @@ module MAPI
     require 'sinatra/activerecord'
     register Sinatra::ActiveRecordExtension
 
-    require 'rack/token_auth'
-    use Rack::TokenAuth do |token, options, env|
-      if token != ENV['MAPI_SECRET_TOKEN']
-        req = Rack::Request.new(env)
-        is_valid = req.params['api_key'] == ENV['MAPI_SECRET_TOKEN']
-        env['QUERY_STRING'].gsub! /(^|&)api_key=([^&]*)(&|$)/, '\1api_key=[SANITIZED]\3' # mask the API token after checking it
-        is_valid
-      else
-        true
+    def self.authentication_block
+      Proc.new do |token, options, env|
+        if token != ENV['MAPI_SECRET_TOKEN']
+          req = Rack::Request.new(env)
+          is_valid = req.params['api_key'] == ENV['MAPI_SECRET_TOKEN']
+          env['QUERY_STRING'].gsub! /(^|&)api_key=([^&]*)(&|$)/, '\1api_key=[SANITIZED]\3' # mask the API token after checking it
+          is_valid
+        else
+          true
+        end
       end
     end
+
+    require 'rack/token_auth'
+    use Rack::TokenAuth, &authentication_block
 
     ActiveRecord::Base.establish_connection(:cdb) if environment == :production
 
