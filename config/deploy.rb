@@ -67,6 +67,7 @@ namespace :deploy do
   before :compile_assets, :clear_tmp
   before :publishing, :missing_dirs
   after :publishing, :restart
+  after :migrate, :seed
 
   after :restart, :clear_cache do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
