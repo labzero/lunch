@@ -66,20 +66,49 @@ module MAPI
         }
       }.with_indifferent_access
 
+      def self.is_weekend_or_holiday (maturity_date)
+        (@@holidays.include?(maturity_date.strftime('%F')) || maturity_date.saturday? || maturity_date.sunday?) ? true : false
+      end
+
+      def self.get_maturity_date (original_maturity_date, frequency_unit)
+        maturity_date = original_maturity_date
+        while MAPI::Services::Rates.is_weekend_or_holiday(maturity_date)
+          maturity_date = maturity_date + 1.day
+        end
+        if (frequency_unit == 'M' || frequency_unit == 'Y')
+          if (maturity_date > original_maturity_date.end_of_month)
+            maturity_date =  original_maturity_date.end_of_month
+            while MAPI::Services::Rates.is_weekend_or_holiday(maturity_date)
+              maturity_date = maturity_date - 1.day
+            end
+          end
+        end
+        maturity_date
+      end
+
       def self.registered(app)
         if app.environment == :production
           @@mds_connection = Savon.client(
-              wsdl: ENV['MAPI_MDS_ENDPOINT'],
-              env_namespace: :soapenv,
-              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1', 'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'},
-              element_form_default: :qualified,
-              namespace_identifier: :v1,
-              pretty_print_xml: true
+            wsdl: ENV['MAPI_MDS_ENDPOINT'],
+            env_namespace: :soapenv,
+            namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1', 'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'},
+            element_form_default: :qualified,
+            namespace_identifier: :v1,
+            pretty_print_xml: true
+          )
+
+          @@cal_connection =  Savon.client(
+            wsdl: ENV['MAPI_CALENDAR_ENDPOINT'],
+            env_namespace: :soapenv,
+            namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/businessCalendar/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1'},
+            element_form_default: :qualified,
+            namespace_identifier: :v1,
+            pretty_print_xml: true
           )
         else
           @@mds_connection = nil
+          @@cal_connection = nil
         end
-
 
         service_root '/rates', app
         swagger_api_root :rates do
@@ -249,6 +278,22 @@ module MAPI
         end
 
         relative_get "/summary" do
+          if @@cal_connection
+            @@cal_connection.operations
+            message = {'v1:endDate' => Date.today + 1200.days, 'v1:startDate' => Date.today}
+            response = @@client.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
+            if response.success?
+              response.doc.remove_namespaces!
+              @@holidays = response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')[0].css('days day date').map do |holiday|
+                Date.parse(holiday.content)
+              end
+            else
+              halt 503, 'Calendar Service Unavailable'
+            end
+          else
+            @@holidays = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'calendar_holidays.json')))
+          end
+
           data = if @@mds_connection
             @@mds_connection.operations
             request = LOAN_TYPES.collect do |type|
@@ -282,7 +327,7 @@ module MAPI
                     'payment_on' => 'Maturity',
                     'interest_day_count' => fhlbsfresponse[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
                     'rate' => fhlbsfdatapoints[ctr_term-1].at_css('value').content,
-                    'maturity_date' => DateTime.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content)
+                    'maturity_date' => MAPI::Services::Rates.get_maturity_date(Date.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content), TERM_MAPPING[term][:frequency_unit])
                   }
                 end
               end
@@ -298,7 +343,8 @@ module MAPI
             # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
             LOAN_TYPES.each do |type|
               LOAN_TERMS.each do |term|
-                hash[type][term][:maturity_date] = (Time.mktime(now.year, now.month, now.day, now.hour, now.min) + hash[type][term][:days_to_maturity].to_i.days).to_s
+                hash[type][term][:maturity_date] = MAPI::Services::Rates.get_maturity_date(DateTime.parse((Time.mktime(now.year, now.month, now.day, now.hour, now.min) + hash[type][term][:days_to_maturity].to_i.days).to_s), TERM_MAPPING[term][:frequency_unit])
+                #hash[type][term][:maturity_date] = MAPI::Services::Rates.get_maturity_date(DateTime.parse(@@holidays[0]), TERM_MAPPING[term][:frequency_unit])
               end
             end
             hash[:timestamp] = now
