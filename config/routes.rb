@@ -1,14 +1,13 @@
 Rails.application.routes.draw do
+  devise_for :users, controllers: { sessions: 'users/sessions' }, :skip => [:sessions]
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
   # You can have the root of your site routed with "root"
 
-  root 'welcome#index'
-
   get '/details' => 'welcome#details'
 
-  get 'grid_demo' => 'welcome#grid_demo'
+  get '/grid_demo' => 'welcome#grid_demo'
 
   get '/dashboard' => 'dashboard#index'
 
@@ -30,6 +29,14 @@ Rails.application.routes.draw do
   get '/messages' => 'messages#index'
 
   post '/settings/save' => 'settings#save'
+
+  devise_scope :user do
+    get '/' => 'users/sessions#new', :as => :new_user_session
+    post '/' => 'users/sessions#create', :as => :user_session
+    delete 'logout' => 'users/sessions#destroy', :as => :destroy_user_session
+  end
+
+  root 'users/sessions#new'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

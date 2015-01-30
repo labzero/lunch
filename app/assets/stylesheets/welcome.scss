@@ -1,3 +1,5 @@
+$welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 4.5)) / $column-4x8-right-width) * 100%;
+
 .welcome {
   margin-top: 30px;
   h1, .logo-container {
@@ -21,7 +23,7 @@
   }
   .column-4x8-right {
     p {
-      width: ((($grid-column-width * 4) + ($gutter-width * 4.5)) / $column-4x8-right-width) * 100%; // p constrained in way that falls slightly out of grid layout
+      width: $welcome-right-column-real-width; // p constrained in way that falls slightly out of grid layout
       margin-top: 0;
     }
   }
@@ -32,5 +34,48 @@
     display: inline-block;
     background: $logo-black no-repeat;
     background-size: contain;
+  }
+  form {
+    width: $welcome-right-column-real-width;
+    @extend %dashboard-module-base-styling;
+    padding: 0 20px 20px 20px;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+  }
+  legend {
+    @extend %dashboard-module-header;
+    @extend %typography-section-title;
+    display: block;
+    width: 200%; // This is a hack. We use overflow hidden to get the border drawn all the way across.
+    box-sizing: border-box;
+    position: relative;
+    left: -20px;
+    right: -20px;
+    margin-bottom: 20px;
+  }
+
+  .input-field-container {
+    margin-bottom: 20px;
+    &:last-of-type {
+      margin-bottom: 10px;
+    }
+  }
+
+  label {
+    margin-bottom: 3px;
+    display: block;
+  }
+
+  input {
+    width: 100%;
+  }
+
+  a {
+    @extend %typography-table-link;
+    color: $actionable-blue;
+    display: block;
+    margin-bottom: 20px;
+    line-height: 1;
   }
 }

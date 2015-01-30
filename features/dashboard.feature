@@ -3,6 +3,9 @@ Feature: Visiting the Dashboard
   I want to use visit the dashboard for the FHLB Member Portal
   In order to find information
 
+Background:
+  Given I am logged in
+
   @smoke
   Scenario: Visit dashboard
     When I visit the dashboard

@@ -1,8 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe MessagesController, :type => :controller do
+  login_user
 
   describe 'GET index' do
+    it_behaves_like 'a user required action', :get, :index
     let(:message_service_instance) { double('MessageServiceInstance') }
     let(:messages) { double('Array of Messages') }
     it 'should render the index view' do

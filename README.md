@@ -52,9 +52,12 @@ Follow these steps to get up and running:
 4. Edit `.env` and set `MAPI_SECRET_TOKEN` to some long cryptographic string. If you change this, old cookies will become unusable.
 5. `export ORACLE_INSTALLER=PATH_TO_INSTALLER` with `PATH_TO_INSTALLER` replaced with the path to the directory containing the Oracle DB 11g RPM.
 6. `vagrant up` -- This will take 15-30 minutes, and will generate a `.deb` version of the 11g RPM in the same directory was the RPM. Save this file if you want to be able to rebuild your Vagrant system more quickly.
-7. `rake db:setup` -- You will be asked for the SYSTEM password twice, which is `password`.
-8. `foreman start`
-9. Navigate over to [http://localhost:3000](http://localhost:3000)
+7. If you want to be able to work offline, [follow these steps](http://chaos667.tumblr.com/post/20006357466/ora-21561-and-oracle-instant-client-11-2) to add a needed host entry to `/etc/hosts`.
+8. `rake db:setup` -- You will be asked for the SYSTEM password twice, which is `password`.
+9. `foreman start`
+10. `./ldap/run-server --reseed --port 3200`
+11. Navigate over to [http://localhost:3000](http://localhost:3000).
+12. The login details are 'local' (username) and 'development' (password).
 
 # .env Details
 
@@ -71,3 +74,13 @@ This is a summary of the options supported in our .env files:
 * `MAPI_FHLBSF_ACCOUNT`: FHLBSF account for getting Calypso data.
 * `SOAP_SECRET_KEY`: FHLBSF password for Market Data Service.
 * `MAPI_MDS_ENDPOINT`: FHLBSF endpoint for Market Data Service.
+* `LDAP_HOST`: Hostname of the LDAP server.
+* `LDAP_PORT`: Port of the LDAP server.
+* `LDAP_ADMIN_USERNAME`: Username of the LDAP service account.
+* `LDAP_ADMIN_PASSWORD`: Password for the LDAP service account.
+
+## Running the Tests
+
+To run the unit tests and security analysis, use `rake ci:build`. If you want to run just the Rails unit test suite, use `rake spec`. To run the MAPI unit test suite, use `rake spec:api`. For integration tests (cucumber), run `cucumber`. The cucumber tests are not run as part of `rake ci:build`.
+
+All commits should pass `rake ci:build && cucumber` before being pushed.

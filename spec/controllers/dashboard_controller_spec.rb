@@ -1,7 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe DashboardController, :type => :controller do
+  login_user
+
   describe "GET index", :vcr do
+    it_behaves_like 'a user required action', :get, :index
     it "should render the index view" do
       get :index
       expect(response.body).to render_template("index")
@@ -103,6 +106,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:json_response) { {some: "json"}.to_json }
     let(:RatesService) {class_double(RatesService)}
     let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
+    it_behaves_like 'a user required action', :get, :quick_advance_rates
     it "should call the RatesService object with quick_advance_rates and return the quick_advance_table_rows partial" do
       expect(RatesService).to receive(:new).and_return(rate_service_instance)
       expect(rate_service_instance).to receive(:quick_advance_rates).and_return(json_response)
@@ -118,6 +122,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:advance_term) {'some term'}
     let(:advance_type) {'some type'}
     let(:advance_rate) {'0.17'}
+    it_behaves_like 'a user required action', :post, :quick_advance_preview
     it "should render the quick_advance_preview partial" do
       post :quick_advance_preview, rate_data: {advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate}.to_json
       expect(response.body).to render_template(partial: 'dashboard/_quick_advance_preview')
@@ -138,6 +143,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:advance_type) {'some type'}
     let(:advance_rate) {'0.17'}
     let(:json_response) {{json: "response"}.to_json}
+    it_behaves_like 'a user required action', :post, :quick_advance_confirmation
     it "should call the RatesService object's `quick_advance_confirmation` method with the POSTed advance_type, advance_term and rate and return a json response" do
       stub_const("MEMBER_ID", 750)
       expect(RatesService).to receive(:new).and_return(rate_service_instance)
@@ -152,6 +158,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:etransact_service_instance) {double('EtransactAdvancesService')}
     let(:response_hash) { {} }
     let(:RatesService) {class_double(RatesService)}
+    it_behaves_like 'a user required action', :get, :current_overnight_vrc
     it 'calls `current_overnight_vrc` on the rate service and `etransact_active?` on the etransact service' do
       allow(RatesService).to receive(:new).and_return(rate_service_instance)
       allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)

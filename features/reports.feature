@@ -3,6 +3,9 @@ Feature: Visiting the Reports Summary Page
   I want to use visit the reports summary page for the FHLB Member Portal
   In order to view reports
 
+Background:
+  Given I am logged in
+
 @smoke
 Scenario: Visit reports summary page from header link
   Given I visit the dashboard

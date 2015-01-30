@@ -84,12 +84,23 @@
   font-weight: $semibold-weight;
 }
 
+@mixin typography-table-link {
+  font-size: 0.8rem;
+  font-weight: $normal-weight;
+  text-transform: uppercase;
+}
+
 @mixin typography-field-placeholder {
   font-size: 1rem;
   font-weight: $normal-weight;
 }
 
 @mixin typography-field-value {
+  font-size: 1rem;
+  font-weight: $normal-weight;
+}
+
+@mixin typography-field-label {
   font-size: 1rem;
   font-weight: $normal-weight;
 }
@@ -117,6 +128,11 @@
 @mixin typography-report-summary {
   font-size: 2.4rem;
   font-weight: $light-weight;
+}
+
+@mixin typography-error-message {
+  font-size: 1rem;
+  font-weight: $normal-weight;
 }
 
 %typography-page-title {
@@ -171,6 +187,10 @@
   @include typography-table-total;
 }
 
+%typography-table-link {
+  @include typography-table-link;
+}
+
 %typography-subtitle {
   @include typography-subtitle;
 }
@@ -181,6 +201,10 @@
 
 %typography-field-value {
   @include typography-field-value;
+}
+
+%typography-field-label {
+  @include typography-field-label;
 }
 
 %typography-graph-label {
@@ -213,4 +237,8 @@
 
 %typography-table-cell-heading {
   @include typography-table-cell-heading;
+}
+
+%typography-error-message {
+  @include typography-error-message;
 }

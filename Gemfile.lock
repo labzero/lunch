@@ -35,6 +35,7 @@ GEM
     arel (5.0.1.20140414130214)
     autoprefixer-rails (3.1.2.20141016)
       execjs
+    bcrypt (3.1.9)
     bootstrap-daterangepicker-rails (0.1.1)
       railties (~> 4.0)
     brakeman (2.6.3)
@@ -93,7 +94,18 @@ GEM
       gherkin (~> 2.12)
       multi_json (>= 1.7.5, < 2.0)
       multi_test (>= 0.1.1)
+    database_cleaner (1.4.0)
     debugger-linecache (1.2.0)
+    devise (3.4.1)
+      bcrypt (~> 3.0)
+      orm_adapter (~> 0.1)
+      railties (>= 3.2.6, < 5)
+      responders
+      thread_safe (~> 0.1)
+      warden (~> 1.2.3)
+    devise_ldap_authenticatable (0.8.1)
+      devise (>= 3.0)
+      net-ldap (>= 0.3.1, < 0.6.0)
     diff-lcs (1.2.5)
     dimensions (1.3.0)
     docile (1.1.5)
@@ -104,6 +116,11 @@ GEM
       dotenv (= 0.11.1)
     erubis (2.7.0)
     execjs (2.2.1)
+    factory_girl (4.5.0)
+      activesupport (>= 3.0.0)
+    factory_girl_rails (4.5.0)
+      factory_girl (~> 4.5.0)
+      railties (>= 3.0.0)
     faker (1.4.3)
       i18n (~> 0.5)
     fastercsv (1.5.5)
@@ -158,6 +175,8 @@ GEM
       railties (>= 3.1)
     multi_json (1.10.1)
     multi_test (0.1.1)
+    net-ldap (0.5.1)
+    net-ping (1.7.6)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (2.9.1)
@@ -165,6 +184,7 @@ GEM
     nokogiri (1.6.3.1)
       mini_portile (= 0.6.0)
     nori (2.4.0)
+    orm_adapter (0.5.0)
     rack (1.5.2)
     rack-protection (1.5.3)
       rack
@@ -199,6 +219,8 @@ GEM
       json (~> 1.4)
     rerun (0.10.0)
       listen (~> 2.7, >= 2.7.3)
+    responders (1.1.2)
+      railties (>= 3.2, < 4.2)
     rest-client (1.7.2)
       mime-types (>= 1.16, < 3.0)
       netrc (~> 0.7)
@@ -307,6 +329,8 @@ GEM
     uuid (2.3.7)
       macaddr (~> 1.0)
     vcr (2.9.3)
+    warden (1.2.3)
+      rack (>= 1.0)
     wasabi (3.3.1)
       httpi (~> 2.0)
       nokogiri (>= 1.4.0)
@@ -331,7 +355,10 @@ DEPENDENCIES
   capistrano-rvm
   capybara
   cucumber
+  database_cleaner
+  devise_ldap_authenticatable
   dotenv-rails
+  factory_girl_rails
   faker
   foreman
   haml-rails
@@ -341,6 +368,7 @@ DEPENDENCIES
   jquery-placeholder-rails
   jquery-rails
   momentjs-rails
+  net-ping
   nokogiri
   rack-token_auth
   rails (= 4.1.6)
