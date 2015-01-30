@@ -49,6 +49,7 @@ gem 'swagger-blocks', require: false
 gem 'savon', require: false
 gem 'nokogiri', require: false
 gem 'rack-token_auth', require: false
+gem 'logging', require: false
 
 group :development, :test do
   gem 'rspec-rails'
