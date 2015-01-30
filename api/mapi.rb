@@ -24,12 +24,24 @@ require_relative 'models/member_sta_activities'
 
 module MAPI
 
+  class CustomLogger
+    def initialize(app, logger)
+      @app, @logger = app, logger
+    end
+
+    def call(env)
+      env['rack.logger'] = @logger
+      @app.call(env)
+    end
+  end
+
   class ServiceApp < Sinatra::Base
+    require 'logging'
     configure do
-      enable :logging
-      file = File.new("#{settings.root}/../log/mapi-#{settings.environment}.log", 'a+')
-      file.sync = true
-      use Rack::CommonLogger, file
+      $logger = ::Logging.logger(STDOUT)
+      $logger.add_appenders(Logging.appenders.file("#{settings.root}/../log/mapi-#{settings.environment}.log"))
+      use MAPI::CustomLogger, $logger
+      use Sinatra::CommonLogger, $logger
     end
 
     error do
@@ -65,6 +77,10 @@ module MAPI
 
     get '/' do
       settings.environment.to_s
+    end
+
+    get '/raise_error' do
+      raise 'Some Error'
     end
 
     register MAPI::Services::MockRates
