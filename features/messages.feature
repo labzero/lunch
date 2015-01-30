@@ -3,6 +3,9 @@ Feature: Visiting the Messages Page
   I want to use visit the messages page for the FHLB Member Portal
   In order to view corporate communications
 
+  Background:
+    Given I am logged in
+
 @smoke
 Scenario: Visit the messages page from the header
   Given I visit the dashboard
