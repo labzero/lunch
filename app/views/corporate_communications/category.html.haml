@@ -1,17 +1,16 @@
 .row.sidebar-row.corporate-communications
   %aside.sidebar.sidebar-filter.column-2x10-left.column-2x10-extended
-    = form_tag(messages_url, method: 'GET') do
-      = render 'shared/sidebar', sidebar_label: t('global.categories'), sidebar_options: @sidebar_options, sidebar_name: 'messages_filter', default_value: @filter, sidebar_type: 'filter'
+    = render 'shared/sidebar', sidebar_label: t('global.categories'), sidebar_options: @sidebar_options, sidebar_name: 'messages_filter', default_value: @selected_category_label, sidebar_type: 'nav'
   .sidebar-row-main-content
     .column-2x10-right.column-2x10-extended
       %section
         %h1= t('global.messages')
         %h2= t('messages.receive_via_email')
         %p= t('messages.edit_email_settings_html', url: settings_path)
-        %table.table-striped
+        %table.table-striped.corporate-communications-index
           - @messages.each do |message|
             %tr{data: {category: message[:category]}}
               %td
-                %a{href: ''}
+                %a{href: corporate_communication_path(@filter, message)}
                   %h3= message[:title]
                   %small= message[:date_sent].strftime('%d %b %Y')

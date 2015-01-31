@@ -26,7 +26,10 @@ Rails.application.routes.draw do
 
   get '/settings' => 'settings#index'
 
-  get '/messages' => 'messages#index'
+  scope 'corporate_communications/:category' do
+    resources :corporate_communications, only: :show, as: :corporate_communication
+    get '/' => 'corporate_communications#category', as: :corporate_communications
+  end
 
   post '/settings/save' => 'settings#save'
 

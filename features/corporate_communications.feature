@@ -22,3 +22,8 @@ Scenario: Filtering by message type
   When I select the "Credit & Collateral" filter in the sidebar
   Then I should see the active state for the "Credit & Collateral" sidebar item
     And I should only see "Credit & Collateral" messages
+
+Scenario: View the details of a message
+  Given I am on the Messages Page
+  When I select the first message on the messages page
+  Then I should be see the message detail view

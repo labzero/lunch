@@ -51,6 +51,8 @@ $icon-close: "\e608";
 $icon-alert: "\e609";
 $icon-arrow-left: "\e610";
 $icon-caret: "\e60a";
+$icon-print: "\e60b";
+$icon-forward: "\e60c";
 
 .icon-gear-before:before, .icon-gear-after:after {
   @extend %icon-font;
@@ -117,4 +119,14 @@ $icon-caret: "\e60a";
 .icon-caret-before:before, .icon-caret-after:after {
   @extend %icon-font;
   content: "#{$icon-caret}";
+}
+
+.icon-forward-before:before, .icon-forward-after:after {
+  @extend %icon-font;
+  content: "#{$icon-forward}";
+}
+
+.icon-print-before:before, .icon-print-after:after {
+  @extend %icon-font;
+  content: "#{$icon-print}";
 }

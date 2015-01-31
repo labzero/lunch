@@ -1,0 +1,79 @@
+.corporate-communications {
+  h1 {
+    margin-bottom: 20px;
+  }
+}
+
+.corporate-communications-index {
+  @extend %table-striped;
+  margin-top: 60px;
+  border-top: 1px solid $light-blue;
+  border-bottom: 1px solid $light-blue;
+  a {
+    display: block;
+    padding: 10px 20px 5px;
+  }
+  h3 {
+    @extend %typography-table-cell-heading;
+    color: $darkest-gray;
+    margin: 0;
+  }
+  small {
+    @extend %typography-table-annotation;
+    color: $medium-gray;
+    text-transform: uppercase;
+    margin: 0;
+  }
+}
+
+.corporate-communication-detail-reset {
+  @import "base/normalize";
+  margin-top: 25px;
+}
+
+.corporate-communication-detail-wrapper {
+  border: 1px solid $light-blue;
+  border-radius: $default-border-radius;
+}
+
+.corporate-communication-detail-intro {
+  padding: 20px 25px;
+  border-bottom: 1px solid $light-blue;
+  h2, p {
+    margin: 0;
+  }
+}
+
+.corporate-communication-detail-navigation {
+  float: left;
+  .icon-arrow-left-before:before {
+    margin-right: 12px;
+  }
+  .icon-arrow-right-after:after {
+    margin-left: 12px;
+  }
+}
+
+.corporate-communication-detail-share {
+  float: right;
+  .icon-forward-before:before, .icon-print-before:before {
+    margin-right: 10px;
+  }
+}
+
+.corporate-communication-detail-actions {
+  @extend %clearfix;
+  margin-bottom: 25px;
+  button {
+    @extend %typography-subtitle;
+    width: 110px;
+    box-sizing: border-box;
+    &:last-child {
+      margin-left: 8px;
+    }
+    &:before, &:after {
+      font-size: 1.2rem;
+      vertical-align: text-top;
+    }
+  }
+}
