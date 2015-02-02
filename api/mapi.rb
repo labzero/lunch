@@ -22,26 +22,35 @@ require_relative 'models/member_borrowing_capacity_details'
 require_relative 'models/member_sta_activities'
 
 
+
 module MAPI
 
   class CustomLogger
-    def initialize(app, logger)
-      @app, @logger = app, logger
+    def initialize(app, file)
+      @app, @file = app, file
     end
 
     def call(env)
-      env['rack.logger'] = @logger
-      @app.call(env)
+      logger = ::Logging.logger(@file)
+      logger.add_appenders(Logging.appenders.rack('request-steam', env['rack.errors']))
+      env['rack.logger'] = logger
+      @app.call env
+    end
+  end
+
+  class CommonLogger < Sinatra::CommonLogger
+    def call(env)
+      @logger = env['rack.logger']
+      super
     end
   end
 
   class ServiceApp < Sinatra::Base
     require 'logging'
+    require_relative '../lib/logging/appenders/rack'
     configure do
-      $logger = ::Logging.logger(STDOUT)
-      $logger.add_appenders(Logging.appenders.file("#{settings.root}/../log/mapi-#{settings.environment}.log"))
-      use MAPI::CustomLogger, $logger
-      use Sinatra::CommonLogger, $logger
+      use MAPI::CustomLogger, "#{settings.root}/../log/mapi-#{settings.environment}.log"
+      use MAPI::CommonLogger
     end
 
     error do
