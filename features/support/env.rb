@@ -116,6 +116,7 @@ AfterConfiguration do
   end
   raise 'Server failed to serve heartbeat' if result != '200'
   sleep 10 #sleep 10 more seconds after we get our first 200 response to let the app come up more
+  require Rails.root.join('db', 'seeds.rb') unless custom_host
 end
 
 AfterStep('@pause') do
