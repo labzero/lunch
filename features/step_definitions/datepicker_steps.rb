@@ -49,7 +49,7 @@ When(/^I select the (\d+)(?:st|rd|th) of this month in the (left|right) calendar
     calendar.find(advance_class).click
     # we should add a 5 second check here to avoid infinte loops
   end
-  calendar.find("td.available:not(.off)", text: day).click
+  calendar.find("td.available:not(.off)", text: /^#{day}$/).click
 end
 
 When(/^I select all of last year including today$/) do
@@ -61,7 +61,7 @@ When(/^I select all of last year including today$/) do
   while calendar.find('.month').text != target_month
     calendar.find('.fa-arrow-left').click
   end
-  calendar.find("td.available:not(.off)", text: day).click
+  calendar.find("td.available:not(.off)", text: /^#{day}$/).click
 end
 
 

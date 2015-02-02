@@ -41,6 +41,7 @@ RSpec.describe ReportsController, :type => :controller do
       it 'should use the last full month if no params are passed' do
         start_of_month = (today - 1.month).beginning_of_month
         end_of_month = start_of_month.end_of_month
+        expect(Date).to receive(:today).at_least(:once).and_return(today)
         expect(member_balance_service_instance).to receive(:capital_stock_activity).with(start_of_month, end_of_month).and_return(response_hash)
         get :capital_stock_activity
       end
