@@ -48,9 +48,14 @@ module MAPI
   class ServiceApp < Sinatra::Base
     require 'logging'
     require_relative '../lib/logging/appenders/rack'
+    require 'sinatra/activerecord'
+    register Sinatra::ActiveRecordExtension
     configure do
-      use MAPI::CustomLogger, "#{settings.root}/../log/mapi-#{settings.environment}.log"
+      set :show_exceptions, ENV['MAPI_SHOW_EXCEPTIONS'] == 'true'
+      file = "#{settings.root}/../log/mapi-#{settings.environment}.log"
+      use MAPI::CustomLogger, file
       use MAPI::CommonLogger
+      ::ActiveRecord::Base.logger = ::Logging.logger(file)
     end
 
     error do
@@ -61,10 +66,6 @@ module MAPI
       logger.error error
       'Unexpected Server Error'
     end
-
-    set :show_exceptions, ENV['MAPI_SHOW_EXCEPTIONS'] == 'true'
-    require 'sinatra/activerecord'
-    register Sinatra::ActiveRecordExtension
 
     def self.authentication_block
       Proc.new do |token, options, env|
