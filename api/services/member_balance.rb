@@ -103,7 +103,7 @@ module MAPI
                 key :code, 400
                 key :message, 'Invalid input'
               end
-          end
+            end
           end
           api do
             key :path, "/{id}/capital_stock_activities/{from_date}/{to_date}"
@@ -210,6 +210,38 @@ module MAPI
               response_message do
                 key :code, 400
                 key :message, 'Invalid input'
+              end
+            end
+          end
+          api do
+            key :path, "/{id}/advances_details/{as_of_date}"
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve Advances Details daily image of the specific date for a member'
+              key :notes, 'Returns Advances Details daily image for the selected date.'
+              key :type, :AdvancesDetails
+              key :nickname, :getAdvancesDetailsForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :as_of_date
+                key :required, true
+                key :type, :string
+                key :description, 'As of date yyyy-mm-dd for the Advances Details Report.'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 400
+                key :message, 'Invalid date'
               end
             end
           end
@@ -608,7 +640,7 @@ module MAPI
           AND DESCR <> 'Interest Rate / Daily Balance'
           AND trans_date >= to_date(#{ActiveRecord::Base.connection.quote(from_date)}, 'yyyy-mm-dd')
           AND trans_date <= to_date(#{ActiveRecord::Base.connection.quote(to_date)}, 'yyyy-mm-dd')
-          UNION
+          UNION ALL
           SELECT TRANS_DATE, REFNUMBER, DESCR, DEBIT, CREDIT, RATE, BALANCE
           FROM PORTFOLIOS.STA_WEB_DETAIL
           WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
@@ -716,6 +748,206 @@ module MAPI
             end_balance: close_balance,
             end_date: close_balance_date,
             activities: activities_formatted
+          }.to_json
+        end
+
+        # Advances Details
+        relative_get "/:id/advances_details/:as_of_date" do
+          member_id = params[:id]
+          as_of_date = params[:as_of_date]
+
+          #1.check that input for from and to dates are valid date and expected format
+          check_date_format = as_of_date.match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+          if !check_date_format
+            halt 400, "Invalid Date format of yyyy-mm-dd"
+          else
+            if as_of_date.to_date >  Date.today()
+              halt 400, "Invalid future date"
+            end
+          end
+
+
+          advances_detail_connection_string = <<-SQL
+            SELECT ADVDET_ADVANCE_NUMBER,
+              ADVDET_CURRENT_PAR,
+              ADV_DAY_COUNT, ADV_PAYMENT_FREQ,
+              ADX_INTEREST_RECEIVABLE,
+              ADX_NEXT_INT_PAYMENT_DATE,
+              ADVDET_INTEREST_RATE,
+              ADVDET_ISSUE_DATE,
+              ADVDET_MATURITY_DATE,
+              ADVDET_MNEMONIC,
+              ADVDET_DATEUPDATE, ADVDET_SUBSIDY_PROGRAM,
+              TRADE_DATE,
+              FUTURE_INTEREST,
+              ADV_INDEX,
+              TOTAL_PREPAY_FEES,
+              SA_TOTAL_PREPAY_FEES,
+              SA_INDICATION_VALUATION_DATE
+            FROM WEB_INET.WEB_ADVANCES_DETAIL_RPT
+            WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+          SQL
+
+          advances_historical_detail_connection_string = <<-SQL
+            SELECT ADVDET_ADVANCE_NUMBER,
+              ADVDET_CURRENT_PAR,
+              ADV_DAY_COUNT, ADV_PAYMENT_FREQ,
+              ADX_INTEREST_RECEIVABLE,
+              ADX_NEXT_INT_PAYMENT_DATE,
+              ADVDET_INTEREST_RATE,
+              ADVDET_ISSUE_DATE,
+              ADVDET_MATURITY_DATE,
+              ADVDET_MNEMONIC,
+              ADVDET_DATEUPDATE, ADVDET_SUBSIDY_PROGRAM,
+              TRADE_DATE,
+              FUTURE_INTEREST,
+              ADV_INDEX,
+              TOTAL_PREPAY_FEES,
+              SA_TOTAL_PREPAY_FEES,
+              SA_INDICATION_VALUATION_DATE
+             FROM WEB_INET.WEB_ADVANCES_HISTORICAL_RPT
+             WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+             AND (AdvDet_DateUpdate  = to_date(#{ ActiveRecord::Base.connection.quote(as_of_date)}, 'yyyy-mm-dd'))
+          SQL
+
+          advances_details_records= []
+          latest_row_found = false
+
+          now = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE)
+          today_date = now.to_date
+          if settings.environment == :production
+            # if date is yesterday or later, get data from the lastest view
+            if as_of_date.to_date >  today_date - 2
+              cp_advances_cursor = ActiveRecord::Base.connection.execute(advances_detail_connection_string)
+              while row = cp_advances_cursor.fetch_hash()
+                latest_row_found = true
+                advances_details_records.push(row)
+              end
+            end
+            # if no data found in latest view and date is before today, go to the historical view. Use today just in case retrieval is after today EOD batch job ran
+            if as_of_date.to_date <  today_date  && !latest_row_found
+              cp_advances_historical_cursor = ActiveRecord::Base.connection.execute(advances_historical_detail_connection_string)
+              while row = cp_advances_historical_cursor.fetch_hash()
+                advances_details_records.push(row)
+              end
+            end
+          else
+            latest_row_found = false
+            # if date is yesterday or later, get data from the lastest view
+            if as_of_date.to_date >  today_date  - 2
+              advances_details_records = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_latest.json')))
+              latest_row_found = true
+            end
+            if as_of_date.to_date < today_date  && !latest_row_found
+              advances_details_records = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_historical.json')))
+            end
+          end
+
+          # format the result sets with some business logic
+          advances_details_formatted = []
+          structured_product_indication_date = nil
+          advances_details_records.each do |row|
+
+            payment_frequency_description = row['ADV_PAYMENT_FREQ'].to_s
+            case payment_frequency_description
+              when 'D'
+                payment_frequency_description = 'Daily'
+              when 'M'
+                payment_frequency_description = 'Monthly'
+              when 'Q'
+                payment_frequency_description = 'Quarterly'
+              when 'S'
+                payment_frequency_description = 'Semiannually'
+              when 'A'
+                payment_frequency_description = 'Annually'
+              when 'IAM'
+                payment_frequency_description = 'At Maturity'
+              when '4W'
+                payment_frequency_description = 'Every 4 weeks'
+              when '9W'
+                payment_frequency_description = 'Every 9 weeks'
+              when '13W'
+                payment_frequency_description = 'Every 13 weeks'
+              when '26W'
+                payment_frequency_description = 'Every 26 weeks';
+              when 'ME'
+                payment_frequency_description = 'Monthend'
+            end
+
+            day_count_basis_description = row['ADV_DAY_COUNT'].to_s
+            case day_count_basis_description
+              when 'BOND'
+                day_count_basis_description = '30/360'
+              when 'A360'
+                day_count_basis_description = 'Actual/360'
+              when 'A365'
+                day_count_basis_description = 'Actual/365'
+              when 'ACT365'
+                day_count_basis_description = 'Actual/Actual'
+              when '30/360'
+                day_count_basis_description = '30/360'
+              when 'ACT/360'
+                day_count_basis_description = 'Actual/360'
+              when 'ACT/365'
+                day_count_basis_description = 'Actual/365'
+              when 'ACT/ACT'
+                day_count_basis_description = 'Actual/Actual'
+            end
+
+            # If data is latest and not historical, get logic to set prepayment indication fees... if TOTAL_PREPAY_FEES is nil, start the logic else, just use the value
+            if  latest_row_found
+              prepayment_indication_fees = row['TOTAL_PREPAY_FEES']
+              notes_indicator = nil
+              sa_indication_date = nil
+              if prepayment_indication_fees == nil
+                if (row['SA_TOTAL_PREPAY_FEES'] == nil || row['SA_INDICATION_VALUATION_DATE'] == nil)
+                  sa_indication_date = nil
+                  if row['ADVDET_MNEMONIC'].downcase.include? 'vrc'
+                    notes_indicator = '2'
+                  else
+                    notes_indicator = '3'
+                  end
+                else
+                  prepayment_indication_fees = row['SA_TOTAL_PREPAY_FEES']
+                  sa_indication_date = row['SA_INDICATION_VALUATION_DATE'].to_date
+                  structured_product_indication_date = sa_indication_date
+                end
+              end
+            else
+              notes_indicator = nil
+              sa_indication_date = nil
+            end
+            maturity_date = row['ADVDET_MATURITY_DATE'].to_date
+            if (maturity_date == ('2038-12-31').to_date)  && (row['ADVDET_MNEMONIC'].downcase.include? 'open')
+              maturity_date = nil
+              open_vrc = true
+            else
+              open_vrc = false
+            end
+            reformat_hash = {'trade_date' => row['TRADE_DATE'].to_date,
+                             'funding_date' => row['ADVDET_ISSUE_DATE'].to_date,
+                             'maturity_date' => maturity_date,
+                             'current_par' => (row['ADVDET_CURRENT_PAR'] || 0),
+                             'interest_rate' => (row['ADVDET_INTEREST_RATE'] || 0).to_f.round(5),
+                             'next_interest_pay_date' => row['ADX_NEXT_INT_PAYMENT_DATE'].to_date,
+                             'accrued_interest' => row['ADX_INTEREST_RECEIVABLE'],
+                             'estimated_next_interest_payment' => row['FUTURE_INTEREST'],
+                             'interest_payment_frequency' => payment_frequency_description,
+                             'day_count_basis' => day_count_basis_description,
+                             'advance_type' => row['ADVDET_MNEMONIC'],
+                             'advance_number' => row['ADVDET_ADVANCE_NUMBER'],
+                             'discount_program' => (row['ADVDET_SUBSIDY_PROGRAM'] || '--'),
+                             'prepayment_fee_indication' => prepayment_indication_fees,
+                             'notes' => notes_indicator,
+                             'structure_product_prepay_valuation_date' => sa_indication_date,
+                             'open_vrc_indicator' => open_vrc
+            }
+            advances_details_formatted.push(reformat_hash)
+          end
+          {
+            as_of_date: as_of_date.to_date,
+            structured_product_indication_date: structured_product_indication_date,
+            advances_details: advances_details_formatted
           }.to_json
         end
       end
