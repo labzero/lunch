@@ -281,7 +281,7 @@ module MAPI
           if @@cal_connection
             @@cal_connection.operations
             message = {'v1:endDate' => Date.today + 1200.days, 'v1:startDate' => Date.today}
-            response = @@client.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
+            response = @@cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
             if response.success?
               response.doc.remove_namespaces!
               @@holidays = response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')[0].css('days day date').map do |holiday|
