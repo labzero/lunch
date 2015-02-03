@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'date'
 
 describe MAPI::ServiceApp do
   before do
@@ -70,6 +71,24 @@ describe MAPI::ServiceApp do
     end
     it "should return a timestamp" do
       expect(rate_summary[:timestamp]).to be_kind_of(String)
+    end
+  end
+
+  describe "is_weekend_or_holiday" do
+    it "should return true if date is a weekend" do
+      expect(MAPI::Services::Rates.is_weekend_or_holiday(Date.parse('2015-02-01'))).to be true
+    end
+    it "should return false if date is not a weekend" do
+      expect(MAPI::Services::Rates.is_weekend_or_holiday(Date.parse('2015-02-03'))).to be false
+    end
+  end
+
+  describe "get_maturity_date" do
+    it "should return the same date if is not a weekend" do
+      expect(MAPI::Services::Rates.get_maturity_date(Date.parse('2015-02-03'), 'D')).to eq(Date.parse('2015-02-03'))
+    end
+    it "should return the next non weekend date if is weekend" do
+      expect(MAPI::Services::Rates.get_maturity_date(Date.parse('2015-02-01'), 'Y')).to eq(Date.parse('2015-02-02'))
     end
   end
 end

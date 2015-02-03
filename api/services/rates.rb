@@ -344,7 +344,6 @@ module MAPI
             LOAN_TYPES.each do |type|
               LOAN_TERMS.each do |term|
                 hash[type][term][:maturity_date] = MAPI::Services::Rates.get_maturity_date(DateTime.parse((Time.mktime(now.year, now.month, now.day, now.hour, now.min) + hash[type][term][:days_to_maturity].to_i.days).to_s), TERM_MAPPING[term][:frequency_unit])
-                #hash[type][term][:maturity_date] = MAPI::Services::Rates.get_maturity_date(DateTime.parse(@@holidays[0]), TERM_MAPPING[term][:frequency_unit])
               end
             end
             hash[:timestamp] = now
