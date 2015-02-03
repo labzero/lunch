@@ -22,26 +22,41 @@ require_relative 'models/member_borrowing_capacity_details'
 require_relative 'models/member_sta_activities'
 
 
+
 module MAPI
 
-  class CustomLogger
+  class Logger
     def initialize(app, logger)
       @app, @logger = app, logger
     end
 
     def call(env)
       env['rack.logger'] = @logger
-      @app.call(env)
+      @app.call env
+    end
+  end
+
+  class CommonLogger < Rack::CommonLogger
+    def call(env)
+      @logger = env['rack.logger']
+      super
     end
   end
 
   class ServiceApp < Sinatra::Base
     require 'logging'
+    require_relative '../lib/logging/appenders/rack'
+    require 'sinatra/activerecord'
+    register Sinatra::ActiveRecordExtension
     configure do
-      $logger = ::Logging.logger(STDOUT)
-      $logger.add_appenders(Logging.appenders.file("#{settings.root}/../log/mapi-#{settings.environment}.log"))
-      use MAPI::CustomLogger, $logger
-      use Sinatra::CommonLogger, $logger
+      set :show_exceptions, ENV['MAPI_SHOW_EXCEPTIONS'] == 'true'
+
+      disable :logging # all logging does is add middleware. We will add similar middleware here
+      logger = ::Logging.logger['MAPI']
+      logger.add_appenders(Logging.appenders.file("#{settings.root}/../log/mapi-#{settings.environment}.log"))
+      use MAPI::Logger, logger
+      use MAPI::CommonLogger
+      ::ActiveRecord::Base.logger = logger
     end
 
     error do
@@ -52,10 +67,6 @@ module MAPI
       logger.error error
       'Unexpected Server Error'
     end
-
-    set :show_exceptions, ENV['MAPI_SHOW_EXCEPTIONS'] == 'true'
-    require 'sinatra/activerecord'
-    register Sinatra::ActiveRecordExtension
 
     def self.authentication_block
       Proc.new do |token, options, env|
