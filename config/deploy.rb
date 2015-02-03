@@ -79,3 +79,17 @@ namespace :deploy do
   end
 
 end
+
+namespace :cluster do
+  namespace :logs do
+    desc 'Fetches the logfiles from the cluster in question'
+    task :fetch do
+      FileUtils.mkdir_p('downloads')
+      role_set = Set.new([:web, :api])
+      on roles(*role_set.to_a) do |host|
+        role = (host.roles & role_set).to_a.join('-')
+        download!(File.join(shared_path, 'log'), "downloads/#{role}-#{host.hostname}", recursive: true)
+      end
+    end
+  end
+end
