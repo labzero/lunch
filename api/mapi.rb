@@ -25,20 +25,18 @@ require_relative 'models/member_sta_activities'
 
 module MAPI
 
-  class CustomLogger
-    def initialize(app, file)
-      @app, @file = app, file
+  class Logger
+    def initialize(app, logger)
+      @app, @logger = app, logger
     end
 
     def call(env)
-      logger = ::Logging.logger(@file)
-      logger.add_appenders(Logging.appenders.rack('request-steam', env['rack.errors']))
-      env['rack.logger'] = logger
+      env['rack.logger'] = @logger
       @app.call env
     end
   end
 
-  class CommonLogger < Sinatra::CommonLogger
+  class CommonLogger < Rack::CommonLogger
     def call(env)
       @logger = env['rack.logger']
       super
@@ -52,10 +50,13 @@ module MAPI
     register Sinatra::ActiveRecordExtension
     configure do
       set :show_exceptions, ENV['MAPI_SHOW_EXCEPTIONS'] == 'true'
-      file = "#{settings.root}/../log/mapi-#{settings.environment}.log"
-      use MAPI::CustomLogger, file
+
+      disable :logging # all logging does is add middleware. We will add similar middleware here
+      logger = ::Logging.logger['MAPI']
+      logger.add_appenders(Logging.appenders.file("#{settings.root}/../log/mapi-#{settings.environment}.log"))
+      use MAPI::Logger, logger
       use MAPI::CommonLogger
-      ::ActiveRecord::Base.logger = ::Logging.logger(file)
+      ::ActiveRecord::Base.logger = logger
     end
 
     error do
