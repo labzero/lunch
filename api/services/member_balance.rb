@@ -3,6 +3,31 @@ module MAPI
     module MemberBalance
       include MAPI::Services::Base
 
+      ADVANCES_PAYMENT_FREQUENCY_MAPPING = {
+          'D'=> 'Daily',
+          'M'=> 'Monthly',
+          'Q'=> 'Quarterly',
+          'S'=> 'Semiannually',
+          'A'=> 'Annually',
+          'IAM'=> 'At Maturity',
+          '4W'=> 'Every 4 weeks',
+          '9W'=> 'Every 9 weeks',
+          '13W'=> 'Every 13 weeks',
+          '26W'=> 'Every 26 weeks',
+          'ME'=> 'Monthend'
+      }
+
+      ADVANCES_DAY_COUNT_BASIS_MAPPING = {
+          'BOND'=> '30/360',
+          'A360'=> 'Actual/360',
+          'A365'=> 'Actual/365',
+          'ACT365'=> 'Actual/Actual',
+          '30/360'=> '30/360',
+          'ACT/360'=> 'Actual/360',
+          'ACT/365'=> 'Actual/365',
+          'ACT/ACT'=> 'Actual/Actual'
+      }
+
       def self.registered(app)
         service_root '/member', app
         swagger_api_root :member do
@@ -849,49 +874,14 @@ module MAPI
           advances_details_records.each do |row|
 
             payment_frequency_description = row['ADV_PAYMENT_FREQ'].to_s
-            case payment_frequency_description
-              when 'D'
-                payment_frequency_description = 'Daily'
-              when 'M'
-                payment_frequency_description = 'Monthly'
-              when 'Q'
-                payment_frequency_description = 'Quarterly'
-              when 'S'
-                payment_frequency_description = 'Semiannually'
-              when 'A'
-                payment_frequency_description = 'Annually'
-              when 'IAM'
-                payment_frequency_description = 'At Maturity'
-              when '4W'
-                payment_frequency_description = 'Every 4 weeks'
-              when '9W'
-                payment_frequency_description = 'Every 9 weeks'
-              when '13W'
-                payment_frequency_description = 'Every 13 weeks'
-              when '26W'
-                payment_frequency_description = 'Every 26 weeks';
-              when 'ME'
-                payment_frequency_description = 'Monthend'
+            payment_frequency_description = ADVANCES_PAYMENT_FREQUENCY_MAPPING[payment_frequency_description]
+            if payment_frequency_description == nil
+              payment_frequency_description = row['ADV_PAYMENT_FREQ'].to_s
             end
-
             day_count_basis_description = row['ADV_DAY_COUNT'].to_s
-            case day_count_basis_description
-              when 'BOND'
-                day_count_basis_description = '30/360'
-              when 'A360'
-                day_count_basis_description = 'Actual/360'
-              when 'A365'
-                day_count_basis_description = 'Actual/365'
-              when 'ACT365'
-                day_count_basis_description = 'Actual/Actual'
-              when '30/360'
-                day_count_basis_description = '30/360'
-              when 'ACT/360'
-                day_count_basis_description = 'Actual/360'
-              when 'ACT/365'
-                day_count_basis_description = 'Actual/365'
-              when 'ACT/ACT'
-                day_count_basis_description = 'Actual/Actual'
+            day_count_basis_description = ADVANCES_DAY_COUNT_BASIS_MAPPING[day_count_basis_description]
+            if day_count_basis_description == nil
+              day_count_basis_description = row['ADV_DAY_COUNT'].to_s
             end
 
             # If data is latest and not historical, get logic to set prepayment indication fees... if TOTAL_PREPAY_FEES is nil, start the logic else, just use the value
