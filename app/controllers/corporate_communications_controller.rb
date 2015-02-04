@@ -1,18 +1,6 @@
 class CorporateCommunicationsController < ApplicationController
 
-  def category
-    set_standard_corp_com_instance_variables(params[:category])
-    message_service = MessageService.new
-    @messages = message_service.corporate_communications(@filter)
-  end
-
-  def show
-    set_standard_corp_com_instance_variables(params[:category])
-    @message = CorporateCommunication.find(params[:id])
-  end
-
-  private
-  def set_standard_corp_com_instance_variables(category_param)
+  before_action do
     @sidebar_options = [
         [I18n.t('messages.categories.all'), corporate_communications_path('all')],
         [I18n.t('messages.categories.investor_relations'), corporate_communications_path('investor_relations')],
@@ -22,9 +10,22 @@ class CorporateCommunicationsController < ApplicationController
         [I18n.t('messages.categories.technical_updates'), corporate_communications_path('technical_updates')],
         [I18n.t('messages.categories.community'), corporate_communications_path('community')]
     ]
-    @filter = category_param
-    @filter = 'all' unless CorporateCommunication::VALID_CATEGORIES.include?(@filter)
+    @filter = params[:category]
+    raise 'invalid category' unless CorporateCommunication::VALID_CATEGORIES.include?(@filter) || @filter == 'all'
     @selected_category_label = t("messages.categories.#{@filter}")
+  end
+
+  def category
+    message_service = MessageService.new
+    @messages = message_service.corporate_communications(@filter)
+  end
+
+  def show
+    if @filter == 'all'
+      @message = CorporateCommunication.find(params[:id])
+    else
+      @message = CorporateCommunication.find_by!(id: params[:id], category: @filter)
+    end
   end
 
 end

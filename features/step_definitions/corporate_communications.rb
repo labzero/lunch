@@ -24,28 +24,6 @@ Then(/^I should see the active state for the "(.*?)" sidebar item$/) do |text|
   page.assert_selector('.sidebar-filter a.active', text: text)
 end
 
-Then(/^I should only see "(.*?)" messages$/) do |text|
-  category = case text
-    when I18n.t('messages.categories.investor_relations')
-      'investor_relations'
-    when I18n.t('messages.categories.credit')
-      'credit'
-    when I18n.t('messages.categories.misc')
-      'misc'
-     when I18n.t('messages.categories.products')
-       'products'
-     when I18n.t('messages.categories.community')
-       'community'
-     when I18n.t('messages.categories.technical_updates')
-       'technical_updates'
-     else
-       raise 'unknown category for corporate communication selection'
-  end
-  page.all('table tr').each do |row|
-    expect(row['data-category']).to eq(category)
-  end
-end
-
 When(/^I select the first message on the messages page$/) do
   page.find('table.corporate-communications-index tr:first-child').click
 end

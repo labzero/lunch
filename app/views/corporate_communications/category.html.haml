@@ -9,7 +9,7 @@
         %p= t('messages.edit_email_settings_html', url: settings_path)
         %table.table-striped.corporate-communications-index
           - @messages.each do |message|
-            %tr{data: {category: message[:category]}}
+            %tr
               %td
                 %a{href: corporate_communication_path(@filter, message)}
                   %h3= message[:title]

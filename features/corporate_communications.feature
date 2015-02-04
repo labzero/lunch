@@ -18,10 +18,12 @@ Scenario: Filtering by message type
   Given I am on the Messages Page
   When I select the "Investor Relations & Disclosure" filter in the sidebar
   Then I should see the active state for the "Investor Relations & Disclosure" sidebar item
-    And I should only see "Investor Relations & Disclosure" messages
+  When I select the first message on the messages page
+  Then I should see the active state for the "Investor Relations & Disclosure" sidebar item
   When I select the "Credit & Collateral" filter in the sidebar
   Then I should see the active state for the "Credit & Collateral" sidebar item
-    And I should only see "Credit & Collateral" messages
+  When I select the first message on the messages page
+  Then I should see the active state for the "Credit & Collateral" sidebar item
 
 Scenario: View the details of a message
   Given I am on the Messages Page
