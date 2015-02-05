@@ -86,30 +86,38 @@ module MAPI
         maturity_date
       end
 
-      def self.registered(app)
-        if app.environment == :production
-          @@mds_connection = Savon.client(
-            wsdl: ENV['MAPI_MDS_ENDPOINT'],
-            env_namespace: :soapenv,
-            namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1', 'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'},
-            element_form_default: :qualified,
-            namespace_identifier: :v1,
-            pretty_print_xml: true
-          )
-
-          @@cal_connection =  Savon.client(
-            wsdl: ENV['MAPI_CALENDAR_ENDPOINT'],
-            env_namespace: :soapenv,
-            namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/businessCalendar/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1'},
-            element_form_default: :qualified,
-            namespace_identifier: :v1,
-            pretty_print_xml: true
+      def self.init_mds_connection(environment)
+        if environment == :production
+          @@mds_connection ||= Savon.client(
+              wsdl: ENV['MAPI_MDS_ENDPOINT'],
+              env_namespace: :soapenv,
+              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1', 'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'},
+              element_form_default: :qualified,
+              namespace_identifier: :v1,
+              pretty_print_xml: true
           )
         else
-          @@mds_connection = nil
-          @@cal_connection = nil
+          @@mds_connection ||= nil
         end
+      end
 
+      def self.init_cal_connection(environment)
+        if environment == :production
+          puts "environment: #{environment}"
+          @@cal_connection ||= Savon.client(
+              wsdl: ENV['MAPI_CALENDAR_ENDPOINT'],
+              env_namespace: :soapenv,
+              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/businessCalendar/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1'},
+              element_form_default: :qualified,
+              namespace_identifier: :v1,
+              pretty_print_xml: true
+          )
+        else
+          @@cal_connection ||= nil
+        end
+      end
+
+      def self.registered(app)
         service_root '/rates', app
         swagger_api_root :rates do
           api do
@@ -234,7 +242,7 @@ module MAPI
             halt 404, 'Term Not Found'
           end
 
-          data = if @@mds_connection
+          data = if MAPI::Services::Rates.init_mds_connection(settings.environment)
             @@mds_connection.operations
             lookup_term = TERM_MAPPING[params[:term]]
             message = {
@@ -278,9 +286,10 @@ module MAPI
         end
 
         relative_get "/summary" do
-          if @@cal_connection
+
+          if MAPI::Services::Rates.init_cal_connection(settings.environment)
             @@cal_connection.operations
-            message = {'v1:endDate' => Date.today + 1200.days, 'v1:startDate' => Date.today}
+            message = {'v1:endDate' => Date.today + 3.years, 'v1:startDate' => Date.today}
             response = @@cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
             if response.success?
               response.doc.remove_namespaces!
@@ -294,7 +303,8 @@ module MAPI
             @@holidays = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'calendar_holidays.json')))
           end
 
-          data = if @@mds_connection
+          data = if MAPI::Services::Rates.init_mds_connection(settings.environment)
+            puts "mds: #{@@mds_connection.inspect}"
             @@mds_connection.operations
             request = LOAN_TYPES.collect do |type|
             {

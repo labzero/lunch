@@ -72,6 +72,20 @@ describe MAPI::ServiceApp do
     it "should return a timestamp" do
       expect(rate_summary[:timestamp]).to be_kind_of(String)
     end
+
+    describe "in the production environment", :vcr do
+      before do
+        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+        #expect(Savon).to receive(:client).at_least(1).and_return('bar')
+      end
+      it "should return rates for default loan_types at default loan_terms" do
+        loan_terms.each do |loan_type|
+          loan_types.each do |loan_term|
+            expect(rate_summary[loan_term][loan_type][:rate]).to be_kind_of(String)
+          end
+        end
+      end
+    end
   end
 
   describe "is_weekend_or_holiday" do
@@ -89,6 +103,9 @@ describe MAPI::ServiceApp do
     end
     it "should return the next non weekend date if is weekend" do
       expect(MAPI::Services::Rates.get_maturity_date(Date.parse('2015-02-01'), 'Y')).to eq(Date.parse('2015-02-02'))
+    end
+    it "should return the previous non weekend date if is weekend and month/year term and hits next month" do
+      expect(MAPI::Services::Rates.get_maturity_date(Date.parse('2015-01-31'), 'Y')).to eq(Date.parse('2015-01-30'))
     end
   end
 end
