@@ -288,7 +288,8 @@ module MAPI
           if MAPI::Services::Rates.init_cal_connection(settings.environment)
             puts "environment: #{settings.environment}"
             puts "@@cal_connection: #{@@cal_connection.inspect}"
-            @@cal_connection.operations
+            #@@cal_connection.operations
+            puts "operations start"
             message = {'v1:endDate' => Date.today + 3.years, 'v1:startDate' => Date.today}
             response = @@cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
             if response.success?

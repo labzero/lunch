@@ -1,5 +1,7 @@
 require 'spec_helper'
 require 'date'
+require "savon/mock/spec_helper"
+
 
 describe MAPI::ServiceApp do
   before do
@@ -74,10 +76,15 @@ describe MAPI::ServiceApp do
     end
 
     describe "in the production environment", :vcr do
+      #include Savon::SpecHelper
       before do
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
-        #expect(Savon).to receive(:client).at_least(1).and_return('bar')
+        #Savon.mock!
       end
+      after do
+        #Savon.unmock!
+      end
+      #Savon.expects(:get_holiday).with(message: :message).returns('hi')
       it "should return rates for default loan_types at default loan_terms" do
         loan_terms.each do |loan_type|
           loan_types.each do |loan_term|
