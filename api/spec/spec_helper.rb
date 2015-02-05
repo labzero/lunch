@@ -25,7 +25,9 @@ VCR.configure do |c|
   c.hook_into :webmock
   c.allow_http_connections_when_no_cassette = true
   c.configure_rspec_metadata!
-  c.default_cassette_options = {record: :new_episodes}
+  c.ignore_localhost                        = true
+  c.default_cassette_options                = { allow_playback_repeats: true, match_requests_on: [:method, :uri, :headers] }
+  #c.default_cassette_options = {record: :new_episodes}
 end
 
 require 'simplecov'

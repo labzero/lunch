@@ -103,7 +103,6 @@ module MAPI
 
       def self.init_cal_connection(environment)
         if environment == :production
-          puts "environment: #{environment}"
           @@cal_connection ||= Savon.client(
               wsdl: ENV['MAPI_CALENDAR_ENDPOINT'],
               env_namespace: :soapenv,
@@ -286,8 +285,9 @@ module MAPI
         end
 
         relative_get "/summary" do
-
           if MAPI::Services::Rates.init_cal_connection(settings.environment)
+            puts "environment: #{settings.environment}"
+            puts "@@cal_connection: #{@@cal_connection.inspect}"
             @@cal_connection.operations
             message = {'v1:endDate' => Date.today + 3.years, 'v1:startDate' => Date.today}
             response = @@cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
@@ -299,12 +299,14 @@ module MAPI
             else
               halt 503, 'Calendar Service Unavailable'
             end
+            puts "@@holidays: #{@@holidays.inspect}"
           else
             @@holidays = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'calendar_holidays.json')))
           end
 
           data = if MAPI::Services::Rates.init_mds_connection(settings.environment)
-            puts "mds: #{@@mds_connection.inspect}"
+            puts "environment: #{settings.environment}"
+            puts "@@mds_connection: #{@@mds_connection.inspect}"
             @@mds_connection.operations
             request = LOAN_TYPES.collect do |type|
             {
