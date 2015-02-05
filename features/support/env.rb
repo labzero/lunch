@@ -40,9 +40,9 @@ if !custom_host
     server.close if server
   end
 
-  def check_service(port, thr, out, err, name=nil, host='localhost')
-    name ||= "localhost:#{port}"
-    pinger = Net::Ping::TCP.new 'localhost', port, 1
+  def check_service(port, thr, out, err, name=nil, host='127.0.0.1')
+    name ||= "#{host}:#{port}"
+    pinger = Net::Ping::TCP.new host, port, 1
     now = Time.now
     while !pinger.ping
       if Time.now - now > 10
