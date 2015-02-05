@@ -102,13 +102,39 @@ Then(/^I should see a "(.*?)" starting on "(.*?)" and ending on "(.*?)"$/) do |r
   step %{I should see "#{closing_balance}"}
   start_date_obj = start_date.to_date
   end_date_obj = end_date.to_date
-  page.all('.report-table tbody td:first-child').each do |element|
-    if element['class'].split(' ').include?('dataTables_empty')
-      next
-    end
-    date = Date.strptime(element.text, "%m/%d/%Y")
-    raise Capybara::ExpectationNotMet, "date #{date} out of range [#{start_date_obj}, #{end_date_obj}]" unless date >= start_date_obj && date <= end_date_obj
+  report_dates_in_range?(start_date_obj, end_date_obj)
+end
+
+Then(/^I should see a "(.*?)" with data for dates between the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of (this|last) month$/) do |report_type, start_day, end_day, month|
+  if month == 'this'
+    start_date_obj = Date.new(@today.year, @today.month, start_day.to_i)
+    end_date_obj = Date.new(@today.year, @today.month, end_day.to_i)
+  elsif month == 'last'
+    start_date_obj = (Date.new(@today.year, @today.month, start_day.to_i) - 1.month)
+    end_date_obj = (Date.new(@today.year, @today.month, end_day.to_i) - 1.month)
   end
+  step %{I should see a "Settlement Transaction Account Statement" with dates between "#{start_date_obj}" and "#{end_date_obj}"}
+end
+
+Then(/^I should see a "(.*?)" with dates between "(.*?)" and "(.*?)"$/) do |report_type, start_date, end_date|
+  # TODO add a null check for the case where no data is returned at all
+  start_date_obj = start_date.to_date
+  end_date_obj = end_date.to_date
+  case report_type
+    when "Settlement Transaction Account Statement"
+      opening_balance = I18n.t('reports.pages.settlement_transaction_account.opening_balance_heading', date: nil)
+      closing_balance = I18n.t('reports.pages.settlement_transaction_account.closing_balance_heading', date: nil)
+    when "Capital Stock Activity Statement"
+      opening_balance = I18n.t('reports.pages.capital_stock_activity.opening_balance_heading', date: nil)
+      closing_balance = I18n.t('reports.pages.capital_stock_activity.closing_balance_heading', date: nil)
+    else raise "unknown report type"
+  end
+  expect(page.find(".datepicker-trigger input").value).to eq("#{start_date_obj.strftime('%B %-d, %Y')} - #{end_date_obj.strftime('%B %-d, %Y')}")
+  returned_start_date = page.find('.report-summary-data:nth-child(1) h3').text.gsub(opening_balance, '').to_date
+  returned_end_date = page.find('.report-summary-data:nth-child(2) h3').text.gsub(closing_balance, '').to_date
+  expect(start_date_obj).to be <= returned_start_date
+  expect(end_date_obj).to be >= returned_end_date
+  report_dates_in_range?(start_date_obj, end_date_obj)
 end
 
 Given(/^I'm showing Settlement Transaction Account activities from the last year$/) do
@@ -118,7 +144,7 @@ Given(/^I'm showing Settlement Transaction Account activities from the last year
   step 'I click the datepicker field'
   step 'I select all of last year including today'
   step 'I click the datepicker apply button'
-  step %{I should see a "Settlement Transaction Account Statement" starting on "#{start_date}" and ending on "#{end_date}"}
+  step %{I should see a "Settlement Transaction Account Statement" with dates between "#{start_date}" and "#{end_date}"}
 end
 
 When(/^I filter the Settlement Transaction Account Statement by "(.*?)"$/) do |text|
@@ -142,5 +168,15 @@ def sleep_if_close_to_midnight
   seconds_till_tomorrow = (now.tomorrow.beginning_of_day - now) * 1.days
   if seconds_till_tomorrow <= 30
     sleep(seconds_till_tomorrow + 1)
+  end
+end
+
+def report_dates_in_range? (start_date, end_date)
+  page.all('.report-table tbody td:first-child').each do |element|
+    if element['class'].split(' ').include?('dataTables_empty')
+      next
+    end
+    date = Date.strptime(element.text, "%m/%d/%Y")
+    raise Capybara::ExpectationNotMet, "date #{date} out of range [#{start_date}, #{end_date}]" unless date >= start_date && date <= end_date
   end
 end
