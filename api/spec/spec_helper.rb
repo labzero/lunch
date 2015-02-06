@@ -15,8 +15,8 @@
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
-
-require 'rack/test'
+require 'dotenv'
+Dotenv.load File.expand_path('../../../.env', __FILE__)
 
 require 'vcr'
 
@@ -27,6 +27,8 @@ VCR.configure do |c|
   c.configure_rspec_metadata!
   c.default_cassette_options = {record: :new_episodes}
 end
+
+require 'rack/test'
 
 require 'simplecov'
 require 'simplecov-rcov'

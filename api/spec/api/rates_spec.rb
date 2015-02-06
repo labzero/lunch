@@ -1,7 +1,5 @@
 require 'spec_helper'
 require 'date'
-require "savon/mock/spec_helper"
-
 
 describe MAPI::ServiceApp do
   before do
@@ -75,22 +73,24 @@ describe MAPI::ServiceApp do
       expect(rate_summary[:timestamp]).to be_kind_of(String)
     end
 
-    describe "in the production environment", :vcr do
-      #include Savon::SpecHelper
+    describe "in the production environment" do
       before do
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
-        #Savon.mock!
       end
-      after do
-        #Savon.unmock!
-      end
-      #Savon.expects(:get_holiday).with(message: :message).returns('hi')
-      it "should return rates for default loan_types at default loan_terms" do
+      it "should return rates for default loan_types at default loan_terms", vcr: {cassette_name: 'calendar_mds_service'} do
         loan_terms.each do |loan_type|
           loan_types.each do |loan_term|
             expect(rate_summary[loan_term][loan_type][:rate]).to be_kind_of(String)
           end
         end
+      end
+      it "should return Internal Service Error, if calendar service is unavaible", vcr: {cassette_name: 'calendar_service_unavailable'} do
+        get '/rates/summary'
+        expect(last_response.status).to eq(503)
+      end
+      it "should return Internal Service Error, if mds service is unavaible", vcr: {cassette_name: 'mds_service_unavailable'} do
+        get '/rates/summary'
+        expect(last_response.status).to eq(503)
       end
     end
   end

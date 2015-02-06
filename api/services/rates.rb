@@ -97,7 +97,7 @@ module MAPI
               pretty_print_xml: true
           )
         else
-          @@mds_connection ||= nil
+          @@mds_connection = nil
         end
       end
 
@@ -112,7 +112,7 @@ module MAPI
               pretty_print_xml: true
           )
         else
-          @@cal_connection ||= nil
+          @@cal_connection = nil
         end
       end
 
@@ -285,30 +285,24 @@ module MAPI
         end
 
         relative_get "/summary" do
-          if MAPI::Services::Rates.init_cal_connection(settings.environment)
-            puts "environment: #{settings.environment}"
-            puts "@@cal_connection: #{@@cal_connection.inspect}"
-            #@@cal_connection.operations
-            puts "operations start"
+          MAPI::Services::Rates.init_cal_connection(settings.environment)
+          if @@cal_connection
             message = {'v1:endDate' => Date.today + 3.years, 'v1:startDate' => Date.today}
-            response = @@cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
-            if response.success?
-              response.doc.remove_namespaces!
-              @@holidays = response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')[0].css('days day date').map do |holiday|
-                Date.parse(holiday.content)
-              end
-            else
-              halt 503, 'Calendar Service Unavailable'
+            begin
+              response = @@cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
+            rescue Savon::Error => error
+              halt 503, 'Internal Service Error'
             end
-            puts "@@holidays: #{@@holidays.inspect}"
+            response.doc.remove_namespaces!
+            @@holidays = response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')[0].css('days day date').map do |holiday|
+              Date.parse(holiday.content)
+            end
           else
             @@holidays = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'calendar_holidays.json')))
           end
 
-          data = if MAPI::Services::Rates.init_mds_connection(settings.environment)
-            puts "environment: #{settings.environment}"
-            puts "@@mds_connection: #{@@mds_connection.inspect}"
-            @@mds_connection.operations
+          MAPI::Services::Rates.init_mds_connection(settings.environment)
+          data = if @@mds_connection
             request = LOAN_TYPES.collect do |type|
             {
               'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
@@ -323,32 +317,31 @@ module MAPI
               'v11:caller' => [{ 'v11:id' => ENV['MAPI_COF_ACCOUNT']}],
               'v1:requests' =>  [{'v1:fhlbsfMarketDataRequest' => request}]
             }
-            response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
-            namespaces = {'a' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns' => 'http://fhlbsf.com/schema/msg/marketdata/v1'}
-            if response.success? && response.doc.search('//xmlns:transactionResult', namespaces).text != 'Error'
-              hash = {}
-              response.doc.remove_namespaces!
-              fhlbsfresponse = response.doc.xpath('//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse')
-              LOAN_TYPES.each_with_index do |type, ctr_type|
-                hash[type] ||= {}
-                fhlbsfdatapoints = fhlbsfresponse[ctr_type].css('marketData FhlbsfMarketData data FhlbsfDataPoint')
-                LOAN_TERMS.each_with_index do |term, ctr_term|
-                  if ctr_term == 0
-                    ctr_term = 1
-                  end
-                  hash[type][term] = {
-                    'payment_on' => 'Maturity',
-                    'interest_day_count' => fhlbsfresponse[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
-                    'rate' => fhlbsfdatapoints[ctr_term-1].at_css('value').content,
-                    'maturity_date' => MAPI::Services::Rates.get_maturity_date(Date.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content), TERM_MAPPING[term][:frequency_unit])
-                  }
-                end
-              end
-              hash['timestamp'] = Time.now
-              hash
-            else
-              halt 503, 'Service Unavailable'
+            begin
+              response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
+            rescue Savon::Error => error
+              halt 503, 'Internal Service Error'
             end
+            hash = {}
+            response.doc.remove_namespaces!
+            fhlbsfresponse = response.doc.xpath('//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse')
+            LOAN_TYPES.each_with_index do |type, ctr_type|
+              hash[type] ||= {}
+              fhlbsfdatapoints = fhlbsfresponse[ctr_type].css('marketData FhlbsfMarketData data FhlbsfDataPoint')
+              LOAN_TERMS.each_with_index do |term, ctr_term|
+                if ctr_term == 0
+                  ctr_term = 1
+                end
+                hash[type][term] = {
+                  'payment_on' => 'Maturity',
+                  'interest_day_count' => fhlbsfresponse[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
+                  'rate' => fhlbsfdatapoints[ctr_term-1].at_css('value').content,
+                  'maturity_date' => MAPI::Services::Rates.get_maturity_date(Date.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content), TERM_MAPPING[term][:frequency_unit])
+                }
+              end
+            end
+            hash['timestamp'] = Time.now
+            hash
           else
             # We have no real data source yet.
             hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_summary.json'))).with_indifferent_access
