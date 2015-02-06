@@ -454,11 +454,12 @@ describe MAPI::ServiceApp do
     end
     describe 'in the production environment' do
       let(:from_date) {'2015-01-01'}
-      let(:to_date) {'2015-01-21'}
-
+      let(:to_date) {'2015-01-25'}
+      let(:sta_count_dates) {{"BALANCE_ROW_COUNT"=> 2}}
       let(:sta_open_balances) {{"ACCOUNT_NUMBER"=> '020022', "OPEN_BALANCE"=> 10000.00, "TRANS_DATE"=>"09-Jan-2015 12:00 AM"}}
-      let(:sta_open_to_adjust_value) {{"ACCCOUNT_NUMBER"=> '022011', "ADJUST_TRANS_COUNT"=> 1, "MIN_DATE"=>"01-Jan-2015 12:00 AM","AMOUNT_TO_ADJUST"=> 0.63}}
+      let(:sta_open_to_adjust_value) {{"ACCCOUNT_NUMBER"=> '022011', "ADJUST_TRANS_COUNT"=> 1, "MIN_DATE"=>"02-Jan-2015 12:00 AM","AMOUNT_TO_ADJUST"=> 0.63}}
       let(:sta_close_balances) {{"ACCOUNT_NUMBER"=> '022011', "BALANCE"=> 9499.99, "TRANS_DATE"=>"21-Jan-2015 12:00 AM"}}
+      let(:sta_close_balances2) {{"ACCOUNT_NUMBER"=> '022011', "BALANCE"=> 10000.00, "TRANS_DATE"=>"24-Jan-2015 12:00 AM"}}
       let(:sta_breakdown1) {{"TRANS_DATE" =>"21-Jan-2015 12:00 AM",  "REFNUMBER"=> nil,"DESCR"=> 'Interest Rate / Daily Balance',
                             "DEBIT" => 0, "CREDIT" => 0, "RATE" =>0.12,
                             "BALANCE"=> 9499.99}}
@@ -468,20 +469,23 @@ describe MAPI::ServiceApp do
       let(:sta_breakdown3) {{"TRANS_DATE" =>"01-Jan-2015 12:00 AM",  "REFNUMBER"=> nil, "DESCR"=> 'INTEREST',
                              "DEBIT" => 0, "CREDIT" => 0.63, "RATE" =>0,
                              "BALANCE"=> 0}}
-      let(:result_set1) {double('Oracle Result Set', fetch_hash: nil)}
-      let(:result_set2) {double('Oracle Result Set', fetch_hash: nil)}
-      let(:result_set3) {double('Oracle Result Set', fetch_hash: nil)}
-      let(:result_set4) {double('Oracle Result Set', fetch_hash: nil)}
+      let(:result_sta_count) {double('Oracle Result Set', fetch_hash: nil)}
+      let(:result_open) {double('Oracle Result Set', fetch_hash: nil)}
+      let(:result_adjustment) {double('Oracle Result Set', fetch_hash: nil)}
+      let(:result_close) {double('Oracle Result Set', fetch_hash: nil)}
+      let(:result_activities) {double('Oracle Result Set', fetch_hash: nil)}
       before do
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
-        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set1)
-        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set2)
-        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set3)
-        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set4)
-        allow(result_set1).to receive(:fetch_hash).and_return(sta_open_balances, nil)
-        allow(result_set2).to receive(:fetch_hash).and_return(sta_open_to_adjust_value, nil)
-        allow(result_set3).to receive(:fetch_hash).and_return(sta_close_balances, nil)
-        allow(result_set4).to receive(:fetch_hash).and_return(sta_breakdown1, sta_breakdown2, sta_breakdown3, nil)
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_sta_count)
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_open)
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_adjustment)
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_close)
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_activities)
+        allow(result_sta_count).to receive(:fetch_hash).and_return(sta_count_dates, nil)
+        allow(result_open).to receive(:fetch_hash).and_return(sta_open_balances, nil)
+        allow(result_adjustment).to receive(:fetch_hash).and_return(sta_open_to_adjust_value, nil)
+        allow(result_close).to receive(:fetch_hash).and_return(sta_close_balances, nil)
+        allow(result_activities).to receive(:fetch_hash).and_return(sta_breakdown1, sta_breakdown2, sta_breakdown3, nil)
       end
 
       it_behaves_like 'a STA activities endpoint'
@@ -491,9 +495,9 @@ describe MAPI::ServiceApp do
       end
       it 'should return expected balance value and date for Opening balance to be adjusted' do
         expect(sta_activities['start_balance']).to eq(10000.00 - 0.63)
-        expect(sta_activities['start_date'].to_s).to eq('2015-01-01')
+        expect(sta_activities['start_date'].to_s).to eq('2015-01-02')
       end
-      it 'should return the expected close balance and date' do
+      it 'should return the expected close balance and date which is what returned from database and not the date passed in' do
         expect(sta_activities['end_balance']).to eq(9499.99)
         expect(sta_activities['end_date'].to_s).to eq('2015-01-21')
       end
@@ -526,16 +530,45 @@ describe MAPI::ServiceApp do
 
       end
 
-      it 'should return date and 0 values with empty hash for collateral for standard and sbc if no data returned' do
-        expect(result_set1).to receive(:fetch_hash).and_return(nil)
-        expect(result_set2).to receive(:fetch_hash).and_return(nil)
-        expect(result_set3).to receive(:fetch_hash).and_return(nil)
-        expect(result_set4).to receive(:fetch_hash).and_return(nil)
-        expect(sta_activities['start_balance']).to eq(0)
-        expect(sta_activities['end_balance']).to eq(0)
-        expect(sta_activities['start_date'].to_s).to eq(from_date)
-        expect(sta_activities['end_date'].to_s).to eq(to_date)
+      it 'should return start date and end date that are returned from the open & close balance queries when there is no adjustment' do
+        expect(result_sta_count).to receive(:fetch_hash).and_return(sta_count_dates, nil).at_least(1).times
+        expect(result_open).to receive(:fetch_hash).and_return(sta_open_balances, nil).at_least(1).times
+        expect(result_adjustment).to receive(:fetch_hash).and_return(nil)
+        expect(result_close).to receive(:fetch_hash).and_return(sta_close_balances, nil).at_least(1).times
+        expect(result_activities).to receive(:fetch_hash).and_return(sta_breakdown1, nil).at_least(1).times
+        expect(sta_activities['start_balance']).to eq(10000.00)
+        expect(sta_activities['end_balance']).to eq(9499.99,)
+        expect(sta_activities['start_date'].to_s).to eq('2015-01-09')
+        expect(sta_activities['end_date'].to_s).to eq('2015-01-21')
+        expect(sta_activities['activities'].count).to eq(1)
+      end
+
+      it 'should return 0 activites row if there are balances that did not changed' do
+        expect(result_sta_count).to receive(:fetch_hash).and_return(sta_count_dates, nil).at_least(1).times
+        expect(result_open).to receive(:fetch_hash).and_return(sta_open_balances, nil).at_least(1).times
+        expect(result_adjustment).to receive(:fetch_hash).and_return(nil)
+        expect(result_close).to receive(:fetch_hash).and_return(sta_close_balances2, nil).at_least(1).times
+        expect(result_activities).to receive(:fetch_hash).and_return(nil)
+        expect(sta_activities['start_balance']).to eq(10000.00)
+        expect(sta_activities['end_balance']).to eq(10000.00,)
+        expect(sta_activities['start_date'].to_s).to eq('2015-01-09')
+        expect(sta_activities['end_date'].to_s).to eq('2015-01-24')
         expect(sta_activities['activities'].count).to eq(0)
+      end
+    end
+    describe 'in the production environment with 0 row count' do
+      let(:from_date) {'2015-01-01'}
+      let(:to_date) {'2015-01-21'}
+      let(:sta_count_0) {{"BALANCE_ROW_COUNT"=> 0}}
+      let(:result_sta_count) {double('Oracle Result Set', fetch_hash: nil)}
+      before do
+        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_sta_count)
+        allow(result_sta_count).to receive(:fetch_hash).and_return(sta_count_0, nil)
+      end
+      it 'invalid param result in 404 if row count is 0' do
+        get "/member/#{MEMBER_ID}/sta_activities/#{from_date}/#{to_date}"
+        expect(last_response.status).to eq(404)
       end
     end
   end

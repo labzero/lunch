@@ -211,6 +211,10 @@ module MAPI
                 key :code, 400
                 key :message, 'Invalid input'
               end
+              response_message do
+                key :code, 404
+                key :message, 'No Data Found'
+              end
             end
           end
         end
@@ -549,12 +553,23 @@ module MAPI
           member_id = params[:id]
           from_date = params[:from_date]
           to_date = params[:to_date]
+          sta_count = 0
+
           [from_date, to_date].each do |date|
             check_date_format = date.match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
             if !check_date_format
               halt 400, "Invalid Start Date format of yyyy-mm-dd"
             end
           end
+
+          sta_check_data_exist_connection_string = <<-SQL
+          SELECT COUNT(*) As BALANCE_ROW_COUNT
+          FROM PORTFOLIOS.STA_WEB_DETAIL
+          WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
+          AND TRANS_DATE BETWEEN to_date(#{ActiveRecord::Base.connection.quote(from_date)}, 'yyyy-mm-dd')
+          AND to_date(#{ActiveRecord::Base.connection.quote(to_date)}, 'yyyy-mm-dd')
+          AND DESCR = 'Interest Rate / Daily Balance'
+          SQL
 
           sta_open_balance_connection_string = <<-SQL
           SELECT ACCOUNT_NUMBER, (SUM(BALANCE) - SUM(CREDIT) - SUM(DEBIT)) OPEN_BALANCE, TRANS_DATE
@@ -598,6 +613,7 @@ module MAPI
               WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
               AND DESCR = 'Interest Rate / Daily Balance'
               AND trans_date <= to_date(#{ActiveRecord::Base.connection.quote(to_date)}, 'yyyy-mm-dd')
+              AND trans_date >= to_date(#{ActiveRecord::Base.connection.quote(from_date)}, 'yyyy-mm-dd')
             )
           SQL
 
@@ -608,7 +624,7 @@ module MAPI
           AND DESCR <> 'Interest Rate / Daily Balance'
           AND trans_date >= to_date(#{ActiveRecord::Base.connection.quote(from_date)}, 'yyyy-mm-dd')
           AND trans_date <= to_date(#{ActiveRecord::Base.connection.quote(to_date)}, 'yyyy-mm-dd')
-          UNION
+          UNION ALL
           SELECT TRANS_DATE, REFNUMBER, DESCR, DEBIT, CREDIT, RATE, BALANCE
           FROM PORTFOLIOS.STA_WEB_DETAIL
           WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id.to_i)}
@@ -624,12 +640,23 @@ module MAPI
 
           from_date = from_date.to_date
           to_date = to_date.to_date
-
           open_balance_hash = {}
           open_balance_adjust_hash  = {}
           close_balance_hash  = {}
           activities_array = []
+
+
           if settings.environment == :production
+            # get the count to make sure there is record, at the same time, get the max and min date with balances to pass into subsequence balance
+            sta_count_cursor = ActiveRecord::Base.connection.execute(sta_check_data_exist_connection_string)
+            while row = sta_count_cursor.fetch_hash()
+              sta_count = row['BALANCE_ROW_COUNT']
+              break
+            end
+            if sta_count == 0
+               halt 404, "No Data Found"
+            end
+
             sta_open_cursor = ActiveRecord::Base.connection.execute(sta_open_balance_connection_string)
             while row = sta_open_cursor.fetch_hash()
               open_balance_hash  = row
@@ -652,6 +679,10 @@ module MAPI
             end
 
           else
+            sta_count_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_count.json')))
+            if sta_count_hash['BALANCE_ROW_COUNT'].to_i == 0
+              halt 404, "No Data Found"
+            end
             open_balance_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_open_balance_earliest.json')))
             open_balance_adjust_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_open_balance_adjust_value.json')))
             close_balance_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_close_balance.json')))
