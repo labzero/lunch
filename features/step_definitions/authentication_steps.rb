@@ -7,7 +7,7 @@ end
 Given(/^I am logged in as "(.*?)" with password "(.*?)"$/) do |user, password|
   step %{I am logged out}
   step %{I fill in and submit the log in form with username "#{user}" and password "#{password}"}
-  page.assert_selector('.main-nav .nav-logout', wait: 5)
+  page.assert_selector('.main-nav .nav-logout')
 end
 
 Given(/^I am logged in$/) do
@@ -26,7 +26,7 @@ end
 Given(/^I am logged out$/) do
   visit('/')
   begin
-    page.find_field('user[username]', wait: 2 )
+    page.find_field('user[username]', wait: 5)
   rescue Capybara::ElementNotFound => e
     step %{I log out}
   end
