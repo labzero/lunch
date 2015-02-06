@@ -28,12 +28,20 @@ describe DatePickerHelper do
     before do
       expect(helper).to receive(:default_dates_hash).at_least(:once).and_return(default_dates)
     end
-    it 'should build a presets array' do
+    it 'should build a presets array for a date range picker by default' do
       expect(helper.range_picker_default_presets(last_month_start_date, last_month_end_date).length).to eq(3)
       helper.range_picker_default_presets(custom_start_date, custom_end_date).each do |preset|
           expect(preset).to be_kind_of(Hash)
           expect(preset[:start_date]).to be_kind_of(Date)
           expect(preset[:end_date]).to be_kind_of(Date)
+      end
+    end
+    it 'should build a presets array for a single date picker if passed `true` as the last argument' do
+      expect(helper.range_picker_default_presets(last_month_start_date, last_month_end_date, true).length).to eq(3)
+      helper.range_picker_default_presets(custom_start_date, custom_end_date, true).each do |preset|
+        expect(preset).to be_kind_of(Hash)
+        expect(preset[:start_date]).to be_kind_of(Date)
+        expect(preset[:end_date]).to be_kind_of(Date)
       end
     end
     it 'should flag the first preset as the default if the start and end args match the current month to date' do

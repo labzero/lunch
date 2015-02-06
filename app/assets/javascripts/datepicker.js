@@ -6,6 +6,7 @@ $(function () {
     var $datePickerTrigger = $(datePickerTrigger);
     var $wrapper = $($datePickerTrigger.siblings('.datepicker-wrapper'));
     var openDir = $wrapper.data('date-picker-open-direction') || false;
+    var singleDatePicker = $wrapper.data('date-picker-single-date-picker') || false;
     var presets = $wrapper.data('date-picker-presets');
     var $form = $($wrapper.data('date-picker-form'));
     var ranges = {};
@@ -37,7 +38,8 @@ $(function () {
       opens: openDir,
       defaultPreset: defaultPreset,
       startDate: startDate,
-      endDate: endDate
+      endDate: endDate,
+      singleDatePicker: singleDatePicker
     });
     datePickerSelectionHandler($datePickerTrigger, $wrapper, presets);
     setDatePickerApplyListener($datePickerTrigger, $form);
@@ -55,12 +57,35 @@ $(function () {
           customRangeLabel: options.customLabel,
           cancelLabel: ''
         },
-        opens: options.opens
+        opens: options.opens,
+        singleDatePicker: options.singleDatePicker
       }
     );
     $datePickerWrapper.find('.daterangepicker .ranges').insertBefore($datePickerWrapper.find('.calendar.first'));
     $datePickerWrapper.find('.range_inputs').html($datePickerWrapper.find('.range_inputs').html().replace(/&nbsp;/g, '')); // get rid of whitespace added between hidden buttons
     $($datePickerWrapper.find('.ranges li')[options.defaultPreset]).click(); // default to "Last Month" when first opening
+    if (options.singleDatePicker) {
+      // hide the calendar when you're first opening the datepicker, unless the 'custom' tab is the one selected
+      $('.datepicker-trigger').on('show.daterangepicker', function(event){
+        if ( !$datePickerWrapper.find('.ranges li').last().hasClass('active') ) {
+          $datePickerWrapper.find('.calendar.first').hide();
+        }
+      });
+      $datePickerWrapper.find('.ranges').show(); // always show the pre-selected tabs (daterangepicker.js hides these when set with the option singleDatePicker
+      $datePickerWrapper.find('.calendar.second').remove(); // remove the second calendar, as it won't be used
+      $datePickerWrapper.find('.calendar').off('click.daterangepicker', 'td.available'); // remove daterangepicker's event handling so that we can force user to click 'apply' button when selecting custom date
+      $datePickerWrapper.find('.calendar').on('click.daterangepicker', 'td.available', function(event){
+        var $target = $(event.target);
+        event.stopPropagation();
+        event.preventDefault();
+        // set start and end dates to this date
+        var monthAndYear = $target.closest('table').find('th.month').text();
+        var day = $target.text();
+        var selectedDate = new Date(monthAndYear + ' ' + day);
+        $datePickerTrigger.data('daterangepicker').setStartDate(selectedDate);
+        $datePickerTrigger.data('daterangepicker').setEndDate(selectedDate);
+      });
+    }
   };
 
   // Choosing "This Month" or "Last Month" shouldn't close the datepicker until the apply button is pressed
@@ -103,7 +128,13 @@ $(function () {
   };
 
   function setDatePickerPlaceholder($datePickerTrigger, startDate, endDate) {
-    $datePickerTrigger.find('input').val(startDate.format('MMMM D, YYYY') + ' - ' + endDate.format('MMMM D, YYYY'));
+    if ($($datePickerTrigger.siblings('.datepicker-wrapper')).data('date-picker-single-date-picker')) {
+      var input_field_text = $datePickerTrigger.data('date-picker-input-field-text').replace(/`replace_date`/, startDate.format('MMMM D, YYYY'));
+      $datePickerTrigger.find('input').val(input_field_text);
+    }
+    else {
+      $datePickerTrigger.find('input').val(startDate.format('MMMM D, YYYY') + ' - ' + endDate.format('MMMM D, YYYY'));
+    };
   }
 
 });
