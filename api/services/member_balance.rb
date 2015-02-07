@@ -853,6 +853,7 @@ module MAPI
             if as_of_date.to_date <  today_date  && !latest_row_found
               cp_advances_historical_cursor = ActiveRecord::Base.connection.execute(advances_historical_detail_connection_string)
               while row = cp_advances_historical_cursor.fetch_hash()
+
                 advances_details_records.push(row)
               end
             end
@@ -860,11 +861,23 @@ module MAPI
             latest_row_found = false
             # if date is yesterday or later, get data from the lastest view
             if as_of_date.to_date >  today_date  - 2
-              advances_details_records = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_latest.json')))
+              rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_latest.json')))
+              advances_details_records = rows.sample
               latest_row_found = true
             end
             if as_of_date.to_date < today_date  && !latest_row_found
-              advances_details_records = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_historical.json')))
+              rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_historical.json'))).sample
+               rows.collect! do |details|
+                 if details['ADVDET_MATURITY_DATE'].to_date < as_of_date.to_date
+                   details['ADVDET_MATURITY_DATE'] = as_of_date.to_date + (1 + rand(30))
+                 end
+                 if details['ADVDET_ISSUE_DATE'].to_date  > as_of_date.to_date
+                   details['ADVDET_ISSUE_DATE'] = as_of_date.to_date - (1 + rand(7))
+                   details['TRADE_DATE'] = details['ADVDET_ISSUE_DATE']
+                 end
+                 details
+               end
+              advances_details_records = rows
             end
           end
 
@@ -895,12 +908,13 @@ module MAPI
                   if row['ADVDET_MNEMONIC'].downcase.include? 'vrc'
                     notes_indicator = '2'
                   else
-                    notes_indicator = '3'
+                    notes_indicator = '1'
                   end
                 else
                   prepayment_indication_fees = row['SA_TOTAL_PREPAY_FEES']
                   sa_indication_date = row['SA_INDICATION_VALUATION_DATE'].to_date
                   structured_product_indication_date = sa_indication_date
+                  notes_indicator = '3'
                 end
               end
             else
@@ -914,12 +928,18 @@ module MAPI
             else
               open_vrc = false
             end
+            # handle for data prior 2013 March which has no next interest payment date
+            if row['ADX_NEXT_INT_PAYMENT_DATE'] != nil
+              estimated_next_interest_payment = row['ADX_NEXT_INT_PAYMENT_DATE'].to_date
+            else
+              estimated_next_interest_payment == row['ADX_NEXT_INT_PAYMENT_DATE']
+            end
             reformat_hash = {'trade_date' => row['TRADE_DATE'].to_date,
                              'funding_date' => row['ADVDET_ISSUE_DATE'].to_date,
                              'maturity_date' => maturity_date,
                              'current_par' => (row['ADVDET_CURRENT_PAR'] || 0),
                              'interest_rate' => (row['ADVDET_INTEREST_RATE'] || 0).to_f.round(5),
-                             'next_interest_pay_date' => row['ADX_NEXT_INT_PAYMENT_DATE'].to_date,
+                             'next_interest_pay_date' => estimated_next_interest_payment,
                              'accrued_interest' => row['ADX_INTEREST_RECEIVABLE'],
                              'estimated_next_interest_payment' => row['FUTURE_INTEREST'],
                              'interest_payment_frequency' => payment_frequency_description,

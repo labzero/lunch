@@ -598,9 +598,9 @@ describe MAPI::ServiceApp do
 
     describe 'in development environment, if date is before yesterday, it should get historical data' do
       let(:advances) { get "/member/#{MEMBER_ID}/advances_details/2013-01-02"; JSON.parse(last_response.body) }
-      it 'should return 3 rows which is from the member_advances_historical.json file' do
+      it 'should return rows from member_advances_historical.json file that is not' do
         expect(advances['as_of_date']).to eq('2013-01-02')
-        expect(advances['advances_details'].count()).to eq(3)
+        expect(advances['advances_details'].count()).to_not eq(4)
       end
     end
 
@@ -703,7 +703,7 @@ describe MAPI::ServiceApp do
 
       it_behaves_like 'Advances Details endpoint'
 
-      it 'should return the same number of advances_details rows retrieved' do
+      it 'should return the multiple advances_details rows' do
         expect(advances['advances_details'].count()).to eq(4)
       end
 
