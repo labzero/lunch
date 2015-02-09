@@ -840,12 +840,16 @@ module MAPI
 
           now = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE)
           today_date = now.to_date
+          latest_date = as_of_date
           if settings.environment == :production
             # if date is yesterday or later, get data from the lastest view
             if as_of_date.to_date >  today_date - 2
               cp_advances_cursor = ActiveRecord::Base.connection.execute(advances_detail_connection_string)
               while row = cp_advances_cursor.fetch_hash()
-                latest_row_found = true
+                if latest_row_found == false
+                  latest_date = row['ADVDET_DATEUPDATE'].to_date
+                  latest_row_found = true
+                  end
                 advances_details_records.push(row)
               end
             end
@@ -853,7 +857,6 @@ module MAPI
             if as_of_date.to_date <  today_date  && !latest_row_found
               cp_advances_historical_cursor = ActiveRecord::Base.connection.execute(advances_historical_detail_connection_string)
               while row = cp_advances_historical_cursor.fetch_hash()
-
                 advances_details_records.push(row)
               end
             end
@@ -861,9 +864,20 @@ module MAPI
             latest_row_found = false
             # if date is yesterday or later, get data from the lastest view
             if as_of_date.to_date >  today_date  - 2
-              rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_latest.json')))
-              advances_details_records = rows.sample
+              rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_latest.json'))).sample
+              # advances_details_records = rows.sample
+              rows.collect! do |details|
+                if details['ADVDET_MATURITY_DATE'].to_date < as_of_date.to_date
+                  details['ADVDET_MATURITY_DATE'] = as_of_date.to_date + (1 + rand(30))
+                end
+                if details['ADVDET_ISSUE_DATE'].to_date  > as_of_date.to_date
+                  details['ADVDET_ISSUE_DATE'] = as_of_date.to_date - (1 + rand(7))
+                  details['TRADE_DATE'] = details['ADVDET_ISSUE_DATE']
+                end
+                details
+              end
               latest_row_found = true
+              advances_details_records = rows
             end
             if as_of_date.to_date < today_date  && !latest_row_found
               rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_historical.json'))).sample
@@ -955,7 +969,7 @@ module MAPI
             advances_details_formatted.push(reformat_hash)
           end
           {
-            as_of_date: as_of_date.to_date,
+            as_of_date: latest_date.to_date,
             structured_product_indication_date: structured_product_indication_date,
             advances_details: advances_details_formatted
           }.to_json
