@@ -32,9 +32,13 @@ When(/^I choose the last month preset in the datepicker$/) do
   page.find('.daterangepicker .ranges li', text: (@today.beginning_of_month - 1.months).strftime("%B")).click
 end
 
-When(/^I select the (\d+)(?:st|rd|th) of this month in the (left|right) calendar/) do |day, calendar|
+When(/^I select the (\d+)(?:st|rd|th) of (this|last) month in the (left|right) calendar/) do |day, month, calendar|
   calendar = page.find(".daterangepicker .calendar.#{calendar}")
-  this_month = @today.strftime("%b %Y")
+  month = if month == 'this'
+            @today.strftime("%b %Y")
+          elsif month == 'last'
+            (@today - 1.month).strftime("%b %Y")
+          end
   current_month = calendar.find('.month').text.to_date
   if current_month.year > @today.year
     advance_class = '.fa-arrow-left'
@@ -45,7 +49,7 @@ When(/^I select the (\d+)(?:st|rd|th) of this month in the (left|right) calendar
       advance_class = '.fa-arrow-right'
     end
   end
-  while calendar.find('.month').text != this_month
+  while calendar.find('.month').text != month
     calendar.find(advance_class).click
     # we should add a 5 second check here to avoid infinte loops
   end
