@@ -76,6 +76,8 @@ en:
     range:
       this_month: "%{month} to date"
       custom: Custom date range
+    single:
+      input: "As of {replace_date}"
   settings:
     title: Settings
     save: Save
