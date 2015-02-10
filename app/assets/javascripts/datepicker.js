@@ -68,11 +68,10 @@ $(function () {
       // hide the calendar when you're first opening the datepicker, unless the 'custom' tab is the one selected
       $('.datepicker-trigger').on('show.daterangepicker', function(event){
         if ( !$datePickerWrapper.find('.ranges li').last().hasClass('active') ) {
-          $datePickerWrapper.find('.calendar.first').hide();
+          $datePickerWrapper.find('.calendar.single').hide();
         }
       });
       $datePickerWrapper.find('.ranges').show(); // always show the pre-selected tabs (daterangepicker.js hides these when set with the option singleDatePicker
-      $datePickerWrapper.find('.calendar.second').remove(); // remove the second calendar, as it won't be used
       $datePickerWrapper.find('.calendar').off('click.daterangepicker', 'td.available'); // remove daterangepicker's event handling so that we can force user to click 'apply' button when selecting custom date
       $datePickerWrapper.find('.calendar').on('click.daterangepicker', 'td.available', function(event){
         var $target = $(event.target);
@@ -109,7 +108,11 @@ $(function () {
               $datePickerTrigger.data('daterangepicker').setEndDate(preset.end_date);
             };
           } else {
-            $datePickerWrapper.find('.calendar').show();
+            var calendarSelector = '.calendar';
+            if ($datePickerTrigger.data('daterangepicker').singleDatePicker) {
+              calendarSelector += '.right';
+            }
+            $datePickerWrapper.find(calendarSelector).show();
           };
         };
       });

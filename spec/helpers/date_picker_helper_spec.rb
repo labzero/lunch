@@ -36,9 +36,9 @@ describe DatePickerHelper do
           expect(preset[:end_date]).to be_kind_of(Date)
       end
     end
-    it 'should build a presets array for a single date picker if passed `true` as the last argument' do
-      expect(helper.range_picker_default_presets(last_month_start_date, last_month_end_date, true).length).to eq(3)
-      helper.range_picker_default_presets(custom_start_date, custom_end_date, true).each do |preset|
+    it 'should build a presets array for a single date picker if no end_date is passed' do
+      expect(helper.range_picker_default_presets(last_month_start_date).length).to eq(3)
+      helper.range_picker_default_presets(custom_start_date).each do |preset|
         expect(preset).to be_kind_of(Hash)
         expect(preset[:start_date]).to be_kind_of(Date)
         expect(preset[:end_date]).to be_kind_of(Date)
