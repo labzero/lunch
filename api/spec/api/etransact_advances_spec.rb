@@ -83,9 +83,9 @@ describe MAPI::ServiceApp do
                                "SBC_AA_ENABLED"=>  "Y", "END_TIME" => "0001",  "OVERRIDE_END_DATE" =>  "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME"=>  "2000"}}
       let(:some_status_data2) {{"AO_TERM_BUCKET_ID" => 2, "TERM_BUCKET_LABEL"=> "1 Week", "WHOLE_LOAN_ENABLED"=>  "Y", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
                                 "SBC_AA_ENABLED"=>  "N", "END_TIME" => "2000",  "OVERRIDE_END_DATE" =>  "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME"=>  "0700"}}
-       let(:some_status_data3) {{"AO_TERM_BUCKET_ID" => 3, "TERM_BUCKET_LABEL"=> "2 Weeks", "WHOLE_LOAN_ENABLED"=>  "Y", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
+      let(:some_status_data3) {{"AO_TERM_BUCKET_ID" => 3, "TERM_BUCKET_LABEL"=> "2 Weeks", "WHOLE_LOAN_ENABLED"=>  "Y", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
                                 "SBC_AA_ENABLED"=>  "Y", "END_TIME" => "2000",  "OVERRIDE_END_DATE" =>  today_date, "OVERRIDE_END_TIME"=>  "2359"}}
-       let(:result_set) {double('Oracle Result Set', fetch: nil)}
+      let(:result_set) {double('Oracle Result Set', fetch: nil)}
       let(:result_set2) {double('Oracle Result Set', fetch: nil)}
       let(:result_set3) {double('Oracle Result Set', fetch: nil)}
       let(:result_set4) {double('Oracle Result Set', fetch_hash: nil)}
