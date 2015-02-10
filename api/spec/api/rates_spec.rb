@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'date'
 
 describe MAPI::ServiceApp do
   before do
@@ -70,6 +71,48 @@ describe MAPI::ServiceApp do
     end
     it "should return a timestamp" do
       expect(rate_summary[:timestamp]).to be_kind_of(String)
+    end
+
+    describe "in the production environment" do
+      before do
+        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+      end
+      it "should return rates for default loan_types at default loan_terms", vcr: {cassette_name: 'calendar_mds_service'} do
+        loan_terms.each do |loan_type|
+          loan_types.each do |loan_term|
+            expect(rate_summary[loan_term][loan_type][:rate]).to be_kind_of(String)
+          end
+        end
+      end
+      it "should return Internal Service Error, if calendar service is unavaible", vcr: {cassette_name: 'calendar_service_unavailable'} do
+        get '/rates/summary'
+        expect(last_response.status).to eq(503)
+      end
+      it "should return Internal Service Error, if mds service is unavaible", vcr: {cassette_name: 'mds_service_unavailable'} do
+        get '/rates/summary'
+        expect(last_response.status).to eq(503)
+      end
+    end
+  end
+
+  describe "is_weekend_or_holiday" do
+    it "should return true if date is a weekend" do
+      expect(MAPI::Services::Rates.is_weekend_or_holiday(Date.parse('2015-02-01'))).to be true
+    end
+    it "should return false if date is not a weekend" do
+      expect(MAPI::Services::Rates.is_weekend_or_holiday(Date.parse('2015-02-03'))).to be false
+    end
+  end
+
+  describe "get_maturity_date" do
+    it "should return the same date if is not a weekend" do
+      expect(MAPI::Services::Rates.get_maturity_date(Date.parse('2015-02-03'), 'D')).to eq(Date.parse('2015-02-03'))
+    end
+    it "should return the next non weekend date if is weekend" do
+      expect(MAPI::Services::Rates.get_maturity_date(Date.parse('2015-02-01'), 'Y')).to eq(Date.parse('2015-02-02'))
+    end
+    it "should return the previous non weekend date if is weekend and month/year term and hits next month" do
+      expect(MAPI::Services::Rates.get_maturity_date(Date.parse('2015-01-31'), 'Y')).to eq(Date.parse('2015-01-30'))
     end
   end
 end

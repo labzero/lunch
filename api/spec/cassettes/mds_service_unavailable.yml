@@ -1,0 +1,533 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://appservices/CalendarServicesAuth/CalendarService.svc?wsdl
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - private
+      Content-Type:
+      - text/xml; charset=UTF-8
+      Server:
+      - Microsoft-IIS/7.5
+      X-Aspnet-Version:
+      - 2.0.50727
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Fri, 06 Feb 2015 17:49:49 GMT
+      Content-Length:
+      - '1967'
+    body:
+      encoding: UTF-8
+      string: <?xml version="1.0" encoding="utf-8"?><wsdl:definitions name="CalendarService"
+        targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex"
+        xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+        xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"
+        xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+        xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+        xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:i0="http://fhlbsf.com/contract/calendar/v1" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"><wsdl:import namespace="http://fhlbsf.com/contract/calendar/v1"
+        location="http://sfdw64netapp1.fhlbsf-i.com/CalendarServicesAuth/CalendarService.svc?wsdl=wsdl0"/><wsdl:types/><wsdl:binding
+        name="ClearUsernameBinding_ICalendarService" type="i0:ICalendarService"><soap:binding
+        transport="http://schemas.xmlsoap.org/soap/http"/><wsdl:operation name="getHoliday"><soap:operation
+        soapAction="http://fhlbsf.com/contract/calendar/v1/ICalendarService/getHoliday"
+        style="document"/><wsdl:input name="HolidayRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="HolidayResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation></wsdl:binding><wsdl:service
+        name="CalendarService"><wsdl:port name="ClearUsernameBinding_ICalendarService"
+        binding="tns:ClearUsernameBinding_ICalendarService"><soap:address location="http://sfdw64netapp1.fhlbsf-i.com/CalendarServicesAuth/CalendarService.svc"/></wsdl:port></wsdl:service></wsdl:definitions>
+    http_version:
+  recorded_at: Fri, 06 Feb 2015 17:49:49 GMT
+- request:
+    method: post
+    uri: http://sfdw64netapp1.fhlbsf-i.com/CalendarServicesAuth/CalendarService.svc
+    body:
+      encoding: UTF-8
+      string: <?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:v1="http://fhlbsf.com/schema/msg/businessCalendar/v1"
+        xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+        xmlns:v11="http://fhlbsf.com/schema/canonical/common/v1"><soapenv:Header><wsse:Security><wsse:UsernameToken><wsse:Username>FHLBSF\\svcsys_fobo_mdtest</wsse:Username><wsse:Password>RiYPHJfc9g2L6eAisIQX3QWu4DJs75</wsse:Password></wsse:UsernameToken></wsse:Security></soapenv:Header><soapenv:Body><v1:holidayRequest><v1:endDate>2018-05-21</v1:endDate><v1:startDate>2015-02-06</v1:startDate></v1:holidayRequest></soapenv:Body></soapenv:Envelope>
+    headers:
+      Soapaction:
+      - '"http://fhlbsf.com/contract/calendar/v1/ICalendarService/getHoliday"'
+      Content-Type:
+      - text/xml;charset=UTF-8
+      Content-Length:
+      - '809'
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - private
+      Content-Type:
+      - text/xml; charset=utf-8
+      Server:
+      - Microsoft-IIS/7.5
+      X-Aspnet-Version:
+      - 2.0.50727
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Fri, 06 Feb 2015 17:49:49 GMT
+      Content-Length:
+      - '6282'
+    body:
+      encoding: UTF-8
+      string: <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"><s:Header><o:Security
+        s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"><u:Timestamp
+        u:Id="_0"><u:Created>2015-02-06T17:49:50.635Z</u:Created><u:Expires>2015-02-06T17:54:50.635Z</u:Expires></u:Timestamp></o:Security></s:Header><s:Body><holidayResponse
+        xmlns="http://fhlbsf.com/schema/msg/businessCalendar/v1"><description i:nil="true"
+        xmlns="http://fhlbsf.com/schema/canonical/common/v1" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"/><requestTime
+        xmlns="http://fhlbsf.com/schema/canonical/common/v1">0001-01-01T00:00:00</requestTime><transactionResult
+        xmlns="http://fhlbsf.com/schema/canonical/common/v1">Success</transactionResult><holidays
+        xmlns:a="http://fhlbsf.com/schema/canonical/businessCalendar/v1" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><a:businessCenters><a:businessCenter>USNY</a:businessCenter><a:days><a:day><a:date>2015-02-16</a:date><a:holiday>Presidents'
+        Day</a:holiday></a:day><a:day><a:date>2015-05-25</a:date><a:holiday>Memorial
+        Day</a:holiday></a:day><a:day><a:date>2015-07-04</a:date><a:holiday>Independence
+        Day</a:holiday></a:day><a:day><a:date>2015-09-07</a:date><a:holiday>Labor
+        Day</a:holiday></a:day><a:day><a:date>2015-10-12</a:date><a:holiday>Columbus
+        Day</a:holiday></a:day><a:day><a:date>2015-11-11</a:date><a:holiday>Veterans'
+        Day</a:holiday></a:day><a:day><a:date>2015-11-26</a:date><a:holiday>Thanksgiving</a:holiday></a:day><a:day><a:date>2015-12-25</a:date><a:holiday>Christmas</a:holiday></a:day><a:day><a:date>2016-01-01</a:date><a:holiday>New
+        Year's Day</a:holiday></a:day><a:day><a:date>2016-01-18</a:date><a:holiday>Martin
+        Luther King Jr. Day</a:holiday></a:day><a:day><a:date>2016-02-15</a:date><a:holiday>Presidents'
+        Day</a:holiday></a:day><a:day><a:date>2016-05-30</a:date><a:holiday>Memorial
+        Day</a:holiday></a:day><a:day><a:date>2016-07-04</a:date><a:holiday>Independence
+        Day</a:holiday></a:day><a:day><a:date>2016-09-05</a:date><a:holiday>Labor
+        Day</a:holiday></a:day><a:day><a:date>2016-10-10</a:date><a:holiday>Columbus
+        Day</a:holiday></a:day><a:day><a:date>2016-11-11</a:date><a:holiday>Veterans'
+        Day</a:holiday></a:day><a:day><a:date>2016-11-24</a:date><a:holiday>Thanksgiving</a:holiday></a:day><a:day><a:date>2016-12-26</a:date><a:holiday>Christmas
+        OBS</a:holiday></a:day><a:day><a:date>2017-01-02</a:date><a:holiday>New Year's
+        Day OBS</a:holiday></a:day><a:day><a:date>2017-01-16</a:date><a:holiday>Martin
+        Luther King Jr. Day</a:holiday></a:day><a:day><a:date>2017-02-20</a:date><a:holiday>Presidents'
+        Day</a:holiday></a:day><a:day><a:date>2017-05-29</a:date><a:holiday>Memorial
+        Day</a:holiday></a:day><a:day><a:date>2017-07-04</a:date><a:holiday>Independence
+        Day</a:holiday></a:day><a:day><a:date>2017-09-04</a:date><a:holiday>Labor
+        Day</a:holiday></a:day><a:day><a:date>2017-10-09</a:date><a:holiday>Columbus
+        Day</a:holiday></a:day><a:day><a:date>2017-11-11</a:date><a:holiday>Veterans'
+        Day</a:holiday></a:day><a:day><a:date>2017-11-23</a:date><a:holiday>Thanksgiving</a:holiday></a:day><a:day><a:date>2017-12-25</a:date><a:holiday>Christmas</a:holiday></a:day><a:day><a:date>2018-01-01</a:date><a:holiday>New
+        Year's Day</a:holiday></a:day><a:day><a:date>2018-01-15</a:date><a:holiday>Martin
+        Luther King Jr. Day</a:holiday></a:day><a:day><a:date>2018-02-19</a:date><a:holiday>Presidents'
+        Day</a:holiday></a:day></a:days></a:businessCenters><a:businessCenters><a:businessCenter>London</a:businessCenter><a:days><a:day><a:date>2015-04-03</a:date><a:holiday>Good
+        Friday</a:holiday></a:day><a:day><a:date>2015-04-06</a:date><a:holiday>Easter
+        Monday</a:holiday></a:day><a:day><a:date>2015-05-04</a:date><a:holiday>Early
+        May Bank Holiday</a:holiday></a:day><a:day><a:date>2015-05-25</a:date><a:holiday>Late
+        May Bank Holiday</a:holiday></a:day><a:day><a:date>2015-08-31</a:date><a:holiday>Summer
+        Bank Holiday</a:holiday></a:day><a:day><a:date>2015-12-25</a:date><a:holiday>Christmas</a:holiday></a:day><a:day><a:date>2015-12-28</a:date><a:holiday>Boxing
+        Day OBS</a:holiday></a:day><a:day><a:date>2016-01-01</a:date><a:holiday>New
+        Year's Day</a:holiday></a:day><a:day><a:date>2016-03-25</a:date><a:holiday>Good
+        Friday</a:holiday></a:day><a:day><a:date>2016-03-28</a:date><a:holiday>Easter
+        Monday</a:holiday></a:day><a:day><a:date>2016-05-02</a:date><a:holiday>Early
+        May Bank Holiday</a:holiday></a:day><a:day><a:date>2016-05-30</a:date><a:holiday>Late
+        May Bank Holiday</a:holiday></a:day><a:day><a:date>2016-08-29</a:date><a:holiday>Summer
+        Bank Holiday</a:holiday></a:day><a:day><a:date>2016-12-26</a:date><a:holiday>Christmas
+        OBS</a:holiday></a:day><a:day><a:date>2016-12-27</a:date><a:holiday>Boxing
+        Day OBS</a:holiday></a:day><a:day><a:date>2017-01-02</a:date><a:holiday>New
+        Year's Day OBS</a:holiday></a:day><a:day><a:date>2017-04-14</a:date><a:holiday>Good
+        Friday</a:holiday></a:day><a:day><a:date>2017-04-17</a:date><a:holiday>Easter
+        Monday</a:holiday></a:day><a:day><a:date>2017-05-01</a:date><a:holiday>Early
+        May Bank Holiday</a:holiday></a:day><a:day><a:date>2017-05-29</a:date><a:holiday>Late
+        May Bank Holiday</a:holiday></a:day><a:day><a:date>2017-08-28</a:date><a:holiday>Summer
+        Bank Holiday</a:holiday></a:day><a:day><a:date>2017-12-25</a:date><a:holiday>Christmas</a:holiday></a:day><a:day><a:date>2017-12-26</a:date><a:holiday>Boxing
+        Day</a:holiday></a:day><a:day><a:date>2018-01-01</a:date><a:holiday>New Year's
+        Day</a:holiday></a:day><a:day><a:date>2018-03-30</a:date><a:holiday>Good Friday</a:holiday></a:day><a:day><a:date>2018-04-02</a:date><a:holiday>Easter
+        Monday</a:holiday></a:day><a:day><a:date>2018-05-07</a:date><a:holiday>Early
+        May Bank Holiday</a:holiday></a:day></a:days></a:businessCenters><a:businessCenters><a:businessCenter>FHLBSF
+        Special Pricing Day</a:businessCenter><a:days><a:day><a:date>2015-04-03</a:date><a:holiday>Good
+        Friday</a:holiday></a:day><a:day><a:date>2016-03-25</a:date><a:holiday>Good
+        Friday</a:holiday></a:day><a:day><a:date>2017-04-14</a:date><a:holiday>Good
+        Friday</a:holiday></a:day><a:day><a:date>2018-03-30</a:date><a:holiday>Good
+        Friday</a:holiday></a:day></a:days></a:businessCenters></holidays></holidayResponse></s:Body></s:Envelope>
+    http_version:
+  recorded_at: Fri, 06 Feb 2015 17:49:50 GMT
+- request:
+    method: get
+    uri: http://appservices/MarketDataServicesAuth/MarketDataService.svc?wsdl
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - private
+      Content-Type:
+      - text/xml; charset=UTF-8
+      Server:
+      - Microsoft-IIS/7.5
+      X-Aspnet-Version:
+      - 2.0.50727
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Fri, 06 Feb 2015 17:49:49 GMT
+      Content-Length:
+      - '2007'
+    body:
+      encoding: UTF-8
+      string: <?xml version="1.0" encoding="utf-8"?><wsdl:definitions name="MarketDataService"
+        targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex"
+        xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+        xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"
+        xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+        xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+        xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:i0="http://fhlbsf.com/contract/marketdata/v1" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"><wsdl:import namespace="http://fhlbsf.com/contract/marketdata/v1"
+        location="http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc?wsdl=wsdl0"/><wsdl:types/><wsdl:binding
+        name="ClearUsernameBinding_IMarketDataService" type="i0:IMarketDataService"><soap:binding
+        transport="http://schemas.xmlsoap.org/soap/http"/><wsdl:operation name="getMarketData"><soap:operation
+        soapAction="http://fhlbsf.com/contract/marketdata/v1/IMarketDataService/getMarketData"
+        style="document"/><wsdl:input name="MarketDataRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="MarketDataResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation></wsdl:binding><wsdl:service
+        name="MarketDataService"><wsdl:port name="ClearUsernameBinding_IMarketDataService"
+        binding="tns:ClearUsernameBinding_IMarketDataService"><soap:address location="http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc"/></wsdl:port></wsdl:service></wsdl:definitions>
+    http_version:
+  recorded_at: Fri, 06 Feb 2015 17:49:50 GMT
+- request:
+    method: post
+    uri: http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc
+    body:
+      encoding: UTF-8
+      string: <?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:v1="http://fhlbsf.com/schema/msg/marketdata/v1"
+        xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+        xmlns:v11="http://fhlbsf.com/schema/canonical/common/v1" xmlns:v12="http://fhlbsf.com/schema/canonical/marketdata/v1"
+        xmlns:v13="http://fhlbsf.com/schema/canonical/shared/v1"><soapenv:Header><wsse:Security><wsse:UsernameToken><wsse:Username>FHLBSF\\svcsys_fobo_mdtest</wsse:Username><wsse:Password>RiYPHJfc9g2L6eAisIQX3QWu4DJs75</wsse:Password></wsse:UsernameToken></wsse:Security></soapenv:Header><soapenv:Body><v1:marketDataRequest><v11:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v11:caller><v1:requests><v1:fhlbsfMarketDataRequest><v1:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v1:caller><v1:marketData><v12:name>FRC_WL</v12:name><v12:pricingGroup><v12:id>Live</v12:id></v12:pricingGroup><v12:data></v12:data></v1:marketData></v1:fhlbsfMarketDataRequest><v1:fhlbsfMarketDataRequest><v1:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v1:caller><v1:marketData><v12:name>FRC_AGCY</v12:name><v12:pricingGroup><v12:id>Live</v12:id></v12:pricingGroup><v12:data></v12:data></v1:marketData></v1:fhlbsfMarketDataRequest><v1:fhlbsfMarketDataRequest><v1:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v1:caller><v1:marketData><v12:name>FRC_AAA</v12:name><v12:pricingGroup><v12:id>Live</v12:id></v12:pricingGroup><v12:data></v12:data></v1:marketData></v1:fhlbsfMarketDataRequest><v1:fhlbsfMarketDataRequest><v1:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v1:caller><v1:marketData><v12:name>FRC_AA</v12:name><v12:pricingGroup><v12:id>Live</v12:id></v12:pricingGroup><v12:data></v12:data></v1:marketData></v1:fhlbsfMarketDataRequest></v1:requests></v1:marketDataRequest></soapenv:Body></soapenv:Envelope>
+    headers:
+      Soapaction:
+      - '"http://fhlbsf.com/contract/marketdata/v1/IMarketDataService/getMarketData"'
+      Content-Type:
+      - text/xml;charset=UTF-8
+      Content-Length:
+      - '1991'
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 500
+      message: OK
+    headers:
+      Cache-Control:
+      - private
+      Content-Type:
+      - text/xml; charset=utf-8
+      Server:
+      - Microsoft-IIS/7.5
+      X-Aspnet-Version:
+      - 2.0.50727
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Fri, 06 Feb 2015 17:49:50 GMT
+      Content-Length:
+      - '39191'
+    body:
+      encoding: UTF-8
+      string: <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"><s:Header><o:Security
+        s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"><u:Timestamp
+        u:Id="_0"><u:Created>2015-02-06T17:49:50.697Z</u:Created><u:Expires>2015-02-06T17:54:50.697Z</u:Expires></u:Timestamp></o:Security></s:Header><s:Body><marketDataResponse
+        xmlns="http://fhlbsf.com/schema/msg/marketdata/v1"><responses xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><fhlbsfMarketDataResponse><description/><requestTime>2015-02-06T09:49:50.6976938-08:00</requestTime><transactionResult>Success</transactionResult><marketData
+        xmlns:a="http://fhlbsf.com/schema/canonical/marketdata/v1"><a:FhlbsfMarketData><a:dayCountBasis>ACT/ACT</a:dayCountBasis><a:paymentFrequency
+        xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>0</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:paymentFrequency><a:snapTime>2015-02-06T09:49:50.6976938-08:00</a:snapTime><a:valueUnit
+        i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide i:nil="true"/><a:businessDayConvention
+        i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:name>FRC_WL</a:name><a:pricingGroup><a:id>Live</a:id></a:pricingGroup><a:data><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2015-02-07T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.14</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2015-02-07T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.24</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>W</b:frequencyUnit></a:interval><a:maturityDate>2015-02-13T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.36</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>2</b:frequency><b:frequencyUnit>W</b:frequencyUnit></a:interval><a:maturityDate>2015-02-20T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.47</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>3</b:frequency><b:frequencyUnit>W</b:frequencyUnit></a:interval><a:maturityDate>2015-02-27T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.58</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-03-08T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>0.68</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>2</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-04-07T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>0.79</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>3</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-05-07T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>0.90</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>6</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-08-05T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>1.00</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>Y</b:frequencyUnit></a:interval><a:maturityDate>2016-02-06T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>1.11</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>2</b:frequency><b:frequencyUnit>Y</b:frequencyUnit></a:interval><a:maturityDate>2017-02-05T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>1.22</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>3</b:frequency><b:frequencyUnit>Y</b:frequencyUnit></a:interval><a:maturityDate>2018-02-05T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>1.33</a:value></a:FhlbsfDataPoint></a:data></a:FhlbsfMarketData></marketData></fhlbsfMarketDataResponse><fhlbsfMarketDataResponse><description/><requestTime>2015-02-06T09:49:50.6976938-08:00</requestTime><transactionResult>Success</transactionResult><marketData
+        xmlns:a="http://fhlbsf.com/schema/canonical/marketdata/v1"><a:FhlbsfMarketData><a:dayCountBasis>ACT/360</a:dayCountBasis><a:paymentFrequency
+        xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>0</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:paymentFrequency><a:snapTime>2015-02-06T09:49:50.6976938-08:00</a:snapTime><a:valueUnit
+        i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide i:nil="true"/><a:businessDayConvention
+        i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:name>FRC_AGCY</a:name><a:pricingGroup><a:id>Live</a:id></a:pricingGroup><a:data><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2015-02-07T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.14</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2015-02-07T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.24</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>W</b:frequencyUnit></a:interval><a:maturityDate>2015-02-13T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.36</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>2</b:frequency><b:frequencyUnit>W</b:frequencyUnit></a:interval><a:maturityDate>2015-02-20T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.47</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>3</b:frequency><b:frequencyUnit>W</b:frequencyUnit></a:interval><a:maturityDate>2015-02-27T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.58</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-03-08T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>0.68</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>2</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-04-07T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>0.79</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>3</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-05-07T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>0.90</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>6</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-08-05T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>1.00</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>Y</b:frequencyUnit></a:interval><a:maturityDate>2016-02-06T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>1.11</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>2</b:frequency><b:frequencyUnit>Y</b:frequencyUnit></a:interval><a:maturityDate>2017-02-05T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>1.22</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>3</b:frequency><b:frequencyUnit>Y</b:frequencyUnit></a:interval><a:maturityDate>2018-02-05T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>1.33</a:value></a:FhlbsfDataPoint></a:data></a:FhlbsfMarketData></marketData></fhlbsfMarketDataResponse><fhlbsfMarketDataResponse><description/><requestTime>2015-02-06T09:49:50.6976938-08:00</requestTime><transactionResult>Success</transactionResult><marketData
+        xmlns:a="http://fhlbsf.com/schema/canonical/marketdata/v1"><a:FhlbsfMarketData><a:dayCountBasis>ACT/360</a:dayCountBasis><a:paymentFrequency
+        xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>0</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:paymentFrequency><a:snapTime>2015-02-06T09:49:50.6976938-08:00</a:snapTime><a:valueUnit
+        i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide i:nil="true"/><a:businessDayConvention
+        i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:name>FRC_AAA</a:name><a:pricingGroup><a:id>Live</a:id></a:pricingGroup><a:data><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2015-02-07T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.14</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2015-02-07T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.24</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>W</b:frequencyUnit></a:interval><a:maturityDate>2015-02-13T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.36</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>2</b:frequency><b:frequencyUnit>W</b:frequencyUnit></a:interval><a:maturityDate>2015-02-20T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.47</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>3</b:frequency><b:frequencyUnit>W</b:frequencyUnit></a:interval><a:maturityDate>2015-02-27T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.58</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-03-08T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>0.68</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>2</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-04-07T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>0.79</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>3</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-05-07T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>0.90</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>6</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-08-05T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>1.00</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>Y</b:frequencyUnit></a:interval><a:maturityDate>2016-02-06T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>1.11</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>2</b:frequency><b:frequencyUnit>Y</b:frequencyUnit></a:interval><a:maturityDate>2017-02-05T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>1.22</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>3</b:frequency><b:frequencyUnit>Y</b:frequencyUnit></a:interval><a:maturityDate>2018-02-05T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>1.33</a:value></a:FhlbsfDataPoint></a:data></a:FhlbsfMarketData></marketData></fhlbsfMarketDataResponse><fhlbsfMarketDataResponse><description/><requestTime>2015-02-06T09:49:50.6976938-08:00</requestTime><transactionResult>Success</transactionResult><marketData
+        xmlns:a="http://fhlbsf.com/schema/canonical/marketdata/v1"><a:FhlbsfMarketData><a:dayCountBasis>ACT/360</a:dayCountBasis><a:paymentFrequency
+        xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>0</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:paymentFrequency><a:snapTime>2015-02-06T09:49:50.6976938-08:00</a:snapTime><a:valueUnit
+        i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide i:nil="true"/><a:businessDayConvention
+        i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:name>FRC_AA</a:name><a:pricingGroup><a:id>Live</a:id></a:pricingGroup><a:data><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2015-02-07T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.14</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2015-02-07T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.24</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>W</b:frequencyUnit></a:interval><a:maturityDate>2015-02-13T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.36</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>2</b:frequency><b:frequencyUnit>W</b:frequencyUnit></a:interval><a:maturityDate>2015-02-20T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.47</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>3</b:frequency><b:frequencyUnit>W</b:frequencyUnit></a:interval><a:maturityDate>2015-02-27T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>0.58</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-03-08T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>0.68</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>2</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-04-07T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>0.79</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>3</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-05-07T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>0.90</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>6</b:frequency><b:frequencyUnit>M</b:frequencyUnit></a:interval><a:maturityDate>2015-08-05T09:49:50.6976938-07:00</a:maturityDate></a:tenor><a:value>1.00</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>Y</b:frequencyUnit></a:interval><a:maturityDate>2016-02-06T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>1.11</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>2</b:frequency><b:frequencyUnit>Y</b:frequencyUnit></a:interval><a:maturityDate>2017-02-05T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>1.22</a:value></a:FhlbsfDataPoint><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>3</b:frequency><b:frequencyUnit>Y</b:frequencyUnit></a:interval><a:maturityDate>2018-02-05T09:49:50.6976938-08:00</a:maturityDate></a:tenor><a:value>1.33</a:value></a:FhlbsfDataPoint></a:data></a:FhlbsfMarketData></marketData></fhlbsfMarketDataResponse></responses></marketDataResponse></s:Body></s:Envelope>
+    http_version:
+  recorded_at: Fri, 06 Feb 2015 17:49:50 GMT
+recorded_with: VCR 2.9.3

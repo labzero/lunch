@@ -66,9 +66,29 @@ module MAPI
         }
       }.with_indifferent_access
 
-      def self.registered(app)
-        if app.environment == :production
-          @@mds_connection = Savon.client(
+      def self.is_weekend_or_holiday (maturity_date)
+        (@@holidays.include?(maturity_date.strftime('%F')) || maturity_date.saturday? || maturity_date.sunday?) ? true : false
+      end
+
+      def self.get_maturity_date (original_maturity_date, frequency_unit)
+        maturity_date = original_maturity_date
+        while MAPI::Services::Rates.is_weekend_or_holiday(maturity_date)
+          maturity_date = maturity_date + 1.day
+        end
+        if (frequency_unit == 'M' || frequency_unit == 'Y')
+          if (maturity_date > original_maturity_date.end_of_month)
+            maturity_date =  original_maturity_date.end_of_month
+            while MAPI::Services::Rates.is_weekend_or_holiday(maturity_date)
+              maturity_date = maturity_date - 1.day
+            end
+          end
+        end
+        maturity_date
+      end
+
+      def self.init_mds_connection(environment)
+        if environment == :production
+          @@mds_connection ||= Savon.client(
               wsdl: ENV['MAPI_MDS_ENDPOINT'],
               env_namespace: :soapenv,
               namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1', 'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'},
@@ -79,8 +99,24 @@ module MAPI
         else
           @@mds_connection = nil
         end
+      end
 
+      def self.init_cal_connection(environment)
+        if environment == :production
+          @@cal_connection ||= Savon.client(
+              wsdl: ENV['MAPI_CALENDAR_ENDPOINT'],
+              env_namespace: :soapenv,
+              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/businessCalendar/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1'},
+              element_form_default: :qualified,
+              namespace_identifier: :v1,
+              pretty_print_xml: true
+          )
+        else
+          @@cal_connection = nil
+        end
+      end
 
+      def self.registered(app)
         service_root '/rates', app
         swagger_api_root :rates do
           api do
@@ -205,7 +241,7 @@ module MAPI
             halt 404, 'Term Not Found'
           end
 
-          data = if @@mds_connection
+          data = if MAPI::Services::Rates.init_mds_connection(settings.environment)
             @@mds_connection.operations
             lookup_term = TERM_MAPPING[params[:term]]
             message = {
@@ -249,8 +285,24 @@ module MAPI
         end
 
         relative_get "/summary" do
+          MAPI::Services::Rates.init_cal_connection(settings.environment)
+          if @@cal_connection
+            message = {'v1:endDate' => Date.today + 3.years, 'v1:startDate' => Date.today}
+            begin
+              response = @@cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
+            rescue Savon::Error => error
+              halt 503, 'Internal Service Error'
+            end
+            response.doc.remove_namespaces!
+            @@holidays = response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')[0].css('days day date').map do |holiday|
+              Date.parse(holiday.content)
+            end
+          else
+            @@holidays = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'calendar_holidays.json')))
+          end
+
+          MAPI::Services::Rates.init_mds_connection(settings.environment)
           data = if @@mds_connection
-            @@mds_connection.operations
             request = LOAN_TYPES.collect do |type|
             {
               'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
@@ -265,32 +317,31 @@ module MAPI
               'v11:caller' => [{ 'v11:id' => ENV['MAPI_COF_ACCOUNT']}],
               'v1:requests' =>  [{'v1:fhlbsfMarketDataRequest' => request}]
             }
-            response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
-            namespaces = {'a' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns' => 'http://fhlbsf.com/schema/msg/marketdata/v1'}
-            if response.success? && response.doc.search('//xmlns:transactionResult', namespaces).text != 'Error'
-              hash = {}
-              response.doc.remove_namespaces!
-              fhlbsfresponse = response.doc.xpath('//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse')
-              LOAN_TYPES.each_with_index do |type, ctr_type|
-                hash[type] ||= {}
-                fhlbsfdatapoints = fhlbsfresponse[ctr_type].css('marketData FhlbsfMarketData data FhlbsfDataPoint')
-                LOAN_TERMS.each_with_index do |term, ctr_term|
-                  if ctr_term == 0
-                    ctr_term = 1
-                  end
-                  hash[type][term] = {
-                    'payment_on' => 'Maturity',
-                    'interest_day_count' => fhlbsfresponse[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
-                    'rate' => fhlbsfdatapoints[ctr_term-1].at_css('value').content,
-                    'maturity_date' => DateTime.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content)
-                  }
-                end
-              end
-              hash['timestamp'] = Time.now
-              hash
-            else
-              halt 503, 'Service Unavailable'
+            begin
+              response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
+            rescue Savon::Error => error
+              halt 503, 'Internal Service Error'
             end
+            hash = {}
+            response.doc.remove_namespaces!
+            fhlbsfresponse = response.doc.xpath('//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse')
+            LOAN_TYPES.each_with_index do |type, ctr_type|
+              hash[type] ||= {}
+              fhlbsfdatapoints = fhlbsfresponse[ctr_type].css('marketData FhlbsfMarketData data FhlbsfDataPoint')
+              LOAN_TERMS.each_with_index do |term, ctr_term|
+                if ctr_term == 0
+                  ctr_term = 1
+                end
+                hash[type][term] = {
+                  'payment_on' => 'Maturity',
+                  'interest_day_count' => fhlbsfresponse[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
+                  'rate' => fhlbsfdatapoints[ctr_term-1].at_css('value').content,
+                  'maturity_date' => MAPI::Services::Rates.get_maturity_date(Date.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content), TERM_MAPPING[term][:frequency_unit])
+                }
+              end
+            end
+            hash['timestamp'] = Time.now
+            hash
           else
             # We have no real data source yet.
             hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_summary.json'))).with_indifferent_access
@@ -298,7 +349,7 @@ module MAPI
             # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
             LOAN_TYPES.each do |type|
               LOAN_TERMS.each do |term|
-                hash[type][term][:maturity_date] = (Time.mktime(now.year, now.month, now.day, now.hour, now.min) + hash[type][term][:days_to_maturity].to_i.days).to_s
+                hash[type][term][:maturity_date] = MAPI::Services::Rates.get_maturity_date(DateTime.parse((Time.mktime(now.year, now.month, now.day, now.hour, now.min) + hash[type][term][:days_to_maturity].to_i.days).to_s), TERM_MAPPING[term][:frequency_unit])
               end
             end
             hash[:timestamp] = now

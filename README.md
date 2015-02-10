@@ -74,6 +74,7 @@ This is a summary of the options supported in our .env files:
 * `MAPI_FHLBSF_ACCOUNT`: FHLBSF account for getting Calypso data.
 * `SOAP_SECRET_KEY`: FHLBSF password for Market Data Service.
 * `MAPI_MDS_ENDPOINT`: FHLBSF endpoint for Market Data Service.
+* `MAPI_CALENDAR_ENDPOINT`: FHLBSF endpoint for Market Data Service.
 * `LDAP_HOST`: Hostname of the LDAP server.
 * `LDAP_PORT`: Port of the LDAP server.
 * `LDAP_ADMIN_USERNAME`: Username of the LDAP service account.
@@ -84,3 +85,4 @@ This is a summary of the options supported in our .env files:
 To run the unit tests and security analysis, use `rake ci:build`. If you want to run just the Rails unit test suite, use `rake spec`. To run the MAPI unit test suite, use `rake spec:api`. For integration tests (cucumber), run `cucumber`. The cucumber tests are not run as part of `rake ci:build`.
 
 All commits should pass `rake ci:build && cucumber` before being pushed.
+
