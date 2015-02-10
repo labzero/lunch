@@ -1,5 +1,5 @@
 Given(/^I am on the Messages Page$/) do
-  visit '/messages'
+  visit '/corporate_communications/all'
 end
 
 When(/^I click on the messages icon in the header$/) do
@@ -8,7 +8,7 @@ end
 
 Then(/^I should see a list of message categories in the sidebar$/) do
   [I18n.t('messages.categories.all'), I18n.t('messages.categories.community'), I18n.t('messages.categories.credit'), I18n.t('messages.categories.investor_relations'), I18n.t('messages.categories.misc'), I18n.t('messages.categories.technical_updates'), I18n.t('messages.categories.products')].each do |category|
-    page.assert_selector('.sidebar span', text: category)
+    page.assert_selector('.sidebar a', text: category)
   end
 end
 
@@ -17,16 +17,19 @@ Then(/^I should see "(.*?)" as the page's title$/) do |text|
 end
 
 When(/^I select the "(.*?)" filter in the sidebar$/) do |text|
-  page.find('.sidebar-filter span', text: text).click
+  page.find('.sidebar-filter a', text: text).click
 end
 
 Then(/^I should see the active state for the "(.*?)" sidebar item$/) do |text|
-  page.assert_selector('.sidebar-filter span.active', text: text)
+  page.assert_selector('.sidebar-filter a.active', text: text)
 end
 
-Then(/^I should only see "(.*?)" messages$/) do |text|
-  category = page.find('.sidebar-filter span', text: text)['data-sidebar-value']
-  page.all('table tr').each do |row|
-    expect(row['data-category']).to eq(category)
-  end
+When(/^I select the first message on the messages page$/) do
+  page.find('table.corporate-communications-index tr:first-child').click
+end
+
+Then(/^I should be see the message detail view$/) do
+  page.assert_selector('.corporate-communication-detail-actions')
+  page.assert_selector('.corporate-communication-detail-intro')
+  page.assert_selector('.corporate-communication-detail-reset')
 end

@@ -56,6 +56,10 @@ en:
     messages: Messages
     categories: Categories
     login: Log In
+    prior: Prior
+    next: Next
+    forward: Forward
+    print: Print
   nav:
     primary:
       welcome: Hi %{name}
@@ -129,7 +133,6 @@ en:
       view: View
       download: Download
       xml: XML
-      print: Print
     previous_activity:
       title: Previous Activity
       overnight_vrc: Overnight VRC Open
