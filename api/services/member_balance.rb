@@ -786,7 +786,9 @@ module MAPI
           if !check_date_format
             halt 400, "Invalid Date format of yyyy-mm-dd"
           else
-            if as_of_date.to_date >  Date.today()
+            now = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE)
+            today_date = now.to_date
+            if as_of_date.to_date >  today_date
               halt 400, "Invalid future date"
             end
           end
