@@ -1,9 +1,10 @@
-module ProcessCorpCom
-  require 'nokogiri'
-  require 'css_parser'
+namespace :process do
+  desc "Adds namespaced classes to corporate communication email bodies and returns the html body of the email"
+  task :corp_com, [:file_location] do |task, args|
+    require 'nokogiri'
+    require 'css_parser'
 
-  def prepend_style_tags(file_location)
-    original_email = Mail.read(file_location)
+    original_email = Mail.read(args.file_location)
     html = original_email.html_part.body.decoded
 
     doc = Nokogiri::HTML(html)
@@ -25,8 +26,5 @@ module ProcessCorpCom
     body.children.first.add_previous_sibling(style)
 
     body.inner_html
-
   end
-
-
 end
