@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe MAPI::ServiceApp do
   MEMBER_ID = 750
-
+  NOW = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE)
   before do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
   end
@@ -181,7 +181,6 @@ describe MAPI::ServiceApp do
         expect(capital_stock_activities['activities']).to eq([])
       end
       it 'should return expected hash and data type' do
-        # expect(result_set).to receive(:fetch).and_return(some_activity, nil)
         capital_stock_activities['activities'].each do |activity|
           expect(activity['cert_id']).to be_kind_of(String)
           expect(activity['share_number']).to be_kind_of(Numeric)
@@ -294,7 +293,6 @@ describe MAPI::ServiceApp do
 
       it 'should return the expected value for Standard collateral hash' do
         result_standard_collateral = borrowing_capacity_details['standard']['collateral']
-        # check the first row
         row = result_standard_collateral[0]
         expect(row['type']).to eq('BL SUMMARY - RESIDENTIAL')
         expect(row['count']).to eq(1)
@@ -574,9 +572,7 @@ describe MAPI::ServiceApp do
   end
 
   describe 'Advances Details' do
-    now = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE)
-    today_date = now.to_date
-    let(:as_of_date) {today_date}
+    let(:as_of_date) {NOW.to_date}
     let(:advances) { get "/member/#{MEMBER_ID}/advances_details/#{as_of_date}"; JSON.parse(last_response.body) }
     RSpec.shared_examples 'Advances Details endpoint' do
       it 'should return a date for as_of_date' do
@@ -638,8 +634,7 @@ describe MAPI::ServiceApp do
     end
 
     it 'invalid param or future date result in 400 error message' do
-      now = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE)
-      future_date = now.to_date + 1
+      future_date = NOW.to_date + 1
       get "/member/#{MEMBER_ID}/advances_details/12-12-2014"
       expect(last_response.status).to eq(400)
       get "/member/#{MEMBER_ID}/advances_details/#{future_date}"
@@ -647,9 +642,7 @@ describe MAPI::ServiceApp do
     end
 
     describe 'in the production environment with the date that is yesterday to get latest EOD image' do
-      now = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE)
-      latest_date = now.to_date - 1
-      let(:as_of_date) {latest_date}
+      let(:as_of_date) {NOW.to_date-1}
       let(:advances_current1) {{"ADVDET_ADVANCE_NUMBER"=> "330111", "ADVDET_CURRENT_PAR"=> 7000000, "ADV_DAY_COUNT"=>"ACT/ACT", "ADV_PAYMENT_FREQ"=> "ME",
                                 "ADX_INTEREST_RECEIVABLE"=> 10095.34, "ADX_NEXT_INT_PAYMENT_DATE"=> "02-FEB-2015 12:00 AM", "ADVDET_INTEREST_RATE"=> 1.88,
                                 "ADVDET_ISSUE_DATE"=> "23-SEP-2013 12:00 AM", "ADVDET_MATURITY_DATE"=> "24-SEP-2018 12:00 AM", "ADVDET_MNEMONIC"=> "FRC",
@@ -691,9 +684,7 @@ describe MAPI::ServiceApp do
       end
     end
     describe 'in the production environment with the date that yesterday to get current image' do
-      now = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE)
-      latest_date = now.to_date - 1
-      let(:as_of_date) {latest_date}
+      let(:as_of_date) {NOW.to_date-1}
       let(:advances_current1) {{"ADVDET_ADVANCE_NUMBER"=> "330113", "ADVDET_CURRENT_PAR"=> 7000000, "ADV_DAY_COUNT"=>"A360", "ADV_PAYMENT_FREQ"=> "M",
                                 "ADX_INTEREST_RECEIVABLE"=> 10095.34, "ADX_NEXT_INT_PAYMENT_DATE"=> "02-FEB-2015 12:00 AM", "ADVDET_INTEREST_RATE"=> 1.88,
                                 "ADVDET_ISSUE_DATE"=> "23-SEP-2013 12:00 AM", "ADVDET_MATURITY_DATE"=> "24-SEP-2018 12:00 AM", "ADVDET_MNEMONIC"=> "FRC",
@@ -789,9 +780,7 @@ describe MAPI::ServiceApp do
     end
 
     describe 'in the production environment with the date that is yesterday but no current image and should get historical image' do
-      now = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE)
-      latest_date = now.to_date - 1
-      let(:as_of_date) {latest_date}
+      let(:as_of_date) {NOW.to_date-1}
       let(:advances_historical){{"ADVDET_ADVANCE_NUMBER"=> "330004", "ADVDET_CURRENT_PAR"=> 3000000, "ADV_DAY_COUNT"=> "A365",
                                  "ADV_PAYMENT_FREQ"=> "S", "ADX_INTEREST_RECEIVABLE"=>  6305.75, "ADX_NEXT_INT_PAYMENT_DATE"=> "28-FEB-2014 12:00 AM",
                                  "ADVDET_INTEREST_RATE"=> 2.74, "ADVDET_ISSUE_DATE"=> "23-SEP-2013 12:00 AM", "ADVDET_MATURITY_DATE"=>  "31-DEC-2018 12:00 AM",
@@ -856,9 +845,7 @@ describe MAPI::ServiceApp do
       end
     end
     describe 'in the production environment with the date that is older than yesterday should only retrieve once from database' do
-      now = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE)
-      latest_date = now.to_date - 1
-      let(:as_of_date) {latest_date}
+      let(:as_of_date) {NOW.to_date-1}
       let(:advances_historical){{"ADVDET_ADVANCE_NUMBER"=> "330006", "ADVDET_CURRENT_PAR"=> 3000000, "ADV_DAY_COUNT"=> "ACT/365",
                                  "ADV_PAYMENT_FREQ"=> "13W", "ADX_INTEREST_RECEIVABLE"=>  6305.75, "ADX_NEXT_INT_PAYMENT_DATE"=> "28-FEB-2014 12:00 AM",
                                  "ADVDET_INTEREST_RATE"=> 2.74, "ADVDET_ISSUE_DATE"=> "23-SEP-2013 12:00 AM", "ADVDET_MATURITY_DATE"=>  "31-DEC-2018 12:00 AM",
