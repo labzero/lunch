@@ -60,11 +60,28 @@ RSpec.describe CorporateCommunicationsController, :type => :controller do
       get :show, category: 'misc', id: corporate_communication
       expect(assigns[:message]).to eq(corporate_communication)
     end
-    it 'raises an error if the corporate communication id cannot be found' do
-      expect{get :show, category: 'misc', id: (corporate_communication.id - 1)}.to raise_error
-    end
-    it 'raises an error if the corporate communication id is found but does not match the given category' do
-      expect{get :show, category: 'community', id: corporate_communication.id}.to raise_error
+    describe 'setting the @prior_message and @next_message instance variables' do
+      before do
+        @message_1 = ::FactoryGirl.create(:corporate_communication)
+        @message_2 = ::FactoryGirl.create(:corporate_communication)
+        @message_3 = ::FactoryGirl.create(:corporate_communication)
+      end
+      it 'sets @prior_message to the message just before the currently selected message in a given category' do
+        get :show, category: 'all', id: @message_2.id
+        expect(assigns[:prior_message]).to eq(@message_1)
+      end
+      it 'does not set @prior_message if the currently selected message is the first in a given category' do
+        get :show, category: 'all', id: @message_1.id
+        expect(assigns[:prior_message]).to be_nil
+      end
+      it 'sets @next_message to the message just after the currently selected message in a given category' do
+        get :show, category: 'all', id: @message_2.id
+        expect(assigns[:next_message]).to eq(@message_3)
+      end
+      it 'does not set @next_message if the currently selected message is the last in a given category' do
+        get :show, category: 'all', id: @message_3.id
+        expect(assigns[:next_message]).to be_nil
+      end
     end
   end
 

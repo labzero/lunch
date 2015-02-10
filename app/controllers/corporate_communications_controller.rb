@@ -26,6 +26,19 @@ class CorporateCommunicationsController < ApplicationController
     else
       @message = CorporateCommunication.find_by!(id: params[:id], category: @filter)
     end
+    message_service = MessageService.new
+    messages_array = message_service.corporate_communications(@filter)
+    messages_length = messages_array.count
+    message_index = messages_array.index { |message| message.email_id == @message.email_id }
+    # for linking to 'prior' and 'next' messages in a given category
+    if message_index != 0 && (message_index + 1) < messages_length
+      @prior_message = messages_array[message_index - 1]
+      @next_message = messages_array[message_index + 1]
+    elsif message_index == 0 && (message_index + 1) < messages_length
+      @next_message = messages_array[message_index + 1]
+    elsif message_index != 0 && (message_index + 1) == messages_length
+      @prior_message = messages_array[message_index - 1]
+    end
   end
 
 end

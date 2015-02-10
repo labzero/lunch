@@ -46,6 +46,14 @@
 
 .corporate-communication-detail-navigation {
   float: left;
+  a {
+    background-color: $secondary-gray;
+    cursor: default;
+    &.active {
+      background-color: $actionable-blue;
+      cursor: pointer;
+    }
+  }
   .icon-arrow-left-before:before {
     margin-right: 12px;
   }
@@ -64,10 +72,12 @@
 .corporate-communication-detail-actions {
   @extend %clearfix;
   margin-bottom: 25px;
-  button {
+  button, a {
     @extend %typography-subtitle;
     width: 110px;
     box-sizing: border-box;
+    color: $white;
+    text-align: center;
     &:last-child {
       margin-left: 8px;
     }
