@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe MAPI::ServiceApp do
   MEMBER_ID = 750
-  let!(:as_of_date)  {Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE).to_date-1}
+  let(:as_of_date)  {Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE).to_date-1}
 
 
   before do
