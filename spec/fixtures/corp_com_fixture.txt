@@ -1,0 +1,134 @@
+                                                                                                                                                                                                                                                               
+Delivered-To: dave@labzero.com
+Received: by 10.170.187.146 with SMTP id d140csp136810yke;
+        Thu, 15 Jan 2015 13:26:10 -0800 (PST)
+X-Received: by 10.170.127.5 with SMTP id t5mr8545328ykb.2.1421357170679;
+        Thu, 15 Jan 2015 13:26:10 -0800 (PST)
+Return-Path: <v-cnjldfi_bmmecfgmae_cdofemmk_cdofemmk_a@bounce.mkt1700.com>
+Received: from mail1843.federalhomeloan.mkt1700.com (mail1843.federalhomeloan.mkt1700.com. [208.85.53.43])
+        by mx.google.com with ESMTP id o53si1026563yho.210.2015.01.15.13.26.10
+        for <dave@labzero.com>;
+        Thu, 15 Jan 2015 13:26:10 -0800 (PST)
+Received-SPF: pass (google.com: domain of v-cnjldfi_bmmecfgmae_cdofemmk_cdofemmk_a@bounce.mkt1700.com designates 208.85.53.43 as permitted sender) client-ip=208.85.53.43;
+Authentication-Results: mx.google.com;
+       spf=pass (google.com: domain of v-cnjldfi_bmmecfgmae_cdofemmk_cdofemmk_a@bounce.mkt1700.com designates 208.85.53.43 as permitted sender) smtp.mail=v-cnjldfi_bmmecfgmae_cdofemmk_cdofemmk_a@bounce.mkt1700.com;
+       dkim=fail header.i=@info.fhlbsf.com
+DKIM-Signature: v=1; a=rsa-sha1; c=relaxed/relaxed; s=spop; d=info.fhlbsf.com;
+ h=Date:From:Reply-To:To:Message-ID:Subject:MIME-Version:Content-Type:List-Unsubscribe; i=marketing@info.fhlbsf.com;
+ bh=8CK2vcWfMkk1bY/lYqvTz3chXeA=;
+ b=Qv7ex9ppKtLNpvkpGojLvh3GbVwO2iHQG6qEmyRxuECj2TabSlyqK2cl/yBkxz4KDwwXQqfrVgO+
+   ggEqX+IBIg==
+DomainKey-Signature: a=rsa-sha1; c=nofws; q=dns; s=spop; d=info.fhlbsf.com;
+ b=UsDytzDYL1XLw39RhPp8O0BHsQVajcFWS+LBsM0uehIlSDo2a6xCmGgzVva3V7ZaXP+8CnUEmSJO
+   lHE52g+zxw==;
+Received: by mail1843.federalhomeloan.mkt1700.com id hn0o7419if4c for <dave@labzero.com>; Thu, 15 Jan 2015 21:26:09 +0000 (envelope-from <v-cnjldfi_bmmecfgmae_cdofemmk_cdofemmk_a@bounce.mkt1700.com>)
+Date: Thu, 15 Jan 2015 21:26:09 +0000 (GMT)
+From: FHLBank San Francisco <marketing@info.fhlbsf.com>
+Reply-To: marketing@info.fhlbsf.com
+To: dave@labzero.com
+Message-ID: <305182683.1342369051421357169664.JavaMail.app@rbg42.atlis1>
+Subject: Test HTML - Join Us January 18 for the NAHB Annual Dinner!
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="----=_Part_580902_1782822442.1421357169642"
+x-mid: 47821656
+x-job: 47821656
+x-rpcampaign: sp47821656
+x-orgId: 26686
+List-Unsubscribe: <mailto:v-cnjldfi_bmmecfgmae_cdofemmk_cdofemmk_a@bounce.mkt1700.com?subject=Unsubscribe>
+
+------=_Part_580902_1782822442.1421357169642
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<html><head><title>FHLBank San Francisco | Announcement</title><style type=
+=3D"text/css">
+a {
+=09=09color: #366
+=09}
+p {
+=09=09font-family: Verdana, Geneva, sans-serif;
+=09=09font-size:11px;
+=09=09line-height:18px;
+=09=09font-weight:normal;
+=09=09color:#222
+=09}</style></head><body><p><span style=3D"font-family: Arial;font-size: 10=
+pt;">You are receiving this email as a test mailing. Some contents of this =
+email may not display and/or behave properly.  <a href=3D"http://links.mkt4=
+1.net/ui/static/TestMailingMore.html">Learn more...</a></span></p><!--Map f=
+or fhlbsf.com homepage hyperlink in top banner--><p><map id=3D"top_banner" =
+name=3D"top_banner"><area shape=3D"rect" alt=3D"FHLBank San Francisco" coor=
+ds=3D"600,9,690,40" name=3D"www_fhlbsf_com"  href=3D"http://links.mkt1700.c=
+om/ctt?kn=3D2&ms=3DNDc4MjE2NTYS1&r=3DMTIzNTQ5ODcxMTA4S0&b=3D0&j=3DNjAyMjI5O=
+TYyS0&mt=3D1&rt=3D0" /></map><!--Email Table 700px centered--></p><table he=
+ight=3D"583" cellspacing=3D"0" cellpadding=3D"0" width=3D"704" align=3D"cen=
+ter" border=3D"0"><tr><!--Read online link to silverpop--><td width=3D"700"=
+ colspan=3D"2" align=3D"center" style=3D"font-size: 9px; font-family: Verda=
+na,Geneva,sans-serif; color: rgb(0,0,0); padding-bottom: 5px; padding-top: =
+5px; padding-left: 5px; padding-right: 5px">Read <a target=3D"_blank" xt=3D=
+"SPCLICKTOVIEW"  href=3D"http://links.mkt1700.com/servlet/MailView?ms=3DNDc=
+4MjE2NTYS1&r=3DMTIzNTQ5ODcxMTA4S0&j=3DNjAyMjI5OTYyS0&mt=3D1&rt=3D0" name=3D=
+"Read Online">online</a>.</td></tr><tr><!--Top Banner--><td colspan=3D"2" s=
+tyle=3D"border-top: #bbb 1px solid; border-right: #bbb 1px solid; border-bo=
+ttom: #bbb 1px solid; border-left: #bbb 1px solid"><img border=3D"0"  alt=
+=3D"" width=3D"700" height=3D"150"    src=3D'http://contentz.mkt1700.com/ra=
+/2015/26686/01/47821656/LA_NAHB_STDfinal_122.jpg' /></td></tr><tr><!--Left =
+Body Column--><td valign=3D"top" width=3D"175" style=3D"border-left: rgb(20=
+4,204,204) 1px solid"><table cellspacing=3D"0" cellpadding=3D"0" width=3D"1=
+75" border=3D"0"><tr><td valign=3D"top" style=3D"font-size: 11px; font-fami=
+ly: Verdana,Arial,Helvetica,sans-serif; color: rgb(34,34,34); padding-top: =
+20px; padding-left: 10px; line-height: 16px"><p>December 22, 2014</p></td><=
+/tr><tr><td valign=3D"top" style=3D"font-size: 11px; font-family: Verdana,A=
+rial,Helvetica,sans-serif; font-weight: normal; color: rgb(34,34,34); paddi=
+ng-bottom: 10px; padding-left: 10px; line-height: 16px"><p></p></td></tr></=
+table></td><!--Right Body Column--><td valign=3D"top" width=3D"522" style=
+=3D"border-right: rgb(204,204,204) 1px solid; border-left: rgb(204,204,204)=
+ 1px solid"><table cellspacing=3D"0" cellpadding=3D"0" width=3D"522" border=
+=3D"0"><tr><td valign=3D"top" align=3D"left" style=3D"font-size: 11px; font=
+-family: Verdana,Arial,Helvetica,sans-serif; font-weight: normal; color: rg=
+b(34,34,34); padding-bottom: 10px; padding-top: 20px; padding-left: 10px; l=
+ine-height: 18px; padding-right: 14px"><p>We look forward to seeing you at =
+the National Association of Home Builders Annual Leadership Dinner.<br /><b=
+r /><strong>Your Hosts:</strong><br />Federal Home Loan Bank of San Francis=
+co and the<br />Council of Federal Home Loan Banks <br /><br /><strong>Sund=
+ay, January 18, 2015</strong><br />7:00&nbsp;pm &nbsp;Reception<br />8:00 p=
+m &nbsp;Dinner</p><p><a target=3D"_blank"  href=3D"http://links.mkt1700.com=
+/ctt?kn=3D3&ms=3DNDc4MjE2NTYS1&r=3DMTIzNTQ5ODcxMTA4S0&b=3D0&j=3DNjAyMjI5OTY=
+yS0&mt=3D1&rt=3D0" name=3D"Eventbrite_1">RSVP</a>&nbsp;by January 12, 2015,=
+ or&nbsp;contact <a target=3D"_blank"  href=3D"mailto:blackbur@fhlbsf.com?s=
+ubject=3DNAHB%20Annual%20Leadership%20Dinner" name=3D"Kevin B email_1">Kevi=
+n Blackburn</a>&nbsp;at (415) 616-2572 for&nbsp;additional information. Thi=
+s invitation is not transferable. One&nbsp;guest per attendee.<br />&nbsp;<=
+br /><a target=3D"_blank"  href=3D"http://links.mkt1700.com/ctt?kn=3D1&ms=
+=3DNDc4MjE2NTYS1&r=3DMTIzNTQ5ODcxMTA4S0&b=3D0&j=3DNjAyMjI5OTYyS0&mt=3D1&rt=
+=3D0" name=3D"Bazaar_1">Bazaar Meat by Jos&eacute; Andr&eacute;s</a><br />S=
+LS Las Vegas Hotel<br />2535 South Las Vegas Boulevard<br />Las Vegas, NV 8=
+9109<br />&nbsp;<br />We look forward to seeing you on January 18!</p><p>&n=
+bsp;</p></td></tr></table></td></tr><tr><!--Bank Address--><td valign=3D"to=
+p" width=3D"700" colspan=3D"2" style=3D"font-size: 9px; border-top: rgb(204=
+,204,204) 1px solid; font-family: Verdana,sans-serif; color: rgb(119,119,11=
+9); padding-top: 10px; line-height: 13px"><strong>Federal Home Loan Bank of=
+ San Francisco</strong> &nbsp;600 California Street, Suite 300, San Francis=
+co, California 94108</td></tr><tr><!--Disclaimer--><td valign=3D"top" width=
+=3D"700" colspan=3D"2" style=3D"font-size: 9px; font-family: Verdana,sans-s=
+erif; color: rgb(119,119,119); padding-top: 5px; line-height: 13px">The con=
+tents of this email, together with any attachments, are intended only for t=
+he use of the individual or entity to which they are addressed and may cont=
+ain information that is legally privileged, confidential, and exempt from d=
+isclosure. If you are not the intended recipient, you are hereby notified t=
+hat any dissemination, distribution, or copying of this email, or any attac=
+hment, is strictly prohibited. If you have received this email in error, pl=
+ease: (i) reply immediately to this email indicating that you received this=
+ communication in error; and (ii) promptly delete this message, along with =
+any attachments, from your computer. Thank you.</td></tr><tr><!--Opt out an=
+d Copyright--><td valign=3D"top" width=3D"700" colspan=3D"2" style=3D"font-=
+size: 9px; font-family: Verdana,sans-serif; color: rgb(119,119,119); paddin=
+g-top: 10px; padding-left: 0px; line-height: 13px">If you do not wish to re=
+ceive this information in the future, please <a target=3D"_blank"  href=3D"=
+mailto:websupport@fhlbsf.com?subject=3DOpt%20Out" name=3D"Opt Out_1">notify=
+ us</a>.<br /><br />&copy; 2014 Federal Home Loan Bank of San Francisco. Al=
+l rights reserved.</td></tr></table><IMG src=3D"http://open.mkt1700.com/ope=
+n/log/47821656/MTIzNTQ5ODcxMTA4S0/0/NjAyMjI5OTYyS0/1/0"></body></html>
+
+
+------=_Part_580902_1782822442.1421357169642--
