@@ -159,4 +159,15 @@
     }
   }
 
+  &.single {
+    .calendar {
+      margin: 0 auto;
+      border-right: none;
+      td.in-range {
+        background: $white;
+        color: $text-color;
+      }
+    }
+  }
+
 }

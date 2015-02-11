@@ -13,7 +13,7 @@
         = text_field_tag :start_date, @start_date, class: 'datepicker-input-field'
         = text_field_tag :end_date, @end_date, class: 'datepicker-input-field'
         .report-datepicker
-          = render 'shared/date_picker', presets: @picker_presets, form: '.report-inputs form'
+          = render 'shared/date_picker', presets: @picker_presets, form: '.report-inputs form', single_date_picker: @single_date_picker
         .report-filter
           = render 'shared/dropdown', dropdown_name: 'sta_filter', default_value: @filter, default_text: @filter_text, dropdown_options: @filter_options
   .report-main-body

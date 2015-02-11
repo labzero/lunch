@@ -60,6 +60,8 @@ en:
     next: Next
     forward: Forward
     print: Print
+    as_of: As of
+    today: Today
   nav:
     primary:
       welcome: Hi %{name}
@@ -75,8 +77,7 @@ en:
       this_month: "%{month} to date"
       custom: Custom date range
     single:
-      this_month: As of Today
-      custom: Custom date
+      input: "As of {replace_date}"
   settings:
     title: Settings
     save: Save
