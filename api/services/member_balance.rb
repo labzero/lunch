@@ -898,7 +898,6 @@ module MAPI
             # if date is yesterday or later, get data from the lastest view
             if as_of_date.to_date >  today_date  - 2
               rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_latest.json'))).sample
-              # advances_details_records = rows.sample
               rows.collect! do |details|
                 if details['ADVDET_MATURITY_DATE'].to_date < as_of_date.to_date
                   details['ADVDET_MATURITY_DATE'] = as_of_date.to_date + (1 + rand(30))
