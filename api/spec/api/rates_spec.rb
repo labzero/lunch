@@ -73,6 +73,21 @@ describe MAPI::ServiceApp do
       expect(rate_summary[:timestamp]).to be_kind_of(String)
     end
 
+    it "should always call get_maturity_date" do
+      expect(MAPI::Services::Rates).to receive(:get_maturity_date).at_least(48).with(kind_of(Date), kind_of(String))
+      get '/rates/summary'
+    end
+
+    it "should set maturity date to get maturity date" do
+      maturity_date = 'foobar'
+      allow(MAPI::Services::Rates).to receive(:get_maturity_date).and_return(maturity_date)
+      loan_types.each do |loan_type|
+        loan_terms.each do |loan_term|
+          expect(rate_summary[loan_type][loan_term][:maturity_date]).to eq(maturity_date)
+        end
+      end
+    end
+
     describe "in the production environment" do
       before do
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
@@ -115,4 +130,5 @@ describe MAPI::ServiceApp do
       expect(MAPI::Services::Rates.get_maturity_date(Date.parse('2015-01-31'), 'Y')).to eq(Date.parse('2015-01-30'))
     end
   end
+
 end
