@@ -7,7 +7,7 @@ When(/^I click on the messages icon in the header$/) do
 end
 
 Then(/^I should see a list of message categories in the sidebar$/) do
-  [I18n.t('messages.categories.all'), I18n.t('messages.categories.community'), I18n.t('messages.categories.credit'), I18n.t('messages.categories.investor_relations'), I18n.t('messages.categories.misc'), I18n.t('messages.categories.technical_updates'), I18n.t('messages.categories.products')].each do |category|
+  [I18n.t('messages.categories.all'), I18n.t('messages.categories.community_program'),  I18n.t('messages.categories.community_works'), I18n.t('messages.categories.collateral'), I18n.t('messages.categories.investor_relations'), I18n.t('messages.categories.accounting'), I18n.t('messages.categories.educational'), I18n.t('messages.categories.products')].each do |category|
     page.assert_selector('.sidebar a', text: category)
   end
 end

@@ -49,15 +49,15 @@ RSpec.describe CorporateCommunicationsController, :type => :controller do
 
   describe 'GET show' do
     it_behaves_like 'a user required action', :get, :category, category: 'all', id: ::FactoryGirl.build(:corporate_communication)
-    let(:corporate_communication) { ::FactoryGirl.create(:corporate_communication, category: 'misc') }
+    let(:corporate_communication) { ::FactoryGirl.create(:corporate_communication, category: 'accounting') }
     it 'sets @message to the appropriate CorporateCommunication record if `all` is given as the category argument' do
       expect(CorporateCommunication).to receive(:find).with(corporate_communication.id.to_s).and_call_original
       get :show, category: 'all', id: corporate_communication
       expect(assigns[:message]).to eq(corporate_communication)
     end
     it 'sets @message to the appropriate CorporateCommunication record given the proper category' do
-      expect(CorporateCommunication).to receive(:find_by!).with({:id => corporate_communication.id.to_s, :category => 'misc'}).and_call_original
-      get :show, category: 'misc', id: corporate_communication
+      expect(CorporateCommunication).to receive(:find_by!).with({:id => corporate_communication.id.to_s, :category => 'accounting'}).and_call_original
+      get :show, category: 'accounting', id: corporate_communication
       expect(assigns[:message]).to eq(corporate_communication)
     end
     describe 'setting the @prior_message and @next_message instance variables' do
