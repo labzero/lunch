@@ -1,5 +1,5 @@
 - setting_types = %w(account password quick_advance quick_report email)
-- email_options = %w(reports investor_relations miscellaneous products credit technical community)
+- email_options = %w(reports investor_relations accounting products collateral community_program community_works educational)
 .row.sidebar-row
   %aside.sidebar.column-2x10-left
     = render 'shared/sidebar', sidebar_label: t('settings.title'), sidebar_options: @sidebar_options, sidebar_name: 'settings_nav', default_value: t('settings.email.title'), sidebar_type: 'nav'
