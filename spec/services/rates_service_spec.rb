@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe RatesService do
   let(:member_id) {double(MEMBER_ID)}
-  subject { RatesService.new }
+  subject { RatesService.new(double('request', uuid: '12345')) }
   it { expect(subject).to respond_to(:overnight_vrc) }
   it { expect(subject).to respond_to(:quick_advance_rates) }
   describe "`overnight_vrc` method", :vcr do

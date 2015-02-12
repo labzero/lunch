@@ -96,7 +96,7 @@ class ReportsController < ApplicationController
 
   def capital_stock_activity
     default_dates = default_dates_hash
-    member_balances = MemberBalanceService.new(MEMBER_ID)
+    member_balances = MemberBalanceService.new(MEMBER_ID, request)
     @start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
     @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
@@ -105,7 +105,7 @@ class ReportsController < ApplicationController
   end
 
   def borrowing_capacity
-    member_balances = MemberBalanceService.new(MEMBER_ID)
+    member_balances = MemberBalanceService.new(MEMBER_ID, request)
     date = params[:end_date] || Date.today
     @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(date.to_date)
     raise StandardError, "There has been an error and ReportsController#borrowing_capacity has returned nil. Check error logs." if @borrowing_capacity_summary.blank?
@@ -113,7 +113,7 @@ class ReportsController < ApplicationController
 
   def settlement_transaction_account
     default_dates = default_dates_hash
-    member_balances = MemberBalanceService.new(MEMBER_ID)
+    member_balances = MemberBalanceService.new(MEMBER_ID, request)
     @start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
     @daily_balance_key = MemberBalanceService::DAILY_BALANCE_KEY

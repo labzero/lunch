@@ -1,8 +1,4 @@
-class EtransactAdvancesService
-
-  def initialize
-    @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint, headers: {:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""}
-  end
+class EtransactAdvancesService < MAPIService
 
   def etransact_active?
     begin

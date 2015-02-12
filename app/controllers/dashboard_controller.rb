@@ -6,8 +6,8 @@ class DashboardController < ApplicationController
   ADVANCE_TERMS = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
 
   def index
-    rate_service = RatesService.new
-    etransact_service = EtransactAdvancesService.new
+    rate_service = RatesService.new(request)
+    etransact_service = EtransactAdvancesService.new(request)
 
     @previous_activity = [
       [t('dashboard.previous_activity.overnight_vrc'), 44503000, DateTime.new(2014,9,3)],
@@ -53,7 +53,7 @@ class DashboardController < ApplicationController
     }];
 
 
-    member_balances = MemberBalanceService.new(MEMBER_ID)
+    member_balances = MemberBalanceService.new(MEMBER_ID, request)
 
 
     @pledged_collateral = member_balances.pledged_collateral
@@ -81,9 +81,9 @@ class DashboardController < ApplicationController
   end
 
   def quick_advance_rates
-    etransact_service = EtransactAdvancesService.new
+    etransact_service = EtransactAdvancesService.new(request)
     @quick_advances_active = etransact_service.etransact_active?
-    rate_data = RatesService.new.quick_advance_rates(MEMBER_ID)
+    rate_data = RatesService.new(request).quick_advance_rates(MEMBER_ID)
     render partial: 'quick_advance_table_rows', locals: {rate_data: rate_data, advance_terms: ADVANCE_TERMS, advance_types: ADVANCE_TYPES}
   end
 
@@ -92,7 +92,7 @@ class DashboardController < ApplicationController
     advance_type = rate_data[:advance_type]
     advance_term = rate_data[:advance_term]
     advance_rate = rate_data[:advance_rate].to_f
-    preview = RatesService.new.quick_advance_preview(MEMBER_ID, advance_type, advance_term, advance_rate)
+    preview = RatesService.new(request).quick_advance_preview(MEMBER_ID, advance_type, advance_term, advance_rate)
     render partial: 'quick_advance_preview', locals: preview # key names received from RatesService.new.quick_advance_preview must match variable names in partial
   end
 
@@ -101,13 +101,13 @@ class DashboardController < ApplicationController
     advance_type = rate_data[:advance_type]
     advance_term = rate_data[:advance_term]
     advance_rate = rate_data[:advance_rate].to_f
-    confirmation = RatesService.new.quick_advance_confirmation(MEMBER_ID, advance_type, advance_term, advance_rate)
+    confirmation = RatesService.new(request).quick_advance_confirmation(MEMBER_ID, advance_type, advance_term, advance_rate)
     render json: confirmation # this will likely become a partial once we have designs for the confirmation dialog
   end
 
   def current_overnight_vrc
-    etransact_service = EtransactAdvancesService.new
-    response = RatesService.new.current_overnight_vrc || {}
+    etransact_service = EtransactAdvancesService.new(request)
+    response = RatesService.new(request).current_overnight_vrc || {}
     response[:quick_advances_active] = etransact_service.etransact_active?
     render json: response
   end
