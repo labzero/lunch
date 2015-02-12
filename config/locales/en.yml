@@ -380,9 +380,11 @@ en:
     edit_email_settings_html: Edit your <a href=%{url}>Email Settings</a> to choose which messages you want to receive via email.
     categories:
       all: All Messages
-      investor_relations: Investor Relations & Disclosure
-      misc: Misc Corporate
+      investor_relations: Shareholder Communications / Investor Relations
+      accounting: Accounting Communications
       products: Products and Services
-      credit: Credit & Collateral
-      technical_updates: Technical & Operational Updates
-      community: Community Programs
+      collateral: Collateral Pledging
+      community_program: Community Programs
+      community_works: "Community Works Quarterly E\u2011newsletter"
+      educational: Educational and Networking Events
+

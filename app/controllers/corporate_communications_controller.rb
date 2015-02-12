@@ -4,11 +4,12 @@ class CorporateCommunicationsController < ApplicationController
     @sidebar_options = [
         [I18n.t('messages.categories.all'), corporate_communications_path('all')],
         [I18n.t('messages.categories.investor_relations'), corporate_communications_path('investor_relations')],
-        [I18n.t('messages.categories.misc'), corporate_communications_path('misc')],
+        [I18n.t('messages.categories.accounting'), corporate_communications_path('accounting')],
         [I18n.t('messages.categories.products'), corporate_communications_path('products')],
-        [I18n.t('messages.categories.credit'), corporate_communications_path('credit')],
-        [I18n.t('messages.categories.technical_updates'), corporate_communications_path('technical_updates')],
-        [I18n.t('messages.categories.community'), corporate_communications_path('community')]
+        [I18n.t('messages.categories.collateral'), corporate_communications_path('collateral')],
+        [I18n.t('messages.categories.community_program'), corporate_communications_path('community_program')],
+        [I18n.t('messages.categories.community_works'), corporate_communications_path('community_works')],
+        [I18n.t('messages.categories.educational'), corporate_communications_path('educational')]
     ]
     @filter = params[:category]
     raise 'invalid category' unless CorporateCommunication::VALID_CATEGORIES.include?(@filter) || @filter == 'all'
