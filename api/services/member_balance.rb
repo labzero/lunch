@@ -975,16 +975,14 @@ module MAPI
             else
               open_vrc = false
             end
-            # handle for data prior 2013 March which has no next interest payment date
-            estimated_next_interest_payment = row['ADX_NEXT_INT_PAYMENT_DATE'].to_date if row['ADX_NEXT_INT_PAYMENT_DATE']
             reformat_hash = {'trade_date' => row['TRADE_DATE'].to_date,
                              'funding_date' => row['ADVDET_ISSUE_DATE'].to_date,
                              'maturity_date' => maturity_date,
-                             'current_par' => (row['ADVDET_CURRENT_PAR'] || 0),
+                             'current_par' => (row['ADVDET_CURRENT_PAR'] || 0).round,
                              'interest_rate' => (row['ADVDET_INTEREST_RATE'] || 0).to_f.round(5),
-                             'next_interest_pay_date' => estimated_next_interest_payment,
-                             'accrued_interest' => row['ADX_INTEREST_RECEIVABLE'],
-                             'estimated_next_interest_payment' => row['FUTURE_INTEREST'],
+                             'next_interest_pay_date' => (row['ADX_NEXT_INT_PAYMENT_DATE'].to_date if row['ADX_NEXT_INT_PAYMENT_DATE']),
+                             'accrued_interest' => (row['ADX_INTEREST_RECEIVABLE'].to_f if row['ADX_INTEREST_RECEIVABLE']),
+                             'estimated_next_interest_payment' => (row['FUTURE_INTEREST'].to_f if row['FUTURE_INTEREST']),
                              'interest_payment_frequency' => payment_frequency_description,
                              'day_count_basis' => day_count_basis_description,
                              'advance_type' => row['ADVDET_MNEMONIC'],
