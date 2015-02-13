@@ -1,5 +1,4 @@
 - setting_types = %w(account password quick_advance quick_report email)
-- email_options = %w(reports investor_relations miscellaneous products credit technical community)
 .row.sidebar-row
   %aside.sidebar.column-2x10-left
     = render 'shared/sidebar', sidebar_label: t('settings.title'), sidebar_options: @sidebar_options, sidebar_name: 'settings_nav', default_value: t('settings.email.title'), sidebar_type: 'nav'
@@ -8,7 +7,7 @@
       %section.settings-email
         %h1= t('settings.email.header')
         %table
-          - email_options.each_with_index do |email_option, index|
+          - @email_options.each_with_index do |email_option, index|
             - checked = cookies["settings_email_options_#{email_option}"] == 'true'
             %tr{class: "settings-email-#{email_option}-row #{'settings-item-required' if index == 1} #{'settings-item-checked' if checked}"}
               %td= t("settings.email.#{email_option}.title")

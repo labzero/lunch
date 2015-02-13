@@ -16,6 +16,13 @@ RSpec.describe SettingsController, :type => :controller do
         expect(option.last).to be_kind_of(String)
       end
     end
+    it 'should set @email_options as an array of email categories with reports in front' do
+      get :index
+      expect(assigns[:email_options]).to be_kind_of(Array)
+      expect(assigns[:email_options].first).to eq('reports')
+      expect(assigns[:email_options][1..-1]).to eq(CorporateCommunication::VALID_CATEGORIES)
+    end
+
   end
 
   describe 'POST save' do
