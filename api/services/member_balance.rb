@@ -204,7 +204,7 @@ module MAPI
             operation do
               key :method, 'GET'
               key :summary, 'Retrieve STA Activities transactions.'
-              key :notes, 'Returns STA Activities for the selected periord.'
+              key :notes, 'Returns STA Activities for the selected period.'
               key :type, :STAActivities
               key :nickname, :getSTAActivitiesForMember
               parameter do
@@ -812,7 +812,7 @@ module MAPI
           member_id = params[:id]
           as_of_date = params[:as_of_date]
 
-          #1.check that input for from and to dates are valid date and expected format
+          #check that input for as_of_date is a valid date and in the expected format
           check_date_format = as_of_date.match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
           if !check_date_format
             halt 400, "Invalid Date format of yyyy-mm-dd"
@@ -868,6 +868,7 @@ module MAPI
              AND (AdvDet_DateUpdate  = to_date(#{ ActiveRecord::Base.connection.quote(as_of_date)}, 'yyyy-mm-dd'))
           SQL
 
+          as_of_date = as_of_date.to_date
           advances_details_records= []
           latest_row_found = false
 
@@ -876,7 +877,7 @@ module MAPI
           latest_date = as_of_date
           if settings.environment == :production
             # if date is yesterday or later, get data from the lastest view
-            if as_of_date.to_date >  today_date - 2
+            if as_of_date >  today_date - 2.days
               cp_advances_cursor = ActiveRecord::Base.connection.execute(advances_detail_connection_string)
               while row = cp_advances_cursor.fetch_hash()
                 if latest_row_found == false
@@ -887,7 +888,7 @@ module MAPI
               end
             end
             # if no data found in latest view and date is before today, go to the historical view. Use today just in case retrieval is after today EOD batch job ran
-            if as_of_date.to_date <  today_date  && !latest_row_found
+            if as_of_date <  today_date  && !latest_row_found
               cp_advances_historical_cursor = ActiveRecord::Base.connection.execute(advances_historical_detail_connection_string)
               while row = cp_advances_historical_cursor.fetch_hash()
                 advances_details_records.push(row)
@@ -896,14 +897,14 @@ module MAPI
           else
             latest_row_found = false
             # if date is yesterday or later, get data from the lastest view
-            if as_of_date.to_date >  today_date  - 2
+            if as_of_date >  today_date  - 2.days
               rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_latest.json'))).sample
               rows.collect! do |details|
-                if details['ADVDET_MATURITY_DATE'].to_date < as_of_date.to_date
-                  details['ADVDET_MATURITY_DATE'] = as_of_date.to_date + (1 + rand(30))
+                if details['ADVDET_MATURITY_DATE'].to_date < as_of_date
+                  details['ADVDET_MATURITY_DATE'] = as_of_date + (1 + rand(30))
                 end
-                if details['ADVDET_ISSUE_DATE'].to_date  > as_of_date.to_date
-                  details['ADVDET_ISSUE_DATE'] = as_of_date.to_date - (1 + rand(7))
+                if details['ADVDET_ISSUE_DATE'].to_date  > as_of_date
+                  details['ADVDET_ISSUE_DATE'] = as_of_date - (1 + rand(7))
                   details['TRADE_DATE'] = details['ADVDET_ISSUE_DATE']
                 end
                 details
@@ -911,14 +912,14 @@ module MAPI
               latest_row_found = true
               advances_details_records = rows
             end
-            if as_of_date.to_date < today_date  && !latest_row_found
+            if as_of_date < today_date  && !latest_row_found
               rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_historical.json'))).sample
                rows.collect! do |details|
-                 if details['ADVDET_MATURITY_DATE'].to_date < as_of_date.to_date
-                   details['ADVDET_MATURITY_DATE'] = as_of_date.to_date + (1 + rand(30))
+                 if details['ADVDET_MATURITY_DATE'].to_date < as_of_date
+                   details['ADVDET_MATURITY_DATE'] = as_of_date + (1 + rand(30))
                  end
-                 if details['ADVDET_ISSUE_DATE'].to_date  > as_of_date.to_date
-                   details['ADVDET_ISSUE_DATE'] = as_of_date.to_date - (1 + rand(7))
+                 if details['ADVDET_ISSUE_DATE'].to_date  > as_of_date
+                   details['ADVDET_ISSUE_DATE'] = as_of_date - (1 + rand(7))
                    details['TRADE_DATE'] = details['ADVDET_ISSUE_DATE']
                  end
                  details
@@ -975,11 +976,7 @@ module MAPI
               open_vrc = false
             end
             # handle for data prior 2013 March which has no next interest payment date
-            if row['ADX_NEXT_INT_PAYMENT_DATE'] != nil
-              estimated_next_interest_payment = row['ADX_NEXT_INT_PAYMENT_DATE'].to_date
-            else
-              estimated_next_interest_payment == row['ADX_NEXT_INT_PAYMENT_DATE']
-            end
+            estimated_next_interest_payment = row['ADX_NEXT_INT_PAYMENT_DATE'].to_date if row['ADX_NEXT_INT_PAYMENT_DATE']
             reformat_hash = {'trade_date' => row['TRADE_DATE'].to_date,
                              'funding_date' => row['ADVDET_ISSUE_DATE'].to_date,
                              'maturity_date' => maturity_date,
@@ -992,7 +989,7 @@ module MAPI
                              'day_count_basis' => day_count_basis_description,
                              'advance_type' => row['ADVDET_MNEMONIC'],
                              'advance_number' => row['ADVDET_ADVANCE_NUMBER'],
-                             'discount_program' => (row['ADVDET_SUBSIDY_PROGRAM'] || '--'),
+                             'discount_program' => (row['ADVDET_SUBSIDY_PROGRAM']),
                              'prepayment_fee_indication' => prepayment_indication_fees,
                              'notes' => notes_indicator,
                              'structure_product_prepay_valuation_date' => sa_indication_date,

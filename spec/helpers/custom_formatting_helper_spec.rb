@@ -9,4 +9,11 @@ describe CustomFormattingHelper do
       expect(helper.fhlb_formatted_currency(0)).to eq('0')
     end
   end
+
+  describe '`fhlb_formatted_date` method' do
+    let(:date) {Date.new(2015,1,20)}
+    it 'converts a date into a string following the MM-DD-YYYY convention' do
+      expect(helper.fhlb_formatted_date(date)).to eq('01-20-2015')
+    end
+  end
 end

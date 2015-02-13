@@ -1,5 +1,7 @@
 class ReportsController < ApplicationController
   include DatePickerHelper
+  include CustomFormattingHelper
+  include ActionView::Helpers::NumberHelper
 
   MEMBER_ID = 750 #this is the hard-coded fhlb client id number we're using for the time-being
 
@@ -9,11 +11,8 @@ class ReportsController < ApplicationController
       credit: {
         advances_detail: {
           updated: t('global.daily'),
-          available_history: t('global.all')
-        },
-        historical_advances_detail: {
-          updated: t('global.daily'),
-          available_history: t('reports.history.months18')
+          available_history: t('global.all'),
+          route: reports_advances_detail_path
         },
         interest_rate: {
           updated: t('global.daily'),
@@ -139,6 +138,27 @@ class ReportsController < ApplicationController
     @show_ending_balance = false
     if @settlement_transaction_account[:activities] && @settlement_transaction_account[:activities].length > 0
       @show_ending_balance = @end_date != @settlement_transaction_account[:activities][0][:trans_date].to_date || @settlement_transaction_account[:activities][0][:balance].blank?
+    end
+  end
+
+  def advances_detail
+    @as_of_date = (params[:as_of_date] || Date.today).to_date
+    member_balances = MemberBalanceService.new(MEMBER_ID)
+    @advances_detail = member_balances.advances_details(@as_of_date)
+    raise StandardError, "There has been an error and ReportsController#advances_detail has returned nil. Check error logs." if @advances_detail.blank?
+    @picker_presets = range_picker_default_presets(@as_of_date)
+    # prepayment fee indication for detail view
+    @advances_detail[:advances_details].each_with_index do |advance, i|
+      case advance[:notes]
+      when '1'
+        @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.unavailable_online')
+      when '2'
+        @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.not_applicable_to_vrc')
+      when '3'
+        @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.prepayment_fee_restructure_html', fee: number_to_currency(advance[:prepayment_fee_indication]), date: fhlb_formatted_date(advance[:structure_product_prepay_valuation_date].to_date))
+      else
+        @advances_detail[:advances_details][i][:prepayment_fee_indication] = number_to_currency(advance[:prepayment_fee_indication]) || t('global.not_applicable')
+      end
     end
   end
 

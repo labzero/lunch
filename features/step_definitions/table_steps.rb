@@ -40,6 +40,8 @@ def compare_sort_order(column_name, sort_order, table_selector='.report-table')
       case column_name
         when "Date"
           value = Date.strptime(element.text, '%m/%d/%Y')
+        when "Trade Date"
+          value = Date.strptime(element.text, '%m-%d-%Y')
         when "Certificate Sequence"
           value = element.text.to_i
         when "Original Amount"

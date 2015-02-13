@@ -62,6 +62,11 @@ en:
     print: Print
     as_of: As of
     today: Today
+    details: Details
+    open: Open
+    hide: Hide
+    none: None
+    not_applicable: Not applicable
   nav:
     primary:
       welcome: Hi %{name}
@@ -78,6 +83,7 @@ en:
       custom: Custom date range
     single:
       input: "As of {replace_date}"
+      custom: Custom date
   settings:
     title: Settings
     save: Save
@@ -278,9 +284,6 @@ en:
       advances_detail:
         title: Advances Detail
         summary: Your institution’s outstanding advances such as maturity, date, estimated next payment, and prepayment fee indications. The data is downloadable, and the columns can be sorted in ascending and descending order.
-      historical_advances_detail:
-        title: Historical Advances Detail
-        summary: Provides details about your outstanding advances as of a specific date. The data is downloadable, and the columns can be sorted in ascending and descending order.
       interest_rate:
         title: Interest Rate Resets
         summary: Shows advances with an interest rate reset on the effective date.
@@ -376,10 +379,42 @@ en:
         closing_balance_heading: "Balance as of close of business %{date}:"
         table_title: Settlement/Transaction Account (STA) Detail
         closing_balance: Balance as of close of business
+      advances_detail:
+        title: Advances Detail
+        total_current_par_heading: "Total Current Par as of %{date}"
+        total_accrued_interest_heading: "Total Accrued Interest as of %{date}"
+        estimated_next_payment_heading: "Estimated Next Interest Payment as of %{date}"
+        trade_date: Trade Date
+        funding_date: Funding Date
+        maturity_date: Maturity Date
+        advance_number: Advance Number
+        advance_type: Advance Type
+        current_par_heading: Current Par ($)
+        current_par: Current Par
+        interest_payment_frequency: Interest Payment Frequency
+        day_count_basis: Day Count Basis
+        interest_rate_heading: Int. Rate (%)
+        interest_rate: Interest Rate
+        next_interest_payment_date: Next Interest Payment Date
+        accrued_interest_heading: Accrued Interest ($)
+        accrued_interest: Accrued Interest
+        estimated_next_payment_table_heading: Estimated Next Interest Payment ($)
+        estimated_next_payment: Estimated Next Interest Payment
+        discount_program: Discount Program
+        prepayment_fee_indication: Prepayment Fee Indication
+        record_title: Placeholder Record Title
+        unavailable_online: Not available online
+        not_applicable_to_vrc: Not applicable to VRC
+        prepayment_fee_restructure_html: "%{fee} <br>Prepayment was calculated on <br>%{date}"
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at (415) 616-2945.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at (415) 616-2634 or (415) 616-2913.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
     close_of_business_processing_notice: Other data as of Close of Business on the prior business day.
+    maturity_date_notice: In the event of a prepayment modification, to original maturity date may differ from the actual maturity date.
+    accrued_interest_notice: The amount of interest accrued may vary from time to time because of rate or manual adjustments.
+    estimated_next_interest_payment_notice: For each FRC and ARC Advance, the Estimated Next Interest Payment provides an estimate of the interest payment amount to be debited to your Settlement/Transaction Account (STA) on the next interest payment date. These are estimates only and should not be relied upon as a final statement of the total interest payments to be debited to your STA on any interest payment date, and they are subject to change without notice. In addition, this report does not reflect any principal repayment or reduction amounts or any other amounts associated with your advances that may be debited to your STA on the next interest payment date. Estimated next interest payment amounts for some advance types are not available online.
+    merger_notice: In the event of a merger, this report may not include all advances from the acquired instiution.
+    advances_and_securities_agreement_notice: Nothing in this report in any way ammends, modifies, or waives the terms of your Advances and Securities Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issues puruant to that Agreement. The Bank expressly disclaims and and all liability that may arise from your institution’s reliance on any information contained in, or errors or omissions made with respect to, this report. Please call (415) 616-2559 if you have any questions.
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email

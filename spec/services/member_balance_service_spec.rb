@@ -7,9 +7,9 @@ describe MemberBalanceService do
   it { expect(subject).to respond_to(:total_securities) }
   it { expect(subject).to respond_to(:effective_borrowing_capacity) }
   it { expect(subject).to respond_to(:capital_stock_activity) }
-  describe "`pledged_collateral` method", :vcr do
+  describe '`pledged_collateral` method', :vcr do
     let(:pledged_collateral) {subject.pledged_collateral}
-    it "should return a hash of hashes containing pledged collateral values" do
+    it 'should return a hash of hashes containing pledged collateral values' do
       expect(pledged_collateral.length).to be >= 1
       expect(pledged_collateral[:mortgages][:absolute]).to be_kind_of(Numeric)
       expect(pledged_collateral[:mortgages][:percentage]).to be_kind_of(Float)
@@ -20,36 +20,36 @@ describe MemberBalanceService do
       expect(pledged_collateral[:aa][:absolute]).to be_kind_of(Numeric)
       expect(pledged_collateral[:aa][:percentage]).to be_kind_of(Float)
     end
-    it "should return nil if there was an API error" do
+    it 'should return nil if there was an API error' do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
       expect(pledged_collateral).to eq(nil)
     end
-    it "should return nil if there was a connection error" do
+    it 'should return nil if there was a connection error' do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
       expect(pledged_collateral).to eq(nil)
     end
   end
-  describe "`total_securities` method", :vcr do
+  describe '`total_securities` method', :vcr do
     let(:total_securities) {subject.total_securities}
-    it "should return a hash of hashes containing total security values" do
+    it 'should return a hash of hashes containing total security values' do
       expect(total_securities.length).to be >= 1
       expect(total_securities[:pledged_securities][:absolute]).to be_kind_of(Integer)
       expect(total_securities[:pledged_securities][:percentage]).to be_kind_of(Float)
       expect(total_securities[:safekept_securities][:absolute]).to be_kind_of(Integer)
       expect(total_securities[:safekept_securities][:percentage]).to be_kind_of(Float)
     end
-    it "should return nil if there was an API error" do
+    it 'should return nil if there was an API error' do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
       expect(total_securities).to eq(nil)
     end
-    it "should return nil if there was a connection error" do
+    it 'should return nil if there was a connection error' do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
       expect(total_securities).to eq(nil)
     end
   end
-  describe "`effective_borrowing_capacity` method", :vcr do
+  describe '`effective_borrowing_capacity` method', :vcr do
     let(:effective_borrowing_capacity) {subject.effective_borrowing_capacity}
-    it "should return a hash of hashes containing effective borrowing capacity values" do
+    it 'should return a hash of hashes containing effective borrowing capacity values' do
       expect(effective_borrowing_capacity.length).to be >= 1
       expect(effective_borrowing_capacity[:used_capacity]).to be_kind_of(Hash)
       expect(effective_borrowing_capacity[:used_capacity][:absolute]).to be_kind_of(Integer)
@@ -58,17 +58,17 @@ describe MemberBalanceService do
       expect(effective_borrowing_capacity[:unused_capacity][:absolute]).to be_kind_of(Integer)
       expect(effective_borrowing_capacity[:unused_capacity][:percentage]).to be_kind_of(Float)
     end
-    it "should return nil if there was an API error" do
+    it 'should return nil if there was an API error' do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
       expect(effective_borrowing_capacity).to eq(nil)
     end
-    it "should return nil if there was a connection error" do
+    it 'should return nil if there was a connection error' do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
       expect(effective_borrowing_capacity).to eq(nil)
     end
   end
 
-  describe "`capital_stock_activity` method", :vcr do
+  describe '`capital_stock_activity` method', :vcr do
     let(:start_date) {Date.new(2014,12,01)}
     let(:end_date) {Date.new(2014,12,31)}
     let(:capital_stock_activity) {subject.capital_stock_activity(start_date, end_date)}
@@ -118,7 +118,7 @@ describe MemberBalanceService do
     end
 
     describe 'error handling for MAPI endpoints' do
-      it "should return nil if there was an API error for the start_date capital_stock_balance endpoint" do
+      it 'should return nil if there was an API error for the start_date capital_stock_balance endpoint' do
         expect(request_object).to receive(:get).and_raise(RestClient::InternalServerError)
         expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_return(request_object)
         expect(capital_stock_activity).to eq(nil)
@@ -140,12 +140,12 @@ describe MemberBalanceService do
         expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{end_date}").and_return(request_object)
         expect(capital_stock_activity).to eq(nil)
       end
-      it "should return nil if there was an API error for the capital_stock_activities endpoint" do
+      it 'should return nil if there was an API error for the capital_stock_activities endpoint' do
         expect(request_object).to receive(:get).and_raise(RestClient::InternalServerError)
         override_activities_endpoint(start_date, end_date, request_object)
         expect(capital_stock_activity).to eq(nil)
       end
-      it "should return nil if there was a connection error for the capital_stock_activities endpoint" do
+      it 'should return nil if there was a connection error for the capital_stock_activities endpoint' do
         expect(request_object).to receive(:get).and_raise(Errno::ECONNREFUSED)
         override_activities_endpoint(start_date, end_date, request_object)
         expect(capital_stock_activity).to eq(nil)
@@ -177,7 +177,7 @@ describe MemberBalanceService do
   describe '`borrowing_capacity_summary` method' do
     let(:today) {Date.new(2014,12,1)}
     let(:borrowing_capacity_summary) {subject.borrowing_capacity_summary(today)}
-    describe "member has both standard collateral and securities-backed collateral" do
+    describe 'member has both standard collateral and securities-backed collateral' do
       it 'should return an array of standard collateral objects' do
         expect(borrowing_capacity_summary[:standard][:collateral].length).to be >= 1
         borrowing_capacity_summary[:standard][:collateral].each do |collateral_object|
@@ -296,7 +296,7 @@ describe MemberBalanceService do
         end
       end
     end
-    describe "member has no standard collateral but does have securities-backed collateral" do
+    describe 'member has no standard collateral but does have securities-backed collateral' do
       let(:response_data) { JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary', 'borrowing_capacity_summary_no_standard_collateral.json'))) }
       before do
         # TODO stub out MAPI response instead of JSON.parse once the endpoint is rigged up
@@ -314,7 +314,7 @@ describe MemberBalanceService do
         expect(borrowing_capacity_summary[:standard_excess_capacity]).to eq(-9568500)
       end
     end
-    describe "member has neither standard collateral nor securities-backed collateral (e.g. a new member)" do
+    describe 'member has neither standard collateral nor securities-backed collateral (e.g. a new member)' do
       let(:response_data) { JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary', 'borrowing_capacity_summary_no_data.json'))) }
       before do
         # TODO stub out MAPI response instead of JSON.parse once the endpoint is rigged up
@@ -333,7 +333,7 @@ describe MemberBalanceService do
         end
       end
     end
-    describe "error states" do
+    describe 'error states' do
       it 'returns nil if there is a JSON parsing error' do
         # TODO change this stub once you implement the MAPI endpoint
         expect(File).to receive(:read).and_return('some malformed json!')
@@ -387,11 +387,11 @@ describe MemberBalanceService do
       expect(Rails.logger).to receive(:warn)
       expect(settlement_transaction_account).to be(nil)
     end
-    it "should return nil if there was an API error" do
+    it 'should return nil if there was an API error' do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
       expect(settlement_transaction_account).to eq(nil)
     end
-    it "should return nil if there was a connection error" do
+    it 'should return nil if there was a connection error' do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
       expect(settlement_transaction_account).to eq(nil)
     end
@@ -432,6 +432,45 @@ describe MemberBalanceService do
       end
       it 'should show all activities if nothing is passed as the filter argument' do
         expect(subject.settlement_transaction_account(start_date, end_date)[:activities].length).to eq(23)
+      end
+    end
+  end
+
+  describe '`advances_details` method', :vcr do
+    let(:as_of_date) {Date.new(2015,1,20)}
+    let(:advances_details) {subject.advances_details(as_of_date)}
+    it 'should return a hash of advances details' do
+      expect(advances_details[:as_of_date]).to be_kind_of(Date)
+      expect(advances_details[:total_par]).to be_kind_of(Integer)
+      expect(advances_details[:total_accrued_interest]).to be_kind_of(Float)
+      expect(advances_details[:estimated_next_payment]).to be_kind_of(Float)
+      expect(advances_details[:advances_details]).to be_kind_of(Array)
+    end
+    it 'should return nil if there is a JSON parsing error' do
+      expect(JSON).to receive(:parse).and_raise(JSON::ParserError)
+      expect(Rails.logger).to receive(:warn)
+      expect(advances_details).to be(nil)
+    end
+    it 'should return nil if there was an API error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(advances_details).to eq(nil)
+    end
+    it 'should return nil if there was a connection error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(advances_details).to eq(nil)
+    end
+    describe 'calculating totals' do
+      before do
+        expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'advances_details.json'))))
+      end
+      it 'should calculate `total_par` based on the value of the constituent advance records' do
+        expect(advances_details[:total_par]).to eq(110000000)
+      end
+      it 'should calculate `total_accrued_interest` based on the value of the constituent advance records' do
+        expect(advances_details[:total_accrued_interest]).to eq(43809.42)
+      end
+      it 'should calculate `estimated_next_payment` based on the value of the constituent advance records' do
+        expect(advances_details[:estimated_next_payment]).to eq(50837.53)
       end
     end
   end
