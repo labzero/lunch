@@ -4,7 +4,7 @@ require 'bundler'
 Bundler.setup # don't auto require all gems
 
 require 'dotenv'
-Dotenv.load '../.env'
+Dotenv.load File.expand_path('../.env', __dir__)
 
 ENV['RACK_ENV'] = ENV['RAILS_ENV'] if !ENV['RACK_ENV'] && ENV['RAILS_ENV']
 
