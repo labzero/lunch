@@ -8,6 +8,8 @@ class SettingsController < ApplicationController
         [t("settings.quick_report.title"), '#'],
         [t("settings.email.title"), '#']
     ]
+
+    @email_options = ['reports'] + CorporateCommunication::VALID_CATEGORIES
   end
 
   # POST

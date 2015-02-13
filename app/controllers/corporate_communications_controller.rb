@@ -2,18 +2,18 @@ class CorporateCommunicationsController < ApplicationController
 
   before_action do
     @sidebar_options = [
-        [I18n.t('messages.categories.all'), corporate_communications_path('all')],
-        [I18n.t('messages.categories.investor_relations'), corporate_communications_path('investor_relations')],
-        [I18n.t('messages.categories.accounting'), corporate_communications_path('accounting')],
-        [I18n.t('messages.categories.products'), corporate_communications_path('products')],
-        [I18n.t('messages.categories.collateral'), corporate_communications_path('collateral')],
-        [I18n.t('messages.categories.community_program'), corporate_communications_path('community_program')],
-        [I18n.t('messages.categories.community_works'), corporate_communications_path('community_works')],
-        [I18n.t('messages.categories.educational'), corporate_communications_path('educational')]
+        [I18n.t('settings.email.all.title'), corporate_communications_path('all')],
+        [I18n.t('settings.email.investor_relations.title'), corporate_communications_path('investor_relations')],
+        [I18n.t('settings.email.accounting.title'), corporate_communications_path('accounting')],
+        [I18n.t('settings.email.products.title'), corporate_communications_path('products')],
+        [I18n.t('settings.email.collateral.title'), corporate_communications_path('collateral')],
+        [I18n.t('settings.email.community_program.title'), corporate_communications_path('community_program')],
+        [I18n.t('settings.email.community_works.title'), corporate_communications_path('community_works')],
+        [I18n.t('settings.email.educational.title'), corporate_communications_path('educational')]
     ]
     @filter = params[:category]
     raise 'invalid category' unless CorporateCommunication::VALID_CATEGORIES.include?(@filter) || @filter == 'all'
-    @selected_category_label = t("messages.categories.#{@filter}")
+    @selected_category_label = t("settings.email.#{@filter}.title")
   end
 
   def category

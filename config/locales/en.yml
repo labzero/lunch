@@ -95,13 +95,16 @@ en:
       header: Choose which email messages to receive
       selected_item_message: "(Be sure to include fhlbsf.com in your Safe Senders list)"
       required_item_message_html: "You are assigned to receive these emails. For more information, <a href=\"%{url}\">contact us</a>."
+      all:
+        title: all
+        description_html: ""
       reports:
         title: Reports
         description_html: "Send me reports as defined in <a href=\"%{url}\">Quick Reports Settings</a>"
       investor_relations:
         title: Shareholder Communications / Investor Relations
         description_html: Quarterly earnings releases; annual and quarterly financial reports; Board of Directors election announcements; changes in Bank leadership (including changes to the Board of Directors, the Bank’s Affordable Housing Advisory Council, and senior management); changes to the Bank’s capital plan; changes to the Bank’s excess stock repurchase, retained earnings, and dividend framework.
-      accounting :
+      accounting:
         title: Accounting Communications
         description_html: Quarterly dividend and stock repurchase announcements; changes to related policies, procedures, and reports.
       products:
@@ -115,7 +118,7 @@ en:
         description_html: Program announcements (including round openings, results, changes to policies and procedures) for our targeted grant and credit programs that support affordable housing and economic development; Affordable Housing Advisory Council annual reports; invitations to program workshops and webinars.
       community_works:
         title: "Community Works Quarterly E\u2011newsletter"
-        description_html: "&nbsp;"
+        description_html: ""
       educational:
         title: Educational and Networking Events
         description_html: Invitations to educational and networking meetings and events sponsored for members by the Bank, including conferences, seminars, and webinars.
@@ -381,13 +384,4 @@ en:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email
     edit_email_settings_html: Edit your <a href=%{url}>Email Settings</a> to choose which messages you want to receive via email.
-    categories:
-      all: All Messages
-      investor_relations: Shareholder Communications / Investor Relations
-      accounting: Accounting Communications
-      products: Products and Services
-      collateral: Collateral Pledging
-      community_program: Community Programs
-      community_works: "Community Works Quarterly E\u2011newsletter"
-      educational: Educational and Networking Events
 
