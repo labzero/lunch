@@ -63,7 +63,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
     describe "RateService failures" do
       let(:RatesService) {class_double(RatesService)}
-      let(:rate_service_instance) {RatesService.new}
+      let(:rate_service_instance) {RatesService.new(double('request', uuid: '12345'))}
       before do
         expect(RatesService).to receive(:new).and_return(rate_service_instance)
       end
@@ -80,7 +80,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
     describe "MemberBalanceService failures" do
       let(:MemberBalanceService) {class_double(MemberBalanceService)}
-      let(:member_balance_instance) {MemberBalanceService.new(DashboardController::MEMBER_ID)}
+      let(:member_balance_instance) {MemberBalanceService.new(DashboardController::MEMBER_ID, double('request', uuid: '12345'))}
       before do
         expect(MemberBalanceService).to receive(:new).and_return(member_balance_instance)
       end

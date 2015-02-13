@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe MemberBalanceService do
   MEMBER_ID = 750
-  subject { MemberBalanceService.new(MEMBER_ID) }
+  subject { MemberBalanceService.new(MEMBER_ID, double('request', uuid: '12345')) }
   it { expect(subject).to respond_to(:pledged_collateral) }
   it { expect(subject).to respond_to(:total_securities) }
   it { expect(subject).to respond_to(:effective_borrowing_capacity) }

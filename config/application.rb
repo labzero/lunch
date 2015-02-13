@@ -23,6 +23,17 @@ module FhlbMember
     config.mapi = ActiveSupport::OrderedOptions.new
     config.mapi.endpoint = ENV['MAPI_ENDPOINT'] || 'http://localhost:3100/mapi'
 
+    # moved the session parser up in the middleware hierarchy
+    config.middleware.delete(ActionDispatch::Cookies)
+    config.middleware.delete(ActionDispatch::Session::CookieStore)
+    config.middleware.insert_before(Rails::Rack::Logger, ActionDispatch::Session::CookieStore)
+    config.middleware.insert_before(ActionDispatch::Session::CookieStore, ActionDispatch::Cookies)
+
     config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+    config.log_tags = [
+      lambda { |request| "request_id=#{request.uuid}" },
+      lambda { |request| "session_id=#{request.session.id}"},
+      lambda { |request| request.session["warden.user.user.key"].nil? ? "user_id=NONE" : "user_id=#{request.session["warden.user.user.key"][0][0]}"}
+    ]
   end
 end

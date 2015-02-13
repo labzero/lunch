@@ -1,8 +1,8 @@
-class MemberBalanceService
+class MemberBalanceService < MAPIService
   DAILY_BALANCE_KEY = 'Interest Rate / Daily Balance' # the key returned by us from MAPI to let us know a row represents balance at close of business
 
-  def initialize(member_id)
-    @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint, headers: {:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""}
+  def initialize(member_id, request)
+    super(request)
     @member_id = member_id
     raise ArgumentError, 'member_id must not be blank' if member_id.blank?
   end

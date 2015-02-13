@@ -32,15 +32,27 @@ module MAPI
     end
 
     def call(env)
-      env['rack.logger'] = @logger
-      @app.call env
+      resp = nil
+      tags = ["request_id=#{env['HTTP_X_REQUEST_ID'] || SecureRandom.uuid}"]
+      @logger.tagged(*tags) do 
+        env['rack.logger'] = @logger
+        env['logger.tags'] = tags
+        resp = @app.call env
+      end
+      resp
+    ensure
+      ActiveSupport::LogSubscriber.flush_all!
     end
   end
 
   class CommonLogger < Rack::CommonLogger
     def call(env)
       @logger = env['rack.logger']
-      super
+      began_at = Time.now
+      status, header, body = @app.call(env)
+      header = Rack::Utils::HeaderHash.new(header)
+      body = Rack::BodyProxy.new(body) { @logger.tagged(env['logger.tags']) { log(env, status, header, began_at) } }
+      [status, header, body]
     end
   end
 
@@ -53,8 +65,12 @@ module MAPI
       set :show_exceptions, ENV['MAPI_SHOW_EXCEPTIONS'] == 'true'
 
       disable :logging # all logging does is add middleware. We will add similar middleware here
-      logger = ::Logging.logger['MAPI']
-      logger.add_appenders(Logging.appenders.file("#{settings.root}/../log/mapi-#{settings.environment}.log"))
+      logger = ActiveSupport::TaggedLogging.new(::Logger.new("#{settings.root}/../log/mapi-#{settings.environment}.log"))
+      class << logger
+        def <<(msg)
+          info(msg.chomp)
+        end
+      end
       use MAPI::Logger, logger
       use MAPI::CommonLogger
       ::ActiveRecord::Base.logger = logger
