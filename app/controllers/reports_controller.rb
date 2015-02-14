@@ -143,7 +143,7 @@ class ReportsController < ApplicationController
 
   def advances_detail
     @as_of_date = (params[:as_of_date] || Date.today).to_date
-    member_balances = MemberBalanceService.new(MEMBER_ID)
+    member_balances = MemberBalanceService.new(MEMBER_ID, request)
     @advances_detail = member_balances.advances_details(@as_of_date)
     raise StandardError, "There has been an error and ReportsController#advances_detail has returned nil. Check error logs." if @advances_detail.blank?
     @picker_presets = range_picker_default_presets(@as_of_date)
