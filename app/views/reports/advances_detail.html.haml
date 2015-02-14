@@ -16,15 +16,15 @@
   .report-main-body
     .report-summary-data
       %h3
-        = t('reports.pages.advances_detail.total_current_par_heading', date: @as_of_date.strftime('%B %-d, %Y'))
+        = t('reports.pages.advances_detail.total_current_par_heading', date: fhlb_date_long_alpha(@as_of_date))
       %p= number_to_currency(@advances_detail[:total_par], precision: 0)
     .report-summary-data
       %h3
-        = t('reports.pages.advances_detail.total_accrued_interest_heading', date: @as_of_date.strftime('%B %-d, %Y'))
+        = t('reports.pages.advances_detail.total_accrued_interest_heading', date: fhlb_date_long_alpha(@as_of_date))
       %p= number_to_currency(@advances_detail[:total_accrued_interest])
     .report-summary-data
       %h3
-        = t('reports.pages.advances_detail.estimated_next_payment_heading', date: @as_of_date.strftime('%B %-d, %Y'))
+        = t('reports.pages.advances_detail.estimated_next_payment_heading', date: fhlb_date_long_alpha(@as_of_date))
       %p= number_to_currency(@advances_detail[:estimated_next_payment])
     %h2.report-table-title= t('reports.pages.advances_detail.title')
     %table.table-allow-wrapping.report-table.advances-details-report-table{data: {sortable: true, :'disable-auto-width' => true}}
@@ -44,13 +44,13 @@
       %tbody
         - @advances_detail[:advances_details].each_with_index do |row, index|
           %tr
-            %td.report-cell-narrow= fhlb_formatted_date(row[:trade_date]) if row[:trade_date]
-            %td.report-cell-narrow= fhlb_formatted_date(row[:funding_date]) if row[:funding_date]
-            %td.report-cell-narrow= row[:maturity_date].blank? ? t('global.open') : fhlb_formatted_date(row[:maturity_date])
+            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:trade_date]) if row[:trade_date]
+            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:funding_date]) if row[:funding_date]
+            %td.report-cell-narrow= row[:maturity_date].blank? ? t('global.open') : fhlb_date_standard_numeric(row[:maturity_date])
             %td.report-cell-narrow= row[:advance_number]
             %td.report-cell-narrow.report-cell-right= number_with_delimiter(row[:current_par]) if row[:current_par]
             %td.report-cell-narrow= row[:interest_rate]
-            %td.report-cell-narrow= row[:next_interest_pay_date].blank? ? '-' : fhlb_formatted_date(row[:next_interest_pay_date])
+            %td.report-cell-narrow= row[:next_interest_pay_date].blank? ? '-' : fhlb_date_standard_numeric(row[:next_interest_pay_date])
             %td.report-cell-narrow.report-cell-right= number_with_delimiter(row[:accrued_interest]) if row[:accrued_interest]
             %td.report-cell-narrow.report-cell-right= row[:estimated_next_interest_payment].blank? ? '-' : number_with_delimiter(row[:estimated_next_interest_payment])
             %td.report-cell-narrow.report-cell-right.detail-view-trigger= t('global.view')
@@ -61,13 +61,13 @@
                 %table
                   %tr
                     %td= t('reports.pages.advances_detail.trade_date')
-                    %td= fhlb_formatted_date(row[:trade_date]) if row[:trade_date]
+                    %td= fhlb_date_standard_numeric(row[:trade_date]) if row[:trade_date]
                   %tr
                     %td= t('reports.pages.advances_detail.funding_date')
-                    %td= fhlb_formatted_date(row[:funding_date]) if row[:funding_date]
+                    %td= fhlb_date_standard_numeric(row[:funding_date]) if row[:funding_date]
                   %tr
                     %td= t('reports.pages.advances_detail.maturity_date')
-                    %td= row[:maturity_date].blank? ? t('global.open') : fhlb_formatted_date(row[:maturity_date])
+                    %td= row[:maturity_date].blank? ? t('global.open') : fhlb_date_standard_numeric(row[:maturity_date])
                 %table
                   %tr
                     %td= t('reports.pages.advances_detail.advance_number')
@@ -97,7 +97,7 @@
                 %table
                   %tr
                     %td= t('reports.pages.advances_detail.next_interest_payment_date')
-                    %td= row[:next_interest_pay_date].blank? ? '-' : fhlb_formatted_date(row[:next_interest_pay_date])
+                    %td= row[:next_interest_pay_date].blank? ? '-' : fhlb_date_standard_numeric(row[:next_interest_pay_date])
                   %tr
                     %td= t('reports.pages.advances_detail.estimated_next_payment')
                     %td= row[:estimated_next_interest_payment].blank? ? '-' : number_to_currency(row[:estimated_next_interest_payment])
@@ -108,7 +108,7 @@
                 %table
                   %tr
                     %td= t('reports.pages.advances_detail.prepayment_fee_indication')
-                    %td= row[:prepayment_fee_indication]
+                    %td= row[:prepayment_fee_indication].html_safe
       %tfoot
         %tr
           %td.report-cell-narrow= t('global.totals')

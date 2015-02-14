@@ -150,12 +150,12 @@ class ReportsController < ApplicationController
     # prepayment fee indication for detail view
     @advances_detail[:advances_details].each_with_index do |advance, i|
       case advance[:notes]
-      when '1'
+      when 'unavailable_online'
         @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.unavailable_online')
-      when '2'
+      when 'not_applicable_to_vrc'
         @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.not_applicable_to_vrc')
-      when '3'
-        @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.prepayment_fee_restructure_html', fee: number_to_currency(advance[:prepayment_fee_indication]), date: fhlb_formatted_date(advance[:structure_product_prepay_valuation_date].to_date))
+      when 'prepayment_fee_restructure'
+        @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.prepayment_fee_restructure_html', fee: number_to_currency(advance[:prepayment_fee_indication]), date: fhlb_date_standard_numeric(advance[:structure_product_prepay_valuation_date].to_date))
       else
         @advances_detail[:advances_details][i][:prepayment_fee_indication] = number_to_currency(advance[:prepayment_fee_indication]) || t('global.not_applicable')
       end

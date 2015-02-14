@@ -1,5 +1,5 @@
 module CustomFormattingHelper
-  def fhlb_formatted_currency number
+  def fhlb_formatted_currency(number)
     if number.to_i == 0
       '0'
     else
@@ -7,7 +7,12 @@ module CustomFormattingHelper
     end
   end
 
-  def fhlb_formatted_date date
+  def fhlb_date_standard_numeric(date)
     date.to_date.strftime('%m-%d-%Y')
   end
+
+  def fhlb_date_long_alpha(date)
+    date.strftime('%B %-d, %Y')
+  end
+
 end

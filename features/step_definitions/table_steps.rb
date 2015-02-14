@@ -76,3 +76,9 @@ def compare_sort_order(column_name, sort_order, table_selector='.report-table')
   end
 
 end
+
+def skip_if_table_empty(&block)
+  if !page.first('.report-table tbody tr:first-child td:first-child')['class'].split(' ').include?('dataTables_empty')
+    yield block
+  end
+end

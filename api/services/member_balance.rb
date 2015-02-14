@@ -953,15 +953,15 @@ module MAPI
                 if (row['SA_TOTAL_PREPAY_FEES'] == nil || row['SA_INDICATION_VALUATION_DATE'] == nil)
                   sa_indication_date = nil
                   if row['ADVDET_MNEMONIC'].downcase.include? 'vrc'
-                    notes_indicator = '2'
+                    notes_indicator = :not_applicable_to_vrc
                   else
-                    notes_indicator = '1'
+                    notes_indicator = :unavailable_online
                   end
                 else
                   prepayment_indication_fees = row['SA_TOTAL_PREPAY_FEES']
                   sa_indication_date = row['SA_INDICATION_VALUATION_DATE'].to_date
                   structured_product_indication_date = sa_indication_date
-                  notes_indicator = '3'
+                  notes_indicator = :prepayment_fee_restructure
                 end
               end
             else

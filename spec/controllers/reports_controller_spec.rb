@@ -251,31 +251,31 @@ RSpec.describe ReportsController, :type => :controller do
           allow(advances_detail).to receive(:[]).with(:advances_details).at_least(1).and_return(advances_array)
           allow(member_balance_service_instance).to receive(:advances_details).and_return(advances_detail)
         end
-        it 'sets the attribute to `unavailable online` message if `notes` attribute for that record is 1' do
+        it 'sets the attribute to `unavailable online` message if `notes` attribute for that record is `unavailable_online`' do
           expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('reports.pages.advances_detail.unavailable_online'))
-          expect(advance_record).to receive(:[]).with(:notes).and_return('1')
+          expect(advance_record).to receive(:[]).with(:notes).and_return('unavailable_online')
           get :advances_detail
         end
-        it 'sets the attribute to `not applicable for vrc` message if `notes` attribute for that record is 2' do
+        it 'sets the attribute to `not applicable for vrc` message if `notes` attribute for that record is `not_applicable_to_vrc`' do
           expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('reports.pages.advances_detail.not_applicable_to_vrc'))
-          expect(advance_record).to receive(:[]).with(:notes).and_return('2')
+          expect(advance_record).to receive(:[]).with(:notes).and_return('not_applicable_to_vrc')
           get :advances_detail
         end
-        it 'sets the attribute to `prepayment fee restructure` message if `notes` attribute for that record is 3' do
+        it 'sets the attribute to `prepayment fee restructure` message if `notes` attribute for that record is `prepayment_fee_restructure`' do
           date = Date.new(2013, 1, 1)
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('reports.pages.advances_detail.prepayment_fee_restructure_html', fee: number_to_currency(prepayment_fee), date: fhlb_formatted_date(date)))
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('reports.pages.advances_detail.prepayment_fee_restructure_html', fee: number_to_currency(prepayment_fee), date: fhlb_date_standard_numeric(date)))
           expect(advance_record).to receive(:[]).with(:structure_product_prepay_valuation_date).and_return(date)
           expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
-          expect(advance_record).to receive(:[]).with(:notes).and_return('3')
+          expect(advance_record).to receive(:[]).with(:notes).and_return('prepayment_fee_restructure')
           get :advances_detail
         end
-        it 'sets the attribute to equal the `prepayment_fee_indication` value if that attribute exists and the `note` attribute is not 1, 2, or 3' do
+        it 'sets the attribute to equal the `prepayment_fee_indication` value if that attribute exists and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
           expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, number_to_currency(prepayment_fee))
           expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
           expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
           get :advances_detail
         end
-        it 'sets the attribute to equal the `not applicable` message if there is no value for the `prepayment_fee_indication` attribute and the `note` attribute is not 1, 2, or 3' do
+        it 'sets the attribute to equal the `not applicable` message if there is no value for the `prepayment_fee_indication` attribute and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
           expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('global.not_applicable'))
           expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
           expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(nil)

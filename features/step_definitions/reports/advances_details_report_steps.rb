@@ -14,26 +14,26 @@ Then(/^I should see advances details for the (\d+)(?:st|rd|th) of (this|last) mo
 end
 
 When(/^I click on the view cell for the first advance$/) do
-  if !page.first('.report-table tbody tr:first-child td:first-child')['class'].split(' ').include?('dataTables_empty')
+  skip_if_table_empty do
     page.find('.report-table tr:first-child .detail-view-trigger').click
   end
 end
 
 Then(/^I should see the detailed view for the first advance$/) do
-  if !page.first('.report-table tbody tr:first-child td:first-child')['class'].split(' ').include?('dataTables_empty')
+  skip_if_table_empty do
     page.assert_selector('.report-table tr:first-child .advance-details', visible: true)
     page.assert_selector('.report-table tr:first-child .advance-details h3', text: I18n.t('reports.pages.advances_detail.record_title'), visible: true)
   end
 end
 
 When(/^I click on the hide link for the first advance detail view$/) do
-  if !page.first('.report-table tbody tr:first-child td:first-child')['class'].split(' ').include?('dataTables_empty')
+  skip_if_table_empty do
     page.find('.report-table tr:first-child .advance-details .hide-detail-view').click
   end
 end
 
 Then(/^I should not see the detailed view for the first advance$/) do
-  if !page.first('.report-table tbody tr:first-child td:first-child')['class'].split(' ').include?('dataTables_empty')
+  skip_if_table_empty do
     page.assert_selector('.report-table tr:first-child .advance-details', visible: :hidden)
   end
 end
