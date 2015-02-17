@@ -276,4 +276,41 @@ class MemberBalanceService < MAPIService
     data
   end
 
+  def advances_details(as_of_date)
+    as_of_date = as_of_date.to_date
+
+    begin
+      response = @connection["/member/#{@member_id}/advances_details/#{as_of_date.iso8601}"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.advances_details encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.advances_details encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.advances_details encountered a JSON parsing error: #{e}")
+      return nil
+    end
+
+    data[:total_par] = 0
+    data[:total_accrued_interest] = 0
+    data[:estimated_next_payment] = 0
+    data[:advances_details].each do |advance|
+      data[:total_par] += advance[:current_par] if advance[:current_par]
+      data[:total_accrued_interest] += advance[:accrued_interest] if advance[:accrued_interest]
+      data[:estimated_next_payment] += advance[:estimated_next_interest_payment] if advance[:estimated_next_interest_payment]
+    end
+
+    data[:as_of_date] = data[:as_of_date].to_date
+    data[:total_par] = data[:total_par].round
+    data[:total_accrued_interest] = data[:total_accrued_interest].to_f
+    data[:estimated_next_payment] = data[:estimated_next_payment].to_f
+
+    data
+  end
+
 end

@@ -36,6 +36,7 @@ module DatePickerHelper
       picker_presets.first[:start_date] = default_dates[:today]
       picker_presets[1][:label] = "#{t('global.as_of')} #{default_dates[:last_month_end].to_date.strftime('%B')} #{default_dates[:last_month_end].day.ordinalize}"
       picker_presets[1][:start_date] = default_dates[:last_month_end]
+      picker_presets.last[:label] = t('datepicker.single.custom')
       picker_presets.last[:end_date] = custom_start_date
     end
 

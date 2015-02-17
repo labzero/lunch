@@ -10,6 +10,10 @@ When(/^I choose the custom date range in the datepicker$/) do
   page.find('.daterangepicker .ranges li', text: I18n.t('datepicker.range.custom')).click
 end
 
+When(/^I choose the custom date in the datepicker$/) do
+  page.find('.daterangepicker .ranges li', text: I18n.t('datepicker.single.custom')).click
+end
+
 When(/^I choose the month to date preset in the datepicker$/) do
   page.find('.daterangepicker .ranges li', text: I18n.t('datepicker.range.this_month', month: @today.strftime("%B"))).click
 end
@@ -32,8 +36,12 @@ When(/^I choose the last month preset in the datepicker$/) do
   page.find('.daterangepicker .ranges li', text: (@today.beginning_of_month - 1.months).strftime("%B")).click
 end
 
-When(/^I select the (\d+)(?:st|rd|th) of (this|last) month in the (left|right) calendar/) do |day, month, calendar|
-  calendar = page.find(".daterangepicker .calendar.#{calendar}")
+When(/^I select the (\d+)(?:st|rd|th) of (this|last) month in the (left|right|single datepicker) calendar/) do |day, month, calendar|
+  if calendar == 'single datepicker'
+    calendar = page.find(".daterangepicker .calendar.single")
+  else
+    calendar = page.find(".daterangepicker .calendar.#{calendar}")
+  end
   month = if month == 'this'
             @today.strftime("%b %Y")
           elsif month == 'last'
@@ -43,7 +51,7 @@ When(/^I select the (\d+)(?:st|rd|th) of (this|last) month in the (left|right) c
   if current_month.year > @today.year
     advance_class = '.fa-arrow-left'
   else
-    if current_month.year == @today.year && current_month.month > @today.month
+    if current_month.year == @today.year && current_month.month > month.to_date.month
       advance_class = '.fa-arrow-left'
     else
       advance_class = '.fa-arrow-right'
@@ -67,7 +75,3 @@ When(/^I select all of last year including today$/) do
   end
   calendar.find("td.available:not(.off)", text: /^#{day}$/).click
 end
-
-
-
-

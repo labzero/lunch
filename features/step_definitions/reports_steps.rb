@@ -56,12 +56,22 @@ Given(/^I am on the Settlement Transaction Account Statement page$/) do
   visit '/reports/settlement-transaction-account'
 end
 
+Given(/^I am on the Advances Detail page$/) do
+  sleep_if_close_to_midnight
+  @today = Date.today
+  visit '/reports/advances-detail'
+end
+
 Given(/I am on the Borrowing Capacity Statement page$/) do
   visit '/reports/borrowing-capacity'
 end
 
 When(/^I click the Certificate Sequence column heading$/) do
   page.find('th', text: I18n.t('reports.pages.capital_stock_activity.certificate_sequence')).click
+end
+
+When(/^I click the Trade Date column heading$/) do
+  page.find('th', text: I18n.t('reports.pages.advances_detail.trade_date')).click
 end
 
 When(/^I click the Date column heading$/) do
@@ -171,12 +181,12 @@ def sleep_if_close_to_midnight
   end
 end
 
-def report_dates_in_range? (start_date, end_date)
+def report_dates_in_range? (start_date, end_date, date_format="%m/%d/%Y")
   page.all('.report-table tbody td:first-child').each do |element|
     if element['class'].split(' ').include?('dataTables_empty')
       next
     end
-    date = Date.strptime(element.text, "%m/%d/%Y")
+    date = Date.strptime(element.text, date_format)
     raise Capybara::ExpectationNotMet, "date #{date} out of range [#{start_date}, #{end_date}]" unless date >= start_date && date <= end_date
   end
 end

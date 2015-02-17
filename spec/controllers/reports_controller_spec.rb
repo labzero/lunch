@@ -1,4 +1,6 @@
 require 'rails_helper'
+include CustomFormattingHelper
+include ActionView::Helpers::NumberHelper
 
 RSpec.describe ReportsController, :type => :controller do
   login_user
@@ -17,6 +19,7 @@ RSpec.describe ReportsController, :type => :controller do
     let(:today) {Date.new(2015,1,20)}
     let(:start_date) {Date.new(2014,12,01)}
     let(:end_date) {Date.new(2014,12,31)}
+    let(:picker_preset_hash) {double(Hash)}
     before do
       allow(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
     end
@@ -50,7 +53,6 @@ RSpec.describe ReportsController, :type => :controller do
         expect{get :capital_stock_activity}.to raise_error(StandardError)
       end
       describe "view instance variables" do
-        let(:picker_preset_hash) {double(Hash)}
         before {
           allow(member_balance_service_instance).to receive(:capital_stock_activity).with(kind_of(Date), kind_of(Date)).and_return(response_hash)
         }
@@ -109,7 +111,6 @@ RSpec.describe ReportsController, :type => :controller do
           expect{get :settlement_transaction_account}.to raise_error(StandardError)
         end
         describe "view instance variables" do
-          let(:picker_preset_hash) {double(Hash)}
           before {
             allow(member_balance_service_instance).to receive(:settlement_transaction_account).with(kind_of(Date), kind_of(Date), kind_of(String)).and_return(response_hash)
           }
@@ -196,6 +197,89 @@ RSpec.describe ReportsController, :type => :controller do
           allow(response_hash).to receive(:[]).with(:activities).at_least(:once).and_return(activities_array)
           get :settlement_transaction_account, start_date: start_date, end_date: end_date
           expect(assigns[:show_ending_balance]).to eq(true)
+        end
+      end
+    end
+
+    describe 'GET advances_detail' do
+      it_behaves_like 'a user required action', :get, :advances_detail
+      let(:advances_detail) {double('Advances Detail object')}
+      let(:as_of_date) { Date.new(2014,12,31) }
+      before do
+        allow(member_balance_service_instance).to receive(:advances_details).and_return(advances_detail)
+        allow(advances_detail).to receive(:[]).with(:advances_details).and_return([])
+      end
+
+      it 'should render the capital_stock_activity view' do
+        get :advances_detail
+        expect(response.body).to render_template('advances_detail')
+      end
+
+      it 'sets @as_of_date to param[:as_of_date] if available' do
+        get :advances_detail, as_of_date: as_of_date
+        expect(assigns[:as_of_date]).to eq(as_of_date)
+      end
+
+      it 'sets @as_of_date to today\'s date if param[:as_of_date] is not available' do
+        expect(Date).to receive(:today).at_least(1).and_return(today)
+        get :advances_detail
+        expect(assigns[:as_of_date]).to eq(today)
+      end
+
+      it 'should pass @as_of_date to DatePickerHelper#range_picker_default_presets and set @picker_presets to its outcome' do
+        expect(controller).to receive(:range_picker_default_presets).with(as_of_date).and_return(picker_preset_hash)
+        get :advances_detail, as_of_date: as_of_date
+        expect(assigns[:picker_presets]).to eq(picker_preset_hash)
+      end
+
+      it 'should call the method `advances_details` on a MemberBalanceService instance with the `as_of` argument and set @advances_detail to its result' do
+        expect(member_balance_service_instance).to receive(:advances_details).with(as_of_date).and_return(advances_detail)
+        get :advances_detail, as_of_date: as_of_date
+        expect(assigns[:advances_detail]).to eq(advances_detail)
+      end
+
+      it 'should raise an error if `advances_details` returns nil' do
+        expect(member_balance_service_instance).to receive(:advances_details).and_return(nil)
+        expect{get :advances_detail, as_of_date: as_of_date}.to raise_error
+      end
+
+      describe 'setting the `prepayment_fee_indication` attribute for a given advance record' do
+        let(:advance_record) {double('Advance Record')}
+        let(:advances_array) {[advance_record]}
+        let(:prepayment_fee) {464654654}
+        before do
+          allow(advances_detail).to receive(:[]).with(:advances_details).at_least(1).and_return(advances_array)
+          allow(member_balance_service_instance).to receive(:advances_details).and_return(advances_detail)
+        end
+        it 'sets the attribute to `unavailable online` message if `notes` attribute for that record is `unavailable_online`' do
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('reports.pages.advances_detail.unavailable_online'))
+          expect(advance_record).to receive(:[]).with(:notes).and_return('unavailable_online')
+          get :advances_detail
+        end
+        it 'sets the attribute to `not applicable for vrc` message if `notes` attribute for that record is `not_applicable_to_vrc`' do
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('reports.pages.advances_detail.not_applicable_to_vrc'))
+          expect(advance_record).to receive(:[]).with(:notes).and_return('not_applicable_to_vrc')
+          get :advances_detail
+        end
+        it 'sets the attribute to `prepayment fee restructure` message if `notes` attribute for that record is `prepayment_fee_restructure`' do
+          date = Date.new(2013, 1, 1)
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('reports.pages.advances_detail.prepayment_fee_restructure_html', fee: number_to_currency(prepayment_fee), date: fhlb_date_standard_numeric(date)))
+          expect(advance_record).to receive(:[]).with(:structure_product_prepay_valuation_date).and_return(date)
+          expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
+          expect(advance_record).to receive(:[]).with(:notes).and_return('prepayment_fee_restructure')
+          get :advances_detail
+        end
+        it 'sets the attribute to equal the `prepayment_fee_indication` value if that attribute exists and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, number_to_currency(prepayment_fee))
+          expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
+          expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
+          get :advances_detail
+        end
+        it 'sets the attribute to equal the `not applicable` message if there is no value for the `prepayment_fee_indication` attribute and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('global.not_applicable'))
+          expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
+          expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(nil)
+          get :advances_detail
         end
       end
     end

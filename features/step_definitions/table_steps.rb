@@ -40,6 +40,8 @@ def compare_sort_order(column_name, sort_order, table_selector='.report-table')
       case column_name
         when "Date"
           value = Date.strptime(element.text, '%m/%d/%Y')
+        when "Trade Date"
+          value = Date.strptime(element.text, '%m-%d-%Y')
         when "Certificate Sequence"
           value = element.text.to_i
         when "Original Amount"
@@ -73,4 +75,10 @@ def compare_sort_order(column_name, sort_order, table_selector='.report-table')
     end
   end
 
+end
+
+def skip_if_table_empty(&block)
+  if !page.first('.report-table tbody tr:first-child td:first-child')['class'].split(' ').include?('dataTables_empty')
+    yield block
+  end
 end

@@ -12,6 +12,7 @@ $(function () {
     var ranges = {};
     var lastCustomLabel;
     var defaultPreset = 1;
+    var maxDate = $wrapper.data('date-picker-max-date') ? moment($wrapper.data('date-picker-max-date')) : false;
     $.each(presets, function(index, preset) {
       if (preset.start_date) {
         preset.start_date = moment(preset.start_date);
@@ -39,7 +40,8 @@ $(function () {
       defaultPreset: defaultPreset,
       startDate: startDate,
       endDate: endDate,
-      singleDatePicker: singleDatePicker
+      singleDatePicker: singleDatePicker,
+      maxDate: maxDate
     });
     datePickerSelectionHandler($datePickerTrigger, $wrapper, presets);
     setDatePickerApplyListener($datePickerTrigger, $form);
@@ -52,6 +54,7 @@ $(function () {
         startDate: options.startDate,
         endDate: options.endDate,
         ranges: options.ranges,
+        maxDate: options.maxDate,
         parentEl: $datePickerWrapper,
         locale: {
           customRangeLabel: options.customLabel,
@@ -124,8 +127,12 @@ $(function () {
     $datePickerTrigger.on('apply.daterangepicker', function(ev, picker) {
       ev.stopPropagation();
       setDatePickerPlaceholder($datePickerTrigger, picker.startDate, picker.endDate);
-      $form.find('input[name=start_date]').val(picker.startDate.format('YYYY-MM-DD'));
-      $form.find('input[name=end_date]').val(picker.endDate.format('YYYY-MM-DD'));
+      if ($($datePickerTrigger.siblings('.datepicker-wrapper')).data('date-picker-single-date-picker')) {
+        $form.find('input[name=as_of_date]').val(picker.startDate.format('YYYY-MM-DD'));
+      } else {
+        $form.find('input[name=end_date]').val(picker.endDate.format('YYYY-MM-DD'));
+        $form.find('input[name=start_date]').val(picker.startDate.format('YYYY-MM-DD'));
+      }
       $form.submit();
     });
   };
