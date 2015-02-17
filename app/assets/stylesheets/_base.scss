@@ -21,7 +21,6 @@ $logo-black: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGlu
 
 html, body {
   position: relative;
-  height: 100%;
   overflow-x: hidden; // fix for IE horz scroll bug when tooltip extends past 960 grid - also allows full-bleed section backgrounds
   font-size: $default-font-size;
   color: $text-color;
@@ -30,9 +29,14 @@ html, body {
 
 html {
   background-color: $light-gray;
+  height: 100%;
   &.white-background {
     background: $white;
   }
+}
+
+body {
+  min-height: 100%;
 }
 
 @media screen and (max-width: $row-width) {
