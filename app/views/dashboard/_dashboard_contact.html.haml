@@ -5,4 +5,4 @@
     = render 'dashboard/dashboard_icon', icon: :phone, alt_text: t('dashboard.contacts.icon_alt_text')
     %h2= title
     %p= name
-    %p= phone_number
+    %p= fhlb_formatted_phone_number(phone_number)

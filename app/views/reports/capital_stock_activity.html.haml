@@ -45,4 +45,4 @@
           %td.report-cell-right= number_with_delimiter @capital_stock_activity[:total_debits]
           %td.report-cell-right= number_with_delimiter @capital_stock_activity[:total_credits]
           %td.report-cell-expanding
-    %small= t('reports.accuracy_notice_html', url: '#')
+    %small= t('reports.accuracy_notice_html', url: '#', phone_number: fhlb_formatted_phone_number('4156162634'), phone_number_alt: fhlb_formatted_phone_number('4156162913'))
