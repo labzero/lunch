@@ -18,7 +18,7 @@
           %tr
             %td.description-cell
               %h3= t("reports.#{category}.#{report}.title")
-              %p= t("reports.#{category}.#{report}.summary")
+              %p= t("reports.#{category}.#{report}.summary", phone_number: "#{fhlb_formatted_phone_number(details[:phone_number]) if details[:phone_number]}")
             %td.updated-cell= details[:updated]
             %td.history-cell= details[:available_history]
             %td
