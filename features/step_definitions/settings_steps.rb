@@ -31,3 +31,7 @@ end
 Then(/^I should see the selected state for the "(.*?)" option$/) do |option|
   page.assert_selector(".settings-email-#{option}-row td:nth-child(3) .settings-selected-item-message", :visible => true)
 end
+
+Then(/^I should see the auto\-save message for the email settings page$/) do
+  page.assert_selector(".settings-save-message")
+end
