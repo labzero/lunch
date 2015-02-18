@@ -20,6 +20,8 @@ module FhlbMember
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
 
+    config.time_zone = 'Eastern Time (US & Canada)'
+
     config.mapi = ActiveSupport::OrderedOptions.new
     config.mapi.endpoint = ENV['MAPI_ENDPOINT'] || 'http://localhost:3100/mapi'
 

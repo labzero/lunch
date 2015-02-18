@@ -46,19 +46,19 @@ end
 
 Given(/^I am on the Capital Stock Activity Statement page$/) do
   sleep_if_close_to_midnight
-  @today = Date.today
+  @today = Time.zone.now.to_date
   visit '/reports/capital-stock-activity'
 end
 
 Given(/^I am on the Settlement Transaction Account Statement page$/) do
   sleep_if_close_to_midnight
-  @today = Date.today
+  @today = Time.zone.now.to_date
   visit '/reports/settlement-transaction-account'
 end
 
 Given(/^I am on the Advances Detail page$/) do
   sleep_if_close_to_midnight
-  @today = Date.today
+  @today = Time.zone.now.to_date
   visit '/reports/advances-detail'
 end
 
@@ -148,8 +148,8 @@ Then(/^I should see a "(.*?)" with dates between "(.*?)" and "(.*?)"$/) do |repo
 end
 
 Given(/^I'm showing Settlement Transaction Account activities from the last year$/) do
-  start_date = (Date.today - 1.year).strftime('%B %-d, %Y')
-  end_date = Date.today.strftime('%B %-d, %Y')
+  start_date = (Time.zone.now.to_date - 1.year).strftime('%B %-d, %Y')
+  end_date = Time.zone.now.to_date.strftime('%B %-d, %Y')
   sleep_if_close_to_midnight
   step 'I click the datepicker field'
   step 'I select all of last year including today'

@@ -20,8 +20,13 @@ RSpec.describe ReportsController, :type => :controller do
     let(:start_date) {Date.new(2014,12,01)}
     let(:end_date) {Date.new(2014,12,31)}
     let(:picker_preset_hash) {double(Hash)}
+    let(:zone) {double('Time.zone')}
+    let(:now) {double('Time.zone.now')}
     before do
       allow(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
+      allow(now).to receive(:to_date).at_least(1).and_return(today)
+      allow(zone).to receive(:now).at_least(1).and_return(now)
+      allow(Time).to receive(:zone).at_least(1).and_return(zone)
     end
 
     describe 'GET capital_stock_activity' do
@@ -44,7 +49,6 @@ RSpec.describe ReportsController, :type => :controller do
       it 'should use the last full month if no params are passed' do
         start_of_month = (today - 1.month).beginning_of_month
         end_of_month = start_of_month.end_of_month
-        expect(Date).to receive(:today).at_least(:once).and_return(today)
         expect(member_balance_service_instance).to receive(:capital_stock_activity).with(start_of_month, end_of_month).and_return(response_hash)
         get :capital_stock_activity
       end
@@ -221,7 +225,6 @@ RSpec.describe ReportsController, :type => :controller do
       end
 
       it 'sets @as_of_date to today\'s date if param[:as_of_date] is not available' do
-        expect(Date).to receive(:today).at_least(1).and_return(today)
         get :advances_detail
         expect(assigns[:as_of_date]).to eq(today)
       end

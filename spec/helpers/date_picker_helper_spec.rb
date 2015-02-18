@@ -3,8 +3,15 @@ require 'spec_helper'
 describe DatePickerHelper do
   describe '`default_dates_hash` method' do
     let(:today) { Date.new(2013,1,1) }
+    let(:picker_preset_hash) {double(Hash)}
+    let(:zone) {double('Time.zone')}
+    let(:now) {double('Time.zone.now')}
+    before do
+      allow(now).to receive(:to_date).at_least(1).and_return(today)
+      allow(zone).to receive(:now).at_least(1).and_return(now)
+      allow(Time).to receive(:zone).at_least(1).and_return(zone)
+    end
     it 'returns a hash with keys for `today`, `this_month_start`, `last_month_start`, and `last_month_end`' do
-      allow(Date).to receive(:today).at_least(:once).and_return(today)
       expect(helper.default_dates_hash[:today]).to eq(today)
       expect(helper.default_dates_hash[:this_month_start]).to eq(today.beginning_of_month)
       expect(helper.default_dates_hash[:last_month_start]).to eq(today.beginning_of_month - 1.month)

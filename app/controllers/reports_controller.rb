@@ -105,7 +105,7 @@ class ReportsController < ApplicationController
 
   def borrowing_capacity
     member_balances = MemberBalanceService.new(MEMBER_ID, request)
-    date = params[:end_date] || Date.today
+    date = params[:end_date] || Time.zone.now.to_date
     @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(date.to_date)
     raise StandardError, "There has been an error and ReportsController#borrowing_capacity has returned nil. Check error logs." if @borrowing_capacity_summary.blank?
   end
@@ -142,7 +142,7 @@ class ReportsController < ApplicationController
   end
 
   def advances_detail
-    @as_of_date = (params[:as_of_date] || Date.today).to_date
+    @as_of_date = (params[:as_of_date] || Time.zone.now.to_date).to_date
     member_balances = MemberBalanceService.new(MEMBER_ID, request)
     @advances_detail = member_balances.advances_details(@as_of_date)
     raise StandardError, "There has been an error and ReportsController#advances_detail has returned nil. Check error logs." if @advances_detail.blank?
