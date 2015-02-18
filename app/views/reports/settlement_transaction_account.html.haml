@@ -59,4 +59,4 @@
           %td.report-cell-right= '-'
           %td.report-cell-right= '-'
           %td.report-cell-right= number_to_currency(@settlement_transaction_account[:start_balance]) || '-'
-    %small= t('reports.change_notice')
+    %small= t('reports.change_notice', phone_number: fhlb_formatted_phone_number('4156162945'))

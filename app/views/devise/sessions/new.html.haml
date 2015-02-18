@@ -9,7 +9,7 @@
   .row
     .column-4x8-left
       %p= t('welcome.questions.p')
-      %p= t('welcome.questions.phone')
+      %p= fhlb_formatted_phone_number('4155557283')
     .column-4x8-right
       %p= t('welcome.intro')
       = form_for(resource, as: resource_name, url: session_path(resource_name)) do |f|
