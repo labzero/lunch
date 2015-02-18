@@ -1,7 +1,7 @@
 module DatePickerHelper
 
   def default_dates_hash
-    today = Date.today
+    today = Time.zone.now.to_date
     {
       this_month_start: today.beginning_of_month,
       today: today,

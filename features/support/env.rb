@@ -11,6 +11,7 @@ require 'i18n'
 I18n.load_path += Dir.glob('config/locales/*.yml')
 
 require 'active_support/all'
+Time.zone = 'Pacific Time (US & Canada)' # set Time.zone for when cukes run with custom_host
 
 custom_host = ENV['APP_HOST'] || env_config['app_host']
 
