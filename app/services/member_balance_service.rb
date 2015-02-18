@@ -1,5 +1,6 @@
 class MemberBalanceService < MAPIService
   DAILY_BALANCE_KEY = 'Interest Rate / Daily Balance' # the key returned by us from MAPI to let us know a row represents balance at close of business
+  LOAN_TYPES = [:Agency, :AAA, :AA]
 
   def initialize(member_id, request)
     super(request)
@@ -205,8 +206,8 @@ class MemberBalanceService < MAPIService
         securities_backed_collateral_fields = [:total_market_value, :total_borrowing_capacity, :advances, :standard_credit, :remaining_market_value, :remaining_borrowing_capacity]
         securities_backed_collateral_fields.each do |key|
           data[:sbc_totals][key] ||= 0
-          data[:sbc][:collateral].each do |row|
-            data[:sbc_totals][key] += row[key].to_i
+          LOAN_TYPES.each do |type|
+            data[:sbc_totals][key] += data[:sbc][:collateral][type][key].to_i
           end
         end
         data[:sbc_excess_capacity] = data[:sbc_totals][:remaining_borrowing_capacity].to_i - data[:sbc][:utilized].values.sum

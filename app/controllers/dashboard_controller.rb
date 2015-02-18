@@ -8,6 +8,10 @@ class DashboardController < ApplicationController
   def index
     rate_service = RatesService.new(request)
     etransact_service = EtransactAdvancesService.new(request)
+    member_balances = MemberBalanceService.new(MEMBER_ID, request)
+
+    date = params[:end_date] || Date.today
+    @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(date.to_date)
 
     @previous_activity = [
       [t('dashboard.previous_activity.overnight_vrc'), 44503000, DateTime.new(2014,9,3)],
@@ -33,16 +37,15 @@ class DashboardController < ApplicationController
     ]
 
     market_value = [
-      [t('dashboard.your_account.table.market_value.agency'), 0],
-      [t('dashboard.your_account.table.market_value.aaa'), 0],
-      [t('dashboard.your_account.table.market_value.aa'), 0]
+      [t('dashboard.your_account.table.market_value.agency'), @borrowing_capacity_summary[:sbc][:collateral][:Agency][:total_market_value]],
+      [t('dashboard.your_account.table.market_value.aaa'),  @borrowing_capacity_summary[:sbc][:collateral][:AAA][:total_market_value]],
+      [t('dashboard.your_account.table.market_value.aa'),  @borrowing_capacity_summary[:sbc][:collateral][:AA][:total_market_value]],
     ]
-
     borrowing_capacity = [
-      [t('dashboard.your_account.table.borrowing_capacity.standard'), 65000000],
-      [t('dashboard.your_account.table.borrowing_capacity.agency'), 0],
-      [t('dashboard.your_account.table.borrowing_capacity.aaa'), 0],
-      [t('dashboard.your_account.table.borrowing_capacity.aa'), 0]
+      [t('dashboard.your_account.table.borrowing_capacity.standard'), @borrowing_capacity_summary[:standard_credit_totals][:borrowing_capacity]],
+      [t('dashboard.your_account.table.borrowing_capacity.agency'), @borrowing_capacity_summary[:sbc][:collateral][:Agency][:total_borrowing_capacity]],
+      [t('dashboard.your_account.table.borrowing_capacity.aaa'), @borrowing_capacity_summary[:sbc][:collateral][:AAA][:total_borrowing_capacity]],
+      [t('dashboard.your_account.table.borrowing_capacity.aa'), @borrowing_capacity_summary[:sbc][:collateral][:AA][:total_borrowing_capacity]],
     ]
 
     @sub_tables = {remaining: remaining, market_value: market_value, borrowing_capacity: borrowing_capacity}
@@ -51,9 +54,6 @@ class DashboardController < ApplicationController
       name: 'Test',
       data: rate_service.overnight_vrc
     }];
-
-
-    member_balances = MemberBalanceService.new(MEMBER_ID, request)
 
 
     @pledged_collateral = member_balances.pledged_collateral

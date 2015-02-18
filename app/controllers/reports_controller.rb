@@ -107,6 +107,7 @@ class ReportsController < ApplicationController
     member_balances = MemberBalanceService.new(MEMBER_ID, request)
     date = params[:end_date] || Date.today
     @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(date.to_date)
+    @loan_types = [:Agency, :AAA, :AA]
     raise StandardError, "There has been an error and ReportsController#borrowing_capacity has returned nil. Check error logs." if @borrowing_capacity_summary.blank?
   end
 
