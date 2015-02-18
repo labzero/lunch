@@ -8,6 +8,17 @@ class ReportsController < ApplicationController
 
   def index
     @reports = {
+      price_indications: {
+        current: {
+          updated: t('global.daily'),
+          available_history: t('global.current_day'),
+          summary: t('reports.price_indications.current.summary', phone_number: fhlb_formatted_phone_number('8004443452'))
+        },
+        historical: {
+          updated: t('global.daily'),
+          available_history: t('global.various')
+        }
+      },
       credit: {
         advances_detail: {
           updated: t('global.daily'),

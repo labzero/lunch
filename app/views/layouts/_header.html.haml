@@ -19,6 +19,11 @@
         = link_to(t('reports.title'), reports_path, class: 'nav-menu')
         %ul.nav-dropdown<>
           %li<>
+            = link_to(t('reports.price_indications.title'), reports_path)
+            %ul.nav-dropdown-nested
+              %li= link_to(t('reports.price_indications.current.title'), reports_path)
+              %li= link_to(t('reports.price_indications.historical.title'), reports_path)
+          %li<>
             = link_to(t('reports.credit.title'), reports_path)
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.credit.advances_detail.title'), reports_advances_detail_path)

@@ -67,6 +67,7 @@ en:
     hide: Hide
     none: None
     not_applicable: Not applicable
+    various: Various
   nav:
     primary:
       welcome: Hi %{name}
@@ -278,6 +279,14 @@ en:
       months36: 36 months
       months12: 12 months
       present2007: 2007-present
+    price_indications:
+      title: Price Indications
+      current:
+        title: Current
+        summary: Current price indications are subject to change. For current quotes call %{phone_number} between 7 a.m. and 2 p.m. Pacific time. Variable Rate Credit advances are available until 2 p.m., and all other advances are generally available until 12 noon.
+      historical:
+        title: Historical
+        summary: Historical price indications reflect the price indications posted at the beginning of the day, not actual prices.
     credit:
       title: Credit
       advances_detail:

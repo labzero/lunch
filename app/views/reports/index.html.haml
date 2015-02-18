@@ -17,8 +17,8 @@
         - reports.each do |report, details|
           %tr
             %td.description-cell
-              %h3= t("reports.#{category}.#{report}.title")
-              %p= t("reports.#{category}.#{report}.summary")
+              %h3= details[:title] || t("reports.#{category}.#{report}.title")
+              %p= details[:summary] || t("reports.#{category}.#{report}.summary")
             %td.updated-cell= details[:updated]
             %td.history-cell= details[:available_history]
             %td
