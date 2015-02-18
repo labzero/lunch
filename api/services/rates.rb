@@ -291,6 +291,7 @@ module MAPI
             begin
               response = @@cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
             rescue Savon::Error => error
+              logger.error error
               halt 503, 'Internal Service Error'
             end
             response.doc.remove_namespaces!
@@ -320,6 +321,7 @@ module MAPI
             begin
               response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
             rescue Savon::Error => error
+              logger.error error
               halt 503, 'Internal Service Error'
             end
             hash = {}
