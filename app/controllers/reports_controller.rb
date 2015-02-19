@@ -5,7 +5,6 @@ class ReportsController < ApplicationController
 
   MEMBER_ID = 750 #this is the hard-coded fhlb client id number we're using for the time-being
 
-
   def index
     @reports = {
       price_indications: {

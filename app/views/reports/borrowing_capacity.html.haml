@@ -107,15 +107,15 @@
             %th= t('reports.pages.borrowing_capacity_summary.remaining_borrowing_capacity')
         - if @borrowing_capacity_summary[:sbc].length > 0
           %tbody
-            -@borrowing_capacity_summary[:sbc][:collateral].each do |row|
+            -@borrowing_capacity_summary[:sbc][:collateral].each do |type, value|
               %tr
-                %td.report-cell-narrow= row[:type]
-                %td.report-cell-right= fhlb_formatted_currency(row[:total_market_value])
-                %td.report-cell-right= fhlb_formatted_currency(row[:total_borrowing_capacity])
-                %td.report-cell-right= fhlb_formatted_currency(row[:advances])
-                %td.report-cell-right= fhlb_formatted_currency(row[:standard_credit])
-                %td.report-cell-right= fhlb_formatted_currency(row[:remaining_market_value])
-                %td.report-cell-right= fhlb_formatted_currency(row[:remaining_borrowing_capacity])
+                %td.report-cell-narrow= t("dashboard.your_account.pledged_collateral.#{type}")
+                %td.report-cell-right= fhlb_formatted_currency(value[:total_market_value])
+                %td.report-cell-right= fhlb_formatted_currency(value[:total_borrowing_capacity])
+                %td.report-cell-right= fhlb_formatted_currency(value[:advances])
+                %td.report-cell-right= fhlb_formatted_currency(value[:standard_credit])
+                %td.report-cell-right= fhlb_formatted_currency(value[:remaining_market_value])
+                %td.report-cell-right= fhlb_formatted_currency(value[:remaining_borrowing_capacity])
           %tfoot
             %tr
               %td.report-cell-narrow= t('global.totals')

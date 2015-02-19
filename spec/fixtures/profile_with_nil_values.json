@@ -1,0 +1,13 @@
+{
+  "sta_balance":null,
+  "credit_outstanding":null,
+  "financial_available":null,
+  "stock_leverage":null,
+  "collateral_market_value_sbc_agency":null,
+  "collateral_market_value_sbc_aaa":null,
+  "collateral_market_value_sbc_aa":null,
+  "borrowing_capacity_standard":null,
+  "borrowing_capacity_sbc_agency":null,
+  "borrowing_capacity_sbc_aaa":null,
+  "borrowing_capacity_sbc_aa":null
+}

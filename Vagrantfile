@@ -192,7 +192,7 @@ EOS
 export PATH=$JAVA_HOME/bin:$PATH' | cat - /etc/bash.bashrc | sudo tee /etc/bash.bashrc > /dev/null
   source /etc/bash.bashrc
   cd /vagrant_oracle_installer
-  test -f `ls *.deb` || (echo "Building .deb, this will take A LONG TIME..."; sudo alien --scripts -k -d #{oracle_rpm_name})
+  test -f "`ls *.deb`" || (echo "Building .deb, this will take A LONG TIME..."; sudo alien --scripts -k -d #{oracle_rpm_name})
   DEB_NAME=`ls *.deb`
   echo #{Shellwords.escape(chkconfig_script)} | sudo tee -a /sbin/chkconfig
   sudo chmod 755 /sbin/chkconfig

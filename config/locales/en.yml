@@ -266,8 +266,8 @@ en:
           aaa: 'SBC:AAA'
           aa: 'SBC:AA'
         borrowing_capacity:
-          title: Collateral borrowing capacity
-          standard: Standard credit program
+          title: Collateral Borrowing Capacity
+          standard: Standard Credit Program
           agency: 'SBC:Agency'
           aaa: 'SBC:AAA'
           aa: 'SBC:AA'

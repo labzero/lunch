@@ -8,6 +8,9 @@ class DashboardController < ApplicationController
   def index
     rate_service = RatesService.new(request)
     etransact_service = EtransactAdvancesService.new(request)
+    member_balances = MemberBalanceService.new(MEMBER_ID, request)
+
+    profile = member_balances.profile
 
     @previous_activity = [
       [t('dashboard.previous_activity.overnight_vrc'), 44503000, DateTime.new(2014,9,3)],
@@ -22,27 +25,30 @@ class DashboardController < ApplicationController
       [t('dashboard.anticipated_activity.stock_purchase'), -37990, DateTime.new(2014,8,12), t('dashboard.anticipated_activity.estimated')],
     ]
 
+    if profile
+      profile.each {|key, value| profile[key] = '-' if value.nil?}
+    end
+
     @account_overview = [
-      [t('dashboard.your_account.table.balance'), 1973179.93],
-      [t('dashboard.your_account.table.credit_outstanding'), 105000000]
+      [t('dashboard.your_account.table.balance'), profile ? profile[:sta_balance] : '-'],
+      [t('dashboard.your_account.table.credit_outstanding'), profile ? profile[:credit_outstanding] : '-']
     ]
 
     remaining = [
-      [t('dashboard.your_account.table.remaining.available'), 105000000],
-      [t('dashboard.your_account.table.remaining.leverage'), 12400000]
+      [t('dashboard.your_account.table.remaining.available'), profile ? profile[:financial_available] : '-'],
+      [t('dashboard.your_account.table.remaining.leverage'), profile ? profile[:stock_leverage] : '-'],
     ]
 
     market_value = [
-      [t('dashboard.your_account.table.market_value.agency'), 0],
-      [t('dashboard.your_account.table.market_value.aaa'), 0],
-      [t('dashboard.your_account.table.market_value.aa'), 0]
+      [t('dashboard.your_account.table.market_value.agency'), profile ? profile[:collateral_market_value_sbc_agency] : '-'],
+      [t('dashboard.your_account.table.market_value.aaa'),  profile ? profile[:collateral_market_value_sbc_aaa] : '-'],
+      [t('dashboard.your_account.table.market_value.aa'),  profile ? profile[:collateral_market_value_sbc_aa] : '-']
     ]
-
     borrowing_capacity = [
-      [t('dashboard.your_account.table.borrowing_capacity.standard'), 65000000],
-      [t('dashboard.your_account.table.borrowing_capacity.agency'), 0],
-      [t('dashboard.your_account.table.borrowing_capacity.aaa'), 0],
-      [t('dashboard.your_account.table.borrowing_capacity.aa'), 0]
+      [t('dashboard.your_account.table.borrowing_capacity.standard'), profile ? profile[:borrowing_capacity_standard] : '-'],
+      [t('dashboard.your_account.table.borrowing_capacity.agency'), profile ? profile[:borrowing_capacity_sbc_agency] : '-'],
+      [t('dashboard.your_account.table.borrowing_capacity.aaa'), profile ? profile[:borrowing_capacity_sbc_aaa] : '-'],
+      [t('dashboard.your_account.table.borrowing_capacity.aa'), profile ? profile[:borrowing_capacity_sbc_aa] : '-'],
     ]
 
     @sub_tables = {remaining: remaining, market_value: market_value, borrowing_capacity: borrowing_capacity}
@@ -51,9 +57,6 @@ class DashboardController < ApplicationController
       name: 'Test',
       data: rate_service.overnight_vrc
     }];
-
-
-    member_balances = MemberBalanceService.new(MEMBER_ID, request)
 
 
     @pledged_collateral = member_balances.pledged_collateral

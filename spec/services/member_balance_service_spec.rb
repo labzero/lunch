@@ -174,6 +174,50 @@ describe MemberBalanceService do
   end
 
   # TODO add vcr once MAPI endpoint is rigged up
+  describe 'profile' do
+    let(:profile) {subject.profile}
+    it 'should return profile data' do
+      expect(profile.length).to be >= 1
+      expect(profile[:sta_balance]).to be_kind_of(Integer)
+      expect(profile[:credit_outstanding]).to be_kind_of(Integer)
+      expect(profile[:financial_available]).to be_kind_of(Integer)
+      expect(profile[:stock_leverage]).to be_kind_of(Integer)
+      expect(profile[:collateral_market_value_sbc_agency]).to be_kind_of(Integer)
+      expect(profile[:collateral_market_value_sbc_aaa]).to be_kind_of(Integer)
+      expect(profile[:collateral_market_value_sbc_aa]).to be_kind_of(Integer)
+      expect(profile[:borrowing_capacity_standard]).to be_kind_of(Integer)
+      expect(profile[:borrowing_capacity_sbc_agency]).to be_kind_of(Integer)
+      expect(profile[:borrowing_capacity_sbc_aaa]).to be_kind_of(Integer)
+      expect(profile[:borrowing_capacity_sbc_aa]).to be_kind_of(Integer)
+    end
+    describe 'bad data' do
+      before do
+        expect(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'profile_with_nil_values.json'))))
+      end
+      it 'should pass nil values if data from MAPI has nil values' do
+        expect(profile[:sta_balance]).to be(nil)
+        expect(profile[:credit_outstanding]).to be(nil)
+        expect(profile[:financial_available]).to be(nil)
+        expect(profile[:stock_leverage]).to be(nil)
+        expect(profile[:collateral_market_value_sbc_agency]).to be(nil)
+        expect(profile[:collateral_market_value_sbc_aaa]).to be(nil)
+        expect(profile[:collateral_market_value_sbc_aa]).to be(nil)
+        expect(profile[:borrowing_capacity_standard]).to be(nil)
+        expect(profile[:borrowing_capacity_sbc_agency]).to be(nil)
+        expect(profile[:borrowing_capacity_sbc_aaa]).to be(nil)
+        expect(profile[:borrowing_capacity_sbc_aa]).to be(nil)
+      end
+    end
+    describe 'error states' do
+      it 'returns nil if there is a JSON parsing error' do
+        # TODO change this stub once you implement the MAPI endpoint
+        expect(File).to receive(:read).and_return('some malformed json!')
+        expect(Rails.logger).to receive(:warn)
+        expect(profile).to be(nil)
+      end
+    end
+  end
+
   describe '`borrowing_capacity_summary` method' do
     let(:today) {Date.new(2014,12,1)}
     let(:borrowing_capacity_summary) {subject.borrowing_capacity_summary(today)}
@@ -206,14 +250,13 @@ describe MemberBalanceService do
       end
       it 'should return an array of securities-backed collateral objects' do
         expect(borrowing_capacity_summary[:sbc][:collateral].length).to be >= 1
-        borrowing_capacity_summary[:sbc][:collateral].each do |collateral_object|
-          expect(collateral_object[:type]).to be_kind_of(String)
-          expect(collateral_object[:total_market_value]).to be_kind_of(Integer)
-          expect(collateral_object[:total_borrowing_capacity]).to be_kind_of(Integer)
-          expect(collateral_object[:advances]).to be_kind_of(Integer)
-          expect(collateral_object[:standard_credit]).to be_kind_of(Integer)
-          expect(collateral_object[:remaining_market_value]).to be_kind_of(Integer)
-          expect(collateral_object[:remaining_borrowing_capacity]).to be_kind_of(Integer)
+        borrowing_capacity_summary[:sbc][:collateral].each do |collateral_object, value|
+          expect(value[:total_market_value]).to be_kind_of(Integer)
+          expect(value[:total_borrowing_capacity]).to be_kind_of(Integer)
+          expect(value[:advances]).to be_kind_of(Integer)
+          expect(value[:standard_credit]).to be_kind_of(Integer)
+          expect(value[:remaining_market_value]).to be_kind_of(Integer)
+          expect(value[:remaining_borrowing_capacity]).to be_kind_of(Integer)
         end
       end
       it 'should return a hash of utilized securities-backed line items' do
@@ -260,8 +303,8 @@ describe MemberBalanceService do
             expect(borrowing_capacity_summary[:standard_excess_capacity]).to eq(2207180460)
           end
           it 'should total all of the securities-backed collateral fields' do
-            expect(borrowing_capacity_summary[:sbc_totals][:total_market_value]).to eq(105613)
-            expect(borrowing_capacity_summary[:sbc_totals][:total_borrowing_capacity]).to eq(100332)
+            expect(borrowing_capacity_summary[:sbc_totals][:total_market_value]).to eq(4193763)
+            expect(borrowing_capacity_summary[:sbc_totals][:total_borrowing_capacity]).to eq(601332)
             expect(borrowing_capacity_summary[:sbc_totals][:advances]).to eq(0)
             expect(borrowing_capacity_summary[:sbc_totals][:standard_credit]).to eq(0)
             expect(borrowing_capacity_summary[:sbc_totals][:remaining_market_value]).to eq(105613)
