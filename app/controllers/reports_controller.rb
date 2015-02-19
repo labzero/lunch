@@ -16,7 +16,8 @@ class ReportsController < ApplicationController
         },
         historical: {
           updated: t('global.daily'),
-          available_history: t('global.various')
+          available_history: t('global.various'),
+          route: reports_historical_price_indications_path
         }
       },
       credit: {
@@ -171,6 +172,51 @@ class ReportsController < ApplicationController
         @advances_detail[:advances_details][i][:prepayment_fee_indication] = number_to_currency(advance[:prepayment_fee_indication]) || t('global.not_applicable')
       end
     end
+  end
+
+  def historical_price_indications
+    rate_service = RatesService.new(request)
+    default_dates = default_dates_hash
+    @start_date = ((params[:start_date] || default_dates[:this_year_start])).to_date
+    @end_date = ((params[:end_date] || default_dates[:today])).to_date
+
+    @picker_presets = range_picker_default_presets(@start_date, @end_date)
+    @collateral_type_options = [
+        [t('reports.pages.price_indications.standard_credit_program'), 'standard'],
+        [t('reports.pages.price_indications.sbc_program'), 'sbc']
+    ]
+    collateral_type = params[:historical_price_collateral_type]
+    @collateral_type_options.each do |option|
+      if option[1] == collateral_type
+        @collateral_type = collateral_type
+        @collateral_type_text = option[0]
+        break
+      end
+    end
+    @collateral_type ||= @collateral_type_options.first.last
+    @collateral_type_text ||= @collateral_type_options.first.first
+    @credit_type_options = [
+        [t('reports.pages.price_indications.fixed_rate_credit'), 'frc'],
+        [t('reports.pages.price_indications.variable_rate_credit'), 'vrc'],
+        [t('reports.pages.price_indications.adjustable_rate.1m_libor'), '1m_libor'],
+        [t('reports.pages.price_indications.adjustable_rate.3m_libor'), '3m_libor'],
+        [t('reports.pages.price_indications.adjustable_rate.6m_libor'), '6m_libor'],
+        [t('reports.pages.price_indications.adjustable_rate.daily_prime'), 'daily_prime'],
+        [t('reports.pages.price_indications.adjustable_rate.embedded_cap'), 'embedded_cap']
+    ]
+    credit_type = params[:historical_price_credit_type]
+    @credit_type_options.each do |option|
+      if option[1] == credit_type
+        @credit_type = credit_type
+        @credit_type_text = option[0]
+        break
+      end
+    end
+    @credit_type ||= @credit_type_options.first.last
+    @credit_type_text ||= @credit_type_options.first.first
+
+    @historical_price_indications = rate_service.historical_price_indications(@start_date, @end_date, @collateral_type, @credit_type)
+    raise StandardError, "There has been an error and ReportsController#historical_price_indications has returned nil. Check error logs." if @historical_price_indications.blank?
   end
 
 end

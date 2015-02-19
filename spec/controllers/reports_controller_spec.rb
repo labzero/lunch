@@ -5,6 +5,19 @@ include ActionView::Helpers::NumberHelper
 RSpec.describe ReportsController, :type => :controller do
   login_user
 
+  let(:today) {Date.new(2015,1,20)}
+  let(:start_date) {Date.new(2014,12,01)}
+  let(:end_date) {Date.new(2014,12,31)}
+  let(:picker_preset_hash) {double(Hash)}
+  let(:zone) {double('Time.zone')}
+  let(:now) {double('Time.zone.now')}
+
+  before do
+    allow(now).to receive(:to_date).at_least(1).and_return(today)
+    allow(zone).to receive(:now).at_least(1).and_return(now)
+    allow(Time).to receive(:zone).at_least(1).and_return(zone)
+  end
+
   describe 'GET index' do
     it_behaves_like 'a user required action', :get, :index
     it 'should render the index view' do
@@ -16,17 +29,9 @@ RSpec.describe ReportsController, :type => :controller do
   describe 'requests hitting MemberBalanceService' do
     let(:member_balance_service_instance) { double('MemberBalanceServiceInstance') }
     let(:response_hash) { double('MemberBalanceHash') }
-    let(:today) {Date.new(2015,1,20)}
-    let(:start_date) {Date.new(2014,12,01)}
-    let(:end_date) {Date.new(2014,12,31)}
-    let(:picker_preset_hash) {double(Hash)}
-    let(:zone) {double('Time.zone')}
-    let(:now) {double('Time.zone.now')}
+
     before do
       allow(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
-      allow(now).to receive(:to_date).at_least(1).and_return(today)
-      allow(zone).to receive(:now).at_least(1).and_return(now)
-      allow(Time).to receive(:zone).at_least(1).and_return(zone)
     end
 
     describe 'GET capital_stock_activity' do
@@ -287,4 +292,119 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
   end
+
+  describe 'requests hitting RatesService' do
+    let(:rates_service_instance) { double('RatesService') }
+    let(:response_hash) { double('RatesServiceHash') }
+
+    before do
+      allow(RatesService).to receive(:new).and_return(rates_service_instance)
+      allow(rates_service_instance).to receive(:historical_price_indications).and_return(response_hash)
+    end
+
+    describe 'GET historical_price_indications' do
+      it_behaves_like 'a user required action', :get, :historical_price_indications
+      it 'renders the historical_price_indications view' do
+        expect(rates_service_instance).to receive(:historical_price_indications).and_return(response_hash)
+        get :historical_price_indications
+        expect(response.body).to render_template('historical_price_indications')
+      end
+      it 'should use the start_date and end_date provided in the params hash if available' do
+        expect(rates_service_instance).to receive(:historical_price_indications).with(start_date, end_date, anything, anything).and_return(response_hash)
+        get :historical_price_indications, start_date: start_date, end_date: end_date
+      end
+      it 'should use the start of this year to date as the date range if no params are passed' do
+        start_of_year = today.beginning_of_year
+        expect(rates_service_instance).to receive(:historical_price_indications).with(start_of_year, today, anything, anything).and_return(response_hash)
+        get :historical_price_indications
+      end
+      it 'should raise an error if @historical_price_indications is nil' do
+        expect(rates_service_instance).to receive(:historical_price_indications).and_return(nil)
+        expect{get :historical_price_indications}.to raise_error(StandardError)
+      end
+      describe "view instance variables" do
+        before {
+          # allow(rates_service_instance).to receive(:settlement_transaction_account).with(kind_of(Date), kind_of(Date), kind_of(String)).and_return(response_hash)
+        }
+        it 'should set @historical_price_indications' do
+          expect(rates_service_instance).to receive(:historical_price_indications).and_return(response_hash)
+          get :historical_price_indications
+          expect(assigns[:historical_price_indications]).to eq(response_hash)
+        end
+        it 'should set @start_date to the start_date param' do
+          get :historical_price_indications, start_date: start_date, end_date: end_date
+          expect(assigns[:start_date]).to eq(start_date)
+        end
+        it 'should set @end_date to the end_date param' do
+          get :historical_price_indications, start_date: start_date, end_date: end_date
+          expect(assigns[:end_date]).to eq(end_date)
+        end
+        it 'should pass @start_date and @end_date to DatePickerHelper#range_picker_default_presets and set @picker_presets to its outcome' do
+          expect(controller).to receive(:range_picker_default_presets).with(start_date, end_date).and_return(picker_preset_hash)
+          get :historical_price_indications, start_date: start_date, end_date: end_date
+          expect(assigns[:picker_presets]).to eq(picker_preset_hash)
+        end
+        it 'should set @collateral_type to `standard` and @collateral_type_text to the proper i18next translation for `standard` if standard is passed as the historical_price_collateral_type param' do
+          get :historical_price_indications, historical_price_collateral_type: 'standard'
+          expect(assigns[:collateral_type]).to eq('standard')
+          expect(assigns[:collateral_type_text]).to eq(I18n.t('reports.pages.price_indications.standard_credit_program'))
+        end
+        it 'should set @collateral_type to `sbc` and @collateral_type_text to the proper i18next translation for `sbc` if sbc is passed as the historical_price_collateral_type param' do
+          get :historical_price_indications, historical_price_collateral_type: 'sbc'
+          expect(assigns[:collateral_type]).to eq('sbc')
+          expect(assigns[:collateral_type_text]).to eq(I18n.t('reports.pages.price_indications.sbc_program'))
+        end
+        it 'should set @collateral_type to `standard` and @collateral_type_text to the proper i18next translation for `standard` if nothing is passed for the historical_price_collateral_type param' do
+          get :historical_price_indications
+          expect(assigns[:collateral_type_text]).to eq(I18n.t('reports.pages.price_indications.standard_credit_program'))
+        end
+        it 'should set @collateral_type_options to an array of arrays containing the appropriate values and labels for standard and sbc' do
+          options_array = [
+              [I18n.t('reports.pages.price_indications.standard_credit_program'), 'standard'],
+              [I18n.t('reports.pages.price_indications.sbc_program'), 'sbc']
+          ]
+          get :historical_price_indications
+          expect(assigns[:collateral_type_options]).to eq(options_array)
+        end
+        it 'should set @credit_type to `frc` and @credit_type_text to the proper i18next translation for `frc` if frc is passed as the historical_price_credit_type param' do
+          get :historical_price_indications, historical_price_credit_type: 'frc'
+          expect(assigns[:credit_type]).to eq('frc')
+          expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.fixed_rate_credit'))
+        end
+        it 'should set @credit_type to `vrc` and @credit_type_text to the proper i18next translation for `vrc` if vrc is passed as the historical_price_credit_type param' do
+          get :historical_price_indications, historical_price_credit_type: 'vrc'
+          expect(assigns[:credit_type]).to eq('vrc')
+          expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.variable_rate_credit'))
+        end
+        ['1m_libor', '3m_libor', '6m_libor', 'daily_prime', 'embedded_cap'].each do |credit_type|
+          it "should set @credit_type to `#{credit_type}` and @credit_type_text to the proper i18next translation for `#{credit_type}` if #{credit_type} is passed as the historical_price_credit_type param" do
+            get :historical_price_indications, historical_price_credit_type: credit_type
+            expect(assigns[:credit_type]).to eq(credit_type)
+            expect(assigns[:credit_type_text]).to eq(I18n.t("reports.pages.price_indications.adjustable_rate.#{credit_type}"))
+          end
+        end
+        it 'should set @credit_type to `frc` and @credit_type_text to the proper i18next translation for `frc` if nothing is passed for the historical_price_credit_type param' do
+          get :historical_price_indications
+          expect(assigns[:credit_type]).to eq('frc')
+          expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.fixed_rate_credit'))
+        end
+        it 'should set @credit_type_options to an array of arrays containing the appropriate values and labels for standard and sbc' do
+          options_array = [
+              [I18n.t('reports.pages.price_indications.fixed_rate_credit'), 'frc'],
+              [I18n.t('reports.pages.price_indications.variable_rate_credit'), 'vrc'],
+              [I18n.t('reports.pages.price_indications.adjustable_rate.1m_libor'), '1m_libor'],
+              [I18n.t('reports.pages.price_indications.adjustable_rate.3m_libor'), '3m_libor'],
+              [I18n.t('reports.pages.price_indications.adjustable_rate.6m_libor'), '6m_libor'],
+              [I18n.t('reports.pages.price_indications.adjustable_rate.daily_prime'), 'daily_prime'],
+              [I18n.t('reports.pages.price_indications.adjustable_rate.embedded_cap'), 'embedded_cap']
+          ]
+          get :historical_price_indications
+          expect(assigns[:credit_type_options]).to eq(options_array)
+        end
+      end
+    end
+
+  end
+
+
 end

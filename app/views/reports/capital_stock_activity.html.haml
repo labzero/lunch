@@ -34,7 +34,7 @@
       %tbody
         -@capital_stock_activity[:activities].each do |row|
           %tr
-            %td.report-cell-narrow= row[:trans_date].strftime('%m/%d/%Y')
+            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:trans_date])
             %td= row['cert_id']
             %td.report-cell-right= number_with_delimiter row[:debit_shares]
             %td.report-cell-right= number_with_delimiter row[:credit_shares]

@@ -102,6 +102,12 @@
   form {
     display: none;
   }
+  &.report-filter-wide {
+    width: 320px;
+    .dropdown-selection {
+      width: 320px;
+    }
+  }
 }
 
 .report-main-body {
@@ -368,6 +374,24 @@
       &:nth-child(1), &:nth-child(2), &:nth-child(4), &:nth-child(6) {
         border-right: none;
       }
+    }
+  }
+}
+
+.historical-price-indications-report {
+  .report-header {
+    margin-bottom: 100px;
+  }
+  .report-filter:first-of-type {
+    margin-left: 0;
+  }
+  .report-datepicker {
+    margin-left: 10px;
+  }
+  .report-table {
+    th:first-child {
+      width: 80px;
+      box-sizing: border-box;
     }
   }
 }

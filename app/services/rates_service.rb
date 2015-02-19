@@ -1,4 +1,7 @@
 class RatesService < MAPIService
+  COLLATERAL_TYPES = %i(standard sbc)
+  CREDIT_TYPES = %i(frc vrc arc 1m_libor 3m_libor 6m_libor daily_prime embedded_cap)
+  HISTORICAL_FRC_TERMS = %i(1m 2m 3m 6m 1y 2y 3y 5y 7y 10y 15y 20y 30y)
 
   def overnight_vrc(days=30)
     begin
@@ -39,18 +42,6 @@ class RatesService < MAPIService
   end
 
   def quick_advance_preview(member_id, advance_type, advance_term, rate)
-    raise ArgumentError, 'member_id must not be blank' if member_id.blank?
-    raise ArgumentError, 'advance_type must not be blank' if advance_type.blank?
-    raise ArgumentError, 'advance_term must not be blank' if advance_term.blank?
-    raise ArgumentError, 'rate must not be blank' if rate.blank?
-
-    # TODO: hit the proper MAPI endpoint, once it exists! In the meantime, always return the fake.
-    # if @connection
-    #   # hit the proper MAPI endpoint
-    # else
-    #   JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_preview.json'))).with_indifferent_access
-    # end
-
     data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_preview.json'))).with_indifferent_access
     data[:funding_date] = data[:funding_date].gsub('-', ' ')
     data[:maturity_date] = data[:maturity_date].gsub('-', ' ')
@@ -58,22 +49,54 @@ class RatesService < MAPIService
   end
 
   def quick_advance_confirmation(member_id, advance_type, advance_term, rate)
-    raise ArgumentError, 'member_id must not be blank' if member_id.blank?
-    raise ArgumentError, 'advance_type must not be blank' if advance_type.blank?
-    raise ArgumentError, 'advance_term must not be blank' if advance_term.blank?
-    raise ArgumentError, 'rate must not be blank' if rate.blank?
-
     # TODO: hit the proper MAPI endpoint, once it exists! In the meantime, always return the fake.
-    # if @connection
-    #   # hit the proper MAPI endpoint
-    # else
-    #   JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_confirmation.json'))).with_indifferent_access
-    # end
 
     data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_confirmation.json'))).with_indifferent_access
     data[:funding_date] = data[:funding_date].gsub('-', ' ')
     data[:maturity_date] = data[:maturity_date].gsub('-', ' ')
     data
+  end
+
+  def historical_price_indications(start_date, end_date, collateral_type, credit_type)
+    # TODO: hit the proper MAPI endpoint, once it exists! In the meantime, construct plausible fake data.
+    start_date = start_date.to_date
+    end_date = end_date.to_date
+
+    if !CREDIT_TYPES.include?(credit_type.to_sym)
+      Rails.logger.warn("#{credit_type} was passed to RatesService.historical_price_indications as the credit_type arg and is invalid. Credit type must be one of these values: #{CREDIT_TYPES}")
+      return nil
+    end
+    if !COLLATERAL_TYPES.include?(collateral_type.to_sym)
+      Rails.logger.warn("#{collateral_type} was passed to RatesService.historical_price_indications as the collateral_type arg and is invalid. Collateral type must be one of these values: #{COLLATERAL_TYPES}")
+      return nil
+    end
+    data = {
+        start_date: start_date.to_date,
+        end_date: end_date.to_date,
+        collateral_type: collateral_type,
+        credit_type: credit_type,
+        rates_by_date: []
+    }
+    (start_date..end_date).each do |date|
+      day_of_week = date.wday
+      if day_of_week != 0 && day_of_week != 6
+        data[:rates_by_date].push(
+          {
+            date: date,
+            rates_by_term: []
+          }
+        )
+        HISTORICAL_FRC_TERMS.each do |term|
+          data[:rates_by_date].last[:rates_by_term].push(
+            term: term,
+            rate: rand.round(3),
+            day_count_basis: "Actual/Actual",
+            pay_freq: "Monthly"
+          )
+        end
+      end
+    end
+    data.with_indifferent_access
   end
 
 end

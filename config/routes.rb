@@ -24,6 +24,7 @@ Rails.application.routes.draw do
   get '/reports/borrowing-capacity' => 'reports#borrowing_capacity'
   get '/reports/settlement-transaction-account' => 'reports#settlement_transaction_account'
   get '/reports/advances-detail' => 'reports#advances_detail'
+  get '/reports/historical-price-indications' => 'reports#historical_price_indications'
 
   get '/settings' => 'settings#index'
 

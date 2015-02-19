@@ -35,7 +35,7 @@ Scenario: Viewing the details of a given advance
   Then I should not see the detailed view for the first advance
 
 @smoke
-Scenario: Member sorts the advances details report by certificate sequence
+Scenario: Member sorts the advances details report by trade date
   Given I am on the Advances Detail page
   When I click the Trade Date column heading
   Then I should see the "Trade Date" column values in "ascending" order

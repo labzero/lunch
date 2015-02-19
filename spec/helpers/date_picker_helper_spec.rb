@@ -16,6 +16,7 @@ describe DatePickerHelper do
       expect(helper.default_dates_hash[:this_month_start]).to eq(today.beginning_of_month)
       expect(helper.default_dates_hash[:last_month_start]).to eq(today.beginning_of_month - 1.month)
       expect(helper.default_dates_hash[:last_month_end]).to eq((today.beginning_of_month - 1.month).end_of_month)
+      expect(helper.default_dates_hash[:this_year_start]).to eq(today.beginning_of_year)
     end
   end
 
