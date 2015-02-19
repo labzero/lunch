@@ -6,7 +6,8 @@ module DatePickerHelper
       this_month_start: today.beginning_of_month,
       today: today,
       last_month_start: today.beginning_of_month - 1.month,
-      last_month_end: (today.beginning_of_month - 1.month).end_of_month
+      last_month_end: (today.beginning_of_month - 1.month).end_of_month,
+      this_year_start: today.beginning_of_year
     }
   end
 

@@ -62,6 +62,12 @@ Given(/^I am on the Advances Detail page$/) do
   visit '/reports/advances-detail'
 end
 
+Given(/^I am on the Historical Price Indications page$/) do
+  sleep_if_close_to_midnight
+  @today = Time.zone.now.to_date
+  visit '/reports/historical-price-indications'
+end
+
 Given(/I am on the Borrowing Capacity Statement page$/) do
   visit '/reports/borrowing-capacity'
 end
@@ -181,7 +187,7 @@ def sleep_if_close_to_midnight
   end
 end
 
-def report_dates_in_range? (start_date, end_date, date_format="%m/%d/%Y")
+def report_dates_in_range? (start_date, end_date, date_format="%m-%d-%Y")
   page.all('.report-table tbody td:first-child').each do |element|
     if element['class'].split(' ').include?('dataTables_empty')
       next

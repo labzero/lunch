@@ -1,0 +1,34 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.historical-price-indications-report.row
+  .report-header
+    %h1= t('reports.pages.price_indications.historical')
+    .report-header-buttons
+      %button.report-button-left= t('global.print')
+      %span.report-split-button
+        %button.report-button-right= t('dashboard.actions.download')
+        %button.report-drop-down-right= t('dashboard.actions.xml')
+    .report-inputs
+      = form_tag(reports_historical_price_indications_url, method: 'GET') do
+        = text_field_tag :start_date, @start_date, class: 'datepicker-input-field'
+        = text_field_tag :end_date, @end_date, class: 'datepicker-input-field'
+        .report-filter
+          = render 'shared/dropdown', dropdown_name: 'historical_price_collateral_type', default_value: @collateral_type, default_text: @collateral_type_text, dropdown_options: @collateral_type_options
+        .report-filter.report-filter-wide
+          = render 'shared/dropdown', dropdown_name: 'historical_price_credit_type', default_value: @credit_type, default_text: @credit_type_text, dropdown_options: @credit_type_options
+        .report-datepicker
+          = render 'shared/date_picker', presets: @picker_presets, form: '.report-inputs form', single_date_picker: @single_date_picker, open_direction: 'left'
+  .report-main-body
+    %table.table-allow-wrapping.report-table{data: {sortable: true, :'disable-auto-width' => true}}
+      %thead
+        %tr
+          %th.report-cell-narrow= t('global.date')
+          - ['1_month', '2_months', '3_months', '6_months', '1_year', '2_years', '3_years', '5_years', '7_years', '10_years', '15_years', '20_years', '30_years'].each do |term|
+            %th.report-cell-narrow{data: {unsortable: true}}= t("global.dates.#{term}")
+      %tbody
+        - @historical_price_indications[:rates_by_date].each do |row|
+          %tr
+            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
+            - row[:rates_by_term].each do |rate|
+              %td.report-cell-narrow= rate[:rate]
+          

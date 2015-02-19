@@ -42,5 +42,5 @@ def check_advances_details_for_date(date)
   page.assert_selector('.report-summary-data h3', text: I18n.t('reports.pages.advances_detail.total_current_par_heading', date: date.strftime('%B %-d, %Y')))
   page.assert_selector('.report-summary-data h3', text: I18n.t('reports.pages.advances_detail.total_accrued_interest_heading', date: date.strftime('%B %-d, %Y')))
   page.assert_selector('.report-summary-data h3', text: I18n.t('reports.pages.advances_detail.estimated_next_payment_heading', date: date.strftime('%B %-d, %Y')))
-  report_dates_in_range?((Time.zone.now.to_date - 100.years), date, "%m-%d-%Y")
+  report_dates_in_range?((Time.zone.now.to_date - 100.years), date)
 end
