@@ -1,0 +1,13 @@
+{
+  "sta_balance":190349,
+  "credit_outstanding":35000000,
+  "financial_available":149603250,
+  "stock_leverage":1111,
+  "collateral_market_value_sbc_agency":400000,
+  "collateral_market_value_sbc_aaa":15758230,
+  "collateral_market_value_sbc_aa":600000,
+  "borrowing_capacity_standard":91643604,
+  "borrowing_capacity_sbc_agency":15166204,
+  "borrowing_capacity_sbc_aaa":800000,
+  "borrowing_capacity_sbc_aa":65775560
+}

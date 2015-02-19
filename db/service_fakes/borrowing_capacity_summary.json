@@ -116,7 +116,7 @@
   },
   "sbc" : {
     "collateral" : {
-      "AA": {
+      "aa": {
         "total_market_value": 100500,
         "total_borrowing_capacity": 200500,
         "advances": 0,
@@ -124,7 +124,7 @@
         "remaining_market_value": 0,
         "remaining_borrowing_capacity": 0
       },
-      "AAA": {
+      "aaa": {
         "total_market_value": 3987650,
         "total_borrowing_capacity": 300500,
         "advances": 0,
@@ -132,7 +132,7 @@
         "remaining_market_value": 0,
         "remaining_borrowing_capacity": 0
       },
-      "Agency": {
+      "agency": {
         "total_market_value": 105613,
         "total_borrowing_capacity": 100332,
         "advances": 0,

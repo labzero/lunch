@@ -1,6 +1,5 @@
 class MemberBalanceService < MAPIService
   DAILY_BALANCE_KEY = 'Interest Rate / Daily Balance' # the key returned by us from MAPI to let us know a row represents balance at close of business
-  LOAN_TYPES = [:Agency, :AAA, :AA]
 
   def initialize(member_id, request)
     super(request)
@@ -206,8 +205,8 @@ class MemberBalanceService < MAPIService
         securities_backed_collateral_fields = [:total_market_value, :total_borrowing_capacity, :advances, :standard_credit, :remaining_market_value, :remaining_borrowing_capacity]
         securities_backed_collateral_fields.each do |key|
           data[:sbc_totals][key] ||= 0
-          LOAN_TYPES.each do |type|
-            data[:sbc_totals][key] += data[:sbc][:collateral][type][key].to_i
+          data[:sbc][:collateral].each do |type, value|
+            data[:sbc_totals][key] += value[key].to_i
           end
         end
         data[:sbc_excess_capacity] = data[:sbc_totals][:remaining_borrowing_capacity].to_i - data[:sbc][:utilized].values.sum
@@ -311,6 +310,17 @@ class MemberBalanceService < MAPIService
     data[:total_accrued_interest] = data[:total_accrued_interest].to_f
     data[:estimated_next_payment] = data[:estimated_next_payment].to_f
 
+    data
+  end
+
+  def profile
+    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
+    begin
+      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'profile.json'))).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.profile encountered a JSON parsing error: #{e}")
+      return nil
+    end
     data
   end
 
