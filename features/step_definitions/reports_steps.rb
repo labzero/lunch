@@ -187,7 +187,7 @@ def sleep_if_close_to_midnight
   end
 end
 
-def report_dates_in_range? (start_date, end_date, date_format="%m-%d-%Y")
+def report_dates_in_range? (start_date, end_date, date_format="%m/%d/%Y")
   page.all('.report-table tbody td:first-child').each do |element|
     if element['class'].split(' ').include?('dataTables_empty')
       next
