@@ -11,9 +11,13 @@ describe CustomFormattingHelper do
   end
 
   describe '`fhlb_date_standard_numeric` method' do
-    let(:date) {Date.new(2015,1,20)}
-    it 'converts a date into a string following the MM-DD-YYYY convention' do
-      expect(helper.fhlb_date_standard_numeric(date)).to eq('01-20-2015')
+    describe 'converting a date in to a string following the MM/DD/YYYY convention' do
+      it 'should handle single digit months and days' do
+        expect(helper.fhlb_date_standard_numeric(Date.new(2015,1,2))).to eq('01/02/2015')
+      end
+      it 'should handle double digit months and days' do
+        expect(helper.fhlb_date_standard_numeric(Date.new(2015,11,20))).to eq('11/20/2015')
+      end
     end
   end
 
@@ -51,6 +55,16 @@ describe CustomFormattingHelper do
     end
     it 'does not include the ext section if a string without digits was passed' do
       expect(helper.fhlb_formatted_phone_number('11234567890', 'abc')).to eq('(123) 456-7890')
+    end
+  end
+
+  describe '`fhlb_date_quarter` method' do
+    [[1..3, 'First Quarter 2015'], [4..6, 'Second Quarter 2015'], [7..9, 'Third Quarter 2015'], [10..12, 'Fourth Quarter 2015']].each do |expectation|
+      expectation.first.each do |month|
+        it 'converts a date into its quarter representation' do
+          expect(helper.fhlb_date_quarter(Date.new(2015, month, 2))).to eq(expectation.last)
+        end
+      end
     end
   end
 end
