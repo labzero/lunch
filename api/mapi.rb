@@ -65,7 +65,7 @@ module MAPI
       set :show_exceptions, ENV['MAPI_SHOW_EXCEPTIONS'] == 'true'
 
       disable :logging # all logging does is add middleware. We will add similar middleware here
-      logger = ActiveSupport::TaggedLogging.new(::Logger.new("#{settings.root}/../log/mapi-#{settings.environment}.log"))
+      logger = ActiveSupport::TaggedLogging.new(::Logger.new("#{settings.root}/../log/mapi-#{settings.environment}.log", 'daily'))
       class << logger
         def <<(msg)
           info(msg.chomp)
