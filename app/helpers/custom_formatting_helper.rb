@@ -39,4 +39,12 @@ module CustomFormattingHelper
     end
     formated_number
   end
+
+  def fhlb_add_unit_to_table_header(header, unit)
+    header + ' (' + unit + ')'
+  end
+
+  def fhlb_formatted_percentage(number, precision=0)
+    number_to_percentage(number, precision: precision)
+  end
 end

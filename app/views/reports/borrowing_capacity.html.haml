@@ -28,7 +28,7 @@
             %th.report-cell-narrow.report-cell-right= t('global.original_amount')
             %th.report-cell-narrow.report-cell-right= t('global.unpaid_principal')
             %th.report-cell-narrow.report-cell-right= t('reports.pages.borrowing_capacity_summary.market_value')
-            %th.report-cell-narrow.report-cell-right= t('reports.pages.borrowing_capacity_summary.bc_upb')
+            %th.report-cell-narrow.report-cell-right= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity_summary.bc_upb'), '%')
             %th.report-cell-narrow.report-cell-expanding= t('global.borrowing_capacity')
         - if @borrowing_capacity_summary[:standard].length > 0
           %tbody
@@ -39,7 +39,7 @@
                 %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(row[:original_amount])
                 %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(row[:unpaid_principal])
                 %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(row[:market_value])
-                %td.report-cell-narrow.report-cell-right= number_to_percentage(row[:bc_upb], precision: 0)
+                %td.report-cell-narrow.report-cell-right= row[:bc_upb]
                 %td.report-cell-narrow.report-cell-right.report-cell-expanding= fhlb_formatted_currency(row[:borrowing_capacity])
           %tfoot
             %tr

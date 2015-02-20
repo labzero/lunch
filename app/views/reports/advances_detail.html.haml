@@ -34,11 +34,11 @@
           %th.report-cell-narrow= t('reports.pages.advances_detail.funding_date')
           %th.report-cell-narrow= t('reports.pages.advances_detail.maturity_date')
           %th.report-cell-narrow= t('reports.pages.advances_detail.advance_number')
-          %th.report-cell-narrow= t('reports.pages.advances_detail.current_par_heading')
-          %th.report-cell-narrow= t('reports.pages.advances_detail.interest_rate_heading')
+          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.current_par_heading'), '$')
+          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.interest_rate_heading'), '%')
           %th.report-cell-narrow= t('reports.pages.advances_detail.next_interest_payment_date')
-          %th.report-cell-narrow= t('reports.pages.advances_detail.accrued_interest_heading')
-          %th.report-cell-narrow= t('reports.pages.advances_detail.estimated_next_payment_table_heading')
+          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.accrued_interest_heading'), '$')
+          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.estimated_next_payment_table_heading'), '$')
           %th.report-cell-narrow{data: {unsortable: true}}= t('global.details')
           %th
       %tbody

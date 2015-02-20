@@ -67,4 +67,19 @@ describe CustomFormattingHelper do
       end
     end
   end
+
+  describe '`fhlb_add_unit_to_table_header` method' do
+    it 'adds a (unit) to a string' do
+      expect(helper.fhlb_add_unit_to_table_header('my header', '%')).to eq('my header (%)')
+    end
+  end
+
+  describe '`fhlb_formatted_percentage` method' do
+    it 'returns percentage with no precision' do
+      expect(helper.fhlb_formatted_percentage(30.23)).to eq('30%')
+    end
+    it 'returns percentage with 2 precision' do
+      expect(helper.fhlb_formatted_percentage(30.23, 2)).to eq('30.23%')
+    end
+  end
 end
