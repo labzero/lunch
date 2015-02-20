@@ -103,10 +103,6 @@ class RatesService < MAPIService
       Rails.logger.warn("Currently, RatesService.historical_price_indications only accepts 'frc', 'vrc', '1m_libor', '3m_libor', '6m_libor' and daily_prime' as the credit_type arg. You supplied #{credit_type}, which is not yet supported.")
       return nil
     end
-    if collateral_type != :standard
-      Rails.logger.warn("Currently, RatesService.historical_price_indications only accepts 'standard' as the collateral_type arg. You supplied #{collateral_type}, which is not yet supported.")
-      return nil
-    end
     # END of code that should be deleted once all args are supported
 
     data = {
@@ -119,7 +115,7 @@ class RatesService < MAPIService
     (start_date..end_date).each do |date|
       day_of_week = date.wday
       if day_of_week != 0 && day_of_week != 6
-        r = Random.new(date.to_time.to_i + CREDIT_TYPES.index(credit_type))
+        r = Random.new(date.to_time.to_i + CREDIT_TYPES.index(credit_type) + COLLATERAL_TYPES.index(collateral_type))
         data[:rates_by_date].push(
           {
             date: date,

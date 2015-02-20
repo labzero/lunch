@@ -180,7 +180,7 @@ Then(/^I should only see "(.*?)" rows in the Settlement Transaction Account Stat
 end
 
 When(/^I select "(.*?)" from the (credit|collateral) type selector$/) do |credit_type, selector|
-  page.find(".credit-type-filter .dropdown-selection").click
+  page.find(".#{selector}-type-filter .dropdown-selection").click
   page.find('li', text: credit_type, visible: true).click
 end
 
