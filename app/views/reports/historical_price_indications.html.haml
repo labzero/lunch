@@ -19,19 +19,4 @@
         .report-datepicker
           = render 'shared/date_picker', presets: @picker_presets, form: '.report-inputs form', single_date_picker: @single_date_picker, open_direction: 'left'
   .report-main-body
-    %table.table-allow-wrapping.report-table{data: {sortable: false, :'disable-auto-width' => true}, class: "#{@collateral_type}_#{@credit_type}_table"}
-      %thead
-        - if @table_data[:table_heading]
-          %tr.table-heading-row
-            %th{data: {unsortable: true}}
-            %th{colspan: (@table_data[:column_headings].length - 1), data: {unsortable: true}}= @table_data[:table_heading]
-        %tr
-          - @table_data[:column_headings].each_with_index do |heading, index|
-            %th.report-cell-narrow{data: {unsortable: index != 0}}= heading
-      %tbody
-        - @table_data[:rows].each do |row|
-          %tr
-            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
-            - row[:rates_by_term].each do |rate|
-              %td.report-cell-narrow= rate[:rate]
-          
+    = render 'reports/reports_table', table_class: "#{@collateral_type}_#{@credit_type}_table", table_data: @table_data
