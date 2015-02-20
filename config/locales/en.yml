@@ -68,6 +68,8 @@ en:
     none: None
     not_applicable: Not applicable
     various: Various
+    year_to_date: Year to date
+    last_year: Last year
     dates:
       1_day: 1 day
       1_month: 1 mo

@@ -6,16 +6,20 @@ Then(/^I should see the datepicker$/) do
   page.assert_selector('.daterangepicker', visible: true)
 end
 
-When(/^I choose the custom date range in the datepicker$/) do
-  page.find('.daterangepicker .ranges li', text: I18n.t('datepicker.range.custom')).click
-end
-
-When(/^I choose the custom date in the datepicker$/) do
-  page.find('.daterangepicker .ranges li', text: I18n.t('datepicker.single.custom')).click
-end
-
-When(/^I choose the month to date preset in the datepicker$/) do
-  page.find('.daterangepicker .ranges li', text: I18n.t('datepicker.range.this_month', month: @today.strftime("%B"))).click
+When(/^I choose the "(.*?)" in the datepicker$/) do |selector|
+  text = case selector
+    when 'custom date range'
+      I18n.t('datepicker.range.custom')
+    when 'custom date'
+      I18n.t('datepicker.single.custom')
+    when 'month to date preset'
+      I18n.t('datepicker.range.this_month', month: @today.strftime("%B"))
+    when 'last year preset'
+      I18n.t('global.last_year')
+    else
+      raise 'unknown selector for date picker'
+  end
+  page.find('.daterangepicker .ranges li', text: text).click
 end
 
 When(/^I click the datepicker apply button$/) do
@@ -65,8 +69,8 @@ When(/^I select the (\d+)(?:st|rd|th) of (this|last) month in the (left|right|si
 end
 
 When(/^I select all of last year including today$/) do
-  step 'I choose the month to date preset in the datepicker'
-  step  'I choose the custom date range in the datepicker'
+  step 'I choose the "month to date preset" in the datepicker'
+  step  'I choose the "custom date range" in the datepicker'
   calendar = page.find(".daterangepicker .calendar.left")
   day = @today.day
   target_month = (@today - 1.year).strftime("%b %Y")
@@ -74,4 +78,11 @@ When(/^I select all of last year including today$/) do
     calendar.find('.fa-arrow-left').click
   end
   calendar.find("td.available:not(.off)", text: /^#{day}$/).click
+end
+
+Then(/^I should see a report with dates for last year$/) do
+  today = Time.zone.now.to_date
+  last_year_start = (today - 1.year).beginning_of_year
+  last_year_end = (today - 1.year).end_of_year
+  report_dates_in_range?(last_year_start, last_year_end)
 end
