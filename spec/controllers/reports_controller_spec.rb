@@ -367,34 +367,34 @@ RSpec.describe ReportsController, :type => :controller do
         it 'should set @credit_type to `frc` and @credit_type_text to the proper i18next translation for `frc` if frc is passed as the historical_price_credit_type param' do
           get :historical_price_indications, historical_price_credit_type: 'frc'
           expect(assigns[:credit_type]).to eq('frc')
-          expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.fixed_rate_credit'))
+          expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.frc.dropdown'))
         end
         it 'should set @credit_type to `vrc` and @credit_type_text to the proper i18next translation for `vrc` if vrc is passed as the historical_price_credit_type param' do
           get :historical_price_indications, historical_price_credit_type: 'vrc'
           expect(assigns[:credit_type]).to eq('vrc')
-          expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.variable_rate_credit'))
+          expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.vrc.dropdown'))
         end
         ['1m_libor', '3m_libor', '6m_libor', 'daily_prime'].each do |credit_type|
           it "should set @credit_type to `#{credit_type}` and @credit_type_text to the proper i18next translation for `#{credit_type}` if #{credit_type} is passed as the historical_price_credit_type param" do
             get :historical_price_indications, historical_price_credit_type: credit_type
             expect(assigns[:credit_type]).to eq(credit_type)
-            expect(assigns[:credit_type_text]).to eq(I18n.t("reports.pages.price_indications.adjustable_rate.#{credit_type}"))
+            expect(assigns[:credit_type_text]).to eq(I18n.t("reports.pages.price_indications.#{credit_type}.dropdown"))
           end
         end
         it 'should set @credit_type to `frc` and @credit_type_text to the proper i18next translation for `frc` if nothing is passed for the historical_price_credit_type param' do
           get :historical_price_indications
           expect(assigns[:credit_type]).to eq('frc')
-          expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.fixed_rate_credit'))
+          expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.frc.dropdown'))
         end
         it 'should set @credit_type_options to an array of arrays containing the appropriate values and labels for standard and sbc' do
           options_array = [
-              [I18n.t('reports.pages.price_indications.fixed_rate_credit'), 'frc'],
-              [I18n.t('reports.pages.price_indications.variable_rate_credit'), 'vrc'],
-              [I18n.t('reports.pages.price_indications.adjustable_rate.1m_libor'), '1m_libor'],
-              [I18n.t('reports.pages.price_indications.adjustable_rate.3m_libor'), '3m_libor'],
-              [I18n.t('reports.pages.price_indications.adjustable_rate.6m_libor'), '6m_libor'],
-              [I18n.t('reports.pages.price_indications.adjustable_rate.daily_prime'), 'daily_prime'],
-              [I18n.t('reports.pages.price_indications.adjustable_rate.embedded_cap'), 'embedded_cap']
+              [I18n.t('reports.pages.price_indications.frc.dropdown'), 'frc'],
+              [I18n.t('reports.pages.price_indications.vrc.dropdown'), 'vrc'],
+              [I18n.t('reports.pages.price_indications.1m_libor.dropdown'), '1m_libor'],
+              [I18n.t('reports.pages.price_indications.3m_libor.dropdown'), '3m_libor'],
+              [I18n.t('reports.pages.price_indications.6m_libor.dropdown'), '6m_libor'],
+              [I18n.t('reports.pages.price_indications.daily_prime.dropdown'), 'daily_prime'],
+              [I18n.t('reports.pages.price_indications.embedded_cap.dropdown'), 'embedded_cap']
           ]
           get :historical_price_indications
           expect(assigns[:credit_type_options]).to eq(options_array)

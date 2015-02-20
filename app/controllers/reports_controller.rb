@@ -195,13 +195,13 @@ class ReportsController < ApplicationController
     @collateral_type ||= @collateral_type_options.first.last
     @collateral_type_text ||= @collateral_type_options.first.first
     @credit_type_options = [
-        [t('reports.pages.price_indications.fixed_rate_credit'), 'frc'],
-        [t('reports.pages.price_indications.variable_rate_credit'), 'vrc'],
-        [t('reports.pages.price_indications.adjustable_rate.1m_libor'), '1m_libor'],
-        [t('reports.pages.price_indications.adjustable_rate.3m_libor'), '3m_libor'],
-        [t('reports.pages.price_indications.adjustable_rate.6m_libor'), '6m_libor'],
-        [t('reports.pages.price_indications.adjustable_rate.daily_prime'), 'daily_prime'],
-        [t('reports.pages.price_indications.adjustable_rate.embedded_cap'), 'embedded_cap']
+        [t('reports.pages.price_indications.frc.dropdown'), 'frc'],
+        [t('reports.pages.price_indications.vrc.dropdown'), 'vrc'],
+        [t('reports.pages.price_indications.1m_libor.dropdown'), '1m_libor'],
+        [t('reports.pages.price_indications.3m_libor.dropdown'), '3m_libor'],
+        [t('reports.pages.price_indications.6m_libor.dropdown'), '6m_libor'],
+        [t('reports.pages.price_indications.daily_prime.dropdown'), 'daily_prime'],
+        [t('reports.pages.price_indications.embedded_cap.dropdown'), 'embedded_cap']
     ]
     credit_type = params[:historical_price_credit_type]
     @credit_type_options.each do |option|
@@ -222,8 +222,8 @@ class ReportsController < ApplicationController
       column_heading_keys = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.values
     when :vrc
       column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
-    when *RatesService::ARC_CREDIT_TYPES 
-      table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}")
+    when *RatesService::ARC_CREDIT_TYPES
+      table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading")
       column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
       # TODO add statement for 'embedded_cap' when it is rigged up
     end

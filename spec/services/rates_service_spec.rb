@@ -138,6 +138,10 @@ describe RatesService do
         expect(RatesService::HISTORICAL_FRC_TERM_MAPPINGS).to receive(:keys).at_least(1).and_call_original
         subject.historical_price_indications(start_date, end_date, 'standard', 'frc')
       end
+      it 'should use HISTORICAL_VRC_TERM_MAPPINGS keys to set the terms if `vrc` is passed as the credit_type arg' do
+        expect(RatesService::HISTORICAL_VRC_TERM_MAPPINGS).to receive(:keys).at_least(1).and_call_original
+        subject.historical_price_indications(start_date, end_date, 'standard', 'vrc')
+      end
       [:'1m_libor', :'3m_libor', :'6m_libor', :daily_prime].each do |credit_type|
         it "should use HISTORICAL_ARC_TERM_MAPPINGS keys to set the terms if `#{credit_type}` is passed as the credit_type arg" do
           expect(RatesService::HISTORICAL_ARC_TERM_MAPPINGS).to receive(:keys).at_least(1).and_call_original
@@ -182,10 +186,6 @@ describe RatesService do
     it 'returns nil if `sbc` is passed as the collateral_type arg' do
       expect(Rails.logger).to receive(:warn)
       expect(subject.historical_price_indications(start_date, end_date, 'sbc', RatesService::CREDIT_TYPES.first)).to be_nil
-    end
-    it 'returns nil if `vrc` is passed as the credit_type arg' do
-      expect(Rails.logger).to receive(:warn)
-      expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, 'vrc')).to be_nil
     end
     it 'returns nil if `embedded_cap` is passed as the credit_type arg' do
       expect(Rails.logger).to receive(:warn)

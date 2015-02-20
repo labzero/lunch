@@ -379,9 +379,6 @@
 }
 
 .historical-price-indications-report {
-  .report-header {
-    margin-bottom: 100px;
-  }
   .report-filter:first-of-type {
     margin-left: 0;
   }
@@ -398,9 +395,18 @@
   }
 }
 
-.standard_frc_table {
+.standard_frc_table, .standard_vrc_table {
   th {
     width: 64px;
+  }
+}
+
+.standard_vrc_table {
+  width: auto;
+  &.report-table {
+    th:first-child {
+      width: 85px;
+    }
   }
 }
 
@@ -413,7 +419,7 @@
   }
   &.report-table {
     th:first-child {
-      width: 84px;
+      width: 85px;
     }
   }
   .table-heading-row {

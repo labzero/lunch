@@ -99,8 +99,8 @@ class RatesService < MAPIService
 
     # TODO remove this code once you support all collateral_types and credit_types
     # START of code that should be deleted once all args are supported
-    if credit_type == :embedded_cap || credit_type == :vrc
-      Rails.logger.warn("Currently, RatesService.historical_price_indications only accepts 'frc', '1m_libor', '3m_libor', '6m_libor' and daily_prime' as the credit_type arg. You supplied #{credit_type}, which is not yet supported.")
+    if credit_type == :embedded_cap 
+      Rails.logger.warn("Currently, RatesService.historical_price_indications only accepts 'frc', 'vrc', '1m_libor', '3m_libor', '6m_libor' and daily_prime' as the credit_type arg. You supplied #{credit_type}, which is not yet supported.")
       return nil
     end
     if collateral_type != :standard
@@ -129,10 +129,12 @@ class RatesService < MAPIService
         terms = case credit_type
         when :frc
           HISTORICAL_FRC_TERM_MAPPINGS.keys
+        when :vrc
+          HISTORICAL_VRC_TERM_MAPPINGS.keys
         when :'1m_libor', :'3m_libor', :'6m_libor', :daily_prime
           HISTORICAL_ARC_TERM_MAPPINGS.keys
         else
-          # TODO add in the proper terms for 'vrc' and 'embedded_cap' once those are rigged up
+          # TODO add in the proper terms for 'embedded_cap' once that is rigged up
         end
         terms.each do |term|
           rate = if ARC_CREDIT_TYPES.include?(credit_type)
