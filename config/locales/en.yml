@@ -429,16 +429,16 @@ en:
         maturity_date: Maturity Date
         advance_number: Advance Number
         advance_type: Advance Type
-        current_par_heading: Current Par ($)
+        current_par_heading: Current Par
         current_par: Current Par
         interest_payment_frequency: Interest Payment Frequency
         day_count_basis: Day Count Basis
-        interest_rate_heading: Int. Rate (%)
+        interest_rate_heading: Int. Rate
         interest_rate: Interest Rate
         next_interest_payment_date: Next Interest Payment Date
-        accrued_interest_heading: Accrued Interest ($)
+        accrued_interest_heading: Accrued Interest
         accrued_interest: Accrued Interest
-        estimated_next_payment_table_heading: Estimated Next Interest Payment ($)
+        estimated_next_payment_table_heading: Estimated Next Interest Payment
         estimated_next_payment: Estimated Next Interest Payment
         discount_program: Discount Program
         prepayment_fee_indication: Prepayment Fee Indication
