@@ -8,11 +8,17 @@ module CustomFormattingHelper
   end
 
   def fhlb_date_standard_numeric(date)
-    date.to_date.strftime('%m-%d-%Y')
+    date.to_date.strftime('%m/%d/%Y')
   end
 
   def fhlb_date_long_alpha(date)
-    date.strftime('%B %-d, %Y')
+    date.to_date.strftime('%B %-d, %Y')
+  end
+
+  def fhlb_date_quarter(date)
+    date = date.to_date
+    quarter = (date.month / 3.0).ceil
+    I18n.t("dates.quarters.#{quarter}", year: date.year)
   end
 
   def fhlb_formatted_phone_number(number, ext=nil)

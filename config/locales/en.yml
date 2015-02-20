@@ -82,6 +82,12 @@ en:
       15_years: 15yr
       20_years: 20 yr
       30_years: 30 yr
+  dates:
+    quarters:
+      "1": First Quarter %{year}
+      "2": Second Quarter %{year}
+      "3": Third Quarter %{year}
+      "4": Fourth Quarter %{year}
   nav:
     primary:
       welcome: Hi %{name}
