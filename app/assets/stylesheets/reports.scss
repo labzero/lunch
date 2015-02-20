@@ -389,9 +389,40 @@
     margin-left: 10px;
   }
   .report-table {
-    th:first-child {
-      width: 80px;
+    th {
       box-sizing: border-box;
+      &:first-child {
+        width: 82px;
+      }
+    }
+  }
+}
+
+.standard_frc_table {
+  th {
+    width: 64px;
+  }
+}
+
+.standard_1m_libor_table, .standard_3m_libor_table, .standard_6m_libor_table, .standard_daily_prime_table {
+  width: auto;
+  border-top: none;
+  border-left: none;
+  th, td {
+    border: 1px solid $light-blue;
+  }
+  &.report-table {
+    th:first-child {
+      width: 84px;
+    }
+  }
+  .table-heading-row {
+    th:first-child {
+      border: none;
+      background-color: $white;
+    }
+    th:last-child {
+      text-align: center;
     }
   }
 }

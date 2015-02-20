@@ -105,11 +105,11 @@ describe RatesService do
     let(:historical_prices) {subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)}
     it 'should return nil if the argument passed for collateral_type is not valid' do
       expect(Rails.logger).to receive(:warn)
-      expect(subject.historical_price_indications(start_date, end_date, 'invalid collateral type', RatesService::CREDIT_TYPES.sample)).to be_nil
+      expect(subject.historical_price_indications(start_date, end_date, 'invalid collateral type', RatesService::CREDIT_TYPES.first)).to be_nil
     end
     it 'should return nil if the argument passed for credit_type is not valid' do
       expect(Rails.logger).to receive(:warn)
-      expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.sample, 'invalid credit type')).to be_nil
+      expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, 'invalid credit type')).to be_nil
     end
     it 'should return the start date that it was supplied' do
       expect(historical_prices[:start_date]).to eq(start_date)
@@ -130,11 +130,28 @@ describe RatesService do
         expect(row[:rates_by_term]).to be_kind_of(Array)
       end
     end
+
+    # TODO remove this code once you are hitting MAPI and not generating fake data in your method
+    # START of code to remove once MAPI endpoint is built
+    describe 'credit_type mappings for creation of fake data' do
+      it 'should use HISTORICAL_FRC_TERM_MAPPINGS keys to set the terms if `frc` is passed as the credit_type arg' do
+        expect(RatesService::HISTORICAL_FRC_TERM_MAPPINGS).to receive(:keys).at_least(1).and_call_original
+        subject.historical_price_indications(start_date, end_date, 'standard', 'frc')
+      end
+      [:'1m_libor', :'3m_libor', :'6m_libor', :daily_prime].each do |credit_type|
+        it "should use HISTORICAL_ARC_TERM_MAPPINGS keys to set the terms if `#{credit_type}` is passed as the credit_type arg" do
+          expect(RatesService::HISTORICAL_ARC_TERM_MAPPINGS).to receive(:keys).at_least(1).and_call_original
+          subject.historical_price_indications(start_date, end_date, 'standard', credit_type)
+        end
+      end
+    end
+    # END of code to remove once MAPI endpoint is built
+
     describe 'rate data objects' do
       it 'should have an associated term' do
         historical_prices[:rates_by_date].each do |row|
           row[:rates_by_term].each do |rate_object|
-            expect(RatesService::HISTORICAL_FRC_TERMS).to include(rate_object[:term])
+            expect(RatesService::HISTORICAL_FRC_TERM_MAPPINGS.keys).to include(rate_object[:term])
           end
         end
       end
@@ -160,5 +177,20 @@ describe RatesService do
         end
       end
     end
+    # TODO remove code below once you have rigged up the reports for all supported collateral_types and credit_types
+    # START of code that should be removed once this method supports all valid collateral_types and credit_types
+    it 'returns nil if `sbc` is passed as the collateral_type arg' do
+      expect(Rails.logger).to receive(:warn)
+      expect(subject.historical_price_indications(start_date, end_date, 'sbc', RatesService::CREDIT_TYPES.first)).to be_nil
+    end
+    it 'returns nil if `vrc` is passed as the credit_type arg' do
+      expect(Rails.logger).to receive(:warn)
+      expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, 'vrc')).to be_nil
+    end
+    it 'returns nil if `embedded_cap` is passed as the credit_type arg' do
+      expect(Rails.logger).to receive(:warn)
+      expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, 'embedded_cap')).to be_nil
+    end
+    # END of code that should be removed once this method supports all valid collateral_types and credit_types
   end
 end

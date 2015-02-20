@@ -179,6 +179,11 @@ Then(/^I should only see "(.*?)" rows in the Settlement Transaction Account Stat
   end
 end
 
+When(/^I select "(.*?)" from the (credit|collateral) type selector$/) do |credit_type, selector|
+  page.find(".credit-type-filter .dropdown-selection").click
+  page.find('li', text: credit_type, visible: true).click
+end
+
 def sleep_if_close_to_midnight
   now = DateTime.now
   seconds_till_tomorrow = (now.tomorrow.beginning_of_day - now) * 1.days
