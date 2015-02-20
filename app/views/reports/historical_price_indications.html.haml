@@ -19,4 +19,5 @@
         .report-datepicker
           = render 'shared/date_picker', presets: @picker_presets, form: '.report-inputs form', single_date_picker: @single_date_picker, open_direction: 'left'
   .report-main-body
+    %h2.report-table-title= t("reports.pages.price_indications.#{@credit_type}.#{@collateral_type}_table_title")
     = render 'reports/reports_table', table_class: "#{@collateral_type}_#{@credit_type}_table", table_data: @table_data
