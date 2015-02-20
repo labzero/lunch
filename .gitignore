@@ -1,7 +1,6 @@
 /.bundle
 /db/*.sqlite3
 /db/*.sqlite3-journal
-/log/*.log
 /tmp
 .idea
 .DS_Store
@@ -11,3 +10,4 @@ brakeman.tabs
 brakeman.html
 .vagrant
 coverage
+/log/*
