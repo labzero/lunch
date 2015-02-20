@@ -1,6 +1,7 @@
 class RatesService < MAPIService
   COLLATERAL_TYPES = %i(standard sbc)
   CREDIT_TYPES = %i(frc vrc 1m_libor 3m_libor 6m_libor daily_prime embedded_cap)
+  ARC_CREDIT_TYPES = %i(1m_libor 3m_libor 6m_libor daily_prime)
   HISTORICAL_FRC_TERM_MAPPINGS = {
     :'1m' => '1_month',
     :'2m' => '2_months',
@@ -118,7 +119,7 @@ class RatesService < MAPIService
     (start_date..end_date).each do |date|
       day_of_week = date.wday
       if day_of_week != 0 && day_of_week != 6
-        r = Random.new(date.to_time.to_i)
+        r = Random.new(date.to_time.to_i + CREDIT_TYPES.index(credit_type))
         data[:rates_by_date].push(
           {
             date: date,
@@ -134,12 +135,8 @@ class RatesService < MAPIService
           # TODO add in the proper terms for 'vrc' and 'embedded_cap' once those are rigged up
         end
         terms.each do |term|
-          rate = if [:'1m_libor', :'3m_libor', :'6m_libor', :daily_prime].include?(credit_type)
-            rand_array = []
-            (credit_type.to_s.split(//).first.to_i + 1).times do
-              rand_array << r.rand(-200..200)
-            end
-            rand_array.last
+          rate = if ARC_CREDIT_TYPES.include?(credit_type)
+            r.rand(-200..200)
           else
             r.rand.round(3)
           end
