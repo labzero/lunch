@@ -1,7 +1,31 @@
 class RatesService < MAPIService
   COLLATERAL_TYPES = %i(standard sbc)
-  CREDIT_TYPES = %i(frc vrc arc 1m_libor 3m_libor 6m_libor daily_prime embedded_cap)
-  HISTORICAL_FRC_TERMS = %i(1m 2m 3m 6m 1y 2y 3y 5y 7y 10y 15y 20y 30y)
+  CREDIT_TYPES = %i(frc vrc 1m_libor 3m_libor 6m_libor daily_prime embedded_cap)
+  ARC_CREDIT_TYPES = %i(1m_libor 3m_libor 6m_libor daily_prime)
+  HISTORICAL_FRC_TERM_MAPPINGS = {
+    :'1m' => '1_month',
+    :'2m' => '2_months',
+    :'3m' => '3_months',
+    :'6m' => '6_months',
+    :'1y' => '1_year',
+    :'2y' => '2_years',
+    :'3y' => '3_years',
+    :'5y' => '5_years',
+    :'7y' => '7_years',
+    :'10y' => '10_years',
+    :'15y' => '15_years',
+    :'20y' => '20_years',
+    :'30y' => '30_years'
+  }
+  HISTORICAL_ARC_TERM_MAPPINGS = {
+    :'1y' => '1_year',
+    :'2y' => '2_years',
+    :'3y' => '3_years',
+    :'5y' => '5_years'
+  }
+  HISTORICAL_VRC_TERM_MAPPINGS = {
+    :'1d' => '1_day'
+  }
 
   def overnight_vrc(days=30)
     begin
@@ -61,35 +85,64 @@ class RatesService < MAPIService
     # TODO: hit the proper MAPI endpoint, once it exists! In the meantime, construct plausible fake data.
     start_date = start_date.to_date
     end_date = end_date.to_date
+    collateral_type = collateral_type.to_sym
+    credit_type = credit_type.to_sym
 
-    if !CREDIT_TYPES.include?(credit_type.to_sym)
+    if !CREDIT_TYPES.include?(credit_type)
       Rails.logger.warn("#{credit_type} was passed to RatesService.historical_price_indications as the credit_type arg and is invalid. Credit type must be one of these values: #{CREDIT_TYPES}")
       return nil
     end
-    if !COLLATERAL_TYPES.include?(collateral_type.to_sym)
+    if !COLLATERAL_TYPES.include?(collateral_type)
       Rails.logger.warn("#{collateral_type} was passed to RatesService.historical_price_indications as the collateral_type arg and is invalid. Collateral type must be one of these values: #{COLLATERAL_TYPES}")
       return nil
     end
+
+    # TODO remove this code once you support all collateral_types and credit_types
+    # START of code that should be deleted once all args are supported
+    if credit_type == :embedded_cap || credit_type == :vrc
+      Rails.logger.warn("Currently, RatesService.historical_price_indications only accepts 'frc', '1m_libor', '3m_libor', '6m_libor' and daily_prime' as the credit_type arg. You supplied #{credit_type}, which is not yet supported.")
+      return nil
+    end
+    if collateral_type != :standard
+      Rails.logger.warn("Currently, RatesService.historical_price_indications only accepts 'standard' as the collateral_type arg. You supplied #{collateral_type}, which is not yet supported.")
+      return nil
+    end
+    # END of code that should be deleted once all args are supported
+
     data = {
-        start_date: start_date.to_date,
-        end_date: end_date.to_date,
-        collateral_type: collateral_type,
-        credit_type: credit_type,
-        rates_by_date: []
+      start_date: start_date.to_date,
+      end_date: end_date.to_date,
+      collateral_type: collateral_type,
+      credit_type: credit_type,
+      rates_by_date: []
     }
     (start_date..end_date).each do |date|
       day_of_week = date.wday
       if day_of_week != 0 && day_of_week != 6
+        r = Random.new(date.to_time.to_i + CREDIT_TYPES.index(credit_type))
         data[:rates_by_date].push(
           {
             date: date,
             rates_by_term: []
           }
         )
-        HISTORICAL_FRC_TERMS.each do |term|
+        terms = case credit_type
+        when :frc
+          HISTORICAL_FRC_TERM_MAPPINGS.keys
+        when :'1m_libor', :'3m_libor', :'6m_libor', :daily_prime
+          HISTORICAL_ARC_TERM_MAPPINGS.keys
+        else
+          # TODO add in the proper terms for 'vrc' and 'embedded_cap' once those are rigged up
+        end
+        terms.each do |term|
+          rate = if ARC_CREDIT_TYPES.include?(credit_type)
+            r.rand(-200..200)
+          else
+            r.rand.round(3)
+          end
           data[:rates_by_date].last[:rates_by_term].push(
             term: term,
-            rate: rand.round(3),
+            rate: rate,
             day_count_basis: "Actual/Actual",
             pay_freq: "Monthly"
           )

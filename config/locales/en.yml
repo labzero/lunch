@@ -69,6 +69,7 @@ en:
     not_applicable: Not applicable
     various: Various
     dates:
+      1_day: 1 day
       1_month: 1 mo
       2_months: 2 mo
       3_months: 3 mo
@@ -381,6 +382,10 @@ en:
           6m_libor: Adjustable Rate Credit (ARC) 6 month LIBOR
           daily_prime: Adjustable Rate Credit (ARC) Daily Prime
           embedded_cap: Adjustable Rate Credit (ARC) with Embedded Cap
+        1m_libor: 1 mo LIBOR
+        3m_libor: 3 mo LIBOR
+        6m_libor: 6 mo LIBOR
+        daily_prime: Daily Prime LIBOR
       capital_stock_activity:
         title: Capital Stock Activity Statement
         opening_balance_heading: "Opening balance of Class B Shares as of %{date}:"

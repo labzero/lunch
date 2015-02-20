@@ -300,6 +300,7 @@ RSpec.describe ReportsController, :type => :controller do
     before do
       allow(RatesService).to receive(:new).and_return(rates_service_instance)
       allow(rates_service_instance).to receive(:historical_price_indications).and_return(response_hash)
+      allow(response_hash).to receive(:[]).with(:rates_by_date)
     end
 
     describe 'GET historical_price_indications' do
@@ -323,9 +324,6 @@ RSpec.describe ReportsController, :type => :controller do
         expect{get :historical_price_indications}.to raise_error(StandardError)
       end
       describe "view instance variables" do
-        before {
-          # allow(rates_service_instance).to receive(:settlement_transaction_account).with(kind_of(Date), kind_of(Date), kind_of(String)).and_return(response_hash)
-        }
         it 'should set @historical_price_indications' do
           expect(rates_service_instance).to receive(:historical_price_indications).and_return(response_hash)
           get :historical_price_indications
@@ -376,7 +374,7 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[:credit_type]).to eq('vrc')
           expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.variable_rate_credit'))
         end
-        ['1m_libor', '3m_libor', '6m_libor', 'daily_prime', 'embedded_cap'].each do |credit_type|
+        ['1m_libor', '3m_libor', '6m_libor', 'daily_prime'].each do |credit_type|
           it "should set @credit_type to `#{credit_type}` and @credit_type_text to the proper i18next translation for `#{credit_type}` if #{credit_type} is passed as the historical_price_credit_type param" do
             get :historical_price_indications, historical_price_credit_type: credit_type
             expect(assigns[:credit_type]).to eq(credit_type)

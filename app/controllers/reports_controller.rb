@@ -216,6 +216,28 @@ class ReportsController < ApplicationController
 
     @historical_price_indications = rate_service.historical_price_indications(@start_date, @end_date, @collateral_type, @credit_type)
     raise StandardError, "There has been an error and ReportsController#historical_price_indications has returned nil. Check error logs." if @historical_price_indications.blank?
+
+    case @credit_type.to_sym
+    when :frc
+      column_heading_keys = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.values
+    when :vrc
+      column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
+    when *RatesService::ARC_CREDIT_TYPES 
+      table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}")
+      column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
+      # TODO add statement for 'embedded_cap' when it is rigged up
+    end
+
+    column_headings = []
+    column_heading_keys.each do |key|
+      column_headings << I18n.t("global.dates.#{key}")
+    end
+
+    @table_data = {
+      :table_heading => table_heading,
+      :column_headings => column_headings.insert(0, I18n.t('global.date')),
+      :rows => @historical_price_indications[:rates_by_date]
+    }
   end
 
 end
