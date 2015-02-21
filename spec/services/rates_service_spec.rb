@@ -183,10 +183,6 @@ describe RatesService do
     end
     # TODO remove code below once you have rigged up the reports for all supported collateral_types and credit_types
     # START of code that should be removed once this method supports all valid collateral_types and credit_types
-    it 'returns nil if `sbc` is passed as the collateral_type arg' do
-      expect(Rails.logger).to receive(:warn)
-      expect(subject.historical_price_indications(start_date, end_date, 'sbc', RatesService::CREDIT_TYPES.first)).to be_nil
-    end
     it 'returns nil if `embedded_cap` is passed as the credit_type arg' do
       expect(Rails.logger).to receive(:warn)
       expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, 'embedded_cap')).to be_nil

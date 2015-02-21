@@ -178,7 +178,6 @@ class ReportsController < ApplicationController
     default_dates = default_dates_hash
     @start_date = ((params[:start_date] || default_dates[:this_year_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:today])).to_date
-
     @picker_presets = range_picker_default_presets(@start_date, @end_date)
     @collateral_type_options = [
         [t('reports.pages.price_indications.standard_credit_program'), 'standard'],
@@ -199,10 +198,14 @@ class ReportsController < ApplicationController
         [t('reports.pages.price_indications.vrc.dropdown'), 'vrc'],
         [t('reports.pages.price_indications.1m_libor.dropdown'), '1m_libor'],
         [t('reports.pages.price_indications.3m_libor.dropdown'), '3m_libor'],
-        [t('reports.pages.price_indications.6m_libor.dropdown'), '6m_libor'],
+        [t('reports.pages.price_indications.6m_libor.dropdown'), '6m_libor']
+    ]
+    if @collateral_type == 'standard'
+      @credit_type_options.push(
         [t('reports.pages.price_indications.daily_prime.dropdown'), 'daily_prime'],
         [t('reports.pages.price_indications.embedded_cap.dropdown'), 'embedded_cap']
-    ]
+      )
+    end
     credit_type = params[:historical_price_credit_type]
     @credit_type_options.each do |option|
       if option[1] == credit_type
