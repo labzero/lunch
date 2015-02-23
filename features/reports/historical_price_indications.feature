@@ -52,3 +52,17 @@ Scenario Outline: Choosing different historic price indication reports
   | Securities-Backed Credit | collateral          | Adjustable Rate Credit (ARC) 3 month LIBOR | credit          | 3 mo LIBOR    |
   | Securities-Backed Credit | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR    |
 
+@jira-mem-359
+Scenario: Custom datepicker options
+  Given I am on the Historical Price Indications page
+  When I click the datepicker field
+  Then I should see "Year to date"
+  And I should see "Last year"
+
+@jira-mem-359
+Scenario: Choosing `Last year` as a datepicker option
+  Given I am on the Historical Price Indications page
+  When I click the datepicker field
+  And I choose the "last year preset" in the datepicker
+  And I click the datepicker apply button
+  Then I should see a report with dates for last year

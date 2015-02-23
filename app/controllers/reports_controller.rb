@@ -111,7 +111,7 @@ class ReportsController < ApplicationController
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
     @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
     raise StandardError, "There has been an error and ReportsController#capital_stock_activity has returned nil. Check error logs." if @capital_stock_activity.blank?
-    @picker_presets = range_picker_default_presets(@start_date, @end_date)
+    @picker_presets = date_picker_presets(@start_date, @end_date)
   end
 
   def borrowing_capacity
@@ -127,7 +127,7 @@ class ReportsController < ApplicationController
     @start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
     @daily_balance_key = MemberBalanceService::DAILY_BALANCE_KEY
-    @picker_presets = range_picker_default_presets(@start_date, @end_date)
+    @picker_presets = date_picker_presets(@start_date, @end_date)
     @filter_options = [
         [t('global.all'), 'all'],
         [t('global.debits'), 'debit'],
@@ -157,7 +157,7 @@ class ReportsController < ApplicationController
     member_balances = MemberBalanceService.new(MEMBER_ID, request)
     @advances_detail = member_balances.advances_details(@as_of_date)
     raise StandardError, "There has been an error and ReportsController#advances_detail has returned nil. Check error logs." if @advances_detail.blank?
-    @picker_presets = range_picker_default_presets(@as_of_date)
+    @picker_presets = date_picker_presets(@as_of_date)
     # prepayment fee indication for detail view
     @advances_detail[:advances_details].each_with_index do |advance, i|
       case advance[:notes]
@@ -178,7 +178,20 @@ class ReportsController < ApplicationController
     default_dates = default_dates_hash
     @start_date = ((params[:start_date] || default_dates[:this_year_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:today])).to_date
-    @picker_presets = range_picker_default_presets(@start_date, @end_date)
+    preset_options = {
+        :first_preset => {
+            :label => I18n.t('global.last_year'),
+            :start_date => default_dates[:last_year_start],
+            :end_date => default_dates[:last_year_end]
+        },
+        :second_preset => {
+            :label => I18n.t('global.year_to_date'),
+            :start_date => default_dates[:this_year_start],
+            :end_date => default_dates[:today]
+        }
+    }
+    @picker_presets = date_picker_presets(@start_date, @end_date, preset_options)
+    
     @collateral_type_options = [
         [t('reports.pages.price_indications.standard_credit_program'), 'standard'],
         [t('reports.pages.price_indications.sbc_program'), 'sbc']
