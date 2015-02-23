@@ -3,10 +3,53 @@ require 'spec_helper'
 describe CustomFormattingHelper do
   describe '`fhlb_formatted_currency` method' do
     it 'converts a number into the approved FHLB currency format' do
-      expect(helper.fhlb_formatted_currency(465465465)).to eq('$465,465,465')
+      expect(helper.fhlb_formatted_currency(465465465, html: false)).to eq('$465,465,465.00')
     end
     it 'omits the dollar-sign if it is passed the number 0' do
-      expect(helper.fhlb_formatted_currency(0)).to eq('0')
+      expect(helper.fhlb_formatted_currency(0, html: false)).to eq('0')
+    end
+    it 'accepts an optional precision value' do
+      expect(helper.fhlb_formatted_currency(465465465, precision: 0, html: false)).to eq('$465,465,465')
+    end
+    it 'wraps negative numbers in paranthesis' do
+      expect(helper.fhlb_formatted_currency(-123456789, html: false)).to eq('($123,456,789.00)')
+    end
+    it 'wraps the formatted currency in a span with a class indicating the sign if requested' do
+      expect(helper.fhlb_formatted_currency(-123456789, html: true)).to eq('<span class="number-negative">($123,456,789.00)</span>')
+      expect(helper.fhlb_formatted_currency(123456789, html: true)).to eq('<span class="number-positive">$123,456,789.00</span>')
+    end
+    it 'defaults to HTML output' do
+      expect(helper.fhlb_formatted_currency(123)).to eq('<span class="number-positive">$123.00</span>')
+    end
+    it 'treats nil as zero' do
+      expect(helper.fhlb_formatted_currency(nil)).to eq(helper.fhlb_formatted_currency(0))
+    end
+  end
+
+  describe '`fhlb_formatted_currency_whole` method' do
+    it 'calls fhlb_formatted_currency with a default precision of 0' do
+      number = double('Number')
+      expect(helper).to receive(:fhlb_formatted_currency).with(number, {precision: 0})
+      helper.fhlb_formatted_currency_whole(number)
+    end
+  end
+
+  describe '`fhlb_formatted_number` method' do
+    it 'adds delimiters to the number' do
+      expect(helper.fhlb_formatted_number(123456789, html: false)).to eq('123,456,789')
+    end
+    it 'wraps negative numbers in paranthesis' do
+      expect(helper.fhlb_formatted_number(-123456789, html: false)).to eq('(123,456,789)')
+    end
+    it 'wraps the formatted currency in a span with a class indicating the sign if requested' do
+      expect(helper.fhlb_formatted_number(-123456789, html: true)).to eq('<span class="number-negative">(123,456,789)</span>')
+      expect(helper.fhlb_formatted_number(123456789, html: true)).to eq('<span class="number-positive">123,456,789</span>')
+    end
+    it 'defaults to HTML output' do
+      expect(helper.fhlb_formatted_number(123)).to eq('<span class="number-positive">123</span>')
+    end
+    it 'treats nil as zero' do
+      expect(helper.fhlb_formatted_number(nil)).to eq(helper.fhlb_formatted_number(0))
     end
   end
 

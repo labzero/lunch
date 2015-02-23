@@ -249,10 +249,18 @@ class ReportsController < ApplicationController
       column_headings << I18n.t("global.dates.#{key}")
     end
 
+    rows = if @historical_price_indications[:rates_by_date]
+      @historical_price_indications[:rates_by_date].collect do |row|
+        {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: :rate, value: column[:rate] } } }
+      end
+    else
+      []
+    end
+
     @table_data = {
       :table_heading => table_heading,
       :column_headings => column_headings.insert(0, I18n.t('global.date')),
-      :rows => @historical_price_indications[:rates_by_date]
+      :rows => rows
     }
   end
 
