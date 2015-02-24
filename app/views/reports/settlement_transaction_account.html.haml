@@ -43,34 +43,20 @@
             %td.report-cell-expanding= t('reports.pages.settlement_transaction_account.closing_balance')
             %td.report-cell-right= '-'
             %td.report-cell-right= '-'
-<<<<<<< Updated upstream
-            %td.report-cell-right= fhlb_formatted_currency(@settlement_transaction_account[:end_balance]) || '-'
-=======
             %td.report-cell-right= number_with_delimiter(@settlement_transaction_account[:end_balance]) || '-'
->>>>>>> Stashed changes
         -@settlement_transaction_account[:activities].each do |row|
           %tr
             %td.report-cell-narrow= fhlb_date_standard_numeric(row[:trans_date])
             %td.report-cell-expanding= row[:refnumber]
             %td.report-cell-expanding= row[:descr] == @daily_balance_key ? t('reports.pages.settlement_transaction_account.closing_balance') : row[:descr]
-<<<<<<< Updated upstream
-            %td.report-cell-right= fhlb_formatted_currency(row[:debit]) || '-'
-            %td.report-cell-right= fhlb_formatted_currency(row[:credit]) || '-'
-            %td.report-cell-right= fhlb_formatted_currency(row[:balance]) || '-'
-=======
             %td.report-cell-right= number_with_delimiter(row[:debit]) || '-'
             %td.report-cell-right= number_with_delimiter(row[:credit]) || '-'
             %td.report-cell-right= number_with_delimiter(row[:balance]) || '-'
->>>>>>> Stashed changes
         %tr.beginning-balance-row
           %td.report-cell-narrow= fhlb_date_standard_numeric(@settlement_transaction_account[:start_date])
           %td.report-cell-expanding
           %td.report-cell-expanding= t('global.beginning_balance')
           %td.report-cell-right= '-'
           %td.report-cell-right= '-'
-<<<<<<< Updated upstream
-          %td.report-cell-right= fhlb_formatted_currency(@settlement_transaction_account[:start_balance]) || '-'
-=======
           %td.report-cell-right= number_with_delimiter(@settlement_transaction_account[:start_balance]) || '-'
->>>>>>> Stashed changes
     %small= t('reports.change_notice', phone_number: fhlb_formatted_phone_number('4156162945'))

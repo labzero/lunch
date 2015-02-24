@@ -36,19 +36,11 @@
               %tr
                 %td.report-cell-narrow.report-cell-narrow= row[:type]
                 %td.report-cell-narrow.report-cell-right= row[:count]
-<<<<<<< Updated upstream
-                %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency_whole(row[:original_amount])
-                %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency_whole(row[:unpaid_principal])
-                %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency_whole(row[:market_value])
-                %td.report-cell-narrow.report-cell-right= row[:bc_upb]
-                %td.report-cell-narrow.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(row[:borrowing_capacity])
-=======
                 %td.report-cell-narrow.report-cell-right= number_with_delimiter(row[:original_amount])
                 %td.report-cell-narrow.report-cell-right= number_with_delimiter(row[:unpaid_principal])
                 %td.report-cell-narrow.report-cell-right= number_with_delimiter(row[:market_value])
                 %td.report-cell-narrow.report-cell-right= row[:bc_upb]
                 %td.report-cell-narrow.report-cell-right.report-cell-expanding= number_with_delimiter(row[:borrowing_capacity])
->>>>>>> Stashed changes
           %tfoot
             %tr
               %td.report-cell-narrow= t('global.totals')
@@ -63,15 +55,6 @@
           %tbody
             %tr
               %td= t('reports.pages.borrowing_capacity_summary.less_line_items.blanket_lien')
-<<<<<<< Updated upstream
-              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:standard][:excluded][:blanket_lien])
-            %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.bank_borrowing_capacity')
-              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:standard][:excluded][:bank])
-            %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.excluded_regulatory')
-              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:standard][:excluded][:regulatory])
-=======
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:excluded][:blanket_lien])
             %tr
               %td= t('reports.pages.borrowing_capacity_summary.less_line_items.bank_borrowing_capacity')
@@ -79,7 +62,6 @@
             %tr
               %td= t('reports.pages.borrowing_capacity_summary.less_line_items.excluded_regulatory')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:excluded][:regulatory])
->>>>>>> Stashed changes
           %tfoot
             %tr
               %td= t('reports.pages.borrowing_capacity_summary.net_loan_collateral')
@@ -88,27 +70,6 @@
           %tbody
             %tr
               %td= t('reports.pages.borrowing_capacity_summary.less_line_items.advances')
-<<<<<<< Updated upstream
-              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:standard][:utilized][:advances])
-            %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.letters_of_credit')
-              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:standard][:utilized][:letters_of_credit])
-            %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.swap_collateral')
-              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:standard][:utilized][:swap_collateral])
-            %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.cover_sbc_type')
-              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:standard][:utilized][:sbc_type_deficiencies])
-            %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.payment_fees')
-              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:standard][:utilized][:payment_fees])
-            %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.other_collateral')
-              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:standard][:utilized][:other_collateral])
-            %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.mpf_ce_collateral')
-              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:standard][:utilized][:mpf_ce_collateral])
-=======
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:utilized][:advances])
             %tr
               %td= t('reports.pages.borrowing_capacity_summary.less_line_items.letters_of_credit')
@@ -128,7 +89,6 @@
             %tr
               %td= t('reports.pages.borrowing_capacity_summary.less_line_items.mpf_ce_collateral')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:utilized][:mpf_ce_collateral])
->>>>>>> Stashed changes
           %tfoot
             %tr
               %td= t('reports.pages.borrowing_capacity_summary.excess_capacity')
@@ -150,21 +110,12 @@
             -@borrowing_capacity_summary[:sbc][:collateral].each do |type, value|
               %tr
                 %td.report-cell-narrow= t("dashboard.your_account.pledged_collateral.#{type}")
-<<<<<<< Updated upstream
-                %td.report-cell-right= fhlb_formatted_currency_whole(value[:total_market_value])
-                %td.report-cell-right= fhlb_formatted_currency_whole(value[:total_borrowing_capacity])
-                %td.report-cell-right= fhlb_formatted_currency_whole(value[:advances])
-                %td.report-cell-right= fhlb_formatted_currency_whole(value[:standard_credit])
-                %td.report-cell-right= fhlb_formatted_currency_whole(value[:remaining_market_value])
-                %td.report-cell-right= fhlb_formatted_currency_whole(value[:remaining_borrowing_capacity])
-=======
                 %td.report-cell-right= number_with_delimiter(value[:total_market_value])
                 %td.report-cell-right= number_with_delimiter(value[:total_borrowing_capacity])
                 %td.report-cell-right= number_with_delimiter(value[:advances])
                 %td.report-cell-right= number_with_delimiter(value[:standard_credit])
                 %td.report-cell-right= number_with_delimiter(value[:remaining_market_value])
                 %td.report-cell-right= number_with_delimiter(value[:remaining_borrowing_capacity])
->>>>>>> Stashed changes
           %tfoot
             %tr
               %td.report-cell-narrow= t('global.totals')
@@ -179,17 +130,10 @@
           %tbody
             %tr
               %td= t('reports.pages.borrowing_capacity_summary.less_line_items.other_collateral')
-<<<<<<< Updated upstream
-              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:sbc][:utilized][:other_collateral])
-            %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.excluded_regulatory')
-              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:sbc][:utilized][:excluded_regulatory])
-=======
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:sbc][:utilized][:other_collateral])
             %tr
               %td= t('reports.pages.borrowing_capacity_summary.less_line_items.excluded_regulatory')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:sbc][:utilized][:excluded_regulatory])
->>>>>>> Stashed changes
           %tfoot
             %tr
               %td= t('reports.pages.borrowing_capacity_summary.excess_capacity')
