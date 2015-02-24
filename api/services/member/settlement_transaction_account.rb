@@ -169,15 +169,15 @@ module MAPI
             activities_formatted = []
             # caller expect end point to return null instead of 0 value for credit, debit and balances
             activities_array.each do |row|
-              credit = row['CREDIT']
+              credit = row['CREDIT'].to_f
               if credit == 0
                 credit = nil
               end
-              debit = row['DEBIT']
+              debit = row['DEBIT'].to_f
               if debit == 0
                 debit = nil
               end
-              balance_temp = row['BALANCE']
+              balance_temp = row['BALANCE'].to_f
               description = row['DESCR']
               if (balance_temp == 0 && description != 'Interest Rate / Daily Balance')
                 balance_temp = nil
@@ -187,7 +187,7 @@ module MAPI
                       'descr' => description,
                       'debit' => debit,
                       'credit' => credit,
-                      'rate' => row['RATE'],
+                      'rate' => row['RATE'].to_f,
                       'balance' => balance_temp
               }
               activities_formatted.push(hash)

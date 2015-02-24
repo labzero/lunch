@@ -458,14 +458,14 @@ describe MAPI::ServiceApp do
       let(:sta_close_balances) {{"ACCOUNT_NUMBER"=> '022011', "BALANCE"=> "9499.99", "TRANS_DATE"=>"21-Jan-2015 12:00 AM"}}
       let(:sta_close_balances2) {{"ACCOUNT_NUMBER"=> '022011', "BALANCE"=> "10000.00", "TRANS_DATE"=>"24-Jan-2015 12:00 AM"}}
       let(:sta_breakdown1) {{"TRANS_DATE" =>"21-Jan-2015 12:00 AM",  "REFNUMBER"=> nil,"DESCR"=> 'Interest Rate / Daily Balance',
-                            "DEBIT" => 0, "CREDIT" => 0, "RATE" =>0.12,
-                            "BALANCE"=> 9499.99}}
+                            "DEBIT" => "0", "CREDIT" => "0", "RATE" => "0.12",
+                            "BALANCE"=> "9499.99"}}
       let(:sta_breakdown2) {{"TRANS_DATE" =>"21-Jan-2015 12:00 AM",  "REFNUMBER"=> "F99999","DESCR"=> 'SECURITIES SAFEKEEPING FEE',
-                             "DEBIT" => 500.01, "CREDIT" => 0, "RATE" =>0,
-                             "BALANCE"=> 0}}
+                             "DEBIT" => "500.01", "CREDIT" => "0", "RATE" =>"0",
+                             "BALANCE"=> "0"}}
       let(:sta_breakdown3) {{"TRANS_DATE" =>"01-Jan-2015 12:00 AM",  "REFNUMBER"=> nil, "DESCR"=> 'INTEREST',
-                             "DEBIT" => 0, "CREDIT" => 0.63, "RATE" =>0,
-                             "BALANCE"=> 0}}
+                             "DEBIT" => "0", "CREDIT" => "0.63", "RATE" => "0",
+                             "BALANCE"=> "0"}}
       let(:result_sta_count) {double('Oracle Result Set', fetch_hash: nil)}
       let(:result_open) {double('Oracle Result Set', fetch_hash: nil)}
       let(:result_adjustment) {double('Oracle Result Set', fetch_hash: nil)}
