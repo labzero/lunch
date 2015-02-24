@@ -104,20 +104,20 @@ Then(/^I should see a "(.*?)" for the (\d+)(?:st|rd|th) through the (\d+)(?:st|r
 end
 
 Then(/^I should see a "(.*?)" starting on "(.*?)" and ending on "(.*?)"$/) do |report_type, start_date, end_date|
-  case report_type
-    when "Settlement Transaction Account Statement"
-      opening_balance = I18n.t('reports.pages.settlement_transaction_account.opening_balance_heading', date: start_date)
-      closing_balance = I18n.t('reports.pages.settlement_transaction_account.closing_balance_heading', date: end_date)
-    when "Capital Stock Activity Statement"
-      opening_balance = I18n.t('reports.pages.capital_stock_activity.opening_balance_heading', date: start_date)
-      closing_balance = I18n.t('reports.pages.capital_stock_activity.closing_balance_heading', date: end_date)
-    else raise "unknown report type"
-  end
-  expect(page.find(".datepicker-trigger input").value).to eq("#{start_date} - #{end_date}")
-  step %{I should see "#{opening_balance}"}
-  step %{I should see "#{closing_balance}"}
   start_date_obj = start_date.to_date
   end_date_obj = end_date.to_date
+  case report_type
+    when "Settlement Transaction Account Statement"
+      opening_balance = I18n.t('reports.pages.settlement_transaction_account.opening_balance_heading', date: start_date_obj.strftime('%B %-d, %Y'))
+      closing_balance = I18n.t('reports.pages.settlement_transaction_account.closing_balance_heading', date: end_date_obj.strftime('%B %-d, %Y'))
+    when "Capital Stock Activity Statement"
+      opening_balance = I18n.t('reports.pages.capital_stock_activity.opening_balance_heading', date: start_date_obj.strftime('%B %-d, %Y'))
+      closing_balance = I18n.t('reports.pages.capital_stock_activity.closing_balance_heading', date: end_date_obj.strftime('%B %-d, %Y'))
+    else raise "unknown report type"
+  end
+  expect(page.find(".datepicker-trigger input").value).to eq("#{start_date_obj.strftime('%m/%d/%Y')} - #{end_date_obj.strftime('%m/%d/%Y')}")
+  step %{I should see "#{opening_balance}"}
+  step %{I should see "#{closing_balance}"}
   report_dates_in_range?(start_date_obj, end_date_obj)
 end
 
@@ -145,7 +145,7 @@ Then(/^I should see a "(.*?)" with dates between "(.*?)" and "(.*?)"$/) do |repo
       closing_balance = I18n.t('reports.pages.capital_stock_activity.closing_balance_heading', date: nil)
     else raise "unknown report type"
   end
-  expect(page.find(".datepicker-trigger input").value).to eq("#{start_date_obj.strftime('%B %-d, %Y')} - #{end_date_obj.strftime('%B %-d, %Y')}")
+  expect(page.find(".datepicker-trigger input").value).to eq("#{start_date_obj.strftime('%m/%d/%Y')} - #{end_date_obj.strftime('%m/%d/%Y')}")
   returned_start_date = page.find('.report-summary-data:nth-child(1) h3').text.gsub(opening_balance, '').to_date
   returned_end_date = page.find('.report-summary-data:nth-child(2) h3').text.gsub(closing_balance, '').to_date
   expect(start_date_obj).to be <= returned_start_date
