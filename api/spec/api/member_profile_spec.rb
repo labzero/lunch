@@ -8,61 +8,29 @@ describe MAPI::ServiceApp do
   end
   describe 'member profile' do
     let(:member_financial_position) { get "/member/#{member_id}/member_profile"; JSON.parse(last_response.body) }
-    RSpec.shared_examples 'a Member Profile endpoint' do
-      it "should return json with expected elements" do
-        expect(member_financial_position.length).to be >= 1
-        expect(member_financial_position['sta_balance']).to be_kind_of(Numeric)
-        if (member_financial_position['credit_outstanding'] != nil)
-          expect(member_financial_position['credit_outstanding']).to be_kind_of(Numeric)
-        end
-        if member_financial_position['financial_available'] != nil
-          expect(member_financial_position['financial_available']).to be_kind_of(Integer)
-        end
-        if member_financial_position['credit_outstanding'] != nil
-          expect(member_financial_position['credit_outstanding']).to be_kind_of(Integer)
-        end
-        if member_financial_position['stock_leverage'] != nil
-          expect(member_financial_position['stock_leverage']).to be_kind_of(Integer)
-        end
-        if member_financial_position['credit_outstanding'] != nil
-          expect(member_financial_position['credit_outstanding']).to be_kind_of(Integer)
-        end
-        if member_financial_position['collateral_market_value_sbc_agency'] != nil
-          expect(member_financial_position['collateral_market_value_sbc_agency']).to be_kind_of(Integer)
-        end
-        if member_financial_position['collateral_market_value_sbc_aaa'] != nil
-          expect(member_financial_position['collateral_market_value_sbc_aaa']).to be_kind_of(Integer)
-        end
-        if member_financial_position['collateral_market_value_sbc_aa'] != nil
-          expect(member_financial_position['collateral_market_value_sbc_aa']).to be_kind_of(Integer)
-        end
-        if member_financial_position['borrowing_capacity_standard'] != nil
-          expect(member_financial_position['borrowing_capacity_standard']).to be_kind_of(Integer)
-        end
-        if member_financial_position['borrowing_capacity_sbc_agency'] != nil
-          expect(member_financial_position['borrowing_capacity_sbc_agency']).to be_kind_of(Integer)
-        end
-        if member_financial_position['borrowing_capacity_sbc_aaa'] != nil
-          expect(member_financial_position['borrowing_capacity_sbc_aaa']).to be_kind_of(Integer)
-        end
-        if member_financial_position['borrowing_capacity_sbc_aa'] != nil
-          expect(member_financial_position['borrowing_capacity_sbc_aa']).to be_kind_of(Integer)
-        end
-      end
-
-      it 'should call capital_stock_requirement method and return stock_leverage' do
-        expect(member_financial_position['stock_leverage']).to be_kind_of(Integer)
-      end
-
-      it 'should return 11 column' do
-        expect(member_financial_position.count).to eq(11)
-      end
+    it "should return json with expected elements type" do
+      expect(member_financial_position.length).to be >= 1
+      expect(member_financial_position['sta_balance']).to be_kind_of(Numeric)
+      expect(member_financial_position['credit_outstanding']).to be_kind_of(Numeric)
+      expect(member_financial_position['credit_outstanding']).to be_kind_of(Integer)
+      expect(member_financial_position['stock_leverage']).to be_kind_of(Integer)
+      expect(member_financial_position['credit_outstanding']).to be_kind_of(Integer)
+      expect(member_financial_position['collateral_market_value_sbc_agency']).to be_kind_of(Integer)
+      expect(member_financial_position['collateral_market_value_sbc_aaa']).to be_kind_of(Integer)
+      expect(member_financial_position['collateral_market_value_sbc_aa']).to be_kind_of(Integer)
+      expect(member_financial_position['borrowing_capacity_standard']).to be_kind_of(Integer)
+      expect(member_financial_position['borrowing_capacity_sbc_agency']).to be_kind_of(Integer)
+      expect(member_financial_position['borrowing_capacity_sbc_aaa']).to be_kind_of(Integer)
+      expect(member_financial_position['borrowing_capacity_sbc_aa']).to be_kind_of(Integer)
     end
 
+    it 'should call capital_stock_requirement method and return stock_leverage' do
+     expect(member_financial_position['stock_leverage']).to be_kind_of(Integer)
+    end
 
-    describe 'in the development environment' do
-      it_behaves_like 'a Member Profile endpoint'
-     end
+    it 'should return 11 column' do
+     expect(member_financial_position.count).to eq(11)
+    end
 
     describe 'in the production environment' do
         let(:member_position_result) {double('Oracle Result Set', fetch: nil)}
@@ -95,7 +63,7 @@ describe MAPI::ServiceApp do
         end
 
         it 'should return stock_leverage column with nil value if capital_stock_requirements services is not successful' , vcr: {cassette_name: 'capital_stock_service_unavailable'} do
-          # expect(member_financial_position['stock_leverage']).to eq(nil)
+          expect(member_financial_position['stock_leverage']).to eq(nil)
           expect(member_financial_position['sta_balance']).to eq(190349.49)
           expect(member_financial_position['financial_available']).to eq(169771251)
           expect(member_financial_position['credit_outstanding']).to eq(5000001)

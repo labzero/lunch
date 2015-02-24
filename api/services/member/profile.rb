@@ -78,15 +78,19 @@ module MAPI
           end
           stock_leverage = nil
           # get the 4 values from member position and pass into capital stock services to get the stock_leverage value
-          if member_position_hash.count() > 0
+          if member_position_hash.count > 0
             total_cap_stock = member_position_hash['TOTAL_CAPITAL_STOCK']|| 0
             advances_outstanding = member_position_hash['ADVANCES_OUTSTANDING']|| 0
             mpf_unpaid_balance = member_position_hash['MPF_UNPAID_BALANCE']|| 0
             mortgage_related_assets = member_position_hash['MRTG_RELATED_ASSETS']|| 0
             capital_stock_returns = MAPI::Shared::CapitalStockServices::capital_stock_requirements(total_cap_stock, advances_outstanding, mpf_unpaid_balance, mortgage_related_assets, app.settings.environment)
             if capital_stock_returns.count > 0
-              stock_leverage = capital_stock_returns['additional_advances'].to_i
-            else
+              if capital_stock_returns['additional_advances']
+                stock_leverage = capital_stock_returns['additional_advances'].to_i
+              else
+                stock_leverage = capital_stock_returns['additional_advances']
+              end
+             else
               Rails.logger.warn("MAPI::Shared::CapitalStockServices error. Not returning values")
             end
           end
