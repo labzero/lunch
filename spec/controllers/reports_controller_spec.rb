@@ -278,7 +278,7 @@ RSpec.describe ReportsController, :type => :controller do
           get :advances_detail
         end
         it 'sets the attribute to equal the `prepayment_fee_indication` value if that attribute exists and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, number_to_currency(prepayment_fee))
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, fhlb_formatted_currency(prepayment_fee))
           expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
           expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
           get :advances_detail

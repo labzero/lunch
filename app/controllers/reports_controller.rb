@@ -168,7 +168,7 @@ class ReportsController < ApplicationController
       when 'prepayment_fee_restructure'
         @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.prepayment_fee_restructure_html', fee: number_to_currency(advance[:prepayment_fee_indication]), date: fhlb_date_standard_numeric(advance[:structure_product_prepay_valuation_date].to_date))
       else
-        @advances_detail[:advances_details][i][:prepayment_fee_indication] = number_to_currency(advance[:prepayment_fee_indication]) || t('global.not_applicable')
+        @advances_detail[:advances_details][i][:prepayment_fee_indication] = fhlb_formatted_currency(advance[:prepayment_fee_indication]) || t('global.not_applicable')
       end
     end
   end

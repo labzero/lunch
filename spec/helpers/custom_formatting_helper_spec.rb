@@ -5,8 +5,11 @@ describe CustomFormattingHelper do
     it 'converts a number into the approved FHLB currency format' do
       expect(helper.fhlb_formatted_currency(465465465, html: false)).to eq('$465,465,465.00')
     end
-    it 'omits the dollar-sign if it is passed the number 0' do
+    it 'omits the dollar-sign and decimals if it is passed the number 0' do
       expect(helper.fhlb_formatted_currency(0, html: false)).to eq('0')
+    end
+    it 'shows the dollar-sign if it is passed the number 0 and force_unit is true' do
+      expect(helper.fhlb_formatted_currency(0, html: false, force_unit: true)).to eq('$0.00')
     end
     it 'accepts an optional precision value' do
       expect(helper.fhlb_formatted_currency(465465465, precision: 0, html: false)).to eq('$465,465,465')
@@ -21,8 +24,8 @@ describe CustomFormattingHelper do
     it 'defaults to HTML output' do
       expect(helper.fhlb_formatted_currency(123)).to eq('<span class="number-positive">$123.00</span>')
     end
-    it 'treats nil as zero' do
-      expect(helper.fhlb_formatted_currency(nil)).to eq(helper.fhlb_formatted_currency(0))
+    it 'returns nil if passed nil' do
+      expect(helper.fhlb_formatted_currency(nil)).to be_nil
     end
   end
 
@@ -48,8 +51,8 @@ describe CustomFormattingHelper do
     it 'defaults to HTML output' do
       expect(helper.fhlb_formatted_number(123)).to eq('<span class="number-positive">123</span>')
     end
-    it 'treats nil as zero' do
-      expect(helper.fhlb_formatted_number(nil)).to eq(helper.fhlb_formatted_number(0))
+    it 'returns nil if passed nil' do
+      expect(helper.fhlb_formatted_number(nil)).to be_nil
     end
   end
 
