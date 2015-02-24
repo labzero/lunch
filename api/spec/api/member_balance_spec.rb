@@ -426,22 +426,13 @@ describe MAPI::ServiceApp do
       it 'should return expected hash and data type or nil in development' do
         sta_activities['activities'].each do |activity|
           expect(activity['trans_date'].to_s).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
-          if (activity['refnumber'] != nil )
-           expect(activity['refnumber']).to be_kind_of(String)
-          end
-          if (activity['descr'] != nil )
-            expect(activity['descr']).to be_kind_of(String)
-          end
-          if (activity['debit'] != nil )
-            expect(activity['debit']).to be_kind_of(Numeric)
-          end
-          if (activity['credit'] != nil )
-            expect(activity['credit']).to be_kind_of(Numeric)
-          end
-          if (activity['balance'] != nil )
-            expect(activity['balance']).to be_kind_of(Numeric)
-          end
-          expect(activity['rate']).to be_kind_of(Numeric)
+          expect(activity['refnumber']).to be_kind_of(String).or be_nil
+          expect(activity['descr']).to be_kind_of(String)
+          expect(activity['debit']).to be_kind_of(Numeric).or be_nil
+          expect(activity['credit']).to be_kind_of(Numeric).or be_nil
+          expect(activity['debit'] || activity['credit'] || activity['balance']).to_not be_nil
+          expect(activity['balance']).to be_kind_of(Numeric).or be_nil
+          expect(activity['rate']).to be_kind_of(Numeric).or be_nil
         end
       end
     end
@@ -462,10 +453,10 @@ describe MAPI::ServiceApp do
       let(:from_date) {'2015-01-01'}
       let(:to_date) {'2015-01-25'}
       let(:sta_count_dates) {{"BALANCE_ROW_COUNT"=> 2}}
-      let(:sta_open_balances) {{"ACCOUNT_NUMBER"=> '020022', "OPEN_BALANCE"=> 10000.00, "TRANS_DATE"=>"09-Jan-2015 12:00 AM"}}
+      let(:sta_open_balances) {{"ACCOUNT_NUMBER"=> '020022', "OPEN_BALANCE"=> "10000.00", "TRANS_DATE"=>"09-Jan-2015 12:00 AM"}}
       let(:sta_open_to_adjust_value) {{"ACCCOUNT_NUMBER"=> '022011', "ADJUST_TRANS_COUNT"=> 1, "MIN_DATE"=>"02-Jan-2015 12:00 AM","AMOUNT_TO_ADJUST"=> 0.63}}
-      let(:sta_close_balances) {{"ACCOUNT_NUMBER"=> '022011', "BALANCE"=> 9499.99, "TRANS_DATE"=>"21-Jan-2015 12:00 AM"}}
-      let(:sta_close_balances2) {{"ACCOUNT_NUMBER"=> '022011', "BALANCE"=> 10000.00, "TRANS_DATE"=>"24-Jan-2015 12:00 AM"}}
+      let(:sta_close_balances) {{"ACCOUNT_NUMBER"=> '022011', "BALANCE"=> "9499.99", "TRANS_DATE"=>"21-Jan-2015 12:00 AM"}}
+      let(:sta_close_balances2) {{"ACCOUNT_NUMBER"=> '022011', "BALANCE"=> "10000.00", "TRANS_DATE"=>"24-Jan-2015 12:00 AM"}}
       let(:sta_breakdown1) {{"TRANS_DATE" =>"21-Jan-2015 12:00 AM",  "REFNUMBER"=> nil,"DESCR"=> 'Interest Rate / Daily Balance',
                             "DEBIT" => 0, "CREDIT" => 0, "RATE" =>0.12,
                             "BALANCE"=> 9499.99}}
