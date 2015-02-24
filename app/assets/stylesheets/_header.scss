@@ -26,6 +26,9 @@
   }
   li {
     display: inline-block;
+    .input-field-container {
+      vertical-align: middle;
+    }
   }
   a {
     text-decoration: none;
