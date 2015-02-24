@@ -139,11 +139,11 @@ $(function () {
 
   function setDatePickerPlaceholder($datePickerTrigger, startDate, endDate) {
     if ($($datePickerTrigger.siblings('.datepicker-wrapper')).data('date-picker-single-date-picker')) {
-      var input_field_text = $datePickerTrigger.data('date-picker-input-field-text').replace(/\{replace_date\}/, startDate.format('MMMM D, YYYY'));
+      var input_field_text = $datePickerTrigger.data('date-picker-input-field-text').replace(/\{replace_date\}/, startDate.format('MM/DD/YYYY'));
       $datePickerTrigger.find('input').val(input_field_text);
     }
     else {
-      $datePickerTrigger.find('input').val(startDate.format('MMMM D, YYYY') + ' - ' + endDate.format('MMMM D, YYYY'));
+      $datePickerTrigger.find('input').val(startDate.format('MM/DD/YYYY') + ' - ' + endDate.format('MM/DD/YYYY'));
     };
   }
 
