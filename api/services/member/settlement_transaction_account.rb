@@ -1,7 +1,7 @@
 module MAPI
   module Services
     module Member
-      module Sta
+      module SettlementTransactionAccount
         def self.sta_activities(app, member_id, from_date, to_date)
           member_id = member_id.to_i
           sta_count = 0
@@ -153,9 +153,9 @@ module MAPI
           if sta_count ==  0
             {}
           else
-            open_balance = open_balance_hash['OPEN_BALANCE'] || 0
+            open_balance = open_balance_hash['OPEN_BALANCE'].to_f || 0
             open_balance_date = (open_balance_hash['TRANS_DATE'] || from_date).to_date # adjust to earliest date with transaction records or balances
-            close_balance = close_balance_hash['BALANCE'] || 0
+            close_balance = close_balance_hash['BALANCE'].to_f || 0
             close_balance_date = (close_balance_hash['TRANS_DATE'] || to_date).to_date  # adjust to the latest date with transaction records or balances
 
             # adjusting open balance final where the between from date and 1st balance date has transaction
@@ -169,15 +169,15 @@ module MAPI
             activities_formatted = []
             # caller expect end point to return null instead of 0 value for credit, debit and balances
             activities_array.each do |row|
-              credit = row['CREDIT']
+              credit = row['CREDIT'].to_f
               if credit == 0
                 credit = nil
               end
-              debit = row['DEBIT']
+              debit = row['DEBIT'].to_f
               if debit == 0
                 debit = nil
               end
-              balance_temp = row['BALANCE']
+              balance_temp = row['BALANCE'].to_f
               description = row['DESCR']
               if (balance_temp == 0 && description != 'Interest Rate / Daily Balance')
                 balance_temp = nil
@@ -187,7 +187,7 @@ module MAPI
                       'descr' => description,
                       'debit' => debit,
                       'credit' => credit,
-                      'rate' => row['RATE'],
+                      'rate' => row['RATE'].to_f,
                       'balance' => balance_temp
               }
               activities_formatted.push(hash)
@@ -195,7 +195,7 @@ module MAPI
             {
                 start_balance: open_balance.to_f.round(4),
                 start_date: open_balance_date,
-                end_balance: close_balance,
+                end_balance: close_balance.to_f.round(4),
                 end_date: close_balance_date,
                 activities: activities_formatted
             }.to_json

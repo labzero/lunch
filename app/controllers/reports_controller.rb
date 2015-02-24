@@ -168,7 +168,7 @@ class ReportsController < ApplicationController
       when 'prepayment_fee_restructure'
         @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.prepayment_fee_restructure_html', fee: number_to_currency(advance[:prepayment_fee_indication]), date: fhlb_date_standard_numeric(advance[:structure_product_prepay_valuation_date].to_date))
       else
-        @advances_detail[:advances_details][i][:prepayment_fee_indication] = number_to_currency(advance[:prepayment_fee_indication]) || t('global.not_applicable')
+        @advances_detail[:advances_details][i][:prepayment_fee_indication] = fhlb_formatted_currency(advance[:prepayment_fee_indication]) || t('global.not_applicable')
       end
     end
   end
@@ -249,10 +249,18 @@ class ReportsController < ApplicationController
       column_headings << I18n.t("global.dates.#{key}")
     end
 
+    rows = if @historical_price_indications[:rates_by_date]
+      @historical_price_indications[:rates_by_date].collect do |row|
+        {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: :rate, value: column[:rate] } } }
+      end
+    else
+      []
+    end
+
     @table_data = {
       :table_heading => table_heading,
       :column_headings => column_headings.insert(0, I18n.t('global.date')),
-      :rows => @historical_price_indications[:rates_by_date]
+      :rows => rows
     }
   end
 

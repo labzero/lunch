@@ -358,7 +358,7 @@
       display: none;
     }
   }
-  td {
+  tbody td {
     &:nth-child(10) {
       text-transform: uppercase;
       color: $actionable-blue;

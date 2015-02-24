@@ -13,5 +13,14 @@
     - table_data[:rows].each do |row|
       %tr
         %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
-        - row[:rates_by_term].each do |rate|
-          %td.report-cell-narrow.report-cell-right= rate[:rate]
+        - row[:columns].each do |column|
+          %td.report-cell-narrow.report-cell-right
+            - case column[:type]
+            - when :rate
+              = fhlb_formatted_number(column[:value])
+            - when :currency
+              = fhlb_formatted_currency(column[:value])
+            - when :currency_whole
+              = fhlb_formatted_currency(column[:value], precision: 0)
+            - else
+              = column[:value]

@@ -1,7 +1,7 @@
 require_relative 'member/balance'
 require_relative 'member/capital_stock'
 require_relative 'member/borrowing_capacity_details'
-require_relative 'member/sta'
+require_relative 'member/settlement_transaction_account'
 require_relative 'member/advances_details'
 require_relative 'member/profile'
 
@@ -351,7 +351,7 @@ module MAPI
             end
           end
           if check_date_ok
-            result = MAPI::Services::Member::Sta.sta_activities(self, member_id, from_date, to_date)
+            result = MAPI::Services::Member::SettlementTransactionAccount.sta_activities(self, member_id, from_date, to_date)
             if result == {}
               halt 404, "No Data Found"
             else

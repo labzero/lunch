@@ -63,9 +63,9 @@
         %tbody
           - @account_overview.each do |row|
             %tr
-              %td.label #{row[0]}
+              %td.label= row[0]
               %td.currency $
-              %td.value #{number_with_delimiter(row[1], precision: 0)}
+              %td.value= fhlb_formatted_number(row[1])
           - @sub_tables.each do |sub_table_name, sub_table|
             %tr
               %td{colspan: '3'}
@@ -76,9 +76,9 @@
                   %tbody
                     - sub_table.each do |row|
                       %tr
-                        %td.label #{row[0]}
+                        %td.label= row[0]
                         %td.currency $
-                        %td.value #{number_with_delimiter(row[1], precision: 0)}
+                        %td.value= fhlb_formatted_number(row[1])
   .column-3
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances'} do
       - if @quick_advances_active
@@ -115,12 +115,12 @@
           - @previous_activity.each_with_index do |row, i|
             %tr
               %td
-                #{row[0]}
-                %div.dashboard-module-content-light #{row[2].strftime('%^b %d %Y')}
+                = row[0]
+                %div.dashboard-module-content-light=row[2].strftime('%^b %d %Y')
               - if i == 0
-                %td #{number_to_currency(row[1], precision: 0)}
+                %td= fhlb_formatted_currency_whole(row[1])
               - else
-                %td #{number_with_delimiter(row[1], precision: 0)}
+                %td= fhlb_formatted_number(row[1])
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.anticipated_activity.title'), action_type: 'calendar-icon'} do
       %table.table-dashboard-anticipated-activity
         %tbody

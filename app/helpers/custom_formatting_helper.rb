@@ -1,10 +1,45 @@
 module CustomFormattingHelper
-  def fhlb_formatted_currency(number)
-    if number.to_i == 0
+  include ActionView::Helpers::TagHelper
+  def fhlb_formatted_currency(number, options={})
+    options.reverse_update({html: true, negative_format: '(%u%n)', force_unit: false})
+    return nil if number.nil?
+    formatted = if !options[:force_unit] && number == 0
       '0'
     else
-      number_to_currency(number, precision: 0)
+      number_to_currency(number, options)
     end
+
+    if options[:html]
+      fhlb_formatted_number_html(number, formatted)
+    else
+      formatted
+    end
+  end
+
+  def fhlb_formatted_currency_whole(number, options={})
+    fhlb_formatted_currency(number, options.merge(precision: 0))
+  end
+
+  def fhlb_formatted_number(number, options={})
+    options.reverse_update({html: true, precision: 0})
+    return nil if number.nil?
+    formatted = number_with_precision(number.abs, options.merge(delimiter: ','))
+    formatted = if number < 0
+      "(#{formatted})"
+    else
+      formatted
+    end
+
+    if options[:html]
+      fhlb_formatted_number_html(number, formatted)
+    else
+      formatted
+    end
+  end
+
+  def fhlb_formatted_number_html(number, formatted_number)
+    number_class = (number < 0 ? :'number-negative' : :'number-positive')
+    content_tag(:span, formatted_number, class: number_class)
   end
 
   def fhlb_date_standard_numeric(date)

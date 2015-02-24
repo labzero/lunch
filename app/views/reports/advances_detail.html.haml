@@ -17,15 +17,15 @@
     .report-summary-data
       %h3
         = t('reports.pages.advances_detail.total_current_par_heading', date: fhlb_date_long_alpha(@as_of_date))
-      %p= number_to_currency(@advances_detail[:total_par], precision: 0)
+      %p= fhlb_formatted_currency_whole(@advances_detail[:total_par], force_unit: true)
     .report-summary-data
       %h3
         = t('reports.pages.advances_detail.total_accrued_interest_heading', date: fhlb_date_long_alpha(@as_of_date))
-      %p= number_to_currency(@advances_detail[:total_accrued_interest])
+      %p= fhlb_formatted_currency(@advances_detail[:total_accrued_interest], force_unit: true)
     .report-summary-data
       %h3
         = t('reports.pages.advances_detail.estimated_next_payment_heading', date: fhlb_date_long_alpha(@as_of_date))
-      %p= number_to_currency(@advances_detail[:estimated_next_payment])
+      %p= fhlb_formatted_currency(@advances_detail[:estimated_next_payment], force_unit: true)
     %h2.report-table-title= t('reports.pages.advances_detail.title')
     %table.table-allow-wrapping.report-table.advances-details-report-table{data: {sortable: true, :'disable-auto-width' => true}}
       %thead
@@ -48,11 +48,11 @@
             %td.report-cell-narrow= fhlb_date_standard_numeric(row[:funding_date]) if row[:funding_date]
             %td.report-cell-narrow= row[:maturity_date].blank? ? t('global.open') : fhlb_date_standard_numeric(row[:maturity_date])
             %td.report-cell-narrow= row[:advance_number]
-            %td.report-cell-narrow.report-cell-right= number_with_delimiter(row[:current_par]) if row[:current_par]
+            %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:current_par]) if row[:current_par]
             %td.report-cell-narrow= row[:interest_rate]
             %td.report-cell-narrow= row[:next_interest_pay_date].blank? ? '-' : fhlb_date_standard_numeric(row[:next_interest_pay_date])
-            %td.report-cell-narrow.report-cell-right= number_with_delimiter(row[:accrued_interest]) if row[:accrued_interest]
-            %td.report-cell-narrow.report-cell-right= row[:estimated_next_interest_payment].blank? ? '-' : number_with_delimiter(row[:estimated_next_interest_payment])
+            %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:accrued_interest], precision: 2) if row[:accrued_interest]
+            %td.report-cell-narrow.report-cell-right= row[:estimated_next_interest_payment].blank? ? '-' : fhlb_formatted_number(row[:estimated_next_interest_payment], precision: 2)
             %td.report-cell-narrow.report-cell-right.detail-view-trigger= t('global.view')
             %td.advance-details{colspan: 10}
               %h3= t('reports.pages.advances_detail.record_title')
@@ -78,7 +78,7 @@
                 %table
                   %tr
                     %td= t('reports.pages.advances_detail.current_par')
-                    %td= number_to_currency(row[:current_par], precision: 0) if row[:current_par]
+                    %td= fhlb_formatted_currency_whole(row[:current_par]) if row[:current_par]
                 %table
                   %tr
                     %td= t('reports.pages.advances_detail.interest_payment_frequency')
@@ -93,14 +93,14 @@
                     %td= row[:interest_rate]
                   %tr
                     %td= t('reports.pages.advances_detail.accrued_interest')
-                    %td= number_to_currency(row[:accrued_interest]) if row[:accrued_interest]
+                    %td= fhlb_formatted_currency(row[:accrued_interest]) if row[:accrued_interest]
                 %table
                   %tr
                     %td= t('reports.pages.advances_detail.next_interest_payment_date')
                     %td= row[:next_interest_pay_date].blank? ? '-' : fhlb_date_standard_numeric(row[:next_interest_pay_date])
                   %tr
                     %td= t('reports.pages.advances_detail.estimated_next_payment')
-                    %td= row[:estimated_next_interest_payment].blank? ? '-' : number_to_currency(row[:estimated_next_interest_payment])
+                    %td= row[:estimated_next_interest_payment].blank? ? '-' : fhlb_formatted_currency(row[:estimated_next_interest_payment])
                 %table
                   %tr
                     %td= t('reports.pages.advances_detail.discount_program')
@@ -113,8 +113,8 @@
         %tr
           %td.report-cell-narrow= t('global.totals')
           %td.report-cell-narrow{colspan: 3}
-          %td.report-cell-narrow.report-cell-right= number_to_currency(@advances_detail[:total_par], precision: 0)
+          %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency_whole(@advances_detail[:total_par], force_unit: true)
           %td.report-cell-narrow{colspan: 2}
-          %td.report-cell-narrow.report-cell-right= number_to_currency(@advances_detail[:total_accrued_interest])
-          %td.report-cell-narrow.report-cell-right= number_to_currency(@advances_detail[:estimated_next_payment])
+          %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@advances_detail[:total_accrued_interest], force_unit: true)
+          %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@advances_detail[:estimated_next_payment], force_unit: true)
           %td.report-cell-narrow

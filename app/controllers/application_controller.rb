@@ -8,6 +8,7 @@ class ApplicationController < ActionController::Base
   unless Rails.env.test?
     rescue_from Exception do |exception|
       Rails.logger.error exception
+      Rails.logger.error exception.backtrace.join("\n")
       render :text => exception, :status => 500
     end
   end
