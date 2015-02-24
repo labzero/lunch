@@ -94,7 +94,7 @@ describe MAPI::ServiceApp do
         expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
         allow(result_set).to receive(:fetch).and_return(some_activity, nil)
       end
-      it 'should return jason wth keys total_capacity, unused_capacity with the first 2 columns returned' do
+      it 'should return json wth keys total_capacity, unused_capacity with the first 2 columns returned' do
         expect(effective_borrowing_capacity['total_capacity']).to eq(12345)
         expect(effective_borrowing_capacity['unused_capacity']).to eq(54911)
       end

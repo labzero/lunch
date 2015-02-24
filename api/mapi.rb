@@ -2,12 +2,13 @@ require 'sinatra/base'
 require 'swagger/blocks'
 
 require_relative 'shared/constants'
+require_relative 'shared/capital_stock_services'
 
 require_relative 'services/base'
 require_relative 'services/mock_rates'
 require_relative 'services/mock_members'
 require_relative 'services/rates'
-require_relative 'services/member_balance'
+require_relative 'services/member'
 require_relative 'services/etransact_advances'
 
 require_relative 'models/member'
@@ -21,6 +22,7 @@ require_relative 'models/member_capital_stock'
 require_relative 'models/member_borrowing_capacity_details'
 require_relative 'models/member_sta_activities'
 require_relative 'models/member_advances_details'
+require_relative 'models/member_profile'
 
 
 
@@ -114,7 +116,7 @@ module MAPI
     register MAPI::Services::MockRates
     register MAPI::Services::MockMembers
     register MAPI::Services::Rates
-    register MAPI::Services::MemberBalance
+    register MAPI::Services::Member
     register MAPI::Services::EtransactAdvances
   end
 
