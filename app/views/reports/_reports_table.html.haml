@@ -16,8 +16,10 @@
         - row[:columns].each do |column|
           %td.report-cell-narrow.report-cell-right
             - case column[:type]
-            - when :rate
+            - when :basis
               = fhlb_formatted_number(column[:value])
+            - when :rate
+              = fhlb_formatted_number(column[:value], precision: 3)
             - when :currency
               = fhlb_formatted_currency(column[:value])
             - when :currency_whole
