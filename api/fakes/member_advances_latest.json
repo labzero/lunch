@@ -32,7 +32,7 @@
         "ADVDET_MATURITY_DATE": "23-SEP-2016 12:00 AM",
         "ADVDET_MNEMONIC": "FRC",
         "ADVDET_DATEUPDATE": "27-JAN-2015 12:00 AM",
-        "ADVDET_SUBSIDY_PROGRAM": null ,
+        "ADVDET_SUBSIDY_PROGRAM": "ACE" ,
         "TRADE_DATE": "23-SEP-2013 12:00 AM",
         "FUTURE_INTEREST": 4161.64,
         "ADV_INDEX": null,
@@ -41,7 +41,7 @@
         "SA_INDICATION_VALUATION_DATE": null
         },
         {
-        "ADVDET_ADVANCE_NUMBER": "330112",
+        "ADVDET_ADVANCE_NUMBER": "330122",
         "ADVDET_CURRENT_PAR": 3000000,
         "ADV_DAY_COUNT": "ACT/ACT",
         "ADV_PAYMENT_FREQ": "ME",
@@ -61,7 +61,7 @@
         "SA_INDICATION_VALUATION_DATE": null
         },
         {
-        "ADVDET_ADVANCE_NUMBER": 342179,
+        "ADVDET_ADVANCE_NUMBER": "342179",
         "ADVDET_CURRENT_PAR": 100000000,
         "ADV_DAY_COUNT": "ACT/360",
         "ADV_PAYMENT_FREQ": "M",
@@ -94,7 +94,7 @@
             "ADVDET_MATURITY_DATE": "23-SEP-2016 12:00 AM",
             "ADVDET_MNEMONIC": "FRC",
             "ADVDET_DATEUPDATE": "05-FEB-2015 12:00 AM",
-            "ADVDET_SUBSIDY_PROGRAM":null ,
+            "ADVDET_SUBSIDY_PROGRAM":"ACE" ,
             "TRADE_DATE": "23-SEP-2013 12:00 AM",
             "FUTURE_INTEREST": 3758.9,
             "ADV_INDEX": null,
@@ -161,6 +161,45 @@
             "TOTAL_PREPAY_FEES": 6568.72,
             "SA_TOTAL_PREPAY_FEES": null,
             "SA_INDICATION_VALUATION_DATE": null
+        },
+        {
+            "ADVDET_ADVANCE_NUMBER": "330122",
+            "ADVDET_CURRENT_PAR": 3000000,
+            "ADV_DAY_COUNT": "ACT/ACT",
+            "ADV_PAYMENT_FREQ": "ME",
+            "ADX_INTEREST_RECEIVABLE": 6305.75,
+            "ADX_NEXT_INT_PAYMENT_DATE": "28-FEB-2015 12:00 AM",
+            "ADVDET_INTEREST_RATE": 2.74,
+            "ADVDET_ISSUE_DATE": "23-SEP-2013 12:00 AM",
+            "ADVDET_MATURITY_DATE": "31-DEC-2038 12:00 AM",
+            "ADVDET_MNEMONIC": "VRC-OPEN",
+            "ADVDET_DATEUPDATE": "27-JAN-2015 12:00 AM",
+            "ADVDET_SUBSIDY_PROGRAM": null ,
+            "TRADE_DATE": "23-SEP-2013 12:00 AM",
+            "FUTURE_INTEREST": 6981.37,
+            "ADV_INDEX": "USD-VRC-FHLBSF 1D",
+            "TOTAL_PREPAY_FEES": null,
+            "SA_TOTAL_PREPAY_FEES": null ,
+            "SA_INDICATION_VALUATION_DATE": null
+        },
+        {   "ADVDET_ADVANCE_NUMBER": "342179",
+            "ADVDET_CURRENT_PAR": 100000000,
+            "ADV_DAY_COUNT": "ACT/360",
+            "ADV_PAYMENT_FREQ": "M",
+            "ADX_INTEREST_RECEIVABLE": 27408.33,
+            "ADX_NEXT_INT_PAYMENT_DATE": "02-FEB-2015 12:00 AM",
+            "ADVDET_INTEREST_RATE": 0.3795,
+            "ADVDET_ISSUE_DATE": "30-APR-2014 12:00 AM",
+            "ADVDET_MATURITY_DATE": "01-FEB-2018 12:00 AM",
+            "ADVDET_MNEMONIC": "ARC-LIBOR",
+            "ADVDET_DATEUPDATE": "27-JAN-2015 12:00 AM",
+            "ADVDET_SUBSIDY_PROGRAM": null ,
+            "TRADE_DATE": "29-APR-2014 12:00 AM",
+            "FUTURE_INTEREST": 32679.17,
+            "ADV_INDEX": "USD-LIBOR-BBA 1M",
+            "TOTAL_PREPAY_FEES": null,
+            "SA_TOTAL_PREPAY_FEES": 1234.12 ,
+            "SA_INDICATION_VALUATION_DATE": "31-DEC-2014 12:00 AM"
         }
      ]
 ]
