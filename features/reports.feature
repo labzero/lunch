@@ -27,12 +27,12 @@ Scenario: Member sees Capital Stock Activity Statement
   Given I visit the dashboard
   When I select "Capital Stock Activity Statement" from the reports dropdown
   Then I should see report summary data
-    And I should see a report table with multiple data rows
+  And I should see a report table with multiple data rows
 
 @smoke
 Scenario: Member sorts the Capital Stock Activity Statement by date
   Given I am on the Capital Stock Activity Statement page
-    And I should see the "Date" column values in "ascending" order
+  And I should see the "Date" column values in "ascending" order
   When I click the Date column heading
   Then I should see the "Date" column values in "descending" order
 
@@ -98,7 +98,7 @@ Scenario: Member sees Settlement Transaction Account Statement
   Given I visit the dashboard
   When I select "Settlement/Transaction Account (STA)" from the reports dropdown
   Then I should see report summary data
-    And I should see a report table with multiple data rows
+  And I should see a report table with multiple data rows
 
 Scenario: Member chooses a custom date range on the Settlement Transaction Account Statement
   Given I am on the Settlement Transaction Account Statement page
@@ -112,7 +112,7 @@ Scenario: Member chooses a custom date range on the Settlement Transaction Accou
 
 Scenario: Member filters the Settlement Transaction Account Statement
   Given I am on the Settlement Transaction Account Statement page
-    And I'm showing Settlement Transaction Account activities from the last year
+  And I'm showing Settlement Transaction Account activities from the last year
   When I filter the Settlement Transaction Account Statement by "Credits"
   Then I should only see "Credits" rows in the Settlement Transaction Account Statement table
   When I filter the Settlement Transaction Account Statement by "Debits"
