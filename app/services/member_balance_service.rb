@@ -248,6 +248,12 @@ class MemberBalanceService < MAPIService
 
     data[:activities].each_with_index do |activity, i|
       data[:activities][i][:trans_date] = activity[:trans_date].to_date
+      data[:activities][i][:rate] = nil if activity[:rate] == 0
+      if activity[:debit]
+        data[:activities][i][:transaction] = activity[:debit] * -1
+      elsif activity[:credit]
+        data[:activities][i][:transaction] = activity[:credit]
+      end
     end
 
     data[:start_date] = data[:start_date].to_date

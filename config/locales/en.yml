@@ -52,6 +52,8 @@ en:
     debits: Debits
     credits: Credits
     balance: Balance
+    rates: Rates
+    daily_balances: Daily Balances
     beginning_balance: Beginning Balance
     messages: Messages
     categories: Categories
@@ -446,6 +448,7 @@ en:
         closing_balance_heading: "Balance as of close of business %{date}:"
         table_title: Settlement/Transaction Account (STA) Detail
         closing_balance: Balance as of close of business
+        debit_credit_heading: Debits/Credits
       advances_detail:
         title: Advances Detail
         total_current_par_heading: "Total Current Par as of %{date}"
