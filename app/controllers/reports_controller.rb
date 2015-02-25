@@ -236,11 +236,14 @@ class ReportsController < ApplicationController
     case @credit_type.to_sym
     when :frc
       column_heading_keys = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.values
+      rate_display_type = :rate
     when :vrc
       column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
+      rate_display_type = :rate
     when *RatesService::ARC_CREDIT_TYPES
       table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading")
       column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
+      rate_display_type = :basis
       # TODO add statement for 'embedded_cap' when it is rigged up
     end
 
@@ -251,7 +254,7 @@ class ReportsController < ApplicationController
 
     rows = if @historical_price_indications[:rates_by_date]
       @historical_price_indications[:rates_by_date].collect do |row|
-        {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: :rate, value: column[:rate] } } }
+        {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: rate_display_type, value: column[:rate] } } }
       end
     else
       []
