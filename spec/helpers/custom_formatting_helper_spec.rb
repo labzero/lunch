@@ -128,4 +128,13 @@ describe CustomFormattingHelper do
       expect(helper.fhlb_formatted_percentage(30.23, 2)).to eq('30.23%')
     end
   end
+
+  describe '`fhlb_formated_currency_unit` method' do
+    it 'returns currency with no precision and left/right align' do
+      expect(helper.fhlb_formated_currency_unit(30, '$')).to eq('<span class="currency_alignment"><span class="alignleft">$</span><span class="alignright">30</span></span>')
+    end
+    it 'returns currency with 2 precision and left/right align' do
+      expect(helper.fhlb_formated_currency_unit(30, '$', 2)).to eq('<span class="currency_alignment"><span class="alignleft">$</span><span class="alignright">30.00</span></span>')
+    end
+  end
 end
