@@ -82,4 +82,10 @@ module CustomFormattingHelper
   def fhlb_formatted_percentage(number, precision=0)
     number_to_percentage(number, precision: precision)
   end
+
+  def fhlb_formated_currency_unit(number, unit, precision=0)
+    unit_class = content_tag(:span, unit, class: 'alignleft')
+    number_class = content_tag(:span, fhlb_formatted_number(number, precision: precision), class: 'alignright')
+    content_tag(:span, unit_class + number_class, class: 'currency_alignment')
+  end
 end

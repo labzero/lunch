@@ -432,3 +432,14 @@
     }
   }
 }
+
+.currency_alignment {
+  width: 9em;
+  display: block;
+  .alignleft {
+    float: left;
+  }
+  .alignright {
+    float: right;
+  }
+}
