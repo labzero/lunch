@@ -12,3 +12,5 @@ brakeman.html
 coverage
 /log/*
 cucumber.json
+cucumber.junit
+cucumber.html
