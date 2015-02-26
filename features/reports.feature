@@ -92,28 +92,3 @@ Scenario: Member sorts the Standard Credit Program table on the Borrowing Capaci
   Then I should see the "Original Amount" column values in "ascending" order on the "Standard Credit Program" parent table
   When I click the "Original Amount" column heading on the "Standard Credit Program" parent table
   Then I should see the "Original Amount" column values in "descending" order on the "Standard Credit Program" parent table
-
-@smoke
-Scenario: Member sees Settlement Transaction Account Statement
-  Given I visit the dashboard
-  When I select "Settlement/Transaction Account (STA)" from the reports dropdown
-  Then I should see report summary data
-  And I should see a report table with multiple data rows
-
-Scenario: Member chooses a custom date range on the Settlement Transaction Account Statement
-  Given I am on the Settlement Transaction Account Statement page
-  And I click the datepicker field
-  When I choose the "custom date range" in the datepicker
-  Then I should see two calendars
-  When I select the 1st of last month in the left calendar
-  And I select the 20th of last month in the right calendar
-  And I click the datepicker apply button
-  Then I should see a "Settlement Transaction Account Statement" with data for dates between the 1st through the 20th of last month
-
-Scenario: Member filters the Settlement Transaction Account Statement
-  Given I am on the Settlement Transaction Account Statement page
-  And I'm showing Settlement Transaction Account activities from the last year
-  When I filter the Settlement Transaction Account Statement by "Credits"
-  Then I should only see "Credits" rows in the Settlement Transaction Account Statement table
-  When I filter the Settlement Transaction Account Statement by "Debits"
-  Then I should only see "Debits" rows in the Settlement Transaction Account Statement table

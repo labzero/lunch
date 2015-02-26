@@ -131,7 +131,8 @@ class ReportsController < ApplicationController
     @filter_options = [
         [t('global.all'), 'all'],
         [t('global.debits'), 'debit'],
-        [t('global.credits'), 'credit']
+        [t('global.credits'), 'credit'],
+        [t('global.daily_balances'), 'balance']
     ]
     filter_param = params[:sta_filter]
     @filter_options.each do |option|

@@ -162,11 +162,12 @@ RSpec.describe ReportsController, :type => :controller do
             expect(assigns[:filter]).to eq('all')
             expect(assigns[:filter_text]).to eq(I18n.t('global.all'))
           end
-          it 'should set @filter_options to an array of arrays containing the appropriate values and labels for credit, debit and all' do
+          it 'should set @filter_options to an array of arrays containing the appropriate values and labels for credit, debit, daily balance and all' do
             options_array = [
                 [I18n.t('global.all'), 'all'],
                 [I18n.t('global.debits'), 'debit'],
-                [I18n.t('global.credits'), 'credit']
+                [I18n.t('global.credits'), 'credit'],
+                [I18n.t('global.daily_balances'), 'balance']
             ]
             get :settlement_transaction_account
             expect(assigns[:filter_options]).to eq(options_array)

@@ -65,21 +65,8 @@ module MAPI
           SELECT TRANS_DATE, REFNUMBER, DESCR, DEBIT, CREDIT, RATE, BALANCE
           FROM PORTFOLIOS.STA_WEB_DETAIL
           WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id)}
-          AND DESCR <> 'Interest Rate / Daily Balance'
           AND trans_date >= to_date(#{ActiveRecord::Base.connection.quote(from_date)}, 'yyyy-mm-dd')
           AND trans_date <= to_date(#{ActiveRecord::Base.connection.quote(to_date)}, 'yyyy-mm-dd')
-          UNION ALL
-          SELECT TRANS_DATE, REFNUMBER, DESCR, DEBIT, CREDIT, RATE, BALANCE
-          FROM PORTFOLIOS.STA_WEB_DETAIL
-          WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id)}
-          AND DESCR = 'Interest Rate / Daily Balance'
-          AND TRANS_DATE IN
-            ( select TRANS_DATE FROM portfolios.sta_web_detail
-              WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id)}
-              AND DESCR <>'Interest Rate / Daily Balance'
-              AND trans_date >= to_date(#{ActiveRecord::Base.connection.quote(from_date)}, 'yyyy-mm-dd')
-              AND trans_date <= to_date(#{ActiveRecord::Base.connection.quote(to_date)}, 'yyyy-mm-dd')
-            )
           SQL
 
           from_date = from_date.to_date
@@ -130,22 +117,44 @@ module MAPI
               # return {} to the caller to indicate no data found
               {}
             else
-              open_balance_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_open_balance_earliest.json')))
               open_balance_adjust_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_open_balance_adjust_value.json')))
-              close_balance_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_close_balance.json')))
-              activities_array = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities.json')))
+              open_balance_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_open_balance_earliest.json')))
+              if to_date - from_date > 4
+                activities_array = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities.json')))
+                close_balance_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_close_balance.json')))
+              else
+                activities_array = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_small_set.json')))
+                close_balance_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_close_balance_small_set.json')))
+              end
               open_balance_hash['TRANS_DATE'] = from_date
               close_balance_hash['TRANS_DATE'] = to_date
               open_balance_adjust_hash['MIN_DATE'] = from_date
               count = 0
-              activities_array.collect! do |activity|
+              last_date = activities_array.first['TRANS_DATE']
+              activities_array.collect!.with_index do |activity, i|
+                count += 1 if i == 0 || last_date != activity['TRANS_DATE']
                 new_date = from_date.to_date + count.days
                 if new_date > to_date
                   new_date = to_date
                 end
+                last_date = activity['TRANS_DATE']
                 activity['TRANS_DATE'] = new_date
-                count += 1
                 activity
+              end
+              # add fake "daily balance" rows to the end of the activities_array so we have data for the whole date range
+              ((activities_array.last['TRANS_DATE'] + 1.day)..to_date).each do |date|
+                day_of_week = date.wday
+                if day_of_week != 0 && day_of_week != 6
+                  activities_array.push({
+                                            "TRANS_DATE" =>date,
+                                            "DESCR" =>"Interest Rate / Daily Balance",
+                                            "REFNUMBER" =>nil,
+                                            "DEBIT" =>0,
+                                            "CREDIT" =>0,
+                                            "RATE" =>activities_array.last['RATE'],
+                                            "BALANCE" =>activities_array.last['BALANCE']
+                                        })
+                end
               end
             end
           end

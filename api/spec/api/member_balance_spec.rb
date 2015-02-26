@@ -445,8 +445,31 @@ describe MAPI::ServiceApp do
     describe 'in the development environment' do
       it_behaves_like 'a STA activities endpoint'
 
-      it 'should has 2 rows of activities based on the fake data' do
-        expect(sta_activities['activities'].count).to eq(3)
+      it 'should have activities for the given date range' do
+        sta_activities['activities'].each do |activity|
+          expect(activity['trans_date'] >= from_date && activity['trans_date'] <= to_date)
+        end
+        min_number_of_days = 0
+        (from_date.to_date..to_date.to_date).each do |date|
+          day_of_week = date.wday
+          min_number_of_days += 1 if day_of_week != 0 && day_of_week != 6
+        end
+        expect(sta_activities['activities'].count).to be > min_number_of_days
+      end
+      describe 'small date range' do
+        let(:from_date) {'2014-01-01'}
+        let(:to_date) {'2014-01-03'}
+        it 'should have activities for the given date range' do
+          sta_activities['activities'].each do |activity|
+            expect(activity['trans_date'] >= from_date && activity['trans_date'] <= to_date)
+          end
+          min_number_of_days = 0
+          (from_date.to_date..to_date.to_date).each do |date|
+            day_of_week = date.wday
+            min_number_of_days += 1 if day_of_week != 0 && day_of_week != 6
+          end
+          expect(sta_activities['activities'].count).to be > min_number_of_days
+        end
       end
     end
     describe 'in the production environment' do

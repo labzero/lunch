@@ -169,12 +169,19 @@ When(/^I filter the Settlement Transaction Account Statement by "(.*?)"$/) do |t
 end
 
 Then(/^I should only see "(.*?)" rows in the Settlement Transaction Account Statement table$/) do |text|
-  page.assert_selector('.report-table thead th', text: text)
-  column_index = page.evaluate_script("$('.report-table thead th:contains(#{text})').index()") + 1
+  if text == 'Debit' || text == 'Credit'
+    column_heading = I18n.t('reports.pages.settlement_transaction_account.debit_credit_heading')
+  else
+    column_heading = text
+  end
+  page.assert_selector('.report-table thead th', text: column_heading)
+  column_index = page.evaluate_script("$('.report-table thead th:contains(#{column_heading})').index()") + 1
   if !page.find(".report-table tbody tr:first-child td:first-child")['class'].split(' ').include?('dataTables_empty')
     page.all(".report-table tbody tr:not(.beginning-balance-row) td:nth-child(#{column_index})").each_with_index do |element, index|
       next if index == 0 # this is a hack to get around Capybara's inability to handle tr:not(.beginning-balance-row, .ending-balance-row). Apparently, Capybara can only handle one `not` selector
       expect(element.text.gsub(/\D/,'').to_f).to be > 0
+      expect(element.text[0]).to eq('(') if text == 'Debit'
+      expect(element.text[-1]).to eq(')') if text == 'Debit'
     end
   end
 end
