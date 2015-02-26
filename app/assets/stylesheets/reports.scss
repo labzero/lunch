@@ -207,6 +207,17 @@
   .report-cell-expanding {
     width: auto;
   }
+
+  .sorting, .sorting_asc, .sorting_desc {
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .sorting_asc, .sorting_desc {
+    background-color: $secondary-gray;
+  }
+
 }
 .report-parent-table {
   margin-bottom: 5px;
