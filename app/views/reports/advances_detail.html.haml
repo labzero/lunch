@@ -3,11 +3,7 @@
 .report.advances-detail-report.row
   .report-header
     %h1= t('global.advances')
-    .report-header-buttons
-      %button.report-button-left= t('global.print')
-      %span.report-split-button
-        %button.report-button-right= t('dashboard.actions.download')
-        %button.report-drop-down-right= t('dashboard.actions.xml')
+    = render 'reports_header_buttons'
     .report-inputs
       = form_tag(reports_advances_url, method: 'GET') do
         = text_field_tag :as_of_date, @as_of_date, class: 'datepicker-input-field'
