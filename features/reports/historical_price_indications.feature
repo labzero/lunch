@@ -7,7 +7,7 @@ Feature: Visiting the Historical Price Indications Report Page
 Background:
   Given I am logged in
 
-@smoke, @jira-mem-311
+@smoke @jira-mem-311
 Scenario: Visit historical price indications from header link
   Given I visit the dashboard
   When I select "Historical" from the reports dropdown
@@ -16,26 +16,18 @@ Scenario: Visit historical price indications from header link
 
 @jira-mem-311
 Scenario: Defaults to Standard Collateral Program FRC
-  Given I visit the dashboard
-  When I select "Historical" from the reports dropdown
+  Given I am on the Historical Price Indications page
   Then I should see "Standard Credit Program"
   And I should see "Fixed Rate Credit (FRC)"
 
-@smoke, @jira-mem-402
-Scenario: Choosing Standard Collateral Program VRC
+@jira-mem-358
+Scenario: Choosing an SBC credit program should select the default credit type if the current credit_type is not available in SBC programs.
   Given I am on the Historical Price Indications page
-  When I select "Variable Rate Credit (VRC)" from the credit type selector
-  Then I should see "Variable Rate Credit (VRC)"
-  And I should see "Variable Rate Credit (VRC)"
+  And I select "Adjustable Rate Credit (ARC) Daily Prime" from the credit type selector
+  When I select "Securities-Backed Credit" from the collateral type selector
+  Then I should see "Fixed Rate Credit (FRC)"
 
-@smoke, @jira-mem-358
-Scenario: Choosing SBC Variable Rate price indications
-  Given I am on the Historical Price Indications page
-  When I select "Variable Rate Credit (VRC)" from the credit type selector
-  Then I should see "Variable Rate Credit (VRC)"
-  And I should see "Variable Rate Credit (VRC)"
-
-@smoke, @jira-mem-318
+@smoke @jira-mem-318 @jira-mem-402 @jira-mem-358
 Scenario Outline: Choosing different historic price indication reports
   Given I am on the Historical Price Indications page
   When I select "<collateral_type>" from the <collateral_selector> type selector
@@ -43,14 +35,16 @@ Scenario Outline: Choosing different historic price indication reports
   Then I should see "<credit_type>"
   And I should see "<table_heading>"
   Examples:
-  | collateral_type          | collateral_selector | credit_type                                | credit_selector | table_heading |
-  | Standard Credit Program  | collateral          | Adjustable Rate Credit (ARC) 1 month LIBOR | credit          | 1 mo LIBOR    |
-  | Standard Credit Program  | collateral          | Adjustable Rate Credit (ARC) 3 month LIBOR | credit          | 3 mo LIBOR    |
-  | Standard Credit Program  | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR    |
-  | Standard Credit Program  | collateral          | Adjustable Rate Credit (ARC) Daily Prime   | credit          | Daily Prime   |
-  | Securities-Backed Credit | collateral          | Adjustable Rate Credit (ARC) 1 month LIBOR | credit          | 1 mo LIBOR    |
-  | Securities-Backed Credit | collateral          | Adjustable Rate Credit (ARC) 3 month LIBOR | credit          | 3 mo LIBOR    |
-  | Securities-Backed Credit | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR    |
+  | collateral_type          | collateral_selector | credit_type                                | credit_selector | table_heading                |
+  | Standard Credit Program  | collateral          | Adjustable Rate Credit (ARC) 1 month LIBOR | credit          | 1 mo LIBOR                   |
+  | Standard Credit Program  | collateral          | Adjustable Rate Credit (ARC) 3 month LIBOR | credit          | 3 mo LIBOR                   |
+  | Standard Credit Program  | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR                   |
+  | Standard Credit Program  | collateral          | Adjustable Rate Credit (ARC) Daily Prime   | credit          | Daily Prime                  |
+  | Standard Credit Program  | collateral          | Variable Rate Credit (VRC)                 | credit          | Variable Rate Credit (VRC)   |
+  | Securities-Backed Credit | collateral          | Adjustable Rate Credit (ARC) 1 month LIBOR | credit          | 1 mo LIBOR                   |
+  | Securities-Backed Credit | collateral          | Adjustable Rate Credit (ARC) 3 month LIBOR | credit          | 3 mo LIBOR                   |
+  | Securities-Backed Credit | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR                   |
+  | Securities-Backed Credit | collateral          | Variable Rate Credit (VRC)                 | credit          | Variable Rate Credit (VRC)   |
 
 @jira-mem-359
 Scenario: Custom datepicker options
