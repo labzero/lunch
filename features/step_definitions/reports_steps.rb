@@ -32,7 +32,7 @@ end
 When(/^I select "(.*?)" from the reports dropdown$/) do |report|
   step 'I don\'t see the reports dropdown'
   step 'I hover on the reports link in the header'
-  page.click_link(report)
+  page.find('.nav-dropdown').click_link(report)
 end
 
 Then(/^I should see report summary data$/) do
@@ -59,7 +59,7 @@ end
 Given(/^I am on the Advances Detail page$/) do
   sleep_if_close_to_midnight
   @today = Time.zone.now.to_date
-  visit '/reports/advances-detail'
+  visit '/reports/advances'
 end
 
 Given(/^I am on the Historical Price Indications page$/) do

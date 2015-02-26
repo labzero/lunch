@@ -284,8 +284,8 @@ RSpec.describe ReportsController, :type => :controller do
           expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
           get :advances_detail
         end
-        it 'sets the attribute to equal the `not applicable` message if there is no value for the `prepayment_fee_indication` attribute and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('global.not_applicable'))
+        it 'sets the attribute to equal the `not available for past dates` message if there is no value for the `prepayment_fee_indication` attribute and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('reports.pages.advances_detail.unavailable_for_past_dates'))
           expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
           expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(nil)
           get :advances_detail

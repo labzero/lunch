@@ -243,7 +243,7 @@ en:
       monthly: Monthly
       quarterly: Quarterly
       annually: Annually
-      advances_detail: Advances Detail
+      advances_detail: Advances
       forward_commitments: Forward Commitments
     your_account:
       title: Your Account
@@ -315,7 +315,7 @@ en:
     credit:
       title: Credit
       advances_detail:
-        title: Advances Detail
+        title: Advances
         summary: Your institution’s outstanding advances such as maturity, date, estimated next payment, and prepayment fee indications. The data is downloadable, and the columns can be sorted in ascending and descending order.
       interest_rate:
         title: Interest Rate Resets
@@ -450,7 +450,7 @@ en:
         closing_balance: Balance as of close of business
         debit_credit_heading: Debits/Credits
       advances_detail:
-        title: Advances Detail
+        title: "Advances outstanding as of close of business %{date}"
         total_current_par_heading: "Total Current Par as of %{date}"
         total_accrued_interest_heading: "Total Accrued Interest as of %{date}"
         estimated_next_payment_heading: "Estimated Next Interest Payment as of %{date}"
@@ -463,7 +463,6 @@ en:
         current_par: Current Par
         interest_payment_frequency: Interest Payment Frequency
         day_count_basis: Day Count Basis
-        interest_rate_heading: Int. Rate
         interest_rate: Interest Rate
         next_interest_payment_date: Next Interest Payment Date
         accrued_interest_heading: Accrued Interest
@@ -472,8 +471,9 @@ en:
         estimated_next_payment: Estimated Next Interest Payment
         discount_program: Discount Program
         prepayment_fee_indication: Prepayment Fee Indication
-        record_title: Placeholder Record Title
+        record_title: "Advance Number: %{advance_number}"
         unavailable_online: Not available online
+        unavailable_for_past_dates: Not available for past dates
         not_applicable_to_vrc: Not applicable to VRC
         prepayment_fee_restructure_html: "%{fee} <br>Prepayment was calculated on <br>%{date}"
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
