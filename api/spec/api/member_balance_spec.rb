@@ -612,10 +612,10 @@ describe MAPI::ServiceApp do
           expect(row['current_par']).to be_kind_of(Numeric)
           expect(row['interest_rate']).to be_kind_of(Numeric)
           expect(row['open_vrc_indicator']).to be_boolean
-          if !(row['open_vrc_indicator'])
-            expect(row['maturity_date'].to_s).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
-          else
+          if (row['open_vrc_indicator'])
             expect(row['maturity_date']).to be_nil
+          else
+            expect(row['maturity_date'].to_s).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
           end
         end
       end
@@ -623,37 +623,30 @@ describe MAPI::ServiceApp do
 
     describe 'in the development environment' do
       it 'should return 4 or 6 rows when reading from current fake data ' do
+      expect(advances['structured_product_indication_date'].to_s).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+        advances['advances_details'].each do |row|
+          expect(row['estimated_next_interest_payment']).to be_kind_of(Numeric)
+          expect(row['next_interest_pay_date']).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+          expect(row['discount_program']).to be_kind_of(String).or be_nil
+          expect(row['prepayment_fee_indication']).to be_kind_of(Numeric).or be_nil
+          expect(row['estimated_next_interest_payment']).to be_kind_of(Numeric)
+          expect(row['next_interest_pay_date']).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
 
-          expect(advances['advances_details'].count).to eq(4).or eq(6)
-          expect(advances['structured_product_indication_date'].to_s).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
-          advances['advances_details'].each do |row|
-            expect(row['estimated_next_interest_payment']).to be_kind_of(Numeric)
-            expect(row['next_interest_pay_date']).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
-            expect(row['discount_program']).to be_kind_of(String).or be_nil
-            expect(row['prepayment_fee_indication']).to be_kind_of(Numeric).or be_nil
-            expect(row['estimated_next_interest_payment']).to be_kind_of(Numeric)
-            expect(row['next_interest_pay_date']).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
-
-            if row['prepayment_fee_indication'] ==  nil
-             expect(row['structure_product_prepay_valuation_date']).to be_nil
-             expect(row['notes'].to_s).to be_kind_of(String)
-            else
-             expect(row['prepayment_fee_indication']).to be_kind_of(Numeric)
-             expect(row['structure_product_prepay_valuation_date']).to be_nil.or match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
-            end
+          if row['prepayment_fee_indication'] ==  nil
+            expect(row['structure_product_prepay_valuation_date']).to be_nil
+            expect(row['notes'].to_s).to be_kind_of(String)
+          else
+            expect(row['prepayment_fee_indication']).to be_kind_of(Numeric)
+            expect(row['structure_product_prepay_valuation_date']).to be_nil.or match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
           end
         end
+      end
 
       it_behaves_like 'Advances Details endpoint'
     end
 
     describe 'in development environment, if date is before yesterday, it should get historical data' do
       let(:advances) { get "/member/#{MEMBER_ID}/advances_details/2013-01-02"; JSON.parse(last_response.body) }
-      it 'should return rows from member_advances_historical.json file that is not' do
-        expect(advances['as_of_date']).to eq('2013-01-02')
-        expect(advances['advances_details'].count()).to_not eq(4)
-        expect(advances['structured_product_indication_date']).to be_nil()
-      end
       it 'should show nil for prepayment related ' do
         advances['advances_details'].each do |row|
           expect(row['prepayment_fee_indication']).to be_nil()
