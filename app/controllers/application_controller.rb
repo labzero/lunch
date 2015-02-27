@@ -4,12 +4,12 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   before_action :authenticate_user!
-  
-  unless Rails.env.test?
-    rescue_from Exception do |exception|
-      Rails.logger.error exception
-      Rails.logger.error exception.backtrace.join("\n")
-      render :text => exception, :status => 500
+
+  rescue_from Exception do |exception|
+    if Rails.env.test?
+      raise exception
+    else
+      handle_exception(exception)
     end
   end
 
@@ -21,5 +21,15 @@ class ApplicationController < ActionController::Base
 
   def after_sign_in_path_for(resource)
     stored_location_for(resource) || dashboard_path
+  end
+
+  def handle_exception(exception)
+    Rails.logger.error exception
+    Rails.logger.error exception.backtrace.join("\n")
+    begin
+      render 'error/500', :layout => false, :status => 500
+    rescue => e
+      render :text => e, :status => 500
+    end
   end
 end

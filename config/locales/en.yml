@@ -490,4 +490,8 @@ en:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email
     edit_email_settings_html: Edit your <a href=%{url}>Email Settings</a> to choose which messages you want to receive via email.
-
+  errors:
+    "500":
+      headline: Sorry for the inconvenience.
+      p1: We have encountered an error and are working on fixing the problem as quickly as possible.
+      p2: "If you need assistance, contact our Web Support team at %{phone_number}"
