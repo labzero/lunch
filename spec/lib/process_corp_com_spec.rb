@@ -8,7 +8,7 @@ describe ProcessCorpCom do
   describe 'prepend_style_tags method' do
     let(:email) {File.join(Rails.root + 'spec' + 'fixtures' + 'corp_com_fixture.txt')}
     it 'moves the `style` element from the email\'s `head` node into its `body` node' do
-      expect(subject.prepend_style_tags(email)).to include('<style type="text/css">')
+      expect(subject.prepend_style_tags(email)).to include('<style type=\"text/css\">')
     end
     it 'prepends the styles contained in the style node with `.corporate-communication-detail-reset`' do
       expect(subject.prepend_style_tags(email)).to include('.corporate-communication-detail-reset a')
@@ -16,6 +16,12 @@ describe ProcessCorpCom do
     end
     it 'throws an error if it cannot find the file it was passed' do
       expect{subject.prepend_style_tags('some_nonexistant_file.txt')}.to raise_error(Errno::ENOENT)
+    end
+    it 'removes images that start with http://open.mkt1700.com/open/log/' do
+      expect(subject.prepend_style_tags(email)).not_to include('http://open.mkt1700.com/open/log/')
+    end
+    it 'replaces html element links that start with http://links.mkt1700.com/' do
+      expect(subject.prepend_style_tags(email)).not_to include('http://links.mkt1700.com/')
     end
   end
 end
