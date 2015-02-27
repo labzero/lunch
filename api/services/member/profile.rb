@@ -51,7 +51,7 @@ module MAPI
             STA_ACCOUNT_NUMBER,
             STX_UPDATE_DATE,
             STX_CURRENT_LEDGER_BALANCE,
-            STX_INT_RATE,
+            STX_INT_RATE
             FROM PORTFOLIOS.STA e, PORTFOLIOS.STA_TRANS f
             WHERE e.STA_ACCOUNT_TYPE = 1
             AND  f.STA_ID = e.STA_ID AND e.fhlb_id = #{ActiveRecord::Base.connection.quote(member_id)}
