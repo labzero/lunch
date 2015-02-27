@@ -179,7 +179,7 @@
       %button.report-button-left #{t('global.view')}
       %span.report-split-button
         %button.report-button-right #{t('dashboard.actions.download')}
-        %button.report-drop-down-right #{t('dashboard.actions.xml')}
+        %button.report-drop-down-right #{t('global.pdf')}
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
       %ul
         %li= render 'dashboard/dashboard_contact', email: 'user@example.com', title: t('dashboard.contacts.type.nonstandard_advance'), name: 'Bob – RM', phone_number: '415–555–7283'

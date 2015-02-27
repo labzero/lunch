@@ -3,11 +3,7 @@
 .report.row
   .report-header
     %h1= t('reports.pages.capital_stock_activity.title')
-    .report-header-buttons
-      %button.report-button-left= t('global.print')
-      %span.report-split-button
-        %button.report-button-right= t('dashboard.actions.download')
-        %button.report-drop-down-right= t('dashboard.actions.xml')
+    = render 'reports_header_buttons'
     .report-datepicker
       = form_tag(reports_capital_stock_activity_url, method: 'GET') do
         = text_field_tag :start_date, @start_date

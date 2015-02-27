@@ -1,3 +1,4 @@
+@jira-mem-69
 Feature: Visiting the Advances Detail Report Page
   As a user
   I want to use visit the advances detail report page for the FHLB Member Portal
@@ -6,19 +7,21 @@ Feature: Visiting the Advances Detail Report Page
 Background:
   Given I am logged in
 
-@smoke
+@smoke @jira-mem-405
 Scenario: Visit advances details page from header link
   Given I visit the dashboard
-  When I select "Advances Detail" from the reports dropdown
+  When I select "Advances" from the reports dropdown
   Then I should see report summary data
   And I should see a report table with multiple data rows
 
 # NOTE: If this is changed to a smoke test and run against production data, "as_of_date" as returned by MAPI could be either today or yesterday depending on when the test is run
+@jira-mem-405
 Scenario: Defaults to current advances details
   Given I visit the dashboard
-  When I select "Advances Detail" from the reports dropdown
+  When I select "Advances" from the reports dropdown
   Then I should see advances details for today
 
+@jira-mem-405
 Scenario: Viewing historic advances details
   Given I am on the Advances Detail page
   When I click the datepicker field
@@ -27,6 +30,7 @@ Scenario: Viewing historic advances details
   And I click the datepicker apply button
   Then I should see advances details for the 14th of last month
 
+@jira-mem-405
 Scenario: Viewing the details of a given advance
   Given I am on the Advances Detail page
   When I click on the view cell for the first advance
@@ -34,7 +38,7 @@ Scenario: Viewing the details of a given advance
   When I click on the hide link for the first advance detail view
   Then I should not see the detailed view for the first advance
 
-@smoke
+@smoke @jira-mem-405
 Scenario: Member sorts the advances details report by trade date
   Given I am on the Advances Detail page
   When I click the Trade Date column heading

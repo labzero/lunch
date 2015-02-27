@@ -15,6 +15,8 @@ end
 
 When(/^I click on the view cell for the first advance$/) do
   skip_if_table_empty do
+    column_index = page.evaluate_script("$('.report-table thead th:contains(#{I18n.t('reports.pages.advances_detail.advance_number')})').index()") + 1
+    @advance_number = page.find(".report-table tbody tr:first-child td:nth-child(#{column_index})").text
     page.find('.report-table tr:first-child .detail-view-trigger').click
   end
 end
@@ -22,7 +24,8 @@ end
 Then(/^I should see the detailed view for the first advance$/) do
   skip_if_table_empty do
     page.assert_selector('.report-table tr:first-child .advance-details', visible: true)
-    page.assert_selector('.report-table tr:first-child .advance-details h3', text: I18n.t('reports.pages.advances_detail.record_title'), visible: true)
+    page.assert_selector('.report-table tr:first-child .advance-details h3', text: I18n.t('reports.pages.advances_detail.record_title', advance_number: @advance_number), visible: true)
+    remove_instance_variable(:@advance_number)
   end
 end
 
@@ -40,7 +43,5 @@ end
 
 def check_advances_details_for_date(date)
   page.assert_selector('.report-summary-data h3', text: I18n.t('reports.pages.advances_detail.total_current_par_heading', date: date.strftime('%B %-d, %Y')))
-  page.assert_selector('.report-summary-data h3', text: I18n.t('reports.pages.advances_detail.total_accrued_interest_heading', date: date.strftime('%B %-d, %Y')))
-  page.assert_selector('.report-summary-data h3', text: I18n.t('reports.pages.advances_detail.estimated_next_payment_heading', date: date.strftime('%B %-d, %Y')))
   report_dates_in_range?((Time.zone.now.to_date - 100.years), date)
 end
