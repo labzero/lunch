@@ -1,13 +1,12 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  let(:member_id) {750}
 
   before do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
   end
   describe 'member profile' do
-    let(:member_financial_position) { get "/member/#{member_id}/member_profile"; JSON.parse(last_response.body) }
+    let(:member_financial_position) { get "/member/#{MEMBER_ID}/member_profile"; JSON.parse(last_response.body) }
     it "should return json with expected elements type" do
       expect(member_financial_position.length).to be >= 1
       expect(member_financial_position['sta_balance']).to be_kind_of(Numeric)
