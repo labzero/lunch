@@ -4,7 +4,7 @@ module ProcessCorpCom
   require 'net/http'
   require 'uri'
 
-  def self.prepend_style_tags(file_location)
+  def self.process_email_html(file_location)
     file_location = File.expand_path(file_location)
     original_email = Mail.read(file_location)
     html = original_email.html_part.body.decoded
@@ -49,7 +49,7 @@ module ProcessCorpCom
 
     body.children.first.add_previous_sibling(style)
 
-    body.inner_html.gsub("\n", '\n').gsub("\"", '\"')
+    body.inner_html
 
   end
 
