@@ -7,12 +7,12 @@ RSpec.describe ApplicationController, :type => :controller do
     let(:backtrace) {%w(some backtrace array returned by the error)}
     it 'captures all StandardErrors and displays the 500 error view' do
       expect(error).to receive(:backtrace).and_return(backtrace)
-      expect(controller).to receive(:render).with('error/500', {:layout=>false, :status=>500})
+      expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500})
       controller.send(:handle_exception, error)
     end
     it 'rescues any exceptions raised when rendering the `error/500` view' do
       expect(error).to receive(:backtrace).at_least(1).and_return(backtrace)
-      expect(controller).to receive(:render).with('error/500', {:layout=>false, :status=>500}).and_raise(error)
+      expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500}).and_raise(error)
       expect(controller).to receive(:render).with({:text=>error, :status=>500})
       controller.send(:handle_exception, error)
     end
