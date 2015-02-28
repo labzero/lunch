@@ -493,5 +493,5 @@ en:
   errors:
     "500":
       headline: Sorry for the inconvenience.
-      p1: We have encountered an error and are working on fixing the problem as quickly as possible.
-      p2: "If you need assistance, contact our Web Support team at %{phone_number}"
+      summary: We have encountered an error and are working on fixing the problem as quickly as possible.
+      assistance: "If you need assistance, contact our Web Support team at %{phone_number}"
