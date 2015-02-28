@@ -11,3 +11,6 @@ brakeman.html
 .vagrant
 coverage
 /log/*
+cucumber.json
+cucumber.junit
+cucumber.html

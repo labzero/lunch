@@ -59,7 +59,7 @@ gem 'logging', require: false
 
 group :development, :test do
   gem 'rspec-rails'
-  gem 'cucumber'
+  gem 'cucumber', '>= 2.0.0.rc1'
   gem 'capybara'
   gem 'selenium-webdriver'
   gem 'foreman'
