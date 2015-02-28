@@ -27,9 +27,9 @@ class ApplicationController < ActionController::Base
     Rails.logger.error exception
     Rails.logger.error exception.backtrace.join("\n")
     begin
-      render 'error/500', layout: 'error', :status => 500
+      render 'error/500', layout: 'error', status: 500
     rescue => e
-      render :text => e, :status => 500
+      render text: e, status: 500
     end
   end
 end
