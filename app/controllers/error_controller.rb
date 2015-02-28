@@ -5,4 +5,8 @@ class ErrorController < ApplicationController
     raise StandardError
   end
 
+  def maintenance
+    render 'maintenance', layout: 'error', :status => 503
+  end
+
 end
