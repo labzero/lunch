@@ -27,14 +27,6 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
       margin-top: 0;
     }
   }
-  .logo {
-    @extend %hide-text;
-    height: 50px;
-    width: round($logo-aspect-ratio * 50px);
-    display: inline-block;
-    background: $logo-black no-repeat;
-    background-size: contain;
-  }
   form {
     width: $welcome-right-column-real-width;
     @extend %dashboard-module-base-styling;
@@ -77,5 +69,16 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     display: block;
     margin-bottom: 20px;
     line-height: 1;
+  }
+}
+
+.welcome, .error-page {
+  .logo {
+    @extend %hide-text;
+    height: 50px;
+    width: round($logo-aspect-ratio * 50px);
+    display: inline-block;
+    background: $logo-black no-repeat;
+    background-size: contain;
   }
 }

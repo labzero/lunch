@@ -1,0 +1,15 @@
+.error-page {
+  text-align: center;
+  margin-top: 160px;
+  h1 {
+    @extend %typography-report-summary;
+    color: $actionable-blue;
+    margin: 0 0 50px;
+  }
+  p {
+    margin: 0 0 5px;
+  }
+  .logo {
+    margin-top: 90px;
+  }
+}

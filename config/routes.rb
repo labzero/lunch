@@ -43,6 +43,8 @@ Rails.application.routes.draw do
 
   root 'users/sessions#new'
 
+  get '/error' => 'error#standard_error' unless Rails.env.production?
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 
