@@ -56,7 +56,7 @@ module MAPI
             WHERE e.STA_ACCOUNT_TYPE = 1
             AND  f.STA_ID = e.STA_ID AND e.fhlb_id = #{ActiveRecord::Base.connection.quote(member_id)}
             AND f.STX_UPDATE_DATE =
-            (SELECT MAX(STX_UPDATE_DATE) FROM PORTFOLIOS.STA_TRANS WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id)})
+            (SELECT MAX(STX_UPDATE_DATE) FROM PORTFOLIOS.STA_TRANS)
           SQL
 
           if app.settings.environment == :production
