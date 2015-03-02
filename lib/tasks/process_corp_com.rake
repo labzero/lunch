@@ -3,6 +3,6 @@ namespace :process do
   task :corp_com, [:file_location] do |task, args|
     require 'process_corp_com'
 
-    print ProcessCorpCom.prepend_style_tags(args.file_location)
+    print ProcessCorpCom.process_email_html(args.file_location)
   end
 end
