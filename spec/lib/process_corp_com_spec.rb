@@ -5,7 +5,7 @@ require 'process_corp_com'
 describe ProcessCorpCom do
   it { expect(subject).to respond_to(:process_email_html) }
 
-  describe 'process_email_html method' do
+  describe 'process_email_html method', :vcr do
     let(:email) {File.join(Rails.root + 'spec' + 'fixtures' + 'corp_com_fixture.txt')}
     it 'moves the `style` element from the email\'s `head` node into its `body` node' do
       expect(subject.process_email_html(email)).to include('<style type="text/css">')
