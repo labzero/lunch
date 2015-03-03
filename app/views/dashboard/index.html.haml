@@ -63,8 +63,12 @@
         %tbody
           - @account_overview.each do |row|
             %tr
-              %td.label= row[0]
-              %td.value= fhlb_formated_currency_unit(row[1], '$')
+              %td{colspan: '3'}
+                %table.sub-table
+                  %tbody
+                    %tr
+                      %td.label= row[0]
+                      %td.value= fhlb_formated_currency_unit(row[1], '$')
           - @sub_tables.each do |sub_table_name, sub_table|
             %tr
               %td{colspan: '3'}
