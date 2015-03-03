@@ -14,3 +14,4 @@ coverage
 cucumber.*json
 cucumber.junit
 cucumber.*html
+cucumber-primary-ready

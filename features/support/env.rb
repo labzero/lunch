@@ -13,7 +13,21 @@ I18n.load_path += Dir.glob('config/locales/*.yml')
 require 'active_support/all'
 Time.zone = 'Pacific Time (US & Canada)' # set Time.zone for when cukes run with custom_host
 
+is_parallel_primary = ENV['TEST_ENV_NUMBER'] == ''
+is_parallel_secondary = ENV['TEST_ENV_NUMBER'] && ENV['TEST_ENV_NUMBER'].length > 0
+is_parallel = is_parallel_primary || is_parallel_secondary
+
 custom_host = ENV['APP_HOST'] || env_config['app_host']
+
+if is_parallel_secondary && !custom_host
+  now = Time.now
+  while !File.exists?('cucumber-primary-ready')
+    if Time.now - now > 20
+      raise "Cucumber runner #{ENV['TEST_ENV_NUMBER']} timed out waiting for the primary runner to start!"
+    end
+    sleep(1)
+  end
+end
 
 if !custom_host
   ENV['RAILS_ENV'] ||= 'test' # for some reason we default to development in some cases
@@ -27,11 +41,7 @@ if !custom_host
   WebMock.allow_net_connect! # allow all Net connections
 
   AfterConfiguration do
-    DatabaseCleaner.clean_with :truncation
-  end
-
-  Before('@clean') do
-    DatabaseCleaner.clean_with :truncation
+    DatabaseCleaner.clean_with :truncation if !is_parallel || is_parallel_primary
   end
 
   def find_available_port
@@ -104,10 +114,6 @@ if !custom_host
   mapi_stderr.close
   puts 'MAPI Started.'
   ENV['MAPI_ENDPOINT'] = "http://localhost:#{mapi_port}/mapi"
-
-  at_exit do
-    DatabaseCleaner.clean_with :truncation
-  end
 else
   Capybara.app_host = custom_host
 end
@@ -133,7 +139,16 @@ AfterConfiguration do
   end
   raise 'Server failed to serve heartbeat' if result != '200'
   sleep 10 #sleep 10 more seconds after we get our first 200 response to let the app come up more
-  require Rails.root.join('db', 'seeds.rb') unless custom_host
+  if !is_parallel || is_parallel_primary
+    require Rails.root.join('db', 'seeds.rb') unless custom_host
+  end
+
+  if is_parallel_primary
+    FileUtils.touch('cucumber-primary-ready')
+    at_exit do
+      FileUtils.rm_rf('cucumber-primary-ready')
+    end
+  end
 end
 
 AfterStep('@pause') do
@@ -141,8 +156,10 @@ AfterStep('@pause') do
   STDIN.getc
 end
 
-Around do |scenario, block|
-  JenkinsSauce.output_jenkins_log(scenario)
-  block.call
-  ::Capybara.current_session.driver.quit
+if ENV['CUCUMBER_INCLUDE_SAUCE_SESSION']
+  Around do |scenario, block|
+    JenkinsSauce.output_jenkins_log(scenario)
+    block.call
+    ::Capybara.current_session.driver.quit if ENV['CUCUMBER_INCLUDE_SAUCE_SESSION'] == 'scenario'
+  end
 end
