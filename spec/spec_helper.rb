@@ -72,6 +72,10 @@ RSpec.configure do |config|
   config.include FactoryGirl::Syntax::Methods
   config.extend AuthenticationHelpers, :type => :controller
 
+  config.before(:all) do
+    DatabaseCleaner.clean_with :truncation
+  end
+
 # The settings below are suggested to provide a good initial experience
 # with RSpec, but feel free to customize to your heart's content.
 =begin
