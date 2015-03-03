@@ -140,3 +140,9 @@ AfterStep('@pause') do
   print 'Press Return to continue'
   STDIN.getc
 end
+
+Around do |scenario, block|
+  JenkinsSauce.output_jenkins_log(scenario)
+  block.call
+  ::Capybara.current_session.driver.quit
+end
