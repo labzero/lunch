@@ -6,6 +6,8 @@ class ErrorController < ApplicationController
   end
 
   def maintenance
+    @inline_styles = true
+    @skip_javascript = true
     render 'maintenance', layout: 'error', :status => 503
   end
 

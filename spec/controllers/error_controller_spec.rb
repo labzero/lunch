@@ -30,5 +30,13 @@ RSpec.describe ErrorController, :type => :controller do
       get :maintenance
       expect(response.status).to be(503)
     end
+    it 'enables inline styles' do
+      get :maintenance
+      expect(assigns['inline_styles']).to eq(true)
+    end
+    it 'disables javascript' do
+      get :maintenance
+      expect(assigns['skip_javascript']).to eq(true)
+    end
   end
 end

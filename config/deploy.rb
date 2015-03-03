@@ -64,7 +64,19 @@ namespace :deploy do
     end
   end
 
+  desc 'Builds the maintenance site'
+  task :compile_maintenance => [:set_rails_env] do
+    on release_roles(fetch(:assets_roles)) do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          execute :rake, "process:maintenance[#{release_path}/public/maintenance.html]"
+        end
+      end
+    end
+  end
+
   before :compile_assets, :clear_tmp
+  after :compile_assets, :compile_maintenance
   before :publishing, :missing_dirs
   after :publishing, :restart
   after :migrate, :seed
@@ -89,6 +101,24 @@ namespace :cluster do
       on roles(*role_set.to_a) do |host|
         role = (host.roles & role_set).to_a.join('-')
         download!(File.join(shared_path, 'log'), "downloads/#{role}-#{host.hostname}", recursive: true)
+      end
+    end
+  end
+  namespace :maintenance do
+    desc 'Enables maintenance mode.'
+    task :on do
+      on release_roles(fetch(:assets_roles)) do
+        within shared_path do
+          execute :touch, 'MAINTENANCE'
+        end
+      end
+    end
+    desc 'Disables maintenance mode.'
+    task :off do
+      on release_roles(fetch(:assets_roles)) do
+        within shared_path do
+          execute :rm, 'MAINTENANCE'
+        end
       end
     end
   end
