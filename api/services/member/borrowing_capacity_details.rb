@@ -56,32 +56,32 @@ module MAPI
             standard_breakdown_formatted.push(reformat_hash)
           end
           # format the SBC into an array of hash
-          sbc_breakdown = [
-              { type: 'AA',
-                total_market_value: (balance_hash['SBC_MV_AA'] || 0).to_f.round,
+          sbc_breakdown = {
+              aa:
+              { total_market_value: (balance_hash['SBC_MV_AA'] || 0).to_f.round,
                 total_borrowing_capacity: (balance_hash['SBC_BC_AA'] || 0).to_f.round,
                 advances: (balance_hash['SBC_ADVANCES_AA'] || 0).to_f.round,
                 standard_credit: (balance_hash['SBC_COVER_OTHER_AA'] || 0).to_f.round,
                 remaining_market_value: (balance_hash['SBC_MV_COLL_EXCESS_DEF_AA'] || 0).to_f.round,
                 remaining_borrowing_capacity: (balance_hash['SBC_COLL_EXCESS_DEF_AA'] || 0).to_f.round
               },
-              { type: 'AAA',
-                total_market_value: (balance_hash['SBC_MV_AAA'] || 0).to_f.round,
+              aaa:
+              { total_market_value: (balance_hash['SBC_MV_AAA'] || 0).to_f.round,
                 total_borrowing_capacity: (balance_hash['SBC_BC_AAA'] || 0).to_f.round,
                 advances: (balance_hash['SBC_ADVANCES_AAA'] || 0).to_f.round,
                 standard_credit: (balance_hash['SBC_COVER_OTHER_AAA'] || 0).to_f.round,
                 remaining_market_value: (balance_hash['SBC_MV_COLL_EXCESS_DEF_AAA'] || 0).to_f.round,
                 remaining_borrowing_capacity: (balance_hash['SBC_COLL_EXCESS_DEF_AAA'] || 0).to_f.round
               },
-              { type: 'Agency',
-                total_market_value: (balance_hash['SBC_MV_AG'] || 0).to_f.round,
+              agency:
+              { total_market_value: (balance_hash['SBC_MV_AG'] || 0).to_f.round,
                 total_borrowing_capacity: (balance_hash['SBC_BC_AG'] || 0).to_f.round,
                 advances: (balance_hash['SBC_ADVANCES_AG'] || 0).to_f.round,
                 standard_credit: (balance_hash['SBC_COVER_OTHER_AG'] || 0).to_f.round,
                 remaining_market_value: (balance_hash['SBC_MV_COLL_EXCESS_DEF_AG'] || 0).to_f.round,
                 remaining_borrowing_capacity: (balance_hash['SBC_COLL_EXCESS_DEF_AG'] || 0).to_f.round
               }
-          ]
+          }
 
           {  date: as_of_date.to_date,
              standard: {

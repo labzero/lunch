@@ -164,12 +164,21 @@ class MemberBalanceService < MAPIService
   end
 
   def borrowing_capacity_summary(date)
-
-    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
+    # get borrowing capacity by date
     begin
-      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'borrowing_capacity_summary.json'))).with_indifferent_access
+      response = @connection["member/#{@member_id}/borrowing_capacity_details/#{date}"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.borrowing_capacity_details encountered a RestClient error while hitting the /member/#{@member_id}/borrowing_capacity_details/#{date} MAPI endpoint: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.borrowing_capacity_details encountered a connection error while hitting the /member/#{@member_id}/borrowing_capacity_details/#{date} MAPI endpoint: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
     rescue JSON::ParserError => e
-      Rails.logger.warn("MemberBalanceService.borrowing_capacity_summary encountered a JSON parsing error: #{e}")
+      Rails.logger.warn("MemberBalanceService.borrowing_capacity_details encountered a JSON parsing error: #{e}")
       return nil
     end
 

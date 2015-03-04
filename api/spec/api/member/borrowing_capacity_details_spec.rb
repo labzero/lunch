@@ -44,8 +44,7 @@ describe MAPI::ServiceApp do
         expect(result_standard_utilized['mpf_ce_collateral']).to be_a_kind_of(Integer)
 
         result_sbc_collateral = borrowing_capacity_details['sbc']['collateral']
-        result_sbc_collateral.each do |row|
-          expect(row['type']).to be_kind_of(String)
+        result_sbc_collateral.each do |collateral_object, row|
           expect(row['total_market_value']).to be_a_kind_of(Integer)
           expect(row['total_borrowing_capacity']).to be_a_kind_of(Integer)
           expect(row['advances']).to be_a_kind_of(Integer)
@@ -131,29 +130,31 @@ describe MAPI::ServiceApp do
 
       it 'should return the expected values for SBC collateral' do
         result_sbc_collateral = borrowing_capacity_details['sbc']['collateral']
-
-        result_sbc_collateral.each do |row|
-          if  row['type'] == 'AA'
+        expect(result_sbc_collateral).to include('aa', 'aaa', 'agency')
+        result_sbc_collateral.each do |collateral_type, row|
+          if  collateral_type == 'aa'
             expect(row['total_market_value']).to eq(1)
             expect(row['total_borrowing_capacity']).to eq(2)
             expect(row['advances']).to eq(3)
             expect(row['standard_credit']).to eq(4)
             expect(row['remaining_market_value']).to eq(5)
             expect(row['remaining_borrowing_capacity']).to eq(6)
-          elsif row['type'] == 'AAA'
+          elsif collateral_type == 'aaa'
             expect(row['total_market_value']).to eq(7)
             expect(row['total_borrowing_capacity']).to eq(8)
             expect(row['advances']).to eq(9)
             expect(row['standard_credit']).to eq(10)
             expect(row['remaining_market_value']).to eq(11)
             expect(row['remaining_borrowing_capacity']).to eq(13)
-          elsif row['type'] == 'Agency'
+          elsif collateral_type == 'agency'
             expect(row['total_market_value']).to eq(3584326)
             expect(row['total_borrowing_capacity']).to eq(3405110)
             expect(row['advances']).to eq(19)
             expect(row['standard_credit']).to eq(1)
             expect(row['remaining_market_value']).to eq(3584326)
             expect(row['remaining_borrowing_capacity']).to eq(3584327)
+          else
+            raise 'wrong collateral type'
           end
         end
       end
@@ -178,15 +179,23 @@ describe MAPI::ServiceApp do
         expect(borrowing_capacity_details['sbc']['utilized']['other_collateral']).to eq(0)
         expect(borrowing_capacity_details['sbc']['utilized']['excluded_regulatory']).to eq(0)
         result_sbc_collateral = borrowing_capacity_details['sbc']['collateral']
-        result_sbc_collateral.each do |row|
-          if  row['type'] == 'AA'
+        expect(result_sbc_collateral).to include('aa', 'aaa', 'agency')
+        result_sbc_collateral.each do |collateral_type, row|
+          if  collateral_type == 'aa'
             expect(row['total_market_value']).to eq(0)
             expect(row['total_borrowing_capacity']).to eq(0)
             expect(row['advances']).to eq(0)
             expect(row['standard_credit']).to eq(0)
             expect(row['remaining_market_value']).to eq(0)
             expect(row['remaining_borrowing_capacity']).to eq(0)
-          elsif row['type'] == 'AAA'
+          elsif collateral_type == 'aaa'
+            expect(row['total_market_value']).to eq(0)
+            expect(row['total_borrowing_capacity']).to eq(0)
+            expect(row['advances']).to eq(0)
+            expect(row['standard_credit']).to eq(0)
+            expect(row['remaining_market_value']).to eq(0)
+            expect(row['remaining_borrowing_capacity']).to eq(0)
+          elsif collateral_type == 'agency'
             expect(row['total_market_value']).to eq(0)
             expect(row['total_borrowing_capacity']).to eq(0)
             expect(row['advances']).to eq(0)
@@ -194,12 +203,7 @@ describe MAPI::ServiceApp do
             expect(row['remaining_market_value']).to eq(0)
             expect(row['remaining_borrowing_capacity']).to eq(0)
           else
-            expect(row['total_market_value']).to eq(0)
-            expect(row['total_borrowing_capacity']).to eq(0)
-            expect(row['advances']).to eq(0)
-            expect(row['standard_credit']).to eq(0)
-            expect(row['remaining_market_value']).to eq(0)
-            expect(row['remaining_borrowing_capacity']).to eq(0)
+            raise 'wrong collateral type'
           end
         end
       end

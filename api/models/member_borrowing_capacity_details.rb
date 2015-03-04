@@ -107,10 +107,20 @@ module MAPI
         end
       end
       swagger_model :SBCTypeObject do
-        property :type do
-          key :type, :string
-          key :description, 'SBC collateral loan type'
+        property :aa do
+          key :type,  :SBCTypeDetailObject
+          key :description, 'An object containing the list of Securities Backed Collateral (SBC) AA Type Object'
         end
+        property :aaa do
+          key :type,  :SBCTypeDetailObject
+          key :description, 'An object containing the list of Securities Backed Collateral (SBC) AAA Type Object'
+        end
+        property :agency do
+          key :type,  :SBCTypeDetailObject
+          key :description, 'An object containing the list of Securities Backed Collateral (SBC) Agency Type Object'
+        end
+      end
+      swagger_model :SBCTypeDetailObject do
         property :total_market_value do
           key :type, :number
           key :description, 'Total market value of this SBC collateral'
