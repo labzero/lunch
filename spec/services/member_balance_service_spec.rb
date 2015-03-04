@@ -218,7 +218,7 @@ describe MemberBalanceService do
     end
   end
 
-  describe '`borrowing_capacity_summary` method' do
+  describe '`borrowing_capacity_summary` method', :vcr do
     let(:today) {Date.new(2014,12,1)}
     let(:borrowing_capacity_summary) {subject.borrowing_capacity_summary(today)}
     describe 'member has both standard collateral and securities-backed collateral' do
@@ -248,8 +248,10 @@ describe MemberBalanceService do
         expect(borrowing_capacity_summary[:standard][:utilized][:other_collateral]).to be_kind_of(Integer)
         expect(borrowing_capacity_summary[:standard][:utilized][:mpf_ce_collateral]).to be_kind_of(Integer)
       end
-      it 'should return an array of securities-backed collateral objects' do
-        expect(borrowing_capacity_summary[:sbc][:collateral].length).to be >= 1
+      it 'should return three securities-backed collateral objects' do
+        expect(borrowing_capacity_summary[:sbc][:collateral][:aa].length).to be >= 1
+        expect(borrowing_capacity_summary[:sbc][:collateral][:aaa].length).to be >= 1
+        expect(borrowing_capacity_summary[:sbc][:collateral][:agency].length).to be >= 1
         borrowing_capacity_summary[:sbc][:collateral].each do |collateral_object, value|
           expect(value[:total_market_value]).to be_kind_of(Integer)
           expect(value[:total_borrowing_capacity]).to be_kind_of(Integer)
@@ -378,24 +380,28 @@ describe MemberBalanceService do
     end
     describe 'error states' do
       it 'returns nil if there is a JSON parsing error' do
-        # TODO change this stub once you implement the MAPI endpoint
-        expect(File).to receive(:read).and_return('some malformed json!')
+        expect(JSON).to receive(:parse).and_raise(JSON::ParserError)
         expect(Rails.logger).to receive(:warn)
         expect(borrowing_capacity_summary).to be(nil)
       end
       it 'returns nil if there is malformed data in the standard object' do
-        # TODO change this stub once you implement the MAPI endpoint
         expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary', 'borrowing_capacity_summary_malformed_standard.json'))))
         expect(Rails.logger).to receive(:warn)
         expect(borrowing_capacity_summary).to be(nil)
       end
       it 'returns nil if there is malformed data in the sbc object' do
-        # TODO change this stub once you implement the MAPI endpoint
         expect(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'borrowing_capacity_summary', 'borrowing_capacity_summary_malformed_sbc.json'))))
         expect(Rails.logger).to receive(:warn)
         expect(borrowing_capacity_summary).to be(nil)
       end
-      # TODO add tests for MAPI errors once MAPI is rigged up
+      it 'should return nil if there was an API error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(borrowing_capacity_summary).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(borrowing_capacity_summary).to eq(nil)
+      end
     end
   end
 
