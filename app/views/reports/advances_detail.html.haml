@@ -5,10 +5,7 @@
     %h1= t('global.advances')
     = render 'reports_header_buttons'
     .report-inputs
-      = form_tag(reports_advances_url, method: 'GET') do
-        = text_field_tag :as_of_date, @as_of_date, class: 'datepicker-input-field'
-        .report-datepicker
-          = render 'shared/date_picker', presets: @picker_presets, form: '.report-inputs form', single_date_picker: true, max_date: Time.zone.now.to_date
+      = render 'reports_date_picker_form', as_of_date: @as_of_date, report_url: reports_advances_url, presets: @picker_presets, single_date_picker: true, max_date: Time.zone.now.to_date
   .report-main-body
     .report-summary-data
       %h3

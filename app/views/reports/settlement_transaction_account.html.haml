@@ -5,11 +5,7 @@
     %h1= t('reports.pages.settlement_transaction_account.title')
     = render 'reports_header_buttons'
     .report-inputs
-      = form_tag(reports_settlement_transaction_account_url, method: 'GET') do
-        = text_field_tag :start_date, @start_date, class: 'datepicker-input-field'
-        = text_field_tag :end_date, @end_date, class: 'datepicker-input-field'
-        .report-datepicker
-          = render 'shared/date_picker', presets: @picker_presets, form: '.report-inputs form', single_date_picker: @single_date_picker
+      = render layout: 'reports_date_picker_form', locals: {start_date: @start_date, end_date: @end_date, report_url: reports_settlement_transaction_account_url, presets: @picker_presets, single_date_picker: @single_date_picker} do
         .report-filter
           = render 'shared/dropdown', dropdown_name: 'sta_filter', default_value: @filter, default_text: @filter_text, dropdown_options: @filter_options
   .report-main-body
