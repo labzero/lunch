@@ -22,7 +22,7 @@ custom_host = ENV['APP_HOST'] || env_config['app_host']
 if is_parallel_secondary && !custom_host
   now = Time.now
   while !File.exists?('cucumber-primary-ready')
-    if Time.now - now > 20
+    if Time.now - now > 30
       raise "Cucumber runner #{ENV['TEST_ENV_NUMBER']} timed out waiting for the primary runner to start!"
     end
     sleep(1)
@@ -148,6 +148,7 @@ AfterConfiguration do
     at_exit do
       FileUtils.rm_rf('cucumber-primary-ready')
     end
+    sleep(20) # primary runner needs to sleep to make sure secondary workers see the sentinel (in the case where the primary work exits quickly... ie no work to do)
   end
 end
 
