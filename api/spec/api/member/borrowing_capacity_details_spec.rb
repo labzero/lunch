@@ -130,7 +130,7 @@ describe MAPI::ServiceApp do
 
       it 'should return the expected values for SBC collateral' do
         result_sbc_collateral = borrowing_capacity_details['sbc']['collateral']
-
+        expect(result_sbc_collateral).to include('aa', 'aaa', 'agency')
         result_sbc_collateral.each do |collateral_type, row|
           if  collateral_type == 'aa'
             expect(row['total_market_value']).to eq(1)
@@ -153,6 +153,8 @@ describe MAPI::ServiceApp do
             expect(row['standard_credit']).to eq(1)
             expect(row['remaining_market_value']).to eq(3584326)
             expect(row['remaining_borrowing_capacity']).to eq(3584327)
+          else
+            raise 'wrong collateral type'
           end
         end
       end
@@ -177,6 +179,7 @@ describe MAPI::ServiceApp do
         expect(borrowing_capacity_details['sbc']['utilized']['other_collateral']).to eq(0)
         expect(borrowing_capacity_details['sbc']['utilized']['excluded_regulatory']).to eq(0)
         result_sbc_collateral = borrowing_capacity_details['sbc']['collateral']
+        expect(result_sbc_collateral).to include('aa', 'aaa', 'agency')
         result_sbc_collateral.each do |collateral_type, row|
           if  collateral_type == 'aa'
             expect(row['total_market_value']).to eq(0)
@@ -199,6 +202,8 @@ describe MAPI::ServiceApp do
             expect(row['standard_credit']).to eq(0)
             expect(row['remaining_market_value']).to eq(0)
             expect(row['remaining_borrowing_capacity']).to eq(0)
+          else
+            raise 'wrong collateral type'
           end
         end
       end
