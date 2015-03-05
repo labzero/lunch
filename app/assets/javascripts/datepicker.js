@@ -127,11 +127,9 @@ $(function () {
     $datePickerTrigger.on('apply.daterangepicker', function(ev, picker) {
       ev.stopPropagation();
       setDatePickerPlaceholder($datePickerTrigger, picker.startDate, picker.endDate);
-      if ($($datePickerTrigger.siblings('.datepicker-wrapper')).data('date-picker-single-date-picker')) {
-        $form.find('input[name=as_of_date]').val(picker.startDate.format('YYYY-MM-DD'));
-      } else {
+      $form.find('input[name=start_date]').val(picker.startDate.format('YYYY-MM-DD'));
+      if (!$($datePickerTrigger.siblings('.datepicker-wrapper')).data('date-picker-single-date-picker')) {
         $form.find('input[name=end_date]').val(picker.endDate.format('YYYY-MM-DD'));
-        $form.find('input[name=start_date]').val(picker.startDate.format('YYYY-MM-DD'));
       }
       $form.submit();
     });

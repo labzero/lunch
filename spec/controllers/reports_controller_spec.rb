@@ -214,7 +214,7 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET advances_detail' do
       it_behaves_like 'a user required action', :get, :advances_detail
       let(:advances_detail) {double('Advances Detail object')}
-      let(:as_of_date) { Date.new(2014,12,31) }
+      let(:start_date) { Date.new(2014,12,31) }
       before do
         allow(member_balance_service_instance).to receive(:advances_details).and_return(advances_detail)
         allow(advances_detail).to receive(:[]).with(:advances_details).and_return([])
@@ -225,31 +225,31 @@ RSpec.describe ReportsController, :type => :controller do
         expect(response.body).to render_template('advances_detail')
       end
 
-      it 'sets @as_of_date to param[:as_of_date] if available' do
-        get :advances_detail, as_of_date: as_of_date
-        expect(assigns[:as_of_date]).to eq(as_of_date)
+      it 'sets @start_date to param[:start_date] if available' do
+        get :advances_detail, start_date: start_date
+        expect(assigns[:start_date]).to eq(start_date)
       end
 
-      it 'sets @as_of_date to today\'s date if param[:as_of_date] is not available' do
+      it 'sets @start_date to today\'s date if param[:start_date] is not available' do
         get :advances_detail
-        expect(assigns[:as_of_date]).to eq(today)
+        expect(assigns[:start_date]).to eq(today)
       end
 
       it 'should pass @as_of_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-        expect(controller).to receive(:date_picker_presets).with(as_of_date).and_return(picker_preset_hash)
-        get :advances_detail, as_of_date: as_of_date
+        expect(controller).to receive(:date_picker_presets).with(start_date).and_return(picker_preset_hash)
+        get :advances_detail, start_date: start_date
         expect(assigns[:picker_presets]).to eq(picker_preset_hash)
       end
 
-      it 'should call the method `advances_details` on a MemberBalanceService instance with the `as_of` argument and set @advances_detail to its result' do
-        expect(member_balance_service_instance).to receive(:advances_details).with(as_of_date).and_return(advances_detail)
-        get :advances_detail, as_of_date: as_of_date
+      it 'should call the method `advances_details` on a MemberBalanceService instance with the `start` argument and set @advances_detail to its result' do
+        expect(member_balance_service_instance).to receive(:advances_details).with(start_date).and_return(advances_detail)
+        get :advances_detail, start_date: start_date
         expect(assigns[:advances_detail]).to eq(advances_detail)
       end
 
       it 'should raise an error if `advances_details` returns nil' do
         expect(member_balance_service_instance).to receive(:advances_details).and_return(nil)
-        expect{get :advances_detail, as_of_date: as_of_date}.to raise_error
+        expect{get :advances_detail, start_date: start_date}.to raise_error
       end
 
       describe 'setting the `prepayment_fee_indication` attribute for a given advance record' do

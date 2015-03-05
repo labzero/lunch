@@ -1,10 +1,11 @@
 - placeholder ||= nil
 - open_direction ||= 'right'
 - presets ||= []
+- form ||= nil
 - single_date_picker ||= false
 - input_field_text ||= "#{t('datepicker.single.input')}"
 - max_date ||= false
 
 %span.input-field-container.pull-right.icon-calendar-after.datepicker-trigger{data: {:'date-picker-input-field-text' => input_field_text}}
   %input{placeholder: placeholder, disabled: true}
-.datepicker-wrapper{data: {:'date-picker-presets' => presets.to_json, :'date-picker-open-direction' => open_direction, :'date-picker-form' => '.report-inputs form', :'date-picker-single-date-picker' => single_date_picker.to_s, :'date-picker-max-date' => max_date}}
+.datepicker-wrapper{data: {:'date-picker-presets' => presets.to_json, :'date-picker-open-direction' => open_direction, :'date-picker-form' => form, :'date-picker-single-date-picker' => single_date_picker.to_s, :'date-picker-max-date' => max_date}}

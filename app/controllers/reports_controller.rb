@@ -154,11 +154,11 @@ class ReportsController < ApplicationController
   end
 
   def advances_detail
-    @as_of_date = (params[:as_of_date] || Time.zone.now.to_date).to_date
+    @start_date = (params[:start_date] || Time.zone.now.to_date).to_date
     member_balances = MemberBalanceService.new(MEMBER_ID, request)
-    @advances_detail = member_balances.advances_details(@as_of_date)
+    @advances_detail = member_balances.advances_details(@start_date)
     raise StandardError, "There has been an error and ReportsController#advances_detail has returned nil. Check error logs." if @advances_detail.blank?
-    @picker_presets = date_picker_presets(@as_of_date)
+    @picker_presets = date_picker_presets(@start_date)
     # prepayment fee indication for detail view
     @advances_detail[:advances_details].each_with_index do |advance, i|
       case advance[:notes]
