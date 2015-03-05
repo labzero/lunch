@@ -153,14 +153,14 @@ Then(/^I should see a "(.*?)" with dates between "(.*?)" and "(.*?)"$/) do |repo
   report_dates_in_range?(start_date_obj, end_date_obj)
 end
 
-Given(/^I'm showing Settlement Transaction Account activities from the last year$/) do
-  start_date = (Time.zone.now.to_date - 1.year).strftime('%B %-d, %Y')
-  end_date = Time.zone.now.to_date.strftime('%B %-d, %Y')
-  sleep_if_close_to_midnight
+Given(/^I am showing Settlement Transaction Account activities for (\d+)$/) do |year|
+  start_date = Time.zone.parse("#{year}-01-01")
+  end_date = Time.zone.parse("#{year}-12-31")
   step 'I click the datepicker field'
-  step 'I select all of last year including today'
+  step %{I choose the "custom date range" in the datepicker}
+  step %{I select a start date of "#{start_date}" and an end date of "#{end_date}"}
   step 'I click the datepicker apply button'
-  step %{I should see a "Settlement Transaction Account Statement" with dates between "#{start_date}" and "#{end_date}"}
+  step %{I should see a "Settlement Transaction Account Statement" with dates between "#{start_date.strftime('%B %-d, %Y')}" and "#{end_date.strftime('%B %-d, %Y')}"}
 end
 
 When(/^I filter the Settlement Transaction Account Statement by "(.*?)"$/) do |text|

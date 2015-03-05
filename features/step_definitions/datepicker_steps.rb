@@ -40,22 +40,24 @@ When(/^I choose the last month preset in the datepicker$/) do
   page.find('.daterangepicker .ranges li', text: (@today.beginning_of_month - 1.months).strftime("%B")).click
 end
 
-When(/^I select the (\d+)(?:st|rd|th) of (this|last) month in the (left|right|single datepicker) calendar/) do |day, month, calendar|
+When(/^I select the (\d+)(?:st|rd|th) of "(.*?)" in the (left|right|single datepicker) calendar/) do |day, month, calendar|
   if calendar == 'single datepicker'
     calendar = page.find(".daterangepicker .calendar.single")
   else
     calendar = page.find(".daterangepicker .calendar.#{calendar}")
   end
-  month = if month == 'this'
+  month = if month == 'this month'
             @today.strftime("%b %Y")
-          elsif month == 'last'
+          elsif month == 'last month'
             (@today - 1.month).strftime("%b %Y")
+          else
+            month
           end
   current_month = calendar.find('.month').text.to_date
-  if current_month.year > @today.year
+  if current_month.year > month.to_date.year
     advance_class = '.fa-arrow-left'
   else
-    if current_month.year == @today.year && current_month.month > month.to_date.month
+    if current_month.year == month.to_date.year && current_month.month > month.to_date.month
       advance_class = '.fa-arrow-left'
     else
       advance_class = '.fa-arrow-right'
@@ -66,6 +68,13 @@ When(/^I select the (\d+)(?:st|rd|th) of (this|last) month in the (left|right|si
     # we should add a 5 second check here to avoid infinte loops
   end
   calendar.find("td.available:not(.off)", text: /^#{day}$/).click
+end
+
+When(/^I select a start date of "(.*?)" and an end date of "(.*?)"$/) do |start_date, end_date|
+  start_date = start_date.to_date
+  end_date = end_date.to_date
+  step %{I select the 1st of "#{start_date.strftime("%b %Y")}" in the left calendar}
+  step %{I select the 31st of "#{end_date.strftime("%b %Y")}" in the right calendar}
 end
 
 When(/^I select all of last year including today$/) do
