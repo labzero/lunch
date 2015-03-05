@@ -37,9 +37,9 @@ Background:
 
   Scenario: Quick Advance flyout opens
     When I visit the dashboard
-      And I enter "55503000" into the ".dashboard-module-advances input" input field
+      And I enter "56503000" into the ".dashboard-module-advances input" input field
     Then I should see a flyout
-      And I should see "55503000" in the quick advance flyout input field
+      And I should see "56503000" in the quick advance flyout input field
 
   @smoke
   Scenario: Quick Advance flyout closes
