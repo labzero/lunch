@@ -26,7 +26,7 @@ Scenario: Viewing historic advances details
   Given I am on the Advances Detail page
   When I click the datepicker field
   And I choose the "custom date" in the datepicker
-  And I select the 14th of last month in the single datepicker calendar
+  And I select the 14th of "last month" in the single datepicker calendar
   And I click the datepicker apply button
   Then I should see advances details for the 14th of last month
 
