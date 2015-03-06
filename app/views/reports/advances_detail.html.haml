@@ -5,16 +5,13 @@
     %h1= t('global.advances')
     = render 'reports_header_buttons'
     .report-inputs
-      = form_tag(reports_advances_url, method: 'GET') do
-        = text_field_tag :as_of_date, @as_of_date, class: 'datepicker-input-field'
-        .report-datepicker
-          = render 'shared/date_picker', presets: @picker_presets, form: '.report-inputs form', single_date_picker: true, max_date: Time.zone.now.to_date
+      = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_advances_url, presets: @picker_presets, single_date_picker: true, max_date: Time.zone.now.to_date
   .report-main-body
     .report-summary-data
       %h3
-        = t('reports.pages.advances_detail.total_current_par_heading', date: fhlb_date_long_alpha(@as_of_date))
+        = t('reports.pages.advances_detail.total_current_par_heading', date: fhlb_date_long_alpha(@start_date))
       %p= fhlb_formatted_currency_whole(@advances_detail[:total_par], force_unit: true)
-    %h2.report-table-title= t('reports.pages.advances_detail.title', date: fhlb_date_standard_numeric(@as_of_date))
+    %h2.report-table-title= t('reports.pages.advances_detail.title', date: fhlb_date_standard_numeric(@start_date))
     %table.table-allow-wrapping.report-table.advances-details-report-table{data: {sortable: true, :'disable-auto-width' => true}}
       %thead
         %tr

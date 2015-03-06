@@ -4,11 +4,8 @@
   .report-header
     %h1= t('reports.pages.capital_stock_activity.title')
     = render 'reports_header_buttons'
-    .report-datepicker
-      = form_tag(reports_capital_stock_activity_url, method: 'GET') do
-        = text_field_tag :start_date, @start_date
-        = text_field_tag :end_date, @end_date
-      = render 'shared/date_picker', presets: @picker_presets, form: '.report-datepicker form'
+    .report-inputs
+      = render 'reports_date_picker_form', start_date: @start_date, end_date: @end_date, report_url: reports_capital_stock_activity_url, presets: @picker_presets
   .report-main-body
     .report-summary-data
       %h3
