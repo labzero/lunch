@@ -46,27 +46,7 @@ When(/^I select the (\d+)(?:st|rd|th) of "(.*?)" in the (left|right|single datep
   else
     calendar = page.find(".daterangepicker .calendar.#{calendar}")
   end
-  month = if month == 'this month'
-            @today.strftime("%b %Y")
-          elsif month == 'last month'
-            (@today - 1.month).strftime("%b %Y")
-          else
-            month
-          end
-  current_month = calendar.find('.month').text.to_date
-  if current_month.year > month.to_date.year
-    advance_class = '.fa-arrow-left'
-  else
-    if current_month.year == month.to_date.year && current_month.month > month.to_date.month
-      advance_class = '.fa-arrow-left'
-    else
-      advance_class = '.fa-arrow-right'
-    end
-  end
-  while calendar.find('.month').text != month
-    calendar.find(advance_class).click
-    # we should add a 5 second check here to avoid infinte loops
-  end
+  change_datepicker_to_month(@today, month, calendar)
   calendar.find("td.available:not(.off)", text: /^#{day}$/).click
 end
 
@@ -94,4 +74,40 @@ Then(/^I should see a report with dates for last year$/) do
   last_year_start = (today - 1.year).beginning_of_year
   last_year_end = (today - 1.year).end_of_year
   report_dates_in_range?(last_year_start, last_year_end)
+end
+
+Then(/^I should not see available dates after today$/) do
+  step %{I choose the "custom date" in the datepicker}
+  calendar = page.find(".daterangepicker .calendar.single")
+  change_datepicker_to_month(@today, @today.strftime("%b %Y"), calendar)
+  day = @today.mday
+  calendar.assert_no_selector('.table-condensed .next.available')
+  days = Time.days_in_month(@today.month, @today.year)
+  (day + 1).upto(days) do |a_day|
+    calendar.assert_selector("td.disabled.off", text: /^#{a_day}$/)
+  end
+end
+
+def change_datepicker_to_month(today, month, calendar)
+  month = if month == 'this month'
+            today.strftime("%b %Y")
+          elsif month == 'last month'
+            (today - 1.month).strftime("%b %Y")
+          else
+            month
+          end
+  current_month = calendar.find('.month').text.to_date
+  if current_month.year > month.to_date.year
+    advance_class = '.fa-arrow-left'
+  else
+    if current_month.year == month.to_date.year && current_month.month > month.to_date.month
+      advance_class = '.fa-arrow-left'
+    else
+      advance_class = '.fa-arrow-right'
+    end
+  end
+  while calendar.find('.month').text != month
+    calendar.find(advance_class).click
+    # we should add a 5 second check here to avoid infinte loops
+  end
 end

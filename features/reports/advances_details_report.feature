@@ -45,3 +45,9 @@ Scenario: Member sorts the advances details report by trade date
   Then I should see the "Trade Date" column values in "ascending" order
   And I click the Trade Date column heading
   Then I should see the "Trade Date" column values in "descending" order
+
+@jira-mem-324 @jira-mem-505
+Scenario: Member can't select a date in the future
+  Given I am on the Advances Detail page
+  When I click the datepicker field
+  Then I should not see available dates after today
