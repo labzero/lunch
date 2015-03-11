@@ -48,11 +48,13 @@ Background:
       And I click on the flyout close button
     Then I should not see a flyout
 
+  @jira-mem-229 @jira-mem-506
   Scenario: Quick Advance flyout table
     When I visit the dashboard
       And I open the quick advance flyout
     Then I should see the quick advance table
       And I should see a rate for the "overnight" term with a type of "whole"
+      And I should see the selected state for the cell with a term of "overnight" and a type of "whole" 
 
   Scenario: Quick Advance flyout tooltip
     Given I visit the dashboard
