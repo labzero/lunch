@@ -113,3 +113,8 @@ Background:
     Given I visit the dashboard
     When I open the quick advance flyout
     Then I should see the selected state for the cell with a term of "overnight" and a type of "whole"
+
+  @data-unavailable @jira-mem-408
+  Scenario: Data for Aggregate 30 Day Terms module is temporarily unavailable
+    When I visit the dashboard
+    Then the Aggregate 30 Day Terms graph should show the Temporarily Unavailable state

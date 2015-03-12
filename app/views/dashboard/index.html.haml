@@ -1,10 +1,9 @@
 - @page_title = t('dashboard.meta_title')
 .dashboard.row
   .column-3
-    - if @market_overview.first[:data]
-      =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.market_overview.title'), classes: 'dashboard-module-market'} do
-        .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
-    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account']} do
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.market_overview.title'), classes: 'dashboard-module-market', data_available: !@market_overview.first[:data].blank?} do
+      .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account'], data_available: true} do
       - if @pledged_collateral
         .dashboard-pledged-collateral
           - mortgage_total = @pledged_collateral[:mortgages][:absolute] + @pledged_collateral[:agency][:absolute] + @pledged_collateral[:aaa][:absolute] + @pledged_collateral[:aa][:absolute]
@@ -82,7 +81,7 @@
                         %td.label= row[0]
                         %td.value= fhlb_formated_currency_unit(row[1], '$')
   .column-3
-    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances'} do
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances', data_available: true} do
       - if @quick_advances_active
         = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}
       %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advances_active}"}
@@ -111,7 +110,7 @@
               %th= t('dashboard.quick_advance.table.aa')
           %tbody
         %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.initiate')
-    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), action_type: 'more-button'} do
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), action_type: 'more-button', data_available: !@previous_activity.blank?} do
       %table.table-dashboard-previous-activity
         %tbody
           - @previous_activity.each_with_index do |row, i|
@@ -123,7 +122,7 @@
                 %td= fhlb_formatted_currency_whole(row[1])
               - else
                 %td= fhlb_formatted_number(row[1])
-    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.anticipated_activity.title'), action_type: 'calendar-icon'} do
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.anticipated_activity.title'), action_type: 'calendar-icon', data_available: true} do
       %table.table-dashboard-anticipated-activity
         %tbody
           - @anticipated_activity.each_with_index do |row, i|
@@ -147,7 +146,7 @@
                   %div.dashboard-module-content-light #{row[3].upcase}
       %button.total-button #{t('dashboard.anticipated_activity.total_maturing_today')} #{number_to_currency(@total_maturing_today, precision: 0)}
   .column-3
-    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.reports.title'), classes: 'dashboard-module-reports'} do
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.reports.title'), classes: 'dashboard-module-reports', data_available: true} do
       = render 'shared/input_field', icon: :calendar, placeholder: t('dashboard.reports.as_of_yesterday'), location: :after
       %button.edit-button #{t('dashboard.actions.edit')}
       %table.table-dashboard-quick-reports
@@ -184,7 +183,7 @@
       %span.report-split-button
         %button.report-button-right #{t('dashboard.actions.download')}
         %button.report-drop-down-right #{t('global.pdf')}
-    = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
+    = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact', data_available: true} do
       %ul
         %li= render 'dashboard/dashboard_contact', email: 'user@example.com', title: t('dashboard.contacts.type.nonstandard_advance'), name: 'Bob – RM', phone_number: '415–555–7283'
         %li= render 'dashboard/dashboard_contact', email: 'otheruser@example.com', title: t('dashboard.contacts.type.general'), name: 'Teresa – FHLB Desk', phone_number: '415–555–7283'

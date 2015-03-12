@@ -421,3 +421,11 @@ $breakdown-table-currency-width: 10px;
     }
   }
 }
+
+.dashboard-module-temporarily-unavailable {
+  @extend %typography-section-title;
+  color: $medium-gray;
+  background: $white;
+  text-align: center;
+  padding: 13px 0;
+}

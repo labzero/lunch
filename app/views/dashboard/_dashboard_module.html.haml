@@ -1,6 +1,7 @@
 -action_type ||= ''
 -action ||= {type: action_type}
 -classes ||= []
+-data_available ||= false
 %section.dashboard-module{class: classes}
   %header
     %h1= title
@@ -10,4 +11,7 @@
       .icon{class: action[:type].gsub(/(.*)-icon/, 'icon-\1-before')}
         .icon-alt-text= t("dashboard.actions.#{action[:type].gsub('-icon', '')}")
   .dashboard-module-content
-    =yield
+    -if data_available
+      =yield
+    -else
+      .dashboard-module-temporarily-unavailable= t('global.temporarily_unavailable')
