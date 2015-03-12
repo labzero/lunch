@@ -1,0 +1,13 @@
+-action_type ||= ''
+-action ||= {type: action_type}
+-classes ||= []
+%section.dashboard-module{class: classes}
+  %header
+    %h1= title
+    - if action && action[:type].include?('-button')
+      %button.primary-button{class: action[:type]}= t("dashboard.actions.#{action[:type].gsub('-button', '')}")
+    - elsif action && action[:type].include?('-icon')
+      .icon{class: action[:type].gsub(/(.*)-icon/, 'icon-\1-before')}
+        .icon-alt-text= t("dashboard.actions.#{action[:type].gsub('-icon', '')}")
+  .dashboard-module-content
+    =yield

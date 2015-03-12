@@ -1,0 +1,54 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.sta-statement.row
+  .report-header
+    %h1= t('reports.pages.settlement_transaction_account.title')
+    = render 'reports_header_buttons'
+    .report-inputs
+      = render layout: 'reports_date_picker_form', locals: {start_date: @start_date, end_date: @end_date, report_url: reports_settlement_transaction_account_url, presets: @picker_presets, single_date_picker: @single_date_picker} do
+        .report-filter
+          = render 'shared/dropdown', dropdown_name: 'sta_filter', default_value: @filter, default_text: @filter_text, dropdown_options: @filter_options
+  .report-main-body
+    .report-summary-data
+      %h3
+        = t('reports.pages.settlement_transaction_account.opening_balance_heading', date: fhlb_date_long_alpha(@settlement_transaction_account[:start_date]))
+      %p= fhlb_formatted_currency(@settlement_transaction_account[:start_balance], force_unit: true)
+    .report-summary-data
+      %h3
+        = t('reports.pages.settlement_transaction_account.closing_balance_heading', date: fhlb_date_long_alpha(@settlement_transaction_account[:end_date]))
+      %p= fhlb_formatted_currency(@settlement_transaction_account[:end_balance], force_unit: true)
+    %h2.report-table-title= t('reports.pages.settlement_transaction_account.table_title')
+    %table.report-table{data: {sortable: false}}
+      %thead
+        %tr
+          %th.report-cell-narrow= t("global.date")
+          %th.report-cell-expanding= t("global.reference_number")
+          %th.report-cell-expanding= t("global.description")
+          %th= fhlb_add_unit_to_table_header(t('global.rates'), '%')
+          %th= fhlb_add_unit_to_table_header(t("reports.pages.settlement_transaction_account.debit_credit_heading"), '$')
+          %th= fhlb_add_unit_to_table_header(t('global.balance'), '$')
+      %tbody
+        - if @show_ending_balance
+          %tr.ending-balance-row
+            %td.report-cell-narrow= fhlb_date_standard_numeric(@settlement_transaction_account[:end_date])
+            %td.report-cell-expanding
+            %td.report-cell-expanding= t('reports.pages.settlement_transaction_account.closing_balance')
+            %td.report-cell-right= '-'
+            %td.report-cell-right= '-'
+            %td.report-cell-right= fhlb_formatted_number(@settlement_transaction_account[:end_balance], precision: 2) || '-'
+        -@settlement_transaction_account[:activities].each do |row|
+          %tr
+            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:trans_date])
+            %td.report-cell-expanding= row[:refnumber]
+            %td.report-cell-expanding= row[:descr] == @daily_balance_key ? t('reports.pages.settlement_transaction_account.closing_balance') : row[:descr]
+            %td.report-cell-right= fhlb_formatted_number(row[:rate], precision: 5) || '-'
+            %td.report-cell-right= fhlb_formatted_number(row[:transaction], precision: 2) || '-'
+            %td.report-cell-right= fhlb_formatted_number(row[:balance], precision: 2) || '-'
+        %tr.beginning-balance-row
+          %td.report-cell-narrow= fhlb_date_standard_numeric(@settlement_transaction_account[:start_date])
+          %td.report-cell-expanding
+          %td.report-cell-expanding= t('global.beginning_balance')
+          %td.report-cell-right= '-'
+          %td.report-cell-right= '-'
+          %td.report-cell-right= fhlb_formatted_number(@settlement_transaction_account[:start_balance], precision: 2) || '-'
+    %small= t('reports.change_notice', phone_number: fhlb_formatted_phone_number('4156162945'))

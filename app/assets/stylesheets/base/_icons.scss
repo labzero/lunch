@@ -1,0 +1,132 @@
+@font-face {
+  font-family: 'fhlbsf-icons';
+  src:font-url('fhlbsf-icons.eot?-s1srtn');
+  src:font-url('fhlbsf-icons.eot?#iefix-s1srtn') format('embedded-opentype'),
+    font-url('fhlbsf-icons.woff?-s1srtn') format('woff'),
+    font-url('fhlbsf-icons.ttf?-s1srtn') format('truetype'),
+    font-url('fhlbsf-icons.svg?-s1srtn#fhlbsf-icons') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+%icon-font {
+  font-family: 'fhlbsf-icons';
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+%very-small-icon-font {
+  @extend %icon-font;
+  font-size: 0.8667rem;;
+}
+
+%small-icon-font {
+  @extend %icon-font;
+  font-size: 1rem;
+}
+
+%large-icon-font {
+  @extend %icon-font;
+  font-size: 1.3333rem;
+}
+
+$icon-gear: "\e600";
+$icon-chevron: "\e601";
+$icon-envelope: "\e602";
+$icon-magnify: "\e603";
+$icon-arrow-right: "\e604";
+$icon-calendar: "\e605";
+$icon-phone: "\e606";
+$icon-dollar: "$";
+$icon-edit: "\e607";
+$icon-close: "\e608";
+$icon-alert: "\e609";
+$icon-arrow-left: "\e610";
+$icon-caret: "\e60a";
+$icon-print: "\e60b";
+$icon-forward: "\e60c";
+
+.icon-gear-before:before, .icon-gear-after:after {
+  @extend %icon-font;
+  content: "#{$icon-gear}";
+}
+
+.icon-chevron-before:before, .icon-chevron-after:after {
+  @extend %icon-font;
+  content: "#{$icon-chevron}";
+}
+
+.icon-envelope-before:before, .icon-envelope-after:after {
+  @extend %icon-font;
+  content: "#{$icon-envelope}";
+}
+
+.icon-magnify-before:before, .icon-magnify-after:after {
+  @extend %icon-font;
+  content: "#{$icon-magnify}";
+}
+
+.icon-arrow-right-before:before, .icon-arrow-right-after:after {
+  @extend %icon-font;
+  content: "#{$icon-arrow-right}";
+}
+
+.icon-arrow-left-before:before, .icon-arrow-left-after:after {
+  @extend %icon-font;
+  content: "#{$icon-arrow-left}";
+}
+
+.icon-calendar-before:before, .icon-calendar-after:after {
+  @extend %icon-font;
+  content: "#{$icon-calendar}";
+}
+
+.icon-phone-before:before, .icon-phone-after:after {
+  @extend %icon-font;
+  content: "#{$icon-phone}";
+}
+
+.icon-dollar-before:before, .icon-dollar-after:after {
+  @extend %icon-font;
+  font-family: $default-font-family;
+  font-weight: $bold-weight;
+  content: "#{$icon-dollar}";
+}
+
+.icon-edit-before:before, .icon-edit-after:after {
+  @extend %icon-font;
+  content: "#{$icon-edit}";
+}
+
+.icon-close-before:before, .icon-close-after:after {
+  @extend %icon-font;
+  content: "#{$icon-close}";
+}
+
+.icon-alert-before:before, .icon-alert-after:after {
+  @extend %icon-font;
+  content: "#{$icon-alert}";
+}
+
+.icon-caret-before:before, .icon-caret-after:after {
+  @extend %icon-font;
+  content: "#{$icon-caret}";
+}
+
+.icon-forward-before:before, .icon-forward-after:after {
+  @extend %icon-font;
+  content: "#{$icon-forward}";
+}
+
+.icon-print-before:before, .icon-print-after:after {
+  @extend %icon-font;
+  content: "#{$icon-print}";
+}

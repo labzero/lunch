@@ -1,0 +1,149 @@
+{
+  "date" : "",
+  "standard" : {
+    "collateral" : [
+      {
+        "type" : "RESIDENTIAL - ARMs",
+        "count" : 1739,
+        "original_amount" : 1684961602,
+        "unpaid_principal" : 1621269967,
+        "market_value" : 1668470539,
+        "borrowing_capacity" : 1534992054
+      },
+      {
+        "type" : "RESIDENTIAL - FIXED",
+        "count" : 280,
+        "original_amount" : 187391836,
+        "unpaid_principal" : 169336131,
+        "market_value" : 170490197,
+        "borrowing_capacity" : 156850842
+      },
+      {
+        "type" : "MULTIFAMILY - ARMs",
+        "count" : 680,
+        "original_amount" : 805835151,
+        "unpaid_principal" : 665244590,
+        "market_value" : 640129758,
+        "borrowing_capacity" : 524906064
+      },
+      {
+        "type" : "MULTIFAMILY - FIXED",
+        "count" : 48,
+        "original_amount" : 112323440,
+        "unpaid_principal" : 91601422,
+        "market_value" : 89641644,
+        "borrowing_capacity" : 73506124
+      },
+      {
+        "type" : "SECONDS",
+        "count" : 112,
+        "original_amount" : 13769580,
+        "unpaid_principal" : 7924170,
+        "market_value" : 6298338,
+        "borrowing_capacity" : 5164581
+      },
+      {
+        "type" : "COMMERCIAL",
+        "count" : 361,
+        "original_amount" : 671578359,
+        "unpaid_principal" : 521158356,
+        "market_value" : 510355716,
+        "borrowing_capacity" : 408284430
+      },
+      {
+        "type" : "RESIDENTIAL FIRST LIEN HELOCs",
+        "count" : 33,
+        "original_amount" : 4530550,
+        "unpaid_principal" : 2649441,
+        "market_value" : 2800835,
+        "borrowing_capacity" : 2576753
+      },
+      {
+        "type" : "RESIDENTIAL FIRSTS LOSS SHARE",
+        "count" : 6003,
+        "original_amount" : 2059938430,
+        "unpaid_principal" : 1858647736,
+        "market_value" : 1858644908,
+        "borrowing_capacity" : 1115184662
+      },
+      {
+        "type" : "RESIDENTIAL SECONDS LOSS SHARE",
+        "count" : 5156,
+        "original_amount" : 462913294,
+        "unpaid_principal" : 332653512,
+        "market_value" : 332650969,
+        "borrowing_capacity" : 199588533
+      },
+      {
+        "type" : "BL RESI 1st LOSS SHARE",
+        "count" : 1,
+        "original_amount" : 2309802176,
+        "unpaid_principal" : 2309802176,
+        "market_value" : 2309802176,
+        "borrowing_capacity" : 1385881305
+      },
+      {
+        "type" : "BL RESI 2ND LOSS SHARE",
+        "count" : 1,
+        "original_amount" : 89742880,
+        "unpaid_principal" : 89742880,
+        "market_value" : 89742880,
+        "borrowing_capacity" : 53845728
+      },
+      {
+        "type" : "RESIDENTIAL NEG AM",
+        "count" : 2390,
+        "original_amount" : 903488373,
+        "unpaid_principal" : 846731274,
+        "market_value" : 783985114,
+        "borrowing_capacity" : 681822163
+      }
+    ],
+    "excluded" : {
+      "blanket_lien" : 0,
+      "bank" : 0,
+      "regulatory" : 0
+    },
+    "utilized" : {
+      "advances" : 3363500000,
+      "letters_of_credit" : 6025000,
+      "swap_collateral" : 0,
+      "sbc_type_deficiencies" : 0,
+      "payment_fees" : 0,
+      "other_collateral" : 0,
+      "mpf_ce_collateral" : 0
+    }
+  },
+  "sbc" : {
+    "collateral" : {
+      "aa": {
+        "total_market_value": 100500,
+        "total_borrowing_capacity": 200500,
+        "advances": 0,
+        "standard_credit": 0,
+        "remaining_market_value": 0,
+        "remaining_borrowing_capacity": 0
+      },
+      "aaa": {
+        "total_market_value": 3987650,
+        "total_borrowing_capacity": 300500,
+        "advances": 0,
+        "standard_credit": 0,
+        "remaining_market_value": 0,
+        "remaining_borrowing_capacity": 0
+      },
+      "agency": {
+        "total_market_value": 105613,
+        "total_borrowing_capacity": 100332,
+        "advances": 0,
+        "standard_credit": 0,
+        "remaining_market_value": 105613,
+        "remaining_borrowing_capacity": 100332
+      }
+    },
+    "utilized" : {
+      "other_collateral" : 0,
+      "excluded_regulatory" : 0
+    }
+  }
+}

@@ -1,0 +1,31 @@
+- header_template ||= 'layouts/header'
+- inline_styles ||= false
+- skip_javascript ||= false
+- css_manifest ||= 'application'
+- js_manifest ||= 'application'
+!!!
+%html{class: @html_class}
+  %head
+    %meta{charset: "utf-8"}
+    %meta{content: "IE=edge,chrome=1", :'http-equiv' => "X-UA-Compatible"}
+    %title= @page_title || 'FHLB Member Portal'
+    - if css_manifest
+      - if !inline_styles
+        = stylesheet_link_tag css_manifest, media: "all"
+      - else
+        %style
+          - css_mainfest_filename = (css_manifest.end_with?('.css') ? css_manifest : css_manifest + '.css' )
+          != FhlbMember::Application.assets.find_asset(css_mainfest_filename).source
+    = javascript_include_tag js_manifest unless skip_javascript
+    = csrf_meta_tags
+  %body
+    %header.page-header= render header_template
+    %main
+      = yield
+    .flyout-row
+      .column-1
+        .flyout
+          .flyout-top-section
+            .flyout-close-button.icon-close-before
+          .flyout-bottom-section
+    .flyout-background

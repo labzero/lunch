@@ -1,0 +1,4 @@
+browserslist:
+  - "last 3 versions"
+  - "> 1%"
+  - "Explorer > 8"

@@ -18,6 +18,483 @@
 #
 # To learn more, please read the Rails Internationalization guide
 # available at http://guides.rubyonrails.org/i18n.html.
-
 en:
-  hello: "Hello world"
+  global:
+    na: N/A
+    vrc_overnight: VRC Overnight
+    currency:
+      thousand: T
+      million: MM
+    updated: Updated
+    view: View
+    available_history: Available History
+    daily: Daily
+    monthly: Monthly
+    all: All
+    current_day: Current Day
+    quarterly: Quarterly
+    date: Date
+    total: Total
+    totals: Totals
+    transaction_type: Transaction Type
+    apply: Apply
+    cancel: Cancel
+    borrowing_capacity: Borrowing Capacity
+    advances: Advances
+    total_market_value: Total Market Value
+    collateral_type: Collateral Type
+    count: Count
+    original_amount: Original Amount
+    unpaid_principal: Unpaid Principal
+    balance_as_of_close_of_business: Balance as of close of business
+    reference_number: Reference Number
+    description: Description
+    debits: Debits
+    credits: Credits
+    balance: Balance
+    rates: Rates
+    daily_balances: Daily Balances
+    beginning_balance: Beginning Balance
+    messages: Messages
+    categories: Categories
+    login: Log In
+    prior: Prior
+    next: Next
+    forward: Forward
+    print: Print
+    as_of: As of
+    today: Today
+    details: Details
+    open: Open
+    hide: Hide
+    none: None
+    not_applicable: Not applicable
+    various: Various
+    year_to_date: Year to date
+    last_year: Last year
+    pdf: PDF
+    dates:
+      1_day: 1 day
+      1_month: 1 mo
+      2_months: 2 mo
+      3_months: 3 mo
+      6_months: 6 mo
+      1_year: 1 yr
+      2_years: 2 yr
+      3_years: 3 yr
+      5_years: 5 yr
+      7_years: 7 yr
+      10_years: 10 yr
+      15_years: 15yr
+      20_years: 20 yr
+      30_years: 30 yr
+  dates:
+    quarters:
+      "1": First Quarter %{year}
+      "2": Second Quarter %{year}
+      "3": Third Quarter %{year}
+      "4": Fourth Quarter %{year}
+  nav:
+    primary:
+      welcome: Hi %{name}
+      logout: Logout
+      search: Search
+    secondary:
+      advances: Advances
+      letters_of_credit: Letters of Credit
+      mortgages: Mortgages
+      securities: Securities
+  datepicker:
+    range:
+      this_month: "%{month} to date"
+      custom: Custom date range
+    single:
+      input: "As of {replace_date}"
+      custom: Custom date
+  settings:
+    title: Settings
+    save: Save
+    save_message: Last auto-saved
+    account:
+      title: Accounts
+    password:
+      title: Passwords
+    quick_advance:
+      title: Quick Advances
+    quick_report:
+      title: Quick Reports
+    email:
+      title: Emails
+      header: Choose which email messages to receive
+      selected_item_message: "(Be sure to include fhlbsf.com in your Safe Senders list)"
+      required_item_message_html: "You are assigned to receive these emails. For more information, <a href=\"%{url}\">contact us</a>."
+      all:
+        title: all
+        description_html: ""
+      reports:
+        title: Reports
+        description_html: "Send me reports as defined in <a href=\"%{url}\">Quick Reports Settings</a>"
+      investor_relations:
+        title: Shareholder Communications / Investor Relations
+        description_html: Quarterly earnings releases; annual and quarterly financial reports; Board of Directors election announcements; changes in Bank leadership (including changes to the Board of Directors, the Bank’s Affordable Housing Advisory Council, and senior management); changes to the Bank’s capital plan; changes to the Bank’s excess stock repurchase, retained earnings, and dividend framework.
+      accounting:
+        title: Accounting Communications
+        description_html: Quarterly dividend and stock repurchase announcements; changes to related policies, procedures, and reports.
+      products:
+        title: Products and Services
+        description_html: Announcements regarding new products and product enhancements, changes to credit policies and procedures (including updates to the Credit Guide), eTransact updates, MPF updates.
+      collateral:
+        title: Collateral Pledging
+        description_html: Changes to collateral policies and procedures (including updates to the Collateral Guide) that affect the pledging of securities or loan collateral, the determination of borrowing capacity, the field review process, and related matters.
+      community_program:
+        title: Community Programs
+        description_html: Program announcements (including round openings, results, changes to policies and procedures) for our targeted grant and credit programs that support affordable housing and economic development; Affordable Housing Advisory Council annual reports; invitations to program workshops and webinars.
+      community_works:
+        title: "Community Works Quarterly E\u2011newsletter"
+        description_html: ""
+      educational:
+        title: Educational and Networking Events
+        description_html: Invitations to educational and networking meetings and events sponsored for members by the Bank, including conferences, seminars, and webinars.
+  welcome:
+    meta_title: FHLB - Welcome
+    title: Welcome!
+    intro: Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sit amet placerat odio, a ornare nibh. Integer sagittis, ex eu dignissim commodo, dui dui maximus massa, sit amet rutrum dolor dui et tellus.
+    logo: FHLBank San Francisco
+    questions:
+      p: Questions about access
+    forgot_password: Forgot Password
+  dashboard:
+    meta_title: FHLB - Dashboard
+    actions:
+      more: More
+      edit: Edit
+      calendar: Calendar
+      view: View
+      download: Download
+      xml: XML
+    previous_activity:
+      title: Previous Activity
+      overnight_vrc: Overnight VRC Open
+    anticipated_activity:
+      title: Anticipated Activity
+      dividend: Dividend
+      collateral_rebalancing: Collateral Rebalancing
+      stock_purchase: Stock Purchase
+      estimated: Estimated
+      total_maturing_today: Total Maturing Today
+    contacts:
+      title: Contacts
+      icon_alt_text: Contact
+      search_placeholder: 'Search for FHLB contact'
+      type:
+        general: General Inquiries
+        nonstandard_advance: Nonstandard Advances
+    quick_advance:
+      title: Quick Advances
+      advance_placeholder: Enter Dollar Amount
+      advances_desk_closed: The Advances Desk is closed.
+      advances_desk_closed_link: View rates
+      advance_last_updated: The following rates were last updated %{last_updated}
+      hours_of_operation_html: "You may initiate an advance during the <a href=\"%{url}\">Advance Desk Hours of Operation</a>."
+      table:
+        term: Term
+        whole_loan: Whole Loan
+        agency: Agency
+        aaa: AAA
+        aa: AA
+        ACTACT: Actual/Actual
+        ACT360: Actual/360
+        axes_labels:
+          standard: Standard
+          securities_backed: SBC
+          variable_rate: VRC
+          fixed_rate: FRC
+          overnight: Overnight
+          open: Open
+          1week: 1 Week
+          2week: 2 Weeks
+          3week: 3 Weeks
+          1month: 1 Month
+          2month: 2 Months
+          3month: 3 Months
+          6month: 6 Months
+          1year: 1 Year
+          2year: 2 Years
+          3year: 3 Years
+      buttons:
+        back: Back
+        initiate: Initiate the selected advance
+      preview:
+        valid:
+          title: Confirm Advance
+          p: FHLB-SF will hedge the advance once you initiate it. It cannot be changed without a fee. Please read the details below and ensure they are correct before you confirm the advance.
+        field_headings:
+          advance_amount: Amount
+          advance_type: Program
+          interest_day_count: "Int Day #"
+          payment_on: Payment
+          advance_term: Term
+          funding_date: Funding
+          maturity_date: Maturity
+    reports:
+      title: Reports
+      as_of_yesterday: As of yesterday
+      daily: Daily
+      weekly: Weekly
+      monthly: Monthly
+      quarterly: Quarterly
+      annually: Annually
+      advances_detail: Advances
+      forward_commitments: Forward Commitments
+    your_account:
+      title: Your Account
+      pledged_collateral:
+        title: Pledged Collateral
+        mortgages: Mortgages
+        securities: Securities
+        agency: Agency
+        aaa: AAA
+        aa: AA
+      total_securities:
+        title: Total Securities
+        pledged: Pledged
+        safekept: Safekept
+      effective_borrowing_capacity:
+        title: Effective Borrowing Capacity
+        used: Used
+        unused: Unused
+      anticipated_activity:
+        title: Anticipated Activity
+      table:
+        balance: Sta Balance
+        credit_outstanding: Credit Outstanding
+        remaining:
+          title: Remaining
+          available: Financial Available
+          leverage: Stock Leverage
+        market_value:
+          title: Collateral Market Value
+          agency: 'SBC:Agency'
+          aaa: 'SBC:AAA'
+          aa: 'SBC:AA'
+        borrowing_capacity:
+          title: Collateral Borrowing Capacity
+          standard: Standard Credit Program
+          agency: 'SBC:Agency'
+          aaa: 'SBC:AAA'
+          aa: 'SBC:AA'
+    market_overview:
+      title: Market Overview
+  reports:
+    meta_title: FHLB - Reports
+    title: Reports
+    setup_quick_advance:
+      title: Want faster access to your reports?
+      content_html: "Set up <a href=\"%{url}\">Quick Reports</a> to have the latest reports emailed to you, or lorem ipsum something something to access reports from the dashboard."
+    shared_table_values:
+      updated_th: Updated
+      available_history_th: Available History
+      link_td: View
+    continuously: Continuously
+    twice_daily: Twice Daily
+    share_count: # supports all CLDR rules
+      one: "%{count} share"
+      other: "%{count} shares"
+    history:
+      months18: 18 months
+      months36: 36 months
+      months12: 12 months
+      present2007: 2007-present
+    price_indications:
+      title: Price Indications
+      current:
+        title: Current
+        summary: Current price indications are subject to change. For current quotes call %{phone_number} between 7 a.m. and 2 p.m. Pacific time. Variable Rate Credit advances are available until 2 p.m., and all other advances are generally available until 12 noon.
+      historical:
+        title: Historical
+        summary: Historical price indications reflect the price indications posted at the beginning of the day, not actual prices.
+    credit:
+      title: Credit
+      advances_detail:
+        title: Advances
+        summary: Your institution’s outstanding advances such as maturity, date, estimated next payment, and prepayment fee indications. The data is downloadable, and the columns can be sorted in ascending and descending order.
+      interest_rate:
+        title: Interest Rate Resets
+        summary: Shows advances with an interest rate reset on the effective date.
+      letters_of_credit:
+        title: Letters of Credit Detail
+        summary: Details any outstanding letters of credit.
+      forward_commitments:
+        title: Forward Commitments
+        summary: Shows all committed advances and their future funding.
+      parallel_shift:
+        title: Putable Advance Parallel Shift Sensitivity
+        summary: A measure of held assets’ price-sesitivity given a specified shift in rates.
+    collateral:
+      title: Collateral
+      borrowing_capacity:
+        title: Borrowing Capacity
+        summary: Covers both the Standard Credit Program and the Securities-Backed Credit Program. The loan collateral data in the Standard Credit section of the report is updated during the day to reflect the processing of new MCUs.
+      mcu:
+        title: MCU Status
+        summary: Shows data from the most recently processed MCU from your institution, including summary information and detailed information on rejected loans and loan data inconsistencies.
+    capital_stock:
+      title: Capital Stock
+      trial_balance:
+        title: Capital Stock Trial Balance
+        summary: Shows all shares owned as of a specific day.
+      activity:
+        title: Capital Stock Activity Statement
+        summary: Shows all stock activity for a specified period.
+      dividend_transaction:
+        title: Dividend Transaction Statement
+        summary: Includes the date the last dividend was paid, the dividend rate, the number and amount of shares received, and the amount of each cash dividend paid.
+      dividend_statement:
+        title: Capital Stock Dividend Statement
+        summary: Shows a detailed dividend calculation for each certificate owned during the dividend period.
+    settlement:
+      title: Settlement/Transaction Account (STA)
+      account:
+        title: Settlement/Transaction Account (STA)
+        summary: The monthly interest earned on the STA account posts on the first business day of the following month.
+    securities:
+      title: Securities
+      transactions:
+        title: Securities Transaction Report
+        summary: Reflects transactions that have settled as of 11:30 a.m. and is generally available at approximately 1:00 p.m. on the settlement day. The final report reflects all transactions that have settled that day and is generally available at the end of the business day.
+      cash_projections:
+        title: Cash Projections Detail Report
+        summary: Lists securities transactions that the custodian anticipates posting to your account over the next five days. The report reflects estimated information as of the close of business on the previous business day and is available at the beginning of the current business day.
+      current:
+        title: Current Securities Position
+        summary: Provides totals and summaries for pledged and unpledged securities as of the current day. The report is updated throughout the day and reflects changes in your securities position.
+      monthly:
+        title: Monthly Securities Position
+        summary: Provides totals and summaries for pledged and unpledged securities as of the prior monthend. The report reflects securities information as of the close of business on the last business day of the month and is generally available one business day following monthend.
+      services_monthly:
+        title: Securities Services Monthly Statement
+        summary: Provides a breakdown of the securities services fees that will be debited from your institution’s Settlement/Transaction Account on the last business day of the month. It is updated for the prior month approximately five to seven days before monthend.
+    pages:
+      price_indications:
+        historical: Historical Price Indications
+        standard_credit_program: Standard Credit Program
+        sbc_program: Securities-Backed Credit
+        frc:
+          dropdown: Fixed Rate Credit (FRC)
+          standard_table_title: Standard Credit Program, Fixed Rate Credit (FRC), All Terms
+          sbc_table_title: Securities-Backed Credit, Fixed Rate Credit (FRC), All Terms
+        vrc:
+          dropdown: Variable Rate Credit (VRC)
+          standard_table_title: Standard Credit Program, Variable Rate Credit (VRC), All Terms
+          sbc_table_title: Securities-Backed Credit, Variable Rate Credit (VRC), All Terms
+        1m_libor:
+          dropdown: Adjustable Rate Credit (ARC) 1 month LIBOR
+          standard_table_title: Standard Credit Program, Adjustable Rate Credit (ARC) 1 month LIBOR, All Terms
+          sbc_table_title: Securities-Backed  Credit, Adjustable Rate Credit (ARC) 1 month LIBOR, All Terms
+          table_heading: 1 mo LIBOR
+        3m_libor:
+          dropdown: Adjustable Rate Credit (ARC) 3 month LIBOR
+          standard_table_title: Standard Credit Program, Adjustable Rate Credit (ARC) 3 month LIBOR, All Terms
+          sbc_table_title: Securities-Backed  Credit, Adjustable Rate Credit (ARC) 3 month LIBOR, All Terms
+          table_heading: 3 mo LIBOR
+        6m_libor:
+          dropdown: Adjustable Rate Credit (ARC) 6 month LIBOR
+          standard_table_title: Standard Credit Program, Adjustable Rate Credit (ARC) 6 month LIBOR, All Terms
+          sbc_table_title: Securities-Backed  Credit, Adjustable Rate Credit (ARC) 6 month LIBOR, All Terms
+          table_heading: 6 mo LIBOR
+        daily_prime:
+          dropdown: Adjustable Rate Credit (ARC) Daily Prime
+          standard_table_title: Standard Credit Program, Adjustable Rate Credit (ARC) Daily Prime, All Terms
+          sbc_table_title: Securities-Backed  Credit, Adjustable Rate Credit (ARC) Daily Prime, All Terms
+          table_heading: Daily Prime
+        embedded_cap:
+          dropdown: Adjustable Rate Credit (ARC) with Embedded Cap
+          standard_table_title: Standard Credit Program, Adjustable Rate Credit (ARC) Daily Prime, All Terms
+          sbc_table_title: Securities-Backed  Credit, Adjustable Rate Credit (ARC) Daily Prime, All Terms
+      capital_stock_activity:
+        title: Capital Stock Activity Statement
+        opening_balance_heading: "Opening balance of Class B Shares as of %{date}:"
+        closing_balance_heading: "Closing balance of Class B Shares as of %{date}:"
+        table_title: Class B stock at $100 per share
+        certificate_sequence: Certificate Sequence
+        debit_shares: "Debits: Number of Shares"
+        credit_shares: "Credits: Number of Shares"
+      borrowing_capacity_summary:
+        total_borrowing_capacity_heading: "Total Borrowing Capacity:"
+        remaining_borrowing_capacity_heading: "Remaining Borrowing Capacity:"
+        standard_credit_program: Standard Credit Program
+        sbc_program: Securities-Backed Credit (SBC) Program
+        market_value: Market Val
+        total_borrowing_capacity: Total Borrowing Capacity
+        standard_credit: Covered by Standard Credit
+        remaining_market_value: Market Value Remaining
+        remaining_borrowing_capacity: Borrowing Capacity Remaining
+        bc_upb: BC/UPB
+        net_loan_collateral: Net Loan Collateral Borrowing Capacity
+        excess_capacity: Excess Borrowing Capacity
+        less_line_items:
+          blanket_lien: Less Excluded Blanket Lien Borrowing Capacity
+          bank_borrowing_capacity: Less Excluded Bank Borrowing Capacity
+          excluded_regulatory: Less Excluded Regulatory Borrowing Capacity
+          advances: Less Advances
+          letters_of_credit: Less Letters of Credit
+          swap_collateral: Less SWAP Collateral Required
+          cover_sbc_type: Less Cover SBC Type Deficiencies
+          payment_fees: Less Potential Payment Fees
+          other_collateral: Less Other Collateral Required
+          mpf_ce_collateral: Less MPF CE Collateral Required
+      settlement_transaction_account:
+        title: Settlement/Transaction Account (STA) Statement
+        opening_balance_heading: "Beginning balance of as of %{date}:"
+        closing_balance_heading: "Balance as of close of business %{date}:"
+        table_title: Settlement/Transaction Account (STA) Detail
+        closing_balance: Balance as of close of business
+        debit_credit_heading: Debits/Credits
+      advances_detail:
+        title: "Advances outstanding as of close of business %{date}"
+        total_current_par_heading: "Total Current Par as of %{date}"
+        total_accrued_interest_heading: "Total Accrued Interest as of %{date}"
+        estimated_next_payment_heading: "Estimated Next Interest Payment as of %{date}"
+        trade_date: Trade Date
+        funding_date: Funding Date
+        maturity_date: Maturity Date
+        advance_number: Advance Number
+        advance_type: Advance Type
+        current_par_heading: Current Par
+        current_par: Current Par
+        interest_payment_frequency: Interest Payment Frequency
+        day_count_basis: Day Count Basis
+        interest_rate: Interest Rate
+        next_interest_payment_date: Next Interest Payment Date
+        accrued_interest_heading: Accrued Interest
+        accrued_interest: Accrued Interest
+        estimated_next_payment_table_heading: Estimated Next Interest Payment
+        estimated_next_payment: Estimated Next Interest Payment
+        discount_program: Discount Program
+        prepayment_fee_indication: Prepayment Fee Indication
+        record_title: "Advance Number: %{advance_number}"
+        unavailable_online: Not available online
+        unavailable_for_past_dates: Not available for past dates
+        not_applicable_to_vrc: Not applicable to VRC
+        prepayment_fee_restructure_html: "%{fee} <br>Prepayment was calculated on <br>%{date}"
+    change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
+    accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
+    intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
+    close_of_business_processing_notice: Other data as of Close of Business on the prior business day.
+    maturity_date_notice: In the event of a prepayment modification, to original maturity date may differ from the actual maturity date.
+    accrued_interest_notice: The amount of interest accrued may vary from time to time because of rate or manual adjustments.
+    estimated_next_interest_payment_notice: For each FRC and ARC Advance, the Estimated Next Interest Payment provides an estimate of the interest payment amount to be debited to your Settlement/Transaction Account (STA) on the next interest payment date. These are estimates only and should not be relied upon as a final statement of the total interest payments to be debited to your STA on any interest payment date, and they are subject to change without notice. In addition, this report does not reflect any principal repayment or reduction amounts or any other amounts associated with your advances that may be debited to your STA on the next interest payment date. Estimated next interest payment amounts for some advance types are not available online.
+    merger_notice: In the event of a merger, this report may not include all advances from the acquired instiution.
+    advances_and_securities_agreement_notice: Nothing in this report in any way ammends, modifies, or waives the terms of your Advances and Securities Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issues puruant to that Agreement. The Bank expressly disclaims and and all liability that may arise from your institution’s reliance on any information contained in, or errors or omissions made with respect to, this report. Please call (415) 616-2559 if you have any questions.
+  messages:
+    meta_title: FHLB - Messages
+    receive_via_email: Receiving messages via email
+    edit_email_settings_html: Edit your <a href=%{url}>Email Settings</a> to choose which messages you want to receive via email.
+  errors:
+    assistance: "If you need assistance, contact our Web Support team at %{phone_number}"
+    "500":
+      headline: Sorry for the inconvenience.
+      summary: We have encountered an error and are working on fixing the problem as quickly as possible.
+    maintenance:
+      headline: Scheduled Downtime
+      summary: We're currently performing maintenance on the Member Portal. We'll have things up and running again soon.

@@ -1,0 +1,191 @@
+- @page_title = t('dashboard.meta_title')
+.dashboard.row
+  .column-3
+    - if @market_overview.first[:data]
+      =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.market_overview.title'), classes: 'dashboard-module-market'} do
+        .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account']} do
+      - if @pledged_collateral
+        .dashboard-pledged-collateral
+          - mortgage_total = @pledged_collateral[:mortgages][:absolute] + @pledged_collateral[:agency][:absolute] + @pledged_collateral[:aaa][:absolute] + @pledged_collateral[:aa][:absolute]
+          - if mortgage_total  > 0
+            %h2= t('dashboard.your_account.pledged_collateral.title')
+            .dashboard-gauge
+              - mortgage_percentage = number_to_percentage(@pledged_collateral[:mortgages][:percentage], precision: 1)
+              - agency_percentage = number_to_percentage(@pledged_collateral[:agency][:percentage], precision: 1)
+              - aaa_percentage = number_to_percentage(@pledged_collateral[:aaa][:percentage], precision: 1)
+              - aa_percentage = number_to_percentage(@pledged_collateral[:aa][:percentage], precision: 1)
+              .collateral-gauge-mortgages.gauge-section{style: "width: #{mortgage_percentage}; #{'display: none' unless mortgage_percentage.to_f > 0}"}
+                .inner-gauge-section
+                = render 'shared/tooltip', tooltip_data: { t('dashboard.your_account.pledged_collateral.mortgages')=>'', number_to_human(@pledged_collateral[:mortgages][:absolute], units: 'global.currency') =>  mortgage_percentage}
+              .collateral-gauge-securities.gauge-section{style: "width: #{agency_percentage}; #{'display: none' unless agency_percentage.to_f > 0}"}
+                .inner-gauge-section
+                = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.pledged_collateral.agency')=>'',number_to_human(@pledged_collateral[:agency][:absolute], units: 'global.currency') => agency_percentage}
+              .collateral-gauge-securities.gauge-section{style: "width: #{aaa_percentage}; #{'display: none' unless aaa_percentage.to_f > 0}"}
+                .inner-gauge-section
+                = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.pledged_collateral.aaa')=>'', number_to_human(@pledged_collateral[:aaa][:absolute], units: 'global.currency') => aaa_percentage}
+              .collateral-gauge-securities.gauge-section{style: "width: #{aa_percentage}; #{'display: none' unless aa_percentage.to_f > 0}"}
+                .inner-gauge-section
+                = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.pledged_collateral.aa')=>'', number_to_human(@pledged_collateral[:aa][:absolute], units: 'global.currency') => aa_percentage}
+            .dashboard-gauge-labels
+              %span.collateral-gauge-label-mortgages= t('dashboard.your_account.pledged_collateral.mortgages')
+              %span.collateral-gauge-label-securities= t('dashboard.your_account.pledged_collateral.securities')
+      - if @total_securities
+        .dashboard-total-securities
+          - securities_total =  @total_securities[:safekept_securities][:absolute] + @total_securities[:pledged_securities][:absolute]
+          - if securities_total > 0
+            %h2= t('dashboard.your_account.total_securities.title')
+            .dashboard-gauge
+              -if @total_securities[:pledged_securities][:absolute] > 0
+                .total-securities-gauge-pledged.gauge-section{style: "width: #{number_to_percentage(@total_securities[:pledged_securities][:percentage], precision: 1)};"}
+                  .inner-gauge-section
+              -if @total_securities[:safekept_securities][:absolute] > 0
+                .total-safekept-gauge-pledged.gauge-section{style: "width: #{number_to_percentage(@total_securities[:safekept_securities][:percentage], precision: 1)};"}
+                  .inner-gauge-section
+            .dashboard-gauge-labels
+              %span.total-securities-label-pledged= t('dashboard.your_account.total_securities.pledged') + ": #{@total_securities[:pledged_securities][:absolute]}"
+              %span= t('dashboard.your_account.total_securities.safekept') + ": #{@total_securities[:safekept_securities][:absolute]}"
+      - if @effective_borrowing_capacity
+        .dashboard-effective-borrowing-capacity
+          %h2= t('dashboard.your_account.effective_borrowing_capacity.title')
+          .dashboard-gauge
+            .borrowing-capacity-gauge-used.gauge-section{style: "width: #{number_to_percentage(@effective_borrowing_capacity[:used_capacity][:percentage], precision: 1)};"}
+              .inner-gauge-section
+            .borrowing-capacity-gauge-threshold{style: "left: #{@effective_borrowing_capacity[:threshold_capacity]}%"}
+              = render 'shared/tooltip', tooltip_data: {"#{@effective_borrowing_capacity[:threshold_capacity]}%" => nil}
+          .dashboard-gauge-labels
+            %span.borrowing-capacity-label-used= t('dashboard.your_account.effective_borrowing_capacity.used') + ": #{number_to_human(@effective_borrowing_capacity[:used_capacity][:absolute], units: 'global.currency')}"
+            %span= t('dashboard.your_account.effective_borrowing_capacity.unused') + ": #{number_to_human(@effective_borrowing_capacity[:unused_capacity][:absolute], units: 'global.currency')}"
+      .dashboard-anticipated-activity-graph
+        %h2= t('dashboard.your_account.anticipated_activity.title')
+        =image_tag('anticipated-activity.png', alt: 'Anticipated Activity Graph')
+      %table.dashboard-account-breakdown-table
+        %tbody
+          - @account_overview.each do |row|
+            %tr
+              %td{colspan: '3'}
+                %table.sub-table
+                  %tbody
+                    %tr
+                      %td.label= row[0]
+                      %td.value= fhlb_formated_currency_unit(row[1], '$')
+          - @sub_tables.each do |sub_table_name, sub_table|
+            %tr
+              %td{colspan: '3'}
+                %table.sub-table
+                  %thead
+                    %tr
+                      %th.label{colspan: '3'}= t("dashboard.your_account.table.#{sub_table_name}.title") #note that the key names in our locale/en.yml file must match the key names in the @sub_tables hash
+                  %tbody
+                    - sub_table.each do |row|
+                      %tr
+                        %td.label= row[0]
+                        %td.value= fhlb_formated_currency_unit(row[1], '$')
+  .column-3
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances'} do
+      - if @quick_advances_active
+        = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}
+      %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advances_active}"}
+        = t('dashboard.quick_advance.advances_desk_closed')
+        = link_to t('dashboard.quick_advance.advances_desk_closed_link'), '', data: {'flyout-trigger' => 'active'}
+      - if @quick_advances_active
+        %p.dashboard-vrc-overnight-message= t('global.vrc_overnight')
+        .dashboard-advances-rate
+          = @current_overnight_vrc
+          %span<> %
+      .quick-advance-last-updated-message{class: "#{'show-message' unless @quick_advances_active}"}
+        %p= t('dashboard.quick_advance.advance_last_updated', last_updated: @quick_advance_last_updated)
+        %p= t('dashboard.quick_advance.hours_of_operation_html', url: '')
+      - if @quick_advances_active
+        %table
+          %thead
+            %tr
+              %th{colspan: 2}
+              %th= t('dashboard.quick_advance.table.axes_labels.standard')
+              %th{colspan: 3}= t('dashboard.quick_advance.table.axes_labels.securities_backed')
+            %tr.quick-advance-column-labels
+              %th{colspan: 2}= t('dashboard.quick_advance.table.term')
+              %th= t('dashboard.quick_advance.table.whole_loan')
+              %th= t('dashboard.quick_advance.table.agency')
+              %th= t('dashboard.quick_advance.table.aaa')
+              %th= t('dashboard.quick_advance.table.aa')
+          %tbody
+        %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.initiate')
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), action_type: 'more-button'} do
+      %table.table-dashboard-previous-activity
+        %tbody
+          - @previous_activity.each_with_index do |row, i|
+            %tr
+              %td
+                = row[0]
+                %div.dashboard-module-content-light=row[2].strftime('%^b %d %Y')
+              - if i == 0
+                %td= fhlb_formatted_currency_whole(row[1])
+              - else
+                %td= fhlb_formatted_number(row[1])
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.anticipated_activity.title'), action_type: 'calendar-icon'} do
+      %table.table-dashboard-anticipated-activity
+        %tbody
+          - @anticipated_activity.each_with_index do |row, i|
+            - if row[1].nil?
+              - sgn = t('global.na')
+            - elsif row[1] > 0
+              - sgn = '+'
+            - else
+              - sgn = ''
+            %tr
+              %td
+                #{row[0]}
+                %div.dashboard-module-content-light #{row[2].strftime('%^b %d %Y')}
+              - if i == 0
+                %td
+                  #{sgn}#{number_to_currency(row[1], precision: 0)}
+                  %div.dashboard-module-content-light #{row[3].upcase}
+              - else
+                %td
+                  #{sgn}#{number_with_delimiter(row[1], precision: 0)}
+                  %div.dashboard-module-content-light #{row[3].upcase}
+      %button.total-button #{t('dashboard.anticipated_activity.total_maturing_today')} #{number_to_currency(@total_maturing_today, precision: 0)}
+  .column-3
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.reports.title'), classes: 'dashboard-module-reports'} do
+      = render 'shared/input_field', icon: :calendar, placeholder: t('dashboard.reports.as_of_yesterday'), location: :after
+      %button.edit-button #{t('dashboard.actions.edit')}
+      %table.table-dashboard-quick-reports
+        %tbody
+          %tr
+            %td
+              = render 'shared/check_box', id: t('dashboard.reports.daily')
+            %td
+              %label= t('dashboard.reports.daily') + ' (2)'
+              %div.dashboard-module-content-light #{t('dashboard.reports.advances_detail')}
+              %div.dashboard-module-content-light #{t('dashboard.reports.forward_commitments')}
+          %tr
+            %td
+              = render 'shared/check_box', id: t('dashboard.reports.weekly')
+            %td
+              %label= t('dashboard.reports.weekly') + ' (1)'
+          %tr
+            %td
+              = render 'shared/check_box', id: t('dashboard.reports.monthly')
+            %td
+              %label= t('dashboard.reports.monthly') + ' (4)'
+          %tr
+            %td
+              = render 'shared/check_box', id: t('dashboard.reports.quarterly')
+            %td
+              %label= t('dashboard.reports.quarterly') + ' (2)'
+          %tr
+            %td
+              = render 'shared/check_box', id: t('dashboard.reports.annually')
+            %td
+              %label= t('dashboard.reports.annually')
+      %a #{t('dashboard.actions.more')}
+      %button.report-button-left #{t('global.view')}
+      %span.report-split-button
+        %button.report-button-right #{t('dashboard.actions.download')}
+        %button.report-drop-down-right #{t('global.pdf')}
+    = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
+      %ul
+        %li= render 'dashboard/dashboard_contact', email: 'user@example.com', title: t('dashboard.contacts.type.nonstandard_advance'), name: 'Bob – RM', phone_number: '415–555–7283'
+        %li= render 'dashboard/dashboard_contact', email: 'otheruser@example.com', title: t('dashboard.contacts.type.general'), name: 'Teresa – FHLB Desk', phone_number: '415–555–7283'
+      = render 'shared/input_field', icon: :magnify, placeholder: t('dashboard.contacts.search_placeholder')

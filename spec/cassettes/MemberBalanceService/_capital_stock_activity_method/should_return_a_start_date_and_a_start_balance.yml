@@ -1,0 +1,126 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/capital_stock_balance/2014-12-01
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token=""
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '76'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      Date:
+      - Wed, 14 Jan 2015 01:50:59 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"open_balance":55460.0,"close_balance":56355.0,"balance_date":"2014-12-01"}'
+    http_version: 
+  recorded_at: Wed, 14 Jan 2015 01:50:59 GMT
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/capital_stock_balance/2014-12-31
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token=""
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '76'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      Date:
+      - Wed, 14 Jan 2015 01:50:59 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"open_balance":55460.0,"close_balance":56355.0,"balance_date":"2014-12-31"}'
+    http_version: 
+  recorded_at: Wed, 14 Jan 2015 01:50:59 GMT
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/capital_stock_activities/2014-12-01/2014-12-31
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token=""
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '120'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      Date:
+      - Wed, 14 Jan 2015 01:51:00 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"activities":[{"cert_id":"51115","share_number":5864.0,"trans_date":"2014-12-15","trans_type":"Purchase","dr_cr":"C"}]}'
+    http_version: 
+  recorded_at: Wed, 14 Jan 2015 01:51:00 GMT
+recorded_with: VCR 2.9.3

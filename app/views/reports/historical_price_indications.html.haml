@@ -1,0 +1,15 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.historical-price-indications-report.row
+  .report-header
+    %h1= t('reports.pages.price_indications.historical')
+    = render 'reports_header_buttons'
+    .report-inputs
+      = render layout: 'reports_date_picker_form', locals: {start_date: @start_date, end_date: @end_date, report_url: reports_historical_price_indications_url, presets: @picker_presets, single_date_picker: @single_date_picker, open_direction: 'left', insert_filter_before: true} do
+        .report-filter.collateral-type-filter
+          = render 'shared/dropdown', dropdown_name: 'historical_price_collateral_type', default_value: @collateral_type, default_text: @collateral_type_text, dropdown_options: @collateral_type_options
+        .report-filter.report-filter-wide.credit-type-filter
+          = render 'shared/dropdown', dropdown_name: 'historical_price_credit_type', default_value: @credit_type, default_text: @credit_type_text, dropdown_options: @credit_type_options
+  .report-main-body
+    %h2.report-table-title= t("reports.pages.price_indications.#{@credit_type}.#{@collateral_type}_table_title")
+    = render 'reports/reports_table', table_class: "#{@collateral_type}_#{@credit_type}_table", table_data: @table_data

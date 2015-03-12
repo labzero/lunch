@@ -1,0 +1,20 @@
+.row.sidebar-row.corporate-communications
+  %aside.sidebar.sidebar-filter.column-2x10-left.column-2x10-extended
+    = form_tag(corporate_communications_url, method: 'GET') do
+      = render 'shared/sidebar', sidebar_label: t('global.categories'), sidebar_options: @sidebar_options, sidebar_name: 'messages_filter', default_value: @selected_category_label, sidebar_type: 'nav'
+  .sidebar-row-main-content
+    .column-2x10-right.column-2x10-extended
+      %section
+        %h1= t('global.messages')
+        .corporate-communication-detail-actions
+          .corporate-communication-detail-navigation
+            =link_to t('global.prior'), (@prior_message ? corporate_communication_path(@filter, @prior_message) : '#'), class: "primary-button icon-arrow-left-before #{'active' if @prior_message}"
+            =link_to t('global.next'), (@next_message ? corporate_communication_path(@filter, @next_message) : '#'), class: "primary-button icon-arrow-right-after #{'active' if @next_message}"
+          .corporate-communication-detail-share
+            %button.primary-button.icon-forward-before= t('global.forward')
+            %button.primary-button.icon-print-before= t('global.print')
+        .corporate-communication-detail-wrapper
+          .corporate-communication-detail-intro
+            %h2= @message[:title]
+            %p= @message[:date_sent].strftime('%l:%M %p, %d %b %Y')
+          .corporate-communication-detail-reset= @message[:body].html_safe

@@ -1,0 +1,19 @@
+- placeholder ||= nil
+- icon ||= nil
+- field_class ||= []
+- field_data ||= {}
+- location ||= 'before'
+- field_name ||= nil
+- form_builder ||= nil
+- field_type ||= :text_field
+- label ||= nil
+- if label
+  - if form_builder
+    = form_builder.label label
+  - else
+    = label_tag label, for: field_name if label
+%span.input-field-container{class: icon ? "icon-#{icon}-#{location}" : nil}
+  - if form_builder
+    = form_builder.send field_type, field_name, {placeholder: placeholder, class: field_class, data: field_data}
+  - else
+    %input{placeholder: placeholder, class: field_class, data: field_data, name: field_name}

@@ -1,0 +1,92 @@
+%absolute-pseudoelement {
+  content: '';
+  position: absolute;
+}
+
+%hide-text {
+  text-indent: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+%horizontal-center {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+%vertical-center {
+  position: absolute;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+
+%center-both {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+%clearfix {
+  overflow: hidden;
+}
+
+%pseudoelement-clearfix {
+  &:before, &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+@mixin input-placeholder {
+  &::-webkit-input-placeholder {
+     @content;
+  }
+
+  &:-moz-placeholder { /* Firefox 18- */
+     @content;
+  }
+
+  &::-moz-placeholder {  /* Firefox 19+ */
+     @content;
+  }
+
+  &:-ms-input-placeholder {  
+     @content;
+  }
+  &.placeholder {
+    @content;
+  }
+}
+
+%pseudo-background-cover {
+  @extend %absolute-pseudoelement;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+@mixin pseudo-background-cover($background-color: transparent) {
+  &:before {
+    @extend %pseudo-background-cover;
+    background-color: $background-color;
+  }
+}
+
+@mixin full-bleed-background($bg_color: transparent) {
+  &:after {
+    content: '';
+    background-color: $bg_color;
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    z-index: -1;
+    top: 0;
+  }
+}

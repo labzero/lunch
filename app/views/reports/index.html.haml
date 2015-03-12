@@ -1,0 +1,25 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.reports.row
+  %h1= t('reports.title')
+  .setup-quick-reports
+    %h2= t('reports.setup_quick_advance.title')
+    %p= t('reports.setup_quick_advance.content_html', url: '/#')
+  - @reports.each do |category, reports|
+    %table.reports-table.table-striped
+      %thead
+        %tr
+          %th= t("reports.#{category}.title")
+          %th= t('global.updated')
+          %th= t('global.available_history')
+          %th
+      %tbody
+        - reports.each do |report, details|
+          %tr
+            %td.description-cell
+              %h3= details[:title] || t("reports.#{category}.#{report}.title")
+              %p= details[:summary] || t("reports.#{category}.#{report}.summary")
+            %td.updated-cell= details[:updated]
+            %td.history-cell= details[:available_history]
+            %td
+              =link_to t('global.view'), details[:route] || '#'

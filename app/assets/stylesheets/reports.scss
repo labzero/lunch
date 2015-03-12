@@ -1,0 +1,470 @@
+.reports {
+  h1 {
+    @extend %typography-page-title;
+    margin: 32px 0 17px;
+  }
+  a {
+    text-decoration: none;
+    color: $actionable-blue;
+  }
+}
+.setup-quick-reports {
+  width: (7 * $grid-column-width) + (6 * $gutter-width);
+  h2 {
+    @extend %typography-section-title;
+    margin: 0 0 5px;
+  }
+  p {
+    margin: 0 0 50px;
+  }
+}
+.reports-table {
+  @extend %table-striped;
+  border-bottom: 1px solid $light-blue;
+  margin-bottom: 70px;
+  thead {
+    border-bottom: 1px solid $light-blue;
+  }
+  td, th {
+    vertical-align: top;
+    text-align: left;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  th {
+    @extend %typography-header-text;
+    color: $medium-gray;
+    &:first-child {
+      @extend %typography-section-title;
+      padding-bottom: 10px;
+      color: $text-color;
+    }
+  }
+  td {
+    @extend %typography-subtitle;
+    padding-top: 15px;
+    height: 100px;
+    h3 {
+      @extend %typography-subtitle;
+      margin: 0 0 5px;
+    }
+    p {
+      margin: 0;
+      font-size: 0.8667rem;
+      font-weight: $normal-weight;
+    }
+    &:last-child {
+      text-transform: uppercase;
+    }
+  }
+  td:first-child, th:first-child {
+    width: (8 * $grid-column-width) + (7 * $gutter-width);
+    padding-right: $grid-column-width + $gutter-width;
+    padding-left: $gutter-width;
+  }
+  .updated-cell {
+    width: $grid-column-width + (2 * $gutter-width);
+  }
+  .history-cell {
+    width: ( 2 * $grid-column-width) + (2 * $gutter-width);
+  }
+}
+
+.report-header-buttons {
+  float: right;
+  margin-top: 32px;
+}
+
+.report {
+  h1 {
+    @extend %typography-page-title;
+    margin: 32px 0 17px;
+  }
+  input {
+    color: $medium-gray;
+    @include typography-field-placeholder;
+  }
+  .datepicker-input-field {
+    display: none;
+  }
+}
+
+.report-header {
+  @extend %pseudoelement-clearfix;
+  margin-bottom: 50px;
+  h1 {
+    float: left;
+  }
+}
+
+.report-datepicker, .report-filter {
+  width: (3 * $grid-column-width) + (2 * $gutter-width);
+  form {
+    display: none;
+  }
+  &.report-filter-wide {
+    width: 320px;
+    .dropdown-selection {
+      width: 320px;
+    }
+  }
+}
+
+.report-main-body {
+  margin-bottom: 100px;
+  section {
+    clear: both;
+  }
+  h3 {
+    @extend %typography-subtitle;
+    margin: 0;
+  }
+  small {
+    width: 540px;
+    display: block;
+    a {
+      color: $actionable-blue;
+    }
+    p {
+      margin: 0;
+    }
+  }
+}
+
+.report-summary-data {
+  display: inline-block;
+  width: (3 * $grid-column-width) + (2 * $gutter-width);
+  margin-right: $grid-column-width + (2 * $gutter-width);
+  margin-bottom: 40px;
+  &:nth-child(3) {
+    margin-right: 0;
+  }
+  p {
+    @extend %typography-report-summary;
+    color: $actionable-blue;
+    margin: 0;
+  }
+}
+
+.report-table-title {
+  @extend %typography-section-title;
+  margin: 0 0 15px;
+}
+
+.report-table {
+  margin-bottom: 50px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid $light-blue;
+  border-collapse: collapse;
+  line-height: 1;
+
+  td, th {
+    border: solid $light-blue;
+    border-width: 0 1px 1px 0;
+    padding: 10px 15px 10px 15px;
+    font-weight: inherit;
+    width: 1px; // Causes the table cell to shrink to fit
+    white-space: nowrap;
+  }
+
+  th {
+    text-align: left;
+  }
+
+  thead {
+    @extend %typography-table-heading;
+    background-color: $light-gray;
+  }
+
+  tbody {
+    @extend %typography-table-cell;
+    tr:nth-child(odd) {
+      background-color: $lightest-blue;
+    }
+  }
+
+  tfoot {
+    @extend %typography-table-total;
+    background-color: $medium-gray;
+    border-left: 1px solid $medium-gray;
+    border-right: 1px solid $medium-gray;
+    color: $white;
+  }
+
+  .report-cell-right {
+    text-align: right;
+  }
+
+  .report-cell-total {
+    border-right-width: 0px;
+  }
+
+  .report-cell-narrow {
+    padding-left: 10px;
+  }
+
+  .report-cell-expanding {
+    width: auto;
+  }
+
+  .sorting, .sorting_asc, .sorting_desc {
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .sorting_asc, .sorting_desc {
+    background-color: $secondary-gray;
+  }
+
+}
+.report-parent-table {
+  margin-bottom: 5px;
+}
+.report-sub-table {
+  float: right;
+  width: (7 * $grid-column-width) + (7 * $gutter-width);
+  margin-bottom: 0;
+  td:first-child {
+    width: (4 * $grid-column-width) + (5 * $gutter-width);
+  }
+}
+
+.table-allow-wrapping {
+  td, th {
+    white-space: normal;
+  }
+  th {
+    position: relative;
+    vertical-align: top;
+    &:after {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+  }
+}
+
+.report-tables-section {
+  @extend %clearfix;
+  margin-bottom: 50px;
+}
+
+.report-table-summary-data {
+  display: block;
+  float: right;
+  margin-right: 0;
+  text-align: right;
+}
+
+.report-inputs {
+  clear: both;
+  .report-datepicker, .report-filter {
+    float: left;
+  }
+}
+
+.report-filter {
+  margin-left: 10px;
+}
+
+.sta-statement {
+  .report-table {
+    th {
+      box-sizing: border-box;
+    }
+    th:nth-child(2) {
+      min-width: 160px;
+    }
+
+    th:nth-child(4), th:nth-child(5), th:nth-child(6) {
+      min-width: 105px;
+    }
+  }
+}
+
+.advances-detail-report {
+  .advance-details {
+    position: relative;
+    display: none;
+    padding: 20px 25px;
+    h3 {
+      margin-bottom: 10px;
+    }
+    .left-column, .right-column {
+      float:left;
+      margin-right: 20px;
+    }
+    .left-column {
+      width: 355px;
+    }
+    .right-column {
+      width: 385px;
+    }
+    table {
+      width: 100%;
+      border-top: 1px solid $secondary-gray;
+      &:last-child {
+        border-bottom: 1px solid $secondary-gray;
+      }
+      td {
+        border: none;
+        padding: 10px 0 0;
+
+      }
+      tr {
+        background-color: inherit;
+      }
+      tr:last-child td {
+        padding-bottom: 10px;
+      }
+      &:last-child {
+        td:first-child {
+          vertical-align: top;
+        }
+        td:last-child {
+          line-height: $tight-line-height;
+        }
+      }
+    }
+    .hide-detail-view {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      margin: 0;
+      text-transform: uppercase;
+      color: $actionable-blue;
+      cursor: pointer;
+    }
+  }
+  .detail-view {
+    .advance-details {
+      display: table-cell;
+    }
+  }
+  .detail-view > td:not(.advance-details) {
+    display: none;
+  }
+}
+
+.advances-details-report-table {
+  td, th {
+    width: auto;
+    box-sizing: border-box;
+    padding: 10px;
+  }
+  th {
+    &:nth-child(5) {
+      min-width: 78px;
+    }
+    &:nth-child(6) {
+      min-width: 105px;
+    }
+    &:nth-child(7) {
+      min-width: 70px;
+    }
+    &:nth-child(8) {
+      min-width: 101px;
+    }
+    &:nth-child(9) {
+      min-width: 85px;
+    }
+    &:nth-child(10) {
+      min-width: 136px;
+    }
+    &:last-child {
+      display: none;
+    }
+  }
+  tbody td {
+    &:nth-child(11) {
+      text-transform: uppercase;
+      color: $actionable-blue;
+      cursor: pointer;
+    }
+    table {
+      td:first-child {
+        width: 210px;
+        @extend %typography-table-heading;
+        color: $medium-gray;
+      }
+      td:last-child {
+        @extend %typography-table-heading;
+      }
+    }
+  }
+  tfoot {
+    td {
+      &:nth-child(1), &:nth-child(2), &:nth-child(4), &:nth-child(6) {
+        border-right: none;
+      }
+    }
+  }
+}
+
+.historical-price-indications-report {
+  .report-filter:first-of-type {
+    margin-left: 0;
+  }
+  .report-datepicker {
+    margin-left: 10px;
+  }
+  .report-table {
+    th {
+      box-sizing: border-box;
+      &:first-child {
+        width: 82px;
+      }
+    }
+  }
+}
+
+.standard_frc_table, .standard_vrc_table, .sbc_frc_table, .sbc_vrc_table {
+  th {
+    width: 64px;
+  }
+}
+
+.standard_vrc_table, .sbc_vrc_table {
+  width: auto;
+  &.report-table {
+    th:first-child {
+      width: 85px;
+    }
+  }
+}
+
+.standard_1m_libor_table, .standard_3m_libor_table, .standard_6m_libor_table, .standard_daily_prime_table, .sbc_1m_libor_table, .sbc_3m_libor_table, .sbc_6m_libor_table {
+  width: auto;
+  border-top: none;
+  border-left: none;
+  th, td {
+    border: 1px solid $light-blue;
+  }
+  &.report-table {
+    th:first-child {
+      width: 85px;
+    }
+  }
+  .table-heading-row {
+    th:first-child {
+      border: none;
+      background-color: $white;
+    }
+    th:last-child {
+      text-align: center;
+    }
+  }
+}
+
+.currency_alignment {
+  width: 9em;
+  display: block;
+  .alignleft {
+    float: left;
+  }
+  .alignright {
+    float: right;
+  }
+}

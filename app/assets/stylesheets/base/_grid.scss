@@ -1,0 +1,77 @@
+%row {
+  width: $row-width;
+  overflow: hidden;
+  margin: 0 auto;
+  padding: 0 $row-padding;
+  display: block;
+  box-sizing: border-box;
+}
+
+.row {
+  @extend %row;
+}
+
+@mixin column {
+  float: left;
+  margin-left: $gutter-width;
+  box-sizing: border-box;
+  &:first-child {
+    margin-left: 0;
+  }
+}
+
+%column {
+  @include column;
+}
+
+.column-1 {
+  @extend %column;
+  width: $column-1-width;
+}
+
+.column-3 {
+  @extend %column;
+  width: $column-3-width;
+}
+
+.column-3-span-2 {
+  @extend %column;
+  width: ($grid-column-width * 8) + ($gutter-width * 7);
+}
+
+.column-2-left {
+  @extend %column;
+  width: ($grid-column-width * 2) + $gutter-width;
+}
+
+.column-2-right {
+  @extend %column;
+  width: ($grid-column-width * 10) + ($gutter-width * 9);
+}
+
+.column-4x8-left {
+  @extend %column;
+  width: ($grid-column-width * 4) + ($gutter-width * 3);
+}
+
+.column-4x8-right {
+  @extend %column;
+  width: $column-4x8-right-width;
+}
+
+.column-2x10-left {
+  @extend %column;
+  width:($grid-column-width * 2) + ($gutter-width * 1.5);
+  &.column-2x10-extended {
+    width:($grid-column-width * 2) + ($gutter-width * 2.5);
+  }
+}
+
+.column-2x10-right {
+  @extend %column;
+  width:($grid-column-width * 10) + ($gutter-width * 9.5);
+  margin-left: 0;
+  &.column-2x10-extended {
+    width:($grid-column-width * 10) + ($gutter-width * 8.5);
+  }
+}

@@ -1,0 +1,112 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://appservices/CapitalStockServicesAuth/CapitalStockService.svc?wsdl
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - ! '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - private
+      Content-Type:
+      - text/xml; charset=UTF-8
+      Server:
+      - Microsoft-IIS/7.5
+      X-Aspnet-Version:
+      - 2.0.50727
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Fri, 13 Feb 2015 22:37:36 GMT
+      Content-Length:
+      - '2851'
+    body:
+      encoding: US-ASCII
+      string: <?xml version="1.0" encoding="utf-8"?><wsdl:definitions name="CapitalStockService"
+        targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex"
+        xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+        xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"
+        xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+        xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+        xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:i0="http://fhlbsf.com/contract/capitalstockfobo/v1" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"><wsdl:import namespace="http://fhlbsf.com/contract/capitalstockfobo/v1"
+        location="http://sfdw64netapp1.fhlbsf-i.com/CapitalStockServicesAuth/CapitalStockService.svc?wsdl=wsdl0"/><wsdl:types/><wsdl:binding
+        name="CustomBinding_ICapitalStockPort" type="i0:ICapitalStockService"><soap:binding
+        transport="http://schemas.xmlsoap.org/soap/http"/><wsdl:operation name="getCapitalStockLimits"><soap:operation
+        soapAction="http://fhlbsf.com/contract/capitalstockfobo/v1/ICapitalStockService/getCapitalStockLimits"
+        style="document"/><wsdl:input name="CapitalStockLimitRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="CapitalStockLimitResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation><wsdl:operation
+        name="getCapitalStockRequirements"><soap:operation soapAction="http://fhlbsf.com/contract/capitalstockfobo/v1/ICapitalStockService/getCapitalStockRequirements"
+        style="document"/><wsdl:input name="CapitalStockCalculatorRequest"><soap:body
+        use="literal"/></wsdl:input><wsdl:output name="CapitalStockCalculatorResponse"><soap:body
+        use="literal"/></wsdl:output></wsdl:operation><wsdl:operation name="getCapitalStockCalculatorData"><soap:operation
+        soapAction="http://fhlbsf.com/contract/capitalstockfobo/v1/ICapitalStockService/getCapitalStockCalculatorData"
+        style="document"/><wsdl:input name="CapitalStockCalculatorDataRequest"><soap:body
+        use="literal"/></wsdl:input><wsdl:output name="CapitalStockCalculatorDataResponse"><soap:body
+        use="literal"/></wsdl:output></wsdl:operation></wsdl:binding><wsdl:service
+        name="CapitalStockService"><wsdl:port name="CustomBinding_ICapitalStockPort"
+        binding="tns:CustomBinding_ICapitalStockPort"><soap:address location="http://sfdw64netapp1.fhlbsf-i.com/CapitalStockServicesAuth/CapitalStockService.svc"/></wsdl:port></wsdl:service></wsdl:definitions>
+    http_version:
+  recorded_at: Fri, 13 Feb 2015 22:37:36 GMT
+- request:
+    method: post
+    uri: http://sfdw64netapp1.fhlbsf-i.com/CapitalStockServicesAuth/CapitalStockService.svc
+    body:
+      encoding: US-ASCII
+      string: <?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:v1="http://fhlbsf.com/schema/msg/capitalstockfobo/v1"
+        xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+        xmlns:v11="http://fhlbsf.com/schema/canonical/common/v1" xmlns:v12="http://fhlbsf.com/schema/canonical/capitalstockfobo/v1"><soapenv:Header><wsse:Security><wsse:UsernameToken><wsse:Username>FHLBSF\\svcsys_fobo_mdtest</wsse:Username><wsse:Password>RiYPHJfc9g2L6eAisIQX3QWu4DJs75</wsse:Password></wsse:UsernameToken></wsse:Security></soapenv:Header><soapenv:Body><v1:capitalStockCalculatorRequest><v1:criteria><v12:totalCapitalStock>1000000</v12:totalCapitalStock><v12:advancesOutstanding>1000</v12:advancesOutstanding><v12:mpfUnpaidBalance>0</v12:mpfUnpaidBalance><v12:mortgageRelatedAssets>300300</v12:mortgageRelatedAssets></v1:criteria></v1:capitalStockCalculatorRequest></soapenv:Body></soapenv:Envelope>
+    headers:
+      Soapaction:
+      - ! '"http://fhlbsf.com/contract/capitalstockfobo/v1/ICapitalStockService/getCapitalStockRequirements"'
+      Content-Type:
+      - text/xml;charset=UTF-8
+      Content-Length:
+      - '1075'
+      Accept:
+      - ! '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 500
+      message: OK
+    headers:
+      Cache-Control:
+      - private
+      Content-Type:
+      - text/xml; charset=utf-8
+      Server:
+      - Microsoft-IIS/7.5
+      X-Aspnet-Version:
+      - 2.0.50727
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Fri, 13 Feb 2015 22:37:36 GMT
+      Content-Length:
+      - '1765'
+    body:
+      encoding: US-ASCII
+      string: <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><capitalStockCalculatorResponse
+        xmlns="http://fhlbsf.com/schema/msg/capitalstockfobo/v1"><description i:nil="true"
+        xmlns="http://fhlbsf.com/schema/canonical/common/v1" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"/><requestTime
+        xmlns="http://fhlbsf.com/schema/canonical/common/v1">0001-01-01T00:00:00</requestTime><transactionResult
+        xmlns="http://fhlbsf.com/schema/canonical/common/v1">Success</transactionResult><capitalStockRequirements
+        xmlns:a="http://fhlbsf.com/schema/canonical/capitalstockfobo/v1" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><a:advancesPercentage>0.03</a:advancesPercentage><a:mpfPercentage>0.03</a:mpfPercentage><a:advancesStockRequirement>100</a:advancesStockRequirement><a:unroundedAdvancesStockRequirement>30.00</a:unroundedAdvancesStockRequirement><a:mpfStockRequirement>0</a:mpfStockRequirement><a:unroundedMpfStockRequirement>0.00</a:unroundedMpfStockRequirement><a:mavStockRequirement>300300</a:mavStockRequirement><a:unroundedMavStockRequirement>300300</a:unroundedMavStockRequirement><a:capitalStockRequirement>300300</a:capitalStockRequirement><a:unroundedCapitalStockRequirement>300300</a:unroundedCapitalStockRequirement><a:advAndMpfStockRequirement>100</a:advAndMpfStockRequirement><a:unroundedAdvAndMpfStockRequirement>30.00</a:unroundedAdvAndMpfStockRequirement><a:excessDeficiency>699700</a:excessDeficiency><a:stockPurchaseRequirement>0</a:stockPurchaseRequirement><a:unusedStock>999900</a:unusedStock><a:unroundedUnusedStock>999970.00</a:unroundedUnusedStock><a:additionalAdvances>33330000</a:additionalAdvances><a:additionalMpf>33330000</a:additionalMpf></capitalStockRequirements></capitalStockCalculatorResponse></s:Body></s:Envelope>
+    http_version:
+  recorded_at: Fri, 13 Feb 2015 22:37:37 GMT
+recorded_with: VCR 2.9.3

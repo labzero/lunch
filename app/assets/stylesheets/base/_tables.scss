@@ -1,0 +1,18 @@
+%table-striped {
+  width: 100%;
+  margin-bottom: 25px;
+  @extend %typography-paragraph-tight;
+  tbody {
+    tr:nth-child(odd) td,
+    tr:nth-child(odd) th {
+      background: $lightest-blue;
+    }
+  }
+}
+
+td {
+  .number-negative {
+    display: inline-block;
+    margin-right: -3px;
+  }
+}

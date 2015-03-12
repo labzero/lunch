@@ -1,0 +1,92 @@
+$button-vertical-padding: 7px;
+%button {
+  padding: $button-vertical-padding 10px;
+  text-transform: uppercase;
+  font-size: 0.867rem;
+  border-radius: $default-border-radius;
+  background: transparent;
+  border: none;
+  outline: none;
+  text-decoration: none;
+  display: inline-block;
+  line-height: 1;
+  font-weight: $normal-weight;
+}
+
+.primary-button {
+  @extend %button;
+  color: $white;
+  background-color: $actionable-blue;
+}
+
+.total-button {
+  @extend .primary-button;
+  text-transform: none;
+  width: 100%;
+  text-align: justify;
+}
+
+.edit-button {
+  @extend %button;
+  background-color: $secondary-gray;
+  float: right;
+  &:before {
+    display: inline-block;
+    padding-right: 5px;
+    @extend %icon-font;
+    content: "#{$icon-edit}";
+  }
+}
+
+.down-button {
+  @extend %button;
+  color: $actionable-blue;
+  &:after {
+    display: inline-block;
+    @extend %icon-font;
+    content: "#{$icon-chevron}";
+    padding-left: 5px;
+    font-size: 11px;
+  }
+}
+
+.more-button {
+  &:after {
+    @extend %icon-font;
+    content: " #{$icon-arrow-right}";
+  }
+}
+
+.save-button {
+  @extend %button;
+  font-size: 1rem;
+  padding: 10px 0;
+  width: 2 * $grid-column-width + $gutter-width;
+  float: right;
+}
+
+.report-button-left {
+  @extend .primary-button;
+}
+
+.report-split-button {
+  font-size: 0; // get rid of whitespace between buttons
+  .report-button-right {
+    @extend .primary-button;
+    border-bottom-left-radius: $default-border-radius;
+    border-top-left-radius: $default-border-radius;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+  }
+  .report-drop-down-right {
+    @extend .down-button;
+    border-bottom-right-radius: $default-border-radius;
+    border-top-right-radius: $default-border-radius;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    vertical-align: bottom;
+    border: 1px solid $actionable-blue;
+    padding-bottom: $button-vertical-padding - 1px;
+    padding-top: $button-vertical-padding - 1px;
+  }
+}

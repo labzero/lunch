@@ -1,0 +1,73 @@
+%input-field-styling {
+  border: 1px solid $actionable-blue;
+  border-radius: $default-border-radius;
+  color: $text-color;
+  padding: 5px 0 3px 10px;
+  box-sizing: border-box;
+  width: 100%;
+  display: inline-block;
+  height: 30px;
+  line-height: normal;
+  @include input-placeholder {
+    color: $medium-gray;
+    @include typography-field-placeholder;
+  }
+}
+
+.input-field-container {
+  position: relative;
+  display: inline-block;
+  line-height: $input-field-height;
+  height: $input-field-height; // fixes a phantom 1px whitespace occurring under input-field-containers
+  overflow: hidden;
+  width: 100%;
+  @extend %typography-field-value;
+  &:before {
+    position: absolute;
+    top: 10px;
+    left: 8px;
+    z-index: 1;
+    color: $actionable-blue;
+    font-size: 0.75rem;
+  }
+  &:after {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    padding: 5px 8px;
+    z-index: 0;
+    background: $actionable-blue;
+    color: white;
+    font-size: 1.35rem;
+    border-bottom-right-radius: $default-border-radius;
+    border-top-right-radius: $default-border-radius;
+  }
+  input {
+    @extend %input-field-styling;
+  }
+
+  &[class*=" icon-"], &[class^="icon-"] {
+    &[class$="-before"], &[class*="-before "] {
+      input {
+        padding-left: 30px;
+      }
+    }
+  }
+}
+
+fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+label {
+  @extend %typography-field-value;
+  color: $medium-gray;
+}
+
+.form-error {
+  color: $alert-red;
+  @extend %typography-error-message;
+  margin-bottom: 30px;
+}

@@ -1,0 +1,37 @@
+---
+
+default: &default
+  primary_user:
+    username: <%= ENV['CUCUMBER_PRIMARY_USERNAME'] || 'local' %>
+    password: <%= ENV['CUCUMBER_PRIMARY_PASSWORD'] || 'development' %>
+
+local:
+  <<: *default
+
+dev:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default
+
+# insert configs once known
+#qa:
+#  app_host: 'qa.foo.com'
+#  user1:
+#    username:
+#    password:
+#
+#staging:
+#  app_host: 'stg.foo.com'
+#  user1:
+#    username:
+#    password:
+#
+#production:
+#  app_host: 'www.foo.com'
+#  user1:
+#    username:
+#    password:

@@ -1,0 +1,44 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/advances_details/2015-01-20
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '3590'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      Date:
+      - Fri, 13 Feb 2015 01:44:54 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"as_of_date":"2015-01-20","structured_product_indication_date":null,"advances_details":[{"trade_date":"0007-08-31","funding_date":"2007-08-31","maturity_date":"2015-02-08","current_par":20000000,"interest_rate":4.15,"next_interest_pay_date":null,"accrued_interest":156777.78,"estimated_next_interest_payment":null,"interest_payment_frequency":"Quarterly","day_count_basis":"Actual/360","advance_type":"SBC-PUTABLE-AG","advance_number":"0126609","discount_program":null,"prepayment_fee_indication":null,"notes":null,"structure_product_prepay_valuation_date":null,"open_vrc_indicator":false},{"trade_date":"2007-09-04","funding_date":"2007-09-04","maturity_date":"2015-02-07","current_par":5000000,"interest_rate":4.81,"next_interest_pay_date":null,"accrued_interest":103548.61,"estimated_next_interest_payment":null,"interest_payment_frequency":"Semiannually","day_count_basis":"Actual/360","advance_type":"SBC-FRC-AG","advance_number":"0126718","discount_program":null,"prepayment_fee_indication":null,"notes":null,"structure_product_prepay_valuation_date":null,"open_vrc_indicator":false},{"trade_date":"2007-08-16","funding_date":"2007-08-16","maturity_date":"2015-01-29","current_par":8000000,"interest_rate":4.82,"next_interest_pay_date":null,"accrued_interest":6321.31,"estimated_next_interest_payment":null,"interest_payment_frequency":"Monthend","day_count_basis":"Actual/Actual","advance_type":"FRC-REGULAR","advance_number":"0125465","discount_program":null,"prepayment_fee_indication":null,"notes":null,"structure_product_prepay_valuation_date":null,"open_vrc_indicator":false},{"trade_date":"2007-10-11","funding_date":"2007-10-11","maturity_date":"2015-02-06","current_par":10000000,"interest_rate":4.86,"next_interest_pay_date":null,"accrued_interest":7967.21,"estimated_next_interest_payment":null,"interest_payment_frequency":"Monthend","day_count_basis":"Actual/Actual","advance_type":"FRC-REGULAR","advance_number":"0129630","discount_program":null,"prepayment_fee_indication":null,"notes":null,"structure_product_prepay_valuation_date":null,"open_vrc_indicator":false},{"trade_date":"2007-10-24","funding_date":"2007-10-24","maturity_date":"2015-02-18","current_par":10000000,"interest_rate":4.29,"next_interest_pay_date":null,"accrued_interest":125125,"estimated_next_interest_payment":null,"interest_payment_frequency":"Semiannually","day_count_basis":"Actual/360","advance_type":"SBC-FRC-AG","advance_number":"0130681","discount_program":null,"prepayment_fee_indication":null,"notes":null,"structure_product_prepay_valuation_date":null,"open_vrc_indicator":false},{"trade_date":"2007-10-24","funding_date":"2007-10-24","maturity_date":"2015-01-29","current_par":10000000,"interest_rate":4.77,"next_interest_pay_date":null,"accrued_interest":139125,"estimated_next_interest_payment":null,"interest_payment_frequency":"Semiannually","day_count_basis":"Actual/360","advance_type":"SBC-ARC-LIBOR-AG","advance_number":"0130682","discount_program":null,"prepayment_fee_indication":null,"notes":null,"structure_product_prepay_valuation_date":null,"open_vrc_indicator":false},{"trade_date":"2007-11-09","funding_date":"2007-11-09","maturity_date":"2015-02-16","current_par":15000000,"interest_rate":3.72,"next_interest_pay_date":null,"accrued_interest":137950,"estimated_next_interest_payment":null,"interest_payment_frequency":"Quarterly","day_count_basis":"Actual/360","advance_type":"SBC-PUTABLE-AG","advance_number":"0132090","discount_program":null,"prepayment_fee_indication":null,"notes":null,"structure_product_prepay_valuation_date":null,"open_vrc_indicator":false}]}'
+    http_version: 
+  recorded_at: Fri, 13 Feb 2015 01:44:54 GMT
+recorded_with: VCR 2.9.3

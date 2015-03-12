@@ -1,0 +1,55 @@
+.main-nav
+  .row
+    = link_to(t('welcome.logo'), dashboard_url, class: 'logo')
+    %ul
+      %li= t('nav.primary.welcome', name: 'Alma')
+      %li.nav-logout= link_to(t('nav.primary.logout'), destroy_user_session_url, method: :delete)
+      %li.nav-settings= link_to('', '/settings', class: 'icon-gear-after')
+      %li.nav-mail= link_to('', corporate_communications_path('all'), class: 'icon-envelope-after')
+      %li
+        = render 'shared/input_field', icon: :magnify, placeholder: t('nav.primary.search'), field_class: :'nav-search'
+.secondary-nav
+  %nav.row
+    %ul<>
+      %li<>= link_to(t('nav.secondary.advances'), '#', class: 'nav-menu')
+      %li<>= link_to(t('nav.secondary.letters_of_credit'), '#', class: 'nav-menu')
+      %li<>= link_to(t('nav.secondary.mortgages'), '#', class: 'nav-menu')
+      %li<>= link_to(t('nav.secondary.securities'), '#', class: 'nav-menu')
+      %li<>
+        = link_to(t('reports.title'), reports_path, class: 'nav-menu')
+        %ul.nav-dropdown<>
+          %li<>
+            = link_to(t('reports.price_indications.title'), reports_path)
+            %ul.nav-dropdown-nested
+              %li= link_to(t('reports.price_indications.current.title'), reports_path)
+              %li= link_to(t('reports.price_indications.historical.title'), reports_historical_price_indications_path)
+          %li<>
+            = link_to(t('reports.credit.title'), reports_path)
+            %ul.nav-dropdown-nested
+              %li= link_to(t('reports.credit.advances_detail.title'), reports_advances_path)
+              %li= link_to(t('reports.credit.interest_rate.title'), reports_path)
+              %li= link_to(t('reports.credit.letters_of_credit.title'), reports_path)
+              %li= link_to(t('reports.credit.forward_commitments.title'), reports_path)
+              %li= link_to(t('reports.credit.parallel_shift.title'), reports_path)
+          %li<>
+            = link_to(t('reports.collateral.title'), reports_path)
+            %ul.nav-dropdown-nested
+              %li= link_to(t('reports.collateral.borrowing_capacity.title'), reports_borrowing_capacity_path)
+              %li= link_to(t('reports.collateral.mcu.title'), reports_path)
+          %li<>
+            = link_to(t('reports.capital_stock.title'), reports_path)
+            %ul.nav-dropdown-nested
+              %li= link_to(t('reports.capital_stock.trial_balance.title'), reports_path)
+              %li= link_to(t('reports.capital_stock.activity.title'), reports_capital_stock_activity_path)
+              %li= link_to(t('reports.capital_stock.dividend_transaction.title'), reports_path)
+              %li= link_to(t('reports.capital_stock.dividend_statement.title'), reports_path)
+          %li<>
+            = link_to(t('reports.settlement.account.title'), reports_settlement_transaction_account_path)
+          %li<>
+            = link_to(t('reports.securities.title'), reports_path)
+            %ul.nav-dropdown-nested
+              %li= link_to(t('reports.securities.transactions.title'), reports_path)
+              %li= link_to(t('reports.securities.cash_projections.title'), reports_path)
+              %li= link_to(t('reports.securities.current.title'), reports_path)
+              %li= link_to(t('reports.securities.monthly.title'), reports_path)
+              %li= link_to(t('reports.securities.services_monthly.title'), reports_path)

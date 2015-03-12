@@ -1,0 +1,23 @@
+%h2.quick-advance-preview-subheading= t('dashboard.quick_advance.preview.valid.title')
+.quick-advance-preview.icon-alert-before
+  %p.quick-advance-preview-message= t('dashboard.quick_advance.preview.valid.p')
+  .quick-advance-summary
+    %p
+      = t('dashboard.quick_advance.preview.field_headings.advance_amount') +':'
+      %span= '$' + number_with_delimiter(advance_amount, precision: 0)
+    %dl
+      %dt= t('dashboard.quick_advance.preview.field_headings.advance_type') +':'
+      %dd= advance_type
+      %dt= t('dashboard.quick_advance.preview.field_headings.interest_day_count') +':'
+      %dd= interest_day_count
+      %dt= t('dashboard.quick_advance.preview.field_headings.payment_on') +':'
+      %dd= payment_on
+    %dl
+      %dt= t('dashboard.quick_advance.preview.field_headings.advance_term') +':'
+      %dd= advance_term
+      %dt= t('dashboard.quick_advance.preview.field_headings.funding_date') +':'
+      %dd= funding_date
+      %dt= t('dashboard.quick_advance.preview.field_headings.maturity_date') +':'
+      %dd= maturity_date
+%button.quick-advance-back-button.icon-arrow-left-before= t('dashboard.quick_advance.buttons.back')
+%button.primary-button.confirm-quick-advance{data: {'advance-type' => advance_type, 'advance-term' => advance_term, 'advance-rate' => advance_rate}}= t('dashboard.quick_advance.buttons.initiate')

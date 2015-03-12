@@ -1,0 +1,12 @@
+.graph-tooltip-label {
+  @extend %typography-graph-label;
+  font-family: $default-font-family;
+  color: $text-color;
+  padding-right: 5px;
+}
+
+.graph-tooltip-value {
+  @extend %typography-graph-data;
+  font-family: $default-font-family;
+  color: $text-color;
+}

@@ -1,0 +1,423 @@
+.dashboard {
+  margin-top: $gutter-width;
+  overflow: visible;
+  position: relative;
+}
+
+%dashboard-module-base-styling {
+  border: 1px solid $light-blue;
+  border-radius: $default-border-radius;
+  background: $white;
+  box-shadow: 0px 0px 6px rgba(0,0,0, .09);
+  margin-bottom: 20px;
+}
+
+%dashboard-module-header {
+  border-bottom: 1px solid $light-blue;
+  padding: 15px 20px;
+  @extend %clearfix;
+  h1 {
+    float: left;
+  }
+  button {
+    float: right;
+  }
+}
+
+.dashboard-module {
+  @extend %dashboard-module-base-styling;
+  h1 {
+    @extend %typography-section-title;
+    margin: 0;
+  }
+  h2 {
+    @extend %typography-subtitle;
+  }
+  header {
+    @extend %dashboard-module-header;
+  }
+  .icon-alt-text {
+    overflow: hidden;
+    width: 0;
+    height: 0;
+  }
+  .icon {
+    @extend %large-icon-font;
+    color: $actionable-blue;
+    float: right;
+  }
+}
+
+%dashboard-module-chromeless {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  header, .dashboard-module-content {
+    border: none;
+    padding: 0 0 20px 0;
+  }
+}
+
+.table-dashboard-previous-activity, .table-dashboard-anticipated-activity {
+  @extend %table-striped;
+  td, th {
+    height: 46px;
+  }
+  td {
+    padding-top: 11px;
+    padding-right: 10px;
+    text-align: right;
+    vertical-align: top;
+  }
+  td:first-child {
+    padding-top: 11px;
+    padding-left: 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+}
+
+.table-dashboard-quick-reports {
+  @extend %table-striped;
+  margin-top: 22px;
+  tbody {
+    td, th {
+      height: 12px;
+    }
+    td {
+      padding-top: 10px;
+      padding-bottom: 10px;
+      padding-right: 0;
+      text-align: left;
+      vertical-align: top;
+    }
+    td:first-child {
+      padding-left: 10px;
+      vertical-align: top;
+    }
+  }
+}
+
+.dashboard-module-content {
+  padding: 20px;
+}
+
+.dashboard-module-content-light {
+  @extend %typography-table-annotation;
+}
+
+.dashboard-module-contact {
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    margin: 0 0 20px 0;
+    padding: 0;
+    &:last-child {
+      margin-bottom: 30px;
+    }
+  }
+}
+
+.dashboard-contact {
+  text-decoration: none;
+  color: inherit;
+  h2 {
+    @extend %typography-subtitle;
+    margin: 0;
+  }
+  p {
+    @extend %typography-paragraph-tight;
+    margin: 0;
+  }
+}
+
+.dashboard-contact-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 27px;
+  background-color: $light-blue;
+  float: left;
+  margin-right: 10px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-image: image-url('placeholder-usericon.svg');
+}
+
+%dashboard-module-advances-icon-dollar {
+  font-size: 0.8rem;
+  left: 11px;
+  top: 9px;
+}
+
+%dashboard-module-advances-input {
+  padding-left: 25px;
+}
+
+.dashboard-module-advances {
+  a {
+    color: $actionable-blue;
+    text-decoration: none;
+  }
+  p {
+    color: $text-color;
+  }
+  .icon-dollar-before:before {
+    @extend %dashboard-module-advances-icon-dollar;
+  }
+  .input-field-container {
+    input {
+      @extend %dashboard-module-advances-input;
+    }
+  }
+  .dashboard-module-content {
+    color: $actionable-blue;
+  }
+  table, .initiate-quick-advance {
+    display: none;
+  }
+}
+
+.quick-advance-desk-closed-message {
+  margin-bottom: 0;
+}
+
+.quick-advance-last-updated-message {
+  display: none;
+}
+
+p.dashboard-vrc-overnight-message {
+  font-weight: $semibold-weight;
+  margin-bottom: 5px;
+  color: $actionable-blue;
+  &:after {
+    @extend %icon-font;
+    content: " #{$icon-chevron}";
+    font-size: 0.8rem;
+  }
+}
+
+.dashboard-advances-rate {
+  font-weight: $extralight-weight;
+  font-size: 5rem;
+  line-height: 1;
+  margin-bottom: -17px; // UGH. Design doesn't account for descender spacing
+  span {
+    vertical-align: top;
+    font-size: 3rem;
+    display: inline-block;
+    margin-top: 3px;
+  }
+}
+
+.dashboard-module-your-account {
+  @extend %dashboard-module-chromeless;
+  table {
+    width: 100%;
+  }
+  header {
+    padding-bottom: 10px;
+  }
+  h2 {
+    margin: 0;
+  }
+}
+
+$breakdown-table-label-width: 195px;
+$breakdown-table-currency-width: 10px;
+.dashboard-account-breakdown-table {
+  @extend %typography-dashboard-account-summary;
+  th {
+    @extend %typography-dashboard-account-summary;
+    text-align: left;
+  }
+  th, .label, .currency, .value {
+    padding: 5px 0;
+    box-sizing: border-box;
+  }
+  .label {
+    width: $breakdown-table-label-width;
+    padding-left: 20px;
+  }
+  .currency {
+    width: $breakdown-table-currency-width;
+    text-align: right;
+  }
+  .value {
+    text-align: right;
+    padding-right: 20px; // replace with standard sizing once we move to fixed layout
+  }
+  th {
+    background: $white;
+    border-top: 1px solid $secondary-gray;
+  }
+  .sub-table td.label {
+    padding-left: 30px;
+  }
+}
+
+.dashboard-module-market {
+  @extend %dashboard-module-chromeless;
+  .dashboard-module-content {
+    padding-bottom: 0;
+  }
+}
+
+.dashboard-market-graph {
+  height: 50px;
+}
+
+.dashboard-anticipated-activity-graph {
+  h2 {
+    margin-bottom: 5px;
+  }
+  img {
+    width: 100%; // don't worry about this styling, it will be removed once we add the real graph
+  }
+}
+
+.dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-effective-borrowing-capacity, .dashboard-anticipated-activity-graph {
+  clear: both; // using instead of extending %clearfix, because we want overflow to be visible for tooltip
+}
+
+.dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-effective-borrowing-capacity {
+  margin-bottom: 8px;
+}
+
+.dashboard-gauge {
+  position: relative;
+  height: 25px;
+  background: $white;
+  border-radius: 3px;
+  padding: 4px 4px 4px 2px;
+  border: 1px solid $light-blue;
+  box-sizing: border-box;
+  .gauge-section {
+    position: relative;
+    height: 100%;
+    float: left;
+    padding-left: 2px;
+    box-sizing: border-box;
+    &:hover {
+      .tooltip {
+        display: block;
+      }
+    }
+  }
+  .inner-gauge-section {
+    width: 100%;
+    height: 100%;
+    border-radius: 3px;
+  }
+}
+
+.dashboard-gauge-labels {
+  @extend %typography-dashboard-gauge-label;
+  @extend %clearfix;
+  span:first-child {
+    float: left;
+  }
+  span:last-child {
+    float: right;
+  }
+}
+
+.collateral-gauge-label-mortgages {
+  color: $light-green;
+}
+
+.collateral-gauge-label-securities, .total-securities-label-pledged  {
+  color: $dark-green;
+}
+
+.collateral-gauge-mortgages .inner-gauge-section {
+  background: $light-green;
+}
+
+.collateral-gauge-securities, .total-securities-gauge-pledged {
+  .inner-gauge-section {
+    background: $dark-green;
+  }
+}
+
+.total-safekept-gauge-pledged {
+  .inner-gauge-section {
+    background: $medium-gray;
+  }
+}
+
+.dashboard-effective-borrowing-capacity {
+  position: relative;
+}
+
+.borrowing-capacity-gauge-threshold {
+  position: absolute;
+  top: 0;
+  margin-left: -5.5px;
+  width: 11px;
+  height: 100%;
+  background: $actionable-blue;
+  z-index: 1;
+  &:before {
+    @extend %absolute-pseudoelement;
+    left: 5px;
+    width: 1px;
+    height: 100%;
+    background: $brand-blue;
+    z-index: 0;
+  }
+  &:hover {
+    .tooltip {
+      display: block;
+      span:first-child {
+        margin-right: 0;
+      }
+    }
+  }
+}
+
+.borrowing-capacity-gauge-used .inner-gauge-section {
+  background: $accent-green;
+}
+
+.borrowing-capacity-label-used {
+  color: $accent-green;
+}
+
+.dashboard-module-reports {
+  .dashboard-module-content {
+    position: relative;
+    height: 504px;
+    .report-button-left {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+    }
+    .report-split-button {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+    }
+  }
+  .input-field-container {
+    input {
+      padding-left: 10px;
+    }
+    width: 165px;
+  }
+  a {
+    text-transform: uppercase;
+    font-size: 0.867rem;
+    color: $actionable-blue;
+    border: none;
+    background-color: white;
+    float: right;
+    &:after {
+      @extend %icon-font;
+      content: " #{$icon-arrow-right}";
+    }
+  }
+}

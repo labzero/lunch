@@ -1,0 +1,23 @@
+/*
+ *= require source-sans-pro/regular
+ *= require source-sans-pro/semibold
+ *= require source-sans-pro/bold
+ *= require source-sans-pro/light
+ *= require source-sans-pro/extralight
+ *= require daterangepicker-bs3
+ */
+
+// base styles
+@import 'base';
+@import 'header';
+
+// page styles
+@import 'welcome';
+@import 'dashboard';
+@import 'graphs';
+@import 'flyouts';
+@import 'reports';
+@import 'settings';
+@import 'datepicker';
+@import 'corporate_communications';
+@import 'errors';

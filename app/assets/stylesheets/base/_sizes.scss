@@ -1,0 +1,16 @@
+$row-width: 960px;
+$grid-column-width: 60px; // 12 columns
+$gutter-width: 20px; // 11 gutters
+$row-padding: 10px; // 1 each on outside of row
+
+$column-1-width: ($grid-column-width * 12) + ($gutter-width * 11);
+$column-3-width: ($grid-column-width * 4) + ($gutter-width * 3);
+
+$column-4x8-right-width: ($grid-column-width * 8) + ($gutter-width * 7);
+
+$default-border-radius: 3px;
+
+$header-main-nav-height: 60px;
+$header-secondary-nav-height: 30px;
+$header-height: $header-main-nav-height + $header-secondary-nav-height;
+$input-field-height: 30px;

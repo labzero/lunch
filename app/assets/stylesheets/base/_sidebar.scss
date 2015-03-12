@@ -1,0 +1,63 @@
+.sidebar-row {
+  .sidebar {
+    ul {
+      margin: 0 10px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    li {
+      a, &.sidebar-label, span {
+        padding: 10px;
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        font-weight: $semibold-weight;
+        &.active {
+          background-color: $actionable-blue;
+          color: $white;
+          border-radius: $default-border-radius;
+        }
+      }
+      a, span {
+        cursor: pointer;
+      }
+      &.sidebar-label {
+        padding-top: 0;
+        color: $medium-gray;
+      }
+    }
+    select {
+      display: none;
+    }
+  }
+  .column-2x10-right {
+    @include full-bleed-background($white);
+  }
+
+  a {
+    color: $actionable-blue;
+    text-decoration: none;
+  }
+}
+
+.sidebar-row  .sidebar, .sidebar-row-main-content {
+  margin-top: 30px;
+}
+
+.sidebar-row-main-content {
+  @extend %pseudoelement-clearfix;
+  h1 {
+    @extend %typography-page-title;
+    margin: 0 0 25px;
+  }
+  h2 {
+    @extend %typography-section-title;
+    margin-bottom: 5px;
+  }
+  p {
+    margin: 0;
+  }
+  section {
+    padding-left: $gutter-width;
+  }
+}

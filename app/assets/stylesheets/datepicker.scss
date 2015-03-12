@@ -1,0 +1,173 @@
+.datepicker-wrapper {
+  position: relative;
+}
+
+.daterangepicker {
+  display: none;
+  width: 433px;
+  border: 1px solid $actionable-blue;
+  padding: 0 0 30px 0;
+  &.opensleft, &.opensright {
+    .calendar {
+      margin: 0;
+    }
+  }
+  &.opensleft:after, &.opensleft:before {
+    display: none;
+  }
+  .prev.available {
+    transform: rotate(90deg);
+  }
+  .next.available {
+    transform: rotate(270deg);
+  }
+  .prev, .next {
+    &.available i:before {
+      @extend %icon-font;
+      content: "#{$icon-chevron}";
+      color: $actionable-blue;
+      font-size: .8667rem;
+    }
+  }
+  td.in-range {
+    background: $actionable-blue;
+    color: $white;
+  }
+  td.start-date, td.end-date {
+    border-radius: 0;
+  }
+  td.active, td.active:hover {
+    background: $actionable-blue;
+    border: none;
+  }
+  .daterangepicker_start_input, .daterangepicker_end_input {
+    display: none;
+  }
+
+  &.opensleft, &.opensright, &.openscenter {
+    .ranges {
+      float: none;
+      margin: 0;
+    }
+  }
+
+  .ranges {
+    width: 100%;
+    border-bottom: 1px solid $secondary-gray;
+    ul {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+    li {
+      display: table-cell;
+      @extend %typography-default-text;
+      color: $text-color;
+      text-align: center;
+      border: none;
+      border-radius: 0;
+      background: $white;
+      padding: 10px 0;
+      position: relative;
+      &.active, &:hover {
+        background: $secondary-gray;
+        border: none;
+        color: $text-color;
+        &:before {
+          border: none;
+        }
+      }
+      &:before {
+        content: '';
+        border-left: 1px solid $secondary-gray;
+        position: absolute;
+        left: -1px;
+        top: 6px;
+        height: 30px;
+      }
+      &:first-child:before {
+        border: none;
+      }
+      &:first-child {
+        border-top-left-radius: 4px;
+      }
+      &:last-child {
+        border-top-right-radius: 4px;
+      }
+    }
+  }
+
+  .range_inputs {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+  }
+
+  .cancelBtn, .applyBtn {
+    position: absolute;
+    height: 30px;
+    border: none;
+  }
+  
+  .cancelBtn {
+    left: 0;
+    width: 30px;
+    border-bottom-left-radius: 4px;
+    &:before {
+      @extend %absolute-pseudoelement;
+      @extend %center-both;
+      @extend %icon-font;
+      content: "#{$icon-close}";
+    }
+  }
+  .applyBtn {
+    @extend %typography-table-heading;
+    text-transform: uppercase;
+    margin-left: 30px;
+    right: 0;
+    background: #5ea2e3;
+    width: 100%;
+    border-bottom-right-radius: 4px;
+    color: $white;
+  }
+
+  .calendar-date {
+    border: none;
+    border-radius: 0;
+    padding: 6px;
+  }
+
+  .calendar {
+    &.first {
+      border-right: 1px solid $secondary-gray;
+    }
+    td, th {
+      font-family: $default-font-family;
+    }
+    .month {
+      @extend %typography-table-heading;
+      padding: 10px;
+    }
+    thead tr:last-child {
+      display: none;
+    }
+    tbody td {
+      @extend %typography-calendar-day;
+      min-width: 28px;
+    }
+  }
+
+  &.single {
+    .calendar {
+      margin: 0 auto;
+      border-right: none;
+      td.in-range {
+        background: $white;
+        color: $text-color;
+      }
+    }
+  }
+
+}
