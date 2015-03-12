@@ -93,4 +93,34 @@ describe MAPI::ServiceApp do
 
     end
   end
+  describe 'list of all members' do
+    let(:members) { get '/member/'; JSON.parse(last_response.body) }
+    [:development, :test, :production].each do |env|
+      describe "in #{env}" do
+        let(:first_record) { {'FHLB_ID' => '1', 'CP_ASSOC' => 'Some Name'} }
+        let(:second_record) { {'FHLB_ID' => '2', 'CP_ASSOC' => 'Another Name'} }
+        before do
+          expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(env)
+          results = double('Oracle Result Set')
+          allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(results)
+          allow(results).to receive(:fetch_hash).and_return(first_record, second_record, nil)
+        end
+        it 'returns 200 on success' do
+          get '/member/'
+          expect(last_response.status).to be(200)
+        end
+        it 'returns an array of members on success' do
+          expect(members).to be_kind_of(Array)
+          expect(members.count).to be >= 1
+          members.each do |member|
+            expect(member).to be_kind_of(Hash)
+            expect(member['id']).to be_kind_of(Numeric)
+            expect(member['id']).to be > 0
+            expect(member['name']).to be_kind_of(String)
+            expect(member['name']).to be_present
+          end
+        end
+      end
+    end
+  end
 end

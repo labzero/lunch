@@ -273,6 +273,18 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve list of all members'
+              key :type, :array
+              items do
+                key :'$ref', :Member
+              end
+              key :nickname, :getMembers
+            end
+          end
         end
 
         # pledged collateral route
@@ -387,6 +399,10 @@ module MAPI
         relative_get '/:id/member_profile' do
           member_id = params[:id]
           MAPI::Services::Member::Profile.member_profile(self, member_id)
+        end
+
+        relative_get '/' do
+          MAPI::Services::Member::Profile.member_list(self)
         end
       end
     end

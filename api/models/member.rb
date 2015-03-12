@@ -9,8 +9,7 @@ module MAPI
           key :type, :integer
           key :format, :int64
           key :description, 'member id'
-          key :minimum, '0.0'
-          key :maximum, '100000.0'
+          key :minimum, '0'
         end
         property :name do
           key :type, :string
