@@ -2,6 +2,12 @@ module MAPI
   module Services
     module Member
       module Profile
+        MEMBER_LIST_QUERY = <<-SQL
+          select web_adm.web_member_data.FHLB_ID, web_adm.web_member_data.CP_ASSOC
+          from web_adm.web_member_data
+          where web_adm.web_member_data.CP_ASSOC is not null -- this is redundent given the table doesn't allow nulls in this column
+        SQL
+
         def self.member_profile(app, member_id)
           member_id = member_id.to_i
 
@@ -107,6 +113,19 @@ module MAPI
             borrowing_capacity_sbc_aaa: (member_position_hash['EXCESS_SBC_BORR_CAP_AAA'].to_i if member_position_hash['EXCESS_SBC_BORR_CAP_AAA']),
             borrowing_capacity_sbc_aa: (member_position_hash['EXCESS_SBC_BORR_CAP_AA'].to_i if member_position_hash['EXCESS_SBC_BORR_CAP_AA'])
           }.to_json
+        end
+
+        def self.member_list(app)
+          members = []
+          if app.settings.environment == :production
+            member_query_cursor = ActiveRecord::Base.connection.execute(MEMBER_LIST_QUERY)
+            while row = member_query_cursor.fetch_hash()
+              members << row
+            end
+          else
+            members = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_list.json')))
+          end
+          (members.collect {|member| {id: member['FHLB_ID'].to_i, name: member['CP_ASSOC'].to_s} }).to_json
         end
       end
     end
