@@ -12,7 +12,7 @@
         = t('reports.pages.advances_detail.total_current_par_heading', date: fhlb_date_long_alpha(@start_date))
       %p= fhlb_formatted_currency_whole(@advances_detail[:total_par], force_unit: true)
     %h2.report-table-title= t('reports.pages.advances_detail.title', date: fhlb_date_standard_numeric(@start_date))
-    %table.table-allow-wrapping.report-table.advances-details-report-table{data: {sortable: true, :'disable-auto-width' => true}}
+    %table.table-allow-wrapping.report-table.advances-details-report-table{data: {sortable: true, :'disable-auto-width' => true, :'missing-data-message' => t('errors.table_data_unavailable')}}
       %thead
         %tr
           %th.report-cell-narrow= t('reports.pages.advances_detail.trade_date')

@@ -22,7 +22,7 @@ module CustomFormattingHelper
 
   def fhlb_formatted_number(number, options={})
     options.reverse_update({html: true, precision: 0})
-    return nil if number.nil?
+    return '–' if number.nil?
     formatted = number_with_precision(number.abs, options.merge(delimiter: ','))
     formatted = if number < 0
       "(#{formatted})"

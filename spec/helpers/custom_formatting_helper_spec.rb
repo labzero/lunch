@@ -51,8 +51,8 @@ describe CustomFormattingHelper do
     it 'defaults to HTML output' do
       expect(helper.fhlb_formatted_number(123)).to eq('<span class="number-positive">123</span>')
     end
-    it 'returns nil if passed nil' do
-      expect(helper.fhlb_formatted_number(nil)).to be_nil
+    it 'returns "–" if passed nil' do
+      expect(helper.fhlb_formatted_number(nil)).to eq('–')
     end
   end
 
