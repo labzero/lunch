@@ -116,5 +116,6 @@ Background:
 
   @data-unavailable @jira-mem-408
   Scenario: Data for Aggregate 30 Day Terms module is temporarily unavailable
-    When I visit the dashboard
+    Given I visit the dashboard
+    When there is no data for "Aggregate 30 Day Terms"
     Then the Aggregate 30 Day Terms graph should show the Temporarily Unavailable state
