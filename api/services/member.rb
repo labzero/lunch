@@ -4,6 +4,7 @@ require_relative 'member/borrowing_capacity_details'
 require_relative 'member/settlement_transaction_account'
 require_relative 'member/advances_details'
 require_relative 'member/profile'
+require_relative 'member/disabled_reports'
 
 module MAPI
   module Services
@@ -285,6 +286,23 @@ module MAPI
               key :nickname, :getMembers
             end
           end
+          api do
+            key :path, '/{id}/disabled_reports'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the IDs of reports flagged as disabled'
+              key :notes, 'Retrieve the IDs of reports flagged as disabled'
+              key :type, :DisabledReports
+              key :nickname, :getDisabledReportIDsForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -403,6 +421,12 @@ module MAPI
 
         relative_get '/' do
           MAPI::Services::Member::Profile.member_list(self)
+        end
+
+        # Member Disabled Reports
+        relative_get '/:id/disabled_reports' do
+          member_id = params[:id]
+          MAPI::Services::Member::DisabledReports.disabled_report_ids(self, member_id)
         end
       end
     end

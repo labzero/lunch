@@ -23,6 +23,7 @@ require_relative 'models/member_borrowing_capacity_details'
 require_relative 'models/member_sta_activities'
 require_relative 'models/member_advances_details'
 require_relative 'models/member_profile'
+require_relative 'models/member_disabled_reports'
 
 
 
