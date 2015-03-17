@@ -27,7 +27,7 @@ module MAPI
             end
           end
 
-          #right now we're just going to return an empty array for non-prod environments, as this means no reports are flagged as disabled, which is the norm for the vast majority of members
+          # return empty array for non-prod environments, as this reflects the norm for most users (i.e. no reports are flagged as disabled)
           disabled_report_ids.uniq.to_json
         end
       end

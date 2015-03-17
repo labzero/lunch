@@ -16,8 +16,6 @@ describe MAPI::ServiceApp do
     describe 'in the production environment' do
       let(:global_disabled_reports_result) {double('Oracle Result Set', fetch: nil)}
       let(:member_disabled_reports_result) {double('Oracle Result Set', fetch: nil)}
-      # let(:global_disabled_report_ids) {[[5], [6], [7], [8], nil]}
-      # let(:member_disabled_report_ids) {[[1], [6], [7], [10], nil]}
 
       before do
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
