@@ -74,6 +74,7 @@ en:
     year_to_date: Year to date
     last_year: Last year
     pdf: PDF
+    en_dash: –
     dates:
       1_day: 1 day
       1_month: 1 mo
