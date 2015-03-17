@@ -1,9 +1,8 @@
 - @page_title = t('dashboard.meta_title')
 .dashboard.row
   .column-3
-    - if @market_overview.first[:data]
-      =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.market_overview.title'), classes: 'dashboard-module-market'} do
-        .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.market_overview.title'), classes: 'dashboard-module-market', data_available: !@market_overview.first[:data].blank?} do
+      .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account']} do
       - if @pledged_collateral
         .dashboard-pledged-collateral
@@ -111,7 +110,7 @@
               %th= t('dashboard.quick_advance.table.aa')
           %tbody
         %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.initiate')
-    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), action_type: 'more-button'} do
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), action_type: 'more-button', data_available: !@previous_activity.blank?} do
       %table.table-dashboard-previous-activity
         %tbody
           - @previous_activity.each_with_index do |row, i|
