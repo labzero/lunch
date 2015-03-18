@@ -34,3 +34,8 @@ When I filter the Settlement Transaction Account Statement by "Debits"
 Then I should only see "Debit" rows in the Settlement Transaction Account Statement table
 When I filter the Settlement Transaction Account Statement by "Daily Balances"
 Then I should only see "Balance ($)" rows in the Settlement Transaction Account Statement table
+
+@data-unavailable @jira-mem-283
+Scenario: No data is available to show in the Settlement Transaction Account Statement
+  When I am on the Settlement Transaction Account Statement page
+  Then I should see an empty report table with Data Unavailable messaging

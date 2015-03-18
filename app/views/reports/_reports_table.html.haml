@@ -10,19 +10,23 @@
       - table_data[:column_headings].each_with_index do |heading, index|
         %th.report-cell-narrow{data: {unsortable: index != 0}}= heading
   %tbody
-    - table_data[:rows].each do |row|
+    - if table_data[:rows].blank?
       %tr
-        %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
-        - row[:columns].each do |column|
-          %td.report-cell-narrow.report-cell-right
-            - case column[:type]
-            - when :basis
-              = fhlb_formatted_number(column[:value])
-            - when :rate
-              = fhlb_formatted_number(column[:value], precision: 3)
-            - when :currency
-              = fhlb_formatted_currency(column[:value])
-            - when :currency_whole
-              = fhlb_formatted_currency(column[:value], precision: 0)
-            - else
-              = column[:value]
+        %td.dataTables_empty{colspan: table_data[:column_headings].count}= t('errors.table_data_unavailable')
+    - else
+      - table_data[:rows].each do |row|
+        %tr
+          %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
+          - row[:columns].each do |column|
+            %td.report-cell-narrow.report-cell-right
+              - case column[:type]
+              - when :basis
+                = fhlb_formatted_number(column[:value])
+              - when :rate
+                = fhlb_formatted_number(column[:value], precision: 3)
+              - when :currency
+                = fhlb_formatted_currency(column[:value])
+              - when :currency_whole
+                = fhlb_formatted_currency(column[:value], precision: 0)
+              - else
+                = column[:value]

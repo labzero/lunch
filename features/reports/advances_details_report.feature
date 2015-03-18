@@ -51,3 +51,8 @@ Scenario: Member can't select a date in the future
   Given I am on the Advances Detail page
   When I click the datepicker field
   Then I should not see available dates after today
+
+@data-unavailable @jira-mem-283
+Scenario: No data is available to show in the Advances Detail Report
+  When I am on the Advances Detail page
+  Then I should see an empty report table with Data Unavailable messaging

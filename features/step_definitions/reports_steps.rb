@@ -39,6 +39,10 @@ Then(/^I should see report summary data$/) do
   page.assert_selector('.report-summary-data', visible: true)
 end
 
+Then(/^I should see an empty report table with Data Unavailable messaging$/) do
+  page.assert_selector('.report-table tbody tr:first-child .dataTables_empty', text: I18n.t('errors.table_data_unavailable'))
+end
+
 Then(/^I should see a report table with multiple data rows$/) do
   page.assert_selector('.report-table')
   expect(page.all('.report-table tbody tr').length).to be > 0

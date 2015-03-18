@@ -28,27 +28,31 @@
           %th= fhlb_add_unit_to_table_header(t("reports.pages.settlement_transaction_account.debit_credit_heading"), '$')
           %th= fhlb_add_unit_to_table_header(t('global.balance'), '$')
       %tbody
-        - if @show_ending_balance
-          %tr.ending-balance-row
-            %td.report-cell-narrow= fhlb_date_standard_numeric(@settlement_transaction_account[:end_date])
-            %td.report-cell-expanding
-            %td.report-cell-expanding= t('reports.pages.settlement_transaction_account.closing_balance')
-            %td.report-cell-right= '-'
-            %td.report-cell-right= '-'
-            %td.report-cell-right= fhlb_formatted_number(@settlement_transaction_account[:end_balance], precision: 2) || '-'
-        -@settlement_transaction_account[:activities].each do |row|
+        - if @settlement_transaction_account[:end_balance].blank? && @settlement_transaction_account[:start_balance].blank? && @settlement_transaction_account[:activities].blank?
           %tr
-            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:trans_date])
-            %td.report-cell-expanding= row[:refnumber]
-            %td.report-cell-expanding= row[:descr] == @daily_balance_key ? t('reports.pages.settlement_transaction_account.closing_balance') : row[:descr]
-            %td.report-cell-right= fhlb_formatted_number(row[:rate], precision: 5) || '-'
-            %td.report-cell-right= fhlb_formatted_number(row[:transaction], precision: 2) || '-'
-            %td.report-cell-right= fhlb_formatted_number(row[:balance], precision: 2) || '-'
-        %tr.beginning-balance-row
-          %td.report-cell-narrow= fhlb_date_standard_numeric(@settlement_transaction_account[:start_date])
-          %td.report-cell-expanding
-          %td.report-cell-expanding= t('global.beginning_balance')
-          %td.report-cell-right= '-'
-          %td.report-cell-right= '-'
-          %td.report-cell-right= fhlb_formatted_number(@settlement_transaction_account[:start_balance], precision: 2) || '-'
+            %td.dataTables_empty{colspan: 6}= t('errors.table_data_unavailable')
+        - else
+          - if @show_ending_balance
+            %tr.ending-balance-row
+              %td.report-cell-narrow= fhlb_date_standard_numeric(@settlement_transaction_account[:end_date])
+              %td.report-cell-expanding
+              %td.report-cell-expanding= t('reports.pages.settlement_transaction_account.closing_balance')
+              %td.report-cell-right
+              %td.report-cell-right
+              %td.report-cell-right= fhlb_formatted_number(@settlement_transaction_account[:end_balance], precision: 2) || '-'
+          -@settlement_transaction_account[:activities].each do |row|
+            %tr
+              %td.report-cell-narrow= fhlb_date_standard_numeric(row[:trans_date])
+              %td.report-cell-expanding= row[:refnumber]
+              %td.report-cell-expanding= row[:descr] == @daily_balance_key ? t('reports.pages.settlement_transaction_account.closing_balance') : row[:descr]
+              %td.report-cell-right= fhlb_formatted_number(row[:rate], precision: 5, optional_number: true)
+              %td.report-cell-right= fhlb_formatted_number(row[:transaction], precision: 2, optional_number: true)
+              %td.report-cell-right= fhlb_formatted_number(row[:balance], precision: 2, optional_number: true)
+          %tr.beginning-balance-row
+            %td.report-cell-narrow= fhlb_date_standard_numeric(@settlement_transaction_account[:start_date])
+            %td.report-cell-expanding
+            %td.report-cell-expanding= t('global.beginning_balance')
+            %td.report-cell-right
+            %td.report-cell-right
+            %td.report-cell-right= fhlb_formatted_number(@settlement_transaction_account[:start_balance], precision: 2) || '-'
     %small= t('reports.change_notice', phone_number: fhlb_formatted_phone_number('4156162945'))

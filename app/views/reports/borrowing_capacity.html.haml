@@ -16,7 +16,7 @@
         %p= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:remaining_borrowing_capacity], force_unit: true)
     %section.standard-credit-borrowing-capacity-tables.report-tables-section
       %h2.report-table-title= t('reports.pages.borrowing_capacity_summary.standard_credit_program')
-      %table.report-table.report-parent-table{data: {sortable: true, :'default-sort' => [[1, 'desc']]}}
+      %table.report-table.report-parent-table{data: {sortable: true, :'default-sort' => [[1, 'desc']], :'missing-data-message' => t('errors.table_data_unavailable')}}
         %thead
           %tr
             %th.report-cell-narrow= t('global.collateral_type')

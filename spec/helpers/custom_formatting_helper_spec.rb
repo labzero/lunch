@@ -51,8 +51,11 @@ describe CustomFormattingHelper do
     it 'defaults to HTML output' do
       expect(helper.fhlb_formatted_number(123)).to eq('<span class="number-positive">123</span>')
     end
-    it 'returns nil if passed nil' do
-      expect(helper.fhlb_formatted_number(nil)).to be_nil
+    it 'returns nil if passed nil and the option `optional_number`' do
+      expect(helper.fhlb_formatted_number(nil, optional_number: true)).to be_nil
+    end
+    it 'returns the `missing_value` I18n value if passed nil' do
+      expect(helper.fhlb_formatted_number(nil)).to eq(I18n.t('global.missing_value'))
     end
   end
 

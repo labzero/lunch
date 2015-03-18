@@ -468,3 +468,11 @@
     float: right;
   }
 }
+
+td.dataTables_empty {
+  @extend %typography-table-data-unavailable;
+  color: $medium-gray;
+  background: $white;
+  text-align: center;
+  padding: 40px 0;
+}
