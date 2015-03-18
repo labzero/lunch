@@ -23,7 +23,7 @@ module CustomFormattingHelper
   def fhlb_formatted_number(number, options={})
     options.reverse_update({html: true, precision: 0})
     return nil if number.nil? && options[:optional_number]
-    return t('global.en_dash') if number.nil?
+    return t('global.missing_value') if number.nil?
     formatted = number_with_precision(number.abs, options.merge(delimiter: ','))
     formatted = if number < 0
       "(#{formatted})"
