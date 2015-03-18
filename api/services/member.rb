@@ -292,7 +292,10 @@ module MAPI
               key :method, 'GET'
               key :summary, 'Retrieve the IDs of reports flagged as disabled'
               key :notes, 'Retrieve the IDs of reports flagged as disabled'
-              key :type, :DisabledReports
+              key :type, :array
+              items do
+                key :type, :integer
+              end
               key :nickname, :getDisabledReportIDsForMember
               parameter do
                 key :paramType, :path
