@@ -48,7 +48,7 @@ RSpec.describe ReportsController, :type => :controller do
         expect(assigns[:capital_stock_activity]).to eq(response_hash)
       end
       it 'should set @capital_stock_activity to {} if the report is disabled' do
-        expect(controller).to receive(:report_disabled?).with(ReportsController::CAPITAL_STOCK_ACTIVITY_WEB_FLAGS, request).and_return(true)
+        expect(controller).to receive(:report_disabled?).with(ReportsController::CAPITAL_STOCK_ACTIVITY_WEB_FLAGS).and_return(true)
         get :capital_stock_activity
         expect(assigns[:capital_stock_activity]).to eq({})
       end
@@ -103,7 +103,7 @@ RSpec.describe ReportsController, :type => :controller do
         expect(assigns[:borrowing_capacity_summary]).to eq(response_hash)
       end
       it 'should set @borrowing_capacity_summary to {} if the report is disabled' do
-        expect(controller).to receive(:report_disabled?).with(ReportsController::BORROWING_CAPACITY_WEB_FLAGS, request).and_return(true)
+        expect(controller).to receive(:report_disabled?).with(ReportsController::BORROWING_CAPACITY_WEB_FLAGS).and_return(true)
         get :borrowing_capacity
         expect(assigns[:borrowing_capacity_summary]).to eq({})
       end
@@ -135,7 +135,7 @@ RSpec.describe ReportsController, :type => :controller do
             expect{get :settlement_transaction_account}.to raise_error(StandardError)
           end
           it 'should set @settlement_transaction_account to {} if the report is disabled' do
-            expect(controller).to receive(:report_disabled?).with(ReportsController::SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS, request).and_return(true)
+            expect(controller).to receive(:report_disabled?).with(ReportsController::SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS).and_return(true)
             get :settlement_transaction_account
             expect(assigns[:settlement_transaction_account]).to eq({})
           end
@@ -265,7 +265,7 @@ RSpec.describe ReportsController, :type => :controller do
           expect{get :advances_detail, start_date: start_date}.to raise_error
         end
         it 'should set @advances_detail to {} if the report is disabled' do
-          expect(controller).to receive(:report_disabled?).with(ReportsController::ADVANCES_DETAIL_WEB_FLAGS, request).and_return(true)
+          expect(controller).to receive(:report_disabled?).with(ReportsController::ADVANCES_DETAIL_WEB_FLAGS).and_return(true)
           get :advances_detail
           expect(assigns[:advances_detail]).to eq({})
         end
@@ -350,7 +350,7 @@ RSpec.describe ReportsController, :type => :controller do
           expect{get :historical_price_indications}.to raise_error(StandardError)
         end
         it 'should set @historical_price_indications to {} if the report is disabled' do
-          expect(controller).to receive(:report_disabled?).with(ReportsController::HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS, request).and_return(true)
+          expect(controller).to receive(:report_disabled?).with(ReportsController::HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS).and_return(true)
           get :historical_price_indications
           expect(assigns[:historical_price_indications]).to eq({})
         end
@@ -470,13 +470,12 @@ RSpec.describe ReportsController, :type => :controller do
 
   describe 'private methods' do
     describe '`report_disabled?` method' do
-      let(:request_object) {double('some request object')}
       let(:report_flags) {double('some report flags')}
       let(:member_service_instance) {instance_double('MemberService')}
       let(:response) {double('some_response')}
-      let(:method_call) {controller.send(:report_disabled?, report_flags, request_object)}
+      let(:method_call) {controller.send(:report_disabled?, report_flags)}
       it 'passes in the member_id and report_flags to the `report_disabled?` method on a newly created instance of MemberService and returns the response' do
-        expect(MemberService).to receive(:new).with(request_object).and_return(member_service_instance)
+        expect(MemberService).to receive(:new).and_return(member_service_instance)
         expect(member_service_instance).to receive(:report_disabled?).with(ReportsController::MEMBER_ID, report_flags).and_return(response)
         expect(method_call).to eq(response)
       end

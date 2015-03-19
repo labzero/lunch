@@ -34,10 +34,6 @@ class MemberService < MAPIService
   INVESTMENTS	= 32
   SECURITIESBILLSTATEMENT = 33
 
-  def initialize(request)
-    super(request)
-  end
-
   def report_disabled?(member_id, report_flags)
     begin
       response = @connection["member/#{member_id}/disabled_reports"].get

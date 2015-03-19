@@ -116,7 +116,7 @@ class ReportsController < ApplicationController
     member_balances = MemberBalanceService.new(MEMBER_ID, request)
     @start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
-    if report_disabled?(CAPITAL_STOCK_ACTIVITY_WEB_FLAGS, request)
+    if report_disabled?(CAPITAL_STOCK_ACTIVITY_WEB_FLAGS)
       @capital_stock_activity = {}
     else
       @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
@@ -128,7 +128,7 @@ class ReportsController < ApplicationController
   def borrowing_capacity
     member_balances = MemberBalanceService.new(MEMBER_ID, request)
     date = params[:end_date] || Time.zone.now.to_date
-    if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS, request)
+    if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
       @borrowing_capacity_summary = {}
     else
       @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(date.to_date)
@@ -160,7 +160,7 @@ class ReportsController < ApplicationController
     # default filter to 'all' if invalid filter param was passed
     @filter ||= @filter_options[0][1]
     @filter_text ||= @filter_options[0][0]
-    if report_disabled?(SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS, request)
+    if report_disabled?(SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS)
       @settlement_transaction_account = {}
     else
       @settlement_transaction_account = member_balances.settlement_transaction_account(@start_date, @end_date, @filter)
@@ -176,7 +176,7 @@ class ReportsController < ApplicationController
     @start_date = (params[:start_date] || Time.zone.now.to_date).to_date
     member_balances = MemberBalanceService.new(MEMBER_ID, request)
     @picker_presets = date_picker_presets(@start_date)
-    if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS, request)
+    if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)
       @advances_detail = {}
     else
       @advances_detail = member_balances.advances_details(@start_date)
@@ -254,7 +254,7 @@ class ReportsController < ApplicationController
     @credit_type ||= @credit_type_options.first.last
     @credit_type_text ||= @credit_type_options.first.first
 
-    if report_disabled?(HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS, request)
+    if report_disabled?(HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS)
       @historical_price_indications = {}
     else
       @historical_price_indications = rate_service.historical_price_indications(@start_date, @end_date, @collateral_type, @credit_type)
@@ -296,7 +296,7 @@ class ReportsController < ApplicationController
   end
 
   private
-  def report_disabled?(report_flags, request)
+  def report_disabled?(report_flags)
     member_info = MemberService.new(request)
     member_info.report_disabled?(MEMBER_ID, report_flags)
   end
