@@ -262,7 +262,7 @@ en:
         pledged: Pledged
         safekept: Safekept
       effective_borrowing_capacity:
-        title: Effective Borrowing Capacity
+        title: Borrowing Capacity
         used: Used
         unused: Unused
       anticipated_activity:
