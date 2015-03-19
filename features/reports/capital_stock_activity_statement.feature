@@ -65,5 +65,12 @@ Scenario: Member chooses a custom date range on Capital Stock Activity Statement
 
 @data-unavailable @jira-mem-283
 Scenario: No data is available to show in the Capital Stock Activity Statement
-  When I am on the Capital Stock Activity Statement page
+  Given I am on the Capital Stock Activity Statement page
+  When the "Capital Stock Activity" table has no data
+  Then I should see an empty report table with Data Unavailable messaging
+
+@data-unavailable @jira-mem-282
+Scenario: The Capital Stock Activity Statement has been disabled
+  Given I am on the Capital Stock Activity Statement page
+  When the "Capital Stock Activity" report has been disabled
   Then I should see an empty report table with Data Unavailable messaging

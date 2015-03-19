@@ -24,8 +24,11 @@ describe CustomFormattingHelper do
     it 'defaults to HTML output' do
       expect(helper.fhlb_formatted_currency(123)).to eq('<span class="number-positive">$123.00</span>')
     end
-    it 'returns nil if passed nil' do
-      expect(helper.fhlb_formatted_currency(nil)).to be_nil
+    it 'returns nil if passed nil and the option `optional_number`' do
+      expect(helper.fhlb_formatted_currency(nil, optional_number: true)).to be_nil
+    end
+    it 'returns the `missing_value` I18n value if passed nil' do
+      expect(helper.fhlb_formatted_currency(nil)).to eq(I18n.t('global.missing_value'))
     end
   end
 
@@ -34,6 +37,9 @@ describe CustomFormattingHelper do
       number = double('Number')
       expect(helper).to receive(:fhlb_formatted_currency).with(number, {precision: 0})
       helper.fhlb_formatted_currency_whole(number)
+    end
+    it 'returns the `missing_value` I18n value if passed nil' do
+      expect(helper.fhlb_formatted_currency_whole(nil)).to eq(I18n.t('global.missing_value'))
     end
   end
 
@@ -67,6 +73,9 @@ describe CustomFormattingHelper do
       it 'should handle double digit months and days' do
         expect(helper.fhlb_date_standard_numeric(Date.new(2015,11,20))).to eq('11/20/2015')
       end
+      it 'returns the I18n value for `missing_value` if passed nil' do
+        expect(helper.fhlb_date_standard_numeric(nil)).to eq(I18n.t('global.missing_value'))
+      end
     end
   end
 
@@ -74,6 +83,9 @@ describe CustomFormattingHelper do
     let(:date) {Date.new(2015,1,2)}
     it 'converts a date into an alphanumeric string following the `Month d, YYYY` format' do
       expect(helper.fhlb_date_long_alpha(date)).to eq('January 2, 2015')
+    end
+    it 'returns the I18n value for `missing_value` if passed nil' do
+      expect(helper.fhlb_date_long_alpha(nil)).to eq(I18n.t('global.missing_value'))
     end
   end
   
@@ -115,6 +127,9 @@ describe CustomFormattingHelper do
         end
       end
     end
+    it 'returns the I18n value for `missing_value` if passed nil' do
+      expect(helper.fhlb_date_quarter(nil)).to eq(I18n.t('global.missing_value'))
+    end
   end
 
   describe '`fhlb_add_unit_to_table_header` method' do
@@ -129,6 +144,9 @@ describe CustomFormattingHelper do
     end
     it 'returns percentage with 2 precision' do
       expect(helper.fhlb_formatted_percentage(30.23, 2)).to eq('30.23%')
+    end
+    it 'returns the I18n value for `missing_value` if passed nil' do
+      expect(helper.fhlb_formatted_percentage(nil)).to eq(I18n.t('global.missing_value'))
     end
   end
 

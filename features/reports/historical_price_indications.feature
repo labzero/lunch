@@ -63,5 +63,12 @@ Scenario: Choosing `Last year` as a datepicker option
 
 @data-unavailable @jira-mem-283
 Scenario: No data is available to show in the Historical Price Indications report
-  When I am on the Historical Price Indications page
+  Given I am on the Historical Price Indications page
+  When the "Historical Price Indications" table has no data
+  Then I should see an empty report table with Data Unavailable messaging
+
+@data-unavailable @jira-mem-282
+Scenario: The Historical Price Indications report has been disabled
+  Given I am on the Historical Price Indications page
+  When the "Historical Price Indications" report has been disabled
   Then I should see an empty report table with Data Unavailable messaging

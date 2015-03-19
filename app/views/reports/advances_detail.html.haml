@@ -28,7 +28,7 @@
           %th.report-cell-narrow{data: {unsortable: true}}= t('global.details')
           %th
       %tbody
-        - @advances_detail[:advances_details].each_with_index do |row, index|
+        - @advances_detail[:advances_details].to_a.each_with_index do |row, index|
           %tr
             %td.report-cell-narrow= fhlb_date_standard_numeric(row[:trade_date]) if row[:trade_date]
             %td.report-cell-narrow= fhlb_date_standard_numeric(row[:funding_date]) if row[:funding_date]

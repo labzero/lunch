@@ -1,6 +1,7 @@
 - table_class ||= nil
 - table_data ||= {}
-%table.table-allow-wrapping.report-table{data: {sortable: false, :'disable-auto-width' => true}, class: table_class}
+- is_sortable = defined?(sortable) ? sortable : true
+%table.table-allow-wrapping.report-table{data: {sortable: is_sortable, :'disable-auto-width' => true, :'missing-data-message' => t('errors.table_data_unavailable')}, class: table_class}
   %thead
     - if table_data[:table_heading]
       %tr.table-heading-row
@@ -10,7 +11,7 @@
       - table_data[:column_headings].each_with_index do |heading, index|
         %th.report-cell-narrow{data: {unsortable: index != 0}}= heading
   %tbody
-    - if table_data[:rows].blank?
+    - if table_data[:rows].blank? && !is_sortable
       %tr
         %td.dataTables_empty{colspan: table_data[:column_headings].count}= t('errors.table_data_unavailable')
     - else
