@@ -4,6 +4,17 @@
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.market_overview.title'), classes: 'dashboard-module-market', data_available: !@market_overview.first[:data].blank?} do
       .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account']} do
+      - if @effective_borrowing_capacity
+        .dashboard-effective-borrowing-capacity
+          %h2= t('dashboard.your_account.effective_borrowing_capacity.title')
+          .dashboard-gauge
+            .borrowing-capacity-gauge-used.gauge-section{style: "width: #{number_to_percentage(@effective_borrowing_capacity[:used_capacity][:percentage], precision: 1)};"}
+              .inner-gauge-section
+            .borrowing-capacity-gauge-threshold{style: "left: #{@effective_borrowing_capacity[:threshold_capacity]}%"}
+              = render 'shared/tooltip', tooltip_data: {"#{@effective_borrowing_capacity[:threshold_capacity]}%" => nil}
+          .dashboard-gauge-labels
+            %span.borrowing-capacity-label-used= t('dashboard.your_account.effective_borrowing_capacity.used') + ": #{number_to_human(@effective_borrowing_capacity[:used_capacity][:absolute], units: 'global.currency')}"
+            %span= t('dashboard.your_account.effective_borrowing_capacity.unused') + ": #{number_to_human(@effective_borrowing_capacity[:unused_capacity][:absolute], units: 'global.currency')}"
       - if @pledged_collateral
         .dashboard-pledged-collateral
           - mortgage_total = @pledged_collateral[:mortgages][:absolute] + @pledged_collateral[:agency][:absolute] + @pledged_collateral[:aaa][:absolute] + @pledged_collateral[:aa][:absolute]
@@ -44,17 +55,6 @@
             .dashboard-gauge-labels
               %span.total-securities-label-pledged= t('dashboard.your_account.total_securities.pledged') + ": #{@total_securities[:pledged_securities][:absolute]}"
               %span= t('dashboard.your_account.total_securities.safekept') + ": #{@total_securities[:safekept_securities][:absolute]}"
-      - if @effective_borrowing_capacity
-        .dashboard-effective-borrowing-capacity
-          %h2= t('dashboard.your_account.effective_borrowing_capacity.title')
-          .dashboard-gauge
-            .borrowing-capacity-gauge-used.gauge-section{style: "width: #{number_to_percentage(@effective_borrowing_capacity[:used_capacity][:percentage], precision: 1)};"}
-              .inner-gauge-section
-            .borrowing-capacity-gauge-threshold{style: "left: #{@effective_borrowing_capacity[:threshold_capacity]}%"}
-              = render 'shared/tooltip', tooltip_data: {"#{@effective_borrowing_capacity[:threshold_capacity]}%" => nil}
-          .dashboard-gauge-labels
-            %span.borrowing-capacity-label-used= t('dashboard.your_account.effective_borrowing_capacity.used') + ": #{number_to_human(@effective_borrowing_capacity[:used_capacity][:absolute], units: 'global.currency')}"
-            %span= t('dashboard.your_account.effective_borrowing_capacity.unused') + ": #{number_to_human(@effective_borrowing_capacity[:unused_capacity][:absolute], units: 'global.currency')}"
       .dashboard-anticipated-activity-graph
         %h2= t('dashboard.your_account.anticipated_activity.title')
         =image_tag('anticipated-activity.png', alt: 'Anticipated Activity Graph')
