@@ -194,8 +194,8 @@ en:
     quick_advance:
       title: Quick Advances
       advance_placeholder: Enter Dollar Amount
-      advances_desk_closed: The Advances Desk is closed.
-      advances_desk_closed_link: View rates
+      advances_desk_closed: The Member Services Desk is closed.
+      advances_desk_closed_link: View Current Price Indications
       advance_last_updated: The following rates were last updated %{last_updated}
       hours_of_operation_html: "You may initiate an advance during the <a href=\"%{url}\">Advance Desk Hours of Operation</a>."
       table:
