@@ -34,7 +34,21 @@ class MemberService < MAPIService
   INVESTMENTS	= 32
   SECURITIESBILLSTATEMENT = 33
 
-  def report_disabled?(member_id, report_flags)
+  def initialize(request)
+    super(request)
+  end
 
+  def report_disabled?(member_id, report_flags)
+    begin
+      response = @connection["member/#{member_id}/disabled_reports"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberService.disabled_reports encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberService.disabled_reports encountered a connection error: #{e.class.name}")
+      return nil
+    end
+    disabled_flags = JSON.parse(response.body)
+    (disabled_flags & report_flags).length > 0
   end
 end
