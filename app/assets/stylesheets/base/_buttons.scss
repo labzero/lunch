@@ -11,12 +11,26 @@ $button-vertical-padding: 7px;
   display: inline-block;
   line-height: 1;
   font-weight: $normal-weight;
+  text-align: center;
+  box-sizing: border-box;
+  &:visited {
+    color: inherit;
+  }
 }
 
 .primary-button {
   @extend %button;
   color: $white;
   background-color: $actionable-blue;
+  &[disabled] {
+    background-color: $secondary-gray;
+  }
+}
+
+.secondary-button {
+  @extend %button;
+  color: $text-color;
+  background-color: $secondary-gray;
 }
 
 .total-button {

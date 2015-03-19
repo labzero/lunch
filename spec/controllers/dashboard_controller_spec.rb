@@ -2,6 +2,9 @@ require 'rails_helper'
 
 RSpec.describe DashboardController, :type => :controller do
   login_user
+  before do
+    session['member_id'] = 750
+  end
 
   describe "GET index", :vcr do
     it_behaves_like 'a user required action', :get, :index
@@ -80,7 +83,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
     describe "MemberBalanceService failures" do
       let(:MemberBalanceService) {class_double(MemberBalanceService)}
-      let(:member_balance_instance) {MemberBalanceService.new(DashboardController::MEMBER_ID, double('request', uuid: '12345'))}
+      let(:member_balance_instance) {MemberBalanceService.new(750, double('request', uuid: '12345'))}
       before do
         expect(MemberBalanceService).to receive(:new).and_return(member_balance_instance)
       end

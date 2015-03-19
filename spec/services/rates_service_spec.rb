@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe RatesService do
-  let(:member_id) {double(MEMBER_ID)}
+  let(:member_id) {double('MemberID')}
   let(:advance_type) {double('advance_type')}
   let(:advance_term) {double('advance_term')}
   let(:advance_rate) {double('advance_rate')}

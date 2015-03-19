@@ -33,13 +33,15 @@
     box-sizing: border-box;
     background: $white;
     z-index: 1;
+    overflow-y: scroll;
   }
   li {
+    @extend %truncate-text;
     padding: 0px 0 3px 10px;
     &:first-child {
       padding-top: 5px;
     }
-    &:hover {
+    &:hover, &.selected {
       color: $actionable-blue;
       font-weight: $semibold-weight;
     }
@@ -48,9 +50,11 @@
 
 .dropdown-selection {
   @extend %input-field-styling;
+  @extend %truncate-text;
   color: $medium-gray;
   display: table-cell;
   vertical-align: middle;
   width: (3 * $grid-column-width) + (2 * $gutter-width);
+  padding-right: 35px;
 }
 

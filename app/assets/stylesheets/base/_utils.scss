@@ -9,6 +9,12 @@
   overflow: hidden;
 }
 
+%truncate-text {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
 %horizontal-center {
   position: absolute;
   left: 50%;
