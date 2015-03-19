@@ -268,21 +268,46 @@ class ReportsController < ApplicationController
     when :vrc
       column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
       rate_display_type = :rate
-    when *RatesService::ARC_CREDIT_TYPES
+    when :'1m_libor', :'3m_libor', :'6m_libor'
       table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading")
       column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
       rate_display_type = :basis
       # TODO add statement for 'embedded_cap' when it is rigged up
+    when :daily_prime
+      column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
+      benchmark_index_display_type = :index
+      spread_to_benchmark_display_type  = :basis
     end
 
     column_headings = []
-    column_heading_keys.each do |key|
-      column_headings << I18n.t("global.dates.#{key}")
+    column_sub_headings = []
+    if (@credit_type.to_sym == :daily_prime)
+      column_heading_keys.each do |key|
+        column_headings << I18n.t("global.full_dates.#{key}")
+        column_sub_headings = [fhlb_add_unit_to_table_header(I18n.t("reports.pages.price_indications.daily_prime.benchmark_index"), '%'), I18n.t("reports.pages.price_indications.daily_prime.basis_point_spread")]
+      end
+      column_sub_headings_first =  I18n.t('global.date')
+    else
+      column_heading_keys.each do |key|
+        column_headings << I18n.t("global.dates.#{key}")
+      end
+      column_headings.insert(0, I18n.t('global.date'))
     end
 
     rows = if @historical_price_indications[:rates_by_date]
-      @historical_price_indications[:rates_by_date].collect do |row|
-        {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: rate_display_type, value: column[:rate] } } }
+      if (@credit_type.to_sym == :daily_prime)
+        @historical_price_indications[:rates_by_date].collect do |row|
+          columns = []
+          row[:rates_by_term].each do |column|
+            columns <<  {type: benchmark_index_display_type, value: column[:benchmark_index]}
+            columns <<  {type: spread_to_benchmark_display_type, value: column[:spread_to_benchmark] }
+          end
+          {date: row[:date], columns: columns }
+        end
+      else
+        @historical_price_indications[:rates_by_date].collect do |row|
+          {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: rate_display_type, value: column[:rate] } } }
+        end
       end
     else
       []
@@ -290,7 +315,9 @@ class ReportsController < ApplicationController
 
     @table_data = {
       :table_heading => table_heading,
-      :column_headings => column_headings.insert(0, I18n.t('global.date')),
+      :column_headings => column_headings,
+      :column_sub_headings => column_sub_headings,
+      :column_sub_headings_first => column_sub_headings_first,
       :rows => rows
     }
   end
