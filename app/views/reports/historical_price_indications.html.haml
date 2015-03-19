@@ -11,5 +11,6 @@
         .report-filter.report-filter-wide.credit-type-filter
           = render 'shared/dropdown', dropdown_name: 'historical_price_credit_type', default_value: @credit_type, default_text: @credit_type_text, dropdown_options: @credit_type_options
   .report-main-body
+    = @table_data[:rows][0]
     %h2.report-table-title= t("reports.pages.price_indications.#{@credit_type}.#{@collateral_type}_table_title")
-    = render 'reports/reports_table', table_class: "#{@collateral_type}_#{@credit_type}_table", table_data: @table_data
+    = render 'reports/reports_table', table_class: "#{@collateral_type}_#{@credit_type}_table", table_data: @table_data, sortable: false

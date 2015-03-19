@@ -24,5 +24,12 @@ Scenario: Member sorts the Standard Credit Program table on the Borrowing Capaci
 
 @data-unavailable @jira-mem-283
 Scenario: No data is available to show in the Borrowing Capacity Statement
-  When I am on the Borrowing Capacity Statement page
+  Given I am on the Borrowing Capacity Statement page
+  When the "Borrowing Capacity Statement" table has no data
+  Then I should see an empty report table with Data Unavailable messaging
+
+@data-unavailable @jira-mem-282
+Scenario: The Borrowing Capacity Statement has been disabled
+  Given I am on the Borrowing Capacity Statement page
+  When the "Borrowing Capacity Statement" report has been disabled
   Then I should see an empty report table with Data Unavailable messaging

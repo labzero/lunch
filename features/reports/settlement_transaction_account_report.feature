@@ -37,5 +37,12 @@ Then I should only see "Balance ($)" rows in the Settlement Transaction Account 
 
 @data-unavailable @jira-mem-283
 Scenario: No data is available to show in the Settlement Transaction Account Statement
-  When I am on the Settlement Transaction Account Statement page
+  Given I am on the Settlement Transaction Account Statement page
+  When the "Settlement Transaction Account" table has no data
+  Then I should see an empty report table with Data Unavailable messaging
+
+@data-unavailable @jira-mem-282
+Scenario: The Settlement Transaction Account Statement has been disabled
+  Given I am on the Settlement Transaction Account Statement page
+  When the "Settlement Transaction Account" report has been disabled
   Then I should see an empty report table with Data Unavailable messaging

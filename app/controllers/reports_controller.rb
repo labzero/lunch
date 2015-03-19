@@ -5,6 +5,13 @@ class ReportsController < ApplicationController
 
   MEMBER_ID = 750 #this is the hard-coded fhlb client id number we're using for the time-being
 
+  # Mapping of current reports onto flags defined in MemberService
+  ADVANCES_DETAIL_WEB_FLAGS = [MemberService::ADVANCES_DETAIL_DATA, MemberService::ADVANCES_DETAIL_HISTORY]
+  BORROWING_CAPACITY_WEB_FLAGS = [MemberService::COLLATERAL_REPORT_DATA]
+  CAPITAL_STOCK_ACTIVITY_WEB_FLAGS = [MemberService::CURRENT_SECURITIES_POSITION, MemberService::CAPSTOCK_REPORT_BALANCE]
+  HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MemberService::IRDB_RATES_DATA]
+  SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MemberService::STA_BALANCE_AND_RATE_DATA, MemberService::STA_DETAIL_DATA]
+
   def index
     @reports = {
       price_indications: {
@@ -109,16 +116,24 @@ class ReportsController < ApplicationController
     member_balances = MemberBalanceService.new(MEMBER_ID, request)
     @start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
-    @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
-    raise StandardError, "There has been an error and ReportsController#capital_stock_activity has returned nil. Check error logs." if @capital_stock_activity.blank?
+    if report_disabled?(CAPITAL_STOCK_ACTIVITY_WEB_FLAGS, request)
+      @capital_stock_activity = {}
+    else
+      @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
+      raise StandardError, "There has been an error and ReportsController#capital_stock_activity has returned nil. Check error logs." if @capital_stock_activity.blank?
+    end
     @picker_presets = date_picker_presets(@start_date, @end_date)
   end
 
   def borrowing_capacity
     member_balances = MemberBalanceService.new(MEMBER_ID, request)
     date = params[:end_date] || Time.zone.now.to_date
-    @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(date.to_date)
-    raise StandardError, "There has been an error and ReportsController#borrowing_capacity has returned nil. Check error logs." if @borrowing_capacity_summary.blank?
+    if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS, request)
+      @borrowing_capacity_summary = {}
+    else
+      @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(date.to_date)
+      raise StandardError, "There has been an error and ReportsController#borrowing_capacity has returned nil. Check error logs." if @borrowing_capacity_summary.blank?
+    end
   end
 
   def settlement_transaction_account
@@ -145,8 +160,12 @@ class ReportsController < ApplicationController
     # default filter to 'all' if invalid filter param was passed
     @filter ||= @filter_options[0][1]
     @filter_text ||= @filter_options[0][0]
-    @settlement_transaction_account = member_balances.settlement_transaction_account(@start_date, @end_date, @filter)
-    raise StandardError, "There has been an error and ReportsController#settlement_transaction_account has returned nil. Check error logs." if @settlement_transaction_account.blank?
+    if report_disabled?(SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS, request)
+      @settlement_transaction_account = {}
+    else
+      @settlement_transaction_account = member_balances.settlement_transaction_account(@start_date, @end_date, @filter)
+      raise StandardError, "There has been an error and ReportsController#settlement_transaction_account has returned nil. Check error logs." if @settlement_transaction_account.blank?
+    end
     @show_ending_balance = false
     if @settlement_transaction_account[:activities] && @settlement_transaction_account[:activities].length > 0
       @show_ending_balance = @end_date != @settlement_transaction_account[:activities][0][:trans_date].to_date || @settlement_transaction_account[:activities][0][:balance].blank?
@@ -156,20 +175,24 @@ class ReportsController < ApplicationController
   def advances_detail
     @start_date = (params[:start_date] || Time.zone.now.to_date).to_date
     member_balances = MemberBalanceService.new(MEMBER_ID, request)
-    @advances_detail = member_balances.advances_details(@start_date)
-    raise StandardError, "There has been an error and ReportsController#advances_detail has returned nil. Check error logs." if @advances_detail.blank?
     @picker_presets = date_picker_presets(@start_date)
-    # prepayment fee indication for detail view
-    @advances_detail[:advances_details].each_with_index do |advance, i|
-      case advance[:notes]
-      when 'unavailable_online'
-        @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.unavailable_online')
-      when 'not_applicable_to_vrc'
-        @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.not_applicable_to_vrc')
-      when 'prepayment_fee_restructure'
-        @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.prepayment_fee_restructure_html', fee: number_to_currency(advance[:prepayment_fee_indication]), date: fhlb_date_standard_numeric(advance[:structure_product_prepay_valuation_date].to_date))
-      else
-        @advances_detail[:advances_details][i][:prepayment_fee_indication] = fhlb_formatted_currency(advance[:prepayment_fee_indication]) || t('reports.pages.advances_detail.unavailable_for_past_dates')
+    if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS, request)
+      @advances_detail = {}
+    else
+      @advances_detail = member_balances.advances_details(@start_date)
+      raise StandardError, "There has been an error and ReportsController#advances_detail has returned nil. Check error logs." if @advances_detail.blank?
+      # prepayment fee indication for detail view
+      @advances_detail[:advances_details].each_with_index do |advance, i|
+        case advance[:notes]
+          when 'unavailable_online'
+            @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.unavailable_online')
+          when 'not_applicable_to_vrc'
+            @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.not_applicable_to_vrc')
+          when 'prepayment_fee_restructure'
+            @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.prepayment_fee_restructure_html', fee: number_to_currency(advance[:prepayment_fee_indication]), date: fhlb_date_standard_numeric(advance[:structure_product_prepay_valuation_date].to_date))
+          else
+            @advances_detail[:advances_details][i][:prepayment_fee_indication] = fhlb_formatted_currency(advance[:prepayment_fee_indication], optional_number: true) || t('reports.pages.advances_detail.unavailable_for_past_dates')
+        end
       end
     end
   end
@@ -231,8 +254,12 @@ class ReportsController < ApplicationController
     @credit_type ||= @credit_type_options.first.last
     @credit_type_text ||= @credit_type_options.first.first
 
-    @historical_price_indications = rate_service.historical_price_indications(@start_date, @end_date, @collateral_type, @credit_type)
-    raise StandardError, "There has been an error and ReportsController#historical_price_indications has returned nil. Check error logs." if @historical_price_indications.blank?
+    if report_disabled?(HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS, request)
+      @historical_price_indications = {}
+    else
+      @historical_price_indications = rate_service.historical_price_indications(@start_date, @end_date, @collateral_type, @credit_type)
+      raise StandardError, "There has been an error and ReportsController#historical_price_indications has returned nil. Check error logs." if @historical_price_indications.blank?
+    end
 
     case @credit_type.to_sym
     when :frc
@@ -266,6 +293,12 @@ class ReportsController < ApplicationController
       :column_headings => column_headings.insert(0, I18n.t('global.date')),
       :rows => rows
     }
+  end
+
+  private
+  def report_disabled?(report_flags, request)
+    member_info = MemberService.new(request)
+    member_info.report_disabled?(MEMBER_ID, report_flags)
   end
 
 end

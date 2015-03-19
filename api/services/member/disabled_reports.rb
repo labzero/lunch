@@ -25,9 +25,13 @@ module MAPI
             while row = report_availability_for_member_cursor.fetch()
               disabled_report_ids << row[0].to_i
             end
+          else
+            # currently the fake data returns an empty array, as this reflects the typical state for users (i.e. no reports have been flagged as disabled)
+            global_report_availability = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'global_report_availability.json')))
+            report_availability_for_member = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'report_availability_for_member.json')))
+            disabled_report_ids = global_report_availability + report_availability_for_member
           end
 
-          # return empty array for non-prod environments, as this reflects the norm for most users (i.e. no reports are flagged as disabled)
           disabled_report_ids.uniq.to_json
         end
       end
