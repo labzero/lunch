@@ -34,10 +34,10 @@
               - case column[:type]
               - when :basis
                 = fhlb_formatted_number(column[:value])
-              - when :rate
-                = fhlb_formatted_number(column[:value], precision: 3)
               - when :index
                 = fhlb_formatted_number(column[:value], precision: 5)
+              - when :rate
+                = fhlb_formatted_number(column[:value], precision: 2)
               - when :currency
                 = fhlb_formatted_currency(column[:value])
               - when :currency_whole
