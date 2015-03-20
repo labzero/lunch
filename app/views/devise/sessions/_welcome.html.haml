@@ -1,0 +1,15 @@
+- @page_title = t('welcome.meta_title')
+%section.welcome
+  .row
+    .column-4x8-left
+      .logo-container
+        .logo= t('welcome.logo')
+    .column-4x8-right
+      %h1= t('welcome.title')
+  .row
+    .column-4x8-left
+      %p= t('welcome.questions.p')
+      %p= fhlb_formatted_phone_number('4155557283')
+    .column-4x8-right
+      %p= t('welcome.intro')
+      = yield

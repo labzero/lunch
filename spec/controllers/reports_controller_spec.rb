@@ -471,12 +471,17 @@ RSpec.describe ReportsController, :type => :controller do
   describe 'private methods' do
     describe '`report_disabled?` method' do
       let(:report_flags) {double('some report flags')}
-      let(:member_service_instance) {instance_double('MemberService')}
+      let(:member_service_instance) {instance_double('MembersService')}
       let(:response) {double('some_response')}
       let(:method_call) {controller.send(:report_disabled?, report_flags)}
-      it 'passes in the member_id and report_flags to the `report_disabled?` method on a newly created instance of MemberService and returns the response' do
-        expect(MemberService).to receive(:new).and_return(member_service_instance)
-        expect(member_service_instance).to receive(:report_disabled?).with(ReportsController::MEMBER_ID, report_flags).and_return(response)
+
+      before do
+        session['member_id'] = 750
+      end
+      
+      it 'passes in the member_id and report_flags to the `report_disabled?` method on a newly created instance of MembersService and returns the response' do
+        expect(MembersService).to receive(:new).and_return(member_service_instance)
+        expect(member_service_instance).to receive(:report_disabled?).with(750, report_flags).and_return(response)
         expect(method_call).to eq(response)
       end
     end

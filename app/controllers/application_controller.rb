@@ -20,6 +20,7 @@ class ApplicationController < ActionController::Base
   end
 
   def after_sign_in_path_for(resource)
+    return user_session_select_member_path unless session['member_id'].present?
     stored_location_for(resource) || dashboard_path
   end
 
@@ -31,5 +32,9 @@ class ApplicationController < ActionController::Base
     rescue => e
       render text: e, status: 500
     end
+  end
+
+  def current_member_id
+    session['member_id']
   end
 end

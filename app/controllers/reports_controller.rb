@@ -3,14 +3,12 @@ class ReportsController < ApplicationController
   include CustomFormattingHelper
   include ActionView::Helpers::NumberHelper
 
-  MEMBER_ID = 750 #this is the hard-coded fhlb client id number we're using for the time-being
-
-  # Mapping of current reports onto flags defined in MemberService
-  ADVANCES_DETAIL_WEB_FLAGS = [MemberService::ADVANCES_DETAIL_DATA, MemberService::ADVANCES_DETAIL_HISTORY]
-  BORROWING_CAPACITY_WEB_FLAGS = [MemberService::COLLATERAL_REPORT_DATA]
-  CAPITAL_STOCK_ACTIVITY_WEB_FLAGS = [MemberService::CURRENT_SECURITIES_POSITION, MemberService::CAPSTOCK_REPORT_BALANCE]
-  HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MemberService::IRDB_RATES_DATA]
-  SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MemberService::STA_BALANCE_AND_RATE_DATA, MemberService::STA_DETAIL_DATA]
+  # Mapping of current reports onto flags defined in MembersService
+  ADVANCES_DETAIL_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA, MembersService::ADVANCES_DETAIL_HISTORY]
+  BORROWING_CAPACITY_WEB_FLAGS = [MembersService::COLLATERAL_REPORT_DATA]
+  CAPITAL_STOCK_ACTIVITY_WEB_FLAGS = [MembersService::CURRENT_SECURITIES_POSITION, MembersService::CAPSTOCK_REPORT_BALANCE]
+  HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::IRDB_RATES_DATA]
+  SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
 
   def index
     @reports = {
@@ -113,7 +111,7 @@ class ReportsController < ApplicationController
 
   def capital_stock_activity
     default_dates = default_dates_hash
-    member_balances = MemberBalanceService.new(MEMBER_ID, request)
+    member_balances = MemberBalanceService.new(current_member_id, request)
     @start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
     if report_disabled?(CAPITAL_STOCK_ACTIVITY_WEB_FLAGS)
@@ -126,7 +124,7 @@ class ReportsController < ApplicationController
   end
 
   def borrowing_capacity
-    member_balances = MemberBalanceService.new(MEMBER_ID, request)
+    member_balances = MemberBalanceService.new(current_member_id, request)
     date = params[:end_date] || Time.zone.now.to_date
     if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
       @borrowing_capacity_summary = {}
@@ -138,7 +136,7 @@ class ReportsController < ApplicationController
 
   def settlement_transaction_account
     default_dates = default_dates_hash
-    member_balances = MemberBalanceService.new(MEMBER_ID, request)
+    member_balances = MemberBalanceService.new(current_member_id, request)
     @start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
     @daily_balance_key = MemberBalanceService::DAILY_BALANCE_KEY
@@ -174,7 +172,9 @@ class ReportsController < ApplicationController
 
   def advances_detail
     @start_date = (params[:start_date] || Time.zone.now.to_date).to_date
-    member_balances = MemberBalanceService.new(MEMBER_ID, request)
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    @advances_detail = member_balances.advances_details(@start_date)
+    raise StandardError, "There has been an error and ReportsController#advances_detail has returned nil. Check error logs." if @advances_detail.blank?
     @picker_presets = date_picker_presets(@start_date)
     if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)
       @advances_detail = {}
@@ -297,8 +297,8 @@ class ReportsController < ApplicationController
 
   private
   def report_disabled?(report_flags)
-    member_info = MemberService.new(request)
-    member_info.report_disabled?(MEMBER_ID, report_flags)
+    member_info = MembersService.new(request)
+    member_info.report_disabled?(current_member_id, report_flags)
   end
 
 end

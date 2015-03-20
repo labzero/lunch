@@ -125,7 +125,7 @@ module MAPI
           else
             members = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_list.json')))
           end
-          (members.collect {|member| {id: member['FHLB_ID'].to_i, name: member['CP_ASSOC'].to_s} }).to_json
+          ((members.sort {|a, b| a['CP_ASSOC'] <=> b['CP_ASSOC']}).collect {|member| {id: member['FHLB_ID'].to_i, name: member['CP_ASSOC'].to_s} }).to_json
         end
       end
     end

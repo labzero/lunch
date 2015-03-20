@@ -1,0 +1,7 @@
+= render layout: 'welcome' do
+  = form_tag user_session_set_member_path, method: :post do
+    %fieldset
+      %legend= t('welcome.choose_member')
+    = render 'shared/dropdown', dropdown_name: :member_id, dropdown_options: @members, default_text: t('welcome.select_bank')
+    = link_to(t('nav.primary.logout'), destroy_user_session_url, method: :delete, class: 'secondary-button logout-link')
+    = submit_tag t('global.continue'), class: 'primary-button', disabled: true

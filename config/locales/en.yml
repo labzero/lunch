@@ -75,6 +75,7 @@ en:
     last_year: Last year
     pdf: PDF
     missing_value: –
+    continue: Continue
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -165,6 +166,8 @@ en:
     questions:
       p: Questions about access
     forgot_password: Forgot Password
+    choose_member: Choose a member bank
+    select_bank: Select bank
   dashboard:
     meta_title: FHLB - Dashboard
     actions:
