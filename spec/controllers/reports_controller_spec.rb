@@ -339,6 +339,44 @@ RSpec.describe ReportsController, :type => :controller do
         expect(rates_service_instance).to receive(:historical_price_indications).with(start_of_year, today, anything, anything).and_return(response_hash)
         get :historical_price_indications
       end
+      it 'should raise an error if @historical_price_indications is nil' do
+        expect(rates_service_instance).to receive(:historical_price_indications).and_return(nil)
+        expect{get :historical_price_indications}.to raise_error(StandardError)
+      end
+      describe 'daily_prime' do
+        let(:rates_by_date) { double('RatesByDate') }
+        let(:rates_by_term) { double('RatesByTerm') }
+        let(:benchmark_index) {3}
+        let(:spread_to_benchmark) {175}
+        let(:date) { today }
+        before do
+          allow(response_hash).to receive(:[]).with(:rates_by_date).and_return([rates_by_date])
+          allow(rates_by_date).to receive(:[]).with(:rates_by_term).and_return([rates_by_term])
+          allow(rates_by_date).to receive(:[]).with(:date).and_return(date)
+          allow(rates_by_term).to receive(:[]).with(:benchmark_index).and_return(benchmark_index)
+          allow(rates_by_term).to receive(:[]).with(:spread_to_benchmark).and_return(spread_to_benchmark)
+        end
+        it 'should set row to return both benchmark and spread to benchmark' do
+          get :historical_price_indications, historical_price_collateral_type: 'standard', historical_price_credit_type: 'daily_prime'
+          expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:index, :value=>3}, {:type=>:basis, :value=>175}])
+        end
+      end
+      describe '1m_libor' do
+        let(:rates_by_date) { double('RatesByDate') }
+        let(:rates_by_term) { double('RatesByTerm') }
+        let(:rate) {3}
+        let(:date) { today }
+        before do
+          allow(response_hash).to receive(:[]).with(:rates_by_date).and_return([rates_by_date])
+          allow(rates_by_date).to receive(:[]).with(:rates_by_term).and_return([rates_by_term])
+          allow(rates_by_date).to receive(:[]).with(:date).and_return(date)
+          allow(rates_by_term).to receive(:[]).with(:rate).and_return(rate)
+        end
+        it 'should set row to return rate' do
+          get :historical_price_indications, historical_price_collateral_type: 'standard', historical_price_credit_type: '1m_libor'
+          expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:basis, :value=>3}])
+        end
+      end
       describe "view instance variables" do
         it 'should set @historical_price_indications' do
           expect(rates_service_instance).to receive(:historical_price_indications).and_return(response_hash)
@@ -426,7 +464,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         describe '@table_data' do
           describe 'table_heading' do
-            ['1m_libor', '3m_libor', '6m_libor', 'daily_prime'].each do |credit_type|
+            ['1m_libor', '3m_libor', '6m_libor'].each do |credit_type|
               it "should set table_heading to the I18n translation for #{credit_type} table heading if the credit type is `#{credit_type}`" do
                 get :historical_price_indications, historical_price_credit_type: credit_type
                 expect((assigns[:table_data])[:table_heading]).to eq(I18n.t("reports.pages.price_indications.#{credit_type}.table_heading"))
@@ -437,6 +475,7 @@ RSpec.describe ReportsController, :type => :controller do
             let(:frc_column_headings) {[I18n.t('global.date'), I18n.t('global.dates.1_month'), I18n.t('global.dates.2_months'), I18n.t('global.dates.3_months'), I18n.t('global.dates.6_months'), I18n.t('global.dates.1_year'), I18n.t('global.dates.2_years'), I18n.t('global.dates.3_years'), I18n.t('global.dates.5_years'), I18n.t('global.dates.7_years'), I18n.t('global.dates.10_years'), I18n.t('global.dates.15_years'), I18n.t('global.dates.20_years'), I18n.t('global.dates.30_years')]}
             let(:vrc_column_headings)  {[I18n.t('global.date'), I18n.t('global.dates.1_day')]}
             let(:arc_column_headings) {[I18n.t('global.date'), I18n.t('global.dates.1_year'), I18n.t('global.dates.2_years'), I18n.t('global.dates.3_years'), I18n.t('global.dates.5_years')]}
+            let(:arc_daily_prime_column_headings) {[I18n.t('global.full_dates.1_year'), I18n.t('global.full_dates.2_years'), I18n.t('global.full_dates.3_years'), I18n.t('global.full_dates.5_years')]}
             it 'sets column_headings for the `frc` credit type' do
               get :historical_price_indications, historical_price_credit_type: 'frc'
               expect((assigns[:table_data])[:column_headings]).to eq(frc_column_headings)
@@ -445,11 +484,15 @@ RSpec.describe ReportsController, :type => :controller do
               get :historical_price_indications, historical_price_credit_type: 'vrc'
               expect((assigns[:table_data])[:column_headings]).to eq(vrc_column_headings)
             end
-            ['1m_libor', '3m_libor', '6m_libor', 'daily_prime'].each do |credit_type|
+            ['1m_libor', '3m_libor', '6m_libor'].each do |credit_type|
               it "sets column_headings for the #{credit_type} credit_type" do
                 get :historical_price_indications, historical_price_credit_type: credit_type
                 expect((assigns[:table_data])[:column_headings]).to eq(arc_column_headings)
               end
+            end
+            it 'sets column_headings for the daily_prime credit_type' do
+              get :historical_price_indications, historical_price_credit_type: 'daily_prime'
+              expect((assigns[:table_data])[:column_headings]).to eq(arc_daily_prime_column_headings)
             end
           end
           describe 'rows' do

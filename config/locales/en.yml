@@ -88,9 +88,24 @@ en:
       5_years: 5 yr
       7_years: 7 yr
       10_years: 10 yr
-      15_years: 15yr
+      15_years: 15 yr
       20_years: 20 yr
       30_years: 30 yr
+    full_dates:
+      1_day: 1 day
+      1_month: 1 month
+      2_months: 2 month
+      3_months: 3 month
+      6_months: 6 month
+      1_year: 1 year
+      2_years: 2 year
+      3_years: 3 year
+      5_years: 5 year
+      7_years: 7 year
+      10_years: 10 year
+      15_years: 15 year
+      20_years: 20 year
+      30_years: 30 year
   dates:
     quarters:
       "1": First Quarter %{year}
@@ -412,6 +427,8 @@ en:
           standard_table_title: Standard Credit Program, Adjustable Rate Credit (ARC) Daily Prime, All Terms
           sbc_table_title: Securities-Backed  Credit, Adjustable Rate Credit (ARC) Daily Prime, All Terms
           table_heading: Daily Prime
+          benchmark_index: Benchmark Index
+          basis_point_spread: Basis Point Spread to Benchmark
         embedded_cap:
           dropdown: Adjustable Rate Credit (ARC) with Embedded Cap
           standard_table_title: Standard Credit Program, Adjustable Rate Credit (ARC) Daily Prime, All Terms

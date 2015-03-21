@@ -180,6 +180,20 @@ describe RatesService do
           end
         end
       end
+      it 'should return a benchmark_index as a float' do # TODO maybe change this to account for null values coming back from MAPI once the endpoint is built
+        historical_prices[:rates_by_date].each do |row|
+          row[:rates_by_term].each do |rate_object|
+            expect(rate_object[:benchmark_index]).to be_kind_of(Integer)
+          end
+        end
+      end
+      it 'should return a spread_to_benchmark as a float' do # TODO maybe change this to account for null values coming back from MAPI once the endpoint is built
+        historical_prices[:rates_by_date].each do |row|
+          row[:rates_by_term].each do |rate_object|
+            expect(rate_object[:spread_to_benchmark]).to be_kind_of(Integer)
+          end
+        end
+      end
     end
     # TODO remove code below once you have rigged up the reports for all supported collateral_types and credit_types
     # START of code that should be removed once this method supports all valid collateral_types and credit_types
