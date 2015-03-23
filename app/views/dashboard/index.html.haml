@@ -117,7 +117,7 @@
             %tr
               %td
                 = row[0]
-                %div.dashboard-module-content-light=row[2].strftime('%^b %d %Y')
+                %div.dashboard-module-content-light= fhlb_date_standard_numeric(row[2])
               - if i == 0
                 %td= fhlb_formatted_currency_whole(row[1])
               - else
@@ -135,7 +135,7 @@
             %tr
               %td
                 #{row[0]}
-                %div.dashboard-module-content-light #{row[2].strftime('%^b %d %Y')}
+                %div.dashboard-module-content-light= fhlb_date_standard_numeric(row[2])
               - if i == 0
                 %td
                   #{sgn}#{number_to_currency(row[1], precision: 0)}
@@ -185,6 +185,6 @@
         %button.report-drop-down-right #{t('global.pdf')}
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
       %ul
-        %li= render 'dashboard/dashboard_contact', email: 'user@example.com', title: t('dashboard.contacts.type.nonstandard_advance'), name: 'Bob Harrison', phone_number: '415–555–7283', picture_url: image_url('bob_harrison.jpg')
-        %li= render 'dashboard/dashboard_contact', email: 'otheruser@example.com', title: t('dashboard.contacts.type.general'), name: 'Theresa Reyes', phone_number: '415–555–7283', picture_url: image_url('theresa_reyes.jpg')
+        %li= render 'dashboard/dashboard_contact', email: 'user@example.com', title: t('dashboard.contacts.type.relationship_manager'), name: 'Bob Harrison', phone_number: fhlb_formatted_phone_number('4155557283'), picture_url: image_url('bob_harrison.jpg')
+        %li= render 'dashboard/dashboard_contact', email: 'otheruser@example.com', title: t('dashboard.contacts.type.member_services_desk'), name: 'Theresa Reyes', phone_number: fhlb_formatted_phone_number('4155557283'), picture_url: image_url('theresa_reyes.jpg')
       = render 'shared/input_field', icon: :magnify, placeholder: t('dashboard.contacts.search_placeholder')
