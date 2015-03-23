@@ -13,8 +13,8 @@
             .borrowing-capacity-gauge-threshold{style: "left: #{@effective_borrowing_capacity[:threshold_capacity]}%"}
               = render 'shared/tooltip', tooltip_data: {"#{@effective_borrowing_capacity[:threshold_capacity]}%" => nil}
           .dashboard-gauge-labels
-            %span.borrowing-capacity-label-used= t('dashboard.your_account.effective_borrowing_capacity.used') + ": #{number_to_human(@effective_borrowing_capacity[:used_capacity][:absolute], units: 'global.currency')}"
-            %span= t('dashboard.your_account.effective_borrowing_capacity.unused') + ": #{number_to_human(@effective_borrowing_capacity[:unused_capacity][:absolute], units: 'global.currency')}"
+            %span.borrowing-capacity-label-used= t('dashboard.your_account.effective_borrowing_capacity.used') + ": #{fhlb_formatted_currency_whole(@effective_borrowing_capacity[:used_capacity][:absolute], html: false)}"
+            %span= t('dashboard.your_account.effective_borrowing_capacity.unused') + ": #{fhlb_formatted_currency_whole(@effective_borrowing_capacity[:unused_capacity][:absolute], html: false)}"
       - if @pledged_collateral
         .dashboard-pledged-collateral
           - mortgage_total = @pledged_collateral[:mortgages][:absolute] + @pledged_collateral[:agency][:absolute] + @pledged_collateral[:aaa][:absolute] + @pledged_collateral[:aa][:absolute]
@@ -27,16 +27,16 @@
               - aa_percentage = number_to_percentage(@pledged_collateral[:aa][:percentage], precision: 1)
               .collateral-gauge-mortgages.gauge-section{style: "width: #{mortgage_percentage}; #{'display: none' unless mortgage_percentage.to_f > 0}"}
                 .inner-gauge-section
-                = render 'shared/tooltip', tooltip_data: { t('dashboard.your_account.pledged_collateral.mortgages')=>'', number_to_human(@pledged_collateral[:mortgages][:absolute], units: 'global.currency') =>  mortgage_percentage}
+                = render 'shared/tooltip', tooltip_data: { t('dashboard.your_account.pledged_collateral.mortgages')=>'', fhlb_formatted_currency_whole(@pledged_collateral[:mortgages][:absolute], html: false) =>  mortgage_percentage}
               .collateral-gauge-securities.gauge-section{style: "width: #{agency_percentage}; #{'display: none' unless agency_percentage.to_f > 0}"}
                 .inner-gauge-section
-                = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.pledged_collateral.agency')=>'',number_to_human(@pledged_collateral[:agency][:absolute], units: 'global.currency') => agency_percentage}
+                = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.pledged_collateral.agency')=>'',fhlb_formatted_currency_whole(@pledged_collateral[:agency][:absolute], html: false) => agency_percentage}
               .collateral-gauge-securities.gauge-section{style: "width: #{aaa_percentage}; #{'display: none' unless aaa_percentage.to_f > 0}"}
                 .inner-gauge-section
-                = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.pledged_collateral.aaa')=>'', number_to_human(@pledged_collateral[:aaa][:absolute], units: 'global.currency') => aaa_percentage}
+                = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.pledged_collateral.aaa')=>'', fhlb_formatted_currency_whole(@pledged_collateral[:aaa][:absolute], html: false) => aaa_percentage}
               .collateral-gauge-securities.gauge-section{style: "width: #{aa_percentage}; #{'display: none' unless aa_percentage.to_f > 0}"}
                 .inner-gauge-section
-                = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.pledged_collateral.aa')=>'', number_to_human(@pledged_collateral[:aa][:absolute], units: 'global.currency') => aa_percentage}
+                = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.pledged_collateral.aa')=>'', fhlb_formatted_currency_whole(@pledged_collateral[:aa][:absolute], html: false) => aa_percentage}
             .dashboard-gauge-labels
               %span.collateral-gauge-label-mortgages= t('dashboard.your_account.pledged_collateral.mortgages')
               %span.collateral-gauge-label-securities= t('dashboard.your_account.pledged_collateral.securities')

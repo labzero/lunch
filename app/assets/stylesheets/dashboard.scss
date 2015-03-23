@@ -303,6 +303,7 @@ $breakdown-table-currency-width: 10px;
     &:hover {
       .tooltip {
         display: block;
+        z-index: 1;
       }
     }
   }
