@@ -185,6 +185,6 @@
         %button.report-drop-down-right #{t('global.pdf')}
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
       %ul
-        %li= render 'dashboard/dashboard_contact', email: 'user@example.com', title: t('dashboard.contacts.type.nonstandard_advance'), name: 'Bob – RM', phone_number: '415–555–7283'
-        %li= render 'dashboard/dashboard_contact', email: 'otheruser@example.com', title: t('dashboard.contacts.type.general'), name: 'Teresa – FHLB Desk', phone_number: '415–555–7283'
+        %li= render 'dashboard/dashboard_contact', email: 'user@example.com', title: t('dashboard.contacts.type.nonstandard_advance'), name: 'Bob Harrison', phone_number: '415–555–7283', picture_url: image_url('bob_harrison.jpg')
+        %li= render 'dashboard/dashboard_contact', email: 'otheruser@example.com', title: t('dashboard.contacts.type.general'), name: 'Theresa Reyes', phone_number: '415–555–7283', picture_url: image_url('theresa_reyes.jpg')
       = render 'shared/input_field', icon: :magnify, placeholder: t('dashboard.contacts.search_placeholder')
