@@ -401,31 +401,31 @@ en:
         sbc_program: Securities-Backed Credit
         frc:
           dropdown: Fixed Rate Credit (FRC)
-          standard_table_title: Standard Credit Program, Fixed Rate Credit (FRC), All Terms
-          sbc_table_title: Securities-Backed Credit, Fixed Rate Credit (FRC), All Terms
+          standard_table_title: FRC (%)
+          sbc_table_title: FRC (%)
         vrc:
           dropdown: Variable Rate Credit (VRC)
-          standard_table_title: Standard Credit Program, Variable Rate Credit (VRC), All Terms
-          sbc_table_title: Securities-Backed Credit, Variable Rate Credit (VRC), All Terms
+          standard_table_title: VRC Overnight (%)
+          sbc_table_title: VRC Overnight (%)
         1m_libor:
           dropdown: Adjustable Rate Credit (ARC) 1 month LIBOR
-          standard_table_title: Standard Credit Program, Adjustable Rate Credit (ARC) 1 month LIBOR, All Terms
-          sbc_table_title: Securities-Backed  Credit, Adjustable Rate Credit (ARC) 1 month LIBOR, All Terms
+          standard_table_title: ARC 1 Month LIBOR (Basis Point Spread)
+          sbc_table_title: ARC 1 Month LIBOR (Basis Point Spread)
           table_heading: 1 mo LIBOR
         3m_libor:
           dropdown: Adjustable Rate Credit (ARC) 3 month LIBOR
-          standard_table_title: Standard Credit Program, Adjustable Rate Credit (ARC) 3 month LIBOR, All Terms
-          sbc_table_title: Securities-Backed  Credit, Adjustable Rate Credit (ARC) 3 month LIBOR, All Terms
+          standard_table_title: ARC 3 Month LIBOR (Basis Point Spread)
+          sbc_table_title: ARC 3 Month LIBOR (Basis Point Spread)
           table_heading: 3 mo LIBOR
         6m_libor:
           dropdown: Adjustable Rate Credit (ARC) 6 month LIBOR
-          standard_table_title: Standard Credit Program, Adjustable Rate Credit (ARC) 6 month LIBOR, All Terms
-          sbc_table_title: Securities-Backed  Credit, Adjustable Rate Credit (ARC) 6 month LIBOR, All Terms
+          standard_table_title: ARC 6 Month LIBOR (Basis Point Spread)
+          sbc_table_title: ARC 6 Month LIBOR (Basis Point Spread)
           table_heading: 6 mo LIBOR
         daily_prime:
           dropdown: Adjustable Rate Credit (ARC) Daily Prime
-          standard_table_title: Standard Credit Program, Adjustable Rate Credit (ARC) Daily Prime, All Terms
-          sbc_table_title: Securities-Backed  Credit, Adjustable Rate Credit (ARC) Daily Prime, All Terms
+          standard_table_title: ARC Daily Prime
+          sbc_table_title: ARC Daily Prime
           table_heading: Daily Prime
           benchmark_index: Benchmark Index
           basis_point_spread: Basis Point Spread to Benchmark
