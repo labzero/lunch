@@ -286,7 +286,7 @@ en:
       anticipated_activity:
         title: Anticipated Activity
       table:
-        balance: Sta Balance
+        balance: STA Balance
         credit_outstanding: Credit Outstanding
         remaining:
           title: Remaining
