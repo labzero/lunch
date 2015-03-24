@@ -203,12 +203,14 @@ en:
       estimated: Estimated
       total_maturing_today: Total Maturing Today
     contacts:
-      title: Contacts
+      title: Contact
       icon_alt_text: Contact
       search_placeholder: 'Search for FHLB contact'
       type:
         general: General Inquiries
         nonstandard_advance: Nonstandard Advances
+        relationship_manager: Relationship Manager
+        member_services_desk: Member Services Desk
     quick_advance:
       title: Quick Advances
       advance_placeholder: Enter Dollar Amount

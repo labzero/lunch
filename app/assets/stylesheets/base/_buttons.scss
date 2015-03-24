@@ -38,6 +38,12 @@ $button-vertical-padding: 7px;
   text-transform: none;
   width: 100%;
   text-align: justify;
+  span:first-child {
+    float: left;
+  }
+  span:last-child {
+    float: right;
+  }
 }
 
 .edit-button {
