@@ -113,38 +113,26 @@
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), action_type: 'more-button', data_available: !@previous_activity.blank?} do
       %table.table-dashboard-previous-activity
         %tbody
-          - @previous_activity.each_with_index do |row, i|
+          - @previous_activity.each do |row|
             %tr
               %td
                 = row[0]
                 %div.dashboard-module-content-light= fhlb_date_standard_numeric(row[2])
-              - if i == 0
-                %td= fhlb_formatted_currency_whole(row[1])
-              - else
-                %td= fhlb_formatted_number(row[1])
+              %td= fhlb_formated_currency_unit(row[1])
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.anticipated_activity.title'), action_type: 'calendar-icon'} do
       %table.table-dashboard-anticipated-activity
         %tbody
           - @anticipated_activity.each_with_index do |row, i|
-            - if row[1].nil?
-              - sgn = t('global.na')
-            - elsif row[1] > 0
-              - sgn = '+'
-            - else
-              - sgn = ''
             %tr
               %td
-                #{row[0]}
+                = row[0]
                 %div.dashboard-module-content-light= fhlb_date_standard_numeric(row[2])
-              - if i == 0
-                %td
-                  #{sgn}#{number_to_currency(row[1], precision: 0)}
-                  %div.dashboard-module-content-light #{row[3].upcase}
-              - else
-                %td
-                  #{sgn}#{number_with_delimiter(row[1], precision: 0)}
-                  %div.dashboard-module-content-light #{row[3].upcase}
-      %button.total-button #{t('dashboard.anticipated_activity.total_maturing_today')} #{number_to_currency(@total_maturing_today, precision: 0)}
+              %td
+                =fhlb_formated_currency_unit(row[1])
+                %div.dashboard-module-content-light= row[3].upcase
+      %button.total-button
+        %span= t('dashboard.anticipated_activity.total_maturing_today')
+        %span= number_to_currency(@total_maturing_today, precision: 0)
   .column-3
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.reports.title'), classes: 'dashboard-module-reports'} do
       = render 'shared/input_field', icon: :calendar, placeholder: t('dashboard.reports.as_of_yesterday'), location: :after
