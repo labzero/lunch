@@ -68,16 +68,8 @@ module MAPI
           if app.settings.environment == :production
             member_position_hash  = {}
             member_sta_hash  = {}
-            member_position_cursor = ActiveRecord::Base.connection.execute(member_position_connection_string)
-            while row = member_position_cursor.fetch_hash()
-              member_position_hash  = row
-              break
-            end
-            member_sta_cursor_string = ActiveRecord::Base.connection.execute(member_position_connection_string)
-            while row = member_sta_cursor_string.fetch_hash()
-              member_sta_hash  = row
-              break
-            end
+            member_position_hash = ActiveRecord::Base.connection.execute(member_position_connection_string).fetch_hash() || {}
+            member_sta_hash = ActiveRecord::Base.connection.execute(member_sta_cursor_string).fetch_hash() || {}
           else
             member_position_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_financial_position.json'))).sample
             member_sta_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_balances.json'))).sample
