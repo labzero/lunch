@@ -25,6 +25,7 @@ en:
     currency:
       thousand: T
       million: MM
+    currency_symbol: $
     updated: Updated
     view: View
     available_history: Available History
