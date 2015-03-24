@@ -154,6 +154,9 @@ describe CustomFormattingHelper do
     it 'returns two spans nested in a span with the default currency symbol and a currency with precision of 0' do
       expect(helper.fhlb_formated_currency_unit(30)).to eq("<span class=\"currency_alignment\"><span class=\"alignleft\">#{I18n.t('global.currency_symbol')}</span><span class=\"alignright\"><span class=\"number-positive\">30</span></span></span>")
     end
+    it 'returns two spans nested in a span with any passed in string as the currency symbol' do
+      expect(helper.fhlb_formated_currency_unit(30, '£')).to eq("<span class=\"currency_alignment\"><span class=\"alignleft\">£</span><span class=\"alignright\"><span class=\"number-positive\">30</span></span></span>")
+    end
     it 'returns currency with 2 precision and left/right align' do
       expect(helper.fhlb_formated_currency_unit(30, '$', 2)).to eq('<span class="currency_alignment"><span class="alignleft">$</span><span class="alignright"><span class="number-positive">30.00</span></span></span>')
     end
