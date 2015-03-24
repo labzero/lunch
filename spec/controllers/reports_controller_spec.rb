@@ -358,7 +358,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'should set row to return both benchmark and spread to benchmark' do
           get :historical_price_indications, historical_price_collateral_type: 'standard', historical_price_credit_type: 'daily_prime'
-          expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:index, :value=>3}, {:type=>:basis, :value=>175}])
+          expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:index, :value=>benchmark_index}, {:type=>:basis, :value=>spread_to_benchmark}])
         end
       end
       describe '1m_libor' do
@@ -374,7 +374,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'should set row to return rate' do
           get :historical_price_indications, historical_price_collateral_type: 'standard', historical_price_credit_type: '1m_libor'
-          expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:basis, :value=>3}])
+          expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:basis, :value=>rate}])
         end
       end
       describe "view instance variables" do
