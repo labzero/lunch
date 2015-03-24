@@ -90,7 +90,7 @@ module CustomFormattingHelper
     number_to_percentage(number, precision: precision)
   end
 
-  def fhlb_formated_currency_unit(number, unit=I18n.t('global.currency_symbol'), precision=0)
+  def fhlb_formated_currency_unit(number, unit='$', precision=0)
     unit_class = content_tag(:span, unit, class: 'alignleft')
     number_class = content_tag(:span, fhlb_formatted_number(number, precision: precision), class: 'alignright')
     inner_content = number.blank?? number_class : unit_class + number_class
