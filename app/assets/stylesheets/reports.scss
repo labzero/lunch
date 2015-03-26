@@ -152,12 +152,8 @@
 }
 
 .report-table {
+  @extend %empty_table;
   margin-bottom: 50px;
-  width: 100%;
-  text-align: left;
-  border: 1px solid $light-blue;
-  border-collapse: collapse;
-  line-height: 1;
 
   td, th {
     border: solid $light-blue;
@@ -474,9 +470,5 @@ td .currency_alignment {
 }
 
 td.dataTables_empty {
-  @extend %typography-table-data-unavailable;
-  color: $medium-gray;
-  background: $white;
-  text-align: center;
-  padding: 40px 0;
+  @extend %empty_table_cell;
 }

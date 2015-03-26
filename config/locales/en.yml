@@ -147,7 +147,7 @@ en:
       selected_item_message: "(Be sure to include fhlbsf.com in your Safe Senders list)"
       required_item_message_html: "You are assigned to receive these emails. For more information, <a href=\"%{url}\">contact us</a>."
       all:
-        title: all
+        title: All Messages
         description_html: ""
       reports:
         title: Reports
@@ -523,3 +523,4 @@ en:
       headline: Scheduled Downtime
       summary: We're currently performing maintenance on the Member Portal. We'll have things up and running again soon.
     table_data_unavailable: This information is currently unavailable
+    no_messages: No Messages
