@@ -16,3 +16,19 @@ td {
     margin-right: -3px;
   }
 }
+
+%empty_table_cell {
+  @extend %typography-table-data-unavailable;
+  color: $medium-gray;
+  background: $white;
+  text-align: center;
+  padding: 40px 0;
+}
+
+%empty_table {
+  width: 100%;
+  text-align: left;
+  border: 1px solid $light-blue;
+  border-collapse: collapse;
+  line-height: 1;
+}

@@ -40,4 +40,16 @@ Scenario: Navigate from one detail page to another
   When I click on the "Prior" link at the top of the message detail view
   Then I should see the date and the title of the message I remembered
 
+@data-unavailable @jira-mem-288
+Scenario: No messages in any category
+  Given I am on the Messages Page
+  When the "Messages" table has no data
+  Then I should see a No Messages indicator
+
+@data-unavailable @jira-mem-288
+  Scenario: No messages in "Collateral" category
+  Given I am on the Messages Page
+  When the "Collateral Pledging" category has no messages
+  Then "Collateral Pledging" category should be disabled
+
 

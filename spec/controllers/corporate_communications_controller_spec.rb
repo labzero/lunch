@@ -4,12 +4,16 @@ RSpec.describe CorporateCommunicationsController, :type => :controller do
   login_user
 
   describe 'before_filter methods' do
+    let(:message_service_instance) { double('MessageServiceInstance') }
+    let(:corporate_communications_zero) { double('Array of Messages', count: 0) }
+    let(:corporate_communications_non_zero) { double('Array of Messages', count: 7) }
     it 'should set @sidebar_options as an array of options with a label and a value' do
       get :category, category: 'all'
       expect(assigns(:sidebar_options)).to be_kind_of(Array)
       assigns(:sidebar_options).each do |option|
-        expect(option.first).to be_kind_of(String)
-        expect(option.last).to be_kind_of(String)
+        expect(option[0]).to be_kind_of(String)
+        expect(option[1]).to be_kind_of(String)
+        expect(option[2]).to be_kind_of(TrueClass).or be_kind_of(FalseClass)
       end
     end
     CorporateCommunication::VALID_CATEGORIES.each do |category|
@@ -24,24 +28,41 @@ RSpec.describe CorporateCommunicationsController, :type => :controller do
     it 'should raise an error if nothing is passed as a category argument' do
       expect{get :category}.to raise_error
     end
+    it 'should return true if the number of messages is zero' do
+      allow(MessageService).to receive(:new).and_return(message_service_instance)
+      allow(message_service_instance).to receive(:corporate_communications).and_return(corporate_communications_zero)
+      get :category, category: 'all'
+      assigns(:sidebar_options).each do |option|
+        expect(option[2]).to be_kind_of(TrueClass)
+      end
+    end
+    it 'should return false if the number of messages is not zero' do
+      allow(MessageService).to receive(:new).and_return(message_service_instance)
+      allow(message_service_instance).to receive(:corporate_communications).and_return(corporate_communications_non_zero)
+      get :category, category: 'all'
+      assigns(:sidebar_options).each do |option|
+        expect(option[2]).to be_kind_of(FalseClass)
+      end
+    end
   end
 
   describe 'GET category' do
     it_behaves_like 'a user required action', :get, :category, category: 'all'
     let(:message_service_instance) { double('MessageServiceInstance') }
-    let(:corporate_communications) { double('Array of Messages') }
+    let(:corporate_communications) { double('Array of Messages', count: 7 ) }
     it 'should render the category view' do
       get :category, category: 'all'
       expect(response.body).to render_template('category')
     end
     it 'should pass @filter to MessageService#corporate_communications as an argument' do
-      expect(message_service_instance).to receive(:corporate_communications).with('all')
-      expect(MessageService).to receive(:new).and_return(message_service_instance)
+      allow(message_service_instance).to receive(:corporate_communications).with(kind_of(String)).and_return(corporate_communications)
+      allow(MessageService).to receive(:new).and_return(message_service_instance)
+      expect(message_service_instance).to receive(:corporate_communications).with('all').at_least(2).and_return(corporate_communications)
       get :category, category: 'all'
     end
     it 'should set @messages to the value returned by MessageService#corporate_communications' do
-      expect(message_service_instance).to receive(:corporate_communications).and_return(corporate_communications)
-      expect(MessageService).to receive(:new).and_return(message_service_instance)
+      allow(MessageService).to receive(:new).and_return(message_service_instance)
+      allow(message_service_instance).to receive(:corporate_communications).and_return(corporate_communications)
       get :category, category: 'all'
       expect(assigns[:messages]).to eq(corporate_communications)
     end

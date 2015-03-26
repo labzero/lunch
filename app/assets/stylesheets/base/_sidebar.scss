@@ -17,6 +17,10 @@
           color: $white;
           border-radius: $default-border-radius;
         }
+        &.disabled {
+          color: $medium-gray;
+          cursor: auto;
+        }
       }
       a, span {
         cursor: pointer;
