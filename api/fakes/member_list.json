@@ -1,5 +1,14 @@
 [
   {"FHLB_ID": 1, "CP_ASSOC": "Old McDonald's Leanding Window"},
   {"FHLB_ID": 2, "CP_ASSOC": "Bobby's Payday Loans"},
-  {"FHLB_ID": 3, "CP_ASSOC": "Irish Bank"}
+  {"FHLB_ID": 3, "CP_ASSOC": "Irish Bank"},
+  {"FHLB_ID": 4, "CP_ASSOC": "S'more Bank"},
+  {"FHLB_ID": 5, "CP_ASSOC": "Wells Faygo"},
+  {"FHLB_ID": 6, "CP_ASSOC": "Chaste Manhattan"},
+  {"FHLB_ID": 7, "CP_ASSOC": "Subprime Backalley Lenders"},
+  {"FHLB_ID": 8, "CP_ASSOC": "Loan Sharks Incorporated"},
+  {"FHLB_ID": 9, "CP_ASSOC": "Marina Bank"},
+  {"FHLB_ID": 10, "CP_ASSOC": "Overseas Bank"},
+  {"FHLB_ID": 11, "CP_ASSOC": "Cayman Islands Holding Company"},
+  {"FHLB_ID": 12, "CP_ASSOC": "The Bank With The Really Really Long Name That Requires Truncation or Expansion"}
 ]

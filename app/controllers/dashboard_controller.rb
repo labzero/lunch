@@ -1,6 +1,5 @@
 class DashboardController < ApplicationController
 
-  MEMBER_ID = 750 #this is the hard-coded fhlb client id number we're using for the time-being
   THRESHOLD_CAPACITY = 35 #this will be set by each client, probably with a default value of 35, and be stored in some as-yet-unnamed db
   ADVANCE_TYPES = [:whole, :agency, :aaa, :aa]
   ADVANCE_TERMS = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
@@ -8,7 +7,7 @@ class DashboardController < ApplicationController
   def index
     rate_service = RatesService.new(request)
     etransact_service = EtransactAdvancesService.new(request)
-    member_balances = MemberBalanceService.new(MEMBER_ID, request)
+    member_balances = MemberBalanceService.new(current_member_id, request)
 
     profile = member_balances.profile
 
@@ -86,7 +85,7 @@ class DashboardController < ApplicationController
   def quick_advance_rates
     etransact_service = EtransactAdvancesService.new(request)
     @quick_advances_active = etransact_service.etransact_active?
-    rate_data = RatesService.new(request).quick_advance_rates(MEMBER_ID)
+    rate_data = RatesService.new(request).quick_advance_rates(current_member_id)
     render partial: 'quick_advance_table_rows', locals: {rate_data: rate_data, advance_terms: ADVANCE_TERMS, advance_types: ADVANCE_TYPES}
   end
 
@@ -95,7 +94,7 @@ class DashboardController < ApplicationController
     advance_type = rate_data[:advance_type]
     advance_term = rate_data[:advance_term]
     advance_rate = rate_data[:advance_rate].to_f
-    preview = RatesService.new(request).quick_advance_preview(MEMBER_ID, advance_type, advance_term, advance_rate)
+    preview = RatesService.new(request).quick_advance_preview(current_member_id, advance_type, advance_term, advance_rate)
     render partial: 'quick_advance_preview', locals: preview # key names received from RatesService.new.quick_advance_preview must match variable names in partial
   end
 
@@ -104,7 +103,7 @@ class DashboardController < ApplicationController
     advance_type = rate_data[:advance_type]
     advance_term = rate_data[:advance_term]
     advance_rate = rate_data[:advance_rate].to_f
-    confirmation = RatesService.new(request).quick_advance_confirmation(MEMBER_ID, advance_type, advance_term, advance_rate)
+    confirmation = RatesService.new(request).quick_advance_confirmation(current_member_id, advance_type, advance_term, advance_rate)
     render json: confirmation # this will likely become a partial once we have designs for the confirmation dialog
   end
 

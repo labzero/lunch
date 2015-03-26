@@ -50,7 +50,7 @@
 }
 
 @mixin typography-dashboard-account-summary {
-  font-size: 0.8rem;
+  font-size: 0.8667rem;
   font-weight: $normal-weight;
 }
 
@@ -132,6 +132,11 @@
 
 @mixin typography-error-message {
   font-size: 1rem;
+  font-weight: $normal-weight;
+}
+
+@mixin typography-table-data-unavailable {
+  font-size: 1.6rem;
   font-weight: $normal-weight;
 }
 
@@ -241,4 +246,8 @@
 
 %typography-error-message {
   @include typography-error-message;
+}
+
+%typography-table-data-unavailable {
+  @include typography-table-data-unavailable;
 }

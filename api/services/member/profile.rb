@@ -68,16 +68,8 @@ module MAPI
           if app.settings.environment == :production
             member_position_hash  = {}
             member_sta_hash  = {}
-            member_position_cursor = ActiveRecord::Base.connection.execute(member_position_connection_string)
-            while row = member_position_cursor.fetch_hash()
-              member_position_hash  = row
-              break
-            end
-            member_sta_cursor_string = ActiveRecord::Base.connection.execute(member_position_connection_string)
-            while row = member_sta_cursor_string.fetch_hash()
-              member_sta_hash  = row
-              break
-            end
+            member_position_hash = ActiveRecord::Base.connection.execute(member_position_connection_string).fetch_hash() || {}
+            member_sta_hash = ActiveRecord::Base.connection.execute(member_sta_cursor_string).fetch_hash() || {}
           else
             member_position_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_financial_position.json'))).sample
             member_sta_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_balances.json'))).sample
@@ -125,7 +117,7 @@ module MAPI
           else
             members = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_list.json')))
           end
-          (members.collect {|member| {id: member['FHLB_ID'].to_i, name: member['CP_ASSOC'].to_s} }).to_json
+          ((members.sort {|a, b| a['CP_ASSOC'] <=> b['CP_ASSOC']}).collect {|member| {id: member['FHLB_ID'].to_i, name: member['CP_ASSOC'].to_s} }).to_json
         end
       end
     end

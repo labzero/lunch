@@ -2,7 +2,8 @@ module CustomFormattingHelper
   include ActionView::Helpers::TagHelper
   def fhlb_formatted_currency(number, options={})
     options.reverse_update({html: true, negative_format: '(%u%n)', force_unit: false})
-    return nil if number.nil?
+    return nil if number.nil? && options[:optional_number]
+    return t('global.missing_value') if number.nil?
     formatted = if !options[:force_unit] && number == 0
       '0'
     else
@@ -17,12 +18,14 @@ module CustomFormattingHelper
   end
 
   def fhlb_formatted_currency_whole(number, options={})
+    return t('global.missing_value') if number.nil?
     fhlb_formatted_currency(number, options.merge(precision: 0))
   end
 
   def fhlb_formatted_number(number, options={})
     options.reverse_update({html: true, precision: 0})
-    return nil if number.nil?
+    return nil if number.nil? && options[:optional_number]
+    return t('global.missing_value') if number.nil?
     formatted = number_with_precision(number.abs, options.merge(delimiter: ','))
     formatted = if number < 0
       "(#{formatted})"
@@ -43,14 +46,17 @@ module CustomFormattingHelper
   end
 
   def fhlb_date_standard_numeric(date)
+    return t('global.missing_value') if date.nil?
     date.to_date.strftime('%m/%d/%Y')
   end
 
   def fhlb_date_long_alpha(date)
+    return t('global.missing_value') if date.nil?
     date.to_date.strftime('%B %-d, %Y')
   end
 
   def fhlb_date_quarter(date)
+    return t('global.missing_value') if date.nil?
     date = date.to_date
     quarter = (date.month / 3.0).ceil
     I18n.t("dates.quarters.#{quarter}", year: date.year)
@@ -80,12 +86,14 @@ module CustomFormattingHelper
   end
 
   def fhlb_formatted_percentage(number, precision=0)
+    return t('global.missing_value') if number.nil?
     number_to_percentage(number, precision: precision)
   end
 
-  def fhlb_formated_currency_unit(number, unit, precision=0)
+  def fhlb_formated_currency_unit(number, unit='$', precision=0)
     unit_class = content_tag(:span, unit, class: 'alignleft')
     number_class = content_tag(:span, fhlb_formatted_number(number, precision: precision), class: 'alignright')
-    content_tag(:span, unit_class + number_class, class: 'currency_alignment')
+    inner_content = number.blank?? number_class : unit_class + number_class
+    content_tag(:span, inner_content, class: 'currency_alignment')
   end
 end

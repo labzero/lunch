@@ -60,3 +60,15 @@ Scenario: Choosing `Last year` as a datepicker option
   And I choose the "last year preset" in the datepicker
   And I click the datepicker apply button
   Then I should see a report with dates for last year
+
+@data-unavailable @jira-mem-283
+Scenario: No data is available to show in the Historical Price Indications report
+  Given I am on the Historical Price Indications page
+  When the "Historical Price Indications" table has no data
+  Then I should see an empty report table with Data Unavailable messaging
+
+@data-unavailable @jira-mem-282
+Scenario: The Historical Price Indications report has been disabled
+  Given I am on the Historical Price Indications page
+  When the "Historical Price Indications" report has been disabled
+  Then I should see an empty report table with Data Unavailable messaging

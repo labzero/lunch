@@ -458,6 +458,10 @@
   }
 }
 
+td .currency_alignment {
+  width: auto;
+}
+
 .currency_alignment {
   width: 9em;
   display: block;
@@ -467,4 +471,12 @@
   .alignright {
     float: right;
   }
+}
+
+td.dataTables_empty {
+  @extend %typography-table-data-unavailable;
+  color: $medium-gray;
+  background: $white;
+  text-align: center;
+  padding: 40px 0;
 }

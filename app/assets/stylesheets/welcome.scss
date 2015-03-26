@@ -33,13 +33,12 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     padding: 0 20px 20px 20px;
     box-sizing: border-box;
     position: relative;
-    overflow: hidden;
   }
   legend {
     @extend %dashboard-module-header;
     @extend %typography-section-title;
     display: block;
-    width: 200%; // This is a hack. We use overflow hidden to get the border drawn all the way across.
+    width: calc(100% + 40px);
     box-sizing: border-box;
     position: relative;
     left: -20px;
@@ -49,7 +48,7 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
 
   .input-field-container {
     margin-bottom: 20px;
-    &:last-of-type {
+    &:last-of-type:not(.dropdown) {
       margin-bottom: 10px;
     }
   }
@@ -63,12 +62,36 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     width: 100%;
   }
 
-  a {
+  input[type=submit], .logout-link {
+    width: calc(50% - 10px);
+  }
+
+  input[type=submit] {
+    float: right;
+  }
+
+  a:not(.logout-link) {
     @extend %typography-table-link;
     color: $actionable-blue;
     display: block;
     margin-bottom: 20px;
     line-height: 1;
+  }
+  .dropdown-selection {
+    width: 100%;
+    display: block;
+  }
+
+  .dropdown {
+    ul {
+      max-height: 285px;
+      width: 400px;
+      right: auto;
+    }
+  }
+
+  .row {
+    overflow: visible;
   }
 }
 

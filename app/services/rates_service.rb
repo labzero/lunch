@@ -142,7 +142,9 @@ class RatesService < MAPIService
             term: term,
             rate: rate,
             day_count_basis: "Actual/Actual",
-            pay_freq: "Monthly"
+            pay_freq: "Monthly",
+            benchmark_index: r.rand(10),
+            spread_to_benchmark: r.rand(-200..200)
           )
         end
       end

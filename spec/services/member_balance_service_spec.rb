@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 describe MemberBalanceService do
-  MEMBER_ID = 750
-  subject { MemberBalanceService.new(MEMBER_ID, double('request', uuid: '12345')) }
+  let(:member_id) { 750 }
+  subject { MemberBalanceService.new(member_id, double('request', uuid: '12345')) }
   it { expect(subject).to respond_to(:pledged_collateral) }
   it { expect(subject).to respond_to(:total_securities) }
   it { expect(subject).to respond_to(:effective_borrowing_capacity) }
@@ -120,24 +120,24 @@ describe MemberBalanceService do
     describe 'error handling for MAPI endpoints' do
       it 'should return nil if there was an API error for the start_date capital_stock_balance endpoint' do
         expect(request_object).to receive(:get).and_raise(RestClient::InternalServerError)
-        expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_return(request_object)
+        expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_return(request_object)
         expect(capital_stock_activity).to eq(nil)
       end
       it "should return nil if there was a connection error for the start_date capital_stock_balance endpoint" do
         expect(request_object).to receive(:get).and_raise(Errno::ECONNREFUSED)
-        expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_return(request_object)
+        expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_return(request_object)
         expect(capital_stock_activity).to eq(nil)
       end
       it "should return nil if there was an API error for the end_date capital_stock_balance endpoint" do
         expect(request_object).to receive(:get).and_raise(RestClient::InternalServerError)
-        expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_call_original
-        expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{end_date}").and_return(request_object)
+        expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_call_original
+        expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{end_date}").and_return(request_object)
         expect(capital_stock_activity).to eq(nil)
       end
       it "should return nil if there was a connection error for the end_date capital_stock_balance endpoint" do
         expect(request_object).to receive(:get).and_raise(Errno::ECONNREFUSED)
-        expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_call_original
-        expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{end_date}").and_return(request_object)
+        expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_call_original
+        expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{end_date}").and_return(request_object)
         expect(capital_stock_activity).to eq(nil)
       end
       it 'should return nil if there was an API error for the capital_stock_activities endpoint' do
@@ -526,21 +526,21 @@ describe MemberBalanceService do
 
   # Helper Methods
   def override_start_balance_endpoint(start_date, end_date, request_object)
-    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_return(request_object)
-    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{end_date}").and_call_original
-    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_activities/#{start_date}/#{end_date}").and_call_original
+    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_return(request_object)
+    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{end_date}").and_call_original
+    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_activities/#{start_date}/#{end_date}").and_call_original
   end
 
   def override_end_balance_endpoint(start_date, end_date, request_object)
-    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_call_original
-    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{end_date}").and_return(request_object)
-    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_activities/#{start_date}/#{end_date}").and_call_original
+    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_call_original
+    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{end_date}").and_return(request_object)
+    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_activities/#{start_date}/#{end_date}").and_call_original
   end
 
   def override_activities_endpoint(start_date, end_date, request_object)
-    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{start_date}").and_call_original
-    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_balance/#{end_date}").and_call_original
-    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{MEMBER_ID}/capital_stock_activities/#{start_date}/#{end_date}").and_return(request_object)
+    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_call_original
+    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{end_date}").and_call_original
+    expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_activities/#{start_date}/#{end_date}").and_return(request_object)
   end
 
 end

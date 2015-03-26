@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe RatesService do
-  let(:member_id) {double(MEMBER_ID)}
+  let(:member_id) {double('MemberID')}
   let(:advance_type) {double('advance_type')}
   let(:advance_term) {double('advance_term')}
   let(:advance_rate) {double('advance_rate')}
@@ -177,6 +177,20 @@ describe RatesService do
         historical_prices[:rates_by_date].each do |row|
           row[:rates_by_term].each do |rate_object|
             expect(rate_object[:pay_freq]).to be_kind_of(String)
+          end
+        end
+      end
+      it 'should return a benchmark_index as a float' do # TODO maybe change this to account for null values coming back from MAPI once the endpoint is built
+        historical_prices[:rates_by_date].each do |row|
+          row[:rates_by_term].each do |rate_object|
+            expect(rate_object[:benchmark_index]).to be_kind_of(Integer)
+          end
+        end
+      end
+      it 'should return a spread_to_benchmark as a float' do # TODO maybe change this to account for null values coming back from MAPI once the endpoint is built
+        historical_prices[:rates_by_date].each do |row|
+          row[:rates_by_term].each do |rate_object|
+            expect(rate_object[:spread_to_benchmark]).to be_kind_of(Integer)
           end
         end
       end

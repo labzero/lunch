@@ -1,28 +1,46 @@
 - table_class ||= nil
 - table_data ||= {}
-%table.table-allow-wrapping.report-table{data: {sortable: false, :'disable-auto-width' => true}, class: table_class}
+- is_sortable = defined?(sortable) ? sortable : true
+%table.table-allow-wrapping.report-table{data: {sortable: is_sortable, :'disable-auto-width' => true, :'missing-data-message' => t('errors.table_data_unavailable')}, class: table_class}
   %thead
     - if table_data[:table_heading]
       %tr.table-heading-row
         %th{data: {unsortable: true}}
         %th{colspan: (table_data[:column_headings].length - 1), data: {unsortable: true}}= table_data[:table_heading]
-    %tr
+    - if table_data[:column_sub_headings].blank?
+      %tr
       - table_data[:column_headings].each_with_index do |heading, index|
         %th.report-cell-narrow{data: {unsortable: index != 0}}= heading
-  %tbody
-    - table_data[:rows].each do |row|
+    - else
+      %tr.table-heading-row
+        %th{data: {unsortable: true}}
+        - table_data[:column_headings].each_with_index do |heading, index|
+          %th{colspan: (table_data[:column_sub_headings].length), data: {unsortable: index != 0}}= heading
       %tr
-        %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
-        - row[:columns].each do |column|
-          %td.report-cell-narrow.report-cell-right
-            - case column[:type]
-            - when :basis
-              = fhlb_formatted_number(column[:value])
-            - when :rate
-              = fhlb_formatted_number(column[:value], precision: 3)
-            - when :currency
-              = fhlb_formatted_currency(column[:value])
-            - when :currency_whole
-              = fhlb_formatted_currency(column[:value], precision: 0)
-            - else
-              = column[:value]
+        %th.report-cell-narrow{data: {unsortable: true}}=  table_data[:column_sub_headings_first]
+        - table_data[:column_headings].each do
+          - table_data[:column_sub_headings].each_with_index do |sub_heading, sub_index|
+            %th.report-cell-narrow{data: {unsortable: sub_index != 0}}= sub_heading
+  %tbody
+    - if table_data[:rows].blank? && !is_sortable
+      %tr
+        %td.dataTables_empty{colspan: table_data[:column_headings].count}= t('errors.table_data_unavailable')
+    - else
+      - table_data[:rows].each do |row|
+        %tr
+          %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
+          - row[:columns].each do |column|
+            %td.report-cell-narrow.report-cell-right
+              - case column[:type]
+              - when :basis
+                = fhlb_formatted_number(column[:value])
+              - when :index
+                = fhlb_formatted_number(column[:value], precision: 5)
+              - when :rate
+                = fhlb_formatted_number(column[:value], precision: 2)
+              - when :currency
+                = fhlb_formatted_currency(column[:value])
+              - when :currency_whole
+                = fhlb_formatted_currency(column[:value], precision: 0)
+              - else
+                = column[:value]

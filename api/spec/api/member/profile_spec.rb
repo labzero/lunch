@@ -120,6 +120,13 @@ describe MAPI::ServiceApp do
             expect(member['name']).to be_present
           end
         end
+        it 'sorts the members by name' do
+          last_name = ''
+          members.each do |member|
+            expect(member['name']).to be > last_name
+            last_name = member['name']
+          end
+        end
       end
     end
   end

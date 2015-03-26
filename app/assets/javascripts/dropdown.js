@@ -37,6 +37,8 @@ $(function(){
     $dropdown.removeClass('open'); // close all dropdowns
     // if there is a value for the item you selected and it differs from the current selection, change DOM and trigger change event
     var selectedValue = $targetEl.data('dropdown-value');
+    $targetEl.siblings().removeClass('selected');
+    $targetEl.addClass('selected');
     if ( selectedValue && selectedValue !== $selectEl.val() ) {
       $selectEl.val(selectedValue);
       $dropdownEl.find('.dropdown-selection').text($targetEl.text());

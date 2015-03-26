@@ -37,13 +37,14 @@ FileUtils.chdir(File.dirname(__FILE__))
 ## For OSX:
 ENV['PATH'] = "#{ENV['PATH']}:/usr/libexec"
 
-template = File.read('slapd-test.conf.erb')
-normal_out = 'slapd-test.conf'
-ssl_out = 'slapd-ssl-test.conf'
-
 
 @root_dir = File.expand_path options[:dir]
 FileUtils.mkdir_p File.join(@root_dir, 'run')
+
+template = File.read('slapd-test.conf.erb')
+normal_out = File.join(@root_dir, 'slapd-test.conf')
+ssl_out = File.join(@root_dir, 'slapd-ssl-test.conf')
+
 File.open(normal_out, 'w') do |f|
   @ssl = false
   f.write ERB.new(template).result(binding)

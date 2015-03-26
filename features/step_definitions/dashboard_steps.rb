@@ -167,3 +167,11 @@ end
 When(/^I click on the quick advance confirmation close button$/) do
   page.find(".quick-advance-confirmation-button").click
 end
+
+Then(/^the Aggregate 30 Day Terms graph should show the Temporarily Unavailable state$/) do
+  page.assert_selector('.dashboard-module-market .dashboard-module-temporarily-unavailable', text: I18n.t('global.temporarily_unavailable'))
+end
+
+When(/^there is no data for "(.*?)"$/) do |data|
+  # this step may be used in the future to conditionally shut off certain endpoints or otherwise mock the experience of no data returned
+end

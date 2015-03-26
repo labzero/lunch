@@ -231,7 +231,6 @@ $breakdown-table-currency-width: 10px;
 .dashboard-account-breakdown-table {
   @extend %typography-dashboard-account-summary;
   th {
-    @extend %typography-dashboard-account-summary;
     text-align: left;
   }
   th, .label, .currency, .value {
@@ -240,7 +239,7 @@ $breakdown-table-currency-width: 10px;
   }
   .label {
     width: $breakdown-table-label-width;
-    padding-left: 20px;
+    padding-left: 5px;
   }
   .currency {
     width: $breakdown-table-currency-width;
@@ -248,14 +247,14 @@ $breakdown-table-currency-width: 10px;
   }
   .value {
     text-align: right;
-    padding-right: 20px; // replace with standard sizing once we move to fixed layout
+    padding-right: 10px;
   }
   th {
     background: $white;
     border-top: 1px solid $secondary-gray;
   }
   .sub-table td.label {
-    padding-left: 30px;
+    padding-left: 10px;
   }
 }
 
@@ -304,6 +303,7 @@ $breakdown-table-currency-width: 10px;
     &:hover {
       .tooltip {
         display: block;
+        z-index: 1;
       }
     }
   }
@@ -420,4 +420,12 @@ $breakdown-table-currency-width: 10px;
       content: " #{$icon-arrow-right}";
     }
   }
+}
+
+.dashboard-module-temporarily-unavailable {
+  @extend %typography-section-title;
+  color: $medium-gray;
+  background: $white;
+  text-align: center;
+  padding: 13px 0;
 }

@@ -4,9 +4,11 @@ default: &default
   primary_user:
     username: <%= ENV['CUCUMBER_PRIMARY_USERNAME'] || 'local' %>
     password: <%= ENV['CUCUMBER_PRIMARY_PASSWORD'] || 'development' %>
+  primary_bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Meridian Bank, National Association' %>
 
 local:
   <<: *default
+  primary_bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Wells Faygo' %>
 
 dev:
   <<: *default

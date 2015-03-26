@@ -35,8 +35,20 @@ When(/^I select "(.*?)" from the reports dropdown$/) do |report|
   page.find('.nav-dropdown').click_link(report)
 end
 
+When(/^the "(.*?)" table has no data$/) do |report|
+  # placeholder step for now in case we implement turning off data for certain reports during testing
+end
+
+When(/^the "(.*?)" report has been disabled$/) do |report|
+  # placeholder step for now in case we implement disabling reports during testing
+end
+
 Then(/^I should see report summary data$/) do
   page.assert_selector('.report-summary-data', visible: true)
+end
+
+Then(/^I should see an empty report table with Data Unavailable messaging$/) do
+  page.assert_selector('.report-table tbody tr:first-child .dataTables_empty', text: I18n.t('errors.table_data_unavailable'))
 end
 
 Then(/^I should see a report table with multiple data rows$/) do

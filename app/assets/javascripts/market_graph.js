@@ -3,16 +3,18 @@ $(function () {
   var graphWidth = graphElement.width();
   var graphData = graphElement.data('graph-series');
   var graphSmallestY = 100;
+  var graphBiggestY = 0;
   if (graphData && graphData.length) {
     $.each(graphData[0].data, function(i, v) {
       graphSmallestY = Math.min(v[1], graphSmallestY);
+      graphBiggestY = Math.max(v[1], graphBiggestY);
     });
   };
-  
+
   graphElement.highcharts({
     chart: {
       type: 'area',
-      spacing: [20, 0, 0, 0],
+      spacing: [0, 0, 0, 5],
       style: {
         overflow: 'visible'
       }
@@ -91,19 +93,26 @@ $(function () {
       lineColor: 'transparent'
     },
     yAxis: {
-      endOnTick: false,
-      startOnTick: false,
-      labels: {
-        enabled: false
-      },
       title: {
         text: null
       },
-      tickPositions: [0],
-      lineWidth: 0,
-      gridLineWidth: 0,
-      lineColor: 'transparent',
-      min: graphSmallestY
+      labels: {
+        x: -5,
+        y: -3,
+        step: 4,
+        style: {
+          fontSize: '8px'
+        }
+      },
+      showLastLabel: false,
+      lineWidth: 1,
+      gridLineWidth: 1,
+      gridLineColor: '#eef1f0',
+      lineColor: '#eef1f0',
+      min: graphSmallestY,
+      tickAmount: 6,
+      tickInterval: 0.01,
+      tickLength: 0
     },
     series: graphData,
     credits: {
