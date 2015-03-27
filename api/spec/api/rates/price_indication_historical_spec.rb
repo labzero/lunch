@@ -120,7 +120,7 @@ describe MAPI::ServiceApp do
 
     describe 'calendar_holiday_london_only' do
       let(:start_date) {'2014-04-01'}
-      let(:end_date) {'2014-05-01'}
+      let(:end_date) {'2014-06-01'}
       let(:london_only_holidays) {MAPI::Services::Rates::PriceIndicationHistorical.calendar_holiday_london_only(:test, start_date, end_date)}
       before do
         allow(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:calendar_holiday_london_only).at_least(1).and_call_original
@@ -128,8 +128,8 @@ describe MAPI::ServiceApp do
 
       it 'returns an array of dates if there are London-only holidays contained in the given range' do
         expect(london_only_holidays).to be_kind_of(Array)
-        expect(london_only_holidays.first).to eq('2014-04-18')
-        expect(london_only_holidays.last).to eq('2014-04-21')
+        expect(london_only_holidays.first).to eq(Time.zone.parse('2014-04-18'))
+        expect(london_only_holidays.last).to eq(Time.zone.parse('2014-05-06'))
       end
       describe 'in production', vcr: {cassette_name: 'london_only_calendar_mds_service'} do
         let(:london_only_holidays) {MAPI::Services::Rates::PriceIndicationHistorical.calendar_holiday_london_only(:production, start_date, end_date)}

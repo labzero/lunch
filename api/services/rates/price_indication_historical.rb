@@ -79,6 +79,9 @@ module MAPI
         end
 
         def self.calendar_holiday_london_only(environment, from_date, to_date)
+          holiday_london = []
+          holiday_us = []
+
           cal_connection = MAPI::Services::Rates.init_cal_connection(environment)
           if cal_connection
             message = {'v1:endDate' => to_date.to_date.strftime('%F') , 'v1:startDate' => from_date.to_date.strftime('%F') }
@@ -88,31 +91,32 @@ module MAPI
               raise 'Internal Service Error: the holiday calendar service could not be reached'
             end
             response.doc.remove_namespaces!
-            holiday_london = []
-            holiday_us = []
-            holiday_london_only  = []
             holiday_type = response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')
             holiday_type.each do |row|
               case row.css('businessCenter').text
                 when 'USNY'
                   row.css('days day date').map do |holiday|
-                    holiday_us.push(Time.zone.parse(holiday.content))
+                    holiday_us.push(holiday.content)
                   end
                 when 'London'
                   row.css('days day date').map do |holiday|
-                    holiday_london.push(Time.zone.parse(holiday.content))
+                    holiday_london.push(holiday.content)
                   end
               end
             end
-            holiday_london.each do |row|
-              holiday_date = Time.zone.parse(row.to_s)
-              holiday_london_only.push(holiday_date) unless (holiday_us.include?(holiday_date) || holiday_date.saturday? || holiday_date.sunday?)
-            end
-            holiday_london_only
           else
-            holiday_london_only = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'calendar_london_only_holidays.json')))
-            holiday_london_only.delete_if {|date| !(from_date.to_date..to_date.to_date).include?(date.to_date)}
+            holiday_london, holiday_us = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'calendar_london_only_holidays.json')))
           end
+
+          holiday_london.collect! {|date| Time.zone.parse(date)}
+          holiday_us.collect! {|date| Time.zone.parse(date)}
+
+          holiday_london_only  = []
+          holiday_london.each do |holiday_date|
+            holiday_london_only.push(holiday_date) unless (holiday_us.include?(holiday_date) || holiday_date.saturday? || holiday_date.sunday?)
+          end
+          
+          holiday_london_only.delete_if {|date| !(from_date.to_date..to_date.to_date).include?(date.to_date)}
         end
 
         # private

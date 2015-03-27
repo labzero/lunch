@@ -371,7 +371,7 @@ module MAPI
           else
             rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_historic_overnight.json')))[0..(days - 1)]
             rows.collect do |row|
-              [Date.parse(row[0]), row[1]]
+              [Time.zone.parse(row[0]), row[1]]
             end
           end
 
@@ -583,7 +583,7 @@ module MAPI
             end
             response.doc.remove_namespaces!
             @@holidays = response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')[0].css('days day date').map do |holiday|
-              Date.parse(holiday.content)
+              Time.zone.parse(holiday.content)
             end
           else
             @@holidays = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'calendar_holidays.json')))
@@ -625,7 +625,7 @@ module MAPI
                   'payment_on' => 'Maturity',
                   'interest_day_count' => fhlbsfresponse[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
                   'rate' => fhlbsfdatapoints[ctr_term-1].at_css('value').content,
-                  'maturity_date' => MAPI::Services::Rates.get_maturity_date(Date.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content), TERM_MAPPING[term][:frequency_unit])
+                  'maturity_date' => MAPI::Services::Rates.get_maturity_date(Time.zone.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content), TERM_MAPPING[term][:frequency_unit])
                 }
               end
             end
