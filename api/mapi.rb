@@ -1,9 +1,9 @@
 require 'sinatra/base'
 require 'swagger/blocks'
+require 'active_support/time'
 
 require_relative 'shared/constants'
 require_relative 'shared/capital_stock_services'
-require_relative 'shared/calendar_holiday_services'
 
 require_relative 'services/base'
 require_relative 'services/mock_rates'
@@ -28,6 +28,7 @@ require_relative 'models/current_price_indications'
 require_relative 'models/rates/price_indication_historical'
 
 module MAPI
+  Time.zone = 'Pacific Time (US & Canada)'
 
   class Logger
     def initialize(app, logger)

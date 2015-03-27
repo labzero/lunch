@@ -7,6 +7,8 @@ module MAPI
   module Services
     module Rates
       include MAPI::Services::Base
+      include MAPI::Shared::Constants
+      
       COLLATERAL_TYPES = [:standard, :sbc]
       COLLATERAL_MAPPING = {
           standard: 'REGULAR',
@@ -85,6 +87,7 @@ module MAPI
       end
 
       def self.get_maturity_date (original_maturity_date, frequency_unit)
+        original_maturity_date = original_maturity_date.to_date
         maturity_date = original_maturity_date
         while MAPI::Services::Rates.is_weekend_or_holiday(maturity_date)
           maturity_date = maturity_date + 1.day
@@ -301,7 +304,7 @@ module MAPI
 
           # Price Indication Historical rates for VRC, FRC, ARC
           api do
-            key :path, "/price_indication/historical/{start_date}/{end_date}/{collateral_type}/{credit_type}"
+            key :path, '/price_indication/historical/{start_date}/{end_date}/{collateral_type}/{credit_type}'
             operation do
               key :method, 'GET'
               key :summary, 'Retrieve historical price indication rates for the selected date range for the specified collateral/credit type.'
@@ -647,34 +650,19 @@ module MAPI
 
         # Price Indication Historical rates for VRC, FRC, ARC
         relative_get "/price_indication/historical/:start_date/:end_date/:collateral_type/:credit_type" do
-          start_date = params[:start_date]
-          end_date = params[:end_date]
-          collateral_type = params[:collateral_type]
-          credit_type = params[:credit_type]
-          check_date_ok = true
-          #1.check that input date if provided to be valid date and expected format.
-          [start_date, end_date].each do |date|
-            check_date_format = date.match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
-            if !check_date_format
-              check_date_ok = false
-            end
-          end
-          #start_date to be earlier than from_date
-          if start_date.to_date > end_date.to_date
-            check_date_ok = false
-          end
-          if check_date_ok
-            #2. check the collateral_type and credit type are the expected types
-            if !MAPI::Services::Rates::PriceIndicationHistorical::IRDB_CODE_TERM_MAPPING[collateral_type]
-              halt 400, "Invalid Collateral type"
-            elsif !MAPI::Services::Rates::PriceIndicationHistorical::IRDB_CODE_TERM_MAPPING[collateral_type][credit_type]
-              halt 400, "Invalid Credit type"
-            else
-              result = MAPI::Services::Rates::PriceIndicationHistorical.price_indication_historical(self, start_date, end_date, collateral_type, credit_type)
-              result.to_json
-            end
+          MAPI::Services::Rates.init_cal_connection(settings.environment)
+          start_date = params[:start_date].to_date
+          end_date = params[:end_date].to_date
+          collateral_type = params[:collateral_type].to_sym
+          credit_type = params[:credit_type].to_sym
+          halt 400, 'Invalid Date format of yyyy-mm-dd or date range' if start_date.to_date > end_date.to_date
+          if !MAPI::Services::Rates::PriceIndicationHistorical::IRDB_CODE_TERM_MAPPING[collateral_type]
+            halt 400, "Invalid Collateral type"
+          elsif !MAPI::Services::Rates::PriceIndicationHistorical::IRDB_CODE_TERM_MAPPING[collateral_type][credit_type]
+            halt 400, "Invalid Credit type"
           else
-            halt 400, "Invalid Date format of yyyy-mm-dd or date range"
+            result = MAPI::Services::Rates::PriceIndicationHistorical.price_indication_historical(self, start_date, end_date, collateral_type, credit_type)
+            result.to_json
           end
         end
       end

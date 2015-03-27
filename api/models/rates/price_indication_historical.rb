@@ -41,9 +41,13 @@ module MAPI
           key :type, :string
           key :description, 'Terms for the rates i.e. 1D, 1M, 3M, 1Y etc'
         end
-        property :rate do
-          key :type, :Numeric
-          key :description, 'Rates value.  Depends on the credit type, either decimal or -/+ digit number'
+        property :type do
+          key :type, :string
+          key :description, 'The type of value being returned. Either a `rate` or a `basis_point`'
+        end
+        property :value do
+          key :type, :Fixnum
+          key :description, 'The value being returned. Either a rate or a basis_point'
         end
         property :day_count_basis do
           key :type, :string
