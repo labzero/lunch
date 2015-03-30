@@ -66,7 +66,7 @@ module MAPI
 
           # add placeholder rates_by_date object and associated rate_objects for London-only holidays
           if credit_type != :vrc && !london_only_holidays.blank?
-            rates_by_date = Private.add_london_holiday_rows(london_only_holidays, rates_by_date, irdb_term_array)
+            rates_by_date = Private.add_london_holiday_rows(london_only_holidays, rates_by_date, irdb_term_array, credit_type==:daily_prime)
           end
 
           {
@@ -196,10 +196,22 @@ module MAPI
             rows
           end
 
-          def self.add_london_holiday_rows(holiday_array, rates_array, terms)
+          def self.add_london_holiday_rows(holiday_array, rates_array, terms, daily_prime=false)
             holiday_array.each do |date|
+              rates_array.delete_if {|rate_object| rate_object[:date].to_date == date.to_date}
               rates_array.push({date: date.to_date, rates_by_term: []})
-              # Build the appropriate number of rate_objects with the correct terms
+              # Build the appropriate number of rate_objects with the correct terms - add an extra for daily_prime to account for its benchmark rate
+              if daily_prime
+                rates_array.last[:rates_by_term].push(
+                    {
+                        term: '1D',
+                        type: 'index', # placeholder type
+                        value: nil,
+                        day_count_basis: nil,
+                        pay_freq: nil
+                    }
+                )
+              end
               terms.each do |term|
                 rates_array.last[:rates_by_term].push(
                   {
