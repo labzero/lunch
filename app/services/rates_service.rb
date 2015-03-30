@@ -82,7 +82,6 @@ class RatesService < MAPIService
   end
 
   def historical_price_indications(start_date, end_date, collateral_type, credit_type)
-    # TODO: hit the proper MAPI endpoint, once it exists! In the meantime, construct plausible fake data.
     start_date = start_date.to_date
     end_date = end_date.to_date
     collateral_type = collateral_type.to_sym
@@ -97,59 +96,24 @@ class RatesService < MAPIService
       return nil
     end
 
-    # TODO remove this code once you support all collateral_types and credit_types
-    # START of code that should be deleted once all args are supported
+    # TODO remove this code once you support 'embedded_cap'
+    # START of code that should be deleted once embedded_cap is supported
     if credit_type == :embedded_cap 
       Rails.logger.warn("Currently, RatesService.historical_price_indications only accepts 'frc', 'vrc', '1m_libor', '3m_libor', '6m_libor' and daily_prime' as the credit_type arg. You supplied #{credit_type}, which is not yet supported.")
       return nil
     end
-    # END of code that should be deleted once all args are supported
+    # END of code that should be deleted once embedded_cap is supported
 
-    data = {
-      start_date: start_date.to_date,
-      end_date: end_date.to_date,
-      collateral_type: collateral_type,
-      credit_type: credit_type,
-      rates_by_date: []
-    }
-    (start_date..end_date).each do |date|
-      day_of_week = date.wday
-      if day_of_week != 0 && day_of_week != 6
-        r = Random.new(date.to_time.to_i + CREDIT_TYPES.index(credit_type) + COLLATERAL_TYPES.index(collateral_type))
-        data[:rates_by_date].push(
-          {
-            date: date,
-            rates_by_term: []
-          }
-        )
-        terms = case credit_type
-        when :frc
-          HISTORICAL_FRC_TERM_MAPPINGS.keys
-        when :vrc
-          HISTORICAL_VRC_TERM_MAPPINGS.keys
-        when :'1m_libor', :'3m_libor', :'6m_libor', :daily_prime
-          HISTORICAL_ARC_TERM_MAPPINGS.keys
-        else
-          # TODO add in the proper terms for 'embedded_cap' once that is rigged up
-        end
-        terms.each do |term|
-          rate = if ARC_CREDIT_TYPES.include?(credit_type)
-            r.rand(-200..200)
-          else
-            r.rand.round(3)
-          end
-          data[:rates_by_date].last[:rates_by_term].push(
-            term: term,
-            rate: rate,
-            day_count_basis: "Actual/Actual",
-            pay_freq: "Monthly",
-            benchmark_index: r.rand(10),
-            spread_to_benchmark: r.rand(-200..200)
-          )
-        end
-      end
+    begin
+      response = @connection["rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/#{credit_type}"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("RatesService.current_overnight_vrc encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("RatesService.overnight_vrc encountered a connection error: #{e.class.name}")
+      return nil
     end
-    data.with_indifferent_access
+    JSON.parse(response.body).with_indifferent_access
   end
 
 end

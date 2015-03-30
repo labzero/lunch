@@ -386,38 +386,24 @@ RSpec.describe ReportsController, :type => :controller do
         expect(rates_service_instance).to receive(:historical_price_indications).and_return(nil)
         expect{get :historical_price_indications}.to raise_error(StandardError)
       end
-      describe 'daily_prime' do
-        let(:rates_by_date) { double('RatesByDate') }
-        let(:rates_by_term) { double('RatesByTerm') }
-        let(:benchmark_index) {3}
-        let(:spread_to_benchmark) {175}
-        let(:date) { today }
-        before do
-          allow(response_hash).to receive(:[]).with(:rates_by_date).and_return([rates_by_date])
-          allow(rates_by_date).to receive(:[]).with(:rates_by_term).and_return([rates_by_term])
-          allow(rates_by_date).to receive(:[]).with(:date).and_return(date)
-          allow(rates_by_term).to receive(:[]).with(:benchmark_index).and_return(benchmark_index)
-          allow(rates_by_term).to receive(:[]).with(:spread_to_benchmark).and_return(spread_to_benchmark)
-        end
-        it 'should set row to return both benchmark and spread to benchmark' do
+      describe 'credit_type of :daily_prime' do
+        let(:index) {0.17564}
+        let(:basis_1Y) {45}
+        let(:basis_2Y) {-127}
+        let(:basis_3Y) {-62}
+        let(:basis_5Y) {189}
+        let(:rates_by_term) { [
+            {:term=>'1D', :type=>'index', :value=>index, 'day_count_basis'=>'Actual/360', :pay_freq=>'Daily'},
+            {:term=>'1Y', :type=>'basis_point', :value=>basis_1Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'},
+            {:term=>'2Y', :type=>'basis_point', :value=>basis_2Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'},
+            {:term=>'3Y', :type=>'basis_point', :value=>basis_3Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'},
+            {:term=>'5Y', :type=>'basis_point', :value=>basis_5Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'}
+        ] }
+        let(:rates_by_date) { [{date: today, rates_by_term: rates_by_term}] }
+        it 'adds the index value for a given date as a column before each basis_point spread per term' do
+          allow(response_hash).to receive(:[]).with(:rates_by_date).and_return(rates_by_date)
           get :historical_price_indications, historical_price_collateral_type: 'standard', historical_price_credit_type: 'daily_prime'
-          expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:index, :value=>benchmark_index}, {:type=>:basis, :value=>spread_to_benchmark}])
-        end
-      end
-      describe '1m_libor' do
-        let(:rates_by_date) { double('RatesByDate') }
-        let(:rates_by_term) { double('RatesByTerm') }
-        let(:rate) {3}
-        let(:date) { today }
-        before do
-          allow(response_hash).to receive(:[]).with(:rates_by_date).and_return([rates_by_date])
-          allow(rates_by_date).to receive(:[]).with(:rates_by_term).and_return([rates_by_term])
-          allow(rates_by_date).to receive(:[]).with(:date).and_return(date)
-          allow(rates_by_term).to receive(:[]).with(:rate).and_return(rate)
-        end
-        it 'should set row to return rate' do
-          get :historical_price_indications, historical_price_collateral_type: 'standard', historical_price_credit_type: '1m_libor'
-          expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:basis, :value=>rate}])
+          expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_1Y}, {:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_2Y}, {:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_3Y}, {:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_5Y}])
         end
       end
       describe "view instance variables" do
@@ -539,10 +525,10 @@ RSpec.describe ReportsController, :type => :controller do
             end
           end
           describe 'rows' do
-            let(:row_1) {{date: 'some_date', rates_by_term: [{rate: 'rate_1'}, {rate: 'rate_2'}]}}
-            let(:row_2) {{date: 'some_other_date', rates_by_term: [{rate: 'rate_3'}, {rate: 'rate_4'}]}}
+            let(:row_1) {{date: 'some_date', rates_by_term: [{type: :index, value: 'rate_1'}, {type: :index, value: 'rate_2'}]}}
+            let(:row_2) {{date: 'some_other_date', rates_by_term: [{type: :index, value: 'rate_3'}, {type: :index, value: 'rate_4'}]}}
             let(:rows) {[row_1, row_2]}
-            let(:formatted_rows) {[{date: 'some_date', columns: [{type: :rate, value: 'rate_1'}, {type: :rate, value: 'rate_2'}]}, {date: 'some_other_date', columns: [{type: :rate, value: 'rate_3'}, {type: :rate, value: 'rate_4'}]}]}
+            let(:formatted_rows) {[{date: 'some_date', columns: [{type: :index, value: 'rate_1'}, {type: :index, value: 'rate_2'}]}, {date: 'some_other_date', columns: [{type: :index, value: 'rate_3'}, {type: :index, value: 'rate_4'}]}]}
             it 'should be an array of rows, each containing a row object with a date and a column array containing objects with a type and a rate value' do
               allow(response_hash).to receive(:[]).with(:rates_by_date).and_return(rows)
               get :historical_price_indications, historical_price_credit_type: 'frc'

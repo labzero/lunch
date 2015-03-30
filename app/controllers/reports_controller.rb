@@ -273,19 +273,14 @@ class ReportsController < ApplicationController
     case @credit_type.to_sym
     when :frc
       column_heading_keys = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.values
-      rate_display_type = :rate
     when :vrc
       column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
-      rate_display_type = :rate
     when :'1m_libor', :'3m_libor', :'6m_libor'
       table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading")
       column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
-      rate_display_type = :basis
       # TODO add statement for 'embedded_cap' when it is rigged up
     when :daily_prime
       column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
-      benchmark_index_display_type = :index
-      spread_to_benchmark_display_type  = :basis
     end
 
     column_headings = []
@@ -307,15 +302,17 @@ class ReportsController < ApplicationController
       if (@credit_type.to_sym == :daily_prime)
         @historical_price_indications[:rates_by_date].collect do |row|
           columns = []
-          row[:rates_by_term].each do |column|
-            columns <<  {type: benchmark_index_display_type, value: column[:benchmark_index]}
-            columns <<  {type: spread_to_benchmark_display_type, value: column[:spread_to_benchmark] }
+          # need to replicate rate data for display purposes
+          row[:rates_by_term].each_with_index do |column, i|
+            next if i == 0
+            columns <<  {type: row[:rates_by_term][0][:type].to_sym, value: row[:rates_by_term][0][:value]}
+            columns <<  {type: column[:type].to_sym, value: column[:value] }
           end
           {date: row[:date], columns: columns }
         end
       else
         @historical_price_indications[:rates_by_date].collect do |row|
-          {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: rate_display_type, value: column[:rate] } } }
+          {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: column[:type].to_sym, value: column[:value] } } }
         end
       end
     else

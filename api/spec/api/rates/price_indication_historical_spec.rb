@@ -214,7 +214,8 @@ describe MAPI::ServiceApp do
         it 'adds an empty historic_price object for every date and term it is given' do
           [1,2].each do |i|
             expect(subject.add_london_holiday_rows(holiday_array, rates_array, terms)[i][:rates_by_term].first[:term]).to eq(terms.first)
-            [:type, :value, :day_count_basis, :pay_freq].each do |property|
+            expect(subject.add_london_holiday_rows(holiday_array, rates_array, terms)[i][:rates_by_term].first[:type]).to eq('index')
+            [:value, :day_count_basis, :pay_freq].each do |property|
               expect(subject.add_london_holiday_rows(holiday_array, rates_array, terms)[i][:rates_by_term].first[property]).to be_nil
             end
           end
@@ -224,7 +225,7 @@ describe MAPI::ServiceApp do
       describe '`rate_object_data_type` method' do
         [:frc, :vrc].each do |credit_type|
           it "returns 'rate' if credit_type is '#{credit_type}'" do
-            expect(subject.rate_object_data_type(credit_type, nil)).to eq('rate')
+            expect(subject.rate_object_data_type(credit_type, nil)).to eq('index')
           end
         end
         [:'1m_libor', :'3m_libor', :'6m_libor'].each do |credit_type|
@@ -234,7 +235,7 @@ describe MAPI::ServiceApp do
         end
       end
       it 'returns `rate` if credit_type is `:daily_prime` and trx_ir_code is `PRIME`' do
-        expect(subject.rate_object_data_type(:daily_prime, 'PRIME')).to eq('rate')
+        expect(subject.rate_object_data_type(:daily_prime, 'PRIME')).to eq('index')
       end
       it 'returns `basis_point` if credit_type is `:daily_prime` and trx_ir_code is `APRIMEAT`' do
         expect(subject.rate_object_data_type(:daily_prime, 'APRIMEAT')).to eq('basis_point')

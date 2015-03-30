@@ -45,11 +45,11 @@ module MAPI
 
             # construct a rate object
             rate_object = {
-                term: row['TRX_TERM_VALUE'].to_s + row['TRX_TERM_UOM'].to_s,
-                type: data_type,
-                value: row['TRX_VALUE'].to_f, # Should be fine to make all values floats, even though basis_points and spread_to_benchmark will be Integers. We can handle styling in the app.
-                day_count_basis: row['MS_DAY_CNT_BAS'].to_s,
-                pay_freq: pay_freq
+              term: row['TRX_TERM_VALUE'].to_s + row['TRX_TERM_UOM'].to_s,
+              type: data_type,
+              value: row['TRX_VALUE'].to_f, # Should be fine to make all values floats, even though basis_points and spread_to_benchmark will be Integers. We can handle styling in the app.
+              day_count_basis: row['MS_DAY_CNT_BAS'].to_s,
+              pay_freq: pay_freq
             }
 
             # In the case where we've run into a row with a date that is different than that of the preceding row, we need
@@ -163,31 +163,31 @@ module MAPI
                 # need to create special case for daily_prime where we add a rate in addition to populating the normal term values with basis points
                 if credit_type == :daily_prime
                   data = {
-                      'TRX_IR_CODE' => 'PRIME',
-                      'TRX_EFFECTIVE_DATE' => date.strftime('%F'),
-                      'TRX_TERM_VALUE' => '1',
-                      'TRX_TERM_UOM' => 'D',
-                      'TRX_VALUE' => r.rand.round(3),
-                      'MS_DAY_CNT_BAS' => 'Actual/360',
-                      'MS_DATA_FREQ' => 'Daily'
+                    'TRX_IR_CODE' => 'PRIME',
+                    'TRX_EFFECTIVE_DATE' => date.strftime('%F'),
+                    'TRX_TERM_VALUE' => '1',
+                    'TRX_TERM_UOM' => 'D',
+                    'TRX_VALUE' => r.rand.round(5),
+                    'MS_DAY_CNT_BAS' => 'Actual/360',
+                    'MS_DATA_FREQ' => 'Daily'
                   }
                   rows.push(data)
                 end
                 terms.each do |term|
                   if credit_type == :frc || credit_type == :vrc
-                    value = r.rand.round(3)
+                    value = r.rand.round(5)
                   elsif credit_type == :'1m_libor' || credit_type ==  :'3m_libor' || credit_type ==  :'6m_libor' || credit_type == :daily_prime
                     value = r.rand(-200..200)
                   end
                   split_term = term.scan(/\d+|\D+/)
                   data = {
-                      'TRX_IR_CODE' => irdb_code,
-                      'TRX_EFFECTIVE_DATE' => date.strftime('%F'),
-                      'TRX_TERM_VALUE' => split_term.first,
-                      'TRX_TERM_UOM' => split_term.last,
-                      'TRX_VALUE' => value,
-                      'MS_DAY_CNT_BAS' => 'Actual/360', #TODO fake this more accurately for each credit_type and term if we actually start consuming this data
-                      'MS_DATA_FREQ' => 'Quarterly' #TODO fake this more accurately for each credit_type and term if we actually start consuming this data
+                    'TRX_IR_CODE' => irdb_code,
+                    'TRX_EFFECTIVE_DATE' => date.strftime('%F'),
+                    'TRX_TERM_VALUE' => split_term.first,
+                    'TRX_TERM_UOM' => split_term.last,
+                    'TRX_VALUE' => value,
+                    'MS_DAY_CNT_BAS' => 'Actual/360', #TODO fake this more accurately for each credit_type and term if we actually start consuming this data
+                    'MS_DATA_FREQ' => 'Quarterly' #TODO fake this more accurately for each credit_type and term if we actually start consuming this data
                   }
                   rows.push(data)
                 end
@@ -202,13 +202,13 @@ module MAPI
               # Build the appropriate number of rate_objects with the correct terms
               terms.each do |term|
                 rates_array.last[:rates_by_term].push(
-                    {
-                        term: term.to_s,
-                        type: nil,
-                        value: nil,
-                        day_count_basis: nil,
-                        pay_freq: nil
-                    }
+                  {
+                    term: term.to_s,
+                    type: 'index', # placeholder type
+                    value: nil,
+                    day_count_basis: nil,
+                    pay_freq: nil
+                  }
                 )
               end
             end
@@ -219,7 +219,7 @@ module MAPI
           # determine the data-type of the value that will be returned for the rate object
           def self.rate_object_data_type(credit_type, trx_ir_code)
             if credit_type == :frc || credit_type == :vrc || (credit_type == :daily_prime && trx_ir_code == 'PRIME')
-              'rate'
+              'index'
             elsif credit_type == :'1m_libor' || credit_type ==  :'3m_libor' || credit_type ==  :'6m_libor' || (credit_type == :daily_prime && trx_ir_code == 'APRIMEAT')
               'basis_point'
             end
