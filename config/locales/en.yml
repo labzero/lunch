@@ -76,6 +76,7 @@ en:
     pdf: PDF
     missing_value: –
     continue: Continue
+    fhlb_full: Federal Home Loan Bank San Francisco
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -127,7 +128,7 @@ en:
       this_month: "%{month} to date"
       custom: Custom date range
     single:
-      input: "As of {replace_date}"
+      input: "As of %{date}"
       custom: Custom date
   settings:
     title: Settings
@@ -510,6 +511,7 @@ en:
     estimated_next_interest_payment_notice: For each FRC and ARC Advance, the Estimated Next Interest Payment provides an estimate of the interest payment amount to be debited to your Settlement/Transaction Account (STA) on the next interest payment date. These are estimates only and should not be relied upon as a final statement of the total interest payments to be debited to your STA on any interest payment date, and they are subject to change without notice. In addition, this report does not reflect any principal repayment or reduction amounts or any other amounts associated with your advances that may be debited to your STA on the next interest payment date. Estimated next interest payment amounts for some advance types are not available online.
     merger_notice: In the event of a merger, this report may not include all advances from the acquired instiution.
     advances_and_securities_agreement_notice: Nothing in this report in any way ammends, modifies, or waives the terms of your Advances and Securities Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issues puruant to that Agreement. The Bank expressly disclaims and and all liability that may arise from your institution’s reliance on any information contained in, or errors or omissions made with respect to, this report. Please call (415) 616-2559 if you have any questions.
+    pdf_footer: "%{report_name} as of %{date}"
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email

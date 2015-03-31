@@ -1,4 +1,9 @@
+- allowed_params ||= [:start_date, :end_date]
+- download_params ||= params.slice(*[*allowed_params])
 .report-header-buttons
   %span.report-split-button
-    %button.report-button-right= t('dashboard.actions.download')
-    %button.report-drop-down-right= t('global.pdf')
+    = form_tag url_for(format: :pdf), method: :get do |f|
+      - download_params.each do |key, value|
+        = hidden_field_tag key, value
+      %button.report-button-right= t('dashboard.actions.download')
+      %button.report-drop-down-right= t('global.pdf')

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe MembersService do
-  let(:member_id) { 750 }
+  let(:member_id) { 3 }
   subject { MembersService.new(double('request', uuid: '12345')) }
   it { expect(subject).to respond_to(:report_disabled?) }
 
@@ -63,6 +63,24 @@ describe MembersService do
         expect(member[:name]).to be_kind_of(String)
         expect(member[:name]).to be_present
       end
+    end
+  end
+  describe '`member` method', :vcr do
+    let(:member) { subject.member(member_id) }
+    it 'should return nil if there was an API error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(member).to eq(nil)
+    end
+    it 'should return nil if there was a connection error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(member).to eq(nil)
+    end
+    it 'returns a member on success' do
+      expect(member).to be_kind_of(Hash)
+      expect(member[:id]).to be_kind_of(Numeric)
+      expect(member[:id]).to be > 0
+      expect(member[:name]).to be_kind_of(String)
+      expect(member[:name]).to be_present
     end
   end
 end

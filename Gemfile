@@ -59,6 +59,7 @@ gem 'logging', require: false
 
 # for background tasks
 gem 'resque'
+gem 'wicked_pdf'
 
 group :development, :test do
   gem 'rspec-rails'

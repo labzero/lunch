@@ -1,8 +1,8 @@
-$extralight-weight: 200;
-$light-weight: 300;
-$normal-weight: 400;
-$semibold-weight: 600;
-$bold-weight: 700;
+$extralight-weight: 200 !default;
+$light-weight: 300 !default;
+$normal-weight: 400 !default;
+$semibold-weight: 600 !default;
+$bold-weight: 700 !default;
 $tight-line-height: 1.2;
 $loose-line-height: 1.538;
 
@@ -10,8 +10,15 @@ $loose-line-height: 1.538;
 $default-font-family: 'SourceSansPro', 'Segoe UI', 'Myriad Pro', sans-serif;
 $default-font-size: 15px; // sets rem in _base.scss
 
+// Reports Font Style
+$print-font-family: 'SourceSansPro';
+
 @mixin default-font {
   font-family: $default-font-family;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@mixin print-font {
+  font-family: $print-font-family;
 }

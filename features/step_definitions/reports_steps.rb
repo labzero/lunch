@@ -203,6 +203,14 @@ When(/^I select "(.*?)" from the (credit|collateral) type selector$/) do |credit
   page.find('li', text: credit_type, visible: true).click
 end
 
+When(/^I request a PDF$/) do
+  click_button(I18n.t('dashboard.actions.download'))
+end
+
+Then(/^I should recieve a PDF file$/) do
+  page.response_headers['Content-Type'].should == 'application/pdf'
+end
+
 def sleep_if_close_to_midnight
   now = DateTime.now
   seconds_till_tomorrow = (now.tomorrow.beginning_of_day - now) * 1.days

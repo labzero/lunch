@@ -3,7 +3,7 @@
 - presets ||= []
 - form ||= nil
 - single_date_picker ||= false
-- input_field_text ||= "#{t('datepicker.single.input')}"
+- input_field_text ||= "#{t('datepicker.single.input', date: '{replace_date}')}"
 - max_date ||= false
 
 %span.input-field-container.pull-right.icon-calendar-after.datepicker-trigger{data: {:'date-picker-input-field-text' => input_field_text}}

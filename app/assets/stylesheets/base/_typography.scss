@@ -140,6 +140,66 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-print-header {
+  @include print-font;
+  font-size: 17pt;
+  font-weight: $semibold-weight;
+}
+
+@mixin typography-print-subheader {
+  @include print-font;
+  font-size: 13pt;
+  font-weight: $semibold-weight;
+}
+
+@mixin typography-print-summary-title {
+  @include print-font;
+  font-size: 9pt;
+  font-weight: $semibold-weight;
+}
+
+@mixin typography-print-summary-data {
+  @include print-font;
+  font-size: 15pt;
+  font-weight: $light-weight;
+}
+
+@mixin typography-print-details {
+  @include print-font;
+  font-size: 10pt;
+  font-weight: $normal-weight;
+}
+
+@mixin typography-print-table-heading {
+  @include print-font;
+  font-size: 6pt;
+  font-weight: $bold-weight;
+}
+
+@mixin typography-print-table-cell {
+  @include print-font;
+  font-size: 6pt;
+  font-weight: $normal-weight;
+}
+
+@mixin typography-print-table-total {
+  @include print-font;
+  font-size: 6pt;
+  font-weight: $bold-weight;
+}
+
+@mixin typography-print-footnote {
+  @include print-font;
+  font-size: 5.5pt;
+  font-weight: $normal-weight;
+}
+
+@mixin typography-print-footer {
+  @include print-font;
+  font-size: 5pt;
+  font-weight: $normal-weight;
+}
+
 %typography-page-title {
   @include typography-page-title;
 }
@@ -250,4 +310,44 @@
 
 %typography-table-data-unavailable {
   @include typography-table-data-unavailable;
+}
+
+%typography-print-header {
+  @include typography-print-header;
+}
+
+%typography-print-subheader {
+  @include typography-print-subheader;
+}
+
+%typography-print-table-heading {
+  @include typography-print-table-heading;
+}
+
+%typography-print-table-cell {
+  @include typography-print-table-cell;
+}
+
+%typography-print-table-total {
+  @include typography-print-table-total;
+}
+
+%typography-print-footnote {
+  @include typography-print-footnote;
+}
+
+%typography-print-footer {
+  @include typography-print-footer;
+}
+
+%typography-print-summary-title {
+  @include typography-print-summary-title;
+}
+
+%typography-print-summary-data {
+  @include typography-print-summary-data;
+}
+
+%typography-print-details {
+  @include typography-print-details;
 }

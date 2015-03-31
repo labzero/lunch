@@ -16,6 +16,10 @@
     display: inline-block;
     margin: 9px 0 11px;
   }
+  .print-logo {
+    background: $logo-black; // Work around for a wkhtmltopdf bug
+    margin: 0px;
+  }
   ul {
     @extend %typography-header-text ;
     float: right;
@@ -57,6 +61,20 @@
   }
   .input-field-container:before {
     color: $brand-blue;
+  }
+}
+
+@media print {
+  .page-header {
+    box-shadow: none;
+  }
+
+  .main-nav {
+    background-color: transparent;
+    .logo {
+      height: 32px;
+      width: round($logo-aspect-ratio * 32px);
+    }
   }
 }
 

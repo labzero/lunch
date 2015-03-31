@@ -38,5 +38,6 @@ module FhlbMember
       lambda { |request| request.session["warden.user.user.key"].nil? ? "user_id=NONE" : "user_id=#{request.session["warden.user.user.key"][0][0]}"}
     ]
     config.logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new(Rails.root.join('log', "#{Rails.env}.log"), 'daily'))
+    config.active_job.queue_adapter = :resque
   end
 end

@@ -70,3 +70,7 @@ Capybara.register_driver :sauce_chrome_win7 do |app|
                                  :url => SAUCE_CONNECT_URL,
                                  :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.chrome(caps))
 end
+
+Capybara.register_driver :rack_test do |app|
+  Capybara::RackTest::Driver.new(app, follow_redirects: true, respect_data_method: true)
+end

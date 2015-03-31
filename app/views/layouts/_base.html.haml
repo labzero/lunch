@@ -14,8 +14,8 @@
         = stylesheet_link_tag css_manifest, media: "all"
       - else
         %style
-          - css_mainfest_filename = (css_manifest.end_with?('.css') ? css_manifest : css_manifest + '.css' )
-          != FhlbMember::Application.assets.find_asset(css_mainfest_filename).source
+          - css_manifest_filename = (css_manifest.end_with?('.css') ? css_manifest : css_manifest + '.css' )
+          != FhlbMember::Application.assets.find_asset(css_manifest_filename).source
     = javascript_include_tag js_manifest unless skip_javascript
     = csrf_meta_tags
   %body

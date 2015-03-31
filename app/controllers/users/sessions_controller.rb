@@ -12,9 +12,10 @@ class Users::SessionsController < Devise::SessionsController
 
   def set_member
     member_id = params[:member_id].to_i
-    valid_ids = @members.collect { |member| member[:id] }
-    raise 'invalid member ID!' unless valid_ids.include?(member_id)
+    member = @members.find { |member| member[:id] == member_id }
+    raise 'invalid member ID!' unless member
     session['member_id'] = member_id
+    session['member_name'] = member[:name]
     redirect_to after_sign_in_path_for(current_user)
   end
 end
