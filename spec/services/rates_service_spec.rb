@@ -101,7 +101,7 @@ describe RatesService do
     end
   end
 
-  describe '`historical_price_indications` method' do
+  describe '`historical_price_indications` method', :vcr do
     let(:historical_prices) {subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)}
     it 'should return nil if the argument passed for collateral_type is not valid' do
       expect(Rails.logger).to receive(:warn)
