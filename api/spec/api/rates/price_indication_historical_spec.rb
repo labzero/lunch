@@ -34,12 +34,17 @@ describe MAPI::ServiceApp do
     it 'should return a rates_by_date array' do
       expect(price_indications['rates_by_date']).to be_kind_of(Array)
     end
+    it 'should add rate objects for all terms for a given rate_by_date object' do
+      expect(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:add_rate_objects_for_all_terms)
+      price_indications
+    end
     describe 'adding London holidays' do
       it 'should not add London holidays if there are none to add' do
         expect(MAPI::Services::Rates::PriceIndicationHistorical::Private).to_not receive(:add_london_holiday_rows)
       end
       describe 'when there are holidays to add' do
         before do
+          allow(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:add_rate_objects_for_all_terms)
           allow(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:calendar_holiday_london_only).at_least(1).and_return(['1776-07-04'])
         end
         CREDIT_TYPES.each do |credit_type|
@@ -206,23 +211,42 @@ describe MAPI::ServiceApp do
 
       describe '`add_london_holiday_rows` method' do
         let(:rates_array) {[{date: '2014-04-01'.to_date, rates_by_term: ['some array of terms']}, {date: '2014-06-13'.to_date, rates_by_term: ['some array of terms']}]}
-        let(:holiday_array) {['2014-04-01'.to_date, '2014-04-02'.to_date]}
+        let(:holiday_array) {['2014-04-01'.to_date, '2014-07-02'.to_date]}
         let(:terms) {LIBOR_TERMS}
-        it 'iterates through an array of dates and adds a new rate_by_date object to the given rates_by_date array' do
-          expect(subject.add_london_holiday_rows(holiday_array, rates_array, terms).length).to eq(3)
-        end
-        it 'replaces historic_price objects in the given array with an empty one if the date is a London holiday' do
+        it 'iterates through an array of dates and adds an empty rate_by_date object to the given rates_by_date array' do
           expect(subject.add_london_holiday_rows(holiday_array, rates_array, terms).length).to eq(3)
           [:value, :day_count_basis, :pay_freq].each do |property|
-            expect(subject.add_london_holiday_rows(holiday_array, rates_array, terms).first[:rates_by_term].first[property]).to be_nil
+            expect((subject.add_london_holiday_rows(holiday_array, rates_array, terms).select {|rate_object| rate_object[:date] == '2014-07-02'.to_date}).first[:rates_by_term].first[property]).to be_nil
           end
+          expect(LIBOR_TERMS).to include((subject.add_london_holiday_rows(holiday_array, rates_array, terms).select {|rate_object| rate_object[:date] == '2014-07-02'.to_date}).first[:rates_by_term].first[:term])
+          expect((subject.add_london_holiday_rows(holiday_array, rates_array, terms).select {|rate_object| rate_object[:date] == '2014-07-02'.to_date}).first[:rates_by_term].first[:type]).to eq('index')
+        end
+        it 'ignores dates in the holiday_array if they are already present in the rates_array' do
+          expect(subject.add_london_holiday_rows(holiday_array, rates_array, terms).length).to eq(3)
           expect((subject.add_london_holiday_rows(holiday_array, rates_array, terms).select {|rate_object| rate_object[:date] == '2014-04-01'.to_date}).length).to eq(1)
+          expect((subject.add_london_holiday_rows(holiday_array, rates_array, terms).select {|rate_object| rate_object[:date] == '2014-04-01'.to_date}).first[:rates_by_term]).to eq(['some array of terms'])
         end
         it 'adds the correct number of historic_rate_objects based on the terms given' do
-          expect(subject.add_london_holiday_rows(holiday_array, rates_array, terms).first[:rates_by_term].length).to eq(terms.length)
+          expect(subject.add_london_holiday_rows(holiday_array, rates_array, terms).last[:rates_by_term].length).to eq(terms.length)
         end
         it 'adds an extra historic_rate_object in the rate_array if the credit_type is daily_prime' do
-          expect(subject.add_london_holiday_rows(holiday_array, rates_array, terms, :daily_prime).first[:rates_by_term].length).to eq(terms.length + 1)
+          expect(subject.add_london_holiday_rows(holiday_array, rates_array, terms, :daily_prime).last[:rates_by_term].length).to eq(terms.length + 1)
+        end
+      end
+
+      describe '`add_rate_objects_for_all_terms` method' do
+        let(:rates_array) {[{date: '2014-04-01'.to_date, rates_by_term: [
+                            {term: LIBOR_TERMS[0]},
+                            {term: LIBOR_TERMS[2]},
+                            {term: LIBOR_TERMS[3]}
+                          ]}]}
+        let(:terms) {LIBOR_TERMS}
+        it 'iterates through all rates_by_terms arrays for the rate_array and creates empty historic_rate_objects for any terms that are missing' do
+          expect(subject.add_rate_objects_for_all_terms(rates_array, terms).first[:rates_by_term].length).to eq(LIBOR_TERMS.length)
+          [:value, :day_count_basis, :pay_freq].each do |property|
+            expect(subject.add_rate_objects_for_all_terms(rates_array, terms).first[:rates_by_term].select {|rate_object| rate_object[:term] == LIBOR_TERMS[1]}.first[property]).to be_nil
+          end
+          expect(subject.add_rate_objects_for_all_terms(rates_array, terms).first[:rates_by_term].select {|rate_object| rate_object[:term] == LIBOR_TERMS[1]}.first[:type]).to eq('index')
         end
       end
 
