@@ -211,6 +211,7 @@ en:
         nonstandard_advance: Nonstandard Advances
         relationship_manager: Relationship Manager
         member_services_desk: Member Services Desk
+        collateral_asset_manager: Collateral Asset Manager
     quick_advance:
       title: Quick Advances
       advance_placeholder: Enter Dollar Amount

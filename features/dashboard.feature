@@ -13,7 +13,7 @@ Background:
 
   Scenario: See dashboard contacts
     When I visit the dashboard
-    Then I should see 2 contacts
+    Then I should see 3 contacts
 
   @smoke
   Scenario: See dashboard quick advance module
