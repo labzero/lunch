@@ -411,6 +411,50 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
+  describe 'GET current_price_indications' do
+    let(:rates_service_instance) { double('RatesService') }
+    let(:member_balances_service_instance) { double('MemberBalanceService') }
+    let(:response_cpi_hash) { double('RatesServiceHash') }
+    let(:response_sta_hash) { double('MemberBalanceServiceHash') }
+    let(:vrc_response) {{'advance_maturity' => 'Overnight/Open','overnight_fed_funds_benchmark' => 0.13,'basis_point_spread_to_benchmark' => 5,'advance_rate' => 0.18}}
+    let(:frc_response) {[{'advance_maturity' =>'1 Month','treasury_benchmark_maturity' => '3 Months','nominal_yield_of_benchmark' => 0.01,'basis_point_spread_to_benchmark' => 20,'advance_rate' => 0.21}]}
+    let(:arc_response) {[{'advance_maturity' => '1 Year','1_month_libor' => 6,'3_month_libor' => 4,'6_month_libor' => 11,'prime' => -295}]}
+
+    before do
+      allow(RatesService).to receive(:new).and_return(rates_service_instance)
+      allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
+      allow(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
+      allow(response_sta_hash).to receive(:[]).with('sta_rate')
+      allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'vrc').at_least(1).and_return(vrc_response)
+      allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'frc').at_least(1).and_return(frc_response)
+      allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'arc').at_least(1).and_return(arc_response)
+    end
+    it_behaves_like 'a user required action', :get, :current_price_indications
+    it 'renders the current_price_indications view' do
+      allow(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
+      allow(response_cpi_hash).to receive(:collect)
+      expect(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
+      expect(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
+      get :current_price_indications
+      expect(response.body).to render_template('current_price_indications')
+    end
+    it 'should return vrc data' do
+      get :current_price_indications
+      expect(assigns[:standard_vrc_data]).to eq(vrc_response)
+      expect(assigns[:sbc_vrc_data]).to eq(vrc_response)
+    end
+    it 'should return frc data' do
+      get :current_price_indications
+      expect(assigns[:standard_frc_data]).to eq(frc_response)
+      expect(assigns[:sbc_frc_data]).to eq(frc_response)
+    end
+    it 'should return arc data' do
+      get :current_price_indications
+      expect(assigns[:standard_arc_data]).to eq(arc_response)
+      expect(assigns[:sbc_arc_data]).to eq(arc_response)
+    end
+  end
+
   describe 'requests hitting RatesService' do
     let(:rates_service_instance) { double('RatesService') }
     let(:response_hash) { double('RatesServiceHash') }

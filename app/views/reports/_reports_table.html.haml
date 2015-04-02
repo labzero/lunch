@@ -28,7 +28,8 @@
     - else
       - table_data[:rows].each do |row|
         %tr
-          %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
+          -if row[:date]
+            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
           - row[:columns].each do |column|
             %td.report-cell-narrow.report-cell-right
               - case column[:type]

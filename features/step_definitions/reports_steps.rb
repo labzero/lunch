@@ -72,6 +72,8 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/borrowing-capacity'
   when 'Historical Price Indications'
     visit '/reports/historical-price-indications'
+    when 'Current Price Indications'
+      visit '/reports/current-price-indications'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end

@@ -26,6 +26,10 @@ class RatesService < MAPIService
   HISTORICAL_VRC_TERM_MAPPINGS = {
     :'1d' => '1_day'
   }
+  CURRENT_CREDIT_TYPES = %i(vrc frc arc)
+  CURRENT_VRC_CREDIT_TYPES = %i(advance_maturity overnight_fed_funds_benchmark basis_point_spread_to_benchmark advance_rate)
+  CURRENT_FRC_CREDIT_TYPES = %i(advance_maturity treasury_benchmark_maturity nominal_yield_of_benchmark basis_point_spread_to_benchmark advance_rate)
+  CURRENT_ARC_CREDIT_TYPES = %i(advance_maturity 1_month_libor 3_month_libor 6_month_libor prime)
 
   def overnight_vrc(days=30)
     begin
@@ -76,6 +80,23 @@ class RatesService < MAPIService
     data[:advance_number] = Random.rand(999999).to_s.rjust(6, '0')
     data[:initiated_at] = Time.zone.now.to_datetime
     fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
+  end
+
+  def current_price_indications(collateral_type, credit_type)
+    collateral_type = collateral_type.to_sym
+    credit_type = credit_type.to_sym
+
+    if !CURRENT_CREDIT_TYPES.include?(credit_type)
+      Rails.logger.warn("#{credit_type} was passed to RatesService.current_price_indications as the credit_type arg and is invalid. Credit type must be one of these values: #{CURRENT_CREDIT_TYPES}")
+      return nil
+    end
+    if !COLLATERAL_TYPES.include?(collateral_type)
+      Rails.logger.warn("#{collateral_type} was passed to RatesService.current_price_indications as the collateral_type arg and is invalid. Collateral type must be one of these values: #{COLLATERAL_TYPES}")
+      return nil
+    end
+    response = @connection["rates/price_indications/current/#{credit_type}/#{collateral_type}"].get
+    data ||= JSON.parse(response.body)
+    data
   end
 
   def historical_price_indications(start_date, end_date, collateral_type, credit_type)

@@ -211,6 +211,137 @@ class ReportsController < ApplicationController
     end
   end
 
+  def current_price_indications
+    rate_service = RatesService.new(request)
+    member_balances = MemberBalanceService.new(current_member_id, request)
+
+    #sta data
+    @sta_data = member_balances.settlement_transaction_rate
+    @sta_table_data = {
+        :row_name => I18n.t("reports.pages.price_indications.current.#{MemberBalanceService::STA_RATE_KEY}"),
+        :row_value => @sta_data['sta_rate']
+    }
+    #vrc headers
+    column_heading_keys = RatesService::CURRENT_VRC_CREDIT_TYPES
+    column_headings = []
+    column_heading_keys.each do |key|
+      column_headings << I18n.t("reports.pages.price_indications.current.#{key}")
+    end
+    #vrc data for standard collateral
+    @standard_vrc_data = rate_service.current_price_indications('standard', 'vrc')
+    columns = @standard_vrc_data.collect do |row|
+      {value: row[1]}
+    end
+    rows = [{columns: columns}]
+    @standard_vrc_table_data = {
+        :column_headings => column_headings,
+        :rows => rows
+    }
+    #vrc data for sbc collateral
+    @sbc_vrc_data = rate_service.current_price_indications('sbc', 'vrc')
+    columns = @sbc_vrc_data.collect do |row|
+      {value: row[1]}
+    end
+    rows = [{columns: columns}]
+    @sbc_vrc_table_data = {
+        :column_headings => column_headings,
+        :rows => rows
+    }
+
+    #frc headers
+    column_heading_keys = RatesService::CURRENT_FRC_CREDIT_TYPES
+    column_headings = []
+    column_heading_keys.each do |key|
+      column_headings << I18n.t("reports.pages.price_indications.current.#{key}")
+    end
+    #frc data for standard collateral
+    @standard_frc_data = rate_service.current_price_indications('standard', 'frc')
+    rows = @standard_frc_data.collect do |row|
+      columns = []
+      row.each do |value|
+        if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
+          columns << {value: value[1]}
+        elsif value[0]=='basis_point_spread_to_benchmark'
+          columns << {type: :basis_point, value: value[1]}
+        else
+          columns << {type: :rate, value: value[1]}
+        end
+      end
+      {columns: columns}
+    end
+    @standard_frc_table_data = {
+        :column_headings => column_headings,
+        :rows => rows
+    }
+    #frc data for sbc collateral
+    @sbc_frc_data = rate_service.current_price_indications('sbc', 'frc')
+    rows = @sbc_frc_data.collect do |row|
+      columns = []
+      row.each do |value|
+        if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
+          columns << {value: value[1]}
+        elsif value[0]=='basis_point_spread_to_benchmark'
+          columns << {type: :basis_point, value: value[1]}
+        else
+          columns << {type: :rate, value: value[1]}
+        end
+      end
+      {columns: columns}
+    end
+    @sbc_frc_table_data = {
+        :column_headings => column_headings,
+        :rows => rows
+    }
+
+    #arc headers for standard collateral
+    column_heading_keys = RatesService::CURRENT_ARC_CREDIT_TYPES
+    column_headings = []
+    column_heading_keys.each do |key|
+      column_headings << I18n.t("reports.pages.price_indications.current.#{key}")
+    end
+    #arc data for standard collateral
+    @standard_arc_data = rate_service.current_price_indications('standard', 'arc')
+    rows = @standard_arc_data.collect do |row|
+      columns = []
+      row.each do |value|
+        if value[0]=='advance_maturity'
+          columns << {value: value[1]}
+        else
+          columns << {type: :basis_point, value: value[1]}
+        end
+      end
+      {columns: columns}
+    end
+    @standard_arc_table_data = {
+        :column_headings => column_headings,
+        :rows => rows
+    }
+    #arc headers for sbc collateral
+    column_headings = []
+    column_heading_keys.each_with_index do |key, index|
+      if index < 4
+        column_headings << I18n.t("reports.pages.price_indications.current.#{key}")
+      end
+    end
+    #arc data for sbc collateral
+    @sbc_arc_data = rate_service.current_price_indications('sbc', 'arc')
+    rows = @sbc_arc_data.collect do |row|
+      columns = []
+      row.each do |value|
+        if value[0]=='advance_maturity'
+          columns << {value: value[1]}
+        elsif value[0]=='1_month_libor' || value[0]=='3_month_libor' || value[0]=='6_month_libor'
+          columns << {type: :basis_point, value: value[1]}
+        end
+      end
+      {columns: columns}
+    end
+    @sbc_arc_table_data = {
+        :column_headings => column_headings,
+        :rows => rows
+    }
+  end
+
   def historical_price_indications
     rate_service = RatesService.new(request)
     default_dates = default_dates_hash
@@ -325,7 +456,6 @@ class ReportsController < ApplicationController
     else
       []
     end
-
     @table_data = {
       :table_heading => table_heading,
       :column_headings => column_headings,

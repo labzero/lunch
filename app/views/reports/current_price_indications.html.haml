@@ -1,0 +1,95 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.price-indications-report.row
+  .report-header
+    %h1= t('reports.pages.price_indications.current.title')
+    = render 'reports_header_buttons'
+    %p= t('reports.pages.price_indications.current.summary', phone_number: fhlb_formatted_phone_number('8004443452'))
+  .report-main-body
+    %h2.report-table-title= t('reports.pages.price_indications.standard_credit_program')
+    .report-table-title
+      %h3= t('reports.pages.price_indications.current.vrc')
+    = render 'reports/reports_table', table_class: 'current_price_vrc_table', table_data: @standard_vrc_table_data, sortable: false
+    %small
+      %p= t('reports.pages.price_indications.current.interest_day_count')+': '+t('reports.pages.price_indications.current.actual_actual')
+      %p= t('reports.pages.price_indications.current.payment_frequency')+':'
+      .report_info_indent
+        %p= t('reports.pages.price_indications.current.overnight')+': '+t('reports.pages.price_indications.current.at_maturity')
+        %p= t('reports.pages.price_indications.current.open')+': '+t('reports.pages.price_indications.current.at_monthend_and_at_repayment')
+    .report-table-title-with-margins
+      %h3= t('reports.pages.price_indications.current.frc')
+    = render 'reports/reports_table', table_class: 'current_price_frc_table', table_data: @standard_frc_table_data, sortable: false
+    %small
+      %p= t('reports.pages.price_indications.current.interest_day_count')+': '+t('reports.pages.price_indications.current.actual_actual')
+      %p= t('reports.pages.price_indications.current.open')+': '+t('reports.pages.price_indications.current.at_monthend_and_at_repayment')
+    .report-table-title-with-margins
+      %h3= t('reports.pages.price_indications.current.arc')
+    = render 'reports/reports_table', table_class: 'current_price_arc_table', table_data: @standard_arc_table_data, sortable: false
+    %small
+      %p= t('reports.pages.price_indications.current.interest_day_count')+': '+t('reports.pages.price_indications.current.actual_360')
+      %p= t('reports.pages.price_indications.current.interest_rate_reset')+': '+t('reports.pages.price_indications.current.monthly')+', '+t('reports.pages.price_indications.current.quarterly')+', '+t('reports.pages.price_indications.current.semiannually')+', '+t('reports.pages.price_indications.current.daily')
+      %p= t('reports.pages.price_indications.current.payment_frequency')+': '+t('reports.pages.price_indications.current.monthly_and_at_repayment')+', '+t('reports.pages.price_indications.current.quarterly_and_at_repayment')
+      .report_info_indent
+        %p= t('reports.pages.price_indications.current.semiannually_and_at_repayment')+', '+t('reports.pages.price_indications.current.quarterly_and_at_repayment')
+  .report-main-body
+    %h2.report-table-title= t('reports.pages.price_indications.sbc_program')
+    .report-table-title
+      %h3= t('reports.pages.price_indications.current.vrc')
+    = render 'reports/reports_table', table_class: 'current_price_vrc_table', table_data: @sbc_vrc_table_data, sortable: false
+    %small
+      %p= t('reports.pages.price_indications.current.interest_day_count')+': '+t('reports.pages.price_indications.current.actual_actual')
+      %p= t('reports.pages.price_indications.current.payment_frequency')+':'
+      .report_info_indent
+        %p= t('reports.pages.price_indications.current.overnight')+': '+t('reports.pages.price_indications.current.at_maturity')
+        %p= t('reports.pages.price_indications.current.open')+': '+t('reports.pages.price_indications.current.at_monthend_and_at_repayment')
+    .report-table-title-with-margins
+      %h3= t('reports.pages.price_indications.current.frc')
+    = render 'reports/reports_table', table_class: 'current_price_frc_table', table_data: @sbc_frc_table_data, sortable: false
+    %small
+      %p= t('reports.pages.price_indications.current.interest_day_count')+': '+t('reports.pages.price_indications.current.actual_360')
+      %p= t('reports.pages.price_indications.current.payment_frequency')+':'
+      .report_info_indent
+        %p= t('reports.pages.price_indications.current.advances_with_terms_of_180_days_or_less')+': '+t('reports.pages.price_indications.current.at_repayment')
+        %p= t('reports.pages.price_indications.current.advances_with_terms_of_more_than')+': '+t('reports.pages.price_indications.current.semiannually_and_at_repayment')
+    .report-table-title-with-margins
+      %h3= t('reports.pages.price_indications.current.arc')
+    = render 'reports/reports_table', table_class: 'current_price_arc_sbc_table', table_data: @sbc_arc_table_data, sortable: false
+    %small
+      %p= t('reports.pages.price_indications.current.interest_day_count')+': '+t('reports.pages.price_indications.current.actual_360')
+      %p= t('reports.pages.price_indications.current.interest_rate_reset')+': '+t('reports.pages.price_indications.current.monthly')+', '+t('reports.pages.price_indications.current.quarterly')+', '+t('reports.pages.price_indications.current.semiannually')
+      %p= t('reports.pages.price_indications.current.payment_frequency')+': '+t('reports.pages.price_indications.current.monthly_and_at_repayment')+', '+t('reports.pages.price_indications.current.quarterly_and_at_repayment')
+      .report_info_indent
+        %p= t('reports.pages.price_indications.current.semiannually_and_at_repayment')
+  .report-main-body
+    %h2.report-table-title= t('reports.pages.price_indications.settlement_transaction_account')
+    %table.report-table.sta_rate_table{data: {sortable: false}}
+      %tbody
+        %tr
+          %td= @sta_table_data[:row_name]
+          %td.report-cell-right.report-cell-expanding= fhlb_formatted_number(@sta_table_data[:row_value], precision: 5)
+    %small
+      %p= t('reports.pages.price_indications.current.interest_day_count')+': '+t('reports.pages.price_indications.current.actual_360')
+      %p= t('reports.pages.price_indications.current.sta_info')
+  .report-main-body
+    %h2.report-table-title= t('reports.general_information.title')
+    %small
+      %ol
+        %li= t('reports.general_information.does_not_constitute_solicitation_html', url: terms_of_use_path)
+        %li= t('reports.general_information.market_data_html', url: disclaimer_reuters_path, picture_url: image_url('thomson_reuters.gif'))
+        %li= t('reports.general_information.same_day_pricing')
+        %li= t('reports.general_information.interest_rates_on_securities_backed_credit_advances', phone_number: fhlb_formatted_phone_number('8004443452'))
+        %li= t('reports.general_information.please_call_the_member_services_desk', phone_number: fhlb_formatted_phone_number('8004443452'))
+        %ul
+          %li= t('reports.general_information.callable_advance')
+          %li= t('reports.general_information.putable_advance')
+          %li= t('reports.general_information.amortizing_advance')
+          %li= t('reports.general_information.lc')
+          %li= t('reports.general_information.ace')
+          %li= t('reports.general_information.cip')
+          %li= t('reports.general_information.hpa')
+          %li= t('reports.general_information.advances_with_embedded_options')
+          %li= t('reports.general_information.advances_with_partial_prepayment_symmetry')
+        %li= t('reports.general_information.reduced_prices')
+        %li= t('reports.general_information.standby_letters_of_credit')
+        %li= t('reports.general_information.for_advances_traded_on_or_after_january_1')
+        %li= t('reports.general_information.the_bank_will_provide_prepayment_fee_indications')

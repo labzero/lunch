@@ -6,7 +6,8 @@ Rails.application.routes.draw do
   # You can have the root of your site routed with "root"
 
   get '/details' => 'welcome#details'
-
+  get '/terms-of-use' => 'error#standard_error', as: :terms_of_use
+  get '/disclaimer-reuters' => 'error#standard_error', as: :disclaimer_reuters
   get '/grid_demo' => 'welcome#grid_demo'
 
   get '/dashboard' => 'dashboard#index'
@@ -26,15 +27,15 @@ Rails.application.routes.draw do
   get '/reports/advances' => 'reports#advances_detail'
   get '/reports/historical-price-indications' => 'reports#historical_price_indications'
   get '/reports/cash-projections' => 'reports#cash_projections'
+  get '/reports/current-price-indications' => 'reports#current_price_indications'
 
   get '/settings' => 'settings#index'
+  post '/settings/save' => 'settings#save'
 
   scope 'corporate_communications/:category' do
     resources :corporate_communications, only: :show, as: :corporate_communication
     get '/' => 'corporate_communications#category', as: :corporate_communications
   end
-
-  post '/settings/save' => 'settings#save'
 
   devise_scope :user do
     get '/' => 'users/sessions#new', :as => :new_user_session

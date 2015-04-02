@@ -1,6 +1,6 @@
 class MemberBalanceService < MAPIService
   DAILY_BALANCE_KEY = 'Interest Rate / Daily Balance' # the key returned by us from MAPI to let us know a row represents balance at close of business
-
+  STA_RATE_KEY = 'sta_rate'
   def initialize(member_id, request)
     super(request)
     @member_id = member_id
@@ -387,6 +387,17 @@ class MemberBalanceService < MAPIService
       total_interest: total_interest,
       projections: rows
     }.with_indifferent_access
+  end
+
+  def settlement_transaction_rate
+    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
+    begin
+      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'settlement_transaction_rate.json'))).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.settlement_transaction_rate encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data
   end
 
 end
