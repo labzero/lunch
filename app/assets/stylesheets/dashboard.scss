@@ -24,6 +24,16 @@
   }
 }
 
+%dashboard-module-link {
+  @extend %typography-header-nav;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: $actionable-blue;
+  border: none;
+  background-color: white;
+  float: right;
+}
+
 .dashboard-module {
   @extend %dashboard-module-base-styling;
   h1 {
@@ -35,6 +45,10 @@
   }
   header {
     @extend %dashboard-module-header;
+    a {
+      @extend %dashboard-module-link;
+      line-height: 1.6rem;
+    }
   }
   .icon-alt-text {
     overflow: hidden;
@@ -76,6 +90,10 @@
     text-align: left;
     vertical-align: top;
   }
+}
+
+.table-dashboard-previous-activity {
+  margin-bottom: 0;
 }
 
 .table-dashboard-quick-reports {
@@ -409,12 +427,7 @@ $breakdown-table-currency-width: 10px;
     width: 165px;
   }
   a {
-    text-transform: uppercase;
-    font-size: 0.867rem;
-    color: $actionable-blue;
-    border: none;
-    background-color: white;
-    float: right;
+    @extend %dashboard-module-link;
     &:after {
       @extend %icon-font;
       content: " #{$icon-arrow-right}";
