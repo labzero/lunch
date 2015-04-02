@@ -428,10 +428,6 @@ $breakdown-table-currency-width: 10px;
   }
   a {
     @extend %dashboard-module-link;
-    &:after {
-      @extend %icon-font;
-      content: " #{$icon-arrow-right}";
-    }
   }
 }
 

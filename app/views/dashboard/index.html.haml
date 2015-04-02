@@ -166,7 +166,7 @@
               = render 'shared/check_box', id: t('dashboard.reports.annually')
             %td
               %label= t('dashboard.reports.annually')
-      %a #{t('dashboard.actions.more')}
+      =link_to(t('dashboard.reports.view_reports'), reports_path)
       %button.report-button-left #{t('global.view')}
       %span.report-split-button
         %button.report-button-right #{t('dashboard.actions.download')}
