@@ -2,6 +2,7 @@
 -action ||= {type: action_type}
 -classes ||= []
 -has_data = defined?(data_available) ? data_available : true
+-link ||= nil
 %section.dashboard-module{class: classes}
   %header
     %h1= title
@@ -10,6 +11,8 @@
     - elsif action && action[:type].include?('-icon')
       .icon{class: action[:type].gsub(/(.*)-icon/, 'icon-\1-before')}
         .icon-alt-text= t("dashboard.actions.#{action[:type].gsub('-icon', '')}")
+    - elsif link && link[:name] && link[:path]
+      =link_to(link[:name], link[:path])
   .dashboard-module-content
     -if has_data
       =yield
