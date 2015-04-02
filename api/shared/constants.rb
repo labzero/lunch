@@ -8,8 +8,6 @@ module MAPI
       VRC_TERMS = ['1D']
       FRC_TERMS = ['1M', '2M', '3M', '6M', '1Y', '2Y', '3Y', '5Y', '7Y', '10Y', '15Y', '20Y', '30Y']
       LIBOR_TERMS = ['1Y', '2Y', '3Y', '5Y']
-
-      ETRANSACT_TIME_ZONE = 'Pacific Time (US & Canada)'
       REPORT_PARAM_DATE_FORMAT = /\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/
 
       IRDB_CODE_TERM_MAPPING =

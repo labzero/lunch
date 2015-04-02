@@ -77,7 +77,7 @@ module MAPI
             as_of_date = as_of_date.to_date
             advances_details_records= []
             latest_row_found = false
-            now = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE)
+            now = Time.zone.now
             today_date = now.to_date
             latest_date = as_of_date
             if app.settings.environment == :production

@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe MAPI::ServiceApp do
 
-  let(:as_of_date)  {Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE).to_date-1}
+  let(:as_of_date)  {Time.zone.now.to_date - 1.day}
 
   let(:advances_historical){{"ADVDET_ADVANCE_NUMBER"=> "330006", "ADVDET_CURRENT_PAR"=> 3000000, "ADV_DAY_COUNT"=> "ACT/365",
                              "ADV_PAYMENT_FREQ"=> "13W", "ADX_INTEREST_RECEIVABLE"=>  6305.75, "ADX_NEXT_INT_PAYMENT_DATE"=> "28-FEB-2014 12:00 AM",
@@ -79,7 +79,7 @@ describe MAPI::ServiceApp do
     end
 
     it 'invalid param or future date result in 400 error message' do
-      future_date = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE).to_date+1
+      future_date = Time.zone.now.to_date + 1.day
       get "/member/#{MEMBER_ID}/advances_details/12-12-2014"
       expect(last_response.status).to eq(400)
       get "/member/#{MEMBER_ID}/advances_details/#{future_date}"
