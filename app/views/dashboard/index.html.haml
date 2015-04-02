@@ -2,6 +2,9 @@
 .dashboard.row
   .column-3
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.market_overview.title'), classes: 'dashboard-module-market', data_available: !@market_overview.first[:data].blank?} do
+      .dashboard-market-graph-toggle
+        =link_to(t('dashboard.market_overview.vrc'), '', class: 'active')
+        =link_to(t('global.advances'), '')
       .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account']} do
       - if @effective_borrowing_capacity
@@ -56,7 +59,7 @@
               %span.total-securities-label-pledged= t('dashboard.your_account.total_securities.pledged') + ": #{@total_securities[:pledged_securities][:absolute]}"
               %span= t('dashboard.your_account.total_securities.safekept') + ": #{@total_securities[:safekept_securities][:absolute]}"
       .dashboard-anticipated-activity-graph
-        %h2= t('dashboard.your_account.anticipated_activity.title')
+        %h2= t('dashboard.your_account.projected_sta_balance.title')
         =image_tag('anticipated-activity.png', alt: 'Anticipated Activity Graph')
       %table.dashboard-account-breakdown-table
         %tbody

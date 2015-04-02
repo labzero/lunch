@@ -286,8 +286,8 @@ en:
         title: Borrowing Capacity
         used: Used
         unused: Unused
-      anticipated_activity:
-        title: Anticipated Activity
+      projected_sta_balance:
+        title: Projected STA Balance
       table:
         balance: STA Balance
         credit_outstanding: Credit Outstanding
@@ -307,7 +307,8 @@ en:
           aaa: 'SBC:AAA'
           aa: 'SBC:AA'
     market_overview:
-      title: Market Overview
+      title: Market Rates
+      vrc: 30-Day VRC Rate (%)
   reports:
     meta_title: FHLB - Reports
     title: Reports
