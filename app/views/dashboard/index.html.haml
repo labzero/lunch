@@ -61,28 +61,29 @@
       .dashboard-anticipated-activity-graph
         %h2= t('dashboard.your_account.projected_sta_balance.title')
         =image_tag('anticipated-activity.png', alt: 'Anticipated Activity Graph')
-      %table.dashboard-account-breakdown-table
-        %tbody
-          - @account_overview.each do |row|
+      .dashboard-account-summary
+        %h2= t('dashboard.your_account.account_summary')
+        %table
+          %tbody
+            - @account_overview.each do |sub_table_name, sub_table|
+              %tr
+                %td{colspan: '3'}
+                  %table.sub-table
+                    - if sub_table.first.is_a?(Hash) &&  sub_table.first[:title]
+                      %thead
+                        %tr
+                          %th.label{colspan: '3'}= t("dashboard.your_account.table.#{sub_table_name}.title") #note that the key names in our locale/en.yml file must match the key names in the @sub_tables hash
+                    %tbody
+                      - sub_table.each do |row|
+                        - next if row.is_a?(Hash)
+                        %tr{class: "#{'footnote-row' if row[2]}"}
+                          %td.label= row[0]
+                          %td.value= fhlb_formated_currency_unit(row[1], '$', row[3] || 0)
+                        - if row[2]
+                          %tr
+                            %td.footnote{colspan: 2}= row[2]
             %tr
-              %td{colspan: '3'}
-                %table.sub-table
-                  %tbody
-                    %tr
-                      %td.label= row[0]
-                      %td.value= fhlb_formated_currency_unit(row[1], '$')
-          - @sub_tables.each do |sub_table_name, sub_table|
-            %tr
-              %td{colspan: '3'}
-                %table.sub-table
-                  %thead
-                    %tr
-                      %th.label{colspan: '3'}= t("dashboard.your_account.table.#{sub_table_name}.title") #note that the key names in our locale/en.yml file must match the key names in the @sub_tables hash
-                  %tbody
-                    - sub_table.each do |row|
-                      %tr
-                        %td.label= row[0]
-                        %td.value= fhlb_formated_currency_unit(row[1], '$')
+              %td.borrowing-capacity-note= t('dashboard.your_account.table.borrowing_capacity_note_html', url: reports_borrowing_capacity_url)
   .column-3
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances'} do
       - if @quick_advances_active

@@ -1,13 +1,18 @@
 {
-  "sta_balance":190349,
-  "credit_outstanding":35000000,
-  "financial_available":149603250,
-  "stock_leverage":1111,
+  "sta_balance":2345678910,
+  "credit_outstanding":3456678910,
+  "financial_available":1456678910,
+  "stock_leverage":1234567.89,
   "collateral_market_value_sbc_agency":400000,
   "collateral_market_value_sbc_aaa":15758230,
   "collateral_market_value_sbc_aa":600000,
   "borrowing_capacity_standard":91643604,
   "borrowing_capacity_sbc_agency":15166204,
   "borrowing_capacity_sbc_aaa":800000,
-  "borrowing_capacity_sbc_aa":65775560
+  "borrowing_capacity_sbc_aa":65775560,
+  "remaining_collateral_borrowing_capacity":1456678910,
+  "standard_total_borrowing_capacity":7283449,
+  "standard_remaining_borrowing_capacity":4283449,
+  "sbc_total_borrowing_capacity":304929815,
+  "sbc_remaining_borrowing_capacity":304929815
 }

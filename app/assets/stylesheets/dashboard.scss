@@ -248,37 +248,58 @@ p.dashboard-vrc-overnight-message {
   h2 {
     margin: 0;
   }
+  .dashboard-module-content > div {
+    margin-bottom: 15px;
+  }
 }
 
 $breakdown-table-label-width: 195px;
 $breakdown-table-currency-width: 10px;
-.dashboard-account-breakdown-table {
-  @extend %typography-dashboard-account-summary;
-  th {
-    text-align: left;
+.dashboard-account-summary {
+  table {
+    @extend %typography-dashboard-account-summary;
+    th {
+      @extend %typography-dashboard-account-summary;
+      background: $white;
+      border-top: 1px solid $secondary-gray;
+      text-align: left;
+    }
+    th, .label, .currency, .value {
+      padding: 5px 0;
+      box-sizing: border-box;
+    }
+    .label, .footnote {
+      width: $breakdown-table-label-width;
+      padding-left: 10px;
+    }
+    .footnote-row td {
+      padding-bottom: 0;
+    }
+    .footnote {
+      @extend %typography-footnote;
+      padding-bottom: 5px;
+    }
+    .currency {
+      width: $breakdown-table-currency-width;
+      text-align: right;
+    }
+    .value {
+      text-align: right;
+      padding-right: 10px;
+    }
+    .sub-table {
+      background: $white;
+      margin-top: 10px;
+      border-top: 1px solid $secondary-gray;
+      border-bottom: 1px solid $secondary-gray;
+    }
   }
-  th, .label, .currency, .value {
-    padding: 5px 0;
-    box-sizing: border-box;
-  }
-  .label {
-    width: $breakdown-table-label-width;
-    padding-left: 5px;
-  }
-  .currency {
-    width: $breakdown-table-currency-width;
-    text-align: right;
-  }
-  .value {
-    text-align: right;
-    padding-right: 10px;
-  }
-  th {
-    background: $white;
-    border-top: 1px solid $secondary-gray;
-  }
-  .sub-table td.label {
-    padding-left: 10px;
+  .borrowing-capacity-note {
+    padding: 10px;
+    a {
+      color: $actionable-blue;
+      text-decoration: none;
+    }
   }
 }
 

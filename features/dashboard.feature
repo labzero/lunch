@@ -28,7 +28,7 @@ Background:
       And I should see the Anticipated Activity graph
       And I should see a pledged collateral gauge
       And I should see a total securities gauge
-      And I should see an effective borrwoing capacity gauge
+      And I should see an effective borrowing capacity gauge
 
   @smoke
   Scenario: See dashboard market overview graph
