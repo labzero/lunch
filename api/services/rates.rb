@@ -6,6 +6,19 @@ module MAPI
   module Services
     module Rates
       include MAPI::Services::Base
+      COLLATERAL_TYPES = [:standard, :sbc]
+      COLLATERAL_MAPPING = {
+          standard: 'REGULAR',
+          sbc: 'CREDIT'
+      }.with_indifferent_access
+
+      CURRENT_CREDIT_TYPES = [:vrc, :frc, :arc]
+      CURRENT_CREDIT_MAPPING = {
+          vrc: 'VARIABLES',
+          frc: 'FIXED',
+          arc: 'ADJUSTABLES'
+      }.with_indifferent_access
+
       LOAN_TYPES = [:whole, :agency, :aaa, :aa]
       LOAN_TERMS = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
       LOAN_MAPPING = {
@@ -116,9 +129,93 @@ module MAPI
         end
       end
 
+      def self.init_pi_connection(environment)
+        if environment == :production
+          @@pi_connection ||= Savon.client(
+              wsdl: ENV['MAPI_MDS_ENDPOINT'],
+              env_namespace: :soapenv,
+              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/reports/msg/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/reports/contract/v1'},
+              element_form_default: :qualified,
+              namespace_identifier: :v1,
+              pretty_print_xml: true
+          )
+        else
+          @@pi_connection = nil
+        end
+      end
+
       def self.registered(app)
         service_root '/rates', app
         swagger_api_root :rates do
+          api do
+            key :path, "/price_indications/current/vrc/{collateral}"
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve current price indications for vrc products'
+              key :notes, 'Returns current price indications based on vrc and collateral inputs'
+              key :type, :CurrentPriceIndicationsVrc
+              key :nickname, :CurrentPriceIndicationsVrc
+              parameter do
+                key :paramType, :path
+                key :name, :collateral
+                key :required, true
+                key :type, :string
+                key :enum, COLLATERAL_TYPES
+                key :description, 'The type of collateral used.'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
+
+          api do
+            key :path, "/price_indications/current/frc/{collateral}"
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve current price indications for frc products'
+              key :notes, 'Returns current price indications based on frc and collateral inputs'
+              key :type, :CurrentPriceIndicationsFrc
+              key :nickname, :CurrentPriceIndicationsFrc
+              parameter do
+                key :paramType, :path
+                key :name, :collateral
+                key :required, true
+                key :type, :string
+                key :enum, COLLATERAL_TYPES
+                key :description, 'The type of collateral used.'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
+
+          api do
+            key :path, "/price_indications/current/arc/{collateral}"
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve current price indications for arc products'
+              key :notes, 'Returns current price indications based on arc and collateral inputs'
+              key :type, :CurrentPriceIndicationsArc
+              key :nickname, :CurrentPriceIndicationsArc
+              parameter do
+                key :paramType, :path
+                key :name, :collateral
+                key :required, true
+                key :type, :string
+                key :enum, COLLATERAL_TYPES
+                key :description, 'The type of collateral used.'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
+
           api do
             key :path, "/historic/overnight"
             operation do
@@ -231,6 +328,144 @@ module MAPI
           end
 
           data.to_json
+        end
+
+        relative_get "/price_indications/current/vrc/:collateral" do
+          if !COLLATERAL_MAPPING[params[:collateral]]
+            halt 404, 'Collateral Not Found'
+          end
+
+          data = if MAPI::Services::Rates.init_pi_connection(settings.environment)
+            @@pi_connection.operations
+            message = {
+              'v1:productType' => CURRENT_CREDIT_MAPPING['vrc'],
+              'v1:subProductType' => COLLATERAL_MAPPING[params[:collateral]]
+            }
+            begin
+              response = @@pi_connection.call(:get_pricing_indications, message_tag: 'pricingIndicationsRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
+            rescue Savon::Error => error
+              logger.error error
+              halt 503, 'Internal Service Error'
+            end
+            response.doc.remove_namespaces!
+            fhlbsfresponse = response.doc.xpath('//Envelope//Body//pricingIndicationsResponse//response//Items//FhlbsfReportDataBlock//Data//FhlbsfReportData')
+            fhlbsfdatapoints = fhlbsfresponse[3].css('Table Rows TableRow Cells TableCell')
+            hash = {
+              'advance_maturity' => fhlbsfdatapoints[0].at_css('Text').content,
+              'overnight_fed_funds_benchmark' => fhlbsfdatapoints[1].at_css('Text').content,
+              'basis_point_spread_to_benchmark' => fhlbsfdatapoints[2].at_css('Text').content,
+              'advance_rate' => fhlbsfdatapoints[3].at_css('Text').content
+            }
+            hash
+          else
+            hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_current_price_indications_vrc.json'))).with_indifferent_access
+            hash
+          end
+          hash = {
+            'advance_maturity' => data['advance_maturity'].to_s,
+            'overnight_fed_funds_benchmark' => data['overnight_fed_funds_benchmark'].to_f,
+            'basis_point_spread_to_benchmark' => data['basis_point_spread_to_benchmark'].to_i,
+            'advance_rate' => data['advance_rate'].to_f
+          }
+          hash.to_json
+        end
+
+        relative_get "/price_indications/current/frc/:collateral" do
+          if !COLLATERAL_MAPPING[params[:collateral]]
+            halt 404, 'Collateral Not Found'
+          end
+
+          data = if MAPI::Services::Rates.init_pi_connection(settings.environment)
+            @@pi_connection.operations
+            message = {
+              'v1:productType' => CURRENT_CREDIT_MAPPING['frc'],
+              'v1:subProductType' => COLLATERAL_MAPPING[params[:collateral]]
+            }
+            begin
+              response = @@pi_connection.call(:get_pricing_indications, message_tag: 'pricingIndicationsRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
+            rescue Savon::Error => error
+              logger.error error
+              halt 503, 'Internal Service Error'
+            end
+            response.doc.remove_namespaces!
+            fhlbsfresponse = response.doc.xpath('//Envelope//Body//pricingIndicationsResponse//response//Items//FhlbsfReportDataBlock//Data//FhlbsfReportData')
+            fhlbsfdatapoints = fhlbsfresponse[3].css('Table Rows TableRow Cells')
+            hash = fhlbsfdatapoints.collect do |fhlbsfdatapoint|
+              result = fhlbsfdatapoint.css('TableCell')
+              {
+                'advance_maturity' => result[0].at_css('Text').content,
+                'treasury_benchmark_maturity' => result[1].at_css('Text').content,
+                'nominal_yield_of_benchmark' => result[2].at_css('Text').content,
+                'basis_point_spread_to_benchmark' => result[3].at_css('Text').content,
+                'advance_rate' => result[4].at_css('Text').content
+              }
+            end
+            hash
+          else
+            hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_current_price_indications_frc.json')))
+            hash
+          end
+          data_formatted = []
+          data.each do |row|
+            hash = {
+              'advance_maturity' => row['advance_maturity'].to_s,
+              'treasury_benchmark_maturity' => row['treasury_benchmark_maturity'].to_s,
+              'nominal_yield_of_benchmark' => row['nominal_yield_of_benchmark'].to_f,
+              'basis_point_spread_to_benchmark' => row['basis_point_spread_to_benchmark'].to_i,
+              'advance_rate' => row['advance_rate'].to_f
+            }
+            data_formatted.push(hash)
+          end
+          data_formatted.to_json
+        end
+
+        relative_get "/price_indications/current/arc/:collateral" do
+          if !COLLATERAL_MAPPING[params[:collateral]]
+            halt 404, 'Collateral Not Found'
+          end
+
+          data = if MAPI::Services::Rates.init_pi_connection(settings.environment)
+            @@pi_connection.operations
+            message = {
+              'v1:productType' => CURRENT_CREDIT_MAPPING['arc'],
+              'v1:subProductType' => COLLATERAL_MAPPING[params[:collateral]]
+            }
+            begin
+              response = @@pi_connection.call(:get_pricing_indications, message_tag: 'pricingIndicationsRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
+            rescue Savon::Error => error
+              logger.error error
+              halt 503, 'Internal Service Error'
+            end
+            response.doc.remove_namespaces!
+            fhlbsfresponse = response.doc.xpath('//Envelope//Body//pricingIndicationsResponse//response//Items//FhlbsfReportDataBlock//Data//FhlbsfReportData')
+            fhlbsfdatapoints = fhlbsfresponse[3].css('Table Rows TableRow Cells')
+            hash = fhlbsfdatapoints.collect do |fhlbsfdatapoint|
+              result = fhlbsfdatapoint.css('TableCell')
+              {
+                'advance_maturity' =>   result[0].at_css('Text').content,
+                '1_month_libor' =>  result[1].at_css('Text').content,
+                '3_month_libor' =>  result[2].at_css('Text').content,
+                '6_month_libor' =>  result[3].at_css('Text').content,
+                'prime' =>  result[4].at_css('Text').content
+              }
+            end
+            hash
+          else
+            hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_current_price_indications_arc.json')))
+            hash
+          end
+          data_formatted = []
+          data.each do |row|
+            hash = {
+                'advance_maturity' => row['advance_maturity'].to_s,
+                '1_month_libor' => row['1_month_libor'].to_i,
+                '3_month_libor' => row['3_month_libor'].to_i,
+                '6_month_libor' => row['6_month_libor'].to_i,
+                'prime' => row['prime'].to_i
+            }
+            data_formatted.push(hash)
+          end
+          data_formatted.to_json
         end
 
         relative_get "/:loan/:term" do

@@ -131,4 +131,103 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe 'price_indications_current_vrc' do
+    let(:price_indications_current_vrc) { get '/rates/price_indications/current/vrc/standard'; JSON.parse(last_response.body).with_indifferent_access }
+    it 'should return data relevant to each loan_term' do
+      expect(price_indications_current_vrc[:advance_maturity]).to be_kind_of(String)
+      expect(price_indications_current_vrc[:overnight_fed_funds_benchmark]).to be_kind_of(Float)
+      expect(price_indications_current_vrc[:basis_point_spread_to_benchmark]).to be_kind_of(Numeric)
+      expect(price_indications_current_vrc[:advance_rate]).to be_kind_of(Float)
+    end
+    it 'invalid collateral should result in 404 error message' do
+      get '/rates/price_indications/current/vrc/foo'
+      expect(last_response.status).to eq(404)
+    end
+    describe 'in the production environment' do
+      before do
+        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+      end
+      it 'should return data relevant to each loan_term', vcr: {cassette_name: 'current_price_indications_vrc'} do
+        expect(price_indications_current_vrc[:advance_maturity]).to be_kind_of(String)
+        expect(price_indications_current_vrc[:overnight_fed_funds_benchmark]).to be_kind_of(Float)
+        expect(price_indications_current_vrc[:basis_point_spread_to_benchmark]).to be_kind_of(Numeric)
+        expect(price_indications_current_vrc[:advance_rate]).to be_kind_of(Float)
+      end
+      it 'should return Internal Service Error, if current price indications service is unavaible', vcr: {cassette_name: 'current_price_indications_unavailable'} do
+        get '/rates/price_indications/current/vrc/standard'
+        expect(last_response.status).to eq(503)
+      end
+    end
+  end
+
+  describe 'price_indications_current_frc' do
+    let(:price_indications_current_frc) { get '/rates/price_indications/current/frc/sbc'; JSON.parse(last_response.body) }
+    it 'should return data relevant to each loan_term' do
+      price_indications_current_frc.each do |frc|
+        expect(frc['advance_maturity']).to be_kind_of(String)
+        expect(frc['treasury_benchmark_maturity']).to be_kind_of(String)
+        expect(frc['nominal_yield_of_benchmark']).to be_kind_of(Float)
+        expect(frc['basis_point_spread_to_benchmark']).to be_kind_of(Numeric)
+        expect(frc['advance_rate']).to be_kind_of(Float)
+      end
+    end
+    it 'invalid collateral should result in 404 error message' do
+      get '/rates/price_indications/current/frc/foo'
+      expect(last_response.status).to eq(404)
+    end
+    describe 'in the production environment' do
+      before do
+        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+      end
+      it 'should return data relevant to each loan_term', vcr: {cassette_name: 'current_price_indications_frc'} do
+        price_indications_current_frc.each do |frc|
+          expect(frc['advance_maturity']).to be_kind_of(String)
+          expect(frc['treasury_benchmark_maturity']).to be_kind_of(String)
+          expect(frc['nominal_yield_of_benchmark']).to be_kind_of(Float)
+          expect(frc['basis_point_spread_to_benchmark']).to be_kind_of(Numeric)
+          expect(frc['advance_rate']).to be_kind_of(Float)
+        end
+      end
+      it 'should return Internal Service Error, if current price indications service is unavaible', vcr: {cassette_name: 'current_price_indications_unavailable'} do
+        get '/rates/price_indications/current/frc/sbc'
+        expect(last_response.status).to eq(503)
+      end
+    end
+  end
+
+  describe 'price_indications_current_arc' do
+    let(:price_indications_current_frc) { get '/rates/price_indications/current/arc/standard'; JSON.parse(last_response.body) }
+    it 'should return data relevant to each loan_term' do
+      price_indications_current_frc.each do |arc|
+        expect(arc['advance_maturity']).to be_kind_of(String)
+        expect(arc['1_month_libor']).to be_kind_of(Numeric)
+        expect(arc['3_month_libor']).to be_kind_of(Numeric)
+        expect(arc['6_month_libor']).to be_kind_of(Numeric)
+        expect(arc['prime']).to be_kind_of(Numeric)
+      end
+    end
+    it 'invalid collateral should result in 404 error message' do
+      get '/rates/price_indications/current/arc/foo'
+      expect(last_response.status).to eq(404)
+    end
+    describe 'in the production environment' do
+      before do
+        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+      end
+      it 'should return data relevant to each loan_term', vcr: {cassette_name: 'current_price_indications_arc'} do
+        price_indications_current_frc.each do |arc|
+          expect(arc['advance_maturity']).to be_kind_of(String)
+          expect(arc['1_month_libor']).to be_kind_of(Numeric)
+          expect(arc['3_month_libor']).to be_kind_of(Numeric)
+          expect(arc['6_month_libor']).to be_kind_of(Numeric)
+          expect(arc['prime']).to be_kind_of(Numeric)
+        end
+      end
+      it 'should return Internal Service Error, if current price indications service is unavaible', vcr: {cassette_name: 'current_price_indications_unavailable'} do
+        get '/rates/price_indications/current/arc/standard'
+        expect(last_response.status).to eq(503)
+      end
+    end
+  end
+
 end
