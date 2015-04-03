@@ -14,6 +14,8 @@ We use [Vagrant](https://www.vagrantup.com/) to manage a VM that provides all th
 * [Vagrant](https://www.vagrantup.com/) installed.
 * [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html) 11g installed, along with the accompanying SDK headers (separate download). See below for details.
 * [Oracle DB Express 11g Release 2](http://www.oracle.com/technetwork/database/database-technologies/express-edition/downloads/index-083047.html) for Linux (RPM) downloaded. You just need the file, installation will be handled by Vagrant.
+* [Redis](http://redis.io/) installed. `brew install redis` if you are on a Mac with Homebrew.
+* [wkhtmltopdf](http://wkhtmltopdf.org/) with patched QT installed.
 
 ### Oracle Instant Client
 

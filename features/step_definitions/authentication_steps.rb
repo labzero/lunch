@@ -42,10 +42,22 @@ When(/^I select the (\d+)(?:st|rd|th) member bank$/) do |num|
 end
 
 When(/^I select the "(.*?)" member bank$/) do |bank_name|
-  dropdown = page.find('.welcome .dropdown')
-  dropdown.click
-  dropdown.find('li', text: bank_name).click
-  click_button(I18n.t('global.continue'))
+  # remove the rack_test branch once we have users tied to a specific bank
+  if Capybara.current_driver == :rack_test
+    page.find('.welcome .dropdown option', text: bank_name).select_option
+    form = page.find('.welcome form')
+    class << form
+      def submit
+        Capybara::RackTest::Form.new(self.driver, self.native).submit({})
+      end
+    end
+    form.submit
+  else
+    dropdown = page.find('.welcome .dropdown')
+    dropdown.click
+    dropdown.find('li', text: bank_name).click
+    click_button(I18n.t('global.continue'))
+  end
 end
 
 Given(/^I am logged out$/) do

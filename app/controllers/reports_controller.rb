@@ -10,6 +10,10 @@ class ReportsController < ApplicationController
   HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::IRDB_RATES_DATA]
   SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
 
+  before_action do
+    @member_name = current_member_name
+  end
+
   def index
     @reports = {
       price_indications: {
@@ -194,6 +198,11 @@ class ReportsController < ApplicationController
             @advances_detail[:advances_details][i][:prepayment_fee_indication] = fhlb_formatted_currency(advance[:prepayment_fee_indication], optional_number: true) || t('reports.pages.advances_detail.unavailable_for_past_dates')
         end
       end
+    end
+    @advances_detail[:advances_details].sort! { |a, b| a[:trade_date] <=> b[:trade_date] } if @advances_detail[:advances_details]
+    respond_to do |format|
+      format.html { render 'advances_detail' } # you must call render explicitly if you are using respond_to and want PDF generation to work
+      format.pdf { send_data RenderReportPDFJob.new.perform(current_member_id, 'advances_detail', {start_date: @start_date}), filename: 'advances.pdf' }
     end
   end
 

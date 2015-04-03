@@ -236,9 +236,33 @@ RSpec.describe ReportsController, :type => :controller do
         allow(advances_detail).to receive(:[]).with(:advances_details).and_return([])
       end
 
-      it 'should render the capital_stock_activity view' do
+      it 'should render the advances_detail view' do
         get :advances_detail
         expect(response.body).to render_template('advances_detail')
+      end
+
+      describe 'downloading a PDF' do
+        let(:member_id) { double('A Member ID') }
+        let(:start_date) { date = double('A Date'); allow(date).to receive(:to_date).and_return(date); date }
+        let(:pdf) { double('PDF') }
+        before do
+          allow_any_instance_of(MembersService).to receive(:report_disabled?).and_return(false)
+          allow_any_instance_of(MembersService).to receive(:member).with(anything).and_return({id: member_id, name: 'Foo'})
+          allow_any_instance_of(subject.class).to receive(:current_member_id).and_return(member_id)
+        end
+        it 'should render a PDF when the requested format is `application/pdf`' do
+          expect_any_instance_of(RenderReportPDFJob).to receive(:perform).with(member_id, 'advances_detail', anything)
+          get :advances_detail, format: :pdf
+        end
+        it 'should render a PDF using the requested start_date' do
+          expect_any_instance_of(RenderReportPDFJob).to receive(:perform).with(any_args, hash_including(start_date: start_date))
+          get :advances_detail, format: :pdf, start_date: start_date
+        end
+        it 'should send the pdf' do
+          allow_any_instance_of(RenderReportPDFJob).to receive(:perform).and_return(pdf)
+          expect_any_instance_of(subject.class).to receive(:send_data).with(pdf, hash_including(filename: 'advances.pdf')).and_call_original
+          get :advances_detail, format: :pdf
+        end
       end
 
       describe 'view instance variables' do
@@ -268,6 +292,25 @@ RSpec.describe ReportsController, :type => :controller do
           expect(controller).to receive(:report_disabled?).with(ReportsController::ADVANCES_DETAIL_WEB_FLAGS).and_return(true)
           get :advances_detail
           expect(assigns[:advances_detail]).to eq({})
+        end
+        it 'should sort the advances found in @advances_detail[:advances_details]' do
+          expect(advances_detail[:advances_details]).to receive(:sort!)
+          get :advances_detail
+        end
+        it 'should order the advances found in @advances_detail[:advances_details] by `trade_date` ascending' do
+          unsorted_advances = [
+            {trade_date: Date.today},
+            {trade_date: Date.today + 1.years},
+            {trade_date: Date.today - 1.years},
+            {trade_date: Date.today - 3.years}
+          ]
+          allow(advances_detail).to receive(:[]).with(:advances_details).and_return(unsorted_advances)
+          get :advances_detail
+          last_trade_date = nil
+          assigns[:advances_detail][:advances_details].each do |advance|
+            expect(advance[:trade_date]).to be >= last_trade_date if last_trade_date
+            last_trade_date = advance[:trade_date]
+          end
         end
       end
 

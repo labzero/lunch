@@ -45,4 +45,26 @@ RSpec.describe ApplicationController, :type => :controller do
       controller.send(:after_sign_in_path_for, 'some resource')
     end
   end
+
+  describe '`current_member_id` method' do
+    let(:member_id) { double('A Member ID') }
+    it 'should return the `member_id` from the session' do
+      session['member_id'] = member_id
+      expect(controller.current_member_id).to eq(member_id)
+    end
+    it 'should return nil if there is no `member_id`' do
+      expect(controller.current_member_id).to be_nil
+    end
+  end
+
+  describe '`current_member_name` method' do
+    let(:member_name) { double('A Member Name') }
+    it 'should return the `member_name` from the session' do
+      session['member_name'] = member_name
+      expect(controller.current_member_name).to eq(member_name)
+    end
+    it 'should return nil if there is no `member_name`' do
+      expect(controller.current_member_name).to be_nil
+    end
+  end
 end

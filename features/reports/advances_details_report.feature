@@ -63,3 +63,9 @@ Scenario: The Advances Detail Report has been disabled
   Given I am on the Advances Detail page
   When the "Advances Detail" report has been disabled
   Then I should see an empty report table with Data Unavailable messaging
+
+@smoke @rack_test @jira-mem-415 @wip
+Scenario: Member downloads a PDF of the Advances Detail report
+  Given I am on the Advances Detail page
+  When I request a PDF
+  Then I should recieve a PDF file

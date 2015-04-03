@@ -1,0 +1,14 @@
+-# = render 'layouts/base', header_template: 'layouts/header_print', inline_styles: @inline_styles || false, skip_javascript: @skip_javascript || false, css_manifest: 'print.css'
+- css_manifest ||= 'print'
+!!!
+%html{class: @html_class}
+  %head
+    %meta{charset: "utf-8"}
+    %meta{content: "IE=edge,chrome=1", :'http-equiv' => "X-UA-Compatible"}
+    %title= @page_title || 'FHLB Member Portal'
+    %style
+      - css_manifest_filename = (css_manifest.end_with?('.css') ? css_manifest : css_manifest + '.css' )
+      != FhlbMember::Application.assets.find_asset(css_manifest_filename).source
+  %body
+    %header.page-header= render 'layouts/header_print'
+    = yield

@@ -13,6 +13,14 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def current_member_id
+    session['member_id']
+  end
+
+  def current_member_name
+    session['member_name']
+  end
+
   private
 
   def after_sign_out_path_for(resource)
@@ -32,9 +40,5 @@ class ApplicationController < ActionController::Base
     rescue => e
       render text: e, status: 500
     end
-  end
-
-  def current_member_id
-    session['member_id']
   end
 end
