@@ -31,7 +31,7 @@ def sauce_name
   ENV['JOB_NAME'] || "Local Dev (#{`whoami`.strip})"
 end
 
-base_opts = {:username => SAUCE_USERNAME, :access_key => SAUCE_ACCESS_KEY, :build => sauce_build, :name => sauce_name, :'parent-tunnel' => (ENV['SAUCE_PARENT_TUNNEL'] || nil), :'selenium-version' => ENV['SAUCE_SELENIUM_VERSION'] || nil, :'iedriver-version' => ENV['SAUCE_IEDRIVER_VERSION'] || nil}
+base_opts = {:username => SAUCE_USERNAME, :access_key => SAUCE_ACCESS_KEY, :build => sauce_build, :name => sauce_name, :'parent-tunnel' => (ENV['SAUCE_PARENT_TUNNEL'] || nil), :'tunnel-identifier' => (ENV['SAUCE_TUNNEL_IDENTIFIER'] || nil), :'selenium-version' => ENV['SAUCE_SELENIUM_VERSION'] || nil, :'iedriver-version' => ENV['SAUCE_IEDRIVER_VERSION'] || nil}
 
 SAUCE_CONNECT_URL = ENV['REMOTE'] == 'true' ? "http://#{SAUCE_USERNAME}:#{SAUCE_ACCESS_KEY}@ondemand.saucelabs.com:80/wd/hub" : "http://localhost:#{SAUCE_PORT}/wd/hub"
 
