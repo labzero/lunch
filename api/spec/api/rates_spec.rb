@@ -146,6 +146,10 @@ describe MAPI::ServiceApp do
       get "rates/price_indication/historical/#{start_date}/#{end_date}/standard/bar"
       expect(last_response.status).to eq(400)
     end
+    it 'calls the `price_indication_historical` method on the MAPI::Services::Rates::PriceIndicationHistorical module' do
+      expect(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:price_indication_historical)
+      get "rates/price_indication/historical/#{start_date}/#{end_date}/standard/vrc"
+    end
   end
 
   describe 'price_indications_current_vrc' do

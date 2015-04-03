@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'date'
-include MAPI::Shared::Constants
 
 describe MAPI::ServiceApp do
   before do
@@ -14,7 +13,7 @@ describe MAPI::ServiceApp do
     let(:price_indications) { get "rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/#{credit_type}"; JSON.parse(last_response.body) }
 
     before do
-      allow(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:calendar_holiday_london_only).at_least(1).and_return([])
+      allow(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:calendar_holiday_london_only).and_return([])
       allow(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:fake_historical_price_indications).and_return([])
     end
 
@@ -23,7 +22,7 @@ describe MAPI::ServiceApp do
     end
     it 'should return the date at which the bank starting storing data for that credit type if the given start_date occurs before that date' do
       start_date = '1992-01-01'
-      expect((get "rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/#{credit_type}"; JSON.parse(last_response.body))['start_date']).to eq(IRDB_CODE_TERM_MAPPING[:standard][:frc][:min_date])
+      expect((get "rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/#{credit_type}"; JSON.parse(last_response.body))['start_date'].to_date).to eq(MAPI::Shared::Constants::IRDB_CODE_TERM_MAPPING[:standard][:frc][:min_date])
     end
     it 'should return the collateral_type that was passed in' do
       expect(price_indications['collateral_type'].to_s).to eq(collateral_type)
@@ -45,9 +44,9 @@ describe MAPI::ServiceApp do
       describe 'when there are holidays to add' do
         before do
           allow(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:add_rate_objects_for_all_terms)
-          allow(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:calendar_holiday_london_only).at_least(1).and_return(['1776-07-04'])
+          allow(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:calendar_holiday_london_only).and_return(['1776-07-04'])
         end
-        CREDIT_TYPES.each do |credit_type|
+        MAPI::Shared::Constants::CREDIT_TYPES.each do |credit_type|
           next if credit_type == :embedded_cap # TODO add test once embedded cap is rigged up
           if credit_type == :vrc
             it 'should not add London holidays if the credit_type is `vrc`' do
@@ -69,24 +68,40 @@ describe MAPI::ServiceApp do
         allow(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:fake_historical_price_indications).and_call_original
       end
       it 'should contain rates_by_date objects' do
-        expect(price_indications['rates_by_date'].first).to be_kind_of(Hash)
+        price_indications['rates_by_date'].each do |rate_by_date_object|
+          expect(rate_by_date_object).to be_kind_of(Hash)
+        end
       end
       describe 'a rates_by_date object' do
         it 'should contain a date' do
-          expect(price_indications['rates_by_date'].first['date']).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+          price_indications['rates_by_date'].each do |rate_by_date_object|
+            expect(rate_by_date_object['date']).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+          end
         end
         it 'should contain a rates_by_term array of rate_objects' do
-          expect(price_indications['rates_by_date'].first['rates_by_term']).to be_kind_of(Array)
-          expect(price_indications['rates_by_date'].first['rates_by_term'].first).to be_kind_of(Hash)
+          price_indications['rates_by_date'].each do |rate_by_date_object|
+            expect(rate_by_date_object['rates_by_term']).to be_kind_of(Array)
+            rate_by_date_object['rates_by_term'].each do |rate_by_term_object|
+              expect(rate_by_term_object).to be_kind_of(Hash)
+            end
+          end
         end
         describe 'a rate_object' do
           ['term', 'type', 'day_count_basis', 'pay_freq'].each do |property|
             it "should contain a #{property}" do
-              expect(price_indications['rates_by_date'].first['rates_by_term'].first[property]).to be_kind_of(String)
+              price_indications['rates_by_date'].each do |rate_by_date_object|
+                rate_by_date_object['rates_by_term'].each do |rate_by_term_object|
+                  expect(rate_by_term_object[property]).to be_kind_of(String)
+                end
+              end
             end
           end
           it 'should contain a value' do
-            expect(price_indications['rates_by_date'].first['rates_by_term'].first['value']).to be_kind_of(Float)
+            price_indications['rates_by_date'].each do |rate_by_date_object|
+              rate_by_date_object['rates_by_term'].each do |rate_by_term_object|
+                expect(rate_by_term_object['value']).to be_kind_of(Float)
+              end
+            end
           end
         end
       end
@@ -107,18 +122,18 @@ describe MAPI::ServiceApp do
                        'MS_DATA_FREQ' => 'Daily'
                    }}
       before do
-        allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+        allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
       end
       it 'executes the SQL query for the irdb_connection if the credit type is anything other than :daily_prime' do
-        expect(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:irdb_connection_string).and_return(irdb_query)
+        allow(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:irdb_sql_query).and_return(irdb_query)
         expect(ActiveRecord::Base.connection).to receive(:execute).with(irdb_query).and_return(irdb_cursor)
-        expect(irdb_cursor).to receive(:fetch_hash).and_return(rows, nil)
+        allow(irdb_cursor).to receive(:fetch_hash)
         price_indications
       end
       it 'executes the SQL query for the irdb_with_benchmark_connection if the credit type is :daily_prime' do
-        expect(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:irdb_with_benchmark_connection_string).and_return(benchmark_query)
+        allow(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:irdb_with_benchmark_sql_query).and_return(benchmark_query)
         expect(ActiveRecord::Base.connection).to receive(:execute).with(benchmark_query).and_return(benchmark_cursor)
-        expect(benchmark_cursor).to receive(:fetch_hash).and_return(rows, nil)
+        allow(benchmark_cursor).to receive(:fetch_hash)
         get "rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/daily_prime"; JSON.parse(last_response.body)
       end
     end
@@ -128,7 +143,7 @@ describe MAPI::ServiceApp do
       let(:end_date) {'2014-06-01'}
       let(:london_only_holidays) {MAPI::Services::Rates::PriceIndicationHistorical.calendar_holiday_london_only(:test, start_date, end_date)}
       before do
-        allow(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:calendar_holiday_london_only).at_least(1).and_call_original
+        allow(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:calendar_holiday_london_only).and_call_original
       end
 
       it 'returns an array of dates if there are London-only holidays contained in the given range' do
@@ -169,39 +184,52 @@ describe MAPI::ServiceApp do
         end
         it 'returns an array of historic_price objects' do
           expect(subject.fake_historical_price_indications(start_date, end_date, :standard, :vrc, 'FRADVN', ['1D'], london_holidays)).to be_kind_of(Array)
-          expect(subject.fake_historical_price_indications(start_date, end_date, :standard, :vrc, 'FRADVN', ['1D'], london_holidays).first).to be_kind_of(Hash)
+          subject.fake_historical_price_indications(start_date, end_date, :standard, :vrc, 'FRADVN', ['1D'], london_holidays).each do |historic_price_object|
+            expect(historic_price_object).to be_kind_of(Hash)
+          end
         end
         describe 'historic_price object' do
           ['TRX_IR_CODE', 'TRX_TERM_VALUE', 'TRX_TERM_UOM', 'MS_DAY_CNT_BAS', 'MS_DATA_FREQ'].each do |property|
             it "returns a '#{property}' value" do
-              expect(subject.fake_historical_price_indications(start_date, end_date, :standard, :vrc, 'FRADVN', ['1D'], london_holidays).first[property]).to be_kind_of(String)
+              subject.fake_historical_price_indications(start_date, end_date, :standard, :vrc, 'FRADVN', ['1D'], london_holidays).each do |historic_price_object|
+                expect(historic_price_object[property]).to be_kind_of(String)
+              end
             end
           end
           it 'returns a `TRX_EFFECTIVE_DATE` value' do
-            expect(subject.fake_historical_price_indications(start_date, end_date, :standard, :vrc, 'FRADVN', ['1D'], london_holidays).first['TRX_EFFECTIVE_DATE']).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+            subject.fake_historical_price_indications(start_date, end_date, :standard, :vrc, 'FRADVN', ['1D'], london_holidays).each do |historic_price_object|
+              expect(historic_price_object['TRX_EFFECTIVE_DATE']).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+            end
           end
-          COLLATERAL_TYPES.each do |collateral_type|
-            CREDIT_TYPES.each do |credit_type|
-              irdb_lookup = IRDB_CODE_TERM_MAPPING[collateral_type][credit_type]
+          MAPI::Shared::Constants::COLLATERAL_TYPES.each do |collateral_type|
+            MAPI::Shared::Constants::CREDIT_TYPES.each do |credit_type|
+              irdb_lookup = MAPI::Shared::Constants::IRDB_CODE_TERM_MAPPING[collateral_type][credit_type]
               next if credit_type == :embedded_cap # TODO add test once embedded cap is rigged up
               if credit_type == :frc || credit_type == :vrc
                 it "returns a rate if the collateral_type is '#{collateral_type}' and the credit_type is '#{credit_type}'" do
-                  expect(subject.fake_historical_price_indications(start_date, end_date, collateral_type, credit_type, irdb_lookup[:code], irdb_lookup[:terms], london_holidays).first['TRX_VALUE']).to be_between(0,1)
-                  expect(subject.fake_historical_price_indications(start_date, end_date, collateral_type, credit_type, irdb_lookup[:code], irdb_lookup[:terms], london_holidays).first['TRX_VALUE']).to be_kind_of(Float)
+                  subject.fake_historical_price_indications(start_date, end_date, collateral_type, credit_type, irdb_lookup[:code], irdb_lookup[:terms], london_holidays).each do |historic_price_object|
+                    expect(historic_price_object['TRX_VALUE']).to be_between(0,1)
+                    expect(historic_price_object['TRX_VALUE']).to be_kind_of(Float)
+                  end
                 end
               elsif credit_type == :daily_prime && collateral_type == :standard
-                it "returns a rate for a given date if the credit_type is '#{credit_type}'" do
+                it "returns a rate as the first value for a given date if the credit_type is '#{credit_type}'" do
                   expect(subject.fake_historical_price_indications(start_date, end_date, collateral_type, credit_type, irdb_lookup[:code], irdb_lookup[:terms], london_holidays).first['TRX_VALUE']).to be_between(0,1)
                   expect(subject.fake_historical_price_indications(start_date, end_date, collateral_type, credit_type, irdb_lookup[:code], irdb_lookup[:terms], london_holidays).first['TRX_VALUE']).to be_kind_of(Float)
                 end
-                it "returns a basis_point for a given date if the credit_type is '#{credit_type}'" do
-                  expect(subject.fake_historical_price_indications(start_date, end_date, collateral_type, credit_type, irdb_lookup[:code], irdb_lookup[:terms], london_holidays)[1]['TRX_VALUE']).to be_between(-200,200)
-                  expect(subject.fake_historical_price_indications(start_date, end_date, collateral_type, credit_type, irdb_lookup[:code], irdb_lookup[:terms], london_holidays)[1]['TRX_VALUE']).to be_kind_of(Fixnum)
+                it "returns a basis_point for all other values than the first for a given date if the credit_type is '#{credit_type}'" do
+                  subject.fake_historical_price_indications(start_date, start_date, collateral_type, credit_type, irdb_lookup[:code], irdb_lookup[:terms], london_holidays).each_with_index do |historic_price_object, i|
+                    next if i == 0
+                    expect(historic_price_object['TRX_VALUE']).to be_between(-200,200)
+                    expect(historic_price_object['TRX_VALUE']).to be_kind_of(Fixnum)
+                  end
                 end
               elsif credit_type != :daily_prime
                 it "returns a basis_point if the collateral_type is '#{collateral_type}' and the credit_type is '#{credit_type}'" do
-                  expect(subject.fake_historical_price_indications(start_date, end_date, collateral_type, credit_type, irdb_lookup[:code], irdb_lookup[:terms], london_holidays).first['TRX_VALUE']).to be_between(-200,200)
-                  expect(subject.fake_historical_price_indications(start_date, end_date, collateral_type, credit_type, irdb_lookup[:code], irdb_lookup[:terms], london_holidays).first['TRX_VALUE']).to be_kind_of(Fixnum)
+                  subject.fake_historical_price_indications(start_date, end_date, collateral_type, credit_type, irdb_lookup[:code], irdb_lookup[:terms], london_holidays).each do |historic_price_object|
+                    expect(historic_price_object['TRX_VALUE']).to be_between(-200,200)
+                    expect(historic_price_object['TRX_VALUE']).to be_kind_of(Fixnum)
+                  end
                 end
               end
             end
@@ -212,13 +240,23 @@ describe MAPI::ServiceApp do
       describe '`add_london_holiday_rows` method' do
         let(:rates_array) {[{date: '2014-04-01'.to_date, rates_by_term: ['some array of terms']}, {date: '2014-06-13'.to_date, rates_by_term: ['some array of terms']}]}
         let(:holiday_array) {['2014-04-01'.to_date, '2014-07-02'.to_date]}
-        let(:terms) {LIBOR_TERMS}
+        let(:terms) {MAPI::Shared::Constants::LIBOR_TERMS}
         it 'iterates through an array of dates and adds an empty rate_by_date object to the given rates_by_date array' do
           expect(subject.add_london_holiday_rows(holiday_array, rates_array, terms).length).to eq(3)
           [:value, :day_count_basis, :pay_freq].each do |property|
-            expect((subject.add_london_holiday_rows(holiday_array, rates_array, terms).select {|rate_object| rate_object[:date] == '2014-07-02'.to_date}).first[:rates_by_term].first[property]).to be_nil
+            (subject.add_london_holiday_rows(holiday_array, rates_array, terms).select {|rate_object| rate_object[:date] == '2014-07-02'.to_date}).each do |rate_by_date_object|
+              rate_by_date_object[:rates_by_term].each do |rate_by_term_object|
+                expect(rate_by_term_object[property]).to be_nil
+              end
+            end
           end
-          expect(LIBOR_TERMS).to include((subject.add_london_holiday_rows(holiday_array, rates_array, terms).select {|rate_object| rate_object[:date] == '2014-07-02'.to_date}).first[:rates_by_term].first[:term])
+          (subject.add_london_holiday_rows(holiday_array, rates_array, terms).select {|rate_object| rate_object[:date] == '2014-07-02'.to_date}).each do |rate_by_date_object|
+            rate_by_date_object[:rates_by_term].each do |rate_by_term_object|
+              expect(terms).to include(rate_by_term_object[:term])
+              expect(rate_by_term_object[:type]).to eq('index')
+            end
+          end
+          expect(terms).to include((subject.add_london_holiday_rows(holiday_array, rates_array, terms).select {|rate_object| rate_object[:date] == '2014-07-02'.to_date}).first[:rates_by_term].first[:term])
           expect((subject.add_london_holiday_rows(holiday_array, rates_array, terms).select {|rate_object| rate_object[:date] == '2014-07-02'.to_date}).first[:rates_by_term].first[:type]).to eq('index')
         end
         it 'ignores dates in the holiday_array if they are already present in the rates_array' do
@@ -235,28 +273,28 @@ describe MAPI::ServiceApp do
       end
 
       describe '`add_rate_objects_for_all_terms` method' do
+        let(:terms) {MAPI::Shared::Constants::LIBOR_TERMS}
         let(:rates_array) {[{date: '2014-04-01'.to_date, rates_by_term: [
-                            {term: LIBOR_TERMS[0]},
-                            {term: LIBOR_TERMS[2]},
-                            {term: LIBOR_TERMS[3]}
+                            {term: terms[0]},
+                            {term: terms[2]},
+                            {term: terms[3]}
                           ]}]}
-        let(:terms) {LIBOR_TERMS}
         it 'iterates through all rates_by_terms arrays for the rate_array and creates empty historic_rate_objects for any terms that are missing' do
-          expect(subject.add_rate_objects_for_all_terms(rates_array, terms).first[:rates_by_term].length).to eq(LIBOR_TERMS.length)
+          expect(subject.add_rate_objects_for_all_terms(rates_array, terms).first[:rates_by_term].length).to eq(MAPI::Shared::Constants::LIBOR_TERMS.length)
           [:value, :day_count_basis, :pay_freq].each do |property|
-            expect(subject.add_rate_objects_for_all_terms(rates_array, terms).first[:rates_by_term].select {|rate_object| rate_object[:term] == LIBOR_TERMS[1]}.first[property]).to be_nil
+            expect(subject.add_rate_objects_for_all_terms(rates_array, terms).first[:rates_by_term].select {|rate_object| rate_object[:term] == MAPI::Shared::Constants::LIBOR_TERMS[1]}.first[property]).to be_nil
           end
-          expect(subject.add_rate_objects_for_all_terms(rates_array, terms).first[:rates_by_term].select {|rate_object| rate_object[:term] == LIBOR_TERMS[1]}.first[:type]).to eq('index')
+          expect(subject.add_rate_objects_for_all_terms(rates_array, terms).first[:rates_by_term].select {|rate_object| rate_object[:term] == MAPI::Shared::Constants::LIBOR_TERMS[1]}.first[:type]).to eq('index')
         end
       end
 
       describe '`rate_object_data_type` method' do
-        [:frc, :vrc].each do |credit_type|
+        MAPI::Shared::Constants::INDEX_CREDIT_TYPES.each do |credit_type|
           it "returns 'rate' if credit_type is '#{credit_type}'" do
             expect(subject.rate_object_data_type(credit_type, nil)).to eq('index')
           end
         end
-        [:'1m_libor', :'3m_libor', :'6m_libor'].each do |credit_type|
+        MAPI::Shared::Constants::BASIS_POINT_CREDIT_TYPES.each do |credit_type|
           it "returns 'basis_point' if credit_type is '#{credit_type}'" do
             expect(subject.rate_object_data_type(credit_type, nil)).to eq('basis_point')
           end

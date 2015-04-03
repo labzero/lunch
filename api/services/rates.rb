@@ -655,7 +655,7 @@ module MAPI
           end_date = params[:end_date].to_date
           collateral_type = params[:collateral_type].to_sym
           credit_type = params[:credit_type].to_sym
-          halt 400, 'Invalid Date format of yyyy-mm-dd or date range' if start_date.to_date > end_date.to_date
+          halt 400, 'Invalid date range: start_date must occur earlier than end_date' if start_date.to_date > end_date.to_date
           if !MAPI::Services::Rates::PriceIndicationHistorical::IRDB_CODE_TERM_MAPPING[collateral_type]
             halt 400, "Invalid Collateral type"
           elsif !MAPI::Services::Rates::PriceIndicationHistorical::IRDB_CODE_TERM_MAPPING[collateral_type][credit_type]

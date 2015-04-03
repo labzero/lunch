@@ -15,11 +15,11 @@ module MAPI
           irdb_code= irdb_lookup[:code]
           irdb_term_array = irdb_lookup[:terms]
           irdb_term_string = irdb_term_array.map { |i| "'" + i.to_s + "'"}.join(",")
-          irdb_min_date = irdb_lookup[:min_date].to_date
+          irdb_min_date = irdb_lookup[:min_date]
           start_date = irdb_min_date if start_date < irdb_min_date
 
-          irdb = Private.irdb_connection_string(start_date, end_date, irdb_code, irdb_term_string)
-          irdb_with_benchmark = Private.irdb_with_benchmark_connection_string(start_date, end_date, irdb_code, irdb_term_string)
+          irdb = Private.irdb_sql_query(start_date, end_date, irdb_code, irdb_term_string)
+          irdb_with_benchmark = Private.irdb_with_benchmark_sql_query(start_date, end_date, irdb_code, irdb_term_string)
           london_only_holidays = calendar_holiday_london_only(env, start_date, end_date)
 
           rate_raw_records = []
@@ -79,13 +79,13 @@ module MAPI
           }
         end
 
-        def self.calendar_holiday_london_only(environment, from_date, to_date)
+        def self.calendar_holiday_london_only(environment, start_date, end_date)
           holiday_london = []
           holiday_us = []
 
           cal_connection = MAPI::Services::Rates.init_cal_connection(environment)
           if cal_connection
-            message = {'v1:endDate' => to_date.to_date.strftime('%F') , 'v1:startDate' => from_date.to_date.strftime('%F') }
+            message = {'v1:endDate' => end_date.to_date.strftime('%F') , 'v1:startDate' => start_date.to_date.strftime('%F') }
             begin
               response = cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
             rescue Savon::Error => error
@@ -117,14 +117,14 @@ module MAPI
             holiday_london_only.push(holiday_date) unless (holiday_us.include?(holiday_date) || holiday_date.saturday? || holiday_date.sunday?)
           end
           
-          holiday_london_only.delete_if {|date| !(from_date.to_date..to_date.to_date).include?(date.to_date)}
+          holiday_london_only.delete_if {|date| !(start_date.to_date..end_date.to_date).include?(date.to_date)}
         end
 
         # private
         module Private
           include MAPI::Shared::Constants
 
-          def self.irdb_connection_string(start_date, end_date, irdb_code, irdb_term_string)
+          def self.irdb_sql_query(start_date, end_date, irdb_code, irdb_term_string)
             <<-SQL
               SELECT TRX_IR_CODE, TRX_EFFECTIVE_DATE, TRX_TERM_VALUE, TRX_TERM_UOM, TRX_VALUE,
               MS_DAY_CNT_BAS, MS_DATA_FREQ
@@ -139,7 +139,7 @@ module MAPI
             SQL
           end
 
-          def self.irdb_with_benchmark_connection_string(start_date, end_date, irdb_code, irdb_term_string)
+          def self.irdb_with_benchmark_sql_query(start_date, end_date, irdb_code, irdb_term_string)
             <<-SQL
               SELECT TRX_IR_CODE, TRX_EFFECTIVE_DATE, TRX_TERM_VALUE, TRX_TERM_UOM, TRX_VALUE,
               MS_DAY_CNT_BAS, MS_DATA_FREQ
@@ -164,7 +164,7 @@ module MAPI
                 # need to create special case for daily_prime where we add a rate in addition to populating the normal term values with basis points
                 if credit_type == :daily_prime
                   data = {
-                    'TRX_IR_CODE' => 'PRIME',
+                    'TRX_IR_CODE' => DAILY_PRIME_TRX_IR_CODE_INDEX,
                     'TRX_EFFECTIVE_DATE' => date.strftime('%F'),
                     'TRX_TERM_VALUE' => '1',
                     'TRX_TERM_UOM' => 'D',
@@ -251,9 +251,9 @@ module MAPI
 
           # determine the data-type of the value that will be returned for the rate object
           def self.rate_object_data_type(credit_type, trx_ir_code)
-            if credit_type == :frc || credit_type == :vrc || (credit_type == :daily_prime && trx_ir_code == 'PRIME')
+            if INDEX_CREDIT_TYPES.include?(credit_type) || (credit_type == :daily_prime && trx_ir_code == DAILY_PRIME_TRX_IR_CODE_INDEX)
               'index'
-            elsif credit_type == :'1m_libor' || credit_type ==  :'3m_libor' || credit_type ==  :'6m_libor' || (credit_type == :daily_prime && trx_ir_code == 'APRIMEAT')
+            elsif BASIS_POINT_CREDIT_TYPES.include?(credit_type) || (credit_type == :daily_prime && trx_ir_code == DAILY_PRIME_TRX_IR_CODE_BASIS_POINT)
               'basis_point'
             end
           end

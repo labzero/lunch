@@ -32,11 +32,11 @@ module MAPI
           key :description, 'Dates for the quoted rates'
         end
         property :rates_by_term do
-          key :type, :RatesBytermObject
+          key :type, :RatesByTermObject
           key :description, 'An object containing the rates information'
         end
       end
-      swagger_model :RatesBytermObject do
+      swagger_model :RatesByTermObject do
         property :term do
           key :type, :string
           key :description, 'Terms for the rates i.e. 1D, 1M, 3M, 1Y etc'
