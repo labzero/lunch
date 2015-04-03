@@ -96,6 +96,12 @@
   margin-bottom: 0;
 }
 
+.table-dashboard-anticipated-activity {
+  td .currency-alignment {
+    min-width: 6em;
+  }
+}
+
 .table-dashboard-quick-reports {
   @extend %table-striped;
   margin-top: 22px;

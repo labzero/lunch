@@ -94,6 +94,6 @@ module CustomFormattingHelper
     unit_class = content_tag(:span, unit, class: 'alignleft')
     number_class = content_tag(:span, fhlb_formatted_number(number, precision: precision), class: 'alignright')
     inner_content = number.blank?? number_class : unit_class + number_class
-    content_tag(:span, inner_content, class: 'currency_alignment')
+    content_tag(:span, inner_content, class: 'currency-alignment')
   end
 end
