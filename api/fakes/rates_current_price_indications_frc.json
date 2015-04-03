@@ -1,0 +1,72 @@
+[
+  {
+    "advance_maturity": "1 Month",
+    "treasury_benchmark_maturity": "3 Months",
+    "nominal_yield_of_benchmark": 0.01,
+    "basis_point_spread_to_benchmark": 20,
+    "advance_rate": 0.21
+  },
+  {
+    "advance_maturity": "2 Month",
+    "treasury_benchmark_maturity": "3 Months",
+    "nominal_yield_of_benchmark": 0.01,
+    "basis_point_spread_to_benchmark": 20,
+    "advance_rate": 0.21
+  },
+  {
+    "advance_maturity": "3 Month",
+    "treasury_benchmark_maturity": "3 Months",
+    "nominal_yield_of_benchmark": 0.01,
+    "basis_point_spread_to_benchmark": 20,
+    "advance_rate": 0.22
+  },
+  {
+    "advance_maturity": "4 Month",
+    "treasury_benchmark_maturity": "6 Months",
+    "nominal_yield_of_benchmark": 0.09,
+    "basis_point_spread_to_benchmark": 19,
+    "advance_rate": 0.28
+  },
+  {
+    "advance_maturity": "5 Month",
+    "treasury_benchmark_maturity": "6 Months",
+    "nominal_yield_of_benchmark": 0.09,
+    "basis_point_spread_to_benchmark": 19,
+    "advance_rate": 0.29
+  },
+  {
+    "advance_maturity": "6 Month",
+    "treasury_benchmark_maturity": "6 Months",
+    "nominal_yield_of_benchmark": 0.09,
+    "basis_point_spread_to_benchmark": 22,
+    "advance_rate": 0.31
+  },
+  {
+    "advance_maturity": "1 Year",
+    "treasury_benchmark_maturity": "2 Years",
+    "nominal_yield_of_benchmark": 0.71,
+    "basis_point_spread_to_benchmark": 24,
+    "advance_rate": 0.47
+  },
+  {
+    "advance_maturity": "2 Years",
+    "treasury_benchmark_maturity": "2 Years",
+    "nominal_yield_of_benchmark": 0.71,
+    "basis_point_spread_to_benchmark": 24,
+    "advance_rate": 0.95
+  },
+  {
+    "advance_maturity": "3 Years",
+    "treasury_benchmark_maturity": "3 Years",
+    "nominal_yield_of_benchmark": 1.11,
+    "basis_point_spread_to_benchmark": 25,
+    "advance_rate": 1.36
+  },
+  {
+    "advance_maturity": "5 Years",
+    "treasury_benchmark_maturity": "5 Years",
+    "nominal_yield_of_benchmark": 1.65,
+    "basis_point_spread_to_benchmark": 27,
+    "advance_rate": 1.92
+  }
+]

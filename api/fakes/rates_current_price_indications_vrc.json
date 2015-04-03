@@ -1,0 +1,6 @@
+{
+  "advance_maturity" : "Overnight/Open",
+  "overnight_fed_funds_benchmark" : 0.13,
+  "basis_point_spread_to_benchmark" : 5,
+  "advance_rate" : 0.18
+}
