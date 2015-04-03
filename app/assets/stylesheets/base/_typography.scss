@@ -200,6 +200,11 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-footnote {
+  font-size: 0.6667rem;
+  font-weight: $normal-weight;
+}
+
 %typography-page-title {
   @include typography-page-title;
 }
@@ -350,4 +355,8 @@
 
 %typography-print-details {
   @include typography-print-details;
+}
+
+%typography-footnote {
+  @include typography-footnote;
 }

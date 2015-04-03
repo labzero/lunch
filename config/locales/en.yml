@@ -273,6 +273,7 @@ en:
       view_reports: View All Reports
     your_account:
       title: Your Account
+      account_summary: Account Summary
       pledged_collateral:
         title: Pledged Collateral
         mortgages: Mortgages
@@ -291,23 +292,21 @@ en:
       projected_sta_balance:
         title: Projected STA Balance
       table:
-        balance: STA Balance
-        credit_outstanding: Credit Outstanding
+        balance: 'STA Balance:*'
+        balance_footnote: '*as of close of business on prior business day'
+        credit_outstanding: 'Credit Outstanding:'
         remaining:
-          title: Remaining
+          title: 'Remaining:'
           available: Financial Available
+          capacity: Collateral Borrowing Capacity
           leverage: Stock Leverage
-        market_value:
-          title: Collateral Market Value
-          agency: 'SBC:Agency'
-          aaa: 'SBC:AAA'
-          aa: 'SBC:AA'
-        borrowing_capacity:
-          title: Collateral Borrowing Capacity
-          standard: Standard Credit Program
-          agency: 'SBC:Agency'
-          aaa: 'SBC:AAA'
-          aa: 'SBC:AA'
+        standard_program:
+          title: 'Standard Program:'
+        sbc_program:
+          title: 'Securities-Backed Credit Program:'
+        total_borrowing_capacity: Total Borrowing Capacity
+        remaining_borrowing_capacity: Remaining Borrowing Capacity
+        borrowing_capacity_note_html: View your institution's <a href=%{url}>Borrowing Capacity</a> report for detailed information
     market_overview:
       title: Market Rates
       vrc: 30-Day VRC Rate (%)

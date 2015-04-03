@@ -24,39 +24,40 @@ class DashboardController < ApplicationController
       [t('dashboard.anticipated_activity.stock_purchase'), -37990, DateTime.new(2014,8,12), t('dashboard.anticipated_activity.estimated')],
     ]
 
-    if profile
-      profile.each {|key, value| profile[key] = '-' if value.nil?}
-    end
+    # @account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
+    sta_balance = [
+      [t('dashboard.your_account.table.balance'), profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
+    ]
 
-    @account_overview = [
-      [t('dashboard.your_account.table.balance'), profile ? profile[:sta_balance] : '-'],
-      [t('dashboard.your_account.table.credit_outstanding'), profile ? profile[:credit_outstanding] : '-']
+    credit_outstanding = [
+      [t('dashboard.your_account.table.credit_outstanding'), profile[:credit_outstanding]]
     ]
 
     remaining = [
-      [t('dashboard.your_account.table.remaining.available'), profile ? profile[:financial_available] : '-'],
-      [t('dashboard.your_account.table.remaining.leverage'), profile ? profile[:stock_leverage] : '-'],
+      {title: t('dashboard.your_account.table.remaining.title')},
+      [t('dashboard.your_account.table.remaining.available'), profile[:financial_available]],
+      [t('dashboard.your_account.table.remaining.capacity'), profile[:remaining_collateral_borrowing_capacity]],
+      [t('dashboard.your_account.table.remaining.leverage'), profile[:stock_leverage], nil, 2]
     ]
 
-    market_value = [
-      [t('dashboard.your_account.table.market_value.agency'), profile ? profile[:collateral_market_value_sbc_agency] : '-'],
-      [t('dashboard.your_account.table.market_value.aaa'),  profile ? profile[:collateral_market_value_sbc_aaa] : '-'],
-      [t('dashboard.your_account.table.market_value.aa'),  profile ? profile[:collateral_market_value_sbc_aa] : '-']
-    ]
-    borrowing_capacity = [
-      [t('dashboard.your_account.table.borrowing_capacity.standard'), profile ? profile[:borrowing_capacity_standard] : '-'],
-      [t('dashboard.your_account.table.borrowing_capacity.agency'), profile ? profile[:borrowing_capacity_sbc_agency] : '-'],
-      [t('dashboard.your_account.table.borrowing_capacity.aaa'), profile ? profile[:borrowing_capacity_sbc_aaa] : '-'],
-      [t('dashboard.your_account.table.borrowing_capacity.aa'), profile ? profile[:borrowing_capacity_sbc_aa] : '-'],
+    standard_program = [
+      {title: t('dashboard.your_account.table.standard_program.title')},
+      [t('dashboard.your_account.table.total_borrowing_capacity'), profile[:standard_total_borrowing_capacity]],
+      [t('dashboard.your_account.table.remaining_borrowing_capacity'), profile[:standard_remaining_borrowing_capacity]]
     ]
 
-    @sub_tables = {remaining: remaining, market_value: market_value, borrowing_capacity: borrowing_capacity}
+    sbc_program = [
+        {title: t('dashboard.your_account.table.sbc_program.title')},
+        [t('dashboard.your_account.table.total_borrowing_capacity'), profile[:sbc_total_borrowing_capacity]],
+        [t('dashboard.your_account.table.remaining_borrowing_capacity'), profile[:sbc_remaining_borrowing_capacity]]
+    ]
+
+    @account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining, standard_program: standard_program, sbc_program: sbc_program}
 
     @market_overview = [{
       name: 'Test',
       data: rate_service.overnight_vrc
-    }];
-
+    }]
 
     @pledged_collateral = member_balances.pledged_collateral
     @total_securities = member_balances.total_securities

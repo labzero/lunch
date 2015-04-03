@@ -9,5 +9,10 @@
   "borrowing_capacity_standard":null,
   "borrowing_capacity_sbc_agency":null,
   "borrowing_capacity_sbc_aaa":null,
-  "borrowing_capacity_sbc_aa":null
+  "borrowing_capacity_sbc_aa":null,
+  "remaining_collateral_borrowing_capacity":null,
+  "standard_total_borrowing_capacity":null,
+  "standard_remaining_borrowing_capacity":null,
+  "sbc_total_borrowing_capacity":null,
+  "sbc_remaining_borrowing_capacity":null
 }
