@@ -278,8 +278,28 @@ $breakdown-table-currency-width: 10px;
 
 .dashboard-module-market {
   @extend %dashboard-module-chromeless;
-  .dashboard-module-content {
+  .dashboard-module-content, header {
     padding-bottom: 0;
+  }
+}
+
+.dashboard-market-graph-toggle {
+  @extend %typography-table-heading;
+  text-align: right;
+  a {
+    text-decoration: none;
+    color: $actionable-blue;
+    &.active {
+      cursor: default;
+      color: $text-color;
+    }
+    &:first-child {
+      padding-right: 10px;
+      border-right: 1px solid $secondary-gray;
+    }
+    &:last-child {
+      padding-left: 10px;
+    }
   }
 }
 
