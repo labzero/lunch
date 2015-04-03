@@ -24,36 +24,32 @@ class DashboardController < ApplicationController
       [t('dashboard.anticipated_activity.stock_purchase'), -37990, DateTime.new(2014,8,12), t('dashboard.anticipated_activity.estimated')],
     ]
 
-    if profile
-      profile.each {|key, value| profile[key] = '-' if value.nil?}
-    end
-
     # @account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
     sta_balance = [
-      [t('dashboard.your_account.table.balance'), profile ? profile[:sta_balance] : '-', t('dashboard.your_account.table.balance_footnote')],
+      [t('dashboard.your_account.table.balance'), profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
     ]
 
     credit_outstanding = [
-      [t('dashboard.your_account.table.credit_outstanding'), profile ? profile[:credit_outstanding] : '-']
+      [t('dashboard.your_account.table.credit_outstanding'), profile[:credit_outstanding]]
     ]
 
     remaining = [
-      {title: true},
-      [t('dashboard.your_account.table.remaining.available'), profile ? profile[:financial_available] : '-'],
-      [t('dashboard.your_account.table.remaining.capacity'), profile ? profile[:remaining_collateral_borrowing_capacity] : '-'],
-      [t('dashboard.your_account.table.remaining.leverage'), profile ? profile[:stock_leverage] : '-', nil, 2]
+      {title: t('dashboard.your_account.table.remaining.title')},
+      [t('dashboard.your_account.table.remaining.available'), profile[:financial_available]],
+      [t('dashboard.your_account.table.remaining.capacity'), profile[:remaining_collateral_borrowing_capacity]],
+      [t('dashboard.your_account.table.remaining.leverage'), profile[:stock_leverage], nil, 2]
     ]
 
     standard_program = [
-      {title: true},
-      [t('dashboard.your_account.table.total_borrowing_capacity'), profile ? profile[:standard_total_borrowing_capacity] : '-'],
-      [t('dashboard.your_account.table.remaining_borrowing_capacity'), profile ? profile[:standard_remaining_borrowing_capacity] : '-']
+      {title: t('dashboard.your_account.table.standard_program.title')},
+      [t('dashboard.your_account.table.total_borrowing_capacity'), profile[:standard_total_borrowing_capacity]],
+      [t('dashboard.your_account.table.remaining_borrowing_capacity'), profile[:standard_remaining_borrowing_capacity]]
     ]
 
     sbc_program = [
-        {title: true},
-        [t('dashboard.your_account.table.total_borrowing_capacity'), profile ? profile[:sbc_total_borrowing_capacity] : '-'],
-        [t('dashboard.your_account.table.remaining_borrowing_capacity'), profile ? profile[:sbc_remaining_borrowing_capacity] : '-']
+        {title: t('dashboard.your_account.table.sbc_program.title')},
+        [t('dashboard.your_account.table.total_borrowing_capacity'), profile[:sbc_total_borrowing_capacity]],
+        [t('dashboard.your_account.table.remaining_borrowing_capacity'), profile[:sbc_remaining_borrowing_capacity]]
     ]
 
     @account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining, standard_program: standard_program, sbc_program: sbc_program}
