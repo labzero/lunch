@@ -273,14 +273,15 @@ class ReportsController < ApplicationController
     case @credit_type.to_sym
     when :frc
       column_heading_keys = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.values
+      terms = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.keys
     when :vrc
       column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
-    when :'1m_libor', :'3m_libor', :'6m_libor'
-      table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading")
+      terms = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.keys
+    when *RatesService::ARC_CREDIT_TYPES
+      table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading") unless @credit_type == :daily_prime
       column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
+      terms = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.keys
       # TODO add statement for 'embedded_cap' when it is rigged up
-    when :daily_prime
-      column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
     end
 
     column_headings = []
@@ -299,6 +300,7 @@ class ReportsController < ApplicationController
     end
 
     rows = if @historical_price_indications[:rates_by_date]
+      @historical_price_indications[:rates_by_date] = add_rate_objects_for_all_terms(@historical_price_indications[:rates_by_date], terms, @credit_type.to_sym)
       if (@credit_type.to_sym == :daily_prime)
         @historical_price_indications[:rates_by_date].collect do |row|
           columns = []
@@ -332,6 +334,26 @@ class ReportsController < ApplicationController
   def report_disabled?(report_flags)
     member_info = MembersService.new(request)
     member_info.report_disabled?(current_member_id, report_flags)
+  end
+
+  def add_rate_objects_for_all_terms(rates_by_date_array, terms, credit_type)
+    terms.unshift('1d') if credit_type == :daily_prime
+    new_array = []
+    rates_by_date_array.each do |rate_by_date_obj|
+      rate_by_date_obj = rate_by_date_obj
+      new_array << {date: rate_by_date_obj[:date], rates_by_term: []}
+      terms.each do |term|
+        rate_obj = rate_by_date_obj[:rates_by_term].select {|rate_obj| rate_obj[:term] == term.to_s.upcase}.first || {
+            term: term.to_s.upcase,
+            type: 'index', # placeholder type
+            value: nil,
+            day_count_basis: nil,
+            pay_freq: nil
+        }
+        new_array.last[:rates_by_term] << rate_obj.with_indifferent_access
+      end
+    end
+    new_array
   end
 
 end

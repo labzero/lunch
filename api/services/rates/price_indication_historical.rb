@@ -68,7 +68,6 @@ module MAPI
           if credit_type != :vrc && !london_only_holidays.blank?
             rates_by_date = Private.add_london_holiday_rows(london_only_holidays, rates_by_date, irdb_term_array, credit_type==:daily_prime)
           end
-          rates_by_date = Private.add_rate_objects_for_all_terms(rates_by_date, irdb_term_array, credit_type==:daily_prime) # make sure each date object contains the proper number of rate_by_term objects
 
           {
             start_date: start_date.to_date,
@@ -228,25 +227,6 @@ module MAPI
             end
             # sort rates_by_date array to preserve order
             rates_array.sort_by {|hash| hash[:date]}
-          end
-
-          def self.add_rate_objects_for_all_terms(rates_by_date_array, terms, daily_prime=false)
-            terms.unshift('1D') if daily_prime
-            new_array = []
-            rates_by_date_array.each do |rate_by_date_obj|
-              new_array << {date: rate_by_date_obj[:date], rates_by_term: []}
-              terms.each do |term|
-                rate_obj = rate_by_date_obj[:rates_by_term].select {|rate_obj| rate_obj[:term] == term}.first || {
-                  term: term.to_s,
-                  type: 'index', # placeholder type
-                  value: nil,
-                  day_count_basis: nil,
-                  pay_freq: nil
-                }
-                new_array.last[:rates_by_term] << rate_obj
-              end
-            end
-            new_array
           end
 
           # determine the data-type of the value that will be returned for the rate object

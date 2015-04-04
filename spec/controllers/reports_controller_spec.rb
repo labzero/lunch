@@ -402,6 +402,7 @@ RSpec.describe ReportsController, :type => :controller do
         let(:rates_by_date) { [{date: today, rates_by_term: rates_by_term}] }
         it 'adds the index value for a given date as a column before each basis_point spread per term' do
           allow(response_hash).to receive(:[]).with(:rates_by_date).and_return(rates_by_date)
+          allow(response_hash).to receive(:[]=)
           get :historical_price_indications, historical_price_collateral_type: 'standard', historical_price_credit_type: 'daily_prime'
           expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_1Y}, {:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_2Y}, {:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_3Y}, {:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_5Y}])
         end
@@ -531,6 +532,7 @@ RSpec.describe ReportsController, :type => :controller do
             let(:formatted_rows) {[{date: 'some_date', columns: [{type: :index, value: 'rate_1'}, {type: :index, value: 'rate_2'}]}, {date: 'some_other_date', columns: [{type: :index, value: 'rate_3'}, {type: :index, value: 'rate_4'}]}]}
             it 'should be an array of rows, each containing a row object with a date and a column array containing objects with a type and a rate value' do
               allow(response_hash).to receive(:[]).with(:rates_by_date).and_return(rows)
+              allow(response_hash).to receive(:[]=)
               get :historical_price_indications, historical_price_credit_type: 'frc'
               expect((assigns[:table_data])[:rows]).to eq(formatted_rows)
             end
@@ -557,6 +559,58 @@ RSpec.describe ReportsController, :type => :controller do
         expect(method_call).to eq(response)
       end
     end
+
+    describe '`add_rate_objects_for_all_terms` method' do
+      let(:terms) {RatesService::HISTORICAL_ARC_TERM_MAPPINGS.keys}
+      let(:rates_array) {[{date: '2014-04-01'.to_date, rates_by_term: [
+                          {"term"=>"2Y", "type"=>"basis_point", "value"=>105.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"}.with_indifferent_access,
+                          {"term"=>"3Y", "type"=>"basis_point", "value"=>193.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"}.with_indifferent_access,
+                          {"term"=>"5Y", "type"=>"basis_point", "value"=>197.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"}.with_indifferent_access
+                        ]}]}
+      let(:credit_type) {:'3m_libor'}
+      let(:method_call) {controller.send(:add_rate_objects_for_all_terms, rates_array, terms, credit_type)}
+      it 'adds `1d` to the terms array if passed :daily_prime as a credit_type' do
+        controller.send(:add_rate_objects_for_all_terms, rates_array, terms, :daily_prime)
+        expect(terms.first).to eq('1d')
+        expect(terms.length).to eq(RatesService::HISTORICAL_ARC_TERM_MAPPINGS.keys.length + 1)
+      end
+      it 'iterates through all rates_by_terms arrays for the rate_array and creates empty historic_rate_objects for any terms that are missing' do
+        method_call.each do |rate_by_date_object|
+          expect(rate_by_date_object[:rates_by_term].length).to eq(terms.length)
+        end
+        [:value, :day_count_basis, :pay_freq].each do |property|
+          method_call.each do |rate_by_date_object|
+            terms.length.times do |i|
+              if i == 0
+                expect(rate_by_date_object[:rates_by_term].select {|rate_object| rate_object[:term] == terms.first.to_s.upcase}.length).to be >= 1
+                (rate_by_date_object[:rates_by_term].select {|rate_object| rate_object[:term] == terms.first.to_s.upcase}).each do |rate_by_term_object|
+                  expect(rate_by_term_object[property]).to be_nil
+                end
+              else
+                expect(rate_by_date_object[:rates_by_term].select {|rate_object| rate_object[:term] == terms[i].to_s.upcase}.length).to be >= 1
+                (rate_by_date_object[:rates_by_term].select {|rate_object| rate_object[:term] == terms[i].to_s.upcase}).each do |rate_by_term_object|
+                  if property == :value
+                    expect(rate_by_term_object[property]).to be_kind_of(Float)
+                  else
+                    expect(rate_by_term_object[property]).to be_kind_of(String)
+                  end
+                end
+              end
+            end
+          end
+        end
+        method_call.each do |rate_by_date_object|
+          (rate_by_date_object[:rates_by_term].select {|rate_object| rate_object[:term] == terms[1].to_s.upcase}).each do |rate_by_term_object|
+            expect(rate_by_term_object[:type]).to eq('basis_point')
+          end
+        end
+      end
+    end
   end
 
 end
+
+[{:term=>"1Y", :type=>"index", :value=>nil, :day_count_basis=>nil, :pay_freq=>nil},
+{"term"=>"2Y", "type"=>"basis_point", "value"=>105.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"},
+{"term"=>"3Y", "type"=>"basis_point", "value"=>193.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"},
+{"term"=>"5Y", "type"=>"basis_point", "value"=>197.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"}]
