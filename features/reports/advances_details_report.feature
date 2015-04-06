@@ -69,3 +69,9 @@ Scenario: Member downloads a PDF of the Advances Detail report
   Given I am on the Advances Detail page
   When I request a PDF
   Then I should recieve a PDF file
+
+@smoke @rack_test @jira-mem-538 @wip
+Scenario: Member downloads an XLSX of the Advances Detail report
+  Given I am on the Advances Detail page
+  When I request an XLSX
+  Then I should recieve an XLSX file

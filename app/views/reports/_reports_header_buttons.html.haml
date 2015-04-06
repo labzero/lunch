@@ -1,9 +1,9 @@
 - allowed_params ||= [:start_date, :end_date]
 - download_params ||= params.slice(*[*allowed_params])
 .report-header-buttons
-  %span.report-split-button
-    = form_tag url_for(format: :pdf), method: :get do |f|
+  %span.split-button
+    = form_tag url_for, method: :get do |f|
       - download_params.each do |key, value|
         = hidden_field_tag key, value
-      %button.report-button-right= t('dashboard.actions.download')
-      %button.report-drop-down-right= t('global.pdf')
+      %button.split-button-left= t('dashboard.actions.download')
+      = render 'shared/dropdown', classes: 'split-button-right', dropdown_name: :export_format, default_value: :pdf, default_text: t('global.pdf'), dropdown_options: [[t('global.pdf'), :pdf], [t('global.excel'), :xlsx]], calculate_width: true
