@@ -12,11 +12,6 @@ describe MAPI::ServiceApp do
     let(:end_date) {'2014-02-01'}
     let(:price_indications) { get "rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/#{credit_type}"; JSON.parse(last_response.body) }
 
-    before do
-      allow(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:calendar_holiday_london_only).and_return([])
-      allow(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:fake_historical_price_indications).and_return([])
-    end
-
     it 'should return the start_date that was given if it occurred after the bank began storing that data' do
       expect(price_indications['start_date']).to eq(start_date)
     end
@@ -59,9 +54,6 @@ describe MAPI::ServiceApp do
     end
 
     describe 'the rates_by_date array' do
-      before do
-        allow(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:fake_historical_price_indications).and_call_original
-      end
       it 'should contain rates_by_date objects' do
         price_indications['rates_by_date'].each do |rate_by_date_object|
           expect(rate_by_date_object).to be_kind_of(Hash)
@@ -118,6 +110,7 @@ describe MAPI::ServiceApp do
                    }}
       before do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
+        allow(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:calendar_holiday_london_only).and_return([])
       end
       it 'executes the SQL query for the irdb_connection if the credit type is anything other than :daily_prime' do
         allow(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:irdb_sql_query).and_return(irdb_query)
@@ -137,9 +130,6 @@ describe MAPI::ServiceApp do
       let(:start_date) {'2014-04-01'}
       let(:end_date) {'2014-06-01'}
       let(:london_only_holidays) {MAPI::Services::Rates::PriceIndicationHistorical.calendar_holiday_london_only(:test, start_date, end_date)}
-      before do
-        allow(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:calendar_holiday_london_only).and_call_original
-      end
 
       it 'returns an array of dates if there are London-only holidays contained in the given range' do
         expect(london_only_holidays).to be_kind_of(Array)
@@ -174,9 +164,6 @@ describe MAPI::ServiceApp do
         let(:start_date) {'2014-04-01'.to_date}
         let(:end_date) {'2014-04-02'.to_date}
         let(:london_holidays) {[]}
-        before do
-          allow(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:fake_historical_price_indications).and_call_original
-        end
         it 'returns an array of historic_price objects' do
           expect(subject.fake_historical_price_indications(start_date, end_date, :standard, :vrc, 'FRADVN', ['1D'], london_holidays)).to be_kind_of(Array)
           subject.fake_historical_price_indications(start_date, end_date, :standard, :vrc, 'FRADVN', ['1D'], london_holidays).each do |historic_price_object|
