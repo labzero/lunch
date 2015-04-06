@@ -101,7 +101,7 @@ describe RatesService do
     end
   end
 
-  describe "`historical_price_indications` method" do
+  describe '`historical_price_indications` method', :vcr do
     let(:historical_prices) {subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)}
     it 'should return nil if the argument passed for collateral_type is not valid' do
       expect(Rails.logger).to receive(:warn)
@@ -111,96 +111,20 @@ describe RatesService do
       expect(Rails.logger).to receive(:warn)
       expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, 'invalid credit type')).to be_nil
     end
-    it 'should return the start date that it was supplied' do
-      expect(historical_prices[:start_date]).to eq(start_date)
-    end
-    it 'should return the end date that it was supplied' do
-      expect(historical_prices[:end_date]).to eq(end_date)
-    end
-    it 'should return the collateral type that it was supplied' do
-      expect(historical_prices[:collateral_type]).to eq(RatesService::COLLATERAL_TYPES.first)
-    end
-    it 'should return the credit type that it was supplied' do
-      expect(historical_prices[:credit_type]).to eq(RatesService::CREDIT_TYPES.first)
-    end
-    it 'should return an array of rate data objects with an associated date and rate array for each one' do
-      expect(historical_prices[:rates_by_date]).to be_kind_of(Array)
-      historical_prices[:rates_by_date].each do |row|
-        expect(row[:date]).to be_kind_of(Date)
-        expect(row[:rates_by_term]).to be_kind_of(Array)
-      end
-    end
-
-    # TODO remove this code once you are hitting MAPI and not generating fake data in your method
-    # START of code to remove once MAPI endpoint is built
-    describe 'credit_type mappings for creation of fake data' do
-      it 'should use HISTORICAL_FRC_TERM_MAPPINGS keys to set the terms if `frc` is passed as the credit_type arg' do
-        expect(RatesService::HISTORICAL_FRC_TERM_MAPPINGS).to receive(:keys).at_least(1).and_call_original
-        subject.historical_price_indications(start_date, end_date, 'standard', 'frc')
-      end
-      it 'should use HISTORICAL_VRC_TERM_MAPPINGS keys to set the terms if `vrc` is passed as the credit_type arg' do
-        expect(RatesService::HISTORICAL_VRC_TERM_MAPPINGS).to receive(:keys).at_least(1).and_call_original
-        subject.historical_price_indications(start_date, end_date, 'standard', 'vrc')
-      end
-      [:'1m_libor', :'3m_libor', :'6m_libor', :daily_prime].each do |credit_type|
-        it "should use HISTORICAL_ARC_TERM_MAPPINGS keys to set the terms if `#{credit_type}` is passed as the credit_type arg" do
-          expect(RatesService::HISTORICAL_ARC_TERM_MAPPINGS).to receive(:keys).at_least(1).and_call_original
-          subject.historical_price_indications(start_date, end_date, 'standard', credit_type)
-        end
-      end
-    end
-    # END of code to remove once MAPI endpoint is built
-
-    describe 'rate data objects' do
-      it 'should have an associated term' do
-        historical_prices[:rates_by_date].each do |row|
-          row[:rates_by_term].each do |rate_object|
-            expect(RatesService::HISTORICAL_FRC_TERM_MAPPINGS.keys).to include(rate_object[:term])
-          end
-        end
-      end
-      it 'should return a rate as a float' do # TODO maybe change this to account for null values coming back from MAPI once the endpoint is built
-        historical_prices[:rates_by_date].each do |row|
-          row[:rates_by_term].each do |rate_object|
-            expect(rate_object[:rate]).to be_kind_of(Float)
-          end
-        end
-      end
-      it 'should return a day_count_basis as a string' do
-        historical_prices[:rates_by_date].each do |row|
-          row[:rates_by_term].each do |rate_object|
-            expect(rate_object[:day_count_basis]).to be_kind_of(String)
-          end
-        end
-      end
-      it 'should return a pay_freq as a string' do
-        historical_prices[:rates_by_date].each do |row|
-          row[:rates_by_term].each do |rate_object|
-            expect(rate_object[:pay_freq]).to be_kind_of(String)
-          end
-        end
-      end
-      it 'should return a benchmark_index as a float' do # TODO maybe change this to account for null values coming back from MAPI once the endpoint is built
-        historical_prices[:rates_by_date].each do |row|
-          row[:rates_by_term].each do |rate_object|
-            expect(rate_object[:benchmark_index]).to be_kind_of(Integer)
-          end
-        end
-      end
-      it 'should return a spread_to_benchmark as a float' do # TODO maybe change this to account for null values coming back from MAPI once the endpoint is built
-        historical_prices[:rates_by_date].each do |row|
-          row[:rates_by_term].each do |rate_object|
-            expect(rate_object[:spread_to_benchmark]).to be_kind_of(Integer)
-          end
-        end
-      end
-    end
-    # TODO remove code below once you have rigged up the reports for all supported collateral_types and credit_types
-    # START of code that should be removed once this method supports all valid collateral_types and credit_types
-    it 'returns nil if `embedded_cap` is passed as the credit_type arg' do
+    it 'should return nil if `embedded_cap` is passed for credit_type' do
       expect(Rails.logger).to receive(:warn)
       expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, 'embedded_cap')).to be_nil
     end
-    # END of code that should be removed once this method supports all valid collateral_types and credit_types
+    it 'should return nil if there was an API error' do
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)).to eq(nil)
+    end
+    it 'should return nil if there was a connection error' do
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)).to eq(nil)
+    end
+    it 'should return a data object from the MAPI endpoint' do
+      expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)).to be_kind_of(Hash)
+    end
   end
 end

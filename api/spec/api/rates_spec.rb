@@ -24,7 +24,7 @@ describe MAPI::ServiceApp do
     it "should return the rates in ascending date order" do
       last_date = nil
       rates.each do |rate|
-        date = Date.parse(rate.first)
+        date = Time.zone.parse(rate.first)
         if last_date
           expect(date).to be > last_date
         end
@@ -42,8 +42,8 @@ describe MAPI::ServiceApp do
           rate = JSON.parse(last_response.body)
           expect(rate['rate']).to be_kind_of(Float)
           expect(rate['updated_at']).to match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01]) ([01]\d|2[0-3]):[0-5]\d:[0-5]\d [+-](0\d|1[012])[0-5][0-5]\Z/)
-          date = DateTime.parse(rate['updated_at'])
-          expect(date).to be <= DateTime.now
+          date = Time.zone.parse(rate['updated_at'])
+          expect(date).to be <= Time.zone.now
         end
       end
     end
@@ -112,22 +112,43 @@ describe MAPI::ServiceApp do
 
   describe "is_weekend_or_holiday" do
     it "should return true if date is a weekend" do
-      expect(MAPI::Services::Rates.is_weekend_or_holiday(Date.parse('2015-02-01'))).to be true
+      expect(MAPI::Services::Rates.is_weekend_or_holiday(Time.zone.parse('2015-02-01').to_date)).to be true
     end
     it "should return false if date is not a weekend" do
-      expect(MAPI::Services::Rates.is_weekend_or_holiday(Date.parse('2015-02-03'))).to be false
+      expect(MAPI::Services::Rates.is_weekend_or_holiday(Time.zone.parse('2015-02-03').to_date)).to be false
     end
   end
 
   describe "get_maturity_date" do
     it "should return the same date if is not a weekend" do
-      expect(MAPI::Services::Rates.get_maturity_date(Date.parse('2015-02-03'), 'D')).to eq(Date.parse('2015-02-03'))
+      expect(MAPI::Services::Rates.get_maturity_date(Time.zone.parse('2015-02-03').to_date, 'D')).to eq(Time.zone.parse('2015-02-03').to_date)
     end
     it "should return the next non weekend date if is weekend" do
-      expect(MAPI::Services::Rates.get_maturity_date(Date.parse('2015-02-01'), 'Y')).to eq(Date.parse('2015-02-02'))
+      expect(MAPI::Services::Rates.get_maturity_date(Time.zone.parse('2015-02-01').to_date, 'Y')).to eq(Time.zone.parse('2015-02-02').to_date)
     end
     it "should return the previous non weekend date if is weekend and month/year term and hits next month" do
-      expect(MAPI::Services::Rates.get_maturity_date(Date.parse('2015-01-31'), 'Y')).to eq(Date.parse('2015-01-30'))
+      expect(MAPI::Services::Rates.get_maturity_date(Time.zone.parse('2015-01-31').to_date, 'Y')).to eq(Time.zone.parse('2015-01-30').to_date)
+    end
+  end
+
+  describe 'historic price indications' do
+    let(:start_date) {'2014-04-01'}
+    let(:end_date) {'2014-04-02'}
+    it 'throws a 400 if the start_date is later than the end_date' do
+      get "rates/price_indication/historical/#{end_date}/#{start_date}/standard/vrc"
+      expect(last_response.status).to eq(400)
+    end
+    it 'throws a 400 if you enter an invalid collateral_type' do
+      get "rates/price_indication/historical/#{start_date}/#{end_date}/foo/vrc"
+      expect(last_response.status).to eq(400)
+    end
+    it 'throws a 400 if you enter an invalid credit_type' do
+      get "rates/price_indication/historical/#{start_date}/#{end_date}/standard/bar"
+      expect(last_response.status).to eq(400)
+    end
+    it 'calls the `price_indication_historical` method on the MAPI::Services::Rates::PriceIndicationHistorical module' do
+      expect(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:price_indication_historical)
+      get "rates/price_indication/historical/#{start_date}/#{end_date}/standard/vrc"
     end
   end
 

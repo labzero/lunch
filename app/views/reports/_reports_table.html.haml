@@ -32,7 +32,7 @@
           - row[:columns].each do |column|
             %td.report-cell-narrow.report-cell-right
               - case column[:type]
-              - when :basis
+              - when :basis_point
                 = fhlb_formatted_number(column[:value])
               - when :index
                 = fhlb_formatted_number(column[:value], precision: 5)

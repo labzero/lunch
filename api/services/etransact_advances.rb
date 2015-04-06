@@ -120,7 +120,7 @@ module MAPI
           end
           # # loop thru to get status for each of the type and term
           loan_status = {}
-          now = Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE)
+          now = Time.zone.now
           now_string = now.strftime("%H%M%S")
           today_date = now.to_date
 
