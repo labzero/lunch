@@ -1,5 +1,7 @@
 module CustomFormattingHelper
   include ActionView::Helpers::TagHelper
+  include ActionView::Helpers::NumberHelper
+  
   def fhlb_formatted_currency(number, options={})
     options.reverse_update({html: true, negative_format: '(%u%n)', force_unit: false})
     return nil if number.nil? && options[:optional_number]

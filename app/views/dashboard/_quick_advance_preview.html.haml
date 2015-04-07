@@ -4,7 +4,7 @@
   .quick-advance-summary
     %p
       = t('dashboard.quick_advance.preview.field_headings.advance_amount') +':'
-      %span= '$' + number_with_delimiter(advance_amount, precision: 0)
+      %span= fhlb_formatted_currency(advance_amount)
     %dl
       %dt= t('dashboard.quick_advance.preview.field_headings.advance_type') +':'
       %dd= advance_type

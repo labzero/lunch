@@ -5,6 +5,7 @@ describe RatesService do
   let(:advance_type) {double('advance_type')}
   let(:advance_term) {double('advance_term')}
   let(:advance_rate) {double('advance_rate')}
+  let(:amount) { double('An Amount') }
   let(:start_date) {Date.new(2014,12,01)}
   let(:end_date) {Date.new(2014,12,31)}
 
@@ -53,11 +54,11 @@ describe RatesService do
   end
 
   describe "`quick_advance_preview` method" do
-    let(:quick_advance_preview) {subject.quick_advance_preview(member_id, advance_type, advance_term, advance_rate)}
+    let(:quick_advance_preview) {subject.quick_advance_preview(member_id, amount, advance_type, advance_term, advance_rate)}
     it "should return a hash of hashes containing info relevant to the requested preview" do
       expect(quick_advance_preview.length).to be >= 1
       expect(quick_advance_preview[:status]).to be_kind_of(String)
-      expect(quick_advance_preview[:advance_amount]).to be_kind_of(Integer)
+      expect(quick_advance_preview[:advance_amount]).to eq(amount)
       expect(quick_advance_preview["advance_term"]).to be_kind_of(String)
       expect(quick_advance_preview["advance_type"]).to be_kind_of(String)
       expect(quick_advance_preview["interest_day_count"]).to be_kind_of(String)
@@ -68,12 +69,12 @@ describe RatesService do
   end
 
   describe "`quick_advance_confirmation` method" do
-    let(:quick_advance_confirmation) {subject.quick_advance_confirmation(member_id, advance_type, advance_term, advance_rate)}
-    it "should return a hash of hashes containing info relevant to the requested preview" do
+    let(:quick_advance_confirmation) {subject.quick_advance_confirmation(member_id, amount, advance_type, advance_term, advance_rate)}
+    it "should return a hash of hashes containing info relevant to the requested advance" do
       expect(quick_advance_confirmation.length).to be >= 1
       expect(quick_advance_confirmation[:status]).to be_kind_of(String)
       expect(quick_advance_confirmation[:confirmation_number]).to be_kind_of(Integer)
-      expect(quick_advance_confirmation[:advance_amount]).to be_kind_of(Integer)
+      expect(quick_advance_confirmation[:advance_amount]).to eq(amount)
       expect(quick_advance_confirmation["advance_term"]).to be_kind_of(String)
       expect(quick_advance_confirmation["advance_type"]).to be_kind_of(String)
       expect(quick_advance_confirmation["interest_day_count"]).to be_kind_of(String)
