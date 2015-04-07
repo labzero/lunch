@@ -91,20 +91,12 @@ class DashboardController < ApplicationController
   end
 
   def quick_advance_preview
-    rate_data = JSON.parse(params[:rate_data]).with_indifferent_access
-    advance_type = rate_data[:advance_type]
-    advance_term = rate_data[:advance_term]
-    advance_rate = rate_data[:advance_rate].to_f
-    preview = RatesService.new(request).quick_advance_preview(current_member_id, advance_type, advance_term, advance_rate)
+    preview = RatesService.new(request).quick_advance_preview(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f)
     render partial: 'quick_advance_preview', locals: preview # key names received from RatesService.new.quick_advance_preview must match variable names in partial
   end
 
   def quick_advance_confirmation
-    rate_data = JSON.parse(params[:rate_data]).with_indifferent_access
-    advance_type = rate_data[:advance_type]
-    advance_term = rate_data[:advance_term]
-    advance_rate = rate_data[:advance_rate].to_f
-    confirmation = RatesService.new(request).quick_advance_confirmation(current_member_id, advance_type, advance_term, advance_rate)
+    confirmation = RatesService.new(request).quick_advance_confirmation(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f)
     render json: confirmation # this will likely become a partial once we have designs for the confirmation dialog
   end
 

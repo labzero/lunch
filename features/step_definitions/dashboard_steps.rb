@@ -1,3 +1,7 @@
+require 'action_view'
+require_relative '../../app/helpers/custom_formatting_helper'
+include CustomFormattingHelper
+
 When /^I visit the dashboard$/ do
   visit "/dashboard"
 end
@@ -67,7 +71,8 @@ end
 
 
 When(/^I open the quick advance flyout$/) do
-  step "I enter \"44503000\" into the \".dashboard-module-advances input\" input field"
+  @amount = Random.rand(100000000)
+  step "I enter \"#{@amount}\" into the \".dashboard-module-advances input\" input field"
   step "I should see a flyout"
   sleep 0.5 # we select a rate after the flyout opens, but in some cases selenium does its checks before that JS fires
 end
@@ -101,6 +106,8 @@ Then(/^I should see the quick advance table tooltip for the cell with a term of 
 end
 
 When(/^I select the rate with a term of "(.*?)" and a type of "(.*?)"$/) do |term, type|
+  @rate_term = term
+  @rate_type = type
   page.find(".dashboard-quick-advance-flyout td[data-advance-term='#{term}'][data-advance-type='#{type}']").click
 end
 
@@ -125,7 +132,8 @@ When(/^I click on the initiate advance button$/) do
 end
 
 Then(/^I should see a preview of the quick advance$/) do
-  page.assert_selector(".quick-advance-preview", visible: true)
+  page.assert_selector('.quick-advance-preview', visible: true)
+  valdiate_passed_advance_params
 end
 
 Then(/^I should not see a preview of the quick advance$/) do
@@ -142,6 +150,7 @@ end
 
 Then(/^I should see confirmation number for the advance$/) do
   page.assert_selector('.quick-advance-summary p', text: "Advance Number:", visible: true)
+  valdiate_passed_advance_params
 end
 
 Then(/^I should not see the quick advance preview message$/) do
@@ -174,4 +183,18 @@ end
 
 When(/^there is no data for "(.*?)"$/) do |data|
   # this step may be used in the future to conditionally shut off certain endpoints or otherwise mock the experience of no data returned
+end
+
+def valdiate_passed_advance_params
+  page.assert_selector('.quick-advance-summary span', visible: true, text: fhlb_formatted_currency(@amount, html: false))
+  page.assert_selector('.quick-advance-summary dd', visible: true, text: I18n.t("dashboard.quick_advance.table.axes_labels.#{@rate_term}"))
+  rate_type_text = case @rate_type
+  when 'whole'
+    I18n.t('dashboard.quick_advance.table.whole_loan')
+  when 'aaa', 'aa', 'agency'
+    I18n.t("dashboard.quick_advance.table.#{@rate_type}")
+  else
+    I18n.t('global.none')
+  end
+  page.assert_selector('.quick-advance-summary dd', visible: true, text: rate_type_text)
 end

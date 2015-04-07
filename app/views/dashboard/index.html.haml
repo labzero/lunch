@@ -87,7 +87,7 @@
   .column-3
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances'} do
       - if @quick_advances_active
-        = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}
+        = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}, field_name: :amount
       %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advances_active}"}
         = t('dashboard.quick_advance.advances_desk_closed')
         = link_to t('dashboard.quick_advance.advances_desk_closed_link'), '', data: {'flyout-trigger' => 'active'}

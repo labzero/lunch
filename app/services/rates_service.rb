@@ -65,20 +65,21 @@ class RatesService < MAPIService
     JSON.parse(response.body).with_indifferent_access
   end
 
-  def quick_advance_preview(member_id, advance_type, advance_term, rate)
+  def quick_advance_preview(member_id, amount, advance_type, advance_term, rate)
     data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_preview.json'))).with_indifferent_access
     data[:funding_date] = data[:funding_date].gsub('-', ' ')
     data[:maturity_date] = data[:maturity_date].gsub('-', ' ')
-    data
+
+    fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
   end
 
-  def quick_advance_confirmation(member_id, advance_type, advance_term, rate)
+  def quick_advance_confirmation(member_id, amount, advance_type, advance_term, rate)
     # TODO: hit the proper MAPI endpoint, once it exists! In the meantime, always return the fake.
 
     data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_confirmation.json'))).with_indifferent_access
     data[:funding_date] = data[:funding_date].gsub('-', ' ')
     data[:maturity_date] = data[:maturity_date].gsub('-', ' ')
-    data
+    fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
   end
 
   def historical_price_indications(start_date, end_date, collateral_type, credit_type)
@@ -114,6 +115,23 @@ class RatesService < MAPIService
       return nil
     end
     JSON.parse(response.body).with_indifferent_access
+  end
+
+  protected
+
+  def fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
+    data[:advance_rate] = rate
+    data[:advance_amount] = amount
+    data[:advance_term] = I18n.t("dashboard.quick_advance.table.axes_labels.#{advance_term}")
+    data[:advance_type] = case advance_type
+    when 'whole'
+      I18n.t('dashboard.quick_advance.table.whole_loan')
+    when 'aaa', 'aa', 'agency'
+      I18n.t("dashboard.quick_advance.table.#{advance_type}")
+    else
+      I18n.t('global.none')
+    end
+    data
   end
 
 end
