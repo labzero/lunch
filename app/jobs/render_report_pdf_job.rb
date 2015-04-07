@@ -19,8 +19,10 @@ class RenderReportPDFJob < ActiveJob::Base
     controller.instance_variable_set(:@member_name, controller.session['member_name'])
     controller.params = params
     controller.class_eval { layout 'print' }
-    html = controller.send(report_name.to_sym).first
-    unless controller.performed?
+    response = controller.send(report_name.to_sym)
+    if controller.performed?
+      html = response.first
+    else
       html = controller.render_to_string("reports/#{report_name}")
     end
     controller.class_eval { layout 'print_footer' }

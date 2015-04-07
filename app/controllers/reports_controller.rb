@@ -200,9 +200,12 @@ class ReportsController < ApplicationController
       end
     end
     @advances_detail[:advances_details].sort! { |a, b| a[:trade_date] <=> b[:trade_date] } if @advances_detail[:advances_details]
-    respond_to do |format|
-      format.html { render 'advances_detail' } # you must call render explicitly if you are using respond_to and want PDF generation to work
-      format.pdf { send_data RenderReportPDFJob.new.perform(current_member_id, 'advances_detail', {start_date: @start_date}), filename: 'advances.pdf' }
+
+    case params[:export_format]
+    when 'pdf'
+      send_data RenderReportPDFJob.new.perform(current_member_id, 'advances_detail', {start_date: @start_date}), filename: 'advances.pdf'
+    when 'xlsx'
+      send_data RenderReportExcelJob.new.perform(current_member_id, 'advances_detail', {start_date: @start_date}), filename: "advances-#{@start_date.strftime('%Y%m%d')}.xlsx"
     end
   end
 

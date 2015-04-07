@@ -38,7 +38,7 @@ RSpec.describe RenderReportPDFJob, type: :job do
 
   it 'should render the report if the controller action didn\'t' do
     allow(reports_controller).to receive(:performed?).and_return(false)
-    allow(reports_controller).to receive(:render_to_string).with("reports/#{report_name}").and_return(report_html)
+    expect(reports_controller).to receive(:render_to_string).with("reports/#{report_name}").and_return(report_html)
     run_job
   end
 

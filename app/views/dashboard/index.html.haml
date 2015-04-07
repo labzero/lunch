@@ -175,9 +175,9 @@
               %label= t('dashboard.reports.annually')
       =link_to(t('dashboard.reports.view_reports'), reports_path)
       %button.report-button-left #{t('global.view')}
-      %span.report-split-button
-        %button.report-button-right #{t('dashboard.actions.download')}
-        %button.report-drop-down-right #{t('global.pdf')}
+      %span.split-button
+        %button.split-button-left #{t('dashboard.actions.download')}
+        %button.split-button-right #{t('global.pdf')}
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
       %ul
         %li= render 'dashboard/dashboard_contact', email: 'user@example.com', title: t('dashboard.contacts.type.relationship_manager'), name: 'Bob Harrison', phone_number: fhlb_formatted_phone_number('4155557283'), picture_url: image_url('bob_harrison.jpg')

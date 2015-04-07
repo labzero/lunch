@@ -60,6 +60,7 @@ gem 'logging', require: false
 # for background tasks
 gem 'resque'
 gem 'wicked_pdf'
+gem 'axlsx_rails', '>= 0.3.0'
 
 group :development, :test do
   gem 'rspec-rails'

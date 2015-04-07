@@ -243,25 +243,49 @@ RSpec.describe ReportsController, :type => :controller do
 
       describe 'downloading a PDF' do
         let(:member_id) { double('A Member ID') }
-        let(:start_date) { date = double('A Date'); allow(date).to receive(:to_date).and_return(date); date }
+        let(:start_date) { Date.today - 3.years }
         let(:pdf) { double('PDF') }
         before do
           allow_any_instance_of(MembersService).to receive(:report_disabled?).and_return(false)
           allow_any_instance_of(MembersService).to receive(:member).with(anything).and_return({id: member_id, name: 'Foo'})
           allow_any_instance_of(subject.class).to receive(:current_member_id).and_return(member_id)
         end
-        it 'should render a PDF when the requested format is `application/pdf`' do
+        it 'should render a PDF when the requested `export_format` is `pdf`' do
           expect_any_instance_of(RenderReportPDFJob).to receive(:perform).with(member_id, 'advances_detail', anything)
-          get :advances_detail, format: :pdf
+          get :advances_detail, export_format: :pdf
         end
         it 'should render a PDF using the requested start_date' do
           expect_any_instance_of(RenderReportPDFJob).to receive(:perform).with(any_args, hash_including(start_date: start_date))
-          get :advances_detail, format: :pdf, start_date: start_date
+          get :advances_detail, export_format: :pdf, start_date: start_date
         end
         it 'should send the pdf' do
           allow_any_instance_of(RenderReportPDFJob).to receive(:perform).and_return(pdf)
           expect_any_instance_of(subject.class).to receive(:send_data).with(pdf, hash_including(filename: 'advances.pdf')).and_call_original
-          get :advances_detail, format: :pdf
+          get :advances_detail, export_format: :pdf
+        end
+      end
+
+      describe 'downloading an XLSX' do
+        let(:member_id) { double('A Member ID') }
+        let(:start_date) { Date.today - 3.years }
+        let(:xlsx) { double('XLSX') }
+        before do
+          allow_any_instance_of(MembersService).to receive(:report_disabled?).and_return(false)
+          allow_any_instance_of(MembersService).to receive(:member).with(anything).and_return({id: member_id, name: 'Foo'})
+          allow_any_instance_of(subject.class).to receive(:current_member_id).and_return(member_id)
+        end
+        it 'should render a XLSX when the requested `export_format` is `xlsx`' do
+          expect_any_instance_of(RenderReportExcelJob).to receive(:perform).with(member_id, 'advances_detail', anything)
+          get :advances_detail, export_format: :xlsx
+        end
+        it 'should render a XLSX using the requested start_date' do
+          expect_any_instance_of(RenderReportExcelJob).to receive(:perform).with(any_args, hash_including(start_date: start_date))
+          get :advances_detail, export_format: :xlsx, start_date: start_date
+        end
+        it 'should send the XLSX' do
+          allow_any_instance_of(RenderReportExcelJob).to receive(:perform).and_return(xlsx)
+          expect_any_instance_of(subject.class).to receive(:send_data).with(xlsx, hash_including(filename: "advances-#{today.strftime('%Y%m%d')}.xlsx")).and_call_original
+          get :advances_detail, export_format: :xlsx
         end
       end
 
