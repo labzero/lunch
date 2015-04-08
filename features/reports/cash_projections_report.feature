@@ -16,7 +16,7 @@ Feature: Visiting the Cash Projections Report Page
 
   @jira-mem-367
   Scenario: Viewing the details of a given projection
-    Given I am on the "Cash Projections" page
+    Given I am on the "Cash Projections" report page
     When I click on the view cell for the first cash projection
     Then I should see the detailed view for the first cash projection
     When I click on the hide link for the first cash projection
@@ -24,7 +24,7 @@ Feature: Visiting the Cash Projections Report Page
 
   @smoke @jira-mem-367
   Scenario: Member sorts the cash projections report by settlement date
-    Given I am on the "Cash Projections" page
+    Given I am on the "Cash Projections" report page
     When I click the "Settlement Date" column heading
     Then I should see the "Settlement Date" column values in "ascending" order
     And I click the "Settlement Date" column heading
@@ -32,12 +32,12 @@ Feature: Visiting the Cash Projections Report Page
 
   @data-unavailable @jira-mem-283
   Scenario: No data is available to show in the cash projections report
-    Given I am on the "Cash Projections" page
+    Given I am on the "Cash Projections" report page
     When the "Cash Projections" table has no data
     Then I should see an empty report table with Data Unavailable messaging
 
   @data-unavailable @jira-mem-282
   Scenario: The cash projections report has been disabled
-    Given I am on the "Cash Projections" page
+    Given I am on the "Cash Projections" report page
     When the "Cash Projections" report has been disabled
     Then I should see an empty report table with Data Unavailable messaging

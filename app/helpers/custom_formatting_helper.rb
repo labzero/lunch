@@ -99,7 +99,4 @@ module CustomFormattingHelper
     content_tag(:span, inner_content, class: 'currency-alignment')
   end
 
-  def fhlb_formatted_string(string)
-    string || t('global.missing_value')
-  end
 end

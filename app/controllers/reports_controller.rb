@@ -336,14 +336,14 @@ class ReportsController < ApplicationController
   end
 
   def cash_projections
-    @as_of_date = Time.zone.now - 1.day # TODO need to find last business day properly (this will be part of the MAPI endpoint)
     member_balances = MemberBalanceService.new(current_member_id, request)
     if report_disabled?(CASH_PROJECTIONS_WEB_FLAGS)
       @cash_projections = {}
     else
-      @cash_projections = member_balances.cash_projections(@as_of_date)
+      @cash_projections = member_balances.cash_projections
       raise StandardError, "There has been an error and ReportsController#cash_projections has returned nil. Check error logs." if @cash_projections.blank?
     end
+    @as_of_date = @cash_projections[:as_of_date].to_date if @cash_projections[:as_of_date]
   end
 
   private

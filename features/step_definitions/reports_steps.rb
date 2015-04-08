@@ -56,7 +56,7 @@ Then(/^I should see a report table with multiple data rows$/) do
   expect(page.all('.report-table tbody tr').length).to be > 0
 end
 
-Given(/^I am on the "(.*?)" page$/) do |report|
+Given(/^I am on the "(.*?)" report page$/) do |report|
   sleep_if_close_to_midnight
   @today = Time.zone.now.to_date
   case report

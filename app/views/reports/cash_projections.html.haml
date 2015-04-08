@@ -40,8 +40,8 @@
         - @cash_projections[:projections].to_a.each do |row|
           %tr
             %td.report-cell-narrow= fhlb_date_standard_numeric(row[:settlement_date])
-            %td.report-cell-narrow= fhlb_formatted_string(row[:cusip])
-            %td.report-cell-narrow= fhlb_formatted_string(row[:description])
+            %td.report-cell-narrow= row[:cusip] || t('global.missing_value')
+            %td.report-cell-narrow= row[:description] || t('global.missing_value')
             %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:original_par], precision: 2)
             %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:coupon_rate], precision: 4)
             %td.report-cell-narrow= fhlb_date_standard_numeric(row[:maturity_date])
@@ -51,7 +51,7 @@
             - unless @print_layout
               %td.report-cell-narrow.report-cell-right.detail-view-trigger= t('global.view')
               %td.report-detail-cell{colspan: 11}
-                %h3= t('reports.pages.cash_projections.record_title', cusip:fhlb_formatted_string(row[:cusip]))
+                %h3= t('reports.pages.cash_projections.record_title', cusip: row[:cusip] || t('global.missing_value'))
                 %p.hide-detail-view= t('global.hide')
                 .left-column
                   %table
@@ -60,21 +60,21 @@
                       %td= fhlb_date_standard_numeric(row[:settlement_date])
                     %tr
                       %td= t('reports.pages.cash_projections.custody_account')
-                      %td= fhlb_formatted_string(row[:custody_account])
+                      %td= row[:custody_account] || t('global.missing_value')
                   %table
                     %tr
                       %td= t('reports.pages.cash_projections.cusip')
-                      %td= fhlb_formatted_string(row[:cusip])
+                      %td= row[:cusip] || t('global.missing_value')
                     %tr
                       %td= t('reports.pages.cash_projections.security_description')
-                      %td= fhlb_formatted_string(row[:description])
+                      %td= row[:description] || t('global.missing_value')
                   %table
                     %tr
                       %td= t('reports.pages.cash_projections.transaction_code')
-                      %td= fhlb_formatted_string(row[:transaction_code])
+                      %td= row[:transaction_code] || t('global.missing_value')
                     %tr
                       %td= t('reports.pages.cash_projections.pool_number')
-                      %td= fhlb_formatted_string(row[:pool_number])
+                      %td= row[:pool_number] || t('global.missing_value')
                 .right-column
                   %table
                     %tr

@@ -535,27 +535,23 @@ describe MemberBalanceService do
   end
 
   describe '`cash_projections` method' do
-    let(:as_of_date) {Date.new(2015,1,20)}
-    let(:cash_projections) {subject.cash_projections(as_of_date)}
-    it 'returns an object with the date it was given' do
-      expect(cash_projections[:as_of_date]).to eq(as_of_date)
+    let(:cash_projections) {subject.cash_projections}
+    it 'returns an object with an as_of_date indicating when FHLB most recently produced cash projections' do
+      expect(cash_projections[:as_of_date]).to be_kind_of(Date)
     end
     it 'returns an object with a projections array' do
       expect(cash_projections[:projections]).to be_kind_of(Array)
     end
     it 'returns a total_net_amount that is the sum of the total_amount for each projection' do
       total = cash_projections[:projections].inject(0) { |sum, projection| sum += projection[:total] }
-      expect(total).to be > 0
       expect(cash_projections[:total_net_amount]).to eq(total)
     end
     it 'returns a total_interest that is the sum of the interest for each projection' do
       interest = cash_projections[:projections].inject(0) { |sum, projection| sum += projection[:interest] }
-      expect(interest).to be > 0
       expect(cash_projections[:total_interest]).to eq(interest)
     end
     it 'returns a total_principal that is the sum of the interest for each projection' do
       principal = cash_projections[:projections].inject(0) { |sum, projection| sum += projection[:principal] }
-      expect(principal).to be > 0
       expect(cash_projections[:total_principal]).to eq(principal)
     end
     describe 'projection objects' do

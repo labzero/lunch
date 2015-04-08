@@ -339,9 +339,17 @@ class MemberBalanceService < MAPIService
     data
   end
 
-  def cash_projections(as_of_date)
+  def cash_projections
     fake_data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'cash_projections.json'))).with_indifferent_access
-    as_of_date = as_of_date.to_date
+    today = Time.zone.now.to_date
+    as_of_date =
+      if today.wday == 0
+        today - 2.days
+      elsif today.wday == 1
+        today - 3.days
+      else
+        today - 1.day
+      end
 
     total_net_amount = 0
     total_principal = 0
