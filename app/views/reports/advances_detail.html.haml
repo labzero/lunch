@@ -46,7 +46,7 @@
             %td.report-cell-narrow.report-cell-right= row[:estimated_next_interest_payment].blank? ? '-' : fhlb_formatted_number(row[:estimated_next_interest_payment], precision: 2)
             - unless @print_layout
               %td.report-cell-narrow.report-cell-right.detail-view-trigger= t('global.view')
-              %td.advance-details{colspan: 11}
+              %td.report-detail-cell{colspan: 11}
                 %h3= t('reports.pages.advances_detail.record_title', advance_number: row[:advance_number])
                 %p.hide-detail-view= t('global.hide')
                 .left-column

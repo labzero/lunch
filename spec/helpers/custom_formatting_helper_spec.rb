@@ -164,4 +164,13 @@ describe CustomFormattingHelper do
       expect(helper.fhlb_formated_currency_unit(nil)).to eq("<span class=\"currency-alignment\"><span class=\"alignright\">#{I18n.t('global.missing_value')}</span></span>")
     end
   end
+
+  describe '`fhlb_formatted_string` method' do
+    it 'returns the string it was given' do
+      expect(helper.fhlb_formatted_string('some string')).to eq('some string')
+    end
+    it 'returns the I18n value for `missing_value` if passed nil' do
+      expect(helper.fhlb_formatted_string(nil)).to eq(I18n.t('global.missing_value'))
+    end
+  end
 end

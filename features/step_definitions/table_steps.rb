@@ -38,16 +38,16 @@ def compare_sort_order(column_name, sort_order, table_selector='.report-table')
     last_value = nil
     page.all("#{table_selector} tbody tr td:nth-child(#{column_index})").each do |element|
       case column_name
-        when "Date", "Trade Date"
+        when 'Date', 'Trade Date', 'Settlement Date'
           value = Date.strptime(element.text, '%m/%d/%Y')
-        when "Certificate Sequence"
+        when 'Certificate Sequence'
           value = element.text.to_i
-        when "Original Amount"
+        when 'Original Amount'
           value = element.text.delete('$,').to_i
-        when "Borrowing Capacity Remaining"
+        when 'Borrowing Capacity Remaining'
           value = element.text.delete('$,').to_i
         else
-          raise "column_name not recognized"
+          raise 'column_name not recognized'
       end
 
       if last_value

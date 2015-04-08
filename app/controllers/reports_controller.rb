@@ -9,6 +9,7 @@ class ReportsController < ApplicationController
   CAPITAL_STOCK_ACTIVITY_WEB_FLAGS = [MembersService::CURRENT_SECURITIES_POSITION, MembersService::CAPSTOCK_REPORT_BALANCE]
   HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::IRDB_RATES_DATA]
   SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
+  CASH_PROJECTIONS_WEB_FLAGS = [MembersService::CASH_PROJECTIONS_DATA]
 
   before_action do
     @member_name = current_member_name
@@ -95,7 +96,8 @@ class ReportsController < ApplicationController
         },
         cash_projections: {
           updated: t('global.daily'),
-          available_history: t('global.current_day')
+          available_history: t('global.current_day'),
+          route: reports_cash_projections_path
         },
         current: {
           updated: t('reports.continuously'),
@@ -331,6 +333,17 @@ class ReportsController < ApplicationController
       :column_sub_headings_first => column_sub_headings_first,
       :rows => rows
     }
+  end
+
+  def cash_projections
+    @as_of_date = Time.zone.now - 1.day # TODO need to find last business day properly (this will be part of the MAPI endpoint)
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    if report_disabled?(CASH_PROJECTIONS_WEB_FLAGS)
+      @cash_projections = {}
+    else
+      @cash_projections = member_balances.cash_projections(@as_of_date)
+      raise StandardError, "There has been an error and ReportsController#cash_projections has returned nil. Check error logs." if @cash_projections.blank?
+    end
   end
 
   private

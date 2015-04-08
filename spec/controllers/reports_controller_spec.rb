@@ -378,6 +378,32 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
+
+    describe 'GET cash_projections' do
+      let(:as_of_date) { '2014-12-12'.to_date}
+      it_behaves_like 'a user required action', :get, :cash_projections
+      describe 'view instance variables' do
+        before {
+          allow(member_balance_service_instance).to receive(:cash_projections).with(kind_of(Date)).and_return(response_hash)
+          allow(Time.zone.now).to receive(:-).and_return(as_of_date)
+        }
+        it 'should set @cash_projections to the hash returned from MemberBalanceService' do
+          expect(member_balance_service_instance).to receive(:cash_projections).and_return(response_hash)
+          get :cash_projections
+          expect(assigns[:cash_projections]).to eq(response_hash)
+        end
+        it 'should set @cash_projections to {} if the report is disabled' do
+          expect(controller).to receive(:report_disabled?).with(ReportsController::CASH_PROJECTIONS_WEB_FLAGS).and_return(true)
+          get :cash_projections
+          expect(assigns[:cash_projections]).to eq({})
+        end
+        #TODO rewrite or remove this test after MAPI endpoint is created, as this will likely become part of the cash_projections hash
+        it 'should set @as_of_date' do
+          get :cash_projections
+          expect(assigns[:as_of_date]).to be_kind_of(Date)
+        end
+      end
+    end
   end
 
   describe 'requests hitting RatesService' do

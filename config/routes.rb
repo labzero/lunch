@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   get '/reports/settlement-transaction-account' => 'reports#settlement_transaction_account'
   get '/reports/advances' => 'reports#advances_detail'
   get '/reports/historical-price-indications' => 'reports#historical_price_indications'
+  get '/reports/cash-projections' => 'reports#cash_projections'
 
   get '/settings' => 'settings#index'
 

@@ -1,0 +1,109 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.cash-projections-report.row
+  .report-header
+    %h1= t('reports.pages.cash_projections.title')
+    - if @print_layout
+      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@as_of_date))
+    - else
+      = render 'reports_header_buttons'
+  .report-main-body
+    %section
+      .report-summary-data
+        %h3
+          = t('reports.pages.cash_projections.total_net_header', date: fhlb_date_long_alpha(@as_of_date))
+        %p= fhlb_formatted_currency(@cash_projections[:total_net_amount], force_unit: true, precision: 2)
+      .report-summary-data
+        %h3
+          = t('reports.pages.cash_projections.total_principal', date: fhlb_date_long_alpha(@as_of_date))
+        %p= fhlb_formatted_currency(@cash_projections[:total_principal], force_unit: true, precision: 2)
+      .report-summary-data
+        %h3
+          = t('reports.pages.cash_projections.total_interest', date: fhlb_date_long_alpha(@as_of_date))
+        %p= fhlb_formatted_currency(@cash_projections[:total_interest], force_unit: true, precision: 2)
+    %table.table-allow-wrapping.report-table.cash-projections-report-table{data: {sortable: true, :'disable-auto-width' => true, :'missing-data-message' => t('errors.table_data_unavailable')}}
+      %thead
+        %tr
+          %th.report-cell-narrow= t('reports.pages.cash_projections.settlement_date')
+          %th.report-cell-narrow{data: {unsortable: true}}= t('reports.pages.cash_projections.cusip')
+          %th.report-cell-narrow{data: {unsortable: true}}= t('reports.pages.cash_projections.security_description')
+          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('reports.pages.cash_projections.par'), '$')
+          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('reports.pages.cash_projections.coupon_rate'), '%')
+          %th.report-cell-narrow{data: {unsortable: true}}= t('global.maturity_date')
+          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.principal'), '$')
+          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.interest'), '$')
+          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.total'), '$')
+          - unless @print_layout
+            %th.report-cell-narrow{data: {unsortable: true}}= t('global.details')
+            %th
+      %tbody
+        - @cash_projections[:projections].to_a.each do |row|
+          %tr
+            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:settlement_date])
+            %td.report-cell-narrow= fhlb_formatted_string(row[:cusip])
+            %td.report-cell-narrow= fhlb_formatted_string(row[:description])
+            %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:original_par], precision: 2)
+            %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:coupon_rate], precision: 4)
+            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:maturity_date])
+            %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:principal], precision: 2)
+            %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:interest], precision: 2)
+            %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:total], precision: 2)
+            - unless @print_layout
+              %td.report-cell-narrow.report-cell-right.detail-view-trigger= t('global.view')
+              %td.report-detail-cell{colspan: 11}
+                %h3= t('reports.pages.cash_projections.record_title', cusip:fhlb_formatted_string(row[:cusip]))
+                %p.hide-detail-view= t('global.hide')
+                .left-column
+                  %table
+                    %tr
+                      %td= t('reports.pages.cash_projections.settlement_date')
+                      %td= fhlb_date_standard_numeric(row[:settlement_date])
+                    %tr
+                      %td= t('reports.pages.cash_projections.custody_account')
+                      %td= fhlb_formatted_string(row[:custody_account])
+                  %table
+                    %tr
+                      %td= t('reports.pages.cash_projections.cusip')
+                      %td= fhlb_formatted_string(row[:cusip])
+                    %tr
+                      %td= t('reports.pages.cash_projections.security_description')
+                      %td= fhlb_formatted_string(row[:description])
+                  %table
+                    %tr
+                      %td= t('reports.pages.cash_projections.transaction_code')
+                      %td= fhlb_formatted_string(row[:transaction_code])
+                    %tr
+                      %td= t('reports.pages.cash_projections.pool_number')
+                      %td= fhlb_formatted_string(row[:pool_number])
+                .right-column
+                  %table
+                    %tr
+                      %td= t('reports.pages.cash_projections.par')
+                      %td= fhlb_formatted_currency(row[:original_par], force_unit: true, precision: 2)
+                    %tr
+                      %td= t('reports.pages.cash_projections.coupon_rate')
+                      %td= fhlb_formatted_percentage(row[:coupon_rate], 3)
+                  %table
+                    %tr
+                      %td= t('global.maturity_date')
+                      %td= fhlb_date_standard_numeric(row[:maturity_date])
+                  %table
+                    %tr
+                      %td= t('global.principal')
+                      %td= fhlb_formatted_currency(row[:principal], force_unit: true,  precision: 2)
+                    %tr
+                      %td= t('global.interest')
+                      %td= fhlb_formatted_currency(row[:interest], force_unit: true, precision: 2)
+                    %tr
+                      %td= t('global.total')
+                      %td= fhlb_formatted_currency(row[:total], force_unit: true, precision: 2)
+      %tfoot
+        %tr
+          %td.report-cell-narrow.report-cell-right{colspan: 6}= t('reports.pages.cash_projections.total_net')
+          %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@cash_projections[:total_principal], force_unit: true, precision: 2)
+          %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@cash_projections[:total_interest], force_unit: true, precision: 2)
+          %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@cash_projections[:total_net_amount], force_unit: true, precision: 2)
+          - unless @print_layout
+            %td.report-cell-narrow
+    %section
+      %small= t('reports.anticipated_transactions')
