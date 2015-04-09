@@ -28,7 +28,9 @@
           %th.report-cell-narrow= t('reports.pages.advances_detail.next_interest_payment_date')
           %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.accrued_interest_heading'), '$')
           %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.estimated_next_payment_table_heading'), '$')
-          - unless @print_layout
+          - if @print_layout
+            %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.prepayment_fee_indication'), '$')
+          - else
             %th.report-cell-narrow{data: {unsortable: true}}= t('global.details')
             %th
       %tbody
@@ -44,7 +46,11 @@
             %td.report-cell-narrow= row[:next_interest_pay_date].blank? ? '-' : fhlb_date_standard_numeric(row[:next_interest_pay_date])
             %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:accrued_interest], precision: 2) if row[:accrued_interest]
             %td.report-cell-narrow.report-cell-right= row[:estimated_next_interest_payment].blank? ? '-' : fhlb_formatted_number(row[:estimated_next_interest_payment], precision: 2)
-            - unless @print_layout
+            - if @print_layout
+              %td.report-cell-narrow.report-cell-right
+                = fhlb_formatted_number(row[:prepayment_fee_indication], optional_number: true)
+                = row[:prepayment_fee_indication_notes].html_safe if row[:prepayment_fee_indication_notes]
+            - else
               %td.report-cell-narrow.report-cell-right.detail-view-trigger= t('global.view')
               %td.report-detail-cell{colspan: 11}
                 %h3= t('reports.pages.advances_detail.record_title', advance_number: row[:advance_number])
@@ -100,7 +106,9 @@
                   %table
                     %tr
                       %td= t('reports.pages.advances_detail.prepayment_fee_indication')
-                      %td= row[:prepayment_fee_indication].html_safe
+                      %td
+                        = fhlb_formatted_currency(row[:prepayment_fee_indication], optional_number: true)
+                        = row[:prepayment_fee_indication_notes].html_safe if row[:prepayment_fee_indication_notes]
       %tfoot
         %tr
           %td.report-cell-narrow= t('global.totals')
