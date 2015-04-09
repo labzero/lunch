@@ -16,7 +16,7 @@ module MAPI
           SQL
 
           sta_open_balance_connection_string = <<-SQL
-          SELECT ACCOUNT_NUMBER, (SUM(BALANCE) - SUM(CREDIT) - SUM(DEBIT)) OPEN_BALANCE, TRANS_DATE
+          SELECT ACCOUNT_NUMBER, (SUM(BALANCE) - SUM(CREDIT) + SUM(DEBIT)) OPEN_BALANCE, TRANS_DATE
           FROM PORTFOLIOS.STA_WEB_DETAIL
           WHERE fhlb_id = #{ActiveRecord::Base.connection.quote(member_id)}
           AND TRANS_DATE =
