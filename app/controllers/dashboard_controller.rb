@@ -86,18 +86,38 @@ class DashboardController < ApplicationController
   def quick_advance_rates
     etransact_service = EtransactAdvancesService.new(request)
     @quick_advances_active = etransact_service.etransact_active?
-    rate_data = RatesService.new(request).quick_advance_rates(current_member_id)
-    render partial: 'quick_advance_table_rows', locals: {rate_data: rate_data, advance_terms: ADVANCE_TERMS, advance_types: ADVANCE_TYPES}
+    @rate_data = RatesService.new(request).quick_advance_rates(current_member_id)
+    @advance_terms = ADVANCE_TERMS
+    @advance_types = ADVANCE_TYPES
+    render layout: false
   end
 
   def quick_advance_preview
     preview = RatesService.new(request).quick_advance_preview(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f)
-    render partial: 'quick_advance_preview', locals: preview # key names received from RatesService.new.quick_advance_preview must match variable names in partial
+    @advance_amount = preview[:advance_amount]
+    @advance_type = preview[:advance_type]
+    @interest_day_count = preview[:interest_day_count]
+    @payment_on = preview[:payment_on]
+    @advance_term = preview[:advance_term]
+    @funding_date = preview[:funding_date]
+    @maturity_date = preview[:maturity_date]
+    @advance_rate = preview[:advance_rate]
+    render layout: false
   end
 
   def quick_advance_confirmation
     confirmation = RatesService.new(request).quick_advance_confirmation(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f)
-    render json: confirmation # this will likely become a partial once we have designs for the confirmation dialog
+    @initiated_at = confirmation[:initiated_at]
+    @advance_amount = confirmation[:advance_amount]
+    @advance_type = confirmation[:advance_type]
+    @interest_day_count = confirmation[:interest_day_count]
+    @payment_on = confirmation[:payment_on]
+    @advance_term = confirmation[:advance_term]
+    @funding_date = confirmation[:funding_date]
+    @maturity_date = confirmation[:maturity_date]
+    @advance_rate = confirmation[:advance_rate]
+    @advance_number = confirmation[:advance_number]
+    render layout: false
   end
 
   def current_overnight_vrc

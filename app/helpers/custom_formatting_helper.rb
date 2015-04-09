@@ -64,6 +64,11 @@ module CustomFormattingHelper
     I18n.t("dates.quarters.#{quarter}", year: date.year)
   end
 
+  def fhlb_datetime_standard_numeric(datetime)
+    return t('global.missing_value') if datetime.nil?
+    datetime.to_datetime.strftime('%l:%M%P %m/%d/%Y')
+  end
+
   def fhlb_formatted_phone_number(number, ext=nil)
     number.gsub!(/[^0-9]/, '')
     ext.gsub!(/[^0-9]/, '') if ext

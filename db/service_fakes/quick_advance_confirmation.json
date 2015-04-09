@@ -7,6 +7,6 @@
   "advance_type" : "SBC:AAA",
   "interest_day_count" : "Actual/AC.",
   "payment_on" : "Maturity",
-  "funding_date" : "01-Feb-15",
-  "maturity_date" : "22-Mar-15"
+  "funding_date" : "01-Feb-2015",
+  "maturity_date" : "22-Mar-2015"
 }

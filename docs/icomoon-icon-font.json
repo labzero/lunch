@@ -1,19 +1,27 @@
 {
 	"metadata": {
-		"name": "icomoon-icon-font",
-		"lastOpened": 1422665181083,
-		"created": 1414699606900
+		"name": "FHLBSF",
+		"lastOpened": 1428451350587,
+		"created": 1428451343671
 	},
 	"iconSets": [
 		{
 			"selection": [
+				{
+					"order": 17,
+					"id": 325,
+					"name": "success",
+					"prevSize": 32,
+					"code": 58893,
+					"tempChar": ""
+				},
 				{
 					"order": 1,
 					"id": 324,
 					"prevSize": 32,
 					"code": 58891,
 					"name": "print",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 2,
@@ -21,7 +29,7 @@
 					"prevSize": 32,
 					"code": 58892,
 					"name": "forward",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 3,
@@ -29,7 +37,7 @@
 					"name": "caret",
 					"prevSize": 32,
 					"code": 58890,
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 4,
@@ -37,7 +45,7 @@
 					"prevSize": 32,
 					"code": 58889,
 					"name": "alert",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 5,
@@ -45,7 +53,7 @@
 					"prevSize": 32,
 					"code": 58885,
 					"name": "calendar",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 6,
@@ -53,7 +61,7 @@
 					"prevSize": 32,
 					"code": 58881,
 					"name": "chevron",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 7,
@@ -61,7 +69,7 @@
 					"prevSize": 32,
 					"code": 58888,
 					"name": "close",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 8,
@@ -69,7 +77,7 @@
 					"prevSize": 32,
 					"code": 58887,
 					"name": "edit",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 9,
@@ -77,7 +85,7 @@
 					"prevSize": 32,
 					"code": 58880,
 					"name": "gear",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 10,
@@ -85,7 +93,7 @@
 					"prevSize": 32,
 					"code": 58883,
 					"name": "magnify",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 11,
@@ -93,7 +101,7 @@
 					"prevSize": 32,
 					"code": 58886,
 					"name": "phone",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 12,
@@ -101,7 +109,7 @@
 					"prevSize": 32,
 					"code": 58882,
 					"name": "envelope",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 13,
@@ -109,7 +117,7 @@
 					"prevSize": 32,
 					"code": 58896,
 					"name": "arrow-left",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 14,
@@ -117,7 +125,7 @@
 					"prevSize": 32,
 					"code": 58884,
 					"name": "arrow-right",
-					"tempChar": ""
+					"tempChar": ""
 				}
 			],
 			"id": 0,
@@ -128,6 +136,22 @@
 			"height": 1024,
 			"prevSize": 32,
 			"icons": [
+				{
+					"id": 25,
+					"paths": [
+						"M422.673 773.365l-215.048-215.048 46.318-46.318 168.731 168.731 347.385-344.077 46.318 46.318z",
+						"M512 968.563c-251.44 0-456.563-205.122-456.563-456.563s205.122-456.563 456.563-456.563 456.563 205.122 456.563 456.563c0 251.44-205.122 456.563-456.563 456.563zM512 121.604c-215.048 0-390.396 175.347-390.396 390.396s175.347 390.396 390.396 390.396 390.396-175.347 390.396-390.396c0-215.048-175.347-390.396-390.396-390.396z"
+					],
+					"attrs": [
+						{},
+						{}
+					],
+					"isMulticolor": false,
+					"grid": 20,
+					"tags": [
+						"success"
+					]
+				},
 				{
 					"id": 24,
 					"paths": [
@@ -423,7 +447,18 @@
 					"grid": 24
 				}
 			],
-			"invisible": false
+			"invisible": false,
+			"colorThemes": [
+				[
+					[
+						68,
+						68,
+						68,
+						1
+					]
+				]
+			],
+			"colorThemeIdx": 0
 		}
 	],
 	"externalSets": [],
@@ -457,5 +492,6 @@
 		"search": "",
 		"gridSize": 16,
 		"showGrid": true
-	}
+	},
+	"uid": -1
 }

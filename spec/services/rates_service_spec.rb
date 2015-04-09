@@ -63,8 +63,8 @@ describe RatesService do
       expect(quick_advance_preview["advance_type"]).to be_kind_of(String)
       expect(quick_advance_preview["interest_day_count"]).to be_kind_of(String)
       expect(quick_advance_preview["payment_on"]).to be_kind_of(String)
-      expect(quick_advance_preview["funding_date"]).to be_kind_of(String)
-      expect(quick_advance_preview["maturity_date"]).to be_kind_of(String)
+      expect(quick_advance_preview["funding_date"]).to be_kind_of(Date)
+      expect(quick_advance_preview["maturity_date"]).to be_kind_of(Date)
     end
   end
 
@@ -79,8 +79,8 @@ describe RatesService do
       expect(quick_advance_confirmation["advance_type"]).to be_kind_of(String)
       expect(quick_advance_confirmation["interest_day_count"]).to be_kind_of(String)
       expect(quick_advance_confirmation["payment_on"]).to be_kind_of(String)
-      expect(quick_advance_confirmation["funding_date"]).to be_kind_of(String)
-      expect(quick_advance_confirmation["maturity_date"]).to be_kind_of(String)
+      expect(quick_advance_confirmation["funding_date"]).to be_kind_of(Date)
+      expect(quick_advance_confirmation["maturity_date"]).to be_kind_of(Date)
     end
   end
 

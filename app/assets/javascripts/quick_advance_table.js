@@ -50,36 +50,39 @@
         // append the html response, hide old nodes and show the new ones
         $flyoutBottomSection.append($(htmlResponse));
         $oldNodes.hide();
-        $('.flyout-top-section-body').append($flyoutBottomSection.find('.quick-advance-preview-subheading')); // this part of the html response must get appended to top-section
+        $('.flyout-top-section-body .quick-advance-preview-subheading').show();
 
         // event listener and handler for back button click
         $('.quick-advance-back-button').on('click', function() {
-          $('.quick-advance-preview-subheading, .quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
+          $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
           $oldNodes.show();
         });
 
         // event listener and handler for .confirm-quick-advance button click
         $('.confirm-quick-advance').on('click', function(){
-          setRateFromElementData($(this));
           confirmQuickAdvance(selected_rate); //
         });
       });
     };
 
     function confirmQuickAdvance(rate_data) {
-      $.post('/dashboard/quick_advance_confirmation', packageParameters(rate_data), function(jsonResponse){
-        // we're going to render a partial here once we get the designs for this confirmation
-        // in the meantime, just replacing some nodes in .quick-advance-preview to display confirmation number and allow flyout close
-        $('.quick-advance-preview').addClass('quick-advance-confirmation');
-        $('.quick-advance-preview-message, .quick-advance-back-button, .confirm-quick-advance').remove();
-        $('.quick-advance-summary')
-          .prepend("<p>Advance Number: <span>" + jsonResponse['confirmation_number'] +"</span></p>");
-        $('.flyout-bottom-section')
-          .append('<button class = "primary-button quick-advance-confirmation-button">Close</button>');
-        $('.quick-advance-confirmation-button').on('click', function(){
-          $('.flyout-close-button').click(); // again, definitely not how we want to handle this, but waiting until designs are finalized to build out
+      var $flyoutBottomSection = $('.flyout-bottom-section');
+      var $flyoutTopSection = $('.flyout-top-section-body');
+      var $quickAdvancePreview = $flyoutBottomSection.find('.quick-advance-preview');
+      $quickAdvancePreview.addClass('loading');
+      var height = $flyoutBottomSection.find('.quick-advance-body p:not(.quick-advance-loading-message)').height();
+      $flyoutBottomSection.find('.quick-advance-loading-message').height(height);
+      $flyoutBottomSection.find('button').attr('disabled', 'disabled');
+      $flyoutTopSection.find('.quick-advance-preview-subheading').hide();
+      $flyoutTopSection.find('.quick-advance-confirmation-subheading').show();
+      setTimeout(function() {
+        $.post('/dashboard/quick_advance_confirmation', packageParameters(rate_data), function(htmlResponse){
+          $quickAdvancePreview.hide();
+          $flyoutBottomSection.append($(htmlResponse));
+          $flyoutTopSection.find('.quick-advance-preview-subheading').hide();
+          $flyoutTopSection.find('.quick-advance-confirmation-subheading').show();
         });
-      });
+      }, 3000);
     };
 
     function setRateFromElementData($element) {

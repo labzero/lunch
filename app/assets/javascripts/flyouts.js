@@ -5,7 +5,6 @@
     var $flyoutBackground = $('.flyout-background');
     var $flyoutTopSection = $flyout.find('.flyout-top-section');
     var $flyoutBottomSection = $flyout.find('.flyout-bottom-section');
-    var $flyoutCloseButton = $flyout.find('.flyout-close-button');
 
     // initialize flyout by appending elements to the .top-section and .bottom-section.
     $flyoutTopSection.append(topContent);
@@ -29,7 +28,7 @@
 
     var that = this;
     // teardown the background and reset the flyout
-    $flyoutCloseButton.on('click', function(event){
+    $flyout.on('click', '.flyout-close-button, [data-flyout-action=close]', function(event){
       that.trigger('flyout-reset-initiated');
       $flyoutBackground.fadeOut();
       $('html').css('height', '100%'); // set html height back to 100%
@@ -41,7 +40,7 @@
           'margin-top': '',
           'margin-left': ''
         });
-        $flyoutCloseButton.off();
+        $flyout.off();
       });
     });
 

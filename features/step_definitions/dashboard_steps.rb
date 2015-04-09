@@ -149,7 +149,7 @@ When(/^I click on the quick advance confirm button$/) do
 end
 
 Then(/^I should see confirmation number for the advance$/) do
-  page.assert_selector('.quick-advance-summary p', text: "Advance Number:", visible: true)
+  page.assert_selector('.quick-advance-summary dt', text: "Advance Number:", visible: true)
   valdiate_passed_advance_params
 end
 
@@ -158,7 +158,11 @@ Then(/^I should not see the quick advance preview message$/) do
 end
 
 Then(/^I should see the quick advance confirmation close button$/) do
-  page.assert_selector('.quick-advance-confirmation-button', visible: true)
+  page.assert_selector('.quick-advance-confirmation .primary-button', text: I18n.t('global.close').upcase, visible: true)
+end
+
+Then(/^I should see the quick advance interstitial$/) do
+  page.assert_selector('.quick-advance-body .quick-advance-loading-message', visible: true)
 end
 
 Then(/^I successfully execute a quick advance$/) do
@@ -174,7 +178,7 @@ Then(/^I successfully execute a quick advance$/) do
 end
 
 When(/^I click on the quick advance confirmation close button$/) do
-  page.find(".quick-advance-confirmation-button").click
+  page.find('.quick-advance-confirmation .primary-button', text: I18n.t('global.close').upcase).click
 end
 
 Then(/^the Aggregate 30 Day Terms graph should show the Temporarily Unavailable state$/) do
@@ -186,7 +190,7 @@ When(/^there is no data for "(.*?)"$/) do |data|
 end
 
 def valdiate_passed_advance_params
-  page.assert_selector('.quick-advance-summary span', visible: true, text: fhlb_formatted_currency(@amount, html: false))
+  page.assert_selector('.quick-advance-summary span', visible: true, text: fhlb_formatted_currency(@amount, html: false, precision: 0))
   page.assert_selector('.quick-advance-summary dd', visible: true, text: I18n.t("dashboard.quick_advance.table.axes_labels.#{@rate_term}"))
   rate_type_text = case @rate_type
   when 'whole'
