@@ -191,13 +191,13 @@ class ReportsController < ApplicationController
       @advances_detail[:advances_details].each_with_index do |advance, i|
         case advance[:notes]
           when 'unavailable_online'
-            @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.unavailable_online')
+            @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.unavailable_online')
           when 'not_applicable_to_vrc'
-            @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.not_applicable_to_vrc')
+            @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.not_applicable_to_vrc')
           when 'prepayment_fee_restructure'
-            @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.prepayment_fee_restructure_html', fee: number_to_currency(advance[:prepayment_fee_indication]), date: fhlb_date_standard_numeric(advance[:structure_product_prepay_valuation_date].to_date))
+            @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.prepayment_fee_restructure_html', date: fhlb_date_standard_numeric(advance[:structure_product_prepay_valuation_date].to_date))
           else
-            @advances_detail[:advances_details][i][:prepayment_fee_indication] = fhlb_formatted_currency(advance[:prepayment_fee_indication], optional_number: true) || t('reports.pages.advances_detail.unavailable_for_past_dates')
+            @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.unavailable_for_past_dates') unless advance[:prepayment_fee_indication]
         end
       end
     end

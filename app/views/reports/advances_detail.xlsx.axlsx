@@ -20,10 +20,12 @@ workbook.styles do |styles|
       t('reports.pages.advances_detail.accrued_interest'),
       t('reports.pages.advances_detail.next_interest_payment_date'),
       t('reports.pages.advances_detail.estimated_next_payment'),
+      t('reports.pages.advances_detail.prepayment_fee_indication'),
+      t('reports.pages.advances_detail.prepayment_fee_notes'),
       t('reports.pages.advances_detail.discount_program')
     ]
     @advances_detail[:advances_details].each do |details|
-      styles = [date_format, date_format, date_format, nil, nil, currency_format, nil, nil, interest_format, currency_format, date_format, currency_format, nil]
+      styles = [date_format, date_format, date_format, nil, nil, currency_format, nil, nil, interest_format, currency_format, date_format, currency_format, currency_format, nil, nil]
       if details[:maturity_date].blank?
         styles[2] = open_date_format
       end
@@ -40,6 +42,8 @@ workbook.styles do |styles|
         details[:accrued_interest],
         details[:next_interest_pay_date].to_date,
         details[:estimated_next_interest_payment],
+        details[:prepayment_fee_indication],
+        strip_tags(details[:prepayment_fee_indication_notes]),
         details[:discount_program] || '--'
       ], style: styles
     end

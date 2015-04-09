@@ -507,7 +507,9 @@ en:
         unavailable_online: Not available online
         unavailable_for_past_dates: Not available for past dates
         not_applicable_to_vrc: Not applicable to VRC
-        prepayment_fee_restructure_html: "%{fee} <br>Prepayment was calculated on <br>%{date}"
+        prepayment_fee_restructure_html: "<br>Prepayment was calculated on <br>%{date}"
+        prepayment_fee_restructure: Prepayment was calculated on %{date}
+        prepayment_fee_notes: Prepayment Fee Notes
       cash_projections:
         title: Cash Projections
         total_net_header: "Total Net Amount as of close of business %{date}:"

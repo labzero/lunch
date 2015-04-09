@@ -635,6 +635,13 @@ td.dataTables_empty {
       &:last-child {
         display: table-cell;
       }
+      br:first-of-type {
+        content: ' ';
+        &:after {
+          content: "\a\a";
+          white-space: pre;
+        }
+      }
     }
   }
   .report-print-footer {
