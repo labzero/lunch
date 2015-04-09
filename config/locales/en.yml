@@ -78,6 +78,9 @@ en:
     continue: Continue
     fhlb_full: Federal Home Loan Bank San Francisco
     excel: Excel
+    maturity_date: Maturity Date
+    principal: Principal
+    interest: Interest
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -505,6 +508,21 @@ en:
         unavailable_for_past_dates: Not available for past dates
         not_applicable_to_vrc: Not applicable to VRC
         prepayment_fee_restructure_html: "%{fee} <br>Prepayment was calculated on <br>%{date}"
+      cash_projections:
+        title: Cash Projections
+        total_net_header: "Total Net Amount as of close of business %{date}:"
+        total_principal: "Total Principal as of close of business %{date}:"
+        total_interest: "Total Interest as of close of business %{date}:"
+        settlement_date: Settlement Date
+        custody_account: Custody Account Number
+        transaction_code: Transaction Code
+        pool_number: Pool Number
+        cusip: CUSIP
+        record_title: "CUSIP %{cusip}"
+        security_description: Security Description
+        par: Original Par Value
+        coupon_rate: Coupon Rate
+        total_net: Total Net Amount
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
@@ -515,6 +533,7 @@ en:
     merger_notice: In the event of a merger, this report may not include all advances from the acquired instiution.
     advances_and_securities_agreement_notice: Nothing in this report in any way ammends, modifies, or waives the terms of your Advances and Securities Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issues puruant to that Agreement. The Bank expressly disclaims and and all liability that may arise from your institution’s reliance on any information contained in, or errors or omissions made with respect to, this report. Please call (415) 616-2559 if you have any questions.
     pdf_footer: "%{report_name} as of %{date}"
+    anticipated_transactions: The records included in this report are anticipated transactions for the listed settlement dates. These transactions are subject to change prior to final settlement. Net adjustment credit and/or debit amounts will be posted to your STA account on the settlement date.
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email

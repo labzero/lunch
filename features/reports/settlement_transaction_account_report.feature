@@ -15,7 +15,7 @@ Then I should see report summary data
 And I should see a report table with multiple data rows
 
 Scenario: Member chooses a custom date range on the Settlement Transaction Account Statement
-Given I am on the Settlement Transaction Account Statement page
+Given I am on the "Settlement Transaction Account Statement" report page
 And I click the datepicker field
 When I choose the "custom date range" in the datepicker
 Then I should see two calendars
@@ -26,7 +26,7 @@ Then I should see a "Settlement Transaction Account Statement" with data for dat
 
 @jira-mem-247, @jira-mem-503
 Scenario: Member filters the Settlement Transaction Account Statement
-Given I am on the Settlement Transaction Account Statement page
+Given I am on the "Settlement Transaction Account Statement" report page
 And I am showing Settlement Transaction Account activities for 2014
 When I filter the Settlement Transaction Account Statement by "Credits"
 Then I should only see "Credit" rows in the Settlement Transaction Account Statement table
@@ -37,12 +37,12 @@ Then I should only see "Balance ($)" rows in the Settlement Transaction Account 
 
 @data-unavailable @jira-mem-283
 Scenario: No data is available to show in the Settlement Transaction Account Statement
-  Given I am on the Settlement Transaction Account Statement page
+  Given I am on the "Settlement Transaction Account Statement" report page
   When the "Settlement Transaction Account" table has no data
   Then I should see an empty report table with Data Unavailable messaging
 
 @data-unavailable @jira-mem-282
 Scenario: The Settlement Transaction Account Statement has been disabled
-  Given I am on the Settlement Transaction Account Statement page
+  Given I am on the "Settlement Transaction Account Statement" report page
   When the "Settlement Transaction Account" report has been disabled
   Then I should see an empty report table with Data Unavailable messaging

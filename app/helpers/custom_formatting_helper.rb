@@ -98,4 +98,5 @@ module CustomFormattingHelper
     inner_content = number.blank?? number_class : unit_class + number_class
     content_tag(:span, inner_content, class: 'currency-alignment')
   end
+
 end

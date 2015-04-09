@@ -164,4 +164,5 @@ describe CustomFormattingHelper do
       expect(helper.fhlb_formated_currency_unit(nil)).to eq("<span class=\"currency-alignment\"><span class=\"alignright\">#{I18n.t('global.missing_value')}</span></span>")
     end
   end
+
 end
