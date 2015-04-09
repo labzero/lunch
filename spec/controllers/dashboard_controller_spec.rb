@@ -111,19 +111,36 @@ RSpec.describe DashboardController, :type => :controller do
   end
 
   describe "GET quick_advance_rates", :vcr do
-    let(:json_response) { {some: "json"}.to_json }
+    let(:rate_data) { {some: 'data'} }
     let(:RatesService) {class_double(RatesService)}
     let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
     it_behaves_like 'a user required action', :get, :quick_advance_rates
-    it "should call the RatesService object with quick_advance_rates and return the quick_advance_table_rows partial" do
+    it 'should call the RatesService object with quick_advance_rates' do
       expect(RatesService).to receive(:new).and_return(rate_service_instance)
-      expect(rate_service_instance).to receive(:quick_advance_rates).and_return(json_response)
+      expect(rate_service_instance).to receive(:quick_advance_rates).and_return(rate_data)
       get :quick_advance_rates
-      expect(response.body).to render_template(partial: 'dashboard/_quick_advance_table_rows')
     end
+    it 'should render its view' do
+      get :quick_advance_rates
+      expect(response.body).to render_template('dashboard/quick_advance_rates')
+    end
+    it 'should set @rate_data' do
+      allow(RatesService).to receive(:new).and_return(rate_service_instance)
+      allow(rate_service_instance).to receive(:quick_advance_rates).and_return(rate_data)
+      get :quick_advance_rates
+      expect(assigns[:rate_data]).to eq(rate_data)
+    end
+    it 'should set @advance_terms' do
+      get :quick_advance_rates
+      expect(assigns[:advance_terms]).to eq(subject.class::ADVANCE_TERMS)
+    end
+    it 'should set @advance_types' do
+      get :quick_advance_rates
+      expect(assigns[:advance_types]).to eq(subject.class::ADVANCE_TYPES)
   end
 
   describe "POST quick_advance_preview" do
+    end
     let(:RatesService) {class_double(RatesService)}
     let(:rate_service_instance) {double("rate service instance", quick_advance_preview: nil)}
     let(:member_id) {double(MEMBER_ID)}
@@ -131,16 +148,50 @@ RSpec.describe DashboardController, :type => :controller do
     let(:advance_type) {'some type'}
     let(:advance_rate) {'0.17'}
     let(:amount) { Random.rand(100000000) }
+    let(:make_request) { post :quick_advance_preview, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount
+ }
     it_behaves_like 'a user required action', :post, :quick_advance_preview
-    it "should render the quick_advance_preview partial" do
-      post :quick_advance_preview, rate_data: {advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate}.to_json
-      expect(response.body).to render_template(partial: 'dashboard/_quick_advance_preview')
+    it 'should render its view' do
+      make_request
+      expect(response.body).to render_template('dashboard/quick_advance_preview')
     end
-    it "should call the RatesService object's `quick_advance_preview` method with the POSTed advance_type, advance_term and rate" do
+    it 'should call the RatesService object\'s `quick_advance_preview` method with the POSTed advance_type, advance_term and rate' do
       stub_const("MEMBER_ID", 750)
       expect(RatesService).to receive(:new).and_return(rate_service_instance)
-      expect(rate_service_instance).to receive(:quick_advance_preview).with(MEMBER_ID, amount, advance_type, advance_term, advance_rate.to_f)
-      post :quick_advance_preview, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount
+      expect(rate_service_instance).to receive(:quick_advance_preview).with(MEMBER_ID, amount, advance_type, advance_term, advance_rate.to_f).and_return({})
+      make_request
+    end
+    it 'should set @advance_amount' do
+      make_request
+      expect(assigns[:advance_amount]).to eq(amount)
+    end
+    it 'should set @advance_type' do
+      make_request
+      expect(assigns[:advance_type]).to be_kind_of(String)
+    end
+    it 'should set @interest_day_count' do
+      make_request
+      expect(assigns[:interest_day_count]).to be_kind_of(String)
+    end
+    it 'should set @payment_on' do
+      make_request
+      expect(assigns[:payment_on]).to be_kind_of(String)
+    end
+    it 'should set @advance_term' do
+      make_request
+      expect(assigns[:advance_term]).to be_kind_of(String)
+    end
+    it 'should set @funding_date' do
+      make_request
+      expect(assigns[:funding_date]).to be_kind_of(Date)
+    end
+    it 'should set @maturity_date' do
+      make_request
+      expect(assigns[:maturity_date]).to be_kind_of(Date)
+    end
+    it 'should set @advance_rate' do
+      make_request
+      expect(assigns[:advance_rate]).to be_kind_of(Numeric)
     end
   end
 
@@ -152,14 +203,54 @@ RSpec.describe DashboardController, :type => :controller do
     let(:advance_type) {'some type'}
     let(:advance_rate) {'0.17'}
     let(:amount) { Random.rand(100000000) }
-    let(:json_response) { {json: "response"} }
+    let(:make_request) { post :quick_advance_confirmation, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount }
     it_behaves_like 'a user required action', :post, :quick_advance_confirmation
     it "should call the RatesService object's `quick_advance_confirmation` method with the POSTed advance_type, advance_term and rate and return a json response" do
       stub_const("MEMBER_ID", 750)
       expect(RatesService).to receive(:new).and_return(rate_service_instance)
-      expect(rate_service_instance).to receive(:quick_advance_confirmation).with(MEMBER_ID, amount, advance_type, advance_term, advance_rate.to_f).and_return(json_response)
-      post :quick_advance_confirmation, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount
-      expect(response.body).to eq(json_response.to_json)
+      expect(rate_service_instance).to receive(:quick_advance_confirmation).with(MEMBER_ID, amount, advance_type, advance_term, advance_rate.to_f).and_return({})
+      make_request
+      expect(response.body).to render_template('dashboard/quick_advance_confirmation')
+    end
+    it 'should set @initiated_at' do
+      make_request
+      expect(assigns[:initiated_at]).to be_kind_of(DateTime)
+    end
+    it 'should set @advance_amount' do
+      make_request
+      expect(assigns[:advance_amount]).to eq(amount)
+    end
+    it 'should set @advance_type' do
+      make_request
+      expect(assigns[:advance_type]).to be_kind_of(String)
+    end
+    it 'should set @interest_day_count' do
+      make_request
+      expect(assigns[:interest_day_count]).to be_kind_of(String)
+    end
+    it 'should set @payment_on' do
+      make_request
+      expect(assigns[:payment_on]).to be_kind_of(String)
+    end
+    it 'should set @advance_term' do
+      make_request
+      expect(assigns[:advance_term]).to be_kind_of(String)
+    end
+    it 'should set @funding_date' do
+      make_request
+      expect(assigns[:funding_date]).to be_kind_of(Date)
+    end
+    it 'should set @maturity_date' do
+      make_request
+      expect(assigns[:maturity_date]).to be_kind_of(Date)
+    end
+    it 'should set @advance_rate' do
+      make_request
+      expect(assigns[:advance_rate]).to be_kind_of(Numeric)
+    end
+    it 'should set @advance_number' do
+      make_request
+      expect(assigns[:advance_number]).to be_kind_of(String)
     end
   end
 

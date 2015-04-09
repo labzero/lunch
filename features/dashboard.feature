@@ -98,7 +98,8 @@ Background:
       And I should not see the quick advance table
       And I should see a preview of the quick advance
     When I click on the quick advance confirm button
-    Then I should see confirmation number for the advance
+    Then I should see the quick advance interstitial
+      And I should see confirmation number for the advance
       And I should not see the quick advance preview message
       And I should see the quick advance confirmation close button
 

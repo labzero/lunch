@@ -67,18 +67,14 @@ class RatesService < MAPIService
 
   def quick_advance_preview(member_id, amount, advance_type, advance_term, rate)
     data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_preview.json'))).with_indifferent_access
-    data[:funding_date] = data[:funding_date].gsub('-', ' ')
-    data[:maturity_date] = data[:maturity_date].gsub('-', ' ')
-
     fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
   end
 
   def quick_advance_confirmation(member_id, amount, advance_type, advance_term, rate)
     # TODO: hit the proper MAPI endpoint, once it exists! In the meantime, always return the fake.
-
     data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_confirmation.json'))).with_indifferent_access
-    data[:funding_date] = data[:funding_date].gsub('-', ' ')
-    data[:maturity_date] = data[:maturity_date].gsub('-', ' ')
+    data[:advance_number] = Random.rand(999999).to_s.rjust(6, '0')
+    data[:initiated_at] = Time.zone.now.to_datetime
     fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
   end
 
@@ -120,6 +116,8 @@ class RatesService < MAPIService
   protected
 
   def fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
+    data[:funding_date] = data[:funding_date].to_date
+    data[:maturity_date] = data[:maturity_date].to_date
     data[:advance_rate] = rate
     data[:advance_amount] = amount
     data[:advance_term] = I18n.t("dashboard.quick_advance.table.axes_labels.#{advance_term}")

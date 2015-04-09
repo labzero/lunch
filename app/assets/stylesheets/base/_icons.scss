@@ -53,6 +53,7 @@ $icon-arrow-left: "\e610";
 $icon-caret: "\e60a";
 $icon-print: "\e60b";
 $icon-forward: "\e60c";
+$icon-success: "\e60d";
 
 .icon-gear-before:before, .icon-gear-after:after {
   @extend %icon-font;
@@ -129,4 +130,9 @@ $icon-forward: "\e60c";
 .icon-print-before:before, .icon-print-after:after {
   @extend %icon-font;
   content: "#{$icon-print}";
+}
+
+.icon-success-before:before, .icon-success-after:after {
+  @extend %icon-font;
+  content: "#{$icon-success}";
 }
