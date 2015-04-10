@@ -433,7 +433,6 @@ RSpec.describe ReportsController, :type => :controller do
     it 'renders the current_price_indications view' do
       allow(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
       allow(response_cpi_hash).to receive(:collect)
-      allow(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
       allow(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
       get :current_price_indications
       expect(response.body).to render_template('current_price_indications')
@@ -452,6 +451,33 @@ RSpec.describe ReportsController, :type => :controller do
       get :current_price_indications
       expect(assigns[:standard_arc_data]).to eq(arc_response)
       expect(assigns[:sbc_arc_data]).to eq(arc_response)
+    end
+  end
+
+  describe 'GET interest_rate_resets' do
+    let(:rates_service_instance) { double('RatesService') }
+    let(:response_hash) { double('RatesServiceHash') }
+    let(:effective_date) { double('effective_date') }
+    let(:advance_number) { double('advance_number') }
+    let(:prior_rate) { double('prior_rate') }
+    let(:new_rate) { double('new_rate') }
+    let(:next_reset) { double('next_reset') }
+    let(:irr_response) {[{'effective_date' => effective_date, 'advance_number' => advance_number, 'prior_rate' => prior_rate, 'new_rate' => new_rate, 'next_reset' => next_reset}]}
+
+    before do
+      allow(RatesService).to receive(:new).and_return(rates_service_instance)
+      allow(rates_service_instance).to receive(:interest_rate_resets).at_least(1).and_return(irr_response)
+    end
+    it_behaves_like 'a user required action', :get, :interest_rate_resets
+    it 'renders the interest_rate_resets view' do
+      allow(rates_service_instance).to receive(:interest_rate_resets).and_return(response_hash)
+      allow(response_hash).to receive(:collect)
+      get :interest_rate_resets
+      expect(response.body).to render_template('interest_rate_resets')
+    end
+    it 'should return irr data' do
+      get :interest_rate_resets
+      expect(assigns[:irr_table_data][:rows][0][:columns]).to eq([{:type=>:date, :value=>effective_date}, {:value=>advance_number}, {:type=>:index, :value=>prior_rate}, {:type=>:index, :value=>new_rate}, {:value=>next_reset}])
     end
   end
 

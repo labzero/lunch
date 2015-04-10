@@ -607,6 +607,20 @@
   }
 }
 
+.interest_rate_resets_table {
+  &.report-table {
+    width: 600px;
+    td {
+      &:nth-child(1) {
+        text-align: left;
+      }
+      &:nth-child(2) {
+        text-align: left;
+      }
+    }
+  }
+}
+
 .standard_1m_libor_table, .standard_3m_libor_table, .standard_6m_libor_table, .standard_daily_prime_table, .sbc_1m_libor_table, .sbc_3m_libor_table, .sbc_6m_libor_table, .current_price_vrc_table {
   width: auto;
   border-top: none;

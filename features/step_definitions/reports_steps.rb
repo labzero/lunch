@@ -72,8 +72,10 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/borrowing-capacity'
   when 'Historical Price Indications'
     visit '/reports/historical-price-indications'
-    when 'Current Price Indications'
-      visit '/reports/current-price-indications'
+  when 'Current Price Indications'
+    visit '/reports/current-price-indications'
+  when 'Interest Rate Resets'
+    visit '/reports/interest_rate_resets'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
@@ -271,22 +273,23 @@ def report_dates_in_range? (start_date, end_date, date_format="%m/%d/%Y")
 end
 
 Then(/^I should see vrc current price indications report$/) do
-  page.assert_selector('.current_price_vrc_table')
-  expect(page.all('.current_price_vrc_table tbody tr').length).to be > 0
+  page.assert_selector('.current_price_vrc_table tbody tr')
 end
 
 Then(/^I should see frc current price indications report$/) do
-  page.assert_selector('.current_price_frc_table')
-  expect(page.all('.current_price_frc_table tbody tr').length).to be > 0
+  page.assert_selector('.current_price_frc_table tbody tr')
 end
 
 Then(/^I should see arc current price indications report$/) do
-  page.assert_selector('.current_price_arc_table')
-  expect(page.all('.current_price_arc_table tbody tr').length).to be > 0
+  page.assert_selector('.current_price_arc_table tbody tr')
 end
 
 Then(/^I should see sta rates report$/) do
-  page.assert_selector('.sta_rate_table')
-  expect(page.all('.sta_rate_table tbody tr').length).to be > 0
+  page.assert_selector('.sta_rate_table tbody tr')
 end
+
+Then(/^I should see interest rate resets report$/) do
+  page.assert_selector('.interest_rate_resets_table tbody tr')
+end
+
 

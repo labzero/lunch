@@ -43,5 +43,7 @@
                 = fhlb_formatted_currency(column[:value])
               - when :currency_whole
                 = fhlb_formatted_currency(column[:value], precision: 0)
+              - when :date
+                = fhlb_date_standard_numeric(column[:value])
               - else
                 = column[:value]

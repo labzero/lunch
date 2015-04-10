@@ -28,6 +28,7 @@ Rails.application.routes.draw do
   get '/reports/historical-price-indications' => 'reports#historical_price_indications'
   get '/reports/cash-projections' => 'reports#cash_projections'
   get '/reports/current-price-indications' => 'reports#current_price_indications'
+  get '/reports/interest_rate_resets' => 'reports#interest_rate_resets'
 
   get '/settings' => 'settings#index'
   post '/settings/save' => 'settings#save'
