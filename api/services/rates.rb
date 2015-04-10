@@ -498,7 +498,7 @@ module MAPI
                 '1_month_libor' =>  result[1].at_css('Text').content,
                 '3_month_libor' =>  result[2].at_css('Text').content,
                 '6_month_libor' =>  result[3].at_css('Text').content,
-                'prime' =>  result[4].at_css('Text').content
+                'prime' =>  params[:collateral] == 'standard' ? result[4].at_css('Text').content : 0
               }
             end
             hash
