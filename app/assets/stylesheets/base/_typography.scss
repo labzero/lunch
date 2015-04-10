@@ -46,7 +46,7 @@
 
 @mixin typography-dropdown-selector {
   font-size: 0.8667rem;
-  font-weight: $normal-weight;
+  font-weight: $semibold-weight;
 }
 
 @mixin typography-dashboard-account-summary {
@@ -91,13 +91,13 @@
 }
 
 @mixin typography-field-placeholder {
-  font-size: 1rem;
+  font-size: 0.8667rem;
   font-weight: $normal-weight;
 }
 
 @mixin typography-field-value {
-  font-size: 1rem;
-  font-weight: $normal-weight;
+  font-size: 0.8667rem;
+  font-weight: $semibold-weight;
 }
 
 @mixin typography-field-label {
