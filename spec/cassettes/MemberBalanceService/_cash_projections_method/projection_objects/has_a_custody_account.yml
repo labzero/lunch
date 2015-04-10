@@ -1,0 +1,59 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/cash_projections
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
+      X-Request-Id:
+      - '12345'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '4253'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      Date:
+      - Fri, 10 Apr 2015 18:04:00 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"as_of_date":"2015-04-09","total_net_amount":561201.99,"total_principal":52080431.86000001,"total_interest":644321.69,"projections":[{"settlement_date":"2015-04-15","custody_account":"082131","cusip":"31387A5A9","description":"FEDERAL
+        NAT MTG ASSN REMIC POOL #F","transaction_code":"MBSD","pool_number":"PLJ12604","original_par":20769498.0,"coupon_rate":5.067,"maturity_date":"2015-04-09","principal":860902.28,"interest":77061.87,"total":30352.1},{"settlement_date":"2015-04-22","custody_account":"082131","cusip":"31398VXP6","description":"FEDERAL
+        HOME LN MTG PC GOLD POOL #","transaction_code":"MBSD","pool_number":"PLC91075","original_par":991779.0,"coupon_rate":0.368,"maturity_date":"2015-04-10","principal":4933918.93,"interest":73280.82,"total":68204.05},{"settlement_date":"2015-04-15","custody_account":"082131","cusip":"3137ABZW4","description":"GS
+        MTG SECS CORP GSR 2005-AR4 MTG","transaction_code":"MBSD","pool_number":"PLAE0988","original_par":15856500.0,"coupon_rate":5.362,"maturity_date":"2015-04-11","principal":2600003.31,"interest":82194.38,"total":75975.18},{"settlement_date":"2015-04-14","custody_account":"082131","cusip":"3138ALJS7","description":"FEDERAL
+        NAT MTG ASSN REMIC POOL #F","transaction_code":"MBSD","pool_number":"PL254914","original_par":21474875.0,"coupon_rate":5.123,"maturity_date":"2015-04-12","principal":6791974.16,"interest":10320.24,"total":60839.8},{"settlement_date":"2015-04-14","custody_account":"082131","cusip":"31388PY54","description":"FEDERAL
+        HOME LN MTG CORP PARTN CTF","transaction_code":"MBSD","pool_number":"PL256294","original_par":5280043.0,"coupon_rate":6.5809999999999995,"maturity_date":"2015-04-13","principal":7212712.94,"interest":44790.32,"total":35191.01},{"settlement_date":"2015-04-13","custody_account":"082131","cusip":"31397MJG3","description":"FEDERAL
+        HOME LN MTG CORP PARTN CTF","transaction_code":"MBSD","pool_number":"PL256294","original_par":9643501.0,"coupon_rate":4.366,"maturity_date":"2015-04-14","principal":5057692.69,"interest":29396.18,"total":98486.52},{"settlement_date":"2015-04-20","custody_account":"082131","cusip":"36202C3Y7","description":"FEDERAL
+        HOME LN MTG CORP PARTN CTF","transaction_code":"MBSD","pool_number":"PLJ12604","original_par":7450060.0,"coupon_rate":0.048,"maturity_date":"2015-04-15","principal":524884.89,"interest":11680.88,"total":14743.39},{"settlement_date":"2015-04-13","custody_account":"082131","cusip":"3138A8SL1","description":"FEDERAL
+        HOME LN MTG CORP PARTN CTF","transaction_code":"MBSD","pool_number":"PLE80066","original_par":17206451.0,"coupon_rate":4.64,"maturity_date":"2015-04-16","principal":5672364.96,"interest":79428.67,"total":25633.64},{"settlement_date":"2015-04-21","custody_account":"082131","cusip":"31387A5A9","description":"FEDERAL
+        HOME LN MTG PC GOLD POOL #","transaction_code":"MBSD","pool_number":"PLC90902","original_par":3085758.0,"coupon_rate":5.922,"maturity_date":"2015-04-17","principal":7486209.23,"interest":692.18,"total":56653.55},{"settlement_date":"2015-04-15","custody_account":"082131","cusip":"3137ABZW4","description":"GS
+        MTG SECS CORP GSR 2005-AR4 MTG","transaction_code":"MBSD","pool_number":"PL742086","original_par":3433743.0,"coupon_rate":2.713,"maturity_date":"2015-04-18","principal":3856420.18,"interest":45328.58,"total":11411.04},{"settlement_date":"2015-04-18","custody_account":"082131","cusip":"31394TXR1","description":"FEDERAL
+        NAT MTG ASSN REMIC POOL #F","transaction_code":"MBSD","pool_number":"PLN30473","original_par":12721067.0,"coupon_rate":6.557,"maturity_date":"2015-04-19","principal":1654391.88,"interest":79655.11,"total":20463.25},{"settlement_date":"2015-04-17","custody_account":"082131","cusip":"31389RDE3","description":"FEDERAL
+        HOME LN MTG CORP PC GOLD G","transaction_code":"MBSD","pool_number":"PLN30473","original_par":10805901.0,"coupon_rate":3.503,"maturity_date":"2015-04-20","principal":3240244.85,"interest":44417.95,"total":16679.54},{"settlement_date":"2015-04-21","custody_account":"082131","cusip":"31398VXP6","description":"FEDERAL
+        HOME LN MTG PC GOLD POOL #","transaction_code":"MBSD","pool_number":"PL781416","original_par":16836147.0,"coupon_rate":3.449,"maturity_date":"2015-04-21","principal":2188711.56,"interest":66074.51,"total":46568.92}]}'
+    http_version: 
+  recorded_at: Fri, 10 Apr 2015 18:04:00 GMT
+recorded_with: VCR 2.9.3

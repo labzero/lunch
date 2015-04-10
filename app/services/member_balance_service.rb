@@ -340,53 +340,29 @@ class MemberBalanceService < MAPIService
   end
 
   def cash_projections
-    fake_data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'cash_projections.json'))).with_indifferent_access
-    today = Time.zone.now.to_date
-    as_of_date =
-      if today.wday == 0
-        today - 2.days
-      elsif today.wday == 1
-        today - 3.days
-      else
-        today - 1.day
-      end
-
-    total_net_amount = 0
-    total_principal = 0
-    total_interest = 0
-    rows = []
-    number_of_rows = as_of_date.day + as_of_date.month
-    r = Random.new(as_of_date.to_time.to_i + as_of_date.day)
-
-    number_of_rows.times do |i|
-      total_amount = r.rand(19..100000) + r.rand.round(2)
-      interest = r.rand(1..100000) + r.rand.round(2)
-      principal = r.rand(0..8585000) + r.rand.round(2)
-      total_net_amount += total_amount
-      total_principal += principal
-      total_interest += interest
-      rows << {
-          settlement_date: as_of_date + (r.rand(3..14)).days,
-          custody_account: '082131',
-          cusip: fake_data[:cusips][r.rand(0..(fake_data[:cusips].length - 1))],
-          description: fake_data[:descriptions][r.rand(0..(fake_data[:descriptions].length - 1))],
-          transaction_code: 'MBSD',
-          pool_number: fake_data[:pools][r.rand(0..(fake_data[:pools].length - 1))],
-          original_par: r.rand(250000..22500000),
-          coupon_rate: r.rand(0..6) + r.rand.round(3),
-          maturity_date: as_of_date + (i.days),
-          principal: principal,
-          interest: interest,
-          total: total_amount,
-      }
+    begin
+      response = @connection["/member/#{@member_id}/cash_projections"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.cash_projections encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.cash_projections encountered a connection error: #{e.class.name}")
+      return nil
     end
-    {
-      as_of_date: as_of_date,
-      total_net_amount: total_net_amount,
-      total_principal: total_principal,
-      total_interest: total_interest,
-      projections: rows
-    }.with_indifferent_access
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.cash_projections encountered a JSON parsing error: #{e}")
+      return nil
+    end
+
+    data[:as_of_date] = data[:as_of_date].to_date
+    data[:projections].each_with_index do |projection, i|
+      data[:projections][i][:settlement_date] = projection[:settlement_date].to_date
+      data[:projections][i][:maturity_date] = projection[:maturity_date].to_date
+    end
+    data
   end
 
   def settlement_transaction_rate
