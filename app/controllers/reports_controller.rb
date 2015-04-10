@@ -218,15 +218,12 @@ class ReportsController < ApplicationController
     #sta data
     @sta_data = member_balances.settlement_transaction_rate
     @sta_table_data = {
-        :row_name => I18n.t("reports.pages.price_indications.current.#{MemberBalanceService::STA_RATE_KEY}"),
+        :row_name => t('reports.pages.price_indications.current.sta_rate'),
         :row_value => @sta_data['sta_rate']
     }
+
     #vrc headers
-    column_heading_keys = RatesService::CURRENT_VRC_CREDIT_TYPES
-    column_headings = []
-    column_heading_keys.each do |key|
-      column_headings << I18n.t("reports.pages.price_indications.current.#{key}")
-    end
+    column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.overnight_fed_funds_benchmark'), t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'), t('reports.pages.price_indications.current.advance_rate')]
     #vrc data for standard collateral
     @standard_vrc_data = rate_service.current_price_indications('standard', 'vrc')
     columns = @standard_vrc_data.collect do |row|
@@ -249,11 +246,7 @@ class ReportsController < ApplicationController
     }
 
     #frc headers
-    column_heading_keys = RatesService::CURRENT_FRC_CREDIT_TYPES
-    column_headings = []
-    column_heading_keys.each do |key|
-      column_headings << I18n.t("reports.pages.price_indications.current.#{key}")
-    end
+    column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.treasury_benchmark_maturity'), t('reports.pages.price_indications.current.nominal_yield_of_benchmark'), t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'), t('reports.pages.price_indications.current.advance_rate')]
     #frc data for standard collateral
     @standard_frc_data = rate_service.current_price_indications('standard', 'frc')
     rows = @standard_frc_data.collect do |row|
@@ -294,11 +287,7 @@ class ReportsController < ApplicationController
     }
 
     #arc headers for standard collateral
-    column_heading_keys = RatesService::CURRENT_ARC_CREDIT_TYPES
-    column_headings = []
-    column_heading_keys.each do |key|
-      column_headings << I18n.t("reports.pages.price_indications.current.#{key}")
-    end
+    column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor'), t('reports.pages.price_indications.current.3_month_libor'), t('reports.pages.price_indications.current.6_month_libor'), t('reports.pages.price_indications.current.prime')]
     #arc data for standard collateral
     @standard_arc_data = rate_service.current_price_indications('standard', 'arc')
     rows = @standard_arc_data.collect do |row|
@@ -317,12 +306,7 @@ class ReportsController < ApplicationController
         :rows => rows
     }
     #arc headers for sbc collateral
-    column_headings = []
-    column_heading_keys.each_with_index do |key, index|
-      if index < 4
-        column_headings << I18n.t("reports.pages.price_indications.current.#{key}")
-      end
-    end
+    column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor'), t('reports.pages.price_indications.current.3_month_libor'), t('reports.pages.price_indications.current.6_month_libor')]
     #arc data for sbc collateral
     @sbc_arc_data = rate_service.current_price_indications('sbc', 'arc')
     rows = @sbc_arc_data.collect do |row|

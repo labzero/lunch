@@ -236,17 +236,15 @@ describe MemberBalanceService do
       expect(settlement_transaction_rate[:sta_rate]).to be_kind_of(Float)
     end
     describe 'bad data' do
-      before do
-        expect(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'settlement_transaction_rate_with_nil_values.json'))))
-      end
       it 'should pass nil values if data from MAPI has nil values' do
+        allow(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'settlement_transaction_rate_with_nil_values.json'))))
         expect(settlement_transaction_rate[:sta_rate]).to be(nil)
       end
     end
     describe 'error states' do
       it 'returns nil if there is a JSON parsing error' do
         # TODO change this stub once you implement the MAPI endpoint
-        expect(File).to receive(:read).and_return('some malformed json!')
+        allow(File).to receive(:read).and_return('some malformed json!')
         expect(Rails.logger).to receive(:warn)
         expect(settlement_transaction_rate).to be(nil)
       end

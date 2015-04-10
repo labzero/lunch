@@ -19,8 +19,12 @@ Scenario: Visiting the Current Price Indications Report Page
   Given I am on the "Current Price Indications" report page
   Then I should see "Standard Credit Program"
   And I should see "VRC Advance"
+  And I should see vrc current price indications report
   And I should see "FRC Advance"
+  And I should see frc current price indications report
   And I should see "ARC Advance (Basis Point Spread)"
+  And I should see arc current price indications report
   And I should see "Securities-Backed Credit"
   And I should see "Settlement/Transaction Account"
+  And I should see sta rates report
   And I should see "General Information"

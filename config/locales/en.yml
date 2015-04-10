@@ -29,11 +29,13 @@ en:
     view: View
     available_history: Available History
     temporarily_unavailable: Temporarily Unavailable
+    overnight: Overnight
     daily: Daily
     monthly: Monthly
+    quarterly: Quarterly
+    semiannually: Semiannually
     all: All
     current_day: Current Day
-    quarterly: Quarterly
     date: Date
     total: Total
     totals: Totals
@@ -422,17 +424,11 @@ en:
           advance_rate: Advance Rate (%)
           interest_day_count: Interest Day Count
           interest_rate_reset: Interest Rate Reset
-          monthly: Monthly
-          quarterly: Quarterly
-          semiannually: Semiannually
-          daily: Daily
           actual_actual: Actual/Actual
           actual_360: Actual/360
           payment_frequency: Payment Frequency
-          overnight: Overnight
           at_maturity: At maturity
           at_repayment: At repayment
-          open: Open
           at_monthend_and_at_repayment: At monthend and at repayment
           monthly_and_at_repayment: Monthly and at repayment
           quarterly_and_at_repayment: Quarterly and at repayment

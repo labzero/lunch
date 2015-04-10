@@ -433,8 +433,8 @@ RSpec.describe ReportsController, :type => :controller do
     it 'renders the current_price_indications view' do
       allow(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
       allow(response_cpi_hash).to receive(:collect)
-      expect(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
-      expect(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
+      allow(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
+      allow(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
       get :current_price_indications
       expect(response.body).to render_template('current_price_indications')
     end

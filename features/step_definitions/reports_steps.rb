@@ -269,3 +269,24 @@ def report_dates_in_range? (start_date, end_date, date_format="%m/%d/%Y")
     raise Capybara::ExpectationNotMet, "date #{date} out of range [#{start_date}, #{end_date}]" unless date >= start_date && date <= end_date
   end
 end
+
+Then(/^I should see vrc current price indications report$/) do
+  page.assert_selector('.current_price_vrc_table')
+  expect(page.all('.current_price_vrc_table tbody tr').length).to be > 0
+end
+
+Then(/^I should see frc current price indications report$/) do
+  page.assert_selector('.current_price_frc_table')
+  expect(page.all('.current_price_frc_table tbody tr').length).to be > 0
+end
+
+Then(/^I should see arc current price indications report$/) do
+  page.assert_selector('.current_price_arc_table')
+  expect(page.all('.current_price_arc_table tbody tr').length).to be > 0
+end
+
+Then(/^I should see sta rates report$/) do
+  page.assert_selector('.sta_rate_table')
+  expect(page.all('.sta_rate_table tbody tr').length).to be > 0
+end
+
