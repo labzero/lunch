@@ -534,8 +534,21 @@ describe MemberBalanceService do
     end
   end
 
-  describe '`cash_projections` method' do
+  describe '`cash_projections` method', :vcr do
     let(:cash_projections) {subject.cash_projections}
+    it 'should return nil if there is a JSON parsing error' do
+      expect(JSON).to receive(:parse).and_raise(JSON::ParserError)
+      expect(Rails.logger).to receive(:warn)
+      expect(cash_projections).to be(nil)
+    end
+    it 'should return nil if there was an API error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(cash_projections).to eq(nil)
+    end
+    it 'should return nil if there was a connection error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(cash_projections).to eq(nil)
+    end
     it 'returns an object with an as_of_date indicating when FHLB most recently produced cash projections' do
       expect(cash_projections[:as_of_date]).to be_kind_of(Date)
     end
