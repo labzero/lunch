@@ -16,6 +16,7 @@ describe RatesService do
   it { expect(subject).to respond_to(:quick_advance_preview) }
   it { expect(subject).to respond_to(:quick_advance_confirmation) }
   it { expect(subject).to respond_to(:historical_price_indications) }
+  it { expect(subject).to respond_to(:current_price_indications) }
 
   describe "`overnight_vrc` method", :vcr do
     let(:rates) {subject.overnight_vrc}
@@ -126,6 +127,21 @@ describe RatesService do
     end
     it 'should return a data object from the MAPI endpoint' do
       expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)).to be_kind_of(Hash)
+    end
+  end
+
+  describe '`current_price_indications` method', :vcr do
+    let(:current_prices) {subject.current_price_indications(RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)}
+    it 'should return nil if the argument passed for collateral_type is not valid' do
+      expect(Rails.logger).to receive(:warn)
+      expect(subject.current_price_indications('invalid collateral type', RatesService::CREDIT_TYPES.first)).to be_nil
+    end
+    it 'should return nil if the argument passed for credit_type is not valid' do
+      expect(Rails.logger).to receive(:warn)
+      expect(subject.current_price_indications(RatesService::COLLATERAL_TYPES.first, 'invalid credit type')).to be_nil
+    end
+    it 'should return a data object from the MAPI endpoint' do
+      expect(subject.current_price_indications(RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)).to be_kind_of(Array)
     end
   end
 end

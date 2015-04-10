@@ -97,6 +97,11 @@
   h1 {
     float: left;
   }
+  p {
+    clear: both;
+    width: 540px;
+    display: block;
+  }
 }
 
 .report-datepicker, .report-filter {
@@ -141,7 +146,24 @@
     p {
       margin: 0;
     }
+    ol {
+      padding-left: 15px;
+      li {
+        margin-bottom: 10px;
+      }
+    }
+    ul {
+      margin-bottom: 10px;
+      li {
+        list-style-type: disc;
+        margin-bottom: 0px;
+      }
+    }
   }
+}
+
+.report_info_indent {
+  margin-left: 40px;
 }
 
 .report-summary-data {
@@ -160,8 +182,13 @@
 }
 
 .report-table-title {
+   @extend %typography-section-title;
+   margin: 0 0 15px;
+ }
+
+.report-table-title-with-margins {
   @extend %typography-section-title;
-  margin: 0 0 15px;
+  margin: 50px 0 15px;
 }
 
 .report-table {
@@ -466,7 +493,7 @@
   }
 }
 
-.historical-price-indications-report {
+.price-indications-report {
   .report-filter:first-of-type {
     margin-left: 0;
   }
@@ -498,7 +525,89 @@
   }
 }
 
-.standard_1m_libor_table, .standard_3m_libor_table, .standard_6m_libor_table, .standard_daily_prime_table, .sbc_1m_libor_table, .sbc_3m_libor_table, .sbc_6m_libor_table {
+.current_price_vrc_table {
+  &.report-table {
+    width: 480px;
+    th {
+      &:nth-child(2) {
+        min-width: 150px;
+      }
+      &:nth-child(3) {
+        min-width: 140px;
+      }
+    }
+  }
+}
+
+.current_price_frc_table {
+  &.report-table {
+    width: 480px;
+    th {
+      &:nth-child(2) {
+        min-width: 90px;
+      }
+      &:nth-child(3) {
+        min-width: 110px;
+      }
+      &:nth-child(4) {
+        min-width: 100px;
+      }
+    }
+    td {
+      &:nth-child(1) {
+        text-align: left;
+      }
+      &:nth-child(2) {
+        text-align: left;
+      }
+      &:nth-child(3) {
+        text-align: right;
+      }
+      &:nth-child(4) {
+        text-align: right;
+      }
+      &:nth-child(5) {
+        text-align: right;
+      }
+    }
+  }
+}
+
+.current_price_arc_table {
+  &.report-table {
+    width: 380px;
+    td {
+      &:nth-child(1) {
+        text-align: left;
+      }
+    }
+  }
+}
+
+.current_price_arc_sbc_table {
+  &.report-table {
+    width: 310px;
+    td {
+      &:nth-child(1) {
+        text-align: left;
+      }
+    }
+  }
+}
+
+.sta_rate_table {
+  &.report-table {
+    width: 350px;
+    td {
+      &:nth-child(1) {
+        @extend %typography-table-heading;
+        background-color: $light-gray;
+      }
+    }
+  }
+}
+
+.standard_1m_libor_table, .standard_3m_libor_table, .standard_6m_libor_table, .standard_daily_prime_table, .sbc_1m_libor_table, .sbc_3m_libor_table, .sbc_6m_libor_table, .current_price_vrc_table {
   width: auto;
   border-top: none;
   border-left: none;
