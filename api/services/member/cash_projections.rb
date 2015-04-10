@@ -22,7 +22,7 @@ module MAPI
               FROM SAFEKEEPING.ACCOUNT_DOCKET_XREF, SAFEKEEPING.CUSTOMER_PROFILE, SAFEKEEPING.CASH_PROJECTIONS
               WHERE RTRIM(CPJ_BTC_ACCOUNT_NUMBER) = RTRIM(ADX_BTC_ACCOUNT_NUMBER)
               AND CUSTOMER_PROFILE.CP_ID = ACCOUNT_DOCKET_XREF.CP_ID
-              AND CASH_PROJECTIONS.CPJ_BTC_DATE = to_date(#{ ActiveRecord::Base.connection.quote(as_of_date)}, 'yyyy-mm-dd'))
+              AND CASH_PROJECTIONS.CPJ_BTC_DATE = #{ ActiveRecord::Base.connection.quote(as_of_date)}
               AND CUSTOMER_PROFILE.FHLB_ID = #{ ActiveRecord::Base.connection.quote(member_id)}
             SQL
             cash_projections_cursor = ActiveRecord::Base.connection.execute(cash_projections_query)
