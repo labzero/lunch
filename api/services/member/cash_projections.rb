@@ -96,9 +96,8 @@ module MAPI
           end
 
           def self.format_projections(projections)
-            new_array = []
-            projections.each do |projection|
-              new_array << {
+            projections.collect do |projection|
+              {
                 settlement_date: projection[:CPJ_SETTLE_DATE].to_date,
                 custody_account: projection[:CPJ_BTC_ACCOUNT_NUMBER].to_s,
                 cusip: projection[:CPJ_CUSIP].to_s,
@@ -113,7 +112,6 @@ module MAPI
                 total: projection[:CPJ_TOTAL_AMOUNT].to_f
               }
             end
-            new_array
           end
         end
       end
