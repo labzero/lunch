@@ -9,8 +9,11 @@
   height: 30px;
   line-height: normal;
   @include input-placeholder {
-    color: $medium-gray;
+    color: $dark-gray;
     @include typography-field-placeholder;
+  }
+  &:focus {
+    background-color: $light-gray;
   }
 }
 
@@ -62,7 +65,7 @@ fieldset {
 }
 
 label {
-  @extend %typography-field-value;
+  @extend %typography-field-label;
   color: $medium-gray;
 }
 

@@ -18,6 +18,9 @@
     ul {
       display: block;
     }
+    .dropdown-selection {
+      background-color: $light-gray;
+    }
   }
   ul {
     display: none;
@@ -51,7 +54,7 @@
 .dropdown-selection {
   @extend %input-field-styling;
   @extend %truncate-text;
-  color: $medium-gray;
+  color: $dark-gray;
   display: table-cell;
   vertical-align: middle;
   width: (3 * $grid-column-width) + (2 * $gutter-width);
