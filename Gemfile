@@ -57,6 +57,11 @@ gem 'nokogiri', require: false
 gem 'rack-token_auth', require: false
 gem 'logging', require: false
 
+# for background tasks
+gem 'resque'
+gem 'wicked_pdf'
+gem 'axlsx_rails', '>= 0.3.0'
+
 group :development, :test do
   gem 'rspec-rails'
   gem 'cucumber', '>= 2.0.0.rc1'

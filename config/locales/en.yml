@@ -76,6 +76,8 @@ en:
     pdf: PDF
     missing_value: –
     continue: Continue
+    fhlb_full: Federal Home Loan Bank San Francisco
+    excel: Excel
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -127,7 +129,7 @@ en:
       this_month: "%{month} to date"
       custom: Custom date range
     single:
-      input: "As of {replace_date}"
+      input: "As of %{date}"
       custom: Custom date
   settings:
     title: Settings
@@ -147,7 +149,7 @@ en:
       selected_item_message: "(Be sure to include fhlbsf.com in your Safe Senders list)"
       required_item_message_html: "You are assigned to receive these emails. For more information, <a href=\"%{url}\">contact us</a>."
       all:
-        title: all
+        title: All Messages
         description_html: ""
       reports:
         title: Reports
@@ -194,11 +196,11 @@ en:
       xml: XML
     previous_activity:
       title: Previous Activity
-      overnight_vrc: Overnight VRC Open
+      overnight_vrc: Overnight/Open VRC
     anticipated_activity:
       title: Anticipated Activity
       dividend: Dividend
-      collateral_rebalancing: Collateral Rebalancing
+      advance_interest_payment: Advance Interest Payment
       stock_purchase: Stock Purchase
       estimated: Estimated
       total_maturing_today: Total Maturing Today
@@ -211,6 +213,7 @@ en:
         nonstandard_advance: Nonstandard Advances
         relationship_manager: Relationship Manager
         member_services_desk: Member Services Desk
+        collateral_asset_manager: Collateral Asset Manager
     quick_advance:
       title: Quick Advances
       advance_placeholder: Enter Dollar Amount
@@ -268,8 +271,10 @@ en:
       annually: Annually
       advances_detail: Advances
       forward_commitments: Forward Commitments
+      view_reports: View All Reports
     your_account:
       title: Your Account
+      account_summary: Account Summary
       pledged_collateral:
         title: Pledged Collateral
         mortgages: Mortgages
@@ -285,28 +290,27 @@ en:
         title: Borrowing Capacity
         used: Used
         unused: Unused
-      anticipated_activity:
-        title: Anticipated Activity
+      projected_sta_balance:
+        title: Projected STA Balance
       table:
-        balance: STA Balance
-        credit_outstanding: Credit Outstanding
+        balance: 'STA Balance:*'
+        balance_footnote: '*as of close of business on prior business day'
+        credit_outstanding: 'Credit Outstanding:'
         remaining:
-          title: Remaining
+          title: 'Remaining:'
           available: Financial Available
+          capacity: Collateral Borrowing Capacity
           leverage: Stock Leverage
-        market_value:
-          title: Collateral Market Value
-          agency: 'SBC:Agency'
-          aaa: 'SBC:AAA'
-          aa: 'SBC:AA'
-        borrowing_capacity:
-          title: Collateral Borrowing Capacity
-          standard: Standard Credit Program
-          agency: 'SBC:Agency'
-          aaa: 'SBC:AAA'
-          aa: 'SBC:AA'
+        standard_program:
+          title: 'Standard Program:'
+        sbc_program:
+          title: 'Securities-Backed Credit Program:'
+        total_borrowing_capacity: Total Borrowing Capacity
+        remaining_borrowing_capacity: Remaining Borrowing Capacity
+        borrowing_capacity_note_html: View your institution's <a href=%{url}>Borrowing Capacity</a> report for detailed information
     market_overview:
-      title: Market Overview
+      title: Market Rates
+      vrc: 30-Day VRC Rate (%)
   reports:
     meta_title: FHLB - Reports
     title: Reports
@@ -510,6 +514,7 @@ en:
     estimated_next_interest_payment_notice: For each FRC and ARC Advance, the Estimated Next Interest Payment provides an estimate of the interest payment amount to be debited to your Settlement/Transaction Account (STA) on the next interest payment date. These are estimates only and should not be relied upon as a final statement of the total interest payments to be debited to your STA on any interest payment date, and they are subject to change without notice. In addition, this report does not reflect any principal repayment or reduction amounts or any other amounts associated with your advances that may be debited to your STA on the next interest payment date. Estimated next interest payment amounts for some advance types are not available online.
     merger_notice: In the event of a merger, this report may not include all advances from the acquired instiution.
     advances_and_securities_agreement_notice: Nothing in this report in any way ammends, modifies, or waives the terms of your Advances and Securities Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issues puruant to that Agreement. The Bank expressly disclaims and and all liability that may arise from your institution’s reliance on any information contained in, or errors or omissions made with respect to, this report. Please call (415) 616-2559 if you have any questions.
+    pdf_footer: "%{report_name} as of %{date}"
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email
@@ -523,3 +528,4 @@ en:
       headline: Scheduled Downtime
       summary: We're currently performing maintenance on the Member Portal. We'll have things up and running again soon.
     table_data_unavailable: This information is currently unavailable
+    no_messages: No Messages

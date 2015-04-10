@@ -13,7 +13,7 @@ Background:
 
   Scenario: See dashboard contacts
     When I visit the dashboard
-    Then I should see 2 contacts
+    Then I should see 3 contacts
 
   @smoke
   Scenario: See dashboard quick advance module
@@ -28,7 +28,7 @@ Background:
       And I should see the Anticipated Activity graph
       And I should see a pledged collateral gauge
       And I should see a total securities gauge
-      And I should see an effective borrwoing capacity gauge
+      And I should see an effective borrowing capacity gauge
 
   @smoke
   Scenario: See dashboard market overview graph

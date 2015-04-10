@@ -181,7 +181,7 @@ describe MemberBalanceService do
       expect(profile[:sta_balance]).to be_kind_of(Integer)
       expect(profile[:credit_outstanding]).to be_kind_of(Integer)
       expect(profile[:financial_available]).to be_kind_of(Integer)
-      expect(profile[:stock_leverage]).to be_kind_of(Integer)
+      expect(profile[:stock_leverage]).to be_kind_of(Float)
       expect(profile[:collateral_market_value_sbc_agency]).to be_kind_of(Integer)
       expect(profile[:collateral_market_value_sbc_aaa]).to be_kind_of(Integer)
       expect(profile[:collateral_market_value_sbc_aa]).to be_kind_of(Integer)
@@ -189,6 +189,11 @@ describe MemberBalanceService do
       expect(profile[:borrowing_capacity_sbc_agency]).to be_kind_of(Integer)
       expect(profile[:borrowing_capacity_sbc_aaa]).to be_kind_of(Integer)
       expect(profile[:borrowing_capacity_sbc_aa]).to be_kind_of(Integer)
+      expect(profile[:remaining_collateral_borrowing_capacity]).to be_kind_of(Integer)
+      expect(profile[:standard_total_borrowing_capacity]).to be_kind_of(Integer)
+      expect(profile[:standard_remaining_borrowing_capacity]).to be_kind_of(Integer)
+      expect(profile[:sbc_total_borrowing_capacity]).to be_kind_of(Integer)
+      expect(profile[:sbc_remaining_borrowing_capacity]).to be_kind_of(Integer)
     end
     describe 'bad data' do
       before do
@@ -206,6 +211,11 @@ describe MemberBalanceService do
         expect(profile[:borrowing_capacity_sbc_agency]).to be(nil)
         expect(profile[:borrowing_capacity_sbc_aaa]).to be(nil)
         expect(profile[:borrowing_capacity_sbc_aa]).to be(nil)
+        expect(profile[:remaining_collateral_borrowing_capacity]).to be(nil)
+        expect(profile[:standard_total_borrowing_capacity]).to be(nil)
+        expect(profile[:standard_remaining_borrowing_capacity]).to be(nil)
+        expect(profile[:sbc_total_borrowing_capacity]).to be(nil)
+        expect(profile[:sbc_remaining_borrowing_capacity]).to be(nil)
       end
     end
     describe 'error states' do

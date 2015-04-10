@@ -176,7 +176,7 @@ Given(/^I am showing Settlement Transaction Account activities for (\d+)$/) do |
 end
 
 When(/^I filter the Settlement Transaction Account Statement by "(.*?)"$/) do |text|
-  page.find('.dropdown-selection').click
+  page.find('.report-inputs .dropdown-selection').click
   page.find('li', text: text).click
 end
 
@@ -201,6 +201,26 @@ end
 When(/^I select "(.*?)" from the (credit|collateral) type selector$/) do |credit_type, selector|
   page.find(".#{selector}-type-filter .dropdown-selection").click
   page.find('li', text: credit_type, visible: true).click
+end
+
+When(/^I request a PDF$/) do
+  page.find(".report-header-buttons .dropdown-selection").click
+  page.find('.report-header-buttons .dropdown li', text: I18n.t('global.pdf'), visible: true).click
+  click_button(I18n.t('dashboard.actions.download'))
+end
+
+Then(/^I should recieve a PDF file$/) do
+  page.response_headers['Content-Type'].should == 'application/pdf'
+end
+
+When(/^I request an XLSX$/) do
+  page.find(".report-header-buttons .dropdown-selection").click
+  page.find('.report-header-buttons .dropdown li', text: I18n.t('global.excel'), visible: true).click
+  click_button(I18n.t('dashboard.actions.download'))
+end
+
+Then(/^I should recieve an XLSX file$/) do
+  page.response_headers['Content-Type'].should == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 end
 
 def sleep_if_close_to_midnight

@@ -78,7 +78,7 @@ describe MAPI::ServiceApp do
       end
     end
     describe 'in the production enviroment for cases when etransact is turned on' do
-      let(:today_date) { Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE) }
+      let(:today_date) { Time.zone.now }
       let(:some_status_data) {{"AO_TERM_BUCKET_ID" => 1, "TERM_BUCKET_LABEL"=> "Open and O/N", "WHOLE_LOAN_ENABLED"=>  "Y", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
                                "SBC_AA_ENABLED"=>  "Y", "END_TIME" => "0001",  "OVERRIDE_END_DATE" =>  "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME"=>  "2000"}}
       let(:some_status_data2) {{"AO_TERM_BUCKET_ID" => 2, "TERM_BUCKET_LABEL"=> "1 Week", "WHOLE_LOAN_ENABLED"=>  "Y", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
@@ -90,7 +90,7 @@ describe MAPI::ServiceApp do
       let(:result_set3) {double('Oracle Result Set', fetch: nil)}
       let(:result_set4) {double('Oracle Result Set', fetch_hash: nil)}
       before do
-        Timecop.travel Time.now.in_time_zone(MAPI::Shared::Constants::ETRANSACT_TIME_ZONE).at_noon
+        Timecop.travel Time.zone.now.at_noon
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
         allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
         expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)

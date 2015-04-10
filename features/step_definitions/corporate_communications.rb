@@ -52,3 +52,17 @@ end
 When(/^I click on the "(.*?)" link at the top of the message detail view$/) do |text|
   page.find('.corporate-communication-detail-navigation a', text: text.upcase).click
 end
+
+Then(/^I should see a No Messages indicator$/) do
+  page.assert_selector('.corporate-communications-empty tbody tr:first-child .dataTables_empty', text: I18n.t('errors.no_messages'))
+end
+
+Then(/^"(.*?)" category should be disabled$/) do |text|
+  page.assert_selector('.corporate-communications .sidebar-filter span.disabled', text: text)
+end
+
+When(/^the "(.*?)" category has no messages$/) do |text|
+  # placeholder step for now in case we implement removing messages during testing
+end
+
+

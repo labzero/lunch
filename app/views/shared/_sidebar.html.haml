@@ -8,9 +8,12 @@
   = select_tag(sidebar_name, options_for_select(sidebar_options, default_value))
 %ul
   %li.sidebar-label= sidebar_label
-  - sidebar_options.each do |label, value|
+  - sidebar_options.each do |label, value, disabled|
     %li
       - if sidebar_type == 'nav'
-        =link_to label, value, class: ('active' if label == default_value)
+        -if disabled && label != default_value
+          %span.disabled= label
+        -else
+          =link_to label, value, class: ('active' if label == default_value)
       - else
         %span{data: {sidebar: {value: value}}, class: ('active' if value == default_value)}= label

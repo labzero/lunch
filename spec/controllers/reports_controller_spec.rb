@@ -236,9 +236,57 @@ RSpec.describe ReportsController, :type => :controller do
         allow(advances_detail).to receive(:[]).with(:advances_details).and_return([])
       end
 
-      it 'should render the capital_stock_activity view' do
+      it 'should render the advances_detail view' do
         get :advances_detail
         expect(response.body).to render_template('advances_detail')
+      end
+
+      describe 'downloading a PDF' do
+        let(:member_id) { double('A Member ID') }
+        let(:start_date) { Date.today - 3.years }
+        let(:pdf) { double('PDF') }
+        before do
+          allow_any_instance_of(MembersService).to receive(:report_disabled?).and_return(false)
+          allow_any_instance_of(MembersService).to receive(:member).with(anything).and_return({id: member_id, name: 'Foo'})
+          allow_any_instance_of(subject.class).to receive(:current_member_id).and_return(member_id)
+        end
+        it 'should render a PDF when the requested `export_format` is `pdf`' do
+          expect_any_instance_of(RenderReportPDFJob).to receive(:perform).with(member_id, 'advances_detail', anything)
+          get :advances_detail, export_format: :pdf
+        end
+        it 'should render a PDF using the requested start_date' do
+          expect_any_instance_of(RenderReportPDFJob).to receive(:perform).with(any_args, hash_including(start_date: start_date))
+          get :advances_detail, export_format: :pdf, start_date: start_date
+        end
+        it 'should send the pdf' do
+          allow_any_instance_of(RenderReportPDFJob).to receive(:perform).and_return(pdf)
+          expect_any_instance_of(subject.class).to receive(:send_data).with(pdf, hash_including(filename: 'advances.pdf')).and_call_original
+          get :advances_detail, export_format: :pdf
+        end
+      end
+
+      describe 'downloading an XLSX' do
+        let(:member_id) { double('A Member ID') }
+        let(:start_date) { Date.today - 3.years }
+        let(:xlsx) { double('XLSX') }
+        before do
+          allow_any_instance_of(MembersService).to receive(:report_disabled?).and_return(false)
+          allow_any_instance_of(MembersService).to receive(:member).with(anything).and_return({id: member_id, name: 'Foo'})
+          allow_any_instance_of(subject.class).to receive(:current_member_id).and_return(member_id)
+        end
+        it 'should render a XLSX when the requested `export_format` is `xlsx`' do
+          expect_any_instance_of(RenderReportExcelJob).to receive(:perform).with(member_id, 'advances_detail', anything)
+          get :advances_detail, export_format: :xlsx
+        end
+        it 'should render a XLSX using the requested start_date' do
+          expect_any_instance_of(RenderReportExcelJob).to receive(:perform).with(any_args, hash_including(start_date: start_date))
+          get :advances_detail, export_format: :xlsx, start_date: start_date
+        end
+        it 'should send the XLSX' do
+          allow_any_instance_of(RenderReportExcelJob).to receive(:perform).and_return(xlsx)
+          expect_any_instance_of(subject.class).to receive(:send_data).with(xlsx, hash_including(filename: "advances-#{today.strftime('%Y%m%d')}.xlsx")).and_call_original
+          get :advances_detail, export_format: :xlsx
+        end
       end
 
       describe 'view instance variables' do
@@ -268,6 +316,25 @@ RSpec.describe ReportsController, :type => :controller do
           expect(controller).to receive(:report_disabled?).with(ReportsController::ADVANCES_DETAIL_WEB_FLAGS).and_return(true)
           get :advances_detail
           expect(assigns[:advances_detail]).to eq({})
+        end
+        it 'should sort the advances found in @advances_detail[:advances_details]' do
+          expect(advances_detail[:advances_details]).to receive(:sort!)
+          get :advances_detail
+        end
+        it 'should order the advances found in @advances_detail[:advances_details] by `trade_date` ascending' do
+          unsorted_advances = [
+            {trade_date: Date.today},
+            {trade_date: Date.today + 1.years},
+            {trade_date: Date.today - 1.years},
+            {trade_date: Date.today - 3.years}
+          ]
+          allow(advances_detail).to receive(:[]).with(:advances_details).and_return(unsorted_advances)
+          get :advances_detail
+          last_trade_date = nil
+          assigns[:advances_detail][:advances_details].each do |advance|
+            expect(advance[:trade_date]).to be >= last_trade_date if last_trade_date
+            last_trade_date = advance[:trade_date]
+          end
         end
       end
 
@@ -343,38 +410,25 @@ RSpec.describe ReportsController, :type => :controller do
         expect(rates_service_instance).to receive(:historical_price_indications).and_return(nil)
         expect{get :historical_price_indications}.to raise_error(StandardError)
       end
-      describe 'daily_prime' do
-        let(:rates_by_date) { double('RatesByDate') }
-        let(:rates_by_term) { double('RatesByTerm') }
-        let(:benchmark_index) {3}
-        let(:spread_to_benchmark) {175}
-        let(:date) { today }
-        before do
-          allow(response_hash).to receive(:[]).with(:rates_by_date).and_return([rates_by_date])
-          allow(rates_by_date).to receive(:[]).with(:rates_by_term).and_return([rates_by_term])
-          allow(rates_by_date).to receive(:[]).with(:date).and_return(date)
-          allow(rates_by_term).to receive(:[]).with(:benchmark_index).and_return(benchmark_index)
-          allow(rates_by_term).to receive(:[]).with(:spread_to_benchmark).and_return(spread_to_benchmark)
-        end
-        it 'should set row to return both benchmark and spread to benchmark' do
+      describe 'credit_type of :daily_prime' do
+        let(:index) {0.17564}
+        let(:basis_1Y) {45}
+        let(:basis_2Y) {-127}
+        let(:basis_3Y) {-62}
+        let(:basis_5Y) {189}
+        let(:rates_by_term) { [
+            {:term=>'1D', :type=>'index', :value=>index, 'day_count_basis'=>'Actual/360', :pay_freq=>'Daily'},
+            {:term=>'1Y', :type=>'basis_point', :value=>basis_1Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'},
+            {:term=>'2Y', :type=>'basis_point', :value=>basis_2Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'},
+            {:term=>'3Y', :type=>'basis_point', :value=>basis_3Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'},
+            {:term=>'5Y', :type=>'basis_point', :value=>basis_5Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'}
+        ] }
+        let(:rates_by_date) { [{date: today, rates_by_term: rates_by_term}] }
+        it 'adds the index value for a given date as a column before each basis_point spread per term' do
+          allow(response_hash).to receive(:[]).with(:rates_by_date).and_return(rates_by_date)
+          allow(response_hash).to receive(:[]=)
           get :historical_price_indications, historical_price_collateral_type: 'standard', historical_price_credit_type: 'daily_prime'
-          expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:index, :value=>benchmark_index}, {:type=>:basis, :value=>spread_to_benchmark}])
-        end
-      end
-      describe '1m_libor' do
-        let(:rates_by_date) { double('RatesByDate') }
-        let(:rates_by_term) { double('RatesByTerm') }
-        let(:rate) {3}
-        let(:date) { today }
-        before do
-          allow(response_hash).to receive(:[]).with(:rates_by_date).and_return([rates_by_date])
-          allow(rates_by_date).to receive(:[]).with(:rates_by_term).and_return([rates_by_term])
-          allow(rates_by_date).to receive(:[]).with(:date).and_return(date)
-          allow(rates_by_term).to receive(:[]).with(:rate).and_return(rate)
-        end
-        it 'should set row to return rate' do
-          get :historical_price_indications, historical_price_collateral_type: 'standard', historical_price_credit_type: '1m_libor'
-          expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:basis, :value=>rate}])
+          expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_1Y}, {:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_2Y}, {:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_3Y}, {:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_5Y}])
         end
       end
       describe "view instance variables" do
@@ -496,12 +550,13 @@ RSpec.describe ReportsController, :type => :controller do
             end
           end
           describe 'rows' do
-            let(:row_1) {{date: 'some_date', rates_by_term: [{rate: 'rate_1'}, {rate: 'rate_2'}]}}
-            let(:row_2) {{date: 'some_other_date', rates_by_term: [{rate: 'rate_3'}, {rate: 'rate_4'}]}}
+            let(:row_1) {{date: 'some_date', rates_by_term: [{type: :index, value: 'rate_1'}, {type: :index, value: 'rate_2'}]}}
+            let(:row_2) {{date: 'some_other_date', rates_by_term: [{type: :index, value: 'rate_3'}, {type: :index, value: 'rate_4'}]}}
             let(:rows) {[row_1, row_2]}
-            let(:formatted_rows) {[{date: 'some_date', columns: [{type: :rate, value: 'rate_1'}, {type: :rate, value: 'rate_2'}]}, {date: 'some_other_date', columns: [{type: :rate, value: 'rate_3'}, {type: :rate, value: 'rate_4'}]}]}
+            let(:formatted_rows) {[{date: 'some_date', columns: [{type: :index, value: 'rate_1'}, {type: :index, value: 'rate_2'}]}, {date: 'some_other_date', columns: [{type: :index, value: 'rate_3'}, {type: :index, value: 'rate_4'}]}]}
             it 'should be an array of rows, each containing a row object with a date and a column array containing objects with a type and a rate value' do
               allow(response_hash).to receive(:[]).with(:rates_by_date).and_return(rows)
+              allow(response_hash).to receive(:[]=)
               get :historical_price_indications, historical_price_credit_type: 'frc'
               expect((assigns[:table_data])[:rows]).to eq(formatted_rows)
             end
@@ -528,6 +583,58 @@ RSpec.describe ReportsController, :type => :controller do
         expect(method_call).to eq(response)
       end
     end
+
+    describe '`add_rate_objects_for_all_terms` method' do
+      let(:terms) {RatesService::HISTORICAL_ARC_TERM_MAPPINGS.keys}
+      let(:rates_array) {[{date: '2014-04-01'.to_date, rates_by_term: [
+                          {"term"=>"2Y", "type"=>"basis_point", "value"=>105.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"}.with_indifferent_access,
+                          {"term"=>"3Y", "type"=>"basis_point", "value"=>193.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"}.with_indifferent_access,
+                          {"term"=>"5Y", "type"=>"basis_point", "value"=>197.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"}.with_indifferent_access
+                        ]}]}
+      let(:credit_type) {:'3m_libor'}
+      let(:method_call) {controller.send(:add_rate_objects_for_all_terms, rates_array, terms, credit_type)}
+      it 'adds `1d` to the terms array if passed :daily_prime as a credit_type' do
+        controller.send(:add_rate_objects_for_all_terms, rates_array, terms, :daily_prime)
+        expect(terms.first).to eq('1d')
+        expect(terms.length).to eq(RatesService::HISTORICAL_ARC_TERM_MAPPINGS.keys.length + 1)
+      end
+      it 'iterates through all rates_by_terms arrays for the rate_array and creates empty historic_rate_objects for any terms that are missing' do
+        method_call.each do |rate_by_date_object|
+          expect(rate_by_date_object[:rates_by_term].length).to eq(terms.length)
+        end
+        [:value, :day_count_basis, :pay_freq].each do |property|
+          method_call.each do |rate_by_date_object|
+            terms.length.times do |i|
+              if i == 0
+                expect(rate_by_date_object[:rates_by_term].select {|rate_object| rate_object[:term] == terms.first.to_s.upcase}.length).to be >= 1
+                (rate_by_date_object[:rates_by_term].select {|rate_object| rate_object[:term] == terms.first.to_s.upcase}).each do |rate_by_term_object|
+                  expect(rate_by_term_object[property]).to be_nil
+                end
+              else
+                expect(rate_by_date_object[:rates_by_term].select {|rate_object| rate_object[:term] == terms[i].to_s.upcase}.length).to be >= 1
+                (rate_by_date_object[:rates_by_term].select {|rate_object| rate_object[:term] == terms[i].to_s.upcase}).each do |rate_by_term_object|
+                  if property == :value
+                    expect(rate_by_term_object[property]).to be_kind_of(Float)
+                  else
+                    expect(rate_by_term_object[property]).to be_kind_of(String)
+                  end
+                end
+              end
+            end
+          end
+        end
+        method_call.each do |rate_by_date_object|
+          (rate_by_date_object[:rates_by_term].select {|rate_object| rate_object[:term] == terms[1].to_s.upcase}).each do |rate_by_term_object|
+            expect(rate_by_term_object[:type]).to eq('basis_point')
+          end
+        end
+      end
+    end
   end
 
 end
+
+[{:term=>"1Y", :type=>"index", :value=>nil, :day_count_basis=>nil, :pay_freq=>nil},
+{"term"=>"2Y", "type"=>"basis_point", "value"=>105.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"},
+{"term"=>"3Y", "type"=>"basis_point", "value"=>193.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"},
+{"term"=>"5Y", "type"=>"basis_point", "value"=>197.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"}]

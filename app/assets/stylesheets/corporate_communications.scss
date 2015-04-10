@@ -87,3 +87,11 @@
     }
   }
 }
+
+.corporate-communications-empty {
+  @extend %empty_table;
+  margin-top: 60px;
+  td.dataTables_empty {
+    @extend %empty_table_cell;
+  }
+}

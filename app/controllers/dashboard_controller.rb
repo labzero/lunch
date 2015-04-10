@@ -20,43 +20,44 @@ class DashboardController < ApplicationController
 
     @anticipated_activity = [
       [t('dashboard.anticipated_activity.dividend'), 44503, DateTime.new(2014,9,3), t('dashboard.anticipated_activity.estimated')],
-      [t('dashboard.anticipated_activity.collateral_rebalancing'), nil, DateTime.new(2014,9,2), ''],
+      [t('dashboard.anticipated_activity.advance_interest_payment'), -45345, DateTime.new(2014,9,2), ''],
       [t('dashboard.anticipated_activity.stock_purchase'), -37990, DateTime.new(2014,8,12), t('dashboard.anticipated_activity.estimated')],
     ]
 
-    if profile
-      profile.each {|key, value| profile[key] = '-' if value.nil?}
-    end
+    # @account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
+    sta_balance = [
+      [t('dashboard.your_account.table.balance'), profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
+    ]
 
-    @account_overview = [
-      [t('dashboard.your_account.table.balance'), profile ? profile[:sta_balance] : '-'],
-      [t('dashboard.your_account.table.credit_outstanding'), profile ? profile[:credit_outstanding] : '-']
+    credit_outstanding = [
+      [t('dashboard.your_account.table.credit_outstanding'), profile[:credit_outstanding]]
     ]
 
     remaining = [
-      [t('dashboard.your_account.table.remaining.available'), profile ? profile[:financial_available] : '-'],
-      [t('dashboard.your_account.table.remaining.leverage'), profile ? profile[:stock_leverage] : '-'],
+      {title: t('dashboard.your_account.table.remaining.title')},
+      [t('dashboard.your_account.table.remaining.available'), profile[:financial_available]],
+      [t('dashboard.your_account.table.remaining.capacity'), profile[:remaining_collateral_borrowing_capacity]],
+      [t('dashboard.your_account.table.remaining.leverage'), profile[:stock_leverage], nil, 2]
     ]
 
-    market_value = [
-      [t('dashboard.your_account.table.market_value.agency'), profile ? profile[:collateral_market_value_sbc_agency] : '-'],
-      [t('dashboard.your_account.table.market_value.aaa'),  profile ? profile[:collateral_market_value_sbc_aaa] : '-'],
-      [t('dashboard.your_account.table.market_value.aa'),  profile ? profile[:collateral_market_value_sbc_aa] : '-']
-    ]
-    borrowing_capacity = [
-      [t('dashboard.your_account.table.borrowing_capacity.standard'), profile ? profile[:borrowing_capacity_standard] : '-'],
-      [t('dashboard.your_account.table.borrowing_capacity.agency'), profile ? profile[:borrowing_capacity_sbc_agency] : '-'],
-      [t('dashboard.your_account.table.borrowing_capacity.aaa'), profile ? profile[:borrowing_capacity_sbc_aaa] : '-'],
-      [t('dashboard.your_account.table.borrowing_capacity.aa'), profile ? profile[:borrowing_capacity_sbc_aa] : '-'],
+    standard_program = [
+      {title: t('dashboard.your_account.table.standard_program.title')},
+      [t('dashboard.your_account.table.total_borrowing_capacity'), profile[:standard_total_borrowing_capacity]],
+      [t('dashboard.your_account.table.remaining_borrowing_capacity'), profile[:standard_remaining_borrowing_capacity]]
     ]
 
-    @sub_tables = {remaining: remaining, market_value: market_value, borrowing_capacity: borrowing_capacity}
+    sbc_program = [
+        {title: t('dashboard.your_account.table.sbc_program.title')},
+        [t('dashboard.your_account.table.total_borrowing_capacity'), profile[:sbc_total_borrowing_capacity]],
+        [t('dashboard.your_account.table.remaining_borrowing_capacity'), profile[:sbc_remaining_borrowing_capacity]]
+    ]
+
+    @account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining, standard_program: standard_program, sbc_program: sbc_program}
 
     @market_overview = [{
       name: 'Test',
       data: rate_service.overnight_vrc
-    }];
-
+    }]
 
     @pledged_collateral = member_balances.pledged_collateral
     @total_securities = member_balances.total_securities
@@ -90,20 +91,12 @@ class DashboardController < ApplicationController
   end
 
   def quick_advance_preview
-    rate_data = JSON.parse(params[:rate_data]).with_indifferent_access
-    advance_type = rate_data[:advance_type]
-    advance_term = rate_data[:advance_term]
-    advance_rate = rate_data[:advance_rate].to_f
-    preview = RatesService.new(request).quick_advance_preview(current_member_id, advance_type, advance_term, advance_rate)
+    preview = RatesService.new(request).quick_advance_preview(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f)
     render partial: 'quick_advance_preview', locals: preview # key names received from RatesService.new.quick_advance_preview must match variable names in partial
   end
 
   def quick_advance_confirmation
-    rate_data = JSON.parse(params[:rate_data]).with_indifferent_access
-    advance_type = rate_data[:advance_type]
-    advance_term = rate_data[:advance_term]
-    advance_rate = rate_data[:advance_rate].to_f
-    confirmation = RatesService.new(request).quick_advance_confirmation(current_member_id, advance_type, advance_term, advance_rate)
+    confirmation = RatesService.new(request).quick_advance_confirmation(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f)
     render json: confirmation # this will likely become a partial once we have designs for the confirmation dialog
   end
 

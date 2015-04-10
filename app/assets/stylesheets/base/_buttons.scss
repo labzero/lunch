@@ -58,15 +58,19 @@ $button-vertical-padding: 7px;
   }
 }
 
+%down-button-after {
+  display: inline-block;
+  @extend %icon-font;
+  content: "#{$icon-chevron}";
+  padding-left: 5px;
+  font-size: 0.733rem;
+}
+
 .down-button {
   @extend %button;
   color: $actionable-blue;
   &:after {
-    display: inline-block;
-    @extend %icon-font;
-    content: "#{$icon-chevron}";
-    padding-left: 5px;
-    font-size: 11px;
+    @extend %down-button-after;
   }
 }
 
@@ -89,16 +93,43 @@ $button-vertical-padding: 7px;
   @extend .primary-button;
 }
 
-.report-split-button {
+.split-button-left {
+  @extend .primary-button;
+  border-bottom-left-radius: $default-border-radius;
+  border-top-left-radius: $default-border-radius;
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+  vertical-align: top;
+}
+
+.split-button {
   font-size: 0; // get rid of whitespace between buttons
-  .report-button-right {
-    @extend .primary-button;
-    border-bottom-left-radius: $default-border-radius;
-    border-top-left-radius: $default-border-radius;
-    border-bottom-right-radius: 0;
-    border-top-right-radius: 0;
+}
+
+$split-button-height:   27px;
+.split-button-right {
+  &.dropdown {
+    &:after {
+      @extend %down-button-after;
+      background-color: transparent;
+      color: $actionable-blue;
+    }
+    width: auto;
+    height: auto;
+    line-height: 1;
+    .dropdown-selection {
+      width: auto;
+      height: auto;
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0;
+      color: $actionable-blue;
+    }
+    ul {
+      top: $split-button-height;
+      overflow: hidden;
+    }
   }
-  .report-drop-down-right {
+  &:not(.dropdown) {
     @extend .down-button;
     border-bottom-right-radius: $default-border-radius;
     border-top-right-radius: $default-border-radius;

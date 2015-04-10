@@ -10,6 +10,10 @@ class ReportsController < ApplicationController
   HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::IRDB_RATES_DATA]
   SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
 
+  before_action do
+    @member_name = current_member_name
+  end
+
   def index
     @reports = {
       price_indications: {
@@ -195,6 +199,14 @@ class ReportsController < ApplicationController
         end
       end
     end
+    @advances_detail[:advances_details].sort! { |a, b| a[:trade_date] <=> b[:trade_date] } if @advances_detail[:advances_details]
+
+    case params[:export_format]
+    when 'pdf'
+      send_data RenderReportPDFJob.new.perform(current_member_id, 'advances_detail', {start_date: @start_date}), filename: 'advances.pdf'
+    when 'xlsx'
+      send_data RenderReportExcelJob.new.perform(current_member_id, 'advances_detail', {start_date: @start_date}), filename: "advances-#{@start_date.strftime('%Y%m%d')}.xlsx"
+    end
   end
 
   def historical_price_indications
@@ -264,19 +276,15 @@ class ReportsController < ApplicationController
     case @credit_type.to_sym
     when :frc
       column_heading_keys = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.values
-      rate_display_type = :rate
+      terms = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.keys
     when :vrc
       column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
-      rate_display_type = :rate
-    when :'1m_libor', :'3m_libor', :'6m_libor'
-      table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading")
+      terms = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.keys
+    when *RatesService::ARC_CREDIT_TYPES
+      table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading") unless @credit_type == :daily_prime
       column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
-      rate_display_type = :basis
+      terms = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.keys
       # TODO add statement for 'embedded_cap' when it is rigged up
-    when :daily_prime
-      column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
-      benchmark_index_display_type = :index
-      spread_to_benchmark_display_type  = :basis
     end
 
     column_headings = []
@@ -295,18 +303,21 @@ class ReportsController < ApplicationController
     end
 
     rows = if @historical_price_indications[:rates_by_date]
+      @historical_price_indications[:rates_by_date] = add_rate_objects_for_all_terms(@historical_price_indications[:rates_by_date], terms, @credit_type.to_sym)
       if (@credit_type.to_sym == :daily_prime)
         @historical_price_indications[:rates_by_date].collect do |row|
           columns = []
-          row[:rates_by_term].each do |column|
-            columns <<  {type: benchmark_index_display_type, value: column[:benchmark_index]}
-            columns <<  {type: spread_to_benchmark_display_type, value: column[:spread_to_benchmark] }
+          # need to replicate rate data for display purposes
+          row[:rates_by_term].each_with_index do |column, i|
+            next if i == 0
+            columns <<  {type: row[:rates_by_term][0][:type].to_sym, value: row[:rates_by_term][0][:value]}
+            columns <<  {type: column[:type].to_sym, value: column[:value] }
           end
           {date: row[:date], columns: columns }
         end
       else
         @historical_price_indications[:rates_by_date].collect do |row|
-          {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: rate_display_type, value: column[:rate] } } }
+          {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: column[:type].to_sym, value: column[:value] } } }
         end
       end
     else
@@ -326,6 +337,26 @@ class ReportsController < ApplicationController
   def report_disabled?(report_flags)
     member_info = MembersService.new(request)
     member_info.report_disabled?(current_member_id, report_flags)
+  end
+
+  def add_rate_objects_for_all_terms(rates_by_date_array, terms, credit_type)
+    terms.unshift('1d') if credit_type == :daily_prime
+    new_array = []
+    rates_by_date_array.each do |rate_by_date_obj|
+      rate_by_date_obj = rate_by_date_obj
+      new_array << {date: rate_by_date_obj[:date], rates_by_term: []}
+      terms.each do |term|
+        rate_obj = rate_by_date_obj[:rates_by_term].select {|rate_obj| rate_obj[:term] == term.to_s.upcase}.first || {
+            term: term.to_s.upcase,
+            type: 'index', # placeholder type
+            value: nil,
+            day_count_basis: nil,
+            pay_freq: nil
+        }
+        new_array.last[:rates_by_term] << rate_obj.with_indifferent_access
+      end
+    end
+    new_array
   end
 
 end

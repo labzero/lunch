@@ -2,6 +2,7 @@
   $.fn.quickAdvanceTable = function(){
     var $table = this;
     var $initiateButton = $(".dashboard-quick-advance-flyout .initiate-quick-advance");
+    var $amountField = $('.dashboard-quick-advance-flyout input[name=amount]');
     var selected_rate = {};
 
     var $flyoutTableCells = $('.dashboard-quick-advance-flyout td.selectable-cell');
@@ -29,7 +30,7 @@
     // quick advance trigger
     $initiateButton.on('click', function(){
       if ($initiateButton.hasClass('active') && !$.isEmptyObject(selected_rate)) {
-        initiateQuickAdvance(JSON.stringify(selected_rate));
+        initiateQuickAdvance(selected_rate);
       };
     });
 
@@ -42,7 +43,7 @@
     };
 
     function initiateQuickAdvance(rate_data) {
-      $.post('/dashboard/quick_advance_preview', {rate_data: rate_data}, function(htmlResponse){
+      $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function(htmlResponse){
         var $flyoutBottomSection = $('.flyout-bottom-section');
         var $oldNodes = $('.flyout-top-section-body span, .flyout-bottom-section table, .flyout-bottom-section .initiate-quick-advance');
 
@@ -60,13 +61,13 @@
         // event listener and handler for .confirm-quick-advance button click
         $('.confirm-quick-advance').on('click', function(){
           setRateFromElementData($(this));
-          confirmQuickAdvance(JSON.stringify(selected_rate)); //
+          confirmQuickAdvance(selected_rate); //
         });
       });
     };
 
     function confirmQuickAdvance(rate_data) {
-      $.post('/dashboard/quick_advance_confirmation', {rate_data: rate_data}, function(jsonResponse){
+      $.post('/dashboard/quick_advance_confirmation', packageParameters(rate_data), function(jsonResponse){
         // we're going to render a partial here once we get the designs for this confirmation
         // in the meantime, just replacing some nodes in .quick-advance-preview to display confirmation number and allow flyout close
         $('.quick-advance-preview').addClass('quick-advance-confirmation');
@@ -86,6 +87,10 @@
       selected_rate['advance_type'] = $element.data('advance-type');
       selected_rate['advance_rate'] = $element.data('advance-rate');
     };
+
+    function packageParameters(rate_data) {
+      return $.extend({amount: $amountField.val()}, rate_data)
+    }
 
   };
 }( jQuery ));

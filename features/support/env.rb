@@ -11,7 +11,7 @@ require 'i18n'
 I18n.load_path += Dir.glob('config/locales/*.yml')
 
 require 'active_support/all'
-Time.zone = 'Pacific Time (US & Canada)' # set Time.zone for when cukes run with custom_host
+Time.zone = ENV['TIMEZONE'] || 'Pacific Time (US & Canada)'
 
 is_parallel_primary = ENV['TEST_ENV_NUMBER'] == ''
 is_parallel_secondary = ENV['TEST_ENV_NUMBER'] && ENV['TEST_ENV_NUMBER'].length > 0

@@ -1,0 +1,47 @@
+xlsx_package.use_shared_strings = true
+workbook = xlsx_package.workbook
+workbook.styles do |styles|
+  date_format = styles.add_style format_code: 'mm/dd/yyyy'
+  open_date_format = styles.add_style alignment: {horizontal: :right}
+  currency_format = styles.add_style num_fmt: 2
+  interest_format = styles.add_style
+
+  workbook.add_worksheet(name: t('reports.credit.advances_detail.title')) do |sheet|
+    sheet.add_row [
+      t('reports.pages.advances_detail.trade_date'),
+      t('reports.pages.advances_detail.funding_date'),
+      t('reports.pages.advances_detail.maturity_date'),
+      t('reports.pages.advances_detail.advance_number'),
+      t('reports.pages.advances_detail.advance_type'),
+      t('reports.pages.advances_detail.current_par'),
+      t('reports.pages.advances_detail.interest_payment_frequency'),
+      t('reports.pages.advances_detail.day_count_basis'),
+      t('reports.pages.advances_detail.interest_rate'),
+      t('reports.pages.advances_detail.accrued_interest'),
+      t('reports.pages.advances_detail.next_interest_payment_date'),
+      t('reports.pages.advances_detail.estimated_next_payment'),
+      t('reports.pages.advances_detail.discount_program')
+    ]
+    @advances_detail[:advances_details].each do |details|
+      styles = [date_format, date_format, date_format, nil, nil, currency_format, nil, nil, interest_format, currency_format, date_format, currency_format, nil]
+      if details[:maturity_date].blank?
+        styles[2] = open_date_format
+      end
+      sheet.add_row [
+        details[:trade_date].to_date,
+        details[:funding_date].to_date,
+        details[:maturity_date].blank? ? t('global.open') : details[:maturity_date].to_date,
+        details[:advance_number],
+        details[:advance_type],
+        details[:current_par],
+        details[:interest_payment_frequency],
+        details[:day_count_basis],
+        details[:interest_rate],
+        details[:accrued_interest],
+        details[:next_interest_pay_date].to_date,
+        details[:estimated_next_interest_payment],
+        details[:discount_program] || '--'
+      ], style: styles
+    end
+  end
+end

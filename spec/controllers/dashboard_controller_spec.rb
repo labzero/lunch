@@ -12,6 +12,11 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(response.body).to render_template("index")
     end
+    it 'should assign @account_overview' do
+      get :index
+      expect(assigns[:account_overview]).to be_kind_of(Hash)
+      expect(assigns[:account_overview].length).to eq(5)
+    end
     it "should assign @market_overview" do
       get :index
       expect(assigns[:market_overview]).to be_present
@@ -125,6 +130,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:advance_term) {'some term'}
     let(:advance_type) {'some type'}
     let(:advance_rate) {'0.17'}
+    let(:amount) { Random.rand(100000000) }
     it_behaves_like 'a user required action', :post, :quick_advance_preview
     it "should render the quick_advance_preview partial" do
       post :quick_advance_preview, rate_data: {advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate}.to_json
@@ -133,8 +139,8 @@ RSpec.describe DashboardController, :type => :controller do
     it "should call the RatesService object's `quick_advance_preview` method with the POSTed advance_type, advance_term and rate" do
       stub_const("MEMBER_ID", 750)
       expect(RatesService).to receive(:new).and_return(rate_service_instance)
-      expect(rate_service_instance).to receive(:quick_advance_preview).with(MEMBER_ID, advance_type, advance_term, advance_rate.to_f)
-      post :quick_advance_preview, rate_data: {advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate}.to_json
+      expect(rate_service_instance).to receive(:quick_advance_preview).with(MEMBER_ID, amount, advance_type, advance_term, advance_rate.to_f)
+      post :quick_advance_preview, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount
     end
   end
 
@@ -145,14 +151,15 @@ RSpec.describe DashboardController, :type => :controller do
     let(:advance_term) {'some term'}
     let(:advance_type) {'some type'}
     let(:advance_rate) {'0.17'}
-    let(:json_response) {{json: "response"}.to_json}
+    let(:amount) { Random.rand(100000000) }
+    let(:json_response) { {json: "response"} }
     it_behaves_like 'a user required action', :post, :quick_advance_confirmation
     it "should call the RatesService object's `quick_advance_confirmation` method with the POSTed advance_type, advance_term and rate and return a json response" do
       stub_const("MEMBER_ID", 750)
       expect(RatesService).to receive(:new).and_return(rate_service_instance)
-      expect(rate_service_instance).to receive(:quick_advance_confirmation).with(MEMBER_ID, advance_type, advance_term, advance_rate.to_f).and_return(json_response)
-      post :quick_advance_confirmation, rate_data: {advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate}.to_json
-      expect(response.body).to eq(json_response)
+      expect(rate_service_instance).to receive(:quick_advance_confirmation).with(MEMBER_ID, amount, advance_type, advance_term, advance_rate.to_f).and_return(json_response)
+      post :quick_advance_confirmation, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount
+      expect(response.body).to eq(json_response.to_json)
     end
   end
 

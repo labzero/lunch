@@ -1,5 +1,7 @@
 module CustomFormattingHelper
   include ActionView::Helpers::TagHelper
+  include ActionView::Helpers::NumberHelper
+  
   def fhlb_formatted_currency(number, options={})
     options.reverse_update({html: true, negative_format: '(%u%n)', force_unit: false})
     return nil if number.nil? && options[:optional_number]
@@ -94,6 +96,6 @@ module CustomFormattingHelper
     unit_class = content_tag(:span, unit, class: 'alignleft')
     number_class = content_tag(:span, fhlb_formatted_number(number, precision: precision), class: 'alignright')
     inner_content = number.blank?? number_class : unit_class + number_class
-    content_tag(:span, inner_content, class: 'currency_alignment')
+    content_tag(:span, inner_content, class: 'currency-alignment')
   end
 end

@@ -1,0 +1,51 @@
+[
+  {
+    "advance_maturity": "1 Year",
+    "1_month_libor": 6,
+    "3_month_libor": 4,
+    "6_month_libor": 11,
+    "prime": -295
+  },
+  {
+    "advance_maturity": "2 Years",
+    "1_month_libor": 11,
+    "3_month_libor": 0,
+    "6_month_libor": -6,
+    "prime": -286
+  },
+  {
+    "advance_maturity": "2 Years",
+    "1_month_libor": 11,
+    "3_month_libor": 0,
+    "6_month_libor": -6,
+    "prime": -286
+  },
+  {
+    "advance_maturity": "3 Years",
+    "1_month_libor": 6,
+    "3_month_libor": 4,
+    "6_month_libor": -3,
+    "prime": -278
+  },
+  {
+    "advance_maturity": "5 Years",
+    "1_month_libor": 26,
+    "3_month_libor": 14,
+    "6_month_libor": 6,
+    "prime": -262
+  },
+  {
+    "advance_maturity": "7 Years",
+    "1_month_libor": 47,
+    "3_month_libor": 34,
+    "6_month_libor": 26,
+    "prime": -218
+  },
+  {
+    "advance_maturity": "10 Years",
+    "1_month_libor": 65,
+    "3_month_libor": 54,
+    "6_month_libor": 46,
+    "prime": -218
+  }
+]

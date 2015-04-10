@@ -7,10 +7,16 @@
         %h1= t('global.messages')
         %h2= t('messages.receive_via_email')
         %p= t('messages.edit_email_settings_html', url: settings_path)
-        %table.table-striped.corporate-communications-index
-          - @messages.each do |message|
-            %tr
-              %td
-                %a{href: corporate_communication_path(@filter, message)}
-                  %h3= message[:title]
-                  %small= message[:date_sent].strftime('%d %b %Y')
+        -if @sidebar_options.first[2]
+          %table.corporate-communications-empty
+            %tbody
+              %tr
+                %td.dataTables_empty= t('errors.no_messages')
+        -else
+          %table.table-striped.corporate-communications-index
+            - @messages.each do |message|
+              %tr
+                %td
+                  %a{href: corporate_communication_path(@filter, message)}
+                    %h3= message[:title]
+                    %small= fhlb_date_standard_numeric(message[:date_sent])

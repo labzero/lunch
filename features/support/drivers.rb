@@ -31,7 +31,7 @@ def sauce_name
   ENV['JOB_NAME'] || "Local Dev (#{`whoami`.strip})"
 end
 
-base_opts = {:username => SAUCE_USERNAME, :access_key => SAUCE_ACCESS_KEY, :build => sauce_build, :name => sauce_name, :'parent-tunnel' => (ENV['SAUCE_PARENT_TUNNEL'] || nil), :'selenium-version' => ENV['SAUCE_SELENIUM_VERSION'] || nil, :'iedriver-version' => ENV['SAUCE_IEDRIVER_VERSION'] || nil}
+base_opts = {:username => SAUCE_USERNAME, :access_key => SAUCE_ACCESS_KEY, :build => sauce_build, :name => sauce_name, :'parent-tunnel' => (ENV['SAUCE_PARENT_TUNNEL'] || nil), :'tunnel-identifier' => (ENV['SAUCE_TUNNEL_IDENTIFIER'] || nil), :'selenium-version' => ENV['SAUCE_SELENIUM_VERSION'] || nil, :'iedriver-version' => ENV['SAUCE_IEDRIVER_VERSION'] || nil}
 
 SAUCE_CONNECT_URL = ENV['REMOTE'] == 'true' ? "http://#{SAUCE_USERNAME}:#{SAUCE_ACCESS_KEY}@ondemand.saucelabs.com:80/wd/hub" : "http://localhost:#{SAUCE_PORT}/wd/hub"
 
@@ -69,4 +69,8 @@ Capybara.register_driver :sauce_chrome_win7 do |app|
                                  :browser => :remote,
                                  :url => SAUCE_CONNECT_URL,
                                  :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.chrome(caps))
+end
+
+Capybara.register_driver :rack_test do |app|
+  Capybara::RackTest::Driver.new(app, follow_redirects: true, respect_data_method: true)
 end

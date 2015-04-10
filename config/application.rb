@@ -20,7 +20,7 @@ module FhlbMember
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
 
-    config.time_zone = 'Pacific Time (US & Canada)'
+    config.time_zone = ENV['TIMEZONE'] || 'Pacific Time (US & Canada)'
 
     config.mapi = ActiveSupport::OrderedOptions.new
     config.mapi.endpoint = ENV['MAPI_ENDPOINT'] || 'http://localhost:3100/mapi'
@@ -38,5 +38,6 @@ module FhlbMember
       lambda { |request| request.session["warden.user.user.key"].nil? ? "user_id=NONE" : "user_id=#{request.session["warden.user.user.key"][0][0]}"}
     ]
     config.logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new(Rails.root.join('log', "#{Rails.env}.log"), 'daily'))
+    config.active_job.queue_adapter = :resque
   end
 end

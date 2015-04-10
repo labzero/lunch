@@ -2,7 +2,7 @@
 = mail_to(email, class: 'dashboard-contact') do
   .dashboard-contact-avatar{style: picture_url ? "background-image: url(#{picture_url})" : nil}
   .dashboard-contact-details
-    = render 'dashboard/dashboard_icon', icon: :phone, alt_text: t('dashboard.contacts.icon_alt_text')
-    %h2= title
-    %p= name
+    = render 'dashboard/dashboard_icon', icon: :envelope, alt_text: t('dashboard.contacts.icon_alt_text')
+    %h2= name
+    %p= title
     %p= fhlb_formatted_phone_number(phone_number)

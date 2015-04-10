@@ -24,6 +24,16 @@
   }
 }
 
+%dashboard-module-link {
+  @extend %typography-header-nav;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: $actionable-blue;
+  border: none;
+  background-color: white;
+  float: right;
+}
+
 .dashboard-module {
   @extend %dashboard-module-base-styling;
   h1 {
@@ -35,6 +45,10 @@
   }
   header {
     @extend %dashboard-module-header;
+    a {
+      @extend %dashboard-module-link;
+      line-height: 1.6rem;
+    }
   }
   .icon-alt-text {
     overflow: hidden;
@@ -78,6 +92,16 @@
   }
 }
 
+.table-dashboard-previous-activity {
+  margin-bottom: 0;
+}
+
+.table-dashboard-anticipated-activity {
+  td .currency-alignment {
+    min-width: 6em;
+  }
+}
+
 .table-dashboard-quick-reports {
   @extend %table-striped;
   margin-top: 22px;
@@ -117,7 +141,7 @@
     margin: 0 0 20px 0;
     padding: 0;
     &:last-child {
-      margin-bottom: 30px;
+      margin-bottom: 5px;
     }
   }
 }
@@ -224,44 +248,85 @@ p.dashboard-vrc-overnight-message {
   h2 {
     margin: 0;
   }
+  .dashboard-module-content > div {
+    margin-bottom: 15px;
+  }
 }
 
 $breakdown-table-label-width: 195px;
 $breakdown-table-currency-width: 10px;
-.dashboard-account-breakdown-table {
-  @extend %typography-dashboard-account-summary;
-  th {
-    text-align: left;
+.dashboard-account-summary {
+  table {
+    @extend %typography-dashboard-account-summary;
+    th {
+      @extend %typography-dashboard-account-summary;
+      background: $white;
+      border-top: 1px solid $secondary-gray;
+      text-align: left;
+    }
+    th, .label, .currency, .value {
+      padding: 5px 0;
+      box-sizing: border-box;
+    }
+    .label, .footnote {
+      width: $breakdown-table-label-width;
+      padding-left: 10px;
+    }
+    .footnote-row td {
+      padding-bottom: 0;
+    }
+    .footnote {
+      @extend %typography-footnote;
+      padding-bottom: 5px;
+    }
+    .currency {
+      width: $breakdown-table-currency-width;
+      text-align: right;
+    }
+    .value {
+      text-align: right;
+      padding-right: 10px;
+    }
+    .sub-table {
+      background: $white;
+      margin-top: 10px;
+      border-top: 1px solid $secondary-gray;
+      border-bottom: 1px solid $secondary-gray;
+    }
   }
-  th, .label, .currency, .value {
-    padding: 5px 0;
-    box-sizing: border-box;
-  }
-  .label {
-    width: $breakdown-table-label-width;
-    padding-left: 5px;
-  }
-  .currency {
-    width: $breakdown-table-currency-width;
-    text-align: right;
-  }
-  .value {
-    text-align: right;
-    padding-right: 10px;
-  }
-  th {
-    background: $white;
-    border-top: 1px solid $secondary-gray;
-  }
-  .sub-table td.label {
-    padding-left: 10px;
+  .borrowing-capacity-note {
+    padding: 10px;
+    a {
+      color: $actionable-blue;
+      text-decoration: none;
+    }
   }
 }
 
 .dashboard-module-market {
   @extend %dashboard-module-chromeless;
-  .dashboard-module-content {
+  .dashboard-module-content, header {
     padding-bottom: 0;
+  }
+}
+
+.dashboard-market-graph-toggle {
+  @extend %typography-table-heading;
+  text-align: right;
+  a {
+    text-decoration: none;
+    color: $actionable-blue;
+    &.active {
+      cursor: default;
+      color: $text-color;
+    }
+    &:first-child {
+      padding-right: 10px;
+      border-right: 1px solid $secondary-gray;
+    }
+    &:last-child {
+      padding-left: 10px;
+    }
   }
 }
 
@@ -396,7 +461,7 @@ $breakdown-table-currency-width: 10px;
       bottom: 20px;
       left: 20px;
     }
-    .report-split-button {
+    .split-button {
       position: absolute;
       bottom: 20px;
       right: 20px;
@@ -409,16 +474,7 @@ $breakdown-table-currency-width: 10px;
     width: 165px;
   }
   a {
-    text-transform: uppercase;
-    font-size: 0.867rem;
-    color: $actionable-blue;
-    border: none;
-    background-color: white;
-    float: right;
-    &:after {
-      @extend %icon-font;
-      content: " #{$icon-arrow-right}";
-    }
+    @extend %dashboard-module-link;
   }
 }
 

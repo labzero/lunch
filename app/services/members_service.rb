@@ -48,6 +48,12 @@ class MembersService < MAPIService
     (disabled_flags & report_flags).length > 0
   end
 
+  def member(member_id)
+    member_id = member_id.to_i
+    members = all_members
+    members.find {|member| member[:id] == member_id} if members
+  end
+
   def all_members
     begin
       response = @connection["member/"].get
