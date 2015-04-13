@@ -14,12 +14,12 @@ Scenario: Member sees Capital Stock Activity Statement
   Then I should see report summary data
   And I should see a report table with multiple data rows
 
-@smoke
+@smoke @jira-mem-353
 Scenario: Member sorts the Capital Stock Activity Statement by date
   Given I am on the "Capital Stock Activity Statement" report page
-  And I should see the "Date" column values in "ascending" order
-  When I click the "Date" column heading
-  Then I should see the "Date" column values in "descending" order
+  And I should see the "Issue Date" column values in "ascending" order
+  When I click the "Issue Date" column heading
+  Then I should see the "Issue Date" column values in "descending" order
 
 @smoke
 Scenario: Member sorts the Capital Stock Activity Statement by certificate sequence
@@ -28,6 +28,14 @@ Scenario: Member sorts the Capital Stock Activity Statement by certificate seque
   Then I should see the "Certificate Sequence" column values in "ascending" order
   And I click the "Certificate Sequence" column heading
   Then I should see the "Certificate Sequence" column values in "descending" order
+
+@smoke @jira-mem-353
+Scenario: Member sorts the Capital Stock Activity Statement by outstanding shares
+  Given I am on the "Capital Stock Activity Statement" report page
+  When I click the "Outstanding Shares" column heading
+  Then I should see the "Outstanding Shares" column values in "ascending" order
+  And I click the "Outstanding Shares" column heading
+  Then I should see the "Outstanding Shares" column values in "descending" order
 
 Scenario: Member sees date picker when interacting with date field
   Given I am on the "Capital Stock Activity Statement" report page

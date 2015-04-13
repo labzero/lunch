@@ -87,12 +87,16 @@ When(/^I click the "(.*?)" column heading$/) do |column_heading|
                 I18n.t('reports.pages.advances_detail.trade_date')
               when 'Date'
                 I18n.t('global.date')
+              when 'Issue Date'
+                I18n.t('global.issue_date')
               when 'Settlement Date'
                 I18n.t('reports.pages.cash_projections.settlement_date')
+              when 'Outstanding Shares'
+                I18n.t('reports.pages.capital_stock_activity.shares_outstanding')
               else
                 raise Capybara::ExpectationNotMet, 'unknown column heading passed as argument'
             end
-  page.find('th', text: heading).click
+  page.find('.report-table th', text: /^#{Regexp.quote(heading)}$/).click
 end
 
 Then(/^I should see a "(.*?)" for the current month to date$/) do |report_type|
