@@ -162,7 +162,7 @@
   }
 }
 
-.report_info_indent {
+.report-info-indent {
   margin-left: 40px;
 }
 
@@ -510,13 +510,13 @@
   }
 }
 
-.standard_frc_table, .standard_vrc_table, .sbc_frc_table, .sbc_vrc_table {
+.standard-frc-table, .standard-vrc-table, .sbc-frc-table, .sbc-vrc-table {
   th {
     width: 64px;
   }
 }
 
-.standard_vrc_table, .sbc_vrc_table {
+.standard-vrc-table, .sbc-vrc-table {
   width: auto;
   &.report-table {
     th:first-child {
@@ -525,7 +525,7 @@
   }
 }
 
-.current_price_vrc_table {
+.current-price-vrc-table {
   &.report-table {
     width: 480px;
     th {
@@ -539,7 +539,7 @@
   }
 }
 
-.current_price_frc_table {
+.current-price-frc-table {
   &.report-table {
     width: 480px;
     th {
@@ -573,7 +573,7 @@
   }
 }
 
-.current_price_arc_table {
+.current-price-arc-table {
   &.report-table {
     width: 380px;
     td {
@@ -584,7 +584,7 @@
   }
 }
 
-.current_price_arc_sbc_table {
+.current-price-arc-sbc-table {
   &.report-table {
     width: 310px;
     td {
@@ -595,7 +595,7 @@
   }
 }
 
-.sta_rate_table {
+.sta-rate-table {
   &.report-table {
     width: 350px;
     td {
@@ -607,21 +607,11 @@
   }
 }
 
-.interest_rate_resets_table {
-  &.report-table {
-    width: 600px;
-    td {
-      &:nth-child(1) {
-        text-align: left;
-      }
-      &:nth-child(2) {
-        text-align: left;
-      }
-    }
-  }
+.interest-rate-resets-table {
+  width: 600px;
 }
 
-.standard_1m_libor_table, .standard_3m_libor_table, .standard_6m_libor_table, .standard_daily_prime_table, .sbc_1m_libor_table, .sbc_3m_libor_table, .sbc_6m_libor_table, .current_price_vrc_table {
+.standard-1m_libor-table, .standard-3m_libor-table, .standard-6m_libor-table, .standard-daily_prime-table, .sbc-1m_libor-table, .sbc-3m_libor-table, .sbc-6m_libor-table, .current-price-vrc-table {
   width: auto;
   border-top: none;
   border-left: none;

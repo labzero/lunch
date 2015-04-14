@@ -276,24 +276,24 @@ def report_dates_in_range? (start_date, end_date, date_format="%m/%d/%Y")
   end
 end
 
-Then(/^I should see vrc current price indications report$/) do
-  page.assert_selector('.current_price_vrc_table tbody tr')
+Then(/^I should see VRC current price indications report$/) do
+  page.assert_selector('.current-price-vrc-table tbody tr')
 end
 
-Then(/^I should see frc current price indications report$/) do
-  page.assert_selector('.current_price_frc_table tbody tr')
+Then(/^I should see FRC current price indications report$/) do
+  page.assert_selector('.current-price-frc-table tbody tr')
 end
 
-Then(/^I should see arc current price indications report$/) do
-  page.assert_selector('.current_price_arc_table tbody tr')
+Then(/^I should see ARC current price indications report$/) do
+  page.assert_selector('.current-price-arc-table tbody tr')
 end
 
-Then(/^I should see sta rates report$/) do
-  page.assert_selector('.sta_rate_table tbody tr')
+Then(/^I should see STA rates report$/) do
+  page.assert_selector('.sta-rate-table tbody tr')
 end
 
-Then(/^I should see interest rate resets report$/) do
-  page.assert_selector('.interest_rate_resets_table tbody tr')
+Then(/^I should see Interest Rate Resets report$/) do
+  page.assert_selector('.interest-rate-resets-table tbody tr')
 end
 
 

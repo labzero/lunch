@@ -18,4 +18,4 @@ Scenario: Visit interest rate resets from header link
 Scenario: Visiting the Interest Rate Resets Report Page
   Given I am on the "Interest Rate Resets" report page
   Then I should see "The Bank processed the following interest rate resets effective"
-  And I should see interest rate resets report
+  And I should see Interest Rate Resets report

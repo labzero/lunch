@@ -1,11 +1,11 @@
 - @html_class = 'white-background'
 - @page_title = t('reports.meta_title')
-.report.price-indications-report.row
+.report.row
   .report-header
     %h1= t('reports.pages.interest_rate_resets.title')
     = render 'reports_header_buttons'
   .report-main-body
     %h2.report-table-title= t('reports.pages.interest_rate_resets.info', date: fhlb_date_long_alpha(@start_date))
-    = render 'reports/reports_table', table_class: 'interest_rate_resets_table', table_data: @irr_table_data, sortable: false
+    = render 'reports/reports_table', table_class: 'interest-rate-resets-table', table_data: @irr_table_data, sortable: false
     %small
       %p= t('reports.pages.interest_rate_resets.questions', phone_number: fhlb_formatted_phone_number('4156162559'))
