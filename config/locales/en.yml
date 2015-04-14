@@ -567,6 +567,15 @@ en:
         par: Original Par Value
         coupon_rate: Coupon Rate
         total_net: Total Net Amount
+      interest_rate_resets:
+        title: Interest Rate Resets
+        info: "The Bank processed the following interest rate resets effective %{date}"
+        questions: If you have any questions, contact %{phone_number}
+        effective_date: Effective Date
+        advance_number: Advance Number
+        prior_rate: Prior Rate (%)
+        new_rate: New Rate (%)
+        next_reset: Next Reset
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.

@@ -37,7 +37,8 @@ class ReportsController < ApplicationController
         },
         interest_rate: {
           updated: t('global.daily'),
-          available_history: t('reports.history.months12')
+          available_history: t('reports.history.months12'),
+          route: reports_interest_rate_resets_path
         },
         letters_of_credit: {
           updated: t('global.daily'),
@@ -454,6 +455,30 @@ class ReportsController < ApplicationController
       raise StandardError, "There has been an error and ReportsController#cash_projections has returned nil. Check error logs." if @cash_projections.blank?
     end
     @as_of_date = @cash_projections[:as_of_date].to_date if @cash_projections[:as_of_date]
+  end
+
+  def interest_rate_resets
+    rate_service = RatesService.new(request)
+    @start_date = (Time.zone.now.to_date).to_date
+    column_headings = [t('reports.pages.interest_rate_resets.effective_date'), t('reports.pages.interest_rate_resets.advance_number'), t('reports.pages.interest_rate_resets.prior_rate'), t('reports.pages.interest_rate_resets.new_rate'), t('reports.pages.interest_rate_resets.next_reset')]
+    irr_data = rate_service.interest_rate_resets
+    rows = irr_data.collect do |row|
+      columns = []
+      row.each do |value|
+        if value[0]=='prior_rate' || value[0]=='new_rate'
+          columns << {type: :index, value: value[1]}
+        elsif value[0]=='effective_date'
+          columns << {type: :date, value: value[1]}
+        else
+          columns << {value: value[1]}
+        end
+      end
+      {columns: columns}
+    end
+    @irr_table_data = {
+        :column_headings => column_headings,
+        :rows => rows
+    }
   end
 
   private
