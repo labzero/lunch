@@ -1,6 +1,6 @@
 (function( $ ) {
 
-  $.fn.flyout = function(topContent, bottomContent) {
+  $.fn.flyout = function(topContent, bottomContent, useReferenceElement) {
     var $flyout = $('.flyout');
     var $flyoutBackground = $('.flyout-background');
     var $flyoutTopSection = $flyout.find('.flyout-top-section');
@@ -8,14 +8,22 @@
 
     // initialize flyout by appending elements to the .top-section and .bottom-section.
     $flyoutTopSection.append(topContent);
-    $flyoutBottomSection.append(bottomContent);
+    if (bottomContent) {
+      $flyoutBottomSection.append(bottomContent);
+    } else {
+      $flyoutBottomSection.remove();
+    }
+
 
     // give flyout appropriate width and position relative to its reference element
-    $flyoutTopSection.width(this.width());
-    $flyout.css({
-      'margin-top': this.position()['top'],
-      'margin-left': this.position()['left']
-    });
+    if (useReferenceElement) {
+      $flyoutTopSection.width(this.width());
+      $flyout.css({
+        'margin-top': this.position()['top'],
+        'margin-left': this.position()['left']
+      });
+    };
+
 
     // fade in the background and show the flyout
     $flyoutBackground.fadeIn();

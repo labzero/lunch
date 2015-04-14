@@ -89,6 +89,8 @@ en:
     start_date: Start Date
     end_date: End Date
     shares_outstanding: Shares Outstanding
+    prepare_download: Please wait while we prepare your download. This may take up to 60 seconds.
+    cancel_download: Cancel Download
     dates:
       1_day: 1 day
       1_month: 1 mo
