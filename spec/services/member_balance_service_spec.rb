@@ -106,6 +106,14 @@ describe MemberBalanceService do
         expect(capital_stock_activity[:total_credits]).to eq(1444)
         expect(capital_stock_activity[:total_debits]).to eq(4289)
       end
+      it 'should calculate a running total of the shares for each activity' do
+        last_outstanding = capital_stock_activity[:start_balance]
+        expect(capital_stock_activity[:activities].length).to be >= 0 # just so we fail if we have no activities, otherwise we'd test nothing
+        capital_stock_activity[:activities].each do |activity|
+          expect(activity[:outstanding_shares]).to eq(last_outstanding + activity[:credit_shares] - activity[:debit_shares])
+          last_outstanding = activity[:outstanding_shares]
+        end
+      end
     end
 
     describe 'activities hash sad path' do

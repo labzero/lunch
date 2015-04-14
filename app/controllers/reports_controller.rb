@@ -64,10 +64,6 @@ class ReportsController < ApplicationController
         }
       },
       capital_stock: {
-        trial_balance: {
-          updated: t('global.daily'),
-          available_history: t('global.all')
-        },
         activity: {
           updated: t('global.daily'),
           available_history: t('reports.history.months12'),

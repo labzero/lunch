@@ -138,6 +138,7 @@ class MemberBalanceService < MAPIService
     data[:activities] = activities[:activities]
 
     # Tally credits and debits, as the distinction is not made by MAPI. Also format date.
+    outstanding = data[:start_balance]
     data[:total_credits] = 0
     data[:total_debits] = 0
     data[:activities].each_with_index do |row, i|
@@ -149,9 +150,11 @@ class MemberBalanceService < MAPIService
         if row[:dr_cr] == 'C'
           data[:activities][i][:credit_shares] = shares
           data[:total_credits] += shares
+          outstanding += shares
         elsif row[:dr_cr] == 'D'
           data[:activities][i][:debit_shares] = shares
           data[:total_debits] += shares
+          outstanding -= shares
         else
           raise StandardError, "MemberBalanceService.capital_stock_activity returned '#{row[:dr_cr]}' for share type on row number #{i}. Share type should be either 'C' for Credit or 'D' for Debit."
         end
@@ -159,6 +162,7 @@ class MemberBalanceService < MAPIService
         Rails.logger.warn(e)
         return nil
       end
+      data[:activities][i][:outstanding_shares] = outstanding
     end
     data
   end

@@ -37,6 +37,7 @@ en:
     all: All
     current_day: Current Day
     date: Date
+    issue_date: Issue Date
     total: Total
     totals: Totals
     transaction_type: Transaction Type
@@ -490,6 +491,7 @@ en:
         certificate_sequence: Certificate Sequence
         debit_shares: "Debits: Number of Shares"
         credit_shares: "Credits: Number of Shares"
+        shares_outstanding: Shares Outstanding
       borrowing_capacity_summary:
         total_borrowing_capacity_heading: "Total Borrowing Capacity:"
         remaining_borrowing_capacity_heading: "Remaining Borrowing Capacity:"
