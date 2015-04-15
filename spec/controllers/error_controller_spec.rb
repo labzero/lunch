@@ -6,9 +6,9 @@ RSpec.describe ErrorController, :type => :controller do
       expect{get :standard_error}.to raise_error(StandardError)
     end
 
-    describe 'in the non-test env' do
+    describe 'in the production env' do
       before do
-        allow(Rails.env).to receive(:test?).and_return(false)
+        allow(Rails.env).to receive(:production?).and_return(true)
       end
       it 'passes the exception to the `handle_exception` method' do
         expect(controller).to receive(:handle_exception)

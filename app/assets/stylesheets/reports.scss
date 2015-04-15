@@ -162,7 +162,7 @@
   }
 }
 
-.report_info_indent {
+.report-info-indent {
   margin-left: 40px;
 }
 
@@ -510,128 +510,99 @@
   }
 }
 
-.standard_frc_table, .standard_vrc_table, .sbc_frc_table, .sbc_vrc_table {
+.report-dividend-statement {
+  .table-dividend-summary {
+    width: 500px;
+    td:last-of-type {
+      width: 120px;
+    }
+  }
+  .table-dividend-details {
+    th {
+      &:last-child {
+        width: 100px;
+      }
+    }
+    tfoot td:first-child {
+      border-right: none;
+    }
+  }
+}
+
+.standard-frc-table, .standard-vrc-table, .sbc-frc-table, .sbc-vrc-table {
   th {
     width: 64px;
   }
 }
 
-.standard_vrc_table, .sbc_vrc_table {
+.standard-vrc-table, .sbc-vrc-table {
   width: auto;
-  &.report-table {
-    th:first-child {
-      width: 85px;
+  th:first-child {
+    width: 85px;
+  }
+}
+
+.current-price-vrc-table {
+  width: 480px;
+  th {
+    &:nth-child(2) {
+      min-width: 150px;
+    }
+    &:nth-child(3) {
+      min-width: 140px;
     }
   }
 }
 
-.current_price_vrc_table {
-  &.report-table {
-    width: 480px;
-    th {
-      &:nth-child(2) {
-        min-width: 150px;
-      }
-      &:nth-child(3) {
-        min-width: 140px;
-      }
+.current-price-frc-table {
+  width: 480px;
+  th {
+    &:nth-child(2) {
+      min-width: 90px;
+    }
+    &:nth-child(3) {
+      min-width: 110px;
+    }
+    &:nth-child(4) {
+      min-width: 100px;
     }
   }
 }
 
-.current_price_frc_table {
-  &.report-table {
-    width: 480px;
-    th {
-      &:nth-child(2) {
-        min-width: 90px;
-      }
-      &:nth-child(3) {
-        min-width: 110px;
-      }
-      &:nth-child(4) {
-        min-width: 100px;
-      }
-    }
-    td {
-      &:nth-child(1) {
-        text-align: left;
-      }
-      &:nth-child(2) {
-        text-align: left;
-      }
-      &:nth-child(3) {
-        text-align: right;
-      }
-      &:nth-child(4) {
-        text-align: right;
-      }
-      &:nth-child(5) {
-        text-align: right;
-      }
+.current-price-arc-table {
+  width: 380px;
+}
+
+.current-price-arc-sbc-table {
+  width: 310px;
+}
+
+.sta-rate-table {
+  width: 350px;
+}
+
+.report-table-vertical-headers {
+  td {
+    &:nth-child(1) {
+      @extend %typography-table-heading;
+      background-color: $light-gray;
     }
   }
 }
 
-.current_price_arc_table {
-  &.report-table {
-    width: 380px;
-    td {
-      &:nth-child(1) {
-        text-align: left;
-      }
-    }
-  }
+.interest-rate-resets-table {
+  width: 600px;
 }
 
-.current_price_arc_sbc_table {
-  &.report-table {
-    width: 310px;
-    td {
-      &:nth-child(1) {
-        text-align: left;
-      }
-    }
-  }
-}
-
-.sta_rate_table {
-  &.report-table {
-    width: 350px;
-    td {
-      &:nth-child(1) {
-        @extend %typography-table-heading;
-        background-color: $light-gray;
-      }
-    }
-  }
-}
-
-.interest_rate_resets_table {
-  &.report-table {
-    width: 600px;
-    td {
-      &:nth-child(1) {
-        text-align: left;
-      }
-      &:nth-child(2) {
-        text-align: left;
-      }
-    }
-  }
-}
-
-.standard_1m_libor_table, .standard_3m_libor_table, .standard_6m_libor_table, .standard_daily_prime_table, .sbc_1m_libor_table, .sbc_3m_libor_table, .sbc_6m_libor_table, .current_price_vrc_table {
+.standard-1m_libor-table, .standard-3m_libor-table, .standard-6m_libor-table, .standard-daily_prime-table, .sbc-1m_libor-table, .sbc-3m_libor-table, .sbc-6m_libor-table, .current-price-vrc-table {
   width: auto;
   border-top: none;
   border-left: none;
   th, td {
     border: 1px solid $light-blue;
   }
-  &.report-table {
-    th:first-child {
-      width: 85px;
-    }
+  th:first-child {
+    width: 85px;
   }
   .table-heading-row {
     th:first-child {

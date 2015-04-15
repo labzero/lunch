@@ -380,4 +380,23 @@ class MemberBalanceService < MAPIService
     data
   end
 
+  def dividend_statement(quarter)
+    # TODO: hit MAPI endpoint
+    begin
+      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'dividend_statement.json'))).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.dividend_statement encountered a JSON parsing error: #{e}")
+      return nil
+    end
+
+    data[:transaction_date] = quarter.to_date
+    data[:details].each do |detail|
+      detail[:issue_date] = detail[:issue_date].to_date
+      detail[:start_date] = detail[:start_date].to_date
+      detail[:end_date] = detail[:end_date].to_date
+    end
+
+    data
+  end
+
 end

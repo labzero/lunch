@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
   before_action :authenticate_user!
 
   rescue_from Exception do |exception|
-    if Rails.env.test?
+    unless Rails.env.production?
       raise exception
     else
       handle_exception(exception)

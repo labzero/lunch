@@ -85,6 +85,10 @@ en:
     principal: Principal
     interest: Interest
     close: Close
+    certificate_sequence: Certificate Sequence
+    start_date: Start Date
+    end_date: End Date
+    shares_outstanding: Shares Outstanding
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -384,12 +388,9 @@ en:
       activity:
         title: Capital Stock Activity Statement
         summary: Shows all stock activity for a specified period.
-      dividend_transaction:
+      dividend_statement:
         title: Dividend Transaction Statement
         summary: Includes the date the last dividend was paid, the dividend rate, the number and amount of shares received, and the amount of each cash dividend paid.
-      dividend_statement:
-        title: Capital Stock Dividend Statement
-        summary: Shows a detailed dividend calculation for each certificate owned during the dividend period.
     settlement:
       title: Settlement/Transaction Account (STA)
       account:
@@ -576,6 +577,24 @@ en:
         prior_rate: Prior Rate (%)
         new_rate: New Rate (%)
         next_reset: Next Reset
+      dividend_statement:
+        outstanding_shares_heading: 'Total Average Shares Outstanding as of the end of the %{quarter}:'
+        dividend_amount_heading: 'Total Dividend Amount as of the end of the %{quarter}:'
+        summary: Dividend Summary
+        details: Dividend Details
+        headers:
+          period: Dividend Period
+          date: Transaction Date
+          annualized_rate: Annualized Dividend Rate
+          rate: Dividend Rate (dollars per share)
+          total_shares: Total Average Shares Outstanding
+          dividend_shares: Capital Stock Dividend Class B Shares
+          par_value: Capital Stock Dividend Par Value
+          cash_dividend: Cash Dividend Credited to Settlement/Transaction Account No. %{account_number}
+          total_dividend: Total Dividend Amount
+          days_outstanding: Days Outstanding
+          average_shares: Average Shares Outstanding
+          dividend: Dividend
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.

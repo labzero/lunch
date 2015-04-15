@@ -52,9 +52,16 @@ Then(/^I should see an empty report table with Data Unavailable messaging$/) do
 end
 
 Then(/^I should see a report table with multiple data rows$/) do
-  page.assert_selector('.report-table')
-  expect(page.all('.report-table tbody tr').length).to be > 0
+  page.assert_selector('.report-table tbody tr')
 end
+
+Then(/^I should see two report tables with multiple data rows$/) do
+  page.assert_selector('.report-table', count: 2)
+  page.all('.report-table').each do |table|
+    table.assert_selector('tbody tr')
+  end
+end
+
 
 Given(/^I am on the "(.*?)" report page$/) do |report|
   sleep_if_close_to_midnight
@@ -76,6 +83,8 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/current-price-indications'
   when 'Interest Rate Resets'
     visit '/reports/interest_rate_resets'
+  when 'Dividend Transaction Statement'
+    visit '/reports/dividend-statement'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
@@ -91,6 +100,18 @@ When(/^I click the "(.*?)" column heading$/) do |column_heading|
                 I18n.t('global.date')
               when 'Issue Date'
                 I18n.t('global.issue_date')
+              when 'Start Date'
+                I18n.t('global.start_date')
+              when 'End Date'
+                I18n.t('global.end_date')
+              when 'Dividend'
+                I18n.t('reports.pages.dividend_statement.headers.dividend')
+              when 'Shares Outstanding'
+                I18n.t('global.shares_outstanding')
+              when 'Average Shares Outstanding'
+                I18n.t('reports.pages.dividend_statement.headers.average_shares')
+              when 'Days Outstanding'
+                I18n.t('reports.pages.dividend_statement.headers.days_outstanding')
               when 'Settlement Date'
                 I18n.t('reports.pages.cash_projections.settlement_date')
               when 'Outstanding Shares'
@@ -276,24 +297,24 @@ def report_dates_in_range? (start_date, end_date, date_format="%m/%d/%Y")
   end
 end
 
-Then(/^I should see vrc current price indications report$/) do
-  page.assert_selector('.current_price_vrc_table tbody tr')
+Then(/^I should see VRC current price indications report$/) do
+  page.assert_selector('.current-price-vrc-table tbody tr')
 end
 
-Then(/^I should see frc current price indications report$/) do
-  page.assert_selector('.current_price_frc_table tbody tr')
+Then(/^I should see FRC current price indications report$/) do
+  page.assert_selector('.current-price-frc-table tbody tr')
 end
 
-Then(/^I should see arc current price indications report$/) do
-  page.assert_selector('.current_price_arc_table tbody tr')
+Then(/^I should see ARC current price indications report$/) do
+  page.assert_selector('.current-price-arc-table tbody tr')
 end
 
-Then(/^I should see sta rates report$/) do
-  page.assert_selector('.sta_rate_table tbody tr')
+Then(/^I should see STA rates report$/) do
+  page.assert_selector('.sta-rate-table tbody tr')
 end
 
-Then(/^I should see interest rate resets report$/) do
-  page.assert_selector('.interest_rate_resets_table tbody tr')
+Then(/^I should see Interest Rate Resets report$/) do
+  page.assert_selector('.interest-rate-resets-table tbody tr')
 end
 
 

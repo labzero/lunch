@@ -623,6 +623,59 @@ describe MemberBalanceService do
     end
   end
 
+  describe '`dividend_statement` method' do
+    let(:dividend_statement) { subject.dividend_statement(Time.zone.now) }
+    it 'returns a date for its `transaction_date`' do
+      expect(dividend_statement[:transaction_date]).to be_kind_of(Date)
+    end
+    it 'returns a float for its `annualized_rate`' do
+      expect(dividend_statement[:annualized_rate]).to be_kind_of(Float)
+    end
+    it 'returns a float for its `rate`' do
+      expect(dividend_statement[:rate]).to be_kind_of(Float)
+    end
+    it 'returns a numeric for its `average_shares_outstanding`' do
+      expect(dividend_statement[:average_shares_outstanding]).to be_kind_of(Numeric)
+    end
+    it 'returns a fixnum for its `shares_dividend`' do
+      expect(dividend_statement[:shares_dividend]).to be_kind_of(Fixnum)
+    end
+    it 'returns a fixnum for its `shares_par_value`' do
+      expect(dividend_statement[:shares_par_value]).to be_kind_of(Fixnum)
+    end
+    it 'returns a float for its `cash_dividend`' do
+      expect(dividend_statement[:cash_dividend]).to be_kind_of(Float)
+    end
+    it 'returns a float for its `total_dividend`' do
+      expect(dividend_statement[:total_dividend]).to be_kind_of(Float)
+    end
+    it 'returns a string for its `sta_account_number`' do
+      expect(dividend_statement[:sta_account_number]).to be_kind_of(String)
+    end
+    it 'returns an array of dividend details for its `details`' do
+      expect(dividend_statement[:details]).to be_kind_of(Array)
+      expect(dividend_statement[:details].length).to be >= 0
+      dividend_statement[:details].each do |detail|
+        expect(detail[:issue_date]).to be_kind_of(Date)
+        expect(detail[:start_date]).to be_kind_of(Date)
+        expect(detail[:end_date]).to be_kind_of(Date)
+        expect(detail[:certificate_sequence]).to be_kind_of(Fixnum)
+        expect(detail[:shares_outstanding]).to be_kind_of(Fixnum)
+        expect(detail[:average_shares_outstanding]).to be_kind_of(Float)
+        expect(detail[:dividend]).to be_kind_of(Float)
+        expect(detail[:days_outstanding]).to be_kind_of(Fixnum)
+        expect(detail[:start_date]).to be <= detail[:end_date]
+      end
+    end
+    describe 'error states' do
+      it 'returns nil if there is a JSON parsing error' do
+        expect(File).to receive(:read).and_return('some malformed json!')
+        expect(Rails.logger).to receive(:warn)
+        expect(dividend_statement).to be(nil)
+      end
+    end
+  end
+
   # Helper Methods
   def override_start_balance_endpoint(start_date, end_date, request_object)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_return(request_object)
