@@ -4,6 +4,20 @@ Rails.application.configure do
   # Code is not reloaded between requests.
   config.cache_classes = true
 
+  # Paperclip storage configuration
+  config.paperclip_defaults = {
+      storage: :fog,
+      fog_credentials: {
+          use_iam_profile: true,
+          provider: 'AWS',
+          region: ENV['S3_REGION']
+      },
+      fog_directory: ENV['S3_BUCKET_NAME'],
+      path: "#{ENV['S3_PATH_PREFIX']}/private/:filename",
+      fog_public: false,
+      default_url: "/assets/missing.jpg"
+  }
+
   # Eager load code on boot. This eager loads most of Rails and
   # your application in memory, allowing both threaded web servers
   # and those relying on copy on write to perform better.

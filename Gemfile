@@ -63,6 +63,10 @@ gem 'wicked_pdf'
 gem 'axlsx_rails', '>= 0.3.0'
 gem 'resque-pool'
 
+# for AWS assets
+gem "paperclip", "~> 4.2"
+gem 'fog-aws'
+
 group :development, :test do
   gem 'rspec-rails'
   gem 'cucumber', '>= 2.0.0.rc1'
