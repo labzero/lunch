@@ -510,6 +510,25 @@
   }
 }
 
+.report-dividend-statement {
+  .table-dividend-summary {
+    width: 500px;
+    td:last-of-type {
+      width: 120px;
+    }
+  }
+  .table-dividend-details {
+    th {
+      &:last-child {
+        width: 100px;
+      }
+    }
+    tfoot td:first-child {
+      border-right: none;
+    }
+  }
+}
+
 .standard-frc-table, .standard-vrc-table, .sbc-frc-table, .sbc-vrc-table {
   th {
     width: 64px;

@@ -10,6 +10,7 @@ class ReportsController < ApplicationController
   HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::IRDB_RATES_DATA]
   SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
   CASH_PROJECTIONS_WEB_FLAGS = [MembersService::CASH_PROJECTIONS_DATA]
+  DIVIDEND_STATEMENT_WEB_FLAGS = [MembersService::CAPSTOCK_REPORT_DIVIDEND_TRANSACTION, MembersService::CAPSTOCK_REPORT_DIVIDEND_STATEMENT]
 
   before_action do
     @member_name = current_member_name
@@ -70,13 +71,10 @@ class ReportsController < ApplicationController
           available_history: t('reports.history.months12'),
           route: reports_capital_stock_activity_path
         },
-        dividend_transaction: {
-          updated: t('global.quarterly'),
-          available_history: t('reports.history.months36')
-        },
         dividend_statement: {
           updated: t('global.quarterly'),
-          available_history: t('reports.history.present2007')
+          available_history: t('reports.history.months36'),
+          route: reports_dividend_statement_path
         }
       },
       settlement: {
@@ -121,7 +119,7 @@ class ReportsController < ApplicationController
       @capital_stock_activity = {}
     else
       @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
-      raise StandardError, "There has been an error and ReportsController#capital_stock_activity has returned nil. Check error logs." if @capital_stock_activity.blank?
+      raise StandardError, "There has been an error and ReportsController#capital_stock_activity has encountered nil. Check error logs." if @capital_stock_activity.nil?
     end
     @picker_presets = date_picker_presets(@start_date, @end_date)
   end
@@ -133,7 +131,7 @@ class ReportsController < ApplicationController
       @borrowing_capacity_summary = {}
     else
       @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(date.to_date)
-      raise StandardError, "There has been an error and ReportsController#borrowing_capacity has returned nil. Check error logs." if @borrowing_capacity_summary.blank?
+      raise StandardError, "There has been an error and ReportsController#borrowing_capacity has encountered nil. Check error logs." if @borrowing_capacity_summary.nil?
     end
   end
 
@@ -165,7 +163,7 @@ class ReportsController < ApplicationController
       @settlement_transaction_account = {}
     else
       @settlement_transaction_account = member_balances.settlement_transaction_account(@start_date, @end_date, @filter)
-      raise StandardError, "There has been an error and ReportsController#settlement_transaction_account has returned nil. Check error logs." if @settlement_transaction_account.blank?
+      raise StandardError, "There has been an error and ReportsController#settlement_transaction_account has encountered nil. Check error logs." if @settlement_transaction_account.nil?
     end
     @show_ending_balance = false
     if @settlement_transaction_account[:activities] && @settlement_transaction_account[:activities].length > 0
@@ -177,13 +175,13 @@ class ReportsController < ApplicationController
     @start_date = (params[:start_date] || Time.zone.now.to_date).to_date
     member_balances = MemberBalanceService.new(current_member_id, request)
     @advances_detail = member_balances.advances_details(@start_date)
-    raise StandardError, "There has been an error and ReportsController#advances_detail has returned nil. Check error logs." if @advances_detail.blank?
+    raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
     @picker_presets = date_picker_presets(@start_date)
     if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)
       @advances_detail = {}
     else
       @advances_detail = member_balances.advances_details(@start_date)
-      raise StandardError, "There has been an error and ReportsController#advances_detail has returned nil. Check error logs." if @advances_detail.blank?
+      raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
       # prepayment fee indication for detail view
       @advances_detail[:advances_details].each_with_index do |advance, i|
         case advance[:notes]
@@ -400,7 +398,7 @@ class ReportsController < ApplicationController
       @historical_price_indications = {}
     else
       @historical_price_indications = rate_service.historical_price_indications(@start_date, @end_date, @collateral_type, @credit_type)
-      raise StandardError, "There has been an error and ReportsController#historical_price_indications has returned nil. Check error logs." if @historical_price_indications.blank?
+      raise StandardError, "There has been an error and ReportsController#historical_price_indications has encountered nil. Check error logs." if @historical_price_indications.nil?
     end
 
     case @credit_type.to_sym
@@ -468,7 +466,7 @@ class ReportsController < ApplicationController
       @cash_projections = {}
     else
       @cash_projections = member_balances.cash_projections
-      raise StandardError, "There has been an error and ReportsController#cash_projections has returned nil. Check error logs." if @cash_projections.blank?
+      raise StandardError, "There has been an error and ReportsController#cash_projections has encountered nil. Check error logs." if @cash_projections.nil?
     end
     @as_of_date = @cash_projections[:as_of_date].to_date if @cash_projections[:as_of_date]
   end
@@ -492,9 +490,51 @@ class ReportsController < ApplicationController
       {columns: columns}
     end
     @irr_table_data = {
-        :column_headings => column_headings,
-        :rows => rows
+      :column_headings => column_headings,
+      :rows => rows
     }
+  end
+
+  def dividend_statement
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    @dividend_statement_details = {
+      column_headings: [
+        {title: t('global.issue_date'), sortable: true},
+        {title: t('global.certificate_sequence'), sortable: true},
+        {title: t('global.start_date'), sortable: true},
+        {title: t('global.end_date'), sortable: true},
+        {title: t('global.shares_outstanding'), sortable: true},
+        {title: t('reports.pages.dividend_statement.headers.days_outstanding'), sortable: true},
+        {title: t('reports.pages.dividend_statement.headers.average_shares'), sortable: true},
+        {title: t('reports.pages.dividend_statement.headers.dividend'), sortable: true}
+      ]
+    }
+    if report_disabled?(DIVIDEND_STATEMENT_WEB_FLAGS)
+      @dividend_statement = {}
+      @dividend_statement_details[:rows] = []
+    else
+      @dividend_statement = member_balances.dividend_statement(Time.zone.now.to_date)
+      raise StandardError, "There has been an error and ReportsController#dividend_statement has encountered nil. Check error logs." if @dividend_statement.nil?
+      @dividend_statement_details[:rows] = @dividend_statement[:details].collect do |detail|
+        {
+          columns: [
+            {value: detail[:issue_date], type: :date},
+            {value: detail[:certificate_sequence], type: nil},
+            {value: detail[:start_date], type: :date},
+            {value: detail[:end_date], type: :date},
+            {value: detail[:shares_outstanding], type: :number},
+            {value: detail[:days_outstanding], type: :number},
+            {value: detail[:average_shares_outstanding], type: :shares_fractional},
+            {value: detail[:dividend], type: :currency}
+          ]
+        }
+      end
+      @dividend_statement_details[:footer] = [
+        { value: t('global.totals'), colspan: 6},
+        { value: @dividend_statement[:average_shares_outstanding], type: :shares_fractional},
+        { value: @dividend_statement[:total_dividend], type: :currency}
+      ]
+    end
   end
 
   private

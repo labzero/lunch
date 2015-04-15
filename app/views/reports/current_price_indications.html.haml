@@ -62,7 +62,7 @@
         %p= t('reports.pages.price_indications.current.semiannually_and_at_repayment')
   .report-main-body
     %h2.report-table-title= t('reports.pages.price_indications.settlement_transaction_account')
-    %table.report-table.sta-rate-table{data: {sortable: false}}
+    %table.report-table.sta-rate-table.report-table-vertical-headers{data: {sortable: false}}
       %tbody
         %tr
           %td= @sta_table_data[:row_name]

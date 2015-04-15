@@ -409,6 +409,38 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
+
+    describe 'GET dividend_statement' do
+      let(:make_request) { get :dividend_statement }
+      let(:response_hash) { double('A Dividend Statement', :'[]' => nil)}
+      before do
+        allow(member_balance_service_instance).to receive(:dividend_statement).with(kind_of(Date)).and_return(response_hash)
+        allow(response_hash).to receive(:[]).with(:details).and_return([{}])
+      end
+      it_behaves_like 'a user required action', :get, :dividend_statement
+      it 'should assign `@dividend_statement` to the result of calling MemberBalanceService.dividend_statement' do
+        make_request
+        expect(assigns[:dividend_statement]).to be(response_hash)
+      end
+      it 'should assign `@dividend_statement_details`' do
+        make_request
+        expect(assigns[:dividend_statement_details]).to be_present
+        expect(assigns[:dividend_statement_details][:column_headings]).to be_kind_of(Array)
+        expect(assigns[:dividend_statement_details][:rows]).to be_kind_of(Array)
+        expect(assigns[:dividend_statement_details][:footer]).to be_kind_of(Array)
+      end
+      it 'should set @dividend_statement to {} if the report is disabled' do
+        expect(controller).to receive(:report_disabled?).with(ReportsController::DIVIDEND_STATEMENT_WEB_FLAGS).and_return(true)
+        make_request
+        expect(assigns[:dividend_statement]).to eq({})
+      end
+      it 'should set @dividend_statement_details to have no rows if the report is disabled' do
+        expect(controller).to receive(:report_disabled?).with(ReportsController::DIVIDEND_STATEMENT_WEB_FLAGS).and_return(true)
+        make_request
+        expect(assigns[:dividend_statement_details][:rows]).to eq([])
+        expect(assigns[:dividend_statement_details][:footer]).to be_nil
+      end
+    end
   end
 
   describe 'GET current_price_indications' do

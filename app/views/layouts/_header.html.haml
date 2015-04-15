@@ -39,10 +39,8 @@
           %li<>
             = link_to(t('reports.capital_stock.title'), reports_path)
             %ul.nav-dropdown-nested
-              %li= link_to(t('reports.capital_stock.trial_balance.title'), reports_path)
               %li= link_to(t('reports.capital_stock.activity.title'), reports_capital_stock_activity_path)
-              %li= link_to(t('reports.capital_stock.dividend_transaction.title'), reports_path)
-              %li= link_to(t('reports.capital_stock.dividend_statement.title'), reports_path)
+              %li= link_to(t('reports.capital_stock.dividend_statement.title'), reports_dividend_statement_path)
           %li<>
             = link_to(t('reports.settlement.account.title'), reports_settlement_transaction_account_path)
           %li<>
