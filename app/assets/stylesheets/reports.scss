@@ -619,6 +619,22 @@
   width: 600px;
 }
 
+.securities-transactions-table {
+  width: 940px;
+  th {
+    &:nth-child(4) {
+      min-width: 170px;
+    }
+  }
+  tfoot {
+    td {
+      &:nth-child(1) {
+        border-right: none;
+      }
+    }
+  }
+}
+
 .standard-1m_libor-table, .standard-3m_libor-table, .standard-6m_libor-table, .standard-daily_prime-table, .sbc-1m_libor-table, .sbc-3m_libor-table, .sbc-6m_libor-table, .current-price-vrc-table {
   width: auto;
   border-top: none;

@@ -82,13 +82,15 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
   when 'Current Price Indications'
     visit '/reports/current-price-indications'
   when 'Interest Rate Resets'
-    visit '/reports/interest_rate_resets'
+    visit '/reports/interest-rate-resets'
   when 'Dividend Transaction Statement'
     visit '/reports/dividend-statement'
   when 'Securities Services Monthly Statement'
     visit '/reports/securities-services-statement'
   when 'Letters of Credit'
     visit '/reports/letters-of-credit'
+  when 'Securities Transactions'
+    visit '/reports/securities-transactions'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
@@ -316,23 +318,23 @@ def report_dates_in_range? (start_date, end_date, date_format="%m/%d/%Y")
 end
 
 Then(/^I should see VRC current price indications report$/) do
-  page.assert_selector('.current-price-vrc-table tbody tr')
+  page.assert_selector('.current-price-vrc-table tbody tr:first-child td')
 end
 
 Then(/^I should see FRC current price indications report$/) do
-  page.assert_selector('.current-price-frc-table tbody tr')
+  page.assert_selector('.current-price-frc-table tbody tr:first-child td')
 end
 
 Then(/^I should see ARC current price indications report$/) do
-  page.assert_selector('.current-price-arc-table tbody tr')
+  page.assert_selector('.current-price-arc-table tbody tr:first-child td')
 end
 
 Then(/^I should see STA rates report$/) do
-  page.assert_selector('.sta-rate-table tbody tr')
+  page.assert_selector('.sta-rate-table tbody tr:last-child td')
 end
 
 Then(/^I should see Interest Rate Resets report$/) do
-  page.assert_selector('.interest-rate-resets-table tbody tr')
+  page.assert_selector('.interest-rate-resets-table tbody tr:first-child td')
 end
 
 Then(/^I should see the report download flyout$/) do
@@ -342,6 +344,14 @@ end
 Then(/^I should not see the report download flyout$/) do
   page.assert_no_selector('.flyout-loading-message')
   page.assert_selector('.flyout', visible: :hidden)
+end
+
+Then(/^I should see Securities Transactions report$/) do
+  page.assert_selector('.securities-transactions-table tbody tr:first-child td')
+end
+
+Then(/^I should see a security that is indicated as a new transaction$/) do
+  page.find('.securities-transactions-table tbody tr td', text: /.\*\z/)
 end
 
 When(/^I cancel the report download from the flyout$/) do

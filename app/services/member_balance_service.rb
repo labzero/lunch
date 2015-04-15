@@ -395,7 +395,25 @@ class MemberBalanceService < MAPIService
       detail[:start_date] = detail[:start_date].to_date
       detail[:end_date] = detail[:end_date].to_date
     end
+    data
+  end
 
+  def securities_transactions(as_of_date)
+    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
+    begin
+      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'securities_transactions.json'))).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.securities_transactions encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data[:total_payment_or_principal] = 0
+    data[:total_interest] = 0
+    data[:total_net] = 0
+    data[:transactions].each do |security|
+      data[:total_payment_or_principal] += security[:payment_or_principal] if security[:payment_or_principal]
+      data[:total_interest] += security[:interest] if security[:interest]
+      data[:total_net] += security[:total] if security[:total]
+    end
     data
   end
 

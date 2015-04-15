@@ -15,10 +15,10 @@ describe CustomFormattingHelper do
       expect(helper.fhlb_formatted_currency(465465465, precision: 0, html: false)).to eq('$465,465,465')
     end
     it 'wraps negative numbers in paranthesis' do
-      expect(helper.fhlb_formatted_currency(-123456789, html: false)).to eq('($123,456,789.00)')
+      expect(helper.fhlb_formatted_currency(-123456789, html: false)).to eq('$(123,456,789.00)')
     end
     it 'wraps the formatted currency in a span with a class indicating the sign if requested' do
-      expect(helper.fhlb_formatted_currency(-123456789, html: true)).to eq('<span class="number-negative">($123,456,789.00)</span>')
+      expect(helper.fhlb_formatted_currency(-123456789, html: true)).to eq('<span class="number-negative">$(123,456,789.00)</span>')
       expect(helper.fhlb_formatted_currency(123456789, html: true)).to eq('<span class="number-positive">$123,456,789.00</span>')
     end
     it 'defaults to HTML output' do
