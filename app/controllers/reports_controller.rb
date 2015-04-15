@@ -224,7 +224,15 @@ class ReportsController < ApplicationController
     #vrc data for standard collateral
     @standard_vrc_data = rate_service.current_price_indications('standard', 'vrc')
     columns = @standard_vrc_data.collect do |row|
-      {value: row[1]}
+      case row[0]
+      when 'overnight_fed_funds_benchmark', 'advance_rate'
+        type = :rate
+      when 'basis_point_spread_to_benchmark'
+        type = :basis_point
+      else
+        type = nil
+      end
+      {value: row[1], type: type}
     end
     rows = [{columns: columns}]
     @standard_vrc_table_data = {
@@ -234,7 +242,15 @@ class ReportsController < ApplicationController
     #vrc data for sbc collateral
     @sbc_vrc_data = rate_service.current_price_indications('sbc', 'vrc')
     columns = @sbc_vrc_data.collect do |row|
-      {value: row[1]}
+      case row[0]
+      when 'overnight_fed_funds_benchmark', 'advance_rate'
+        type = :rate
+      when 'basis_point_spread_to_benchmark'
+        type = :basis_point
+      else
+        type = nil
+      end
+      {value: row[1], type: type}
     end
     rows = [{columns: columns}]
     @sbc_vrc_table_data = {

@@ -31,19 +31,23 @@
           -if row[:date]
             %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
           - row[:columns].each do |column|
-            %td.report-cell-narrow.report-cell-right
-              - case column[:type]
-              - when :basis_point
-                = fhlb_formatted_number(column[:value])
-              - when :index
-                = fhlb_formatted_number(column[:value], precision: 5)
-              - when :rate
-                = fhlb_formatted_number(column[:value], precision: 2)
-              - when :currency
-                = fhlb_formatted_currency(column[:value])
-              - when :currency_whole
-                = fhlb_formatted_currency(column[:value], precision: 0)
-              - when :date
-                = fhlb_date_standard_numeric(column[:value])
-              - else
-                = column[:value]
+            - classes = [:'report-cell-right', :'report-cell-narrow']
+            - case column[:type]
+            - when :basis_point
+              - value = fhlb_formatted_number(column[:value])
+            - when :index
+              - value = fhlb_formatted_number(column[:value], precision: 5)
+            - when :rate
+              - value = fhlb_formatted_number(column[:value], precision: 2)
+            - when :currency
+              - value = fhlb_formatted_currency(column[:value])
+            - when :currency_whole
+              - value = fhlb_formatted_currency(column[:value], precision: 0)
+            - when :date
+              - value = fhlb_date_standard_numeric(column[:value])
+              - classes = [:'report-cell-narrow']
+            - else
+              - value = column[:value]
+              - classes = [:'report-cell-narrow']
+            %td{class: classes}
+              = value

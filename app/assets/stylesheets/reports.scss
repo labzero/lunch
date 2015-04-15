@@ -518,91 +518,55 @@
 
 .standard-vrc-table, .sbc-vrc-table {
   width: auto;
-  &.report-table {
-    th:first-child {
-      width: 85px;
-    }
+  th:first-child {
+    width: 85px;
   }
 }
 
 .current-price-vrc-table {
-  &.report-table {
-    width: 480px;
-    th {
-      &:nth-child(2) {
-        min-width: 150px;
-      }
-      &:nth-child(3) {
-        min-width: 140px;
-      }
+  width: 480px;
+  th {
+    &:nth-child(2) {
+      min-width: 150px;
+    }
+    &:nth-child(3) {
+      min-width: 140px;
     }
   }
 }
 
 .current-price-frc-table {
-  &.report-table {
-    width: 480px;
-    th {
-      &:nth-child(2) {
-        min-width: 90px;
-      }
-      &:nth-child(3) {
-        min-width: 110px;
-      }
-      &:nth-child(4) {
-        min-width: 100px;
-      }
+  width: 480px;
+  th {
+    &:nth-child(2) {
+      min-width: 90px;
     }
-    td {
-      &:nth-child(1) {
-        text-align: left;
-      }
-      &:nth-child(2) {
-        text-align: left;
-      }
-      &:nth-child(3) {
-        text-align: right;
-      }
-      &:nth-child(4) {
-        text-align: right;
-      }
-      &:nth-child(5) {
-        text-align: right;
-      }
+    &:nth-child(3) {
+      min-width: 110px;
+    }
+    &:nth-child(4) {
+      min-width: 100px;
     }
   }
 }
 
 .current-price-arc-table {
-  &.report-table {
-    width: 380px;
-    td {
-      &:nth-child(1) {
-        text-align: left;
-      }
-    }
-  }
+  width: 380px;
 }
 
 .current-price-arc-sbc-table {
-  &.report-table {
-    width: 310px;
-    td {
-      &:nth-child(1) {
-        text-align: left;
-      }
-    }
-  }
+  width: 310px;
 }
 
 .sta-rate-table {
-  &.report-table {
-    width: 350px;
-    td {
-      &:nth-child(1) {
-        @extend %typography-table-heading;
-        background-color: $light-gray;
-      }
+  width: 350px;
+}
+
+.report-table-vertical-headers {
+  td {
+    &:nth-child(1) {
+      @extend %typography-table-heading;
+      background-color: $light-gray;
     }
   }
 }
@@ -618,10 +582,8 @@
   th, td {
     border: 1px solid $light-blue;
   }
-  &.report-table {
-    th:first-child {
-      width: 85px;
-    }
+  th:first-child {
+    width: 85px;
   }
   .table-heading-row {
     th:first-child {
