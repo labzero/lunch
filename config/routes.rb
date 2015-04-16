@@ -43,8 +43,8 @@ Rails.application.routes.draw do
     get '/' => 'users/sessions#new', :as => :new_user_session
     post '/' => 'users/sessions#create', :as => :user_session
     delete 'logout' => 'users/sessions#destroy', :as => :destroy_user_session
-    get '/member' => 'users/sessions#select_member', :as => :user_session_select_member
-    post '/member' => 'users/sessions#set_member', :as => :user_session_set_member
+    get '/member' => 'members#select_member', :as => :members_select_member
+    post '/member' => 'members#set_member', :as => :members_set_member
   end
 
   root 'users/sessions#new'
