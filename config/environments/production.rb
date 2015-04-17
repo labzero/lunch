@@ -13,9 +13,8 @@ Rails.application.configure do
           region: ENV['S3_REGION']
       },
       fog_directory: ENV['S3_BUCKET_NAME'],
-      path: "#{ENV['S3_PATH_PREFIX']}/private/:filename",
-      fog_public: false,
-      default_url: "/assets/missing.jpg"
+      path: "#{ENV['S3_PATH_PREFIX']}/private/:class/:attachment/:id_partition/:style/:filename",
+      fog_public: false
   }
 
   # Eager load code on boot. This eager loads most of Rails and

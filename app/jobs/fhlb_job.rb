@@ -1,0 +1,31 @@
+require_relative '../../lib/string_io_with_filename' # TODO refactor so lib is autoloaded
+
+class FhlbJob < ActiveJob::Base
+
+  def initialize(*args, &block)
+    super
+    @mutex = Mutex.new
+    class << self
+      alias_method_chain :perform, :rescue
+    end
+  end
+
+  def job_status
+    @mutex.synchronize { @job_status ||= JobStatus.find_or_create_by!(job_id: self.job_id) } # cause we are BOSS
+    @job_status
+  end
+
+  before_enqueue do |job|
+    job.job_status # ensure that JobStatus instance has been created prior to enqueuing
+  end
+
+  def perform_with_rescue(*args, &block)
+    return if job_status.canceled?
+    job_status.started!
+    perform_without_rescue(*args, &block)
+    job_status.completed! unless job_status.completed? || job_status.canceled?
+  rescue => err
+    Rails.logger.warn "#{self.class.name}##{job_id} raised an exception: #{err}"
+    job_status.failed!
+  end
+end

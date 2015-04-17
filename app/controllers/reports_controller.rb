@@ -201,10 +201,14 @@ class ReportsController < ApplicationController
     @advances_detail[:advances_details].sort! { |a, b| a[:trade_date] <=> b[:trade_date] } if @advances_detail[:advances_details]
 
     case params[:export_format]
-    when 'pdf'
-      send_data RenderReportPDFJob.new.perform(current_member_id, 'advances_detail', {start_date: @start_date}), filename: 'advances.pdf'
-    when 'xlsx'
-      send_data RenderReportExcelJob.new.perform(current_member_id, 'advances_detail', {start_date: @start_date}), filename: "advances-#{@start_date.strftime('%Y%m%d')}.xlsx"
+      when 'pdf'
+        job_status = RenderReportPDFJob.perform_later(current_member_id, 'advances_detail', {start_date: @start_date.to_s}).job_status
+        job_status.update_attributes!(user_id: current_user.id)
+        render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status), report_format: 'pdf'}
+      when 'xlsx'
+        job_status = RenderReportExcelJob.perform_later(current_member_id, 'advances_detail', {start_date: @start_date.to_s}).job_status
+        job_status.update_attributes!(user_id: current_user.id)
+        render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status), report_format: 'xlsx'}
     end
   end
 

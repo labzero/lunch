@@ -8,8 +8,7 @@ Rails.application.configure do
 
   # Paperclip storage configuration
   config.paperclip_defaults = {
-      path: File.join(Rails.root, 'tmp'),
-      default_url: "/assets/missing.jpg"
+      path: File.join(Rails.root, 'tmp', 'paperclip', ':class', ':attachment', ':id_partition', ':style', ':filename')
   }
 
   # Do not eager load code on boot.

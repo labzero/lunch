@@ -34,6 +34,10 @@ Rails.application.routes.draw do
   get '/settings' => 'settings#index'
   post '/settings/save' => 'settings#save'
 
+  get '/jobs/:job_status_id' => 'jobs#status', as: 'job_status'
+  get '/jobs/:job_status_id/download' => 'jobs#download', as: 'job_download'
+  get '/jobs/:job_status_id/cancel' => 'jobs#cancel', as: 'job_cancel'
+
   scope 'corporate_communications/:category' do
     resources :corporate_communications, only: :show, as: :corporate_communication
     get '/' => 'corporate_communications#category', as: :corporate_communications

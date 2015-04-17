@@ -86,6 +86,7 @@ $spinner-size: 27px;
     box-sizing: border-box;
     width: 380px;
     padding: 25px 20px 20px 70px;
+    border-radius: $default-border-radius;
     &:before {
       @extend %absolute-pseudoelement;
       top: 20px;
@@ -106,5 +107,14 @@ $spinner-size: 27px;
     @extend %dashboard-module-link;
     float: none;
     cursor: pointer;
+  }
+  &.flyout-loading-error {
+    .flyout-top-section:before {
+      background: none;
+      @extend %icon-font;
+      content: "#{$icon-alert}";
+      color: $alert-red;
+      font-size: $spinner-size;
+    }
   }
 }

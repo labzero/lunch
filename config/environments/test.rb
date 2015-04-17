@@ -7,6 +7,19 @@ Rails.application.configure do
   # and recreated between test runs. Don't rely on the data there!
   config.cache_classes = true
 
+  # Paperclip storage configuration
+  config.paperclip_defaults = {
+      storage: :fog,
+      fog_credentials: {
+          use_iam_profile: true,
+          provider: 'AWS',
+          region: ENV['S3_REGION']
+      },
+      fog_directory: ENV['S3_BUCKET_NAME'],
+      path: "#{ENV['S3_PATH_PREFIX']}/private/:class/:attachment/:id_partition/:style/:filename",
+      fog_public: false
+  }
+
   # Do not eager load code on boot. This avoids loading your whole application
   # just for the purpose of running a single test. If you are using a tool that
   # preloads Rails for running tests, you may have to set it to true.

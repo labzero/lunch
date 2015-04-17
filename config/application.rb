@@ -39,5 +39,7 @@ module FhlbMember
     ]
     config.logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new(Rails.root.join('log', "#{Rails.env}.log"), 'daily'))
     config.active_job.queue_adapter = :resque
+
+    config.active_record.raise_in_transactional_callbacks = true
   end
 end

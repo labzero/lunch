@@ -1,19 +1,29 @@
 (function( $ ) {
 
-  $.fn.flyout = function(topContent, bottomContent, useReferenceElement) {
+  $.fn.flyout = function(options) {
     var $flyout = $('.flyout');
     var $flyoutBackground = $('.flyout-background');
     var $flyoutTopSection = $flyout.find('.flyout-top-section');
     var $flyoutBottomSection = $flyout.find('.flyout-bottom-section');
+    var topContent = options.topContent;
+    var bottomContent = options.bottomContent;
+    var useReferenceElement = options.useReferenceElement;
+    var closeFlyoutAction = options.closeFlyoutAction;
+    var that = this;
+
+    // close flyout if called
+    if (closeFlyoutAction) {
+      closeFlyout(closeFlyoutAction.parentEl, closeFlyoutAction.event);
+      return that;
+    };
 
     // initialize flyout by appending elements to the .top-section and .bottom-section.
     $flyoutTopSection.append(topContent);
     if (bottomContent) {
       $flyoutBottomSection.append(bottomContent);
     } else {
-      $flyoutBottomSection.remove();
+      $flyoutBottomSection.hide();
     }
-
 
     // give flyout appropriate width and position relative to its reference element
     if (useReferenceElement) {
@@ -24,7 +34,6 @@
       });
     };
 
-
     // fade in the background and show the flyout
     $flyoutBackground.fadeIn();
     $flyout.fadeIn();
@@ -34,10 +43,12 @@
 
     this.trigger('flyout-initialized');
 
-    var that = this;
-    // teardown the background and reset the flyout
     $flyout.on('click', '.flyout-close-button, [data-flyout-action=close]', function(event){
-      that.trigger('flyout-reset-initiated');
+      closeFlyout(that, event);
+    });
+
+    function closeFlyout(parentEl, event){
+      parentEl.trigger('flyout-reset-initiated');
       $flyoutBackground.fadeOut();
       $('html').css('height', '100%'); // set html height back to 100%
       $flyout.fadeOut(function(){
@@ -50,9 +61,9 @@
         });
         $flyout.off();
       });
-    });
+    };
 
-    return this;
+    return that;
   };
 
 }( jQuery ));
