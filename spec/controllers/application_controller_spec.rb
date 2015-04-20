@@ -40,8 +40,8 @@ RSpec.describe ApplicationController, :type => :controller do
         controller.send(:after_sign_in_path_for, 'some resource')
       end
     end
-    it 'redirects to Users::Sessions#select_member' do
-      expect(controller).to receive(:user_session_select_member_path)
+    it 'redirects to Members#select_member' do
+      expect(controller).to receive(:members_select_member_path)
       controller.send(:after_sign_in_path_for, 'some resource')
     end
   end
