@@ -12,7 +12,7 @@ Scenario: Member sees Dividend Transaction Statement
   Given I visit the dashboard
   When I select "Dividend Transaction Statement" from the reports dropdown
   Then I should see report summary data
-  And I should see two report tables with multiple data rows
+  And I should see 2 report tables with multiple data rows
 
 @smoke @jira-mem-264
 Scenario: Member sorts the Dividend Transaction Statement by date
@@ -78,7 +78,7 @@ Scenario: Member sorts the Dividend Transaction Statement by dividend
   Then I should see the "Dividend" column values in "descending" order on the "Dividend Details" table
 
 @data-unavailable @jira-mem-264
-Scenario: No data is available to show in the Capital Stock Activity Statement
+Scenario: No data is available to show in the Dividend Transaction Statement Statement
   Given I am on the "Dividend Transaction Statement" report page
   When the "Dividend Summary" table has no data
   Then I should see a "Dividend Summary" report table with all data missing

@@ -595,6 +595,33 @@ en:
           days_outstanding: Days Outstanding
           average_shares: Average Shares Outstanding
           dividend: Dividend
+      securities_services_statement:
+        heading: 'Total amount due as of %{date}:'
+        footnote: '%{footnote}Fees will be charged based on the specific transaction and the amount of staff time required.'
+        questions_html: 'If you have questions regarding this statement, please email <a href=%{mailto_url}>Securities Services</a> or call %{phone_number}.'
+        footer: 'Total amount to be debited from Settlement/Transaction Account No. %{account_number} as of %{date}:'
+        tables:
+          maintenance: Monthly Account Maintenance Fee
+          securities: Monthly Securities Fees
+          transaction: Security Transaction Fees
+          other: Other Fees
+        headers:
+          maintenance: 'Monthly Account Maintenance Fee%{footnote}'
+          fed: 'Fed Eligible%{footnote}'
+          dtc: 'DTC Eligible%{footnote}'
+          funds: 'Physical and Mutual Funds%{footnote}'
+          euroclear: 'Euroclear%{footnote}'
+          disbursement: 'All Income Disbursement%{footnote}'
+          pledge_status: 'Pledge Status Change (account transfer)%{footnote}'
+          certifications: 'Registration of Certifications%{footnote}'
+          research: 'Research Projects%{footnote}'
+          handling: 'Special Handling%{footnote}'
+        line_items:
+          maintenance: based on the number of securities held at the end of the current month
+          per_item_cusip: '%{number} @ %{cost} per item, by CUSIP'
+          per_item: '%{number} @ %{cost} per item'
+          per_par_cusip: '%{number} @ %{cost} per 1000 par, by CUSIP'
+          per_hour: '%{number} @ %{cost} per hour'
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.

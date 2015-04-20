@@ -11,6 +11,7 @@ class ReportsController < ApplicationController
   SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
   CASH_PROJECTIONS_WEB_FLAGS = [MembersService::CASH_PROJECTIONS_DATA]
   DIVIDEND_STATEMENT_WEB_FLAGS = [MembersService::CAPSTOCK_REPORT_DIVIDEND_TRANSACTION, MembersService::CAPSTOCK_REPORT_DIVIDEND_STATEMENT]
+  SECURITIES_SERVICES_STATMENT_WEB_FLAGS = [MembersService::SECURITIESBILLSTATEMENT]
 
   before_action do
     @member_name = current_member_name
@@ -104,7 +105,8 @@ class ReportsController < ApplicationController
         },
         services_monthly: {
           updated: t('global.monthly'),
-          available_history: t('reports.history.months18')
+          available_history: t('reports.history.months18'),
+          route: reports_securities_services_statement_path
         }
       }
     }
@@ -535,6 +537,18 @@ class ReportsController < ApplicationController
         { value: @dividend_statement[:total_dividend], type: :currency}
       ]
     end
+  end
+
+  def securities_services_statement
+    @start_date = (params[:start_date] || Time.zone.now).to_date
+    if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
+      @statement = {}
+    else
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      @statement = member_balances.securities_services_statement(@start_date)
+      raise StandardError, "There has been an error and ReportsController#securities_services_statement has encountered nil. Check error logs." if @statement.nil?
+    end
+    @picker_presets = date_picker_presets(@start_date)
   end
 
   private

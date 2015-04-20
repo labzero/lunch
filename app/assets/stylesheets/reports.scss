@@ -140,6 +140,7 @@
   small {
     width: 540px;
     display: block;
+    clear: both;
     a {
       color: $actionable-blue;
     }
@@ -178,6 +179,11 @@
     @extend %typography-report-summary;
     color: $actionable-blue;
     margin: 0;
+  }
+  &.report-summary-right {
+    text-align: right;
+    float: right;
+    margin-right: 0;
   }
 }
 
@@ -579,6 +585,23 @@
 
 .sta-rate-table {
   width: 350px;
+}
+
+.report-securities-services-statement {
+  .report-summary-data {
+    width: auto;
+  }
+  .report-table {
+    td:first-child {
+      width: 300px;
+    }
+    td:last-child {
+      width: 100px;
+    }
+  }
+  .report-summary-right {
+    width: 40%;
+  }
 }
 
 .report-table-vertical-headers {

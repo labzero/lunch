@@ -399,4 +399,29 @@ class MemberBalanceService < MAPIService
     data
   end
 
+  def securities_services_statement(month)
+    # TODO: hit MAPI endpoint
+    begin
+      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'securities_services_statement.json'))).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.securities_services_statement encountered a JSON parsing error: #{e}")
+      return nil
+    end
+
+    recursive_to_f = Proc.new do |obj|
+      obj.each do |key, value|
+        if value.is_a?(Hash)
+          recursive_to_f.call(value)
+        elsif key == 'count'
+          obj[key] = value.to_i
+        elsif key != 'sta_account_number'
+          obj[key] = value.to_f
+        end
+      end
+    end
+
+    recursive_to_f.call(data)
+    data
+  end
+
 end
