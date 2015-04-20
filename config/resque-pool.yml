@@ -1,0 +1,4 @@
+"*": 2
+
+production:
+  "*": <%= ENV['RESQUE_WORKER_COUNT'] || 4 %>

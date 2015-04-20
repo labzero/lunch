@@ -61,6 +61,7 @@ gem 'logging', require: false
 gem 'resque'
 gem 'wicked_pdf'
 gem 'axlsx_rails', '>= 0.3.0'
+gem 'resque-pool'
 
 group :development, :test do
   gem 'rspec-rails'
