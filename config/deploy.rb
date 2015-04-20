@@ -109,11 +109,11 @@ namespace :resque_pool do
   desc 'Restarts the resque-pool daemon'
   task :restart do
     on roles(:resque), in: :sequence, wait: 5 do
-      sudo :restart, 'resque-pool'
+      sudo 'start resque-pool || restart resque-pool'
     end
   end
   desc 'Reloads the resque-pool daemon, which gives it all new children but leaves the partent process untouched'
-  task :restart do
+  task :reload do
     on roles(:resque), in: :sequence, wait: 5 do
       sudo :reload, 'resque-pool'
     end
