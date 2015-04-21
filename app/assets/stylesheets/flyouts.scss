@@ -74,7 +74,6 @@
   display: none;
 }
 
-$spinner-size: 27px;
 .flyout-loading-message {
   margin-top: 55px;
   margin-left: 290px;
@@ -88,13 +87,10 @@ $spinner-size: 27px;
     padding: 25px 20px 20px 70px;
     border-radius: $default-border-radius;
     &:before {
+      @include icon-loading;
       @extend %absolute-pseudoelement;
       top: 20px;
       left: 20px;
-      background: image-url('spinner.gif');
-      background-size: $spinner-size $spinner-size;
-      width: $spinner-size;
-      height: $spinner-size;
     }
   }
   .flyout-close-button {
@@ -108,7 +104,16 @@ $spinner-size: 27px;
     float: none;
     cursor: pointer;
   }
+  .error-message {
+    display: none;
+  }
   &.flyout-loading-error {
+    .error-message {
+      display: block;
+    }
+    .loading-message {
+      display: none;
+    }
     .flyout-top-section:before {
       background: none;
       @extend %icon-font;

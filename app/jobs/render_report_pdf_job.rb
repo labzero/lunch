@@ -5,7 +5,7 @@ class RenderReportPDFJob < FhlbJob
 
   # TODO create base class, inherit, super perform_later
 
-  def perform(member_id, report_name, params={})
+  def perform(member_id, report_name, filename, params={})
     controller = ReportsController.new
     controller.request = ActionDispatch::TestRequest.new
     controller.response = ActionDispatch::TestResponse.new
@@ -36,7 +36,7 @@ class RenderReportPDFJob < FhlbJob
     pdf = WickedPdf.new.pdf_from_string(html, page_size: 'Letter', print_media_type: true, disable_external_links: true, margin: {top: MARGIN, left: MARGIN, right: MARGIN, bottom: MARGIN}, disable_smart_shrinking: false, footer: { content: footer_html})
     file = StringIOWithFilename.new(pdf)
     file.content_type = 'application/pdf'
-    file.original_filename = 'advances.pdf'
+    file.original_filename = "#{filename}.pdf"
     return if job_status.canceled?
     job_status.result = file
     job_status.status = :completed

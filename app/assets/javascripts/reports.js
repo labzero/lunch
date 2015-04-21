@@ -1,18 +1,18 @@
 $(function () {
-  var $advances_report_form = $('.advances-detail-report .report-header-buttons form');
+  var $reportForm = $('.report .report-header-buttons form');
   var jobStatusTimer;
-  var job_cancel_url;
+  var jobCancelUrl;
 
-  $advances_report_form.on('submit', function(event){
+  $reportForm.on('submit', function(event){
     openLoadingFlyout();
   });
 
-  $advances_report_form.on('ajax:success', function(event, data, status, xhr) {
-    job_cancel_url = data.job_cancel_url;
-    checkJobStatus(data.job_status_url, data.report_format);
+  $reportForm.on('ajax:success', function(event, data, status, xhr) {
+    jobCancelUrl = data.jobCancelUrl;
+    checkJobStatus(data.job_status_url);
   });
 
-  $advances_report_form.on('ajax:failure', function(event, data, status, xhr) {
+  $reportForm.on('ajax:failure', function(event, data, status, xhr) {
     downloadError();
   });
 
@@ -21,27 +21,21 @@ $(function () {
     $('.flyout').addClass('flyout-loading-message');
   };
 
-  function closeLoadingFlyout() {
-    $('body').flyout({closeFlyoutAction: {parentEl: $('body'), event:{target:null}}}); // TODO check if sneaking an empty event in there with a null target is legit
-  };
-
   $('.cancel-report-download').on('click', function(){
-    $.get(job_cancel_url);
+    $.get(jobCancelUrl);
     clearTimeout(jobStatusTimer);
-    closeLoadingFlyout();
   });
 
-  function checkJobStatus(url, format) {
-    $.get(url, {export_format: format})
+  function checkJobStatus(url) {
+    $.get(url)
       .done(function(data) {
         var job_status = data.job_status;
         if (job_status == 'completed') {
-          downloadJob(data.download_url, data.export_format);
-        }
-        else if(job_status == 'failed') {
+          downloadJob(data.download_url);
+        } else if(job_status == 'failed') {
           downloadError();
         } else {
-          jobStatusTimer = setTimeout(function(){checkJobStatus(url, data.export_format)}, 1000);
+          jobStatusTimer = setTimeout(function(){checkJobStatus(url)}, 1000);
         };
       })
       .fail(function(data) {
@@ -49,18 +43,18 @@ $(function () {
       });
   };
 
-  function downloadJob(url, export_format) {
-    closeLoadingFlyout();
-    var export_param = '?export_format=' + export_format;
-    window.location.href = url + export_param;
+  function downloadJob(url) {
+    window.location.href = url;
+    $reportForm.trigger('reportDownloadStarted', {download_url: url});
+    closeFlyout();
+  };
+
+  function closeFlyout() {
+    $('.flyout').trigger('flyout-close');
   };
 
   function downloadError() {
     $('.flyout').addClass('flyout-loading-error');
-    var $flyoutMessage = $('.flyout .loading-report p');
-    var $flyoutLink = $('.flyout .loading-report a');
-    $flyoutMessage.text($flyoutMessage.data('error-text'));
-    $flyoutLink.text($flyoutLink.data('error-text'));
   };
 
 });

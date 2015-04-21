@@ -41,5 +41,8 @@ module FhlbMember
     config.active_job.queue_adapter = :resque
 
     config.active_record.raise_in_transactional_callbacks = true
+
+    # autoload files in the lib directory
+    config.autoload_paths << Rails.root.join('lib')
   end
 end

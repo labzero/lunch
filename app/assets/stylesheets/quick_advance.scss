@@ -288,12 +288,8 @@ $faded-opacity: 0.4 !default;
       display: none;
     }
     &:before {
+      @include icon-loading;
       content: '';
-      width: 30px;
-      height: 30px;
-      background-image: image-url('27x27-brandblue.gif');
-      background-position: center center;
-      background-repeat: no-repeat;
     }
     .quick-advance-loading-message {
       display: block;

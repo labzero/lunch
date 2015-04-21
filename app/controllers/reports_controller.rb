@@ -200,15 +200,15 @@ class ReportsController < ApplicationController
     end
     @advances_detail[:advances_details].sort! { |a, b| a[:trade_date] <=> b[:trade_date] } if @advances_detail[:advances_details]
 
-    case params[:export_format]
-      when 'pdf'
-        job_status = RenderReportPDFJob.perform_later(current_member_id, 'advances_detail', {start_date: @start_date.to_s}).job_status
-        job_status.update_attributes!(user_id: current_user.id)
-        render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status), report_format: 'pdf'}
-      when 'xlsx'
-        job_status = RenderReportExcelJob.perform_later(current_member_id, 'advances_detail', {start_date: @start_date.to_s}).job_status
-        job_status.update_attributes!(user_id: current_user.id)
-        render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status), report_format: 'xlsx'}
+    export_format = params[:export_format]
+    if export_format == 'pdf'
+      job_status = RenderReportPDFJob.perform_later(current_member_id, 'advances_detail', 'advances', {start_date: @start_date.to_s}).job_status
+    elsif export_format == 'xlsx'
+      job_status = RenderReportExcelJob.perform_later(current_member_id, 'advances_detail', "advances-#{@start_date.to_s}", {start_date: @start_date.to_s}).job_status
+    end
+    unless job_status.nil?
+      job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
     end
   end
 

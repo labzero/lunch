@@ -8,14 +8,7 @@
     var topContent = options.topContent;
     var bottomContent = options.bottomContent;
     var useReferenceElement = options.useReferenceElement;
-    var closeFlyoutAction = options.closeFlyoutAction;
-    var that = this;
-
-    // close flyout if called
-    if (closeFlyoutAction) {
-      closeFlyout(closeFlyoutAction.parentEl, closeFlyoutAction.event);
-      return that;
-    };
+    var $that = this;
 
     // initialize flyout by appending elements to the .top-section and .bottom-section.
     $flyoutTopSection.append(topContent);
@@ -44,7 +37,11 @@
     this.trigger('flyout-initialized');
 
     $flyout.on('click', '.flyout-close-button, [data-flyout-action=close]', function(event){
-      closeFlyout(that, event);
+      closeFlyout($that, event);
+    });
+
+    $flyout.on('flyout-close', function(event){
+      closeFlyout($(event.currentTarget), event);
     });
 
     function closeFlyout(parentEl, event){
@@ -63,7 +60,7 @@
       });
     };
 
-    return that;
+    return $that;
   };
 
 }( jQuery ));

@@ -1,5 +1,3 @@
-require_relative '../../lib/string_io_with_filename' # TODO refactor so lib is autoloaded
-
 class FhlbJob < ActiveJob::Base
 
   def initialize(*args, &block)
@@ -22,8 +20,9 @@ class FhlbJob < ActiveJob::Base
   def perform_with_rescue(*args, &block)
     return if job_status.canceled?
     job_status.started!
-    perform_without_rescue(*args, &block)
+    file = perform_without_rescue(*args, &block)
     job_status.completed! unless job_status.completed? || job_status.canceled?
+    file # return the result of the job to handle the case where job is executed inline
   rescue => err
     Rails.logger.warn "#{self.class.name}##{job_id} raised an exception: #{err}"
     job_status.failed!

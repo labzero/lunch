@@ -254,18 +254,15 @@ When(/^I request a PDF$/) do
   click_button(I18n.t('dashboard.actions.download'))
 end
 
-Then(/^I should recieve a PDF file$/) do
-  page.response_headers['Content-Type'].should == 'application/pdf'
+Then(/^I should begin downloading a file$/) do
+  page.execute_script("$('body').on('reportDownloadStarted', function(){$('body').addClass('report-download-started')})")
+  page.assert_selector('body.report-download-started', wait: 100)
 end
 
 When(/^I request an XLSX$/) do
   page.find(".report-header-buttons .dropdown-selection").click
   page.find('.report-header-buttons .dropdown li', text: I18n.t('global.excel'), visible: true).click
   click_button(I18n.t('dashboard.actions.download'))
-end
-
-Then(/^I should recieve an XLSX file$/) do
-  page.response_headers['Content-Type'].should == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 end
 
 When(/^I click on the view cell for the first (advance|cash projection)/) do |report_type|
@@ -336,4 +333,15 @@ Then(/^I should see Interest Rate Resets report$/) do
   page.assert_selector('.interest-rate-resets-table tbody tr')
 end
 
+Then(/^I should see the report download flyout$/) do
+  page.assert_selector('.flyout-loading-message', visible: true)
+end
 
+Then(/^I should not see the report download flyout$/) do
+  page.assert_no_selector('.flyout-loading-message')
+  page.assert_selector('.flyout', visible: :hidden)
+end
+
+When(/^I cancel the report download from the flyout$/) do
+  page.find('.cancel-report-download', text: /#{I18n.t('global.cancel_download')}/i).click
+end

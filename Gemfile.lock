@@ -478,7 +478,7 @@ DEPENDENCIES
   momentjs-rails
   net-ping
   nokogiri
-  paperclip (~> 4.2)
+  paperclip
   parallel_tests
   rack-token_auth
   rails (= 4.2.0)

@@ -9,15 +9,7 @@ Rails.application.configure do
 
   # Paperclip storage configuration
   config.paperclip_defaults = {
-      storage: :fog,
-      fog_credentials: {
-          use_iam_profile: true,
-          provider: 'AWS',
-          region: ENV['S3_REGION']
-      },
-      fog_directory: ENV['S3_BUCKET_NAME'],
-      path: "#{ENV['S3_PATH_PREFIX']}/private/:class/:attachment/:id_partition/:style/:filename",
-      fog_public: false
+      path: File.join(Rails.root, 'tmp', 'test', 'paperclip', ':class', ':attachment', ':id_partition', ':style', ':filename')
   }
 
   # Do not eager load code on boot. This avoids loading your whole application
