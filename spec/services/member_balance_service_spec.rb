@@ -676,6 +676,42 @@ describe MemberBalanceService do
     end
   end
 
+  describe '`securities_services_statement` method' do
+    let(:securities_services_statement) { subject.securities_services_statement(Time.zone.now) }
+    it 'returns a float for its `total`' do
+      expect(securities_services_statement[:total]).to be_kind_of(Float)
+    end
+    it 'returns a string for its `sta_account_number`' do
+      expect(securities_services_statement[:sta_account_number]).to be_kind_of(String)
+    end
+    it 'returns a float for its `account_maintenance.total`' do
+      expect(securities_services_statement[:account_maintenance][:total]).to be_kind_of(Float)
+    end
+    [:income_disbursement, :pledge_status_change, :certifications, :research, :handling].each do |attribute|
+      it "should return a price breakdown hash for `#{attribute}`" do
+        expect(securities_services_statement[attribute][:total]).to be_kind_of(Float)
+        expect(securities_services_statement[attribute][:cost]).to be_kind_of(Float)
+        expect(securities_services_statement[attribute][:count]).to be_kind_of(Fixnum)
+      end
+    end
+    [:secutities_fees, :transaction_fees].each do |section|
+      [:fed, :dtc, :funds, :euroclear].each do |attribute|
+        it "should return a price breakdown hash for `#{section}.#{attribute}`" do
+          expect(securities_services_statement[section][attribute][:total]).to be_kind_of(Float)
+          expect(securities_services_statement[section][attribute][:cost]).to be_kind_of(Float)
+          expect(securities_services_statement[section][attribute][:count]).to be_kind_of(Fixnum)
+        end
+      end
+    end
+    describe 'error states' do
+      it 'returns nil if there is a JSON parsing error' do
+        expect(File).to receive(:read).and_return('some malformed json!')
+        expect(Rails.logger).to receive(:warn)
+        expect(securities_services_statement).to be(nil)
+      end
+    end
+  end
+
   # Helper Methods
   def override_start_balance_endpoint(start_date, end_date, request_object)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_return(request_object)

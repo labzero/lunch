@@ -441,6 +441,52 @@ RSpec.describe ReportsController, :type => :controller do
         expect(assigns[:dividend_statement_details][:footer]).to be_nil
       end
     end
+
+    describe 'GET securities_services_statement' do
+      let(:make_request) { get :securities_services_statement }
+      let(:response_hash) { double('A Securities Services Statement', :'[]' => nil)}
+      before do
+        allow(member_balance_service_instance).to receive(:securities_services_statement).with(kind_of(Date)).and_return(response_hash)
+        allow(response_hash).to receive(:[]).with(:secutities_fees).and_return([{}])
+        allow(response_hash).to receive(:[]).with(:transaction_fees).and_return([{}])
+      end
+      it_behaves_like 'a user required action', :get, :securities_services_statement
+      it 'should assign `@statement` to the result of calling MemberBalanceService.securities_services_statement' do
+        make_request
+        expect(assigns[:statement]).to be(response_hash)
+      end
+      it 'should default @start_date to today' do
+        make_request
+        expect(assigns[:start_date]).to eq(Time.zone.now.to_date)
+      end
+      it 'should set @start_date to the `start_date` param' do
+        get :securities_services_statement, start_date: '2012-02-11'
+        expect(assigns[:start_date]).to eq(Date.new(2012, 2, 11))
+      end
+      it 'should set @picker_presets to the `date_picker_presets` for the `start_date`' do
+        some_presets = double('Some Presets')
+        allow(subject).to receive(:date_picker_presets).with(Time.zone.now.to_date).and_return(some_presets)
+        make_request
+        expect(assigns[:picker_presets]).to eq(some_presets)
+      end
+      it 'should raise an error if @statement is nil' do
+        expect(member_balance_service_instance).to receive(:securities_services_statement).and_return(nil)
+        expect{make_request}.to raise_error(StandardError)
+      end
+      describe 'with the report disabled' do
+        before do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::SECURITIES_SERVICES_STATMENT_WEB_FLAGS).and_return(true)
+        end
+        it 'should set @statement to {} if the report is disabled' do
+          make_request
+          expect(assigns[:statement]).to eq({})
+        end
+        it 'should set @start_date if the report is disabled' do
+          make_request
+          expect(assigns[:start_date]).to be_kind_of(Date)
+        end
+      end
+    end
   end
 
   describe 'GET current_price_indications' do

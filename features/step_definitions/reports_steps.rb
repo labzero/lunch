@@ -55,8 +55,8 @@ Then(/^I should see a report table with multiple data rows$/) do
   page.assert_selector('.report-table tbody tr')
 end
 
-Then(/^I should see two report tables with multiple data rows$/) do
-  page.assert_selector('.report-table', count: 2)
+Then(/^I should see (\d+) report tables with multiple data rows$/) do |count|
+  page.assert_selector('.report-table', count: count)
   page.all('.report-table').each do |table|
     table.assert_selector('tbody tr')
   end
@@ -85,6 +85,8 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/interest_rate_resets'
   when 'Dividend Transaction Statement'
     visit '/reports/dividend-statement'
+  when 'Securities Services Monthly Statement'
+    visit '/reports/securities-services-statement'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
@@ -133,6 +135,23 @@ Then(/^I should see a "(.*?)" for the last month$/) do |report_type|
   start_date = last_month.strftime('%B %-d, %Y')
   end_date = last_month.end_of_month.strftime('%B %-d, %Y')
   step %{I should see a "#{report_type}" starting on "#{start_date}" and ending on "#{end_date}"}
+end
+
+Then(/^I should see a "([^"]*)" for the (\d+)(?:st|rd|th) of the last month$/) do |report, day|
+  start_date = (Date.new(@today.year, @today.month, day.to_i) - 1.month)
+  case report
+  when 'Securities Services Monthly Statement'
+    heading = /^#{Regexp.quote(I18n.t('reports.pages.securities_services_statement.heading', date: fhlb_date_long_alpha(start_date)))}$/
+    sentinel = 'XXXXXXXXXX'
+    footer_base = I18n.t('reports.pages.securities_services_statement.footer', date: fhlb_date_long_alpha(start_date), account_number: sentinel)
+    footer = /^#{Regexp.quote(footer_base).gsub(sentinel, '\d+')}$/
+  else
+    raise 'unknown report'
+  end
+
+  expect(page.find(".datepicker-trigger input").value).to eq(I18n.t('datepicker.single.input', date: fhlb_date_standard_numeric(start_date)))
+  page.assert_selector('.report-summary-data h3', text: heading) if heading
+  page.assert_selector('.report-summary-data h3', text: footer) if footer
 end
 
 Then(/^I should see a "(.*?)" for the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of this month$/) do |report_type, start_day, end_day|
