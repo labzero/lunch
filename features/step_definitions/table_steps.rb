@@ -2,6 +2,10 @@ Then(/^I should see the "(.*?)" column values in "(.*?)" order$/) do |column_nam
   compare_sort_order(column_name, sort_order)
 end
 
+Then(/^I should see the "(.*?)" column values in "(.*?)" order on the "(.*)" table$/) do |column_name, sort_order, table_name|
+  compare_sort_order(column_name, sort_order, get_selector_for_table_section(table_name))
+end
+
 Given(/^I should see the "(.*?)" column values in "(.*?)" order on the "(.*?)" parent table$/) do |column_name, sort_order, table_type|
   parent_selector = get_selector_for_table_section(table_type)
   table_selector = parent_selector + " .report-parent-table"
@@ -25,6 +29,8 @@ def get_selector_for_table_section(table_type)
       selector = ".standard-credit-borrowing-capacity-tables"
     when "Securities-Backed Credit Program"
       selector = ".sbc-borrowing-capacity-tables"
+    when 'Dividend Details'
+      selector = '.table-dividend-details'
     else
       raise 'table title not recognized'
   end
@@ -38,16 +44,20 @@ def compare_sort_order(column_name, sort_order, table_selector='.report-table')
     last_value = nil
     page.all("#{table_selector} tbody tr td:nth-child(#{column_index})").each do |element|
       case column_name
-        when "Date", "Trade Date"
+        when 'Date', 'Trade Date', 'Settlement Date', 'Issue Date', 'Start Date', 'End Date'
           value = Date.strptime(element.text, '%m/%d/%Y')
-        when "Certificate Sequence"
+        when 'Certificate Sequence', 'Days Outstanding'
           value = element.text.to_i
-        when "Original Amount"
+        when 'Original Amount', 'Borrowing Capacity Remaining'
           value = element.text.delete('$,').to_i
-        when "Borrowing Capacity Remaining"
-          value = element.text.delete('$,').to_i
+        when 'Dividend'
+          value = element.text.delete('$,').to_f
+        when 'Average Shares Outstanding'
+          value = element.text.delete(',').to_f
+        when 'Shares Outstanding'
+          value = element.text.delete(',').to_i
         else
-          raise "column_name not recognized"
+          raise 'column_name not recognized'
       end
 
       if last_value

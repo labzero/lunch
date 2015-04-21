@@ -1,0 +1,43 @@
+{
+  "transaction_date": "2015-11-14",
+  "annualized_rate": 1.00,
+  "rate": 1.00,
+  "average_shares_outstanding": 123456000,
+  "shares_dividend": 0,
+  "shares_par_value": 0,
+  "cash_dividend": 12345.67,
+  "total_dividend": 12345.67,
+  "sta_account_number": "25100033",
+  "details": [
+    {
+      "issue_date": "2011-10-12",
+      "certificate_sequence": 49166,
+      "start_date": "2011-10-12",
+      "end_date": "2011-10-12",
+      "shares_outstanding": 14098,
+      "average_shares_outstanding": 100000.00,
+      "dividend": 468.00,
+      "days_outstanding": 96
+    },
+    {
+      "issue_date": "2010-11-01",
+      "certificate_sequence": 54512,
+      "start_date": "2010-11-01",
+      "end_date": "2010-11-01",
+      "shares_outstanding": 34344,
+      "average_shares_outstanding": 56745.00,
+      "dividend": 938.02,
+      "days_outstanding": 31
+    },
+    {
+      "issue_date": "2008-03-01",
+      "certificate_sequence": 45633,
+      "start_date": "2008-03-01",
+      "end_date": "2008-03-01",
+      "shares_outstanding": 1200,
+      "average_shares_outstanding": 1200.50,
+      "dividend": 132.34,
+      "days_outstanding": 54
+    }
+  ]
+}

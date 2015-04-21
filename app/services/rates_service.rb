@@ -26,6 +26,10 @@ class RatesService < MAPIService
   HISTORICAL_VRC_TERM_MAPPINGS = {
     :'1d' => '1_day'
   }
+  CURRENT_CREDIT_TYPES = %i(vrc frc arc)
+  CURRENT_VRC_CREDIT_TYPES = %i(advance_maturity overnight_fed_funds_benchmark basis_point_spread_to_benchmark advance_rate)
+  CURRENT_FRC_CREDIT_TYPES = %i(advance_maturity treasury_benchmark_maturity nominal_yield_of_benchmark basis_point_spread_to_benchmark advance_rate)
+  CURRENT_ARC_CREDIT_TYPES = %i(advance_maturity 1_month_libor 3_month_libor 6_month_libor prime)
 
   def overnight_vrc(days=30)
     begin
@@ -67,19 +71,32 @@ class RatesService < MAPIService
 
   def quick_advance_preview(member_id, amount, advance_type, advance_term, rate)
     data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_preview.json'))).with_indifferent_access
-    data[:funding_date] = data[:funding_date].gsub('-', ' ')
-    data[:maturity_date] = data[:maturity_date].gsub('-', ' ')
-
     fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
   end
 
   def quick_advance_confirmation(member_id, amount, advance_type, advance_term, rate)
     # TODO: hit the proper MAPI endpoint, once it exists! In the meantime, always return the fake.
-
     data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_confirmation.json'))).with_indifferent_access
-    data[:funding_date] = data[:funding_date].gsub('-', ' ')
-    data[:maturity_date] = data[:maturity_date].gsub('-', ' ')
+    data[:advance_number] = Random.rand(999999).to_s.rjust(6, '0')
+    data[:initiated_at] = Time.zone.now.to_datetime
     fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
+  end
+
+  def current_price_indications(collateral_type, credit_type)
+    collateral_type = collateral_type.to_sym
+    credit_type = credit_type.to_sym
+
+    if !CURRENT_CREDIT_TYPES.include?(credit_type)
+      Rails.logger.warn("#{credit_type} was passed to RatesService.current_price_indications as the credit_type arg and is invalid. Credit type must be one of these values: #{CURRENT_CREDIT_TYPES}")
+      return nil
+    end
+    if !COLLATERAL_TYPES.include?(collateral_type)
+      Rails.logger.warn("#{collateral_type} was passed to RatesService.current_price_indications as the collateral_type arg and is invalid. Collateral type must be one of these values: #{COLLATERAL_TYPES}")
+      return nil
+    end
+    response = @connection["rates/price_indications/current/#{credit_type}/#{collateral_type}"].get
+    data ||= JSON.parse(response.body)
+    data
   end
 
   def historical_price_indications(start_date, end_date, collateral_type, credit_type)
@@ -117,9 +134,22 @@ class RatesService < MAPIService
     JSON.parse(response.body).with_indifferent_access
   end
 
+  def interest_rate_resets
+    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
+    begin
+      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'interest_rate_resets.json')))
+    rescue JSON::ParserError => e
+      Rails.logger.warn("RatesService.interest_rate_resets encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data
+  end
+
   protected
 
   def fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
+    data[:funding_date] = data[:funding_date].to_date
+    data[:maturity_date] = data[:maturity_date].to_date
     data[:advance_rate] = rate
     data[:advance_amount] = amount
     data[:advance_term] = I18n.t("dashboard.quick_advance.table.axes_labels.#{advance_term}")

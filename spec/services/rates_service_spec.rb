@@ -16,6 +16,7 @@ describe RatesService do
   it { expect(subject).to respond_to(:quick_advance_preview) }
   it { expect(subject).to respond_to(:quick_advance_confirmation) }
   it { expect(subject).to respond_to(:historical_price_indications) }
+  it { expect(subject).to respond_to(:current_price_indications) }
 
   describe "`overnight_vrc` method", :vcr do
     let(:rates) {subject.overnight_vrc}
@@ -63,8 +64,8 @@ describe RatesService do
       expect(quick_advance_preview["advance_type"]).to be_kind_of(String)
       expect(quick_advance_preview["interest_day_count"]).to be_kind_of(String)
       expect(quick_advance_preview["payment_on"]).to be_kind_of(String)
-      expect(quick_advance_preview["funding_date"]).to be_kind_of(String)
-      expect(quick_advance_preview["maturity_date"]).to be_kind_of(String)
+      expect(quick_advance_preview["funding_date"]).to be_kind_of(Date)
+      expect(quick_advance_preview["maturity_date"]).to be_kind_of(Date)
     end
   end
 
@@ -79,8 +80,8 @@ describe RatesService do
       expect(quick_advance_confirmation["advance_type"]).to be_kind_of(String)
       expect(quick_advance_confirmation["interest_day_count"]).to be_kind_of(String)
       expect(quick_advance_confirmation["payment_on"]).to be_kind_of(String)
-      expect(quick_advance_confirmation["funding_date"]).to be_kind_of(String)
-      expect(quick_advance_confirmation["maturity_date"]).to be_kind_of(String)
+      expect(quick_advance_confirmation["funding_date"]).to be_kind_of(Date)
+      expect(quick_advance_confirmation["maturity_date"]).to be_kind_of(Date)
     end
   end
 
@@ -126,6 +127,41 @@ describe RatesService do
     end
     it 'should return a data object from the MAPI endpoint' do
       expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)).to be_kind_of(Hash)
+    end
+  end
+
+  describe '`current_price_indications` method', :vcr do
+    let(:current_prices) {subject.current_price_indications(RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)}
+    it 'should return nil if the argument passed for collateral_type is not valid' do
+      expect(Rails.logger).to receive(:warn)
+      expect(subject.current_price_indications('invalid collateral type', RatesService::CREDIT_TYPES.first)).to be_nil
+    end
+    it 'should return nil if the argument passed for credit_type is not valid' do
+      expect(Rails.logger).to receive(:warn)
+      expect(subject.current_price_indications(RatesService::COLLATERAL_TYPES.first, 'invalid credit type')).to be_nil
+    end
+    it 'should return a data object from the MAPI endpoint' do
+      expect(subject.current_price_indications(RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)).to be_kind_of(Array)
+    end
+  end
+
+  describe '`interest_rate_resets` method' do
+    let(:irr_rates) {subject.interest_rate_resets}
+    it 'returns nil if there is a JSON parsing error' do
+      # TODO change this stub once you implement the MAPI endpoint
+      allow(File).to receive(:read).and_return('some malformed json!')
+      expect(Rails.logger).to receive(:warn)
+      expect(irr_rates).to be(nil)
+    end
+    it 'should return an array of hashes containing interest rate resets' do
+      expect(irr_rates.length).to be >= 1
+      irr_rates.each do |rate|
+        expect(rate['effective_date']).to be_kind_of(String)
+        expect(rate['advance_number']).to be_kind_of(Integer)
+        expect(rate['prior_rate']).to be_kind_of(Float)
+        expect(rate['new_rate']).to be_kind_of(Float)
+        expect(rate['next_reset']).to be_kind_of(String)
+      end
     end
   end
 end

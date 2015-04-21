@@ -1,6 +1,6 @@
 class MemberBalanceService < MAPIService
   DAILY_BALANCE_KEY = 'Interest Rate / Daily Balance' # the key returned by us from MAPI to let us know a row represents balance at close of business
-
+  STA_RATE_KEY = 'sta_rate'
   def initialize(member_id, request)
     super(request)
     @member_id = member_id
@@ -138,6 +138,7 @@ class MemberBalanceService < MAPIService
     data[:activities] = activities[:activities]
 
     # Tally credits and debits, as the distinction is not made by MAPI. Also format date.
+    outstanding = data[:start_balance]
     data[:total_credits] = 0
     data[:total_debits] = 0
     data[:activities].each_with_index do |row, i|
@@ -149,9 +150,11 @@ class MemberBalanceService < MAPIService
         if row[:dr_cr] == 'C'
           data[:activities][i][:credit_shares] = shares
           data[:total_credits] += shares
+          outstanding += shares
         elsif row[:dr_cr] == 'D'
           data[:activities][i][:debit_shares] = shares
           data[:total_debits] += shares
+          outstanding -= shares
         else
           raise StandardError, "MemberBalanceService.capital_stock_activity returned '#{row[:dr_cr]}' for share type on row number #{i}. Share type should be either 'C' for Credit or 'D' for Debit."
         end
@@ -159,6 +162,7 @@ class MemberBalanceService < MAPIService
         Rails.logger.warn(e)
         return nil
       end
+      data[:activities][i][:outstanding_shares] = outstanding
     end
     data
   end
@@ -336,6 +340,62 @@ class MemberBalanceService < MAPIService
       Rails.logger.warn("MemberBalanceService.profile encountered a JSON parsing error: #{e}")
       return nil
     end
+    data
+  end
+
+  def cash_projections
+    begin
+      response = @connection["/member/#{@member_id}/cash_projections"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.cash_projections encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.cash_projections encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.cash_projections encountered a JSON parsing error: #{e}")
+      return nil
+    end
+
+    data[:as_of_date] = data[:as_of_date].to_date
+    data[:projections].each_with_index do |projection, i|
+      data[:projections][i][:settlement_date] = projection[:settlement_date].to_date
+      data[:projections][i][:maturity_date] = projection[:maturity_date].to_date
+    end
+    data
+  end
+
+  def settlement_transaction_rate
+    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
+    begin
+      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'settlement_transaction_rate.json'))).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.settlement_transaction_rate encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data
+  end
+
+  def dividend_statement(quarter)
+    # TODO: hit MAPI endpoint
+    begin
+      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'dividend_statement.json'))).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.dividend_statement encountered a JSON parsing error: #{e}")
+      return nil
+    end
+
+    data[:transaction_date] = quarter.to_date
+    data[:details].each do |detail|
+      detail[:issue_date] = detail[:issue_date].to_date
+      detail[:start_date] = detail[:start_date].to_date
+      detail[:end_date] = detail[:end_date].to_date
+    end
+
     data
   end
 

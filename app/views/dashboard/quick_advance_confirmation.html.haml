@@ -1,0 +1,5 @@
+.quick-advance-confirmation
+  .quick-advance-body.icon-success-before
+    %p= t('dashboard.quick_advance.confirmation.intro', date_time: fhlb_datetime_standard_numeric(@initiated_at))
+    = render 'quick_advance_summary', advance_amount: @advance_amount, advance_type: @advance_type, interest_day_count: @interest_day_count, payment_on: @payment_on, advance_term: @advance_term, funding_date: @funding_date, maturity_date: @maturity_date, advance_number: @advance_number
+  %button.primary-button{data: { :'flyout-action' => :close }}= t('global.close')

@@ -1,0 +1,52 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+- quarter = fhlb_date_quarter(@dividend_statement[:transaction_date])
+.report.report-dividend-statement.row
+  .report-header
+    %h1= t('reports.capital_stock.dividend_statement.title')
+    - if @print_layout
+      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@start_date))
+    - else
+      = render 'reports_header_buttons', allowed_params: :start_date
+  .report-main-body
+    .report-summary-data
+      %h3
+        = t('reports.pages.dividend_statement.outstanding_shares_heading', quarter: quarter)
+      %p= fhlb_formatted_number(@dividend_statement[:average_shares_outstanding], precision: 2)
+    .report-summary-data
+      %h3
+        = t('reports.pages.dividend_statement.dividend_amount_heading', quarter: quarter)
+      %p= fhlb_formatted_currency(@dividend_statement[:total_dividend])
+    %h2.report-table-title= t('reports.pages.dividend_statement.summary')
+    %table.report-table.report-table-vertical-headers.table-allow-wrapping.table-dividend-summary{data: {sortable: false}}
+      %tbody
+        %tr
+          %td.report-cell-expanding= t('reports.pages.dividend_statement.headers.period')
+          %td.report-cell-right= quarter
+        %tr
+          %td.report-cell-expanding= t('reports.pages.dividend_statement.headers.date')
+          %td.report-cell-right= fhlb_date_standard_numeric(@dividend_statement[:transaction_date])
+        %tr
+          %td.report-cell-expanding= t('reports.pages.dividend_statement.headers.annualized_rate')
+          %td.report-cell-right= fhlb_formatted_percentage(@dividend_statement[:annualized_rate], 2)
+        %tr
+          %td.report-cell-expanding= t('reports.pages.dividend_statement.headers.rate')
+          %td.report-cell-right= fhlb_formatted_currency(@dividend_statement[:rate], precision: 7)
+        %tr
+          %td.report-cell-expanding= t('reports.pages.dividend_statement.headers.total_shares')
+          %td.report-cell-right= fhlb_formatted_number(@dividend_statement[:average_shares_outstanding], precision: 2)
+        %tr
+          %td.report-cell-expanding= t('reports.pages.dividend_statement.headers.dividend_shares')
+          %td.report-cell-right= fhlb_formatted_number(@dividend_statement[:shares_dividend])
+        %tr
+          %td.report-cell-expanding= t('reports.pages.dividend_statement.headers.par_value')
+          %td.report-cell-right= fhlb_formatted_currency(@dividend_statement[:shares_par_value])
+        %tr
+          %td.report-cell-expanding= t('reports.pages.dividend_statement.headers.cash_dividend', account_number: @dividend_statement[:sta_account_number])
+          %td.report-cell-right= fhlb_formatted_currency(@dividend_statement[:cash_dividend])
+        %tr
+          %td.report-cell-expanding= t('reports.pages.dividend_statement.headers.total_dividend')
+          %td.report-cell-right= fhlb_formatted_currency(@dividend_statement[:total_dividend])
+    %h2.report-table-title= t('reports.pages.dividend_statement.details')
+    = render 'reports/reports_table', table_data: @dividend_statement_details, table_class: 'table-dividend-details', no_wrapping: true
+    %small= t('reports.accuracy_notice_html', url: '#', phone_number: fhlb_formatted_phone_number('4156162634'), phone_number_alt: fhlb_formatted_phone_number('4156162913'))

@@ -82,6 +82,8 @@ This is a summary of the options supported in our .env files:
 * `LDAP_PORT`: Port of the LDAP server.
 * `LDAP_ADMIN_USERNAME`: Username of the LDAP service account.
 * `LDAP_ADMIN_PASSWORD`: Password for the LDAP service account.
+* `TIMEZONE`: The time zone to use when we create new Time.zone objects. Defaults to "Pacific Time (US & Canada)" and should not deviate from this.
+* `RESQUE_WORKER_COUNT`: How many Resque workers to start
 
 ## Running the Tests
 

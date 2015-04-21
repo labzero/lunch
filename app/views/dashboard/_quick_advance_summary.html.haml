@@ -1,0 +1,22 @@
+- advance_number ||= nil
+.quick-advance-summary
+  %dl
+    - if advance_number
+      %dt= t('dashboard.quick_advance.field_headings.advance_number') +':'
+      %dd= advance_number
+    %dt= t('dashboard.quick_advance.field_headings.advance_amount') +':'
+    %dd= fhlb_formatted_currency(advance_amount, precision: 0)
+  %dl
+    %dt= t('dashboard.quick_advance.field_headings.advance_type') +':'
+    %dd= advance_type
+    %dt= t('dashboard.quick_advance.field_headings.interest_day_count') +':'
+    %dd= interest_day_count
+    %dt= t('dashboard.quick_advance.field_headings.payment_on') +':'
+    %dd= payment_on
+  %dl
+    %dt= t('dashboard.quick_advance.field_headings.advance_term') +':'
+    %dd= advance_term
+    %dt= t('dashboard.quick_advance.field_headings.funding_date') +':'
+    %dd= fhlb_date_standard_numeric(funding_date)
+    %dt= t('dashboard.quick_advance.field_headings.maturity_date') +':'
+    %dd= fhlb_date_standard_numeric(maturity_date)

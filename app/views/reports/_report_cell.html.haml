@@ -1,0 +1,20 @@
+- classes = [:'report-cell-right', :'report-cell-narrow']
+- case cell[:type]
+- when :basis_point, :number
+  - value = fhlb_formatted_number(cell[:value])
+- when :index
+  - value = fhlb_formatted_number(cell[:value], precision: 5)
+- when :rate, :shares_fractional
+  - value = fhlb_formatted_number(cell[:value], precision: 2)
+- when :currency
+  - value = fhlb_formatted_currency(cell[:value])
+- when :currency_whole
+  - value = fhlb_formatted_currency(cell[:value], precision: 0)
+- when :date
+  - value = fhlb_date_standard_numeric(cell[:value])
+  - classes = [:'report-cell-narrow']
+- else
+  - value = cell[:value]
+  - classes = [:'report-cell-narrow']
+%td{class: classes, colspan: cell[:colspan]}
+  = value

@@ -338,7 +338,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
 
-      describe 'setting the `prepayment_fee_indication` attribute for a given advance record' do
+      describe 'setting the `prepayment_fee_indication_notes` attribute for a given advance record' do
         let(:advance_record) {double('Advance Record')}
         let(:advances_array) {[advance_record]}
         let(:prepayment_fee) {464654654}
@@ -347,36 +347,169 @@ RSpec.describe ReportsController, :type => :controller do
           allow(member_balance_service_instance).to receive(:advances_details).and_return(advances_detail)
         end
         it 'sets the attribute to `unavailable online` message if `notes` attribute for that record is `unavailable_online`' do
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('reports.pages.advances_detail.unavailable_online'))
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.unavailable_online'))
           expect(advance_record).to receive(:[]).with(:notes).and_return('unavailable_online')
           get :advances_detail
         end
         it 'sets the attribute to `not applicable for vrc` message if `notes` attribute for that record is `not_applicable_to_vrc`' do
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('reports.pages.advances_detail.not_applicable_to_vrc'))
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.not_applicable_to_vrc'))
           expect(advance_record).to receive(:[]).with(:notes).and_return('not_applicable_to_vrc')
           get :advances_detail
         end
         it 'sets the attribute to `prepayment fee restructure` message if `notes` attribute for that record is `prepayment_fee_restructure`' do
           date = Date.new(2013, 1, 1)
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('reports.pages.advances_detail.prepayment_fee_restructure_html', fee: number_to_currency(prepayment_fee), date: fhlb_date_standard_numeric(date)))
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.prepayment_fee_restructure_html', date: fhlb_date_standard_numeric(date)))
           expect(advance_record).to receive(:[]).with(:structure_product_prepay_valuation_date).and_return(date)
-          expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
+          allow(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
           expect(advance_record).to receive(:[]).with(:notes).and_return('prepayment_fee_restructure')
           get :advances_detail
         end
-        it 'sets the attribute to equal the `prepayment_fee_indication` value if that attribute exists and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, fhlb_formatted_currency(prepayment_fee))
+        it 'doesn\'t set the attribute if that attribute exists and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
+          expect(advance_record).to_not receive(:[]=).with(:prepayment_fee_indication_notes, anything)
           expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
           expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
           get :advances_detail
         end
         it 'sets the attribute to equal the `not available for past dates` message if there is no value for the `prepayment_fee_indication` attribute and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication, I18n.t('reports.pages.advances_detail.unavailable_for_past_dates'))
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.unavailable_for_past_dates'))
           expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
           expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(nil)
           get :advances_detail
         end
       end
+    end
+
+    describe 'GET cash_projections' do
+      let(:as_of_date) { '2014-12-12'.to_date }
+      it_behaves_like 'a user required action', :get, :cash_projections
+      describe 'view instance variables' do
+        before {
+          allow(response_hash).to receive(:[]).with(:as_of_date).and_return(as_of_date)
+          allow(member_balance_service_instance).to receive(:cash_projections).with(kind_of(Date)).and_return(response_hash)
+        }
+        it 'should set @cash_projections to the hash returned from MemberBalanceService' do
+          expect(member_balance_service_instance).to receive(:cash_projections).and_return(response_hash)
+          get :cash_projections
+          expect(assigns[:cash_projections]).to eq(response_hash)
+        end
+        it 'should set @cash_projections to {} if the report is disabled' do
+          expect(controller).to receive(:report_disabled?).with(ReportsController::CASH_PROJECTIONS_WEB_FLAGS).and_return(true)
+          get :cash_projections
+          expect(assigns[:cash_projections]).to eq({})
+        end
+        it 'should set @as_of_date from the @cash_projections hash' do
+          expect(member_balance_service_instance).to receive(:cash_projections).and_return(response_hash)
+          get :cash_projections
+          expect(assigns[:as_of_date]).to eq(as_of_date)
+        end
+        it 'should set @as_of_date to nil if the report is disabled' do
+          expect(controller).to receive(:report_disabled?).with(ReportsController::CASH_PROJECTIONS_WEB_FLAGS).and_return(true)
+          get :cash_projections
+          expect(assigns[:as_of_date]).to eq(nil)
+        end
+      end
+    end
+
+    describe 'GET dividend_statement' do
+      let(:make_request) { get :dividend_statement }
+      let(:response_hash) { double('A Dividend Statement', :'[]' => nil)}
+      before do
+        allow(member_balance_service_instance).to receive(:dividend_statement).with(kind_of(Date)).and_return(response_hash)
+        allow(response_hash).to receive(:[]).with(:details).and_return([{}])
+      end
+      it_behaves_like 'a user required action', :get, :dividend_statement
+      it 'should assign `@dividend_statement` to the result of calling MemberBalanceService.dividend_statement' do
+        make_request
+        expect(assigns[:dividend_statement]).to be(response_hash)
+      end
+      it 'should assign `@dividend_statement_details`' do
+        make_request
+        expect(assigns[:dividend_statement_details]).to be_present
+        expect(assigns[:dividend_statement_details][:column_headings]).to be_kind_of(Array)
+        expect(assigns[:dividend_statement_details][:rows]).to be_kind_of(Array)
+        expect(assigns[:dividend_statement_details][:footer]).to be_kind_of(Array)
+      end
+      it 'should set @dividend_statement to {} if the report is disabled' do
+        expect(controller).to receive(:report_disabled?).with(ReportsController::DIVIDEND_STATEMENT_WEB_FLAGS).and_return(true)
+        make_request
+        expect(assigns[:dividend_statement]).to eq({})
+      end
+      it 'should set @dividend_statement_details to have no rows if the report is disabled' do
+        expect(controller).to receive(:report_disabled?).with(ReportsController::DIVIDEND_STATEMENT_WEB_FLAGS).and_return(true)
+        make_request
+        expect(assigns[:dividend_statement_details][:rows]).to eq([])
+        expect(assigns[:dividend_statement_details][:footer]).to be_nil
+      end
+    end
+  end
+
+  describe 'GET current_price_indications' do
+    let(:rates_service_instance) { double('RatesService') }
+    let(:member_balances_service_instance) { double('MemberBalanceService') }
+    let(:response_cpi_hash) { double('RatesServiceHash') }
+    let(:response_sta_hash) { double('MemberBalanceServiceHash') }
+    let(:vrc_response) {{'advance_maturity' => 'Overnight/Open','overnight_fed_funds_benchmark' => 0.13,'basis_point_spread_to_benchmark' => 5,'advance_rate' => 0.18}}
+    let(:frc_response) {[{'advance_maturity' =>'1 Month','treasury_benchmark_maturity' => '3 Months','nominal_yield_of_benchmark' => 0.01,'basis_point_spread_to_benchmark' => 20,'advance_rate' => 0.21}]}
+    let(:arc_response) {[{'advance_maturity' => '1 Year','1_month_libor' => 6,'3_month_libor' => 4,'6_month_libor' => 11,'prime' => -295}]}
+
+    before do
+      allow(RatesService).to receive(:new).and_return(rates_service_instance)
+      allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
+      allow(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
+      allow(response_sta_hash).to receive(:[]).with('sta_rate')
+      allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'vrc').at_least(1).and_return(vrc_response)
+      allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'frc').at_least(1).and_return(frc_response)
+      allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'arc').at_least(1).and_return(arc_response)
+    end
+    it_behaves_like 'a user required action', :get, :current_price_indications
+    it 'renders the current_price_indications view' do
+      allow(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
+      allow(response_cpi_hash).to receive(:collect)
+      allow(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
+      get :current_price_indications
+      expect(response.body).to render_template('current_price_indications')
+    end
+    it 'should return vrc data' do
+      get :current_price_indications
+      expect(assigns[:standard_vrc_data]).to eq(vrc_response)
+      expect(assigns[:sbc_vrc_data]).to eq(vrc_response)
+    end
+    it 'should return frc data' do
+      get :current_price_indications
+      expect(assigns[:standard_frc_data]).to eq(frc_response)
+      expect(assigns[:sbc_frc_data]).to eq(frc_response)
+    end
+    it 'should return arc data' do
+      get :current_price_indications
+      expect(assigns[:standard_arc_data]).to eq(arc_response)
+      expect(assigns[:sbc_arc_data]).to eq(arc_response)
+    end
+  end
+
+  describe 'GET interest_rate_resets' do
+    let(:rates_service_instance) { double('RatesService') }
+    let(:response_hash) { double('RatesServiceHash') }
+    let(:effective_date) { double('effective_date') }
+    let(:advance_number) { double('advance_number') }
+    let(:prior_rate) { double('prior_rate') }
+    let(:new_rate) { double('new_rate') }
+    let(:next_reset) { double('next_reset') }
+    let(:irr_response) {[{'effective_date' => effective_date, 'advance_number' => advance_number, 'prior_rate' => prior_rate, 'new_rate' => new_rate, 'next_reset' => next_reset}]}
+
+    before do
+      allow(RatesService).to receive(:new).and_return(rates_service_instance)
+      allow(rates_service_instance).to receive(:interest_rate_resets).at_least(1).and_return(irr_response)
+    end
+    it_behaves_like 'a user required action', :get, :interest_rate_resets
+    it 'renders the interest_rate_resets view' do
+      allow(rates_service_instance).to receive(:interest_rate_resets).and_return(response_hash)
+      allow(response_hash).to receive(:collect)
+      get :interest_rate_resets
+      expect(response.body).to render_template('interest_rate_resets')
+    end
+    it 'should return irr data' do
+      get :interest_rate_resets
+      expect(assigns[:irr_table_data][:rows][0][:columns]).to eq([{:type=>:date, :value=>effective_date}, {:value=>advance_number}, {:type=>:index, :value=>prior_rate}, {:type=>:index, :value=>new_rate}, {:value=>next_reset}])
     end
   end
 

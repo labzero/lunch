@@ -8,6 +8,7 @@
     color: $actionable-blue;
   }
 }
+
 .setup-quick-reports {
   width: (7 * $grid-column-width) + (6 * $gutter-width);
   h2 {
@@ -18,6 +19,7 @@
     margin: 0 0 50px;
   }
 }
+
 .reports-table {
   @extend %table-striped;
   border-bottom: 1px solid $light-blue;
@@ -81,8 +83,8 @@
     margin: 32px 0 17px;
   }
   input {
-    color: $medium-gray;
-    @include typography-field-placeholder;
+    color: $dark-gray;
+    @include typography-field-value;
   }
   .datepicker-input-field {
     display: none;
@@ -95,6 +97,11 @@
   h1 {
     float: left;
   }
+  p {
+    clear: both;
+    width: 540px;
+    display: block;
+  }
 }
 
 .report-datepicker, .report-filter {
@@ -106,6 +113,17 @@
     width: 320px;
     .dropdown-selection {
       width: 320px;
+    }
+  }
+}
+
+.report-datepicker {
+  .input-field-container {
+    input {
+      background-color: $white;
+    }
+    &.active input {
+      background-color: $light-gray;
     }
   }
 }
@@ -128,7 +146,24 @@
     p {
       margin: 0;
     }
+    ol {
+      padding-left: 15px;
+      li {
+        margin-bottom: 10px;
+      }
+    }
+    ul {
+      margin-bottom: 10px;
+      li {
+        list-style-type: disc;
+        margin-bottom: 0px;
+      }
+    }
   }
+}
+
+.report-info-indent {
+  margin-left: 40px;
 }
 
 .report-summary-data {
@@ -147,8 +182,13 @@
 }
 
 .report-table-title {
+   @extend %typography-section-title;
+   margin: 0 0 15px;
+ }
+
+.report-table-title-with-margins {
   @extend %typography-section-title;
-  margin: 0 0 15px;
+  margin: 50px 0 15px;
 }
 
 .report-table {
@@ -214,10 +254,92 @@
     background-color: $secondary-gray;
   }
 
+  .report-detail-cell {
+    position: relative;
+    display: none;
+    padding: 20px 25px;
+    h3 {
+      margin-bottom: 10px;
+    }
+    .left-column, .right-column {
+      float:left;
+      margin-right: 20px;
+      width: 434px;
+    }
+    .right-column {
+      margin-right: 0;
+    }
+    table {
+      width: 100%;
+      border-top: 1px solid $secondary-gray;
+      &:last-child {
+        border-bottom: 1px solid $secondary-gray;
+      }
+      td {
+        border: none;
+        padding: 10px 0 0;
+
+      }
+      tr {
+        background-color: inherit;
+      }
+      tr:last-child td {
+        padding-bottom: 10px;
+      }
+      &:last-child {
+        td:first-child {
+          vertical-align: top;
+        }
+        td:last-child {
+          line-height: $tight-line-height;
+        }
+      }
+    }
+    .hide-detail-view {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      margin: 0;
+      text-transform: uppercase;
+      color: $actionable-blue;
+      cursor: pointer;
+    }
+  }
+  tbody td {
+    table {
+      td:first-child {
+        width: 210px;
+        @extend %typography-table-heading;
+        color: $medium-gray;
+      }
+      td:last-child {
+        @extend %typography-table-heading;
+      }
+    }
+  }
 }
+
+.detail-view {
+  .report-detail-cell {
+    display: table-cell;
+  }
+}
+
+.detail-view > td:not(.report-detail-cell) {
+  display: none;
+}
+
+.detail-view-trigger {
+  text-transform: uppercase;
+  color: $actionable-blue;
+  cursor: pointer;
+  vertical-align: top;
+}
+
 .report-parent-table {
   margin-bottom: 5px;
 }
+
 .report-sub-table {
   float: right;
   width: (7 * $grid-column-width) + (7 * $gutter-width);
@@ -280,67 +402,56 @@
   }
 }
 
-.advances-detail-report {
-  .advance-details {
-    position: relative;
-    display: none;
-    padding: 20px 25px;
-    h3 {
-      margin-bottom: 10px;
+.cash-projections-report-table {
+  td, th {
+    width: auto;
+    box-sizing: border-box;
+    padding: 10px;
+  }
+  td{ 
+    vertical-align: top}
+  th {
+    &:nth-child(1) {
+      min-width: 78px;
     }
-    .left-column, .right-column {
-      float:left;
-      margin-right: 20px;
+    &:nth-child(2) {
+      min-width: 78px;
     }
-    .left-column {
-      width: 355px;
+    &:nth-child(3) {
+      min-width: 168px;
     }
-    .right-column {
-      width: 385px;
+    &:nth-child(4) {
+      min-width: 88px;
     }
-    table {
-      width: 100%;
-      border-top: 1px solid $secondary-gray;
-      &:last-child {
-        border-bottom: 1px solid $secondary-gray;
-      }
-      td {
-        border: none;
-        padding: 10px 0 0;
-
-      }
-      tr {
-        background-color: inherit;
-      }
-      tr:last-child td {
-        padding-bottom: 10px;
-      }
-      &:last-child {
-        td:first-child {
-          vertical-align: top;
-        }
-        td:last-child {
-          line-height: $tight-line-height;
-        }
-      }
+    &:nth-child(5) {
+      min-width: 64px;
     }
-    .hide-detail-view {
-      position: absolute;
-      top: 10px;
-      right: 14px;
-      margin: 0;
-      text-transform: uppercase;
-      color: $actionable-blue;
-      cursor: pointer;
+    &:nth-child(6) {
+      min-width: 78px;
+    }
+    &:nth-child(7) {
+      min-width: 98px;
+    }
+    &:nth-child(8) {
+      min-width: 98px;
+    }
+    &:nth-child(9) {
+      min-width: 110px;
+    }
+    &:last-child {
+      display: none;
     }
   }
-  .detail-view {
-    .advance-details {
-      display: table-cell;
+  tfoot {
+    td {
+      &:first-child {
+        border-right: none;
+        padding-right: 45px;
+      }
+      &:nth-child(4) {
+        border-right: none;
+      }
     }
-  }
-  .detail-view > td:not(.advance-details) {
-    display: none;
   }
 }
 
@@ -373,23 +484,6 @@
       display: none;
     }
   }
-  tbody td {
-    &:nth-child(11) {
-      text-transform: uppercase;
-      color: $actionable-blue;
-      cursor: pointer;
-    }
-    table {
-      td:first-child {
-        width: 210px;
-        @extend %typography-table-heading;
-        color: $medium-gray;
-      }
-      td:last-child {
-        @extend %typography-table-heading;
-      }
-    }
-  }
   tfoot {
     td {
       &:nth-child(1), &:nth-child(2), &:nth-child(4), &:nth-child(6) {
@@ -399,7 +493,7 @@
   }
 }
 
-.historical-price-indications-report {
+.price-indications-report {
   .report-filter:first-of-type {
     margin-left: 0;
   }
@@ -416,32 +510,99 @@
   }
 }
 
-.standard_frc_table, .standard_vrc_table, .sbc_frc_table, .sbc_vrc_table {
+.report-dividend-statement {
+  .table-dividend-summary {
+    width: 500px;
+    td:last-of-type {
+      width: 120px;
+    }
+  }
+  .table-dividend-details {
+    th {
+      &:last-child {
+        width: 100px;
+      }
+    }
+    tfoot td:first-child {
+      border-right: none;
+    }
+  }
+}
+
+.standard-frc-table, .standard-vrc-table, .sbc-frc-table, .sbc-vrc-table {
   th {
     width: 64px;
   }
 }
 
-.standard_vrc_table, .sbc_vrc_table {
+.standard-vrc-table, .sbc-vrc-table {
   width: auto;
-  &.report-table {
-    th:first-child {
-      width: 85px;
+  th:first-child {
+    width: 85px;
+  }
+}
+
+.current-price-vrc-table {
+  width: 480px;
+  th {
+    &:nth-child(2) {
+      min-width: 150px;
+    }
+    &:nth-child(3) {
+      min-width: 140px;
     }
   }
 }
 
-.standard_1m_libor_table, .standard_3m_libor_table, .standard_6m_libor_table, .standard_daily_prime_table, .sbc_1m_libor_table, .sbc_3m_libor_table, .sbc_6m_libor_table {
+.current-price-frc-table {
+  width: 480px;
+  th {
+    &:nth-child(2) {
+      min-width: 90px;
+    }
+    &:nth-child(3) {
+      min-width: 110px;
+    }
+    &:nth-child(4) {
+      min-width: 100px;
+    }
+  }
+}
+
+.current-price-arc-table {
+  width: 380px;
+}
+
+.current-price-arc-sbc-table {
+  width: 310px;
+}
+
+.sta-rate-table {
+  width: 350px;
+}
+
+.report-table-vertical-headers {
+  td {
+    &:nth-child(1) {
+      @extend %typography-table-heading;
+      background-color: $light-gray;
+    }
+  }
+}
+
+.interest-rate-resets-table {
+  width: 600px;
+}
+
+.standard-1m_libor-table, .standard-3m_libor-table, .standard-6m_libor-table, .standard-daily_prime-table, .sbc-1m_libor-table, .sbc-3m_libor-table, .sbc-6m_libor-table, .current-price-vrc-table {
   width: auto;
   border-top: none;
   border-left: none;
   th, td {
     border: 1px solid $light-blue;
   }
-  &.report-table {
-    th:first-child {
-      width: 85px;
-    }
+  th:first-child {
+    width: 85px;
   }
   .table-heading-row {
     th:first-child {
@@ -578,6 +739,13 @@ td.dataTables_empty {
     td, th {
       &:last-child {
         display: table-cell;
+      }
+      br:first-of-type {
+        content: ' ';
+        &:after {
+          content: "\a\a";
+          white-space: pre;
+        }
       }
     }
   }

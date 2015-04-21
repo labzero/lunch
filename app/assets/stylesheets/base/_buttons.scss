@@ -123,6 +123,9 @@ $split-button-height:   27px;
       border-bottom-left-radius: 0;
       border-top-left-radius: 0;
       color: $actionable-blue;
+      height: $split-button-height;
+      padding-top: 0;
+      padding-bottom: 0;
     }
     ul {
       top: $split-button-height;

@@ -1,7 +1,11 @@
 - table_class ||= nil
+- table_class = Array.wrap(table_class)
 - table_data ||= {}
 - is_sortable = defined?(sortable) ? sortable : true
-%table.table-allow-wrapping.report-table{data: {sortable: is_sortable, :'disable-auto-width' => true, :'missing-data-message' => t('errors.table_data_unavailable')}, class: table_class}
+- no_wrapping ||= false
+- unless no_wrapping
+  - table_class << 'table-allow-wrapping'
+%table.report-table{data: {sortable: is_sortable, :'disable-auto-width' => true, :'missing-data-message' => t('errors.table_data_unavailable')}, class: table_class}
   %thead
     - if table_data[:table_heading]
       %tr.table-heading-row
@@ -10,7 +14,13 @@
     - if table_data[:column_sub_headings].blank?
       %tr
       - table_data[:column_headings].each_with_index do |heading, index|
-        %th.report-cell-narrow{data: {unsortable: index != 0}}= heading
+        - unsortable = index != 0
+        - if heading.is_a?(String)
+          - title = heading
+        - else
+          - title = heading[:title]
+          - unsortable = !heading[:sortable] if heading.has_key?(:sortable)
+        %th.report-cell-narrow{data: {unsortable: unsortable}}= title
     - else
       %tr.table-heading-row
         %th{data: {unsortable: true}}
@@ -28,19 +38,11 @@
     - else
       - table_data[:rows].each do |row|
         %tr
-          %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
+          -if row[:date]
+            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
           - row[:columns].each do |column|
-            %td.report-cell-narrow.report-cell-right
-              - case column[:type]
-              - when :basis_point
-                = fhlb_formatted_number(column[:value])
-              - when :index
-                = fhlb_formatted_number(column[:value], precision: 5)
-              - when :rate
-                = fhlb_formatted_number(column[:value], precision: 2)
-              - when :currency
-                = fhlb_formatted_currency(column[:value])
-              - when :currency_whole
-                = fhlb_formatted_currency(column[:value], precision: 0)
-              - else
-                = column[:value]
+            = render 'reports/report_cell', cell: column
+  - if table_data[:footer]
+    %tfoot
+      - table_data[:footer].each do |cell|
+        = render 'reports/report_cell', cell: cell

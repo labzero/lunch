@@ -23,7 +23,7 @@ Scenario: Defaults to current advances details
 
 @jira-mem-405
 Scenario: Viewing historic advances details
-  Given I am on the Advances Detail page
+  Given I am on the "Advances Detail" report page
   When I click the datepicker field
   And I choose the "custom date" in the datepicker
   And I select the 14th of "last month" in the single datepicker calendar
@@ -32,41 +32,41 @@ Scenario: Viewing historic advances details
 
 @jira-mem-405
 Scenario: Viewing the details of a given advance
-  Given I am on the Advances Detail page
+  Given I am on the "Advances Detail" report page
   When I click on the view cell for the first advance
   Then I should see the detailed view for the first advance
-  When I click on the hide link for the first advance detail view
+  When I click on the hide link for the first advance
   Then I should not see the detailed view for the first advance
 
 @smoke @jira-mem-405
 Scenario: Member sorts the advances details report by trade date
-  Given I am on the Advances Detail page
-  When I click the Trade Date column heading
+  Given I am on the "Advances Detail" report page
+  When I click the "Trade Date" column heading
   Then I should see the "Trade Date" column values in "ascending" order
-  And I click the Trade Date column heading
+  And I click the "Trade Date" column heading
   Then I should see the "Trade Date" column values in "descending" order
 
 @jira-mem-324 @jira-mem-505
 Scenario: Member can't select a date in the future
-  Given I am on the Advances Detail page
+  Given I am on the "Advances Detail" report page
   When I click the datepicker field
   Then I should not see available dates after today
 
 @data-unavailable @jira-mem-283
 Scenario: No data is available to show in the Advances Detail Report
-  Given I am on the Advances Detail page
+  Given I am on the "Advances Detail" report page
   When the "Advances Detail" table has no data
   Then I should see an empty report table with Data Unavailable messaging
 
 @data-unavailable @jira-mem-282
 Scenario: The Advances Detail Report has been disabled
-  Given I am on the Advances Detail page
+  Given I am on the "Advances Detail" report page
   When the "Advances Detail" report has been disabled
   Then I should see an empty report table with Data Unavailable messaging
 
 @smoke @rack_test @jira-mem-415 @wip
 Scenario: Member downloads a PDF of the Advances Detail report
-  Given I am on the Advances Detail page
+  Given I am on the "Advances Detail" report page
   When I request a PDF
   Then I should recieve a PDF file
 

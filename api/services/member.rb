@@ -5,6 +5,7 @@ require_relative 'member/settlement_transaction_account'
 require_relative 'member/advances_details'
 require_relative 'member/profile'
 require_relative 'member/disabled_reports'
+require_relative 'member/cash_projections'
 
 module MAPI
   module Services
@@ -306,6 +307,23 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/cash_projections'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve cash projections for the last date the projections were calculated by FHLB'
+              key :notes, 'Typically the last date the projections were calculated corresponds to the last business day. A given member bank will not necessarily have any cash projections for this date.'
+              key :nickname, :getCashProjectionsForMember
+              key :type, :MemberCashProjections
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -430,6 +448,12 @@ module MAPI
         relative_get '/:id/disabled_reports' do
           member_id = params[:id]
           MAPI::Services::Member::DisabledReports.disabled_report_ids(self, member_id)
+        end
+
+        # Member Cash Projections
+        relative_get '/:id/cash_projections' do
+          member_id = params[:id]
+          MAPI::Services::Member::CashProjections.cash_projections(self, member_id).to_json
         end
       end
     end

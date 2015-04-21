@@ -9,6 +9,8 @@ class ReportsController < ApplicationController
   CAPITAL_STOCK_ACTIVITY_WEB_FLAGS = [MembersService::CURRENT_SECURITIES_POSITION, MembersService::CAPSTOCK_REPORT_BALANCE]
   HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::IRDB_RATES_DATA]
   SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
+  CASH_PROJECTIONS_WEB_FLAGS = [MembersService::CASH_PROJECTIONS_DATA]
+  DIVIDEND_STATEMENT_WEB_FLAGS = [MembersService::CAPSTOCK_REPORT_DIVIDEND_TRANSACTION, MembersService::CAPSTOCK_REPORT_DIVIDEND_STATEMENT]
 
   before_action do
     @member_name = current_member_name
@@ -36,7 +38,8 @@ class ReportsController < ApplicationController
         },
         interest_rate: {
           updated: t('global.daily'),
-          available_history: t('reports.history.months12')
+          available_history: t('reports.history.months12'),
+          route: reports_interest_rate_resets_path
         },
         letters_of_credit: {
           updated: t('global.daily'),
@@ -63,22 +66,15 @@ class ReportsController < ApplicationController
         }
       },
       capital_stock: {
-        trial_balance: {
-          updated: t('global.daily'),
-          available_history: t('global.all')
-        },
         activity: {
           updated: t('global.daily'),
           available_history: t('reports.history.months12'),
           route: reports_capital_stock_activity_path
         },
-        dividend_transaction: {
-          updated: t('global.quarterly'),
-          available_history: t('reports.history.months36')
-        },
         dividend_statement: {
           updated: t('global.quarterly'),
-          available_history: t('reports.history.present2007')
+          available_history: t('reports.history.months36'),
+          route: reports_dividend_statement_path
         }
       },
       settlement: {
@@ -95,7 +91,8 @@ class ReportsController < ApplicationController
         },
         cash_projections: {
           updated: t('global.daily'),
-          available_history: t('global.current_day')
+          available_history: t('global.current_day'),
+          route: reports_cash_projections_path
         },
         current: {
           updated: t('reports.continuously'),
@@ -122,7 +119,7 @@ class ReportsController < ApplicationController
       @capital_stock_activity = {}
     else
       @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
-      raise StandardError, "There has been an error and ReportsController#capital_stock_activity has returned nil. Check error logs." if @capital_stock_activity.blank?
+      raise StandardError, "There has been an error and ReportsController#capital_stock_activity has encountered nil. Check error logs." if @capital_stock_activity.nil?
     end
     @picker_presets = date_picker_presets(@start_date, @end_date)
   end
@@ -134,7 +131,7 @@ class ReportsController < ApplicationController
       @borrowing_capacity_summary = {}
     else
       @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(date.to_date)
-      raise StandardError, "There has been an error and ReportsController#borrowing_capacity has returned nil. Check error logs." if @borrowing_capacity_summary.blank?
+      raise StandardError, "There has been an error and ReportsController#borrowing_capacity has encountered nil. Check error logs." if @borrowing_capacity_summary.nil?
     end
   end
 
@@ -166,7 +163,7 @@ class ReportsController < ApplicationController
       @settlement_transaction_account = {}
     else
       @settlement_transaction_account = member_balances.settlement_transaction_account(@start_date, @end_date, @filter)
-      raise StandardError, "There has been an error and ReportsController#settlement_transaction_account has returned nil. Check error logs." if @settlement_transaction_account.blank?
+      raise StandardError, "There has been an error and ReportsController#settlement_transaction_account has encountered nil. Check error logs." if @settlement_transaction_account.nil?
     end
     @show_ending_balance = false
     if @settlement_transaction_account[:activities] && @settlement_transaction_account[:activities].length > 0
@@ -178,24 +175,24 @@ class ReportsController < ApplicationController
     @start_date = (params[:start_date] || Time.zone.now.to_date).to_date
     member_balances = MemberBalanceService.new(current_member_id, request)
     @advances_detail = member_balances.advances_details(@start_date)
-    raise StandardError, "There has been an error and ReportsController#advances_detail has returned nil. Check error logs." if @advances_detail.blank?
+    raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
     @picker_presets = date_picker_presets(@start_date)
     if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)
       @advances_detail = {}
     else
       @advances_detail = member_balances.advances_details(@start_date)
-      raise StandardError, "There has been an error and ReportsController#advances_detail has returned nil. Check error logs." if @advances_detail.blank?
+      raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
       # prepayment fee indication for detail view
       @advances_detail[:advances_details].each_with_index do |advance, i|
         case advance[:notes]
           when 'unavailable_online'
-            @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.unavailable_online')
+            @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.unavailable_online')
           when 'not_applicable_to_vrc'
-            @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.not_applicable_to_vrc')
+            @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.not_applicable_to_vrc')
           when 'prepayment_fee_restructure'
-            @advances_detail[:advances_details][i][:prepayment_fee_indication] = t('reports.pages.advances_detail.prepayment_fee_restructure_html', fee: number_to_currency(advance[:prepayment_fee_indication]), date: fhlb_date_standard_numeric(advance[:structure_product_prepay_valuation_date].to_date))
+            @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.prepayment_fee_restructure_html', date: fhlb_date_standard_numeric(advance[:structure_product_prepay_valuation_date].to_date))
           else
-            @advances_detail[:advances_details][i][:prepayment_fee_indication] = fhlb_formatted_currency(advance[:prepayment_fee_indication], optional_number: true) || t('reports.pages.advances_detail.unavailable_for_past_dates')
+            @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.unavailable_for_past_dates') unless advance[:prepayment_fee_indication]
         end
       end
     end
@@ -207,6 +204,137 @@ class ReportsController < ApplicationController
     when 'xlsx'
       send_data RenderReportExcelJob.new.perform(current_member_id, 'advances_detail', {start_date: @start_date}), filename: "advances-#{@start_date.strftime('%Y%m%d')}.xlsx"
     end
+  end
+
+  def current_price_indications
+    rate_service = RatesService.new(request)
+    member_balances = MemberBalanceService.new(current_member_id, request)
+
+    #sta data
+    @sta_data = member_balances.settlement_transaction_rate
+    @sta_table_data = {
+        :row_name => t('reports.pages.price_indications.current.sta_rate'),
+        :row_value => @sta_data['sta_rate']
+    }
+
+    #vrc headers
+    column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.overnight_fed_funds_benchmark'), t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'), t('reports.pages.price_indications.current.advance_rate')]
+    #vrc data for standard collateral
+    @standard_vrc_data = rate_service.current_price_indications('standard', 'vrc')
+    columns = @standard_vrc_data.collect do |row|
+      case row[0]
+      when 'overnight_fed_funds_benchmark', 'advance_rate'
+        type = :rate
+      when 'basis_point_spread_to_benchmark'
+        type = :basis_point
+      else
+        type = nil
+      end
+      {value: row[1], type: type}
+    end
+    rows = [{columns: columns}]
+    @standard_vrc_table_data = {
+        :column_headings => column_headings,
+        :rows => rows
+    }
+    #vrc data for sbc collateral
+    @sbc_vrc_data = rate_service.current_price_indications('sbc', 'vrc')
+    columns = @sbc_vrc_data.collect do |row|
+      case row[0]
+      when 'overnight_fed_funds_benchmark', 'advance_rate'
+        type = :rate
+      when 'basis_point_spread_to_benchmark'
+        type = :basis_point
+      else
+        type = nil
+      end
+      {value: row[1], type: type}
+    end
+    rows = [{columns: columns}]
+    @sbc_vrc_table_data = {
+        :column_headings => column_headings,
+        :rows => rows
+    }
+
+    #frc headers
+    column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.treasury_benchmark_maturity'), t('reports.pages.price_indications.current.nominal_yield_of_benchmark'), t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'), t('reports.pages.price_indications.current.advance_rate')]
+    #frc data for standard collateral
+    @standard_frc_data = rate_service.current_price_indications('standard', 'frc')
+    rows = @standard_frc_data.collect do |row|
+      columns = []
+      row.each do |value|
+        if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
+          columns << {value: value[1]}
+        elsif value[0]=='basis_point_spread_to_benchmark'
+          columns << {type: :basis_point, value: value[1]}
+        else
+          columns << {type: :rate, value: value[1]}
+        end
+      end
+      {columns: columns}
+    end
+    @standard_frc_table_data = {
+        :column_headings => column_headings,
+        :rows => rows
+    }
+    #frc data for sbc collateral
+    @sbc_frc_data = rate_service.current_price_indications('sbc', 'frc')
+    rows = @sbc_frc_data.collect do |row|
+      columns = []
+      row.each do |value|
+        if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
+          columns << {value: value[1]}
+        elsif value[0]=='basis_point_spread_to_benchmark'
+          columns << {type: :basis_point, value: value[1]}
+        else
+          columns << {type: :rate, value: value[1]}
+        end
+      end
+      {columns: columns}
+    end
+    @sbc_frc_table_data = {
+        :column_headings => column_headings,
+        :rows => rows
+    }
+
+    #arc headers for standard collateral
+    column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor'), t('reports.pages.price_indications.current.3_month_libor'), t('reports.pages.price_indications.current.6_month_libor'), t('reports.pages.price_indications.current.prime')]
+    #arc data for standard collateral
+    @standard_arc_data = rate_service.current_price_indications('standard', 'arc')
+    rows = @standard_arc_data.collect do |row|
+      columns = []
+      row.each do |value|
+        if value[0]=='advance_maturity'
+          columns << {value: value[1]}
+        else
+          columns << {type: :basis_point, value: value[1]}
+        end
+      end
+      {columns: columns}
+    end
+    @standard_arc_table_data = {
+        :column_headings => column_headings,
+        :rows => rows
+    }
+    #arc headers for sbc collateral
+    column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor'), t('reports.pages.price_indications.current.3_month_libor'), t('reports.pages.price_indications.current.6_month_libor')]
+    #arc data for sbc collateral
+    @sbc_arc_data = rate_service.current_price_indications('sbc', 'arc')
+    rows = @sbc_arc_data.collect do |row|
+      columns = []
+      row.each do |value|
+        if value[0]=='advance_maturity'
+          columns << {value: value[1]}
+        elsif value[0]=='1_month_libor' || value[0]=='3_month_libor' || value[0]=='6_month_libor'
+          columns << {type: :basis_point, value: value[1]}
+        end
+      end
+      {columns: columns}
+    end
+    @sbc_arc_table_data = {
+        :column_headings => column_headings,
+        :rows => rows
+    }
   end
 
   def historical_price_indications
@@ -270,7 +398,7 @@ class ReportsController < ApplicationController
       @historical_price_indications = {}
     else
       @historical_price_indications = rate_service.historical_price_indications(@start_date, @end_date, @collateral_type, @credit_type)
-      raise StandardError, "There has been an error and ReportsController#historical_price_indications has returned nil. Check error logs." if @historical_price_indications.blank?
+      raise StandardError, "There has been an error and ReportsController#historical_price_indications has encountered nil. Check error logs." if @historical_price_indications.nil?
     end
 
     case @credit_type.to_sym
@@ -323,7 +451,6 @@ class ReportsController < ApplicationController
     else
       []
     end
-
     @table_data = {
       :table_heading => table_heading,
       :column_headings => column_headings,
@@ -331,6 +458,83 @@ class ReportsController < ApplicationController
       :column_sub_headings_first => column_sub_headings_first,
       :rows => rows
     }
+  end
+
+  def cash_projections
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    if report_disabled?(CASH_PROJECTIONS_WEB_FLAGS)
+      @cash_projections = {}
+    else
+      @cash_projections = member_balances.cash_projections
+      raise StandardError, "There has been an error and ReportsController#cash_projections has encountered nil. Check error logs." if @cash_projections.nil?
+    end
+    @as_of_date = @cash_projections[:as_of_date].to_date if @cash_projections[:as_of_date]
+  end
+
+  def interest_rate_resets
+    rate_service = RatesService.new(request)
+    @start_date = (Time.zone.now.to_date).to_date
+    column_headings = [t('reports.pages.interest_rate_resets.effective_date'), t('reports.pages.interest_rate_resets.advance_number'), t('reports.pages.interest_rate_resets.prior_rate'), t('reports.pages.interest_rate_resets.new_rate'), t('reports.pages.interest_rate_resets.next_reset')]
+    irr_data = rate_service.interest_rate_resets
+    rows = irr_data.collect do |row|
+      columns = []
+      row.each do |value|
+        if value[0]=='prior_rate' || value[0]=='new_rate'
+          columns << {type: :index, value: value[1]}
+        elsif value[0]=='effective_date'
+          columns << {type: :date, value: value[1]}
+        else
+          columns << {value: value[1]}
+        end
+      end
+      {columns: columns}
+    end
+    @irr_table_data = {
+      :column_headings => column_headings,
+      :rows => rows
+    }
+  end
+
+  def dividend_statement
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    @dividend_statement_details = {
+      column_headings: [
+        {title: t('global.issue_date'), sortable: true},
+        {title: t('global.certificate_sequence'), sortable: true},
+        {title: t('global.start_date'), sortable: true},
+        {title: t('global.end_date'), sortable: true},
+        {title: t('global.shares_outstanding'), sortable: true},
+        {title: t('reports.pages.dividend_statement.headers.days_outstanding'), sortable: true},
+        {title: t('reports.pages.dividend_statement.headers.average_shares'), sortable: true},
+        {title: t('reports.pages.dividend_statement.headers.dividend'), sortable: true}
+      ]
+    }
+    if report_disabled?(DIVIDEND_STATEMENT_WEB_FLAGS)
+      @dividend_statement = {}
+      @dividend_statement_details[:rows] = []
+    else
+      @dividend_statement = member_balances.dividend_statement(Time.zone.now.to_date)
+      raise StandardError, "There has been an error and ReportsController#dividend_statement has encountered nil. Check error logs." if @dividend_statement.nil?
+      @dividend_statement_details[:rows] = @dividend_statement[:details].collect do |detail|
+        {
+          columns: [
+            {value: detail[:issue_date], type: :date},
+            {value: detail[:certificate_sequence], type: nil},
+            {value: detail[:start_date], type: :date},
+            {value: detail[:end_date], type: :date},
+            {value: detail[:shares_outstanding], type: :number},
+            {value: detail[:days_outstanding], type: :number},
+            {value: detail[:average_shares_outstanding], type: :shares_fractional},
+            {value: detail[:dividend], type: :currency}
+          ]
+        }
+      end
+      @dividend_statement_details[:footer] = [
+        { value: t('global.totals'), colspan: 6},
+        { value: @dividend_statement[:average_shares_outstanding], type: :shares_fractional},
+        { value: @dividend_statement[:total_dividend], type: :currency}
+      ]
+    end
   end
 
   private

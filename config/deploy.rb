@@ -34,6 +34,7 @@ namespace :deploy do
       # Your restart mechanism here, for example:
       execute :touch, release_path.join('api/tmp/restart.txt')
     end
+    invoke 'resque_pool:restart'
   end
 
   desc 'Creates API directories'
@@ -90,6 +91,37 @@ namespace :deploy do
     end
   end
 
+end
+
+namespace :resque_pool do
+  desc 'Starts the resque-pool daemon'
+  task :start do
+    on roles(:resque), in: :sequence, wait: 5 do
+      sudo :start, 'resque-pool'
+    end
+  end
+  desc 'Stops the resque-pool daemon'
+  task :stop do
+    on roles(:resque), in: :sequence, wait: 5 do
+      sudo :stop, 'resque-pool'
+    end
+  end
+  desc 'Restarts the resque-pool daemon'
+  task :restart do
+    on roles(:resque), in: :sequence, wait: 5 do
+      begin
+        sudo :start, 'resque-pool'
+      rescue SSHKit::Command::Failed
+        sudo :restart, 'resque-pool'
+      end
+    end
+  end
+  desc 'Reloads the resque-pool daemon, which gives it all new children but leaves the partent process untouched'
+  task :reload do
+    on roles(:resque), in: :sequence, wait: 5 do
+      sudo :reload, 'resque-pool'
+    end
+  end
 end
 
 namespace :cluster do

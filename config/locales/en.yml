@@ -29,12 +29,15 @@ en:
     view: View
     available_history: Available History
     temporarily_unavailable: Temporarily Unavailable
+    overnight: Overnight
     daily: Daily
     monthly: Monthly
+    quarterly: Quarterly
+    semiannually: Semiannually
     all: All
     current_day: Current Day
-    quarterly: Quarterly
     date: Date
+    issue_date: Issue Date
     total: Total
     totals: Totals
     transaction_type: Transaction Type
@@ -78,6 +81,14 @@ en:
     continue: Continue
     fhlb_full: Federal Home Loan Bank San Francisco
     excel: Excel
+    maturity_date: Maturity Date
+    principal: Principal
+    interest: Interest
+    close: Close
+    certificate_sequence: Certificate Sequence
+    start_date: Start Date
+    end_date: End Date
+    shares_outstanding: Shares Outstanding
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -249,18 +260,23 @@ en:
       buttons:
         back: Back
         initiate: Initiate the selected advance
+        credit: Review Credit Activity
       preview:
-        valid:
-          title: Confirm Advance
-          p: FHLB-SF will hedge the advance once you initiate it. It cannot be changed without a fee. Please read the details below and ensure they are correct before you confirm the advance.
-        field_headings:
-          advance_amount: Amount
-          advance_type: Program
-          interest_day_count: "Int Day #"
-          payment_on: Payment
-          advance_term: Term
-          funding_date: Funding
-          maturity_date: Maturity
+        title: Confirm Advance
+        intro: FHLB-SF will hedge the advance once you initiate it. It cannot be changed without a fee. Please read the details below and ensure they are correct before you confirm the advance.
+        initiate: Please wait while we initiate your advance. This may take about 30 seconds.
+      confirmation:
+        title: Intiate Advance
+        intro: "We executed your advance at %{date_time}. A Confirmation of Advance will be faxed to your institution."
+      field_headings:
+        advance_amount: Amount
+        advance_type: Program
+        interest_day_count: "Int Day #"
+        payment_on: Payment
+        advance_term: Term
+        funding_date: Funding
+        maturity_date: Maturity
+        advance_number: Advance Number
     reports:
       title: Reports
       as_of_yesterday: As of yesterday
@@ -372,12 +388,9 @@ en:
       activity:
         title: Capital Stock Activity Statement
         summary: Shows all stock activity for a specified period.
-      dividend_transaction:
+      dividend_statement:
         title: Dividend Transaction Statement
         summary: Includes the date the last dividend was paid, the dividend rate, the number and amount of shares received, and the amount of each cash dividend paid.
-      dividend_statement:
-        title: Capital Stock Dividend Statement
-        summary: Shows a detailed dividend calculation for each certificate owned during the dividend period.
     settlement:
       title: Settlement/Transaction Account (STA)
       account:
@@ -402,9 +415,41 @@ en:
         summary: Provides a breakdown of the securities services fees that will be debited from your institution’s Settlement/Transaction Account on the last business day of the month. It is updated for the prior month approximately five to seven days before monthend.
     pages:
       price_indications:
+        current:
+          title: Current Price Indications
+          summary: Price indications are subject to change. For current quotes, call the Member Services Desk at %{phone_number} between 7 a.m. and 2 p.m. California time. Variable Rate Credit advances are available until 2 p.m., and all other advances are generally available until 12 noon.
+          advance_maturity: Advance maturity
+          overnight_fed_funds_benchmark: Overnight Fed Funds Benchmark* (%)
+          treasury_benchmark_maturity: Treasury Benchmark Maturity
+          basis_point_spread_to_benchmark: Basis Point Spread to Benchmark
+          nominal_yield_of_benchmark: Nominal Yield of Benchmark* (%)
+          advance_rate: Advance Rate (%)
+          interest_day_count: Interest Day Count
+          interest_rate_reset: Interest Rate Reset
+          actual_actual: Actual/Actual
+          actual_360: Actual/360
+          payment_frequency: Payment Frequency
+          at_maturity: At maturity
+          at_repayment: At repayment
+          at_monthend_and_at_repayment: At monthend and at repayment
+          monthly_and_at_repayment: Monthly and at repayment
+          quarterly_and_at_repayment: Quarterly and at repayment
+          semiannually_and_at_repayment: Semiannually and at repayment
+          advances_with_terms_of_180_days_or_less: Advances with terms of 180 days or less
+          advances_with_terms_of_more_than: Advances with terms of more than
+          vrc: VRC Advance
+          frc: FRC Advance
+          arc: ARC Advance (Basis Point Spread)
+          1_month_libor: 1 Month LIBOR
+          3_month_libor: 3 Month LIBOR
+          6_month_libor: 6 Month LIBOR
+          prime: Daily Prime
+          sta_info: Published STA rate is applied to previous business day's ending STA balance
+          sta_rate: Effective Rate for Prior Business Day (%)
         historical: Historical Price Indications
         standard_credit_program: Standard Credit Program
         sbc_program: Securities-Backed Credit
+        settlement_transaction_account: Settlement/Transaction Account
         frc:
           dropdown: Fixed Rate Credit (FRC)
           standard_table_title: FRC (%)
@@ -447,6 +492,7 @@ en:
         certificate_sequence: Certificate Sequence
         debit_shares: "Debits: Number of Shares"
         credit_shares: "Credits: Number of Shares"
+        shares_outstanding: Shares Outstanding
       borrowing_capacity_summary:
         total_borrowing_capacity_heading: "Total Borrowing Capacity:"
         remaining_borrowing_capacity_heading: "Remaining Borrowing Capacity:"
@@ -504,7 +550,51 @@ en:
         unavailable_online: Not available online
         unavailable_for_past_dates: Not available for past dates
         not_applicable_to_vrc: Not applicable to VRC
-        prepayment_fee_restructure_html: "%{fee} <br>Prepayment was calculated on <br>%{date}"
+        prepayment_fee_restructure_html: "<br>Prepayment was calculated on <br>%{date}"
+        prepayment_fee_restructure: Prepayment was calculated on %{date}
+        prepayment_fee_notes: Prepayment Fee Notes
+      cash_projections:
+        title: Cash Projections
+        total_net_header: "Total Net Amount as of close of business %{date}:"
+        total_principal: "Total Principal as of close of business %{date}:"
+        total_interest: "Total Interest as of close of business %{date}:"
+        settlement_date: Settlement Date
+        custody_account: Custody Account Number
+        transaction_code: Transaction Code
+        pool_number: Pool Number
+        cusip: CUSIP
+        record_title: "CUSIP %{cusip}"
+        security_description: Security Description
+        par: Original Par Value
+        coupon_rate: Coupon Rate
+        total_net: Total Net Amount
+      interest_rate_resets:
+        title: Interest Rate Resets
+        info: "The Bank processed the following interest rate resets effective %{date}"
+        questions: If you have any questions, contact %{phone_number}
+        effective_date: Effective Date
+        advance_number: Advance Number
+        prior_rate: Prior Rate (%)
+        new_rate: New Rate (%)
+        next_reset: Next Reset
+      dividend_statement:
+        outstanding_shares_heading: 'Total Average Shares Outstanding as of the end of the %{quarter}:'
+        dividend_amount_heading: 'Total Dividend Amount as of the end of the %{quarter}:'
+        summary: Dividend Summary
+        details: Dividend Details
+        headers:
+          period: Dividend Period
+          date: Transaction Date
+          annualized_rate: Annualized Dividend Rate
+          rate: Dividend Rate (dollars per share)
+          total_shares: Total Average Shares Outstanding
+          dividend_shares: Capital Stock Dividend Class B Shares
+          par_value: Capital Stock Dividend Par Value
+          cash_dividend: Cash Dividend Credited to Settlement/Transaction Account No. %{account_number}
+          total_dividend: Total Dividend Amount
+          days_outstanding: Days Outstanding
+          average_shares: Average Shares Outstanding
+          dividend: Dividend
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
@@ -515,6 +605,27 @@ en:
     merger_notice: In the event of a merger, this report may not include all advances from the acquired instiution.
     advances_and_securities_agreement_notice: Nothing in this report in any way ammends, modifies, or waives the terms of your Advances and Securities Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issues puruant to that Agreement. The Bank expressly disclaims and and all liability that may arise from your institution’s reliance on any information contained in, or errors or omissions made with respect to, this report. Please call (415) 616-2559 if you have any questions.
     pdf_footer: "%{report_name} as of %{date}"
+    anticipated_transactions: The records included in this report are anticipated transactions for the listed settlement dates. These transactions are subject to change prior to final settlement. Net adjustment credit and/or debit amounts will be posted to your STA account on the settlement date.
+    general_information:
+      title: General Information
+      does_not_constitute_solicitation_html: This information does not constitute a solicitation or offer or advice (financial or otherwise) by the Bank, but is a description of generally available structures for certain products and price indications for those structures as of the time and date indicated above. This information is subject to the <a href="%{url}">Terms of Use</a> and may change without notice.
+      market_data_html: Market data is generally provided by Thomson Reuters. <img src="%{picture_url}" alt="Reuters Logo"> <a href="%{url}">Disclaimer</a></br>The Bank may use another source of market data if necessary at its discretion.
+      same_day_pricing: Same-day pricing and/or funding for amounts up to $200 million for Variable Rate Credit advances and up to $100 million per posted maturity for all other advances with maturities up to 10 years are available according to your institution's Financing Availability, subject to market conditions. For advances with maturities greater than 10 years, same-day pricing and/or funding are subject to market execution.
+      interest_rates_on_securities_backed_credit_advances: Interest rates on Securities-Backed Credit advances may be lower than rates on advances offered under the Bank's Standard Credit Program and competitive with rates in the securities repurchase market. The price indications shown here are based on Agency MBS collateral. For rates using AAA or AA collateral, call the Member Services Desk at %{phone_number}.
+      please_call_the_member_services_desk: "Please call the Member Services Desk at %{phone_number} for current quotes, additional information about other maturities and customized offerings, and pricing information on the following products:"
+      callable_advance: Callable Advance
+      putable_advance: Putable Advance
+      amortizing_advance: Amortizing Advance
+      lc: Standby Letters of Credit
+      ace: Advances for Community Enterprise (ACE)
+      cip: Community Investment Program (CIP) advances
+      hpa: Homeownership Preservation Advance (HPA)
+      advances_with_embedded_options: Advances with embedded options, including interest rate caps
+      advances_with_partial_prepayment_symmetry: Advances with partial prepayment symmetry
+      reduced_prices: Reduced prices are generally available for advances under the Bank's Community Investment Cash Advance (CICA) credit programs, which include ACE, CIP, and HPA.
+      standby_letters_of_credit: "Standby Letters of Credit (LCs) are available to assist members in facilitating residential housing finance and community lending that are eligible for the following two CICA credit programs: CIP and ACE. LCs may also be used to assist members with asset/liability management or to provide members with liquidity or other funding."
+      for_advances_traded_on_or_after_january_1: "For advances traded on or after January 1, 2002, the maximum voluntary prepayment settlement amount per calendar month per member cannot exceed the greater of: (i) the amount of Bank stock owned by the member as of the last business day of the calendar month prior to the notice date or (ii) $250 million. In addition, the maximum voluntary prepayment amount for all advances is $250 million per member per business day."
+      the_bank_will_provide_prepayment_fee_indications: The Bank will provide prepayment fee indications for up to 5 advances per member per business day.
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email

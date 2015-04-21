@@ -106,6 +106,14 @@ describe MemberBalanceService do
         expect(capital_stock_activity[:total_credits]).to eq(1444)
         expect(capital_stock_activity[:total_debits]).to eq(4289)
       end
+      it 'should calculate a running total of the shares for each activity' do
+        last_outstanding = capital_stock_activity[:start_balance]
+        expect(capital_stock_activity[:activities].length).to be >= 0 # just so we fail if we have no activities, otherwise we'd test nothing
+        capital_stock_activity[:activities].each do |activity|
+          expect(activity[:outstanding_shares]).to eq(last_outstanding + activity[:credit_shares] - activity[:debit_shares])
+          last_outstanding = activity[:outstanding_shares]
+        end
+      end
     end
 
     describe 'activities hash sad path' do
@@ -224,6 +232,29 @@ describe MemberBalanceService do
         expect(File).to receive(:read).and_return('some malformed json!')
         expect(Rails.logger).to receive(:warn)
         expect(profile).to be(nil)
+      end
+    end
+  end
+
+  # TODO add vcr once MAPI endpoint is rigged up
+  describe 'settlement_transaction_rate' do
+    let(:settlement_transaction_rate) {subject.settlement_transaction_rate}
+    it 'should return settlement transaction rate data' do
+      expect(settlement_transaction_rate.length).to be >= 1
+      expect(settlement_transaction_rate[:sta_rate]).to be_kind_of(Float)
+    end
+    describe 'bad data' do
+      it 'should pass nil values if data from MAPI has nil values' do
+        allow(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'settlement_transaction_rate_with_nil_values.json'))))
+        expect(settlement_transaction_rate[:sta_rate]).to be(nil)
+      end
+    end
+    describe 'error states' do
+      it 'returns nil if there is a JSON parsing error' do
+        # TODO change this stub once you implement the MAPI endpoint
+        allow(File).to receive(:read).and_return('some malformed json!')
+        expect(Rails.logger).to receive(:warn)
+        expect(settlement_transaction_rate).to be(nil)
       end
     end
   end
@@ -530,6 +561,117 @@ describe MemberBalanceService do
       end
       it 'should calculate `estimated_next_payment` based on the value of the constituent advance records' do
         expect(advances_details[:estimated_next_payment]).to eq(50837.53)
+      end
+    end
+  end
+
+  describe '`cash_projections` method', :vcr do
+    let(:cash_projections) {subject.cash_projections}
+    it 'should return nil if there is a JSON parsing error' do
+      expect(JSON).to receive(:parse).and_raise(JSON::ParserError)
+      expect(Rails.logger).to receive(:warn)
+      expect(cash_projections).to be(nil)
+    end
+    it 'should return nil if there was an API error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(cash_projections).to eq(nil)
+    end
+    it 'should return nil if there was a connection error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(cash_projections).to eq(nil)
+    end
+    it 'returns an object with an as_of_date indicating when FHLB most recently produced cash projections' do
+      expect(cash_projections[:as_of_date]).to be_kind_of(Date)
+    end
+    it 'returns an object with a projections array' do
+      expect(cash_projections[:projections]).to be_kind_of(Array)
+    end
+    it 'returns a total_net_amount that is the sum of the total_amount for each projection' do
+      total = cash_projections[:projections].inject(0) { |sum, projection| sum += projection[:total] }
+      expect(cash_projections[:total_net_amount]).to eq(total)
+    end
+    it 'returns a total_interest that is the sum of the interest for each projection' do
+      interest = cash_projections[:projections].inject(0) { |sum, projection| sum += projection[:interest] }
+      expect(cash_projections[:total_interest]).to eq(interest)
+    end
+    it 'returns a total_principal that is the sum of the interest for each projection' do
+      principal = cash_projections[:projections].inject(0) { |sum, projection| sum += projection[:principal] }
+      expect(cash_projections[:total_principal]).to eq(principal)
+    end
+    describe 'projection objects' do
+      %w(settlement_date maturity_date).each do |property|
+        it "has a #{property}" do
+          cash_projections[:projections].each do |projection|
+            expect(projection[property]).to be_kind_of(Date)
+          end
+        end
+      end
+      %w(original_par coupon_rate principal interest total).each do |property|
+        it "has a #{property}" do
+          cash_projections[:projections].each do |projection|
+            expect(projection[property]).to be_kind_of(Numeric)
+          end
+        end
+      end
+      %w(custody_account transaction_code cusip description pool_number).each do |property|
+        it "has a #{property}" do
+          cash_projections[:projections].each do |projection|
+            expect(projection[property]).to be_kind_of(String)
+          end
+        end
+      end
+    end
+  end
+
+  describe '`dividend_statement` method' do
+    let(:dividend_statement) { subject.dividend_statement(Time.zone.now) }
+    it 'returns a date for its `transaction_date`' do
+      expect(dividend_statement[:transaction_date]).to be_kind_of(Date)
+    end
+    it 'returns a float for its `annualized_rate`' do
+      expect(dividend_statement[:annualized_rate]).to be_kind_of(Float)
+    end
+    it 'returns a float for its `rate`' do
+      expect(dividend_statement[:rate]).to be_kind_of(Float)
+    end
+    it 'returns a numeric for its `average_shares_outstanding`' do
+      expect(dividend_statement[:average_shares_outstanding]).to be_kind_of(Numeric)
+    end
+    it 'returns a fixnum for its `shares_dividend`' do
+      expect(dividend_statement[:shares_dividend]).to be_kind_of(Fixnum)
+    end
+    it 'returns a fixnum for its `shares_par_value`' do
+      expect(dividend_statement[:shares_par_value]).to be_kind_of(Fixnum)
+    end
+    it 'returns a float for its `cash_dividend`' do
+      expect(dividend_statement[:cash_dividend]).to be_kind_of(Float)
+    end
+    it 'returns a float for its `total_dividend`' do
+      expect(dividend_statement[:total_dividend]).to be_kind_of(Float)
+    end
+    it 'returns a string for its `sta_account_number`' do
+      expect(dividend_statement[:sta_account_number]).to be_kind_of(String)
+    end
+    it 'returns an array of dividend details for its `details`' do
+      expect(dividend_statement[:details]).to be_kind_of(Array)
+      expect(dividend_statement[:details].length).to be >= 0
+      dividend_statement[:details].each do |detail|
+        expect(detail[:issue_date]).to be_kind_of(Date)
+        expect(detail[:start_date]).to be_kind_of(Date)
+        expect(detail[:end_date]).to be_kind_of(Date)
+        expect(detail[:certificate_sequence]).to be_kind_of(Fixnum)
+        expect(detail[:shares_outstanding]).to be_kind_of(Fixnum)
+        expect(detail[:average_shares_outstanding]).to be_kind_of(Float)
+        expect(detail[:dividend]).to be_kind_of(Float)
+        expect(detail[:days_outstanding]).to be_kind_of(Fixnum)
+        expect(detail[:start_date]).to be <= detail[:end_date]
+      end
+    end
+    describe 'error states' do
+      it 'returns nil if there is a JSON parsing error' do
+        expect(File).to receive(:read).and_return('some malformed json!')
+        expect(Rails.logger).to receive(:warn)
+        expect(dividend_statement).to be(nil)
       end
     end
   end

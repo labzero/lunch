@@ -52,48 +52,74 @@ Then(/^I should see an empty report table with Data Unavailable messaging$/) do
 end
 
 Then(/^I should see a report table with multiple data rows$/) do
-  page.assert_selector('.report-table')
-  expect(page.all('.report-table tbody tr').length).to be > 0
+  page.assert_selector('.report-table tbody tr')
 end
 
-Given(/^I am on the Capital Stock Activity Statement page$/) do
+Then(/^I should see two report tables with multiple data rows$/) do
+  page.assert_selector('.report-table', count: 2)
+  page.all('.report-table').each do |table|
+    table.assert_selector('tbody tr')
+  end
+end
+
+
+Given(/^I am on the "(.*?)" report page$/) do |report|
   sleep_if_close_to_midnight
   @today = Time.zone.now.to_date
-  visit '/reports/capital-stock-activity'
+  case report
+  when 'Capital Stock Activity Statement'
+    visit '/reports/capital-stock-activity'
+  when 'Settlement Transaction Account Statement'
+    visit '/reports/settlement-transaction-account'
+  when 'Advances Detail'
+    visit '/reports/advances'
+  when 'Cash Projections'
+    visit '/reports/cash-projections'
+  when 'Borrowing Capacity Statement'
+    visit '/reports/borrowing-capacity'
+  when 'Historical Price Indications'
+    visit '/reports/historical-price-indications'
+  when 'Current Price Indications'
+    visit '/reports/current-price-indications'
+  when 'Interest Rate Resets'
+    visit '/reports/interest_rate_resets'
+  when 'Dividend Transaction Statement'
+    visit '/reports/dividend-statement'
+  else
+    raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
+  end
 end
 
-Given(/^I am on the Settlement Transaction Account Statement page$/) do
-  sleep_if_close_to_midnight
-  @today = Time.zone.now.to_date
-  visit '/reports/settlement-transaction-account'
-end
-
-Given(/^I am on the Advances Detail page$/) do
-  sleep_if_close_to_midnight
-  @today = Time.zone.now.to_date
-  visit '/reports/advances'
-end
-
-Given(/^I am on the Historical Price Indications page$/) do
-  sleep_if_close_to_midnight
-  @today = Time.zone.now.to_date
-  visit '/reports/historical-price-indications'
-end
-
-Given(/I am on the Borrowing Capacity Statement page$/) do
-  visit '/reports/borrowing-capacity'
-end
-
-When(/^I click the Certificate Sequence column heading$/) do
-  page.find('th', text: I18n.t('reports.pages.capital_stock_activity.certificate_sequence')).click
-end
-
-When(/^I click the Trade Date column heading$/) do
-  page.find('th', text: I18n.t('reports.pages.advances_detail.trade_date')).click
-end
-
-When(/^I click the Date column heading$/) do
-  page.find('th', text: I18n.t('global.date')).click
+When(/^I click the "(.*?)" column heading$/) do |column_heading|
+  heading = case column_heading
+              when 'Certificate Sequence'
+                I18n.t('reports.pages.capital_stock_activity.certificate_sequence')
+              when 'Trade Date'
+                I18n.t('reports.pages.advances_detail.trade_date')
+              when 'Date'
+                I18n.t('global.date')
+              when 'Issue Date'
+                I18n.t('global.issue_date')
+              when 'Start Date'
+                I18n.t('global.start_date')
+              when 'End Date'
+                I18n.t('global.end_date')
+              when 'Dividend'
+                I18n.t('reports.pages.dividend_statement.headers.dividend')
+              when 'Shares Outstanding'
+                I18n.t('global.shares_outstanding')
+              when 'Average Shares Outstanding'
+                I18n.t('reports.pages.dividend_statement.headers.average_shares')
+              when 'Days Outstanding'
+                I18n.t('reports.pages.dividend_statement.headers.days_outstanding')
+              when 'Settlement Date'
+                I18n.t('reports.pages.cash_projections.settlement_date')
+              when 'Outstanding Shares'
+                I18n.t('reports.pages.capital_stock_activity.shares_outstanding')
+              else
+                raise Capybara::ExpectationNotMet, 'unknown column heading passed as argument'
+            end
+  page.find('.report-table th', text: /^#{Regexp.quote(heading)}$/).click
 end
 
 Then(/^I should see a "(.*?)" for the current month to date$/) do |report_type|
@@ -223,6 +249,36 @@ Then(/^I should recieve an XLSX file$/) do
   page.response_headers['Content-Type'].should == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 end
 
+When(/^I click on the view cell for the first (advance|cash projection)/) do |report_type|
+  column_name = report_type == 'advance' ? I18n.t('reports.pages.advances_detail.advance_number') : I18n.t('reports.pages.cash_projections.cusip')
+  skip_if_table_empty do
+    column_index = page.evaluate_script("$('.report-table thead th:contains(#{column_name})').index()") + 1
+    @row_identifier = page.find(".report-table tbody tr:first-child td:nth-child(#{column_index})").text
+    page.find('.report-table tr:first-child .detail-view-trigger').click
+  end
+end
+
+Then(/^I should see the detailed view for the first (advance|cash projection)/) do |report_type|
+  text = report_type == 'advance' ? I18n.t('reports.pages.advances_detail.record_title', advance_number: @row_identifier) : I18n.t('reports.pages.cash_projections.record_title', cusip: @row_identifier)
+  skip_if_table_empty do
+    page.assert_selector('.report-table tr:first-child .report-detail-cell', visible: true)
+    page.assert_selector('.report-table tr:first-child .report-detail-cell h3', text: text, visible: true)
+    remove_instance_variable(:@row_identifier)
+  end
+end
+
+When(/^I click on the hide link for the first (advance|cash projection)$/) do |report_type|
+  skip_if_table_empty do
+    page.find('.report-table tr:first-child .report-detail-cell .hide-detail-view').click
+  end
+end
+
+Then(/^I should not see the detailed view for the first (advance|cash projection)$/) do |report_type|
+  skip_if_table_empty do
+    page.assert_selector('.report-table tr:first-child .report-detail-cell', visible: :hidden)
+  end
+end
+
 def sleep_if_close_to_midnight
   now = DateTime.now
   seconds_till_tomorrow = (now.tomorrow.beginning_of_day - now) * 1.days
@@ -240,3 +296,25 @@ def report_dates_in_range? (start_date, end_date, date_format="%m/%d/%Y")
     raise Capybara::ExpectationNotMet, "date #{date} out of range [#{start_date}, #{end_date}]" unless date >= start_date && date <= end_date
   end
 end
+
+Then(/^I should see VRC current price indications report$/) do
+  page.assert_selector('.current-price-vrc-table tbody tr')
+end
+
+Then(/^I should see FRC current price indications report$/) do
+  page.assert_selector('.current-price-frc-table tbody tr')
+end
+
+Then(/^I should see ARC current price indications report$/) do
+  page.assert_selector('.current-price-arc-table tbody tr')
+end
+
+Then(/^I should see STA rates report$/) do
+  page.assert_selector('.sta-rate-table tbody tr')
+end
+
+Then(/^I should see Interest Rate Resets report$/) do
+  page.assert_selector('.interest-rate-resets-table tbody tr')
+end
+
+
