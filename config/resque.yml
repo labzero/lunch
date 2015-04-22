@@ -1,3 +1,3 @@
-development: <%= ENV['REDIS_URL'] || 'localhost:6379/development' %>
-test: <%= ENV['REDIS_URL'] || 'localhost:6379/test' %>
-production: <%= ENV['REDIS_URL'] || 'localhost:6379/production' %>
+development: <%= ENV['RESQUE_REDIS_URL'] || 'localhost:6379/resque-development' %>
+test: <%= ENV['RESQUE_REDIS_URL'] || 'localhost:6379/resque-test' %>
+production: <%= ENV['RESQUE_REDIS_URL'] || 'localhost:6379/resque-production' %>
