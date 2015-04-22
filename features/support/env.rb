@@ -114,6 +114,30 @@ if !custom_host
   mapi_stderr.close
   puts 'MAPI Started.'
   ENV['MAPI_ENDPOINT'] = "http://localhost:#{mapi_port}/mapi"
+
+  puts "Starting resque-pool..."
+  resque_pool = "resque-pool -i"
+  resque_stdin, resque_stdout, resque_stderr, resque_thr = Open3.popen3({'RAILS_ENV' => 'test', 'TERM_CHILD' => '1'}, resque_pool)
+
+  at_exit do
+    Process.kill('TERM', resque_thr.pid) rescue Errno::ESRCH
+    resque_stdin.close
+    resque_thr.value # wait for the thread to finish
+  end
+
+  sleep 5
+  unless resque_thr.alive?
+    IO.copy_stream(resque_stdout, STDOUT)
+    IO.copy_stream(resque_stderr, STDERR)
+    raise 'resque-pool failed to start'
+  end
+
+  # we close the resque-pool's STDIN and STDOUT immediately to avoid a ruby buffer depth issue.
+  resque_stdout.close
+  resque_stderr.close
+  puts 'resque-pool Started.'
+
+
 else
   Capybara.app_host = custom_host
 end
