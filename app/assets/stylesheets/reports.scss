@@ -1,3 +1,9 @@
+@mixin table-cell-treatment {
+  width: auto;
+  box-sizing: border-box;
+  padding: 10px;
+}
+
 .reports {
   h1 {
     @extend %typography-page-title;
@@ -410,9 +416,7 @@
 
 .cash-projections-report-table {
   td, th {
-    width: auto;
-    box-sizing: border-box;
-    padding: 10px;
+    @include table-cell-treatment;
   }
   td{ 
     vertical-align: top}
@@ -463,9 +467,7 @@
 
 .advances-details-report-table {
   td, th {
-    width: auto;
-    box-sizing: border-box;
-    padding: 10px;
+    @include table-cell-treatment;
   }
   th {
     &:nth-child(5) {
@@ -789,5 +791,35 @@ td.dataTables_empty {
   }
   .report-print-bank {
     @include typography-print-subheader;
+  }
+}
+.letters-of-credit-table {
+  td, th {
+    @include table-cell-treatment;
+  }
+  th {
+    &:nth-child(1) {
+      width: 85px;
+    }
+    &:nth-child(2) {
+      width: 105px;
+    }
+    &:nth-child(3) {
+      width: 140px;
+    }
+    &:nth-child(4) {
+      width: 86px;
+    }
+    &:nth-child(5) {
+      width: 115px;
+    }
+    &:nth-child(6) {
+      width: 100px;
+    }
+  }
+  tfoot {
+    td:first-child {
+      border-right: none;
+    }
   }
 }

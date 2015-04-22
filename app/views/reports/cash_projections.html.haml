@@ -24,12 +24,12 @@
     %table.table-allow-wrapping.report-table.cash-projections-report-table{data: {sortable: true, :'disable-auto-width' => true, :'missing-data-message' => t('errors.table_data_unavailable')}}
       %thead
         %tr
-          %th.report-cell-narrow= t('reports.pages.cash_projections.settlement_date')
+          %th.report-cell-narrow= t('common_table_headings.settlement_date')
           %th.report-cell-narrow{data: {unsortable: true}}= t('reports.pages.cash_projections.cusip')
           %th.report-cell-narrow{data: {unsortable: true}}= t('reports.pages.cash_projections.security_description')
           %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('reports.pages.cash_projections.par'), '$')
           %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('reports.pages.cash_projections.coupon_rate'), '%')
-          %th.report-cell-narrow{data: {unsortable: true}}= t('global.maturity_date')
+          %th.report-cell-narrow{data: {unsortable: true}}= t('common_table_headings.maturity_date')
           %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.principal'), '$')
           %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.interest'), '$')
           %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.total'), '$')
@@ -56,7 +56,7 @@
                 .left-column
                   %table
                     %tr
-                      %td= t('reports.pages.cash_projections.settlement_date')
+                      %td= t('common_table_headings.settlement_date')
                       %td= fhlb_date_standard_numeric(row[:settlement_date])
                     %tr
                       %td= t('reports.pages.cash_projections.custody_account')
@@ -85,7 +85,7 @@
                       %td= fhlb_formatted_percentage(row[:coupon_rate], 3)
                   %table
                     %tr
-                      %td= t('global.maturity_date')
+                      %td= t('common_table_headings.maturity_date')
                       %td= fhlb_date_standard_numeric(row[:maturity_date])
                   %table
                     %tr

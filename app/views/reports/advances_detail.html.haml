@@ -18,12 +18,12 @@
     %table.table-allow-wrapping.report-table.advances-details-report-table{data: {sortable: true, :'disable-auto-width' => true, :'missing-data-message' => t('errors.table_data_unavailable')}}
       %thead
         %tr
-          %th.report-cell-narrow= t('reports.pages.advances_detail.trade_date')
+          %th.report-cell-narrow= t('common_table_headings.trade_date')
           %th.report-cell-narrow= t('reports.pages.advances_detail.funding_date')
-          %th.report-cell-narrow= t('reports.pages.advances_detail.maturity_date')
+          %th.report-cell-narrow= t('common_table_headings.maturity_date')
           %th.report-cell-narrow= t('reports.pages.advances_detail.advance_number')
           %th.report-cell-narrow= t('reports.pages.advances_detail.advance_type')
-          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.current_par_heading'), '$')
+          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$')
           %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.interest_rate'), '%')
           %th.report-cell-narrow= t('reports.pages.advances_detail.next_interest_payment_date')
           %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.accrued_interest_heading'), '$')
@@ -58,13 +58,13 @@
                 .left-column
                   %table
                     %tr
-                      %td= t('reports.pages.advances_detail.trade_date')
+                      %td= t('common_table_headings.trade_date')
                       %td= fhlb_date_standard_numeric(row[:trade_date]) if row[:trade_date]
                     %tr
                       %td= t('reports.pages.advances_detail.funding_date')
                       %td= fhlb_date_standard_numeric(row[:funding_date]) if row[:funding_date]
                     %tr
-                      %td= t('reports.pages.advances_detail.maturity_date')
+                      %td= t('common_table_headings.maturity_date')
                       %td= row[:maturity_date].blank? ? t('global.open') : fhlb_date_standard_numeric(row[:maturity_date])
                   %table
                     %tr
@@ -75,7 +75,7 @@
                       %td= row[:advance_type]
                   %table
                     %tr
-                      %td= t('reports.pages.advances_detail.current_par')
+                      %td= t('common_table_headings.current_par')
                       %td= fhlb_formatted_currency_whole(row[:current_par]) if row[:current_par]
                   %table
                     %tr
@@ -126,7 +126,7 @@
           = t('reports.close_of_business_processing_notice')
         %dl
           %dt
-            #{t('reports.pages.advances_detail.maturity_date')}:
+            #{t('common_table_headings.maturity_date')}:
           %dd= t('reports.maturity_date_notice')
           %dt
             #{t('reports.pages.advances_detail.accrued_interest')}:

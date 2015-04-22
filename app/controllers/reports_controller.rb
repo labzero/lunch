@@ -12,6 +12,7 @@ class ReportsController < ApplicationController
   CASH_PROJECTIONS_WEB_FLAGS = [MembersService::CASH_PROJECTIONS_DATA]
   DIVIDEND_STATEMENT_WEB_FLAGS = [MembersService::CAPSTOCK_REPORT_DIVIDEND_TRANSACTION, MembersService::CAPSTOCK_REPORT_DIVIDEND_STATEMENT]
   SECURITIES_SERVICES_STATMENT_WEB_FLAGS = [MembersService::SECURITIESBILLSTATEMENT]
+  LETTERS_OF_CREDIT_WEB_FLAGS = [MembersService::LETTERS_OF_CREDIT_DETAIL_REPORT]
 
   before_action do
     @member_name = current_member_name
@@ -44,7 +45,8 @@ class ReportsController < ApplicationController
         },
         letters_of_credit: {
           updated: t('global.daily'),
-          available_history: t('global.all')
+          available_history: t('global.all'),
+          route: reports_letters_of_credit_path
         },
         forward_commitments: {
           updated: t('global.daily'),
@@ -555,6 +557,40 @@ class ReportsController < ApplicationController
     @picker_presets = date_picker_presets(@start_date)
   end
 
+  def letters_of_credit
+    if report_disabled?(LETTERS_OF_CREDIT_WEB_FLAGS)
+      letters_of_credit = {}
+    else
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      letters_of_credit = member_balances.letters_of_credit
+      raise StandardError, "There has been an error and ReportsController#letters_of_credit has encountered nil. Check error logs." if letters_of_credit.nil?
+    end
+    @as_of_date = letters_of_credit[:as_of_date]
+    @total_current_par = letters_of_credit[:total_current_par]
+    rows = if letters_of_credit[:rows]
+      letters_of_credit[:rows].collect do |row|
+        {
+          columns: [
+            {value: row[:lc_number], type: nil},
+            {value: row[:current_par], type: :currency_whole},
+            {value: row[:maintenance_charge], type: :number},
+            {value: row[:trade_date], type: :date, classes: [:'report-cell-right']},
+            {value: row[:settlement_date], type: :date, classes: [:'report-cell-right']},
+            {value: row[:maturity_date], type: :date, classes: [:'report-cell-right']},
+            {value: row[:description], type: nil}
+          ]
+        }
+      end
+    else
+      {}
+    end
+    @loc_table_data = {
+      column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('common_table_headings.trade_date'), t('common_table_headings.settlement_date'), t('common_table_headings.maturity_date'), t('common_table_headings.description')],
+      rows: rows,
+      footer: [{value: t('global.total')}, {value: @total_current_par, type: :currency_whole}, {value: nil, colspan: 5}]
+    }
+  end
+
   private
   def report_disabled?(report_flags)
     member_info = MembersService.new(request)
@@ -569,11 +605,11 @@ class ReportsController < ApplicationController
       new_array << {date: rate_by_date_obj[:date], rates_by_term: []}
       terms.each do |term|
         rate_obj = rate_by_date_obj[:rates_by_term].select {|rate_obj| rate_obj[:term] == term.to_s.upcase}.first || {
-            term: term.to_s.upcase,
-            type: 'index', # placeholder type
-            value: nil,
-            day_count_basis: nil,
-            pay_freq: nil
+          term: term.to_s.upcase,
+          type: 'index', # placeholder type
+          value: nil,
+          day_count_basis: nil,
+          pay_freq: nil
         }
         new_array.last[:rates_by_term] << rate_obj.with_indifferent_access
       end

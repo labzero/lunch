@@ -52,7 +52,6 @@ en:
     unpaid_principal: Unpaid Principal
     balance_as_of_close_of_business: Balance as of close of business
     reference_number: Reference Number
-    description: Description
     debits: Debits
     credits: Credits
     balance: Balance
@@ -81,7 +80,6 @@ en:
     continue: Continue
     fhlb_full: Federal Home Loan Bank San Francisco
     excel: Excel
-    maturity_date: Maturity Date
     principal: Principal
     interest: Interest
     close: Close
@@ -137,6 +135,12 @@ en:
       letters_of_credit: Letters of Credit
       mortgages: Mortgages
       securities: Securities
+  common_table_headings:
+    trade_date: Trade Date
+    settlement_date: Settlement Date
+    maturity_date: Maturity Date
+    description: Description
+    current_par: Current Par
   datepicker:
     range:
       this_month: "%{month} to date"
@@ -531,13 +535,9 @@ en:
         total_current_par_heading: "Total Current Par as of %{date}"
         total_accrued_interest_heading: "Total Accrued Interest as of %{date}"
         estimated_next_payment_heading: "Estimated Next Interest Payment as of %{date}"
-        trade_date: Trade Date
         funding_date: Funding Date
-        maturity_date: Maturity Date
         advance_number: Advance Number
         advance_type: Advance Type
-        current_par_heading: Current Par
-        current_par: Current Par
         interest_payment_frequency: Interest Payment Frequency
         day_count_basis: Day Count Basis
         interest_rate: Interest Rate
@@ -624,6 +624,13 @@ en:
           per_item: '%{number} @ %{cost} per item'
           per_par_cusip: '%{number} @ %{cost} per 1000 par, by CUSIP'
           per_hour: '%{number} @ %{cost} per hour'
+      letters_of_credit:
+        title: Letters of Credit
+        total_current_par_summary: 'Total Current Par as of close of business on %{date}:'
+        headers:
+          lc_number: LC Number
+          annual_maintenance_charge: Annual Maintenance Charge (bps)*
+        minimum_maintenance_charge: '*The minimum annual maintenance charge is $500.'
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
