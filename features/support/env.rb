@@ -117,7 +117,7 @@ if !custom_host
 
   puts "Starting resque-pool..."
   resque_pool = "resque-pool -i"
-  resque_stdin, resque_stdout, resque_stderr, resque_thr = Open3.popen3({'RAILS_ENV' => 'test', 'TERM_CHILD' => '1'}, resque_pool)
+  resque_stdin, resque_stdout, resque_stderr, resque_thr = Open3.popen3({'RAILS_ENV' => ENV['RAILS_ENV'] || ENV['RACK_ENV'], 'TERM_CHILD' => '1'}, resque_pool)
 
   at_exit do
     Process.kill('TERM', resque_thr.pid) rescue Errno::ESRCH
