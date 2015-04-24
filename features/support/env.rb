@@ -115,9 +115,15 @@ if !custom_host
   puts 'MAPI Started.'
   ENV['MAPI_ENDPOINT'] = "http://localhost:#{mapi_port}/mapi"
 
-  puts "Starting resque-pool..."
-  resque_pool = "resque-pool -i"
-  resque_stdin, resque_stdout, resque_stderr, resque_thr = Open3.popen3({'RAILS_ENV' => ENV['RAILS_ENV'] || ENV['RACK_ENV'], 'TERM_CHILD' => '1'}, resque_pool)
+  verbose = ENV['VERBOSE'] # Need to remove the VERBOSE env variable due to a conflict with Resque::VerboseFormatter and ActiveJob logging
+  begin
+    ENV.delete('VERBOSE')
+    puts "Starting resque-pool..."
+    resque_pool = "resque-pool -i"
+    resque_stdin, resque_stdout, resque_stderr, resque_thr = Open3.popen3({'RAILS_ENV' => ENV['RAILS_ENV'] || ENV['RACK_ENV'], 'TERM_CHILD' => '1'}, resque_pool)
+  ensure
+    ENV['VERBOSE'] = verbose # reset the VERBOSE env variable after resque process is finished.
+  end
 
   at_exit do
     Process.kill('TERM', resque_thr.pid) rescue Errno::ESRCH

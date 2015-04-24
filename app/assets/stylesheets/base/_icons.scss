@@ -136,3 +136,12 @@ $icon-success: "\e60d";
   @extend %icon-font;
   content: "#{$icon-success}";
 }
+
+$spinner-size: 27px !default;
+@mixin icon-loading {
+  background-image: image-url('spinner-27x27-brandblue.gif');
+  background-position: center center;
+  background-repeat: no-repeat;
+  width: $spinner-size + 3px;
+  height: $spinner-size + 3px;
+}

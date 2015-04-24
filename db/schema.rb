@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150128002218) do
+ActiveRecord::Schema.define(version: 20150415002411) do
 
   create_table "corporate_communications", force: true do |t|
     t.string   "email_id"
@@ -23,11 +23,26 @@ ActiveRecord::Schema.define(version: 20150128002218) do
 
   add_index "corporate_communications", ["category"], name: "i_cor_com_cat"
 
+  create_table "job_statuses", force: true do |t|
+    t.integer  "user_id",             limit: nil, precision: 38
+    t.string   "job_id"
+    t.integer  "status",              limit: nil, precision: 38, default: 0
+    t.datetime "finished_at"
+    t.string   "result_file_name"
+    t.string   "result_content_type"
+    t.integer  "result_file_size",    limit: nil, precision: 38
+    t.datetime "result_updated_at"
+  end
+
+  add_index "job_statuses", ["finished_at"], name: "i_job_statuses_finished_at"
+  add_index "job_statuses", ["job_id"], name: "index_job_statuses_on_job_id", unique: true
+  add_index "job_statuses", ["status"], name: "index_job_statuses_on_status"
+
   create_table "users", force: true do |t|
-    t.string   "username",                                        default: "", null: false
+    t.string   "username",                                          default: "", null: false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
-    t.integer  "sign_in_count",          precision: 38, scale: 0, default: 0,  null: false
+    t.integer  "sign_in_count",          limit: nil, precision: 38, default: 0,  null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"

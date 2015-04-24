@@ -19,6 +19,7 @@ require 'dotenv'
 Dotenv.load
 
 require 'vcr'
+require "paperclip/matchers"
 
 VCR.configure do |c|
   c.cassette_library_dir = 'spec/cassettes'
@@ -71,9 +72,11 @@ RSpec.configure do |config|
   config.include Devise::TestHelpers, :type => :controller
   config.include FactoryGirl::Syntax::Methods
   config.extend AuthenticationHelpers, :type => :controller
+  config.include Paperclip::Shoulda::Matchers
 
   config.before(:all) do
     DatabaseCleaner.clean_with :truncation
+    ActiveJob::Base.queue_adapter = :test
   end
 
 # The settings below are suggested to provide a good initial experience

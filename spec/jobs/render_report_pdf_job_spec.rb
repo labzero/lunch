@@ -9,12 +9,16 @@ RSpec.describe RenderReportPDFJob, type: :job do
   let(:report_html) { double('Some Report HTML') }
   let(:footer_html) { double('Some Footer HTML') }
   let(:pdf) { double('A PDF') }
+  let(:filename) { 'my_awesome_filename' }
   let(:params) { {start_date: start_date} }
-  let(:run_job) { subject.perform(member_id, report_name, params) }
+  let(:run_job) { subject.perform(member_id, report_name, filename, params) }
   let(:reports_controller) { ReportsController.new }
-  let(:wicked_pdf) { WickedPdf.new }
+  let(:wicked_pdf) { double('wicked pdf instance', pdf_from_string: pdf) }
+  let(:string_io_with_filename) { double('some StringIO instance', :'content_type=' => nil, :'original_filename=' => nil) }
+  let(:job_status) { double('job status instance', canceled?: false, completed?: false, started!: nil, completed!: nil, :'result=' => nil, :'status=' => nil, save!: nil) }
 
   before do
+    allow(JobStatus).to receive(:find_or_create_by!).and_return(job_status)
     allow(ReportsController).to receive(:new).and_return(reports_controller)
     allow(reports_controller).to receive(report_name).and_return([report_html])
     allow(reports_controller).to receive(:render_to_string).with('reports/pdf_footer').and_return(footer_html)
@@ -22,8 +26,13 @@ RSpec.describe RenderReportPDFJob, type: :job do
     allow(reports_controller).to receive(:instance_variable_set)
     allow(ReportsController).to receive(:layout)
     allow(WickedPdf).to receive(:new).and_return(wicked_pdf)
-    allow(wicked_pdf).to receive(:pdf_from_string).and_return(pdf)
+    allow(StringIOWithFilename).to receive(:new).and_return(string_io_with_filename)
     allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member)
+  end
+
+  it 'should return nil if the job_status is `canceled`' do
+    allow(job_status).to receive(:canceled?).and_return(true)
+    expect(run_job).to be_nil
   end
 
   it 'should fetch the member details for the supplied member_id' do
@@ -45,7 +54,7 @@ RSpec.describe RenderReportPDFJob, type: :job do
   describe 'before calling the report action' do
     let(:run_job) do
       expect(reports_controller).to receive(report_name).and_return([report_html]).ordered
-      subject.perform(member_id, report_name, {start_date: start_date})
+      subject.perform(member_id, report_name, filename, {start_date: start_date})
     end
     it 'should populate the session with the member details' do
       session = double('A Session', :[] => nil)
@@ -116,8 +125,35 @@ RSpec.describe RenderReportPDFJob, type: :job do
       expect(wicked_pdf).to receive(:pdf_from_string).with(any_args, hash_including(disable_smart_shrinking: false))
       run_job
     end
-    it 'should return the PDF' do
-      expect(run_job).to eq(pdf)
+  end
+
+  describe 'writing the PDF to file' do
+    it 'should create an instance of StringIOWithFilename from the generated pdf' do
+      expect(StringIOWithFilename).to receive(:new).with(pdf)
+      run_job
+    end
+    it 'sets the `content_type` of the file' do
+      expect(string_io_with_filename).to receive(:content_type=).with('application/pdf')
+      run_job
+    end
+    it 'sets the `original_filename` of the file' do
+      expect(string_io_with_filename).to receive(:original_filename=).with("#{filename}.pdf")
+      run_job
+    end
+    it 'sets the file as the `result` attribute of the job_status object' do
+      expect(job_status).to receive(:result=).with(string_io_with_filename)
+      run_job
+    end
+    it 'sets the job_status as completed' do
+      expect(job_status).to receive(:status=).with(:completed)
+      run_job
+    end
+    it 'saves the job_status' do
+      expect(job_status).to receive(:save!)
+      run_job
+    end
+    it 'returns the file' do
+      expect(run_job).to eq(string_io_with_filename)
     end
   end
 

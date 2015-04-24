@@ -89,6 +89,8 @@ en:
     start_date: Start Date
     end_date: End Date
     shares_outstanding: Shares Outstanding
+    prepare_download: Please wait while we prepare your download. This may take up to 60 seconds.
+    cancel_download: Cancel Download
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -667,3 +669,4 @@ en:
       summary: We're currently performing maintenance on the Member Portal. We'll have things up and running again soon.
     table_data_unavailable: This information is currently unavailable
     no_messages: No Messages
+    error_occurred: An error has occurred.
