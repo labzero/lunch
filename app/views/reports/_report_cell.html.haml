@@ -16,5 +16,5 @@
 - else
   - value = cell[:value]
   - classes = [:'report-cell-narrow']
-%td{class: classes, colspan: cell[:colspan]}
+%td{class: cell[:classes] || classes, colspan: cell[:colspan]}
   = value

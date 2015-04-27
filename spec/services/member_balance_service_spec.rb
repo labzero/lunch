@@ -712,6 +712,51 @@ describe MemberBalanceService do
     end
   end
 
+  describe '`letters_of_credit` method', :vcr do
+    let(:letters_of_credit) { subject.letters_of_credit}
+    let(:data) { JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'letters_of_credit.json'))).with_indifferent_access }
+
+    it 'returns a date for its `as_of_date`' do
+      expect(letters_of_credit[:as_of_date]).to be_kind_of(Date)
+    end
+    it 'returns a `total_current_par` that is the sum of all the current_par values' do
+      allow(JSON).to receive(:parse).and_return(data)
+      total_current_par = data[:rows].inject(0) {|sum, hash| sum + hash[:current_par]}
+      expect(letters_of_credit[:total_current_par]).to eq(total_current_par)
+    end
+    describe '`rows` attribute' do
+      [:settlement_date, :maturity_date, :trade_date].each do |attr|
+        it "returns a date for its '#{attr}'" do
+          letters_of_credit[:rows].each do |row|
+            expect(row[attr]).to be_kind_of(Date)
+          end
+        end
+      end
+      [:current_par, :maintenance_charge].each do |attr|
+        it "returns an integer for its '#{attr}'" do
+          letters_of_credit[:rows].each do |row|
+            expect(row[attr]).to be_kind_of(Integer)
+          end
+        end
+      end
+      [:lc_number, :description].each do |attr|
+        it "returns a string for its '#{attr}'" do
+          letters_of_credit[:rows].each do |row|
+            expect(row[attr]).to be_kind_of(String)
+          end
+        end
+      end
+    end
+
+    describe 'error states' do
+      it 'returns nil if there is a JSON parsing error' do
+        expect(File).to receive(:read).and_return('some malformed json!')
+        expect(Rails.logger).to receive(:warn)
+        expect(letters_of_credit).to be(nil)
+      end
+    end
+  end
+
   # Helper Methods
   def override_start_balance_endpoint(start_date, end_date, request_object)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_return(request_object)

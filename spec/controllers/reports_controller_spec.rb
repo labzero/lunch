@@ -479,6 +479,74 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
+
+    describe 'GET letters_of_credit' do
+      it_behaves_like 'a user required action', :get, :letters_of_credit
+
+      let(:make_request) { get :letters_of_credit }
+      let(:as_of_date) { double('some date') }
+      let(:total_current_par) { double('total current par') }
+      let(:maturity_date) {double('maturity date')}
+
+      describe 'view instance variables' do
+        before do
+          allow(response_hash).to receive(:[]).with(:as_of_date)
+          allow(response_hash).to receive(:[]).with(:total_current_par)
+          allow(response_hash).to receive(:[]).with(:rows)
+          allow(member_balance_service_instance).to receive(:letters_of_credit).and_return(response_hash)
+        end
+        it 'sets @as_of_date to the value returned by MemberBalanceService.letters_of_credit' do
+          expect(response_hash).to receive(:[]).with(:as_of_date).and_return(as_of_date)
+          make_request
+          expect(assigns[:as_of_date]).to eq(as_of_date)
+        end
+        it 'sets @total_current_par to the value returned by MemberBalanceService.letters_of_credit' do
+          expect(response_hash).to receive(:[]).with(:total_current_par).and_return(total_current_par)
+          make_request
+          expect(assigns[:total_current_par]).to eq(total_current_par)
+        end
+        it 'sets @loc_table_data[:column_headings] to an array of column heading strings' do
+          make_request
+          assigns[:loc_table_data][:column_headings].each do |heading|
+            expect(heading).to be_kind_of(String)
+          end
+        end
+        it 'sets @loc_table_data[:rows] to the formatted value returned by MemberBalanceService.letters_of_credit' do
+          row_keys = [:lc_number, :current_par, :maintenance_charge, :trade_date, :settlement_date, :maturity_date, :description]
+          row = {}
+          row_keys.each do |key|
+            row[key] = double(key.to_s)
+          end
+          expect(response_hash).to receive(:[]).with(:rows).at_least(:once).and_return([row])
+          make_request
+          expect(assigns[:loc_table_data][:rows].length).to eq(1)
+          row_keys.each_with_index do |key, i|
+            expect(assigns[:loc_table_data][:rows][0][:columns][i][:value]).to eq(row[key])
+          end
+        end
+        it 'sets @loc_table_data[:rows] to {} if no row data is returned from MemberBalanceService.letters_of_credit' do
+          make_request
+          expect(assigns[:loc_table_data][:rows]).to eq({})
+        end
+      end
+      describe 'with the report disabled' do
+        before do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::LETTERS_OF_CREDIT_WEB_FLAGS).and_return(true)
+        end
+        it 'sets @as_of_date to nil if the report is disabled' do
+          make_request
+          expect(assigns[:as_of_date]).to be_nil
+        end
+        it 'sets @total_current_par to nil if the report is disabled' do
+          make_request
+          expect(assigns[:total_current_par]).to be_nil
+        end
+        it 'sets @loc_table_data[:rows] to {}' do
+          make_request
+          expect(assigns[:loc_table_data][:rows]).to eq({})
+        end
+      end
+    end
   end
 
   describe 'GET current_price_indications' do

@@ -1,0 +1,32 @@
+{
+  "as_of_date": "",
+  "rows": [
+    {
+    "lc_number": "2015028",
+    "current_par": 110000000,
+    "maintenance_charge": 10,
+    "trade_date": "2015-03-13",
+    "settlement_date": "2015-03-13",
+    "maturity_date": "2015-12-15",
+    "description": "LC"
+    },
+    {
+    "lc_number": "2015022",
+    "current_par": 242600000,
+    "maintenance_charge": 10,
+    "trade_date": "2015-03-04",
+    "settlement_date": "2015-03-04",
+    "maturity_date": "2015-12-15",
+    "description": "LC"
+    },
+    {
+    "lc_number": "2014011",
+    "current_par": 147500000,
+    "maintenance_charge": 10,
+    "trade_date": "2014-01-29",
+    "settlement_date": "2014-01-29",
+    "maturity_date": "2015-07-30",
+    "description": "LC"
+    }
+  ]
+}

@@ -31,6 +31,7 @@ Rails.application.routes.draw do
   get '/reports/interest_rate_resets' => 'reports#interest_rate_resets'
   get '/reports/dividend-statement' => 'reports#dividend_statement'
   get '/reports/securities-services-statement' => 'reports#securities_services_statement'
+  get '/reports/letters-of-credit' => 'reports#letters_of_credit'
   get '/settings' => 'settings#index'
   post '/settings/save' => 'settings#save'
 

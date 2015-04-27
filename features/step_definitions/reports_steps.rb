@@ -87,6 +87,8 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/dividend-statement'
   when 'Securities Services Monthly Statement'
     visit '/reports/securities-services-statement'
+  when 'Letters of Credit'
+    visit '/reports/letters-of-credit'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
@@ -97,7 +99,7 @@ When(/^I click the "(.*?)" column heading$/) do |column_heading|
               when 'Certificate Sequence'
                 I18n.t('reports.pages.capital_stock_activity.certificate_sequence')
               when 'Trade Date'
-                I18n.t('reports.pages.advances_detail.trade_date')
+                I18n.t('common_table_headings.trade_date')
               when 'Date'
                 I18n.t('global.date')
               when 'Issue Date'
@@ -115,7 +117,7 @@ When(/^I click the "(.*?)" column heading$/) do |column_heading|
               when 'Days Outstanding'
                 I18n.t('reports.pages.dividend_statement.headers.days_outstanding')
               when 'Settlement Date'
-                I18n.t('reports.pages.cash_projections.settlement_date')
+                I18n.t('common_table_headings.settlement_date')
               when 'Outstanding Shares'
                 I18n.t('reports.pages.capital_stock_activity.shares_outstanding')
               else
