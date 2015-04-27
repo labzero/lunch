@@ -1,0 +1,1 @@
+BUNDLE_BUILD__SECURID=--with-aceclnt-include=$ACE_SDK_INC --with-aceclnt-lib=$ACE_SDK_LIB

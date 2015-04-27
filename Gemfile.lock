@@ -1,4 +1,11 @@
 GIT
+  remote: https://github.com/labzero/securid.git
+  revision: 50cc380a3284341e04f2285301beb4d08c9d064e
+  branch: 0.2.1
+  specs:
+    securid (0.2.1)
+
+GIT
   remote: https://github.com/rsim/oracle-enhanced.git
   revision: 6ca7870adaa13d885540bb283958e4d1ef1fc6cc
   branch: rails42
@@ -492,6 +499,7 @@ DEPENDENCIES
   sass-rails
   savon
   sdoc
+  securid!
   selenium-webdriver
   shoulda-matchers
   simplecov-rcov
