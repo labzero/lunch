@@ -13,6 +13,7 @@ class ReportsController < ApplicationController
   DIVIDEND_STATEMENT_WEB_FLAGS = [MembersService::CAPSTOCK_REPORT_DIVIDEND_TRANSACTION, MembersService::CAPSTOCK_REPORT_DIVIDEND_STATEMENT]
   SECURITIES_SERVICES_STATMENT_WEB_FLAGS = [MembersService::SECURITIESBILLSTATEMENT]
   LETTERS_OF_CREDIT_WEB_FLAGS = [MembersService::LETTERS_OF_CREDIT_DETAIL_REPORT]
+  SECURITIES_TRANSACTION_WEB_FLAGS = [MembersService::SECURITIES_TRANSACTION_DATA]
 
   before_action do
     @member_name = current_member_name
@@ -90,7 +91,8 @@ class ReportsController < ApplicationController
       securities: {
         transactions: {
           updated: t('reports.twice_daily'),
-          available_history: t('global.all')
+          available_history: t('global.all'),
+          route: reports_securities_transactions_path
         },
         cash_projections: {
           updated: t('global.daily'),
@@ -588,6 +590,55 @@ class ReportsController < ApplicationController
       column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('common_table_headings.trade_date'), t('common_table_headings.settlement_date'), t('common_table_headings.maturity_date'), t('common_table_headings.description')],
       rows: rows,
       footer: [{value: t('global.total')}, {value: @total_current_par, type: :currency_whole}, {value: nil, colspan: 5}]
+    }
+  end
+
+  def securities_transactions
+    @start_date = (params[:start_date] || Time.zone.now.to_date).to_date
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
+      securities_transactions = {}
+      securities_transactions[:transactions] = []
+    else
+      securities_transactions = member_balances.securities_transactions(@start_date)
+      raise StandardError, "There has been an error and ReportsController#securities_transactions has returned nil. Check error logs." if securities_transactions.blank?
+    end
+    @picker_presets = date_picker_presets(@start_date)
+    @total_net = securities_transactions[:total_net]
+    @final = securities_transactions[:final]
+    column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('reports.pages.securities_transactions.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('reports.pages.securities_transactions.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
+    rows = securities_transactions[:transactions].collect do |row|
+      columns = []
+      row.each do |value|
+        case value[0]
+        when 'units'
+          columns << {type: :basis_point, value: value[1]}
+        when 'maturity_date'
+          columns << {type: :date, value: value[1]}
+        when 'payment_or_principal', 'interest', 'total'
+          columns << {type: :rate, value: value[1]}
+        when 'custody_account_no'
+          if row['new_transaction']
+            columns << {type: nil, value: "#{value[1]}*"}
+          else
+            columns << {type: nil, value: value[1]}
+          end
+        when 'cusip', 'transaction_code', 'security_description'
+          columns << {type: nil, value: value[1]}
+        end
+      end
+      {columns: columns}
+    end
+    footer = [
+        { value: t('reports.pages.securities_transactions.total_net_amount'), colspan: 6},
+        { value: securities_transactions[:total_payment_or_principal],  type: :currency},
+        { value: securities_transactions[:total_interest], type: :currency},
+        { value: @total_net, type: :currency}
+    ]
+    @securities_transactions_table_data = {
+        :column_headings => column_headings,
+        :rows => rows,
+        :footer => footer
     }
   end
 

@@ -619,6 +619,61 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
+  describe 'GET securities_transactions' do
+    let(:start_date) { Date.new(2014,12,31) }
+    let(:member_balances_service_instance) { double('MemberBalanceService') }
+    let(:response_hash) { double('MemberBalanceServiceHash') }
+    let(:transaction_hash) { double('transaction_hash') }
+    let(:custody_account_no) { double('custody_account_no') }
+    let(:new_transaction) { double('new_transaction') }
+    let(:cusip) { double('cusip') }
+    let(:transaction_code) { double('transaction_code') }
+    let(:security_description) { double('security_description') }
+    let(:units) { double('units') }
+    let(:maturity_date) { double('maturity_date') }
+    let(:payment_or_principal) { double('payment_or_principal') }
+    let(:interest) { double('interest') }
+    let(:total) { double('total') }
+    let(:total_net) { double('total_net') }
+    let(:final) { double('final') }
+    let(:securities_transactions_response) {[{'custody_account_no' => custody_account_no, 'new_transaction' => false, 'cusip' => cusip, 'transaction_code' => transaction_code, 'security_description' => security_description, 'units' => units, 'maturity_date' => maturity_date, 'payment_or_principal' => payment_or_principal, 'interest' => interest, 'total' => total}]}
+    let(:securities_transactions_response_with_new_transaction) {[{'custody_account_no' => '12345', 'new_transaction' => true, 'cusip' => cusip, 'transaction_code' => transaction_code, 'security_description' => security_description, 'units' => units, 'maturity_date' => maturity_date, 'payment_or_principal' => payment_or_principal, 'interest' => interest, 'total' => total}]}
+
+    before do
+      allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
+      allow(member_balances_service_instance).to receive(:securities_transactions).with(kind_of(Date)).at_least(1).and_return(response_hash)
+      allow(response_hash).to receive(:[]).with(:total_net).and_return(total_net)
+      allow(response_hash).to receive(:[]).with(:final).and_return(final)
+      allow(response_hash).to receive(:[]).with(:total_payment_or_principal)
+      allow(response_hash).to receive(:[]).with(:total_interest)
+    end
+    it_behaves_like 'a user required action', :get, :securities_transactions
+    it 'renders the securities_transactions view' do
+      allow(response_hash).to receive(:[]).with(:transactions).and_return(transaction_hash)
+      allow(transaction_hash).to receive(:collect)
+      get :securities_transactions
+      expect(response.body).to render_template('securities_transactions')
+    end
+    it 'should pass @start_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+      allow(controller).to receive(:date_picker_presets).with(start_date).and_return(picker_preset_hash)
+      allow(response_hash).to receive(:[]).with(:transactions).and_return(securities_transactions_response_with_new_transaction)
+      get :securities_transactions, start_date: start_date
+      expect(assigns[:picker_presets]).to eq(picker_preset_hash)
+    end
+    it 'should return securities transactions data' do
+      allow(response_hash).to receive(:[]).with(:transactions).and_return(securities_transactions_response)
+      get :securities_transactions
+      expect(assigns[:total_net]).to eq(total_net)
+      expect(assigns[:final]).to eq(final)
+      expect(assigns[:securities_transactions_table_data][:rows][0][:columns]).to eq([{:type=>nil, :value=>custody_account_no}, {:type=>nil, :value=>cusip}, {:type=>nil, :value=>transaction_code}, {:type=>nil, :value=>security_description}, {:type=>:basis_point, :value=>units}, {:type=>:date, :value=>maturity_date}, {:type=>:rate, :value=>payment_or_principal}, {:type=>:rate, :value=>interest}, {:type=>:rate, :value=>total}])
+    end
+    it 'should return securities transactions data with new transaction indicator' do
+      allow(response_hash).to receive(:[]).with(:transactions).and_return(securities_transactions_response_with_new_transaction)
+      get :securities_transactions
+      expect(assigns[:securities_transactions_table_data][:rows][0][:columns]).to eq([{:type=>nil, :value=>'12345*'}, {:type=>nil, :value=>cusip}, {:type=>nil, :value=>transaction_code}, {:type=>nil, :value=>security_description}, {:type=>:basis_point, :value=>units}, {:type=>:date, :value=>maturity_date}, {:type=>:rate, :value=>payment_or_principal}, {:type=>:rate, :value=>interest}, {:type=>:rate, :value=>total}])
+    end
+  end
+
   describe 'requests hitting RatesService' do
     let(:rates_service_instance) { double('RatesService') }
     let(:response_hash) { double('RatesServiceHash') }

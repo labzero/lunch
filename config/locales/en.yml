@@ -631,6 +631,25 @@ en:
           lc_number: LC Number
           annual_maintenance_charge: Annual Maintenance Charge (bps)*
         minimum_maintenance_charge: '*The minimum annual maintenance charge is $500.'
+      securities_transactions:
+        title: Securities Transaction
+        info: The Securities Transaction Report is updated twice a day. The Preliminary Securities Transaction Report reflects the transactions that have settled as of 11:30 a.m. and is generally available at approximately 1:00 p.m. on the settlement day. The Final Securities Transaction Report reflects all transactions that have settled that day and is generally available at the end of the business day.
+        effective: Effective %{date}, a "units" column has been added to the Securities Transaction Report.
+        preliminary: Preliminary Securities Transactions settled as of 11:30 a.m. on %{date}
+        final: Final Securities Transactions settled as of close of business on %{date}
+        indicates_a_new_transaction_html: "*Indicates a new transaction."
+        total_net_settled_preliminary: "Total Net Amount settled as of 11:30 a.m. on %{date}:"
+        total_net_settled_final: "Total Net Amount settled as of close of business on %{date}:"
+        custody_account_no: Custody Account No.
+        cusip: CUSIP
+        transaction_code: Transaction Code
+        security_description: Security Description
+        units: Units
+        maturity_date: Maturity Date
+        payment_or_principal: Payment or Principal
+        interest: Interest
+        total: Total
+        total_net_amount: Total Net Amount
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.

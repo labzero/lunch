@@ -1,6 +1,11 @@
 require 'spec_helper'
 
 describe MemberBalanceService do
+  RSpec::Matchers.define :be_boolean do
+    match do |actual|
+      expect(actual).to satisfy { |x| x == true || x == false }
+    end
+  end
   let(:member_id) { 750 }
   subject { MemberBalanceService.new(member_id, double('request', uuid: '12345')) }
   it { expect(subject).to respond_to(:pledged_collateral) }
@@ -255,6 +260,61 @@ describe MemberBalanceService do
         allow(File).to receive(:read).and_return('some malformed json!')
         expect(Rails.logger).to receive(:warn)
         expect(settlement_transaction_rate).to be(nil)
+      end
+    end
+  end
+
+  # TODO add vcr once MAPI endpoint is rigged up
+  describe 'securities_transactions' do
+    let(:as_of_date) {Date.new(2015,1,20)}
+    let(:securities_transactions) {subject.securities_transactions(as_of_date)}
+    it 'should return securities transactions data' do
+      expect(securities_transactions.length).to be >= 1
+      expect(securities_transactions[:final]).to be_boolean
+      expect(securities_transactions[:total_payment_or_principal]).to be_kind_of(Numeric)
+      expect(securities_transactions[:total_net]).to be_kind_of(Numeric)
+      expect(securities_transactions[:total_interest]).to be_kind_of(Numeric)
+      expect(securities_transactions[:transactions]).to be_kind_of(Array)
+      securities_transactions[:transactions].each do |security|
+        expect(security[:custody_account_no]).to be_kind_of(String)
+        expect(security[:new_transaction]).to be_boolean
+        expect(security[:cusip]).to be_kind_of(String)
+        expect(security[:transaction_code]).to be_kind_of(String)
+        expect(security[:security_description]).to be_kind_of(String)
+        expect(security[:units]).to be_kind_of(Integer)
+        expect(security[:maturity_date]).to be_kind_of(String)
+        expect(security[:payment_or_principal]).to be_kind_of(Numeric)
+        expect(security[:interest]).to be_kind_of(Numeric)
+        expect(security[:total]).to be_kind_of(Numeric)
+      end
+    end
+    describe 'bad data' do
+      it 'should pass nil values if data from MAPI has nil values' do
+        allow(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'securities_transactions_with_nil_values.json'))))
+        expect(securities_transactions[:final]).to be(nil)
+        expect(securities_transactions[:total_payment_or_principal]).to be(0)
+        expect(securities_transactions[:total_net]).to be(0)
+        expect(securities_transactions[:total_interest]).to be(0)
+        securities_transactions[:transactions].each do |security|
+          expect(security[:custody_account_no]).to be(nil)
+          expect(security[:new_transaction]).to be(nil)
+          expect(security[:cusip]).to be(nil)
+          expect(security[:transaction_code]).to be(nil)
+          expect(security[:security_description]).to be(nil)
+          expect(security[:units]).to be(nil)
+          expect(security[:maturity_date]).to be(nil)
+          expect(security[:payment_or_principal]).to be(nil)
+          expect(security[:interest]).to be(nil)
+          expect(security[:total]).to be(nil)
+        end
+      end
+    end
+    describe 'error states' do
+      it 'returns nil if there is a JSON parsing error' do
+        # TODO change this stub once you implement the MAPI endpoint
+        allow(File).to receive(:read).and_return('some malformed json!')
+        expect(Rails.logger).to receive(:warn)
+        expect(securities_transactions).to be(nil)
       end
     end
   end
