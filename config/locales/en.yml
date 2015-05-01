@@ -89,6 +89,8 @@ en:
     shares_outstanding: Shares Outstanding
     prepare_download: Please wait while we prepare your download. This may take up to 60 seconds.
     cancel_download: Cancel Download
+    pin: PIN
+    token: Token
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -283,6 +285,16 @@ en:
         funding_date: Funding
         maturity_date: Maturity
         advance_number: Advance Number
+      securid:
+        intro: For your security, please enter your SecurID login credentails.
+        help: Get help with PIN or token
+        errors:
+          resynchronize: Token is not synchronized.
+          change_pin: PIN must be changed.
+          denied: PIN and/or token is invalid.
+          invalid_pin: PIN invalid.
+          invalid_token: Token invalid.
+          unknown: An unexpected error has occured. Please try again.
     reports:
       title: Reports
       as_of_yesterday: As of yesterday

@@ -21,6 +21,16 @@ class ApplicationController < ActionController::Base
     session['member_name']
   end
 
+  # Returns a boolean indicating if the current session has successfully gone
+  # through the evelvated authentication flow with SecurID.
+  def session_elevated?
+    !!session['securid_authenticated']
+  end
+
+  def session_elevate!
+    session['securid_authenticated'] = true
+  end
+
   private
 
   def after_sign_out_path_for(resource)

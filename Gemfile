@@ -24,7 +24,7 @@ gem 'jbuilder'
 gem 'sdoc',          group: :doc
 gem 'rest-client'
 gem 'devise_ldap_authenticatable'
-gem 'securid', git: 'https://github.com/labzero/securid.git', branch: '0.2.1'
+gem 'securid', git: 'https://github.com/labzero/securid.git', branch: '0.2.2'
 
 # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
 # gem 'spring',        group: :development

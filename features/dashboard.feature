@@ -90,6 +90,7 @@ Background:
       And I should see the selected state for the cell with a term of "1week" and a type of "aaa"
       And I should not see a preview of the quick advance
 
+  @jira-mem-560
   Scenario: Confirm rate from Quick Advance preview dialog
     Given I visit the dashboard
       And I open the quick advance flyout
@@ -97,18 +98,57 @@ Background:
       And I click on the initiate advance button
       And I should not see the quick advance table
       And I should see a preview of the quick advance
+      And I enter my SecurID pin and token
     When I click on the quick advance confirm button
     Then I should see the quick advance interstitial
       And I should see confirmation number for the advance
       And I should not see the quick advance preview message
       And I should see the quick advance confirmation close button
 
+  @jira-mem-560
   Scenario: Close flyout after finishing quick advance
     Given I visit the dashboard
       And I successfully execute a quick advance
       And I should see a flyout
     When I click on the quick advance confirmation close button
       Then I should not see a flyout
+
+  @jira-mem-560
+  Scenario: Users are required to enter a SecurID token to take out an advance
+    Given I visit the dashboard
+    And I am on the quick advance preview screen
+    When I click on the quick advance confirm button
+    Then I should see SecurID errors
+    When I enter my SecurID pin and token
+    And I click on the quick advance confirm button
+    Then I should see confirmation number for the advance
+
+  @jira-mem-560
+  Scenario: Users are informed if they enter an invalid pin or token
+    Given I visit the dashboard
+    And I am on the quick advance preview screen
+    When I enter "12ab" for my SecurID pin
+    And I enter my SecurID token
+    And I click on the quick advance confirm button
+    Then I should see SecurID errors
+    When I enter my SecurID pin
+    And I enter "12ab34" for my SecurID token
+    And I click on the quick advance confirm button
+    Then I should see SecurID errors
+
+  @jira-mem-560
+  Scenario: Users aren't required to enter a SecurID token a second time
+    Given I visit the dashboard
+    And I am on the quick advance preview screen
+    When I click on the quick advance confirm button
+    When I enter my SecurID pin and token
+    And I click on the quick advance confirm button
+    Then I should see confirmation number for the advance
+    When I click on the quick advance confirmation close button
+    And I am on the quick advance preview screen
+    Then I shouldn't see the SecurID fields
+    When I click on the quick advance confirm button
+    Then I should see confirmation number for the advance
 
   Scenario: Default selection in Quick Advance flyout
     Given I visit the dashboard

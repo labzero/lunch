@@ -1,9 +1,9 @@
 GIT
   remote: https://github.com/labzero/securid.git
-  revision: 50cc380a3284341e04f2285301beb4d08c9d064e
-  branch: 0.2.1
+  revision: a5faff48e91a0cfab00459b3a66354fec8566106
+  branch: 0.2.2
   specs:
-    securid (0.2.1)
+    securid (0.2.2)
 
 GIT
   remote: https://github.com/rsim/oracle-enhanced.git
