@@ -162,6 +162,18 @@ en:
       title: Quick Advances
     quick_report:
       title: Quick Reports
+    two_factor:
+      title: 2-Step Verification
+      description: Manage login with your SecurID token.
+      help_html: 'To activate, request a new token, or re-synchronize your SecurID token, <a href="%{url}">email Web Support</a> or call them at %{phone_number}.'
+      reset_pin:
+        title: 'Reset Token PIN'
+        description: "If you can't remember your token PIN, contact Web Support before resetting it."
+        cta: 'Reset Token PIN'
+      resynchronize:
+        title: 'Resynchronize Token'
+        description: 'If your token codes are no longer accepted when you try to log in, you may need to resynchronize your token. Contact Web Support before resynchronizing it.'
+        cta: 'Resynchronize Token'
     email:
       title: Emails
       header: Choose which email messages to receive

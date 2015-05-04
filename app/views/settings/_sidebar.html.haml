@@ -1,0 +1,7 @@
+- selected ||= nil
+.row.sidebar-row
+  %aside.sidebar.column-2x10-left
+    = render 'shared/sidebar', sidebar_label: t('settings.title'), sidebar_options: @sidebar_options, sidebar_name: 'settings_nav', default_value: selected, sidebar_type: 'nav'
+  .sidebar-row-main-content
+    .column-2x10-right
+      = yield
