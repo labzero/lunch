@@ -57,6 +57,22 @@ RSpec.describe ApplicationController, :type => :controller do
     end
   end
 
+  describe '`session_elevated?` method' do
+    it 'should return true if the session has a truthy `securid_authenticated` value' do
+      session['securid_authenticated'] = 'foo'
+      expect(controller.session_elevated?).to be(true)
+      session['securid_authenticated'] = true
+      expect(controller.session_elevated?).to be(true)
+    end
+    it 'should return false if the session has a falsey `securid_authenticated` value' do
+      expect(controller.session_elevated?).to be(false)
+      session['securid_authenticated'] = nil
+      expect(controller.session_elevated?).to be(false)
+      session['securid_authenticated'] = false
+      expect(controller.session_elevated?).to be(false)
+    end
+  end
+
   describe '`current_member_name` method' do
     let(:member_name) { double('A Member Name') }
     it 'should return the `member_name` from the session' do

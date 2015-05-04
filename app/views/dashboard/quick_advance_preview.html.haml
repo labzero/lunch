@@ -1,7 +1,20 @@
 .quick-advance-preview
-  .quick-advance-body.icon-alert-before
-    %p= t('dashboard.quick_advance.preview.intro')
-    %p.quick-advance-loading-message= t('dashboard.quick_advance.preview.initiate')
-    = render 'quick_advance_summary', advance_amount: @advance_amount, advance_type: @advance_type, interest_day_count: @interest_day_count, payment_on: @payment_on, advance_term: @advance_term, funding_date: @funding_date, maturity_date: @maturity_date
+  .quick-advance-body
+    .quick-advance-icon-section.icon-alert-before
+      %p= t('dashboard.quick_advance.preview.intro')
+      %p.quick-advance-loading-message= t('dashboard.quick_advance.preview.initiate')
+      = render 'quick_advance_summary', advance_amount: @advance_amount, advance_type: @advance_type, interest_day_count: @interest_day_count, payment_on: @payment_on, advance_term: @advance_term, funding_date: @funding_date, maturity_date: @maturity_date
+    - unless @session_elevated
+      %fieldset
+        %p= t('dashboard.quick_advance.securid.intro')
+        = render 'shared/input_field', field_name: 'securid_pin', field_type: :password, label: t('global.pin'), html_attributes: {maxlength: 4}, horizontal: true
+        = render 'shared/input_field', field_name: 'securid_token', label: t('global.token'), html_attributes: {maxlength: 6}, horizontal: true
+        %p.form-error{data: {'error-type' => :invalid_pin}}= t('dashboard.quick_advance.securid.errors.invalid_pin')
+        %p.form-error{data: {'error-type' => :invalid_token}}= t('dashboard.quick_advance.securid.errors.invalid_token')
+        %p.form-error{data: {'error-type' => :unknown}}= t('dashboard.quick_advance.securid.errors.unknown')
+        %p.form-error{data: {'error-type' => :change_pin}}= t('dashboard.quick_advance.securid.errors.change_pin')
+        %p.form-error{data: {'error-type' => :resynchronize}}= t('dashboard.quick_advance.securid.errors.resynchronize')
+        %p.form-error{data: {'error-type' => :denied}}= t('dashboard.quick_advance.securid.errors.denied')
+        = link_to(t('dashboard.quick_advance.securid.help'), settings_two_factor_path)
   %button.secondary-button.quick-advance-back-button.icon-arrow-left-before= t('dashboard.quick_advance.buttons.back')
-  %button.primary-button.confirm-quick-advance{data: {'advance-type' => @advance_type, 'advance-term' => @advance_term, 'advance-rate' => @advance_rate}}= t('dashboard.quick_advance.buttons.initiate')
+  %button.primary-button.confirm-quick-advance= t('dashboard.quick_advance.buttons.initiate')

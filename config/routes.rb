@@ -16,7 +16,7 @@ Rails.application.routes.draw do
 
   post '/dashboard/quick_advance_preview' => 'dashboard#quick_advance_preview'
 
-  post '/dashboard/quick_advance_confirmation' => 'dashboard#quick_advance_confirmation'
+  post '/dashboard/quick_advance_perform' => 'dashboard#quick_advance_perform'
 
   get '/dashboard/current_overnight_vrc' => 'dashboard#current_overnight_vrc'
 
@@ -36,6 +36,7 @@ Rails.application.routes.draw do
 
   get '/settings' => 'settings#index'
   post '/settings/save' => 'settings#save'
+  get '/settings/two-factor' => 'error#standard_error'
 
   get '/jobs/:job_status_id' => 'jobs#status', as: 'job_status'
   get '/jobs/:job_status_id/download' => 'jobs#download', as: 'job_download'

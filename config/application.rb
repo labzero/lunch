@@ -44,5 +44,8 @@ module FhlbMember
 
     # autoload files in the lib directory
     config.autoload_paths << Rails.root.join('lib')
+
+    # hide securid details
+    config.filter_parameters << [:securid_pin, :securid_token]
   end
 end

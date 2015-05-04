@@ -148,8 +148,8 @@ RSpec.describe DashboardController, :type => :controller do
     let(:advance_type) {'some type'}
     let(:advance_rate) {'0.17'}
     let(:amount) { Random.rand(100000000) }
-    let(:make_request) { post :quick_advance_preview, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount
- }
+    let(:make_request) { post :quick_advance_preview, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount }
+
     it_behaves_like 'a user required action', :post, :quick_advance_preview
     it 'should render its view' do
       make_request
@@ -160,6 +160,12 @@ RSpec.describe DashboardController, :type => :controller do
       expect(RatesService).to receive(:new).and_return(rate_service_instance)
       expect(rate_service_instance).to receive(:quick_advance_preview).with(MEMBER_ID, amount, advance_type, advance_term, advance_rate.to_f).and_return({})
       make_request
+    end
+    it 'should set @session_elevated to the result of calling `session_elevated?`' do
+      result = double('needs securid')
+      expect(subject).to receive(:session_elevated?).and_return(result)
+      make_request
+      expect(assigns[:session_elevated]).to be(result)
     end
     it 'should set @advance_amount' do
       make_request
@@ -195,22 +201,46 @@ RSpec.describe DashboardController, :type => :controller do
     end
   end
 
-  describe "POST quick_advance_confirmation" do
-    let(:RatesService) {class_double(RatesService)}
-    let(:rate_service_instance) {double("rate service instance", quick_advance_confirmation: nil)}
+  describe "POST quick_advance_perform" do
+    let(:rate_service_instance) {RatesService.new(ActionDispatch::TestRequest.new)}
     let(:member_id) {double(MEMBER_ID)}
     let(:advance_term) {'some term'}
     let(:advance_type) {'some type'}
     let(:advance_rate) {'0.17'}
     let(:amount) { Random.rand(100000000) }
-    let(:make_request) { post :quick_advance_confirmation, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount }
-    it_behaves_like 'a user required action', :post, :quick_advance_confirmation
-    it "should call the RatesService object's `quick_advance_confirmation` method with the POSTed advance_type, advance_term and rate and return a json response" do
+    let(:securid_pin) { Random.rand(9999).to_s.rjust(4, '0') }
+    let(:securid_token) { Random.rand(999999).to_s.rjust(6, '0') }
+    let(:make_request) { post :quick_advance_perform, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, securid_pin: securid_pin, securid_token: securid_token }
+    let(:securid_service) { SecurIDService.new('a user', test_mode: true) }
+
+    before do
+      allow(subject).to receive(:session_elevated?).and_return(true)
+      allow(SecurIDService).to receive(:new).and_return(securid_service)
+      allow(RatesService).to receive(:new).and_return(rate_service_instance)
+    end
+
+    it_behaves_like 'a user required action', :post, :quick_advance_perform
+    it 'should call the RatesService object\'s `quick_advance_perform` method with the POSTed advance_type, advance_term and rate' do
       stub_const("MEMBER_ID", 750)
-      expect(RatesService).to receive(:new).and_return(rate_service_instance)
       expect(rate_service_instance).to receive(:quick_advance_confirmation).with(MEMBER_ID, amount, advance_type, advance_term, advance_rate.to_f).and_return({})
       make_request
-      expect(response.body).to render_template('dashboard/quick_advance_confirmation')
+    end
+    it 'should render the confirmation view on success' do
+      make_request
+      expect(response.body).to render_template('dashboard/quick_advance_perform')
+    end
+    it 'should return a JSON response containing the view, the advance status and the securid status' do
+      html = SecureRandom.hex
+      allow(subject).to receive(:render_to_string).and_return(html)
+      make_request
+      json = JSON.parse(response.body)
+      expect(json['html']).to eq(html)
+      expect(json['securid']).to eq(RSA::SecurID::Session::AUTHENTICATED.to_s)
+      expect(json['advance_success']).to be(true)
+    end
+    it 'should check if the session has been elevated' do
+      expect(subject).to receive(:session_elevated?).at_least(:once)
+      make_request
     end
     it 'should set @initiated_at' do
       make_request
@@ -252,6 +282,41 @@ RSpec.describe DashboardController, :type => :controller do
       make_request
       expect(assigns[:advance_number]).to be_kind_of(String)
     end
+    describe 'with unelevated session' do
+      before do
+        allow(subject).to receive(:session_elevated?).and_return(false)
+      end
+      it 'should return a securid status of `invalid_pin` if the pin is malformed' do
+        post :quick_advance_perform, securid_pin: 'foo', securid_token: securid_token
+        json = JSON.parse(response.body)
+        expect(json['securid']).to eq('invalid_pin')
+      end
+      it 'should return a securid status of `invalid_token` if the token is malformed' do
+        post :quick_advance_perform, securid_token: 'foo', securid_pin: securid_pin
+        json = JSON.parse(response.body)
+        expect(json['securid']).to eq('invalid_token')
+      end
+      it 'should authenticate the user via RSA SecurID if the session is not elevated' do
+        expect(securid_service).to receive(:authenticate).with(securid_pin, securid_token)
+        make_request
+      end
+      it 'should elevate the session if RSA SecurID authentication succedes' do
+        expect(securid_service).to receive(:authenticate).with(securid_pin, securid_token).ordered
+        expect(securid_service).to receive(:authenticated?).ordered.and_return(true)
+        expect(subject).to receive(:session_elevate!).ordered
+        make_request
+      end
+      it 'should not elevate the session if RSA SecurID authentication fails' do
+        expect(securid_service).to receive(:authenticate).with(securid_pin, securid_token).ordered
+        expect(securid_service).to receive(:authenticated?).ordered.and_return(false)
+        expect(subject).to_not receive(:session_elevate!).ordered
+        make_request
+      end
+      it 'should not perform the advance if the session is not elevated' do
+        expect(rate_service_instance).to_not receive(:quick_advance_confirmation)
+        make_request
+      end
+    end
   end
 
   describe "GET current_overnight_vrc", :vcr do
@@ -281,4 +346,5 @@ RSpec.describe DashboardController, :type => :controller do
       expect(date).to be <= DateTime.now
     end
   end
+
 end
