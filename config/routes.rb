@@ -37,6 +37,7 @@ Rails.application.routes.draw do
   get '/settings' => 'settings#index'
   post '/settings/save' => 'settings#save'
   get '/settings/two-factor' => 'settings#two_factor'
+  post '/settings/two-factor/pin' => 'settings#reset_pin'
 
   get '/jobs/:job_status_id' => 'jobs#status', as: 'job_status'
   get '/jobs/:job_status_id/download' => 'jobs#download', as: 'job_download'

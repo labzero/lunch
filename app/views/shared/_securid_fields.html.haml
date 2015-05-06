@@ -1,0 +1,8 @@
+= render 'shared/input_field', field_name: 'securid_pin', field_type: :password, label: t('global.pin'), html_attributes: {maxlength: 4}, horizontal: true, field_class: 'securid-field-pin'
+= render 'shared/input_field', field_name: 'securid_token', label: t('global.token'), html_attributes: {maxlength: 6}, horizontal: true, field_class: 'securid-field-token'
+%p.form-error{data: {'error-type' => :invalid_pin}}= t('dashboard.quick_advance.securid.errors.invalid_pin')
+%p.form-error{data: {'error-type' => :invalid_token}}= t('dashboard.quick_advance.securid.errors.invalid_token')
+%p.form-error{data: {'error-type' => :unknown}}= t('dashboard.quick_advance.securid.errors.unknown')
+%p.form-error{data: {'error-type' => :must_change_pin}}= t('dashboard.quick_advance.securid.errors.change_pin')
+%p.form-error{data: {'error-type' => :must_resynchronize}}= t('dashboard.quick_advance.securid.errors.resynchronize')
+%p.form-error{data: {'error-type' => :denied}}= t('dashboard.quick_advance.securid.errors.denied')

@@ -6,11 +6,13 @@ Feature: Visiting the Settings Page
 Background:
   Given I am logged in
 
+@smoke
 Scenario: Navigate to settings page
   Given I visit the dashboard
   When I click on the gear icon in the header
   Then I should see "Settings" as the sidebar title
 
+@smoke
 Scenario: Email Settings
   Given I visit the dashboard
     And I click on the gear icon in the header
@@ -35,9 +37,39 @@ Scenario: Remembering Email Settings
     And I click on "Emails" in the sidebar nav
   Then I should see the selected state for the "reports" option
 
-@jira-mem-599
+@smoke @jira-mem-599
 Scenario: Users can view Two Factor settings
   Given I visit the dashboard
     And I click on the gear icon in the header
   When I click on "2-Step Verification" in the sidebar nav
   Then I should be on the two factor settings page
+
+@jira-mem-600
+Scenario: Users can reset their SecurID PIN
+  Given I am on the two factor authentication settings page
+  When I click on the reset token PIN CTA
+  Then I should see the reset PIN form
+  When I cancel resetting the PIN
+  Then I should not see the reset PIN form
+
+@jira-mem-600
+Scenario: Users are informed if they have entered bad details on the reset PIN form
+  Given I am on the reset PIN page
+  When I enter a bad current PIN
+  And I submit the reset PIN form
+  Then I should see the invalid PIN message
+  When I enter a good current PIN
+  And I enter a bad token
+  And I submit the reset PIN form
+  Then I should see the invalid token message
+  When I enter a good current token
+  And I enter a bad new PIN
+  And I submit the reset PIN form
+  Then I should see the invalid PIN message
+  When I enter a good new PIN
+  And I enter a bad confirm PIN
+  And I submit the reset PIN form
+  Then I should see the invalid PIN message
+  When I enter two different values for the new PIN
+  And I submit the reset PIN form
+  Then I should see the failed to reset PIN message
