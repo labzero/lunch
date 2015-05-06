@@ -39,5 +39,13 @@ module FhlbMember
     ]
     config.logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new(Rails.root.join('log', "#{Rails.env}.log"), 'daily'))
     config.active_job.queue_adapter = :resque
+
+    config.active_record.raise_in_transactional_callbacks = true
+
+    # autoload files in the lib directory
+    config.autoload_paths << Rails.root.join('lib')
+
+    # hide securid details
+    config.filter_parameters << [:securid_pin, :securid_token]
   end
 end

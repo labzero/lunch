@@ -9,6 +9,7 @@ task "resque:pool:setup" do
   ActiveRecord::Base.connection.disconnect!
   # and re-open them in the resque worker parent
   Resque::Pool.after_prefork do |job|
+    WebMock.allow_net_connect! if Rails.env.test? # allow all Net connections
     ActiveRecord::Base.establish_connection
     Resque.redis.client.reconnect
   end

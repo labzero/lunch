@@ -52,7 +52,6 @@ en:
     unpaid_principal: Unpaid Principal
     balance_as_of_close_of_business: Balance as of close of business
     reference_number: Reference Number
-    description: Description
     debits: Debits
     credits: Credits
     balance: Balance
@@ -81,7 +80,6 @@ en:
     continue: Continue
     fhlb_full: Federal Home Loan Bank San Francisco
     excel: Excel
-    maturity_date: Maturity Date
     principal: Principal
     interest: Interest
     close: Close
@@ -89,6 +87,10 @@ en:
     start_date: Start Date
     end_date: End Date
     shares_outstanding: Shares Outstanding
+    prepare_download: Please wait while we prepare your download. This may take up to 60 seconds.
+    cancel_download: Cancel Download
+    pin: PIN
+    token: Token
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -135,6 +137,12 @@ en:
       letters_of_credit: Letters of Credit
       mortgages: Mortgages
       securities: Securities
+  common_table_headings:
+    trade_date: Trade Date
+    settlement_date: Settlement Date
+    maturity_date: Maturity Date
+    description: Description
+    current_par: Current Par
   datepicker:
     range:
       this_month: "%{month} to date"
@@ -154,6 +162,18 @@ en:
       title: Quick Advances
     quick_report:
       title: Quick Reports
+    two_factor:
+      title: 2-Step Verification
+      description: Manage login with your SecurID token.
+      help_html: 'To activate, request a new token, or re-synchronize your SecurID token, <a href="%{url}">email Web Support</a> or call them at %{phone_number}.'
+      reset_pin:
+        title: 'Reset Token PIN'
+        description: "If you can't remember your token PIN, contact Web Support before resetting it."
+        cta: 'Reset Token PIN'
+      resynchronize:
+        title: 'Resynchronize Token'
+        description: 'If your token codes are no longer accepted when you try to log in, you may need to resynchronize your token. Contact Web Support before resynchronizing it.'
+        cta: 'Resynchronize Token'
     email:
       title: Emails
       header: Choose which email messages to receive
@@ -277,6 +297,16 @@ en:
         funding_date: Funding
         maturity_date: Maturity
         advance_number: Advance Number
+      securid:
+        intro: For your security, please enter your SecurID login credentails.
+        help: Get help with PIN or token
+        errors:
+          resynchronize: Token is not synchronized.
+          change_pin: PIN must be changed.
+          denied: PIN and/or token is invalid.
+          invalid_pin: PIN invalid.
+          invalid_token: Token invalid.
+          unknown: An unexpected error has occured. Please try again.
     reports:
       title: Reports
       as_of_yesterday: As of yesterday
@@ -529,13 +559,9 @@ en:
         total_current_par_heading: "Total Current Par as of %{date}"
         total_accrued_interest_heading: "Total Accrued Interest as of %{date}"
         estimated_next_payment_heading: "Estimated Next Interest Payment as of %{date}"
-        trade_date: Trade Date
         funding_date: Funding Date
-        maturity_date: Maturity Date
         advance_number: Advance Number
         advance_type: Advance Type
-        current_par_heading: Current Par
-        current_par: Current Par
         interest_payment_frequency: Interest Payment Frequency
         day_count_basis: Day Count Basis
         interest_rate: Interest Rate
@@ -595,6 +621,59 @@ en:
           days_outstanding: Days Outstanding
           average_shares: Average Shares Outstanding
           dividend: Dividend
+      securities_services_statement:
+        heading: 'Total amount due as of %{date}:'
+        footnote: '%{footnote}Fees will be charged based on the specific transaction and the amount of staff time required.'
+        questions_html: 'If you have questions regarding this statement, please email <a href=%{mailto_url}>Securities Services</a> or call %{phone_number}.'
+        footer: 'Total amount to be debited from Settlement/Transaction Account No. %{account_number} as of %{date}:'
+        tables:
+          maintenance: Monthly Account Maintenance Fee
+          securities: Monthly Securities Fees
+          transaction: Security Transaction Fees
+          other: Other Fees
+        headers:
+          maintenance: 'Monthly Account Maintenance Fee%{footnote}'
+          fed: 'Fed Eligible%{footnote}'
+          dtc: 'DTC Eligible%{footnote}'
+          funds: 'Physical and Mutual Funds%{footnote}'
+          euroclear: 'Euroclear%{footnote}'
+          disbursement: 'All Income Disbursement%{footnote}'
+          pledge_status: 'Pledge Status Change (account transfer)%{footnote}'
+          certifications: 'Registration of Certifications%{footnote}'
+          research: 'Research Projects%{footnote}'
+          handling: 'Special Handling%{footnote}'
+        line_items:
+          maintenance: based on the number of securities held at the end of the current month
+          per_item_cusip: '%{number} @ %{cost} per item, by CUSIP'
+          per_item: '%{number} @ %{cost} per item'
+          per_par_cusip: '%{number} @ %{cost} per 1000 par, by CUSIP'
+          per_hour: '%{number} @ %{cost} per hour'
+      letters_of_credit:
+        title: Letters of Credit
+        total_current_par_summary: 'Total Current Par as of close of business on %{date}:'
+        headers:
+          lc_number: LC Number
+          annual_maintenance_charge: Annual Maintenance Charge (bps)*
+        minimum_maintenance_charge: '*The minimum annual maintenance charge is $500.'
+      securities_transactions:
+        title: Securities Transaction
+        info: The Securities Transaction Report is updated twice a day. The Preliminary Securities Transaction Report reflects the transactions that have settled as of 11:30 a.m. and is generally available at approximately 1:00 p.m. on the settlement day. The Final Securities Transaction Report reflects all transactions that have settled that day and is generally available at the end of the business day.
+        effective: Effective %{date}, a "units" column has been added to the Securities Transaction Report.
+        preliminary: Preliminary Securities Transactions settled as of 11:30 a.m. on %{date}
+        final: Final Securities Transactions settled as of close of business on %{date}
+        indicates_a_new_transaction_html: "*Indicates a new transaction."
+        total_net_settled_preliminary: "Total Net Amount settled as of 11:30 a.m. on %{date}:"
+        total_net_settled_final: "Total Net Amount settled as of close of business on %{date}:"
+        custody_account_no: Custody Account No.
+        cusip: CUSIP
+        transaction_code: Transaction Code
+        security_description: Security Description
+        units: Units
+        maturity_date: Maturity Date
+        payment_or_principal: Payment or Principal
+        interest: Interest
+        total: Total
+        total_net_amount: Total Net Amount
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
@@ -640,3 +719,4 @@ en:
       summary: We're currently performing maintenance on the Member Portal. We'll have things up and running again soon.
     table_data_unavailable: This information is currently unavailable
     no_messages: No Messages
+    error_occurred: An error has occurred.

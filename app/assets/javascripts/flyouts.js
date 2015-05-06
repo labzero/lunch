@@ -1,21 +1,31 @@
 (function( $ ) {
 
-  $.fn.flyout = function(topContent, bottomContent) {
+  $.fn.flyout = function(options) {
     var $flyout = $('.flyout');
     var $flyoutBackground = $('.flyout-background');
     var $flyoutTopSection = $flyout.find('.flyout-top-section');
     var $flyoutBottomSection = $flyout.find('.flyout-bottom-section');
+    var topContent = options.topContent;
+    var bottomContent = options.bottomContent;
+    var useReferenceElement = options.useReferenceElement;
+    var $that = this;
 
     // initialize flyout by appending elements to the .top-section and .bottom-section.
     $flyoutTopSection.append(topContent);
-    $flyoutBottomSection.append(bottomContent);
+    if (bottomContent) {
+      $flyoutBottomSection.append(bottomContent);
+    } else {
+      $flyoutBottomSection.hide();
+    }
 
     // give flyout appropriate width and position relative to its reference element
-    $flyoutTopSection.width(this.width());
-    $flyout.css({
-      'margin-top': this.position()['top'],
-      'margin-left': this.position()['left']
-    });
+    if (useReferenceElement) {
+      $flyoutTopSection.width(this.width());
+      $flyout.css({
+        'margin-top': this.position()['top'],
+        'margin-left': this.position()['left']
+      });
+    };
 
     // fade in the background and show the flyout
     $flyoutBackground.fadeIn();
@@ -26,10 +36,16 @@
 
     this.trigger('flyout-initialized');
 
-    var that = this;
-    // teardown the background and reset the flyout
     $flyout.on('click', '.flyout-close-button, [data-flyout-action=close]', function(event){
-      that.trigger('flyout-reset-initiated');
+      closeFlyout($that, event);
+    });
+
+    $flyout.on('flyout-close', function(event){
+      closeFlyout($(event.currentTarget), event);
+    });
+
+    function closeFlyout(parentEl, event){
+      parentEl.trigger('flyout-reset-initiated');
       $flyoutBackground.fadeOut();
       $('html').css('height', '100%'); // set html height back to 100%
       $flyout.fadeOut(function(){
@@ -42,9 +58,9 @@
         });
         $flyout.off();
       });
-    });
+    };
 
-    return this;
+    return $that;
   };
 
 }( jQuery ));

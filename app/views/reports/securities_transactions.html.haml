@@ -1,0 +1,26 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.row
+  .report-header
+    %h1= t('reports.pages.securities_transactions.title')
+    = render 'reports_header_buttons'
+    .report-inputs
+      = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_securities_transactions_url, presets: @picker_presets, single_date_picker: true, max_date: Time.zone.now.to_date
+  .report-main-body
+    -if @final
+      .report-summary-data
+        %h3= t('reports.pages.securities_transactions.total_net_settled_final', date: fhlb_date_long_alpha(@start_date))
+        %p= fhlb_formatted_currency(@total_net, force_unit: true)
+      %h2.report-table-title= t('reports.pages.securities_transactions.final', date: fhlb_date_standard_numeric(@start_date))
+    -else
+      .report-summary-data
+        %h3= t('reports.pages.securities_transactions.total_net_settled_preliminary', date: fhlb_date_long_alpha(@start_date))
+        %p= fhlb_formatted_currency_whole(@total_net, force_unit: true)
+      %h2.report-table-title= t('reports.pages.securities_transactions.preliminary', date: fhlb_date_standard_numeric(@start_date))
+    %small
+      %p= t('reports.pages.securities_transactions.indicates_a_new_transaction_html')
+    =render 'reports/reports_table', table_class: 'securities-transactions-table', table_data: @securities_transactions_table_data, sortable: false
+    %small
+      %p= t('reports.pages.securities_transactions.info')
+      %br
+      %p= t('reports.pages.securities_transactions.effective', date: fhlb_date_standard_numeric('2010-08-10'))

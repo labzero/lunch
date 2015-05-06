@@ -3,7 +3,7 @@ module CustomFormattingHelper
   include ActionView::Helpers::NumberHelper
   
   def fhlb_formatted_currency(number, options={})
-    options.reverse_update({html: true, negative_format: '(%u%n)', force_unit: false})
+    options.reverse_update({html: true, negative_format: '%u(%n)', force_unit: false})
     return nil if number.nil? && options[:optional_number]
     return t('global.missing_value') if number.nil?
     formatted = if !options[:force_unit] && number == 0

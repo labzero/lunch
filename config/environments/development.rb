@@ -6,6 +6,11 @@ Rails.application.configure do
   # since you don't have to restart the web server when you make code changes.
   config.cache_classes = false
 
+  # Paperclip storage configuration
+  config.paperclip_defaults = {
+      path: File.join(Rails.root, 'tmp', 'paperclip', ':class', ':attachment', ':id_partition', ':style', ':filename')
+  }
+
   # Do not eager load code on boot.
   config.eager_load = false
 

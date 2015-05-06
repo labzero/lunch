@@ -241,51 +241,43 @@ RSpec.describe ReportsController, :type => :controller do
         expect(response.body).to render_template('advances_detail')
       end
 
-      describe 'downloading a PDF' do
-        let(:member_id) { double('A Member ID') }
-        let(:start_date) { Date.today - 3.years }
-        let(:pdf) { double('PDF') }
-        before do
-          allow_any_instance_of(MembersService).to receive(:report_disabled?).and_return(false)
-          allow_any_instance_of(MembersService).to receive(:member).with(anything).and_return({id: member_id, name: 'Foo'})
-          allow_any_instance_of(subject.class).to receive(:current_member_id).and_return(member_id)
-        end
-        it 'should render a PDF when the requested `export_format` is `pdf`' do
-          expect_any_instance_of(RenderReportPDFJob).to receive(:perform).with(member_id, 'advances_detail', anything)
-          get :advances_detail, export_format: :pdf
-        end
-        it 'should render a PDF using the requested start_date' do
-          expect_any_instance_of(RenderReportPDFJob).to receive(:perform).with(any_args, hash_including(start_date: start_date))
-          get :advances_detail, export_format: :pdf, start_date: start_date
-        end
-        it 'should send the pdf' do
-          allow_any_instance_of(RenderReportPDFJob).to receive(:perform).and_return(pdf)
-          expect_any_instance_of(subject.class).to receive(:send_data).with(pdf, hash_including(filename: 'advances.pdf')).and_call_original
-          get :advances_detail, export_format: :pdf
-        end
-      end
+      [['pdf', RenderReportPDFJob], ['xlsx', RenderReportExcelJob]].each do |format|
+        describe "downloading a #{format.first.upcase}" do
+          let(:member_id) { double('A Member ID') }
+          let(:start_date) { Date.today - 3.years }
+          let(:job_status) { double('JobStatus', update_attributes!: nil)}
+          let(:active_job) { double('Active Job Instance', job_status: job_status) }
+          let(:user_id) { rand(1000) }
+          let(:current_user) { double('User', id: user_id)}
 
-      describe 'downloading an XLSX' do
-        let(:member_id) { double('A Member ID') }
-        let(:start_date) { Date.today - 3.years }
-        let(:xlsx) { double('XLSX') }
-        before do
-          allow_any_instance_of(MembersService).to receive(:report_disabled?).and_return(false)
-          allow_any_instance_of(MembersService).to receive(:member).with(anything).and_return({id: member_id, name: 'Foo'})
-          allow_any_instance_of(subject.class).to receive(:current_member_id).and_return(member_id)
-        end
-        it 'should render a XLSX when the requested `export_format` is `xlsx`' do
-          expect_any_instance_of(RenderReportExcelJob).to receive(:perform).with(member_id, 'advances_detail', anything)
-          get :advances_detail, export_format: :xlsx
-        end
-        it 'should render a XLSX using the requested start_date' do
-          expect_any_instance_of(RenderReportExcelJob).to receive(:perform).with(any_args, hash_including(start_date: start_date))
-          get :advances_detail, export_format: :xlsx, start_date: start_date
-        end
-        it 'should send the XLSX' do
-          allow_any_instance_of(RenderReportExcelJob).to receive(:perform).and_return(xlsx)
-          expect_any_instance_of(subject.class).to receive(:send_data).with(xlsx, hash_including(filename: "advances-#{today.strftime('%Y%m%d')}.xlsx")).and_call_original
-          get :advances_detail, export_format: :xlsx
+          before do
+            allow_any_instance_of(MembersService).to receive(:report_disabled?).and_return(false)
+            allow_any_instance_of(MembersService).to receive(:member).with(anything).and_return({id: member_id, name: 'Foo'})
+            allow_any_instance_of(subject.class).to receive(:current_member_id).and_return(member_id)
+            allow(format.last).to receive(:perform_later).and_return(active_job)
+            allow(controller).to receive(:current_user).and_return(current_user)
+          end
+
+          it "should enqueue a report #{format.first} job when the requested `export_format` is `#{format.first}`" do
+            expect(format.last).to receive(:perform_later).with(member_id, 'advances_detail', anything, anything).and_return(active_job)
+            get :advances_detail, export_format: format.first
+          end
+          it 'should enqueue a report #{format.first} job using the requested start_date' do
+            expect(format.last).to receive(:perform_later).with(anything, anything, anything, hash_including(start_date: start_date.to_s)).and_return(active_job)
+            get :advances_detail, export_format: format.first, start_date: start_date
+          end
+          it 'should update the job_status instance with the user_id of the current user' do
+            expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
+            get :advances_detail, export_format: format.first
+          end
+          it 'should return a json response with a `job_status_url`' do
+            get :advances_detail, export_format: format.first
+            expect(JSON.parse(response.body).with_indifferent_access[:job_status_url]).to eq(job_status_url(job_status))
+          end
+          it 'should return a json response with a `job_cancel_url`' do
+            get :advances_detail, export_format: format.first
+            expect(JSON.parse(response.body).with_indifferent_access[:job_cancel_url]).to eq(job_cancel_url(job_status))
+          end
         end
       end
 
@@ -441,6 +433,120 @@ RSpec.describe ReportsController, :type => :controller do
         expect(assigns[:dividend_statement_details][:footer]).to be_nil
       end
     end
+
+    describe 'GET securities_services_statement' do
+      let(:make_request) { get :securities_services_statement }
+      let(:response_hash) { double('A Securities Services Statement', :'[]' => nil)}
+      before do
+        allow(member_balance_service_instance).to receive(:securities_services_statement).with(kind_of(Date)).and_return(response_hash)
+        allow(response_hash).to receive(:[]).with(:secutities_fees).and_return([{}])
+        allow(response_hash).to receive(:[]).with(:transaction_fees).and_return([{}])
+      end
+      it_behaves_like 'a user required action', :get, :securities_services_statement
+      it 'should assign `@statement` to the result of calling MemberBalanceService.securities_services_statement' do
+        make_request
+        expect(assigns[:statement]).to be(response_hash)
+      end
+      it 'should default @start_date to today' do
+        make_request
+        expect(assigns[:start_date]).to eq(Time.zone.now.to_date)
+      end
+      it 'should set @start_date to the `start_date` param' do
+        get :securities_services_statement, start_date: '2012-02-11'
+        expect(assigns[:start_date]).to eq(Date.new(2012, 2, 11))
+      end
+      it 'should set @picker_presets to the `date_picker_presets` for the `start_date`' do
+        some_presets = double('Some Presets')
+        allow(subject).to receive(:date_picker_presets).with(Time.zone.now.to_date).and_return(some_presets)
+        make_request
+        expect(assigns[:picker_presets]).to eq(some_presets)
+      end
+      it 'should raise an error if @statement is nil' do
+        expect(member_balance_service_instance).to receive(:securities_services_statement).and_return(nil)
+        expect{make_request}.to raise_error(StandardError)
+      end
+      describe 'with the report disabled' do
+        before do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::SECURITIES_SERVICES_STATMENT_WEB_FLAGS).and_return(true)
+        end
+        it 'should set @statement to {} if the report is disabled' do
+          make_request
+          expect(assigns[:statement]).to eq({})
+        end
+        it 'should set @start_date if the report is disabled' do
+          make_request
+          expect(assigns[:start_date]).to be_kind_of(Date)
+        end
+      end
+    end
+
+    describe 'GET letters_of_credit' do
+      it_behaves_like 'a user required action', :get, :letters_of_credit
+
+      let(:make_request) { get :letters_of_credit }
+      let(:as_of_date) { double('some date') }
+      let(:total_current_par) { double('total current par') }
+      let(:maturity_date) {double('maturity date')}
+
+      describe 'view instance variables' do
+        before do
+          allow(response_hash).to receive(:[]).with(:as_of_date)
+          allow(response_hash).to receive(:[]).with(:total_current_par)
+          allow(response_hash).to receive(:[]).with(:rows)
+          allow(member_balance_service_instance).to receive(:letters_of_credit).and_return(response_hash)
+        end
+        it 'sets @as_of_date to the value returned by MemberBalanceService.letters_of_credit' do
+          expect(response_hash).to receive(:[]).with(:as_of_date).and_return(as_of_date)
+          make_request
+          expect(assigns[:as_of_date]).to eq(as_of_date)
+        end
+        it 'sets @total_current_par to the value returned by MemberBalanceService.letters_of_credit' do
+          expect(response_hash).to receive(:[]).with(:total_current_par).and_return(total_current_par)
+          make_request
+          expect(assigns[:total_current_par]).to eq(total_current_par)
+        end
+        it 'sets @loc_table_data[:column_headings] to an array of column heading strings' do
+          make_request
+          assigns[:loc_table_data][:column_headings].each do |heading|
+            expect(heading).to be_kind_of(String)
+          end
+        end
+        it 'sets @loc_table_data[:rows] to the formatted value returned by MemberBalanceService.letters_of_credit' do
+          row_keys = [:lc_number, :current_par, :maintenance_charge, :trade_date, :settlement_date, :maturity_date, :description]
+          row = {}
+          row_keys.each do |key|
+            row[key] = double(key.to_s)
+          end
+          expect(response_hash).to receive(:[]).with(:rows).at_least(:once).and_return([row])
+          make_request
+          expect(assigns[:loc_table_data][:rows].length).to eq(1)
+          row_keys.each_with_index do |key, i|
+            expect(assigns[:loc_table_data][:rows][0][:columns][i][:value]).to eq(row[key])
+          end
+        end
+        it 'sets @loc_table_data[:rows] to {} if no row data is returned from MemberBalanceService.letters_of_credit' do
+          make_request
+          expect(assigns[:loc_table_data][:rows]).to eq({})
+        end
+      end
+      describe 'with the report disabled' do
+        before do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::LETTERS_OF_CREDIT_WEB_FLAGS).and_return(true)
+        end
+        it 'sets @as_of_date to nil if the report is disabled' do
+          make_request
+          expect(assigns[:as_of_date]).to be_nil
+        end
+        it 'sets @total_current_par to nil if the report is disabled' do
+          make_request
+          expect(assigns[:total_current_par]).to be_nil
+        end
+        it 'sets @loc_table_data[:rows] to {}' do
+          make_request
+          expect(assigns[:loc_table_data][:rows]).to eq({})
+        end
+      end
+    end
   end
 
   describe 'GET current_price_indications' do
@@ -510,6 +616,61 @@ RSpec.describe ReportsController, :type => :controller do
     it 'should return irr data' do
       get :interest_rate_resets
       expect(assigns[:irr_table_data][:rows][0][:columns]).to eq([{:type=>:date, :value=>effective_date}, {:value=>advance_number}, {:type=>:index, :value=>prior_rate}, {:type=>:index, :value=>new_rate}, {:value=>next_reset}])
+    end
+  end
+
+  describe 'GET securities_transactions' do
+    let(:start_date) { Date.new(2014,12,31) }
+    let(:member_balances_service_instance) { double('MemberBalanceService') }
+    let(:response_hash) { double('MemberBalanceServiceHash') }
+    let(:transaction_hash) { double('transaction_hash') }
+    let(:custody_account_no) { double('custody_account_no') }
+    let(:new_transaction) { double('new_transaction') }
+    let(:cusip) { double('cusip') }
+    let(:transaction_code) { double('transaction_code') }
+    let(:security_description) { double('security_description') }
+    let(:units) { double('units') }
+    let(:maturity_date) { double('maturity_date') }
+    let(:payment_or_principal) { double('payment_or_principal') }
+    let(:interest) { double('interest') }
+    let(:total) { double('total') }
+    let(:total_net) { double('total_net') }
+    let(:final) { double('final') }
+    let(:securities_transactions_response) {[{'custody_account_no' => custody_account_no, 'new_transaction' => false, 'cusip' => cusip, 'transaction_code' => transaction_code, 'security_description' => security_description, 'units' => units, 'maturity_date' => maturity_date, 'payment_or_principal' => payment_or_principal, 'interest' => interest, 'total' => total}]}
+    let(:securities_transactions_response_with_new_transaction) {[{'custody_account_no' => '12345', 'new_transaction' => true, 'cusip' => cusip, 'transaction_code' => transaction_code, 'security_description' => security_description, 'units' => units, 'maturity_date' => maturity_date, 'payment_or_principal' => payment_or_principal, 'interest' => interest, 'total' => total}]}
+
+    before do
+      allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
+      allow(member_balances_service_instance).to receive(:securities_transactions).with(kind_of(Date)).at_least(1).and_return(response_hash)
+      allow(response_hash).to receive(:[]).with(:total_net).and_return(total_net)
+      allow(response_hash).to receive(:[]).with(:final).and_return(final)
+      allow(response_hash).to receive(:[]).with(:total_payment_or_principal)
+      allow(response_hash).to receive(:[]).with(:total_interest)
+    end
+    it_behaves_like 'a user required action', :get, :securities_transactions
+    it 'renders the securities_transactions view' do
+      allow(response_hash).to receive(:[]).with(:transactions).and_return(transaction_hash)
+      allow(transaction_hash).to receive(:collect)
+      get :securities_transactions
+      expect(response.body).to render_template('securities_transactions')
+    end
+    it 'should pass @start_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+      allow(controller).to receive(:date_picker_presets).with(start_date).and_return(picker_preset_hash)
+      allow(response_hash).to receive(:[]).with(:transactions).and_return(securities_transactions_response_with_new_transaction)
+      get :securities_transactions, start_date: start_date
+      expect(assigns[:picker_presets]).to eq(picker_preset_hash)
+    end
+    it 'should return securities transactions data' do
+      allow(response_hash).to receive(:[]).with(:transactions).and_return(securities_transactions_response)
+      get :securities_transactions
+      expect(assigns[:total_net]).to eq(total_net)
+      expect(assigns[:final]).to eq(final)
+      expect(assigns[:securities_transactions_table_data][:rows][0][:columns]).to eq([{:type=>nil, :value=>custody_account_no}, {:type=>nil, :value=>cusip}, {:type=>nil, :value=>transaction_code}, {:type=>nil, :value=>security_description}, {:type=>:basis_point, :value=>units}, {:type=>:date, :value=>maturity_date}, {:type=>:rate, :value=>payment_or_principal}, {:type=>:rate, :value=>interest}, {:type=>:rate, :value=>total}])
+    end
+    it 'should return securities transactions data with new transaction indicator' do
+      allow(response_hash).to receive(:[]).with(:transactions).and_return(securities_transactions_response_with_new_transaction)
+      get :securities_transactions
+      expect(assigns[:securities_transactions_table_data][:rows][0][:columns]).to eq([{:type=>nil, :value=>'12345*'}, {:type=>nil, :value=>cusip}, {:type=>nil, :value=>transaction_code}, {:type=>nil, :value=>security_description}, {:type=>:basis_point, :value=>units}, {:type=>:date, :value=>maturity_date}, {:type=>:rate, :value=>payment_or_principal}, {:type=>:rate, :value=>interest}, {:type=>:rate, :value=>total}])
     end
   end
 

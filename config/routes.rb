@@ -16,7 +16,7 @@ Rails.application.routes.draw do
 
   post '/dashboard/quick_advance_preview' => 'dashboard#quick_advance_preview'
 
-  post '/dashboard/quick_advance_confirmation' => 'dashboard#quick_advance_confirmation'
+  post '/dashboard/quick_advance_perform' => 'dashboard#quick_advance_perform'
 
   get '/dashboard/current_overnight_vrc' => 'dashboard#current_overnight_vrc'
 
@@ -28,11 +28,19 @@ Rails.application.routes.draw do
   get '/reports/historical-price-indications' => 'reports#historical_price_indications'
   get '/reports/cash-projections' => 'reports#cash_projections'
   get '/reports/current-price-indications' => 'reports#current_price_indications'
-  get '/reports/interest_rate_resets' => 'reports#interest_rate_resets'
+  get '/reports/interest-rate-resets' => 'reports#interest_rate_resets'
   get '/reports/dividend-statement' => 'reports#dividend_statement'
+  get '/reports/securities-services-statement' => 'reports#securities_services_statement'
+  get '/reports/letters-of-credit' => 'reports#letters_of_credit'
+  get '/reports/securities-transactions' => 'reports#securities_transactions'
 
   get '/settings' => 'settings#index'
   post '/settings/save' => 'settings#save'
+  get '/settings/two-factor' => 'settings#two_factor'
+
+  get '/jobs/:job_status_id' => 'jobs#status', as: 'job_status'
+  get '/jobs/:job_status_id/download' => 'jobs#download', as: 'job_download'
+  get '/jobs/:job_status_id/cancel' => 'jobs#cancel', as: 'job_cancel'
 
   scope 'corporate_communications/:category' do
     resources :corporate_communications, only: :show, as: :corporate_communication

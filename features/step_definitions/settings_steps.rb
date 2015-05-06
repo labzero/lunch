@@ -14,6 +14,13 @@ Then(/^I should be on the email settings page$/) do
   page.assert_selector('section.settings-email', :visible => true)
 end
 
+Then(/^I should be on the two factor settings page$/) do
+  page.assert_selector('section.settings-two-factor',  visible: true)
+  text = I18n.t('settings.two_factor.title')
+  page.assert_selector('h1', visible: true, text: /\A#{Regexp.quote(text)}\z/)
+  page.assert_selector('.settings-group', visible: true, count: 2)
+end
+
 When(/^I am on the email settings page$/) do
   visit "/settings"
   step "I click on \"Emails\" in the sidebar nav"

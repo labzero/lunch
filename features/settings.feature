@@ -34,3 +34,10 @@ Scenario: Remembering Email Settings
     And I click on the gear icon in the header
     And I click on "Emails" in the sidebar nav
   Then I should see the selected state for the "reports" option
+
+@jira-mem-599
+Scenario: Users can view Two Factor settings
+  Given I visit the dashboard
+    And I click on the gear icon in the header
+  When I click on "2-Step Verification" in the sidebar nav
+  Then I should be on the two factor settings page

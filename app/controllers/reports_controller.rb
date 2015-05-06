@@ -11,6 +11,9 @@ class ReportsController < ApplicationController
   SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
   CASH_PROJECTIONS_WEB_FLAGS = [MembersService::CASH_PROJECTIONS_DATA]
   DIVIDEND_STATEMENT_WEB_FLAGS = [MembersService::CAPSTOCK_REPORT_DIVIDEND_TRANSACTION, MembersService::CAPSTOCK_REPORT_DIVIDEND_STATEMENT]
+  SECURITIES_SERVICES_STATMENT_WEB_FLAGS = [MembersService::SECURITIESBILLSTATEMENT]
+  LETTERS_OF_CREDIT_WEB_FLAGS = [MembersService::LETTERS_OF_CREDIT_DETAIL_REPORT]
+  SECURITIES_TRANSACTION_WEB_FLAGS = [MembersService::SECURITIES_TRANSACTION_DATA]
 
   before_action do
     @member_name = current_member_name
@@ -43,7 +46,8 @@ class ReportsController < ApplicationController
         },
         letters_of_credit: {
           updated: t('global.daily'),
-          available_history: t('global.all')
+          available_history: t('global.all'),
+          route: reports_letters_of_credit_path
         },
         forward_commitments: {
           updated: t('global.daily'),
@@ -87,7 +91,8 @@ class ReportsController < ApplicationController
       securities: {
         transactions: {
           updated: t('reports.twice_daily'),
-          available_history: t('global.all')
+          available_history: t('global.all'),
+          route: reports_securities_transactions_path
         },
         cash_projections: {
           updated: t('global.daily'),
@@ -104,7 +109,8 @@ class ReportsController < ApplicationController
         },
         services_monthly: {
           updated: t('global.monthly'),
-          available_history: t('reports.history.months18')
+          available_history: t('reports.history.months18'),
+          route: reports_securities_services_statement_path
         }
       }
     }
@@ -198,11 +204,15 @@ class ReportsController < ApplicationController
     end
     @advances_detail[:advances_details].sort! { |a, b| a[:trade_date] <=> b[:trade_date] } if @advances_detail[:advances_details]
 
-    case params[:export_format]
-    when 'pdf'
-      send_data RenderReportPDFJob.new.perform(current_member_id, 'advances_detail', {start_date: @start_date}), filename: 'advances.pdf'
-    when 'xlsx'
-      send_data RenderReportExcelJob.new.perform(current_member_id, 'advances_detail', {start_date: @start_date}), filename: "advances-#{@start_date.strftime('%Y%m%d')}.xlsx"
+    export_format = params[:export_format]
+    if export_format == 'pdf'
+      job_status = RenderReportPDFJob.perform_later(current_member_id, 'advances_detail', 'advances', {start_date: @start_date.to_s}).job_status
+    elsif export_format == 'xlsx'
+      job_status = RenderReportExcelJob.perform_later(current_member_id, 'advances_detail', "advances-#{@start_date.to_s}", {start_date: @start_date.to_s}).job_status
+    end
+    unless job_status.nil?
+      job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
     end
   end
 
@@ -537,6 +547,101 @@ class ReportsController < ApplicationController
     end
   end
 
+  def securities_services_statement
+    @start_date = (params[:start_date] || Time.zone.now).to_date
+    if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
+      @statement = {}
+    else
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      @statement = member_balances.securities_services_statement(@start_date)
+      raise StandardError, "There has been an error and ReportsController#securities_services_statement has encountered nil. Check error logs." if @statement.nil?
+    end
+    @picker_presets = date_picker_presets(@start_date)
+  end
+
+  def letters_of_credit
+    if report_disabled?(LETTERS_OF_CREDIT_WEB_FLAGS)
+      letters_of_credit = {}
+    else
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      letters_of_credit = member_balances.letters_of_credit
+      raise StandardError, "There has been an error and ReportsController#letters_of_credit has encountered nil. Check error logs." if letters_of_credit.nil?
+    end
+    @as_of_date = letters_of_credit[:as_of_date]
+    @total_current_par = letters_of_credit[:total_current_par]
+    rows = if letters_of_credit[:rows]
+      letters_of_credit[:rows].collect do |row|
+        {
+          columns: [
+            {value: row[:lc_number], type: nil},
+            {value: row[:current_par], type: :currency_whole},
+            {value: row[:maintenance_charge], type: :number},
+            {value: row[:trade_date], type: :date, classes: [:'report-cell-right']},
+            {value: row[:settlement_date], type: :date, classes: [:'report-cell-right']},
+            {value: row[:maturity_date], type: :date, classes: [:'report-cell-right']},
+            {value: row[:description], type: nil}
+          ]
+        }
+      end
+    else
+      {}
+    end
+    @loc_table_data = {
+      column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('common_table_headings.trade_date'), t('common_table_headings.settlement_date'), t('common_table_headings.maturity_date'), t('common_table_headings.description')],
+      rows: rows,
+      footer: [{value: t('global.total')}, {value: @total_current_par, type: :currency_whole}, {value: nil, colspan: 5}]
+    }
+  end
+
+  def securities_transactions
+    @start_date = (params[:start_date] || Time.zone.now.to_date).to_date
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
+      securities_transactions = {}
+      securities_transactions[:transactions] = []
+    else
+      securities_transactions = member_balances.securities_transactions(@start_date)
+      raise StandardError, "There has been an error and ReportsController#securities_transactions has returned nil. Check error logs." if securities_transactions.blank?
+    end
+    @picker_presets = date_picker_presets(@start_date)
+    @total_net = securities_transactions[:total_net]
+    @final = securities_transactions[:final]
+    column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('reports.pages.securities_transactions.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('reports.pages.securities_transactions.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
+    rows = securities_transactions[:transactions].collect do |row|
+      columns = []
+      row.each do |value|
+        case value[0]
+        when 'units'
+          columns << {type: :basis_point, value: value[1]}
+        when 'maturity_date'
+          columns << {type: :date, value: value[1]}
+        when 'payment_or_principal', 'interest', 'total'
+          columns << {type: :rate, value: value[1]}
+        when 'custody_account_no'
+          if row['new_transaction']
+            columns << {type: nil, value: "#{value[1]}*"}
+          else
+            columns << {type: nil, value: value[1]}
+          end
+        when 'cusip', 'transaction_code', 'security_description'
+          columns << {type: nil, value: value[1]}
+        end
+      end
+      {columns: columns}
+    end
+    footer = [
+        { value: t('reports.pages.securities_transactions.total_net_amount'), colspan: 6},
+        { value: securities_transactions[:total_payment_or_principal],  type: :currency},
+        { value: securities_transactions[:total_interest], type: :currency},
+        { value: @total_net, type: :currency}
+    ]
+    @securities_transactions_table_data = {
+        :column_headings => column_headings,
+        :rows => rows,
+        :footer => footer
+    }
+  end
+
   private
   def report_disabled?(report_flags)
     member_info = MembersService.new(request)
@@ -551,11 +656,11 @@ class ReportsController < ApplicationController
       new_array << {date: rate_by_date_obj[:date], rates_by_term: []}
       terms.each do |term|
         rate_obj = rate_by_date_obj[:rates_by_term].select {|rate_obj| rate_obj[:term] == term.to_s.upcase}.first || {
-            term: term.to_s.upcase,
-            type: 'index', # placeholder type
-            value: nil,
-            day_count_basis: nil,
-            pay_freq: nil
+          term: term.to_s.upcase,
+          type: 'index', # placeholder type
+          value: nil,
+          day_count_basis: nil,
+          pay_freq: nil
         }
         new_array.last[:rates_by_term] << rate_obj.with_indifferent_access
       end

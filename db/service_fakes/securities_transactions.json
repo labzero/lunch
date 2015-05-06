@@ -1,0 +1,53 @@
+{
+  "final": true,
+  "transactions": [
+    {
+      "custody_account_no": "082345",
+      "new_transaction": true,
+      "cusip": "4034YKC",
+      "transaction_code": "DELD",
+      "security_description": "UNITED STATES TREAS NTS DTD",
+      "units": 800000,
+      "maturity_date": "12-JAN-2025",
+      "payment_or_principal": -925892.00,
+      "interest": 0,
+      "total": -926892.00
+    },
+    {
+      "custody_account_no": "082341",
+      "new_transaction": false,
+      "cusip": "4034YFG",
+      "transaction_code": "RECD",
+      "security_description": "FEDERAL HOME LN BKS",
+      "units": 600000,
+      "maturity_date": "12-JAN-2035",
+      "payment_or_principal": -140000.00,
+      "interest": 0,
+      "total": -140000.00
+    },
+    {
+      "custody_account_no": "082342",
+      "new_transaction": false,
+      "cusip": "4034YKZ",
+      "transaction_code": "CMOI",
+      "security_description": "NCUA GUARANTEED NOTES",
+      "units": 20700000,
+      "maturity_date": "12-JAN-2025",
+      "payment_or_principal": 0,
+      "interest": 3568.25,
+      "total": 3568.25
+    },
+    {
+      "custody_account_no": "082123",
+      "new_transaction": false,
+      "cusip": "4034YKE",
+      "transaction_code": "CMOI",
+      "security_description": "NCUA GUARANTEED NOTES",
+      "units": 10700000,
+      "maturity_date": "12-JAN-2021",
+      "payment_or_principal": 0,
+      "interest": 7568.25,
+      "total": 7568.25
+    }
+  ]
+}

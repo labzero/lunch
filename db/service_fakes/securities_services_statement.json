@@ -1,0 +1,76 @@
+{
+  "sta_account_number": "25100033",
+  "total": 532.50,
+  "account_maintenance": {
+    "total": 100.00
+  },
+  "income_disbursement": {
+    "count": 64,
+    "cost": 5.00,
+    "total": 320.00
+  },
+  "pledge_status_change": {
+    "count": 0,
+    "cost": 10.00,
+    "total": 0.00
+  },
+  "certifications": {
+    "count": 0,
+    "cost": 40.00,
+    "total": 0.00
+  },
+  "research": {
+    "count": 0,
+    "cost": 40.00,
+    "total": 0.00
+  },
+  "handling": {
+    "count": 0,
+    "cost": 40.00,
+    "total": 0.00
+  },
+  "secutities_fees": {
+    "fed": {
+      "count": 65,
+      "cost": 1.00,
+      "total": 65.00
+    },
+    "dtc": {
+      "count": 1,
+      "cost": 2.50,
+      "total": 2.50
+    },
+    "funds": {
+      "count": 0,
+      "cost": 4.50,
+      "total": 0.00
+    },
+    "euroclear": {
+      "count": 0,
+      "cost": 0.01,
+      "total": 0.00
+    }
+  },
+  "transaction_fees": {
+    "fed": {
+      "count": 0,
+      "cost": 10.00,
+      "total": 0.00
+    },
+    "dtc": {
+      "count": 3,
+      "cost": 15.00,
+      "total": 45.00
+    },
+    "funds": {
+      "count": 0,
+      "cost": 50.00,
+      "total": 0.00
+    },
+    "euroclear": {
+      "count": 0,
+      "cost": 75.00,
+      "total": 0.00
+    }
+  }
+}

@@ -55,8 +55,8 @@ Then(/^I should see a report table with multiple data rows$/) do
   page.assert_selector('.report-table tbody tr')
 end
 
-Then(/^I should see two report tables with multiple data rows$/) do
-  page.assert_selector('.report-table', count: 2)
+Then(/^I should see (\d+) report tables with multiple data rows$/) do |count|
+  page.assert_selector('.report-table', count: count)
   page.all('.report-table').each do |table|
     table.assert_selector('tbody tr')
   end
@@ -82,9 +82,15 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
   when 'Current Price Indications'
     visit '/reports/current-price-indications'
   when 'Interest Rate Resets'
-    visit '/reports/interest_rate_resets'
+    visit '/reports/interest-rate-resets'
   when 'Dividend Transaction Statement'
     visit '/reports/dividend-statement'
+  when 'Securities Services Monthly Statement'
+    visit '/reports/securities-services-statement'
+  when 'Letters of Credit'
+    visit '/reports/letters-of-credit'
+  when 'Securities Transactions'
+    visit '/reports/securities-transactions'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
@@ -95,7 +101,7 @@ When(/^I click the "(.*?)" column heading$/) do |column_heading|
               when 'Certificate Sequence'
                 I18n.t('reports.pages.capital_stock_activity.certificate_sequence')
               when 'Trade Date'
-                I18n.t('reports.pages.advances_detail.trade_date')
+                I18n.t('common_table_headings.trade_date')
               when 'Date'
                 I18n.t('global.date')
               when 'Issue Date'
@@ -113,7 +119,7 @@ When(/^I click the "(.*?)" column heading$/) do |column_heading|
               when 'Days Outstanding'
                 I18n.t('reports.pages.dividend_statement.headers.days_outstanding')
               when 'Settlement Date'
-                I18n.t('reports.pages.cash_projections.settlement_date')
+                I18n.t('common_table_headings.settlement_date')
               when 'Outstanding Shares'
                 I18n.t('reports.pages.capital_stock_activity.shares_outstanding')
               else
@@ -133,6 +139,23 @@ Then(/^I should see a "(.*?)" for the last month$/) do |report_type|
   start_date = last_month.strftime('%B %-d, %Y')
   end_date = last_month.end_of_month.strftime('%B %-d, %Y')
   step %{I should see a "#{report_type}" starting on "#{start_date}" and ending on "#{end_date}"}
+end
+
+Then(/^I should see a "([^"]*)" for the (\d+)(?:st|rd|th) of the last month$/) do |report, day|
+  start_date = (Date.new(@today.year, @today.month, day.to_i) - 1.month)
+  case report
+  when 'Securities Services Monthly Statement'
+    heading = /^#{Regexp.quote(I18n.t('reports.pages.securities_services_statement.heading', date: fhlb_date_long_alpha(start_date)))}$/
+    sentinel = 'XXXXXXXXXX'
+    footer_base = I18n.t('reports.pages.securities_services_statement.footer', date: fhlb_date_long_alpha(start_date), account_number: sentinel)
+    footer = /^#{Regexp.quote(footer_base).gsub(sentinel, '\d+')}$/
+  else
+    raise 'unknown report'
+  end
+
+  expect(page.find(".datepicker-trigger input").value).to eq(I18n.t('datepicker.single.input', date: fhlb_date_standard_numeric(start_date)))
+  page.assert_selector('.report-summary-data h3', text: heading) if heading
+  page.assert_selector('.report-summary-data h3', text: footer) if footer
 end
 
 Then(/^I should see a "(.*?)" for the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of this month$/) do |report_type, start_day, end_day|
@@ -235,18 +258,15 @@ When(/^I request a PDF$/) do
   click_button(I18n.t('dashboard.actions.download'))
 end
 
-Then(/^I should recieve a PDF file$/) do
-  page.response_headers['Content-Type'].should == 'application/pdf'
+Then(/^I should begin downloading a file$/) do
+  page.execute_script("$('body').on('reportDownloadStarted', function(){$('body').addClass('report-download-started')})")
+  page.assert_selector('body.report-download-started', wait: 100)
 end
 
 When(/^I request an XLSX$/) do
   page.find(".report-header-buttons .dropdown-selection").click
   page.find('.report-header-buttons .dropdown li', text: I18n.t('global.excel'), visible: true).click
   click_button(I18n.t('dashboard.actions.download'))
-end
-
-Then(/^I should recieve an XLSX file$/) do
-  page.response_headers['Content-Type'].should == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 end
 
 When(/^I click on the view cell for the first (advance|cash projection)/) do |report_type|
@@ -298,23 +318,42 @@ def report_dates_in_range? (start_date, end_date, date_format="%m/%d/%Y")
 end
 
 Then(/^I should see VRC current price indications report$/) do
-  page.assert_selector('.current-price-vrc-table tbody tr')
+  page.assert_selector('.current-price-vrc-table tbody tr:first-child td')
 end
 
 Then(/^I should see FRC current price indications report$/) do
-  page.assert_selector('.current-price-frc-table tbody tr')
+  page.assert_selector('.current-price-frc-table tbody tr:first-child td')
 end
 
 Then(/^I should see ARC current price indications report$/) do
-  page.assert_selector('.current-price-arc-table tbody tr')
+  page.assert_selector('.current-price-arc-table tbody tr:first-child td')
 end
 
 Then(/^I should see STA rates report$/) do
-  page.assert_selector('.sta-rate-table tbody tr')
+  page.assert_selector('.sta-rate-table tbody tr:last-child td')
 end
 
 Then(/^I should see Interest Rate Resets report$/) do
-  page.assert_selector('.interest-rate-resets-table tbody tr')
+  page.assert_selector('.interest-rate-resets-table tbody tr:first-child td')
 end
 
+Then(/^I should see the report download flyout$/) do
+  page.assert_selector('.flyout-loading-message', visible: true)
+end
 
+Then(/^I should not see the report download flyout$/) do
+  page.assert_no_selector('.flyout-loading-message')
+  page.assert_selector('.flyout', visible: :hidden)
+end
+
+Then(/^I should see Securities Transactions report$/) do
+  page.assert_selector('.securities-transactions-table tbody tr:first-child td')
+end
+
+Then(/^I should see a security that is indicated as a new transaction$/) do
+  page.find('.securities-transactions-table tbody tr td', text: /.\*\z/)
+end
+
+When(/^I cancel the report download from the flyout$/) do
+  page.find('.cancel-report-download', text: /#{I18n.t('global.cancel_download')}/i).click
+end

@@ -47,6 +47,9 @@
   }
   input {
     @extend %input-field-styling;
+    &.input-field-error {
+      border-color: $alert-red;
+    }
   }
 
   &[class*=" icon-"], &[class^="icon-"] {
@@ -73,4 +76,12 @@ label {
   color: $alert-red;
   @extend %typography-error-message;
   margin-bottom: 30px;
+}
+
+.input-field-container-horizontal {
+  float: left;
+  margin-right: 10px;
+  .input-field-container {
+    width: auto;
+  }
 }
