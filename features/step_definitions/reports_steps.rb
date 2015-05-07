@@ -260,7 +260,7 @@ end
 
 Then(/^I should begin downloading a file$/) do
   page.execute_script("$('body').on('reportDownloadStarted', function(){$('body').addClass('report-download-started')})")
-  page.assert_selector('body.report-download-started', wait: 100)
+  page.assert_selector('body.report-download-started', wait: 180)
 end
 
 When(/^I request an XLSX$/) do

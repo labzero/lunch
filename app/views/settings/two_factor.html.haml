@@ -3,11 +3,30 @@
     %h1= t('settings.two_factor.title')
     %p= t('settings.two_factor.description')
     %p= t('settings.two_factor.help_html', phone_number: fhlb_formatted_phone_number('4156162610'), url: 'mailto:websupport@fhlbsf.com')
-    .settings-group
+    .settings-group.settings-reset-pin
       %h2= t('settings.two_factor.reset_pin.title')
-      %p= t('settings.two_factor.reset_pin.description')
-      = link_to(t('settings.two_factor.reset_pin.cta'), '#')
+      .form-flash-message{data: {type: 'success'}}= t('settings.two_factor.reset_pin.success')
+      .form-flash-message{data: {type: 'error'}}= t('settings.two_factor.reset_pin.error')
+      .settings-inactive-view
+        %p= t('settings.two_factor.reset_pin.description')
+        = link_to(t('settings.two_factor.reset_pin.cta'), '#', class: 'settings-group-cta')
+      = form_tag settings_two_factor_pin_path, method: :post, remote: true, class: 'settings-active-view' do
+        %p= t('settings.two_factor.reset_pin.hint')
+        %ol
+          %li
+            = t('settings.two_factor.reset_pin.prompt_current_pin')
+            %fieldset.securid-form
+              = render 'shared/securid_fields'
+          %li
+            = t('settings.two_factor.reset_pin.prompt_new_pin')
+            %fieldset.securid-form
+              = render 'shared/input_field', field_name: 'securid_new_pin', field_type: :password, label: t('settings.two_factor.reset_pin.new_pin'), html_attributes: {maxlength: 4}, field_class: 'securid-field-pin'
+              = render 'shared/input_field', field_name: 'securid_confirm_pin', field_type: :password, label: t('settings.two_factor.reset_pin.confirm_pin'), html_attributes: {maxlength: 4}, field_class: 'securid-field-pin'
+              %p.form-error{data: {'error-type' => :invalid_pin}}= t('dashboard.quick_advance.securid.errors.invalid_pin')
+              %p.form-error{data: {'error-type' => :pin_mismatch}}= t('settings.two_factor.reset_pin.pin_mismatch')
+        %input.primary-button{type: 'submit', value: t('settings.two_factor.reset_pin.save')}
+        %input.secondary-button{type: 'reset', value: t('global.cancel')}
     .settings-group
       %h2= t('settings.two_factor.resynchronize.title')
       %p= t('settings.two_factor.resynchronize.description')
-      = link_to(t('settings.two_factor.resynchronize.cta'), '#')
+      = link_to(t('settings.two_factor.resynchronize.cta'), '#', class: 'settings-group-cta')

@@ -3,7 +3,8 @@ require 'spec_helper'
 RSpec.describe SettingsController, :type => :controller do
   login_user
   
-  describe "GET index" do
+  describe 'GET index' do
+    it_behaves_like 'a user required action', :get, :index
     it "should render the index view" do
       get :index
       expect(response.body).to render_template('index')
@@ -30,6 +31,7 @@ RSpec.describe SettingsController, :type => :controller do
     let(:cookie_key) {'some_key'}
     let(:cookie_value) {'some_value'}
     let(:cookie_data) { {'cookies' => {cookie_key => cookie_value}} }
+    it_behaves_like 'a user required action', :post, :save
     it 'should return a timestamp' do
       expect(Time).to receive(:now).at_least(:once).and_return(now)
       post :save
@@ -43,6 +45,76 @@ RSpec.describe SettingsController, :type => :controller do
     it 'should not set cookies if no cookie data is posted' do
       post :save
       expect(response.cookies[cookie_key]).to be_nil
+    end
+  end
+
+  describe 'GET two_factor' do
+    it_behaves_like 'a user required action', :get, :two_factor
+    it 'should set @sidebar_options as an array of options with a label and a value' do
+      get :two_factor
+      expect(assigns[:sidebar_options]).to be_kind_of(Array)
+      assigns[:sidebar_options].each do |option|
+        expect(option.first).to be_kind_of(String)
+        expect(option.last).to be_kind_of(String)
+      end
+    end
+    it 'should render a template' do
+      get :two_factor
+      expect(response.body).to render_template('settings/two_factor')
+    end
+  end
+
+  describe 'POST reset_pin' do
+    let(:securid_pin) { Random.rand(9999).to_s.rjust(4, '0') }
+    let(:securid_new_pin) { Random.rand(9999).to_s.rjust(4, '0') }
+    let(:securid_token) { Random.rand(999999).to_s.rjust(6, '0') }
+    let!(:securid_service) { SecurIDService.new('some_user', test_mode: :change_pin) }
+    let(:make_request) { post :reset_pin, securid_token: securid_token, securid_pin: securid_pin, securid_new_pin: securid_new_pin }
+    it_behaves_like 'a user required action', :post, :reset_pin
+    context do
+      before do
+        allow(SecurIDService).to receive(:new).and_return(securid_service)
+      end
+
+      it 'should attempt to authenticate the users SecurID credentials' do
+        expect(securid_service).to receive(:authenticate).with(securid_pin, securid_token)
+        make_request
+      end
+      it 'should return a status of `invalid_pin` if the original pin is malformed' do
+        post :reset_pin, securid_token: securid_token, securid_pin: 'abcd', securid_new_pin: securid_new_pin
+        expect(JSON.parse(response.body)['status']).to eq('invalid_pin')
+      end
+      it 'should return a status of `invalid_token` if the token is malformed' do
+        post :reset_pin, securid_token: '123ab3', securid_pin: securid_pin, securid_new_pin: securid_new_pin
+        expect(JSON.parse(response.body)['status']).to eq('invalid_token')
+      end
+      it 'should return a status of `invalid_new_pin` if the new pin is malformed' do
+        post :reset_pin, securid_token: securid_token, securid_pin: securid_pin, securid_new_pin: '123a'
+        expect(JSON.parse(response.body)['status']).to eq('invalid_new_pin')
+      end
+      it 'should return a status of `success` if the pin change was completed' do
+        make_request
+        expect(JSON.parse(response.body)['status']).to eq('success')
+      end
+      it 'should attempt to change the users pin if the user needs a pin change' do
+        expect(securid_service).to receive(:change_pin).with(securid_new_pin).and_return(true)
+        make_request
+      end
+    end
+    it 'should return a status of `denied` if the user was not authenticated' do
+      allow(SecurIDService).to receive(:new).and_return(SecurIDService.new('some_user', test_mode: :denied))
+      make_request
+      expect(JSON.parse(response.body)['status']).to eq('denied')
+    end
+    it 'should return a status of `authenticated` if the user was authenticated but no pin change was needed' do
+      allow(SecurIDService).to receive(:new).and_return(SecurIDService.new('some_user', test_mode: true))
+      make_request
+      expect(JSON.parse(response.body)['status']).to eq('authenticated')
+    end
+    it 'should return a status of `must_resynchronize` if the user needs to resynchronize their token first' do
+      allow(SecurIDService).to receive(:new).and_return(SecurIDService.new('some_user', test_mode: :resynchronize))
+      make_request
+      expect(JSON.parse(response.body)['status']).to eq('must_resynchronize')
     end
   end
 end

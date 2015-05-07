@@ -76,8 +76,8 @@
     };
 
     function validateSecurID ($form) {
-      var $pin = $form.find('input[name=securid_pin]');
-      var $token = $form.find('input[name=securid_token]');
+      var $pin = $form.find('input.securid-field-pin');
+      var $token = $form.find('input.securid-field-token');
       var pin = $pin.val();
       var token = $token.val();
       var valid = true;
@@ -114,12 +114,8 @@
             $flyoutBottomSection.find('.input-field-error').removeClass('input-field-error');
             transitionToPreviewFromLoading();
 
-            if ($.inArray(json.securid, ['invalid_token', 'invalid_pin', 'denied']) != -1) {
+            if ($.inArray(json.securid, ['invalid_token', 'invalid_pin', 'denied', 'must_resynchronize', 'must_change_pin']) != -1) {
               error = json.securid;
-            } else if (json.securid == 'must_resynchronize') {
-              error = 'resynchronize';
-            } else if (json.securid == 'must_change_pin') {
-              error = 'change_pin';
             }
 
             $flyoutBottomSection.find('p[data-error-type=' + error + ']').show();
