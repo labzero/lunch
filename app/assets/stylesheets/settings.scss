@@ -58,6 +58,21 @@
   }
 }
 
+.settings-reset-pin {
+  li:first-child {
+    margin-bottom: 20px; 
+  }
+}
+
+.settings-resynchronize-token {
+  .input-field-container:last-child {
+    display: block;
+  }
+  ol {
+    margin-top: 0;
+  }
+}
+
 .settings-group {
   border: 1px solid $light-blue;
   border-radius: $default-border-radius;
@@ -73,9 +88,6 @@
   ol {
     padding-left: 0;
     list-style-position: inside;
-  }
-  li:first-child {
-    margin-bottom: 20px; 
   }
   input[type=submit], input[type=reset] {
     width: 140px;

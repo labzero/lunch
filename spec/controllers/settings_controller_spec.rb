@@ -117,4 +117,58 @@ RSpec.describe SettingsController, :type => :controller do
       expect(JSON.parse(response.body)['status']).to eq('must_resynchronize')
     end
   end
+
+  describe 'POST resynchronize' do
+    let(:securid_pin) { Random.rand(9999).to_s.rjust(4, '0') }
+    let(:securid_token) { Random.rand(999999).to_s.rjust(6, '0') }
+    let(:securid_next_token) { Random.rand(999999).to_s.rjust(6, '0') }
+    let!(:securid_service) { SecurIDService.new('some_user', test_mode: :resynchronize) }
+    let(:make_request) { post :resynchronize, securid_token: securid_token, securid_pin: securid_pin, securid_next_token: securid_next_token }
+    it_behaves_like 'a user required action', :post, :resynchronize
+    context do
+      before do
+        allow(SecurIDService).to receive(:new).and_return(securid_service)
+      end
+
+      it 'should attempt to authenticate the users SecurID credentials' do
+        expect(securid_service).to receive(:authenticate).with(securid_pin, securid_token)
+        make_request
+      end
+      it 'should return a status of `invalid_pin` if the original pin is malformed' do
+        post :resynchronize, securid_token: securid_token, securid_pin: 'abcd', securid_next_token: securid_next_token
+        expect(JSON.parse(response.body)['status']).to eq('invalid_pin')
+      end
+      it 'should return a status of `invalid_token` if the token is malformed' do
+        post :resynchronize, securid_token: '123ab3', securid_pin: securid_pin, securid_next_token: securid_next_token
+        expect(JSON.parse(response.body)['status']).to eq('invalid_token')
+      end
+      it 'should return a status of `invalid_next_token` if the next token is malformed' do
+        post :resynchronize, securid_token: securid_token, securid_pin: securid_pin, securid_next_token: '123a12'
+        expect(JSON.parse(response.body)['status']).to eq('invalid_next_token')
+      end
+      it 'should return a status of `success` if the resynchronization was completed' do
+        make_request
+        expect(JSON.parse(response.body)['status']).to eq('success')
+      end
+      it 'should attempt to resynchronize the token if the user needs resynchronization' do
+        expect(securid_service).to receive(:resynchronize).with(securid_pin, securid_next_token).and_return(true)
+        make_request
+      end
+    end
+    it 'should return a status of `denied` if the user was not authenticated' do
+      allow(SecurIDService).to receive(:new).and_return(SecurIDService.new('some_user', test_mode: :denied))
+      make_request
+      expect(JSON.parse(response.body)['status']).to eq('denied')
+    end
+    it 'should return a status of `authenticated` if the user was authenticated but no resynchronization was needed' do
+      allow(SecurIDService).to receive(:new).and_return(SecurIDService.new('some_user', test_mode: true))
+      make_request
+      expect(JSON.parse(response.body)['status']).to eq('authenticated')
+    end
+    it 'should return a status of `must_change_pin` if the user needs to change their PIN first' do
+      allow(SecurIDService).to receive(:new).and_return(SecurIDService.new('some_user', test_mode: :change_pin))
+      make_request
+      expect(JSON.parse(response.body)['status']).to eq('must_change_pin')
+    end
+  end
 end
