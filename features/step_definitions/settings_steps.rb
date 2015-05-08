@@ -48,7 +48,7 @@ Given(/^I am on the two factor authentication settings page$/) do
 end
 
 Then(/^I should see the reset PIN form$/) do
-  page.assert_selector('.settings-two-factor form', visible: true)
+  page.assert_selector('.settings-reset-pin form', visible: true)
 end
 
 When(/^I click on the reset token PIN CTA$/) do
@@ -60,7 +60,7 @@ When(/^I cancel resetting the PIN$/) do
 end
 
 Then(/^I should not see the reset PIN form$/) do
-  page.assert_selector('.settings-two-factor form', visible: false)
+  page.assert_selector('.settings-reset-pin form', visible: false)
 end
 
 Given(/^I am on the reset PIN page$/) do
@@ -92,7 +92,7 @@ Then(/^I should see the invalid token message$/) do
   page.assert_selector('.form-error', text: /\A#{Regexp.quote(I18n.t('dashboard.quick_advance.securid.errors.invalid_token'))}\z/, visible: true)
 end
 
-When(/^I enter a good current token$/) do
+When(/^I enter a good token$/) do
   step %{I enter my SecurID token}
 end
 
@@ -116,4 +116,41 @@ end
 
 Then(/^I should see the failed to reset PIN message$/) do
   page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(I18n.t('settings.two_factor.reset_pin.error'))}\z/, visible: true)
+end
+
+When(/^I click on the resynchronize token CTA$/) do
+  click_link I18n.t('settings.two_factor.resynchronize.cta')
+end
+
+Then(/^I should see the resynchronize token form$/) do
+  page.assert_selector('.settings-resynchronize-token form', visible: true)
+end
+
+When(/^I cancel resynchronizing the token$/) do
+  click_button I18n.t('global.cancel')
+end
+
+Then(/^I should not see the resynchronize token form$/) do
+  page.assert_selector('.settings-resynchronize-token form', visible: false)
+end
+
+Given(/^I am on the resynchronize token page$/) do
+  step %{I am on the two factor authentication settings page}
+  step %{I click on the resynchronize token CTA}
+end
+
+When(/^I submit the resynchronize token form$/) do
+  click_button I18n.t('settings.two_factor.resynchronize.save')
+end
+
+When(/^I enter a bad next token$/) do
+  page.find('input[name=securid_next_token').set('abc1dc')
+end
+
+When(/^I enter a good next token$/) do
+  page.find('input[name=securid_next_token').set(Random.rand(999999).to_s.rjust(6, '0'))
+end
+
+Then(/^I should see the failed to resynchronize token message$/) do
+    page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(I18n.t('settings.two_factor.resynchronize.error'))}\z/, visible: true)
 end

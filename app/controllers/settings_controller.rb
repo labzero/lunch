@@ -54,4 +54,27 @@ class SettingsController < ApplicationController
     render json: {status: status}
   end
 
+  def resynchronize
+    securid = SecurIDService.new(current_user.username)
+    begin
+      securid.authenticate(params[:securid_pin], params[:securid_token])
+      status = securid.status
+    rescue SecurIDService::InvalidPin => e
+      status = 'invalid_pin'
+    rescue SecurIDService::InvalidToken => e
+      status = 'invalid_token'
+    end
+    if securid.resynchronize?
+      begin
+        securid.resynchronize(params[:securid_pin], params[:securid_next_token])
+        status = 'success' if securid.authenticated? 
+      rescue SecurIDService::InvalidPin => e
+        status = 'invalid_pin'
+      rescue SecurIDService::InvalidToken => e
+        status = 'invalid_next_token'
+      end
+    end
+    render json: {status: status}
+  end
+
 end

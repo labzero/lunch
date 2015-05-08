@@ -62,7 +62,7 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
   And I enter a bad token
   And I submit the reset PIN form
   Then I should see the invalid token message
-  When I enter a good current token
+  When I enter a good token
   And I enter a bad new PIN
   And I submit the reset PIN form
   Then I should see the invalid PIN message
@@ -73,3 +73,29 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
   When I enter two different values for the new PIN
   And I submit the reset PIN form
   Then I should see the failed to reset PIN message
+
+  @jira-mem-601
+  Scenario: Users can resynchronize their SecurID token
+    Given I am on the two factor authentication settings page
+    When I click on the resynchronize token CTA
+    Then I should see the resynchronize token form
+    When I cancel resynchronizing the token
+    Then I should not see the resynchronize token form
+
+  @jira-mem-601
+  Scenario: Users are informed if they have entered bad details on the resynchronize token form
+    Given I am on the resynchronize token page
+    When I enter a bad current PIN
+    And I submit the resynchronize token form
+    Then I should see the invalid PIN message
+    When I enter a good current PIN
+    And I enter a bad token
+    And I submit the resynchronize token form
+    Then I should see the invalid token message
+    When I enter a good token
+    And I enter a bad next token
+    And I submit the resynchronize token form
+    Then I should see the invalid token message
+    When I enter a good next token
+    And I submit the resynchronize token form
+    Then I should see the failed to resynchronize token message
