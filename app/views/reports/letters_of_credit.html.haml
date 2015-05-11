@@ -1,0 +1,14 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.row
+  .report-header
+    %h1= t('reports.pages.letters_of_credit.title')
+    = render 'reports_header_buttons'
+  .report-main-body
+    .report-summary-data
+      %h3
+        = t('reports.pages.letters_of_credit.total_current_par_summary', date: fhlb_date_long_alpha(@as_of_date))
+      %p= fhlb_formatted_currency_whole(@total_current_par, force_unit: true)
+    = render 'reports/reports_table', table_class: 'letters-of-credit-table', table_data: @loc_table_data, sortable: false
+    %small
+      %p= t('reports.pages.letters_of_credit.minimum_maintenance_charge')

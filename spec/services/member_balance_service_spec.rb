@@ -1,6 +1,11 @@
 require 'spec_helper'
 
 describe MemberBalanceService do
+  RSpec::Matchers.define :be_boolean do
+    match do |actual|
+      expect(actual).to satisfy { |x| x == true || x == false }
+    end
+  end
   let(:member_id) { 750 }
   subject { MemberBalanceService.new(member_id, double('request', uuid: '12345')) }
   it { expect(subject).to respond_to(:pledged_collateral) }
@@ -255,6 +260,61 @@ describe MemberBalanceService do
         allow(File).to receive(:read).and_return('some malformed json!')
         expect(Rails.logger).to receive(:warn)
         expect(settlement_transaction_rate).to be(nil)
+      end
+    end
+  end
+
+  # TODO add vcr once MAPI endpoint is rigged up
+  describe 'securities_transactions' do
+    let(:as_of_date) {Date.new(2015,1,20)}
+    let(:securities_transactions) {subject.securities_transactions(as_of_date)}
+    it 'should return securities transactions data' do
+      expect(securities_transactions.length).to be >= 1
+      expect(securities_transactions[:final]).to be_boolean
+      expect(securities_transactions[:total_payment_or_principal]).to be_kind_of(Numeric)
+      expect(securities_transactions[:total_net]).to be_kind_of(Numeric)
+      expect(securities_transactions[:total_interest]).to be_kind_of(Numeric)
+      expect(securities_transactions[:transactions]).to be_kind_of(Array)
+      securities_transactions[:transactions].each do |security|
+        expect(security[:custody_account_no]).to be_kind_of(String)
+        expect(security[:new_transaction]).to be_boolean
+        expect(security[:cusip]).to be_kind_of(String)
+        expect(security[:transaction_code]).to be_kind_of(String)
+        expect(security[:security_description]).to be_kind_of(String)
+        expect(security[:units]).to be_kind_of(Integer)
+        expect(security[:maturity_date]).to be_kind_of(String)
+        expect(security[:payment_or_principal]).to be_kind_of(Numeric)
+        expect(security[:interest]).to be_kind_of(Numeric)
+        expect(security[:total]).to be_kind_of(Numeric)
+      end
+    end
+    describe 'bad data' do
+      it 'should pass nil values if data from MAPI has nil values' do
+        allow(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'securities_transactions_with_nil_values.json'))))
+        expect(securities_transactions[:final]).to be(nil)
+        expect(securities_transactions[:total_payment_or_principal]).to be(0)
+        expect(securities_transactions[:total_net]).to be(0)
+        expect(securities_transactions[:total_interest]).to be(0)
+        securities_transactions[:transactions].each do |security|
+          expect(security[:custody_account_no]).to be(nil)
+          expect(security[:new_transaction]).to be(nil)
+          expect(security[:cusip]).to be(nil)
+          expect(security[:transaction_code]).to be(nil)
+          expect(security[:security_description]).to be(nil)
+          expect(security[:units]).to be(nil)
+          expect(security[:maturity_date]).to be(nil)
+          expect(security[:payment_or_principal]).to be(nil)
+          expect(security[:interest]).to be(nil)
+          expect(security[:total]).to be(nil)
+        end
+      end
+    end
+    describe 'error states' do
+      it 'returns nil if there is a JSON parsing error' do
+        # TODO change this stub once you implement the MAPI endpoint
+        allow(File).to receive(:read).and_return('some malformed json!')
+        expect(Rails.logger).to receive(:warn)
+        expect(securities_transactions).to be(nil)
       end
     end
   end
@@ -672,6 +732,87 @@ describe MemberBalanceService do
         expect(File).to receive(:read).and_return('some malformed json!')
         expect(Rails.logger).to receive(:warn)
         expect(dividend_statement).to be(nil)
+      end
+    end
+  end
+
+  describe '`securities_services_statement` method' do
+    let(:securities_services_statement) { subject.securities_services_statement(Time.zone.now) }
+    it 'returns a float for its `total`' do
+      expect(securities_services_statement[:total]).to be_kind_of(Float)
+    end
+    it 'returns a string for its `sta_account_number`' do
+      expect(securities_services_statement[:sta_account_number]).to be_kind_of(String)
+    end
+    it 'returns a float for its `account_maintenance.total`' do
+      expect(securities_services_statement[:account_maintenance][:total]).to be_kind_of(Float)
+    end
+    [:income_disbursement, :pledge_status_change, :certifications, :research, :handling].each do |attribute|
+      it "should return a price breakdown hash for `#{attribute}`" do
+        expect(securities_services_statement[attribute][:total]).to be_kind_of(Float)
+        expect(securities_services_statement[attribute][:cost]).to be_kind_of(Float)
+        expect(securities_services_statement[attribute][:count]).to be_kind_of(Fixnum)
+      end
+    end
+    [:secutities_fees, :transaction_fees].each do |section|
+      [:fed, :dtc, :funds, :euroclear].each do |attribute|
+        it "should return a price breakdown hash for `#{section}.#{attribute}`" do
+          expect(securities_services_statement[section][attribute][:total]).to be_kind_of(Float)
+          expect(securities_services_statement[section][attribute][:cost]).to be_kind_of(Float)
+          expect(securities_services_statement[section][attribute][:count]).to be_kind_of(Fixnum)
+        end
+      end
+    end
+    describe 'error states' do
+      it 'returns nil if there is a JSON parsing error' do
+        expect(File).to receive(:read).and_return('some malformed json!')
+        expect(Rails.logger).to receive(:warn)
+        expect(securities_services_statement).to be(nil)
+      end
+    end
+  end
+
+  describe '`letters_of_credit` method', :vcr do
+    let(:letters_of_credit) { subject.letters_of_credit}
+    let(:data) { JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'letters_of_credit.json'))).with_indifferent_access }
+
+    it 'returns a date for its `as_of_date`' do
+      expect(letters_of_credit[:as_of_date]).to be_kind_of(Date)
+    end
+    it 'returns a `total_current_par` that is the sum of all the current_par values' do
+      allow(JSON).to receive(:parse).and_return(data)
+      total_current_par = data[:rows].inject(0) {|sum, hash| sum + hash[:current_par]}
+      expect(letters_of_credit[:total_current_par]).to eq(total_current_par)
+    end
+    describe '`rows` attribute' do
+      [:settlement_date, :maturity_date, :trade_date].each do |attr|
+        it "returns a date for its '#{attr}'" do
+          letters_of_credit[:rows].each do |row|
+            expect(row[attr]).to be_kind_of(Date)
+          end
+        end
+      end
+      [:current_par, :maintenance_charge].each do |attr|
+        it "returns an integer for its '#{attr}'" do
+          letters_of_credit[:rows].each do |row|
+            expect(row[attr]).to be_kind_of(Integer)
+          end
+        end
+      end
+      [:lc_number, :description].each do |attr|
+        it "returns a string for its '#{attr}'" do
+          letters_of_credit[:rows].each do |row|
+            expect(row[attr]).to be_kind_of(String)
+          end
+        end
+      end
+    end
+
+    describe 'error states' do
+      it 'returns nil if there is a JSON parsing error' do
+        expect(File).to receive(:read).and_return('some malformed json!')
+        expect(Rails.logger).to receive(:warn)
+        expect(letters_of_credit).to be(nil)
       end
     end
   end

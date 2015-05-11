@@ -69,3 +69,57 @@
   color: $actionable-blue;
   cursor: pointer;
 }
+
+.loading-report {
+  display: none;
+}
+
+.flyout-loading-message {
+  margin-top: 55px;
+  margin-left: 290px;
+  .loading-report {
+    display: block;
+  }
+  .flyout-top-section {
+    position: relative;
+    box-sizing: border-box;
+    width: 380px;
+    padding: 25px 20px 20px 70px;
+    border-radius: $default-border-radius;
+    &:before {
+      @include icon-loading;
+      @extend %absolute-pseudoelement;
+      top: 20px;
+      left: 20px;
+    }
+  }
+  .flyout-close-button {
+    display: none;
+  }
+  p {
+    margin-top: 0;
+  }
+  a {
+    @extend %dashboard-module-link;
+    float: none;
+    cursor: pointer;
+  }
+  .error-message {
+    display: none;
+  }
+  &.flyout-loading-error {
+    .error-message {
+      display: block;
+    }
+    .loading-message {
+      display: none;
+    }
+    .flyout-top-section:before {
+      background: none;
+      @extend %icon-font;
+      content: "#{$icon-alert}";
+      color: $alert-red;
+      font-size: $spinner-size;
+    }
+  }
+}

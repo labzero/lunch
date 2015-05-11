@@ -1,0 +1,17 @@
+{
+  "final": null,
+  "transactions": [
+    {
+      "custody_account_no": null,
+      "new_transaction": null,
+      "cusip": null,
+      "transaction_code": null,
+      "security_description": null,
+      "units": null,
+      "maturity_date": null,
+      "payment_or_principal": null,
+      "interest": null,
+      "total": null
+    }
+  ]
+}

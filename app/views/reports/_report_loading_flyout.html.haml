@@ -1,0 +1,7 @@
+.loading-report
+  .loading-message
+    %p= t('global.prepare_download')
+    %a.cancel-report-download{data:{'flyout-action' => 'close'}}= t('global.cancel_download')
+  .error-message
+    %p= t('errors.error_occurred')
+    %a.cancel-report-download= t('global.close')

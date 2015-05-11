@@ -395,8 +395,89 @@ class MemberBalanceService < MAPIService
       detail[:start_date] = detail[:start_date].to_date
       detail[:end_date] = detail[:end_date].to_date
     end
-
     data
+  end
+
+  def securities_transactions(as_of_date)
+    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
+    begin
+      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'securities_transactions.json'))).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.securities_transactions encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data[:total_payment_or_principal] = 0
+    data[:total_interest] = 0
+    data[:total_net] = 0
+    data[:transactions].each do |security|
+      data[:total_payment_or_principal] += security[:payment_or_principal] if security[:payment_or_principal]
+      data[:total_interest] += security[:interest] if security[:interest]
+      data[:total_net] += security[:total] if security[:total]
+    end
+    data
+  end
+
+  def securities_services_statement(month)
+    # TODO: hit MAPI endpoint
+    begin
+      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'securities_services_statement.json'))).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.securities_services_statement encountered a JSON parsing error: #{e}")
+      return nil
+    end
+
+    recursive_to_f = Proc.new do |obj|
+      obj.each do |key, value|
+        if value.is_a?(Hash)
+          recursive_to_f.call(value)
+        elsif key == 'count'
+          obj[key] = value.to_i
+        elsif key != 'sta_account_number'
+          obj[key] = value.to_f
+        end
+      end
+    end
+
+    recursive_to_f.call(data)
+    data
+  end
+
+  def letters_of_credit
+    # TODO: hit MAPI endpoint
+    begin
+      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'letters_of_credit.json'))).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.letters_of_credit encountered a JSON parsing error: #{e}")
+      return nil
+    end
+
+    data[:as_of_date] = fake_as_of_date
+    data[:total_current_par] = 0
+    data[:rows].each_with_index do |row, i|
+      [:settlement_date, :maturity_date, :trade_date].each do |date_key|
+        data[:rows][i][date_key] = row[date_key].to_date
+      end
+      [:current_par, :maintenance_charge].each do |int_key|
+        data[:rows][i][int_key] = row[int_key].to_i
+        data[:total_current_par] += row[int_key].to_i if int_key == :current_par
+      end
+      [:lc_number, :description].each do |string_key|
+        data[:rows][i][string_key] = row[string_key].to_s
+      end
+    end
+    data
+  end
+
+  private
+  def fake_as_of_date
+    today = Time.zone.now.to_date
+    if today.wday == 0
+      today - 2.days
+    elsif today.wday == 1
+      today - 3.days
+    else
+      today - 1.day
+    end
   end
 
 end

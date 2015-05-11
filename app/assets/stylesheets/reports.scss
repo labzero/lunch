@@ -1,3 +1,9 @@
+@mixin table-cell-treatment {
+  width: auto;
+  box-sizing: border-box;
+  padding: 10px;
+}
+
 .reports {
   h1 {
     @extend %typography-page-title;
@@ -140,6 +146,7 @@
   small {
     width: 540px;
     display: block;
+    clear: both;
     a {
       color: $actionable-blue;
     }
@@ -178,6 +185,11 @@
     @extend %typography-report-summary;
     color: $actionable-blue;
     margin: 0;
+  }
+  &.report-summary-right {
+    text-align: right;
+    float: right;
+    margin-right: 0;
   }
 }
 
@@ -404,9 +416,7 @@
 
 .cash-projections-report-table {
   td, th {
-    width: auto;
-    box-sizing: border-box;
-    padding: 10px;
+    @include table-cell-treatment;
   }
   td{ 
     vertical-align: top}
@@ -457,9 +467,7 @@
 
 .advances-details-report-table {
   td, th {
-    width: auto;
-    box-sizing: border-box;
-    padding: 10px;
+    @include table-cell-treatment;
   }
   th {
     &:nth-child(5) {
@@ -581,6 +589,23 @@
   width: 350px;
 }
 
+.report-securities-services-statement {
+  .report-summary-data {
+    width: auto;
+  }
+  .report-table {
+    td:first-child {
+      width: 300px;
+    }
+    td:last-child {
+      width: 100px;
+    }
+  }
+  .report-summary-right {
+    width: 40%;
+  }
+}
+
 .report-table-vertical-headers {
   td {
     &:nth-child(1) {
@@ -592,6 +617,22 @@
 
 .interest-rate-resets-table {
   width: 600px;
+}
+
+.securities-transactions-table {
+  width: 940px;
+  th {
+    &:nth-child(4) {
+      min-width: 170px;
+    }
+  }
+  tfoot {
+    td {
+      &:nth-child(1) {
+        border-right: none;
+      }
+    }
+  }
 }
 
 .standard-1m_libor-table, .standard-3m_libor-table, .standard-6m_libor-table, .standard-daily_prime-table, .sbc-1m_libor-table, .sbc-3m_libor-table, .sbc-6m_libor-table, .current-price-vrc-table {
@@ -766,5 +807,35 @@ td.dataTables_empty {
   }
   .report-print-bank {
     @include typography-print-subheader;
+  }
+}
+.letters-of-credit-table {
+  td, th {
+    @include table-cell-treatment;
+  }
+  th {
+    &:nth-child(1) {
+      width: 85px;
+    }
+    &:nth-child(2) {
+      width: 105px;
+    }
+    &:nth-child(3) {
+      width: 140px;
+    }
+    &:nth-child(4) {
+      width: 86px;
+    }
+    &:nth-child(5) {
+      width: 115px;
+    }
+    &:nth-child(6) {
+      width: 100px;
+    }
+  }
+  tfoot {
+    td:first-child {
+      border-right: none;
+    }
   }
 }

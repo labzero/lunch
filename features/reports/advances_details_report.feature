@@ -64,14 +64,30 @@ Scenario: The Advances Detail Report has been disabled
   When the "Advances Detail" report has been disabled
   Then I should see an empty report table with Data Unavailable messaging
 
-@smoke @rack_test @jira-mem-415 @wip
+@jira-mem-415 @jira-mem-543
+Scenario: Member interacts with the 'report loading' flyout when downloading a PDF of the Advance Detail report
+  Given I am on the "Advances Detail" report page
+  When I request a PDF
+  Then I should see the report download flyout
+  When I cancel the report download from the flyout
+  Then I should not see the report download flyout
+
+@jira-mem-415 @jira-mem-543
+Scenario: Member interacts with the 'report loading' flyout when downloading an XLSX of the Advance Detail report
+  Given I am on the "Advances Detail" report page
+  When I request an XLSX
+  Then I should see the report download flyout
+  When I cancel the report download from the flyout
+  Then I should not see the report download flyout
+
+@smoke @jira-mem-415 @jira-mem-543
 Scenario: Member downloads a PDF of the Advances Detail report
   Given I am on the "Advances Detail" report page
   When I request a PDF
-  Then I should recieve a PDF file
+  Then I should begin downloading a file
 
-@smoke @rack_test @jira-mem-538 @wip
+@smoke @jira-mem-538 @jira-mem-543
 Scenario: Member downloads an XLSX of the Advances Detail report
-  Given I am on the Advances Detail page
+  Given I am on the "Advances Detail" report page
   When I request an XLSX
-  Then I should recieve an XLSX file
+  Then I should begin downloading a file
