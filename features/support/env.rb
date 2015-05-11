@@ -96,6 +96,7 @@ if !custom_host
 
   puts `#{ldap_server} --reseed`
   ENV['LDAP_PORT'] = ldap_port.to_s
+  ENV['LDAP_EXTRANET_PORT'] = ldap_port.to_s
 
   mapi_port = find_available_port
   puts "Starting MAPI: http://localhost:#{mapi_port}"

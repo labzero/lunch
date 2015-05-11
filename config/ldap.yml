@@ -58,7 +58,7 @@ production:
   -
     name: extranet
     host: <%= ENV['LDAP_EXTRANET_HOST'] || 'localhost' %>
-    port: <%= ENV['LDAP_EXTRANET_PORT'] || '3200' %>
+    port: <%= ENV['LDAP_EXTRANET_PORT'] || '389' %>
     attribute: sAMAccountName
     base: dc=extranet,dc=fhlbsf,dc=com
     admin_user: <%= ENV['LDAP_EXTRANET_ADMIN_USERNAME'] %>
@@ -68,7 +68,7 @@ production:
   -
     name: intranet
     host: <%= ENV['LDAP_HOST'] || 'localhost' %>
-    port: <%= ENV['LDAP_PORT'] || '3200' %>
+    port: <%= ENV['LDAP_PORT'] || '389' %>
     attribute: sAMAccountName
     base: dc=fhlbsf-i,dc=com
     admin_user: <%= ENV['LDAP_ADMIN_USERNAME'] %>
