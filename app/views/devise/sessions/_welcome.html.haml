@@ -8,8 +8,7 @@
       %h1= t('welcome.title')
   .row
     .column-4x8-left
-      %p= t('welcome.questions.p')
-      %p= fhlb_formatted_phone_number('4155557283')
+      %p= t('welcome.questions.p_html', url: online_security_path)
     .column-4x8-right
-      %p= t('welcome.intro')
+      %p= t('welcome.intro_html', url: 'mailto:websupport@fhlbsf.com', phone_number: fhlb_formatted_phone_number('4156162610'))
       = yield

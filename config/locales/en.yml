@@ -226,10 +226,10 @@ en:
   welcome:
     meta_title: FHLB - Welcome
     title: Welcome!
-    intro: Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sit amet placerat odio, a ornare nibh. Integer sagittis, ex eu dignissim commodo, dui dui maximus massa, sit amet rutrum dolor dui et tellus.
+    intro_html: 'Contact your institution’s Access Manager or <a href="%{url}">Web Support</a> at %{phone_number} if you have questions about access.'
     logo: FHLBank San Francisco
     questions:
-      p: Questions about access
+      p_html: 'Learn more about<br/><a href="%{url}">Online Security</a>'
     forgot_password: Forgot Password
     choose_member: Choose a member bank
     select_bank: Select bank
