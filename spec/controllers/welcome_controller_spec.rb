@@ -1,6 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe WelcomeController, :type => :controller do
+  before do
+    allow(subject).to receive(:current_user_roles)
+  end
+
   describe "GET details" do
     describe "without a REVISION file" do
       before { `rm ./REVISION 2>/dev/null` }

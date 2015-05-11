@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   before_action :authenticate_user!
+  before_action :current_user_roles
 
   rescue_from Exception do |exception|
     unless Rails.env.production?
@@ -23,13 +24,18 @@ class ApplicationController < ActionController::Base
   end
 
   # Returns a boolean indicating if the current session has successfully gone
-  # through the evelvated authentication flow with SecurID.
+  # through the elevated authentication flow with SecureID.
   def session_elevated?
     !!session['securid_authenticated']
   end
 
   def session_elevate!
     session['securid_authenticated'] = true
+  end
+
+  def current_user_roles
+    session['roles'] ||= current_user.roles(request)
+    current_user.roles = session[:roles]
   end
 
   private
@@ -52,4 +58,5 @@ class ApplicationController < ActionController::Base
       render text: e, status: 500
     end
   end
+
 end

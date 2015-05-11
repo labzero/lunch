@@ -4,6 +4,7 @@ RSpec.describe DashboardController, :type => :controller do
   login_user
   before do
     session['member_id'] = 750
+    allow(subject).to receive(:current_user_roles)
   end
 
   describe "GET index", :vcr do

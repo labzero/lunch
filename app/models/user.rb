@@ -1,5 +1,4 @@
 class User < ActiveRecord::Base
-  DOMAIN_ITERATOR_MAPPING = [:extranet, :intranet]
   INTERNAL_ROLES = {
     :'FCN-MemberSite-Users' => 'CN=FCN-MemberSite-Users,CN=Security Groups,OU=Client Services,DC=fhlbsf-i,DC=com',
     :'FCN-MemberSite-ExternalAccess' => 'CN=FCN-MemberSite-ExternalAccess,CN=Security Groups,OU=Client Services,DC=fhlbsf-i,DC=com',
@@ -20,9 +19,18 @@ class User < ActiveRecord::Base
     self.update_attributes!(ldap_domain: new_ldap_domain) if self.ldap_domain.nil?
   end
 
-  def roles
-    self.ldap_groups
+  def roles(request = nil)
+    @roles ||= (
+      roles = []
+      # Hits ldap_groups and gets an array of the CN's of all the groups the user belongs to.
+      ldap_roles = self.ldap_groups
+      roles << ldap_roles.collect{|object| object.cn} unless ldap_roles.nil?
+      # Hit the MAPI endpoint to check if user is a signer.
+      user_service = UserService.new(request)
+      user_service_roles = user_service.user_roles(username)
+      roles << user_service_roles unless user_service_roles.nil?
+      # roles << 'advance-signer'
+      roles.flatten )
   end
 
-  # ldap_entry defined on model.rb in devise_ldap_authenticatable
 end

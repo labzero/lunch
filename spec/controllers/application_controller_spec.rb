@@ -83,4 +83,23 @@ RSpec.describe ApplicationController, :type => :controller do
       expect(controller.current_member_name).to be_nil
     end
   end
+
+  describe '`current_user_roles` method' do
+    let(:user) { create(:user)}
+    let(:session_roles) { double('session roles') }
+    let(:user_roles) { double('user_roles') }
+    before do
+      allow(controller).to receive(:current_user).and_return(user)
+    end
+    it 'passes the request object to `current_user.roles` and sets `session[:roles]` to the result if that session attribute does not already exist' do
+      expect(user).to receive(:roles).with(an_instance_of(ActionController::TestRequest)).and_return(user_roles)
+      controller.send(:current_user_roles)
+      expect(session['roles']).to eq(user_roles)
+    end
+    it 'does not call `current_user.roles` if `session[:roles]` already exists' do
+      session['roles'] = session_roles
+      expect(user).not_to receive(:roles)
+      controller.send(:current_user_roles)
+    end
+  end
 end

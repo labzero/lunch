@@ -2,6 +2,9 @@ require 'rails_helper'
 
 RSpec.describe JobsController, :type => :controller do
   login_user
+  before do
+    allow(subject).to receive(:current_user_roles)
+  end
 
   describe 'user required actions' do
     it_behaves_like 'a user required action', :get, :status, job_status_id: 5
