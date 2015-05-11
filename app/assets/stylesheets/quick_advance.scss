@@ -252,6 +252,9 @@ $faded-opacity: 0.4 !default;
       left: 0;
       font-size: 30px;
       color: $alert-red;
+      .quick-advance-confirmation & {
+        color: $approval-green;
+      }
     }
   }
   fieldset {
