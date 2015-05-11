@@ -34,6 +34,7 @@ class ApplicationController < ActionController::Base
   end
 
   def current_user_roles
+    return [] unless current_user
     session['roles'] ||= current_user.roles(request)
     current_user.roles = session[:roles]
   end

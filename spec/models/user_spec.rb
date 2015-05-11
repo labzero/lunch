@@ -30,20 +30,24 @@ RSpec.describe User, :type => :model do
     let(:session_roles) { double('roles set from the session') }
     before do
       allow(user).to receive(:ldap_groups).and_return(ldap_roles)
-      allow(UserService).to receive(:new).and_return(user_service)
+      allow(UsersService).to receive(:new).and_return(user_service)
       allow(user_service).to receive(:user_roles).and_return(mapi_roles)
     end
-    it 'will create an instance of UserService with a request argument if one is provided' do
-      allow(UserService).to receive(:new).with(request).and_return(user_service)
+    it 'will create an instance of UsersService with a request argument if one is provided' do
+      expect(UsersService).to receive(:new).with(request).and_return(user_service)
       user.roles(request)
     end
+    it 'will not create an instance of UsersService if no request argument is provided' do
+      expect(UsersService).to_not receive(:new)
+      user.roles
+    end
     it 'returns an array containing the CN of LDAP roles and roles from the MAPI endpoint' do
-      expect(user.roles).to include(ldap_role_cn)
-      expect(user.roles).to include(signer_role)
+      expect(user.roles(request)).to include(ldap_role_cn)
+      expect(user.roles(request)).to include(signer_role)
     end
     it 'returns its `roles` attribute if it exists without hitting LDAP or MAPI' do
       expect(user).to_not receive(:ldap_groups)
-      expect(UserService).to_not receive(:new)
+      expect(UsersService).to_not receive(:new)
       user.roles = session_roles
       expect(user.roles).to eq(session_roles)
     end

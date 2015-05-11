@@ -22,6 +22,24 @@ Given(/^I am logged in$/) do
   page.assert_selector('.main-nav .nav-logout')
 end
 
+Given(/^I am logged in as a quick-advance signer$/) do
+  step %{I am logged in as "#{CustomConfig.env_config['signer_advances_user']['username']}" with password "#{CustomConfig.env_config['signer_advances_user']['password']}"}
+
+  needs_member = page.has_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 5) rescue Capybara::ElementNotFound
+  step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} if needs_member
+
+  page.assert_selector('.main-nav .nav-logout')
+end
+
+Given(/^I am logged in as a quick-advance non-signer$/) do
+  step %{I am logged in as "#{CustomConfig.env_config['non_signer_advances_user']['username']}" with password "#{CustomConfig.env_config['non_signer_advances_user']['password']}"}
+
+  needs_member = page.has_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 5) rescue Capybara::ElementNotFound
+  step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} if needs_member
+
+  page.assert_selector('.main-nav .nav-logout')
+end
+
 When(/^I log in$/) do
   step %{I log in as "#{primary_user['username']}" with password "#{primary_user['password']}"}
 

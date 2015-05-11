@@ -52,8 +52,7 @@ development: &development
     <<: *AUTHORIZATIONS
 
 test:
-  <<: *development
-  <<: *AUTHORIZATIONS
+  *development
 
 production:
   -

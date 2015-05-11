@@ -1,18 +1,18 @@
 GIT
+  remote: https://github.com/labzero/devise_ldap_authenticatable.git
+  revision: 55fde8dc55c58b03fc3b8d951b60bb06c8f86c05
+  branch: v0.9.0
+  specs:
+    devise_ldap_authenticatable (0.9.0)
+      devise (>= 3.4.1)
+      net-ldap (>= 0.3.1, < 0.6.0)
+
+GIT
   remote: https://github.com/labzero/securid.git
   revision: d9deceecee80f5f63074d50c0c54b057314fc809
   branch: 0.2.3
   specs:
     securid (0.2.3)
-
-GIT
-  remote: https://github.com/labzero/devise_ldap_authenticatable.git
-  revision: 3288fb6796624f77c34d90d3a6e46f3b49178d5f
-  branch: feature/support-for-multiple-connections.MEM-494
-  specs:
-    devise_ldap_authenticatable (0.8.7)
-      devise (>= 3.4.1)
-      net-ldap (>= 0.3.1, < 0.6.0)
 
 GIT
   remote: https://github.com/rsim/oracle-enhanced.git

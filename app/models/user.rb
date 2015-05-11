@@ -25,11 +25,12 @@ class User < ActiveRecord::Base
       # Hits ldap_groups and gets an array of the CN's of all the groups the user belongs to.
       ldap_roles = self.ldap_groups
       roles << ldap_roles.collect{|object| object.cn} unless ldap_roles.nil?
-      # Hit the MAPI endpoint to check if user is a signer.
-      user_service = UserService.new(request)
-      user_service_roles = user_service.user_roles(username)
-      roles << user_service_roles unless user_service_roles.nil?
-      # roles << 'advance-signer'
+      # Hit the MAPI endpoint to check if user is a signer. Need request object to connect to MAPI
+      if request
+        user_service = UsersService.new(request)
+        user_service_roles = user_service.user_roles(username)
+        roles << user_service_roles unless user_service_roles.nil?
+      end
       roles.flatten )
   end
 

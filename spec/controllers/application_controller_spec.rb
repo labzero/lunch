@@ -91,6 +91,10 @@ RSpec.describe ApplicationController, :type => :controller do
     before do
       allow(controller).to receive(:current_user).and_return(user)
     end
+    it 'returns an empty array if there is no current_user' do
+      allow(controller).to receive(:current_user).and_return(nil)
+      expect(controller.send(:current_user_roles)).to eq([])
+    end
     it 'passes the request object to `current_user.roles` and sets `session[:roles]` to the result if that session attribute does not already exist' do
       expect(user).to receive(:roles).with(an_instance_of(ActionController::TestRequest)).and_return(user_roles)
       controller.send(:current_user_roles)
