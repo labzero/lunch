@@ -49,31 +49,33 @@ module MAPI
               SELECT * FROM SIGNER.SIGNERS WHERE SIGNERID = #{ActiveRecord::Base.connection.quote(signer_id)}
             SQL
             ActiveRecord::Base.connection.execute(roles_query).fetch_hash do |row|
-              if row['ADVSIGNER'] == 0 || row['ALLRNA'] == 0 || row['ALLPRODUCT'] == 0
+
+              # The bank uses -1 for true, 0 for false
+              if row['ADVSIGNER'] == -1 || row['ALLRNA'] == -1 || row['ALLPRODUCT'] == -1
                 roles << 'signer-advances'
               end
-              if row['COLLATSIGNER'] == 0 || row['ALLRNA'] == 0 || row['ALLPRODUCT'] == 0
+              if row['COLLATSIGNER'] == -1 || row['ALLRNA'] == -1 || row['ALLPRODUCT'] == -1
                 roles << 'signer-collateral'
               end
-              if row['MNYMKTSIGNER'] == 0 || row['ALLRNA'] == 0 || row['ALLPRODUCT'] == 0
+              if row['MNYMKTSIGNER'] == -1 || row['ALLRNA'] == -1 || row['ALLPRODUCT'] == -1
                 roles << 'signer-moneymarket'
               end
-              if row['SWAPSIGNER'] == 0 || row['ALLRNA'] == 0 || row['ALLPRODUCT'] == 0
+              if row['SWAPSIGNER'] == -1 || row['ALLRNA'] == -1 || row['ALLPRODUCT'] == -1
                 roles << 'signer-creditswap'
               end
-              if row['SECURITYSIGNER'] == 0 || row['ALLRNA'] == 0 || row['ALLPRODUCT'] == 0
+              if row['SECURITYSIGNER'] == -1 || row['ALLRNA'] == -1 || row['ALLPRODUCT'] == -1
                 roles << 'signer-securities'
               end
-              if row['WIRESIGNER'] == 0 || row['ALLRNA'] == 0 || row['ALLPRODUCT'] == 0
+              if row['WIRESIGNER'] == -1 || row['ALLRNA'] == -1 || row['ALLPRODUCT'] == -1
                 roles << 'signer-wiretransfers'
               end
-              if row['REPOSIGNER'] == 0 || row['ALLRNA'] == 0 || row['ALLPRODUCT'] == 0
+              if row['REPOSIGNER'] == -1 || row['ALLRNA'] == -1 || row['ALLPRODUCT'] == -1
                 roles << 'signer-repurchaseagreement'
               end
-              if row['AFFORDABITYSIGNER'] == 0 || row['ALLRNA'] == 0 || row['ALLPRODUCT'] == 0
+              if row['AFFORDABITYSIGNER'] == -1 || row['ALLRNA'] == -1 || row['ALLPRODUCT'] == -1
                 roles << 'signer-affordability'
               end
-              if row['ALLRNA'] == 0
+              if row['ALLRNA'] == -1
                 roles << 'access-manager'
               end
             end

@@ -55,7 +55,7 @@ describe MAPI::ServiceApp do
         expect(last_response.status).to eq(200)
       end
       it 'returns an JSON encoded array of roles on success' do
-        allow(roles_cursor).to receive(:fetch_hash).and_yield({'ADVSIGNER' => 0})
+        allow(roles_cursor).to receive(:fetch_hash).and_yield({'ADVSIGNER' => -1})
         expect(json).to eq(['signer-advances'])
       end
       role_mapping = {
@@ -69,28 +69,28 @@ describe MAPI::ServiceApp do
         'AFFORDABITYSIGNER' => ['signer-affordability']
       }
       role_mapping.each do |column, roles|
-        it "returns the correct roles (#{roles.join(', ')}) when the signer has the column `#{column}` set to 0" do
-          column_hash = Hash[role_mapping.keys.collect {|key| [key, -1]}]
-          column_hash[column] = 0
+        it "returns the correct roles (#{roles.join(', ')}) when the signer has the column `#{column}` set to -1" do
+          column_hash = Hash[role_mapping.keys.collect {|key| [key, 0]}]
+          column_hash[column] = -1
           allow(roles_cursor).to receive(:fetch_hash).and_yield(column_hash)
           expect(json).to eq(roles)
         end
-        it 'does not include the roles (#{roles.join(', '), access-manager}) when the signer has the column `#{column}` set to -1' do
-          column_hash = Hash[role_mapping.keys.collect {|key| [key, 0]}]
-          column_hash[column] = -1
+        it 'does not include the roles (#{roles.join(', '), access-manager}) when the signer has the column `#{column}` set to 0' do
+          column_hash = Hash[role_mapping.keys.collect {|key| [key, -1]}]
+          column_hash[column] = 0
           allow(roles_cursor).to receive(:fetch_hash).and_yield(column_hash)
           expect(json).not_to include(*(roles + ['access-manager']))
         end
       end
-      it 'returns all the roles except `access-manager` when the signer has the columnd `ALLPRODUCT` set to 0' do
-        column_hash = Hash[role_mapping.keys.collect {|key| [key, -1]}]
-        column_hash['ALLPRODUCT'] = 0
+      it 'returns all the roles except `access-manager` when the signer has the columnd `ALLPRODUCT` set to -1' do
+        column_hash = Hash[role_mapping.keys.collect {|key| [key, 0]}]
+        column_hash['ALLPRODUCT'] = -1
         allow(roles_cursor).to receive(:fetch_hash).and_yield(column_hash)
         expect(json).to eq(role_mapping.values.flatten)
       end
       it 'returns all the roles when the signer has the columnd `ALLRNA` set to 0' do
-        column_hash = Hash[role_mapping.keys.collect {|key| [key, -1]}]
-        column_hash['ALLRNA'] = 0
+        column_hash = Hash[role_mapping.keys.collect {|key| [key, 0]}]
+        column_hash['ALLRNA'] = -1
         allow(roles_cursor).to receive(:fetch_hash).and_yield(column_hash)
         expect(json).to eq(role_mapping.values.flatten << 'access-manager')
       end
