@@ -253,19 +253,21 @@ When(/^I select "(.*?)" from the (credit|collateral) type selector$/) do |credit
 end
 
 When(/^I request a PDF$/) do
-  page.find(".report-header-buttons .dropdown-selection").click
-  page.find('.report-header-buttons .dropdown li', text: I18n.t('global.pdf'), visible: true).click
-  click_button(I18n.t('dashboard.actions.download'))
+  export_report I18n.t('global.pdf')
 end
 
 Then(/^I should begin downloading a file$/) do
-  page.execute_script("$('body').on('reportDownloadStarted', function(){$('body').addClass('report-download-started')})")
   page.assert_selector('body.report-download-started', wait: 180)
 end
 
 When(/^I request an XLSX$/) do
+  export_report I18n.t('global.excel')
+end
+
+def export_report(format)
+  page.execute_script("$('body').on('reportDownloadStarted', function(){$('body').addClass('report-download-started')})")
   page.find(".report-header-buttons .dropdown-selection").click
-  page.find('.report-header-buttons .dropdown li', text: I18n.t('global.excel'), visible: true).click
+  page.find('.report-header-buttons .dropdown li', text: format, visible: true).click
   click_button(I18n.t('dashboard.actions.download'))
 end
 
