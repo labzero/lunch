@@ -70,7 +70,11 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     float: right;
   }
 
-  a:not(.logout-link) {
+  a {
+    color: $actionable-blue;
+  }
+
+  form a:not(.logout-link) {
     @extend %typography-table-link;
     color: $actionable-blue;
     display: block;
