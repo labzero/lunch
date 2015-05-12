@@ -8,10 +8,12 @@ RSpec.describe UsersService do
     let(:user_roles) {subject.user_roles(user.username)}
     it 'should return nil if there was an API error' do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(Rails.logger).to receive(:warn)
       expect(user_roles).to eq(nil)
     end
     it 'should return nil if there was a connection error' do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(Rails.logger).to receive(:warn)
       expect(user_roles).to eq(nil)
     end
     it 'should return an array of user roles from the MAPI endpoint' do
