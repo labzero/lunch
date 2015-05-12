@@ -129,6 +129,7 @@
 
 .dashboard-module-content-light {
   @extend %typography-table-annotation;
+  clear: both;
 }
 
 .dashboard-module-contact {
