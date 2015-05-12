@@ -38,7 +38,7 @@ module MAPI
           signer_id = nil
           if settings.environment == :production
             signer_id_query = <<-SQL
-              SELECT SIGNER_ID FROM WEB_ADM.ETRANSACT_SIGNER WHERE LOGIN_ID = '#{ActiveRecord::Base.connection.quote(username)}'
+              SELECT SIGNER_ID FROM WEB_ADM.ETRANSACT_SIGNER WHERE LOGIN_ID = #{ActiveRecord::Base.connection.quote(username)}
             SQL
             ActiveRecord::Base.connection.execute(signer_id_query).fetch do |row|
               signer_id = row[0].to_i
@@ -46,7 +46,7 @@ module MAPI
             halt 404, 'User not found' unless signer_id
 
             roles_query = <<-SQL
-              SELECT * FROM SIGNER.SIGNERS WHERE SIGNERID = '#{ActiveRecord::Base.connection.quote(signer_id)}'
+              SELECT * FROM SIGNER.SIGNERS WHERE SIGNERID = #{ActiveRecord::Base.connection.quote(signer_id)}
             SQL
             ActiveRecord::Base.connection.execute(roles_query).fetch_hash do |row|
               if row['ADVSIGNER'] == 0 || row['ALLRNA'] == 0 || row['ALLPRODUCT'] == 0
