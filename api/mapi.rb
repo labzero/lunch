@@ -12,6 +12,7 @@ require_relative 'services/rates'
 require_relative 'services/member'
 require_relative 'services/etransact_advances'
 require_relative 'services/users'
+require_relative 'services/health'
 
 require_relative 'models/member'
 require_relative 'models/member_balance_pledged_collateral'
@@ -124,6 +125,7 @@ module MAPI
     register MAPI::Services::Member
     register MAPI::Services::EtransactAdvances
     register MAPI::Services::Users
+    register MAPI::Services::Health
   end
 
   class DocApp < Sinatra::Base
@@ -163,6 +165,10 @@ module MAPI
       api do
         key :path, '/users'
         key :description, 'Operations about users'
+      end
+      api do
+        key :path, '/healthy'
+        key :description, 'Health status'
       end
     end
 
