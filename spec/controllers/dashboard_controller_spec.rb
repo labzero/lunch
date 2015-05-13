@@ -7,10 +7,18 @@ RSpec.describe DashboardController, :type => :controller do
   end
 
   describe "GET index", :vcr do
+    before do
+      allow(subject).to receive(:current_user_roles)
+    end
+    
     it_behaves_like 'a user required action', :get, :index
     it "should render the index view" do
       get :index
       expect(response.body).to render_template("index")
+    end
+    it 'should call `current_member_roles`' do
+      expect(subject).to receive(:current_user_roles)
+      get :index
     end
     it 'should assign @account_overview' do
       get :index

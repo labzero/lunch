@@ -17,6 +17,25 @@ sAMAccountName: local
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 
+# local user without signer permission
+dn: sAMAccountName=local-non-signer,dc=fhlbsf-i,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Local User Non Signer
+sn: Local
+sAMAccountName: local-non-signer
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+
+# FCN-MemberSite-AccessManagers-R group
+dn: CN=FCN-MemberSite-AccessManagers-R,DC=fhlbsf-i,DC=com
+cn: FCN-MemberSite-AccessManagers-R
+objectClass: group
+objectClass: top
+sAMAccountName: FCN-MemberSite-AccessManagers-R
+member: sAMAccountName=local,dc=fhlbsf-i,dc=com
+
 #dn: ou=people,dc=fhlbsf-i,dc=com
 #objectClass: organizationalUnit
 #ou: people

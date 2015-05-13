@@ -1,0 +1,5 @@
+dn: sAMAccountName=extra,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
+
+dn: dc=extranet,dc=fhlbsf,dc=com
+changetype: delete

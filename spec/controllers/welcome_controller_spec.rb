@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe WelcomeController, :type => :controller do
+
   describe "GET details" do
     describe "without a REVISION file" do
       before { `rm ./REVISION 2>/dev/null` }

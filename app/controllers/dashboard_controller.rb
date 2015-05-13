@@ -8,6 +8,7 @@ class DashboardController < ApplicationController
     rate_service = RatesService.new(request)
     etransact_service = EtransactAdvancesService.new(request)
     member_balances = MemberBalanceService.new(current_member_id, request)
+    current_user_roles
 
     profile = member_balances.profile
 

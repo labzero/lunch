@@ -105,3 +105,11 @@ directory       <%= @root_dir %>
 rootdn          "cn=admin,dc=fhlbsf-i,dc=com"
 ## rootpw = secret
 rootpw          {SSHA}fFjKcZb4cfOAcwSjJer8nCGOEVRUnwCC
+
+database	ldif
+
+suffix          "dc=extranet,dc=fhlbsf,dc=com"
+directory       <%= @root_dir %>
+rootdn          "cn=admin,dc=extranet,dc=fhlbsf,dc=com"
+## rootpw = secret
+rootpw          {SSHA}fFjKcZb4cfOAcwSjJer8nCGOEVRUnwCC

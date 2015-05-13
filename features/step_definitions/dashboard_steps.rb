@@ -20,6 +20,10 @@ Then(/^I should see a dollar amount field$/) do
   mod.assert_selector('input')
 end
 
+Then(/^I should not see the quick-advance module$/) do
+  page.assert_no_selector('.dashboard-module-advances')
+end
+
 Then(/^I should see an advance rate\.$/) do
   mod = page.find('.dashboard-module', :text => I18n.t('dashboard.quick_advance.title'))
   mod.assert_selector('.dashboard-advances-rate', :text => /\d+\.\d+\%/)
