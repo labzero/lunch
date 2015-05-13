@@ -1,21 +1,123 @@
 require 'rails_helper'
 
 RSpec.describe WelcomeController, :type => :controller do
-
+  let(:revision) { SecureRandom.hex }
+  
   describe "GET details" do
-    describe "without a REVISION file" do
-      before { `rm ./REVISION 2>/dev/null` }
-      it "should return an error" do
-        get :details
-        expect(response.body).to match('No REVISION found!')
+    let(:make_request) { get :details }
+    it_behaves_like 'a user not required action', :get, :details
+    it 'calls `get_revision`' do
+      expect(subject).to receive(:get_revision)
+      make_request
+    end
+    it 'renders the revision as text' do
+      allow(subject).to receive(:get_revision).and_return(revision)
+      make_request
+      expect(response.body).to eq(revision)
+    end
+    it 'renders an error if no revision is found' do
+      allow(subject).to receive(:get_revision).and_return(false)
+      make_request
+      expect(response.body).to eq('No REVISION found!')
+    end
+  end
+
+  describe 'GET healthy' do
+    let(:make_request) { get :healthy; JSON.parse(response.body) }
+    it_behaves_like 'a user not required action', :get, :healthy
+    it 'returns a JSON hash' do
+      expect(make_request).to be_kind_of(Hash)
+    end
+    it 'returns the revision found via `get_revision`' do
+      allow(subject).to receive(:get_revision).and_return(revision)
+      expect(make_request['revision']).to eq(revision)
+    end
+    describe 'Redis status' do
+      let(:service_key) {'tomorrowmorrowland'}
+      it 'returns `true` if Redis responds to a PING' do
+        allow(Resque.redis).to receive(:ping).and_return('PONG')
+        expect(make_request[service_key]).to eq(true)
+      end
+      it 'returns `false` if Redis fails to respond to a PING' do
+        allow(Resque.redis).to receive(:ping).and_return(false)
+        expect(make_request[service_key]).to eq(false)
+      end
+      it 'returns `false` if the Redis ping raises an error' do
+        allow(Resque.redis).to receive(:ping).and_raise('some error')
+        expect(make_request[service_key]).to eq(false)
       end
     end
-    describe "with a REVISION file" do
-      before { `echo 'TEST123' > ./REVISION` }
+
+    describe 'DB status' do
+      let(:service_key) {'beforetimes'}
+      it 'returns `true` if the DB connection is active' do
+        allow(ActiveRecord::Base.connection).to receive(:active?).and_return(true)
+        expect(make_request[service_key]).to eq(true)
+      end
+      it 'returns `false` if the DB connection is not active' do
+        allow(ActiveRecord::Base.connection).to receive(:active?).and_return(false)
+        expect(make_request[service_key]).to eq(false)
+      end
+      it 'returns `false` if the DB connection active check raises an error' do
+        allow(ActiveRecord::Base.connection).to receive(:active?).and_raise('some error')
+        expect(make_request[service_key]).to eq(false)
+      end
+    end
+
+    describe 'MAPI status' do
+      let(:service_key) {'bartertown'}
+      it 'returns the MAPI status' do
+        status = SecureRandom.hex
+        allow_any_instance_of(MAPIService).to receive(:ping).and_return(status)
+        expect(make_request[service_key]).to eq(status)
+      end
+      it 'returns `false` if the MAPI ping raises an error' do
+        allow_any_instance_of(MAPIService).to receive(:ping).and_raise('some error')
+        expect(make_request[service_key]).to eq(false)
+      end
+    end
+
+    describe 'Resque status' do
+      let(:service_key) {'masterblaster'}
+      let(:workers) {[]}
+      before do
+        allow(Resque).to receive(:workers).and_return(workers)
+      end
+      it 'returns `true` if there are workers in the Resque pool' do
+        allow(Resque.workers).to receive(:count).and_return(1)
+        expect(make_request[service_key]).to eq(true)
+      end
+      it 'returns `false` if there are no workers in the Resque pool' do
+        allow(Resque.workers).to receive(:count).and_return(0)
+        expect(make_request[service_key]).to eq(false)
+      end
+      it 'returns `false` if the Resque pool worker check raises an error' do
+        allow(Resque.workers).to receive(:count).and_raise('some error')
+        expect(make_request[service_key]).to eq(false)
+      end
+      it 'calls `prune_dead_workers` on each worker before checking the count' do
+        a_worker = double('Worker')
+        expect(a_worker).to receive(:prune_dead_workers).ordered
+        allow(workers).to receive(:each).and_yield(a_worker)
+        expect(Resque.workers).to receive(:count).ordered
+        make_request
+      end
+    end
+  end
+
+  describe '`get_revision` method' do
+    let(:call_method) { subject.send(:get_revision) }
+    describe 'without a REVISION file' do
+      before { `rm ./REVISION 2>/dev/null` }
+      it 'should return false' do
+        expect(call_method).to eq(false)
+      end
+    end
+    describe 'with a REVISION file' do
+      before { `echo '#{revision}' > ./REVISION` }
       after { `rm ./REVISION 2>/dev/null` }
-      it "should return the contents" do
-        get :details
-        expect(response.body).to match('TEST123')
+      it 'should return the contents' do
+        expect(call_method).to eq(revision)
       end
     end
   end

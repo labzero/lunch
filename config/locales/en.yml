@@ -323,7 +323,7 @@ en:
           denied: PIN and/or token is invalid.
           invalid_pin: PIN invalid.
           invalid_token: Token invalid.
-          unknown: An unexpected error has occured. Please try again.
+          unknown: An unexpected error has occurred. Please try again.
     reports:
       title: Reports
       as_of_yesterday: As of yesterday

@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   # You can have the root of your site routed with "root"
 
   get '/details' => 'welcome#details'
+  get '/healthy' => 'welcome#healthy'
   get '/terms-of-use' => 'error#standard_error', as: :terms_of_use
   get '/disclaimer-reuters' => 'error#standard_error', as: :disclaimer_reuters
   get '/online-security' => 'error#standard_error', as: :online_security
