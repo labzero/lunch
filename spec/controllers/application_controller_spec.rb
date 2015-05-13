@@ -85,9 +85,9 @@ RSpec.describe ApplicationController, :type => :controller do
   end
 
   describe '`current_user_roles` method' do
-    let(:user) { create(:user)}
-    let(:session_roles) { double('session roles') }
-    let(:user_roles) { double('user_roles') }
+    let(:user) { double('user', :roles => nil, :roles= => nil)}
+    let(:session_roles) { [double('session roles')] }
+    let(:user_roles) { [double('user_roles')] }
     before do
       allow(controller).to receive(:current_user).and_return(user)
     end
@@ -95,10 +95,19 @@ RSpec.describe ApplicationController, :type => :controller do
       allow(controller).to receive(:current_user).and_return(nil)
       expect(controller.send(:current_user_roles)).to eq([])
     end
-    it 'passes the request object to `current_user.roles` and sets `session[:roles]` to the result if that session attribute does not already exist' do
+    it 'passes the request object to `current_user.roles` ' do
       expect(user).to receive(:roles).with(an_instance_of(ActionController::TestRequest)).and_return(user_roles)
       controller.send(:current_user_roles)
+    end
+    it 'sets `session[:roles]` to the result of current_user.roles if that session attribute does not already exist' do
+      allow(user).to receive(:roles).and_return(user_roles)
+      controller.send(:current_user_roles)
       expect(session['roles']).to eq(user_roles)
+    end
+    it 'sets `current_user.roles` to the array of `session[\'roles\']`' do
+      allow(controller.session).to receive(:[]).with('roles').and_return(session_roles)
+      expect(user).to receive(:roles=).with(session_roles)
+      controller.send(:current_user_roles)
     end
     it 'does not call `current_user.roles` if `session[:roles]` already exists' do
       session['roles'] = session_roles

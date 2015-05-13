@@ -8,12 +8,10 @@ Background:
 
   @smoke
   Scenario: Visit dashboard
-    Given I am logged in
     When I visit the dashboard
     Then I should see dashboard modules
 
   Scenario: See dashboard contacts
-    Given I am logged in
     When I visit the dashboard
     Then I should see 3 contacts
 

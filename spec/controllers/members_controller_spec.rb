@@ -2,9 +2,6 @@ require 'rails_helper'
 
 RSpec.describe MembersController, type: :controller do
   login_user
-  before do
-    allow(subject).to receive(:current_user_roles)
-  end
 
   describe 'GET select_member' do
     let(:make_request) { get :select_member }

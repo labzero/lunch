@@ -4,11 +4,11 @@ Feature: Making a Quick Advance
   In order to execute a quick advance
 
 Background:
-  Given I am logged in as a quick-advance signer
+  Given I am logged in as a "quick-advance signer"
 
 @jira-mem-494
 Scenario: Do not see dashboard quick advance module if I am not an advance-signer
-  Given I am logged in as a quick-advance non-signer
+  Given I am logged in as a "quick-advance non-signer"
   When I visit the dashboard
   Then I should not see the quick-advance module
 

@@ -4,11 +4,11 @@ RSpec.describe AdvancePolicy, :type => :policy do
   subject { AdvancePolicy.new(user, :advance) }
 
   describe '`show?` method' do
-    let(:user) { create(:user) }
+    let(:user) { double('user') }
 
     context 'for a signer' do
       before do
-        allow(user).to receive(:roles).and_return(['signer-advances'])
+        allow(user).to receive(:roles).and_return([User::Roles::ADVANCE_SIGNER])
       end
       it { should permit_action(:show) }
     end

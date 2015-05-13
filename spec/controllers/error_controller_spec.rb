@@ -1,9 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe ErrorController, :type => :controller do
-  before do
-    allow(subject).to receive(:current_user_roles)
-  end
   describe 'GET standard_error' do
     it 'should raise an error' do
       expect{get :standard_error}.to raise_error(StandardError)

@@ -5,7 +5,6 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   before_action :authenticate_user!
-  before_action :current_user_roles
 
   rescue_from Exception do |exception|
     unless Rails.env.production?
@@ -36,7 +35,7 @@ class ApplicationController < ActionController::Base
   def current_user_roles
     return [] unless current_user
     session['roles'] ||= current_user.roles(request)
-    current_user.roles = session[:roles]
+    current_user.roles = session['roles']
   end
 
   private

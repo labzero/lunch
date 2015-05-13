@@ -4,9 +4,6 @@ include ActionView::Helpers::NumberHelper
 
 RSpec.describe ReportsController, :type => :controller do
   login_user
-  before do
-    allow(subject).to receive(:current_user_roles)
-  end
 
   let(:today) {Date.new(2015,1,20)}
   let(:start_date) {Date.new(2014,12,01)}

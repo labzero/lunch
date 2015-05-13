@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe ApplicationPolicy, :type => :policy do
 
   describe 'initialize method' do
-    let(:user) { create(:user) }
+    let(:user) { double('user') }
     let(:record) { double('some record') }
     let (:request) { ApplicationPolicy.new(user, record) }
 

@@ -2,9 +2,6 @@ require 'rails_helper'
 
 RSpec.describe CorporateCommunicationsController, :type => :controller do
   login_user
-  before do
-    allow(subject).to receive(:current_user_roles)
-  end
 
   describe 'before_filter methods' do
     let(:message_service_instance) { double('MessageServiceInstance') }

@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: http://localhost:3100/mapi/users/local/roles
+    uri: http://localhost:3100/mapi/users/foo/roles
     body:
       encoding: US-ASCII
       string: ''
@@ -19,13 +19,13 @@ http_interactions:
       - Ruby
   response:
     status:
-      code: 200
-      message: 'OK '
+      code: 404
+      message: 'Not Found '
     headers:
       Content-Type:
       - text/html;charset=utf-8
       Content-Length:
-      - '19'
+      - '14'
       X-Xss-Protection:
       - 1; mode=block
       X-Content-Type-Options:
@@ -35,12 +35,12 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
       Date:
-      - Tue, 12 May 2015 23:03:07 GMT
+      - Wed, 13 May 2015 00:28:04 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
-      string: '["signer-advances"]'
+      string: User not found
     http_version: 
-  recorded_at: Tue, 12 May 2015 23:03:07 GMT
+  recorded_at: Wed, 13 May 2015 00:28:04 GMT
 recorded_with: VCR 2.9.3
