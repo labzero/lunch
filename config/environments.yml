@@ -10,6 +10,9 @@ default: &default
   non_signer_advances_user:
     username: <%= ENV['CUCUMBER_NON_SIGNER_ADVANCES_USERNAME'] || 'local-non-signer' %>
     password: <%= ENV['CUCUMBER_NON_SIGNER_ADVANCES_PASSWORD'] || 'development' %>
+  extranet_user:
+    username: <%= ENV['CUCUMBER_EXTRANET_USERNAME'] || 'extra' %>
+    password: <%= ENV['CUCUMBER_EXTRANET_PASSWORD'] || 'development' %>
   primary_bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Meridian Bank, National Association' %>
 
 local:

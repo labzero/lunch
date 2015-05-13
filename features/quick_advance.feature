@@ -60,7 +60,6 @@ Scenario: Preview rate from Quick Advance flyout table
   Then I should not see the quick advance table
   And I should see a preview of the quick advance
 
-@smoke
 Scenario: Go back to rate table from preview in Quick Advance flyout
   Given I visit the dashboard
   And I open the quick advance flyout
