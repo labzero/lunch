@@ -3,3 +3,6 @@ changetype: delete
 
 dn: dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
+
+dn: ou=eBiz,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
