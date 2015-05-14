@@ -95,15 +95,15 @@ $button-vertical-padding: 7px;
 
 .split-button-left {
   @extend .primary-button;
-  border-bottom-left-radius: $default-border-radius;
-  border-top-left-radius: $default-border-radius;
-  border-bottom-right-radius: 0;
-  border-top-right-radius: 0;
+  border-radius: 0;
+  border: none;
   vertical-align: top;
 }
 
 .split-button {
   font-size: 0; // get rid of whitespace between buttons
+  border-radius: $default-border-radius;
+  border: 1px solid $actionable-blue;
 }
 
 $split-button-height:   27px;
@@ -120,8 +120,8 @@ $split-button-height:   27px;
     .dropdown-selection {
       width: auto;
       height: auto;
-      border-bottom-left-radius: 0;
-      border-top-left-radius: 0;
+      border-radius: 0;
+      border: none;
       color: $actionable-blue;
       height: $split-button-height;
       padding-top: 0;
@@ -130,16 +130,13 @@ $split-button-height:   27px;
     ul {
       top: $split-button-height;
       overflow: hidden;
+      margin: 0 -1px 0;
+      box-sizing: content-box;
     }
   }
   &:not(.dropdown) {
     @extend .down-button;
-    border-bottom-right-radius: $default-border-radius;
-    border-top-right-radius: $default-border-radius;
-    border-bottom-left-radius: 0;
-    border-top-left-radius: 0;
     vertical-align: bottom;
-    border: 1px solid $actionable-blue;
     padding-bottom: $button-vertical-padding - 1px;
     padding-top: $button-vertical-padding - 1px;
   }
