@@ -4,9 +4,16 @@ Feature: Logging in to the Member Site
   I want to be able to securely authenticate with the Member Portal
   In order to access my bank's information.
 
+@smoke @jira-mem-494
 Scenario: User logs in
   Given I visit the root path
   When I log in
+  Then I should see dashboard modules
+
+@smoke @jira-mem-494
+Scenario: Extranet User logs in
+  Given I visit the root path
+  When I log in as an "extranet user"
   Then I should see dashboard modules
 
 Scenario: User logs out
