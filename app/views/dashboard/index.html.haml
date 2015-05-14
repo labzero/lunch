@@ -178,7 +178,7 @@
               %label= t('dashboard.reports.annually')
       =link_to(t('dashboard.reports.view_reports'), reports_path)
       %button.report-button-left #{t('global.view')}
-      %span.split-button
+      .split-button
         %button.split-button-left #{t('dashboard.actions.download')}
         %button.split-button-right #{t('global.pdf')}
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do

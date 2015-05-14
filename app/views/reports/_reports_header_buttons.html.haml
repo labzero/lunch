@@ -1,7 +1,7 @@
 - allowed_params ||= [:start_date, :end_date]
 - download_params ||= params.slice(*[*allowed_params])
 .report-header-buttons
-  %span.split-button
+  .split-button
     = form_tag url_for, method: :get, remote: true do |f|
       - download_params.each do |key, value|
         = hidden_field_tag key, value
