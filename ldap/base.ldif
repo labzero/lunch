@@ -36,6 +36,12 @@ objectClass: top
 sAMAccountName: FCN-MemberSite-AccessManagers-R
 member: sAMAccountName=local,dc=fhlbsf-i,dc=com
 
+# FHLB-Accounts
+dn: ou=FHLB-Accounts,dc=fhlbsf-i,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: FHLB-Accounts
+
 #dn: ou=people,dc=fhlbsf-i,dc=com
 #objectClass: organizationalUnit
 #ou: people

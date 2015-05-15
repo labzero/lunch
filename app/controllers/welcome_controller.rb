@@ -44,12 +44,28 @@ class WelcomeController < ApplicationController
       resque_status = false
     end
 
+    begin
+      ldap_intranet_status = Devise::LDAP::Connection.admin('intranet').search(filter: 'ou=FHLB-Accounts').present?
+    rescue Exception => e
+      Rails.logger.error("LDAP Intranet check failed: #{e.message}")
+      ldap_intranet_status = false
+    end
+
+    begin
+      ldap_extranet_status = Devise::LDAP::Connection.admin('extranet').search(filter: 'ou=eBiz').present?
+    rescue Exception => e
+      Rails.logger.error("LDAP Extranet check failed: #{e.message}")
+      ldap_extranet_status = false
+    end
+
     render json: {
       revision: get_revision,
       bartertown: mapi_status, # MAPI
       beforetimes: db_status, # App DB
       masterblaster: resque_status, # Resque
-      tomorrowmorrowland: redis_status # Redis
+      tomorrowmorrowland: redis_status, # Redis,
+      madmax: ldap_intranet_status, # LDAP Intranet
+      roadwarrior: ldap_extranet_status # LDAP Extranet
     }
   end
 

@@ -9,3 +9,6 @@ changetype: delete
 
 dn: dc=fhlbsf-i,dc=com
 changetype: delete
+
+dn: ou=FHLB-Accounts,dc=fhlbsf-i,dc=com
+changetype: delete
