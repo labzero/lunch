@@ -49,6 +49,7 @@ module MAPI
               SELECT * FROM SIGNER.SIGNERS WHERE SIGNERID = #{ActiveRecord::Base.connection.quote(signer_id)}
             SQL
             ActiveRecord::Base.connection.execute(roles_query).fetch_hash do |row|
+              roles << 'signer' # because we found them in the DB
 
               # The bank uses -1 for true, 0 for false
               if row['ADVSIGNER'] == -1 || row['ALLRNA'] == -1 || row['ALLPRODUCT'] == -1
@@ -76,7 +77,7 @@ module MAPI
                 roles << 'signer-affordability'
               end
               if row['ALLRNA'] == -1
-                roles << 'access-manager'
+                roles << 'signer-manager'
               end
             end
           else
