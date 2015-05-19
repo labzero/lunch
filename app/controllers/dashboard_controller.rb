@@ -4,6 +4,10 @@ class DashboardController < ApplicationController
   ADVANCE_TYPES = [:whole, :agency, :aaa, :aa]
   ADVANCE_TERMS = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
 
+  before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform] do
+    authorize :advances, :show?
+  end
+
   def index
     rate_service = RatesService.new(request)
     etransact_service = EtransactAdvancesService.new(request)

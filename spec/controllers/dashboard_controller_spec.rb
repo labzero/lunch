@@ -119,10 +119,12 @@ RSpec.describe DashboardController, :type => :controller do
   end
 
   describe "GET quick_advance_rates", :vcr do
+    allow_policy :advances, :show?
     let(:rate_data) { {some: 'data'} }
     let(:RatesService) {class_double(RatesService)}
     let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
     it_behaves_like 'a user required action', :get, :quick_advance_rates
+    it_behaves_like 'an authorization required method', :get, :quick_advance_rates, :advances, :show?
     it 'should call the RatesService object with quick_advance_rates' do
       expect(RatesService).to receive(:new).and_return(rate_service_instance)
       expect(rate_service_instance).to receive(:quick_advance_rates).and_return(rate_data)
@@ -145,10 +147,11 @@ RSpec.describe DashboardController, :type => :controller do
     it 'should set @advance_types' do
       get :quick_advance_rates
       expect(assigns[:advance_types]).to eq(subject.class::ADVANCE_TYPES)
+    end
   end
 
   describe "POST quick_advance_preview" do
-    end
+    allow_policy :advances, :show?
     let(:RatesService) {class_double(RatesService)}
     let(:rate_service_instance) {double("rate service instance", quick_advance_preview: nil)}
     let(:member_id) {double(MEMBER_ID)}
@@ -159,6 +162,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:make_request) { post :quick_advance_preview, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount }
 
     it_behaves_like 'a user required action', :post, :quick_advance_preview
+    it_behaves_like 'an authorization required method', :post, :quick_advance_preview, :advances, :show?
     it 'should render its view' do
       make_request
       expect(response.body).to render_template('dashboard/quick_advance_preview')
@@ -210,6 +214,7 @@ RSpec.describe DashboardController, :type => :controller do
   end
 
   describe "POST quick_advance_perform" do
+    allow_policy :advances, :show?
     let(:rate_service_instance) {RatesService.new(ActionDispatch::TestRequest.new)}
     let(:member_id) {double(MEMBER_ID)}
     let(:advance_term) {'some term'}
@@ -228,6 +233,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
 
     it_behaves_like 'a user required action', :post, :quick_advance_perform
+    it_behaves_like 'an authorization required method', :post, :quick_advance_perform, :advances, :show?
     it 'should call the RatesService object\'s `quick_advance_perform` method with the POSTed advance_type, advance_term and rate' do
       stub_const("MEMBER_ID", 750)
       expect(rate_service_instance).to receive(:quick_advance_confirmation).with(MEMBER_ID, amount, advance_type, advance_term, advance_rate.to_f).and_return({})
