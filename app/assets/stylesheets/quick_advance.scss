@@ -242,15 +242,61 @@ $faded-opacity: 0.4 !default;
 }
 
 .quick-advance-body {
-  @extend %clearfix;
-  position: relative;
-  padding-left: 60px;
-  &:before {
-    position: absolute;
-    top: 1rem;
-    left: 0;
-    font-size: 30px;
-    color: $alert-red;
+  .quick-advance-icon-section {
+    @extend %clearfix;
+    position: relative;
+    padding-left: 60px;
+    &:before {
+      position: absolute;
+      top: 1rem;
+      left: 0;
+      font-size: 30px;
+      color: $alert-red;
+      .quick-advance-confirmation & {
+        color: $approval-green;
+      }
+    }
+  }
+  fieldset {
+    border: 1px solid $light-blue;
+    border-radius: $default-border-radius;
+    padding: 20px;
+    margin-bottom: 20px;
+    p {
+      margin: 0 0 10px 0;
+    }
+    a {
+      text-transform: uppercase;
+      text-decoration: none;
+      display: block;
+      clear: both;
+      color: $actionable-blue;
+      &:visited {
+        color: $actionable-blue;
+      }
+    }
+    .input-field-container {
+      display: block;
+      margin-bottom: 10px;
+      input {
+        padding-left: 10px;
+        padding-right: 10px;
+        &[name=securid_pin] {
+          width: 55px;
+        }
+        &[name=securid_token] {
+          width: 85px;
+        }
+      }
+    }
+    .form-error {
+      margin-bottom: 10px;
+      display: none;
+      clear: both;
+    }
+    .loading & {
+      display: none;
+    }
   }
   dl{
     float: left;
@@ -287,9 +333,11 @@ $faded-opacity: 0.4 !default;
     p {
       display: none;
     }
-    &:before {
-      @include icon-loading;
-      content: '';
+    .quick-advance-icon-section {
+      &:before {
+        @include icon-loading;
+        content: '';
+      }
     }
     .quick-advance-loading-message {
       display: block;
@@ -307,6 +355,7 @@ $faded-opacity: 0.4 !default;
 }
 
 .quick-advance-summary {
+  @extend %clearfix;
   p {
     @extend %typography-confirmation-label;
     margin: 0.5rem 0 0;

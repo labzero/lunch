@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.2.0'
+gem 'rails', '4.2.1'
 gem 'ruby-oci8'
 
 # IF THE DB IS ACTING STRANGE, CHECK THIS BRANCH.
@@ -23,7 +23,11 @@ gem 'jbuilder'
 # bundle exec rake doc:rails generates the API under doc/api.
 gem 'sdoc',          group: :doc
 gem 'rest-client'
-gem 'devise_ldap_authenticatable'
+gem 'securid', git: 'https://github.com/labzero/securid.git', branch: '0.2.3'
+
+# For authentication/authorization
+gem 'devise_ldap_authenticatable', git: 'https://github.com/labzero/devise_ldap_authenticatable.git', branch: 'v0.9.0'
+gem 'pundit'
 
 # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
 # gem 'spring',        group: :development

@@ -4,10 +4,15 @@ class DashboardController < ApplicationController
   ADVANCE_TYPES = [:whole, :agency, :aaa, :aa]
   ADVANCE_TERMS = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
 
+  before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform] do
+    authorize :advances, :show?
+  end
+
   def index
     rate_service = RatesService.new(request)
     etransact_service = EtransactAdvancesService.new(request)
     member_balances = MemberBalanceService.new(current_member_id, request)
+    current_user_roles
 
     profile = member_balances.profile
 
@@ -102,22 +107,46 @@ class DashboardController < ApplicationController
     @funding_date = preview[:funding_date]
     @maturity_date = preview[:maturity_date]
     @advance_rate = preview[:advance_rate]
+    @session_elevated = session_elevated?
     render layout: false
   end
 
-  def quick_advance_confirmation
-    confirmation = RatesService.new(request).quick_advance_confirmation(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f)
-    @initiated_at = confirmation[:initiated_at]
-    @advance_amount = confirmation[:advance_amount]
-    @advance_type = confirmation[:advance_type]
-    @interest_day_count = confirmation[:interest_day_count]
-    @payment_on = confirmation[:payment_on]
-    @advance_term = confirmation[:advance_term]
-    @funding_date = confirmation[:funding_date]
-    @maturity_date = confirmation[:maturity_date]
-    @advance_rate = confirmation[:advance_rate]
-    @advance_number = confirmation[:advance_number]
-    render layout: false
+  def quick_advance_perform
+    unless session_elevated?
+      securid = SecurIDService.new(current_user.username)
+      begin
+        securid.authenticate(params[:securid_pin], params[:securid_token])
+        session_elevate! if securid.authenticated?
+        securid_status = securid.status
+      rescue SecurIDService::InvalidPin => e
+        securid_status = 'invalid_pin'
+      rescue SecurIDService::InvalidToken => e
+        securid_status = 'invalid_token'
+      end
+    else
+      securid_status = :authenticated
+    end
+    advance_success = false
+    response_html = false
+    if session_elevated?
+      confirmation = RatesService.new(request).quick_advance_confirmation(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f)
+      if confirmation
+        advance_success = true 
+
+        @initiated_at = confirmation[:initiated_at]
+        @advance_amount = confirmation[:advance_amount]
+        @advance_type = confirmation[:advance_type]
+        @interest_day_count = confirmation[:interest_day_count]
+        @payment_on = confirmation[:payment_on]
+        @advance_term = confirmation[:advance_term]
+        @funding_date = confirmation[:funding_date]
+        @maturity_date = confirmation[:maturity_date]
+        @advance_rate = confirmation[:advance_rate]
+        @advance_number = confirmation[:advance_number]
+        response_html = render_to_string layout: false
+      end
+    end
+    render json: {securid: securid_status, advance_success: advance_success, html: response_html}
   end
 
   def current_overnight_vrc

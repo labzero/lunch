@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150415002411) do
+ActiveRecord::Schema.define(version: 20150430204209) do
 
   create_table "corporate_communications", force: true do |t|
     t.string   "email_id"
@@ -49,6 +49,7 @@ ActiveRecord::Schema.define(version: 20150415002411) do
     t.string   "last_sign_in_ip"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "ldap_domain"
   end
 
   add_index "users", ["reset_password_token"], name: "i_users_reset_password_token", unique: true

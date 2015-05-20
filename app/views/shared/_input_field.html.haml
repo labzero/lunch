@@ -7,13 +7,22 @@
 - form_builder ||= nil
 - field_type ||= :text_field
 - label ||= nil
-- if label
-  - if form_builder
-    = form_builder.label label
-  - else
-    = label_tag label, for: field_name if label
-%span.input-field-container{class: icon ? "icon-#{icon}-#{location}" : nil}
-  - if form_builder
-    = form_builder.send field_type, field_name, {placeholder: placeholder, class: field_class, data: field_data}
-  - else
-    %input{placeholder: placeholder, class: field_class, data: field_data, name: field_name}
+- field_id ||= field_name
+- html_attributes ||= {}
+- horizontal ||= false
+- html = capture_haml do
+  - if label
+    - if form_builder
+      = form_builder.label label
+    - else
+      = label_tag field_name, label if label
+  %span.input-field-container{class: icon ? "icon-#{icon}-#{location}" : nil}
+    - if form_builder
+      = form_builder.send field_type, field_name, {placeholder: placeholder, class: field_class, data: field_data}.merge(html_attributes)
+    - else
+      %input{{placeholder: placeholder, class: field_class, data: field_data, name: field_name, id: field_id, type: field_type}.merge(html_attributes)}
+- if horizontal
+  %span.input-field-container-horizontal
+    = html
+- else
+  = html

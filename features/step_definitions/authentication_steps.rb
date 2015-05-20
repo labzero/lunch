@@ -14,17 +14,42 @@ Given(/^I am logged in as "(.*?)" with password "(.*?)"$/) do |user, password|
 end
 
 Given(/^I am logged in$/) do
-  step %{I am logged in as "#{primary_user['username']}" with password "#{primary_user['password']}"}
+  step %{I am logged in as a "primary user"}
+end
 
+Given(/^I am logged in as a "(.*?)"$/) do |user_type|
+  user = case user_type
+    when 'primary user'
+      primary_user
+    when 'quick-advance signer'
+      quick_advance_signer
+    when 'quick-advance non-signer'
+      quick_advance_non_signer
+    else
+      raise 'unknown user type'
+  end
+
+  step %{I am logged in as "#{user['username']}" with password "#{user['password']}"}
   needs_member = page.has_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 5) rescue Capybara::ElementNotFound
   step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} if needs_member
-
   page.assert_selector('.main-nav .nav-logout')
 end
 
 When(/^I log in$/) do
-  step %{I log in as "#{primary_user['username']}" with password "#{primary_user['password']}"}
+  step %{I log in as a "primary user"}
+end
 
+When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|
+  user = case user_type
+    when 'primary user'
+      primary_user
+    when 'extranet user'
+      extranet_user
+    else
+      raise 'unknown user type'
+  end
+
+  step %{I log in as "#{user['username']}" with password "#{user['password']}"}
   needs_member = page.has_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 5) rescue Capybara::ElementNotFound
   step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} if needs_member
 end
@@ -105,4 +130,16 @@ end
 
 def primary_user
   CustomConfig.env_config['primary_user']
+end
+
+def quick_advance_signer
+  CustomConfig.env_config['signer_advances_user']
+end
+
+def quick_advance_non_signer
+  CustomConfig.env_config['non_signer_advances_user']
+end
+
+def extranet_user
+  CustomConfig.env_config['extranet_user']
 end

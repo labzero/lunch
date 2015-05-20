@@ -11,6 +11,8 @@ require_relative 'services/mock_members'
 require_relative 'services/rates'
 require_relative 'services/member'
 require_relative 'services/etransact_advances'
+require_relative 'services/users'
+require_relative 'services/health'
 
 require_relative 'models/member'
 require_relative 'models/member_balance_pledged_collateral'
@@ -18,7 +20,6 @@ require_relative 'models/member_balance_total_securities'
 require_relative 'models/member_balance_effective_borrowing_capacity'
 require_relative 'models/realtime_rate'
 require_relative 'models/summary_rates'
-require_relative 'models/etransact_advances'
 require_relative 'models/member_capital_stock'
 require_relative 'models/member_borrowing_capacity_details'
 require_relative 'models/member_sta_activities'
@@ -123,6 +124,8 @@ module MAPI
     register MAPI::Services::Rates
     register MAPI::Services::Member
     register MAPI::Services::EtransactAdvances
+    register MAPI::Services::Users
+    register MAPI::Services::Health
   end
 
   class DocApp < Sinatra::Base
@@ -158,6 +161,14 @@ module MAPI
       api do
         key :path, '/etransact_advances'
         key :description, 'Operations about etransact advances'
+      end
+      api do
+        key :path, '/users'
+        key :description, 'Operations about users'
+      end
+      api do
+        key :path, '/healthy'
+        key :description, 'Health status'
       end
     end
 

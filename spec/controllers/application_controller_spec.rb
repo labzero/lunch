@@ -57,6 +57,22 @@ RSpec.describe ApplicationController, :type => :controller do
     end
   end
 
+  describe '`session_elevated?` method' do
+    it 'should return true if the session has a truthy `securid_authenticated` value' do
+      session['securid_authenticated'] = 'foo'
+      expect(controller.session_elevated?).to be(true)
+      session['securid_authenticated'] = true
+      expect(controller.session_elevated?).to be(true)
+    end
+    it 'should return false if the session has a falsey `securid_authenticated` value' do
+      expect(controller.session_elevated?).to be(false)
+      session['securid_authenticated'] = nil
+      expect(controller.session_elevated?).to be(false)
+      session['securid_authenticated'] = false
+      expect(controller.session_elevated?).to be(false)
+    end
+  end
+
   describe '`current_member_name` method' do
     let(:member_name) { double('A Member Name') }
     it 'should return the `member_name` from the session' do
@@ -65,6 +81,38 @@ RSpec.describe ApplicationController, :type => :controller do
     end
     it 'should return nil if there is no `member_name`' do
       expect(controller.current_member_name).to be_nil
+    end
+  end
+
+  describe '`current_user_roles` method' do
+    let(:user) { double('user', :roles => nil, :roles= => nil)}
+    let(:session_roles) { [double('session roles')] }
+    let(:user_roles) { [double('user_roles')] }
+    before do
+      allow(controller).to receive(:current_user).and_return(user)
+    end
+    it 'returns an empty array if there is no current_user' do
+      allow(controller).to receive(:current_user).and_return(nil)
+      expect(controller.send(:current_user_roles)).to eq([])
+    end
+    it 'passes the request object to `current_user.roles` ' do
+      expect(user).to receive(:roles).with(an_instance_of(ActionController::TestRequest)).and_return(user_roles)
+      controller.send(:current_user_roles)
+    end
+    it 'sets `session[:roles]` to the result of current_user.roles if that session attribute does not already exist' do
+      allow(user).to receive(:roles).and_return(user_roles)
+      controller.send(:current_user_roles)
+      expect(session['roles']).to eq(user_roles)
+    end
+    it 'sets `current_user.roles` to the array of `session[\'roles\']`' do
+      allow(controller.session).to receive(:[]).with('roles').and_return(session_roles)
+      expect(user).to receive(:roles=).with(session_roles)
+      controller.send(:current_user_roles)
+    end
+    it 'does not call `current_user.roles` if `session[:roles]` already exists' do
+      session['roles'] = session_roles
+      expect(user).not_to receive(:roles)
+      controller.send(:current_user_roles)
     end
   end
 end

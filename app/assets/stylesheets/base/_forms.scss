@@ -47,6 +47,9 @@
   }
   input {
     @extend %input-field-styling;
+    &.input-field-error {
+      border-color: $alert-red;
+    }
   }
 
   &[class*=" icon-"], &[class^="icon-"] {
@@ -73,4 +76,62 @@ label {
   color: $alert-red;
   @extend %typography-error-message;
   margin-bottom: 30px;
+}
+
+.input-field-container-horizontal {
+  float: left;
+  margin-right: 10px;
+  .input-field-container {
+    width: auto;
+  }
+}
+
+.securid-form  {
+  .input-field-container {
+    display: block;
+    margin-bottom: 10px;
+    input {
+      padding-left: 10px;
+      padding-right: 10px;
+      &.securid-field-pin {
+        width: 55px;
+      }
+      &.securid-field-token {
+        width: 85px;
+      }
+    }
+  }
+  .form-error {
+    margin-bottom: 10px;
+    display: none;
+    clear: both;
+  }
+}
+
+.form-flash-message {
+  position: relative;
+  display: none;
+  &:before {
+    display: block;
+    position: absolute;
+    top: 5px;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    @extend %icon-font;
+    font-size: 30px;
+  }
+  &[data-type="success"] {
+    color: $approval-green;
+    padding-top: 10px;
+    padding-left: 50px;
+    min-height: 40px;
+    &:before {
+      content: $icon-success;
+    }
+  }
+  &[data-type="error"] {
+    padding-bottom: 20px;
+    color: $alert-red;
+  }
 }

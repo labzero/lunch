@@ -18,6 +18,7 @@ We use [Vagrant](https://www.vagrantup.com/) to manage a VM that provides all th
 * [wkhtmltopdf](http://wkhtmltopdf.org/) with patched QT installed.
 * [ImageMagick](http://www.imagemagick.org/) installed.  `brew install imagemagick` if you are on a Mac with Homebrew.
 * [GhostScript](http://www.ghostscript.com/) installed.  `brew install gs` if you are on a Mac with Homebrew.
+* ACE Agent SDK v8.1 (obtained from the Bank) installed.
 
 ### Oracle Instant Client
 
@@ -44,6 +45,19 @@ Oracle Instant Client is needed for the Oracle DB adapter used by ActiveRecord. 
    ```
 
 6. `source ~/.bashrc` to load the new environment variables into your current shell.
+
+### ACE Agent SDK
+
+You must obtain the binaries for the ACE Agent SDK from the Bank. See the project lead with questions.
+
+1. Download the SDK.
+2. Extract the ZIP file to a known, permananet location.
+3. Open `~/.bash_profile` (or `~/.bashrc` depending on your OS/shell) and add the following lines (replacing `YOUR_PATH` with the absolute path to the ACE Agent SDK directory and `YOUR_ARCH` with the directory or directories needed to get to the library for your machine, eg. `64bit/lnx/release` for 64bit Linux ):
+
+   ```
+   export ACE_SDK_INC=YOUR_PATH/inc
+   export ACE_SDK_LIB=YOUR_PATH/lib/YOUR_ARCH
+   ```
 
 
 ## Setup Instructions

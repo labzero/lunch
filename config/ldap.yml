@@ -19,28 +19,59 @@ authorizations: &AUTHORIZATIONS
     objectCategory: person
     primaryGroupID: 513 # magic number that means 'Domain Users'
 
+authorizations_extranet: &AUTHORIZATIONS_EXTRANET
+      group_base: dc=extranet,dc=fhlbsf,dc=com
+      required_groups:
+      require_attribute:
+        objectClass: user
+        objectCategory: person
+        primaryGroupID: 513 # magic number that means 'Domain Users'
+
 ## Environment
 
 development: &development
-  host: <%= ENV['LDAP_HOST'] || 'localhost' %>
-  port: <%= ENV['LDAP_PORT'] || '3200' %>
-  attribute: sAMAccountName
-  base: dc=fhlbsf-i,dc=com
-  admin_user: <%= ENV['LDAP_ADMIN_USERNAME'] || 'cn=admin,dc=fhlbsf-i,dc=com' %>
-  admin_password: <%= ENV['LDAP_ADMIN_PASSWORD'] || 'secret' %>
-  ssl: false
-  <<: *AUTHORIZATIONS
+  -
+    name: extranet
+    host: <%= ENV['LDAP_EXTRANET_HOST'] || 'localhost' %>
+    port: <%= ENV['LDAP_EXTRANET_PORT'] || '3200' %>
+    attribute: sAMAccountName
+    base: dc=extranet,dc=fhlbsf,dc=com
+    admin_user: <%= ENV['LDAP_EXTRANET_ADMIN_USERNAME'] || 'cn=admin,dc=extranet,dc=fhlbsf,dc=com' %>
+    admin_password: <%= ENV['LDAP_EXTRANET_ADMIN_PASSWORD'] || 'secret' %>
+    ssl: false
+    <<: *AUTHORIZATIONS_EXTRANET
+  -
+    name: intranet
+    host: <%= ENV['LDAP_HOST'] || 'localhost' %>
+    port: <%= ENV['LDAP_PORT'] || '3200' %>
+    attribute: sAMAccountName
+    base: dc=fhlbsf-i,dc=com
+    admin_user: <%= ENV['LDAP_ADMIN_USERNAME'] || 'cn=admin,dc=fhlbsf-i,dc=com' %>
+    admin_password: <%= ENV['LDAP_ADMIN_PASSWORD'] || 'secret' %>
+    ssl: false
+    <<: *AUTHORIZATIONS
 
 test:
-  <<: *development
-  <<: *AUTHORIZATIONS
+  *development
 
 production:
-  host: <%= ENV['LDAP_HOST'] || 'localhost' %>
-  port: <%= ENV['LDAP_PORT'] || '389' %>
-  attribute: sAMAccountName
-  base: dc=fhlbsf-i,dc=com
-  admin_user: <%= ENV['LDAP_ADMIN_USERNAME'] %>
-  admin_password: <%= ENV['LDAP_ADMIN_PASSWORD'] %>
-  ssl: false
-  <<: *AUTHORIZATIONS
+  -
+    name: extranet
+    host: <%= ENV['LDAP_EXTRANET_HOST'] || 'localhost' %>
+    port: <%= ENV['LDAP_EXTRANET_PORT'] || '389' %>
+    attribute: sAMAccountName
+    base: dc=extranet,dc=fhlbsf,dc=com
+    admin_user: <%= ENV['LDAP_EXTRANET_ADMIN_USERNAME'] %>
+    admin_password: <%= ENV['LDAP_EXTRANET_ADMIN_PASSWORD'] %>
+    ssl: false
+    <<: *AUTHORIZATIONS_EXTRANET
+  -
+    name: intranet
+    host: <%= ENV['LDAP_HOST'] || 'localhost' %>
+    port: <%= ENV['LDAP_PORT'] || '389' %>
+    attribute: sAMAccountName
+    base: dc=fhlbsf-i,dc=com
+    admin_user: <%= ENV['LDAP_ADMIN_USERNAME'] %>
+    admin_password: <%= ENV['LDAP_ADMIN_PASSWORD'] %>
+    ssl: false
+    <<: *AUTHORIZATIONS

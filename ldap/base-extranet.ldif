@@ -1,0 +1,21 @@
+dn: dc=extranet,dc=fhlbsf,dc=com
+objectClass: dcObject
+objectClass: organizationalUnit
+dc: extranet
+ou: extranet
+
+# extra user
+dn: sAMAccountName=extra,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet User
+sn: Extranet
+sAMAccountName: extra
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+
+dn: ou=eBiz,dc=extranet,dc=fhlbsf,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: eBiz

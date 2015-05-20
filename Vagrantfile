@@ -172,6 +172,7 @@ export PATH=$ORACLE_HOME/bin:$PATH
 EOS
 
   sql_seed = <<EOS
+ALTER PROFILE DEFAULT LIMIT password_life_time UNLIMITED;
 CREATE USER member_development IDENTIFIED BY notthatsecret;
 GRANT CONNECT TO member_development;
 CREATE USER member_test IDENTIFIED BY notthatsecret;

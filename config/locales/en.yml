@@ -89,6 +89,8 @@ en:
     shares_outstanding: Shares Outstanding
     prepare_download: Please wait while we prepare your download. This may take up to 60 seconds.
     cancel_download: Cancel Download
+    pin: PIN
+    token: Token
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -160,6 +162,35 @@ en:
       title: Quick Advances
     quick_report:
       title: Quick Reports
+    two_factor:
+      title: 2-Step Verification
+      description: Manage login with your SecurID token.
+      help_html: 'To activate, request a new token, or re-synchronize your SecurID token, <a href="%{url}">email Web Support</a> or call them at %{phone_number}.'
+      reset_pin:
+        title: Reset Token PIN
+        description: "If you can't remember your token PIN, contact Web Support before resetting it."
+        cta: Reset Token PIN
+        hint: 'Note: You must save your new PIN before the token code you enter below expires.'
+        prompt_current_pin: Enter your current PIN and a token code.
+        prompt_new_pin: Enter your new PIN.
+        new_pin: New PIN
+        confirm_pin: Re-Enter PIN
+        save: Save PIN
+        success: We reset your token PIN.
+        error: We failed to reset your token PIN. Please contact Web Support for further assistance.
+        pin_mismatch: PINs don't match.
+      resynchronize:
+        title: Reset Token
+        description: If your token codes are no longer accepted when you try to log in, you may need to reset your token. Contact Web Support before resetting it.
+        cta: Reset Token
+        save: Reset Token
+        next_token: Second Token Code
+        success: We reset your token.
+        error: We failed to reset your token. Please contact Web Support for further assistance.
+        steps:
+          enter_original: Enter a token code and your PIN.
+          wait_next: Wait for the next token code to appear, then enter it.
+          submit: Press 'Reset Token' before the second token code expires.
     email:
       title: Emails
       header: Choose which email messages to receive
@@ -195,10 +226,10 @@ en:
   welcome:
     meta_title: FHLB - Welcome
     title: Welcome!
-    intro: Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sit amet placerat odio, a ornare nibh. Integer sagittis, ex eu dignissim commodo, dui dui maximus massa, sit amet rutrum dolor dui et tellus.
+    intro_html: 'Contact your institution’s Access Manager or <a href="%{url}">Web Support</a> at %{phone_number} if you have questions about access.'
     logo: FHLBank San Francisco
     questions:
-      p: Questions about access
+      p_html: 'Learn more about<br/><a href="%{url}">Online Security</a>'
     forgot_password: Forgot Password
     choose_member: Choose a member bank
     select_bank: Select bank
@@ -283,6 +314,16 @@ en:
         funding_date: Funding
         maturity_date: Maturity
         advance_number: Advance Number
+      securid:
+        intro: For your security, please enter your SecurID login credentails.
+        help: Get help with PIN or token
+        errors:
+          resynchronize: Token is not synchronized.
+          change_pin: PIN must be changed.
+          denied: PIN and/or token is invalid.
+          invalid_pin: PIN invalid.
+          invalid_token: Token invalid.
+          unknown: An unexpected error has occurred. Please try again.
     reports:
       title: Reports
       as_of_yesterday: As of yesterday

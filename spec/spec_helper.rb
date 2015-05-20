@@ -73,6 +73,7 @@ RSpec.configure do |config|
   config.include FactoryGirl::Syntax::Methods
   config.extend AuthenticationHelpers, :type => :controller
   config.include Paperclip::Shoulda::Matchers
+  config.extend AuthorizationHelpers, :type => :controller
 
   config.before(:all) do
     DatabaseCleaner.clean_with :truncation

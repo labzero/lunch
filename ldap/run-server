@@ -66,8 +66,14 @@ end
 cmd += ":#{options[:port]}"
 
 if options[:reseed]
-  puts `ldapadd -x -h localhost -p #{options[:port]} -D "cn=admin,dc=fhlbsf-i,dc=com" -w secret -f clear.ldif`
-  puts `ldapadd -x -h localhost -p #{options[:port]} -D "cn=admin,dc=fhlbsf-i,dc=com" -w secret -f base.ldif`
+  [
+      ['cn=admin,dc=fhlbsf-i,dc=com', ['clear.ldif', 'base.ldif']],
+      ['cn=admin,dc=extranet,dc=fhlbsf,dc=com', ['clear-extranet.ldif', 'base-extranet.ldif']]
+  ].each do |dc|
+    dc.last.each do |file|
+      puts `ldapadd -x -h localhost -p #{options[:port]} -D "#{dc.first}" -w secret -f #{file}`
+    end
+  end
 else
   puts(cmd)
   exec(cmd)
