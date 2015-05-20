@@ -43,7 +43,22 @@ class User < ActiveRecord::Base
   end
 
   def locked?
-    ldap_entry.present? && ldap_entry[:lockouttime].present? 
+    ldap_entry.present? && ldap_entry[:lockouttime].try(:first).to_i > 0
+  end
+
+  def lock!
+    reload_ldap_entry
+    Devise::LDAP::Adapter.set_ldap_param(username, :lockoutTime, Time.now.to_i.to_s, nil, ldap_domain)
+  end
+
+  def unlock!
+    reload_ldap_entry
+    Devise::LDAP::Adapter.set_ldap_param(username, :lockoutTime, '0', nil, ldap_domain)
+  end
+
+  def reload
+    reload_ldap_entry
+    super
   end
 
   def self.create(*args, &block)
@@ -87,6 +102,12 @@ class User < ActiveRecord::Base
       roles << user_service_roles unless user_service_roles.nil?
       roles.flatten.collect{ |role| ROLE_MAPPING[role] }.compact
     )
+  end
+
+  protected
+
+  def reload_ldap_entry
+    @ldap_entry = nil
   end
 
 end
