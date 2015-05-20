@@ -4,6 +4,11 @@ objectClass: organizationalUnit
 dc: extranet
 ou: extranet
 
+dn: ou=eBiz,dc=extranet,dc=fhlbsf,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: eBiz
+
 # extra user
 dn: sAMAccountName=extra,dc=extranet,dc=fhlbsf,dc=com
 objectClass: user
@@ -15,7 +20,66 @@ sAMAccountName: extra
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 
-dn: ou=eBiz,dc=extranet,dc=fhlbsf,dc=com
+# extra-chaste user
+dn: sAMAccountName=extra-chaste,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
 objectClass: top
-objectClass: organizationalUnit
-ou: eBiz
+objectClass: person
+cn: Extranet User - Chaste Manhatten
+displayName: Chaste User
+givenName: Chaste
+sn: User
+sAMAccountName: extra-chaste
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: chaste@example.com
+
+# extra-chaste-access user
+dn: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet Access Manager - Chaste Manhatten
+displayName: Chaste Access
+givenName: Chaste
+sn: Access
+sAMAccountName: extra-chaste-access
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: chaste-access@example.com
+
+# extra-wells user
+dn: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet User - Wells Faygo
+displayName: Wells User
+givenName: Wells
+sn: User
+sAMAccountName: extra-wells
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: wells@example.com
+
+# Chaste Manhatten
+dn: CN=FHLB6,dc=extranet,dc=fhlbsf,dc=com
+cn: FHLB6
+objectClass: group
+objectClass: top
+member: sAMAccountName=extra-chaste,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
+
+# Wells Faygo
+dn: CN=FHLB5,dc=extranet,dc=fhlbsf,dc=com
+cn: FHLB5
+objectClass: group
+objectClass: top
+member: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
+
+# FCN-MemberSite-AccessManagers group
+dn: CN=FCN-MemberSite-AccessManagers,dc=extranet,dc=fhlbsf,dc=com
+cn: FCN-MemberSite-AccessManagers
+objectClass: group
+objectClass: top
+member: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com

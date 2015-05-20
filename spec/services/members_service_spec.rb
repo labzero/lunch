@@ -65,6 +65,7 @@ describe MembersService do
       end
     end
   end
+
   describe '`member` method', :vcr do
     let(:member) { subject.member(member_id) }
     it 'should return nil if there was an API error' do
@@ -81,6 +82,42 @@ describe MembersService do
       expect(member[:id]).to be > 0
       expect(member[:name]).to be_kind_of(String)
       expect(member[:name]).to be_present
+    end
+  end
+
+  describe '`users` method' do
+    let(:users) { subject.users(member_id) }
+    let(:dn) { double('A DN', end_with?: true) }
+    let(:user_entry) { double('LDAP Entry: User', dn: dn, :[] => nil) }
+    let(:group_entry) { obj = double('LDAP Entry: Group'); allow(obj).to receive(:[]).with(:member).and_return([dn]); obj }
+    let(:ldap_connection) { double('LDAP Connection', search: []) }
+    before do
+      allow(Devise::LDAP::Connection).to receive(:admin).with('extranet').and_return(ldap_connection)
+      allow(ldap_connection).to receive(:search).with(filter: "CN=FHLB#{member_id.to_i}").and_return([group_entry])
+      allow(ldap_connection).to receive(:search).with(base: dn, scope: Net::LDAP::SearchScope_BaseObject).and_return([user_entry])
+      allow(User).to receive(:find_or_create_by_ldap_entry).and_return(User.new)
+    end
+    it 'should open an admin LDAP connection to the extranet LDAP server' do
+      expect(Devise::LDAP::Connection).to receive(:admin).with('extranet')
+      users
+    end
+    it 'should search for the member banks LDAP group' do
+      expect(ldap_connection).to receive(:search).with(filter: "CN=FHLB#{member_id.to_i}")
+      users
+    end
+    it 'should grab the members of the member banks group' do
+      expect(ldap_connection).to receive(:search).with(base: dn, scope: Net::LDAP::SearchScope_BaseObject)
+      users
+    end
+    it 'should return an array of Users' do
+      expect(users.count).to be > 0
+      users.each do |user|
+        expect(user).to be_kind_of(User)
+      end
+    end
+    it 'should lookup the User record or create it if not found' do
+      expect(User).to receive(:find_or_create_by_ldap_entry).with(user_entry)
+      users
     end
   end
 end

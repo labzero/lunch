@@ -1,0 +1,36 @@
+= render layout: 'sidebar', locals: {selected: t('settings.account.title')} do
+  %section.settings-users
+    .settings-users-header
+      %h1= t('settings.account.title')
+      %button.table-button.secondary-button= t('settings.account.actions.add_user')
+    .settings-users-table
+      %table
+        %thead
+          %tr
+            %th= t('global.name')
+            %th= t('global.username')
+            %th= t('global.email')
+            %th= t('global.role')
+            %th= t('global.actions')
+            %th
+            %th
+        %tbody
+          - @users.each do |user|
+            %tr
+              %td.settings-user-name= user.display_name
+              %td.settings-user-username= user.username
+              %td.settings-user-email= user.email
+              %td= @roles[user.id].collect{|role| content_tag(:span, role, class: 'settings-user-role')}.join(', ').html_safe
+              %td.settings-user-actions
+                - lock_text = @actions[user.id][:locked] ? t('settings.account.actions.unlock') : t('settings.account.actions.lock')
+                - if @actions[user.id][:locked_disabled]
+                  = lock_text
+                - else 
+                  = link_to(lock_text, '#')
+              %td.settings-user-actions
+                - reset_text = t('settings.account.actions.reset_password')
+                - if @actions[user.id][:reset_disabled]
+                  = reset_text
+                - else
+                  = link_to(reset_text, '#')
+              %td.settings-user-actions= link_to(t('global.edit'), '#')

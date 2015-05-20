@@ -16,3 +16,7 @@ cucumber.junit
 cucumber.*html
 cucumber-primary-ready
 dump.rdb
+ldap/openldap-data/*.ldif
+ldap/openldap-data/*dc=com
+ldap/openldap-data/run/slapd.pid
+ldap/openldap-data/run/slapd.args

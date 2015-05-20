@@ -2,6 +2,7 @@ require 'spec_helper'
 
 RSpec.describe SettingsController, :type => :controller do
   login_user
+  deny_policy(:access_manager, :show?)
   
   describe 'GET index' do
     it_behaves_like 'a user required action', :get, :index
@@ -169,6 +170,62 @@ RSpec.describe SettingsController, :type => :controller do
       allow(SecurIDService).to receive(:new).and_return(SecurIDService.new('some_user', test_mode: :change_pin))
       make_request
       expect(JSON.parse(response.body)['status']).to eq('must_change_pin')
+    end
+  end
+
+  describe 'GET users' do
+    allow_policy(:access_manager, :show?)
+    let(:make_request) { get :users }
+    let(:users) { [build(:user), build(:user), build(:user)] }
+    before do
+      allow_any_instance_of(MembersService).to receive(:users).and_return(users)
+      allow(users[0]).to receive(:display_name).and_return('foo')
+      allow(users[1]).to receive(:display_name).and_return('bar')
+      allow(users[2]).to receive(:display_name).and_return('woo')
+      allow(users[0]).to receive(:roles).and_return([User::Roles::ACCESS_MANAGER])
+      allow(users[1]).to receive(:roles).and_return([User::Roles::AUTHORIZED_SIGNER])
+      allow(users[2]).to receive(:roles).and_return([])
+      allow(users[0]).to receive(:id).and_return(1)
+      allow(users[1]).to receive(:id).and_return(2)
+      allow(users[2]).to receive(:id).and_return(3)
+      allow(users[0]).to receive(:locked?).and_return(false)
+      allow(users[1]).to receive(:locked?).and_return(true)
+      allow(users[2]).to receive(:locked?).and_return(false)
+      allow(subject).to receive(:current_user).and_return(users[2])
+    end
+    it_behaves_like 'an authorization required method', :get, :users, :access_manager, :show?
+    it 'calls MembersService to fetch the list of users' do
+      expect_any_instance_of(MembersService).to receive(:users).with(subject.current_member_id)
+      make_request
+    end
+    it 'handles MembersService returning nil' do
+      allow_any_instance_of(MembersService).to receive(:users).with(subject.current_member_id).and_return(nil)
+      make_request
+      expect(response).to have_http_status(:success)
+    end
+    it 'sorts the users by `display_name`' do
+      make_request
+      expect(assigns[:users]).to eq([users[1], users[0], users[2]])
+    end
+    it 'sets `@users` to the list of users' do
+      make_request
+      expect(assigns[:users]).to match_array(users)
+    end
+    it 'sets `@roles` to a hash of human readable roles, keyed by user `id`' do
+      make_request
+      expect(assigns[:roles]).to eq({
+        users[0].id => [I18n.t('settings.account.roles.access_manager')],
+        users[1].id => [I18n.t('settings.account.roles.authorized_signer')],
+        users[2].id => [I18n.t('settings.account.roles.user')]
+      })
+    end
+    it 'sets `@actions` to a hash of allowed actions. keyed by user `id`' do
+      make_request
+      expect(assigns[:actions]).to eq({
+        users[0].id => {locked: false, locked_disabled: false, reset_disabled: false},
+        users[1].id => {locked: true, locked_disabled: false, reset_disabled: false},
+        users[2].id => {locked: false, locked_disabled: true, reset_disabled: true}
+      })
     end
   end
 end

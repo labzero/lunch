@@ -13,6 +13,9 @@ default: &default
   extranet_user:
     username: <%= ENV['CUCUMBER_EXTRANET_USERNAME'] || 'extra' %>
     password: <%= ENV['CUCUMBER_EXTRANET_PASSWORD'] || 'development' %>
+  access_manager:
+    username: <%= ENV['CUCUMBER_ACCESS_MANAGER_USERNAME'] || 'extra-chaste-access' %>
+    password: <%= ENV['CUCUMBER_ACCESS_MANAGER_PASSWORD'] || 'development' %>
   primary_bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Meridian Bank, National Association' %>
 
 local:

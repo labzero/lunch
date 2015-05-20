@@ -17,7 +17,7 @@ Given(/^I am logged in$/) do
   step %{I am logged in as a "primary user"}
 end
 
-Given(/^I am logged in as a "(.*?)"$/) do |user_type|
+Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
   user = case user_type
     when 'primary user'
       primary_user
@@ -25,6 +25,8 @@ Given(/^I am logged in as a "(.*?)"$/) do |user_type|
       quick_advance_signer
     when 'quick-advance non-signer'
       quick_advance_non_signer
+    when 'access manager'
+      access_manager
     else
       raise 'unknown user type'
   end
@@ -142,4 +144,8 @@ end
 
 def extranet_user
   CustomConfig.env_config['extranet_user']
+end
+
+def access_manager
+  CustomConfig.env_config['access_manager']
 end

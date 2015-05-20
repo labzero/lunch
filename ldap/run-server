@@ -4,6 +4,17 @@ require 'erb'
 require 'fileutils'
 require 'optparse'
 
+def reseed(port)
+  [
+    ['cn=admin,dc=fhlbsf-i,dc=com', ['clear.ldif', 'base.ldif']],
+    ['cn=admin,dc=extranet,dc=fhlbsf,dc=com', ['clear-extranet.ldif', 'base-extranet.ldif']]
+  ].each do |dc|
+    dc.last.each do |file|
+      puts `ldapadd -x -h localhost -p #{port} -D "#{dc.first}" -w secret -f #{file}`
+    end
+  end
+end
+
 options = {
   port: 3389,
   dir: 'openldap-data'
@@ -30,6 +41,10 @@ OptionParser.new do |opts|
   opts.on('-v', '--verbose', 'Enables verbose output.') do |v|
     options[:verbose] = v
   end
+
+  opts.on('--fresh', 'Deletes the entire root directory and recreates the DB prior to running.') do |v|
+    options[:fresh] = v
+  end
 end.parse!
 
 FileUtils.chdir(File.dirname(__FILE__))
@@ -39,6 +54,9 @@ ENV['PATH'] = "#{ENV['PATH']}:/usr/libexec"
 
 
 @root_dir = File.expand_path options[:dir]
+
+FileUtils.rm_rf(@root_dir) if options[:fresh]
+
 FileUtils.mkdir_p File.join(@root_dir, 'run')
 
 template = File.read('slapd-test.conf.erb')
@@ -66,15 +84,15 @@ end
 cmd += ":#{options[:port]}"
 
 if options[:reseed]
-  [
-      ['cn=admin,dc=fhlbsf-i,dc=com', ['clear.ldif', 'base.ldif']],
-      ['cn=admin,dc=extranet,dc=fhlbsf,dc=com', ['clear-extranet.ldif', 'base-extranet.ldif']]
-  ].each do |dc|
-    dc.last.each do |file|
-      puts `ldapadd -x -h localhost -p #{options[:port]} -D "#{dc.first}" -w secret -f #{file}`
-    end
-  end
+  reseed(options[:port])
 else
+  if options[:fresh]
+    pid = Process.fork do
+      sleep 3
+      reseed(options[:port])
+    end
+    Process.detach(pid)
+  end
   puts(cmd)
   exec(cmd)
 end

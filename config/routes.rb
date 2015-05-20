@@ -41,6 +41,7 @@ Rails.application.routes.draw do
   get '/settings/two-factor' => 'settings#two_factor'
   post '/settings/two-factor/pin' => 'settings#reset_pin'
   post '/settings/two-factor/resynchronize' => 'settings#resynchronize'
+  get '/settings/users' => 'settings#users'
 
   get '/jobs/:job_status_id' => 'jobs#status', as: 'job_status'
   get '/jobs/:job_status_id/download' => 'jobs#download', as: 'job_download'

@@ -7,11 +7,13 @@ class User < ActiveRecord::Base
     ACCESS_MANAGER_READ_ONLY = 'access_manager_read_only'
     ACCESS_MANAGER = 'access_manager'
     ADMIN = 'admin'
+    AUTHORIZED_SIGNER = 'authorized_signer'
   end
 
   ROLE_MAPPING = {
     'FCN-MemberSite-Users' => Roles::MEMBER_USER,
     'signer-advances' => Roles::ADVANCE_SIGNER,
+    'signer' => Roles::AUTHORIZED_SIGNER,
     'FCN-MemberSite-ExternalAccess' => Roles::USER_WITH_EXTERNAL_ACCESS,
     'FCN-MemberSite-AccessManagers-R' => Roles::ACCESS_MANAGER_READ_ONLY,
     'FCN-MemberSite-AccessManagers' => Roles::ACCESS_MANAGER,
@@ -23,6 +25,51 @@ class User < ActiveRecord::Base
   devise :ldap_authenticatable, :recoverable, :trackable
 
   attr_accessor :roles
+
+  def display_name
+    ldap_entry[:displayname].try(:first) if ldap_entry
+  end
+
+  def email
+    ldap_entry[:mail].try(:first) if ldap_entry
+  end
+
+  def surname
+    ldap_entry[:sn].try(:first) if ldap_entry
+  end
+
+  def given_name
+    ldap_entry[:givenname].try(:first) if ldap_entry
+  end
+
+  def locked?
+    ldap_entry.present? && ldap_entry[:lockouttime].present? 
+  end
+
+  def self.create(*args, &block)
+    ldap_entry = args.try(:first)
+    if ldap_entry.is_a?(Net::LDAP::Entry)
+      raise 'Net::LDAP::Entry must have an objectClass of `user`' unless ldap_entry[:objectclass].include?('user')
+      attrs = {
+        username: ldap_entry[:samaccountname].try(:first),
+        ldap_domain: Devise::LDAP::Adapter.get_ldap_domain_from_dn(ldap_entry.dn)
+      }
+      record = super attrs, &block
+      record.instance_variable_set(:@ldap_entry, ldap_entry) # avoid a second trip to LDAP when possible
+      record
+    else
+      super
+    end
+  end
+
+  def self.find_or_create_by_ldap_entry(entry)
+    record = self.find_or_create_by({
+      username: entry[:samaccountname].try(:first),
+      ldap_domain: Devise::LDAP::Adapter.get_ldap_domain_from_dn(entry.dn)
+    })
+    record.instance_variable_set(:@ldap_entry, entry) # avoid a second trip to LDAP when possible
+    record
+  end
 
   def after_ldap_authentication(new_ldap_domain)
     self.update_attributes!(ldap_domain: new_ldap_domain) if self.ldap_domain.nil?

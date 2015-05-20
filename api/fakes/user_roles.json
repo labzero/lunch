@@ -1,5 +1,6 @@
 {
-  "local": ["signer-advances"],
+  "local": ["signer", "signer-advances"],
   "extra": [],
-  "local-non-signer": []
+  "local-non-signer": [],
+  "extra-chaste-access": ["signer"]
 }

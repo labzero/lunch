@@ -66,4 +66,124 @@ RSpec.describe User, :type => :model do
       expect(subject.roles).to eq(session_roles)
     end
   end
+
+  {
+    display_name: :displayname,
+    email: :mail,
+    surname: :sn,
+    given_name: :givenname
+  }.each do |method, attribute|
+    describe "`#{method}` method" do
+      let(:attribute_value) { double('An LDAP Entry Attribute') }
+      let(:ldap_entry) { double('LDAP Entry: User') }
+      let(:call_method) { subject.send(method) }
+      before do
+        allow(subject).to receive(:ldap_entry).and_return(ldap_entry)
+        allow(ldap_entry).to receive(:[]).with(attribute).and_return([attribute_value])
+      end
+      it 'should fetch the backing LDAP entry' do
+        expect(subject).to receive(:ldap_entry).and_return(ldap_entry)
+        call_method
+      end
+      it "should return the `#{attribute}` of the backing LDAP entry" do
+        expect(call_method).to eq(attribute_value)
+      end
+      it 'should return nil if no entry was found' do
+        allow(subject).to receive(:ldap_entry).and_return(nil)
+        expect(call_method).to be_nil
+      end
+      it "should return nil if the entry had no value for `#{attribute}`" do
+        allow(ldap_entry).to receive(:[]).with(attribute)
+        expect(call_method).to be_nil
+      end
+    end
+  end
+
+  describe '`locked?` method' do
+    let(:attribute_value) { double('An LDAP Entry Attribute') }
+    let(:ldap_entry) { double('LDAP Entry: User') }
+    let(:call_method) { subject.locked? }
+    before do
+      allow(subject).to receive(:ldap_entry).and_return(ldap_entry)
+      allow(ldap_entry).to receive(:[]).with(:lockouttime).and_return([attribute_value])
+    end
+    it 'should fetch the backing LDAP entry' do
+      expect(subject).to receive(:ldap_entry).and_return(ldap_entry)
+      call_method
+    end
+    it 'should return true if the backing LDAP entry has a value for `lockouttime`' do
+      expect(call_method).to eq(true)
+    end
+    it 'should return false if no entry was found' do
+      allow(subject).to receive(:ldap_entry).and_return(nil)
+      expect(call_method).to eq(false)
+    end
+    it 'should return false if the entry had no value for `lockouttime`' do
+      allow(ldap_entry).to receive(:[]).with(:lockouttime)
+      expect(call_method).to eq(false)
+    end
+  end
+
+  describe '`create` class method' do
+    it 'calls `super` if not passed a Net::LDAP::Entry' do
+      arguments = double('Some Arguments')
+      expect(described_class.superclass).to receive(:create).with(arguments)
+      described_class.create(arguments)
+    end
+    describe 'passing a Net::LDAP::Entry' do
+      let(:samaccountname) { double('An Account Username') }
+      let(:ldap_domain) { double('An LDAP Domain') }
+      let(:dn) { double('A DN', end_with?: true) }
+      let(:ldap_entry) { double('LDAP Entry: User', is_a?: true, dn: dn) }
+      let(:call_method) { described_class.create(ldap_entry) }
+      before do
+        allow(ldap_entry).to receive(:[]).with(:objectclass).and_return(['user', 'foo'])
+        allow(ldap_entry).to receive(:[]).with(:samaccountname).and_return([samaccountname])
+        allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
+      end
+      it 'should raise an error if the Entry doesn\'t have an `objectclass` of `user`' do
+        allow(ldap_entry).to receive(:[]).with(:objectclass).and_return(['foo'])
+        expect{call_method}.to raise_error
+      end
+      it 'should call `super` with a `username` of the Entry\'s `samaccountname`' do
+        expect(described_class.superclass).to receive(:create).with(hash_including(username: samaccountname))
+        call_method
+      end
+      it 'should call `super` with an `ldap_domain` of where the Entry was found' do
+        expect(described_class.superclass).to receive(:create).with(hash_including(ldap_domain: ldap_domain))
+        call_method
+      end
+      it 'should call `Devise::LDAP::Adapter.get_ldap_domain_from_dn` to find the `ldap_domain`' do
+        expect(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
+        call_method
+      end
+      it 'should set the `@ldap_entry` on the new User instance' do
+        expect(call_method.ldap_entry).to eq(ldap_entry)
+      end
+    end
+  end
+
+  describe '`find_or_create_by_ldap_entry` class method' do
+    let(:samaccountname) { double('An Account Username') }
+    let(:ldap_domain) { double('An LDAP Domain') }
+    let(:dn) { double('A DN', end_with?: true) }
+    let(:ldap_entry) { double('LDAP Entry: User', is_a?: true, dn: dn) }
+    let(:call_method) { described_class.find_or_create_by_ldap_entry(ldap_entry) }
+    before do
+      allow(ldap_entry).to receive(:[]).with(:samaccountname).and_return([samaccountname])
+      allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
+    end
+    it 'calls `find_or_create_by` with a `username` of the entries `samaccountname`' do
+      expect(described_class).to receive(:find_or_create_by).with(hash_including(username: samaccountname))
+      call_method
+    end
+    it 'calls `find_or_create_by` with a `ldap_domain` of where the Entry was found' do
+      expect(described_class).to receive(:find_or_create_by).with(hash_including(ldap_domain: ldap_domain))
+      call_method
+    end
+    it 'should call `Devise::LDAP::Adapter.get_ldap_domain_from_dn` to find the `ldap_domain`' do
+      expect(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
+      call_method
+    end
+  end
 end
