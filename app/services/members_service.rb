@@ -54,6 +54,20 @@ class MembersService < MAPIService
     members.find {|member| member[:id] == member_id} if members
   end
 
+  def users(member_id)
+    users = nil
+    ldap = Devise::LDAP::Connection.admin('extranet')
+    group = ldap.search(filter: "CN=FHLB#{member_id.to_i}").try(:first)
+    if group
+      users = group[:member].collect do |dn|
+        ldap.search(:base => dn, :scope => Net::LDAP::SearchScope_BaseObject).try(:first)
+      end.compact.collect do |entry|
+        User.find_or_create_by_ldap_entry(entry)
+      end
+    end
+    users
+  end
+
   def all_members
     begin
       response = @connection["member/"].get

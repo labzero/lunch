@@ -154,3 +154,16 @@ end
 Then(/^I should see the failed to resynchronize token message$/) do
     page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(I18n.t('settings.two_factor.resynchronize.error'))}\z/, visible: true)
 end
+
+When(/^I visit the access manager page$/) do
+  visit '/settings/users'
+end
+
+Then(/^I should see a list of users$/) do
+  page.assert_selector('h1', text: /\A#{Regexp.quote(I18n.t('settings.account.title'))}\z/, visible: true)
+  page.assert_selector('.settings-users-table tbody tr', minimum: 1, visible: true)
+end
+
+Then(/^I should not see "([^"]*)" in the sidebar nav$/) do |title|
+  page.assert_no_selector('.sidebar-label', text: /\A#{Regexp.quote(title)}\z/, visible: true)
+end

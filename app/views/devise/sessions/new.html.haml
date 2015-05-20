@@ -4,7 +4,7 @@
       %legend= t('global.login')
       - if flash[:alert].present?
         .form-error= flash[:alert]
-      = render 'shared/input_field', form_builder: f, field_name: :username, label: :username
-      = render 'shared/input_field', form_builder: f, field_name: :password, field_type: :password_field, label: :password
+      = render 'shared/input_field', form_builder: f, field_name: :username, label: t('global.username')
+      = render 'shared/input_field', form_builder: f, field_name: :password, field_type: :password_field, label: t('global.password')
       = link_to(t('welcome.forgot_password'), '#')
       = f.submit t('global.login'), class: 'primary-button'

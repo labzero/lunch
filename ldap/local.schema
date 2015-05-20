@@ -10,7 +10,7 @@ attributetype ( 1.2.840.113556.1.4.98 NAME 'primaryGroupID'
 
 objectclass ( 1.2.840.113556.1.5.9 NAME 'user'
   AUXILIARY
-  MAY (sAMAccountName $ primaryGroupID) )
+  MAY (sAMAccountName $ primaryGroupID $ displayName $ givenName $ mail) )
 
 objectclass ( 1.2.840.113556.1.5.8
 	NAME 'group'

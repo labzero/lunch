@@ -90,6 +90,11 @@
   text-transform: uppercase;
 }
 
+@mixin typography-table-button {
+  font-size: 0.8667rem;
+  font-weight: $semibold-weight;
+}
+
 @mixin typography-field-placeholder {
   font-size: 0.8667rem;
   font-weight: $normal-weight;
@@ -259,6 +264,10 @@
 
 %typography-table-link {
   @include typography-table-link;
+}
+
+%typography-table-button {
+  @include typography-table-button;
 }
 
 %typography-subtitle {

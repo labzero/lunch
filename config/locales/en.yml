@@ -91,6 +91,13 @@ en:
     cancel_download: Cancel Download
     pin: PIN
     token: Token
+    username: Username
+    password: Password
+    email: Email
+    actions: Actions
+    role: Role
+    name: Name
+    edit: Edit
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -155,9 +162,18 @@ en:
     save: Save
     save_message: Last auto-saved
     account:
-      title: Accounts
+      title: Manage Users
+      actions:
+        lock: Lock
+        unlock: Unlock
+        reset_password: Reset Password
+        add_user: Add New Web User
+      roles:
+        user: User
+        access_manager: Access Manager
+        authorized_signer: Authorized Signer
     password:
-      title: Passwords
+      title: Password
     quick_advance:
       title: Quick Advances
     quick_report:

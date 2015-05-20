@@ -131,3 +131,49 @@
     }
   }
 }
+
+.settings-users {
+  .settings-users-table {
+    border: 1px solid $light-blue;
+    border-radius: $default-border-radius;
+    padding: 15px;
+  }
+  .settings-users-header {
+    position: relative;
+    overflow: hidden;
+    .table-button {
+      position: absolute;
+      bottom: 10px;
+      right: 0;
+    }
+  }
+  table {
+    @extend %table-striped;
+    margin: 0;
+    td, th {
+      padding: 10px;
+      &:nth-child(5) {
+        text-align: right;
+      }
+    }
+    th {
+      @extend %typography-table-heading;
+      text-align: left;
+    }
+    td {
+      @extend %typography-table-cell;
+    }
+    .settings-user-email, .settings-user-actions, .settings-user-role, .settings-user-username, .settings-user-name {
+      white-space: nowrap;
+    }
+    .settings-user-name {
+      width: 100%;
+    }
+    .settings-user-actions {
+      text-transform: uppercase;
+      padding-left: 0;
+      padding-right: 10px;
+      color: $medium-gray;
+    }
+  }
+}
