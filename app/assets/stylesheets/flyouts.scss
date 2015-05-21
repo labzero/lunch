@@ -45,16 +45,24 @@
   z-index: 1;
   border-bottom: none;
   box-shadow: none;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
+  &:not(.flyout-single-section) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  &.flyout-single-section {
+    padding: 15px 20px;
+  }
 }
 .flyout-bottom-section {
   @extend %pseudoelement-clearfix;
   position: relative;
   margin-top: -1px;
   margin-left: 0;
-  border-top-left-radius: 0;
   padding: 15px 20px;
+  &:not(.flyout-single-section) {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
 }
 
 .flyout-top-section-body {

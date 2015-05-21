@@ -172,6 +172,15 @@ en:
         user: User
         access_manager: Access Manager
         authorized_signer: Authorized Signer
+      lock:
+        title: Account Locked
+        success: Account for %{name} is locked.
+      unlock:
+        title: Account Unlocked
+        success: Account for %{name} is unlocked.
+      error:
+        title: An Error Occured
+        summary: Your request could not be completed.
     password:
       title: Password
     quick_advance:

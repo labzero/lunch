@@ -106,6 +106,16 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
     When I visit the access manager page
     Then I should see a list of users
 
+  @jira-mem-562
+  Scenario: Users who are Access Managers can lock and unlock user accounts
+    Given I am logged in as an "access manager"
+    When I visit the access manager page
+    And I lock a user
+    Then I should see a locked user success overlay
+    When I dismiss the overlay
+    And I unlock a user
+    Then I should see an unlocked user success overlay
+
   @smoke @jira-mem-561
   Scenario: Users who are not Access Managers can't view the access manager page
     Given I visit the dashboard
