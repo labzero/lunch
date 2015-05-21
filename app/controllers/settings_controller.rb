@@ -15,6 +15,10 @@ class SettingsController < ApplicationController
     authorize :access_manager, :show?
   end
 
+  before_action only: [:unlock, :lock] do
+    authorize :access_manager, :edit?
+  end
+
   def index
     @email_options = ['reports'] + CorporateCommunication::VALID_CATEGORIES
   end
@@ -38,21 +42,42 @@ class SettingsController < ApplicationController
     @roles = {}
     @actions = {}
     @users.each do |user|
-      roles = user.roles.collect do |role|
-        if role == User::Roles::ACCESS_MANAGER
-          t('settings.account.roles.access_manager')
-        elsif role == User::Roles::AUTHORIZED_SIGNER
-          t('settings.account.roles.authorized_signer')
-        end
-      end
-      roles.compact!
-      @roles[user.id] = roles.present? ? roles : [t('settings.account.roles.user')]
-      is_current_user = user.id == current_user.id
-      @actions[user.id] = {
-        locked: user.locked?,
-        locked_disabled: is_current_user,
-        reset_disabled: is_current_user
+      @roles[user.id] = roles_for_user(user)
+      @actions[user.id] = actions_for_user(user)
+    end
+  end
+
+  # POST
+  def unlock
+    @user = User.find(params[:id])
+    if @user.id != current_user.id && @user.unlock!
+      render json: {
+        html: render_to_string(layout: false),
+        row_html: render_to_string(partial: 'user_row', locals: {
+          user: @user,
+          roles: roles_for_user(@user),
+          actions: actions_for_user(@user)
+        })
       }
+    else
+      render json: {}, status: 500
+    end
+  end
+
+  # POST
+  def lock
+    @user = User.find(params[:id])
+    if @user.id != current_user.id && @user.lock!
+      render json: {
+        html: render_to_string(layout: false),
+        row_html: render_to_string(partial: 'user_row', locals: {
+          user: @user,
+          roles: roles_for_user(@user),
+          actions: actions_for_user(@user)
+        })
+      }
+    else
+      render json: {}, status: 500
     end
   end
 
@@ -103,6 +128,29 @@ class SettingsController < ApplicationController
       end
     end
     render json: {status: status}
+  end
+
+  private
+
+  def roles_for_user(user)
+    roles = user.roles.collect do |role|
+      if role == User::Roles::ACCESS_MANAGER
+        t('settings.account.roles.access_manager')
+      elsif role == User::Roles::AUTHORIZED_SIGNER
+        t('settings.account.roles.authorized_signer')
+      end
+    end
+    roles.compact!
+    roles.present? ? roles : [t('settings.account.roles.user')]
+  end
+
+  def actions_for_user(user)
+    is_current_user = user.id == current_user.id
+    {
+      locked: user.locked?,
+      locked_disabled: is_current_user,
+      reset_disabled: is_current_user
+    }
   end
 
 end

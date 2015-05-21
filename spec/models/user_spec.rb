@@ -100,7 +100,7 @@ RSpec.describe User, :type => :model do
   end
 
   describe '`locked?` method' do
-    let(:attribute_value) { double('An LDAP Entry Attribute') }
+    let(:attribute_value) { double('An LDAP Entry Attribute', to_i: Time.now.to_i) }
     let(:ldap_entry) { double('LDAP Entry: User') }
     let(:call_method) { subject.locked? }
     before do
@@ -121,6 +121,66 @@ RSpec.describe User, :type => :model do
     it 'should return false if the entry had no value for `lockouttime`' do
       allow(ldap_entry).to receive(:[]).with(:lockouttime)
       expect(call_method).to eq(false)
+    end
+  end
+
+  describe '`lock!` method' do
+    let(:call_method) { subject.lock! }
+    before do
+      allow(subject).to receive(:reload_ldap_entry)
+      allow(subject).to receive(:ldap_domain).and_return(double('An LDAP Domain'))
+      allow_any_instance_of(Time).to receive(:to_i).and_return(rand(1..999))
+      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param)
+    end
+    it 'calls `reload_ldap_entry`' do
+      expect(subject).to receive(:reload_ldap_entry)
+      call_method
+    end
+    it 'calls `Devise::LDAP::Adapter.set_ldap_param`' do
+      expect(Devise::LDAP::Adapter).to receive(:set_ldap_param).with(subject.username, :lockoutTime, Time.now.to_i.to_s, nil, subject.ldap_domain)
+      call_method
+    end
+  end
+
+  describe '`unlock!` method' do
+    let(:call_method) { subject.unlock! }
+    before do
+      allow(subject).to receive(:reload_ldap_entry)
+      allow(subject).to receive(:ldap_domain).and_return(double('An LDAP Domain'))
+      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param)
+    end
+    it 'calls `reload_ldap_entry`' do
+      expect(subject).to receive(:reload_ldap_entry)
+      call_method
+    end
+    it 'calls `Devise::LDAP::Adapter.set_ldap_param`' do
+      expect(Devise::LDAP::Adapter).to receive(:set_ldap_param).with(subject.username, :lockoutTime, '0', nil, subject.ldap_domain)
+      call_method
+    end
+  end
+
+  describe '`reload` method' do
+    let(:call_method) { subject.reload }
+    before do
+      allow_any_instance_of(described_class.superclass).to receive(:reload)
+    end
+    it 'calls `reload_ldap_entry`' do
+      expect(subject).to receive(:reload_ldap_entry)
+      call_method
+    end
+    it 'calls `super` and returns the result' do
+      result = double('A Result')
+      allow_any_instance_of(described_class.superclass).to receive(:reload).and_return(result)
+      expect(call_method).to be(result)
+    end
+  end
+
+  describe '`reload_ldap_entry` protected method' do
+    let(:call_method) { subject.send(:reload_ldap_entry) }
+    it 'should nil out the `@ldap_entry` instance variable' do
+      subject.instance_variable_set(:@ldap_entry, double('LDAP Entry: User'))
+      call_method
+      expect(subject.instance_variable_get(:@ldap_entry)).to be_nil
     end
   end
 

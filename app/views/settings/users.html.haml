@@ -16,21 +16,10 @@
             %th
         %tbody
           - @users.each do |user|
-            %tr
-              %td.settings-user-name= user.display_name
-              %td.settings-user-username= user.username
-              %td.settings-user-email= user.email
-              %td= @roles[user.id].collect{|role| content_tag(:span, role, class: 'settings-user-role')}.join(', ').html_safe
-              %td.settings-user-actions
-                - lock_text = @actions[user.id][:locked] ? t('settings.account.actions.unlock') : t('settings.account.actions.lock')
-                - if @actions[user.id][:locked_disabled]
-                  = lock_text
-                - else 
-                  = link_to(lock_text, '#')
-              %td.settings-user-actions
-                - reset_text = t('settings.account.actions.reset_password')
-                - if @actions[user.id][:reset_disabled]
-                  = reset_text
-                - else
-                  = link_to(reset_text, '#')
-              %td.settings-user-actions= link_to(t('global.edit'), '#')
+            = render 'user_row', user: user, roles: @roles[user.id], actions: @actions[user.id]
+    .settings-users-overlay.settings-users-error
+      %h3=t('settings.account.error.title')
+      %p.settings-users-overlay-details.icon-alert-before=t('settings.account.error.summary')
+      %button.primary-button{data: {'flyout-action' => 'close'}}= t('global.close')
+    .settings-users-overlay.settings-users-loading
+      

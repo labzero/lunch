@@ -1,0 +1,18 @@
+%tr
+  %td.settings-user-name= user.display_name
+  %td.settings-user-username= user.username
+  %td.settings-user-email= user.email
+  %td= roles.collect{|role| content_tag(:span, role, class: 'settings-user-role')}.join(', ').html_safe
+  %td.settings-user-actions.settings-user-lock
+    - lock_text = actions[:locked] ? [t('settings.account.actions.unlock'), user_unlock_path(user)] : [t('settings.account.actions.lock'), user_lock_path(user)]
+    - if actions[:locked_disabled]
+      = lock_text.first
+    - else 
+      = link_to(*lock_text, remote: true, method: :post)
+  %td.settings-user-actions
+    - reset_text = t('settings.account.actions.reset_password')
+    - if actions[:reset_disabled]
+      = reset_text
+    - else
+      = link_to(reset_text, '#')
+  %td.settings-user-actions= link_to(t('global.edit'), '#')

@@ -40,6 +40,31 @@ $(function () {
     $this.parents('.settings-group').find('.form-flash-message').hide();
   });
 
+  function showUsersFlyout($ele, content) {
+    $ele.flyout({topContent: content, resetContent: true, rowClass: 'settings-users-flyout', hideCloseButton: true});
+  };
+
+  function showUsersError($ele) {
+    showUsersFlyout($ele, $('.settings-users .settings-users-error').clone().show());
+  }
+
+  function showUsersLoading($ele) {
+    showUsersFlyout($ele, $('.settings-users .settings-users-loading').clone().show());
+  }
+
+  var lockSelector = '.settings-user-lock a';
+  $('.settings-users').on('ajax:success', lockSelector, function(event, json, status, xhr) {
+    var $ele = $(event.target);
+    showUsersFlyout($ele, json.html);
+    $ele.parents('tr').replaceWith(json.row_html);
+  }).on('ajax:error', lockSelector, function(event, xhr, status, error) {
+    var $ele = $(event.target);
+    showUsersError($ele);
+  }).on('ajax:beforeSend', lockSelector, function(event) {
+    var $ele = $(event.target);
+    showUsersLoading($ele);
+  });
+
   function buildFormErrorHandler ($root) {
     return function(event, xhr, status, error) {
       $root.find('.form-flash-message').hide();

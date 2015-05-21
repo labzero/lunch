@@ -177,3 +177,50 @@
     }
   }
 }
+
+.settings-users-overlay {
+  overflow: hidden;
+  h3 {
+    margin-top: 0;
+  }
+  .settings-users-overlay-details {
+    position: relative;
+    padding-left: 60px;
+    &:before {
+      position: absolute;
+      top: -6px;
+      left: 0;
+      font-size: 30px;
+      color: $approval-green;
+    }
+  }
+  p {
+    margin-bottom: 25px;
+  }
+  .primary-button {
+    width: 240px;
+    float: right;
+  }
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.settings-users-error {
+  display: none;
+  .settings-users-overlay-details:before {
+    color: $alert-red;
+  }
+}
+
+.settings-users-loading {
+  @include icon-loading;
+  display: none;
+  width: 100%;
+  min-height: 110px;
+}
+
+.settings-users-flyout {
+  &, & .column-1 {
+    width: 550px;
+  }
+}
