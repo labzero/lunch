@@ -1,5 +1,12 @@
 class User < ActiveRecord::Base
 
+  LDAP_ATTRIBUTES_MAPPING = {
+    email: :mail,
+    surname: :sn,
+    given_name: :givenname,
+    display_name: :displayname
+  }.with_indifferent_access.freeze
+
   module Roles
     MEMBER_USER = 'member_user'
     ADVANCE_SIGNER = 'advance_signer'
@@ -24,22 +31,57 @@ class User < ActiveRecord::Base
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :ldap_authenticatable, :recoverable, :trackable
 
-  attr_accessor :roles
+  attr_accessor :roles, :email, :surname, :given_name
+
+  after_save :save_ldap_attributes
 
   def display_name
-    ldap_entry[:displayname].try(:first) if ldap_entry
+    @display_name ||= (ldap_entry[:displayname].try(:first) if ldap_entry)
+  end
+
+  def display_name_changed?
+    changed.include?('display_name')
   end
 
   def email
-    ldap_entry[:mail].try(:first) if ldap_entry
+    @email ||= (ldap_entry[:mail].try(:first) if ldap_entry)
+  end
+
+  def email=(value)
+    attribute_will_change!('email') unless value == email
+    @email = value
+  end
+
+  def email_changed?
+    changed.include?('email')
   end
 
   def surname
-    ldap_entry[:sn].try(:first) if ldap_entry
+    @surname ||= (ldap_entry[:sn].try(:first) if ldap_entry)
+  end
+
+  def surname_changed?
+    changed.include?('surname')
+  end
+
+  def surname=(value)
+    attribute_will_change!('surname') unless value == surname
+    @surname = value
+    rebuild_display_name
   end
 
   def given_name
-    ldap_entry[:givenname].try(:first) if ldap_entry
+    @given_name ||= (ldap_entry[:givenname].try(:first) if ldap_entry)
+  end
+
+  def given_name=(value)
+    attribute_will_change!('given_name') unless value == given_name
+    @given_name = value
+    rebuild_display_name
+  end
+
+  def given_name_changed?
+    changed.include?('given_name')
   end
 
   def locked?
@@ -58,6 +100,7 @@ class User < ActiveRecord::Base
 
   def reload
     reload_ldap_entry
+    reload_ldap_attributes
     super
   end
 
@@ -108,6 +151,38 @@ class User < ActiveRecord::Base
 
   def reload_ldap_entry
     @ldap_entry = nil
+  end
+
+  def reload_ldap_attributes
+    LDAP_ATTRIBUTES_MAPPING.each do |ar_attr, ldap_attr|
+      instance_variable_set(:"@#{ar_attr}", nil)
+    end
+  end
+
+  def rebuild_display_name
+    if surname || given_name
+      new_display_name = "#{given_name} #{surname}"
+      attribute_will_change!('display_name') unless display_name == new_display_name
+      @display_name = new_display_name
+    end
+  end
+
+  def save_ldap_attributes
+    attributes = {}
+    changes.each do |attribute, values|
+      key = LDAP_ATTRIBUTES_MAPPING[attribute]
+      attributes[key] = values.last if key
+    end
+
+    return unless attributes.present?
+
+    reload_ldap_entry
+
+    if Devise::LDAP::Adapter.set_ldap_params(username, attributes, nil, ldap_domain)
+      reload_ldap_attributes
+    else
+      raise ActiveRecord::Rollback
+    end
   end
 
 end
