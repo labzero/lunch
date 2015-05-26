@@ -1,0 +1,32 @@
+.advances {
+  h1 {
+    @extend %typography-page-title;
+    margin: 32px 0 17px;
+  }
+}
+
+.advances-header {
+  @extend %pseudoelement-clearfix;
+  margin-bottom: 50px;
+  h1 {
+    float: left;
+  }
+  p {
+    clear: both;
+    width: 540px;
+    display: block;
+  }
+}
+
+.advances-header-buttons {
+  float: right;
+  margin-top: 32px;
+}
+
+.advances-main-body {
+  @extend %report-main-body;
+}
+
+.manage-advances-table {
+  width: 940px;
+}

@@ -817,6 +817,29 @@ describe MemberBalanceService do
     end
   end
 
+  describe '`active_advances` method' do
+    let(:active_advances) {subject.active_advances}
+    it 'returns nil if there is a JSON parsing error' do
+      # TODO change this stub once you implement the MAPI endpoint
+      allow(File).to receive(:read).and_return('some malformed json!')
+      expect(Rails.logger).to receive(:warn)
+      expect(active_advances).to be(nil)
+    end
+    it 'should return an array of hashes containing active advances' do
+      expect(active_advances.length).to be >= 1
+      active_advances.each do |rate|
+        expect(rate['trade_date']).to be_kind_of(String)
+        expect(rate['funding_date']).to be_kind_of(String)
+        expect(rate['maturity_date']).to be_kind_of(String)
+        expect(rate['advance_number']).to be_kind_of(String)
+        expect(rate['advance_type']).to be_kind_of(String)
+        expect(rate['status']).to be_kind_of(String)
+        expect(rate['interest_rate']).to be_kind_of(Float)
+        expect(rate['current_par']).to be_kind_of(Integer)
+      end
+    end
+  end
+
   # Helper Methods
   def override_start_balance_endpoint(start_date, end_date, request_object)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_return(request_object)

@@ -36,6 +36,9 @@ Rails.application.routes.draw do
   get '/reports/letters-of-credit' => 'reports#letters_of_credit'
   get '/reports/securities-transactions' => 'reports#securities_transactions'
 
+  get '/advances' => 'advances#index'
+  get '/advances/manage-advances' => 'advances#manage_advances'
+
   get '/settings' => 'settings#index'
   post '/settings/save' => 'settings#save'
   get '/settings/two-factor' => 'settings#two_factor'

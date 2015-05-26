@@ -468,6 +468,17 @@ class MemberBalanceService < MAPIService
     data
   end
 
+  def active_advances
+    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
+    begin
+      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'active_advances.json')))
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.active_advances encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data
+  end
+
   private
   def fake_as_of_date
     today = Time.zone.now.to_date
