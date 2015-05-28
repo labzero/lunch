@@ -15,4 +15,4 @@
       = reset_text
     - else
       = link_to(reset_text, '#')
-  %td.settings-user-actions= link_to(t('global.edit'), '#')
+  %td.settings-user-actions.settings-user-edit= link_to(t('global.edit'), user_path(user), remote: true)

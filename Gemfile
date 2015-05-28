@@ -51,6 +51,7 @@ gem 'source-sans-pro-rails'
 gem 'highcharts-rails'
 gem 'jquery-placeholder-rails'
 gem 'jquery-datatables-rails'
+gem 'client_side_validations', git: 'https://github.com/DavyJonesLocker/client_side_validations.git', branch: '4-2-stable'
 
 # for MAPI
 gem 'sinatra', require: false

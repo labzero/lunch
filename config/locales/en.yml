@@ -157,6 +157,26 @@ en:
     single:
       input: "As of %{date}"
       custom: Custom date
+  activerecord:
+    attributes:
+      user:
+        given_name: first name
+        surname: last name
+        username: username
+        email: email address
+        email_confirmation: confirm email address
+    errors:
+      models:
+        user:
+          blank: Please enter a %{attribute}.
+          invalid: Please enter a valid %{attribute}.
+          attributes:
+            email:
+              blank: Please enter an %{attribute}.
+              confirmation: Confirmation email address does not match.
+            email_confirmation:
+              blank: You must confirm your email address.
+              confirmation: Confirmation email address does not match.
   settings:
     title: Settings
     save: Save
@@ -174,13 +194,24 @@ en:
         authorized_signer: Authorized Signer
       lock:
         title: Account Locked
-        success: Account for %{name} is locked.
+        success_html: Account for <strong>%{name}</strong> is locked.
       unlock:
         title: Account Unlocked
-        success: Account for %{name} is unlocked.
+        success_html: Account for <strong>%{name}</strong> is unlocked.
       error:
         title: An Error Occured
         summary: Your request could not be completed.
+      edit:
+        title: Edit User Information
+        save: Save Changes
+        delete: Delete Account
+        first_name: First name
+        last_name: Last name
+        email: Email address
+        confirm_email: Confirm email address
+      update:
+        title: User Information Updated
+        success_html: The information for <strong>%{name}</strong> has been updated.
     password:
       title: Password
     quick_advance:
@@ -752,6 +783,7 @@ en:
     receive_via_email: Receiving messages via email
     edit_email_settings_html: Edit your <a href=%{url}>Email Settings</a> to choose which messages you want to receive via email.
   errors:
+    format: '%{message}'
     assistance: "If you need assistance, contact our Web Support team at %{phone_number}"
     "500":
       headline: Sorry for the inconvenience.

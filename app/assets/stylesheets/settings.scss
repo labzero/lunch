@@ -224,3 +224,41 @@
     width: 550px;
   }
 }
+
+.settings-user-form {
+  .settings-user-form-actions {
+    float: right;
+  }
+  button, .primary-button {
+    width: 130px;
+    margin-right: 20px;
+  }
+  .primary-button {
+    margin-right: 0;
+  }
+  form {
+    margin-bottom: 30px;
+  }
+  input[disabled] {
+    background-color: $secondary-gray;
+  }
+  input[name="user[username]"] {
+    width: 40%;
+  }
+  label {
+    width: 35%;
+    display: inline-block;
+    vertical-align: top;
+    line-height: $form-input-field-height;
+  }
+  .input-field-container-horizontal {
+    display: block;
+    float: none;
+    margin-right: 0;
+    .input-field-container {
+      width: 65%;
+      padding-left: 1px;
+      box-sizing: border-box;
+    }
+  }
+}

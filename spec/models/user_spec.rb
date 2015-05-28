@@ -2,17 +2,33 @@ require 'rails_helper'
 
 RSpec.describe User, :type => :model do
 
+  before do
+    allow_any_instance_of(User).to receive(:ldap_entry).and_return(nil)
+    allow_any_instance_of(User).to receive(:save_ldap_attributes).and_return(true)
+  end
+
   it { is_expected.to callback(:save_ldap_attributes).after(:save) }
+  it { should validate_confirmation_of(:email).on(:update) }
+  it { should validate_presence_of(:email).on(:update) }
+  it { subject.email = 'foo' ; should validate_presence_of(:email_confirmation).on(:update) }
+  it { should validate_presence_of(:given_name).on(:update) }
+  it { should validate_presence_of(:surname).on(:update) }
+  ['foo', 'foo@example', 'foo@example.1'].each do |value|
+    it { should_not allow_value(value).for(:email) }
+  end
+  ['foo@example.com', 'foo@example.co', 'bar@example.org'].each do |value|
+    it { should allow_value(value).for(:email) }
+  end
 
   describe '`after_ldap_authentication` method' do
     let(:new_ldap_domain) { double('some domain name') }
     it 'updates its `ldap_domain` attribute with the argument provided' do
-      expect(subject).to receive(:update_attributes!).with({ldap_domain: new_ldap_domain})
+      expect(subject).to receive(:update_attribute).with(:ldap_domain, new_ldap_domain)
       subject.after_ldap_authentication(new_ldap_domain)
     end
     it 'does not update `ldap_domain` if it already has a value for that attribute' do
       subject.ldap_domain = 'some existing domain name'
-      expect(subject).to_not receive(:update_attributes!)
+      expect(subject).to_not receive(:update_attribute)
       subject.after_ldap_authentication(new_ldap_domain)
     end
   end
@@ -333,6 +349,9 @@ RSpec.describe User, :type => :model do
 
   describe '`save_ldap_attributes` protected method' do
     let(:call_method) { subject.send(:save_ldap_attributes) }
+    before do
+      allow_any_instance_of(User).to receive(:save_ldap_attributes).and_call_original
+    end
     it 'should not save if there are no changes' do
       expect(Devise::LDAP::Adapter).to_not receive(:set_ldap_params)
       call_method
@@ -448,7 +467,7 @@ RSpec.describe User, :type => :model do
         call_method
       end
       it 'should set the `@ldap_entry` on the new User instance' do
-        expect(call_method.ldap_entry).to eq(ldap_entry)
+        expect(call_method.instance_variable_get(:@ldap_entry)).to be(ldap_entry)
       end
     end
   end

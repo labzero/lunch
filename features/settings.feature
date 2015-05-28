@@ -100,24 +100,8 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
     And I submit the resynchronize token form
     Then I should see the failed to resynchronize token message
 
-  @jira-mem-561
-  Scenario: Users who are Access Managers can view the access manager page
-    Given I am logged in as an "access manager"
-    When I visit the access manager page
-    Then I should see a list of users
-
-  @jira-mem-562
-  Scenario: Users who are Access Managers can lock and unlock user accounts
-    Given I am logged in as an "access manager"
-    When I visit the access manager page
-    And I lock a user
-    Then I should see a locked user success overlay
-    When I dismiss the overlay
-    And I unlock a user
-    Then I should see an unlocked user success overlay
-
   @smoke @jira-mem-561
   Scenario: Users who are not Access Managers can't view the access manager page
     Given I visit the dashboard
-    And I click on the gear icon in the header
+    When I click on the gear icon in the header
     Then I should not see "Access Manager" in the sidebar nav

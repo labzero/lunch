@@ -1,5 +1,11 @@
 class User < ActiveRecord::Base
 
+  validates :given_name, presence: {on: :update}
+  validates :surname, presence: {on: :update}
+  validates :email, presence: {on: :update}, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, allow_blank: true }, confirmation: {if: :email_changed?, on: :update}
+  validates :email_confirmation, presence: {if: :email_changed?, on: :update}
+
+
   LDAP_ATTRIBUTES_MAPPING = {
     email: :mail,
     surname: :sn,
@@ -130,7 +136,7 @@ class User < ActiveRecord::Base
   end
 
   def after_ldap_authentication(new_ldap_domain)
-    self.update_attributes!(ldap_domain: new_ldap_domain) if self.ldap_domain.nil?
+    self.update_attribute(:ldap_domain, new_ldap_domain) if self.ldap_domain.nil?
   end
 
   def roles(request = ActionDispatch::TestRequest.new)

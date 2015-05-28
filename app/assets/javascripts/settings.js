@@ -40,16 +40,16 @@ $(function () {
     $this.parents('.settings-group').find('.form-flash-message').hide();
   });
 
-  function showUsersFlyout($ele, content) {
-    $ele.flyout({topContent: content, resetContent: true, rowClass: 'settings-users-flyout', hideCloseButton: true});
+  function showUsersFlyout($ele, content, no_reset) {
+    $ele.flyout({topContent: content, resetContent: !no_reset, rowClass: 'settings-users-flyout', hideCloseButton: true});
   };
 
   function showUsersError($ele) {
     showUsersFlyout($ele, $('.settings-users .settings-users-error').clone().show());
   }
 
-  function showUsersLoading($ele) {
-    showUsersFlyout($ele, $('.settings-users .settings-users-loading').clone().show());
+  function showUsersLoading($ele, no_reset) {
+    showUsersFlyout($ele, $('.settings-users .settings-users-loading').clone().show(), no_reset);
   }
 
   var lockSelector = '.settings-user-lock a';
@@ -64,6 +64,42 @@ $(function () {
     var $ele = $(event.target);
     showUsersLoading($ele);
   });
+
+  var editSelector = '.settings-user-edit a';
+  $('.settings-users').on('ajax:success', editSelector, function(event, json, status, xhr) {
+    var $ele = $(event.target);
+    showUsersFlyout($ele, json.html);
+    var $form = $('.settings-user-form form');
+    $form.data('row', $ele.parents('tr'));
+    $form.enableClientSideValidations();
+  }).on('ajax:error', editSelector, function(event, xhr, status, error) {
+    var $ele = $(event.target);
+    showUsersError($ele);
+  }).on('ajax:beforeSend', editSelector, function(event) {
+    var $ele = $(event.target);
+    showUsersLoading($ele);
+  });
+
+  $('.flyout-row').on('click', '.settings-user-form .primary-button', function() {
+    console.log('click');
+    $('.settings-user-form form').submit();
+  });
+
+  var formSelector = '.settings-user-form';
+  $('.flyout-row').on('ajax:success', formSelector, function(event, json, status, xhr) {
+    var $ele = $(event.target);
+    var $row = $ele.data('row');
+    showUsersFlyout($ele, json.html);
+    $row.replaceWith(json.row_html);
+  }).on('ajax:error', formSelector, function(event, xhr, status, error) {
+    var $ele = $(event.target);
+    showUsersError($ele);
+  }).on('ajax:beforeSend', formSelector, function(event) {
+    var $ele = $(event.target);
+    $(formSelector).hide();
+    showUsersLoading($ele, true);
+  });
+
 
   function buildFormErrorHandler ($root) {
     return function(event, xhr, status, error) {

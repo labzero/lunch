@@ -1,3 +1,5 @@
+$form-input-field-height: 30px !default;
+
 %input-field-styling {
   border: 1px solid $actionable-blue;
   border-radius: $default-border-radius;
@@ -6,7 +8,7 @@
   box-sizing: border-box;
   width: 100%;
   display: inline-block;
-  height: 30px;
+  height: $form-input-field-height;
   line-height: normal;
   @include input-placeholder {
     color: $dark-gray;
@@ -50,6 +52,17 @@
     &.input-field-error {
       border-color: $alert-red;
     }
+  }
+  .label-error {
+    display: none;
+  }
+  &.input-field-container-error {
+    .label-error {
+      width: 100%;
+      color: $alert-red;
+      display: inline-block;
+    }
+    height: auto;
   }
 
   &[class*=" icon-"], &[class^="icon-"] {

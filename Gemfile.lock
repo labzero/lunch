@@ -1,4 +1,11 @@
 GIT
+  remote: https://github.com/DavyJonesLocker/client_side_validations.git
+  revision: 86b5c93df07b3f04743c86d024fce178bfb073e3
+  branch: 4-2-stable
+  specs:
+    client_side_validations (4.2.0)
+
+GIT
   remote: https://github.com/labzero/devise_ldap_authenticatable.git
   revision: 78a6f60c2763f7f00900611924a5a051e329d475
   branch: 0.9.3
@@ -471,6 +478,7 @@ DEPENDENCIES
   capistrano-rails
   capistrano-rvm
   capybara
+  client_side_validations!
   css_parser
   cucumber (>= 2.0.0.rc1)
   database_cleaner
