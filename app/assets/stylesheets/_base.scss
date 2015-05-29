@@ -44,3 +44,38 @@ body {
     overflow: visible;
   }
 }
+
+%report-main-body {
+  margin-bottom: 100px;
+  section {
+    clear: both;
+  }
+  h3 {
+    @extend %typography-subtitle;
+    margin: 0;
+  }
+  small {
+    width: 540px;
+    display: block;
+    clear: both;
+    a {
+      color: $actionable-blue;
+    }
+    p {
+      margin: 0;
+    }
+    ol {
+      padding-left: 15px;
+      li {
+        margin-bottom: 10px;
+      }
+    }
+    ul {
+      margin-bottom: 10px;
+      li {
+        list-style-type: disc;
+        margin-bottom: 0px;
+      }
+    }
+  }
+}
