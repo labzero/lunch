@@ -469,9 +469,18 @@ class MemberBalanceService < MAPIService
   end
 
   def active_advances
-    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
     begin
-      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'active_advances.json')))
+      response = @connection["member/#{@member_id}/active_advances"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.active_advances encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.active_advances encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body)
     rescue JSON::ParserError => e
       Rails.logger.warn("MemberBalanceService.active_advances encountered a JSON parsing error: #{e}")
       return nil

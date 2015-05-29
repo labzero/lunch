@@ -99,11 +99,11 @@ describe MAPI::ServiceApp do
           end
         end
       end
-      it "should return Internal Service Error, if calendar service is unavaible", vcr: {cassette_name: 'calendar_service_unavailable'} do
+      it "should return Internal Service Error, if calendar service is unavailable", vcr: {cassette_name: 'calendar_service_unavailable'} do
         get '/rates/summary'
         expect(last_response.status).to eq(503)
       end
-      it "should return Internal Service Error, if mds service is unavaible", vcr: {cassette_name: 'mds_service_unavailable'} do
+      it "should return Internal Service Error, if mds service is unavailable", vcr: {cassette_name: 'mds_service_unavailable'} do
         get '/rates/summary'
         expect(last_response.status).to eq(503)
       end

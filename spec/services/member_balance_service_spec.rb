@@ -817,16 +817,24 @@ describe MemberBalanceService do
     end
   end
 
-  describe '`active_advances` method' do
+  describe '`active_advances` method', :vcr do
     let(:active_advances) {subject.active_advances}
-    it 'returns nil if there is a JSON parsing error' do
-      # TODO change this stub once you implement the MAPI endpoint
-      allow(File).to receive(:read).and_return('some malformed json!')
+    it 'should return nil if there is a JSON parsing error' do
+      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
       expect(Rails.logger).to receive(:warn)
       expect(active_advances).to be(nil)
     end
+    it 'should return nil if there was an API error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(active_advances).to eq(nil)
+    end
+    it 'should return nil if there was a connection error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(active_advances).to eq(nil)
+    end
     it 'should return an array of hashes containing active advances' do
-      expect(active_advances.length).to be >= 1
+      expect(active_advances).to be_kind_of(Array)
+      expect(active_advances.length).to be >= 0
       active_advances.each do |rate|
         expect(rate['trade_date']).to be_kind_of(String)
         expect(rate['funding_date']).to be_kind_of(String)

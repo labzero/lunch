@@ -11,7 +11,7 @@ class AdvancesController < ApplicationController
           columns << {type: :index, value: value[1]}
         elsif value[0]=='current_par'
             columns << {type: :number, value: value[1]}
-        elsif value[0]=='trade_date' || value[0]=='funding_date' || value[0]=='maturity_date'
+        elsif value[0]=='trade_date' || value[0]=='funding_date' || (value[0]=='maturity_date' and value[1] != 'Open')
           columns << {type: :date, value: value[1]}
         else
           columns << {value: value[1]}
