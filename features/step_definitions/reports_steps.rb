@@ -35,6 +35,10 @@ When(/^I select "(.*?)" from the reports dropdown$/) do |report|
   page.find('.nav-dropdown').click_link(report)
 end
 
+Then(/^I should see "([^"]*)" in the reports dropdown$/) do |report|
+  page.find('.nav-dropdown li', text: /\A#{Regexp.quote(report)}\z/)
+end
+
 When(/^the "(.*?)" table has no data$/) do |report|
   # placeholder step for now in case we implement turning off data for certain reports during testing
 end
@@ -70,7 +74,7 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
   when 'Capital Stock Activity Statement'
     visit '/reports/capital-stock-activity'
   when 'Settlement Transaction Account Statement'
-    visit '/reports/settlement-transaction-account'
+    visit '/reports/settlement-transaction-account?start_date=2015-04-01&end_date=2015-04-30'
   when 'Advances Detail'
     visit '/reports/advances'
   when 'Cash Projections'

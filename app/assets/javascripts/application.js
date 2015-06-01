@@ -17,4 +17,5 @@
 //= require highcharts
 //= require moment
 //= require daterangepicker
+//= require rails.validations
 //= require_tree .

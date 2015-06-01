@@ -227,6 +227,98 @@ RSpec.describe SettingsController, :type => :controller do
     end
   end
 
+  describe 'GET edit_user' do
+    allow_policy(:access_manager, :edit?)
+    let(:user_id) { rand(10000..99999) }
+    let(:make_request) { get :edit_user, id: user_id }
+    let(:email) { SecureRandom.hex }
+    let(:user) { double('User', id: user_id, email: email, :email_confirmation= => nil) }
+    before do
+      allow(User).to receive(:find).and_call_original
+      allow(User).to receive(:find).with(user_id.to_s).and_return(user)
+    end
+    it_behaves_like 'an authorization required method', :get, :edit_user, :access_manager, :edit?, id: rand(10000..99999)
+    it 'assigns the user identified by `params[:id]` to @user' do
+      make_request
+      expect(assigns[:user]).to be(user)
+    end
+    it 'returns a 404 if the user was not found' do
+      expect{get :edit_user, id: 'foo'}.to raise_error(ActiveRecord::RecordNotFound)
+    end
+    it 'assigns the `email` to the `email_confirmation`' do
+      expect(user).to receive(:email_confirmation=).with(email)
+      make_request
+    end
+    it "renders the `edit_user` overlay" do
+      expect(subject).to receive(:render_to_string).with(layout: false)
+      make_request
+    end
+    it 'returns a JSON response' do
+      make_request
+      json = JSON.parse(response.body)
+      expect(json).to have_key('html')
+    end
+  end
+
+  describe 'POST update_user' do
+    allow_policy(:access_manager, :edit?)
+    let(:user_id) { rand(10000..99999) }
+    let(:email) { SecureRandom.hex }
+    let(:given_name) { SecureRandom.hex }
+    let(:surname) { SecureRandom.hex }
+    let(:attributes) { {email: email, given_name: given_name, surname: surname} }
+    let(:make_request) { post :update_user, id: user_id, user: attributes }
+    let(:user) { double('User', class: User, id: user_id, errors: double('Errors', full_messages: [])) }
+    let(:roles) { double('Roles') }
+    let(:actions) { double('Actions') }
+    before do
+      allow(subject).to receive(:roles_for_user).and_return(roles)
+      allow(subject).to receive(:actions_for_user).and_return(actions)
+      allow(subject).to receive(:render_to_string)
+      allow(User).to receive(:find).and_call_original
+      allow(User).to receive(:find).with(user_id.to_s).and_return(user)
+      allow(user).to receive(:update_attributes!)
+    end
+    it { should permit(:email, :given_name, :surname, :email_confirmation).for(:update_user, verb: :post, params: {id: user_id}) }
+    it_behaves_like 'an authorization required method', :post, :update_user, :access_manager, :edit?, id: rand(10000..99999)
+    it 'assigns the user identified by `params[:id]` to @user' do
+      make_request
+      expect(assigns[:user]).to be(user)
+    end
+    it 'returns a 404 if the user was not found' do
+      expect{post :update_user, id: 'foo'}.to raise_error(ActiveRecord::RecordNotFound)
+    end
+    it 'returns a 400 if the `user` parameter is missing' do
+      expect{post :update_user, id: user_id}.to raise_error(ActionController::ParameterMissing)
+    end
+    it 'updates the user with the passed params' do
+      expect(user).to receive(:update_attributes!).with(attributes)
+      make_request
+    end
+    it 'returns a 422 if validation fails' do
+      allow(user).to receive(:update_attributes!).and_raise(ActiveRecord::RecordInvalid.new(user))
+      expect{make_request}.to raise_error(ActiveRecord::RecordInvalid)
+    end
+    it 'renders the `update_user` overlay' do
+      expect(subject).to receive(:render_to_string).with(layout: false)
+      make_request
+    end
+    it 'renders the `user_row`' do
+      expect(subject).to receive(:render_to_string).with(partial: 'user_row', locals: {
+        user: user,
+        roles: roles,
+        actions: actions
+      })
+      make_request
+    end
+    it 'returns a JSON response' do
+      make_request
+      json = JSON.parse(response.body)
+      expect(json).to have_key('html')
+      expect(json).to have_key('row_html')
+    end
+  end
+
   {unlock: :unlock!, lock: :lock!}.each do |route, method|
     describe "POST #{route}" do
       allow_policy(:access_manager, :edit?)

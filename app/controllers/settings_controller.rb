@@ -15,7 +15,7 @@ class SettingsController < ApplicationController
     authorize :access_manager, :show?
   end
 
-  before_action only: [:unlock, :lock] do
+  before_action only: [:unlock, :lock, :edit_user, :update_user] do
     authorize :access_manager, :edit?
   end
 
@@ -79,6 +79,27 @@ class SettingsController < ApplicationController
     else
       render json: {}, status: 500
     end
+  end
+
+  # GET
+  def edit_user
+    @user = User.find(params[:id])
+    @user.email_confirmation = @user.email
+    render json: {html: render_to_string(layout: false)}
+  end
+
+  # POST
+  def update_user
+    @user = User.find(params[:id])
+    @user.update_attributes!(params.require(:user).permit(:given_name, :surname, :email, :email_confirmation))
+    render json: {
+      html: render_to_string(layout: false),
+      row_html: render_to_string(partial: 'user_row', locals: {
+        user: @user,
+        roles: roles_for_user(@user),
+        actions: actions_for_user(@user)
+      })
+    }
   end
 
   # GET
