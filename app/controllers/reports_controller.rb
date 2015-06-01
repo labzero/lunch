@@ -112,6 +112,13 @@ class ReportsController < ApplicationController
           available_history: t('reports.history.months18'),
           route: reports_securities_services_statement_path
         }
+      },
+      authorizations: {
+        user: {
+          updated: t('reports.continuously'),
+          available_history: t('global.current_day'),
+          route: reports_authorizations_path
+        }
       }
     }
   end
@@ -642,6 +649,45 @@ class ReportsController < ApplicationController
     }
   end
 
+  def authorizations
+    @authorizations_filter = params['authorizations_filter'] || 'all'
+    users = MembersService.new(request).signers_and_users(current_member_id).try(:sort_by, &:display_name) || []
+    rows = []
+    users.each do |user|
+      user_roles = roles_for_signers(user)
+      if @authorizations_filter == 'user' && user_roles.include?(t('user_roles.user.title'))
+        rows << {columns: [{type: nil, value: user.display_name}, {type: :list, value: user_roles}]}
+      else
+        next if user_roles.empty? || (@authorizations_filter != 'all' && !user.roles.include?(@authorizations_filter))
+        rows << {columns: [{type: nil, value: user.display_name}, {type: :list, value: user_roles}]}
+      end
+    end
+    @authorizations_table_data = {
+      :column_headings => [t('user_roles.user.title'), t('reports.authorizations.title')],
+      :rows => rows
+    }
+    @roles_dropdown_options = [
+      [t('user_roles.all_authorizations'), 'all'],
+      [t('user_roles.resolution.dropdown'), User::Roles::SIGNER_MANAGER],
+      [t('user_roles.entire_authority.dropdown'), User::Roles::SIGNER_ENTIRE_AUTHORITY],
+      [t('user_roles.affordable_housing.title'), User::Roles::AFFORDABILITY_SIGNER],
+      [t('user_roles.collateral.title'), User::Roles::COLLATERAL_SIGNER],
+      [t('user_roles.money_market.title'), User::Roles::MONEYMARKET_SIGNER],
+      [t('user_roles.interest_rate_derivatives.title'), User::Roles::DERIVATIVES_SIGNER],
+      [t('user_roles.securities.title'), User::Roles::SECURITIES_SIGNER],
+      [t('user_roles.wire_transfer.title'), User::Roles::WIRE_SIGNER],
+      [t('user_roles.access_manager.title'), User::Roles::ACCESS_MANAGER],
+      [t('user_roles.etransact.title'), User::Roles::ETRANSACT_SIGNER],
+      [t('user_roles.user.title'), 'user']
+    ]
+    @roles_dropdown_options.each do |option|
+      if option[1] == @authorizations_filter
+        @authorizations_filter_text = option[0]
+        break
+      end
+    end
+  end
+
   private
   def report_disabled?(report_flags)
     member_info = MembersService.new(request)
@@ -666,6 +712,34 @@ class ReportsController < ApplicationController
       end
     end
     new_array
+  end
+
+  def roles_for_signers(signer)
+    roles = signer.roles.collect do |role|
+      if role == User::Roles::ACCESS_MANAGER
+        t('user_roles.access_manager.title')
+      elsif role == User::Roles::SIGNER_MANAGER
+        t('user_roles.resolution.title')
+      elsif role == User::Roles::SIGNER_ENTIRE_AUTHORITY
+        t('user_roles.entire_authority.title')
+      elsif role == User::Roles::AFFORDABILITY_SIGNER
+        t('user_roles.affordable_housing.title')
+      elsif role == User::Roles::COLLATERAL_SIGNER
+        t('user_roles.collateral.title')
+      elsif role == User::Roles::MONEYMARKET_SIGNER
+        t('user_roles.money_market.title')
+      elsif role == User::Roles::DERIVATIVES_SIGNER
+        t('user_roles.interest_rate_derivatives.title')
+      elsif role == User::Roles::SECURITIES_SIGNER
+        t('user_roles.securities.title')
+      elsif role == User::Roles::WIRE_SIGNER
+        t('user_roles.wire_transfer.title')
+      elsif role == User::Roles::ETRANSACT_SIGNER
+        t('user_roles.etransact.title')
+      end
+    end
+    roles.compact!
+    roles.present? ? roles : [t('user_roles.user.title')]
   end
 
 end

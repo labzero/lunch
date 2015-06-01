@@ -860,6 +860,110 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
+  describe 'GET authorizations' do
+    it_behaves_like 'a user required action', :get, :authorizations
+    describe 'view instance variables' do
+      let(:member_service_instance) {double('MembersService')}
+      let(:user_no_roles) {OpenStruct.new(display_name: 'User With No Roles', roles: [])}
+      let(:user_etransact) {OpenStruct.new(display_name: 'Etransact User', roles: [User::Roles::ETRANSACT_SIGNER])}
+      let(:signers_and_users) {[user_no_roles, user_etransact]}
+      let(:roles) {['all', User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::AFFORDABILITY_SIGNER, User::Roles::COLLATERAL_SIGNER, User::Roles::MONEYMARKET_SIGNER, User::Roles::DERIVATIVES_SIGNER, User::Roles::SECURITIES_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER, User::Roles::ETRANSACT_SIGNER]}
+      let(:role_translations) {[t('user_roles.all_authorizations'), t('user_roles.resolution.dropdown'), t('user_roles.entire_authority.dropdown'), t('user_roles.affordable_housing.title'), t('user_roles.collateral.title'), t('user_roles.money_market.title'), t('user_roles.interest_rate_derivatives.title'), t('user_roles.securities.title'), t('user_roles.wire_transfer.title'), t('user_roles.access_manager.title'), t('user_roles.etransact.title')]}
+      before do
+        allow(MembersService).to receive(:new).and_return(member_service_instance)
+        allow(member_service_instance).to receive(:signers_and_users).and_return(signers_and_users)
+      end
+      it 'sets @authorization_filter to the `authorizations_filter` param' do
+        get :authorizations, :authorizations_filter => 'my filter param'
+        expect(assigns[:authorizations_filter]).to eq('my filter param')
+      end
+      it 'sets @authorization_filter to `all` if no `authorizations_filter` param is provided' do
+        get :authorizations
+        expect(assigns[:authorizations_filter]).to eq('all')
+      end
+      it 'sets @roles_dropdown_options to an array containing dropdown names and values' do
+        get :authorizations
+        expect(assigns[:roles_dropdown_options]).to be_kind_of(Array)
+        assigns[:roles_dropdown_options].each do |option|
+          expect(option.first).to be_kind_of(String)
+          expect(option.last).to be_kind_of(String)
+        end
+      end
+      describe '@authorizations_filter_text' do
+        {
+          'all' => I18n.t('user_roles.all_authorizations'),
+          User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.dropdown'),
+          User::Roles::SIGNER_ENTIRE_AUTHORITY => I18n.t('user_roles.entire_authority.dropdown'),
+          User::Roles::AFFORDABILITY_SIGNER => I18n.t('user_roles.affordable_housing.title'),
+          User::Roles::COLLATERAL_SIGNER => I18n.t('user_roles.collateral.title'),
+          User::Roles::MONEYMARKET_SIGNER => I18n.t('user_roles.money_market.title'),
+          User::Roles::DERIVATIVES_SIGNER => I18n.t('user_roles.interest_rate_derivatives.title'),
+          User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
+          User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
+          User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title'),
+          User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact.title'),
+          'user' => I18n.t('user_roles.user.title')
+        }.each do |role, role_name|
+          it "equals #{role_name} when the authorizations_filter is set to #{role}" do
+            get :authorizations, :authorizations_filter => role
+            expect(assigns[:authorizations_filter_text]).to eq(role_name)
+          end
+        end
+      end
+      describe '`@authorizations_table_data`' do
+        it 'returns a hash with `column_headings`' do
+          get :authorizations
+          expect(assigns[:authorizations_table_data][:column_headings]).to eq([I18n.t('user_roles.user.title'), I18n.t('reports.authorizations.title')])
+        end
+        describe '`rows`' do
+          it 'is an array containing a `columns` hash' do
+            get :authorizations
+            expect(assigns[:authorizations_table_data][:rows]).to be_kind_of(Array)
+            assigns[:authorizations_table_data][:rows].each do |row|
+              expect(row).to be_kind_of(Hash)
+            end
+          end
+          describe '`columns` hash' do
+            it 'contains a `display_name` with no type' do
+              get :authorizations
+              assigns[:authorizations_table_data][:rows].each do |row|
+                expect(row[:columns].first[:type]).to be_nil
+                expect(row[:columns].first[:value]).to be_kind_of(String)
+              end
+            end
+            it 'contains `user_roles` with a type of `list`' do
+              get :authorizations
+              assigns[:authorizations_table_data][:rows].each do |row|
+                expect(row[:columns].last[:type]).to eq(:list)
+                expect(row[:columns].last[:value]).to be_kind_of(Array)
+              end
+            end
+            it 'contains all users sorted by display_name if the authorizations_filter is set to `all`' do
+              get :authorizations
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(2)
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('Etransact User')
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.etransact.title')])
+              expect(assigns[:authorizations_table_data][:rows].last[:columns].first[:value]).to eq('User With No Roles')
+              expect(assigns[:authorizations_table_data][:rows].last[:columns].last[:value]).to eq([I18n.t('user_roles.user.title')])
+            end
+            it "only contains users with a user_role of #{I18n.t('user_roles.user.title')} if the authorizations_filter is set to `user`" do
+              get :authorizations, :authorizations_filter => 'user'
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('User With No Roles')
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.user.title')])
+            end
+            it 'only contains users with the proper role if an authorization_filter is set' do
+              get :authorizations, :authorizations_filter => User::Roles::ETRANSACT_SIGNER
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('Etransact User')
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.etransact.title')])
+            end
+          end
+        end
+      end
+    end
+  end
+
   describe 'private methods' do
     describe '`report_disabled?` method' do
       let(:report_flags) {double('some report flags')}
@@ -924,11 +1028,34 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
+    describe '`roles_for_signers` method' do
+      let(:role_mappings) {
+        {
+          User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
+          User::Roles::SIGNER_ENTIRE_AUTHORITY => I18n.t('user_roles.entire_authority.title'),
+          User::Roles::AFFORDABILITY_SIGNER => I18n.t('user_roles.affordable_housing.title'),
+          User::Roles::COLLATERAL_SIGNER => I18n.t('user_roles.collateral.title'),
+          User::Roles::MONEYMARKET_SIGNER => I18n.t('user_roles.money_market.title'),
+          User::Roles::DERIVATIVES_SIGNER => I18n.t('user_roles.interest_rate_derivatives.title'),
+          User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
+          User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
+          User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title'),
+          User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact.title')
+        }
+      }
+      it 'returns an array containing the I18n translation of the roles for a given user' do
+        role_mappings.each_key do |role|
+          user = OpenStruct.new(:roles => [role])
+          expect(controller.send(:roles_for_signers, user)).to eq([role_mappings[role]])
+        end
+      end
+      it 'returns an array containing the I18n translation for `user` when a given user has no roles' do
+        role_mappings.each_key do |role|
+          user = OpenStruct.new(:roles => [])
+          expect(controller.send(:roles_for_signers, user)).to eq([I18n.t('user_roles.user.title')])
+        end
+      end
+    end
   end
 
 end
-
-[{:term=>"1Y", :type=>"index", :value=>nil, :day_count_basis=>nil, :pay_freq=>nil},
-{"term"=>"2Y", "type"=>"basis_point", "value"=>105.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"},
-{"term"=>"3Y", "type"=>"basis_point", "value"=>193.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"},
-{"term"=>"5Y", "type"=>"basis_point", "value"=>197.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"}]

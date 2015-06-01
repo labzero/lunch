@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe MembersService do
   let(:member_id) { 3 }
@@ -118,6 +118,47 @@ describe MembersService do
     it 'should lookup the User record or create it if not found' do
       expect(User).to receive(:find_or_create_by_ldap_entry).with(user_entry)
       users
+    end
+  end
+
+  describe '`signers_and_users` method' do
+    let(:signer_mapped_roles) {[User::ROLE_MAPPING['signer-etransact']]}
+    let(:signer_roles) {['signer-etransact']}
+    let(:signer) {{name: 'Some Signer', roles: signer_roles}}
+    let(:duplicate_signer) {{name: 'A Duplicate User', username: 'username', roles: signer_roles}}
+    let(:user_roles) {['user']}
+    let(:user) {double('Some User', :display_name => 'User Display Name', roles: user_roles, username: 'username')}
+    let(:member) { subject.signers_and_users(member_id) }
+
+    it 'should return nil if there was an API error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(member).to eq(nil)
+    end
+    it 'should return nil if there was a connection error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(member).to eq(nil)
+    end
+
+    describe 'returns an array' do
+      before do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: [signer].to_json))
+        allow(subject).to receive(:users).and_return([user])
+      end
+      it 'contains all users associated with a bank as OpenStructs with a `display_name` and `roles`' do
+        expect(member).to include(OpenStruct.new(:display_name => 'User Display Name', roles: user_roles))
+      end
+      it 'contains all signers associated with a bank as OpenStructs with a `display_name` and `roles`' do
+        expect(member).to include(OpenStruct.new(:display_name => 'Some Signer', roles: signer_mapped_roles))
+      end
+      it 'does not add a signer to the result set if the signer is also a user' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: [signer, duplicate_signer].to_json))
+        expect(member.length).to eq(2)
+      end
+      it 'returns an empty array if no users or signers are found' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: '[]'))
+        allow(subject).to receive(:users).and_return([])
+        expect(member).to eq([])
+      end
     end
   end
 end

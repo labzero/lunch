@@ -1,0 +1,14 @@
+{
+  "6": [
+    {
+      "name": "Chaste Access",
+      "username": "extra-chaste-access",
+      "roles": ["signer", "signer-etransact"]
+    },
+    {
+      "name": "Della Duck",
+      "username": null,
+      "roles": ["signer-collateral", "signer-moneymarket"]
+    }
+  ]
+}

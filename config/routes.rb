@@ -35,6 +35,7 @@ Rails.application.routes.draw do
   get '/reports/securities-services-statement' => 'reports#securities_services_statement'
   get '/reports/letters-of-credit' => 'reports#letters_of_credit'
   get '/reports/securities-transactions' => 'reports#securities_transactions'
+  get '/reports/authorizations' => 'reports#authorizations'
 
   get '/advances' => 'advances#index'
   get '/advances/manage-advances' => 'advances#manage_advances'

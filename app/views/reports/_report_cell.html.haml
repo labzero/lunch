@@ -13,6 +13,11 @@
 - when :date
   - value = fhlb_date_standard_numeric(cell[:value])
   - classes = [:'report-cell-narrow']
+- when :list
+  - value = '<ul>'
+  - cell[:value].each { |list_item| value += "<li data-list-value='#{list_item}'>#{list_item}</li>" }
+  - value += '</ul>'
+  - value = value.html_safe
 - else
   - value = cell[:value]
   - classes = [:'report-cell-narrow']

@@ -136,6 +136,13 @@
 
 .report-main-body {
   @extend %report-main-body;
+  small {
+    span:first-child {
+      @extend %typography-table-total;
+      margin-right: 5px;
+      margin-top: 10px;
+    }
+  }
 }
 
 .report-info-indent {
@@ -644,6 +651,83 @@ td.dataTables_empty {
   @extend %empty_table_cell;
 }
 
+.letters-of-credit-table {
+  td, th {
+    @include table-cell-treatment;
+  }
+  th {
+    &:nth-child(1) {
+      width: 85px;
+    }
+    &:nth-child(2) {
+      width: 105px;
+    }
+    &:nth-child(3) {
+      width: 140px;
+    }
+    &:nth-child(4) {
+      width: 86px;
+    }
+    &:nth-child(5) {
+      width: 115px;
+    }
+    &:nth-child(6) {
+      width: 100px;
+    }
+  }
+  tfoot {
+    td:first-child {
+      border-right: none;
+    }
+  }
+}
+
+.authorizations-report {
+  .report-header {
+    margin-bottom: 20px;
+  }
+  p {
+    width: 540px;
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+  a {
+    color: $actionable-blue;
+  }
+  small {
+    margin-bottom: 10px;
+  }
+}
+
+.authorizations-table {
+  clear: both;
+  width: auto;
+  td:first-child {
+    @extend %typography-table-heading;
+    width: 160px;
+    box-sizing: border-box;
+    vertical-align: top;
+  }
+  td:last-child {
+    text-align: left;
+    width: 540px;
+    box-sizing: border-box;
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  li {
+    line-height: normal;
+  }
+}
+
+.authorizations-filter {
+  margin: 15px 0 30px;
+}
+
 @media print {
   .report {
     color: $print-color;
@@ -776,35 +860,5 @@ td.dataTables_empty {
   }
   .report-print-bank {
     @include typography-print-subheader;
-  }
-}
-.letters-of-credit-table {
-  td, th {
-    @include table-cell-treatment;
-  }
-  th {
-    &:nth-child(1) {
-      width: 85px;
-    }
-    &:nth-child(2) {
-      width: 105px;
-    }
-    &:nth-child(3) {
-      width: 140px;
-    }
-    &:nth-child(4) {
-      width: 86px;
-    }
-    &:nth-child(5) {
-      width: 115px;
-    }
-    &:nth-child(6) {
-      width: 100px;
-    }
-  }
-  tfoot {
-    td:first-child {
-      border-right: none;
-    }
   }
 }

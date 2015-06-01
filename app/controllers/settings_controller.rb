@@ -162,7 +162,7 @@ class SettingsController < ApplicationController
       end
     end
     roles.compact!
-    roles.present? ? roles : [t('settings.account.roles.user')]
+    roles.present? ? roles : [t('user_roles.user.title')]
   end
 
   def actions_for_user(user)

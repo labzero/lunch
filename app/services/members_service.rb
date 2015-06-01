@@ -81,4 +81,31 @@ class MembersService < MAPIService
 
     JSON.parse(response.body).collect! { |member| member.with_indifferent_access }
   end
+
+  def signers_and_users(member_id)
+    signers_and_users = []
+    # hit MAPI to get the full list of signers
+    begin
+      response = @connection["member/#{member_id}/signers"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MembersService.all_members encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MembersService.all_members encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    signers = JSON.parse(response.body)
+    users = self.users(member_id)
+    usernames = users.blank? ? [] : users.collect(&:username)
+    signers.each do |signer|
+      roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact
+      signers_and_users << OpenStruct.new({display_name: signer['name'], roles: roles}) unless usernames.include?(signer['username'])
+    end
+    users.each do |user|
+      signers_and_users << OpenStruct.new({display_name: user.display_name, roles: user.roles})
+    end
+    signers_and_users
+  end
+
 end
