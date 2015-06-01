@@ -70,7 +70,7 @@ class User < ActiveRecord::Base
         ldap_domain: Devise::LDAP::Adapter.get_ldap_domain_from_dn(ldap_entry.dn)
       }
       record = super attrs, &block
-      record.instance_variable_set(:@ldap_entry, ldap_entry) # avoid a second trip to LDAP when possible
+      record.instance_variable_set(:@ldap_entry, ldap_entry) if record # avoid a second trip to LDAP when possible
       record
     else
       super
@@ -82,7 +82,7 @@ class User < ActiveRecord::Base
       username: entry[:samaccountname].try(:first),
       ldap_domain: Devise::LDAP::Adapter.get_ldap_domain_from_dn(entry.dn)
     })
-    record.instance_variable_set(:@ldap_entry, entry) # avoid a second trip to LDAP when possible
+    record.instance_variable_set(:@ldap_entry, entry) if record # avoid a second trip to LDAP when possible
     record
   end
 
