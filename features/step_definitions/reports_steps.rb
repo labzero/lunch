@@ -35,6 +35,10 @@ When(/^I select "(.*?)" from the reports dropdown$/) do |report|
   page.find('.nav-dropdown').click_link(report)
 end
 
+Then(/^I should see "([^"]*)" in the reports dropdown$/) do |report|
+  page.find('.nav-dropdown li', text: /\A#{Regexp.quote(report)}\z/)
+end
+
 When(/^the "(.*?)" table has no data$/) do |report|
   # placeholder step for now in case we implement turning off data for certain reports during testing
 end

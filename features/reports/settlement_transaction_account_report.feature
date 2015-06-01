@@ -8,9 +8,14 @@ Background:
   Given I am logged in
 
 @smoke
-Scenario: Member sees Settlement Transaction Account Statement
+Scenario: Member sees Settlement Transaction Account Statement in the reports dropdown
 Given I visit the dashboard
-When I select "Settlement/Transaction Account (STA)" from the reports dropdown
+When I hover on the reports link in the header
+Then I should see "Settlement/Transaction Account (STA)" in the reports dropdown
+
+@smoke
+Scenario: Member sees Settlement Transaction Account Statement
+Given I am on the "Settlement Transaction Account Statement" report page
 Then I should see report summary data
 And I should see a report table with multiple data rows
 
