@@ -81,7 +81,6 @@ $(function () {
   });
 
   $('.flyout-row').on('click', '.settings-user-form .primary-button', function() {
-    console.log('click');
     $('.settings-user-form form').submit();
   });
 
