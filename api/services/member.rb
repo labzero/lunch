@@ -6,6 +6,7 @@ require_relative 'member/advances_details'
 require_relative 'member/profile'
 require_relative 'member/disabled_reports'
 require_relative 'member/cash_projections'
+require_relative 'member/trade_activity'
 
 module MAPI
   module Services
@@ -259,6 +260,27 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/active_advances'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve Active Advances for a member'
+              key :notes, 'Returns Active Advances.'
+              key :type, :ActiveAdvances
+              key :nickname, :getActiveAdvancesForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
+          api do
             key :path, '/{id}/member_profile'
             operation do
               key :method, 'GET'
@@ -428,10 +450,22 @@ module MAPI
             if as_of_date.to_date >  today_date
               halt 400, "Invalid future date"
             else
-              MAPI::Services::Member::AdvancesDetails.advances_details(self, member_id, as_of_date)
+              MAPI::Services::Member::AdvancesDetails.advances_details(self, member_id, as_of_date).to_json
             end
           end
 
+        end
+
+        # Active Advances
+        relative_get '/:id/active_advances' do
+          member_id = params[:id]
+          begin
+            result = MAPI::Services::Member::TradeActivity.trade_activity(self, member_id, 'ADVANCES')
+          rescue Savon::Error => error
+            logger.error error
+            halt 503, 'Internal Service Error'
+          end
+          result
         end
 
         # Member Profile

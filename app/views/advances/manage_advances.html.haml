@@ -3,7 +3,5 @@
 .advances.row
   .advances-header
     %h1= t('advances.manage_advances.title')
-    .advances-header-buttons
-      %button.secondary-button= t('advances.add_new')
   .advances-main-body
     = render 'reports/reports_table', table_class: 'manage-advances-table', table_data: @advances_data_table, sortable: false
