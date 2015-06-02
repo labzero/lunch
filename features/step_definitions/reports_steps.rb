@@ -372,30 +372,7 @@ When(/^I select "(.*?)" from the authorizations filter$/) do |text|
 end
 
 When(/^I should only see users with the "(.*?)" role$/) do |role|
-  role_name = case role
-    when 'User'
-      I18n.t('user_roles.user.title')
-    when 'Resolution and Authorization'
-      I18n.t('user_roles.resolution.title')
-    when 'Entire Authority'
-      I18n.t('user_roles.entire_authority.title')
-    when 'Affordable Housing Program'
-      I18n.t('user_roles.affordable_housing.title')
-    when 'Collateral'
-      I18n.t('user_roles.collateral.title')
-    when 'Money Market Transactions'
-      I18n.t('user_roles.money_market.title')
-    when 'Interest Rate Derivatives'
-      I18n.t('user_roles.interest_rate_derivatives.title')
-    when 'Securities Services'
-      I18n.t('user_roles.securities.title')
-    when 'Wire Transfer Services'
-      I18n.t('user_roles.wire_transfer.title')
-    when 'Access Manager'
-      I18n.t('user_roles.access_manager.title')
-    when 'eTransact Holder'
-      I18n.t('user_roles.etransact.title')
-  end
+  role_name = ReportsController::AUTHORIZATIONS_MAPPING[role]
   page.all('.report-table tbody td:last-child').each do |cell|
     next if cell.text == I18n.t('errors.table_data_unavailable')
     cell.assert_selector('li', text: role_name)

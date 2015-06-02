@@ -881,29 +881,16 @@ RSpec.describe ReportsController, :type => :controller do
         get :authorizations
         expect(assigns[:authorizations_filter]).to eq('all')
       end
-      it 'sets @roles_dropdown_options to an array containing dropdown names and values' do
+      it 'sets @authorizations_dropdown_options to an array containing dropdown names and values' do
         get :authorizations
-        expect(assigns[:roles_dropdown_options]).to be_kind_of(Array)
-        assigns[:roles_dropdown_options].each do |option|
+        expect(assigns[:authorizations_dropdown_options]).to be_kind_of(Array)
+        assigns[:authorizations_dropdown_options].each do |option|
           expect(option.first).to be_kind_of(String)
           expect(option.last).to be_kind_of(String)
         end
       end
       describe '@authorizations_filter_text' do
-        {
-          'all' => I18n.t('user_roles.all_authorizations'),
-          User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.dropdown'),
-          User::Roles::SIGNER_ENTIRE_AUTHORITY => I18n.t('user_roles.entire_authority.dropdown'),
-          User::Roles::AFFORDABILITY_SIGNER => I18n.t('user_roles.affordable_housing.title'),
-          User::Roles::COLLATERAL_SIGNER => I18n.t('user_roles.collateral.title'),
-          User::Roles::MONEYMARKET_SIGNER => I18n.t('user_roles.money_market.title'),
-          User::Roles::DERIVATIVES_SIGNER => I18n.t('user_roles.interest_rate_derivatives.title'),
-          User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
-          User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
-          User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title'),
-          User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact.title'),
-          'user' => I18n.t('user_roles.user.title')
-        }.each do |role, role_name|
+        ReportsController::AUTHORIZATIONS_DROPDOWN_MAPPING.each do |role, role_name|
           it "equals #{role_name} when the authorizations_filter is set to #{role}" do
             get :authorizations, :authorizations_filter => role
             expect(assigns[:authorizations_filter_text]).to eq(role_name)
@@ -1029,29 +1016,16 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
     describe '`roles_for_signers` method' do
-      let(:role_mappings) {
-        {
-          User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
-          User::Roles::SIGNER_ENTIRE_AUTHORITY => I18n.t('user_roles.entire_authority.title'),
-          User::Roles::AFFORDABILITY_SIGNER => I18n.t('user_roles.affordable_housing.title'),
-          User::Roles::COLLATERAL_SIGNER => I18n.t('user_roles.collateral.title'),
-          User::Roles::MONEYMARKET_SIGNER => I18n.t('user_roles.money_market.title'),
-          User::Roles::DERIVATIVES_SIGNER => I18n.t('user_roles.interest_rate_derivatives.title'),
-          User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
-          User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
-          User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title'),
-          User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact.title')
-        }
-      }
+      let(:role_mappings) { ReportsController::AUTHORIZATIONS_MAPPING }
       it 'returns an array containing the I18n translation of the roles for a given user' do
         role_mappings.each_key do |role|
-          user = OpenStruct.new(:roles => [role])
+          user = {:roles => [role]}
           expect(controller.send(:roles_for_signers, user)).to eq([role_mappings[role]])
         end
       end
       it 'returns an array containing the I18n translation for `user` when a given user has no roles' do
         role_mappings.each_key do |role|
-          user = OpenStruct.new(:roles => [])
+          user = {:roles => []}
           expect(controller.send(:roles_for_signers, user)).to eq([I18n.t('user_roles.user.title')])
         end
       end

@@ -100,10 +100,10 @@ class MembersService < MAPIService
     usernames = users.blank? ? [] : users.collect(&:username)
     signers.each do |signer|
       roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact
-      signers_and_users << OpenStruct.new({display_name: signer['name'], roles: roles}) unless usernames.include?(signer['username'])
+      signers_and_users << {display_name: signer['name'], roles: roles} unless usernames.include?(signer['username'])
     end
     users.each do |user|
-      signers_and_users << OpenStruct.new({display_name: user.display_name, roles: user.roles})
+      signers_and_users << {display_name: user.display_name, roles: user.roles}
     end
     signers_and_users
   end

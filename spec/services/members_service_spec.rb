@@ -144,11 +144,11 @@ describe MembersService do
         allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: [signer].to_json))
         allow(subject).to receive(:users).and_return([user])
       end
-      it 'contains all users associated with a bank as OpenStructs with a `display_name` and `roles`' do
-        expect(member).to include(OpenStruct.new(:display_name => 'User Display Name', roles: user_roles))
+      it 'contains hashes with with a `display_name` and `roles` representing all users associated with a bank' do
+        expect(member).to include({:display_name => 'User Display Name', roles: user_roles})
       end
-      it 'contains all signers associated with a bank as OpenStructs with a `display_name` and `roles`' do
-        expect(member).to include(OpenStruct.new(:display_name => 'Some Signer', roles: signer_mapped_roles))
+      it 'contains hashes with with a `display_name` and `roles` representing all signers associated with a bank' do
+        expect(member).to include({:display_name => 'Some Signer', roles: signer_mapped_roles})
       end
       it 'does not add a signer to the result set if the signer is also a user' do
         allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: [signer, duplicate_signer].to_json))
