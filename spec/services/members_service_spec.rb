@@ -93,7 +93,7 @@ describe MembersService do
     let(:ldap_connection) { double('LDAP Connection', search: []) }
     before do
       allow(Devise::LDAP::Connection).to receive(:admin).with('extranet').and_return(ldap_connection)
-      allow(ldap_connection).to receive(:search).with(filter: "CN=FHLB#{member_id.to_i}").and_return([group_entry])
+      allow(ldap_connection).to receive(:search).with(filter: "(&(CN=FHLB#{member_id.to_i})(objectClass=group))").and_return([group_entry])
       allow(ldap_connection).to receive(:search).with(base: dn, scope: Net::LDAP::SearchScope_BaseObject).and_return([user_entry])
       allow(User).to receive(:find_or_create_by_ldap_entry).and_return(User.new)
     end
@@ -102,7 +102,7 @@ describe MembersService do
       users
     end
     it 'should search for the member banks LDAP group' do
-      expect(ldap_connection).to receive(:search).with(filter: "CN=FHLB#{member_id.to_i}")
+      expect(ldap_connection).to receive(:search).with(filter: "(&(CN=FHLB#{member_id.to_i})(objectClass=group))")
       users
     end
     it 'should grab the members of the member banks group' do

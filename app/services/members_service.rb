@@ -57,7 +57,7 @@ class MembersService < MAPIService
   def users(member_id)
     users = nil
     ldap = Devise::LDAP::Connection.admin('extranet')
-    group = ldap.search(filter: "CN=FHLB#{member_id.to_i}").try(:first)
+    group = ldap.search(filter: "(&(CN=FHLB#{member_id.to_i})(objectClass=group))").try(:first)
     if group
       users = group[:member].collect do |dn|
         ldap.search(:base => dn, :scope => Net::LDAP::SearchScope_BaseObject).try(:first)
