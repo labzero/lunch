@@ -373,16 +373,17 @@ end
 
 When(/^I should only see users with the "(.*?)" role$/) do |role|
   role_mapping = {
-    User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
-    User::Roles::SIGNER_ENTIRE_AUTHORITY => I18n.t('user_roles.entire_authority.title'),
-    User::Roles::AFFORDABILITY_SIGNER => I18n.t('user_roles.affordable_housing.title'),
-    User::Roles::COLLATERAL_SIGNER => I18n.t('user_roles.collateral.title'),
-    User::Roles::MONEYMARKET_SIGNER => I18n.t('user_roles.money_market.title'),
-    User::Roles::DERIVATIVES_SIGNER => I18n.t('user_roles.interest_rate_derivatives.title'),
-    User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
-    User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
-    User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title'),
-    User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact.title')
+    'Resolution and Authorization' => I18n.t('user_roles.resolution.title'),
+    'Entire Authority' => I18n.t('user_roles.entire_authority.title'),
+    'Affordable Housing Program' => I18n.t('user_roles.affordable_housing.title'),
+    'Collateral' => I18n.t('user_roles.collateral.title'),
+    'Money Market Transactions' => I18n.t('user_roles.money_market.title'),
+    'Interest Rate Derivatives' => I18n.t('user_roles.interest_rate_derivatives.title'),
+    'Securities Services' => I18n.t('user_roles.securities.title'),
+    'Wire Transfer Services' => I18n.t('user_roles.wire_transfer.title'),
+    'Access Manager' => I18n.t('user_roles.access_manager.title'),
+    'eTransact Holder' => I18n.t('user_roles.etransact.title'),
+    'User' => I18n.t('user_roles.user.title')
   }
   role_name = role_mapping[role]
   page.all('.report-table tbody td:last-child').each do |cell|
