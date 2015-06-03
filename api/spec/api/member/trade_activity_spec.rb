@@ -33,8 +33,8 @@ describe MAPI::ServiceApp do
           expect(row['advance_number']).to be_kind_of(String)
           expect(row['advance_type']).to be_kind_of(String)
           expect(row['status']).to be_kind_of(String)
-          expect(row['interest_rate']).to be_kind_of(String)
-          expect(row['current_par']).to be_kind_of(String)
+          expect(row['interest_rate']).to be_kind_of(Numeric)
+          expect(row['current_par']).to be_kind_of(Numeric)
         end
       end
       it 'should return Internal Service Error, if trade service is unavailable', vcr: {cassette_name: 'trade_activity_service_unavailable'} do
