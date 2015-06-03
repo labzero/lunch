@@ -460,7 +460,7 @@ module MAPI
         relative_get '/:id/active_advances' do
           member_id = params[:id]
           begin
-            result = MAPI::Services::Member::TradeActivity.trade_activity(self, member_id, 'ADVANCES')
+            result = MAPI::Services::Member::TradeActivity.trade_activity(self, member_id, 'ADVANCE')
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
