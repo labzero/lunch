@@ -76,6 +76,7 @@ cn: FHLB5
 objectClass: group
 objectClass: top
 member: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra,dc=extranet,dc=fhlbsf,dc=com
 
 # FCN-MemberSite-AccessManagers group
 dn: CN=FCN-MemberSite-AccessManagers,dc=extranet,dc=fhlbsf,dc=com

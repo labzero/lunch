@@ -495,4 +495,37 @@ RSpec.describe User, :type => :model do
       call_method
     end
   end
+
+  describe '`member_id` method' do
+    let(:call_method) { subject.member_id }
+    let(:member_id_instance_variable) { double('@member_id') }
+    let(:bank_id) { rand(9999).to_s }
+    let(:ldap_bank) { double('LDAP entry for bank', cn: ["FHLB#{bank_id}"], objectClass: ['group'])}
+    let(:ldap_group_object) { double('Some LDAP entry for a non-bank group', cn: ["FOO#{bank_id}"], objectClass: ['group'])}
+    let(:ldap_other_object) { double('LDAP entry for a non-group object with a valid bank CN', cn: ["FHLB#{bank_id}"], objectClass: ['top'])}
+    let(:ldap_groups_array) { [ldap_group_object, ldap_other_object, ldap_bank] }
+    before do
+      allow(subject).to receive(:ldap_groups).and_return(ldap_groups_array)
+    end
+    it 'returns the @member_id attribute if it exists' do
+      subject.instance_variable_set(:@member_id, member_id_instance_variable)
+      expect(call_method).to eq(member_id_instance_variable)
+    end
+    it 'ignores groups that do not have an object class of `group`' do
+      expect(ldap_other_object).to_not receive(:remove)
+      call_method
+    end
+    it 'ignores groups that do not a CN that begins with `FHLB` and is followed by any number of digits' do
+      expect(ldap_other_object.cn.first).to_not receive(:remove)
+      call_method
+    end
+    it 'returns the formatted member_id of a group with an objectClass that includes `group` and a CN that begins with `FHLB` followed by any number of digits' do
+      expect(ldap_bank.cn.first).to receive(:remove).and_call_original
+      expect(call_method).to eq(bank_id)
+    end
+    it 'sets the @member_id attribute to the returned bank id' do
+      call_method
+      expect(subject.instance_variable_get(:@member_id)).to eq(bank_id)
+    end
+  end
 end

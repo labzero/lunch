@@ -41,6 +41,13 @@ Scenario: User selects a member bank on login
   When I select the 1st member bank
   Then I should see dashboard modules
 
+@smoke @jira-mem-305
+Scenario: User associated with a bank does not select a member bank on login
+  Given I am logged out
+  And I visit the root path
+  When I fill in and submit the login form as a user belonging to a member bank
+  Then I should see dashboard modules
+
 @jira-mem-502
 Scenario: User logs out without selecting a member bank
   Given I am logged out

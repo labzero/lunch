@@ -8,6 +8,10 @@ Given(/^I fill in and submit the login form$/) do
   step %{I fill in and submit the login form with username "#{primary_user['username']}" and password "#{primary_user['password']}"}
 end
 
+Given(/^I fill in and submit the login form as a user belonging to a member bank$/) do
+  step %{I fill in and submit the login form with username "#{extranet_user['username']}" and password "#{extranet_user['password']}"}
+end
+
 Given(/^I am logged in as "(.*?)" with password "(.*?)"$/) do |user, password|
   step %{I am logged out}
   step %{I fill in and submit the login form with username "#{user}" and password "#{password}"}
