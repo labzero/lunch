@@ -382,7 +382,7 @@ RSpec.describe SettingsController, :type => :controller do
     let(:user) { double('User', roles: ['foo', 'bar']) }
     let(:call_method) { subject.send(:roles_for_user, user) }
     it 'returns the default role if none of the roles match a known role' do
-      expect(call_method).to eq([I18n.t('settings.account.roles.user')])
+      expect(call_method).to eq([I18n.t('user_roles.user.title')])
     end
     it 'returns the Access Manager role if the user is an Access Manager' do
       allow(user).to receive(:roles).and_return([User::Roles::ACCESS_MANAGER, 'bar'])

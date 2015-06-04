@@ -95,6 +95,8 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/letters-of-credit'
   when 'Securities Transactions'
     visit '/reports/securities-transactions'
+  when 'Authorizations'
+    visit '/reports/authorizations'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
@@ -362,4 +364,30 @@ end
 
 When(/^I cancel the report download from the flyout$/) do
   page.find('.cancel-report-download', text: /#{I18n.t('global.cancel_download')}/i).click
+end
+
+When(/^I select "(.*?)" from the authorizations filter$/) do |text|
+  page.find('.report-inputs .dropdown-selection').click
+  page.find('.authorizations-filter li', text: text).click
+end
+
+When(/^I should only see users with the "(.*?)" role$/) do |role|
+  role_mapping = {
+    'Resolution and Authorization' => I18n.t('user_roles.resolution.title'),
+    'Entire Authority' => I18n.t('user_roles.entire_authority.title'),
+    'Affordable Housing Program' => I18n.t('user_roles.affordable_housing.title'),
+    'Collateral' => I18n.t('user_roles.collateral.title'),
+    'Money Market Transactions' => I18n.t('user_roles.money_market.title'),
+    'Interest Rate Derivatives' => I18n.t('user_roles.interest_rate_derivatives.title'),
+    'Securities Services' => I18n.t('user_roles.securities.title'),
+    'Wire Transfer Services' => I18n.t('user_roles.wire_transfer.title'),
+    'Access Manager' => I18n.t('user_roles.access_manager.title'),
+    'eTransact Holder' => I18n.t('user_roles.etransact.title'),
+    'User' => I18n.t('user_roles.user.title')
+  }
+  role_name = role_mapping[role]
+  page.all('.report-table tbody td:last-child').each do |cell|
+    next if cell.text == I18n.t('errors.table_data_unavailable')
+    cell.assert_selector('li', text: role_name)
+  end
 end

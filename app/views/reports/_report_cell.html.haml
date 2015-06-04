@@ -13,6 +13,11 @@
 - when :date
   - value = fhlb_date_standard_numeric(cell[:value])
   - classes = [:'report-cell-narrow']
+- when :list
+  - value = capture_haml do
+    %ul
+      - cell[:value].each do |list_item|
+        %li{data:{'list-value' => list_item}}= list_item
 - else
   - value = cell[:value]
   - classes = [:'report-cell-narrow']

@@ -21,16 +21,34 @@ class User < ActiveRecord::Base
     ACCESS_MANAGER = 'access_manager'
     ADMIN = 'admin'
     AUTHORIZED_SIGNER = 'authorized_signer'
+    SIGNER_MANAGER = 'signer_manager'
+    SIGNER_ENTIRE_AUTHORITY = 'signer_entire_authority'
+    AFFORDABILITY_SIGNER = 'affordability_signer'
+    COLLATERAL_SIGNER = 'collateral_signer'
+    MONEYMARKET_SIGNER = 'moneymarket_signer'
+    DERIVATIVES_SIGNER = 'derivatives_signer'
+    SECURITIES_SIGNER = 'securities_signer'
+    WIRE_SIGNER = 'wire_signer'
+    ETRANSACT_SIGNER = 'etransact_signer'
   end
 
   ROLE_MAPPING = {
     'FCN-MemberSite-Users' => Roles::MEMBER_USER,
-    'signer-advances' => Roles::ADVANCE_SIGNER,
-    'signer' => Roles::AUTHORIZED_SIGNER,
     'FCN-MemberSite-ExternalAccess' => Roles::USER_WITH_EXTERNAL_ACCESS,
     'FCN-MemberSite-AccessManagers-R' => Roles::ACCESS_MANAGER_READ_ONLY,
     'FCN-MemberSite-AccessManagers' => Roles::ACCESS_MANAGER,
-    'FCN-MemberSite-Admins' => Roles::ADMIN
+    'FCN-MemberSite-Admins' => Roles::ADMIN,
+    'signer' => Roles::AUTHORIZED_SIGNER,
+    'signer-manager' => Roles::SIGNER_MANAGER,
+    'signer-entire-authority' => Roles::SIGNER_ENTIRE_AUTHORITY,
+    'signer-advances' => Roles::ADVANCE_SIGNER,
+    'signer-affordability' => Roles::AFFORDABILITY_SIGNER,
+    'signer-collateral' => Roles::COLLATERAL_SIGNER,
+    'signer-moneymarket' => Roles::MONEYMARKET_SIGNER,
+    'signer-creditswap' => Roles::DERIVATIVES_SIGNER,
+    'signer-securities' => Roles::SECURITIES_SIGNER,
+    'signer-wiretransfers' => Roles::WIRE_SIGNER,
+    'signer-etransact' => Roles::ETRANSACT_SIGNER
   }.freeze
 
   # Include default devise modules. Others available are:
