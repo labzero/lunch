@@ -99,3 +99,9 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
     When I enter a good next token
     And I submit the resynchronize token form
     Then I should see the failed to resynchronize token message
+
+  @smoke @jira-mem-561
+  Scenario: Users who are not Access Managers can't view the access manager page
+    Given I visit the dashboard
+    When I click on the gear icon in the header
+    Then I should not see "Access Manager" in the sidebar nav

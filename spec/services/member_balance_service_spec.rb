@@ -817,6 +817,37 @@ describe MemberBalanceService do
     end
   end
 
+  describe '`active_advances` method', :vcr do
+    let(:active_advances) {subject.active_advances}
+    it 'should return nil if there is a JSON parsing error' do
+      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+      expect(Rails.logger).to receive(:warn)
+      expect(active_advances).to be(nil)
+    end
+    it 'should return nil if there was an API error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(active_advances).to eq(nil)
+    end
+    it 'should return nil if there was a connection error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(active_advances).to eq(nil)
+    end
+    it 'should return an array of hashes containing active advances' do
+      expect(active_advances).to be_kind_of(Array)
+      expect(active_advances.length).to be >= 0
+      active_advances.each do |rate|
+        expect(rate['trade_date']).to be_kind_of(String)
+        expect(rate['funding_date']).to be_kind_of(String)
+        expect(rate['maturity_date']).to be_kind_of(String)
+        expect(rate['advance_number']).to be_kind_of(String)
+        expect(rate['advance_type']).to be_kind_of(String)
+        expect(rate['status']).to be_kind_of(String)
+        expect(rate['interest_rate']).to be_kind_of(Float)
+        expect(rate['current_par']).to be_kind_of(Integer)
+      end
+    end
+  end
+
   # Helper Methods
   def override_start_balance_endpoint(start_date, end_date, request_object)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_return(request_object)

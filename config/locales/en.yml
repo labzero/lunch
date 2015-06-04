@@ -91,6 +91,13 @@ en:
     cancel_download: Cancel Download
     pin: PIN
     token: Token
+    username: Username
+    password: Password
+    email: Email
+    actions: Actions
+    role: Role
+    name: Name
+    edit: Edit
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -150,14 +157,63 @@ en:
     single:
       input: "As of %{date}"
       custom: Custom date
+  activerecord:
+    attributes:
+      user:
+        given_name: first name
+        surname: last name
+        username: username
+        email: email address
+        email_confirmation: confirm email address
+    errors:
+      models:
+        user:
+          blank: Please enter a %{attribute}.
+          invalid: Please enter a valid %{attribute}.
+          attributes:
+            email:
+              blank: Please enter an %{attribute}.
+              confirmation: Confirmation email address does not match.
+            email_confirmation:
+              blank: You must confirm your email address.
+              confirmation: Confirmation email address does not match.
   settings:
     title: Settings
     save: Save
     save_message: Last auto-saved
     account:
-      title: Accounts
+      title: Manage Users
+      actions:
+        lock: Lock
+        unlock: Unlock
+        reset_password: Reset Password
+        add_user: Add New Web User
+      roles:
+        user: User
+        access_manager: Access Manager
+        authorized_signer: Authorized Signer
+      lock:
+        title: Account Locked
+        success_html: Account for <strong>%{name}</strong> is locked.
+      unlock:
+        title: Account Unlocked
+        success_html: Account for <strong>%{name}</strong> is unlocked.
+      error:
+        title: An Error Occured
+        summary: Your request could not be completed.
+      edit:
+        title: Edit User Information
+        save: Save Changes
+        delete: Delete Account
+        first_name: First name
+        last_name: Last name
+        email: Email address
+        confirm_email: Confirm email address
+      update:
+        title: User Information Updated
+        success_html: The information for <strong>%{name}</strong> has been updated.
     password:
-      title: Passwords
+      title: Password
     quick_advance:
       title: Quick Advances
     quick_report:
@@ -722,11 +778,22 @@ en:
       standby_letters_of_credit: "Standby Letters of Credit (LCs) are available to assist members in facilitating residential housing finance and community lending that are eligible for the following two CICA credit programs: CIP and ACE. LCs may also be used to assist members with asset/liability management or to provide members with liquidity or other funding."
       for_advances_traded_on_or_after_january_1: "For advances traded on or after January 1, 2002, the maximum voluntary prepayment settlement amount per calendar month per member cannot exceed the greater of: (i) the amount of Bank stock owned by the member as of the last business day of the calendar month prior to the notice date or (ii) $250 million. In addition, the maximum voluntary prepayment amount for all advances is $250 million per member per business day."
       the_bank_will_provide_prepayment_fee_indications: The Bank will provide prepayment fee indications for up to 5 advances per member per business day.
+  advances:
+    quick_advnance:
+      title: Quick Advance
+    add_advance:
+      title: Add an Advance
+    manage_advances:
+      title: Manage Advances
+    add_new: Add New
+    status: Status
+    rate: Rate (%)
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email
     edit_email_settings_html: Edit your <a href=%{url}>Email Settings</a> to choose which messages you want to receive via email.
   errors:
+    format: '%{message}'
     assistance: "If you need assistance, contact our Web Support team at %{phone_number}"
     "500":
       headline: Sorry for the inconvenience.

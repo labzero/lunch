@@ -1,0 +1,25 @@
+= render layout: 'sidebar', locals: {selected: t('settings.account.title')} do
+  %section.settings-users
+    .settings-users-header
+      %h1= t('settings.account.title')
+      %button.table-button.secondary-button= t('settings.account.actions.add_user')
+    .settings-users-table
+      %table
+        %thead
+          %tr
+            %th= t('global.name')
+            %th= t('global.username')
+            %th= t('global.email')
+            %th= t('global.role')
+            %th= t('global.actions')
+            %th
+            %th
+        %tbody
+          - @users.each do |user|
+            = render 'user_row', user: user, roles: @roles[user.id], actions: @actions[user.id]
+    .settings-users-overlay.settings-users-error
+      %h3=t('settings.account.error.title')
+      %p.settings-users-overlay-details.icon-alert-before=t('settings.account.error.summary')
+      %button.primary-button{data: {'flyout-action' => 'close'}}= t('global.close')
+    .settings-users-overlay.settings-users-loading
+      

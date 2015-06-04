@@ -205,7 +205,7 @@ module MAPI
                   as_of_date: latest_date.to_date,
                   structured_product_indication_date: structured_product_indication_date,
                   advances_details: advances_details_formatted
-              }.to_json
+              }
           end
       end
     end

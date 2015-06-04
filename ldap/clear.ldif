@@ -1,14 +1,14 @@
-dn: CN=FCN-MemberSite-AccessManagers-R,DC=fhlbsf-i,DC=com
-changetype: delete
-
 dn: sAMAccountName=local-non-signer,dc=fhlbsf-i,dc=com
 changetype: delete
 
 dn: sAMAccountName=local,dc=fhlbsf-i,dc=com
 changetype: delete
 
-dn: dc=fhlbsf-i,dc=com
+dn: CN=FCN-MemberSite-AccessManagers-R,DC=fhlbsf-i,DC=com
 changetype: delete
 
 dn: ou=FHLB-Accounts,dc=fhlbsf-i,dc=com
+changetype: delete
+
+dn: dc=fhlbsf-i,dc=com
 changetype: delete

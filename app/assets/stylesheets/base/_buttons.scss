@@ -89,6 +89,12 @@ $button-vertical-padding: 7px;
   float: right;
 }
 
+.table-button {
+  @extend %button;
+  @extend %typography-table-button;
+  padding: 10px 30px;
+}
+
 .report-button-left {
   @extend .primary-button;
 }

@@ -1,0 +1,7 @@
+- @html_class = 'white-background'
+- @page_title = t('advances.manage_advances.title')
+.advances.row
+  .advances-header
+    %h1= t('advances.manage_advances.title')
+  .advances-main-body
+    = render 'reports/reports_table', table_class: 'manage-advances-table', table_data: @advances_data_table, sortable: false

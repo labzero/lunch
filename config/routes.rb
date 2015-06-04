@@ -36,11 +36,19 @@ Rails.application.routes.draw do
   get '/reports/letters-of-credit' => 'reports#letters_of_credit'
   get '/reports/securities-transactions' => 'reports#securities_transactions'
 
+  get '/advances' => 'advances#index'
+  get '/advances/manage-advances' => 'advances#manage_advances'
+
   get '/settings' => 'settings#index'
   post '/settings/save' => 'settings#save'
   get '/settings/two-factor' => 'settings#two_factor'
   post '/settings/two-factor/pin' => 'settings#reset_pin'
   post '/settings/two-factor/resynchronize' => 'settings#resynchronize'
+  get '/settings/users' => 'settings#users'
+  post '/settings/users/:id/lock' => 'settings#lock', as: 'user_lock'
+  post '/settings/users/:id/unlock' => 'settings#unlock', as: 'user_unlock'
+  get '/settings/users/:id' => 'settings#edit_user', as: 'user'
+  patch '/settings/users/:id' => 'settings#update_user'
 
   get '/jobs/:job_status_id' => 'jobs#status', as: 'job_status'
   get '/jobs/:job_status_id/download' => 'jobs#download', as: 'job_download'

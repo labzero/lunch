@@ -468,6 +468,26 @@ class MemberBalanceService < MAPIService
     data
   end
 
+  def active_advances
+    begin
+      response = @connection["member/#{@member_id}/active_advances"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.active_advances encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.active_advances encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body)
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.active_advances encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data
+  end
+
   private
   def fake_as_of_date
     today = Time.zone.now.to_date

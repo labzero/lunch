@@ -1,0 +1,7 @@
+.settings-users-overlay.settings-user-form
+  %h3=t('settings.account.edit.title')
+  = render 'user_form', user: @user
+  %button.secondary-button= t('settings.account.edit.delete')
+  .settings-user-form-actions
+    %button.secondary-button{data: {'flyout-action' => 'close'}}= t('global.cancel')
+    %button.primary-button= t('settings.account.edit.save')
