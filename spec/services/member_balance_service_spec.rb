@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe MemberBalanceService do
   RSpec::Matchers.define :be_boolean do
@@ -844,6 +844,40 @@ describe MemberBalanceService do
         expect(rate['status']).to be_kind_of(String)
         expect(rate['interest_rate']).to be_kind_of(Float)
         expect(rate['current_par']).to be_kind_of(Integer)
+      end
+    end
+  end
+
+  describe 'the `parallel_shift` method' do
+    let(:parallel_shift) {subject.parallel_shift}
+    it 'returns a hash with an `as_of_date` that is a date' do
+      expect(parallel_shift[:as_of_date]).to be_kind_of(Date)
+    end
+    it 'returns a hash with a `putable_advances` array' do
+      expect(parallel_shift[:putable_advances]).to be_kind_of(Array)
+    end
+    describe 'the `putable_advances` array' do
+      it 'contains objects representing putable advance data' do
+        parallel_shift[:putable_advances].each do |advance|
+          expect(advance[:advance_number]).to be_kind_of(String)
+          expect(advance[:issue_date]).to be_kind_of(String)
+          expect(advance[:interest_rate]).to be_kind_of(Float)
+          advance[:shift_neg_300].blank? ? (expect(advance[:shift_neg_300]).to be_nil) : (expect(advance[:shift_neg_300]).to be_kind_of(Float))
+          advance[:shift_neg_200].blank? ? (expect(advance[:shift_neg_200]).to be_nil) : (expect(advance[:shift_neg_200]).to be_kind_of(Float))
+          advance[:shift_neg_100].blank? ? (expect(advance[:shift_neg_100]).to be_nil) : (expect(advance[:shift_neg_100]).to be_kind_of(Float))
+          advance[:shift_0].blank? ? (expect(advance[:shift_0]).to be_nil) : (expect(advance[:shift_0]).to be_kind_of(Float))
+          advance[:shift_100].blank? ? (expect(advance[:shift_100]).to be_nil) : (expect(advance[:shift_100]).to be_kind_of(Float))
+          advance[:shift_200].blank? ? (expect(advance[:shift_200]).to be_nil) : (expect(advance[:shift_200]).to be_kind_of(Float))
+          advance[:shift_300].blank? ? (expect(advance[:shift_300]).to be_nil) : (expect(advance[:shift_300]).to be_kind_of(Float))
+        end
+      end
+    end
+
+    describe 'error states' do
+      it 'returns nil if there is a JSON parsing error' do
+        allow(File).to receive(:read).and_return('some malformed json!')
+        expect(Rails.logger).to receive(:warn)
+        expect(parallel_shift).to be(nil)
       end
     end
   end

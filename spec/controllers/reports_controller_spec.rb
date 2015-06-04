@@ -547,6 +547,102 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
+
+    describe 'GET parallel_shift' do
+      it_behaves_like 'a user required action', :get, :parallel_shift
+
+      let(:make_request) { get :parallel_shift }
+      let(:as_of_date) { double('some date') }
+      %i(advance_number issue_date interest_rate shift_neg_300 shift_neg_200 shift_neg_100 shift_0 shift_100 shift_200 shift_300).each do |value|
+        let(value) { double(value.to_s) }
+      end
+      let(:putable_advance_data) { {advance_number: advance_number, issue_date: issue_date, interest_rate: interest_rate, shift_neg_300: shift_neg_300, shift_neg_200: shift_neg_200, shift_neg_100: shift_neg_100, shift_0: shift_0, shift_100: shift_100, shift_200: shift_200, shift_300: shift_300} }
+      let(:putable_advance_nil_data) { {advance_number: advance_number, issue_date: issue_date, interest_rate: interest_rate, shift_neg_300: nil, shift_neg_200: nil, shift_neg_100: nil, shift_0: nil, shift_100: nil, shift_200: nil, shift_300: nil} }
+      let(:parallel_shift_data) { {as_of_date: as_of_date, putable_advances: [putable_advance_data]} }
+      let(:parallel_shift_nil_data) { {as_of_date: as_of_date, putable_advances: [putable_advance_nil_data]} }
+      before do
+        allow(member_balance_service_instance).to receive(:parallel_shift).and_return(parallel_shift_data)
+      end
+      describe 'view instance variables' do
+        it 'sets @as_of_date to the date returned from MemberBalanceService.parallel_shift' do
+          make_request
+          expect(assigns[:as_of_date]).to eq(as_of_date)
+        end
+        describe '`@parallel_shift_table_data`' do
+          before do
+            make_request
+          end
+          it 'returns a hash with `column_headings`' do
+            expect(assigns[:parallel_shift_table_data][:column_headings]).to eq([I18n.t('common_table_headings.advance_number'), I18n.t('global.issue_date'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.interest_rate'), '%'), [-300,-200,-100,0,100,200,300].collect{|x| fhlb_formatted_number(x)}].flatten)
+          end
+          describe '`rows`' do
+            it 'is an array containing a `columns` hash' do
+              expect(assigns[:parallel_shift_table_data][:rows]).to be_kind_of(Array)
+              assigns[:parallel_shift_table_data][:rows].each do |row|
+                expect(row).to be_kind_of(Hash)
+              end
+            end
+            describe '`columns` hash' do
+              it 'contains an `advance_number` with no type' do
+                assigns[:parallel_shift_table_data][:rows].each do |row|
+                  expect(row[:columns].first[:type]).to be_nil
+                  expect(row[:columns].first[:value]).to eq(advance_number)
+                end
+              end
+              it 'contains an `issue_date` with type `date`' do
+                assigns[:parallel_shift_table_data][:rows].each do |row|
+                  expect(row[:columns][1][:type]).to eq(:date)
+                  expect(row[:columns][1][:value]).to eq(issue_date)
+                end
+              end
+              it 'contains a `interest_rate` with type `date`' do
+                assigns[:parallel_shift_table_data][:rows].each do |row|
+                  expect(row[:columns][2][:type]).to eq(:rate)
+                  expect(row[:columns][2][:value]).to eq(interest_rate)
+                end
+              end
+              %w(shift_neg_300 shift_neg_200 shift_neg_100 shift_0 shift_100 shift_200 shift_300).each_with_index do |value, i|
+                it "contains a `#{value}` value with type `basis_point`" do
+                  assigns[:parallel_shift_table_data][:rows].each do |row|
+                    expect(row[:columns][i + 3][:type]).to eq(:basis_point)
+                    expect(row[:columns][i + 3][:value]).to eq(self.send(value))
+                  end
+                end
+              end
+            end
+          end
+        end
+        describe '`@parallel_shift_table_data` rows column hash with putable_advances containing nil values' do
+          %w(shift_neg_300 shift_neg_200 shift_neg_100 shift_0 shift_100 shift_200 shift_300).each_with_index do |value, i|
+            it "contains a `#{value}` with a value of #{I18n.t('global.na')} and no type if `#{value}` is blank" do
+              allow(member_balance_service_instance).to receive(:parallel_shift).and_return(parallel_shift_nil_data)
+              make_request
+              assigns[:parallel_shift_table_data][:rows].each do |row|
+                expect(row[:columns][i + 3][:type]).to be_nil
+                expect(row[:columns][i + 3][:value]).to eq(I18n.t('global.na'))
+              end
+            end
+          end
+        end
+        describe 'with the report disabled' do
+          before do
+            allow(controller).to receive(:report_disabled?).with(ReportsController::PARALLEL_SHIFT_WEB_FLAGS).and_return(true)
+          end
+          it 'sets @as_of_date to nil if the report is disabled' do
+            make_request
+            expect(assigns[:as_of_date]).to be_nil
+          end
+          it '@parallel_shift_table_data has an empty array for its rows attribute' do
+            make_request
+            expect(assigns[:parallel_shift_table_data][:rows]).to eq([])
+          end
+        end
+      end
+      it 'should raise an error if the MemberBalanceService returns nil' do
+        expect(member_balance_service_instance).to receive(:parallel_shift).and_return(nil)
+        expect{make_request}.to raise_error(StandardError)
+      end
+    end
   end
 
   describe 'GET current_price_indications' do

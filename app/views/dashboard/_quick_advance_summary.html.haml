@@ -2,7 +2,7 @@
 .quick-advance-summary
   %dl
     - if advance_number
-      %dt= t('dashboard.quick_advance.field_headings.advance_number') +':'
+      %dt= t('common_table_headings.advance_number') +':'
       %dd= advance_number
     %dt= t('dashboard.quick_advance.field_headings.advance_amount') +':'
     %dd= fhlb_formatted_currency(advance_amount, precision: 0)
