@@ -91,15 +91,18 @@ class SettingsController < ApplicationController
   # POST
   def update_user
     @user = User.find(params[:id])
-    @user.update_attributes!(params.require(:user).permit(:given_name, :surname, :email, :email_confirmation))
-    render json: {
-      html: render_to_string(layout: false),
-      row_html: render_to_string(partial: 'user_row', locals: {
-        user: @user,
-        roles: roles_for_user(@user),
-        actions: actions_for_user(@user)
-      })
-    }
+    if @user.update_attributes!(params.require(:user).permit(:given_name, :surname, :email, :email_confirmation))
+      render json: {
+        html: render_to_string(layout: false),
+        row_html: render_to_string(partial: 'user_row', locals: {
+          user: @user,
+          roles: roles_for_user(@user),
+          actions: actions_for_user(@user)
+        })
+      }
+    else
+      render json: {}, status: 500
+    end
   end
 
   # GET

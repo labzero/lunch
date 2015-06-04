@@ -277,7 +277,7 @@ RSpec.describe SettingsController, :type => :controller do
       allow(subject).to receive(:render_to_string)
       allow(User).to receive(:find).and_call_original
       allow(User).to receive(:find).with(user_id.to_s).and_return(user)
-      allow(user).to receive(:update_attributes!)
+      allow(user).to receive(:update_attributes!).and_return(true)
     end
     it { should permit(:email, :given_name, :surname, :email_confirmation).for(:update_user, verb: :post, params: {id: user_id}) }
     it_behaves_like 'an authorization required method', :post, :update_user, :access_manager, :edit?, id: rand(10000..99999)
@@ -290,6 +290,11 @@ RSpec.describe SettingsController, :type => :controller do
     end
     it 'returns a 400 if the `user` parameter is missing' do
       expect{post :update_user, id: user_id}.to raise_error(ActionController::ParameterMissing)
+    end
+    it 'returns a 500 if the save fails' do
+      allow(user).to receive(:update_attributes!).and_return(false)
+      make_request
+      expect(response).to be_error
     end
     it 'updates the user with the passed params' do
       expect(user).to receive(:update_attributes!).with(attributes)
