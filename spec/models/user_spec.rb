@@ -123,62 +123,95 @@ RSpec.describe User, :type => :model do
   end
 
   describe '`locked?` method' do
-    let(:attribute_value) { double('An LDAP Entry Attribute', to_i: Time.now.to_i) }
+    let(:attribute_value) { double('An LDAP Entry Attribute', to_i: User::LDAP_LOCK_BIT) }
     let(:ldap_entry) { double('LDAP Entry: User') }
     let(:call_method) { subject.locked? }
     before do
       allow(subject).to receive(:ldap_entry).and_return(ldap_entry)
-      allow(ldap_entry).to receive(:[]).with(:lockouttime).and_return([attribute_value])
+      allow(ldap_entry).to receive(:[]).with(:userAccountControl).and_return([attribute_value])
     end
     it 'should fetch the backing LDAP entry' do
       expect(subject).to receive(:ldap_entry).and_return(ldap_entry)
       call_method
     end
-    it 'should return true if the backing LDAP entry has a value for `lockouttime`' do
+    it 'should return true if the backing LDAP entry has the LDAP_LOCK_BIT set' do
       expect(call_method).to eq(true)
     end
     it 'should return false if no entry was found' do
       allow(subject).to receive(:ldap_entry).and_return(nil)
       expect(call_method).to eq(false)
     end
-    it 'should return false if the entry had no value for `lockouttime`' do
-      allow(ldap_entry).to receive(:[]).with(:lockouttime)
+    it 'should return false if the LDAP_LOCK_BIT is not set' do
+      allow(ldap_entry).to receive(:[]).with(:userAccountControl).and_return(512)
       expect(call_method).to eq(false)
     end
   end
 
   describe '`lock!` method' do
     let(:call_method) { subject.lock! }
+    let(:attribute_value) { double('An LDAP Entry Attribute', to_i: 512) }
+    let(:ldap_entry) { double('LDAP Entry: User') }
     before do
       allow(subject).to receive(:reload_ldap_entry)
       allow(subject).to receive(:ldap_domain).and_return(double('An LDAP Domain'))
-      allow_any_instance_of(Time).to receive(:to_i).and_return(rand(1..999))
-      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param)
+      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param).and_return(false)
+      allow(subject).to receive(:ldap_entry).and_return(ldap_entry)
+      allow(ldap_entry).to receive(:[]).with(:userAccountControl).and_return([attribute_value])
     end
-    it 'calls `reload_ldap_entry`' do
-      expect(subject).to receive(:reload_ldap_entry)
+    it 'calls `reload_ldap_entry` before it reads the entry and after' do
+      expect(subject).to receive(:reload_ldap_entry).ordered
+      expect(subject).to receive(:ldap_entry).ordered
+      expect(subject).to receive(:reload_ldap_entry).ordered
       call_method
     end
-    it 'calls `Devise::LDAP::Adapter.set_ldap_param`' do
-      expect(Devise::LDAP::Adapter).to receive(:set_ldap_param).with(subject.username, :lockoutTime, Time.now.to_i.to_s, nil, subject.ldap_domain)
+    it 'returns false if the LDAP entry could not be found' do
+      allow(subject).to receive(:ldap_entry).and_return(nil)
+      expect(call_method).to eq(false)
+    end
+    it 'calls `Devise::LDAP::Adapter.set_ldap_param` with the User::LDAP_LOCK_BIT set' do
+      expect(Devise::LDAP::Adapter).to receive(:set_ldap_param).with(subject.username, :userAccountControl, (attribute_value.to_i | User::LDAP_LOCK_BIT).to_s, nil, subject.ldap_domain)
       call_method
+    end
+    it 'returns false on failure' do
+      expect(call_method).to eq(false)
+    end
+    it 'returns true on success' do
+      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param).and_return(true)
+      expect(call_method).to eq(true)
     end
   end
 
   describe '`unlock!` method' do
     let(:call_method) { subject.unlock! }
+    let(:attribute_value) { double('An LDAP Entry Attribute', to_i: 514) }
+    let(:ldap_entry) { double('LDAP Entry: User') }
     before do
       allow(subject).to receive(:reload_ldap_entry)
       allow(subject).to receive(:ldap_domain).and_return(double('An LDAP Domain'))
-      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param)
+      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param).and_return(false)
+      allow(subject).to receive(:ldap_entry).and_return(ldap_entry)
+      allow(ldap_entry).to receive(:[]).with(:userAccountControl).and_return([attribute_value])
     end
-    it 'calls `reload_ldap_entry`' do
-      expect(subject).to receive(:reload_ldap_entry)
+    it 'calls `reload_ldap_entry` before it reads the entry and after' do
+      expect(subject).to receive(:reload_ldap_entry).ordered
+      expect(subject).to receive(:ldap_entry).ordered
+      expect(subject).to receive(:reload_ldap_entry).ordered
       call_method
     end
-    it 'calls `Devise::LDAP::Adapter.set_ldap_param`' do
-      expect(Devise::LDAP::Adapter).to receive(:set_ldap_param).with(subject.username, :lockoutTime, '0', nil, subject.ldap_domain)
+    it 'returns false if the LDAP entry could not be found' do
+      allow(subject).to receive(:ldap_entry).and_return(nil)
+      expect(call_method).to eq(false)
+    end
+    it 'calls `Devise::LDAP::Adapter.set_ldap_param` with the User::LDAP_LOCK_BIT cleared' do
+      expect(Devise::LDAP::Adapter).to receive(:set_ldap_param).with(subject.username, :userAccountControl, (attribute_value.to_i & (~User::LDAP_LOCK_BIT)).to_s, nil, subject.ldap_domain)
       call_method
+    end
+    it 'returns false on failure' do
+      expect(call_method).to eq(false)
+    end
+    it 'returns true on success' do
+      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param).and_return(true)
+      expect(call_method).to eq(true)
     end
   end
 

@@ -19,6 +19,7 @@ sn: Extranet
 sAMAccountName: extra
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
+userAccountControl: 512
 
 # extra-chaste user
 dn: sAMAccountName=extra-chaste,dc=extranet,dc=fhlbsf,dc=com
@@ -33,6 +34,7 @@ sAMAccountName: extra-chaste
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: chaste@example.com
+userAccountControl: 512
 
 # extra-chaste-access user
 dn: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
@@ -61,6 +63,7 @@ sAMAccountName: extra-wells
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: wells@example.com
+userAccountControl: 512
 
 # Chaste Manhatten
 dn: CN=FHLB6,dc=extranet,dc=fhlbsf,dc=com
