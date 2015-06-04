@@ -1,5 +1,5 @@
 When(/^I edit a user$/) do
-  page.find('.settings-users-table tbody tr:first-child .settings-user-edit a').click
+  page.find('tr:first-child .settings-user-edit a').click
 end
 
 Then(/^I should see an edit user form overlay$/) do

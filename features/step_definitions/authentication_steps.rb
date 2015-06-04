@@ -5,11 +5,11 @@ Given(/^I fill in and submit the login form with username "(.*?)" and password "
 end
 
 Given(/^I fill in and submit the login form$/) do
-  step %{I fill in and submit the login form with username "#{primary_user['username']}" and password "#{primary_user['password']}"}
+  step %{I fill in and submit the login form with username "#{extranet_user['username']}" and password "#{extranet_user['password']}"}
 end
 
-Given(/^I fill in and submit the login form as a user belonging to a member bank$/) do
-  step %{I fill in and submit the login form with username "#{extranet_user['username']}" and password "#{extranet_user['password']}"}
+Given(/^I fill in and submit the login form with a user not associated with a bank$/) do
+  step %{I fill in and submit the login form with username "#{primary_user['username']}" and password "#{primary_user['password']}"}
 end
 
 Given(/^I am logged in as "(.*?)" with password "(.*?)"$/) do |user, password|
@@ -18,7 +18,7 @@ Given(/^I am logged in as "(.*?)" with password "(.*?)"$/) do |user, password|
 end
 
 Given(/^I am logged in$/) do
-  step %{I am logged in as a "primary user"}
+  step %{I am logged in as an "extranet user"}
 end
 
 Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
@@ -31,6 +31,8 @@ Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
       quick_advance_non_signer
     when 'access manager'
       access_manager
+    when 'extranet user'
+      extranet_user
     else
       raise 'unknown user type'
   end
@@ -42,7 +44,7 @@ Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
 end
 
 When(/^I log in$/) do
-  step %{I log in as a "primary user"}
+  step %{I log in as an "extranet user"}
 end
 
 When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|

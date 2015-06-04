@@ -103,7 +103,7 @@ class MembersService < MAPIService
       signers_and_users << {display_name: signer['name'], roles: roles} unless usernames.include?(signer['username'])
     end
     users.each do |user|
-      signers_and_users << {display_name: user.display_name, roles: user.roles}
+      signers_and_users << {display_name: user.display_name || user.username, roles: user.roles}
     end
     signers_and_users
   end
