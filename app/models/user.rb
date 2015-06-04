@@ -12,6 +12,8 @@ class User < ActiveRecord::Base
     display_name: :displayname
   }.with_indifferent_access.freeze
 
+  LDAP_LOCK_BIT = 0x2
+
   module Roles
     MEMBER_USER = 'member_user'
     ADVANCE_SIGNER = 'advance_signer'
@@ -108,17 +110,29 @@ class User < ActiveRecord::Base
   end
 
   def locked?
-    ldap_entry.present? && ldap_entry[:lockouttime].try(:first).to_i > 0
+    ldap_entry.present? && (ldap_entry[:userAccountControl].try(:first).to_i & LDAP_LOCK_BIT) == LDAP_LOCK_BIT
   end
 
   def lock!
     reload_ldap_entry
-    Devise::LDAP::Adapter.set_ldap_param(username, :lockoutTime, Time.now.to_i.to_s, nil, ldap_domain)
+    if ldap_entry
+      access_flags = ldap_entry[:userAccountControl].try(:first).to_i | LDAP_LOCK_BIT
+      reload_ldap_entry
+      Devise::LDAP::Adapter.set_ldap_param(username, :userAccountControl, access_flags.to_s, nil, ldap_domain)
+    else
+      false
+    end
   end
 
   def unlock!
     reload_ldap_entry
-    Devise::LDAP::Adapter.set_ldap_param(username, :lockoutTime, '0', nil, ldap_domain)
+    if ldap_entry
+      access_flags = ldap_entry[:userAccountControl].try(:first).to_i & (~LDAP_LOCK_BIT)
+      reload_ldap_entry
+      Devise::LDAP::Adapter.set_ldap_param(username, :userAccountControl, access_flags.to_s, nil, ldap_domain)
+    else
+      false
+    end
   end
 
   def reload
