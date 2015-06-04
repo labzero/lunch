@@ -391,15 +391,15 @@ RSpec.describe SettingsController, :type => :controller do
     end
     it 'returns the Access Manager role if the user is an Access Manager' do
       allow(user).to receive(:roles).and_return([User::Roles::ACCESS_MANAGER, 'bar'])
-      expect(call_method).to eq([I18n.t('settings.account.roles.access_manager')])
+      expect(call_method).to eq([I18n.t('user_roles.access_manager.title')])
     end
     it 'returns the Authorized Signer role if the user is an Authorized Signer' do
       allow(user).to receive(:roles).and_return([User::Roles::AUTHORIZED_SIGNER, 'woot'])
-      expect(call_method).to eq([I18n.t('settings.account.roles.authorized_signer')])
+      expect(call_method).to eq([I18n.t('user_roles.authorized_signer')])
     end
     it 'returns multiple roles if multiple roles are matched' do
       allow(user).to receive(:roles).and_return([User::Roles::AUTHORIZED_SIGNER, User::Roles::ACCESS_MANAGER])
-      expect(call_method).to eq([I18n.t('settings.account.roles.authorized_signer'), I18n.t('settings.account.roles.access_manager')])
+      expect(call_method).to eq([I18n.t('user_roles.authorized_signer'), I18n.t('user_roles.access_manager.title')])
     end
   end
 

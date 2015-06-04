@@ -1,5 +1,5 @@
 When(/^I edit a user$/) do
-  click_link(I18n.t('global.edit'))
+  page.find('tr:first-child .settings-user-edit a').click
 end
 
 Then(/^I should see an edit user form overlay$/) do

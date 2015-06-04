@@ -45,6 +45,7 @@ class ApplicationController < ActionController::Base
   end
 
   def after_sign_in_path_for(resource)
+    session['member_id'] = current_user.member_id if !session['member_id'].present? && current_user && !current_user.member_id.nil?
     return members_select_member_path unless session['member_id'].present?
     stored_location_for(resource) || dashboard_path
   end

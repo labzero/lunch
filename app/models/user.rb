@@ -5,7 +5,6 @@ class User < ActiveRecord::Base
   validates :email, presence: {on: :update}, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, allow_blank: true }, confirmation: {if: :email_changed?, on: :update}
   validates :email_confirmation, presence: {if: :email_changed?, on: :update}
 
-
   LDAP_ATTRIBUTES_MAPPING = {
     email: :mail,
     surname: :sn,
@@ -55,7 +54,7 @@ class User < ActiveRecord::Base
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :ldap_authenticatable, :recoverable, :trackable
 
-  attr_accessor :roles, :email, :surname, :given_name
+  attr_accessor :roles, :email, :surname, :given_name, :member_id
 
   after_save :save_ldap_attributes
 
@@ -168,6 +167,20 @@ class User < ActiveRecord::Base
       user_service_roles = user_service.user_roles(username)
       roles << user_service_roles unless user_service_roles.nil?
       roles.flatten.collect{ |role| ROLE_MAPPING[role] }.compact
+    )
+  end
+
+  def member_id
+    @member_id ||= (
+      member_id = nil
+      ldap_groups = self.ldap_groups || []
+      ldap_groups.each do |group|
+        if !(group.cn.first=~/\AFHLB\d+\z/).nil? && group.objectClass.include?('group')
+          member_id = group.cn.first.remove(/fhlb/i)
+          break
+        end
+      end
+      member_id
     )
   end
 
