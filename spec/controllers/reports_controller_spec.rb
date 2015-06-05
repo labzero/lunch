@@ -550,14 +550,30 @@ RSpec.describe ReportsController, :type => :controller do
 
     describe 'GET parallel_shift' do
       it_behaves_like 'a user required action', :get, :parallel_shift
-
+      projections = %i(shift_neg_300 shift_neg_200 shift_neg_100 shift_0 shift_100 shift_200 shift_300)
       let(:make_request) { get :parallel_shift }
       let(:as_of_date) { double('some date') }
-      %i(advance_number issue_date interest_rate shift_neg_300 shift_neg_200 shift_neg_100 shift_0 shift_100 shift_200 shift_300).each do |value|
-        let(value) { double(value.to_s) }
+      let(:putable_advance_data) do
+        hash = {
+          advance_number: nil,
+          issue_date: nil,
+          interest_rate: nil,
+        }
+        projections.each do |value|
+          hash[value] = nil
+        end
+        hash.each do |key, value|
+          hash[key] = double(key.to_s)
+        end
+        hash
       end
-      let(:putable_advance_data) { {advance_number: advance_number, issue_date: issue_date, interest_rate: interest_rate, shift_neg_300: shift_neg_300, shift_neg_200: shift_neg_200, shift_neg_100: shift_neg_100, shift_0: shift_0, shift_100: shift_100, shift_200: shift_200, shift_300: shift_300} }
-      let(:putable_advance_nil_data) { {advance_number: advance_number, issue_date: issue_date, interest_rate: interest_rate, shift_neg_300: nil, shift_neg_200: nil, shift_neg_100: nil, shift_0: nil, shift_100: nil, shift_200: nil, shift_300: nil} }
+      let(:putable_advance_nil_data) do
+        hash = putable_advance_data.dup
+        hash.each do |key, value|
+          hash[key] = nil if projections.include?(key)
+        end
+        hash
+      end
       let(:parallel_shift_data) { {as_of_date: as_of_date, putable_advances: [putable_advance_data]} }
       let(:parallel_shift_nil_data) { {as_of_date: as_of_date, putable_advances: [putable_advance_nil_data]} }
       before do
@@ -586,26 +602,26 @@ RSpec.describe ReportsController, :type => :controller do
               it 'contains an `advance_number` with no type' do
                 assigns[:parallel_shift_table_data][:rows].each do |row|
                   expect(row[:columns].first[:type]).to be_nil
-                  expect(row[:columns].first[:value]).to eq(advance_number)
+                  expect(row[:columns].first[:value]).to eq(putable_advance_data[:advance_number])
                 end
               end
               it 'contains an `issue_date` with type `date`' do
                 assigns[:parallel_shift_table_data][:rows].each do |row|
                   expect(row[:columns][1][:type]).to eq(:date)
-                  expect(row[:columns][1][:value]).to eq(issue_date)
+                  expect(row[:columns][1][:value]).to eq(putable_advance_data[:issue_date])
                 end
               end
               it 'contains a `interest_rate` with type `date`' do
                 assigns[:parallel_shift_table_data][:rows].each do |row|
                   expect(row[:columns][2][:type]).to eq(:rate)
-                  expect(row[:columns][2][:value]).to eq(interest_rate)
+                  expect(row[:columns][2][:value]).to eq(putable_advance_data[:interest_rate])
                 end
               end
-              %w(shift_neg_300 shift_neg_200 shift_neg_100 shift_0 shift_100 shift_200 shift_300).each_with_index do |value, i|
+              projections.each_with_index do |value, i|
                 it "contains a `#{value}` value with type `basis_point`" do
                   assigns[:parallel_shift_table_data][:rows].each do |row|
                     expect(row[:columns][i + 3][:type]).to eq(:basis_point)
-                    expect(row[:columns][i + 3][:value]).to eq(self.send(value))
+                    expect(row[:columns][i + 3][:value]).to eq(putable_advance_data[value])
                   end
                 end
               end
@@ -613,7 +629,7 @@ RSpec.describe ReportsController, :type => :controller do
           end
         end
         describe '`@parallel_shift_table_data` rows column hash with putable_advances containing nil values' do
-          %w(shift_neg_300 shift_neg_200 shift_neg_100 shift_0 shift_100 shift_200 shift_300).each_with_index do |value, i|
+          projections.each_with_index do |value, i|
             it "contains a `#{value}` with a value of #{I18n.t('global.na')} and no type if `#{value}` is blank" do
               allow(member_balance_service_instance).to receive(:parallel_shift).and_return(parallel_shift_nil_data)
               make_request
