@@ -48,6 +48,11 @@ Scenario: User associated with a bank does not sees the select member bank scree
   When I fill in and submit the login form
   Then I should see dashboard modules
 
+@smoke @jira-mem-723
+Scenario: User sees name in header once logged in
+  When I am logged in as a "primary user"
+  Then I should see the name for the "primary user" in the header
+
 @jira-mem-502
 Scenario: User logs out without selecting a member bank
   Given I am logged out

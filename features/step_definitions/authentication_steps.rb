@@ -136,6 +136,10 @@ Then(/^I should be logged out$/) do
   step %{I should see the login form}
 end
 
+Then(/^I should see the name for the "(.*?)" in the header$/) do |user_type|
+  page.assert_selector('.main-nav li', text: user_type['given_name'])
+end
+
 def primary_user
   CustomConfig.env_config['primary_user']
 end

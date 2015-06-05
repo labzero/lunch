@@ -2,7 +2,7 @@
   .row
     = link_to(t('welcome.logo'), dashboard_url, class: 'logo')
     %ul
-      %li= t('nav.primary.welcome', name: 'Alma')
+      %li= t('nav.primary.welcome', name: current_user.given_name || current_user.username)
       %li.nav-logout= link_to(t('nav.primary.logout'), destroy_user_session_url, method: :delete)
       %li.nav-settings= link_to('', '/settings', class: 'icon-gear-after')
       %li.nav-mail= link_to('', corporate_communications_path('all'), class: 'icon-envelope-after')

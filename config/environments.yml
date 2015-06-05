@@ -4,6 +4,7 @@ default: &default
   primary_user:
     username: <%= ENV['CUCUMBER_PRIMARY_USERNAME'] || 'local' %>
     password: <%= ENV['CUCUMBER_PRIMARY_PASSWORD'] || 'development' %>
+    given_name: <%= ENV['CUCUMBER_PRIMARY_GIVEN_NAME'] || ENV['CUCUMBER_PRIMARY_USERNAME'] || 'local' %>
   signer_advances_user:
     username: <%= ENV['CUCUMBER_SIGNER_ADVANCES_USERNAME'] || 'local' %>
     password: <%= ENV['CUCUMBER_SIGNER_ADVANCES_PASSWORD'] || 'development' %>
