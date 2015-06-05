@@ -278,7 +278,7 @@ def export_report(format)
 end
 
 When(/^I click on the view cell for the first (advance|cash projection)/) do |report_type|
-  column_name = report_type == 'advance' ? I18n.t('reports.pages.advances_detail.advance_number') : I18n.t('reports.pages.cash_projections.cusip')
+  column_name = report_type == 'advance' ? I18n.t('common_table_headings.advance_number') : I18n.t('reports.pages.cash_projections.cusip')
   skip_if_table_empty do
     column_index = page.evaluate_script("$('.report-table thead th:contains(#{column_name})').index()") + 1
     @row_identifier = page.find(".report-table tbody tr:first-child td:nth-child(#{column_index})").text

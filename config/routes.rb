@@ -36,6 +36,7 @@ Rails.application.routes.draw do
   get '/reports/letters-of-credit' => 'reports#letters_of_credit'
   get '/reports/securities-transactions' => 'reports#securities_transactions'
   get '/reports/authorizations' => 'reports#authorizations'
+  get '/reports/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: 'reports_parallel_shift'
 
   get '/advances' => 'advances#index'
   get '/advances/manage-advances' => 'advances#manage_advances'

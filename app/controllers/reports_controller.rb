@@ -14,6 +14,7 @@ class ReportsController < ApplicationController
   SECURITIES_SERVICES_STATMENT_WEB_FLAGS = [MembersService::SECURITIESBILLSTATEMENT]
   LETTERS_OF_CREDIT_WEB_FLAGS = [MembersService::LETTERS_OF_CREDIT_DETAIL_REPORT]
   SECURITIES_TRANSACTION_WEB_FLAGS = [MembersService::SECURITIES_TRANSACTION_DATA]
+  PARALLEL_SHIFT_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
 
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
@@ -83,7 +84,8 @@ class ReportsController < ApplicationController
         },
         parallel_shift: {
           updated: t('global.monthly'),
-          available_history: t('global.all')
+          available_history: t('global.all'),
+          route: reports_parallel_shift_path
         }
       },
       collateral: {
@@ -519,7 +521,7 @@ class ReportsController < ApplicationController
   def interest_rate_resets
     rate_service = RatesService.new(request)
     @start_date = (Time.zone.now.to_date).to_date
-    column_headings = [t('reports.pages.interest_rate_resets.effective_date'), t('reports.pages.interest_rate_resets.advance_number'), t('reports.pages.interest_rate_resets.prior_rate'), t('reports.pages.interest_rate_resets.new_rate'), t('reports.pages.interest_rate_resets.next_reset')]
+    column_headings = [t('reports.pages.interest_rate_resets.effective_date'), t('common_table_headings.advance_number'), t('reports.pages.interest_rate_resets.prior_rate'), t('reports.pages.interest_rate_resets.new_rate'), t('reports.pages.interest_rate_resets.next_reset')]
     irr_data = rate_service.interest_rate_resets
     rows = irr_data.collect do |row|
       columns = []
@@ -702,6 +704,38 @@ class ReportsController < ApplicationController
         break
       end
     end
+  end
+
+  def parallel_shift
+    if report_disabled?(PARALLEL_SHIFT_WEB_FLAGS)
+      parallel_shift = {putable_advances: {}}
+    else
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      parallel_shift = member_balances.parallel_shift
+      raise StandardError, "There has been an error and ReportsController#parallel_shift has encountered nil. Check error logs." if parallel_shift.nil?
+    end
+    @as_of_date = parallel_shift[:as_of_date]
+    rows = []
+    parallel_shift[:putable_advances].each do |advance|
+      rows << {
+        columns:[
+          {type: nil, value: advance[:advance_number]},
+          {type: :date, value: advance[:issue_date]},
+          {type: :rate, value: advance[:interest_rate]},
+          {type: (advance[:shift_neg_300].blank? ? nil : :basis_point), value: advance[:shift_neg_300] || t('global.na')},
+          {type: (advance[:shift_neg_200].blank? ? nil : :basis_point), value: advance[:shift_neg_200] || t('global.na')},
+          {type: (advance[:shift_neg_100].blank? ? nil : :basis_point), value: advance[:shift_neg_100] || t('global.na')},
+          {type: (advance[:shift_0].blank? ? nil : :basis_point), value: advance[:shift_0] || t('global.na')},
+          {type: (advance[:shift_100].blank? ? nil : :basis_point), value: advance[:shift_100] || t('global.na')},
+          {type: (advance[:shift_200].blank? ? nil : :basis_point), value: advance[:shift_200] || t('global.na')},
+          {type: (advance[:shift_300].blank? ? nil : :basis_point), value: advance[:shift_300] || t('global.na')}
+        ]
+      }
+    end
+    @parallel_shift_table_data = {
+      column_headings: [t('common_table_headings.advance_number'), t('global.issue_date'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%'), [-300,-200,-100,0,100,200,300].collect{|x| fhlb_formatted_number(x)}].flatten,
+      rows: rows
+    }
   end
 
   private

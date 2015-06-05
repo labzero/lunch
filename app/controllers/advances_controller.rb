@@ -3,7 +3,7 @@ class AdvancesController < ApplicationController
     member_balances = MemberBalanceService.new(current_member_id, request)
     active_advances_response = member_balances.active_advances
     raise StandardError, "There has been an error and AdvancesController#manage_advances has encountered nil. Check error logs." if active_advances_response.nil?
-    column_headings = [t('common_table_headings.trade_date'), t('reports.pages.advances_detail.funding_date'), t('common_table_headings.maturity_date'), t('reports.pages.advances_detail.advance_number'), t('reports.pages.advances_detail.advance_type'), t('advances.status'), t('advances.rate'), t('common_table_headings.current_par') + ' ($)']
+    column_headings = [t('common_table_headings.trade_date'), t('reports.pages.advances_detail.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('reports.pages.advances_detail.advance_type'), t('advances.status'), t('advances.rate'), t('common_table_headings.current_par') + ' ($)']
     rows = active_advances_response.collect do |row|
       columns = []
       row.each do |value|

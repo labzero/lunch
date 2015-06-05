@@ -1,0 +1,11 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.row
+  .report-header
+    %h1= t('reports.pages.parallel_shift.title')
+    = render 'reports_header_buttons'
+  .report-main-body
+    %p= t('reports.pages.parallel_shift.info', date: fhlb_date_long_alpha(@as_of_date))
+    = render 'reports/reports_table', table_class: 'parallel-shifts-table', table_data: @parallel_shift_table_data, sortable: false
+    %small
+      %p= t('reports.pages.parallel_shift.disclaimer')
