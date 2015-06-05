@@ -2,9 +2,6 @@
 - @page_title = t('reports.meta_title')
 .reports.row
   %h1= t('reports.title')
-  .setup-quick-reports
-    %h2= t('reports.setup_quick_advance.title')
-    %p= t('reports.setup_quick_advance.content_html', url: '/#')
   - @reports.each do |category, reports|
     %table.reports-table.table-striped
       %thead

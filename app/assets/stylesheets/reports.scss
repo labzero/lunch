@@ -15,21 +15,13 @@
   }
 }
 
-.setup-quick-reports {
-  width: (7 * $grid-column-width) + (6 * $gutter-width);
-  h2 {
-    @extend %typography-section-title;
-    margin: 0 0 5px;
-  }
-  p {
-    margin: 0 0 50px;
-  }
-}
-
 .reports-table {
   @extend %table-striped;
   border-bottom: 1px solid $light-blue;
-  margin-bottom: 70px;
+  margin-top: 70px;
+  &:last-child {
+    margin-bottom: 70px;
+  }
   thead {
     border-bottom: 1px solid $light-blue;
   }
