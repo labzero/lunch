@@ -471,9 +471,6 @@ en:
   reports:
     meta_title: FHLB - Reports
     title: Reports
-    setup_quick_advance:
-      title: Want faster access to your reports?
-      content_html: "Set up <a href=\"%{url}\">Quick Reports</a> to have the latest reports emailed to you, or lorem ipsum something something to access reports from the dashboard."
     shared_table_values:
       updated_th: Updated
       available_history_th: Available History
