@@ -212,6 +212,74 @@
   }
 }
 
+.settings-user-confirm-delete {
+  .settings-users-overlay-details:before {
+    color: $alert-red;
+    top: 0;
+    font-size: 36px;
+  }
+  button {
+    width: 240px;
+  }
+  dt {
+    @extend %typography-subtitle;
+    float: left;
+    width: 120px;
+    overflow: hidden;
+    clear: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: $medium-gray;
+  }
+  dd {
+    @extend %typography-subtitle;
+    @extend %clearfix;
+  }
+  dl, form {
+    padding-left: 60px;
+  }
+  dd, dt {
+    margin-bottom: 7px;
+  }
+  dl {
+    margin: 0 0 30px 0;
+  }
+  p {
+    margin-bottom: 20px;
+  }
+  form {
+    margin-bottom: 20px;
+    ul {
+      list-style: none;
+      padding-left: 20px;
+      margin: 0;
+    }
+    p {
+      @extend %typography-subtitle;
+      margin: 0 0 3px 0;
+      color: $medium-gray;
+      line-height: normal;
+    }
+    label {
+      @extend %typography-subtitle;
+      line-height: 25px;
+      color: $text-color;
+    }
+    .input-field-container {
+      float: left;
+      width: auto;
+      line-height: 25px;
+      height: 25px;
+      input[type=radio] {
+        width: 20px;
+        margin-right: 10px;
+        line-height: 25px;
+        height: 25px;
+      }
+    }
+  }
+}
+
 .settings-users-loading {
   @include icon-loading;
   display: none;

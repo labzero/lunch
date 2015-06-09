@@ -1,10 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe AccessManagerPolicy, :type => :policy do
-  subject { AccessManagerPolicy.new(user, :access_manager) }
+  let(:user) { double('user', id: 1) }
+  let(:resource) { double('resource user', id: 2) }
+  subject { AccessManagerPolicy.new(user, resource) }
 
   describe '`show?` method' do
-    let(:user) { double('user') }
 
     context 'for an access manager' do
       before do
@@ -22,7 +23,6 @@ RSpec.describe AccessManagerPolicy, :type => :policy do
   end
 
   describe '`edit?` method' do
-    let(:user) { double('user') }
 
     context 'for an access manager' do
       before do
@@ -36,6 +36,52 @@ RSpec.describe AccessManagerPolicy, :type => :policy do
         allow(user).to receive(:roles).and_return([])
       end
       it { should_not permit_action(:edit) }
+    end
+  end
+
+  describe '`lock?` method' do
+
+    context 'for an access manager' do
+      before do
+        allow(user).to receive(:roles).and_return([User::Roles::ACCESS_MANAGER])
+      end
+      it { should permit_action(:lock) }
+      context 'locking themselves' do
+        before do
+          allow(user).to receive(:id).and_return(resource.id)
+        end
+        it { should_not permit_action(:lock) }
+      end
+    end
+
+    context 'for a non-access manager' do
+      before do
+        allow(user).to receive(:roles).and_return([])
+      end
+      it { should_not permit_action(:lock) }
+    end
+  end
+
+  describe '`delete?` method' do
+
+    context 'for an access manager' do
+      before do
+        allow(user).to receive(:roles).and_return([User::Roles::ACCESS_MANAGER])
+      end
+      it { should permit_action(:delete) }
+      context 'locking themselves' do
+        before do
+          allow(user).to receive(:id).and_return(resource.id)
+        end
+        it { should_not permit_action(:delete) }
+      end
+    end
+
+    context 'for a non-access manager' do
+      before do
+        allow(user).to receive(:roles).and_return([])
+      end
+      it { should_not permit_action(:delete) }
     end
   end
 end

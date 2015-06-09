@@ -15,7 +15,7 @@
     - if form_builder
       = form_builder.label field_name, label
     - else
-      = label_tag field_name, label
+      = label_tag field_name, label, for: field_id
   %span.input-field-container{class: icon ? "icon-#{icon}-#{location}" : nil}<>
     - if form_builder
       = form_builder.send field_type, field_name, {placeholder: placeholder, class: field_class, data: field_data}.merge(html_attributes)

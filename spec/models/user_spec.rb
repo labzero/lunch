@@ -8,6 +8,7 @@ RSpec.describe User, :type => :model do
   end
 
   it { is_expected.to callback(:save_ldap_attributes).after(:save) }
+  it { is_expected.to callback(:destroy_ldap_entry).after(:destroy) }
   it { should validate_confirmation_of(:email).on(:update) }
   it { should validate_presence_of(:email).on(:update) }
   it { subject.email = 'foo' ; should validate_presence_of(:email_confirmation).on(:update) }
@@ -85,7 +86,8 @@ RSpec.describe User, :type => :model do
     display_name: :displayname,
     email: :mail,
     surname: :sn,
-    given_name: :givenname
+    given_name: :givenname,
+    deletion_reason: :deletereason
   }.each do |method, attribute|
     describe "`#{method}` method" do
       let(:attribute_value) { double('An LDAP Entry Attribute') }
@@ -303,6 +305,24 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`deletion_reason=` method' do
+    let(:value) { 'stole my stapler' }
+    let(:call_method) { subject.deletion_reason = value }
+    it 'should change the deletion_reason attribute on the model' do
+      call_method
+      expect(subject.deletion_reason).to eq(value)
+    end
+    it 'should mark the deletion_reason attribute as dirty if the value changed' do
+      expect(subject).to receive(:attribute_will_change!).with('deletion_reason')
+      call_method
+    end
+    it 'should not mark the deletion_reason attribute as dirty if the value was the same' do
+      allow(subject).to receive(:deletion_reason).and_return(value)
+      expect(subject).to_not receive(:attribute_will_change!).with('deletion_reason')
+      call_method
+    end
+  end
+
   describe '`email_changed?` method' do
     let(:call_method) { subject.email_changed? }
     it 'returns true if a new email value has been set' do
@@ -370,6 +390,22 @@ RSpec.describe User, :type => :model do
       expect(call_method).to be(false)
     end
   end
+
+  describe '`deletion_reason_changed?` method' do
+    let(:call_method) { subject.deletion_reason_changed? }
+    it 'returns true if a new reason value has been set' do
+      subject.deletion_reason = 'they ate my lunch'
+      expect(call_method).to be(true)
+    end
+    it 'returns false if there are no reason changes' do
+      expect(call_method).to be(false)
+    end
+    it 'ignores setting the reason to the same value' do
+      subject.deletion_reason = subject.deletion_reason
+      expect(call_method).to be(false)
+    end
+  end
+
 
   describe '`reload_ldap_entry` protected method' do
     let(:call_method) { subject.send(:reload_ldap_entry) }
@@ -559,6 +595,24 @@ RSpec.describe User, :type => :model do
     it 'sets the @member_id attribute to the returned bank id' do
       call_method
       expect(subject.instance_variable_get(:@member_id)).to eq(bank_id)
+    end
+  end
+
+  describe '`destroy_ldap_entry` method' do
+    let(:call_method) {subject.send(:destroy_ldap_entry)}
+    let(:username) { double('username') }
+    let(:ldap_domain) { double('ldap_domain') }
+    before do
+      allow(subject).to receive(:username).and_return(username)
+      allow(subject).to receive(:ldap_domain).and_return(ldap_domain)
+    end
+    it 'should call `Devise::LDAP::Adapter.delete_ldap_entry`' do
+      expect(Devise::LDAP::Adapter).to receive(:delete_ldap_entry).with(username, nil, ldap_domain).and_return(true)
+      call_method
+    end
+    it 'should raise an `ActiveRecord::Rollback` if the delete fails' do
+      allow(Devise::LDAP::Adapter).to receive(:delete_ldap_entry).and_return(false)
+      expect{call_method}.to raise_error(ActiveRecord::Rollback)
     end
   end
 end

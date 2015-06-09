@@ -251,6 +251,18 @@ en:
       update:
         title: User Information Updated
         success_html: The information for <strong>%{name}</strong> has been updated.
+      confirm_delete:
+        title: Confirm Delete User Access
+        summary_html: Are you sure you want to delete this user's access?<br>This cannot be undone.
+        delete_button: Delete User Access
+        label: '%{field}:'
+        prompt: "Reason for deleting this user's access:"
+        reasons:
+          remove_access: No longer a web user
+          left_institution: No longer with this institution
+      delete_user:
+        title: User Access Deleted
+        success_html: User access for <strong>%{name}</strong> has been deleted.
     password:
       title: Password
     quick_advance:
