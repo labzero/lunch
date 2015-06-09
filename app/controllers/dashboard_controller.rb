@@ -64,8 +64,6 @@ class DashboardController < ApplicationController
       data: rate_service.overnight_vrc
     }]
 
-    @pledged_collateral = member_balances.pledged_collateral
-    @total_securities = member_balances.total_securities
     @effective_borrowing_capacity = member_balances.effective_borrowing_capacity
     @effective_borrowing_capacity.merge!({threshold_capacity: THRESHOLD_CAPACITY}) if @effective_borrowing_capacity # we'll be pulling threshold capacity from a different source than the MemberBalanceService
     @total_maturing_today = 46500000
