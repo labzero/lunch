@@ -33,6 +33,8 @@ Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
       access_manager
     when 'extranet user'
       extranet_user
+    when 'deletable user'
+      deletable_user
     else
       raise 'unknown user type'
   end
@@ -158,4 +160,8 @@ end
 
 def access_manager
   CustomConfig.env_config['access_manager']
+end
+
+def deletable_user
+  CustomConfig.env_config['deletable']
 end

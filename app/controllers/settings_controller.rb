@@ -15,8 +15,19 @@ class SettingsController < ApplicationController
     authorize :access_manager, :show?
   end
 
-  before_action only: [:unlock, :lock, :edit_user, :update_user] do
-    authorize :access_manager, :edit?
+  before_action only: [:edit_user, :update_user] do
+    @user = User.find(params[:id])
+    authorize @user, :edit?
+  end
+
+  before_action only: [:lock, :unlock] do
+    @user = User.find(params[:id])
+    authorize @user, :lock?
+  end
+
+  before_action only: [:delete_user, :confirm_delete] do
+    @user = User.find(params[:id])
+    authorize @user, :delete?
   end
 
   def index
@@ -49,8 +60,7 @@ class SettingsController < ApplicationController
 
   # POST
   def unlock
-    @user = User.find(params[:id])
-    if @user.id != current_user.id && @user.unlock!
+    if @user.unlock!
       render json: {
         html: render_to_string(layout: false),
         row_html: render_to_string(partial: 'user_row', locals: {
@@ -66,8 +76,7 @@ class SettingsController < ApplicationController
 
   # POST
   def lock
-    @user = User.find(params[:id])
-    if @user.id != current_user.id && @user.lock!
+    if @user.lock!
       render json: {
         html: render_to_string(layout: false),
         row_html: render_to_string(partial: 'user_row', locals: {
@@ -83,9 +92,8 @@ class SettingsController < ApplicationController
 
   # GET
   def edit_user
-    @user = User.find(params[:id])
     @user.email_confirmation = @user.email
-    render json: {html: render_to_string(layout: false)}
+    render json: {html: render_to_string(layout: false, locals: { actions: actions_for_user(@user) })}
   end
 
   # POST
@@ -100,6 +108,33 @@ class SettingsController < ApplicationController
           actions: actions_for_user(@user)
         })
       }
+    else
+      render json: {}, status: 500
+    end
+  end
+
+  # GET
+  def confirm_delete
+    render json: {
+      html: render_to_string(layout: false)
+    }
+  end
+
+  # DELETE
+  def delete_user
+    raise Pundit::NotAuthorizedError.new query: :delete?, record: @user if current_user.id == @user.id
+    case params[:reason]
+    when 'remove_access'
+      reason = 'No longer a web user' # these strings should NOT be looked up from I18n here
+    when 'left_institution'
+      reason = 'No longer with this institution'
+    else
+      raise ActiveRecord::RecordInvalid.new(@user)
+    end
+    @user.deletion_reason = reason
+    success = @user.save! && @user.destroy!
+    if success
+      render json: { html: render_to_string(layout: false) }
     else
       render json: {}, status: 500
     end
@@ -173,7 +208,8 @@ class SettingsController < ApplicationController
     {
       locked: user.locked?,
       locked_disabled: is_current_user,
-      reset_disabled: is_current_user
+      reset_disabled: is_current_user,
+      delete_disabled: is_current_user
     }
   end
 

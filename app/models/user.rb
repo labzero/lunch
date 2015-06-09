@@ -5,11 +5,16 @@ class User < ActiveRecord::Base
   validates :email, presence: {on: :update}, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, allow_blank: true }, confirmation: {if: :email_changed?, on: :update}
   validates :email_confirmation, presence: {if: :email_changed?, on: :update}
 
+  def self.policy_class
+    AccessManagerPolicy
+  end
+
   LDAP_ATTRIBUTES_MAPPING = {
     email: :mail,
     surname: :sn,
     given_name: :givenname,
-    display_name: :displayname
+    display_name: :displayname,
+    deletion_reason: :deletereason
   }.with_indifferent_access.freeze
 
   LDAP_LOCK_BIT = 0x2
@@ -56,9 +61,10 @@ class User < ActiveRecord::Base
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :ldap_authenticatable, :recoverable, :trackable
 
-  attr_accessor :roles, :email, :surname, :given_name, :member_id
+  attr_accessor :roles, :email, :surname, :given_name, :member_id, :deletion_reason
 
   after_save :save_ldap_attributes
+  after_destroy :destroy_ldap_entry
 
   def display_name
     @display_name ||= (ldap_entry[:displayname].try(:first) if ldap_entry)
@@ -107,6 +113,19 @@ class User < ActiveRecord::Base
 
   def given_name_changed?
     changed.include?('given_name')
+  end
+
+  def deletion_reason
+    @deletion_reason ||= (ldap_entry[:deletereason].try(:first) if ldap_entry)
+  end
+
+  def deletion_reason=(value)
+    attribute_will_change!('deletion_reason') unless value == deletion_reason
+    @deletion_reason = value
+  end
+
+  def deletion_reason_changed?
+    changed.include?('deletion_reason')
   end
 
   def locked?
@@ -234,6 +253,15 @@ class User < ActiveRecord::Base
     else
       raise ActiveRecord::Rollback
     end
+  end
+
+  def destroy_ldap_entry
+    raise ActiveRecord::Rollback unless Devise::LDAP::Adapter.delete_ldap_entry(username, nil, ldap_domain)
+  end
+
+  # this is needed for devise recoverable since we don't have the column on our table
+  def encrypted_password_changed?
+    false
   end
 
 end

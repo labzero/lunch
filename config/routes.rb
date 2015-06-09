@@ -51,6 +51,8 @@ Rails.application.routes.draw do
   post '/settings/users/:id/unlock' => 'settings#unlock', as: 'user_unlock'
   get '/settings/users/:id' => 'settings#edit_user', as: 'user'
   patch '/settings/users/:id' => 'settings#update_user'
+  get '/settings/users/:id/confirm_delete' => 'settings#confirm_delete', as: 'user_confirm_delete'
+  delete '/settings/users/:id' => 'settings#delete_user'
 
   get '/jobs/:job_status_id' => 'jobs#status', as: 'job_status'
   get '/jobs/:job_status_id/download' => 'jobs#download', as: 'job_download'

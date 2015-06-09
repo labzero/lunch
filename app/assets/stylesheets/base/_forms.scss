@@ -55,11 +55,11 @@ $form-input-field-height: 30px !default;
   }
   .label-error {
     display: none;
+    width: 100%;
+    color: $alert-red;
   }
   &.input-field-container-error {
     .label-error {
-      width: 100%;
-      color: $alert-red;
       display: inline-block;
     }
     height: auto;

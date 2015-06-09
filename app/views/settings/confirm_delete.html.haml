@@ -1,0 +1,17 @@
+.settings-users-overlay.settings-user-confirm-delete
+  %h3=t('settings.account.confirm_delete.title')
+  %p.settings-users-overlay-details.icon-alert-before=t('settings.account.confirm_delete.summary_html')
+  = form_for(@user, remote: true, method: :delete) do |f|
+    %p= t('settings.account.confirm_delete.prompt')
+    %ul
+      %li= render 'shared/input_field', field_type: :radio, field_name: :reason, label: t('settings.account.confirm_delete.reasons.remove_access'), field_id: :reason_remove_access, html_attributes: {value: :remove_access}
+      %li= render 'shared/input_field', field_type: :radio, field_name: :reason, label: t('settings.account.confirm_delete.reasons.left_institution'), field_id: :reason_left_institution, html_attributes: {value: :left_institution}
+  %dl
+    %dt= t('settings.account.confirm_delete.label', field: t('global.name'))
+    %dd= @user.display_name
+    %dt= t('settings.account.confirm_delete.label', field: User.human_attribute_name(:username).capitalize)
+    %dd= @user.username
+    %dt= t('settings.account.confirm_delete.label', field: User.human_attribute_name(:email).capitalize)
+    %dd= @user.email
+  %button.secondary-button{data: {'flyout-action' => 'close'}}= t('global.cancel')
+  %button.primary-button{disabled: 'disabled'}= t('settings.account.confirm_delete.delete_button')

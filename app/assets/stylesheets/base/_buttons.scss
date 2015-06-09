@@ -16,6 +16,11 @@ $button-vertical-padding: 7px;
   &:visited {
     color: inherit;
   }
+  &[disabled] {
+    color: $white;
+    cursor: default;
+    pointer-events: none;
+  }
 }
 
 .primary-button {

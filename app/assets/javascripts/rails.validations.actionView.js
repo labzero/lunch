@@ -11,7 +11,11 @@ window.ClientSideValidations.formBuilders['ActionView::Helpers::FormBuilder'] = 
 
   remove: function(element, settings) {
     element.removeClass('input-field-error');
-    element.removeClass('input-field-container-error');
-    var $container = element.parents('.input-field-container');
+    setTimeout(1, function() { // Work around for a DOM bug in chrome where the event blur never results in a click if we manipulate the DOM geometry
+      if (!element.hasClass('input-field-error')) {
+        var $container = element.parents('.input-field-container');
+        $container.removeClass('input-field-container-error');
+      };
+    });
   }
 }
