@@ -20,8 +20,6 @@ Background:
     When I visit the dashboard
     Then I should see the Your Account table breakdown
       And I should see the Anticipated Activity graph
-      And I should see a pledged collateral gauge
-      And I should see a total securities gauge
       And I should see an effective borrowing capacity gauge
 
   @smoke
