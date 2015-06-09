@@ -2,6 +2,7 @@ require 'spec_helper'
 require 'securid_service' # because our name is weird
 
 describe SecurIDService do
+  let(:prefixed_username) { double('A Prefixed Username') }
   let(:username) { double('A Username') }
   let(:rsa_session) { double('RSA::SecurID::Session', authenticate: nil, change_pin: nil, cancel_pin: nil, resynchronize: nil, status: nil, resynchronize?: nil, change_pin?: nil, authenticated?: nil, denied?: nil) }
   let(:token) { Random.rand(999999).to_s.rjust(6, '0') }
@@ -9,6 +10,7 @@ describe SecurIDService do
   let(:session_status) { double('A Status') }
   subject { SecurIDService.new(username) }
   before do
+    allow(SecurIDService::USERNAME_PREFIX).to receive(:+).with(username).and_return(prefixed_username)
     allow(RSA::SecurID::Session).to receive(:new).and_return(rsa_session)
   end
 
@@ -35,6 +37,12 @@ describe SecurIDService do
     end
   end
 
+  describe 'constructor' do
+    it 'should prefix the username with `prod-`' do
+      expect(subject.instance_variable_get(:@username)).to eq(prefixed_username)
+    end
+  end
+
   describe 'public methods' do
     before do
       allow(subject).to receive(:validate_token)
@@ -55,8 +63,8 @@ describe SecurIDService do
         allow(rsa_session).to receive(:authenticate).and_return(session_status)
         expect(make_call).to be(session_status)
       end
-      it 'should call authenticate on the session and pass the username and concatenated pin and token' do
-        expect(rsa_session).to receive(:authenticate).with(username, pin + token)
+      it 'should call authenticate on the session and pass the prefixed username and concatenated pin and token' do
+        expect(rsa_session).to receive(:authenticate).with(prefixed_username, pin + token)
         make_call
       end
     end

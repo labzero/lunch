@@ -1,7 +1,10 @@
 class SecurIDService
+
+  USERNAME_PREFIX = 'prod-'
+
   def initialize(username, options={})
     options[:test_mode] = ENV['SECURID_TEST_MODE'].to_sym if !options.has_key?(:test_mode) && ENV['SECURID_TEST_MODE']
-    @username = username
+    @username = USERNAME_PREFIX + username
     @session = RSA::SecurID::Session.new options
   end
 
