@@ -275,6 +275,11 @@
         margin-right: 10px;
         line-height: 25px;
         height: 25px;
+        border: none;
+        outline: none;
+        &:focus {
+          background-color: inherit;
+        }
       }
     }
   }
