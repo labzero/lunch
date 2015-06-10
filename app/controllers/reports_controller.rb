@@ -44,6 +44,11 @@ class ReportsController < ApplicationController
     'user' => I18n.t('user_roles.user.title')
   }
 
+  DATE_PICKER_FILTERS = {
+    end_of_month: 'endOfMonth',
+    end_of_quarter: 'endOfQuarter'
+  }
+
   before_action do
     @member_name = current_member_name
   end
@@ -389,19 +394,7 @@ class ReportsController < ApplicationController
     default_dates = default_dates_hash
     @start_date = ((params[:start_date] || default_dates[:this_year_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:today])).to_date
-    preset_options = {
-        :first_preset => {
-            :label => I18n.t('global.last_year'),
-            :start_date => default_dates[:last_year_start],
-            :end_date => default_dates[:last_year_end]
-        },
-        :second_preset => {
-            :label => I18n.t('global.year_to_date'),
-            :start_date => default_dates[:this_year_start],
-            :end_date => default_dates[:today]
-        }
-    }
-    @picker_presets = date_picker_presets(@start_date, @end_date, preset_options)
+    @picker_presets = date_picker_presets(@start_date, @end_date)
     
     @collateral_type_options = [
         [t('reports.pages.price_indications.standard_credit_program'), 'standard'],

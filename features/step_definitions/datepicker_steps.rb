@@ -13,7 +13,7 @@ When(/^I choose the "(.*?)" in the datepicker$/) do |selector|
     when 'custom date'
       I18n.t('datepicker.single.custom')
     when 'month to date preset'
-      I18n.t('datepicker.range.this_month', month: @today.strftime("%B"))
+      I18n.t('datepicker.range.date_to_current', date: @today.strftime("%B"))
     when 'last year preset'
       I18n.t('global.last_year')
     else

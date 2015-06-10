@@ -4,16 +4,20 @@
 
 .daterangepicker {
   display: none;
-  width: 433px;
+  width: 690px;
   border: 1px solid $actionable-blue;
   padding: 0 0 30px 0;
   &.opensleft, &.opensright {
     .calendar {
+      display: block;
       margin: 0;
     }
   }
   &.opensleft:after, &.opensleft:before {
     display: none;
+  }
+  &.dropdown-menu {
+    z-index: 1;
   }
   .prev.available {
     transform: rotate(90deg);
@@ -46,53 +50,34 @@
 
   &.opensleft, &.opensright, &.openscenter {
     .ranges {
-      float: none;
       margin: 0;
     }
   }
 
   .ranges {
-    width: 100%;
-    border-bottom: 1px solid $secondary-gray;
-    ul {
-      display: table;
-      width: 100%;
-      table-layout: fixed;
-    }
+    width: 224px;
     li {
-      display: table-cell;
-      @extend %typography-default-text;
+      @extend %typography-dropdown-selector;
       color: $text-color;
-      text-align: center;
       border: none;
       border-radius: 0;
       background: $white;
-      padding: 10px 0;
       position: relative;
+      margin-bottom: 5px;
       &.active, &:hover {
-        background: $secondary-gray;
         border: none;
-        color: $text-color;
-        &:before {
-          border: none;
-        }
-      }
-      &:before {
-        content: '';
-        border-left: 1px solid $secondary-gray;
-        position: absolute;
-        left: -1px;
-        top: 6px;
-        height: 30px;
-      }
-      &:first-child:before {
-        border: none;
+        background-color: $white;
+        color: $actionable-blue;
       }
       &:first-child {
-        border-top-left-radius: 4px;
+        margin-top: 10px;
       }
-      &:last-child {
-        border-top-right-radius: 4px;
+      &.disabled {
+        color: $secondary-gray;
+        &.active, &:hover {
+          color: $secondary-gray;
+          cursor: default;
+        }
       }
     }
   }
@@ -141,6 +126,7 @@
 
   .calendar {
     &.first {
+      border-left: 1px solid $secondary-gray;
       border-right: 1px solid $secondary-gray;
     }
     td, th {
@@ -160,13 +146,18 @@
   }
 
   &.single {
+    width: 456px;
     .calendar {
       margin: 0 auto;
       border-right: none;
+      float: left;
       td.in-range {
         background: $white;
         color: $text-color;
       }
+    }
+    .ranges {
+      float: left;
     }
   }
 

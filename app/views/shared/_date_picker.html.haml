@@ -5,7 +5,17 @@
 - single_date_picker ||= false
 - input_field_text ||= "#{t('datepicker.single.input', date: '{replace_date}')}"
 - max_date ||= false
+- date_picker_filter ||= nil
+- date_picker_data = { |
+  :'date-picker-presets' => presets.to_json, |
+  :'date-picker-open-direction' => open_direction, |
+  :'date-picker-form' => form, |
+  :'date-picker-single-date-picker' => single_date_picker.to_s, |
+  :'date-picker-max-date' => max_date, |
+  :'date-picker-filter-options' => ReportsController::DATE_PICKER_FILTERS.to_json, |
+  :'date-picker-filter' => date_picker_filter }
+
 
 %span.input-field-container.pull-right.icon-calendar-after.datepicker-trigger{data: {:'date-picker-input-field-text' => input_field_text}}
   %input{placeholder: placeholder, disabled: true}
-.datepicker-wrapper{data: {:'date-picker-presets' => presets.to_json, :'date-picker-open-direction' => open_direction, :'date-picker-form' => form, :'date-picker-single-date-picker' => single_date_picker.to_s, :'date-picker-max-date' => max_date}}
+.datepicker-wrapper{data: date_picker_data}
