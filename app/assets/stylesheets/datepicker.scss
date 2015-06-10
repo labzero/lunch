@@ -19,6 +19,11 @@
   &.dropdown-menu {
     z-index: 1;
   }
+  &.opensright {
+    .ranges {
+      float: left;
+    }
+  }
   .prev.available {
     transform: rotate(90deg);
   }

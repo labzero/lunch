@@ -46,7 +46,7 @@ Scenario: Member sees date picker when interacting with date field
 Scenario: Member chooses the current month to date preset on Capital Stock Activity Statement
   Given I am on the "Capital Stock Activity Statement" report page
   And I click the datepicker field
-  When I choose the "month to date preset" in the datepicker
+  When I choose the "month to date" preset in the datepicker
   Then I should see no calendar
   When I click the datepicker apply button
   Then I should see a "Capital Stock Activity Statement" for the current month to date
@@ -55,7 +55,7 @@ Scenario: Member chooses the current month to date preset on Capital Stock Activ
 Scenario: Member chooses the last month preset on Capital Stock Activity Statement
   Given I am on the "Capital Stock Activity Statement" report page
   And I click the datepicker field
-  When I choose the last month preset in the datepicker
+  When I choose the "last month" preset in the datepicker
   Then I should see no calendar
   When I click the datepicker apply button
   Then I should see a "Capital Stock Activity Statement" for the last month
@@ -64,7 +64,7 @@ Scenario: Member chooses the last month preset on Capital Stock Activity Stateme
 Scenario: Member chooses a custom date range on Capital Stock Activity Statement
   Given I am on the "Capital Stock Activity Statement" report page
   And I click the datepicker field
-  When I choose the "custom date range" in the datepicker
+  When I choose the "custom date range" preset in the datepicker
   Then I should see two calendars
   When I select the 15th of "this month" in the left calendar
   And I select the 20th of "this month" in the right calendar

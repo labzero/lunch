@@ -49,7 +49,7 @@ module DatePickerHelper
     {start_date: start_date, end_date: end_date}
   end
 
-  def date_picker_presets(custom_start_date, custom_end_date = nil, custom_presets = nil )
+  def date_picker_presets(custom_start_date, custom_end_date = nil)
     presets = if custom_end_date.nil?
       date_picker_single(custom_start_date)
     else

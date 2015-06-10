@@ -46,20 +46,45 @@ Scenario Outline: Choosing different historic price indication reports
   | Securities-Backed Credit | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR                   |
   | Securities-Backed Credit | collateral          | Variable Rate Credit (VRC)                 | credit          | Variable Rate Credit (VRC)   |
 
-@jira-mem-359
+@jira-mem-359 @jira-mem-537
 Scenario: Custom datepicker options
   Given I am on the "Historical Price Indications" report page
   When I click the datepicker field
-  Then I should see "Year to date"
-  And I should see "Last year"
+  Then I should see the datepicker preset for "month to date"
+  And I should see the datepicker preset for "last month"
+  And I should see the datepicker preset for "current quarter to date"
+  And I should see the datepicker preset for "last quarter"
+  And I should see the datepicker preset for "year to date"
+  And I should see the datepicker preset for "last year"
+  And I should see the datepicker preset for "custom date range"
 
-@jira-mem-359
-Scenario: Choosing `Last year` as a datepicker option
+@jira-mem-359 @jira-mem-537
+Scenario: Choosing different presets in the datepicker
   Given I am on the "Historical Price Indications" report page
   When I click the datepicker field
-  And I choose the "last year preset" in the datepicker
+  And I choose the "month to date" preset in the datepicker
   And I click the datepicker apply button
-  Then I should see a report with dates for last year
+  Then I should see a report with dates for "month to date"
+  When I click the datepicker field
+  And I choose the "last month" preset in the datepicker
+  And I click the datepicker apply button
+  Then I should see a report with dates for "last month"
+  When I click the datepicker field
+  And I choose the "current quarter to date" preset in the datepicker
+  And I click the datepicker apply button
+  Then I should see a report with dates for "current quarter to date"
+  When I click the datepicker field
+  And I choose the "last quarter" preset in the datepicker
+  And I click the datepicker apply button
+  Then I should see a report with dates for "last quarter"
+  When I click the datepicker field
+  And I choose the "year to date" preset in the datepicker
+  And I click the datepicker apply button
+  Then I should see a report with dates for "year to date"
+  When I click the datepicker field
+  And I choose the "last year" preset in the datepicker
+  And I click the datepicker apply button
+  Then I should see a report with dates for "last year"
 
 @data-unavailable @jira-mem-283
 Scenario: No data is available to show in the Historical Price Indications report

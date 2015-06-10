@@ -18,7 +18,7 @@ Scenario: Member sees Securities Services Statement
 Scenario: Member chooses the current month to date preset on Securities Services Monthly Statement
   Given I am on the "Securities Services Monthly Statement" report page
   When I click the datepicker field
-  And I choose the "custom date" in the datepicker
+  And I choose the "custom date" preset in the datepicker
   And I select the 14th of "last month" in the single datepicker calendar
   And I click the datepicker apply button
   Then I should see a "Securities Services Monthly Statement" for the 14th of the last month

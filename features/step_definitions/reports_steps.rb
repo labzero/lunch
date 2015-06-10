@@ -224,7 +224,7 @@ Given(/^I am showing Settlement Transaction Account activities for (\d+)$/) do |
   start_date = Time.zone.parse("#{year}-01-01")
   end_date = Time.zone.parse("#{year}-12-31")
   step 'I click the datepicker field'
-  step %{I choose the "custom date range" in the datepicker}
+  step %{I choose the "custom date range" preset in the datepicker}
   step %{I select a start date of "#{start_date}" and an end date of "#{end_date}"}
   step 'I click the datepicker apply button'
   step %{I should see a "Settlement Transaction Account Statement" with dates between "#{start_date.strftime('%B %-d, %Y')}" and "#{end_date.strftime('%B %-d, %Y')}"}
