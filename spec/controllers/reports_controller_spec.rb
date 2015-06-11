@@ -860,8 +860,8 @@ RSpec.describe ReportsController, :type => :controller do
           get :historical_price_indications, start_date: start_date, end_date: end_date
           expect(assigns[:end_date]).to eq(end_date)
         end
-        it 'should pass @start_date, @end_date and a custom preset hash to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-          expect(controller).to receive(:date_picker_presets).with(start_date, end_date, anything).and_return(picker_preset_hash)
+        it 'should pass @start_date and @end_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+          expect(controller).to receive(:date_picker_presets).with(start_date, end_date).and_return(picker_preset_hash)
           get :historical_price_indications, start_date: start_date, end_date: end_date
           expect(assigns[:picker_presets]).to eq(picker_preset_hash)
         end

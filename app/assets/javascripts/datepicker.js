@@ -13,6 +13,8 @@ $(function () {
     var lastCustomLabel;
     var defaultPreset = 1;
     var maxDate = $wrapper.data('date-picker-max-date') ? moment($wrapper.data('date-picker-max-date')) : false;
+    var filter = $wrapper.data('date-picker-filter');
+    var filterOptions = $wrapper.data('date-picker-filter-options');
     $.each(presets, function(index, preset) {
       if (preset.start_date) {
         preset.start_date = moment(preset.start_date);
@@ -46,34 +48,36 @@ $(function () {
     datePickerSelectionHandler($datePickerTrigger, $wrapper, presets);
     setDatePickerApplyListener($datePickerTrigger, $form);
     setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
+    if (filter !== undefined) {
+      disablePresets($datePickerTrigger, filter, filterOptions);
+      $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(){
+        filterDates(filter, filterOptions);
+      });
+    };
   });
 
   function initializeDatePicker($datePickerTrigger, $datePickerWrapper, options) {
-    $datePickerTrigger.daterangepicker(
-      {
-        startDate: options.startDate,
-        endDate: options.endDate,
-        ranges: options.ranges,
-        maxDate: options.maxDate,
-        parentEl: $datePickerWrapper,
-        locale: {
-          customRangeLabel: options.customLabel,
-          cancelLabel: ''
-        },
-        opens: options.opens,
-        singleDatePicker: options.singleDatePicker
-      }
-    );
+    var optionsHash = {
+      startDate: options.startDate,
+      endDate: options.endDate,
+      ranges: options.ranges,
+      maxDate: options.maxDate,
+      parentEl: $datePickerWrapper,
+      locale: {
+        customRangeLabel: options.customLabel,
+        cancelLabel: ''
+      },
+      opens: options.opens,
+      singleDatePicker: options.singleDatePicker
+    };
+    $datePickerTrigger.daterangepicker(optionsHash);
+    addUpdateEventTrigger($datePickerTrigger);
+    $datePickerTrigger.daterangepicker(optionsHash); // reinitialize the datepicker with the prototype changes made by `addUpdateEventTrigger`
+
     $datePickerWrapper.find('.daterangepicker .ranges').insertBefore($datePickerWrapper.find('.calendar.first'));
     $datePickerWrapper.find('.range_inputs').html($datePickerWrapper.find('.range_inputs').html().replace(/&nbsp;/g, '')); // get rid of whitespace added between hidden buttons
     $($datePickerWrapper.find('.ranges li')[options.defaultPreset]).click(); // default to "Last Month" when first opening
     if (options.singleDatePicker) {
-      // hide the calendar when you're first opening the datepicker, unless the 'custom' tab is the one selected
-      $('.datepicker-trigger').on('show.daterangepicker', function(event){
-        if ( !$datePickerWrapper.find('.ranges li').last().hasClass('active') ) {
-          $datePickerWrapper.find('.calendar.single').hide();
-        }
-      });
       $datePickerWrapper.find('.ranges').show(); // always show the pre-selected tabs (daterangepicker.js hides these when set with the option singleDatePicker
       $datePickerWrapper.find('.calendar').off('click.daterangepicker', 'td.available'); // remove daterangepicker's event handling so that we can force user to click 'apply' button when selecting custom date
       $datePickerWrapper.find('.calendar').on('click.daterangepicker', 'td.available', function(event){
@@ -90,32 +94,25 @@ $(function () {
     }
   };
 
-  // Choosing "This Month" or "Last Month" shouldn't close the datepicker until the apply button is pressed
+  // Choosing a preset label shouldn't close the datepicker until the apply button is pressed
   function datePickerSelectionHandler($datePickerTrigger, $datePickerWrapper, presets){
     $datePickerWrapper.find('.ranges ul li').each(function(index, label) {
       var $label = $(label);
       $(label).on('click', function(event){
         event.stopPropagation();
-        $('.ranges ul li').removeClass('active');
-        $label.addClass('active');
-        if (presets[index]) {
-          var preset = presets[index];
-          if (!preset.is_custom) {
-            $datePickerWrapper.find('.calendar').hide();
-            
-            if (preset.start_date) {
-              $datePickerTrigger.data('daterangepicker').setStartDate(preset.start_date);
+        if (!$label.hasClass('disabled')) {
+          $('.ranges ul li').removeClass('active');
+          $label.addClass('active');
+          if (presets[index]) {
+            var preset = presets[index];
+            if (!preset.is_custom) {
+              if (preset.start_date) {
+                $datePickerTrigger.data('daterangepicker').setStartDate(preset.start_date);
+              };
+              if (preset.end_date) {
+                $datePickerTrigger.data('daterangepicker').setEndDate(preset.end_date);
+              };
             };
-
-            if (preset.end_date) {
-              $datePickerTrigger.data('daterangepicker').setEndDate(preset.end_date);
-            };
-          } else {
-            var calendarSelector = '.calendar';
-            if ($datePickerTrigger.data('daterangepicker').singleDatePicker) {
-              calendarSelector += '.right';
-            }
-            $datePickerWrapper.find(calendarSelector).show();
           };
         };
       });
@@ -143,6 +140,63 @@ $(function () {
     else {
       $datePickerTrigger.find('input').val(startDate.format('MM/DD/YYYY') + ' - ' + endDate.format('MM/DD/YYYY'));
     };
-  }
+  };
+
+  function filterDates(filter, filterOptions) {
+    var monthMoment = moment($('.calendar.first .month').text(), 'MMM YYYY');
+    var lastDayOfMonth = monthMoment.endOf('month').date();
+    switch (filter) {
+      case filterOptions['end_of_month']:
+        disableAllExceptEndOfMonth(lastDayOfMonth);
+        break;
+      case filterOptions['end_of_quarter']:
+        // disable all dates except 3/31, 6/30, 9/30, 12/31
+        var month = monthMoment.month();
+        if (month === 2 || month === 5 || month === 8 || month === 11) {
+          disableAllExceptEndOfMonth(lastDayOfMonth);
+        } else {
+          $('.calendar.first td.available').removeClass('available').addClass('off disabled');
+        };
+        break;
+    };
+  };
+
+  function disableAllExceptEndOfMonth(day) {
+    $('.calendar.first td.available').each(function(i){
+      var $node = $(this);
+      if ($node.text() != day) {
+        $node.removeClass('available');
+        $node.addClass('off disabled');
+      };
+    });
+  };
+
+  // monkeypatch DateRangePicker to trigger event when calendar is updated
+  function addUpdateEventTrigger(picker) {
+    picker = $(picker).data('daterangepicker');
+    var updateCalendarsOld = picker.__proto__.updateCalendars;
+    if (!updateCalendarsOld.fhlbModified) {
+      picker.__proto__.updateCalendars = function () {
+        var oldResults = updateCalendarsOld.apply(this);
+        this.element.trigger('showCalendar.daterangepicker', this);
+        return oldResults;
+      };
+      picker.__proto__.updateCalendars.fhlbModified = true;
+    };
+  };
+
+  function disablePresets($picker, filter, filterOptions) {
+    var picker = $picker.data('daterangepicker');
+    switch (filter) {
+      case filterOptions['end_of_month']:
+        $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
+        $(picker.container.find('.ranges li')[3]).addClass('disabled'); // 'End of {year}'
+        break;
+      case filterOptions['end_of_quarter']:
+        $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
+        $(picker.container.find('.ranges li')[1]).addClass('disabled'); // 'End of {month}'
+        break;
+    };
+  };
 
 });
