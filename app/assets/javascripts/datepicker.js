@@ -173,15 +173,16 @@ $(function () {
 
   // monkeypatch DateRangePicker to trigger event when calendar is updated
   function addUpdateEventTrigger(picker) {
-    picker = $(picker).data('daterangepicker');
-    var updateCalendarsOld = picker.__proto__.updateCalendars;
+    var picker = $(picker).data('daterangepicker');
+    var pickerPrototype = Object.getPrototypeOf(picker);
+    var updateCalendarsOld = pickerPrototype.updateCalendars;
     if (!updateCalendarsOld.fhlbModified) {
-      picker.__proto__.updateCalendars = function () {
+      pickerPrototype.updateCalendars = function () {
         var oldResults = updateCalendarsOld.apply(this);
         this.element.trigger('showCalendar.daterangepicker', this);
         return oldResults;
       };
-      picker.__proto__.updateCalendars.fhlbModified = true;
+      pickerPrototype.updateCalendars.fhlbModified = true;
     };
   };
 
