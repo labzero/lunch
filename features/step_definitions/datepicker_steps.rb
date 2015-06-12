@@ -63,7 +63,7 @@ When(/^I select all of last year including today$/) do
   calendar.find("td.available:not(.off)", text: /^#{day}$/).click
 end
 
-Then(/^I should see a report with dates for "(.*?)"/) do |selector|
+Then(/^I should see a report with dates for "(.*?)"$/) do |selector|
   case selector
     when 'month to date'
       start_date = default_dates_hash[:this_month_start]
@@ -99,6 +99,11 @@ Then(/^I should not see available dates after today$/) do
   (day + 1).upto(days) do |a_day|
     calendar.assert_selector("td.disabled.off", text: /^#{a_day}$/)
   end
+end
+
+When(/^I write "(.*?)" in the datepicker (start|end) input field$/) do |date, input|
+  page.fill_in("daterangepicker_#{input}", with: ' ') # Capybara doesn't always clear input
+  page.fill_in("daterangepicker_#{input}", with: date.to_s)
 end
 
 def get_datepicker_preset_label(preset)

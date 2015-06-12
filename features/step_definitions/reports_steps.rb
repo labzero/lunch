@@ -188,6 +188,17 @@ Then(/^I should see a "(.*?)" starting on "(.*?)" and ending on "(.*?)"$/) do |r
   report_dates_in_range?(start_date_obj, end_date_obj)
 end
 
+Then(/^I should see a "(.*?)" report as of "(.*?)"$/) do |report_type, as_of_date|
+  as_of_date = as_of_date.to_date
+  case report_type
+    when "Advances Detail"
+      summary_statement = I18n.t('reports.pages.advances_detail.total_current_par_heading', date: as_of_date.strftime('%B %-d, %Y'))
+    else raise "unknown report type"
+  end
+  expect(page.find(".datepicker-trigger input").value).to eq(I18n.t('datepicker.single.input', date: as_of_date.strftime('%m/%d/%Y')))
+  step %{I should see "#{summary_statement}"}
+end
+
 Then(/^I should see a "(.*?)" with data for dates between the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of (this|last) month$/) do |report_type, start_day, end_day, month|
   if month == 'this'
     start_date_obj = Date.new(@today.year, @today.month, start_day.to_i)

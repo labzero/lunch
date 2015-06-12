@@ -43,16 +43,20 @@ $(function () {
       startDate: startDate,
       endDate: endDate,
       singleDatePicker: singleDatePicker,
-      maxDate: maxDate
+      maxDate: maxDate,
+      filter: filter,
+      filterOptions: filterOptions
     });
     datePickerSelectionHandler($datePickerTrigger, $wrapper, presets);
     setDatePickerApplyListener($datePickerTrigger, $form);
     setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
     if (filter !== undefined) {
       disablePresets($datePickerTrigger, filter, filterOptions);
-      $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(){
-        filterDates(filter, filterOptions);
-      });
+      if (singleDatePicker) {
+        $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(){
+          filterDates(filter, filterOptions);
+        });
+      };
     };
   });
 
@@ -73,6 +77,17 @@ $(function () {
     $datePickerTrigger.daterangepicker(optionsHash);
     addUpdateEventTrigger($datePickerTrigger);
     $datePickerTrigger.daterangepicker(optionsHash); // reinitialize the datepicker with the prototype changes made by `addUpdateEventTrigger`
+
+    // Append the daterangepicker's start and end inputs to our own div for design purposes, then attach its event handlers
+    var $datePickerStartInput = $datePickerWrapper.find('.daterangepicker_start_input');
+    var $datePickerEndInput = $datePickerWrapper.find('.daterangepicker_end_input');
+    $datePickerWrapper.find('.daterangepicker').prepend('<div class="datepicker_input_field"><div class="daterangepicker_start_input_wrapper"></div><div class="daterangepicker_end_input_wrapper"></div></div>');
+    $datePickerEndInput.prependTo($('.daterangepicker_end_input_wrapper'));
+    $datePickerStartInput.prependTo($('.daterangepicker_start_input_wrapper'));
+    $([$datePickerEndInput, $datePickerStartInput]).each(function(){this.on('change', function(e) {
+      snapToValidDate(e, $datePickerTrigger.data('daterangepicker'), options);
+      $datePickerTrigger.data('daterangepicker').inputsChanged(e)});})
+    $datePickerWrapper.find('.calendar, .ranges').off('mouseenter mouseleave'); // daterangepicker binds these unwanted events
 
     $datePickerWrapper.find('.daterangepicker .ranges').insertBefore($datePickerWrapper.find('.calendar.first'));
     $datePickerWrapper.find('.range_inputs').html($datePickerWrapper.find('.range_inputs').html().replace(/&nbsp;/g, '')); // get rid of whitespace added between hidden buttons
@@ -200,4 +215,61 @@ $(function () {
     };
   };
 
+  function snapToValidDate(e, picker, options){
+    //  if date is in the future, snap to today
+    var today = moment();
+    var thisMonth = moment().month();
+    var $el = $(e.target);
+    var date = moment($el.val());
+    if (date > today) {
+      date = today;
+      options.singleDatePicker ? picker.setEndDate(today.format('MM/DD/YYYY')) : null;
+      $el.val(today.format('MM/DD/YYYY'));
+    } else if (options.singleDatePicker) {
+      picker.setEndDate(date.format('MM/DD/YYYY'));
+      $el.val(date.format('MM/DD/YYYY'));
+    };
+
+    // apply filters if necessary
+    if (options.singleDatePicker && options.filter !== undefined && options.filterOptions !== undefined) {
+      var inputMonth = date.month();
+      switch (options.filter) {
+        // Snap to end of month
+        case options.filterOptions['end_of_month']:
+          if (inputMonth >= thisMonth) {
+            picker.setEndDate((date.subtract(1, 'month')).endOf('month'));
+          } else {
+            picker.setEndDate(date.endOf('month').format('MM/DD/YYYY'));
+          };
+          $el.val(date.endOf('month').format('MM/DD/YYYY'));
+          break;
+        // Snap to end of quarter
+        case options.filterOptions['end_of_quarter']:
+          var endOfQuarter;
+          var endOfLastQuarter;
+          var setQuarter
+
+          if (inputMonth <= 2) {
+            endOfQuarter = moment(date.year()+'/3/31');
+            endOfLastQuarter = moment((date.year() - 1)+'/12/31');
+          } else if (inputMonth <= 5) {
+            endOfQuarter = moment(date.year()+'/6/30');
+            endOfLastQuarter = moment(date.year()+'/3/31');
+          } else if (inputMonth <= 8) {
+            endOfQuarter = moment(date.year()+'/9/30');
+            endOfLastQuarter = moment(date.year()+'/6/30');
+          } else if (inputMonth <= 12) {
+            endOfQuarter = moment(date.year()+'/12/31');
+            endOfLastQuarter = moment(date.year()+'/9/30');
+          };
+
+          setQuarter = endOfQuarter > today ? endOfLastQuarter : endOfQuarter;
+          picker.setEndDate(setQuarter);
+          $el.val(setQuarter.format('MM/DD/YYYY'));
+          break;
+      };
+    };
+  };
+
 });
+

@@ -71,6 +71,15 @@ Scenario: Member chooses a custom date range on Capital Stock Activity Statement
   And I click the datepicker apply button
   Then I should see a "Capital Stock Activity Statement" for the 15th through the 20th of this month
 
+@jira-mem-630
+Scenario: Entering text in the datepicker input fields
+  Given I am on the "Capital Stock Activity Statement" report page
+  When I click the datepicker field
+  And I write "1/10/2014" in the datepicker start input field
+  And I write "7/13/2014" in the datepicker end input field
+  And I click the datepicker apply button
+  Then I should see a "Capital Stock Activity Statement" starting on "January 10, 2014" and ending on "July 13, 2014"
+
 @data-unavailable @jira-mem-283
 Scenario: No data is available to show in the Capital Stock Activity Statement
   Given I am on the "Capital Stock Activity Statement" report page
