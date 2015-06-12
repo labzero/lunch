@@ -1,0 +1,177 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://appservices/TradeServiceConsolidatedAuth/ConsolidatedService.svc?wsdl
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - private
+      Content-Type:
+      - text/xml; charset=UTF-8
+      Server:
+      - Microsoft-IIS/7.5
+      X-Aspnet-Version:
+      - 2.0.50727
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Fri, 12 Jun 2015 22:54:32 GMT
+      Content-Length:
+      - '5666'
+    body:
+      encoding: UTF-8
+      string: <?xml version="1.0" encoding="utf-8"?><wsdl:definitions name="ConsolidatedService"
+        targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex"
+        xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+        xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"
+        xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+        xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+        xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:i0="http://fhlbsf.com/contract/tradeservices/v1" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"><wsdl:import namespace="http://fhlbsf.com/contract/tradeservices/v1"
+        location="http://sfdw64netapp1.fhlbsf-i.com/TradeServiceConsolidatedAuth/ConsolidatedService.svc?wsdl=wsdl0"/><wsdl:types/><wsdl:binding
+        name="ClearUsernameBinding_IConsolidatedService" type="i0:IConsolidatedService"><soap:binding
+        transport="http://schemas.xmlsoap.org/soap/http"/><wsdl:operation name="getTrade"><soap:operation
+        soapAction="http://fhlbsf.com/contract/tradeservices/v1/IConsolidatedService/getTrade"
+        style="document"/><wsdl:input name="TradeRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="TradeResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation><wsdl:operation
+        name="getHedgeRelationship"><soap:operation soapAction="http://fhlbsf.com/contract/tradeservices/v1/IConsolidatedService/getHedgeRelationship"
+        style="document"/><wsdl:input name="HedgeRelationshipRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="HedgeRelationshipResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation><wsdl:operation
+        name="getPublishedTradeHistory"><soap:operation soapAction="http://fhlbsf.com/contract/tradeservices/v1/IConsolidatedService/getPublishedTradeHistory"
+        style="document"/><wsdl:input name="PublishedHistoryRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="PublishedTradeHistoryResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation><wsdl:operation
+        name="getPublishedHedgeRelationshipHistory"><soap:operation soapAction="http://fhlbsf.com/contract/tradeservices/v1/IConsolidatedService/getPublishedHedgeRelationshipHistory"
+        style="document"/><wsdl:input name="PublishedHistoryRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="PublishedHedgeRelationshipHistoryResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation><wsdl:operation
+        name="getPublishedTradeDeltaHistory"><soap:operation soapAction="http://fhlbsf.com/contract/tradeservices/v1/IConsolidatedService/getPublishedTradeDeltaHistory"
+        style="document"/><wsdl:input name="PublishedHistoryRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="PublishedTradeDeltaHistoryResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation><wsdl:operation
+        name="executeTrade"><soap:operation soapAction="http://fhlbsf.com/contract/tradeservices/v1/IConsolidatedService/executeTrade"
+        style="document"/><wsdl:input name="ExecuteTradeRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="ExecuteTradeResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation><wsdl:operation
+        name="updateTradeStatus"><soap:operation soapAction="http://fhlbsf.com/contract/tradeservices/v1/IConsolidatedService/updateTradeStatus"
+        style="document"/><wsdl:input name="UpdateTradeStatusRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="UpdateTradeStatusResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation><wsdl:operation
+        name="publishTrade"><soap:operation soapAction="http://fhlbsf.com/contract/tradeservices/v1/IConsolidatedService/publishTrade"
+        style="document"/><wsdl:input name="PublishTradeRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="PublishTradeResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation><wsdl:operation
+        name="publishHedgeRelationship"><soap:operation soapAction="http://fhlbsf.com/contract/tradeservices/v1/IConsolidatedService/publishHedgeRelationship"
+        style="document"/><wsdl:input name="PublishHedgeRelationshipRequest"><soap:body
+        use="literal"/></wsdl:input><wsdl:output name="PublishHedgeRelationshipResponse"><soap:body
+        use="literal"/></wsdl:output></wsdl:operation><wsdl:operation name="publishTradeDelta"><soap:operation
+        soapAction="http://fhlbsf.com/contract/tradeservices/v1/IConsolidatedService/publishTradeDelta"
+        style="document"/><wsdl:input name="PublishTradeDeltaRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="PublishTradeDeltaResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation><wsdl:operation
+        name="getExternalTrade"><soap:operation soapAction="http://fhlbsf.com/contract/tradeservices/v1/IConsolidatedService/getExternalTrade"
+        style="document"/><wsdl:input name="TradeRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="TradeResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation></wsdl:binding><wsdl:service
+        name="ConsolidatedService"><wsdl:port name="ClearUsernameBinding_IConsolidatedService"
+        binding="tns:ClearUsernameBinding_IConsolidatedService"><soap:address location="http://sfdw64netapp1.fhlbsf-i.com/TradeServiceConsolidatedAuth/ConsolidatedService.svc"/></wsdl:port></wsdl:service></wsdl:definitions>
+    http_version:
+  recorded_at: Fri, 12 Jun 2015 22:54:32 GMT
+- request:
+    method: post
+    uri: http://sfdw64netapp1.fhlbsf-i.com/TradeServiceConsolidatedAuth/ConsolidatedService.svc
+    body:
+      encoding: UTF-8
+      string: <?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:v1="http://fhlbsf.com/schema/msg/trade/v1"
+        xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+        xmlns:v11="http://fhlbsf.com/schema/canonical/common/v1" xmlns:v12="http://fhlbsf.com/schema/canonical/trade/v1"
+        xmlns:v13="http://fhlbsf.com/schema/canonical/shared/v1" xmlns:v14="http://fhlbsf.com/schema/canonical/advance/v1"
+        xmlns:v15="http://fhlbsf.com/schema/canonical/fixedIncome/v1" xmlns:v16="http://fhlbsf.com/schema/canonical/swap/v1"
+        xmlns:v17="http://fhlbsf.com/schema/canonical/swaption/v1" xmlns:v18="http://fhlbsf.com/schema/canonical/capfloor/v1"
+        xmlns:v19="http://fhlbsf.com/schema/canonical/moneyMarket/v1" xmlns:v110="http://fhlbsf.com/schema/canonical/lc/v1"
+        xmlns:v111="http://fhlbsf.com/schema/canonical/simpleTransfer/v1"><soapenv:Header><wsse:Security><wsse:UsernameToken><wsse:Username>FHLBSF\\svcsys_fobo_mdtest</wsse:Username><wsse:Password>RiYPHJfc9g2L6eAisIQX3QWu4DJs75</wsse:Password></wsse:UsernameToken></wsse:Security></soapenv:Header><soapenv:Body><v1:executeTradeRequest><v11:caller><v11:id>WEB-AO</v11:id></v11:caller><v1:operationType>EXECUTE</v1:operationType><v1:trade><v12:tradeHeader><v12:tradeId>1133</v12:tradeId><v12:parties><v12:party><v13:partyId>1133</v13:partyId><v13:partyName>FHLBank
+        San Francisco</v13:partyName><v12:trader>WEB-AO</v12:trader></v12:party><v12:party><v13:partyId>750</v13:partyId></v12:party></v12:parties><v12:instrument>ADVANCE</v12:instrument><v12:tradeDate>2015-06-12</v12:tradeDate><v12:settlementDate>2015-06-12</v12:settlementDate><v12:openDateMaturity>false</v12:openDateMaturity></v12:tradeHeader><v12:advance><v14:lender>1133</v14:lender><v14:borrower>750</v14:borrower><v14:par><v13:currency>USD</v13:currency><v13:amount>100</v13:amount></v14:par><v14:product>O/N
+        VRC</v14:product><v14:subProduct>VRC</v14:subProduct><v14:term><v13:frequency>1</v13:frequency><v13:frequencyUnit>D</v13:frequencyUnit></v14:term><v14:maturityDate>2015-06-13</v14:maturityDate><v14:collateralType>WHOLE
+        LOAN</v14:collateralType><v14:subsidyProgram>N/A</v14:subsidyProgram><v14:prepaymentSymmetry>false</v14:prepaymentSymmetry><v14:prepaymentModelCode>1</v14:prepaymentModelCode><v14:coupon><v13:paymentDates><v13:firstPaymentDate>2015-06-12</v13:firstPaymentDate><v13:paymentFrequency><v13:frequency>1</v13:frequency><v13:frequencyUnit>T</v13:frequencyUnit></v13:paymentFrequency><v13:paymentConvention><v13:businessDayAdjustment>FOLLOWING</v13:businessDayAdjustment><v13:businessDayCalendar>USNY</v13:businessDayCalendar></v13:paymentConvention><v13:paymentDayOfMonth>0</v13:paymentDayOfMonth></v13:paymentDates><v13:initialRate>0.14</v13:initialRate><v13:floatingRateSchedule><v13:floatingPeriod><v13:startDate>2015-06-12</v13:startDate><v13:rateIndices><v13:rateIndex><v13:index></v13:index><v13:tenor><v13:frequency>1</v13:frequency><v13:frequencyUnit>D</v13:frequencyUnit></v13:tenor><v13:weight>1</v13:weight></v13:rateIndex></v13:rateIndices><v13:periodicCap>100</v13:periodicCap><v13:periodicFloor>0</v13:periodicFloor><v13:dayCountBasis>ACT/360</v13:dayCountBasis><v13:maximumRate>100</v13:maximumRate><v13:minimumRate>0</v13:minimumRate></v13:floatingPeriod></v13:floatingRateSchedule><v13:roundingConvention>NEAREST</v13:roundingConvention></v14:coupon><v14:markup>0</v14:markup><v14:blendedCostOfFundsToLibor>0</v14:blendedCostOfFundsToLibor><v14:costOfFunds>0</v14:costOfFunds><v14:moneyStatus>ROLL</v14:moneyStatus><v14:benchmarkRate>0</v14:benchmarkRate></v12:advance></v1:trade><v1:arrayOfSigners><v1:signer>Ruth
+        Back</v1:signer></v1:arrayOfSigners></v1:executeTradeRequest></soapenv:Body></soapenv:Envelope>
+    headers:
+      Soapaction:
+      - '"http://fhlbsf.com/contract/tradeservices/v1/IConsolidatedService/executeTrade"'
+      Content-Type:
+      - text/xml;charset=UTF-8
+      Content-Length:
+      - '3840'
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - private
+      Content-Type:
+      - text/xml; charset=utf-8
+      Server:
+      - Microsoft-IIS/7.5
+      X-Aspnet-Version:
+      - 2.0.50727
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Fri, 12 Jun 2015 22:54:32 GMT
+      Content-Length:
+      - '7934'
+    body:
+      encoding: UTF-8
+      string: <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"><s:Header><o:Security
+        s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"><u:Timestamp
+        u:Id="_0"><u:Created>2015-06-12T22:54:32.581Z</u:Created><u:Expires>2015-06-12T22:59:32.581Z</u:Expires></u:Timestamp></o:Security></s:Header><s:Body><executeTradeResponse
+        xmlns="http://fhlbsf.com/schema/msg/trade/v1"><description xmlns="http://fhlbsf.com/schema/canonical/common/v1">Trade
+        Successfully Executed|#Par/Rate Valid-true#Term Valid-true#Signers Valid-true#Credit
+        Valid-true#CapitalStock Valid-false#RHFA Valid-true#Collateral Valid-true|</description><requestTime
+        xmlns="http://fhlbsf.com/schema/canonical/common/v1">2015-06-12T15:54:30.844-07:00</requestTime><transactionResult
+        xmlns="http://fhlbsf.com/schema/canonical/common/v1">Success</transactionResult><operationType>EXECUTE</operationType><advanceValidation
+        xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><advanceValidations><amountValid>true</amountValid><fundingDateValid>true</fundingDateValid><advanceRateValid>true</advanceRateValid></advanceValidations><signersValid>true</signersValid><creditValidations><creditValid>true</creditValid><authorizedAmount>100.0</authorizedAmount><maxAmount>167289090</maxAmount></creditValidations><collateralValidations><collateralValid>true</collateralValid><authorizedAmount>100.0</authorizedAmount><maxAmount>51697977</maxAmount></collateralValidations><capitalStockValidations><capitalStockValid>false</capitalStockValid><authorizedAmount>0.0</authorizedAmount></capitalStockValidations><termValidations><termValid>true</termValid><termMonths>360</termMonths></termValidations><rhfaValidations><rhfaValid>true</rhfaValid><maxAmount>0.0</maxAmount></rhfaValidations></advanceValidation><fixedIncomValidation
+        i:nil="true" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"/><moneyMarketValidation
+        i:nil="true" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"/><swapValidation
+        i:nil="true" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"/><capFloorValidation
+        i:nil="true" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"/><trade xmlns:a="http://fhlbsf.com/schema/canonical/trade/v1"
+        xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><a:tradeHeader><a:tradeId>486120</a:tradeId><a:parties><a:party><partyId
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">750</partyId><partyName
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">MERIDIAN BANK, N.A.</partyName><partyCode
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">750</partyCode><a:enteredDateTime>0001-01-01T00:00:00</a:enteredDateTime><a:verifiedTradeTime>0001-01-01T00:00:00</a:verifiedTradeTime><a:signers><a:signer>Ruth
+        Back</a:signer></a:signers></a:party><a:party><partyId xmlns="http://fhlbsf.com/schema/canonical/shared/v1">1133</partyId><partyName
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">FHLB - SAN FRANCISCO</partyName><a:trader>WEB-AO</a:trader><a:enteredDateTime>0001-01-01T00:00:00</a:enteredDateTime><a:verifiedBy>WEB-AO</a:verifiedBy><a:verifiedTradeTime>0001-01-01T00:00:00</a:verifiedTradeTime></a:party></a:parties><a:status>VERIFIED</a:status><a:instrument>ADVANCE</a:instrument><a:tradeDate>2015-06-12-07:00</a:tradeDate><a:tradeTime>15:54:30.844-07:00</a:tradeTime><a:settlementDate>2015-06-12-07:00</a:settlementDate><a:segments
+        xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><a:segment><b:segmentCode>CORE</b:segmentCode><b:allocationPercent>100.0</b:allocationPercent><b:allocationEffectiveDate>2015-06-12-07:00</b:allocationEffectiveDate></a:segment></a:segments><a:fvoFlag>false</a:fvoFlag><a:openDateMaturity>false</a:openDateMaturity><a:lastUpdateDateTime>2015-06-12T15:54:31.11-07:00</a:lastUpdateDateTime><a:version>0</a:version></a:tradeHeader><a:advance
+        xmlns:b="http://fhlbsf.com/schema/canonical/advance/v1"><b:advanceNumber>486120</b:advanceNumber><b:lender>1133</b:lender><b:borrower>750</b:borrower><b:par
+        xmlns:c="http://fhlbsf.com/schema/canonical/shared/v1"><c:currency>USD</c:currency><c:amount>100.0</c:amount></b:par><b:product>O/N
+        VRC</b:product><b:subProduct>VRC - WL</b:subProduct><b:term xmlns:c="http://fhlbsf.com/schema/canonical/shared/v1"><c:frequency>1.0</c:frequency><c:frequencyUnit>D</c:frequencyUnit></b:term><b:maturityDate>2015-06-13-07:00</b:maturityDate><b:collateralType>WHOLE
+        LOAN</b:collateralType><b:rhfaAdvance>false</b:rhfaAdvance><b:prepaymentSymmetry>false</b:prepaymentSymmetry><b:prepaymentModelCode>1</b:prepaymentModelCode><b:coupon><calculationDates
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1"><accrualFrequency><frequency>1.0</frequency><frequencyUnit>T</frequencyUnit></accrualFrequency><accrualConvention><businessDayAdjustment>FOLLOWING</businessDayAdjustment><businessDayCalendar>USNY</businessDayCalendar></accrualConvention></calculationDates><paymentDates
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1"><firstPaymentDate>2015-06-13-07:00</firstPaymentDate><paymentFrequency><frequency>1.0</frequency><frequencyUnit>T</frequencyUnit></paymentFrequency><paymentConvention><businessDayAdjustment>FOLLOWING</businessDayAdjustment><businessDayCalendar>USNY</businessDayCalendar></paymentConvention><paymentAtMaturity>true</paymentAtMaturity><paymentDayOfMonth>13</paymentDayOfMonth></paymentDates><resetDates
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1"><firstResetDate>2015-06-12-07:00</firstResetDate><regularResetStartDate>2015-06-12-07:00</regularResetStartDate><lastResetDate>2015-06-12-07:00</lastResetDate><resetFrequency><frequency>1.0</frequency><frequencyUnit>D</frequencyUnit></resetFrequency><resetDayOfMonth>0</resetDayOfMonth><lookbackDays>0</lookbackDays><resetConvention><businessDayAdjustment>FOLLOWING</businessDayAdjustment><businessDayCalendar>USNY</businessDayCalendar></resetConvention><rateCutOffDays>0</rateCutOffDays><resetDetermination>RETROSPECTIVE</resetDetermination><averagingMethod>WEIGHTED</averagingMethod></resetDates><initialRate
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">0.14</initialRate><floatingRateSchedule
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1"><floatingPeriod><startDate>2015-06-12-07:00</startDate><endDate>2015-06-13-07:00</endDate><rateIndices><rateIndex><index>USD-VRC-FHLBSF</index><tenor><frequency>1.0</frequency><frequencyUnit>D</frequencyUnit></tenor><weight>1.0</weight></rateIndex></rateIndices><spread>0.0</spread><variableSpread>false</variableSpread><periodicCap
+        i:nil="true"/><periodicFloor i:nil="true"/><dayCountBasis>ACT/360</dayCountBasis><maximumRate
+        i:nil="true"/><maxRateIncludesSpread>false</maxRateIncludesSpread><minimumRate
+        i:nil="true"/><minRateIncludesSpread>false</minRateIncludesSpread></floatingPeriod></floatingRateSchedule><intermediateRounding
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">0</intermediateRounding><finalRounding
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">2</finalRounding><roundingConvention
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">NEAREST</roundingConvention></b:coupon><b:constantAdjustedSpread>0</b:constantAdjustedSpread><b:markup>0.0</b:markup><b:embeddedCapFloorCost>0</b:embeddedCapFloorCost><b:blendedCostOfFundsToLibor>0.0</b:blendedCostOfFundsToLibor><b:lowCostBlendRatio>0.0</b:lowCostBlendRatio><b:costOfFunds>0.0</b:costOfFunds><b:cofForwardAdj>0</b:cofForwardAdj><b:cofParSizeAdj>0.0</b:cofParSizeAdj><b:cofRate>0.0</b:cofRate><b:optionCost>0</b:optionCost><b:cofSpread>0</b:cofSpread><b:putableAdjustment>0</b:putableAdjustment><b:ppsAdjustment>0</b:ppsAdjustment><b:moneyStatus>NEW</b:moneyStatus><b:daysToMaturity>0</b:daysToMaturity><b:valuationMethod>Benchmark</b:valuationMethod><b:benchmarkRate>0</b:benchmarkRate><b:agreementType>A</b:agreementType><b:webTrade>true</b:webTrade></a:advance></trade></executeTradeResponse></s:Body></s:Envelope>
+    http_version:
+  recorded_at: Fri, 12 Jun 2015 22:54:33 GMT
+recorded_with: VCR 2.9.3

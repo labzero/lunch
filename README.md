@@ -90,11 +90,12 @@ This is a summary of the options supported in our .env files:
 * `MAPI_SECRET_TOKEN`: The shared secret between MAPI and Rails.
 * `MAPI_COF_ACCOUNT`: FHLBSF account for getting COF data.
 * `MAPI_FHLBSF_ACCOUNT`: FHLBSF account for getting Calypso data.
+* `MAPI_WEB_AO_ACCOUNT`: WEB-AO
 * `SOAP_SECRET_KEY`: FHLBSF password for Market Data Service.
 * `MAPI_MDS_ENDPOINT`: FHLBSF endpoint for Market Data Service.
 * `MAPI_CALENDAR_ENDPOINT`: FHLBSF endpoint for Market Data Service.
-* `MAPI_CAPITALSTOCK_ENDPOINT=http://appservices/CapitalStockServicesAuth/CapitalStockService.svc?wsdl
-* `MAPI_TRADE_ENDPOINT=FHLBSF endpoint for Trade Service.
+* `MAPI_CAPITALSTOCK_ENDPOINT`: FHLBSF endpoint for Capital Stock Service.
+* `MAPI_TRADE_ENDPOINT`: FHLBSF endpoint for Trade Service.
 * `LDAP_HOST`: Hostname of the LDAP server.
 * `LDAP_PORT`: Port of the LDAP server.
 * `LDAP_ADMIN_USERNAME`: Username of the LDAP service account.

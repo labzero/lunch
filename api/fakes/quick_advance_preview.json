@@ -1,0 +1,12 @@
+{
+  "status" : "Success",
+  "confirmation_number" : "",
+  "advance_rate" : 0.17,
+  "advance_amount" : 46500000,
+  "advance_term" : "3 weeks",
+  "advance_type" : "SBC:AAA",
+  "interest_day_count" : "ACT/ACT",
+  "payment_on" : "Maturity",
+  "funding_date" : "01-Feb-2015",
+  "maturity_date" : "22-Mar-2015"
+}
