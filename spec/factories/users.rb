@@ -1,6 +1,7 @@
 FactoryGirl.define do
   factory :user do
-    username "local"
+    username 'local'
+    ldap_domain 'intranet'
     given_name 'Foo'
     surname 'Bar'
     email 'foo@example.com'

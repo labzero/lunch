@@ -46,8 +46,13 @@ class ApplicationController < ActionController::Base
 
   def after_sign_in_path_for(resource)
     session['member_id'] = current_user.member_id if !session['member_id'].present? && current_user && !current_user.member_id.nil?
-    return members_select_member_path unless session['member_id'].present?
-    stored_location_for(resource) || dashboard_path
+    if session['member_id'].present?
+      stored_location_for(resource) || dashboard_path
+    elsif current_user && current_user.ldap_domain == 'intranet'
+      members_select_member_path
+    else
+      raise 'Sign in error: Only intranet users can select a bank.  The current_user is not an intranet user but is also not associated with a member bank.'
+    end
   end
 
   def handle_exception(exception)
