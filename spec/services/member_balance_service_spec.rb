@@ -537,9 +537,13 @@ describe MemberBalanceService do
       expect(Rails.logger).to receive(:warn)
       expect(settlement_transaction_account).to be(nil)
     end
-    it 'should return nil if there was an API error' do
+    it 'should return nil if there was an API error that is not a 404' do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
       expect(settlement_transaction_account).to eq(nil)
+    end
+    it 'should return an empty hash if the API returns a 404' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::Exception.new(nil, 404))
+      expect(settlement_transaction_account).to eq({})
     end
     it 'should return nil if there was a connection error' do
       expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
