@@ -10,7 +10,7 @@
   &.opensleft, &.opensright {
     .calendar {
       display: block;
-      margin: 0;
+      margin: 60px 0 0;
     }
   }
   &.opensleft:after, &.opensleft:before {
@@ -49,8 +49,37 @@
     background: $actionable-blue;
     border: none;
   }
+  .datepicker_input_field {
+    position: absolute;
+    height: 60px;
+    margin-left: 224px;
+    border-left: 1px solid $secondary-gray;
+    border-bottom: 1px solid $secondary-gray;
+  }
+  .daterangepicker_start_input_wrapper, .daterangepicker_end_input_wrapper {
+    position: relative;
+    width: 216px;
+    height: 100%;
+    float: left;
+  }
   .daterangepicker_start_input, .daterangepicker_end_input {
-    display: none;
+    @extend %center-both;
+    float: none;
+    input {
+      width: 90px;
+      box-sizing: border-box;
+      border-radius: $default-border-radius;
+      border: 1px solid $actionable-blue;
+    }
+    label {
+      @extend %typography-table-heading;
+      display: inline;
+      width: auto;
+      color: $medium-gray;
+      text-shadow: none;
+      text-transform: none;
+      margin-right: 10px;
+    }
   }
 
   &.opensleft, &.opensright, &.openscenter {
@@ -153,7 +182,7 @@
   &.single {
     width: 456px;
     .calendar {
-      margin: 0 auto;
+      margin: 60px auto 0;
       border-right: none;
       float: left;
       td.in-range {
@@ -163,6 +192,9 @@
     }
     .ranges {
       float: left;
+    }
+    .daterangepicker_end_input_wrapper {
+      display: none;
     }
   }
 

@@ -52,6 +52,14 @@ Scenario: Member can't select a date in the future
   When I click the datepicker field
   Then I should not see available dates after today
 
+@jira-mem-630
+Scenario: Entering text in the datepicker input field
+  Given I am on the "Advances Detail" report page
+  When I click the datepicker field
+  And I write "1/10/2014" in the datepicker start input field
+  And I click the datepicker apply button
+  Then I should see a "Advances Detail" report as of "January 10, 2014"
+
 @data-unavailable @jira-mem-283
 Scenario: No data is available to show in the Advances Detail Report
   Given I am on the "Advances Detail" report page
