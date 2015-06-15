@@ -4,7 +4,7 @@
 
 .daterangepicker {
   display: none;
-  width: 690px;
+  width: 686px;
   border: 1px solid $actionable-blue;
   padding: 0 0 30px 0;
   &.opensleft, &.opensright {
@@ -58,18 +58,22 @@
   }
   .daterangepicker_start_input_wrapper, .daterangepicker_end_input_wrapper {
     position: relative;
-    width: 216px;
+    width: 230px;
     height: 100%;
     float: left;
   }
   .daterangepicker_start_input, .daterangepicker_end_input {
     @extend %center-both;
     float: none;
+    white-space: pre;
     input {
+      @extend %typography-calendar-day;
       width: 90px;
+      height: 28px;
       box-sizing: border-box;
       border-radius: $default-border-radius;
       border: 1px solid $actionable-blue;
+      padding-left: 8px;
     }
     label {
       @extend %typography-table-heading;
@@ -159,7 +163,9 @@
   }
 
   .calendar {
-    &.first {
+    width: 230px;
+    height: 190px;
+    &.left {
       border-left: 1px solid $secondary-gray;
       border-right: 1px solid $secondary-gray;
     }
@@ -184,6 +190,7 @@
     .calendar {
       margin: 60px auto 0;
       border-right: none;
+      border-left: 1px solid $secondary-gray;
       float: left;
       td.in-range {
         background: $white;
