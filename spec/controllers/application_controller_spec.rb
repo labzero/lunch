@@ -51,9 +51,14 @@ RSpec.describe ApplicationController, :type => :controller do
       call_method
       expect(session['member_id']).to eq(member_id)
     end
-    it 'redirects to Members#select_member' do
+    it 'redirects to Members#select_member if the user is an intranet user' do
+      allow(user).to receive(:ldap_domain).and_return('intranet')
       expect(controller).to receive(:members_select_member_path)
       call_method
+    end
+    it 'raises an error if there is no member_id in the session and the current user is not an intranet user' do
+      allow(user).to receive(:ldap_domain).and_return('extranet')
+      expect{call_method}.to raise_error
     end
   end
 
