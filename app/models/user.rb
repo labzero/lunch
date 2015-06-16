@@ -5,13 +5,19 @@ class User < ActiveRecord::Base
   validates :email, presence: {on: :update}, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, allow_blank: true }, confirmation: {if: :email_changed?, on: :update}
   validates :email_confirmation, presence: {if: :email_changed?, on: :update}
 
+  def self.policy_class
+    AccessManagerPolicy
+  end
 
   LDAP_ATTRIBUTES_MAPPING = {
     email: :mail,
     surname: :sn,
     given_name: :givenname,
-    display_name: :displayname
+    display_name: :displayname,
+    deletion_reason: :deletereason
   }.with_indifferent_access.freeze
+
+  LDAP_LOCK_BIT = 0x2
 
   module Roles
     MEMBER_USER = 'member_user'
@@ -21,25 +27,44 @@ class User < ActiveRecord::Base
     ACCESS_MANAGER = 'access_manager'
     ADMIN = 'admin'
     AUTHORIZED_SIGNER = 'authorized_signer'
+    SIGNER_MANAGER = 'signer_manager'
+    SIGNER_ENTIRE_AUTHORITY = 'signer_entire_authority'
+    AFFORDABILITY_SIGNER = 'affordability_signer'
+    COLLATERAL_SIGNER = 'collateral_signer'
+    MONEYMARKET_SIGNER = 'moneymarket_signer'
+    DERIVATIVES_SIGNER = 'derivatives_signer'
+    SECURITIES_SIGNER = 'securities_signer'
+    WIRE_SIGNER = 'wire_signer'
+    ETRANSACT_SIGNER = 'etransact_signer'
   end
 
   ROLE_MAPPING = {
     'FCN-MemberSite-Users' => Roles::MEMBER_USER,
-    'signer-advances' => Roles::ADVANCE_SIGNER,
-    'signer' => Roles::AUTHORIZED_SIGNER,
     'FCN-MemberSite-ExternalAccess' => Roles::USER_WITH_EXTERNAL_ACCESS,
     'FCN-MemberSite-AccessManagers-R' => Roles::ACCESS_MANAGER_READ_ONLY,
     'FCN-MemberSite-AccessManagers' => Roles::ACCESS_MANAGER,
-    'FCN-MemberSite-Admins' => Roles::ADMIN
+    'FCN-MemberSite-Admins' => Roles::ADMIN,
+    'signer' => Roles::AUTHORIZED_SIGNER,
+    'signer-manager' => Roles::SIGNER_MANAGER,
+    'signer-entire-authority' => Roles::SIGNER_ENTIRE_AUTHORITY,
+    'signer-advances' => Roles::ADVANCE_SIGNER,
+    'signer-affordability' => Roles::AFFORDABILITY_SIGNER,
+    'signer-collateral' => Roles::COLLATERAL_SIGNER,
+    'signer-moneymarket' => Roles::MONEYMARKET_SIGNER,
+    'signer-creditswap' => Roles::DERIVATIVES_SIGNER,
+    'signer-securities' => Roles::SECURITIES_SIGNER,
+    'signer-wiretransfers' => Roles::WIRE_SIGNER,
+    'signer-etransact' => Roles::ETRANSACT_SIGNER
   }.freeze
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :ldap_authenticatable, :recoverable, :trackable
 
-  attr_accessor :roles, :email, :surname, :given_name
+  attr_accessor :roles, :email, :surname, :given_name, :member_id, :deletion_reason
 
   after_save :save_ldap_attributes
+  after_destroy :destroy_ldap_entry
 
   def display_name
     @display_name ||= (ldap_entry[:displayname].try(:first) if ldap_entry)
@@ -90,18 +115,43 @@ class User < ActiveRecord::Base
     changed.include?('given_name')
   end
 
+  def deletion_reason
+    @deletion_reason ||= (ldap_entry[:deletereason].try(:first) if ldap_entry)
+  end
+
+  def deletion_reason=(value)
+    attribute_will_change!('deletion_reason') unless value == deletion_reason
+    @deletion_reason = value
+  end
+
+  def deletion_reason_changed?
+    changed.include?('deletion_reason')
+  end
+
   def locked?
-    ldap_entry.present? && ldap_entry[:lockouttime].try(:first).to_i > 0
+    ldap_entry.present? && (ldap_entry[:userAccountControl].try(:first).to_i & LDAP_LOCK_BIT) == LDAP_LOCK_BIT
   end
 
   def lock!
     reload_ldap_entry
-    Devise::LDAP::Adapter.set_ldap_param(username, :lockoutTime, Time.now.to_i.to_s, nil, ldap_domain)
+    if ldap_entry
+      access_flags = ldap_entry[:userAccountControl].try(:first).to_i | LDAP_LOCK_BIT
+      reload_ldap_entry
+      Devise::LDAP::Adapter.set_ldap_param(username, :userAccountControl, access_flags.to_s, nil, ldap_domain)
+    else
+      false
+    end
   end
 
   def unlock!
     reload_ldap_entry
-    Devise::LDAP::Adapter.set_ldap_param(username, :lockoutTime, '0', nil, ldap_domain)
+    if ldap_entry
+      access_flags = ldap_entry[:userAccountControl].try(:first).to_i & (~LDAP_LOCK_BIT)
+      reload_ldap_entry
+      Devise::LDAP::Adapter.set_ldap_param(username, :userAccountControl, access_flags.to_s, nil, ldap_domain)
+    else
+      false
+    end
   end
 
   def reload
@@ -153,6 +203,20 @@ class User < ActiveRecord::Base
     )
   end
 
+  def member_id
+    @member_id ||= (
+      member_id = nil
+      ldap_groups = self.ldap_groups || []
+      ldap_groups.each do |group|
+        if !(group.cn.first=~/\AFHLB\d+\z/).nil? && group.objectClass.include?('group')
+          member_id = group.cn.first.remove(/fhlb/i)
+          break
+        end
+      end
+      member_id
+    )
+  end
+
   protected
 
   def reload_ldap_entry
@@ -189,6 +253,15 @@ class User < ActiveRecord::Base
     else
       raise ActiveRecord::Rollback
     end
+  end
+
+  def destroy_ldap_entry
+    raise ActiveRecord::Rollback unless Devise::LDAP::Adapter.delete_ldap_entry(username, nil, ldap_domain)
+  end
+
+  # this is needed for devise recoverable since we don't have the column on our table
+  def encrypted_password_changed?
+    false
   end
 
 end

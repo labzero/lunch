@@ -7,6 +7,7 @@ require_relative 'member/profile'
 require_relative 'member/disabled_reports'
 require_relative 'member/cash_projections'
 require_relative 'member/trade_activity'
+require_relative 'member/signer_roles'
 
 module MAPI
   module Services
@@ -346,6 +347,23 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/signers'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve all bank members who are signers'
+              key :notes, 'Returns the full name, username and signer roles for each signer'
+              key :nickname, :getSignersForMember
+              key :type, :MemberSigners
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -460,7 +478,7 @@ module MAPI
         relative_get '/:id/active_advances' do
           member_id = params[:id]
           begin
-            result = MAPI::Services::Member::TradeActivity.trade_activity(self, member_id, 'ADVANCES')
+            result = MAPI::Services::Member::TradeActivity.trade_activity(self, member_id, 'ADVANCE')
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
@@ -488,6 +506,12 @@ module MAPI
         relative_get '/:id/cash_projections' do
           member_id = params[:id]
           MAPI::Services::Member::CashProjections.cash_projections(self, member_id).to_json
+        end
+
+        # Member Signer Roles
+        relative_get '/:id/signers' do
+          member_id = params[:id]
+          MAPI::Services::Member::SignerRoles.signer_roles(self, member_id).to_json
         end
       end
     end

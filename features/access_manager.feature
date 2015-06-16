@@ -67,3 +67,29 @@ Background:
     Then I should a update user success overlay
     When I dismiss the overlay
     Then I should see a user with the a last name of "Doe"
+
+  @jira-mem-564
+  Scenario: Access Managers must select a reason why they are deleting a user
+    Given I visit the access manager page
+    When I edit a non-access manager
+    And I click the delete user button
+    Then I should see the confirm delete overlay
+    And the confirm delete user button should be disabled
+    When I select a reason
+    Then the confirm delete user button should be enabled
+
+  @jira-mem-564
+  Scenario: Access Managers can't delete themselves
+    Given I visit the access manager page
+    When I edit an access manager
+    Then I should see the delete user button disabled
+
+  @jira-mem-564
+  Scenario: Access Managers can delete a user
+    Given I visit the access manager page
+    And I edit the deletable user
+    And I click the delete user button
+    When I select a reason
+    And I submit the delete user form
+    Then I should see the user deleted overlay
+

@@ -5,6 +5,10 @@ Given(/^I fill in and submit the login form with username "(.*?)" and password "
 end
 
 Given(/^I fill in and submit the login form$/) do
+  step %{I fill in and submit the login form with username "#{extranet_user['username']}" and password "#{extranet_user['password']}"}
+end
+
+Given(/^I fill in and submit the login form with a user not associated with a bank$/) do
   step %{I fill in and submit the login form with username "#{primary_user['username']}" and password "#{primary_user['password']}"}
 end
 
@@ -14,7 +18,7 @@ Given(/^I am logged in as "(.*?)" with password "(.*?)"$/) do |user, password|
 end
 
 Given(/^I am logged in$/) do
-  step %{I am logged in as a "primary user"}
+  step %{I am logged in as an "extranet user"}
 end
 
 Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
@@ -27,6 +31,10 @@ Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
       quick_advance_non_signer
     when 'access manager'
       access_manager
+    when 'extranet user'
+      extranet_user
+    when 'deletable user'
+      deletable_user
     else
       raise 'unknown user type'
   end
@@ -38,7 +46,7 @@ Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
 end
 
 When(/^I log in$/) do
-  step %{I log in as a "primary user"}
+  step %{I log in as an "extranet user"}
 end
 
 When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|
@@ -130,6 +138,10 @@ Then(/^I should be logged out$/) do
   step %{I should see the login form}
 end
 
+Then(/^I should see the name for the "(.*?)" in the header$/) do |user_type|
+  page.assert_selector('.main-nav li', text: user_type['given_name'])
+end
+
 def primary_user
   CustomConfig.env_config['primary_user']
 end
@@ -148,4 +160,8 @@ end
 
 def access_manager
   CustomConfig.env_config['access_manager']
+end
+
+def deletable_user
+  CustomConfig.env_config['deletable']
 end

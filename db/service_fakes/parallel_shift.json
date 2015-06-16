@@ -1,0 +1,17 @@
+{
+  "as_of_date" : null,
+  "putable_advances" : [
+    {
+      "advance_number" : "125365",
+      "issue_date" : "2007-08-17",
+      "interest_rate" : 4.21,
+      "shift_neg_300" : null,
+      "shift_neg_200" : null,
+      "shift_neg_100" : 110.9,
+      "shift_0" : 108.73,
+      "shift_100" : 105.81,
+      "shift_200" : 103.49,
+      "shift_300" : 101.63
+    }
+  ]
+}

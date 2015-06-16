@@ -32,32 +32,6 @@ RSpec.describe DashboardController, :type => :controller do
       expect(assigns[:market_overview][0][:name]).to be_present
       expect(assigns[:market_overview][0][:data]).to be_present
     end
-    it "should assign @pledged_collateral" do
-      get :index
-      expect(assigns[:pledged_collateral]).to be_present
-      expect(assigns[:pledged_collateral][:mortgages]).to be_present
-      expect(assigns[:pledged_collateral][:mortgages][:absolute]).to be_present
-      expect(assigns[:pledged_collateral][:mortgages][:percentage]).to be_present
-      expect(assigns[:pledged_collateral][:agency]).to be_present
-      expect(assigns[:pledged_collateral][:agency][:absolute]).to be_present
-      expect(assigns[:pledged_collateral][:agency][:percentage]).to be_present
-      expect(assigns[:pledged_collateral][:aaa]).to be_present
-      expect(assigns[:pledged_collateral][:aaa][:absolute]).to be_present
-      expect(assigns[:pledged_collateral][:aaa][:percentage]).to be_present
-      expect(assigns[:pledged_collateral][:aa]).to be_present
-      expect(assigns[:pledged_collateral][:aa][:absolute]).to be_present
-      expect(assigns[:pledged_collateral][:aa][:percentage]).to be_present
-    end
-    it "should assign @total_securities" do
-      get :index
-      expect(assigns[:total_securities]).to be_present
-      expect(assigns[:total_securities][:pledged_securities]).to be_present
-      expect(assigns[:total_securities][:pledged_securities][:absolute]).to be_present
-      expect(assigns[:total_securities][:pledged_securities][:percentage]).to be_present
-      expect(assigns[:total_securities][:safekept_securities]).to be_present
-      expect(assigns[:total_securities][:safekept_securities][:absolute]).to be_present
-      expect(assigns[:total_securities][:safekept_securities][:percentage]).to be_present
-    end
     it "should assign @effective_borrowing_capacity" do
       get :index
       expect(assigns[:effective_borrowing_capacity]).to be_present
@@ -104,16 +78,6 @@ RSpec.describe DashboardController, :type => :controller do
         expect(member_balance_instance).to receive(:effective_borrowing_capacity).and_return(nil)
         get :index
         expect(assigns[:effective_borrowing_capacity]).to eq(nil)
-      end
-      it 'should assign @total_securities as nil if the balance could not be retrieved' do
-        expect(member_balance_instance).to receive(:total_securities).and_return(nil)
-        get :index
-        expect(assigns[:total_securities]).to eq(nil)
-      end
-      it 'should assign @pledged_collateral as nil if the balance could not be retrieved' do
-        expect(member_balance_instance).to receive(:pledged_collateral).and_return(nil)
-        get :index
-        expect(assigns[:pledged_collateral]).to eq(nil)
       end
     end
   end

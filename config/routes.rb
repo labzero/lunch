@@ -35,6 +35,8 @@ Rails.application.routes.draw do
   get '/reports/securities-services-statement' => 'reports#securities_services_statement'
   get '/reports/letters-of-credit' => 'reports#letters_of_credit'
   get '/reports/securities-transactions' => 'reports#securities_transactions'
+  get '/reports/authorizations' => 'reports#authorizations'
+  get '/reports/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: 'reports_parallel_shift'
 
   get '/advances' => 'advances#index'
   get '/advances/manage-advances' => 'advances#manage_advances'
@@ -49,6 +51,8 @@ Rails.application.routes.draw do
   post '/settings/users/:id/unlock' => 'settings#unlock', as: 'user_unlock'
   get '/settings/users/:id' => 'settings#edit_user', as: 'user'
   patch '/settings/users/:id' => 'settings#update_user'
+  get '/settings/users/:id/confirm_delete' => 'settings#confirm_delete', as: 'user_confirm_delete'
+  delete '/settings/users/:id' => 'settings#delete_user'
 
   get '/jobs/:job_status_id' => 'jobs#status', as: 'job_status'
   get '/jobs/:job_status_id/download' => 'jobs#download', as: 'job_download'

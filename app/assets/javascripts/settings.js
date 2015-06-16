@@ -84,7 +84,7 @@ $(function () {
     $('.settings-user-form form').submit();
   });
 
-  var formSelector = '.settings-user-form';
+  var formSelector = '.settings-user-form form';
   $('.flyout-row').on('ajax:success', formSelector, function(event, json, status, xhr) {
     var $ele = $(event.target);
     var $row = $ele.data('row');
@@ -95,7 +95,48 @@ $(function () {
     showUsersError($ele);
   }).on('ajax:beforeSend', formSelector, function(event) {
     var $ele = $(event.target);
-    $(formSelector).hide();
+    $('.settings-user-form').hide();
+    showUsersLoading($ele, true);
+  });
+
+  var deleteSelector = '.settings-user-delete';
+  $('.flyout-row').on('ajax:success', deleteSelector, function(event, json, status, xhr) {
+    var $ele = $(event.target);
+    var $row = $(formSelector).data('row');
+    showUsersFlyout($ele, json.html);
+    $('.settings-user-confirm-delete form').data('row', $row);
+  }).on('ajax:error', deleteSelector, function(event, xhr, status, error) {
+    var $ele = $(event.target);
+    showUsersError($ele);
+  }).on('ajax:beforeSend', deleteSelector, function(event) {
+    var $ele = $(event.target);
+    if ($ele.attr('disabled')) {
+      return false;
+    };
+    $('.settings-user-form').hide();
+    showUsersLoading($ele, true);
+  });
+
+  $('.flyout-row').on('change', '.settings-user-confirm-delete input[type=radio]', function() {
+    $('.settings-user-confirm-delete .primary-button').attr('disabled', false);
+  });
+
+  $('.flyout-row').on('click', '.settings-user-confirm-delete .primary-button', function() {
+    $('.settings-user-confirm-delete form').submit();
+  });
+
+  var confirmDeleteSelector = '.settings-user-confirm-delete';
+  $('.flyout-row').on('ajax:success', confirmDeleteSelector, function(event, json, status, xhr) {
+    var $ele = $(event.target);
+    var $row = $ele.data('row');
+    $row.remove();
+    showUsersFlyout($ele, json.html);
+  }).on('ajax:error', confirmDeleteSelector, function(event, xhr, status, error) {
+    var $ele = $(event.target);
+    showUsersError($ele);
+  }).on('ajax:beforeSend', confirmDeleteSelector, function(event) {
+    var $ele = $(event.target);
+    $(confirmDeleteSelector).hide();
     showUsersLoading($ele, true);
   });
 

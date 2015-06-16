@@ -8,6 +8,7 @@ RSpec.describe User, :type => :model do
   end
 
   it { is_expected.to callback(:save_ldap_attributes).after(:save) }
+  it { is_expected.to callback(:destroy_ldap_entry).after(:destroy) }
   it { should validate_confirmation_of(:email).on(:update) }
   it { should validate_presence_of(:email).on(:update) }
   it { subject.email = 'foo' ; should validate_presence_of(:email_confirmation).on(:update) }
@@ -85,7 +86,8 @@ RSpec.describe User, :type => :model do
     display_name: :displayname,
     email: :mail,
     surname: :sn,
-    given_name: :givenname
+    given_name: :givenname,
+    deletion_reason: :deletereason
   }.each do |method, attribute|
     describe "`#{method}` method" do
       let(:attribute_value) { double('An LDAP Entry Attribute') }
@@ -123,62 +125,95 @@ RSpec.describe User, :type => :model do
   end
 
   describe '`locked?` method' do
-    let(:attribute_value) { double('An LDAP Entry Attribute', to_i: Time.now.to_i) }
+    let(:attribute_value) { double('An LDAP Entry Attribute', to_i: User::LDAP_LOCK_BIT) }
     let(:ldap_entry) { double('LDAP Entry: User') }
     let(:call_method) { subject.locked? }
     before do
       allow(subject).to receive(:ldap_entry).and_return(ldap_entry)
-      allow(ldap_entry).to receive(:[]).with(:lockouttime).and_return([attribute_value])
+      allow(ldap_entry).to receive(:[]).with(:userAccountControl).and_return([attribute_value])
     end
     it 'should fetch the backing LDAP entry' do
       expect(subject).to receive(:ldap_entry).and_return(ldap_entry)
       call_method
     end
-    it 'should return true if the backing LDAP entry has a value for `lockouttime`' do
+    it 'should return true if the backing LDAP entry has the LDAP_LOCK_BIT set' do
       expect(call_method).to eq(true)
     end
     it 'should return false if no entry was found' do
       allow(subject).to receive(:ldap_entry).and_return(nil)
       expect(call_method).to eq(false)
     end
-    it 'should return false if the entry had no value for `lockouttime`' do
-      allow(ldap_entry).to receive(:[]).with(:lockouttime)
+    it 'should return false if the LDAP_LOCK_BIT is not set' do
+      allow(ldap_entry).to receive(:[]).with(:userAccountControl).and_return(512)
       expect(call_method).to eq(false)
     end
   end
 
   describe '`lock!` method' do
     let(:call_method) { subject.lock! }
+    let(:attribute_value) { double('An LDAP Entry Attribute', to_i: 512) }
+    let(:ldap_entry) { double('LDAP Entry: User') }
     before do
       allow(subject).to receive(:reload_ldap_entry)
       allow(subject).to receive(:ldap_domain).and_return(double('An LDAP Domain'))
-      allow_any_instance_of(Time).to receive(:to_i).and_return(rand(1..999))
-      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param)
+      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param).and_return(false)
+      allow(subject).to receive(:ldap_entry).and_return(ldap_entry)
+      allow(ldap_entry).to receive(:[]).with(:userAccountControl).and_return([attribute_value])
     end
-    it 'calls `reload_ldap_entry`' do
-      expect(subject).to receive(:reload_ldap_entry)
+    it 'calls `reload_ldap_entry` before it reads the entry and after' do
+      expect(subject).to receive(:reload_ldap_entry).ordered
+      expect(subject).to receive(:ldap_entry).ordered
+      expect(subject).to receive(:reload_ldap_entry).ordered
       call_method
     end
-    it 'calls `Devise::LDAP::Adapter.set_ldap_param`' do
-      expect(Devise::LDAP::Adapter).to receive(:set_ldap_param).with(subject.username, :lockoutTime, Time.now.to_i.to_s, nil, subject.ldap_domain)
+    it 'returns false if the LDAP entry could not be found' do
+      allow(subject).to receive(:ldap_entry).and_return(nil)
+      expect(call_method).to eq(false)
+    end
+    it 'calls `Devise::LDAP::Adapter.set_ldap_param` with the User::LDAP_LOCK_BIT set' do
+      expect(Devise::LDAP::Adapter).to receive(:set_ldap_param).with(subject.username, :userAccountControl, (attribute_value.to_i | User::LDAP_LOCK_BIT).to_s, nil, subject.ldap_domain)
       call_method
+    end
+    it 'returns false on failure' do
+      expect(call_method).to eq(false)
+    end
+    it 'returns true on success' do
+      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param).and_return(true)
+      expect(call_method).to eq(true)
     end
   end
 
   describe '`unlock!` method' do
     let(:call_method) { subject.unlock! }
+    let(:attribute_value) { double('An LDAP Entry Attribute', to_i: 514) }
+    let(:ldap_entry) { double('LDAP Entry: User') }
     before do
       allow(subject).to receive(:reload_ldap_entry)
       allow(subject).to receive(:ldap_domain).and_return(double('An LDAP Domain'))
-      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param)
+      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param).and_return(false)
+      allow(subject).to receive(:ldap_entry).and_return(ldap_entry)
+      allow(ldap_entry).to receive(:[]).with(:userAccountControl).and_return([attribute_value])
     end
-    it 'calls `reload_ldap_entry`' do
-      expect(subject).to receive(:reload_ldap_entry)
+    it 'calls `reload_ldap_entry` before it reads the entry and after' do
+      expect(subject).to receive(:reload_ldap_entry).ordered
+      expect(subject).to receive(:ldap_entry).ordered
+      expect(subject).to receive(:reload_ldap_entry).ordered
       call_method
     end
-    it 'calls `Devise::LDAP::Adapter.set_ldap_param`' do
-      expect(Devise::LDAP::Adapter).to receive(:set_ldap_param).with(subject.username, :lockoutTime, '0', nil, subject.ldap_domain)
+    it 'returns false if the LDAP entry could not be found' do
+      allow(subject).to receive(:ldap_entry).and_return(nil)
+      expect(call_method).to eq(false)
+    end
+    it 'calls `Devise::LDAP::Adapter.set_ldap_param` with the User::LDAP_LOCK_BIT cleared' do
+      expect(Devise::LDAP::Adapter).to receive(:set_ldap_param).with(subject.username, :userAccountControl, (attribute_value.to_i & (~User::LDAP_LOCK_BIT)).to_s, nil, subject.ldap_domain)
       call_method
+    end
+    it 'returns false on failure' do
+      expect(call_method).to eq(false)
+    end
+    it 'returns true on success' do
+      allow(Devise::LDAP::Adapter).to receive(:set_ldap_param).and_return(true)
+      expect(call_method).to eq(true)
     end
   end
 
@@ -270,6 +305,24 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`deletion_reason=` method' do
+    let(:value) { 'stole my stapler' }
+    let(:call_method) { subject.deletion_reason = value }
+    it 'should change the deletion_reason attribute on the model' do
+      call_method
+      expect(subject.deletion_reason).to eq(value)
+    end
+    it 'should mark the deletion_reason attribute as dirty if the value changed' do
+      expect(subject).to receive(:attribute_will_change!).with('deletion_reason')
+      call_method
+    end
+    it 'should not mark the deletion_reason attribute as dirty if the value was the same' do
+      allow(subject).to receive(:deletion_reason).and_return(value)
+      expect(subject).to_not receive(:attribute_will_change!).with('deletion_reason')
+      call_method
+    end
+  end
+
   describe '`email_changed?` method' do
     let(:call_method) { subject.email_changed? }
     it 'returns true if a new email value has been set' do
@@ -337,6 +390,22 @@ RSpec.describe User, :type => :model do
       expect(call_method).to be(false)
     end
   end
+
+  describe '`deletion_reason_changed?` method' do
+    let(:call_method) { subject.deletion_reason_changed? }
+    it 'returns true if a new reason value has been set' do
+      subject.deletion_reason = 'they ate my lunch'
+      expect(call_method).to be(true)
+    end
+    it 'returns false if there are no reason changes' do
+      expect(call_method).to be(false)
+    end
+    it 'ignores setting the reason to the same value' do
+      subject.deletion_reason = subject.deletion_reason
+      expect(call_method).to be(false)
+    end
+  end
+
 
   describe '`reload_ldap_entry` protected method' do
     let(:call_method) { subject.send(:reload_ldap_entry) }
@@ -493,6 +562,57 @@ RSpec.describe User, :type => :model do
     it 'should call `Devise::LDAP::Adapter.get_ldap_domain_from_dn` to find the `ldap_domain`' do
       expect(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
       call_method
+    end
+  end
+
+  describe '`member_id` method' do
+    let(:call_method) { subject.member_id }
+    let(:member_id_instance_variable) { double('@member_id') }
+    let(:bank_id) { rand(9999).to_s }
+    let(:ldap_bank) { double('LDAP entry for bank', cn: ["FHLB#{bank_id}"], objectClass: ['group'])}
+    let(:ldap_group_object) { double('Some LDAP entry for a non-bank group', cn: ["FOO#{bank_id}"], objectClass: ['group'])}
+    let(:ldap_other_object) { double('LDAP entry for a non-group object with a valid bank CN', cn: ["FHLB#{bank_id}"], objectClass: ['top'])}
+    let(:ldap_groups_array) { [ldap_group_object, ldap_other_object, ldap_bank] }
+    before do
+      allow(subject).to receive(:ldap_groups).and_return(ldap_groups_array)
+    end
+    it 'returns the @member_id attribute if it exists' do
+      subject.instance_variable_set(:@member_id, member_id_instance_variable)
+      expect(call_method).to eq(member_id_instance_variable)
+    end
+    it 'ignores groups that do not have an object class of `group`' do
+      expect(ldap_other_object).to_not receive(:remove)
+      call_method
+    end
+    it 'ignores groups that do not a CN that begins with `FHLB` and is followed by any number of digits' do
+      expect(ldap_other_object.cn.first).to_not receive(:remove)
+      call_method
+    end
+    it 'returns the formatted member_id of a group with an objectClass that includes `group` and a CN that begins with `FHLB` followed by any number of digits' do
+      expect(ldap_bank.cn.first).to receive(:remove).and_call_original
+      expect(call_method).to eq(bank_id)
+    end
+    it 'sets the @member_id attribute to the returned bank id' do
+      call_method
+      expect(subject.instance_variable_get(:@member_id)).to eq(bank_id)
+    end
+  end
+
+  describe '`destroy_ldap_entry` method' do
+    let(:call_method) {subject.send(:destroy_ldap_entry)}
+    let(:username) { double('username') }
+    let(:ldap_domain) { double('ldap_domain') }
+    before do
+      allow(subject).to receive(:username).and_return(username)
+      allow(subject).to receive(:ldap_domain).and_return(ldap_domain)
+    end
+    it 'should call `Devise::LDAP::Adapter.delete_ldap_entry`' do
+      expect(Devise::LDAP::Adapter).to receive(:delete_ldap_entry).with(username, nil, ldap_domain).and_return(true)
+      call_method
+    end
+    it 'should raise an `ActiveRecord::Rollback` if the delete fails' do
+      allow(Devise::LDAP::Adapter).to receive(:delete_ldap_entry).and_return(false)
+      expect{call_method}.to raise_error(ActiveRecord::Rollback)
     end
   end
 end

@@ -15,8 +15,19 @@ class SettingsController < ApplicationController
     authorize :access_manager, :show?
   end
 
-  before_action only: [:unlock, :lock, :edit_user, :update_user] do
-    authorize :access_manager, :edit?
+  before_action only: [:edit_user, :update_user] do
+    @user = User.find(params[:id])
+    authorize @user, :edit?
+  end
+
+  before_action only: [:lock, :unlock] do
+    @user = User.find(params[:id])
+    authorize @user, :lock?
+  end
+
+  before_action only: [:delete_user, :confirm_delete] do
+    @user = User.find(params[:id])
+    authorize @user, :delete?
   end
 
   def index
@@ -49,8 +60,7 @@ class SettingsController < ApplicationController
 
   # POST
   def unlock
-    @user = User.find(params[:id])
-    if @user.id != current_user.id && @user.unlock!
+    if @user.unlock!
       render json: {
         html: render_to_string(layout: false),
         row_html: render_to_string(partial: 'user_row', locals: {
@@ -66,8 +76,7 @@ class SettingsController < ApplicationController
 
   # POST
   def lock
-    @user = User.find(params[:id])
-    if @user.id != current_user.id && @user.lock!
+    if @user.lock!
       render json: {
         html: render_to_string(layout: false),
         row_html: render_to_string(partial: 'user_row', locals: {
@@ -83,23 +92,52 @@ class SettingsController < ApplicationController
 
   # GET
   def edit_user
-    @user = User.find(params[:id])
     @user.email_confirmation = @user.email
-    render json: {html: render_to_string(layout: false)}
+    render json: {html: render_to_string(layout: false, locals: { actions: actions_for_user(@user) })}
   end
 
   # POST
   def update_user
     @user = User.find(params[:id])
-    @user.update_attributes!(params.require(:user).permit(:given_name, :surname, :email, :email_confirmation))
+    if @user.update_attributes!(params.require(:user).permit(:given_name, :surname, :email, :email_confirmation))
+      render json: {
+        html: render_to_string(layout: false),
+        row_html: render_to_string(partial: 'user_row', locals: {
+          user: @user,
+          roles: roles_for_user(@user),
+          actions: actions_for_user(@user)
+        })
+      }
+    else
+      render json: {}, status: 500
+    end
+  end
+
+  # GET
+  def confirm_delete
     render json: {
-      html: render_to_string(layout: false),
-      row_html: render_to_string(partial: 'user_row', locals: {
-        user: @user,
-        roles: roles_for_user(@user),
-        actions: actions_for_user(@user)
-      })
+      html: render_to_string(layout: false)
     }
+  end
+
+  # DELETE
+  def delete_user
+    raise Pundit::NotAuthorizedError.new query: :delete?, record: @user if current_user.id == @user.id
+    case params[:reason]
+    when 'remove_access'
+      reason = 'No longer a web user' # these strings should NOT be looked up from I18n here
+    when 'left_institution'
+      reason = 'No longer with this institution'
+    else
+      raise ActiveRecord::RecordInvalid.new(@user)
+    end
+    @user.deletion_reason = reason
+    success = @user.save! && @user.destroy!
+    if success
+      render json: { html: render_to_string(layout: false) }
+    else
+      render json: {}, status: 500
+    end
   end
 
   # GET
@@ -156,13 +194,13 @@ class SettingsController < ApplicationController
   def roles_for_user(user)
     roles = user.roles.collect do |role|
       if role == User::Roles::ACCESS_MANAGER
-        t('settings.account.roles.access_manager')
+        t('user_roles.access_manager.title')
       elsif role == User::Roles::AUTHORIZED_SIGNER
-        t('settings.account.roles.authorized_signer')
+        t('user_roles.authorized_signer')
       end
     end
     roles.compact!
-    roles.present? ? roles : [t('settings.account.roles.user')]
+    roles.present? ? roles : [t('user_roles.user.title')]
   end
 
   def actions_for_user(user)
@@ -170,7 +208,8 @@ class SettingsController < ApplicationController
     {
       locked: user.locked?,
       locked_disabled: is_current_user,
-      reset_disabled: is_current_user
+      reset_disabled: is_current_user,
+      delete_disabled: is_current_user
     }
   end
 

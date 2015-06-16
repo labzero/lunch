@@ -4,6 +4,7 @@ default: &default
   primary_user:
     username: <%= ENV['CUCUMBER_PRIMARY_USERNAME'] || 'local' %>
     password: <%= ENV['CUCUMBER_PRIMARY_PASSWORD'] || 'development' %>
+    given_name: <%= ENV['CUCUMBER_PRIMARY_GIVEN_NAME'] || ENV['CUCUMBER_PRIMARY_USERNAME'] || 'local' %>
   signer_advances_user:
     username: <%= ENV['CUCUMBER_SIGNER_ADVANCES_USERNAME'] || 'local' %>
     password: <%= ENV['CUCUMBER_SIGNER_ADVANCES_PASSWORD'] || 'development' %>
@@ -16,6 +17,9 @@ default: &default
   access_manager:
     username: <%= ENV['CUCUMBER_ACCESS_MANAGER_USERNAME'] || 'extra-chaste-access' %>
     password: <%= ENV['CUCUMBER_ACCESS_MANAGER_PASSWORD'] || 'development' %>
+  deletable:
+    username: <%= ENV['CUCUMBER_DELETABLE_USERNAME'] || 'extra-chaste-delete' %>
+    password: <%= ENV['CUCUMBER_DELETABLE_PASSWORD'] || 'development' %>
   primary_bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Meridian Bank, National Association' %>
 
 local:

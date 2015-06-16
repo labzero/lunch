@@ -2,7 +2,7 @@
   .row
     = link_to(t('welcome.logo'), dashboard_url, class: 'logo')
     %ul
-      %li= t('nav.primary.welcome', name: 'Alma')
+      %li= t('nav.primary.welcome', name: current_user.given_name || current_user.username)
       %li.nav-logout= link_to(t('nav.primary.logout'), destroy_user_session_url, method: :delete)
       %li.nav-settings= link_to('', '/settings', class: 'icon-gear-after')
       %li.nav-mail= link_to('', corporate_communications_path('all'), class: 'icon-envelope-after')
@@ -35,7 +35,7 @@
               %li= link_to(t('reports.credit.interest_rate.title'), reports_interest_rate_resets_path)
               %li= link_to(t('reports.credit.letters_of_credit.title'), reports_letters_of_credit_path)
               %li= link_to(t('reports.credit.forward_commitments.title'), reports_path)
-              %li= link_to(t('reports.credit.parallel_shift.title'), reports_path)
+              %li= link_to(t('reports.credit.parallel_shift.title'), reports_parallel_shift_path)
           %li<>
             = link_to(t('reports.collateral.title'), reports_path)
             %ul.nav-dropdown-nested
@@ -56,3 +56,5 @@
               %li= link_to(t('reports.securities.current.title'), reports_path)
               %li= link_to(t('reports.securities.monthly.title'), reports_path)
               %li= link_to(t('reports.securities.services_monthly.title'), reports_securities_services_statement_path)
+          %li<>
+            = link_to(t('reports.authorizations.title'), reports_authorizations_path)

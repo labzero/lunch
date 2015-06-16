@@ -95,6 +95,8 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/letters-of-credit'
   when 'Securities Transactions'
     visit '/reports/securities-transactions'
+  when 'Authorizations'
+    visit '/reports/authorizations'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
@@ -186,6 +188,17 @@ Then(/^I should see a "(.*?)" starting on "(.*?)" and ending on "(.*?)"$/) do |r
   report_dates_in_range?(start_date_obj, end_date_obj)
 end
 
+Then(/^I should see a "(.*?)" report as of "(.*?)"$/) do |report_type, as_of_date|
+  as_of_date = as_of_date.to_date
+  case report_type
+    when "Advances Detail"
+      summary_statement = I18n.t('reports.pages.advances_detail.total_current_par_heading', date: as_of_date.strftime('%B %-d, %Y'))
+    else raise "unknown report type"
+  end
+  expect(page.find(".datepicker-trigger input").value).to eq(I18n.t('datepicker.single.input', date: as_of_date.strftime('%m/%d/%Y')))
+  step %{I should see "#{summary_statement}"}
+end
+
 Then(/^I should see a "(.*?)" with data for dates between the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of (this|last) month$/) do |report_type, start_day, end_day, month|
   if month == 'this'
     start_date_obj = Date.new(@today.year, @today.month, start_day.to_i)
@@ -222,7 +235,7 @@ Given(/^I am showing Settlement Transaction Account activities for (\d+)$/) do |
   start_date = Time.zone.parse("#{year}-01-01")
   end_date = Time.zone.parse("#{year}-12-31")
   step 'I click the datepicker field'
-  step %{I choose the "custom date range" in the datepicker}
+  step %{I choose the "custom date range" preset in the datepicker}
   step %{I select a start date of "#{start_date}" and an end date of "#{end_date}"}
   step 'I click the datepicker apply button'
   step %{I should see a "Settlement Transaction Account Statement" with dates between "#{start_date.strftime('%B %-d, %Y')}" and "#{end_date.strftime('%B %-d, %Y')}"}
@@ -276,7 +289,7 @@ def export_report(format)
 end
 
 When(/^I click on the view cell for the first (advance|cash projection)/) do |report_type|
-  column_name = report_type == 'advance' ? I18n.t('reports.pages.advances_detail.advance_number') : I18n.t('reports.pages.cash_projections.cusip')
+  column_name = report_type == 'advance' ? I18n.t('common_table_headings.advance_number') : I18n.t('reports.pages.cash_projections.cusip')
   skip_if_table_empty do
     column_index = page.evaluate_script("$('.report-table thead th:contains(#{column_name})').index()") + 1
     @row_identifier = page.find(".report-table tbody tr:first-child td:nth-child(#{column_index})").text
@@ -362,4 +375,30 @@ end
 
 When(/^I cancel the report download from the flyout$/) do
   page.find('.cancel-report-download', text: /#{I18n.t('global.cancel_download')}/i).click
+end
+
+When(/^I select "(.*?)" from the authorizations filter$/) do |text|
+  page.find('.report-inputs .dropdown-selection').click
+  page.find('.authorizations-filter li', text: text).click
+end
+
+When(/^I should only see users with the "(.*?)" role$/) do |role|
+  role_mapping = {
+    'Resolution and Authorization' => I18n.t('user_roles.resolution.title'),
+    'Entire Authority' => I18n.t('user_roles.entire_authority.title'),
+    'Affordable Housing Program' => I18n.t('user_roles.affordable_housing.title'),
+    'Collateral' => I18n.t('user_roles.collateral.title'),
+    'Money Market Transactions' => I18n.t('user_roles.money_market.title'),
+    'Interest Rate Derivatives' => I18n.t('user_roles.interest_rate_derivatives.title'),
+    'Securities Services' => I18n.t('user_roles.securities.title'),
+    'Wire Transfer Services' => I18n.t('user_roles.wire_transfer.title'),
+    'Access Manager' => I18n.t('user_roles.access_manager.title'),
+    'eTransact Holder' => I18n.t('user_roles.etransact.title'),
+    'User' => I18n.t('user_roles.user.title')
+  }
+  role_name = role_mapping[role]
+  page.all('.report-table tbody td:last-child').each do |cell|
+    next if cell.text == I18n.t('errors.table_data_unavailable')
+    cell.assert_selector('li', text: role_name)
+  end
 end

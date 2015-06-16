@@ -48,8 +48,8 @@ module MAPI
                   'advance_number' => trade.at_css('advance advanceNumber').content,
                   'advance_type' => trade.at_css('advance product').content,
                   'status' => Date.parse(trade.at_css('tradeHeader tradeDate').content) < Date.today ? 'Outstanding' : 'Pending',
-                  'interest_rate' => trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate').content : trade.at_css('advance coupon initialRate').content,
-                  'current_par' => trade.at_css('advance par amount').content
+                  'interest_rate' => trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate').content.to_f.round(5) : trade.at_css('advance coupon initialRate').content.to_f.round(5),
+                  'current_par' => trade.at_css('advance par amount').content.to_f
                 }
                 trade_activity.push(hash)
               end

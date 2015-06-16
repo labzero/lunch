@@ -14,6 +14,40 @@ class ReportsController < ApplicationController
   SECURITIES_SERVICES_STATMENT_WEB_FLAGS = [MembersService::SECURITIESBILLSTATEMENT]
   LETTERS_OF_CREDIT_WEB_FLAGS = [MembersService::LETTERS_OF_CREDIT_DETAIL_REPORT]
   SECURITIES_TRANSACTION_WEB_FLAGS = [MembersService::SECURITIES_TRANSACTION_DATA]
+  PARALLEL_SHIFT_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
+
+  AUTHORIZATIONS_MAPPING = {
+    User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
+    User::Roles::SIGNER_ENTIRE_AUTHORITY => I18n.t('user_roles.entire_authority.title'),
+    User::Roles::AFFORDABILITY_SIGNER => I18n.t('user_roles.affordable_housing.title'),
+    User::Roles::COLLATERAL_SIGNER => I18n.t('user_roles.collateral.title'),
+    User::Roles::MONEYMARKET_SIGNER => I18n.t('user_roles.money_market.title'),
+    User::Roles::DERIVATIVES_SIGNER => I18n.t('user_roles.interest_rate_derivatives.title'),
+    User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
+    User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
+    User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title'),
+    User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact.title')
+  }
+
+  AUTHORIZATIONS_DROPDOWN_MAPPING = {
+    'all' => I18n.t('user_roles.all_authorizations'),
+    User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.dropdown'),
+    User::Roles::SIGNER_ENTIRE_AUTHORITY => I18n.t('user_roles.entire_authority.dropdown'),
+    User::Roles::AFFORDABILITY_SIGNER => I18n.t('user_roles.affordable_housing.title'),
+    User::Roles::COLLATERAL_SIGNER => I18n.t('user_roles.collateral.title'),
+    User::Roles::MONEYMARKET_SIGNER => I18n.t('user_roles.money_market.title'),
+    User::Roles::DERIVATIVES_SIGNER => I18n.t('user_roles.interest_rate_derivatives.title'),
+    User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
+    User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
+    User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title'),
+    User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact.title'),
+    'user' => I18n.t('user_roles.user.title')
+  }
+
+  DATE_PICKER_FILTERS = {
+    end_of_month: 'endOfMonth',
+    end_of_quarter: 'endOfQuarter'
+  }
 
   before_action do
     @member_name = current_member_name
@@ -55,7 +89,8 @@ class ReportsController < ApplicationController
         },
         parallel_shift: {
           updated: t('global.monthly'),
-          available_history: t('global.all')
+          available_history: t('global.all'),
+          route: reports_parallel_shift_path
         }
       },
       collateral: {
@@ -111,6 +146,13 @@ class ReportsController < ApplicationController
           updated: t('global.monthly'),
           available_history: t('reports.history.months18'),
           route: reports_securities_services_statement_path
+        }
+      },
+      authorizations: {
+        user: {
+          updated: t('reports.continuously'),
+          available_history: t('global.current_day'),
+          route: reports_authorizations_path
         }
       }
     }
@@ -352,19 +394,7 @@ class ReportsController < ApplicationController
     default_dates = default_dates_hash
     @start_date = ((params[:start_date] || default_dates[:this_year_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:today])).to_date
-    preset_options = {
-        :first_preset => {
-            :label => I18n.t('global.last_year'),
-            :start_date => default_dates[:last_year_start],
-            :end_date => default_dates[:last_year_end]
-        },
-        :second_preset => {
-            :label => I18n.t('global.year_to_date'),
-            :start_date => default_dates[:this_year_start],
-            :end_date => default_dates[:today]
-        }
-    }
-    @picker_presets = date_picker_presets(@start_date, @end_date, preset_options)
+    @picker_presets = date_picker_presets(@start_date, @end_date)
     
     @collateral_type_options = [
         [t('reports.pages.price_indications.standard_credit_program'), 'standard'],
@@ -484,7 +514,7 @@ class ReportsController < ApplicationController
   def interest_rate_resets
     rate_service = RatesService.new(request)
     @start_date = (Time.zone.now.to_date).to_date
-    column_headings = [t('reports.pages.interest_rate_resets.effective_date'), t('reports.pages.interest_rate_resets.advance_number'), t('reports.pages.interest_rate_resets.prior_rate'), t('reports.pages.interest_rate_resets.new_rate'), t('reports.pages.interest_rate_resets.next_reset')]
+    column_headings = [t('reports.pages.interest_rate_resets.effective_date'), t('common_table_headings.advance_number'), t('reports.pages.interest_rate_resets.prior_rate'), t('reports.pages.interest_rate_resets.new_rate'), t('reports.pages.interest_rate_resets.next_reset')]
     irr_data = rate_service.interest_rate_resets
     rows = irr_data.collect do |row|
       columns = []
@@ -642,6 +672,65 @@ class ReportsController < ApplicationController
     }
   end
 
+  def authorizations
+    @authorizations_filter = params['authorizations_filter'] || 'all'
+    users = MembersService.new(request).signers_and_users(current_member_id) || []
+    users = users.sort_by{|x| x[:display_name]}
+    rows = []
+    users.each do |user|
+      user_roles = roles_for_signers(user)
+      if @authorizations_filter == 'user' && user_roles.include?(t('user_roles.user.title'))
+        rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
+      else
+        next if user_roles.empty? || (@authorizations_filter != 'all' && !user[:roles].include?(@authorizations_filter))
+        rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
+      end
+    end
+    @authorizations_table_data = {
+      :column_headings => [t('user_roles.user.title'), t('reports.authorizations.title')],
+      :rows => rows
+    }
+    @authorizations_dropdown_options = AUTHORIZATIONS_DROPDOWN_MAPPING.collect{|key, value| [value, key]}
+    @authorizations_dropdown_options.each do |option|
+      if option.last == @authorizations_filter
+        @authorizations_filter_text = option.first
+        break
+      end
+    end
+  end
+
+  def parallel_shift
+    if report_disabled?(PARALLEL_SHIFT_WEB_FLAGS)
+      parallel_shift = {putable_advances: {}}
+    else
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      parallel_shift = member_balances.parallel_shift
+      raise StandardError, "There has been an error and ReportsController#parallel_shift has encountered nil. Check error logs." if parallel_shift.nil?
+    end
+    @as_of_date = parallel_shift[:as_of_date]
+    rows = []
+    parallel_shift[:putable_advances].each do |advance|
+      rows << {
+        columns:[
+          {type: nil, value: advance[:advance_number]},
+          {type: :date, value: advance[:issue_date]},
+          {type: :rate, value: advance[:interest_rate]},
+          {type: (advance[:shift_neg_300].blank? ? nil : :basis_point), value: advance[:shift_neg_300] || t('global.na')},
+          {type: (advance[:shift_neg_200].blank? ? nil : :basis_point), value: advance[:shift_neg_200] || t('global.na')},
+          {type: (advance[:shift_neg_100].blank? ? nil : :basis_point), value: advance[:shift_neg_100] || t('global.na')},
+          {type: (advance[:shift_0].blank? ? nil : :basis_point), value: advance[:shift_0] || t('global.na')},
+          {type: (advance[:shift_100].blank? ? nil : :basis_point), value: advance[:shift_100] || t('global.na')},
+          {type: (advance[:shift_200].blank? ? nil : :basis_point), value: advance[:shift_200] || t('global.na')},
+          {type: (advance[:shift_300].blank? ? nil : :basis_point), value: advance[:shift_300] || t('global.na')}
+        ]
+      }
+    end
+    @parallel_shift_table_data = {
+      column_headings: [t('common_table_headings.advance_number'), t('global.issue_date'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%'), [-300,-200,-100,0,100,200,300].collect{|x| fhlb_formatted_number(x)}].flatten,
+      rows: rows
+    }
+  end
+
   private
   def report_disabled?(report_flags)
     member_info = MembersService.new(request)
@@ -666,6 +755,14 @@ class ReportsController < ApplicationController
       end
     end
     new_array
+  end
+
+  def roles_for_signers(signer)
+    roles = signer[:roles].collect do |role|
+      AUTHORIZATIONS_MAPPING[role]
+    end
+    roles.compact!
+    roles.present? ? roles : [t('user_roles.user.title')]
   end
 
 end

@@ -1,0 +1,30 @@
+.page-footer {
+  @extend %typography-footer;
+  clear: both;
+  text-align: center;
+  background: $white;
+  padding: 10px 0 20px;
+  margin-top: 25px;
+  border-top: 1px solid $secondary-gray;
+  box-shadow: 0 1000px 0 1000px $white; // Simulates stretching of footer to bottom of page, as the `html` element must have a gray background to achieve two-tone effect.
+  span {
+    margin-right: 5px;
+  }
+}
+
+.footer-nav {
+  display: inline;
+  list-style: none;
+  padding: 0;
+  margin-left: 10px;
+  li {
+    &:first-child {
+      padding-left: 0;
+      border-left: none;
+    }
+    color: $actionable-blue;
+    display: inline;
+    padding: 0 10px;
+    border-left: 1px solid $secondary-gray;
+  }
+}

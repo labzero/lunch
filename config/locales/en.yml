@@ -78,7 +78,7 @@ en:
     pdf: PDF
     missing_value: –
     continue: Continue
-    fhlb_full: Federal Home Loan Bank San Francisco
+    fhlb_full: Federal Home Loan Bank of San Francisco
     excel: Excel
     principal: Principal
     interest: Interest
@@ -98,6 +98,12 @@ en:
     role: Role
     name: Name
     edit: Edit
+    copyright_html: "&copy;"
+    copyright_date: 2000-2015
+    contact: Contact
+    terms_of_use: Terms of Use
+    privacy_policy: Privacy Policy
+    truncated_web_address: "fhlbsf.com"
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -150,13 +156,16 @@ en:
     maturity_date: Maturity Date
     description: Description
     current_par: Current Par
+    advance_number: Advance Number
+    interest_rate: Interest Rate
   datepicker:
     range:
-      this_month: "%{month} to date"
+      date_to_current: "%{date} to date"
       custom: Custom date range
     single:
       input: "As of %{date}"
       custom: Custom date
+      end_of: "End of %{date}"
   activerecord:
     attributes:
       user:
@@ -177,6 +186,47 @@ en:
             email_confirmation:
               blank: You must confirm your email address.
               confirmation: Confirmation email address does not match.
+  user_roles:
+    authorized_signer: Authorized Signer
+    all_authorizations: All Authorizations
+    user:
+      title: User
+      description: The designated individual can log into the member website and view reports.
+    access_manager:
+      title: Access Manager
+      description: Identifies your institution's Access Manager(s), who will add and delete users, reset passwords, and lock or unlock website access accounts for individuals
+    resolution:
+      dropdown: Resolution and Authorization
+      title: 'Resolution and Authorization: Member Transactions (All transactions except Wires)'
+      description: The primary form on which you specify individuals who are authorized to execute all types of transactions with the Bank, except for wires. Must be adopted by your Board of Directors and signed by your Corporate Secretary.
+    entire_authority:
+      dropdown: Entire Authority
+      title: Entire Authority (All transactions except Wires)
+      description: This form permits the individuals designated on the Resolution and Authorization to authorize additional officers, employees, or agents of your institution to engage in all transactions with the Bank, except for wires, and to provide instructions regarding all securities-related transactions.
+    wire_transfer:
+      title: Wire Transfer Services
+      description: The designated individuals listed are authorized to conduct offline funds transactions by telephone. The signer listed on this form must be listed as an authorized individual on the Resolution and Authorization.
+    advances:
+      title: Advances
+      description: The designated individuals listed are authorized to execute advances, letters of credit, lines of credit, and other similar extensions of credit with the Bank.
+    affordable_housing:
+      title: Affordable Housing Program
+      description: The designated individuals listed are authorized to exercise authority under the Bank's Affordable Housing Program and any other community investment programs, excluding extensions of credit related to these programs.
+    collateral:
+      title: Collateral
+      description: The designated individuals listed are authorized to engage in collateral transactions with the Bank. Employees listed on this form are authorized to provide instructions regarding the pledging and de-pledging of securities but are not authorized to provide instructions regarding securities held in safekeeping (except to pledge those securities).
+    interest_rate_derivatives:
+      title: Interest Rate Derivatives
+      description: The designated individuals listed are authorized to engage in interest rate derivative transactions with the Bank.
+    money_market:
+      title: Money Market Transactions
+      description: The designated individuals listed are authorized to request or purchase Bank funds in unsecured money market transactions.
+    securities:
+      title: Securities Services
+      description: The designated individuals listed are authorized to move securities to and from their unpledged account (safekeeping account). Employees listed on this form are authorized to provide instructions regarding the purchase and sale of unpledged securities, but are not authorized to pledge or de-pledge securities.
+    etransact:
+      title: eTransact Holder
+      description: Use to request a SecurID token, a security device that allows authorized signers to use eTransact, the Bank's secure online transaction service.
   settings:
     title: Settings
     save: Save
@@ -188,10 +238,6 @@ en:
         unlock: Unlock
         reset_password: Reset Password
         add_user: Add New Web User
-      roles:
-        user: User
-        access_manager: Access Manager
-        authorized_signer: Authorized Signer
       lock:
         title: Account Locked
         success_html: Account for <strong>%{name}</strong> is locked.
@@ -212,6 +258,18 @@ en:
       update:
         title: User Information Updated
         success_html: The information for <strong>%{name}</strong> has been updated.
+      confirm_delete:
+        title: Confirm Delete User Access
+        summary_html: Are you sure you want to delete this user's access?<br>This cannot be undone.
+        delete_button: Delete User Access
+        label: '%{field}:'
+        prompt: "Reason for deleting this user's access:"
+        reasons:
+          remove_access: No longer a web user
+          left_institution: No longer with this institution
+      delete_user:
+        title: User Access Deleted
+        success_html: User access for <strong>%{name}</strong> has been deleted.
     password:
       title: Password
     quick_advance:
@@ -369,7 +427,6 @@ en:
         advance_term: Term
         funding_date: Funding
         maturity_date: Maturity
-        advance_number: Advance Number
       securid:
         intro: For your security, please enter your SecurID login credentails.
         help: Get help with PIN or token
@@ -433,9 +490,6 @@ en:
   reports:
     meta_title: FHLB - Reports
     title: Reports
-    setup_quick_advance:
-      title: Want faster access to your reports?
-      content_html: "Set up <a href=\"%{url}\">Quick Reports</a> to have the latest reports emailed to you, or lorem ipsum something something to access reports from the dashboard."
     shared_table_values:
       updated_th: Updated
       available_history_th: Available History
@@ -516,6 +570,11 @@ en:
       services_monthly:
         title: Securities Services Monthly Statement
         summary: Provides a breakdown of the securities services fees that will be debited from your institution’s Settlement/Transaction Account on the last business day of the month. It is updated for the prior month approximately five to seven days before monthend.
+    authorizations:
+      title: Authorizations
+      user:
+        title: User Authorizations
+        summary: Provides a summary of authorizations granted to bank users.
     pages:
       price_indications:
         current:
@@ -633,11 +692,9 @@ en:
         total_accrued_interest_heading: "Total Accrued Interest as of %{date}"
         estimated_next_payment_heading: "Estimated Next Interest Payment as of %{date}"
         funding_date: Funding Date
-        advance_number: Advance Number
         advance_type: Advance Type
         interest_payment_frequency: Interest Payment Frequency
         day_count_basis: Day Count Basis
-        interest_rate: Interest Rate
         next_interest_payment_date: Next Interest Payment Date
         accrued_interest_heading: Accrued Interest
         accrued_interest: Accrued Interest
@@ -672,7 +729,6 @@ en:
         info: "The Bank processed the following interest rate resets effective %{date}"
         questions: If you have any questions, contact %{phone_number}
         effective_date: Effective Date
-        advance_number: Advance Number
         prior_rate: Prior Rate (%)
         new_rate: New Rate (%)
         next_reset: Next Reset
@@ -747,6 +803,16 @@ en:
         interest: Interest
         total: Total
         total_net_amount: Total Net Amount
+      authorizations:
+        title: Authorizations
+        info:
+          p1_html: The following people are authorized to use the Bank’s services. To update your authorizations on file with the Bank, see the <a href="%{instructions_url}">Signature Card Instructions</a> and the <a href="%{forms_url}">Signature Card Forms</a>.
+          p2_html: 'Some authorized signers may not display on this page at this time. To confirm an authorized signer, contact <a href="%{url}">Web Support</a> or call %{phone_number}.'
+          p3_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about signature cards, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
+      parallel_shift:
+        title: Putable Advance Parallel Shift Sensitivity Analysis
+        info: The valuations below are calculated using data as of %{date}
+        disclaimer: "The valuations provided to you on the Putable Advance Parallel Shift Sensitivity Analysis page are for information purposes only, are provided as an accommodation and without charge, are confidential and are intended solely for your use. The valuations do not represent the actual or indicative forms at which new (or economically equivalent) transactions could be entered into or the actual or indicative terms at which existing (or such equivalent) transactions could be liquidated, assigned or unwound. The valuations were derived using proprietary pricing models and estimates and assumptions about relevant future market conditions and other matters, all of which are subject to change without notice. Please note that the valuation estimates are from the Federal Home Loan Bank of San Francisco's perspective. Any such changes may have a material impact on the valuations provided, and valuations based on other models or different assumptions may yield materially different results. No guaranty or warranty is made as to the reasonableness of any assumptions or the accuracy or completeness of the models or market data, whether internally or externally generated. In providing the valuations on the Putable Advance Parallel Shift Sensitivity Analysis page, the Federal Home Loan Bank of San Francisco has expressly relied upon the representations and certifications made by you to the Federal Home Loan Bank of San Francisco in your Statement of Authority re: Putable Advances. Accordingly, you should not regard the valuations as advice by us in respect of your positions or as the sole basis for such positions, and you should discuss with your accountants, attorneys, investment advisors and other representatives whether and to what extent these valuations may be useful in the preparation of your financial statements, regulatory reports or otherwise. The valuations may vary significantly from the estimates we used in valuing the transaction(s) for purposes of our internal books and records and for other purposes. The Federal Home Loan Bank of San Francisco expressly disclaims any responsibility for (i) the accuracy of the models, market data input into such models or estimates used in deriving the valuations, (ii) any errors or omissions in computing or disseminating the valuations and (iii) any uses to which the valuations are put."
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.

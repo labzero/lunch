@@ -13,7 +13,7 @@
 
 ActiveRecord::Schema.define(version: 20150430204209) do
 
-  create_table "corporate_communications", force: true do |t|
+  create_table "corporate_communications", force: :cascade do |t|
     t.string   "email_id"
     t.string   "title"
     t.datetime "date_sent"
@@ -23,14 +23,14 @@ ActiveRecord::Schema.define(version: 20150430204209) do
 
   add_index "corporate_communications", ["category"], name: "i_cor_com_cat"
 
-  create_table "job_statuses", force: true do |t|
-    t.integer  "user_id",             limit: nil, precision: 38
+  create_table "job_statuses", force: :cascade do |t|
+    t.integer  "user_id",             limit: 16, precision: 38
     t.string   "job_id"
-    t.integer  "status",              limit: nil, precision: 38, default: 0
+    t.integer  "status",              limit: 16, precision: 38, default: 0
     t.datetime "finished_at"
     t.string   "result_file_name"
     t.string   "result_content_type"
-    t.integer  "result_file_size",    limit: nil, precision: 38
+    t.integer  "result_file_size",    limit: 16, precision: 38
     t.datetime "result_updated_at"
   end
 
@@ -38,11 +38,11 @@ ActiveRecord::Schema.define(version: 20150430204209) do
   add_index "job_statuses", ["job_id"], name: "index_job_statuses_on_job_id", unique: true
   add_index "job_statuses", ["status"], name: "index_job_statuses_on_status"
 
-  create_table "users", force: true do |t|
-    t.string   "username",                                          default: "", null: false
+  create_table "users", force: :cascade do |t|
+    t.string   "username",                                         default: "", null: false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
-    t.integer  "sign_in_count",          limit: nil, precision: 38, default: 0,  null: false
+    t.integer  "sign_in_count",          limit: 16, precision: 38, default: 0,  null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"

@@ -26,23 +26,39 @@ RSpec.describe ApplicationController, :type => :controller do
   end
 
   describe '`after_sign_in_path_for(resource)` method' do
+    let(:member_id) { rand(9999) }
+    let(:user) { double('User', member_id: nil) }
+    let(:call_method) { controller.send(:after_sign_in_path_for, 'some resource') }
+    before do
+      allow(controller).to receive(:current_user).and_return(user)
+    end
     describe 'with a member_id in the session' do
       before do
         session['member_id'] = 750
       end
       it 'redirects to the stored location for the resource if it exists' do
         expect(controller).to receive(:stored_location_for).with('some resource')
-        controller.send(:after_sign_in_path_for, 'some resource')
+        call_method
       end
       it 'redirects to the dashboard_path if there is no stored location for the resource' do
         expect(controller).to receive(:dashboard_path)
         expect(controller).to receive(:stored_location_for).with('some resource').and_return(nil)
-        controller.send(:after_sign_in_path_for, 'some resource')
+        call_method
       end
     end
-    it 'redirects to Members#select_member' do
+    it 'sets `member_id` in the session if current_user.member_id returns a member_id' do
+      allow(user).to receive(:member_id).and_return(member_id)
+      call_method
+      expect(session['member_id']).to eq(member_id)
+    end
+    it 'redirects to Members#select_member if the user is an intranet user' do
+      allow(user).to receive(:ldap_domain).and_return('intranet')
       expect(controller).to receive(:members_select_member_path)
-      controller.send(:after_sign_in_path_for, 'some resource')
+      call_method
+    end
+    it 'raises an error if there is no member_id in the session and the current user is not an intranet user' do
+      allow(user).to receive(:ldap_domain).and_return('extranet')
+      expect{call_method}.to raise_error
     end
   end
 

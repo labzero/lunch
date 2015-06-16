@@ -228,16 +228,19 @@ RSpec.describe SettingsController, :type => :controller do
   end
 
   describe 'GET edit_user' do
-    allow_policy(:access_manager, :edit?)
-    let(:user_id) { rand(10000..99999) }
+    allow_policy_resource(:user, :edit?)
+    user_id = rand(10000..99999)
+    let(:user_id) { user_id }
     let(:make_request) { get :edit_user, id: user_id }
     let(:email) { SecureRandom.hex }
-    let(:user) { double('User', id: user_id, email: email, :email_confirmation= => nil) }
+    let(:user) { double('User', id: user_id, email: email, :email_confirmation= => nil, class: User, locked?: false) }
+    let(:actions) { double('Actions') }
     before do
       allow(User).to receive(:find).and_call_original
       allow(User).to receive(:find).with(user_id.to_s).and_return(user)
+      allow(subject).to receive(:actions_for_user).and_return(actions)
     end
-    it_behaves_like 'an authorization required method', :get, :edit_user, :access_manager, :edit?, id: rand(10000..99999)
+    it_behaves_like 'a resource-based authorization required method', :get, :edit_user, :user, :edit?, id: user_id
     it 'assigns the user identified by `params[:id]` to @user' do
       make_request
       expect(assigns[:user]).to be(user)
@@ -250,7 +253,7 @@ RSpec.describe SettingsController, :type => :controller do
       make_request
     end
     it "renders the `edit_user` overlay" do
-      expect(subject).to receive(:render_to_string).with(layout: false)
+      expect(subject).to receive(:render_to_string).with(layout: false, locals: { actions: actions })
       make_request
     end
     it 'returns a JSON response' do
@@ -261,8 +264,9 @@ RSpec.describe SettingsController, :type => :controller do
   end
 
   describe 'POST update_user' do
-    allow_policy(:access_manager, :edit?)
-    let(:user_id) { rand(10000..99999) }
+    allow_policy_resource(:user, :edit?)
+    user_id = rand(10000..99999)
+    let(:user_id) { user_id }
     let(:email) { SecureRandom.hex }
     let(:given_name) { SecureRandom.hex }
     let(:surname) { SecureRandom.hex }
@@ -277,10 +281,10 @@ RSpec.describe SettingsController, :type => :controller do
       allow(subject).to receive(:render_to_string)
       allow(User).to receive(:find).and_call_original
       allow(User).to receive(:find).with(user_id.to_s).and_return(user)
-      allow(user).to receive(:update_attributes!)
+      allow(user).to receive(:update_attributes!).and_return(true)
     end
     it { should permit(:email, :given_name, :surname, :email_confirmation).for(:update_user, verb: :post, params: {id: user_id}) }
-    it_behaves_like 'an authorization required method', :post, :update_user, :access_manager, :edit?, id: rand(10000..99999)
+    it_behaves_like 'a resource-based authorization required method', :post, :update_user, :user, :edit?, id: user_id
     it 'assigns the user identified by `params[:id]` to @user' do
       make_request
       expect(assigns[:user]).to be(user)
@@ -290,6 +294,11 @@ RSpec.describe SettingsController, :type => :controller do
     end
     it 'returns a 400 if the `user` parameter is missing' do
       expect{post :update_user, id: user_id}.to raise_error(ActionController::ParameterMissing)
+    end
+    it 'returns a 500 if the save fails' do
+      allow(user).to receive(:update_attributes!).and_return(false)
+      make_request
+      expect(response).to be_error
     end
     it 'updates the user with the passed params' do
       expect(user).to receive(:update_attributes!).with(attributes)
@@ -319,14 +328,106 @@ RSpec.describe SettingsController, :type => :controller do
     end
   end
 
+  describe 'GET confirm_delete' do
+    allow_policy_resource(:user, :delete?)
+    user_id = rand(10000..99999)
+    let(:user_id) { user_id }
+    let(:make_request) { get :confirm_delete, id: user_id }
+    let(:user) { double('User', class: User, id: user_id, errors: double('Errors', full_messages: [])) }
+    before do
+      allow(User).to receive(:find).and_call_original
+      allow(User).to receive(:find).with(user_id.to_s).and_return(user)
+    end
+    it_behaves_like 'a resource-based authorization required method', :get, :confirm_delete, :user, :delete?, id: user_id
+    it 'returns a 404 if the user was not found' do
+      expect{get :confirm_delete, id: 'foo'}.to raise_error(ActiveRecord::RecordNotFound)
+    end
+    it 'assigns the user identified by `params[:id]` to @user' do
+      make_request
+      expect(assigns[:user]).to be(user)
+    end
+    it 'renders the `confirm_delete` overlay' do
+      expect(subject).to receive(:render_to_string).with(layout: false)
+      make_request
+    end
+    it 'returns a JSON response' do
+      make_request
+      json = JSON.parse(response.body)
+      expect(json).to have_key('html')
+    end
+  end
+
+  describe 'DELETE delete_user' do
+    allow_policy_resource(:user, :delete?)
+    user_id = rand(10000..99999)
+    let(:user_id) { user_id }
+    let(:reason) { 'remove_access' }
+    let(:make_request) { delete :delete_user, id: user_id, reason: reason }
+    let(:user) { double('User', class: User, id: user_id, :'deletion_reason=' => nil, errors: double('Errors', full_messages: []), save!: true, destroy!: true) }
+    before do
+      allow(User).to receive(:find).and_call_original
+      allow(User).to receive(:find).with(user_id.to_s).and_return(user)
+    end
+    it_behaves_like 'a resource-based authorization required method', :delete, :delete_user, :user, :delete?, id: user_id, reason: 'remove_access'
+    it 'returns a 404 if the user was not found' do
+      expect{get :confirm_delete, id: 'foo'}.to raise_error(ActiveRecord::RecordNotFound)
+    end
+    it 'assigns the user identified by `params[:id]` to @user' do
+      make_request
+      expect(assigns[:user]).to be(user)
+    end
+    it 'rejects unknown reasons' do
+      expect {delete :delete_user, id: user_id, reason: 'foo'}.to raise_error
+    end
+    {
+      'remove_access' => 'No longer a web user',
+      'left_institution' => 'No longer with this institution'
+    }.each do |code, message|
+      it "converts reason code `#{code}` into reason string `#{message}`" do
+        expect(user).to receive(:deletion_reason=).with(message)
+        delete :delete_user, id: user_id, reason: code
+      end
+    end
+    it 'saves the deletion reason' do
+      expect(user).to receive(:deletion_reason=).ordered
+      expect(user).to receive(:save!).ordered
+      make_request
+    end
+    it 'skips deleteing the user if the save fails' do
+      allow(user).to receive(:save!).and_return(false)
+      expect(user).to_not receive(:destroy!)
+      make_request
+    end
+    it 'deletes the user' do
+      expect(user).to receive(:destroy!).and_return(true)
+      make_request
+    end
+    it 'returns a 500 if the save fails' do
+      allow(user).to receive(:save!).and_return(false)
+      make_request
+      expect(response).to have_http_status(:error)
+    end
+    it 'returns a 500 if the delete fails' do
+      allow(user).to receive(:destroy!).and_return(false)
+      make_request
+      expect(response).to have_http_status(:error)
+    end
+    it 'returns a JSON response' do
+      make_request
+      json = JSON.parse(response.body)
+      expect(json).to have_key('html')
+    end
+  end
+
   {unlock: :unlock!, lock: :lock!}.each do |route, method|
     describe "POST #{route}" do
-      allow_policy(:access_manager, :edit?)
-      let(:user_id) { rand(10000..99999) }
+      allow_policy_resource(:user, :lock?)
+      user_id = rand(10000..99999)
+      let(:user_id) { user_id }
       let(:make_request) { post route, id: user_id }
       let(:roles) { double('Roles') }
       let(:actions) { double('Actions') }
-      let(:user) { double('User', id: user_id, method => true) }
+      let(:user) { double('User', class: User, id: user_id, method => true) }
       before do
         allow(subject).to receive(:roles_for_user).and_return(roles)
         allow(subject).to receive(:actions_for_user).and_return(actions)
@@ -335,7 +436,7 @@ RSpec.describe SettingsController, :type => :controller do
         allow(User).to receive(:find).and_call_original
         allow(User).to receive(:find).with(user_id.to_s).and_return(user)
       end
-      it_behaves_like 'an authorization required method', :post, route, :access_manager, :edit?, id: rand(10000..99999)
+      it_behaves_like 'a resource-based authorization required method', :post, route, :user, :lock?, id: user_id
       it 'assigns the user identified by `params[:id]` to @user' do
         make_request
         expect(assigns[:user]).to be(user)
@@ -343,11 +444,6 @@ RSpec.describe SettingsController, :type => :controller do
       it "calls `#{method}` on the user" do
         expect(user).to receive(method)
         make_request
-      end
-      it "returns 500 if the user being #{route}ed is the current user" do
-        allow(subject).to receive(:current_user).and_return(user)
-        make_request
-        expect(response).to have_http_status(:error)
       end
       it "returns 500 if the user was not #{route}ed successfully" do
         allow(user).to receive(method).and_return(false)
@@ -382,19 +478,19 @@ RSpec.describe SettingsController, :type => :controller do
     let(:user) { double('User', roles: ['foo', 'bar']) }
     let(:call_method) { subject.send(:roles_for_user, user) }
     it 'returns the default role if none of the roles match a known role' do
-      expect(call_method).to eq([I18n.t('settings.account.roles.user')])
+      expect(call_method).to eq([I18n.t('user_roles.user.title')])
     end
     it 'returns the Access Manager role if the user is an Access Manager' do
       allow(user).to receive(:roles).and_return([User::Roles::ACCESS_MANAGER, 'bar'])
-      expect(call_method).to eq([I18n.t('settings.account.roles.access_manager')])
+      expect(call_method).to eq([I18n.t('user_roles.access_manager.title')])
     end
     it 'returns the Authorized Signer role if the user is an Authorized Signer' do
       allow(user).to receive(:roles).and_return([User::Roles::AUTHORIZED_SIGNER, 'woot'])
-      expect(call_method).to eq([I18n.t('settings.account.roles.authorized_signer')])
+      expect(call_method).to eq([I18n.t('user_roles.authorized_signer')])
     end
     it 'returns multiple roles if multiple roles are matched' do
       allow(user).to receive(:roles).and_return([User::Roles::AUTHORIZED_SIGNER, User::Roles::ACCESS_MANAGER])
-      expect(call_method).to eq([I18n.t('settings.account.roles.authorized_signer'), I18n.t('settings.account.roles.access_manager')])
+      expect(call_method).to eq([I18n.t('user_roles.authorized_signer'), I18n.t('user_roles.access_manager.title')])
     end
   end
 

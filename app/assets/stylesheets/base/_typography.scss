@@ -115,6 +115,11 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-footer {
+  font-size: 0.7333rem;
+  font-weight: $normal-weight;
+}
+
 @mixin typography-graph-data {
   font-size: 1rem;
   font-weight: $semibold-weight;
@@ -324,6 +329,10 @@
 
 %typography-table-data-unavailable {
   @include typography-table-data-unavailable;
+}
+
+%typography-footer {
+  @include typography-footer;
 }
 
 %typography-print-header {

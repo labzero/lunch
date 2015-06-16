@@ -547,6 +547,118 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
+
+    describe 'GET parallel_shift' do
+      it_behaves_like 'a user required action', :get, :parallel_shift
+      projections = %i(shift_neg_300 shift_neg_200 shift_neg_100 shift_0 shift_100 shift_200 shift_300)
+      let(:make_request) { get :parallel_shift }
+      let(:as_of_date) { double('some date') }
+      let(:putable_advance_data) do
+        hash = {
+          advance_number: nil,
+          issue_date: nil,
+          interest_rate: nil,
+        }
+        projections.each do |value|
+          hash[value] = nil
+        end
+        hash.each do |key, value|
+          hash[key] = double(key.to_s)
+        end
+        hash
+      end
+      let(:putable_advance_nil_data) do
+        hash = putable_advance_data.dup
+        hash.each do |key, value|
+          hash[key] = nil if projections.include?(key)
+        end
+        hash
+      end
+      let(:parallel_shift_data) { {as_of_date: as_of_date, putable_advances: [putable_advance_data]} }
+      let(:parallel_shift_nil_data) { {as_of_date: as_of_date, putable_advances: [putable_advance_nil_data]} }
+      before do
+        allow(member_balance_service_instance).to receive(:parallel_shift).and_return(parallel_shift_data)
+      end
+      describe 'view instance variables' do
+        it 'sets @as_of_date to the date returned from MemberBalanceService.parallel_shift' do
+          make_request
+          expect(assigns[:as_of_date]).to eq(as_of_date)
+        end
+        describe '`@parallel_shift_table_data`' do
+          before do
+            make_request
+          end
+          it 'returns a hash with `column_headings`' do
+            expect(assigns[:parallel_shift_table_data][:column_headings]).to eq([I18n.t('common_table_headings.advance_number'), I18n.t('global.issue_date'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.interest_rate'), '%'), [-300,-200,-100,0,100,200,300].collect{|x| fhlb_formatted_number(x)}].flatten)
+          end
+          describe '`rows`' do
+            it 'is an array containing a `columns` hash' do
+              expect(assigns[:parallel_shift_table_data][:rows]).to be_kind_of(Array)
+              assigns[:parallel_shift_table_data][:rows].each do |row|
+                expect(row).to be_kind_of(Hash)
+              end
+            end
+            describe '`columns` hash' do
+              it 'contains an `advance_number` with no type' do
+                assigns[:parallel_shift_table_data][:rows].each do |row|
+                  expect(row[:columns].first[:type]).to be_nil
+                  expect(row[:columns].first[:value]).to eq(putable_advance_data[:advance_number])
+                end
+              end
+              it 'contains an `issue_date` with type `date`' do
+                assigns[:parallel_shift_table_data][:rows].each do |row|
+                  expect(row[:columns][1][:type]).to eq(:date)
+                  expect(row[:columns][1][:value]).to eq(putable_advance_data[:issue_date])
+                end
+              end
+              it 'contains a `interest_rate` with type `date`' do
+                assigns[:parallel_shift_table_data][:rows].each do |row|
+                  expect(row[:columns][2][:type]).to eq(:rate)
+                  expect(row[:columns][2][:value]).to eq(putable_advance_data[:interest_rate])
+                end
+              end
+              projections.each_with_index do |value, i|
+                it "contains a `#{value}` value with type `basis_point`" do
+                  assigns[:parallel_shift_table_data][:rows].each do |row|
+                    expect(row[:columns][i + 3][:type]).to eq(:basis_point)
+                    expect(row[:columns][i + 3][:value]).to eq(putable_advance_data[value])
+                  end
+                end
+              end
+            end
+          end
+        end
+        describe '`@parallel_shift_table_data` rows column hash with putable_advances containing nil values' do
+          projections.each_with_index do |value, i|
+            it "contains a `#{value}` with a value of #{I18n.t('global.na')} and no type if `#{value}` is blank" do
+              allow(member_balance_service_instance).to receive(:parallel_shift).and_return(parallel_shift_nil_data)
+              make_request
+              assigns[:parallel_shift_table_data][:rows].each do |row|
+                expect(row[:columns][i + 3][:type]).to be_nil
+                expect(row[:columns][i + 3][:value]).to eq(I18n.t('global.na'))
+              end
+            end
+          end
+        end
+        describe 'with the report disabled' do
+          before do
+            allow(controller).to receive(:report_disabled?).with(ReportsController::PARALLEL_SHIFT_WEB_FLAGS).and_return(true)
+          end
+          it 'sets @as_of_date to nil if the report is disabled' do
+            make_request
+            expect(assigns[:as_of_date]).to be_nil
+          end
+          it '@parallel_shift_table_data has an empty array for its rows attribute' do
+            make_request
+            expect(assigns[:parallel_shift_table_data][:rows]).to eq([])
+          end
+        end
+      end
+      it 'should raise an error if the MemberBalanceService returns nil' do
+        expect(member_balance_service_instance).to receive(:parallel_shift).and_return(nil)
+        expect{make_request}.to raise_error(StandardError)
+      end
+    end
   end
 
   describe 'GET current_price_indications' do
@@ -748,8 +860,8 @@ RSpec.describe ReportsController, :type => :controller do
           get :historical_price_indications, start_date: start_date, end_date: end_date
           expect(assigns[:end_date]).to eq(end_date)
         end
-        it 'should pass @start_date, @end_date and a custom preset hash to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-          expect(controller).to receive(:date_picker_presets).with(start_date, end_date, anything).and_return(picker_preset_hash)
+        it 'should pass @start_date and @end_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+          expect(controller).to receive(:date_picker_presets).with(start_date, end_date).and_return(picker_preset_hash)
           get :historical_price_indications, start_date: start_date, end_date: end_date
           expect(assigns[:picker_presets]).to eq(picker_preset_hash)
         end
@@ -860,6 +972,97 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
+  describe 'GET authorizations' do
+    it_behaves_like 'a user required action', :get, :authorizations
+    describe 'view instance variables' do
+      let(:member_service_instance) {double('MembersService')}
+      let(:user_no_roles) {OpenStruct.new(display_name: 'User With No Roles', roles: [])}
+      let(:user_etransact) {OpenStruct.new(display_name: 'Etransact User', roles: [User::Roles::ETRANSACT_SIGNER])}
+      let(:signers_and_users) {[user_no_roles, user_etransact]}
+      let(:roles) {['all', User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::AFFORDABILITY_SIGNER, User::Roles::COLLATERAL_SIGNER, User::Roles::MONEYMARKET_SIGNER, User::Roles::DERIVATIVES_SIGNER, User::Roles::SECURITIES_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER, User::Roles::ETRANSACT_SIGNER]}
+      let(:role_translations) {[t('user_roles.all_authorizations'), t('user_roles.resolution.dropdown'), t('user_roles.entire_authority.dropdown'), t('user_roles.affordable_housing.title'), t('user_roles.collateral.title'), t('user_roles.money_market.title'), t('user_roles.interest_rate_derivatives.title'), t('user_roles.securities.title'), t('user_roles.wire_transfer.title'), t('user_roles.access_manager.title'), t('user_roles.etransact.title')]}
+      before do
+        allow(MembersService).to receive(:new).and_return(member_service_instance)
+        allow(member_service_instance).to receive(:signers_and_users).and_return(signers_and_users)
+      end
+      it 'sets @authorization_filter to the `authorizations_filter` param' do
+        get :authorizations, :authorizations_filter => 'my filter param'
+        expect(assigns[:authorizations_filter]).to eq('my filter param')
+      end
+      it 'sets @authorization_filter to `all` if no `authorizations_filter` param is provided' do
+        get :authorizations
+        expect(assigns[:authorizations_filter]).to eq('all')
+      end
+      it 'sets @authorizations_dropdown_options to an array containing dropdown names and values' do
+        get :authorizations
+        expect(assigns[:authorizations_dropdown_options]).to be_kind_of(Array)
+        assigns[:authorizations_dropdown_options].each do |option|
+          expect(option.first).to be_kind_of(String)
+          expect(option.last).to be_kind_of(String)
+        end
+      end
+      describe '@authorizations_filter_text' do
+        ReportsController::AUTHORIZATIONS_DROPDOWN_MAPPING.each do |role, role_name|
+          it "equals #{role_name} when the authorizations_filter is set to #{role}" do
+            get :authorizations, :authorizations_filter => role
+            expect(assigns[:authorizations_filter_text]).to eq(role_name)
+          end
+        end
+      end
+      describe '`@authorizations_table_data`' do
+        it 'returns a hash with `column_headings`' do
+          get :authorizations
+          expect(assigns[:authorizations_table_data][:column_headings]).to eq([I18n.t('user_roles.user.title'), I18n.t('reports.authorizations.title')])
+        end
+        describe '`rows`' do
+          it 'is an array containing a `columns` hash' do
+            get :authorizations
+            expect(assigns[:authorizations_table_data][:rows]).to be_kind_of(Array)
+            assigns[:authorizations_table_data][:rows].each do |row|
+              expect(row).to be_kind_of(Hash)
+            end
+          end
+          describe '`columns` hash' do
+            it 'contains a `display_name` with no type' do
+              get :authorizations
+              assigns[:authorizations_table_data][:rows].each do |row|
+                expect(row[:columns].first[:type]).to be_nil
+                expect(row[:columns].first[:value]).to be_kind_of(String)
+              end
+            end
+            it 'contains `user_roles` with a type of `list`' do
+              get :authorizations
+              assigns[:authorizations_table_data][:rows].each do |row|
+                expect(row[:columns].last[:type]).to eq(:list)
+                expect(row[:columns].last[:value]).to be_kind_of(Array)
+              end
+            end
+            it 'contains all users sorted by display_name if the authorizations_filter is set to `all`' do
+              get :authorizations
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(2)
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('Etransact User')
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.etransact.title')])
+              expect(assigns[:authorizations_table_data][:rows].last[:columns].first[:value]).to eq('User With No Roles')
+              expect(assigns[:authorizations_table_data][:rows].last[:columns].last[:value]).to eq([I18n.t('user_roles.user.title')])
+            end
+            it "only contains users with a user_role of #{I18n.t('user_roles.user.title')} if the authorizations_filter is set to `user`" do
+              get :authorizations, :authorizations_filter => 'user'
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('User With No Roles')
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.user.title')])
+            end
+            it 'only contains users with the proper role if an authorization_filter is set' do
+              get :authorizations, :authorizations_filter => User::Roles::ETRANSACT_SIGNER
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('Etransact User')
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.etransact.title')])
+            end
+          end
+        end
+      end
+    end
+  end
+
   describe 'private methods' do
     describe '`report_disabled?` method' do
       let(:report_flags) {double('some report flags')}
@@ -924,11 +1127,21 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
+    describe '`roles_for_signers` method' do
+      let(:role_mappings) { ReportsController::AUTHORIZATIONS_MAPPING }
+      it 'returns an array containing the I18n translation of the roles for a given user' do
+        role_mappings.each_key do |role|
+          user = {:roles => [role]}
+          expect(controller.send(:roles_for_signers, user)).to eq([role_mappings[role]])
+        end
+      end
+      it 'returns an array containing the I18n translation for `user` when a given user has no roles' do
+        role_mappings.each_key do |role|
+          user = {:roles => []}
+          expect(controller.send(:roles_for_signers, user)).to eq([I18n.t('user_roles.user.title')])
+        end
+      end
+    end
   end
 
 end
-
-[{:term=>"1Y", :type=>"index", :value=>nil, :day_count_basis=>nil, :pay_freq=>nil},
-{"term"=>"2Y", "type"=>"basis_point", "value"=>105.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"},
-{"term"=>"3Y", "type"=>"basis_point", "value"=>193.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"},
-{"term"=>"5Y", "type"=>"basis_point", "value"=>197.0, "day_count_basis"=>"Actual/360", "pay_freq"=>"Quarterly"}]

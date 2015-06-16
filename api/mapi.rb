@@ -27,6 +27,7 @@ require_relative 'models/member_advances_details'
 require_relative 'models/member_active_advances'
 require_relative 'models/member_profile'
 require_relative 'models/member_cash_projections'
+require_relative 'models/member_signers'
 require_relative 'models/current_price_indications'
 require_relative 'models/rates/price_indication_historical'
 

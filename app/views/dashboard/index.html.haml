@@ -18,46 +18,6 @@
           .dashboard-gauge-labels
             %span.borrowing-capacity-label-used= t('dashboard.your_account.effective_borrowing_capacity.used') + ": #{fhlb_formatted_currency_whole(@effective_borrowing_capacity[:used_capacity][:absolute], html: false)}"
             %span= t('dashboard.your_account.effective_borrowing_capacity.unused') + ": #{fhlb_formatted_currency_whole(@effective_borrowing_capacity[:unused_capacity][:absolute], html: false)}"
-      - if @pledged_collateral
-        .dashboard-pledged-collateral
-          - mortgage_total = @pledged_collateral[:mortgages][:absolute] + @pledged_collateral[:agency][:absolute] + @pledged_collateral[:aaa][:absolute] + @pledged_collateral[:aa][:absolute]
-          - if mortgage_total  > 0
-            %h2= t('dashboard.your_account.pledged_collateral.title')
-            .dashboard-gauge
-              - mortgage_percentage = number_to_percentage(@pledged_collateral[:mortgages][:percentage], precision: 1)
-              - agency_percentage = number_to_percentage(@pledged_collateral[:agency][:percentage], precision: 1)
-              - aaa_percentage = number_to_percentage(@pledged_collateral[:aaa][:percentage], precision: 1)
-              - aa_percentage = number_to_percentage(@pledged_collateral[:aa][:percentage], precision: 1)
-              .collateral-gauge-mortgages.gauge-section{style: "width: #{mortgage_percentage}; #{'display: none' unless mortgage_percentage.to_f > 0}"}
-                .inner-gauge-section
-                = render 'shared/tooltip', tooltip_data: { t('dashboard.your_account.pledged_collateral.mortgages')=>'', fhlb_formatted_currency_whole(@pledged_collateral[:mortgages][:absolute], html: false) =>  mortgage_percentage}
-              .collateral-gauge-securities.gauge-section{style: "width: #{agency_percentage}; #{'display: none' unless agency_percentage.to_f > 0}"}
-                .inner-gauge-section
-                = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.pledged_collateral.agency')=>'',fhlb_formatted_currency_whole(@pledged_collateral[:agency][:absolute], html: false) => agency_percentage}
-              .collateral-gauge-securities.gauge-section{style: "width: #{aaa_percentage}; #{'display: none' unless aaa_percentage.to_f > 0}"}
-                .inner-gauge-section
-                = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.pledged_collateral.aaa')=>'', fhlb_formatted_currency_whole(@pledged_collateral[:aaa][:absolute], html: false) => aaa_percentage}
-              .collateral-gauge-securities.gauge-section{style: "width: #{aa_percentage}; #{'display: none' unless aa_percentage.to_f > 0}"}
-                .inner-gauge-section
-                = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.pledged_collateral.aa')=>'', fhlb_formatted_currency_whole(@pledged_collateral[:aa][:absolute], html: false) => aa_percentage}
-            .dashboard-gauge-labels
-              %span.collateral-gauge-label-mortgages= t('dashboard.your_account.pledged_collateral.mortgages')
-              %span.collateral-gauge-label-securities= t('dashboard.your_account.pledged_collateral.securities')
-      - if @total_securities
-        .dashboard-total-securities
-          - securities_total =  @total_securities[:safekept_securities][:absolute] + @total_securities[:pledged_securities][:absolute]
-          - if securities_total > 0
-            %h2= t('dashboard.your_account.total_securities.title')
-            .dashboard-gauge
-              -if @total_securities[:pledged_securities][:absolute] > 0
-                .total-securities-gauge-pledged.gauge-section{style: "width: #{number_to_percentage(@total_securities[:pledged_securities][:percentage], precision: 1)};"}
-                  .inner-gauge-section
-              -if @total_securities[:safekept_securities][:absolute] > 0
-                .total-safekept-gauge-pledged.gauge-section{style: "width: #{number_to_percentage(@total_securities[:safekept_securities][:percentage], precision: 1)};"}
-                  .inner-gauge-section
-            .dashboard-gauge-labels
-              %span.total-securities-label-pledged= t('dashboard.your_account.total_securities.pledged') + ": #{@total_securities[:pledged_securities][:absolute]}"
-              %span= t('dashboard.your_account.total_securities.safekept') + ": #{@total_securities[:safekept_securities][:absolute]}"
       .dashboard-anticipated-activity-graph
         %h2= t('dashboard.your_account.projected_sta_balance.title')
         =image_tag('anticipated-activity.png', alt: 'Anticipated Activity Graph')

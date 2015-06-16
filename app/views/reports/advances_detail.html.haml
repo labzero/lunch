@@ -21,10 +21,10 @@
           %th.report-cell-narrow= t('common_table_headings.trade_date')
           %th.report-cell-narrow= t('reports.pages.advances_detail.funding_date')
           %th.report-cell-narrow= t('common_table_headings.maturity_date')
-          %th.report-cell-narrow= t('reports.pages.advances_detail.advance_number')
+          %th.report-cell-narrow= t('common_table_headings.advance_number')
           %th.report-cell-narrow= t('reports.pages.advances_detail.advance_type')
           %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$')
-          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.interest_rate'), '%')
+          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%')
           %th.report-cell-narrow= t('reports.pages.advances_detail.next_interest_payment_date')
           %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.accrued_interest_heading'), '$')
           %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.estimated_next_payment_table_heading'), '$')
@@ -68,7 +68,7 @@
                       %td= row[:maturity_date].blank? ? t('global.open') : fhlb_date_standard_numeric(row[:maturity_date])
                   %table
                     %tr
-                      %td= t('reports.pages.advances_detail.advance_number')
+                      %td= t('common_table_headings.advance_number')
                       %td= row[:advance_number]
                     %tr
                       %td= t('reports.pages.advances_detail.advance_type')
@@ -87,7 +87,7 @@
                 .right-column
                   %table
                     %tr
-                      %td= t('reports.pages.advances_detail.interest_rate')
+                      %td= t('common_table_headings.interest_rate')
                       %td= row[:interest_rate]
                     %tr
                       %td= t('reports.pages.advances_detail.accrued_interest')
