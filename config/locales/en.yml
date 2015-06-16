@@ -78,7 +78,7 @@ en:
     pdf: PDF
     missing_value: –
     continue: Continue
-    fhlb_full: Federal Home Loan Bank San Francisco
+    fhlb_full: Federal Home Loan Bank of San Francisco
     excel: Excel
     principal: Principal
     interest: Interest
@@ -98,6 +98,12 @@ en:
     role: Role
     name: Name
     edit: Edit
+    copyright_html: "&copy;"
+    copyright_date: 2000-2015
+    contact: Contact
+    terms_of_use: Terms of Use
+    privacy_policy: Privacy Policy
+    truncated_web_address: "fhlbsf.com"
     dates:
       1_day: 1 day
       1_month: 1 mo
