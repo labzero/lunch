@@ -363,7 +363,7 @@ RSpec.describe SettingsController, :type => :controller do
     let(:user_id) { user_id }
     let(:reason) { 'remove_access' }
     let(:make_request) { delete :delete_user, id: user_id, reason: reason }
-    let(:user) { double('User', class: User, id: user_id, 'deletion_reason=': nil, errors: double('Errors', full_messages: []), save!: true, destroy!: true) }
+    let(:user) { double('User', class: User, id: user_id, :'deletion_reason=' => nil, errors: double('Errors', full_messages: []), save!: true, destroy!: true) }
     before do
       allow(User).to receive(:find).and_call_original
       allow(User).to receive(:find).with(user_id.to_s).and_return(user)
@@ -380,8 +380,8 @@ RSpec.describe SettingsController, :type => :controller do
       expect {delete :delete_user, id: user_id, reason: 'foo'}.to raise_error
     end
     {
-      'remove_access': 'No longer a web user',
-      'left_institution': 'No longer with this institution'
+      'remove_access' => 'No longer a web user',
+      'left_institution' => 'No longer with this institution'
     }.each do |code, message|
       it "converts reason code `#{code}` into reason string `#{message}`" do
         expect(user).to receive(:deletion_reason=).with(message)
