@@ -123,7 +123,7 @@ class DashboardController < ApplicationController
   end
 
   def quick_advance_preview
-    preview = RatesService.new(request).quick_advance_preview(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f)
+    preview = MemberBalanceService.new(current_member_id, request).quick_advance_validate(params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, current_user.display_name ? current_user.display_name : current_user.username)
     @advance_amount = preview[:advance_amount]
     @advance_type = preview[:advance_type]
     @interest_day_count = preview[:interest_day_count]
@@ -154,7 +154,7 @@ class DashboardController < ApplicationController
     advance_success = false
     response_html = false
     if session_elevated?
-      confirmation = RatesService.new(request).quick_advance_confirmation(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f)
+      confirmation = MemberBalanceService.new(current_member_id, request).quick_advance_execute(params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, current_user.display_name ? current_user.display_name : current_user.username)
       if confirmation
         advance_success = true 
 
