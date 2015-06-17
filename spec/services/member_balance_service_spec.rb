@@ -208,6 +208,30 @@ describe MemberBalanceService do
       expect(profile[:sbc_total_borrowing_capacity]).to be_kind_of(Integer)
       expect(profile[:sbc_remaining_borrowing_capacity]).to be_kind_of(Integer)
     end
+    describe 'calculated values' do
+      let(:json_response) { {
+        standard_total_borrowing_capacity: rand(90000000),
+        sbc_total_borrowing_capacity: rand(90000000),
+        standard_remaining_borrowing_capacity: rand(90000000),
+        sbc_remaining_borrowing_capacity: rand(90000000),
+        financial_available: rand(90000000)
+      } }
+      before do
+        allow(JSON).to receive(:parse).and_return(json_response)
+      end
+      it 'should calculate `total_borrowing_capacity`' do
+        expect(profile[:total_borrowing_capacity]).to eq(json_response[:standard_total_borrowing_capacity] + json_response[:sbc_total_borrowing_capacity])
+      end
+      it 'should calculate `remaining_borrowing_capacity`' do
+        expect(profile[:remaining_borrowing_capacity]).to eq(json_response[:standard_remaining_borrowing_capacity] + json_response[:sbc_remaining_borrowing_capacity])
+      end
+      it 'should calculate `remaining_borrowing_capacity`' do
+        expect(profile[:used_financing_availability]).to eq((json_response[:standard_total_borrowing_capacity] + json_response[:sbc_total_borrowing_capacity]) - (json_response[:standard_remaining_borrowing_capacity] + json_response[:sbc_remaining_borrowing_capacity]))
+      end
+      it 'should calculate `remaining_borrowing_capacity`' do
+        expect(profile[:uncollateralized_financing_availability]).to eq(json_response[:financial_available] - (json_response[:standard_total_borrowing_capacity] + json_response[:sbc_total_borrowing_capacity]))
+      end
+    end
     describe 'bad data' do
       before do
         expect(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'profile_with_nil_values.json'))))

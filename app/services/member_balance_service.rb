@@ -341,6 +341,11 @@ class MemberBalanceService < MAPIService
       Rails.logger.warn("MemberBalanceService.profile encountered a JSON parsing error: #{e}")
       return nil
     end
+
+    data[:total_borrowing_capacity] = data[:standard_total_borrowing_capacity].to_i + data[:sbc_total_borrowing_capacity].to_i
+    data[:remaining_borrowing_capacity] = data[:standard_remaining_borrowing_capacity].to_i  + data[:sbc_remaining_borrowing_capacity].to_i
+    data[:used_financing_availability] = data[:total_borrowing_capacity].to_i  - data[:remaining_borrowing_capacity].to_i
+    data[:uncollateralized_financing_availability] = data[:financial_available].to_i  - data[:total_borrowing_capacity].to_i
     data
   end
 

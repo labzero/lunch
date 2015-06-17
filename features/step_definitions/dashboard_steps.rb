@@ -42,15 +42,19 @@ Then(/^I should see the Your Account table breakdown$/) do
   mod.assert_selector('td', :text => I18n.t('dashboard.your_account.table.sbc_program.title'))
 end
 
-Then(/^I should see the Anticipated Activity graph$/) do
+Then(/^I should see an? "(.*?)" in the Account module/) do |component|
   mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
-  mod.assert_selector('.dashboard-anticipated-activity-graph')
-end
-
-Then(/^I should see an effective borrowing capacity gauge$/) do
-  mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
-  mod.assert_selector('.dashboard-effective-borrowing-capacity')
-  mod.assert_selector('.dashboard-gauge')
+  selector = case component
+    when 'effective borrowing capacity gauge'
+      '.dashboard-effective-borrowing-capacity'
+    when 'financing availability gauge'
+      '.dashboard-financing-availability'
+    when 'anticipated activity graph'
+      '.dashboard-anticipated-activity-graph'
+    else
+      raise 'Unknown component for Account module'
+  end
+  mod.assert_selector(selector)
 end
 
 Then(/^I should see a flyout$/) do
