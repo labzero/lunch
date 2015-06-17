@@ -357,15 +357,18 @@ $breakdown-table-currency-width: 10px;
   height: 25px;
   background: $white;
   border-radius: 3px;
-  padding: 4px 4px 4px 2px;
+  padding: 3px;
   border: 1px solid $light-blue;
   box-sizing: border-box;
   .gauge-section {
     position: relative;
     height: 100%;
     float: left;
-    padding-left: 2px;
+    margin-left: 2px;
     box-sizing: border-box;
+    &:first-child {
+      margin-left: 0;
+    }
     &:hover {
       .tooltip {
         display: block;
@@ -378,6 +381,22 @@ $breakdown-table-currency-width: 10px;
     height: 100%;
     border-radius: 3px;
   }
+  .tooltip {
+    @extend %inverted-tooltip;
+    margin-top: 5px;
+    .tooltip-pair {
+      display: inline;
+      span {
+        @extend %typography-table-total;
+        &:first-child {
+          margin-right: 5px;
+        }
+      }
+      &:first-child span {
+        font-weight: $normal-weight;
+      }
+    }
+  }
 }
 
 .dashboard-gauge-labels {
@@ -389,6 +408,14 @@ $breakdown-table-currency-width: 10px;
   span:last-child {
     float: right;
   }
+}
+
+.financing-availability-gauge-used .inner-gauge-section, .financing-availability-gauge-unused .inner-gauge-section {
+  background: $accent-green;
+}
+
+.financing-availability-gauge-uncollateralized .inner-gauge-section {
+  background: $medium-gray;
 }
 
 .collateral-gauge-label-mortgages {

@@ -51,6 +51,17 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(assigns[:quick_advances_active]).to be_present
     end
+    it 'should assign @financing_availability' do
+      get :index
+      expect(assigns[:financing_availability]).to be_kind_of(Hash)
+      expect(assigns[:financing_availability][:used]).to be_kind_of(Hash)
+      expect(assigns[:financing_availability][:used][:absolute]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability][:used][:percentage]).to be_kind_of(Float)
+      expect(assigns[:financing_availability][:unused][:absolute]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability][:unused][:percentage]).to be_kind_of(Float)
+      expect(assigns[:financing_availability][:uncollateralized][:absolute]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability][:uncollateralized][:percentage]).to be_kind_of(Float)
+    end
     describe "RateService failures" do
       let(:RatesService) {class_double(RatesService)}
       let(:rate_service_instance) {RatesService.new(double('request', uuid: '12345'))}

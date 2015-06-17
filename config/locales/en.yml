@@ -462,6 +462,11 @@ en:
         title: Total Securities
         pledged: Pledged
         safekept: Safekept
+      financing_availability:
+        title: Financing Availability
+        used: Used
+        unused: Unused
+        uncollateralized: Uncollateralized
       effective_borrowing_capacity:
         title: Borrowing Capacity
         used: Used
