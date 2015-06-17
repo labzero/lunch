@@ -344,11 +344,11 @@ $breakdown-table-currency-width: 10px;
   }
 }
 
-.dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-effective-borrowing-capacity, .dashboard-anticipated-activity-graph {
+.dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-borrowing-capacity, .dashboard-anticipated-activity-graph {
   clear: both; // using instead of extending %clearfix, because we want overflow to be visible for tooltip
 }
 
-.dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-effective-borrowing-capacity {
+.dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-borrowing-capacity {
   margin-bottom: 8px;
 }
 
@@ -364,10 +364,10 @@ $breakdown-table-currency-width: 10px;
     position: relative;
     height: 100%;
     float: left;
-    margin-left: 2px;
+    padding-left: 2px;
     box-sizing: border-box;
     &:first-child {
-      margin-left: 0;
+      padding-left: 0;
     }
     &:hover {
       .tooltip {
@@ -397,6 +397,10 @@ $breakdown-table-currency-width: 10px;
       }
     }
   }
+}
+
+.dashboard-gauge-total {
+  float: right;
 }
 
 .dashboard-gauge-labels {
@@ -442,42 +446,16 @@ $breakdown-table-currency-width: 10px;
   }
 }
 
-.dashboard-effective-borrowing-capacity {
+.dashboard-borrowing-capacity {
   position: relative;
 }
 
-.borrowing-capacity-gauge-threshold {
-  position: absolute;
-  top: 0;
-  margin-left: -5.5px;
-  width: 11px;
-  height: 100%;
-  background: $actionable-blue;
-  z-index: 1;
-  &:before {
-    @extend %absolute-pseudoelement;
-    left: 5px;
-    width: 1px;
-    height: 100%;
-    background: $brand-blue;
-    z-index: 0;
-  }
-  &:hover {
-    .tooltip {
-      display: block;
-      span:first-child {
-        margin-right: 0;
-      }
-    }
-  }
+.borrowing-capacity-gauge-standard .inner-gauge-section {
+  background: $light-green;
 }
 
-.borrowing-capacity-gauge-used .inner-gauge-section {
-  background: $accent-green;
-}
-
-.borrowing-capacity-label-used {
-  color: $accent-green;
+.borrowing-capacity-gauge-sbc .inner-gauge-section {
+  background: $dark-green;
 }
 
 .dashboard-module-reports {

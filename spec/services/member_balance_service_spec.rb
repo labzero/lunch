@@ -439,7 +439,7 @@ describe MemberBalanceService do
             expect(borrowing_capacity_summary[:sbc_excess_capacity]).to eq(76634)
           end
           it 'should calculate total borrowing capacity and remaining borrowing capacity across all security types' do
-            expect(borrowing_capacity_summary[:total_borrowing_capacity]).to eq(2216849292)
+            expect(borrowing_capacity_summary[:total_borrowing_capacity]).to eq(2217350292)
             expect(borrowing_capacity_summary[:remaining_borrowing_capacity]).to eq(2207257094)
           end
           it 'should calculate `borrowing_capacity`/`unpaid_principal_balance` as a rounded, whole-number percentage' do

@@ -20,7 +20,7 @@ Background:
     When I visit the dashboard
     Then I should see the Your Account table breakdown
       And I should see an "anticipated activity graph" in the Account module
-      And I should see an "effective borrowing capacity gauge" in the Account module
+      And I should see an "borrowing capacity gauge" in the Account module
       And I should see a "financing availability gauge" in the Account module
 
   @smoke

@@ -32,16 +32,23 @@ RSpec.describe DashboardController, :type => :controller do
       expect(assigns[:market_overview][0][:name]).to be_present
       expect(assigns[:market_overview][0][:data]).to be_present
     end
-    it "should assign @effective_borrowing_capacity" do
+    it "should assign @borrowing_capacity_gauge" do
+      guage_hash = double('A Guage Hash')
+      allow(subject).to receive(:calculate_gauge_percentages).and_return(guage_hash)
       get :index
-      expect(assigns[:effective_borrowing_capacity]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:used_capacity]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:used_capacity][:absolute]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:used_capacity][:percentage]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:unused_capacity]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:unused_capacity][:absolute]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:unused_capacity][:percentage]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:threshold_capacity]).to be_present
+      expect(assigns[:borrowing_capacity_gauge]).to eq(guage_hash)
+    end
+    it 'should have the expected keys in @borrowing_capacity_gauge' do
+      get :index
+      expect(assigns[:borrowing_capacity_gauge]).to include(:total, :mortgages, :aa, :aaa, :agency)
+    end
+    it 'should call MemberBalanceService.borrowing_capacity_summary with the current date' do
+      expect_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).with(Time.zone.now.to_date).and_call_original
+      get :index
+    end
+    it 'should call `calculate_gauge_percentages` for @borrowing_capacity_gauge' do
+      expect(subject).to receive(:calculate_gauge_percentages)
+      get :index
     end
     it 'should assign @current_overnight_vrc' do
       get :index
@@ -85,10 +92,10 @@ RSpec.describe DashboardController, :type => :controller do
       before do
         expect(MemberBalanceService).to receive(:new).and_return(member_balance_instance)
       end
-      it 'should assign @effective_borrowing_capacity as nil if the balance could not be retrieved' do
-        expect(member_balance_instance).to receive(:effective_borrowing_capacity).and_return(nil)
+      it 'should assign @borrowing_capacity_guage as nil if the balance could not be retrieved' do
+        expect(member_balance_instance).to receive(:borrowing_capacity_summary).and_return(nil)
         get :index
-        expect(assigns[:effective_borrowing_capacity]).to eq(nil)
+        expect(assigns[:borrowing_capacity_guage]).to eq(nil)
       end
     end
   end
