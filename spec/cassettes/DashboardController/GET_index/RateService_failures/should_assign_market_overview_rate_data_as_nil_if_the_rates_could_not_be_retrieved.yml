@@ -354,4 +354,51 @@ http_interactions:
         SUMMARY - RES 2NDs \u0026 HELOCs","count":1,"original_amount":43839000,"unpaid_principal":41105944,"market_value":14387080,"borrowing_capacity":9783214}],"excluded":{"blanket_lien":0,"bank":0,"regulatory":0},"utilized":{"advances":15000000,"letters_of_credit":0,"swap_collateral":0,"sbc_type_deficiencies":0,"payment_fees":0,"other_collateral":0,"mpf_ce_collateral":0}},"sbc":{"collateral":{"aa":{"total_market_value":6000000,"total_borrowing_capacity":5000000,"advances":1000000,"standard_credit":0,"remaining_market_value":5000000,"remaining_borrowing_capacity":4000000},"aaa":{"total_market_value":110000000,"total_borrowing_capacity":90000000,"advances":80000000,"standard_credit":2000000,"remaining_market_value":20000000,"remaining_borrowing_capacity":10000000},"agency":{"total_market_value":358000000,"total_borrowing_capacity":340000000,"advances":12000000,"standard_credit":0,"remaining_market_value":346000000,"remaining_borrowing_capacity":328000000}},"utilized":{"other_collateral":0,"excluded_regulatory":0}}}'
     http_version: 
   recorded_at: Wed, 17 Jun 2015 21:39:25 GMT
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/borrowing_capacity_details/2015-06-18
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      X-Request-Id:
+      - ''
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '1544'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      Date:
+      - Thu, 18 Jun 2015 17:21:51 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"date":"2015-06-18","standard":{"collateral":[{"type":"BL SUMMARY
+        - RESIDENTIAL","count":1,"original_amount":61335000,"unpaid_principal":58403241,"market_value":51394852,"borrowing_capacity":40601933},{"type":"BL
+        SUMMARY - MULTIFAMILY","count":1,"original_amount":16118000,"unpaid_principal":7855913,"market_value":7384558,"borrowing_capacity":5538418},{"type":"BL
+        SUMMARY - COMMERCIAL","count":1,"original_amount":103985000,"unpaid_principal":67974995,"market_value":59138245,"borrowing_capacity":41988153},{"type":"BL
+        SUMMARY - RES 2NDs \u0026 HELOCs","count":1,"original_amount":43839000,"unpaid_principal":41105944,"market_value":14387080,"borrowing_capacity":9783214}],"excluded":{"blanket_lien":0,"bank":0,"regulatory":0},"utilized":{"advances":15000000,"letters_of_credit":0,"swap_collateral":0,"sbc_type_deficiencies":0,"payment_fees":0,"other_collateral":0,"mpf_ce_collateral":0}},"sbc":{"collateral":{"aa":{"total_market_value":6000000,"total_borrowing_capacity":5000000,"advances":1000000,"standard_credit":0,"remaining_market_value":5000000,"remaining_borrowing_capacity":4000000},"aaa":{"total_market_value":110000000,"total_borrowing_capacity":90000000,"advances":80000000,"standard_credit":2000000,"remaining_market_value":20000000,"remaining_borrowing_capacity":10000000},"agency":{"total_market_value":358000000,"total_borrowing_capacity":340000000,"advances":12000000,"standard_credit":0,"remaining_market_value":346000000,"remaining_borrowing_capacity":328000000}},"utilized":{"other_collateral":0,"excluded_regulatory":0}}}'
+    http_version: 
+  recorded_at: Thu, 18 Jun 2015 17:21:51 GMT
 recorded_with: VCR 2.9.3
