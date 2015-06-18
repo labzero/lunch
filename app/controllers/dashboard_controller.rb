@@ -111,6 +111,8 @@ class DashboardController < ApplicationController
     # TODO replace this with the timestamp from the cached quick advance rates timestamp
     date = DateTime.now - 2.hours
     @quick_advance_last_updated = date.strftime("%d %^b %Y, %l:%M %p")
+
+    @@signer_full_name = EtransactAdvancesService.new(request).signer_full_name(current_user.username)
   end
 
   def quick_advance_rates
@@ -123,7 +125,7 @@ class DashboardController < ApplicationController
   end
 
   def quick_advance_preview
-    preview = MemberBalanceService.new(current_member_id, request).quick_advance_validate(params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, current_user.display_name ? current_user.display_name : current_user.username)
+    preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, URI.escape(@@signer_full_name))
     @advance_amount = preview[:advance_amount]
     @advance_type = preview[:advance_type]
     @interest_day_count = preview[:interest_day_count]
@@ -154,7 +156,7 @@ class DashboardController < ApplicationController
     advance_success = false
     response_html = false
     if session_elevated?
-      confirmation = MemberBalanceService.new(current_member_id, request).quick_advance_execute(params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, current_user.display_name ? current_user.display_name : current_user.username)
+      confirmation = EtransactAdvancesService.new(request).quick_advance_execute(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, URI.escape(@@signer_full_name))
       if confirmation
         advance_success = true 
 
@@ -167,7 +169,7 @@ class DashboardController < ApplicationController
         @funding_date = confirmation[:funding_date]
         @maturity_date = confirmation[:maturity_date]
         @advance_rate = confirmation[:advance_rate]
-        @advance_number = confirmation[:advance_number]
+        @advance_number = confirmation[:confirmation_number]
         response_html = render_to_string layout: false
       end
     end

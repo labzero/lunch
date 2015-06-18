@@ -141,14 +141,15 @@ RSpec.describe DashboardController, :type => :controller do
 
   describe "POST quick_advance_preview" do
     allow_policy :advances, :show?
-    let(:RatesService) {class_double(RatesService)}
-    let(:rate_service_instance) {double("rate service instance", quick_advance_preview: nil)}
-    let(:member_id) {double(MEMBER_ID)}
-    let(:advance_term) {'some term'}
-    let(:advance_type) {'some type'}
+    let(:EtransactAdvancesService) {class_double(EtransactAdvancesService)}
+    let(:etransact_service_instance) {double('EtransactAdvancesService', quick_advance_preview: nil)}
+    let(:member_id) {750}
+    let(:advance_term) {'someterm'}
+    let(:advance_type) {'sometype'}
     let(:advance_rate) {'0.17'}
+    let(:username) {'Test User'}
     let(:amount) { Random.rand(100000000) }
-    let(:make_request) { post :quick_advance_preview, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount }
+    let(:make_request) { post :quick_advance_preview, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount}
 
     it_behaves_like 'a user required action', :post, :quick_advance_preview
     it_behaves_like 'an authorization required method', :post, :quick_advance_preview, :advances, :show?
@@ -156,10 +157,9 @@ RSpec.describe DashboardController, :type => :controller do
       make_request
       expect(response.body).to render_template('dashboard/quick_advance_preview')
     end
-    it 'should call the RatesService object\'s `quick_advance_preview` method with the POSTed advance_type, advance_term and rate' do
-      stub_const("MEMBER_ID", 750)
-      expect(RatesService).to receive(:new).and_return(rate_service_instance)
-      expect(rate_service_instance).to receive(:quick_advance_preview).with(MEMBER_ID, amount, advance_type, advance_term, advance_rate.to_f).and_return({})
+    it 'should call the EtransactAdvancesService object\'s `quick_advance_validate` method with the POSTed advance_type, advance_term and rate' do
+      expect(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
+      expect(etransact_service_instance).to receive(:quick_advance_validate).with(member_id, amount, advance_type, advance_term, advance_rate.to_f, URI.escape(username)).and_return({})
       make_request
     end
     it 'should set @session_elevated to the result of calling `session_elevated?`' do
@@ -170,7 +170,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'should set @advance_amount' do
       make_request
-      expect(assigns[:advance_amount]).to eq(amount)
+      expect(assigns[:advance_amount]).to be_kind_of(Numeric)
     end
     it 'should set @advance_type' do
       make_request
@@ -190,11 +190,11 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'should set @funding_date' do
       make_request
-      expect(assigns[:funding_date]).to be_kind_of(Date)
+      expect(assigns[:funding_date]).to be_kind_of(String)
     end
     it 'should set @maturity_date' do
       make_request
-      expect(assigns[:maturity_date]).to be_kind_of(Date)
+      expect(assigns[:maturity_date]).to be_kind_of(String)
     end
     it 'should set @advance_rate' do
       make_request
@@ -204,28 +204,28 @@ RSpec.describe DashboardController, :type => :controller do
 
   describe "POST quick_advance_perform" do
     allow_policy :advances, :show?
-    let(:rate_service_instance) {RatesService.new(ActionDispatch::TestRequest.new)}
-    let(:member_id) {double(MEMBER_ID)}
-    let(:advance_term) {'some term'}
-    let(:advance_type) {'some type'}
+    let(:etransact_service_instance) {EtransactAdvancesService.new(ActionDispatch::TestRequest.new)}
+    let(:member_id) {750}
+    let(:advance_term) {'someterm'}
+    let(:advance_type) {'sometype'}
     let(:advance_rate) {'0.17'}
+    let(:username) {'Test User'}
     let(:amount) { Random.rand(100000000) }
     let(:securid_pin) { Random.rand(9999).to_s.rjust(4, '0') }
     let(:securid_token) { Random.rand(999999).to_s.rjust(6, '0') }
-    let(:make_request) { post :quick_advance_perform, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, securid_pin: securid_pin, securid_token: securid_token }
+    let(:make_request) { post :quick_advance_perform, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, securid_pin: securid_pin, securid_token: securid_token }
     let(:securid_service) { SecurIDService.new('a user', test_mode: true) }
 
     before do
       allow(subject).to receive(:session_elevated?).and_return(true)
       allow(SecurIDService).to receive(:new).and_return(securid_service)
-      allow(RatesService).to receive(:new).and_return(rate_service_instance)
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
     end
 
     it_behaves_like 'a user required action', :post, :quick_advance_perform
     it_behaves_like 'an authorization required method', :post, :quick_advance_perform, :advances, :show?
-    it 'should call the RatesService object\'s `quick_advance_perform` method with the POSTed advance_type, advance_term and rate' do
-      stub_const("MEMBER_ID", 750)
-      expect(rate_service_instance).to receive(:quick_advance_confirmation).with(MEMBER_ID, amount, advance_type, advance_term, advance_rate.to_f).and_return({})
+    it 'should call the EtransactAdvancesService object\'s `quick_advance_execute` method with the POSTed advance_type, advance_term and rate' do
+      expect(etransact_service_instance).to receive(:quick_advance_execute).with(member_id, amount, advance_type, advance_term, advance_rate.to_f, URI.escape(username)).and_return({})
       make_request
     end
     it 'should render the confirmation view on success' do
@@ -251,7 +251,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'should set @advance_amount' do
       make_request
-      expect(assigns[:advance_amount]).to eq(amount)
+      expect(assigns[:advance_amount]).to be_kind_of(Numeric)
     end
     it 'should set @advance_type' do
       make_request
@@ -271,11 +271,11 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'should set @funding_date' do
       make_request
-      expect(assigns[:funding_date]).to be_kind_of(Date)
+      expect(assigns[:funding_date]).to be_kind_of(String)
     end
     it 'should set @maturity_date' do
       make_request
-      expect(assigns[:maturity_date]).to be_kind_of(Date)
+      expect(assigns[:maturity_date]).to be_kind_of(String)
     end
     it 'should set @advance_rate' do
       make_request
@@ -316,7 +316,7 @@ RSpec.describe DashboardController, :type => :controller do
         make_request
       end
       it 'should not perform the advance if the session is not elevated' do
-        expect(rate_service_instance).to_not receive(:quick_advance_confirmation)
+        expect(etransact_service_instance).to_not receive(:quick_advance_execute)
         make_request
       end
     end

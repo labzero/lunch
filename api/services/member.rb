@@ -8,7 +8,6 @@ require_relative 'member/disabled_reports'
 require_relative 'member/cash_projections'
 require_relative 'member/trade_activity'
 require_relative 'member/signer_roles'
-require_relative 'member/execute_trade'
 require_relative 'member/current_securities_position'
 
 module MAPI
@@ -367,77 +366,6 @@ module MAPI
             end
           end
           api do
-            key :path, '/{id}/execute_advance/{operation}/{amount}/{advance_type}/{advance_term}/{rate}/{signer}'
-            operation do
-              key :method, 'GET'
-              key :summary, 'Execute new Advance in Calypso.'
-              key :notes, 'Returns the result of execute trade.'
-              key :type, :ExecuteAdvance
-              key :nickname, :ExecuteAdvance
-              parameter do
-                key :paramType, :path
-                key :name, :id
-                key :required, true
-                key :type, :string
-                key :description, 'The id to find the members from.'
-              end
-              parameter do
-                key :paramType, :path
-                key :name, :operation
-                key :required, true
-                key :type, :string
-                key :description, 'EXECUTE/VALIDATE.'
-              end
-              parameter do
-                key :paramType, :path
-                key :name, :amount
-                key :required, true
-                key :type, :Numeric
-                key :description, 'Amount to execute.'
-              end
-              parameter do
-                key :paramType, :path
-                key :name, :advance_type
-                key :required, true
-                key :type, :string
-                key :description, 'Collateral type.'
-              end
-              parameter do
-                key :paramType, :path
-                key :name, :advance_term
-                key :required, true
-                key :type, :string
-                key :description, 'Term of the advance.'
-              end
-              parameter do
-                key :paramType, :path
-                key :name, :rate
-                key :required, true
-                key :type, :Numeric
-                key :description, 'Advance rate.'
-              end
-              parameter do
-                key :paramType, :path
-                key :name, :signer
-                key :required, true
-                key :type, :string
-                key :description, 'Authorized signer.'
-              end
-              response_message do
-                key :code, 200
-                key :message, 'OK'
-              end
-              response_message do
-                key :code, 400
-                key :message, 'Invalid input'
-              end
-              response_message do
-                key :code, 404
-                key :message, 'No Data Found'
-              end
-            end
-          end
-          api do
             key :path, '/{id}/current_securities_position/{custody_account_type}'
             operation do
               key :method, 'GET'
@@ -588,28 +516,6 @@ module MAPI
           member_id = params[:id]
           begin
             result = MAPI::Services::Member::TradeActivity.trade_activity(self, member_id, 'ADVANCE')
-          rescue Savon::Error => error
-            logger.error error
-            halt 503, 'Internal Service Error'
-          end
-          result
-        end
-
-        # Execute Advance
-        relative_get '/:id/execute_advance/:operation/:amount/:advance_type/:advance_term/:rate/:signer' do
-          operation = params[:operation]
-          member_id = params[:id]
-          amount = params[:amount]
-          advance_type = params[:advance_type]
-          advance_term = params[:advance_term]
-          rate = params[:rate]
-          signer = params[:signer]
-          markup = 0
-          blendedcostoffunds = 0
-          costoffunds = 0
-          benchmarkrate = 0
-          begin
-            result = MAPI::Services::Member::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', operation, amount, advance_term, advance_type, rate, signer, markup, blendedcostoffunds, costoffunds, benchmarkrate)
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'

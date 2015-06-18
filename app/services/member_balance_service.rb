@@ -528,45 +528,6 @@ class MemberBalanceService < MAPIService
     data
   end
 
-  def quick_advance_validate(amount, advance_type, advance_term, rate, signer)
-    begin
-      response = @connection["member/#{@member_id}/execute_advance/VALIDATE/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{URI.encode(signer)}"].get
-    rescue RestClient::Exception => e
-      Rails.logger.warn("MemberBalanceService.quick_advance_validate encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return nil
-    rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("MemberBalanceService.quick_advance_validate encountered a connection error: #{e.class.name}")
-      return nil
-    end
-    begin
-      data = JSON.parse(response.body).with_indifferent_access
-    rescue JSON::ParserError => e
-      Rails.logger.warn("MemberBalanceService.quick_advance_validate encountered a JSON parsing error: #{e}")
-      return nil
-    end
-    data
-  end
-
-  def quick_advance_execute(amount, advance_type, advance_term, rate, signer)
-    begin
-      response = @connection["member/#{@member_id}/execute_advance/EXECUTE/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{URI.encode(signer)}"].get
-    rescue RestClient::Exception => e
-      Rails.logger.warn("MemberBalanceService.quick_advance_execute encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return nil
-    rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("MemberBalanceService.quick_advance_execute encountered a connection error: #{e.class.name}")
-      return nil
-    end
-    begin
-      data = JSON.parse(response.body).with_indifferent_access
-    rescue JSON::ParserError => e
-      Rails.logger.warn("MemberBalanceService.quick_advance_execute encountered a JSON parsing error: #{e}")
-      return nil
-    end
-    data[:initiated_at] = Time.zone.now.to_datetime
-    data
-  end
-
   private
   def fake_as_of_date
     today = Time.zone.now.to_date
