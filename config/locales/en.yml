@@ -451,13 +451,6 @@ en:
     your_account:
       title: Your Account
       account_summary: Account Summary
-      pledged_collateral:
-        title: Pledged Collateral
-        mortgages: Mortgages
-        securities: Securities
-        agency: Agency
-        aaa: AAA
-        aa: AA
       total_securities:
         title: Total Securities
         pledged: Pledged
@@ -467,10 +460,12 @@ en:
         used: Used
         unused: Unused
         uncollateralized: Uncollateralized
-      effective_borrowing_capacity:
+      borrowing_capacity:
         title: Borrowing Capacity
-        used: Used
-        unused: Unused
+        mortgages: Mortgages
+        agency: Agency
+        aaa: AAA
+        aa: AA
       projected_sta_balance:
         title: Projected STA Balance
       table:

@@ -45,8 +45,8 @@ end
 Then(/^I should see an? "(.*?)" in the Account module/) do |component|
   mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
   selector = case component
-    when 'effective borrowing capacity gauge'
-      '.dashboard-effective-borrowing-capacity'
+    when 'borrowing capacity gauge'
+      '.dashboard-borrowing-capacity'
     when 'financing availability gauge'
       '.dashboard-financing-availability'
     when 'anticipated activity graph'
