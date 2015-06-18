@@ -33,11 +33,11 @@ Then I should see a "Settlement Transaction Account Statement" with data for dat
 Scenario: Member filters the Settlement Transaction Account Statement
 Given I am on the "Settlement Transaction Account Statement" report page
 And I am showing Settlement Transaction Account activities for 2014
-When I filter the Settlement Transaction Account Statement by "Credits"
+When I filter the report by "Credits"
 Then I should only see "Credit" rows in the Settlement Transaction Account Statement table
-When I filter the Settlement Transaction Account Statement by "Debits"
+When I filter the report by "Debits"
 Then I should only see "Debit" rows in the Settlement Transaction Account Statement table
-When I filter the Settlement Transaction Account Statement by "Daily Balances"
+When I filter the report by "Daily Balances"
 Then I should only see "Balance ($)" rows in the Settlement Transaction Account Statement table
 
 @data-unavailable @jira-mem-283

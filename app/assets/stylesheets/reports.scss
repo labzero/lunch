@@ -383,9 +383,6 @@
 }
 
 .cash-projections-report-table {
-  td, th {
-    @include table-cell-treatment;
-  }
   td{ 
     vertical-align: top}
   th {
@@ -415,9 +412,6 @@
     }
     &:nth-child(9) {
       min-width: 110px;
-    }
-    &:last-child {
-      display: none;
     }
   }
   tfoot {
@@ -718,6 +712,25 @@ td.dataTables_empty {
 
 .authorizations-filter {
   margin: 15px 0 30px;
+}
+
+.current-securities-report {
+  .report-summary-data {
+    width: 290px;
+    margin-right: 20px;
+    span {
+      white-space: nowrap;
+    }
+  }
+}
+
+.expanding-row-table {
+  td, th {
+    @include table-cell-treatment;
+  }
+  th:last-child {
+    display: none;
+  }
 }
 
 @media print {

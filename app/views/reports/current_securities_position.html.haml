@@ -1,0 +1,123 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.current-securities-report.expanding-row-table.row
+  .report-header
+    %h1= t('reports.pages.securities_position.current.title')
+    = render 'reports_header_buttons'
+    .report-inputs
+      = form_tag(reports_current_securities_position_url, method: 'GET') do
+        .report-filter
+          = render 'shared/dropdown', dropdown_name: 'securities_filter', default_value: @securities_filter, default_text: @securities_filter_text, dropdown_options: @securities_filter_options
+  .report-main-body
+    %section
+      .report-summary-data
+        %h3
+          = @headings[:total_original_par]
+        %p= fhlb_formatted_currency(@current_securities_position[:total_original_par], force_unit: true, precision: 2)
+      .report-summary-data
+        %h3
+          = @headings[:total_current_par]
+        %p= fhlb_formatted_currency(@current_securities_position[:total_current_par], force_unit: true, precision: 2)
+      .report-summary-data
+        %h3
+          = @headings[:total_market_value]
+        %p= fhlb_formatted_currency(@current_securities_position[:total_market_value], force_unit: true, precision: 2)
+    %h2.report-table-title= @headings[:table_heading]
+    %table.table-allow-wrapping.report-table.securities-position-report-table{data: {sortable: true, :'default-sort' => [[0, 'desc']], :'disable-auto-width' => true, :'missing-data-message' => t('errors.table_data_unavailable')}}
+      %thead
+        %tr
+          %th.report-cell-narrow= t('reports.pages.securities_position.security_pledge_type')
+          %th.report-cell-narrow= t('common_table_headings.cusip')
+          %th.report-cell-narrow= t('common_table_headings.security_description')
+          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('common_table_headings.coupon_rate'), '%')
+          %th.report-cell-narrow= t('common_table_headings.maturity_date')
+          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('common_table_headings.original_par_value'), '$')
+          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.securities_position.factor'), '%')
+          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$')
+          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('common_table_headings.price'), '$')
+          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.securities_position.market_value'), '$')
+          %th.report-cell-narrow{data: {unsortable: true}}= t('global.details')
+          %th
+      %tbody
+        - @current_securities_position[:securities].to_a.each do |row|
+          %tr
+            %td.report-cell-narrow= row[:security_pledge_type] || t('global.missing_value')
+            %td.report-cell-narrow= row[:cusip] || t('global.missing_value')
+            %td.report-cell-narrow= row[:description] || t('global.missing_value')
+            %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:coupon_rate], precision: 4)
+            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:maturity_date])
+            %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:original_par], precision: 2)
+            %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:factor], precision: 8)
+            %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:current_par], precision: 2)
+            %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:price], precision: 2)
+            %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:market_value], precision: 2)
+            %td.report-cell-narrow.report-cell-right.detail-view-trigger= t('global.view')
+            %td.report-detail-cell{colspan: 11}
+              %h3= t('common_table_headings.cusip_title', cusip: row[:cusip] || t('global.missing_value'))
+              %p.hide-detail-view= t('global.hide')
+              .left-column
+                %table
+                  %tr
+                    %td= t('common_table_headings.custody_account_number')
+                    %td= row[:custody_account_number] || t('global.missing_value')
+                  %tr
+                    %td= t('reports.pages.securities_position.custody_account_type')
+                    %td= row[:custody_account_type] || t('global.missing_value')
+                  %tr
+                    %td= t('reports.pages.securities_position.security_pledge_type')
+                    %td= row[:security_pledge_type] || t('global.missing_value')
+                %table
+                  %tr
+                    %td= t('common_table_headings.cusip')
+                    %td= row[:cusip] || t('global.missing_value')
+                  %tr
+                    %td= t('common_table_headings.security_description')
+                    %td= row[:description] || t('global.missing_value')
+                %table
+                  %tr
+                    %td= t('reports.pages.securities_position.reg_id')
+                    %td= row[:reg_id] || t('global.missing_value')
+                  %tr
+                    %td= t('common_table_headings.pool_number')
+                    %td= row[:pool_number] || t('global.missing_value')
+                  %tr
+                    %td= t('common_table_headings.coupon_rate')
+                    %td= fhlb_formatted_percentage(row[:coupon_rate], 3)
+                %table
+                  %tr
+                    %td= t('common_table_headings.maturity_date')
+                    %td= fhlb_date_standard_numeric(row[:maturity_date])
+                  %tr
+                    %td= t('common_table_headings.original_par_value')
+                    %td= fhlb_formatted_currency(row[:original_par], force_unit: true, precision: 2)
+              .right-column
+                %table
+                  %tr
+                    %td= t('reports.pages.securities_position.factor')
+                    %td= fhlb_formatted_percentage(row[:factor], 8)
+                  %tr
+                    %td= t('reports.pages.securities_position.factor_date')
+                    %td= fhlb_date_standard_numeric(row[:factor_date])
+                %table
+                  %tr
+                    %td= t('common_table_headings.current_par')
+                    %td= fhlb_formatted_currency(row[:current_par], force_unit: true, precision: 2)
+                %table
+                  %tr
+                    %td= t('common_table_headings.price')
+                    %td= fhlb_formatted_currency(row[:price], force_unit: true,  precision: 2)
+                  %tr
+                    %td= t('common_table_headings.price_date')
+                    %td= fhlb_date_standard_numeric(row[:price_date])
+                %table
+                  %tr
+                    %td= t('reports.pages.securities_position.market_value')
+                    %td= fhlb_formatted_currency(row[:market_value], force_unit: true, precision: 2)
+      %tfoot
+        %tr
+          %td.report-cell-narrow{colspan: 3}= t('reports.pages.cash_projections.total_net')
+          %td.report-cell-narrow.report-cell-right{colspan: 3}= fhlb_formatted_currency(@current_securities_position[:total_original_par], force_unit: true, precision: 2)
+          %td.report-cell-narrow.report-cell-right{colspan: 2}= fhlb_formatted_currency(@current_securities_position[:total_current_par], force_unit: true, precision: 2)
+          %td.report-cell-narrow.report-cell-right{colspan: 3}= fhlb_formatted_currency(@current_securities_position[:total_market_value], force_unit: true, precision: 2)
+    %section
+      %small= t('reports.anticipated_transactions')

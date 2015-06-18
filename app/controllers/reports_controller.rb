@@ -15,6 +15,7 @@ class ReportsController < ApplicationController
   LETTERS_OF_CREDIT_WEB_FLAGS = [MembersService::LETTERS_OF_CREDIT_DETAIL_REPORT]
   SECURITIES_TRANSACTION_WEB_FLAGS = [MembersService::SECURITIES_TRANSACTION_DATA]
   PARALLEL_SHIFT_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
+  CURRENT_SECURITIES_POSITION_WEB_FLAG = [MembersService::CURRENT_SECURITIES_POSITION]
 
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
@@ -136,7 +137,8 @@ class ReportsController < ApplicationController
         },
         current: {
           updated: t('reports.continuously'),
-          available_history: t('global.current_day')
+          available_history: t('global.current_day'),
+          path: reports_current_securities_position_path
         },
         monthly: {
           updated: t('global.monthly'),
@@ -636,7 +638,7 @@ class ReportsController < ApplicationController
     @picker_presets = date_picker_presets(@start_date)
     @total_net = securities_transactions[:total_net]
     @final = securities_transactions[:final]
-    column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('reports.pages.securities_transactions.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('reports.pages.securities_transactions.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
+    column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('common_table_headings.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('common_table_headings.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
     rows = securities_transactions[:transactions].collect do |row|
       columns = []
       row.each do |value|
@@ -729,6 +731,36 @@ class ReportsController < ApplicationController
       column_headings: [t('common_table_headings.advance_number'), t('global.issue_date'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%'), [-300,-200,-100,0,100,200,300].collect{|x| fhlb_formatted_number(x)}].flatten,
       rows: rows
     }
+  end
+
+  def current_securities_position
+    @securities_filter = params['securities_filter'] || 'all'
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    if report_disabled?(CURRENT_SECURITIES_POSITION_WEB_FLAG)
+      @current_securities_position = {securities:[]}
+    else
+      @current_securities_position = member_balances.current_securities_position(@securities_filter)
+      raise StandardError, "There has been an error and ReportsController#current_securities_position has encountered nil. Check error logs." if @current_securities_position.nil?
+    end
+    as_of_date = @current_securities_position[:as_of_date]
+    @headings = {
+      total_original_par: t("reports.pages.securities_position.#{@securities_filter}_securities.total_original_par_heading", date: fhlb_date_long_alpha(as_of_date)),
+      total_current_par: t("reports.pages.securities_position.#{@securities_filter}_securities.total_current_par_heading", date: fhlb_date_long_alpha(as_of_date)),
+      total_market_value: t("reports.pages.securities_position.#{@securities_filter}_securities.total_market_value_heading", date: fhlb_date_long_alpha(as_of_date)),
+      table_heading: t("reports.pages.securities_position.#{@securities_filter}_securities.table_heading", n: @current_securities_position[:securities].length, date: fhlb_date_long_alpha(as_of_date)),
+      footer_total: t("reports.pages.securities_position.#{@securities_filter}_securities.total")
+    }
+    @securities_filter_options = [
+      [t('reports.pages.securities_position.filter.all'), 'all'],
+      [t('reports.pages.securities_position.filter.pledged'), 'pledged'],
+      [t('reports.pages.securities_position.filter.unpledged'), 'unpledged']
+    ]
+    @securities_filter_options.each do |option|
+      if option[1] == @securities_filter
+        @securities_filter_text = option[0]
+        break
+      end
+    end
   end
 
   private

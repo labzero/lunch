@@ -876,6 +876,7 @@ describe MemberBalanceService do
     end
   end
 
+  # TODO add vcr once MAPI endpoint is rigged up
   describe 'the `parallel_shift` method' do
     let(:parallel_shift) {subject.parallel_shift}
     it 'returns a hash with an `as_of_date` that is a date' do
@@ -906,6 +907,66 @@ describe MemberBalanceService do
         allow(File).to receive(:read).and_return('some malformed json!')
         expect(Rails.logger).to receive(:warn)
         expect(parallel_shift).to be(nil)
+      end
+    end
+  end
+
+  describe 'the `current_securities_position` method', :vcr do
+    let(:current_securities_position) {subject.current_securities_position('all')}
+    it 'returns a hash with an `as_of_date` that is a date' do
+      expect(current_securities_position[:as_of_date]).to be_kind_of(Date)
+    end
+    %w(total_original_par total_current_par total_market_value).each do |key|
+      it "returns a hash with a `#{key}` that is a float" do
+        expect(current_securities_position[key.to_sym]).to be_kind_of(Float)
+      end
+    end
+    it 'returns a hash with a `securities` array' do
+      expect(current_securities_position[:securities]).to be_kind_of(Array)
+    end
+    describe 'the `securities` array' do
+      it 'contains objects representing securities data' do
+        current_securities_position[:securities].each do |security|
+          expect(security[:custody_account_number]).to be_kind_of(String)
+          expect(security[:custody_account_type]).to be_kind_of(String)
+          expect(security[:security_pledge_type]).to be_kind_of(String)
+          expect(security[:cusip]).to be_kind_of(String)
+          expect(security[:description]).to be_kind_of(String)
+          expect(security[:reg_id]).to be_kind_of(String)
+          expect(security[:pool_number]).to be_kind_of(String)
+          expect(security[:coupon_rate]).to be_kind_of(Float)
+          expect(security[:maturity_date]).to be_kind_of(String)
+          expect(security[:original_par]).to be_kind_of(Float)
+          expect(security[:factor]).to be_kind_of(Float)
+          expect(security[:factor_date]).to be_kind_of(String)
+          expect(security[:current_par]).to be_kind_of(Float)
+          expect(security[:price]).to be_kind_of(Float)
+          expect(security[:price_date]).to be_kind_of(String)
+          expect(security[:market_value]).to be_kind_of(Float)
+        end
+      end
+    end
+    describe 'error states' do
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(current_securities_position).to be(nil)
+      end
+      it 'should log an error if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(Rails.logger).to receive(:warn)
+        current_securities_position
+      end
+      it 'should return nil if there was an API error that is not a 404' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(current_securities_position).to eq(nil)
+      end
+      it 'should return an {securities:[]} if the API returns a 404' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::Exception.new(nil, 404))
+        expect(current_securities_position).to eq({securities:[]})
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(current_securities_position).to eq(nil)
       end
     end
   end
