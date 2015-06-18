@@ -81,6 +81,20 @@ class DashboardController < ApplicationController
       nil
     end
 
+    @financing_availability_gauge = if profile[:financial_available]
+      calculate_gauge_percentages(
+        {
+          total: profile[:financial_available],
+          used: profile[:used_financing_availability],
+          unused: profile[:remaining_borrowing_capacity],
+          uncollateralized: profile[:uncollateralized_financing_availability]
+        }, profile[:financial_available], :total)
+    else
+      nil
+    end
+
+
+
     @reports_daily = 2
     @reports_weekly = 1
     @reports_monthly = 4
@@ -97,12 +111,6 @@ class DashboardController < ApplicationController
     # TODO replace this with the timestamp from the cached quick advance rates timestamp
     date = DateTime.now - 2.hours
     @quick_advance_last_updated = date.strftime("%d %^b %Y, %l:%M %p")
-
-    @financing_availability = {
-      used: {absolute: profile[:used_financing_availability], percentage: profile[:used_financing_availability].fdiv(profile[:financial_available])*100},
-      unused: {absolute: profile[:remaining_borrowing_capacity], percentage: profile[:remaining_borrowing_capacity].fdiv(profile[:financial_available])*100},
-      uncollateralized: {absolute: profile[:uncollateralized_financing_availability], percentage: profile[:uncollateralized_financing_availability].fdiv(profile[:financial_available])*100}
-    }
   end
 
   def quick_advance_rates

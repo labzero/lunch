@@ -33,10 +33,10 @@ RSpec.describe DashboardController, :type => :controller do
       expect(assigns[:market_overview][0][:data]).to be_present
     end
     it "should assign @borrowing_capacity_gauge" do
-      guage_hash = double('A Guage Hash')
-      allow(subject).to receive(:calculate_gauge_percentages).and_return(guage_hash)
+      gauge_hash = double('A Gauge Hash')
+      allow(subject).to receive(:calculate_gauge_percentages).and_return(gauge_hash)
       get :index
-      expect(assigns[:borrowing_capacity_gauge]).to eq(guage_hash)
+      expect(assigns[:borrowing_capacity_gauge]).to eq(gauge_hash)
     end
     it 'should have the expected keys in @borrowing_capacity_gauge' do
       get :index
@@ -46,8 +46,8 @@ RSpec.describe DashboardController, :type => :controller do
       expect_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).with(Time.zone.now.to_date).and_call_original
       get :index
     end
-    it 'should call `calculate_gauge_percentages` for @borrowing_capacity_gauge' do
-      expect(subject).to receive(:calculate_gauge_percentages)
+    it 'should call `calculate_gauge_percentages` for @borrowing_capacity_gauge and @financing_availability_gauge'  do
+      expect(subject).to receive(:calculate_gauge_percentages).twice
       get :index
     end
     it 'should assign @current_overnight_vrc' do
@@ -58,16 +58,23 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(assigns[:quick_advances_active]).to be_present
     end
-    it 'should assign @financing_availability' do
+    it 'should assign @financing_availability_gauge to nil if there is no value for `financing_availability` in the profile' do
+      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return({})
+      expect(assigns[:financing_availability_gauge]).to be_nil
+    end
+    it 'should assign @financing_availability_gauge' do
       get :index
-      expect(assigns[:financing_availability]).to be_kind_of(Hash)
-      expect(assigns[:financing_availability][:used]).to be_kind_of(Hash)
-      expect(assigns[:financing_availability][:used][:absolute]).to be_kind_of(Numeric)
-      expect(assigns[:financing_availability][:used][:percentage]).to be_kind_of(Float)
-      expect(assigns[:financing_availability][:unused][:absolute]).to be_kind_of(Numeric)
-      expect(assigns[:financing_availability][:unused][:percentage]).to be_kind_of(Float)
-      expect(assigns[:financing_availability][:uncollateralized][:absolute]).to be_kind_of(Numeric)
-      expect(assigns[:financing_availability][:uncollateralized][:percentage]).to be_kind_of(Float)
+      expect(assigns[:financing_availability_gauge]).to be_kind_of(Hash)
+      expect(assigns[:financing_availability_gauge][:used]).to be_kind_of(Hash)
+      expect(assigns[:financing_availability_gauge][:used][:amount]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:used][:percentage]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:used][:display_percentage]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:unused][:amount]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:unused][:percentage]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:unused][:display_percentage]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:uncollateralized][:amount]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:uncollateralized][:percentage]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:uncollateralized][:display_percentage]).to be_kind_of(Numeric)
     end
     describe "RateService failures" do
       let(:RatesService) {class_double(RatesService)}

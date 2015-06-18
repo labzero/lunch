@@ -8,20 +8,15 @@
       .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account']} do
       .dashboard-financing-availability
-        - used_percentage = number_to_percentage(@financing_availability[:used][:percentage], precision: 1)
-        - unused_percentage = number_to_percentage(@financing_availability[:unused][:percentage], precision: 1)
-        - uncollateralized_percentage = number_to_percentage(@financing_availability[:uncollateralized][:percentage], precision: 1)
-        %h2= t('dashboard.your_account.financing_availability.title')
-        .dashboard-gauge
-          .financing-availability-gauge-used.gauge-section{style: "width: calc(#{used_percentage} - 2px);"}
-            .inner-gauge-section
-            = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.financing_availability.used') => nil, used_percentage => nil, fhlb_formatted_currency(@financing_availability[:used][:absolute]) => nil}
-          .financing-availability-gauge-unused.gauge-section{style: "width: calc(#{unused_percentage} - 2px);"}
-            .inner-gauge-section
-            = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.financing_availability.unused') => nil, unused_percentage => nil, fhlb_formatted_currency(@financing_availability[:unused][:absolute]) => nil}
-          .financing-availability-gauge-uncollateralized.gauge-section{style: "width: calc(#{uncollateralized_percentage} - 2px);"}
-            .inner-gauge-section
-            = render 'shared/tooltip', tooltip_data: {t('dashboard.your_account.financing_availability.uncollateralized') => nil, uncollateralized_percentage => nil, fhlb_formatted_currency(@financing_availability[:uncollateralized][:absolute]) => nil}
+        %h2
+          = t('dashboard.your_account.financing_availability.title')
+          %span.dashboard-gauge-total= fhlb_formatted_currency_whole(@financing_availability_gauge[:total][:amount])
+          .dashboard-gauge
+            - @financing_availability_gauge.each do |key, details|
+              - if details[:display_percentage] > 0 && key != :total
+                .gauge-section{style: "width: #{number_to_percentage(details[:display_percentage], precision: 1)};", class: key == :uncollateralized ? 'financing-availability-gauge-uncollateralized' : 'financing-availability-gauge-collateralized'}
+                  .inner-gauge-section
+                  = render 'shared/tooltip', tooltip_data: {t("dashboard.your_account.financing_availability.#{key}") => nil, number_to_percentage(details[:percentage], precision: 1) => nil, fhlb_formatted_currency(details[:amount]) => nil}
       - if @borrowing_capacity_gauge
         .dashboard-borrowing-capacity
           %h2
