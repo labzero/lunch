@@ -58,3 +58,27 @@
               %li= link_to(t('reports.securities.services_monthly.title'), reports_securities_services_statement_path)
           %li<>
             = link_to(t('reports.authorizations.title'), reports_authorizations_path)
+      %li<>
+        = link_to(t('nav.secondary.resources'), '#', class: 'nav-menu')
+        %ul.nav-dropdown<>
+          %li<>= link_to(t('resources.guides.title'), '#')
+          %li<>= link_to(t('resources.fee_schedules.title'), '#')
+          %li<>
+            = link_to(t('resources.forms.title'), '#')
+            %ul.nav-dropdown-nested
+              %li= link_to(t('resources.forms.agreements.title'), '#')
+              %li= link_to(t('resources.forms.authorizations.title'), '#')
+              %li= link_to(t('resources.forms.credit.title'), '#')
+              %li= link_to(t('resources.forms.collateral.title'), '#')
+          %li<>= link_to(t('resources.faq.title'), '#')
+          %li<>= link_to(t('resources.capital_plan.title'), '#')
+          %li<>= link_to(t('resources.investor_relations.title'), '#')
+          %li<>= link_to(t('resources.newsroom.title'), '#')
+          %li<>= link_to(t('resources.regulatory_updates.title'), '#')
+          %li<>= link_to(t('resources.business_continuity.title'), '#')
+          %li<>
+            = link_to(t('resources.membership.title'), '#')
+            %ul.nav-dropdown-nested
+              %li= link_to(t('resources.membership.benefits.title'), '#')
+              %li= link_to(t('resources.membership.requirements.title'), '#')
+              %li= link_to(t('resources.membership.applications.title'), '#')

@@ -150,6 +150,7 @@ en:
       letters_of_credit: Letters of Credit
       mortgages: Mortgages
       securities: Securities
+      resources: Resources
   common_table_headings:
     trade_date: Trade Date
     settlement_date: Settlement Date
@@ -487,6 +488,41 @@ en:
     market_overview:
       title: Market Rates
       vrc: 30-Day VRC Rate (%)
+  resources:
+    guides:
+      title: Guides
+    fee_schedules:
+      title: Fee Schedules
+    forms:
+      title: Forms
+      agreements:
+        title: Agreements
+      authorizations:
+        title: Authorizations
+      credit:
+        title: Credit
+      collateral:
+        title: Collateral
+    faq:
+      title: FAQs
+    capital_plan:
+      title: Capital Plan
+    investor_relations:
+      title: Investor Relations
+    newsroom:
+      title: Newsroom
+    regulatory_updates:
+      title: Regulatory Updates
+    business_continuity:
+      title: Business Continuity
+    membership:
+      title: Membership
+      benefits:
+        title: Benefits
+      requirements:
+        title: Requirements
+      applications:
+        title: Applications
   reports:
     meta_title: FHLB - Reports
     title: Reports
