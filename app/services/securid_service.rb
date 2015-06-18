@@ -1,6 +1,6 @@
 class SecurIDService
 
-  USERNAME_PREFIX = 'prod-'
+  USERNAME_PREFIX = (ENV['SECURID_USER_PREFIX'] || 'prod-').dup  # we dup the string to work around an issue with testing frozen values
 
   def initialize(username, options={})
     options[:test_mode] = ENV['SECURID_TEST_MODE'].to_sym if !options.has_key?(:test_mode) && ENV['SECURID_TEST_MODE']
