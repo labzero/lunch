@@ -9,6 +9,7 @@ require_relative 'member/cash_projections'
 require_relative 'member/trade_activity'
 require_relative 'member/signer_roles'
 require_relative 'member/execute_trade'
+require_relative 'member/current_securities_position'
 
 module MAPI
   module Services
@@ -436,6 +437,42 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/current_securities_position/{custody_account_type}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve current securities of a given account type'
+              key :notes, 'Returns all of the current securities, all of the current pledged securities or all of the current unpledged securities based on "custody_account_type"'
+              key :nickname, :getCurrentSecuritiesPositionForMembers
+              key :type, :MemberCurrentSecuritiesPosition
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :custody_account_type
+                key :required, true
+                key :type, :string
+                key :description, 'An argument to request either all securities, pledged securities or unpledged securities'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 400
+                key :message, 'Invalid param for custody account type'
+              end
+              response_message do
+                key :code, 404
+                key :message, 'No Data Found'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -606,6 +643,27 @@ module MAPI
         relative_get '/:id/signers' do
           member_id = params[:id]
           MAPI::Services::Member::SignerRoles.signer_roles(self, member_id).to_json
+        end
+
+        # Member Current Securities Position
+        relative_get '/:id/current_securities_position/:custody_account_type' do
+          member_id = params[:id]
+          custody_account_type = case params[:custody_account_type]
+            when 'pledged'
+              'P'
+            when 'unpledged'
+              'U'
+            when 'all'
+              nil
+            else
+              halt 400, 'Invalid custody_account_type: must be "all", "pledged" or "unpledged"'
+          end
+          result = MAPI::Services::Member::CurrentSecuritiesPosition.current_securities_position(self, member_id, custody_account_type)
+          if result.nil?
+            halt 404, "No Data Found"
+          else
+            result.to_json
+          end
         end
       end
     end

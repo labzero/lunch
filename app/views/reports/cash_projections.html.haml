@@ -1,6 +1,6 @@
 - @html_class = 'white-background'
 - @page_title = t('reports.meta_title')
-.report.cash-projections-report.row
+.report.cash-projections-report.expanding-row-table.row
   .report-header
     %h1= t('reports.pages.cash_projections.title')
     - if @print_layout
@@ -25,10 +25,10 @@
       %thead
         %tr
           %th.report-cell-narrow= t('common_table_headings.settlement_date')
-          %th.report-cell-narrow{data: {unsortable: true}}= t('reports.pages.cash_projections.cusip')
-          %th.report-cell-narrow{data: {unsortable: true}}= t('reports.pages.cash_projections.security_description')
-          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('reports.pages.cash_projections.par'), '$')
-          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('reports.pages.cash_projections.coupon_rate'), '%')
+          %th.report-cell-narrow{data: {unsortable: true}}= t('common_table_headings.cusip')
+          %th.report-cell-narrow{data: {unsortable: true}}= t('common_table_headings.security_description')
+          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('common_table_headings.original_par_value'), '$')
+          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('common_table_headings.coupon_rate'), '%')
           %th.report-cell-narrow{data: {unsortable: true}}= t('common_table_headings.maturity_date')
           %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.principal'), '$')
           %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.interest'), '$')
@@ -51,7 +51,7 @@
             - unless @print_layout
               %td.report-cell-narrow.report-cell-right.detail-view-trigger= t('global.view')
               %td.report-detail-cell{colspan: 11}
-                %h3= t('reports.pages.cash_projections.record_title', cusip: row[:cusip] || t('global.missing_value'))
+                %h3= t('common_table_headings.cusip_title', cusip: row[:cusip] || t('global.missing_value'))
                 %p.hide-detail-view= t('global.hide')
                 .left-column
                   %table
@@ -59,29 +59,29 @@
                       %td= t('common_table_headings.settlement_date')
                       %td= fhlb_date_standard_numeric(row[:settlement_date])
                     %tr
-                      %td= t('reports.pages.cash_projections.custody_account')
+                      %td= t('common_table_headings.custody_account_number')
                       %td= row[:custody_account] || t('global.missing_value')
                   %table
                     %tr
-                      %td= t('reports.pages.cash_projections.cusip')
+                      %td= t('common_table_headings.cusip')
                       %td= row[:cusip] || t('global.missing_value')
                     %tr
-                      %td= t('reports.pages.cash_projections.security_description')
+                      %td= t('common_table_headings.security_description')
                       %td= row[:description] || t('global.missing_value')
                   %table
                     %tr
                       %td= t('reports.pages.cash_projections.transaction_code')
                       %td= row[:transaction_code] || t('global.missing_value')
                     %tr
-                      %td= t('reports.pages.cash_projections.pool_number')
+                      %td= t('common_table_headings.pool_number')
                       %td= row[:pool_number] || t('global.missing_value')
                 .right-column
                   %table
                     %tr
-                      %td= t('reports.pages.cash_projections.par')
+                      %td= t('common_table_headings.original_par_value')
                       %td= fhlb_formatted_currency(row[:original_par], force_unit: true, precision: 2)
                     %tr
-                      %td= t('reports.pages.cash_projections.coupon_rate')
+                      %td= t('common_table_headings.coupon_rate')
                       %td= fhlb_formatted_percentage(row[:coupon_rate], 3)
                   %table
                     %tr

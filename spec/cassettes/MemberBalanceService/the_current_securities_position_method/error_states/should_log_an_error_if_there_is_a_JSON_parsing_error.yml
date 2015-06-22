@@ -1,0 +1,61 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/current_securities_position/all
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
+      X-Request-Id:
+      - '12345'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '6704'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      Date:
+      - Mon, 22 Jun 2015 17:40:44 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"as_of_date":"2015-06-19","total_original_par":16668376.0,"total_current_par":9376511.782530159,"total_market_value":9452819.782530159,"securities":[{"custody_account_number":"082131","custody_account_type":"P","security_pledge_type":"Standard","cusip":"31418AHT8","description":"PREFERRED
+        TERM SECS VIII LTD / PFD","reg_id":"88","pool_number":"PLJ12604","coupon_rate":0.941,"maturity_date":"2017-05-24","original_par":1638887.0,"factor":0.5777759634072352,"factor_date":"2012-11-23","current_par":946909.5153405935,"price":8.779,"price_date":"0012-10-24","market_value":949957.5153405935},{"custody_account_number":"082131","custody_account_type":"P","security_pledge_type":"SBC","cusip":"31398VXP6","description":"GOVT
+        NAT MTG ASSN REG POOL #460726","reg_id":"88","pool_number":"PLC91075","coupon_rate":3.883,"maturity_date":"2016-01-24","original_par":1084525.0,"factor":0.28713973478443144,"factor_date":"2013-08-17","current_par":311410.2208670855,"price":37.881,"price_date":"0012-10-24","market_value":316290.2208670855},{"custody_account_number":"082131","custody_account_type":"P","security_pledge_type":"Standard","cusip":"31397MJG3","description":"GOVT
+        NAT MTG ASSN II POOL #080519","reg_id":"88","pool_number":"PL780268","coupon_rate":1.83,"maturity_date":"2016-05-17","original_par":571861.0,"factor":0.3322561398290441,"factor_date":"2014-12-15","current_par":190004.328378777,"price":74.746,"price_date":"0012-10-24","market_value":198491.328378777},{"custody_account_number":"082131","custody_account_type":"P","security_pledge_type":"SAFE","cusip":"36202C3Y7","description":"GOVT
+        NAT MTG ASSN REG POOL #460726","reg_id":"88","pool_number":"PL950294","coupon_rate":4.596,"maturity_date":"2017-08-08","original_par":1471123.0,"factor":0.9461561793775157,"factor_date":"2015-02-27","current_par":1391912.117074389,"price":56.667,"price_date":"0012-10-24","market_value":1398931.117074389},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"Standard","cusip":"31385HP48","description":"FEDERAL
+        HOME LN MTG CORP PC GOLD","reg_id":"88","pool_number":"PL950294","coupon_rate":4.506,"maturity_date":"2017-08-23","original_par":1334251.0,"factor":0.022286441078519514,"factor_date":"2013-11-21","current_par":29735.70629545574,"price":67.881,"price_date":"0012-10-24","market_value":38675.70629545574},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"SAFE","cusip":"31395L4R9","description":"GOVT
+        NAT MTG ASSN II  POOL #002577","reg_id":"88","pool_number":"PL742086","coupon_rate":2.415,"maturity_date":"2018-10-04","original_par":2494661.0,"factor":0.9485217462984401,"factor_date":"2014-03-13","current_par":2366240.208142613,"price":44.14,"price_date":"0012-10-24","market_value":2367424.208142613},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"SBC","cusip":"31388PY54","description":"FEDERAL
+        NATL MTG ASSN MEDIUM TERM","reg_id":"88","pool_number":"PL950294","coupon_rate":6.186,"maturity_date":"2019-10-01","original_par":1536703.0,"factor":0.8688790329039384,"factor_date":"2013-09-05","current_par":1335209.0165005808,"price":111.199,"price_date":"0012-10-24","market_value":1345180.0165005808},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"SAFE","cusip":"31398VXP6","description":"FEDERAL
+        HOME LN MTG CORP PC GOLD","reg_id":"88","pool_number":"PLJ12604","coupon_rate":6.309,"maturity_date":"2017-01-20","original_par":506027.0,"factor":0.6637162160494414,"factor_date":"2012-12-02","current_par":335858.3256588507,"price":75.33,"price_date":"0012-10-24","market_value":342705.3256588507},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"Standard","cusip":"36202C3Y7","description":"FEDERAL
+        HOME LN MTG PC GOLD","reg_id":"88","pool_number":"PL","coupon_rate":6.216,"maturity_date":"2016-03-31","original_par":2178286.0,"factor":0.36715632598142056,"factor_date":"2013-08-30","current_par":799771.4846967646,"price":47.284,"price_date":"0012-10-24","market_value":802562.4846967646},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"SBC","cusip":"31362SY33","description":"FEDERAL
+        HOME LN MTG CORP MEDIUM","reg_id":"88","pool_number":"PLAE0988","coupon_rate":3.5949999999999998,"maturity_date":"2017-08-14","original_par":518451.0,"factor":0.5953053832894668,"factor_date":"2014-03-02","current_par":308636.67127180734,"price":43.321,"price_date":"0012-10-24","market_value":315642.67127180734},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"SBC","cusip":"3138A8SL1","description":"GOVT
+        NAT MTG ASSN II  POOL #002577","reg_id":"88","pool_number":"PL256294","coupon_rate":6.091,"maturity_date":"2018-01-21","original_par":1248827.0,"factor":0.3838166322261122,"factor_date":"2015-05-11","current_par":479320.57337303896,"price":50.602,"price_date":"0012-10-24","market_value":480413.57337303896},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"SBC","cusip":"31362SY33","description":"FEDERAL
+        NAT MTG ASSN REMIC","reg_id":"88","pool_number":"PLC91075","coupon_rate":2.149,"maturity_date":"2017-03-21","original_par":449392.0,"factor":0.32724225993811806,"factor_date":"2013-01-16","current_par":147060.05367811077,"price":39.14,"price_date":"0012-10-24","market_value":156852.05367811077},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"SAFE","cusip":"3137AE6B6","description":"FEDERAL
+        HOME LN MTG PC GOLD","reg_id":"88","pool_number":"PL","coupon_rate":3.433,"maturity_date":"2020-09-01","original_par":610610.0,"factor":0.9124975345251588,"factor_date":"2015-01-04","current_par":557180.1195564072,"price":114.934,"price_date":"0012-10-24","market_value":558481.1195564072},{"custody_account_number":"082131","custody_account_type":"P","security_pledge_type":"SAFE","cusip":"31388PXS5","description":"GOVT
+        NAT MTG ASSN REMIC","reg_id":"88","pool_number":"PL254914","coupon_rate":5.548,"maturity_date":"2018-08-10","original_par":369137.0,"factor":0.2933030985598022,"factor_date":"2013-10-08","current_par":108269.0258930697,"price":89.237,"price_date":"0012-10-24","market_value":109929.0258930697},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"SBC","cusip":"3137ABZW4","description":"PREFERRED
+        TERM SECS XXI LTD /  PFD","reg_id":"88","pool_number":"PLAA9369","coupon_rate":2.9459999999999997,"maturity_date":"2020-04-09","original_par":655635.0,"factor":0.10523296621232248,"factor_date":"2015-02-24","current_par":68994.41580261604,"price":8.114,"price_date":"0012-10-24","market_value":71283.41580261604}]}'
+    http_version: 
+  recorded_at: Mon, 22 Jun 2015 17:40:44 GMT
+recorded_with: VCR 2.9.3

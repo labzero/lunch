@@ -159,6 +159,15 @@ en:
     current_par: Current Par
     advance_number: Advance Number
     interest_rate: Interest Rate
+    cusip: CUSIP
+    cusip_title: "CUSIP %{cusip}"
+    security_description: Security Description
+    coupon_rate: Coupon Rate
+    original_par_value: Original Par Value
+    price: Price
+    price_date: Price Date
+    custody_account_number: Custody Account Number
+    pool_number: Pool Number
   datepicker:
     range:
       date_to_current: "%{date} to date"
@@ -751,13 +760,7 @@ en:
         total_principal: "Total Principal as of close of business %{date}:"
         total_interest: "Total Interest as of close of business %{date}:"
         settlement_date: Settlement Date
-        custody_account: Custody Account Number
         transaction_code: Transaction Code
-        pool_number: Pool Number
-        cusip: CUSIP
-        record_title: "CUSIP %{cusip}"
-        security_description: Security Description
-        par: Original Par Value
         coupon_rate: Coupon Rate
         total_net: Total Net Amount
       interest_rate_resets:
@@ -830,9 +833,7 @@ en:
         total_net_settled_preliminary: "Total Net Amount settled as of 11:30 a.m. on %{date}:"
         total_net_settled_final: "Total Net Amount settled as of close of business on %{date}:"
         custody_account_no: Custody Account No.
-        cusip: CUSIP
         transaction_code: Transaction Code
-        security_description: Security Description
         units: Units
         maturity_date: Maturity Date
         payment_or_principal: Payment or Principal
@@ -849,6 +850,37 @@ en:
         title: Putable Advance Parallel Shift Sensitivity Analysis
         info: The valuations below are calculated using data as of %{date}
         disclaimer: "The valuations provided to you on the Putable Advance Parallel Shift Sensitivity Analysis page are for information purposes only, are provided as an accommodation and without charge, are confidential and are intended solely for your use. The valuations do not represent the actual or indicative forms at which new (or economically equivalent) transactions could be entered into or the actual or indicative terms at which existing (or such equivalent) transactions could be liquidated, assigned or unwound. The valuations were derived using proprietary pricing models and estimates and assumptions about relevant future market conditions and other matters, all of which are subject to change without notice. Please note that the valuation estimates are from the Federal Home Loan Bank of San Francisco's perspective. Any such changes may have a material impact on the valuations provided, and valuations based on other models or different assumptions may yield materially different results. No guaranty or warranty is made as to the reasonableness of any assumptions or the accuracy or completeness of the models or market data, whether internally or externally generated. In providing the valuations on the Putable Advance Parallel Shift Sensitivity Analysis page, the Federal Home Loan Bank of San Francisco has expressly relied upon the representations and certifications made by you to the Federal Home Loan Bank of San Francisco in your Statement of Authority re: Putable Advances. Accordingly, you should not regard the valuations as advice by us in respect of your positions or as the sole basis for such positions, and you should discuss with your accountants, attorneys, investment advisors and other representatives whether and to what extent these valuations may be useful in the preparation of your financial statements, regulatory reports or otherwise. The valuations may vary significantly from the estimates we used in valuing the transaction(s) for purposes of our internal books and records and for other purposes. The Federal Home Loan Bank of San Francisco expressly disclaims any responsibility for (i) the accuracy of the models, market data input into such models or estimates used in deriving the valuations, (ii) any errors or omissions in computing or disseminating the valuations and (iii) any uses to which the valuations are put."
+      securities_position:
+        current:
+          title: Current Securities Position
+        filter:
+          all: All Securities
+          pledged: Pledged Securities
+          unpledged: Unpledged Securities
+        all_securities:
+          total_original_par_heading: "Total Original Par as of %{date}:"
+          total_current_par_heading: "Total Current Par as of %{date}:"
+          total_market_value_heading: "Total Market Value as of %{date}:"
+          table_heading: "%{n} Securities as of %{date}"
+          total: Totals
+        pledged_securities:
+          total_original_par_heading: "Total Original Par for all Pledged Securities as of %{date}:"
+          total_current_par_heading: "Total Current Par for all Pledged Securities as of %{date}:"
+          total_market_value_heading: "Total Market Value for all Pledged Securities as of %{date}:"
+          table_heading: "%{n} Pledged Securities as of %{date}"
+          total: Pledged Totals
+        unpledged_securities:
+          total_original_par_heading: "Total Original Par for all Unpledged Securities as of %{date}:"
+          total_current_par_heading: "Total Current Par for all Unpledged Securities as of %{date}:"
+          total_market_value_heading: "Total Market Value for all Unpledged Securities as of %{date}:"
+          table_heading: "%{n} Unpledged Securities as of %{date}"
+          total: Unpledged Totals
+        security_pledge_type: Security Pledge Type
+        factor: Factor
+        factor_date: Factor Date
+        market_value: Market Value
+        custody_account_type: Custody Account Type
+        reg_id: RegID
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
