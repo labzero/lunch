@@ -1,7 +1,3 @@
-When(/^I click on the reports link in the header$/) do
-  page.find('.page-header .secondary-nav a', text: I18n.t('reports.title')).click
-end
-
 Then(/^I should see "(.*?)" as the report page's main title$/) do |title|
   page.assert_selector('h1', text: title)
 end

@@ -13,12 +13,18 @@ Then(/^I should see the (reports|resources) dropdown$/) do |dropdown|
   report_menu.parent.assert_selector('.nav-dropdown', visible: true)
 end
 
+When(/^I click on the (reports|guides) link in the header$/) do |link|
+  page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
+end
+
 def dropdown_title_regex(dropdown)
   title = case dropdown
   when 'reports'
     I18n.t('reports.title')
   when 'resources'
     I18n.t('nav.secondary.resources')
+  when 'guides'
+    I18n.t('resources.guides.title')
   else
     raise 'unknown dropdown'
   end

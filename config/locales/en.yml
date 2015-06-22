@@ -498,6 +498,58 @@ en:
   resources:
     guides:
       title: Guides
+      intro: "The Bank's Credit and Collateral Guides contain comprehensive information about our products and services. For your convenience, recent changes to the guide are summarized below."
+      revised_at: 'Revised: %{date}'
+      view_pdf: View PDF
+      view_updates: View Updates
+      updates: 'Updates to the %{guide}'
+      upcoming: 'Upcoming revisions to the %{guide}'
+      revision: 'Revisions incorporated into the %{guide} as of %{date}'
+      replace: 'The new %{guide} replaces the prior guide in its entirety. We have made the following substantive revisions to the guide:'
+      credit:
+        title: Credit Guide
+        updates:
+          upcoming:
+            - "Please refere to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
+          revisions:
+            -
+              date: '2015-04-22'
+              details:
+                - "Incorporated certain changes to the Bank's capital stock requirements that were announced in Bulletin 1470 on February 26, 2015 (page 8)."
+                - "Adjusted the Community Financial Institution asset cap to $1,123 million for 2015 (page 11)."
+                - "Added a product profile for the new Choice LIBOR Adjustable Rate Credit Advances and made releated revisions (pages 36-37, 42, 58 and 52)."
+                - "Removed references to the Homeownership Preservation Advance, which the Bank no longer offers."
+                - "Increased the maximum term for Standby Letters of Credit to 15 years (page 44)."
+                - "Added an appendix that summarizes the Bank's wire transfer processing deadlines (page 69)."
+            -
+              date: '2014-10-30'
+              details:
+                - "Added the Mortgage Partnership Finance Program to the list of products the Bank currently offers and incorporated several revisions related to that program (pages 6, 9, 12, 22, 44-45)."
+                - "Adjusted the Community Financial Institution asset cap to $1,108 million for 2014 (page 11)."
+                - "Revised the description of prepayment fees for callable and putable advances (page 17)."
+      collateral:
+        title: Collateral Guide
+        updates:
+          upcoming:
+            - "Please refere to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
+          revisions:
+            -
+              date: '2015-04-22'
+              details:
+                - "Adjusted the Community Financial Institution asset cap to $1,123 million for 2015 (pages 7 and 62)."
+                - "Updated the list of ineligible loans (page 48)."
+                - "Clarified that members pledging mortgage loans under blanket lien with summary reporting are required to submit loan portfolio reports or other documentation every six months to support the Blanket Lien Collateral Eligibility Questionnaire or the Blanket Lien Collateral Certification (page 70)."
+                - "Updated the field review discount table (pages 91-93)."
+            -
+              date: '2014-10-30'
+              details:
+                - "Adjusted the Community Financial Institution asset cap to $1,108 million for 2014 (pages 7 and 62)."
+                - "Added a new section on the Bank's Anti-Money Laundering Policy (page 18)."
+                - "Incorporated the increases in the borrowing capacities of certain securities announced in Bulletin No. 1148, dated April 8, 2014 (pages 21-25)."
+                - "Modified the Third-Party Document Custodian section to clarify the Bank's requirements when a member contracts with a document storage provider to store documents for loans pledged to the Bank (page 58)."
+                - "Incorporated the increases in the borrowing capacities of certain loan collateral types announced in Bulletin No. 1455, dated July 9, 2014 (pages 79-80)."
+      collateral_review:
+        title: Collateral Field Review Process
     fee_schedules:
       title: Fee Schedules
     forms:
