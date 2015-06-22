@@ -24,7 +24,10 @@ module MAPI
           if app.settings.environment == :production
             mortages_cursor = ActiveRecord::Base.connection.execute(mortgages_connection_string)
             securities_cursor = ActiveRecord::Base.connection.execute(securities_connection_string)
-            mortgage_mv, agency_mv, aaa_mv, aa_mv = 0
+            mortgage_mv = 0
+            agency_mv = 0
+            aaa_mv = 0
+            aa_mv = 0
             while row = mortages_cursor.fetch()
               mortgage_mv = row[0].to_i
               break
@@ -64,7 +67,8 @@ module MAPI
           if app.settings.environment == :production
             pledged_securities_cursor = ActiveRecord::Base.connection.execute(pledged_securities_string)
             safekept_securities_cursor = ActiveRecord::Base.connection.execute(safekept_securities_string)
-            pledged_securities, safekept_securities = 0
+            pledged_securities = 0
+            safekept_securities = 0
             while row = pledged_securities_cursor.fetch()
               pledged_securities = row[0].to_i
               break
@@ -91,7 +95,8 @@ module MAPI
 
           if app.settings.environment == :production
             borrowing_capacity_cursor = ActiveRecord::Base.connection.execute(borrowing_capacity_connection_string)
-            total_capacity, unused_capacity = 0
+            total_capacity = 0
+            unused_capacity = 0
             while row = borrowing_capacity_cursor.fetch()
               total_capacity = row[0].to_i
               unused_capacity = row[1].to_i

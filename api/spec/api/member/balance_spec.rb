@@ -40,6 +40,14 @@ describe MAPI::ServiceApp do
         expect(pledged_collateral['aaa']).to eq(3000)
         expect(pledged_collateral['aa']).to eq(40000)
       end
+      it 'should return zeros if no record was found' do
+        allow(result_set).to receive(:fetch).and_return(nil)
+        allow(result_set2).to receive(:fetch).and_return(nil)
+        expect(pledged_collateral['mortgages']).to eq(0)
+        expect(pledged_collateral['agency']).to eq(0)
+        expect(pledged_collateral['aaa']).to eq(0)
+        expect(pledged_collateral['aa']).to eq(0)
+      end
     end
   end
 
@@ -65,6 +73,12 @@ describe MAPI::ServiceApp do
         expect(total_securities['pledged_securities']).to eq(12345)
         expect(total_securities['safekept_securities']).to eq(12345)
       end
+      it 'should return zeros if no record was found' do
+        allow(result_set1).to receive(:fetch).and_return(nil)
+        allow(result_set2).to receive(:fetch).and_return(nil)
+        expect(total_securities['safekept_securities']).to eq(0)
+        expect(total_securities['pledged_securities']).to eq(0)
+      end
     end
   end
 
@@ -88,6 +102,11 @@ describe MAPI::ServiceApp do
       it 'should return json wth keys total_capacity, unused_capacity with the first 2 columns returned' do
         expect(effective_borrowing_capacity['total_capacity']).to eq(12345)
         expect(effective_borrowing_capacity['unused_capacity']).to eq(54911)
+      end
+      it 'should return zeros if no record was found' do
+        allow(result_set).to receive(:fetch).and_return(nil)
+        expect(effective_borrowing_capacity['total_capacity']).to eq(0)
+        expect(effective_borrowing_capacity['unused_capacity']).to eq(0)
       end
     end
   end
