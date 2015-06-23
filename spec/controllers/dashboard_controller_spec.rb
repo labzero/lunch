@@ -139,7 +139,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
   end
 
-  describe "POST quick_advance_preview" do
+  describe "POST quick_advance_preview", :vcr do
     allow_policy :advances, :show?
     let(:EtransactAdvancesService) {class_double(EtransactAdvancesService)}
     let(:etransact_service_instance) {double('EtransactAdvancesService', quick_advance_preview: nil)}
@@ -148,7 +148,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:advance_type) {'sometype'}
     let(:advance_rate) {'0.17'}
     let(:username) {'Test User'}
-    let(:amount) { Random.rand(100000000) }
+    let(:amount) { 100 }
     let(:make_request) { post :quick_advance_preview, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount}
 
     it_behaves_like 'a user required action', :post, :quick_advance_preview
@@ -202,7 +202,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
   end
 
-  describe "POST quick_advance_perform" do
+  describe "POST quick_advance_perform", :vcr do
     allow_policy :advances, :show?
     let(:etransact_service_instance) {EtransactAdvancesService.new(ActionDispatch::TestRequest.new)}
     let(:member_id) {750}
@@ -210,9 +210,9 @@ RSpec.describe DashboardController, :type => :controller do
     let(:advance_type) {'sometype'}
     let(:advance_rate) {'0.17'}
     let(:username) {'Test User'}
-    let(:amount) { Random.rand(100000000) }
-    let(:securid_pin) { Random.rand(9999).to_s.rjust(4, '0') }
-    let(:securid_token) { Random.rand(999999).to_s.rjust(6, '0') }
+    let(:amount) { 100 }
+    let(:securid_pin) { '1111' }
+    let(:securid_token) { '222222' }
     let(:make_request) { post :quick_advance_perform, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, securid_pin: securid_pin, securid_token: securid_token }
     let(:securid_service) { SecurIDService.new('a user', test_mode: true) }
 

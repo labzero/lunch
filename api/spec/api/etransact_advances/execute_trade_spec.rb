@@ -29,6 +29,25 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe 'get_signer_full_name' do
+    let(:signer_full_name) { get "/etransact_advances/signer_full_name/#{signer}"; last_response.body }
+    it 'should return signer full name' do
+      expect(signer_full_name).to eq('Test User')
+    end
+    describe 'in the production environment' do
+      let(:result_set) {double('Oracle Result Set', fetch: nil)}
+      let!(:full_name) {['full_name']}
+      before do
+        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
+        allow(result_set).to receive(:fetch).and_return(full_name)
+      end
+      it 'should return signer full name' do
+        expect(signer_full_name).to eq(full_name[0])
+      end
+    end
+  end
+
   describe 'get_payment_info' do
     let(:overnight_response) {{:payment_at=>'Overnight', :advance_payment_frequency=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'T'}, :advance_payment_day_of_month=>0}}
     let(:open_response) {{:payment_at=>'End Of Month', :advance_payment_frequency=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'M'}, :advance_payment_day_of_month=>31}}

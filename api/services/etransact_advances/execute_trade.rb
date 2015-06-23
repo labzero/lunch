@@ -28,7 +28,7 @@ module MAPI
           end
         end
 
-        def self.get_signer_full_name(app, signer)
+        def self.get_signer_full_name(environment, signer)
           signer_connection_string = <<-SQL
             Select
              SIGNERS.FULLNAME
@@ -41,7 +41,7 @@ module MAPI
             WHERE
              ETRANSACT_SIGNER.LOGIN_ID = #{ActiveRecord::Base.connection.quote(signer)}
           SQL
-          if app.settings.environment == :production
+          if environment == :production
             signer_cursor = ActiveRecord::Base.connection.execute(signer_connection_string)
             while row = signer_cursor.fetch()
               signer_full_name = row[0]

@@ -322,7 +322,7 @@ module MAPI
         # Signer Full Name
         relative_get '/signer_full_name/:signer' do
           signer = params[:signer]
-          MAPI::Services::EtransactAdvances::ExecuteTrade::get_signer_full_name(self, signer)
+          MAPI::Services::EtransactAdvances::ExecuteTrade::get_signer_full_name(self.settings.environment, signer)
         end
 
         # Execute Advance
