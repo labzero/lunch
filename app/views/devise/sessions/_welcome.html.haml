@@ -2,13 +2,13 @@
 %section.welcome
   .row
     .column-4x8-left
+      &nbsp;
       .logo-container
         .logo= t('welcome.logo')
     .column-4x8-right
       %h1= t('welcome.title')
   .row
     .column-4x8-left
-      %p= t('welcome.questions.p_html', url: online_security_path)
     .column-4x8-right
       %p= t('welcome.intro_html', url: 'mailto:websupport@fhlbsf.com', phone_number: fhlb_formatted_phone_number('4156162610'))
       = yield

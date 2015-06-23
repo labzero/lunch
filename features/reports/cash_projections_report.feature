@@ -10,7 +10,7 @@ Feature: Visiting the Cash Projections Report Page
   @smoke @jira-mem-367
   Scenario: Visit cash projections report page from header link
     Given I visit the dashboard
-    When I select "Cash Projections Detail Report" from the reports dropdown
+    When I select "Cash Projections" from the reports dropdown
     Then I should see report summary data
     And I should see a report table with multiple data rows
 
