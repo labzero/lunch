@@ -18,7 +18,8 @@ RSpec.describe ResourcesController, type: :controller do
     end
     {
       'creditguide' => 'creditguide.pdf',
-      'collateralguide' => 'collateralguide.pdf'
+      'collateralguide' => 'collateralguide.pdf',
+      'collateralreviewguide' => 'collateralreviewguide.pdf'
     }.each do |name, file|
       it "should send the file `#{file}` when `#{name}` is requested" do
         expect(subject).to receive(:send_file).with(Rails.root.join('private', file), filename: file).and_call_original

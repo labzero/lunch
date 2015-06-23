@@ -11,6 +11,8 @@ class ResourcesController < ApplicationController
       filename = 'creditguide.pdf'
     when 'collateralguide'
       filename = 'collateralguide.pdf'
+    when 'collateralreviewguide'
+      filename = 'collateralreviewguide.pdf'
     else
       raise ActiveRecord::RecordNotFound
     end
