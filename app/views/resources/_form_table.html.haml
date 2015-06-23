@@ -1,0 +1,15 @@
+- row_renderer = Proc.new do |row, nested|
+  %tr{class: nested ? 'resource-form-nested-row' : nil}
+    %td
+      = row[:title]
+      - if row[:form_number]
+        %span.resource-form-number= row[:form_number]
+    %td
+      - if row[:pdf_link]
+        = link_to(t('global.view_pdf'), row[:pdf_link])
+  - if row[:rows]
+    - row[:rows].each do |row|
+      - row_renderer.call(row, true)
+%table.resource-form-table
+  - rows.each do |row|
+    - row_renderer.call(row, false)

@@ -6,6 +6,7 @@ Feature: Guides Page
 Background:
   Given I am logged in
 
+@smoke
 Scenario: Member navigates to the guides page via the resources dropdown
   Given I hover on the resources link in the header
   When I click on the guides link in the header

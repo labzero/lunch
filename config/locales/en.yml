@@ -104,6 +104,7 @@ en:
     terms_of_use: Terms of Use
     privacy_policy: Privacy Policy
     truncated_web_address: "fhlbsf.com"
+    view_pdf: View PDF
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -500,7 +501,6 @@ en:
       title: Guides
       intro: "The Bank's Credit and Collateral Guides contain comprehensive information about our products and services. For your convenience, recent changes to the guide are summarized below."
       revised_at: 'Revised: %{date}'
-      view_pdf: View PDF
       view_updates: View Updates
       updates: 'Updates to the %{guide}'
       upcoming: 'Upcoming revisions to the %{guide}'
@@ -556,12 +556,81 @@ en:
       title: Forms
       agreements:
         title: Agreements
+        advances: Advances and Security Agreement
+        commercial_banks: Commercial Banks, Savings Institutions, and Industrial Loan Companies
+        community: Community Development Financial Institutions
+        credit_unions: Credit Unions
+        insurance: Insurance Companies
+        letters_of_credit: Letters of Credit Agreement
+        safekeeping: Safekeeping Agreement
+        settlement_transaction_account: Settlement/Transaction Account Agreement
       authorizations:
         title: Authorizations
+        signature_cards:
+          title: Signature Cards
+          member_transactions: 'Resolution and Authorization: Member Transactions'
+          designated_persons: Certificate of Designated Persons
+          entire_authority: Entire Authority
+          wire_transfer: Wire Transfer Services
+          advances: Advances
+          affordable_housing: Affordable Housing Program
+          collateral: Collateral
+          interest_rate: Interest Rate Derivatives
+          money_market: Money Market Transaction
+          person_securities: Person-Securities Services
+        wire_transfer:
+          title: Wire Transfer
+          repetitive: Repetitve Wire Instructions
+        capital_stock:
+          title: Capital Stock
+          repurchase: Request for Repurchase of Excess Capital Stock
+          redemption: Notice of Redemption of Capital Stock
+        website:
+          title: Website Access
+          access_manager: Website Access Manager Set-up
+          securid: eTransact SecurID Token Application
       credit:
         title: Credit
+        application: 'Credit Application: CIP and ACE'
+        ace_application: ACE Application for SBA Lenders
+        reimbursement: Letter of Credit Reimbursment Agreement
+        statement_of_authority: Statement of Authority
+        prepayment_symmetry: Advances with Partial Prepayment Symmetry
+        putable_advances: Putable Advances
       collateral:
         title: Collateral
+        lien_real_estate:
+          title: 'Blanket Lien: Real Estate Loan Collateral'
+          pledging: Pledging and Reporting Designation
+          lending_policy: Anti-Predatory Lending Policy Certification Blank Lien Summary
+          questionnaire_html: 'Commercial Banks, Savings Institutions, and Industrial Loan Companies: <br>Blanket Lien Collateral Eligibility Questionnaire—Summary Reporting'
+          certification: 'Collateral: Blanket Lien Collateral Certification—Summary Reporting'
+          notification: 'MCU Notification: Blanket Lien—Detailed Reporting'
+        lien_other:
+          title: 'Blanket Lien: Small Business, Agribusiness, and Farm Loans'
+          certification: CFI Blanket Lien Collateral Certification
+          release: CFI Blanket Lien Collateral Release Request and Certification
+        specific_identification:
+          title: Specific Identification
+          transmission: MCU Data Transmission Set-up
+          transmittal: Mortgage Collateral Update Transmittal Letter
+          questionnaire: MCU Data Field Questionnaire
+        deposits:
+          title: Deposits
+          pledge: Pledge of Time Deposit Account
+        securities:
+          title: Securities
+          pledge: Pledge of Securities
+          release: Securities Release Request
+          deposit: Safekeeping Deposit Request
+          safekeeping_release: Safekeeping Release Request
+        loan_document:
+          title: Loan Document Deliveries
+          assignment: Corporation Assignment Template
+        creditor_relationship:
+          title: Third-Party Creditor Relationships
+          amendment: Amendment to Corporate Credit Union Security Agreement
+          agreement: 'Subordination Agreement: Credit Unions'
     faq:
       title: FAQs
     capital_plan:
