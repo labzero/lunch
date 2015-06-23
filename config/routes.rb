@@ -64,6 +64,11 @@ Rails.application.routes.draw do
     get '/' => 'corporate_communications#category', as: :corporate_communications
   end
 
+  scope 'resources' do
+    get '/guides' => 'resources#guides'
+    get '/download/:file' => 'resources#download', as: :resources_download
+  end
+
   devise_scope :user do
     get '/' => 'users/sessions#new', :as => :new_user_session
     post '/' => 'users/sessions#create', :as => :user_session
