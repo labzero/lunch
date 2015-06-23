@@ -9,6 +9,7 @@ require_relative 'member/cash_projections'
 require_relative 'member/trade_activity'
 require_relative 'member/signer_roles'
 require_relative 'member/current_securities_position'
+require_relative 'member/forward_commitments'
 
 module MAPI
   module Services
@@ -401,6 +402,31 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/forward_commitments/'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve forward commitments for a given member'
+              key :notes, 'Retrieve forward commitments for a given member'
+              key :nickname, :getForwardCommitmentsForMembers
+              key :type, :MemberForwardCommitments
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 404
+                key :message, 'No Data Found'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -565,6 +591,17 @@ module MAPI
               halt 400, 'Invalid custody_account_type: must be "all", "pledged" or "unpledged"'
           end
           result = MAPI::Services::Member::CurrentSecuritiesPosition.current_securities_position(self, member_id, custody_account_type)
+          if result.nil?
+            halt 404, "No Data Found"
+          else
+            result.to_json
+          end
+        end
+
+        # Member Forward Commitments
+        relative_get '/:id/forward_commitments' do
+          member_id = params[:id]
+          result = MAPI::Services::Member::ForwardCommitments.forward_commitments(self, member_id)
           if result.nil?
             halt 404, "No Data Found"
           else

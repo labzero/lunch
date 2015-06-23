@@ -23,11 +23,11 @@ module MAPI
           key :type, :array
           key :description, 'An array of securities objects.'
           items do
-            key :'$ref', :SecuritiessObject
+            key :'$ref', :SecuritiesObject
           end
         end
       end
-      swagger_model :SecuritiessObject do
+      swagger_model :SecuritiesObject do
         property :custody_account_number do
           key :type, :string
           key :description, 'Custody account number'
