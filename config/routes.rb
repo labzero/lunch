@@ -66,6 +66,7 @@ Rails.application.routes.draw do
 
   scope 'resources' do
     get '/guides' => 'resources#guides'
+    get '/download/:file' => 'resources#download', as: :resources_download
   end
 
   devise_scope :user do
