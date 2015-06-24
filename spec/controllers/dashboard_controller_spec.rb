@@ -23,7 +23,7 @@ RSpec.describe DashboardController, :type => :controller do
     it 'should assign @account_overview' do
       get :index
       expect(assigns[:account_overview]).to be_kind_of(Hash)
-      expect(assigns[:account_overview].length).to eq(5)
+      expect(assigns[:account_overview].length).to eq(3)
     end
     it "should assign @market_overview" do
       get :index

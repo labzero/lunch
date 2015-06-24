@@ -389,7 +389,7 @@ en:
         member_services_desk: Member Services Desk
         collateral_asset_manager: Collateral Asset Manager
     quick_advance:
-      title: Quick Advances
+      title: Quick Advance
       advance_placeholder: Enter Dollar Amount
       advances_desk_closed: The Member Services Desk is closed.
       advances_desk_closed_link: View Current Price Indications
