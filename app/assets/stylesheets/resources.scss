@@ -1,42 +1,14 @@
+$resource-page-padding: 140px !default;
+
 .resource-guide-page {
-  h1 {
-    @extend %typography-page-title;
-  }
-  h2 {
-    @extend %typography-section-title;
-  }
-  h3 {
-    @extend %typography-subtitle;
-  }
   p {
-    padding-right: 350px;
+    padding-right: $resource-page-padding + 210px;
   }
   & > p:first-of-type {
     margin-bottom: 60px;
   }
   small {
     @extend %typography-paragraph;
-  }
-  .resource-guide {
-    margin-bottom: 25px;
-  }
-  .resource-guides {
-    margin-bottom: 60px;
-  }
-  .resource-guide-updates {
-    padding-right: 140px;
-  }
-  .resource-guide-update {
-    margin-bottom: 60px;
-    p {
-      padding-right: inherit;
-    }
-    h2 {
-      margin-bottom: 20px;
-    }
-    &:last-child {
-      margin-bottom: inherit;
-    }
   }
   a {
     color: $actionable-blue;
@@ -59,3 +31,90 @@
     }
   }
 }
+
+.resource-guide-page, .resource-forms-page {
+  h1 {
+    @extend %typography-page-title;
+  }
+  h2 {
+    @extend %typography-section-title;
+  }
+  h3 {
+    @extend %typography-subtitle;
+  }
+}
+
+.resource-guide {
+  margin-bottom: 25px;
+}
+
+.resource-guides {
+  margin-bottom: 60px;
+}
+
+.resource-guide-updates {
+  padding-right: $resource-page-padding;
+}
+
+.resource-guide-update {
+  margin-bottom: 60px;
+  p {
+    padding-right: inherit;
+  }
+  h2 {
+    margin-bottom: 20px;
+  }
+  &:last-child {
+    margin-bottom: inherit;
+  }
+}
+
+.resource-forms-page {
+  padding-right: $resource-page-padding;
+  a {
+    text-transform: uppercase;
+    text-decoration: none;
+    color: $actionable-blue;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 60px;
+  }
+  h2, h3 {
+    padding-left: 20px;
+  }
+  h2 {
+    margin-bottom: 10px
+  }
+  h3 {
+    margin-bottom: 5px;
+  }
+  h2 ~ h3 {
+    margin-top: 25px;
+  }
+}
+
+.resource-form-table {
+  @extend %table-striped;
+  border-bottom: 1px solid $light-blue;
+  border-top: 1px solid $light-blue;
+  margin-bottom: 40px;
+  width: 100%;
+  .resource-form-nested-row td:first-child {
+    padding-left: 40px;
+  }
+  .resource-form-number {
+    margin-left: 25px;
+  }
+  td{
+    @extend %typography-table-cell;
+    padding: 7px 20px;
+
+    &:last-child {
+      width: 70px;
+      text-align: right;
+    }
+  }
+}
+

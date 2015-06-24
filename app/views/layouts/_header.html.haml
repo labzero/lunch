@@ -64,12 +64,12 @@
           %li<>= link_to(t('resources.guides.title'), guides_path)
           %li<>= link_to(t('resources.fee_schedules.title'), '#')
           %li<>
-            = link_to(t('resources.forms.title'), '#')
+            = link_to(t('resources.forms.title'), forms_path)
             %ul.nav-dropdown-nested
-              %li= link_to(t('resources.forms.agreements.title'), '#')
-              %li= link_to(t('resources.forms.authorizations.title'), '#')
-              %li= link_to(t('resources.forms.credit.title'), '#')
-              %li= link_to(t('resources.forms.collateral.title'), '#')
+              %li= link_to(t('resources.forms.agreements.title'), forms_path(anchor: :agreements))
+              %li= link_to(t('resources.forms.authorizations.title'), forms_path(anchor: :authorizations))
+              %li= link_to(t('resources.forms.credit.title'), forms_path(anchor: :credit))
+              %li= link_to(t('resources.forms.collateral.title'), forms_path(anchor: :collateral))
           %li<>= link_to(t('resources.faq.title'), '#')
           %li<>= link_to(t('resources.capital_plan.title'), '#')
           %li<>= link_to(t('resources.investor_relations.title'), '#')
