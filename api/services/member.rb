@@ -9,6 +9,7 @@ require_relative 'member/cash_projections'
 require_relative 'member/trade_activity'
 require_relative 'member/signer_roles'
 require_relative 'member/current_securities_position'
+require_relative 'member/forward_commitments'
 
 module MAPI
   module Services
@@ -401,6 +402,27 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/forward_commitments'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve forward commitments for a given member'
+              key :notes, 'Retrieve forward commitments for a given member'
+              key :nickname, :getForwardCommitmentsForMembers
+              key :type, :MemberForwardCommitments
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -570,6 +592,12 @@ module MAPI
           else
             result.to_json
           end
+        end
+
+        # Member Forward Commitments
+        relative_get '/:id/forward_commitments' do
+          member_id = params[:id]
+          MAPI::Services::Member::ForwardCommitments.forward_commitments(self, member_id).to_json
         end
       end
     end

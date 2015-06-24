@@ -1,0 +1,12 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.row
+  .report-header
+    %h1= t('reports.pages.forward_commitments.title')
+    = render 'reports_header_buttons'
+  .report-main-body
+    .report-summary-data
+      %h3
+        = t('reports.pages.letters_of_credit.total_current_par_summary', date: fhlb_date_long_alpha(@as_of_date))
+      %p= fhlb_formatted_currency_whole(@total_current_par, force_unit: true)
+    = render 'reports/reports_table', table_class: 'forward-commitments-table', table_data: @table_data, sortable: true, default_sort: [1, 'asc']

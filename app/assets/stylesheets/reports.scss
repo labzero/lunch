@@ -91,7 +91,6 @@
 
 .report-header {
   @extend %pseudoelement-clearfix;
-  margin-bottom: 50px;
   h1 {
     float: left;
   }
@@ -145,7 +144,7 @@
   display: inline-block;
   width: (3 * $grid-column-width) + (2 * $gutter-width);
   margin-right: $grid-column-width + (2 * $gutter-width);
-  margin-bottom: 40px;
+  margin-bottom: 50px;
   &:nth-child(3) {
     margin-right: 0;
   }
@@ -358,6 +357,7 @@
 
 .report-inputs {
   clear: both;
+  margin-bottom: 86px;
   .report-datepicker, .report-filter {
     float: left;
   }
@@ -669,9 +669,6 @@ td.dataTables_empty {
 }
 
 .authorizations-report {
-  .report-header {
-    margin-bottom: 20px;
-  }
   p {
     width: 540px;
     &:first-child {
@@ -730,6 +727,26 @@ td.dataTables_empty {
   }
   th:last-child {
     display: none;
+  }
+}
+
+.forward-commitments-table {
+  width: 730px;
+  td, th {
+    @include table-cell-treatment;
+  }
+  th {
+    &:nth-child(4), &:nth-child(5), &:nth-child(7) {
+      min-width: 115px;
+    }
+    &:nth-child(6) {
+      min-width: 100px;
+    }
+  }
+  tfoot {
+    td:nth-child(1) {
+      border-right: none;
+    }
   }
 }
 
