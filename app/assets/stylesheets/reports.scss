@@ -736,11 +736,14 @@ td.dataTables_empty {
     @include table-cell-treatment;
   }
   th {
+    &:nth-child(1), &:nth-child(2), &:nth-child(3) {
+      min-width: 100px;
+    }
     &:nth-child(4), &:nth-child(5), &:nth-child(7) {
-      min-width: 115px;
+      min-width: 120px;
     }
     &:nth-child(6) {
-      min-width: 100px;
+      min-width: 105px;
     }
   }
   tfoot {

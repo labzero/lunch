@@ -734,9 +734,13 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[:total_current_par]).to eq(total_current_par)
         end
         describe '@table_data' do
-          it 'should contain a `column_headings` array' do
+          it 'should contain a `column_headings` array containing hashes with a `title` key' do
             forward_commitments
-            assigns[:table_data][:column_headings].each {|heading| expect(heading).to be_kind_of(String)}
+            assigns[:table_data][:column_headings].each {|heading| expect(heading[:title]).to be_kind_of(String)}
+          end
+          it 'should contain a `column_headings` array containing hashes with a `sortable` key' do
+            forward_commitments
+            assigns[:table_data][:column_headings].each {|heading| expect(heading[:sortable]).to eq(true)}
           end
           %i(rows footer).each do |attr|
             it "should contain a #{attr} array" do
