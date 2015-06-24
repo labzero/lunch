@@ -13,7 +13,7 @@ module MAPI
             forward_commitments_cursor = ActiveRecord::Base.connection.execute(forward_commitments_query)
             advances = []
             while row = forward_commitments_cursor.fetch_hash()
-              advances << row.with_indifferent_access
+              advances << row.with_indifferent_access unless row['ADVDET_DATEUPDATE'].blank?
             end
             return {as_of_date: nil, total_current_par: nil, advances: []} if advances.blank?
             as_of_date = advances.first[:ADVDET_DATEUPDATE]
@@ -25,7 +25,7 @@ module MAPI
           total_current_par = advances.inject(0) {|sum, security| sum + security[:ADVDET_CURRENT_PAR].to_i}
 
           {
-            as_of_date: as_of_date.to_date,
+            as_of_date: (as_of_date.to_date if as_of_date),
             total_current_par: total_current_par,
             advances: Private.format_advances(advances)
           }
@@ -56,13 +56,13 @@ module MAPI
           def self.format_advances(advances)
             advances.collect do |advance|
               {
-                trade_date: advance[:ADVDET_TRADE_DATE].to_date,
-                funding_date: advance[:ADVDET_SETTLEMENT_DATE].to_date,
-                maturity_date: advance[:ADVDET_MATURITY_DATE].to_date,
-                advance_number: advance[:ADVDET_ADVANCE_NUMBER].to_s,
-                advance_type: advance[:ADVDET_MNEMONIC].to_s,
-                current_par: advance[:ADVDET_CURRENT_PAR].to_i,
-                interest_rate: advance[:ADVDET_INTEREST_RATE].to_f
+                trade_date: (advance[:ADVDET_TRADE_DATE].to_date if advance[:ADVDET_TRADE_DATE]),
+                funding_date: (advance[:ADVDET_SETTLEMENT_DATE].to_date if advance[:ADVDET_SETTLEMENT_DATE]),
+                maturity_date: (advance[:ADVDET_MATURITY_DATE].to_date if advance[:ADVDET_MATURITY_DATE]),
+                advance_number: (advance[:ADVDET_ADVANCE_NUMBER].to_s if advance[:ADVDET_ADVANCE_NUMBER]),
+                advance_type: (advance[:ADVDET_MNEMONIC].to_s if advance[:ADVDET_MNEMONIC]),
+                current_par: (advance[:ADVDET_CURRENT_PAR].to_i if advance[:ADVDET_CURRENT_PAR]),
+                interest_rate: (advance[:ADVDET_INTEREST_RATE].to_f if advance[:ADVDET_INTEREST_RATE])
               }
             end
           end
