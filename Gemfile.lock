@@ -380,6 +380,7 @@ GEM
       rspec-support (~> 3.2.0)
     rspec-support (3.2.2)
     ruby-oci8 (2.1.8)
+    ruby-prof (0.15.8)
     ruby2ruby (2.1.4)
       ruby_parser (~> 3.1)
       sexp_processor (~> 4.0)
@@ -534,6 +535,7 @@ DEPENDENCIES
   rest-client
   rspec-rails
   ruby-oci8
+  ruby-prof
   sass-rails
   savon
   sdoc

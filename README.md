@@ -119,7 +119,7 @@ This is a summary of the options supported in our .env files:
 * `SMTP_PASSWORD`: The password used to authenticate with the STMP server.
 * `SMTP_AUTHENTICATION_MODE`: The SMTP authentication mode to use (`plain`, `login` or `cram_md5`).
 * `SMTP_SSL_VERIFICATION`: The SMTP SSL verification mode to use. Defaults to 'verify'.
-
+* `PROFILE_MODE`: Set to `true` to enable profiling of the site. A new log file (`performance.log`) will be created to capture all profiling details.
 
 
 ## Running the Tests
