@@ -19,7 +19,7 @@ module MAPI
             current_securities_cursor = ActiveRecord::Base.connection.execute(current_securities_query)
             securities = []
             while row = current_securities_cursor.fetch_hash()
-              securities << row.with_indifferent_access
+              securities << row.with_indifferent_access unless row['SSX_BTC_DATE'].blank?
             end
             return nil if securities.blank?
             as_of_date = securities.first['SSX_BTC_DATE']
@@ -33,7 +33,7 @@ module MAPI
           total_market_value = securities.inject(0) {|sum, security| sum + security[:SSX_MARKET_VALUE].to_f}
 
           {
-            as_of_date: as_of_date.to_date,
+            as_of_date: (as_of_date.to_date if as_of_date),
             total_original_par: total_original_par,
             total_current_par: total_current_par,
             total_market_value: total_market_value,
@@ -78,22 +78,22 @@ module MAPI
           def self.format_securities(securities)
             securities.collect do |security|
               {
-                custody_account_number: security[:ADX_BTC_ACCOUNT_NUMBER].to_s,
-                custody_account_type: security[:ACCOUNT_TYPE].to_s,
-                security_pledge_type: security[:SSD_SECURITY_PLEDGE_TYPE].to_s,
-                cusip: security[:SSK_CUSIP].to_s,
-                description: security[:SSK_DESC1].to_s,
-                reg_id: security[:SSX_REG_ID].to_s,
-                pool_number: security[:SSK_POOL_NUMBER].to_s,
-                coupon_rate: security[:SSX_COUPON_RATE].to_f,
-                maturity_date: security[:SSK_MATURITY_DATE].to_date,
-                original_par: security[:SSX_ORIGINAL_PAR].to_f,
-                factor: security[:SSX_CURRENT_FACTOR].to_f,
-                factor_date: security[:SSX_CUR_FACTOR_DATE].to_date,
-                current_par: security[:SSX_CURRENT_PAR].to_f,
-                price: security[:SSX_PRICE].to_f,
-                price_date: security[:SSX_PRICE_DATE].to_date,
-                market_value: security[:SSX_MARKET_VALUE].to_f
+                custody_account_number: (security[:ADX_BTC_ACCOUNT_NUMBER].to_s if security[:ADX_BTC_ACCOUNT_NUMBER]),
+                custody_account_type: (security[:ACCOUNT_TYPE].to_s if security[:ACCOUNT_TYPE]),
+                security_pledge_type: (security[:SSD_SECURITY_PLEDGE_TYPE].to_s if security[:SSD_SECURITY_PLEDGE_TYPE]),
+                cusip: (security[:SSK_CUSIP].to_s if security[:SSK_CUSIP]),
+                description: (security[:SSK_DESC1].to_s if security[:SSK_DESC1]),
+                reg_id: (security[:SSX_REG_ID].to_s if security[:SSX_REG_ID]),
+                pool_number: (security[:SSK_POOL_NUMBER].to_s if security[:SSK_POOL_NUMBER]),
+                coupon_rate: (security[:SSX_COUPON_RATE].to_f if security[:SSX_COUPON_RATE]),
+                maturity_date: (security[:SSK_MATURITY_DATE].to_date if security[:SSK_MATURITY_DATE]),
+                original_par: (security[:SSX_ORIGINAL_PAR].to_f if security[:SSX_ORIGINAL_PAR]),
+                factor: (security[:SSX_CURRENT_FACTOR].to_f if security[:SSX_CURRENT_FACTOR]),
+                factor_date: (security[:SSX_CUR_FACTOR_DATE].to_date if security[:SSX_CUR_FACTOR_DATE]),
+                current_par: (security[:SSX_CURRENT_PAR].to_f if security[:SSX_CURRENT_PAR]),
+                price: (security[:SSX_PRICE].to_f if security[:SSX_PRICE]),
+                price_date: (security[:SSX_PRICE_DATE].to_date if security[:SSX_PRICE_DATE]),
+                market_value: (security[:SSX_MARKET_VALUE].to_f if security[:SSX_MARKET_VALUE])
               }
             end
           end

@@ -77,25 +77,37 @@ describe MAPI::ServiceApp do
     describe 'private methods' do
       describe '`format_securities` method' do
         let(:formatted_securities) { MAPI::Services::Member::CurrentSecuritiesPosition::Private.format_securities(securities) }
+        date_properties = [:maturity_date, :factor_date, :price_date]
+        string_properties = [:custody_account_number, :custody_account_type, :security_pledge_type, :cusip, :description, :reg_id, :pool_number]
+        float_properties = [:coupon_rate, :original_par, :factor, :current_par, :price, :market_value]
 
-        [:maturity_date, :factor_date, :price_date].each do |property|
+        date_properties.each do |property|
           it "returns an object with a `#{property}` formatted as a date" do
             formatted_securities.each do |security|
               expect(security[property]).to be_kind_of(Date)
             end
           end
         end
-        [:custody_account_number, :custody_account_type, :security_pledge_type, :cusip, :description, :reg_id, :pool_number].each do |property|
+        string_properties.each do |property|
           it "returns an object with a `#{property}` formatted as a string" do
             formatted_securities.each do |security|
               expect(security[property]).to be_kind_of(String)
             end
           end
         end
-        [:coupon_rate, :original_par, :factor, :current_par, :price, :market_value].each do |property|
+        float_properties.each do |property|
           it "returns an object with a `#{property}` formatted as a float" do
             formatted_securities.each do |security|
               expect(security[property]).to be_kind_of(Float)
+            end
+          end
+        end
+        describe 'handling nil values' do
+          (date_properties + string_properties + float_properties).flatten.each do |property|
+            it "returns an object with a nil value for `#{property}` if that property doesn't have a value" do
+              MAPI::Services::Member::CurrentSecuritiesPosition::Private.format_securities([{}, {}]).each do |security|
+                expect(security[property]).to be_nil
+              end
             end
           end
         end
