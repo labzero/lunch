@@ -38,8 +38,6 @@ Then(/^I should see the Your Account table breakdown$/) do
   mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
   mod.assert_selector('td', :text => I18n.t('dashboard.your_account.table.balance'))
   mod.assert_selector('td', :text => I18n.t('dashboard.your_account.table.credit_outstanding'))
-  mod.assert_selector('td', :text => I18n.t('dashboard.your_account.table.standard_program.title'))
-  mod.assert_selector('td', :text => I18n.t('dashboard.your_account.table.sbc_program.title'))
 end
 
 Then(/^I should see an? "(.*?)" in the Account module/) do |component|

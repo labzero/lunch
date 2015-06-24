@@ -46,19 +46,7 @@ class DashboardController < ApplicationController
       [t('dashboard.your_account.table.remaining.leverage'), profile[:stock_leverage], nil, 2]
     ]
 
-    standard_program = [
-      {title: t('dashboard.your_account.table.standard_program.title')},
-      [t('dashboard.your_account.table.total_borrowing_capacity'), profile[:standard_total_borrowing_capacity]],
-      [t('dashboard.your_account.table.remaining_borrowing_capacity'), profile[:standard_remaining_borrowing_capacity]]
-    ]
-
-    sbc_program = [
-        {title: t('dashboard.your_account.table.sbc_program.title')},
-        [t('dashboard.your_account.table.total_borrowing_capacity'), profile[:sbc_total_borrowing_capacity]],
-        [t('dashboard.your_account.table.remaining_borrowing_capacity'), profile[:sbc_remaining_borrowing_capacity]]
-    ]
-
-    @account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining, standard_program: standard_program, sbc_program: sbc_program}
+    @account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining}
 
     @market_overview = [{
       name: 'Test',
