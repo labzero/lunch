@@ -41,7 +41,7 @@ RSpec.describe ResourcesController, type: :controller do
     file_mapping = {
       'creditguide' => 'creditguide.pdf',
       'collateralguide' => 'collateralguide.pdf',
-      'collateralreviewguide' => 'collateralreviewguide.pdf',
+      'collateralreviewguide' => 'mortgage-loan-collateral-field-review-process.pdf',
       'corporation_assignment' => 'Corporate_Assignment.doc',
       'credit_union_amendment' => 'corporate-credit-union-amendment.docx',
       'credit_union_agreement' => 'subordination-agreement-credit-unions.pdf'

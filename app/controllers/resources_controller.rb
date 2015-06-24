@@ -291,7 +291,7 @@ class ResourcesController < ApplicationController
     when 'collateralguide'
       filename = 'collateralguide.pdf'
     when 'collateralreviewguide'
-      filename = 'collateralreviewguide.pdf'
+      filename = 'mortgage-loan-collateral-field-review-process.pdf'
     when 'corporation_assignment'
       filename = 'Corporate_Assignment.doc'
     when 'credit_union_amendment'
