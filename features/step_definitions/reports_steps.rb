@@ -80,6 +80,8 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/authorizations'
   when 'Current Securities Position'
     visit '/reports/current-securities-position'
+  when 'Forward Commitments'
+    visit '/reports/forward-commitments'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
@@ -113,6 +115,8 @@ When(/^I click the "(.*?)" column heading$/) do |column_heading|
                 I18n.t('reports.pages.capital_stock_activity.shares_outstanding')
               when 'Maturity Date'
                 I18n.t('common_table_headings.maturity_date')
+              when 'Funding Date'
+                I18n.t('common_table_headings.funding_date')
               else
                 raise Capybara::ExpectationNotMet, 'unknown column heading passed as argument'
             end

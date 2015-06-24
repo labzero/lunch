@@ -971,6 +971,51 @@ describe MemberBalanceService do
     end
   end
 
+  describe 'the `forward_commitments` method', :vcr do
+    let(:forward_commitments) {subject.forward_commitments}
+    it 'returns a hash with an `as_of_date` that is a date' do
+      expect(forward_commitments[:as_of_date]).to be_kind_of(Date)
+    end
+    it "returns a hash with a `total_current_par` that is an integer" do
+      expect(forward_commitments[:total_current_par]).to be_kind_of(Integer)
+    end
+    it 'returns a hash with an `advances` array' do
+      expect(forward_commitments[:advances]).to be_kind_of(Array)
+    end
+    describe 'the `advances` array' do
+      it 'contains objects representing securities data' do
+        forward_commitments[:advances].each do |security|
+          expect(security[:trade_date]).to be_kind_of(Date)
+          expect(security[:funding_date]).to be_kind_of(Date)
+          expect(security[:maturity_date]).to be_kind_of(Date)
+          expect(security[:advance_number]).to be_kind_of(String)
+          expect(security[:advance_type]).to be_kind_of(String)
+          expect(security[:current_par]).to be_kind_of(Integer)
+          expect(security[:interest_rate]).to be_kind_of(Float)
+        end
+      end
+    end
+    describe 'error states' do
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(forward_commitments).to be(nil)
+      end
+      it 'should log an error if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(Rails.logger).to receive(:warn)
+        forward_commitments
+      end
+      it 'should return nil if there was an API error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(forward_commitments).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(forward_commitments).to eq(nil)
+      end
+    end
+  end
+
   # Helper Methods
   def override_start_balance_endpoint(start_date, end_date, request_object)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_return(request_object)

@@ -403,7 +403,7 @@ module MAPI
             end
           end
           api do
-            key :path, '/{id}/forward_commitments/'
+            key :path, '/{id}/forward_commitments'
             operation do
               key :method, 'GET'
               key :summary, 'Retrieve forward commitments for a given member'
@@ -420,10 +420,6 @@ module MAPI
               response_message do
                 key :code, 200
                 key :message, 'OK'
-              end
-              response_message do
-                key :code, 404
-                key :message, 'No Data Found'
               end
             end
           end
@@ -601,12 +597,7 @@ module MAPI
         # Member Forward Commitments
         relative_get '/:id/forward_commitments' do
           member_id = params[:id]
-          result = MAPI::Services::Member::ForwardCommitments.forward_commitments(self, member_id)
-          if result.nil?
-            halt 404, "No Data Found"
-          else
-            result.to_json
-          end
+          MAPI::Services::Member::ForwardCommitments.forward_commitments(self, member_id).to_json
         end
       end
     end

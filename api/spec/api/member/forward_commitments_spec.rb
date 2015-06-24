@@ -21,14 +21,9 @@ describe MAPI::ServiceApp do
     let(:formatted_advances) { double('an array of advances') }
 
     it 'calls the `forward_commitments` method when the endpoint is hit' do
-      expect(MAPI::Services::Member::ForwardCommitments).to receive(:forward_commitments).and_return('a response')
+      allow(MAPI::Services::Member::ForwardCommitments).to receive(:forward_commitments).and_return('a response')
       get "/member/#{MEMBER_ID}/forward_commitments"
       expect(last_response.status).to eq(200)
-    end
-    it 'returns a 404 if the endpoint returns a blank result' do
-      expect(MAPI::Services::Member::ForwardCommitments).to receive(:forward_commitments).and_return(nil)
-      get "/member/#{MEMBER_ID}/forward_commitments"
-      expect(last_response.status).to eq(404)
     end
 
     [:test, :production].each do |env|
@@ -40,11 +35,24 @@ describe MAPI::ServiceApp do
           allow(MAPI::Services::Member::ForwardCommitments::Private).to receive(:fake_advances).and_return(advances)
           if env == :production
             allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
-            expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(advances_result_set)
+            allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(advances_result_set)
             allow(advances_result_set).to receive(:fetch_hash).and_return(*advances_result)
           end
         end
-
+        if env == :production
+          describe 'when the database returns no advances' do
+            before { allow(advances_result_set).to receive(:fetch_hash).and_return(nil) }
+            it 'returns nil for the `as_of_date`' do
+              expect(member_forward_commitments[:as_of_date]).to be_nil
+            end
+            it 'returns nil for the `total_current_par`' do
+              expect(member_forward_commitments[:total_current_par]).to be_nil
+            end
+            it 'returns an empty array for `advances`' do
+              expect(member_forward_commitments[:advances]).to eq([])
+            end
+          end
+        end
         it 'returns an object with an `as_of_date`' do
           expect(member_forward_commitments[:as_of_date]).to be_kind_of(Date)
         end
@@ -52,7 +60,7 @@ describe MAPI::ServiceApp do
           expect(member_forward_commitments[:total_current_par]).to eq(total_current_par)
         end
         it 'returns an object with an array of formatted `advances`' do
-          expect(MAPI::Services::Member::ForwardCommitments::Private).to receive(:format_advances).with(advances).and_return(formatted_advances)
+          allow(MAPI::Services::Member::ForwardCommitments::Private).to receive(:format_advances).with(advances).and_return(formatted_advances)
           expect(member_forward_commitments[:advances]).to eq(formatted_advances)
         end
       end

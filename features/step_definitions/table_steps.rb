@@ -44,7 +44,7 @@ def compare_sort_order(column_name, sort_order, table_selector='.report-table')
     last_value = nil
     page.all("#{table_selector} tbody tr td:nth-child(#{column_index})").each do |element|
       case column_name
-        when 'Date', 'Trade Date', 'Settlement Date', 'Issue Date', 'Start Date', 'End Date', 'Maturity Date'
+        when 'Date', 'Trade Date', 'Settlement Date', 'Issue Date', 'Start Date', 'End Date', 'Maturity Date', 'Funding Date'
           value = Date.strptime(element.text, '%m/%d/%Y')
         when 'Certificate Sequence', 'Days Outstanding'
           value = element.text.to_i

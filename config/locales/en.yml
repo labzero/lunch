@@ -105,6 +105,7 @@ en:
     privacy_policy: Privacy Policy
     truncated_web_address: "fhlbsf.com"
     view_pdf: View PDF
+    tbd: TBD
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -168,7 +169,9 @@ en:
     price: Price
     price_date: Price Date
     custody_account_number: Custody Account Number
-    pool_number: Pool Number
+    pool_number: Pool
+    funding_date: Funding Date
+    advance_type: Advance Type
   datepicker:
     range:
       date_to_current: "%{date} to date"
@@ -855,8 +858,6 @@ en:
         total_current_par_heading: "Total Current Par as of %{date}"
         total_accrued_interest_heading: "Total Accrued Interest as of %{date}"
         estimated_next_payment_heading: "Estimated Next Interest Payment as of %{date}"
-        funding_date: Funding Date
-        advance_type: Advance Type
         interest_payment_frequency: Interest Payment Frequency
         day_count_basis: Day Count Basis
         next_interest_payment_date: Next Interest Payment Date
@@ -1000,6 +1001,8 @@ en:
         market_value: Market Value
         custody_account_type: Custody Account Type
         reg_id: RegID
+      forward_commitments:
+        title: Forward Commitments
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.

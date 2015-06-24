@@ -528,6 +528,33 @@ class MemberBalanceService < MAPIService
     data
   end
 
+  def forward_commitments
+    begin
+      response = @connection["member/#{@member_id}/forward_commitments"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.forward_commitments encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.forward_commitments encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.forward_commitments encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data[:as_of_date] = data[:as_of_date].to_date if data[:as_of_date]
+    unless data[:advances].blank?
+      data[:advances].collect do |advance|
+        %i(trade_date funding_date maturity_date).each { |date_attr| advance[date_attr] = advance[date_attr].to_date }
+        advance
+      end
+    end
+    data
+  end
+
   private
   def fake_as_of_date
     today = Time.zone.now.to_date

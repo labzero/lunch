@@ -524,9 +524,9 @@ RSpec.describe ReportsController, :type => :controller do
             expect(assigns[:loc_table_data][:rows][0][:columns][i][:value]).to eq(row[key])
           end
         end
-        it 'sets @loc_table_data[:rows] to {} if no row data is returned from MemberBalanceService.letters_of_credit' do
+        it 'sets @loc_table_data[:rows] to an empty array if no row data is returned from MemberBalanceService.letters_of_credit' do
           make_request
-          expect(assigns[:loc_table_data][:rows]).to eq({})
+          expect(assigns[:loc_table_data][:rows]).to eq([])
         end
       end
       describe 'with the report disabled' do
@@ -543,7 +543,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'sets @loc_table_data[:rows] to {}' do
           make_request
-          expect(assigns[:loc_table_data][:rows]).to eq({})
+          expect(assigns[:loc_table_data][:rows]).to eq([])
         end
       end
     end
@@ -710,6 +710,88 @@ RSpec.describe ReportsController, :type => :controller do
           end
         end
 
+      end
+    end
+    describe 'GET forward_commitments' do
+      let(:forward_commitments) { get :forward_commitments }
+
+      it_behaves_like 'a user required action', :get, :forward_commitments
+      describe 'view instance variables' do
+        let(:forward_commitments_response) { double('Forward Commitments response', :[] => nil) }
+        let(:as_of_date) { double('Date') }
+        let(:total_current_par) { double('Total current par') }
+        before {
+          allow(member_balance_service_instance).to receive(:forward_commitments).and_return(forward_commitments_response)
+        }
+        it 'sets @as_of_date to the value returned from the service endpoint' do
+          allow(forward_commitments_response).to receive(:[]).with(:as_of_date).and_return(as_of_date)
+          forward_commitments
+          expect(assigns[:as_of_date]).to eq(as_of_date)
+        end
+        it 'sets @total_current_par to the value returned from the service endpoint' do
+          allow(forward_commitments_response).to receive(:[]).with(:total_current_par).and_return(total_current_par)
+          forward_commitments
+          expect(assigns[:total_current_par]).to eq(total_current_par)
+        end
+        describe '@table_data' do
+          it 'should contain a `column_headings` array' do
+            forward_commitments
+            assigns[:table_data][:column_headings].each {|heading| expect(heading).to be_kind_of(String)}
+          end
+          %i(rows footer).each do |attr|
+            it "should contain a #{attr} array" do
+              forward_commitments
+              expect(assigns[:table_data][attr]).to be_kind_of(Array)
+            end
+          end
+          it 'sets @table_data[:rows] to the formatted value returned by MemberBalanceService.forward_commitments' do
+            row_keys = [:trade_date, :funding_date, :maturity_date, :advance_number, :advance_type, :current_par]
+            row = {}
+            row_keys.each do |key|
+              row[key] = double(key.to_s)
+            end
+            allow(forward_commitments_response).to receive(:[]).with(:advances).at_least(:once).and_return([row])
+            forward_commitments
+            expect(assigns[:table_data][:rows].length).to eq(1)
+            row_keys.each_with_index do |key, i|
+              expect(assigns[:table_data][:rows][0][:columns][i][:value]).to eq(row[key])
+            end
+          end
+          it "sets the interest_rate value in @table_data[:rows] to #{I18n.t('global.tbd')} if the interest rate for that row is 0" do
+            allow(forward_commitments_response).to receive(:[]).with(:advances).at_least(:once).and_return([{interest_rate: 0}])
+            forward_commitments
+            expect(assigns[:table_data][:rows][0][:columns].last[:value]).to eq(I18n.t('global.tbd'))
+            expect(assigns[:table_data][:rows][0][:columns].last[:type]).to be_nil
+          end
+          it "sets the interest_rate value in @table_data[:rows] to its value if the interest rate for that row is greater than 0" do
+            interest_rate = rand()
+            allow(forward_commitments_response).to receive(:[]).with(:advances).at_least(:once).and_return([{interest_rate: interest_rate}])
+            forward_commitments
+            expect(assigns[:table_data][:rows][0][:columns].last[:value]).to eq(interest_rate)
+            expect(assigns[:table_data][:rows][0][:columns].last[:type]).to eq(:rate)
+          end
+          it 'sets @table_data[:rows] to an empty array if no row data is returned from MemberBalanceService.forward_commitments' do
+            forward_commitments
+            expect(assigns[:table_data][:rows]).to eq([])
+          end
+        end
+      end
+      describe 'with the report disabled' do
+        before do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::FORWARD_COMMITMENTS_WEB_FLAG).and_return(true)
+        end
+        it 'sets @as_of_date to nil if the report is disabled' do
+          forward_commitments
+          expect(assigns[:as_of_date]).to be_nil
+        end
+        it 'sets @total_current_par to nil if the report is disabled' do
+          forward_commitments
+          expect(assigns[:total_current_par]).to be_nil
+        end
+        it 'sets @table_data[:rows] to {}' do
+          forward_commitments
+          expect(assigns[:table_data][:rows]).to eq([])
+        end
       end
     end
   end

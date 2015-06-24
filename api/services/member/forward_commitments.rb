@@ -15,7 +15,7 @@ module MAPI
             while row = forward_commitments_cursor.fetch_hash()
               advances << row.with_indifferent_access
             end
-            return nil if advances.blank?
+            return {as_of_date: nil, total_current_par: nil, advances: []} if advances.blank?
             as_of_date = advances.first[:ADVDET_DATEUPDATE]
           else
             as_of_date = MAPI::Services::Member::CashProjections::Private.fake_as_of_date
@@ -36,10 +36,10 @@ module MAPI
           def self.fake_advances(member_id, as_of_date)
             advance_types = ['FRC', 'FRC-REGULAR W/PPS', 'FRC - AMORTIZING']
             rows = []
-            r = Random.new(member_id.to_i + as_of_date.to_time.to_i + as_of_date.day)
 
-            settlement_date = as_of_date + r.rand(90..1095).days
-            r.rand(1..5).times do |i|
+            (as_of_date.wday + 1).times do |i|
+              r = Random.new(member_id.to_i + as_of_date.to_time.to_i + as_of_date.day + i)
+              settlement_date = as_of_date + r.rand(90..1095).days
               rows << {
                 ADVDET_TRADE_DATE: as_of_date - r.rand(180..730).days,
                 ADVDET_SETTLEMENT_DATE: settlement_date,
