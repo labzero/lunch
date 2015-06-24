@@ -13,6 +13,9 @@ objectClass: top
 objectClass: person
 cn: Local User
 sn: Local
+givenname: Local
+sn: User
+displayname: Local User
 sAMAccountName: local
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513

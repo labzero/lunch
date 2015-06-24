@@ -3,7 +3,7 @@ require 'savon'
 
 module MAPI
   module Services
-    module Member
+    module EtransactAdvances
       module ExecuteTrade
 
         LOAN_MAPPING = {
@@ -25,6 +25,31 @@ module MAPI
             )
           else
             @@execute_trade_connection = nil
+          end
+        end
+
+        def self.get_signer_full_name(environment, signer)
+          signer_connection_string = <<-SQL
+            Select
+             SIGNERS.FULLNAME
+            From
+             SIGNER.SIGNERS
+            Left Join
+             WEB_ADM.ETRANSACT_SIGNER
+            On
+             SIGNERS.SIGNERID = ETRANSACT_SIGNER.SIGNER_ID
+            WHERE
+             ETRANSACT_SIGNER.LOGIN_ID = #{ActiveRecord::Base.connection.quote(signer)}
+          SQL
+          if environment == :production
+            signer_cursor = ActiveRecord::Base.connection.execute(signer_connection_string)
+            while row = signer_cursor.fetch()
+              signer_full_name = row[0]
+              break
+            end
+            signer_full_name
+          else
+            'Test User'
           end
         end
 
@@ -74,7 +99,7 @@ module MAPI
               @@payment_at = 'Maturity'
             else
               if (maturity_date - settlement_date).to_i <= 180
-                payment_at = 'Maturity'
+                @@payment_at = 'Maturity'
                 advance_payment_frequency = {
                   'v13:frequency' => 1,
                   'v13:frequencyUnit' => 'T'
@@ -176,7 +201,7 @@ module MAPI
 
           # Advance payment, coupon and markup information
           # Markup, Blended Cost Of Funds To Libor, Cost Of Funds and Benchmark Rate will be calculated later
-          payment_info = MAPI::Services::Member::ExecuteTrade::get_payment_info(advance_term, advance_type, settlement_date, maturity_date)
+          payment_info = MAPI::Services::EtransactAdvances::ExecuteTrade::get_payment_info(advance_term, advance_type, settlement_date, maturity_date)
           advance_payment_coupon_markup = {
             'v14:maturityDate' => maturity_date,
             'v14:collateralType' => LOAN_MAPPING[advance_type],
@@ -201,8 +226,7 @@ module MAPI
             'v14:benchmarkRate' => benchmark_rate
           }
 
-          advance_payment_coupon_markup['v14:coupon'].deep_merge! MAPI::Services::Member::ExecuteTrade::get_advance_rate_schedule(advance_term, rate, day_count, settlement_date, maturity_date)
-
+          advance_payment_coupon_markup['v14:coupon'].deep_merge! MAPI::Services::EtransactAdvances::ExecuteTrade::get_advance_rate_schedule(advance_term, rate, day_count, settlement_date, maturity_date)
           # Header information and placeholders for the advances
           message = {
             'v11:caller' => [{'v11:id' => ENV['MAPI_WEB_AO_ACCOUNT']}],
@@ -230,22 +254,21 @@ module MAPI
 
           # Put it all together
           message['v1:trade']['v12:advance'].deep_merge! advance_lender_amount
-          message['v1:trade']['v12:advance'].deep_merge! MAPI::Services::Member::ExecuteTrade::get_advance_product_info(advance_term)
+          message['v1:trade']['v12:advance'].deep_merge! MAPI::Services::EtransactAdvances::ExecuteTrade::get_advance_product_info(advance_term)
           message['v1:trade']['v12:advance'].deep_merge! advance_payment_coupon_markup
           message
         end
 
         def self.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate)
-          data = if MAPI::Services::Member::ExecuteTrade::init_execute_trade_connection(app.settings.environment)
+          data = if MAPI::Services::EtransactAdvances::ExecuteTrade::init_execute_trade_connection(app.settings.environment)
             member_id = member_id.to_i
-
             # Calculated values
             # True maturity date will be calculated later
-            maturity_date = MAPI::Services::Member::ExecuteTrade::get_maturity_date(Date.today, advance_term)
+            maturity_date = MAPI::Services::EtransactAdvances::ExecuteTrade::get_maturity_date(Date.today, advance_term)
             settlement_date = Date.today
             day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/360' : 'ACT/ACT'
 
-            message = MAPI::Services::Member::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
+            message = MAPI::Services::EtransactAdvances::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
             begin
               response = @@execute_trade_connection.call(:execute_trade, message_tag: 'executeTradeRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
             rescue Savon::Error => error

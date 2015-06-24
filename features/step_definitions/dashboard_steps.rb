@@ -129,7 +129,7 @@ end
 
 Then(/^I should see a preview of the quick advance$/) do
   page.assert_selector('.quick-advance-preview', visible: true)
-  valdiate_passed_advance_params
+  #valdiate_passed_advance_params
 end
 
 Then(/^I should not see a preview of the quick advance$/) do
