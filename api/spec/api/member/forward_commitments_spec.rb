@@ -94,6 +94,15 @@ describe MAPI::ServiceApp do
             expect(advance[:interest_rate]).to be_kind_of(Float)
           end
         end
+        describe 'handling nil values' do
+          [:maturity_date, :funding_date, :trade_date, :advance_number, :advance_type, :current_par, :interest_rate].each do |property|
+            it "returns an object with a nil value for `#{property}` if that property doesn't have a value" do
+              MAPI::Services::Member::ForwardCommitments::Private.format_advances([{}, {}]).each do |security|
+                expect(security[property]).to be_nil
+              end
+            end
+          end
+        end
       end
       
       describe '`fake_advances` method' do
