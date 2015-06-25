@@ -8,6 +8,7 @@ RSpec.describe DashboardController, :type => :controller do
 
   describe "GET index", :vcr do
     before do
+      allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
       allow(subject).to receive(:current_user_roles)
     end
     
@@ -347,6 +348,32 @@ RSpec.describe DashboardController, :type => :controller do
       date = DateTime.parse(hash['updated_at'])
       expect(date).to be_kind_of(DateTime)
       expect(date).to be <= DateTime.now
+    end
+  end
+
+  describe 'calculate_gauge_percentages private method' do
+    let(:foo_capacity) { rand(1000..2000) }
+    let(:bar_capacity) { rand(1000..2000) }
+    let(:total_borrowing_capacity) { foo_capacity + bar_capacity }
+    let(:capacity_hash) do
+      {
+        total: total_borrowing_capacity,
+        foo: foo_capacity,
+        bar: bar_capacity
+      }
+    end
+    let(:call_method) { subject.send(:calculate_gauge_percentages, capacity_hash, total_borrowing_capacity, :total) }
+    it 'should not raise an exception if total_borrowing_capacity is zero' do
+      expect {subject.send(:calculate_gauge_percentages, capacity_hash, 0, :total)}.to_not raise_error
+    end
+    it 'should convert the capacties into gauge hashes' do
+      gauge_hash = call_method
+      expect(gauge_hash[:foo]).to include(:amount, :percentage, :display_percentage)
+      expect(gauge_hash[:bar]).to include(:amount, :percentage, :display_percentage)
+      expect(gauge_hash[:total]).to include(:amount, :percentage, :display_percentage)
+    end
+    it 'should not include the excluded keys values in calculating display_percentage' do
+      expect(call_method[:total][:display_percentage]).to eq(100)
     end
   end
 
