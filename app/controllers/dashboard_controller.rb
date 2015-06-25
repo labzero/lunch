@@ -171,6 +171,8 @@ class DashboardController < ApplicationController
     render json: response
   end
 
+  private
+
   def calculate_gauge_percentages(gauge_hash, total, excluded_keys)
     excluded_keys = Array.wrap(excluded_keys)
     largest_display_percentage_key = nil
@@ -179,7 +181,7 @@ class DashboardController < ApplicationController
     new_gauge_hash = gauge_hash.deep_dup
 
     gauge_hash.each do |key, value|
-      percentage = (value.to_f / total) * 100
+      percentage = total > 0 ? (value.to_f / total) * 100 : 0
 
       display_percentage = percentage.ceil
       display_percentage += display_percentage % 2
@@ -190,7 +192,7 @@ class DashboardController < ApplicationController
         display_percentage: display_percentage
       }
       unless excluded_keys.include?(key)
-        if display_percentage > largest_display_percentage
+        if display_percentage >= largest_display_percentage
           largest_display_percentage = display_percentage
           largest_display_percentage_key = key
         end
