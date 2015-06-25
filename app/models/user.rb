@@ -217,6 +217,10 @@ class User < ActiveRecord::Base
     )
   end
 
+  def ldap_groups
+    Devise::LDAP::Adapter.get_groups(login_with, self.ldap_domain)
+  end
+
   protected
 
   def reload_ldap_entry
