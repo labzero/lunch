@@ -57,13 +57,8 @@ class MembersService < MAPIService
   def users(member_id)
     users = nil
     ldap = Devise::LDAP::Connection.admin('extranet')
-    group = ldap.search(filter: "(&(CN=FHLB#{member_id.to_i})(objectClass=group))").try(:first)
-    if group
-      users = group[:member].collect do |dn|
-        ldap.search(:base => dn, :scope => Net::LDAP::SearchScope_BaseObject).try(:first)
-      end.compact.collect do |entry|
-        User.find_or_create_by_ldap_entry(entry)
-      end
+    ldap.open do
+      users = fetch_ldap_users(ldap, member_id)
     end
     users
   end
@@ -96,16 +91,35 @@ class MembersService < MAPIService
     end
 
     signers = JSON.parse(response.body)
-    users = self.users(member_id)
-    usernames = users.blank? ? [] : users.collect(&:username)
-    signers.each do |signer|
-      roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact
-      signers_and_users << {display_name: signer['name'], roles: roles} unless usernames.include?(signer['username'])
-    end
-    users.each do |user|
-      signers_and_users << {display_name: user.display_name || user.username, roles: user.roles}
+
+    Devise::LDAP::Connection.admin('extranet').open do |ldap|
+      users = fetch_ldap_users(ldap, member_id)
+      usernames = users.blank? ? [] : users.collect(&:username)
+      signers.each do |signer|
+        roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact
+        signers_and_users << {display_name: signer['name'], roles: roles} unless usernames.include?(signer['username'])
+      end
+
+      users.each do |user|
+        signers_and_users << {display_name: user.display_name || user.username, roles: user.roles}
+      end
     end
     signers_and_users
+  end
+
+  protected
+
+  def fetch_ldap_users(ldap, member_id)
+    users = nil
+    group = ldap.search(filter: "(&(CN=FHLB#{member_id.to_i})(objectClass=group))").try(:first)
+    if group
+      users = group[:member].collect do |dn|
+        ldap.search(:base => dn, :scope => Net::LDAP::SearchScope_BaseObject).try(:first)
+      end.compact.collect do |entry|
+        User.find_or_create_by_ldap_entry(entry)
+      end
+    end
+    users
   end
 
 end
