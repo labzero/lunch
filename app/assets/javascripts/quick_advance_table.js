@@ -43,7 +43,7 @@
     };
 
     function initiateQuickAdvance(rate_data) {
-      $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function(htmlResponse){
+      $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function (htmlResponse) {
         var $flyoutBottomSection = $('.flyout-bottom-section');
         var $oldNodes = $('.flyout-top-section-body span, .flyout-bottom-section table, .flyout-bottom-section .initiate-quick-advance');
 
@@ -52,14 +52,18 @@
         $oldNodes.hide();
         $('.flyout-top-section-body .quick-advance-preview-subheading').show();
 
+        transitionToLoadingFromPreview();
         // event listener and handler for back button click
-        $('.quick-advance-back-button').on('click', function() {
+        $('.quick-advance-back-button').on('click', function () {
           $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
           $oldNodes.show();
+        }).error(function () {
+          transitionToPreviewFromLoading();
+          $flyoutBottomSection.find('p[data-error-type=unknown]').show();
         });
 
         // event listener and handler for .confirm-quick-advance button click
-        $('.confirm-quick-advance').on('click', function() {
+        $('.confirm-quick-advance').on('click', function () {
           var $pin = $flyoutBottomSection.find('input[name=securid_pin]');
           var $token = $flyoutBottomSection.find('input[name=securid_token]');
           var pin = $pin.val();
@@ -71,7 +75,11 @@
             };
             performQuickAdvance($.extend(authentication_details, selected_rate));
           }
+        }).error(function () {
+          transitionToPreviewFromLoading();
+          $flyoutBottomSection.find('p[data-error-type=unknown]').show();
         });
+        transitionToPreviewFromLoading();
       });
     };
 
@@ -101,38 +109,36 @@
       var $flyoutTopSection = $('.flyout-top-section-body');
       var $quickAdvancePreview = $flyoutBottomSection.find('.quick-advance-preview');
       transitionToLoadingFromPreview();
-      setTimeout(function() {
-        $.post('/dashboard/quick_advance_perform', packageParameters(rate_data), function(json) {
-          if (json.securid == 'authenticated') {
-            $quickAdvancePreview.hide();
-            $flyoutBottomSection.append($(json.html));
-            $flyoutTopSection.find('.quick-advance-preview-subheading').hide();
-            $flyoutTopSection.find('.quick-advance-confirmation-subheading').show();
-          } else {
-            var error = 'unknown';
+      $.post('/dashboard/quick_advance_perform', packageParameters(rate_data), function(json) {
+        if (json.securid == 'authenticated') {
+          $quickAdvancePreview.hide();
+          $flyoutBottomSection.append($(json.html));
+          $flyoutTopSection.find('.quick-advance-preview-subheading').hide();
+          $flyoutTopSection.find('.quick-advance-confirmation-subheading').show();
+        } else {
+          var error = 'unknown';
 
-            $flyoutBottomSection.find('.input-field-error').removeClass('input-field-error');
-            transitionToPreviewFromLoading();
-
-            if ($.inArray(json.securid, ['invalid_token', 'invalid_pin', 'denied', 'must_resynchronize', 'must_change_pin']) != -1) {
-              error = json.securid;
-            }
-
-            $flyoutBottomSection.find('p[data-error-type=' + error + ']').show();
-
-            if (json.securid == 'invalid_pin' || json.securid == 'must_change_pin') {
-              $flyoutBottomSection.find('input[name=securid_pin]').addClass('input-field-error');
-            } else if (json.securid == 'invalid_token' || json.securid == 'must_resynchronize') {
-              $flyoutBottomSection.find('input[name=securid_token]').addClass('input-field-error');
-            } else if (json.securid == 'denied') {
-              $flyoutBottomSection.find('input[name=securid_pin], input[name=securid_token]').addClass('input-field-error');
-            }
-          }
-        }).error(function() {
+          $flyoutBottomSection.find('.input-field-error').removeClass('input-field-error');
           transitionToPreviewFromLoading();
-          $flyoutBottomSection.find('p[data-error-type=unknown]').show();
-        });
-      }, 3000);
+
+          if ($.inArray(json.securid, ['invalid_token', 'invalid_pin', 'denied', 'must_resynchronize', 'must_change_pin']) != -1) {
+            error = json.securid;
+          }
+
+          $flyoutBottomSection.find('p[data-error-type=' + error + ']').show();
+
+          if (json.securid == 'invalid_pin' || json.securid == 'must_change_pin') {
+            $flyoutBottomSection.find('input[name=securid_pin]').addClass('input-field-error');
+          } else if (json.securid == 'invalid_token' || json.securid == 'must_resynchronize') {
+            $flyoutBottomSection.find('input[name=securid_token]').addClass('input-field-error');
+          } else if (json.securid == 'denied') {
+            $flyoutBottomSection.find('input[name=securid_pin], input[name=securid_token]').addClass('input-field-error');
+          }
+        }
+      }).error(function() {
+        transitionToPreviewFromLoading();
+        $flyoutBottomSection.find('p[data-error-type=unknown]').show();
+      });
     };
 
     function transitionToLoadingFromPreview () {

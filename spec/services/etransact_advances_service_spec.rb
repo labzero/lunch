@@ -57,7 +57,7 @@ describe EtransactAdvancesService do
     end
     it 'returns nil if there is a JSON parsing error' do
       allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
-      expect(Rails.logger).to receive(:warn)
+      allow(Rails.logger).to receive(:warn)
       expect(quick_advance_validate).to be(nil)
     end
     it 'should URL encode the signer' do
@@ -80,8 +80,8 @@ describe EtransactAdvancesService do
       expect(quick_advance_execute[:initiated_at]).to be_kind_of(DateTime)
     end
     it 'returns nil if there is a JSON parsing error' do
-      expect(JSON).to receive(:parse).and_raise(JSON::ParserError)
-      expect(Rails.logger).to receive(:warn)
+      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+      allow(Rails.logger).to receive(:warn)
       expect(quick_advance_execute).to be(nil)
     end
     before { allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED) }
