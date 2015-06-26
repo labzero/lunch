@@ -50,14 +50,14 @@ module MAPI
 
         # private
         module Private
-          def self.fake_as_of_date
-            today = Time.zone.now.to_date
-            if today.wday == 0
-              today - 2.days
-            elsif today.wday == 1
-              today - 3.days
+          def self.fake_as_of_date(date=nil)
+            date = date || Time.zone.now.to_date
+            if date.wday == 0
+              date - 2.days
+            elsif date.wday == 1
+              date - 3.days
             else
-              today - 1.day
+              date - 1.day
             end
           end
 
