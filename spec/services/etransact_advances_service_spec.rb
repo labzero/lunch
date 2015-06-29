@@ -48,17 +48,21 @@ describe EtransactAdvancesService do
       expect(quick_advance_validate).to be_kind_of(Hash)
     end
     it 'should return nil if there was an API error' do
-      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
       expect(quick_advance_validate).to eq(nil)
     end
     it 'should return nil if there was a connection error' do
-      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
       expect(quick_advance_validate).to eq(nil)
     end
     it 'returns nil if there is a JSON parsing error' do
-      expect(JSON).to receive(:parse).and_raise(JSON::ParserError)
+      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
       expect(Rails.logger).to receive(:warn)
       expect(quick_advance_validate).to be(nil)
+    end
+    it 'should URL encode the signer' do
+      expect(URI).to receive(:escape).with(signer)
+      quick_advance_validate
     end
   end
   describe '`quick_advance_execute` method', :vcr do
@@ -83,6 +87,10 @@ describe EtransactAdvancesService do
     before { allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED) }
     it 'should return nil if there was a connection error' do
       expect(quick_advance_execute).to eq(nil)
+    end
+    it 'should URL encode the signer' do
+      expect(URI).to receive(:escape).with(signer)
+      quick_advance_execute
     end
   end
 end

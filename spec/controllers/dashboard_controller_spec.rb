@@ -142,8 +142,7 @@ RSpec.describe DashboardController, :type => :controller do
 
   describe "POST quick_advance_preview", :vcr do
     allow_policy :advances, :show?
-    let(:EtransactAdvancesService) {class_double(EtransactAdvancesService)}
-    let(:etransact_service_instance) {double('EtransactAdvancesService', quick_advance_preview: nil)}
+    let(:etransact_service_instance) {double('EtransactAdvancesService', quick_advance_validate: {}, signer_full_name: username)}
     let(:member_id) {750}
     let(:advance_term) {'someterm'}
     let(:advance_type) {'sometype'}
@@ -157,11 +156,6 @@ RSpec.describe DashboardController, :type => :controller do
     it 'should render its view' do
       make_request
       expect(response.body).to render_template('dashboard/quick_advance_preview')
-    end
-    it 'should call the EtransactAdvancesService object\'s `quick_advance_validate` method with the POSTed advance_type, advance_term and rate' do
-      expect(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
-      expect(etransact_service_instance).to receive(:quick_advance_validate).with(member_id, amount, advance_type, advance_term, advance_rate.to_f, URI.escape(username)).and_return({})
-      make_request
     end
     it 'should set @session_elevated to the result of calling `session_elevated?`' do
       result = double('needs securid')
@@ -201,6 +195,24 @@ RSpec.describe DashboardController, :type => :controller do
       make_request
       expect(assigns[:advance_rate]).to be_kind_of(Numeric)
     end
+    describe 'stubbed service' do
+      before do
+        allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
+      end
+      it 'should call the EtransactAdvancesService object\'s `quick_advance_validate` method with the POSTed advance_type, advance_term and rate' do
+        expect(etransact_service_instance).to receive(:quick_advance_validate).with(member_id, amount, advance_type, advance_term, advance_rate.to_f, username).and_return({})
+        make_request
+      end
+      it 'should request the signer full name' do
+        expect(etransact_service_instance).to receive(:signer_full_name).with(subject.current_user.username).and_return(username)
+        make_request
+      end
+      it 'should not request the signer full name if one is stored in the session' do
+        session['signer_full_name'] = 'foo'
+        expect(etransact_service_instance).to_not receive(:signer_full_name).with(subject.current_user.username)
+        make_request
+      end
+    end
   end
 
   describe "POST quick_advance_perform", :vcr do
@@ -226,7 +238,7 @@ RSpec.describe DashboardController, :type => :controller do
     it_behaves_like 'a user required action', :post, :quick_advance_perform
     it_behaves_like 'an authorization required method', :post, :quick_advance_perform, :advances, :show?
     it 'should call the EtransactAdvancesService object\'s `quick_advance_execute` method with the POSTed advance_type, advance_term and rate' do
-      expect(etransact_service_instance).to receive(:quick_advance_execute).with(member_id, amount, advance_type, advance_term, advance_rate.to_f, URI.escape(username)).and_return({})
+      expect(etransact_service_instance).to receive(:quick_advance_execute).with(member_id, amount, advance_type, advance_term, advance_rate.to_f, username).and_return({})
       make_request
     end
     it 'should render the confirmation view on success' do
@@ -285,6 +297,15 @@ RSpec.describe DashboardController, :type => :controller do
     it 'should set @advance_number' do
       make_request
       expect(assigns[:advance_number]).to be_kind_of(String)
+    end
+    it 'should request the signer full name' do
+      expect(etransact_service_instance).to receive(:signer_full_name).with(subject.current_user.username).and_return(username)
+      make_request
+    end
+    it 'should not request the signer full name if one is stored in the session' do
+      session['signer_full_name'] = 'foo'
+      expect(etransact_service_instance).to_not receive(:signer_full_name).with(subject.current_user.username)
+      make_request
     end
     describe 'with unelevated session' do
       before do

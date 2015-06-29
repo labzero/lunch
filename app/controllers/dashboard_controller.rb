@@ -8,6 +8,10 @@ class DashboardController < ApplicationController
     authorize :advances, :show?
   end
 
+  before_action only: [:quick_advance_perform, :quick_advance_preview] do
+    session['signer_full_name'] ||= EtransactAdvancesService.new(request).signer_full_name(current_user.username)
+  end
+
   def index
     today = Time.zone.now.to_date
     rate_service = RatesService.new(request)
@@ -99,8 +103,6 @@ class DashboardController < ApplicationController
     # TODO replace this with the timestamp from the cached quick advance rates timestamp
     date = DateTime.now - 2.hours
     @quick_advance_last_updated = date.strftime("%d %^b %Y, %l:%M %p")
-
-    @@signer_full_name = EtransactAdvancesService.new(request).signer_full_name(current_user.username)
   end
 
   def quick_advance_rates
@@ -113,7 +115,7 @@ class DashboardController < ApplicationController
   end
 
   def quick_advance_preview
-    preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, URI.escape(@@signer_full_name))
+    preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, session['signer_full_name'])
     @advance_amount = preview[:advance_amount]
     @advance_type = preview[:advance_type]
     @interest_day_count = preview[:interest_day_count]
@@ -144,7 +146,7 @@ class DashboardController < ApplicationController
     advance_success = false
     response_html = false
     if session_elevated?
-      confirmation = EtransactAdvancesService.new(request).quick_advance_execute(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, URI.escape(@@signer_full_name))
+      confirmation = EtransactAdvancesService.new(request).quick_advance_execute(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, session['signer_full_name'])
       if confirmation
         advance_success = true 
 
