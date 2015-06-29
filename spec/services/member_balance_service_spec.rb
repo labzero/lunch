@@ -956,17 +956,69 @@ describe MemberBalanceService do
         expect(Rails.logger).to receive(:warn)
         current_securities_position
       end
-      it 'should return nil if there was an API error that is not a 404' do
+      it 'should return nil if there was an API error' do
         allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
         expect(current_securities_position).to eq(nil)
-      end
-      it 'should return an {securities:[]} if the API returns a 404' do
-        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::Exception.new(nil, 404))
-        expect(current_securities_position).to eq({securities:[]})
       end
       it 'should return nil if there was a connection error' do
         allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
         expect(current_securities_position).to eq(nil)
+      end
+    end
+  end
+
+  describe 'the `monthly_securities_position` method', :vcr do
+    let(:monthly_securities_position) {subject.monthly_securities_position('2015-01-31','all')}
+    it 'returns a hash with an `as_of_date` that is a date' do
+      expect(monthly_securities_position[:as_of_date]).to be_kind_of(Date)
+    end
+    %w(total_original_par total_current_par total_market_value).each do |key|
+      it "returns a hash with a `#{key}` that is a float" do
+        expect(monthly_securities_position[key.to_sym]).to be_kind_of(Float)
+      end
+    end
+    it 'returns a hash with a `securities` array' do
+      expect(monthly_securities_position[:securities]).to be_kind_of(Array)
+    end
+    describe 'the `securities` array' do
+      it 'contains objects representing securities data' do
+        monthly_securities_position[:securities].each do |security|
+          expect(security[:custody_account_number]).to be_kind_of(String)
+          expect(security[:custody_account_type]).to be_kind_of(String)
+          expect(security[:security_pledge_type]).to be_kind_of(String)
+          expect(security[:cusip]).to be_kind_of(String)
+          expect(security[:description]).to be_kind_of(String)
+          expect(security[:reg_id]).to be_kind_of(String)
+          expect(security[:pool_number]).to be_kind_of(String)
+          expect(security[:coupon_rate]).to be_kind_of(Float)
+          expect(security[:maturity_date]).to be_kind_of(String)
+          expect(security[:original_par]).to be_kind_of(Float)
+          expect(security[:factor]).to be_kind_of(Float)
+          expect(security[:factor_date]).to be_kind_of(String)
+          expect(security[:current_par]).to be_kind_of(Float)
+          expect(security[:price]).to be_kind_of(Float)
+          expect(security[:price_date]).to be_kind_of(String)
+          expect(security[:market_value]).to be_kind_of(Float)
+        end
+      end
+    end
+    describe 'error states' do
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(monthly_securities_position).to be(nil)
+      end
+      it 'should log an error if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(Rails.logger).to receive(:warn)
+        monthly_securities_position
+      end
+      it 'should return nil if there was an API error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(monthly_securities_position).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(monthly_securities_position).to eq(nil)
       end
     end
   end

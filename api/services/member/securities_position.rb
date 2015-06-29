@@ -20,25 +20,21 @@ module MAPI
           price: {current: 'SSX_PRICE', monthly: 'SSX_PRICE'},
           price_date: {current: 'SSX_PRICE_DATE', monthly: 'SSX_PRICE_DATE'},
           market_value: {current: 'SSX_MARKET_VALUE', monthly: 'SSD_MARKET_VALUE'}
-        }.with_indifferent_access
+        }.with_indifferent_access.freeze
 
         SECURITIES_QUERY_MAPPINGS = {
           as_of_date: {current: 'SSX_BTC_DATE', monthly: 'SSX_BTC_DATE'},
           query_table: {current: 'SAFEKEEPING.SSK_INTRADAY_SEC_POSITION', monthly: 'SAFEKEEPING.SSK_EOM_RPT_VIEW'}
-        }
+        }.freeze
 
-        STRING_FIELDS = %i(custody_account_number custody_account_type security_pledge_type cusip description pool_number reg_id)
-        FLOAT_FIELDS = %i(coupon_rate original_par factor current_par price market_value)
-        DATE_FIELDS = %i(maturity_date factor_date price_date)
+        STRING_FIELDS = %i(custody_account_number custody_account_type security_pledge_type cusip description pool_number reg_id).freeze
+        FLOAT_FIELDS = %i(coupon_rate original_par factor current_par price market_value).freeze
+        DATE_FIELDS = %i(maturity_date factor_date price_date).freeze
 
         def self.securities_position(app, member_id, report_type, options = {custody_account_type:nil})
           report_type = report_type.to_sym
           if app.settings.environment == :production
-            selection_string = "#{SECURITIES_QUERY_MAPPINGS[:as_of_date][report_type]},"
-            SECURITIES_FIELD_MAPPINGS.each_with_index do |(key, value), i|
-              selection_string += SECURITIES_FIELD_MAPPINGS[key][report_type].to_s
-              selection_string += ',' unless i == (SECURITIES_FIELD_MAPPINGS.length - 1)
-            end
+            selection_string = "#{SECURITIES_QUERY_MAPPINGS[:as_of_date][report_type]}, #{SECURITIES_FIELD_MAPPINGS.collect{|key, value| value[report_type].to_s}.join(',')}"
             securities_query = <<-SQL
               SELECT #{selection_string}
               FROM #{SECURITIES_QUERY_MAPPINGS[:query_table][report_type]}

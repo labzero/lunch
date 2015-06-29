@@ -38,6 +38,7 @@ Rails.application.routes.draw do
   get '/reports/authorizations' => 'reports#authorizations'
   get '/reports/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: 'reports_parallel_shift'
   get '/reports/current-securities-position' => 'reports#current_securities_position'
+  get '/reports/monthly-securities-position' => 'reports#monthly_securities_position'
   get '/reports/forward-commitments' => 'reports#forward_commitments'
 
   get '/advances' => 'advances#index'

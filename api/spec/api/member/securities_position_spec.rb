@@ -69,7 +69,7 @@ describe MAPI::ServiceApp do
             allow(MAPI::Services::Member::SecuritiesPosition::Private).to receive(:fake_securities).and_return(securities)
             if env == :production
               allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
-              expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(securities_result_set)
+              allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(securities_result_set)
               allow(securities_result_set).to receive(:fetch_hash).and_return(*securities_result)
             end
           end

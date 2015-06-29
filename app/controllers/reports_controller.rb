@@ -16,6 +16,7 @@ class ReportsController < ApplicationController
   SECURITIES_TRANSACTION_WEB_FLAGS = [MembersService::SECURITIES_TRANSACTION_DATA]
   PARALLEL_SHIFT_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
   CURRENT_SECURITIES_POSITION_WEB_FLAG = [MembersService::CURRENT_SECURITIES_POSITION]
+  MONTHLY_SECURITIES_WEB_FLAGS = [MembersService::MONTHLY_SECURITIES_POSITION]
   FORWARD_COMMITMENTS_WEB_FLAG = [MembersService::ADVANCES_DETAIL_DATA]
 
   AUTHORIZATIONS_MAPPING = {
@@ -144,7 +145,8 @@ class ReportsController < ApplicationController
         },
         monthly: {
           updated: t('global.monthly'),
-          available_history: t('reports.history.months18')
+          available_history: t('reports.history.months18'),
+          path: reports_monthly_securities_position_path
         },
         services_monthly: {
           updated: t('global.monthly'),
@@ -744,25 +746,24 @@ class ReportsController < ApplicationController
       @current_securities_position = member_balances.current_securities_position(@securities_filter)
       raise StandardError, "There has been an error and ReportsController#current_securities_position has encountered nil. Check error logs." if @current_securities_position.nil?
     end
-    as_of_date = @current_securities_position[:as_of_date]
-    @headings = {
-      total_original_par: t("reports.pages.securities_position.#{@securities_filter}_securities.total_original_par_heading", date: fhlb_date_long_alpha(as_of_date)),
-      total_current_par: t("reports.pages.securities_position.#{@securities_filter}_securities.total_current_par_heading", date: fhlb_date_long_alpha(as_of_date)),
-      total_market_value: t("reports.pages.securities_position.#{@securities_filter}_securities.total_market_value_heading", date: fhlb_date_long_alpha(as_of_date)),
-      table_heading: t("reports.pages.securities_position.#{@securities_filter}_securities.table_heading", n: @current_securities_position[:securities].length, date: fhlb_date_long_alpha(as_of_date)),
-      footer_total: t("reports.pages.securities_position.#{@securities_filter}_securities.total")
-    }
-    @securities_filter_options = [
-      [t('reports.pages.securities_position.filter.all'), 'all'],
-      [t('reports.pages.securities_position.filter.pledged'), 'pledged'],
-      [t('reports.pages.securities_position.filter.unpledged'), 'unpledged']
-    ]
-    @securities_filter_options.each do |option|
-      if option[1] == @securities_filter
-        @securities_filter_text = option[0]
-        break
-      end
+    securities_instance_variables(@current_securities_position, @securities_filter)
+  end
+
+  def monthly_securities_position
+    @securities_filter = params['securities_filter'] || 'all'
+    today = Time.zone.now
+    max_date = today.day == today.end_of_month.day ? today.end_of_month : (today - 1.month).end_of_month
+    @month_end_date = (params[:start_date] || max_date).to_date
+    @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
+    @picker_presets = date_picker_presets(@month_end_date)
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    if report_disabled?(MONTHLY_SECURITIES_WEB_FLAGS)
+      @monthly_securities_position = {securities:[]}
+    else
+      @monthly_securities_position = member_balances.monthly_securities_position(@month_end_date, @securities_filter)
+      raise StandardError, "There has been an error and ReportsController#monthly_securities_position has encountered nil. Check error logs." if @monthly_securities_position.nil?
     end
+    securities_instance_variables(@monthly_securities_position, @securities_filter)
   end
 
   def forward_commitments
@@ -771,7 +772,7 @@ class ReportsController < ApplicationController
       forward_commitments = {}
     else
       forward_commitments = member_balances.forward_commitments
-      raise StandardError, "There has been an error and ReportsController#forward_commitments has encountered nil. Check error logs." if forward_commitments.nil?
+      raise StandardError, "There has been an error and ReportsController#monthly_securities_position has encountered nil. Check error logs." if forward_commitments.nil?
     end
 
     rows = if forward_commitments[:advances]
@@ -809,6 +810,28 @@ class ReportsController < ApplicationController
   end
 
   private
+  def securities_instance_variables(securities_position, filter)
+    as_of_date = securities_position[:as_of_date]
+    @headings = {
+      total_original_par: t("reports.pages.securities_position.#{filter}_securities.total_original_par_heading", date: fhlb_date_long_alpha(as_of_date)),
+      total_current_par: t("reports.pages.securities_position.#{filter}_securities.total_current_par_heading", date: fhlb_date_long_alpha(as_of_date)),
+      total_market_value: t("reports.pages.securities_position.#{filter}_securities.total_market_value_heading", date: fhlb_date_long_alpha(as_of_date)),
+      table_heading: t("reports.pages.securities_position.#{filter}_securities.table_heading", n: securities_position[:securities].length, date: fhlb_date_long_alpha(as_of_date)),
+      footer_total: t("reports.pages.securities_position.#{filter}_securities.total")
+    }
+    @securities_filter_options = [
+      [t('reports.pages.securities_position.filter.all'), 'all'],
+      [t('reports.pages.securities_position.filter.pledged'), 'pledged'],
+      [t('reports.pages.securities_position.filter.unpledged'), 'unpledged']
+    ]
+    @securities_filter_options.each do |option|
+      if option[1] == @securities_filter
+        @securities_filter_text = option[0]
+        break
+      end
+    end
+  end
+
   def report_disabled?(report_flags)
     member_info = MembersService.new(request)
     member_info.report_disabled?(current_member_id, report_flags)
