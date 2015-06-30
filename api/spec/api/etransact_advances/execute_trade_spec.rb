@@ -60,7 +60,10 @@ describe MAPI::ServiceApp do
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('open', 'whole', Date.today, Date.today)).to eq(open_response)
     end
     it 'should return whole loan 1 week payment info' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('1week', 'whole', Date.today, Date.today)).to eq(whole_1_week_response)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('1week', 'whole', Date.new(2015,6,7), Date.new(2015,6,7))).to eq(whole_1_week_response)
+    end
+    it 'should return a next month payment info if a whole loan is excuted on the last day of the month' do
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('1week', 'whole', Date.new(2015,6,30), Date.new(2015,6,30))).to eq(next_month_response)
     end
     it 'should return next month payment info' do
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('1week', 'whole', Date.today, Date.today+32.days)).to eq(next_month_response)
