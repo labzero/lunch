@@ -9,13 +9,9 @@ RSpec.describe ReportsController, :type => :controller do
   let(:start_date) {Date.new(2014,12,01)}
   let(:end_date) {Date.new(2014,12,31)}
   let(:picker_preset_hash) {double(Hash)}
-  let(:zone) {double('Time.zone')}
-  let(:now) {double('Time.zone.now')}
 
   before do
-    allow(now).to receive(:to_date).at_least(1).and_return(today)
-    allow(zone).to receive(:now).at_least(1).and_return(now)
-    allow(Time).to receive(:zone).at_least(1).and_return(zone)
+    allow(Time.zone).to receive(:now).and_return(today)
   end
 
   describe 'GET index' do
@@ -667,7 +663,7 @@ RSpec.describe ReportsController, :type => :controller do
           [I18n.t('reports.pages.securities_position.filter.pledged'), 'pledged'],
           [I18n.t('reports.pages.securities_position.filter.unpledged'), 'unpledged']
         ]
-        let(:securities_position_response) { double('Current Securites Position response', :[] => nil) }
+        let(:securities_position_response) { double('Current Securities Position response', :[] => nil) }
         let(:as_of_date) { Date.new(2014,1,1) }
         before {
           allow(securities_position_response).to receive(:[]).with(:securities).and_return([])
@@ -709,7 +705,58 @@ RSpec.describe ReportsController, :type => :controller do
             expect(assigns[:securities_filter_text]).to eq(option.first)
           end
         end
-
+      end
+    end
+    describe 'GET monthly_securities_position' do
+      it_behaves_like 'a user required action', :get, :monthly_securities_position
+      describe 'view instance variables' do
+        dropdown_options = [
+          [I18n.t('reports.pages.securities_position.filter.all'), 'all'],
+          [I18n.t('reports.pages.securities_position.filter.pledged'), 'pledged'],
+          [I18n.t('reports.pages.securities_position.filter.unpledged'), 'unpledged']
+        ]
+        let(:securities_position_response) { double('Monthly Securities Position response', :[] => nil) }
+        let(:as_of_date) { Date.new(2014,1,1) }
+        before {
+          allow(securities_position_response).to receive(:[]).with(:securities).and_return([])
+          allow(member_balance_service_instance).to receive(:monthly_securities_position).and_return(securities_position_response)
+        }
+        it 'sets @current_securities_position to the hash returned from MemberBalanceService' do
+          get :monthly_securities_position
+          expect(assigns[:monthly_securities_position]).to eq(securities_position_response)
+        end
+        it 'sets @current_securities_position to {securities:[]} if the report is disabled' do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::MONTHLY_SECURITIES_WEB_FLAGS).and_return(true)
+          get :monthly_securities_position
+          expect(assigns[:monthly_securities_position]).to eq({securities:[]})
+        end
+        it 'sets @securities_filter to `all` if no securities_filter param is provided' do
+          get :monthly_securities_position
+          expect(assigns[:securities_filter]).to eq('all')
+        end
+        it 'sets @securities_filter to the value of the securities_filter param' do
+          get :monthly_securities_position, securities_filter: 'some filter'
+          expect(assigns[:securities_filter]).to eq('some filter')
+        end
+        it 'sets @headings to a hash containing various headings for the page' do
+          get :monthly_securities_position
+          expect(assigns[:headings]).to be_kind_of(Hash)
+          expect(assigns[:headings][:total_original_par]).to be_kind_of(String)
+          expect(assigns[:headings][:total_current_par]).to be_kind_of(String)
+          expect(assigns[:headings][:total_market_value]).to be_kind_of(String)
+          expect(assigns[:headings][:table_heading]).to be_kind_of(String)
+          expect(assigns[:headings][:footer_total]).to be_kind_of(String)
+        end
+        it 'sets @securities_filter_options to an array of arrays containing the appropriate values and labels for credit, debit, daily balance and all' do
+          get :monthly_securities_position
+          expect(assigns[:securities_filter_options]).to eq(dropdown_options)
+        end
+        dropdown_options.each do |option|
+          it "sets @securities_filter_text to the appropriate value when @securities_filter equals `#{option.last}`" do
+            get :monthly_securities_position, securities_filter: option.last
+            expect(assigns[:securities_filter_text]).to eq(option.first)
+          end
+        end
       end
     end
     describe 'GET forward_commitments' do

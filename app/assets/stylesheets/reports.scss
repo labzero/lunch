@@ -711,7 +711,7 @@ td.dataTables_empty {
   margin: 15px 0 30px;
 }
 
-.current-securities-report {
+.securities-report {
   .report-summary-data {
     width: 290px;
     margin-right: 20px;
@@ -719,14 +719,54 @@ td.dataTables_empty {
       white-space: nowrap;
     }
   }
+  .report-main-body small p {
+    margin-bottom: 1em;
+  }
+  .report-table {
+    td, th {
+      @include table-cell-treatment;
+    }
+    th {
+      &:nth-child(1), &:nth-child(4) {
+        width: 66px;
+      }
+      &:nth-child(2), &:nth-child(7) {
+        width: 80px;
+      }
+      &:nth-child(3) {
+        width: 130px;
+      }
+      &:nth-child(5) {
+        width: 74px;
+      }
+      &:nth-child(6), &:nth-child(8) {
+        width: 100px;
+      }
+      &:nth-child(9) {
+        width: 70px;
+      }
+      &:nth-child(10) {
+        width: 114px;
+      }
+    }
+    tfoot {
+      td {
+        &:nth-child(1), &:nth-child(4) {
+          border-right: none;
+        }
+      }
+    }
+  }
 }
 
 .expanding-row-table {
-  td, th {
-    @include table-cell-treatment;
-  }
-  th:last-child {
-    display: none;
+  .report-table {
+    td, th {
+      @include table-cell-treatment;
+    }
+    th:last-child {
+      display: none;
+    }
   }
 }
 

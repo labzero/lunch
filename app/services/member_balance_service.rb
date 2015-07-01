@@ -512,7 +512,7 @@ class MemberBalanceService < MAPIService
       response = @connection["member/#{@member_id}/current_securities_position/#{custody_account_type}"].get
     rescue RestClient::Exception => e
       Rails.logger.warn("MemberBalanceService.current_securities_position encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return e.http_code == 404 ? {securities:[]} : nil
+      return nil
     rescue Errno::ECONNREFUSED => e
       Rails.logger.warn("MemberBalanceService.current_securities_position encountered a connection error: #{e.class.name}")
       return nil
@@ -524,7 +524,29 @@ class MemberBalanceService < MAPIService
       Rails.logger.warn("MemberBalanceService.current_securities_position encountered a JSON parsing error: #{e}")
       return nil
     end
-    data[:as_of_date] = data[:as_of_date].to_date
+    data[:as_of_date] = (data[:as_of_date].to_date if data[:as_of_date])
+    data
+  end
+
+  def monthly_securities_position(month_end_date, custody_account_type)
+    month_end_date = month_end_date.to_date.strftime('%Y-%m-%d')
+    begin
+      response = @connection["member/#{@member_id}/monthly_securities_position/#{month_end_date}/#{custody_account_type}"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.monthly_securities_position encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.monthly_securities_position encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.monthly_securities_position encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data[:as_of_date] = (data[:as_of_date].to_date if data[:as_of_date])
     data
   end
 

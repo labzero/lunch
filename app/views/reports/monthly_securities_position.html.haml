@@ -2,10 +2,10 @@
 - @page_title = t('reports.meta_title')
 .report.securities-report.expanding-row-table.row
   .report-header
-    %h1= t('reports.pages.securities_position.current')
+    %h1= t('reports.pages.securities_position.monthly')
     = render 'reports_header_buttons'
     .report-inputs
-      = form_tag(reports_current_securities_position_url, method: 'GET') do
+      = render layout: 'reports_date_picker_form', locals: {start_date: @month_end_date, report_url: reports_monthly_securities_position_url, presets: @picker_presets, single_date_picker: true, max_date: Time.zone.now.to_date, date_picker_filter: @date_picker_filter} do
         .report-filter
           = render 'shared/dropdown', dropdown_name: 'securities_filter', default_value: @securities_filter, default_text: @securities_filter_text, dropdown_options: @securities_filter_options
-  = render 'securities_position', securities_position: @current_securities_position
+  = render 'securities_position', securities_position: @monthly_securities_position

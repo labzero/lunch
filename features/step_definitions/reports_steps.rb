@@ -82,6 +82,8 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/current-securities-position'
   when 'Forward Commitments'
     visit '/reports/forward-commitments'
+  when 'Monthly Securities Position'
+    visit '/reports/monthly-securities-position'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
@@ -253,7 +255,7 @@ Then(/^I should only see "(.*?)" rows in the Settlement Transaction Account Stat
   end
 end
 
-Then(/^I should see a current securities position report for (Pledged|Unpledged) Securities$/) do |filter_type|
+Then(/^I should see a (current|monthly) securities position report for (Pledged|Unpledged) Securities$/) do |report_type, filter_type|
   table_header = page.find('.report-table-title').text
   expect(table_header).to include(filter_type)
   if !page.find(".report-table tbody tr:first-child td:first-child")['class'].split(' ').include?('dataTables_empty')

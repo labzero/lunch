@@ -1,23 +1,23 @@
 module MAPI
   module Models
-    class MemberCurrentSecuritiesPosition
+    class MemberSecuritiesPosition
       include Swagger::Blocks
-      swagger_model :MemberCurrentSecuritiesPosition do
+      swagger_model :MemberSecuritiesPosition do
         property :as_of_date do
           key :type, :date
-          key :description, 'Last date FHLB calculated Current Securities Position for member'
+          key :description, 'Date FHLB calculated Securities Position'
         end
         property :total_original_par do
           key :type, :float
-          key :description, 'The total original par for all current securities'
+          key :description, 'The total original par for given securities'
         end
         property :total_current_par do
           key :type, :float
-          key :description, 'The total current par for all current securities'
+          key :description, 'The total current par for given securities'
         end
         property :total_market_value do
           key :type, :float
-          key :description, 'The total market value for all current securities'
+          key :description, 'The total market value for given securities'
         end
         property :securities do
           key :type, :array
@@ -46,7 +46,7 @@ module MAPI
         end
         property :description do
           key :type, :string
-          key :description, "A desciption of the security"
+          key :description, "A description of the security"
         end
         property :reg_id do
           key :type, :string

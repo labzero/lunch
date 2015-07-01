@@ -206,7 +206,6 @@ $(function () {
     switch (filter) {
       case filterOptions['end_of_month']:
         $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
-        $(picker.container.find('.ranges li')[3]).addClass('disabled'); // 'End of {year}'
         break;
       case filterOptions['end_of_quarter']:
         $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
