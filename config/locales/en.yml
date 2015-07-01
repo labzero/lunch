@@ -713,6 +713,9 @@ en:
       activity:
         title: Capital Stock Activity Statement
         summary: Shows all stock activity for a specified period.
+      capital_stock_and_leverage:
+        title: Capital Stock Position and Leverage Statement
+        summary: ''
       dividend_statement:
         title: Dividend Transaction Statement
         summary: Includes the date the last dividend was paid, the dividend rate, the number and amount of shares received, and the amount of each cash dividend paid.
@@ -1008,6 +1011,17 @@ en:
           p3: The Bank may, in its sole discretion, provide the "Factor," "Price," "Current Par," and "Market Value" for securities held by the Bank on the Member's behalf. The Bank obtains the "Factor" and "Price" for each such security from one or more outside services and uses the "Factor" to calculate the security's "Current Par," which in turn with the "Price" is used to calculate the security's "Market Value." A blank "Factor," "Price," "Current Par or "Market Value" field means the outside service could not or did not provide the "Factor" or "Price" value to the Bank or the security does not have a "Factor" value.
       forward_commitments:
         title: Forward Commitments
+      capital_stock_and_leverage:
+        title: Capital Stock Position and Leverage Statement
+        cap_stock_position: Capital Stock Position
+        cap_stock_leverage: Capital Stock Leverage
+        stock_owned: Stock Owned
+        minimum_requirement: Minimum Stock Requirement
+        excess_stock: Stock Excess/(Deficiency)
+        surplus_stock: Surplus Stock
+        activity_based_requirement: Activity-Based Stock Requirement
+        remaining_stock_html: "Remaining<br> Stock"
+        remaining_leverage: Remaining Leverage
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.

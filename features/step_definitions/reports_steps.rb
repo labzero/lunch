@@ -93,6 +93,8 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/forward-commitments'
   when 'Monthly Securities Position'
     visit '/reports/monthly-securities-position'
+  when 'Capital Stock Position and Leverage Statement'
+    visit '/reports/capital-stock-and-leverage'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end

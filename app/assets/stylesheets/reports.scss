@@ -802,6 +802,46 @@ td.dataTables_empty {
   }
 }
 
+.cap-stock-position-table, .cap-stock-leverage-table {
+  width: 512px;
+  td, th {
+    @include table-cell-treatment;
+  }
+  th {
+    &:nth-child(1) {
+      width: 118px;
+    }
+  }
+}
+
+.cap-stock-position-table {
+  th {
+    &:nth-child(2) {
+      width: 112px;
+    }
+    &:nth-child(3) {
+      width: 164px;
+    }
+    &:nth-child(4) {
+      width: 118px;
+    }
+  }
+}
+
+.cap-stock-leverage-table {
+  th {
+    &:nth-child(2) {
+      width: 136px;
+    }
+    &:nth-child(3) {
+      width: 140px;
+    }
+    &:nth-child(4) {
+      width: 120px;
+    }
+  }
+}
+
 @media print {
   .report {
     color: $print-color;

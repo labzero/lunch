@@ -1,0 +1,10 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.row
+  .report-header
+    %h1= t('reports.pages.capital_stock_and_leverage.title')
+  .report-main-body
+    %h2.report-table-title= t('reports.pages.capital_stock_and_leverage.cap_stock_position')
+    = render 'reports/reports_table', table_class: 'cap-stock-position-table', table_data: @position_table_data, sortable: false
+    %h2.report-table-title= t('reports.pages.capital_stock_and_leverage.cap_stock_leverage')
+    = render 'reports/reports_table', table_class: 'cap-stock-leverage-table', table_data: @leverage_table_data, sortable: false
