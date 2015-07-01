@@ -36,10 +36,10 @@ describe MAPI::ServiceApp do
     end
     describe 'in the production environment' do
       let(:result_set) {double('Oracle Result Set', fetch: nil)}
-      let!(:full_name) {['full_name']}
+      let(:full_name) {['full_name']}
       before do
-        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
-        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
+        allow(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
+        allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
         allow(result_set).to receive(:fetch).and_return(full_name)
       end
       it 'should return signer full name' do
