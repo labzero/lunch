@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150430204209) do
+ActiveRecord::Schema.define(version: 20150630000648) do
 
   create_table "corporate_communications", force: :cascade do |t|
     t.string   "email_id"
@@ -24,14 +24,15 @@ ActiveRecord::Schema.define(version: 20150430204209) do
   add_index "corporate_communications", ["category"], name: "i_cor_com_cat"
 
   create_table "job_statuses", force: :cascade do |t|
-    t.integer  "user_id",             limit: 16, precision: 38
+    t.integer  "user_id",             limit: 16,  precision: 38
     t.string   "job_id"
-    t.integer  "status",              limit: 16, precision: 38, default: 0
+    t.integer  "status",              limit: 16,  precision: 38, default: 0
     t.datetime "finished_at"
     t.string   "result_file_name"
     t.string   "result_content_type"
-    t.integer  "result_file_size",    limit: 16, precision: 38
+    t.integer  "result_file_size",    limit: 16,  precision: 38
     t.datetime "result_updated_at"
+    t.boolean  "no_download",         limit: nil,                default: false
   end
 
   add_index "job_statuses", ["finished_at"], name: "i_job_statuses_finished_at"

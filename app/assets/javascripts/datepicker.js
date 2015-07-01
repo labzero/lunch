@@ -1,64 +1,76 @@
 $(function () {
 
-  // set up all date-pickers on the page
-  $('.datepicker-trigger').each(function(i, datePickerTrigger) {
+  function bindDatepickers() {
+    // set up all date-pickers on the page
+    $('.datepicker-trigger').each(function(i, datePickerTrigger) {
+      var $datePickerTrigger = $(datePickerTrigger);
 
-    var $datePickerTrigger = $(datePickerTrigger);
-    var $wrapper = $($datePickerTrigger.siblings('.datepicker-wrapper'));
-    var openDir = $wrapper.data('date-picker-open-direction') || false;
-    var singleDatePicker = $wrapper.data('date-picker-single-date-picker') || false;
-    var presets = $wrapper.data('date-picker-presets');
-    var $form = $($wrapper.data('date-picker-form'));
-    var ranges = {};
-    var lastCustomLabel;
-    var defaultPreset = 1;
-    var maxDate = $wrapper.data('date-picker-max-date') ? moment($wrapper.data('date-picker-max-date')) : false;
-    var filter = $wrapper.data('date-picker-filter');
-    var filterOptions = $wrapper.data('date-picker-filter-options');
-    $.each(presets, function(index, preset) {
-      if (preset.start_date) {
-        preset.start_date = moment(preset.start_date);
+      if ($datePickerTrigger.data('datepicker-initialized')) {
+        return;
       };
-      if (preset.end_date) {
-        preset.end_date = moment(preset.end_date);
+
+      var $wrapper = $($datePickerTrigger.siblings('.datepicker-wrapper'));
+      var openDir = $wrapper.data('date-picker-open-direction') || false;
+      var singleDatePicker = $wrapper.data('date-picker-single-date-picker') || false;
+      var presets = $wrapper.data('date-picker-presets');
+      var $form = $($wrapper.data('date-picker-form'));
+      var ranges = {};
+      var lastCustomLabel;
+      var defaultPreset = 1;
+      var maxDate = $wrapper.data('date-picker-max-date') ? moment($wrapper.data('date-picker-max-date')) : false;
+      var filter = $wrapper.data('date-picker-filter');
+      var filterOptions = $wrapper.data('date-picker-filter-options');
+      $.each(presets, function(index, preset) {
+        if (preset.start_date) {
+          preset.start_date = moment(preset.start_date);
+        };
+        if (preset.end_date) {
+          preset.end_date = moment(preset.end_date);
+        };
+        if (!preset.is_custom) {
+          ranges[preset.label] = [preset.start_date, preset.end_date]
+        } else {
+          lastCustomLabel = preset.label;
+        };
+        if (preset.is_default) {
+          defaultPreset = index;
+        };
+      });
+
+      var startDate = presets[defaultPreset].start_date;
+      var endDate = presets[defaultPreset].end_date
+
+      initializeDatePicker($datePickerTrigger, $wrapper, {
+        ranges: ranges,
+        customLabel: lastCustomLabel,
+        opens: openDir,
+        defaultPreset: defaultPreset,
+        startDate: startDate,
+        endDate: endDate,
+        singleDatePicker: singleDatePicker,
+        maxDate: maxDate,
+        filter: filter,
+        filterOptions: filterOptions
+      });
+      datePickerSelectionHandler($datePickerTrigger, $wrapper, presets);
+      setDatePickerApplyListener($datePickerTrigger, $form);
+      setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
+      if (filter !== undefined) {
+        disablePresets($datePickerTrigger, filter, filterOptions);
+        if (singleDatePicker) {
+          $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(){
+            filterDates(filter, filterOptions);
+          });
+        };
       };
-      if (!preset.is_custom) {
-        ranges[preset.label] = [preset.start_date, preset.end_date]
-      } else {
-        lastCustomLabel = preset.label;
-      };
-      if (preset.is_default) {
-        defaultPreset = index;
-      };
+
+      $datePickerTrigger.data('datepicker-initialized', true);
     });
+  };
 
-    var startDate = presets[defaultPreset].start_date;
-    var endDate = presets[defaultPreset].end_date
+  bindDatepickers();
 
-    initializeDatePicker($datePickerTrigger, $wrapper, {
-      ranges: ranges,
-      customLabel: lastCustomLabel,
-      opens: openDir,
-      defaultPreset: defaultPreset,
-      startDate: startDate,
-      endDate: endDate,
-      singleDatePicker: singleDatePicker,
-      maxDate: maxDate,
-      filter: filter,
-      filterOptions: filterOptions
-    });
-    datePickerSelectionHandler($datePickerTrigger, $wrapper, presets);
-    setDatePickerApplyListener($datePickerTrigger, $form);
-    setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
-    if (filter !== undefined) {
-      disablePresets($datePickerTrigger, filter, filterOptions);
-      if (singleDatePicker) {
-        $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(){
-          filterDates(filter, filterOptions);
-        });
-      };
-    };
-  });
+  $('body').on('datepicker-rebind', bindDatepickers);
 
   function initializeDatePicker($datePickerTrigger, $datePickerWrapper, options) {
     var optionsHash = {

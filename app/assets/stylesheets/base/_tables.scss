@@ -17,6 +17,46 @@ td {
   }
 }
 
+table.table-loading, table.table-error {
+  td.table-loading-cell, td.table-error-cell {
+    @extend %typography-paragraph;
+    background: $white;
+    text-align: center;
+    padding: 40px 0px;
+    vertical-align: baseline;
+    &:before {
+      display: inline-block;
+      pointer-events: none;
+      vertical-align: middle;
+      margin-right: 20px;
+    }
+  }
+  .table-loading-cell:before {
+    @include icon-loading;
+    content: '';
+  }
+
+  .table-error-cell:before {
+    @extend %icon-alert;
+    font-size: $spinner-size;
+    color: $alert-red;
+  }
+}
+
+.table-error-cell {
+  display: none;
+}
+
+table.table-error  {
+  td.table-loading-cell {
+    display: none;
+  }
+
+  td.table-error-cell {
+    display: table-cell;
+  }
+}
+
 %empty_table_cell {
   @extend %typography-table-data-unavailable;
   color: $medium-gray;

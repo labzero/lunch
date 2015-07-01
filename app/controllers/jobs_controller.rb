@@ -11,18 +11,12 @@ class JobsController < ApplicationController
 
   def download
     id = params[:job_status_id].to_i
-    job_status = JobStatus.find_by(id: id, user_id: current_user.id)
-    Tempfile.open('job_result', Rails.root.join('tmp')) do |f|
-      begin
-        job_status.result.copy_to_local_file(:original, f.path)
-        send_data f.read,
-                  filename: job_status.result_file_name,
-                  type: job_status.result_content_type,
-                  disposition: 'attachment'
-      ensure
-        f.unlink
-      end
-    end
+    job_status = JobStatus.find_by(id: id, user_id: current_user.id, no_download: false)
+    raise ActiveRecord::RecordNotFound unless job_status
+    send_data job_status.result_as_string,
+      filename: job_status.result_file_name,
+      type: job_status.result_content_type,
+      disposition: 'attachment'
     job_status.destroy if job_status
   end
 

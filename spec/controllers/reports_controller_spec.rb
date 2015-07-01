@@ -1162,11 +1162,13 @@ RSpec.describe ReportsController, :type => :controller do
     it_behaves_like 'a user required action', :get, :authorizations
     describe 'view instance variables' do
       let(:member_service_instance) {double('MembersService')}
-      let(:user_no_roles) {OpenStruct.new(display_name: 'User With No Roles', roles: [])}
-      let(:user_etransact) {OpenStruct.new(display_name: 'Etransact User', roles: [User::Roles::ETRANSACT_SIGNER])}
+      let(:user_no_roles) {{display_name: 'User With No Roles', roles: []}}
+      let(:user_etransact) {{display_name: 'Etransact User', roles: [User::Roles::ETRANSACT_SIGNER]}}
       let(:signers_and_users) {[user_no_roles, user_etransact]}
       let(:roles) {['all', User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::AFFORDABILITY_SIGNER, User::Roles::COLLATERAL_SIGNER, User::Roles::MONEYMARKET_SIGNER, User::Roles::DERIVATIVES_SIGNER, User::Roles::SECURITIES_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER, User::Roles::ETRANSACT_SIGNER]}
       let(:role_translations) {[t('user_roles.all_authorizations'), t('user_roles.resolution.dropdown'), t('user_roles.entire_authority.dropdown'), t('user_roles.affordable_housing.title'), t('user_roles.collateral.title'), t('user_roles.money_market.title'), t('user_roles.interest_rate_derivatives.title'), t('user_roles.securities.title'), t('user_roles.wire_transfer.title'), t('user_roles.access_manager.title'), t('user_roles.etransact.title')]}
+      let(:job_id) {rand(1000..10000)}
+      let(:job_status) { double('A Job Status', result_as_string: '[]', destroy: nil, id: job_id, update_attributes!: nil) }
       before do
         allow(MembersService).to receive(:new).and_return(member_service_instance)
         allow(member_service_instance).to receive(:signers_and_users).and_return(signers_and_users)
@@ -1187,6 +1189,69 @@ RSpec.describe ReportsController, :type => :controller do
           expect(option.last).to be_kind_of(String)
         end
       end
+      describe 'when not passed a Job ID' do
+        let(:job) { double('MemberSignersAndUsersJob', job_status: job_status) }
+        let(:make_request) { get :authorizations }
+        before do
+          allow(MemberSignersAndUsersJob).to receive(:perform_later).and_return(job)
+        end
+        it 'sets @job_status_url' do
+          url = double('A URL')
+          allow(subject).to receive(:reports_authorizations_url).with(job_id: job_id, authorizations_filter: 'all').and_return(url)
+          make_request
+          expect(assigns[:load_url]).to eq(url)
+        end
+        it 'sets @load_url' do
+          url = double('A URL')
+          allow(subject).to receive(:job_status_url).with(job_status).and_return(url)
+          make_request
+          expect(assigns[:job_status_url]).to eq(url)
+        end
+        it 'enqueues a `MemberSignersAndUsersJob` job' do
+          expect(MemberSignersAndUsersJob).to receive(:perform_later).and_return(job)
+          make_request
+        end
+        it 'sets the JobStatus `user_id`' do
+          expect(job_status).to receive(:update_attributes!).with(user_id: subject.current_user.id)
+          make_request
+        end
+        it 'should have `deferred` set to true' do
+          make_request
+          expect(assigns[:authorizations_table_data][:deferred]).to eq(true)
+        end
+      end
+
+      describe 'when passed a Job ID' do
+        let(:make_request) { get :authorizations, job_id: job_id }
+        before do
+          allow(JobStatus).to receive(:find_by).and_return(job_status)
+        end
+        it 'should look up the JobStatus related to that ID' do
+          expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: subject.current_user.id, status: JobStatus.statuses[:completed]).and_return(job_status)
+          make_request
+        end
+        it 'raises an `ActiveRecord::RecordNotFound` if the JobStatus isn\'t found' do
+          allow(JobStatus).to receive(:find_by).and_return(nil)
+          expect{make_request}.to raise_error(ActiveRecord::RecordNotFound)
+        end
+        it 'parses the results of the job as JSON' do
+          expect(JSON).to receive(:parse).with(job_status.result_as_string).and_return([])
+          make_request
+        end
+        it 'destroys the JobStatus' do
+          expect(job_status).to receive(:destroy)
+          make_request
+        end
+        it 'should not have `deferred` set' do
+          get :authorizations, job_id: job_id
+          expect(assigns[:authorizations_table_data]).to_not include(:deferred)
+        end
+        it 'should render without a layout if the request is an XHR' do
+          expect(subject).to receive(:render).with(layout: false).and_call_original
+          xhr :get, :authorizations, job_id: job_id
+        end
+      end
+      
       describe '@authorizations_filter_text' do
         ReportsController::AUTHORIZATIONS_DROPDOWN_MAPPING.each do |role, role_name|
           it "equals #{role_name} when the authorizations_filter is set to #{role}" do
@@ -1201,8 +1266,13 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[:authorizations_table_data][:column_headings]).to eq([I18n.t('user_roles.user.title'), I18n.t('reports.authorizations.title')])
         end
         describe '`rows`' do
+          let(:make_request) {get :authorizations, job_id: job_id}
+          before do
+            allow(JobStatus).to receive(:find_by).and_return(job_status)
+            allow(JSON).to receive(:parse).and_return(signers_and_users)
+          end
           it 'is an array containing a `columns` hash' do
-            get :authorizations
+            make_request
             expect(assigns[:authorizations_table_data][:rows]).to be_kind_of(Array)
             assigns[:authorizations_table_data][:rows].each do |row|
               expect(row).to be_kind_of(Hash)
@@ -1210,21 +1280,21 @@ RSpec.describe ReportsController, :type => :controller do
           end
           describe '`columns` hash' do
             it 'contains a `display_name` with no type' do
-              get :authorizations
+              make_request
               assigns[:authorizations_table_data][:rows].each do |row|
                 expect(row[:columns].first[:type]).to be_nil
                 expect(row[:columns].first[:value]).to be_kind_of(String)
               end
             end
             it 'contains `user_roles` with a type of `list`' do
-              get :authorizations
+              make_request
               assigns[:authorizations_table_data][:rows].each do |row|
                 expect(row[:columns].last[:type]).to eq(:list)
                 expect(row[:columns].last[:value]).to be_kind_of(Array)
               end
             end
             it 'contains all users sorted by display_name if the authorizations_filter is set to `all`' do
-              get :authorizations
+              make_request
               expect(assigns[:authorizations_table_data][:rows].length).to eq(2)
               expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('Etransact User')
               expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.etransact.title')])
@@ -1232,13 +1302,13 @@ RSpec.describe ReportsController, :type => :controller do
               expect(assigns[:authorizations_table_data][:rows].last[:columns].last[:value]).to eq([I18n.t('user_roles.user.title')])
             end
             it "only contains users with a user_role of #{I18n.t('user_roles.user.title')} if the authorizations_filter is set to `user`" do
-              get :authorizations, :authorizations_filter => 'user'
+              get :authorizations, :authorizations_filter => 'user', job_id: job_id
               expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
               expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('User With No Roles')
               expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.user.title')])
             end
             it 'only contains users with the proper role if an authorization_filter is set' do
-              get :authorizations, :authorizations_filter => User::Roles::ETRANSACT_SIGNER
+              get :authorizations, :authorizations_filter => User::Roles::ETRANSACT_SIGNER, job_id: job_id
               expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
               expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('Etransact User')
               expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.etransact.title')])

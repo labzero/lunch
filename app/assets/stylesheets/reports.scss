@@ -697,6 +697,12 @@ td.dataTables_empty {
     width: 540px;
     box-sizing: border-box;
   }
+  th:first-child {
+    width: 160px;
+  }
+  th:last-child {
+    width: 540px;
+  }
   ul {
     margin: 0;
     padding: 0;
@@ -704,6 +710,9 @@ td.dataTables_empty {
   }
   li {
     line-height: normal;
+  }
+  td.table-loading-cell {
+    width: 700px;
   }
 }
 
