@@ -70,16 +70,16 @@ When(/^I log in as "(.*?)" with password "(.*?)"$/) do |user, password|
 end
 
 When(/^I select the (\d+)(?:st|rd|th) member bank$/) do |num|
-  dropdown = page.find('.welcome .dropdown')
+  dropdown = page.find('select[name=member_id]')
   dropdown.click
-  dropdown.find("li:nth-child(#{num.to_i})").click
+  dropdown.find("option:nth-child(#{num.to_i})").click
   click_button(I18n.t('global.continue'))
 end
 
 When(/^I select the "(.*?)" member bank$/) do |bank_name|
   # remove the rack_test branch once we have users tied to a specific bank
   if Capybara.current_driver == :rack_test
-    page.find('.welcome .dropdown option', text: bank_name).select_option
+    page.find('select[name=member_id] option', text: bank_name).select_option
     form = page.find('.welcome form')
     class << form
       def submit
@@ -88,9 +88,9 @@ When(/^I select the "(.*?)" member bank$/) do |bank_name|
     end
     form.submit
   else
-    dropdown = page.find('.welcome .dropdown')
+    dropdown = page.find('select[name=member_id]')
     dropdown.click
-    dropdown.find('li', text: bank_name).click
+    dropdown.find('option', text: bank_name).click
     click_button(I18n.t('global.continue'))
   end
 end
@@ -125,7 +125,7 @@ When(/^I log in with a bad username$/) do
 end
 
 Then(/^I should see the member bank selector$/) do
-  page.assert_selector('.welcome .dropdown-selection', text: I18n.t('welcome.select_bank'))
+  page.assert_selector('select[name=member_id]', text: I18n.t('welcome.select_bank'))
 end
 
 Then(/^I should see the member bank selector submit button disabled$/) do
