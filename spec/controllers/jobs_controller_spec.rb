@@ -18,10 +18,13 @@ RSpec.describe JobsController, :type => :controller do
 
     before do
       allow(controller).to receive(:current_user).and_return(current_user)
-      allow(JobStatus).to receive(:find_by).with({id: job_status_id, user_id: user_id}).and_return(job_status)
     end
 
     describe 'GET status' do
+      before do
+        allow(JobStatus).to receive(:find_by).with({id: job_status_id, user_id: user_id}).and_return(job_status)
+      end
+
       it 'returns a JSON response containing a `job_status`' do
         get :status, job_status_id: job_status_id
         expect(JSON.parse(response.body).with_indifferent_access[:job_status]).to eq(status)
@@ -38,22 +41,16 @@ RSpec.describe JobsController, :type => :controller do
       let(:file_name) { double('file name') }
       let(:path) { double('some/file/path') }
       let(:data) { double('some data') }
-      let(:job_status) { double('job status instance', result: result, result_file_name: file_name, result_content_type: content_type, destroy: nil) }
+      let(:job_status) { double('job status instance', result: result, result_file_name: file_name, result_content_type: content_type, destroy: nil, result_as_string: data) }
 
       before do
         allow(result).to receive(:copy_to_local_file)
-        allow_any_instance_of(Tempfile).to receive(:read).and_return(data)
-        allow_any_instance_of(Tempfile).to receive(:path).and_return(path)
+        allow(JobStatus).to receive(:find_by).with({id: job_status_id, user_id: user_id, no_download: false}).and_return(job_status)
       end
 
       ['pdf', 'xlsx'].each do |format|
         it "sends the job result if the report format is `#{format}`" do
-          expect(result).to receive(:copy_to_local_file).with(:original, path)
           expect(controller).to receive(:send_data).with(data, {filename: file_name, type: content_type, disposition: 'attachment'}).and_call_original
-          get :download, job_status_id: job_status_id, export_format: format
-        end
-        it 'unlinks the temporary file' do
-          expect_any_instance_of(Tempfile).to receive(:unlink)
           get :download, job_status_id: job_status_id, export_format: format
         end
         it 'destroys the job' do
@@ -64,6 +61,10 @@ RSpec.describe JobsController, :type => :controller do
     end
 
     describe 'GET cancel' do
+      before do
+        allow(JobStatus).to receive(:find_by).with({id: job_status_id, user_id: user_id}).and_return(job_status)
+      end
+
       it 'sets the given job_status to `canceled`' do
         expect(job_status).to receive(:canceled!)
         get :cancel, job_status_id: job_status_id

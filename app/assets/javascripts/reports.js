@@ -1,20 +1,32 @@
 $(function () {
-  var $reportForm = $('.report .report-header-buttons form');
+  var $reportForm;
+  var $deferredReport;
   var jobStatusTimer;
   var jobCancelUrl;
 
-  $reportForm.on('submit', function(event){
-    openLoadingFlyout();
-  });
+  function bindReport() {
+    $reportForm = $('.report .report-header-buttons form');
+    $deferredReport = $('.report[data-deferred]');
 
-  $reportForm.on('ajax:success', function(event, data, status, xhr) {
-    jobCancelUrl = data.jobCancelUrl;
-    checkJobStatus(data.job_status_url);
-  });
+    $reportForm.on('submit', function(event){
+      openLoadingFlyout();
+    });
 
-  $reportForm.on('ajax:failure', function(event, data, status, xhr) {
-    downloadError();
-  });
+    $reportForm.on('ajax:success', function(event, data, status, xhr) {
+      jobCancelUrl = data.jobCancelUrl;
+      checkDownloadJobStatus(data.job_status_url);
+    });
+
+    $reportForm.on('ajax:failure', function(event, data, status, xhr) {
+      downloadError();
+    });
+
+    if ($deferredReport.length == 1) {
+      checkDeferredJobStatus($deferredReport, $deferredReport.data('deferred'), $deferredReport.data('deferred-load'));
+    };
+  };
+
+  bindReport();
 
   function openLoadingFlyout() {
     $('body').flyout({topContent: $('.loading-report').clone(true)});
@@ -26,7 +38,7 @@ $(function () {
     clearTimeout(jobStatusTimer);
   });
 
-  function checkJobStatus(url) {
+  function checkDownloadJobStatus(url) {
     $.get(url)
       .done(function(data) {
         var job_status = data.job_status;
@@ -35,7 +47,7 @@ $(function () {
         } else if(job_status == 'failed') {
           downloadError();
         } else {
-          jobStatusTimer = setTimeout(function(){checkJobStatus(url)}, 1000);
+          jobStatusTimer = setTimeout(function(){checkDownloadJobStatus(url)}, 1000);
         };
       })
       .fail(function(data) {
@@ -55,6 +67,39 @@ $(function () {
 
   function downloadError() {
     $('.flyout').addClass('flyout-loading-error');
+  };
+
+  function deferredJobError($report) {
+    $report.find('.table-loading').removeClass('table-loading').addClass('table-error');
+  };
+
+  function loadDeferredJob($report, url) {
+    $.get(url).done(function(data) {
+      var $newReport = $(data);
+      $report.replaceWith($newReport);
+      $newReport.trigger('dropdown-rebind');
+      $newReport.trigger('filter-rebind');
+      $newReport.trigger('datepicker-rebind');
+      $newReport.trigger('table-rebind');
+      bindReport();
+    }).fail(function() {
+      deferredJobError($report);
+    });
+  };
+
+  function checkDeferredJobStatus($report, status_url, load_url) {
+    $.get(status_url).done(function(data) {
+      var job_status = data.job_status;
+      if (job_status == 'completed') {
+        loadDeferredJob($report, load_url);
+      } else if(job_status == 'failed') {
+        deferredJobError($report);
+      } else {
+        jobStatusTimer = setTimeout(function(){checkDeferredJobStatus($report, status_url, load_url)}, 1000);
+      };
+    }).fail(function() {
+      deferredJobError($report);
+    });
   };
 
 });

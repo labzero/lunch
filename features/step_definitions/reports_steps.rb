@@ -47,6 +47,15 @@ Then(/^I should see (\d+) report tables with multiple data rows$/) do |count|
   end
 end
 
+Then(/^I should see a loading report table$/) do
+  page.assert_selector('.report-table.table-loading', visible: true)
+end
+
+When(/^I wait for the report to load$/) do
+  page.assert_no_selector('.report-table.table-loading', wait: 180)
+  page.assert_no_selector('.report-table.table-error')
+end
+
 
 Given(/^I am on the "(.*?)" report page$/) do |report|
   sleep_if_close_to_midnight
@@ -393,6 +402,7 @@ end
 When(/^I select "(.*?)" from the authorizations filter$/) do |text|
   page.find('.report-inputs .dropdown-selection').click
   page.find('.authorizations-filter li', text: text).click
+  step %{I wait for the report to load}
 end
 
 When(/^I should only see users with the "(.*?)" role$/) do |role|
