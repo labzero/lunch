@@ -18,6 +18,7 @@ Scenario: Visit authorizations page from header link
 @jira-mem-585 @jira-mem-836
 Scenario: Filtering the authorization report
   Given I am on the "Authorizations" report page
+  And I wait for the report to load
   When I select "Resolution and Authorization" from the authorizations filter
   Then I should only see users with the "Resolution and Authorization" role
   When I select "Entire Authority" from the authorizations filter
