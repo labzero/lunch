@@ -112,7 +112,8 @@ namespace :resque_pool do
       begin
         sudo :start, 'resque-pool'
       rescue SSHKit::Command::Failed
-        sudo :restart, 'resque-pool'
+        sudo :stop, 'resque-pool'
+        sudo :start, 'resque-pool'
       end
     end
   end
