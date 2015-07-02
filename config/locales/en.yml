@@ -89,6 +89,7 @@ en:
     shares_outstanding: Shares Outstanding
     prepare_download: Please wait while we prepare your download. This may take up to 60 seconds.
     cancel_download: Cancel Download
+    prepare_table: Please wait while we retreive this data. 
     pin: PIN
     token: Token
     username: Username
@@ -104,6 +105,8 @@ en:
     terms_of_use: Terms of Use
     privacy_policy: Privacy Policy
     truncated_web_address: "fhlbsf.com"
+    view_pdf: View PDF
+    tbd: TBD
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -150,6 +153,7 @@ en:
       letters_of_credit: Letters of Credit
       mortgages: Mortgages
       securities: Securities
+      resources: Resources
   common_table_headings:
     trade_date: Trade Date
     settlement_date: Settlement Date
@@ -158,6 +162,17 @@ en:
     current_par: Current Par
     advance_number: Advance Number
     interest_rate: Interest Rate
+    cusip: CUSIP
+    cusip_title: "CUSIP %{cusip}"
+    security_description: Security Description
+    coupon_rate: Coupon Rate
+    original_par_value: Original Par Value
+    price: Price
+    price_date: Price Date
+    custody_account_number: Custody Account Number
+    pool_number: Pool
+    funding_date: Funding Date
+    advance_type: Advance Type
   datepicker:
     range:
       date_to_current: "%{date} to date"
@@ -250,7 +265,7 @@ en:
       edit:
         title: Edit User Information
         save: Save Changes
-        delete: Delete Account
+        delete: Delete User
         first_name: First name
         last_name: Last name
         email: Email address
@@ -273,13 +288,13 @@ en:
     password:
       title: Password
     quick_advance:
-      title: Quick Advances
+      title: Quick Advance
     quick_report:
       title: Quick Reports
     two_factor:
       title: 2-Step Verification
-      description: Manage login with your SecurID token.
-      help_html: 'To activate, request a new token, or re-synchronize your SecurID token, <a href="%{url}">email Web Support</a> or call them at %{phone_number}.'
+      description: Manage authentication with your SecurID token.
+      help_html: 'To request a new SecurID token or get help with an existing one, <a href="%{url}">email Web Support</a> or call them at %{phone_number}.'
       reset_pin:
         title: Reset Token PIN
         description: "If you can't remember your token PIN, contact Web Support before resetting it."
@@ -342,11 +357,9 @@ en:
     title: Welcome!
     intro_html: 'Contact your institution’s Access Manager or <a href="%{url}">Web Support</a> at %{phone_number} if you have questions about access.'
     logo: FHLBank San Francisco
-    questions:
-      p_html: 'Learn more about<br/><a href="%{url}">Online Security</a>'
     forgot_password: Forgot Password
-    choose_member: Choose a member bank
-    select_bank: Select bank
+    choose_member: Choose a member institution
+    select_bank: Select institution
   dashboard:
     meta_title: FHLB - Dashboard
     actions:
@@ -377,7 +390,7 @@ en:
         member_services_desk: Member Services Desk
         collateral_asset_manager: Collateral Asset Manager
     quick_advance:
-      title: Quick Advances
+      title: Quick Advance
       advance_placeholder: Enter Dollar Amount
       advances_desk_closed: The Member Services Desk is closed.
       advances_desk_closed_link: View Current Price Indications
@@ -428,7 +441,7 @@ en:
         funding_date: Funding
         maturity_date: Maturity
       securid:
-        intro: For your security, please enter your SecurID login credentails.
+        intro: For your security, please enter your SecurID authentication credentials.
         help: Get help with PIN or token
         errors:
           resynchronize: Token is not synchronized.
@@ -451,21 +464,21 @@ en:
     your_account:
       title: Your Account
       account_summary: Account Summary
-      pledged_collateral:
-        title: Pledged Collateral
-        mortgages: Mortgages
-        securities: Securities
-        agency: Agency
-        aaa: AAA
-        aa: AA
       total_securities:
         title: Total Securities
         pledged: Pledged
         safekept: Safekept
-      effective_borrowing_capacity:
-        title: Borrowing Capacity
+      financing_availability:
+        title: Financing Availability
         used: Used
         unused: Unused
+        uncollateralized: Uncollateralized
+      borrowing_capacity:
+        title: Borrowing Capacity
+        mortgages: Mortgages
+        agency: Agency
+        aaa: AAA
+        aa: AA
       projected_sta_balance:
         title: Projected STA Balance
       table:
@@ -474,7 +487,7 @@ en:
         credit_outstanding: 'Credit Outstanding:'
         remaining:
           title: 'Remaining:'
-          available: Financial Available
+          available: Financing Availability
           capacity: Collateral Borrowing Capacity
           leverage: Stock Leverage
         standard_program:
@@ -487,6 +500,161 @@ en:
     market_overview:
       title: Market Rates
       vrc: 30-Day VRC Rate (%)
+  resources:
+    guides:
+      title: Guides
+      intro: "The Bank's Credit and Collateral Guides contain comprehensive information about our products and services. For your convenience, recent changes to the guide are summarized below."
+      revised_at: 'Revised: %{date}'
+      view_updates: View Updates
+      updates: 'Updates to the %{guide}'
+      upcoming: 'Upcoming revisions to the %{guide}'
+      revision: 'Revisions incorporated into the %{guide} as of %{date}'
+      replace: 'The new %{guide} replaces the prior guide in its entirety. We have made the following substantive revisions to the guide:'
+      credit:
+        title: Credit Guide
+        updates:
+          upcoming:
+            - "Please refere to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
+          revisions:
+            -
+              date: '2015-04-22'
+              details:
+                - "Incorporated certain changes to the Bank's capital stock requirements that were announced in Bulletin 1470 on February 26, 2015 (page 8)."
+                - "Adjusted the Community Financial Institution asset cap to $1,123 million for 2015 (page 11)."
+                - "Added a product profile for the new Choice LIBOR Adjustable Rate Credit Advances and made releated revisions (pages 36-37, 42, 58 and 52)."
+                - "Removed references to the Homeownership Preservation Advance, which the Bank no longer offers."
+                - "Increased the maximum term for Standby Letters of Credit to 15 years (page 44)."
+                - "Added an appendix that summarizes the Bank's wire transfer processing deadlines (page 69)."
+            -
+              date: '2014-10-30'
+              details:
+                - "Added the Mortgage Partnership Finance Program to the list of products the Bank currently offers and incorporated several revisions related to that program (pages 6, 9, 12, 22, 44-45)."
+                - "Adjusted the Community Financial Institution asset cap to $1,108 million for 2014 (page 11)."
+                - "Revised the description of prepayment fees for callable and putable advances (page 17)."
+      collateral:
+        title: Collateral Guide
+        updates:
+          upcoming:
+            - "Please refere to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
+          revisions:
+            -
+              date: '2015-04-22'
+              details:
+                - "Adjusted the Community Financial Institution asset cap to $1,123 million for 2015 (pages 7 and 62)."
+                - "Updated the list of ineligible loans (page 48)."
+                - "Clarified that members pledging mortgage loans under blanket lien with summary reporting are required to submit loan portfolio reports or other documentation every six months to support the Blanket Lien Collateral Eligibility Questionnaire or the Blanket Lien Collateral Certification (page 70)."
+                - "Updated the field review discount table (pages 91-93)."
+            -
+              date: '2014-10-30'
+              details:
+                - "Adjusted the Community Financial Institution asset cap to $1,108 million for 2014 (pages 7 and 62)."
+                - "Added a new section on the Bank's Anti-Money Laundering Policy (page 18)."
+                - "Incorporated the increases in the borrowing capacities of certain securities announced in Bulletin No. 1148, dated April 8, 2014 (pages 21-25)."
+                - "Modified the Third-Party Document Custodian section to clarify the Bank's requirements when a member contracts with a document storage provider to store documents for loans pledged to the Bank (page 58)."
+                - "Incorporated the increases in the borrowing capacities of certain loan collateral types announced in Bulletin No. 1455, dated July 9, 2014 (pages 79-80)."
+      collateral_review:
+        title: Collateral Field Review Process
+    fee_schedules:
+      title: Fee Schedules
+    forms:
+      title: Forms
+      agreements:
+        title: Agreements
+        advances: Advances and Security Agreement
+        commercial_banks: Commercial Banks, Savings Institutions, and Industrial Loan Companies
+        community: Community Development Financial Institutions
+        credit_unions: Credit Unions
+        insurance: Insurance Companies
+        letters_of_credit: Letters of Credit Agreement
+        safekeeping: Safekeeping Agreement
+        settlement_transaction_account: Settlement/Transaction Account Agreement
+      authorizations:
+        title: Authorizations
+        signature_cards:
+          title: Signature Cards
+          member_transactions: 'Resolution and Authorization: Member Transactions'
+          designated_persons: Certificate of Designated Persons
+          entire_authority: Entire Authority
+          wire_transfer: Wire Transfer Services
+          advances: Advances
+          affordable_housing: Affordable Housing Program
+          collateral: Collateral
+          interest_rate: Interest Rate Derivatives
+          money_market: Money Market Transaction
+          person_securities: Person-Securities Services
+        wire_transfer:
+          title: Wire Transfer
+          repetitive: Repetitve Wire Instructions
+        capital_stock:
+          title: Capital Stock
+          repurchase: Request for Repurchase of Excess Capital Stock
+          redemption: Notice of Redemption of Capital Stock
+        website:
+          title: Website Access
+          access_manager: Website Access Manager Set-up
+          securid: eTransact SecurID Token Application
+      credit:
+        title: Credit
+        application: 'Credit Application: CIP and ACE'
+        ace_application: ACE Application for SBA Lenders
+        reimbursement: Letter of Credit Reimbursment Agreement
+        statement_of_authority: Statement of Authority
+        prepayment_symmetry: Advances with Partial Prepayment Symmetry
+        putable_advances: Putable Advances
+      collateral:
+        title: Collateral
+        lien_real_estate:
+          title: 'Blanket Lien: Real Estate Loan Collateral'
+          pledging: Pledging and Reporting Designation
+          lending_policy: Anti-Predatory Lending Policy Certification Blank Lien Summary
+          questionnaire_html: 'Commercial Banks, Savings Institutions, and Industrial Loan Companies: <br>Blanket Lien Collateral Eligibility Questionnaire—Summary Reporting'
+          certification: 'Collateral: Blanket Lien Collateral Certification—Summary Reporting'
+          notification: 'MCU Notification: Blanket Lien—Detailed Reporting'
+        lien_other:
+          title: 'Blanket Lien: Small Business, Agribusiness, and Farm Loans'
+          certification: CFI Blanket Lien Collateral Certification
+          release: CFI Blanket Lien Collateral Release Request and Certification
+        specific_identification:
+          title: Specific Identification
+          transmission: MCU Data Transmission Set-up
+          transmittal: Mortgage Collateral Update Transmittal Letter
+          questionnaire: MCU Data Field Questionnaire
+        deposits:
+          title: Deposits
+          pledge: Pledge of Time Deposit Account
+        securities:
+          title: Securities
+          pledge: Pledge of Securities
+          release: Securities Release Request
+          deposit: Safekeeping Deposit Request
+          safekeeping_release: Safekeeping Release Request
+        loan_document:
+          title: Loan Document Deliveries
+          assignment: Corporation Assignment Template
+        creditor_relationship:
+          title: Third-Party Creditor Relationships
+          amendment: Amendment to Corporate Credit Union Security Agreement
+          agreement: 'Subordination Agreement: Credit Unions'
+    faq:
+      title: FAQs
+    capital_plan:
+      title: Capital Plan
+    investor_relations:
+      title: Investor Relations
+    newsroom:
+      title: Newsroom
+    regulatory_updates:
+      title: Regulatory Updates
+    business_continuity:
+      title: Business Continuity
+    membership:
+      title: Membership
+      benefits:
+        title: Benefits
+      requirements:
+        title: Requirements
+      applications:
+        title: Applications
   reports:
     meta_title: FHLB - Reports
     title: Reports
@@ -508,7 +676,7 @@ en:
       title: Price Indications
       current:
         title: Current
-        summary: Current price indications are subject to change. For current quotes call %{phone_number} between 7 a.m. and 2 p.m. Pacific time. Variable Rate Credit advances are available until 2 p.m., and all other advances are generally available until 12 noon.
+        summary: Current price indications are subject to change. For current quotes call %{phone_number} between 7:00 am and 2:00 pm PT. Variable Rate Credit advances are available until 2:00 pm, and all other advances are generally available until 12 noon.
       historical:
         title: Historical
         summary: Historical price indications reflect the price indications posted at the beginning of the day, not actual prices.
@@ -521,7 +689,7 @@ en:
         title: Interest Rate Resets
         summary: Shows advances with an interest rate reset on the effective date.
       letters_of_credit:
-        title: Letters of Credit Detail
+        title: Letters of Credit
         summary: Details any outstanding letters of credit.
       forward_commitments:
         title: Forward Commitments
@@ -556,10 +724,10 @@ en:
     securities:
       title: Securities
       transactions:
-        title: Securities Transaction Report
-        summary: Reflects transactions that have settled as of 11:30 a.m. and is generally available at approximately 1:00 p.m. on the settlement day. The final report reflects all transactions that have settled that day and is generally available at the end of the business day.
+        title: Securities Transaction
+        summary: Reflects transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm on the settlement day. The final report reflects all transactions that have settled that day and is generally available at the end of the business day.
       cash_projections:
-        title: Cash Projections Detail Report
+        title: Cash Projections
         summary: Lists securities transactions that the custodian anticipates posting to your account over the next five days. The report reflects estimated information as of the close of business on the previous business day and is available at the beginning of the current business day.
       current:
         title: Current Securities Position
@@ -579,7 +747,7 @@ en:
       price_indications:
         current:
           title: Current Price Indications
-          summary: Price indications are subject to change. For current quotes, call the Member Services Desk at %{phone_number} between 7 a.m. and 2 p.m. California time. Variable Rate Credit advances are available until 2 p.m., and all other advances are generally available until 12 noon.
+          summary: Price indications are subject to change. For current quotes, call the Member Services Desk at %{phone_number} between 7:00 am and 2:00 pm. California time. Variable Rate Credit advances are available until 2:00 pm., and all other advances are generally available until 12:00 pm.
           advance_maturity: Advance maturity
           overnight_fed_funds_benchmark: Overnight Fed Funds Benchmark* (%)
           treasury_benchmark_maturity: Treasury Benchmark Maturity
@@ -691,8 +859,6 @@ en:
         total_current_par_heading: "Total Current Par as of %{date}"
         total_accrued_interest_heading: "Total Accrued Interest as of %{date}"
         estimated_next_payment_heading: "Estimated Next Interest Payment as of %{date}"
-        funding_date: Funding Date
-        advance_type: Advance Type
         interest_payment_frequency: Interest Payment Frequency
         day_count_basis: Day Count Basis
         next_interest_payment_date: Next Interest Payment Date
@@ -715,13 +881,7 @@ en:
         total_principal: "Total Principal as of close of business %{date}:"
         total_interest: "Total Interest as of close of business %{date}:"
         settlement_date: Settlement Date
-        custody_account: Custody Account Number
         transaction_code: Transaction Code
-        pool_number: Pool Number
-        cusip: CUSIP
-        record_title: "CUSIP %{cusip}"
-        security_description: Security Description
-        par: Original Par Value
         coupon_rate: Coupon Rate
         total_net: Total Net Amount
       interest_rate_resets:
@@ -786,17 +946,15 @@ en:
         minimum_maintenance_charge: '*The minimum annual maintenance charge is $500.'
       securities_transactions:
         title: Securities Transaction
-        info: The Securities Transaction Report is updated twice a day. The Preliminary Securities Transaction Report reflects the transactions that have settled as of 11:30 a.m. and is generally available at approximately 1:00 p.m. on the settlement day. The Final Securities Transaction Report reflects all transactions that have settled that day and is generally available at the end of the business day.
+        info: The Securities Transaction Report is updated twice a day. The Preliminary Securities Transaction Report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm on the settlement day. The Final Securities Transaction Report reflects all transactions that have settled that day and is generally available at the end of the business day.
         effective: Effective %{date}, a "units" column has been added to the Securities Transaction Report.
-        preliminary: Preliminary Securities Transactions settled as of 11:30 a.m. on %{date}
+        preliminary: Preliminary Securities Transactions settled as of 11:30 am on %{date}
         final: Final Securities Transactions settled as of close of business on %{date}
         indicates_a_new_transaction_html: "*Indicates a new transaction."
-        total_net_settled_preliminary: "Total Net Amount settled as of 11:30 a.m. on %{date}:"
+        total_net_settled_preliminary: "Total Net Amount settled as of 11:30 am. on %{date}:"
         total_net_settled_final: "Total Net Amount settled as of close of business on %{date}:"
         custody_account_no: Custody Account No.
-        cusip: CUSIP
         transaction_code: Transaction Code
-        security_description: Security Description
         units: Units
         maturity_date: Maturity Date
         payment_or_principal: Payment or Principal
@@ -806,13 +964,50 @@ en:
       authorizations:
         title: Authorizations
         info:
-          p1_html: The following people are authorized to use the Bank’s services. To update your authorizations on file with the Bank, see the <a href="%{instructions_url}">Signature Card Instructions</a> and the <a href="%{forms_url}">Signature Card Forms</a>.
-          p2_html: 'Some authorized signers may not display on this page at this time. To confirm an authorized signer, contact <a href="%{url}">Web Support</a> or call %{phone_number}.'
+          p1_html: The following people are authorized to use the Bank’s services. If you’d like to make changes to these authorizations, use a <a href="%{forms_url}">Signature Card Form</a> or see the <a href="%{instructions_url}">Signature Card Instructions</a>.
+          p2_html: 'To confirm an authorized signer, contact <a href="%{url}">Web Support</a> or call %{phone_number}.'
           p3_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about signature cards, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
       parallel_shift:
         title: Putable Advance Parallel Shift Sensitivity Analysis
         info: The valuations below are calculated using data as of %{date}
         disclaimer: "The valuations provided to you on the Putable Advance Parallel Shift Sensitivity Analysis page are for information purposes only, are provided as an accommodation and without charge, are confidential and are intended solely for your use. The valuations do not represent the actual or indicative forms at which new (or economically equivalent) transactions could be entered into or the actual or indicative terms at which existing (or such equivalent) transactions could be liquidated, assigned or unwound. The valuations were derived using proprietary pricing models and estimates and assumptions about relevant future market conditions and other matters, all of which are subject to change without notice. Please note that the valuation estimates are from the Federal Home Loan Bank of San Francisco's perspective. Any such changes may have a material impact on the valuations provided, and valuations based on other models or different assumptions may yield materially different results. No guaranty or warranty is made as to the reasonableness of any assumptions or the accuracy or completeness of the models or market data, whether internally or externally generated. In providing the valuations on the Putable Advance Parallel Shift Sensitivity Analysis page, the Federal Home Loan Bank of San Francisco has expressly relied upon the representations and certifications made by you to the Federal Home Loan Bank of San Francisco in your Statement of Authority re: Putable Advances. Accordingly, you should not regard the valuations as advice by us in respect of your positions or as the sole basis for such positions, and you should discuss with your accountants, attorneys, investment advisors and other representatives whether and to what extent these valuations may be useful in the preparation of your financial statements, regulatory reports or otherwise. The valuations may vary significantly from the estimates we used in valuing the transaction(s) for purposes of our internal books and records and for other purposes. The Federal Home Loan Bank of San Francisco expressly disclaims any responsibility for (i) the accuracy of the models, market data input into such models or estimates used in deriving the valuations, (ii) any errors or omissions in computing or disseminating the valuations and (iii) any uses to which the valuations are put."
+      securities_position:
+        current: Current Securities Position
+        monthly: Monthly Securities Position
+        filter:
+          all: All Securities
+          pledged: Pledged Securities
+          unpledged: Unpledged Securities
+        all_securities:
+          total_original_par_heading: "Total Original Par as of %{date}:"
+          total_current_par_heading: "Total Current Par as of %{date}:"
+          total_market_value_heading: "Total Market Value as of %{date}:"
+          table_heading: "%{n} Securities as of %{date}"
+          total: Totals
+        pledged_securities:
+          total_original_par_heading: "Total Original Par for all Pledged Securities as of %{date}:"
+          total_current_par_heading: "Total Current Par for all Pledged Securities as of %{date}:"
+          total_market_value_heading: "Total Market Value for all Pledged Securities as of %{date}:"
+          table_heading: "%{n} Pledged Securities as of %{date}"
+          total: Pledged Totals
+        unpledged_securities:
+          total_original_par_heading: "Total Original Par for all Unpledged Securities as of %{date}:"
+          total_current_par_heading: "Total Current Par for all Unpledged Securities as of %{date}:"
+          total_market_value_heading: "Total Market Value for all Unpledged Securities as of %{date}:"
+          table_heading: "%{n} Unpledged Securities as of %{date}"
+          total: Unpledged Totals
+        security_pledge_type: Security Pledge Type
+        factor: Factor
+        factor_date: Factor Date
+        market_value: Market Value
+        custody_account_type: Custody Account Type
+        reg_id: RegID
+        disclaimer:
+          p1: The information on this page is provided as of the date and time indicated and is subject to change without notice. Some information may be incomplete and may be updated during the day.
+          p2: The "Market Value" shown for each security pledged to the Bank as collateral is intended solely for internal use by the Bank in calculating the Member's credit availability and is subject to change without notice. The Bank may, in its sole discretion, also provide Market Values for other securities held by the Bank on the Member's behalf. None of the Market Values provided should be used or relied upon by the Member for any purpose, and the Bank expressly disclaims any and all liability that may arise from any such use or reliance by the Member. The Bank may use data from one or more outside pricing services (which may include data providers, such as Thomson Reuters) to calculate the Market Values shown but does not independently verify the accuracy of such data and, therefore, cannot warrant or guarantee its accuracy or the accuracy of any Market Values derived therefrom. In addition, the Bank does not warrant or guarantee the accuracy of its own reporting of any such data received from any outside pricing service or of any Market Values derived therefrom. The Bank disclaims any and all liability that may arise in connection with the Bank's dissemination of any information shown herein, regardless of the cause, or for any resulting damages.
+          p3: The Bank may, in its sole discretion, provide the "Factor," "Price," "Current Par," and "Market Value" for securities held by the Bank on the Member's behalf. The Bank obtains the "Factor" and "Price" for each such security from one or more outside services and uses the "Factor" to calculate the security's "Current Par," which in turn with the "Price" is used to calculate the security's "Market Value." A blank "Factor," "Price," "Current Par or "Market Value" field means the outside service could not or did not provide the "Factor" or "Price" value to the Bank or the security does not have a "Factor" value.
+      forward_commitments:
+        title: Forward Commitments
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
@@ -860,7 +1055,7 @@ en:
     edit_email_settings_html: Edit your <a href=%{url}>Email Settings</a> to choose which messages you want to receive via email.
   errors:
     format: '%{message}'
-    assistance: "If you need assistance, contact our Web Support team at %{phone_number}"
+    assistance: "If you need assistance, contact our Web Support team at %{phone_number}."
     "500":
       headline: Sorry for the inconvenience.
       summary: We have encountered an error and are working on fixing the problem as quickly as possible.

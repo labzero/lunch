@@ -8,6 +8,7 @@ RSpec.describe DashboardController, :type => :controller do
 
   describe "GET index", :vcr do
     before do
+      allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
       allow(subject).to receive(:current_user_roles)
     end
     
@@ -23,7 +24,7 @@ RSpec.describe DashboardController, :type => :controller do
     it 'should assign @account_overview' do
       get :index
       expect(assigns[:account_overview]).to be_kind_of(Hash)
-      expect(assigns[:account_overview].length).to eq(5)
+      expect(assigns[:account_overview].length).to eq(3)
     end
     it "should assign @market_overview" do
       get :index
@@ -32,16 +33,23 @@ RSpec.describe DashboardController, :type => :controller do
       expect(assigns[:market_overview][0][:name]).to be_present
       expect(assigns[:market_overview][0][:data]).to be_present
     end
-    it "should assign @effective_borrowing_capacity" do
+    it "should assign @borrowing_capacity_gauge" do
+      gauge_hash = double('A Gauge Hash')
+      allow(subject).to receive(:calculate_gauge_percentages).and_return(gauge_hash)
       get :index
-      expect(assigns[:effective_borrowing_capacity]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:used_capacity]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:used_capacity][:absolute]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:used_capacity][:percentage]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:unused_capacity]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:unused_capacity][:absolute]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:unused_capacity][:percentage]).to be_present
-      expect(assigns[:effective_borrowing_capacity][:threshold_capacity]).to be_present
+      expect(assigns[:borrowing_capacity_gauge]).to eq(gauge_hash)
+    end
+    it 'should have the expected keys in @borrowing_capacity_gauge' do
+      get :index
+      expect(assigns[:borrowing_capacity_gauge]).to include(:total, :mortgages, :aa, :aaa, :agency)
+    end
+    it 'should call MemberBalanceService.borrowing_capacity_summary with the current date' do
+      expect_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).with(Time.zone.now.to_date).and_call_original
+      get :index
+    end
+    it 'should call `calculate_gauge_percentages` for @borrowing_capacity_gauge and @financing_availability_gauge'  do
+      expect(subject).to receive(:calculate_gauge_percentages).twice
+      get :index
     end
     it 'should assign @current_overnight_vrc' do
       get :index
@@ -50,6 +58,24 @@ RSpec.describe DashboardController, :type => :controller do
     it 'should assign @quick_advances_active' do
       get :index
       expect(assigns[:quick_advances_active]).to be_present
+    end
+    it 'should assign @financing_availability_gauge to nil if there is no value for `financing_availability` in the profile' do
+      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return({})
+      expect(assigns[:financing_availability_gauge]).to be_nil
+    end
+    it 'should assign @financing_availability_gauge' do
+      get :index
+      expect(assigns[:financing_availability_gauge]).to be_kind_of(Hash)
+      expect(assigns[:financing_availability_gauge][:used]).to be_kind_of(Hash)
+      expect(assigns[:financing_availability_gauge][:used][:amount]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:used][:percentage]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:used][:display_percentage]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:unused][:amount]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:unused][:percentage]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:unused][:display_percentage]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:uncollateralized][:amount]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:uncollateralized][:percentage]).to be_kind_of(Numeric)
+      expect(assigns[:financing_availability_gauge][:uncollateralized][:display_percentage]).to be_kind_of(Numeric)
     end
     describe "RateService failures" do
       let(:RatesService) {class_double(RatesService)}
@@ -74,10 +100,10 @@ RSpec.describe DashboardController, :type => :controller do
       before do
         expect(MemberBalanceService).to receive(:new).and_return(member_balance_instance)
       end
-      it 'should assign @effective_borrowing_capacity as nil if the balance could not be retrieved' do
-        expect(member_balance_instance).to receive(:effective_borrowing_capacity).and_return(nil)
+      it 'should assign @borrowing_capacity_guage as nil if the balance could not be retrieved' do
+        expect(member_balance_instance).to receive(:borrowing_capacity_summary).and_return(nil)
         get :index
-        expect(assigns[:effective_borrowing_capacity]).to eq(nil)
+        expect(assigns[:borrowing_capacity_guage]).to eq(nil)
       end
     end
   end
@@ -114,28 +140,22 @@ RSpec.describe DashboardController, :type => :controller do
     end
   end
 
-  describe "POST quick_advance_preview" do
+  describe "POST quick_advance_preview", :vcr do
     allow_policy :advances, :show?
-    let(:RatesService) {class_double(RatesService)}
-    let(:rate_service_instance) {double("rate service instance", quick_advance_preview: nil)}
-    let(:member_id) {double(MEMBER_ID)}
-    let(:advance_term) {'some term'}
-    let(:advance_type) {'some type'}
+    let(:etransact_service_instance) {double('EtransactAdvancesService', quick_advance_validate: {}, signer_full_name: username)}
+    let(:member_id) {750}
+    let(:advance_term) {'someterm'}
+    let(:advance_type) {'sometype'}
     let(:advance_rate) {'0.17'}
-    let(:amount) { Random.rand(100000000) }
-    let(:make_request) { post :quick_advance_preview, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount }
+    let(:username) {'Test User'}
+    let(:amount) { 100 }
+    let(:make_request) { post :quick_advance_preview, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount}
 
     it_behaves_like 'a user required action', :post, :quick_advance_preview
     it_behaves_like 'an authorization required method', :post, :quick_advance_preview, :advances, :show?
     it 'should render its view' do
       make_request
       expect(response.body).to render_template('dashboard/quick_advance_preview')
-    end
-    it 'should call the RatesService object\'s `quick_advance_preview` method with the POSTed advance_type, advance_term and rate' do
-      stub_const("MEMBER_ID", 750)
-      expect(RatesService).to receive(:new).and_return(rate_service_instance)
-      expect(rate_service_instance).to receive(:quick_advance_preview).with(MEMBER_ID, amount, advance_type, advance_term, advance_rate.to_f).and_return({})
-      make_request
     end
     it 'should set @session_elevated to the result of calling `session_elevated?`' do
       result = double('needs securid')
@@ -145,7 +165,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'should set @advance_amount' do
       make_request
-      expect(assigns[:advance_amount]).to eq(amount)
+      expect(assigns[:advance_amount]).to be_kind_of(Numeric)
     end
     it 'should set @advance_type' do
       make_request
@@ -165,42 +185,60 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'should set @funding_date' do
       make_request
-      expect(assigns[:funding_date]).to be_kind_of(Date)
+      expect(assigns[:funding_date]).to be_kind_of(String)
     end
     it 'should set @maturity_date' do
       make_request
-      expect(assigns[:maturity_date]).to be_kind_of(Date)
+      expect(assigns[:maturity_date]).to be_kind_of(String)
     end
     it 'should set @advance_rate' do
       make_request
       expect(assigns[:advance_rate]).to be_kind_of(Numeric)
     end
+    describe 'stubbed service' do
+      before do
+        allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
+      end
+      it 'should call the EtransactAdvancesService object\'s `quick_advance_validate` method with the POSTed advance_type, advance_term and rate' do
+        expect(etransact_service_instance).to receive(:quick_advance_validate).with(member_id, amount, advance_type, advance_term, advance_rate.to_f, username).and_return({})
+        make_request
+      end
+      it 'should request the signer full name' do
+        expect(etransact_service_instance).to receive(:signer_full_name).with(subject.current_user.username).and_return(username)
+        make_request
+      end
+      it 'should not request the signer full name if one is stored in the session' do
+        session['signer_full_name'] = 'foo'
+        expect(etransact_service_instance).to_not receive(:signer_full_name).with(subject.current_user.username)
+        make_request
+      end
+    end
   end
 
-  describe "POST quick_advance_perform" do
+  describe "POST quick_advance_perform", :vcr do
     allow_policy :advances, :show?
-    let(:rate_service_instance) {RatesService.new(ActionDispatch::TestRequest.new)}
-    let(:member_id) {double(MEMBER_ID)}
-    let(:advance_term) {'some term'}
-    let(:advance_type) {'some type'}
+    let(:etransact_service_instance) {EtransactAdvancesService.new(ActionDispatch::TestRequest.new)}
+    let(:member_id) {750}
+    let(:advance_term) {'someterm'}
+    let(:advance_type) {'sometype'}
     let(:advance_rate) {'0.17'}
-    let(:amount) { Random.rand(100000000) }
-    let(:securid_pin) { Random.rand(9999).to_s.rjust(4, '0') }
-    let(:securid_token) { Random.rand(999999).to_s.rjust(6, '0') }
-    let(:make_request) { post :quick_advance_perform, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, securid_pin: securid_pin, securid_token: securid_token }
+    let(:username) {'Test User'}
+    let(:amount) { 100 }
+    let(:securid_pin) { '1111' }
+    let(:securid_token) { '222222' }
+    let(:make_request) { post :quick_advance_perform, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, securid_pin: securid_pin, securid_token: securid_token }
     let(:securid_service) { SecurIDService.new('a user', test_mode: true) }
 
     before do
       allow(subject).to receive(:session_elevated?).and_return(true)
       allow(SecurIDService).to receive(:new).and_return(securid_service)
-      allow(RatesService).to receive(:new).and_return(rate_service_instance)
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
     end
 
     it_behaves_like 'a user required action', :post, :quick_advance_perform
     it_behaves_like 'an authorization required method', :post, :quick_advance_perform, :advances, :show?
-    it 'should call the RatesService object\'s `quick_advance_perform` method with the POSTed advance_type, advance_term and rate' do
-      stub_const("MEMBER_ID", 750)
-      expect(rate_service_instance).to receive(:quick_advance_confirmation).with(MEMBER_ID, amount, advance_type, advance_term, advance_rate.to_f).and_return({})
+    it 'should call the EtransactAdvancesService object\'s `quick_advance_execute` method with the POSTed advance_type, advance_term and rate' do
+      expect(etransact_service_instance).to receive(:quick_advance_execute).with(member_id, amount, advance_type, advance_term, advance_rate.to_f, username).and_return({})
       make_request
     end
     it 'should render the confirmation view on success' do
@@ -226,7 +264,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'should set @advance_amount' do
       make_request
-      expect(assigns[:advance_amount]).to eq(amount)
+      expect(assigns[:advance_amount]).to be_kind_of(Numeric)
     end
     it 'should set @advance_type' do
       make_request
@@ -246,11 +284,11 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'should set @funding_date' do
       make_request
-      expect(assigns[:funding_date]).to be_kind_of(Date)
+      expect(assigns[:funding_date]).to be_kind_of(String)
     end
     it 'should set @maturity_date' do
       make_request
-      expect(assigns[:maturity_date]).to be_kind_of(Date)
+      expect(assigns[:maturity_date]).to be_kind_of(String)
     end
     it 'should set @advance_rate' do
       make_request
@@ -259,6 +297,15 @@ RSpec.describe DashboardController, :type => :controller do
     it 'should set @advance_number' do
       make_request
       expect(assigns[:advance_number]).to be_kind_of(String)
+    end
+    it 'should request the signer full name' do
+      expect(etransact_service_instance).to receive(:signer_full_name).with(subject.current_user.username).and_return(username)
+      make_request
+    end
+    it 'should not request the signer full name if one is stored in the session' do
+      session['signer_full_name'] = 'foo'
+      expect(etransact_service_instance).to_not receive(:signer_full_name).with(subject.current_user.username)
+      make_request
     end
     describe 'with unelevated session' do
       before do
@@ -291,7 +338,7 @@ RSpec.describe DashboardController, :type => :controller do
         make_request
       end
       it 'should not perform the advance if the session is not elevated' do
-        expect(rate_service_instance).to_not receive(:quick_advance_confirmation)
+        expect(etransact_service_instance).to_not receive(:quick_advance_execute)
         make_request
       end
     end
@@ -322,6 +369,32 @@ RSpec.describe DashboardController, :type => :controller do
       date = DateTime.parse(hash['updated_at'])
       expect(date).to be_kind_of(DateTime)
       expect(date).to be <= DateTime.now
+    end
+  end
+
+  describe 'calculate_gauge_percentages private method' do
+    let(:foo_capacity) { rand(1000..2000) }
+    let(:bar_capacity) { rand(1000..2000) }
+    let(:total_borrowing_capacity) { foo_capacity + bar_capacity }
+    let(:capacity_hash) do
+      {
+        total: total_borrowing_capacity,
+        foo: foo_capacity,
+        bar: bar_capacity
+      }
+    end
+    let(:call_method) { subject.send(:calculate_gauge_percentages, capacity_hash, total_borrowing_capacity, :total) }
+    it 'should not raise an exception if total_borrowing_capacity is zero' do
+      expect {subject.send(:calculate_gauge_percentages, capacity_hash, 0, :total)}.to_not raise_error
+    end
+    it 'should convert the capacties into gauge hashes' do
+      gauge_hash = call_method
+      expect(gauge_hash[:foo]).to include(:amount, :percentage, :display_percentage)
+      expect(gauge_hash[:bar]).to include(:amount, :percentage, :display_percentage)
+      expect(gauge_hash[:total]).to include(:amount, :percentage, :display_percentage)
+    end
+    it 'should not include the excluded keys values in calculating display_percentage' do
+      expect(call_method[:total][:display_percentage]).to eq(100)
     end
   end
 

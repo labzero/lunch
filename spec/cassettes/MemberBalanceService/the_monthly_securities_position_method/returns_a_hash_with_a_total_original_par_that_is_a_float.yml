@@ -1,0 +1,57 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/monthly_securities_position/2015-01-31/all
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
+      X-Request-Id:
+      - '12345'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '4960'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      Date:
+      - Mon, 29 Jun 2015 16:46:29 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"as_of_date":"2015-01-30","total_original_par":22781830.0,"total_current_par":13311517.260837344,"total_market_value":13376399.260837344,"securities":[{"custody_account_number":"082131","custody_account_type":"P","security_pledge_type":"SAFE","cusip":"36202C6J7","description":"GOVT
+        NAT MTG ASSN REG POOL #499734","pool_number":"PL742086","reg_id":"88","coupon_rate":0.426,"original_par":1930941.0,"factor":0.14099766604570696,"current_par":272258.1742719634,"price":97.632,"market_value":276746.1742719634,"maturity_date":"2015-11-03","factor_date":"2014-07-13","price_date":"0012-10-24"},{"custody_account_number":"082131","custody_account_type":"P","security_pledge_type":"SAFE","cusip":"31419BCH6","description":"FEDERAL
+        NAT MTG ASSN","pool_number":"PLAE0971","reg_id":"88","coupon_rate":5.625,"original_par":2758544.0,"factor":0.811680619848794,"current_par":2239056.7038001716,"price":80.442,"market_value":2242433.7038001716,"maturity_date":"2017-06-20","factor_date":"2012-12-23","price_date":"0012-10-24"},{"custody_account_number":"082131","custody_account_type":"P","security_pledge_type":"SBC","cusip":"31362SY33","description":"FEDERAL
+        NATL MTG ASSN MEDIUM TERM","pool_number":"PLC01197","reg_id":"88","coupon_rate":0.618,"original_par":2978113.0,"factor":0.752881506556636,"current_par":2242166.202135903,"price":27.424,"market_value":2247777.202135903,"maturity_date":"2019-10-31","factor_date":"2014-12-11","price_date":"0012-10-24"},{"custody_account_number":"082131","custody_account_type":"P","security_pledge_type":"SBC","cusip":"31393TAJ5","description":"GS
+        MTG SECS CORP GSR 2005-AR4 MTG","pool_number":"PL928776","reg_id":"88","coupon_rate":1.097,"original_par":441414.0,"factor":0.9410475708660175,"current_par":415391.5724462523,"price":12.61,"market_value":418334.5724462523,"maturity_date":"2017-11-13","factor_date":"2013-03-30","price_date":"0012-10-24"},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"SBC","cusip":"31393TAJ5","description":"GOVT
+        NAT MTG ASSN II POOL #002615","pool_number":"PL256294","reg_id":"88","coupon_rate":5.586,"original_par":454216.0,"factor":0.3657138433525291,"current_par":166113.07907221236,"price":79.334,"market_value":174744.07907221236,"maturity_date":"2019-01-26","factor_date":"2014-03-18","price_date":"0012-10-24"},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"Standard","cusip":"31388PXS5","description":"GOVT
+        NAT MTG ASSN REMIC","pool_number":"PLAE0971","reg_id":"88","coupon_rate":5.751,"original_par":2747239.0,"factor":0.509589981897032,"current_par":1399965.4722768203,"price":109.355,"market_value":1407261.4722768203,"maturity_date":"2015-11-09","factor_date":"2014-06-12","price_date":"0012-10-24"},{"custody_account_number":"082131","custody_account_type":"P","security_pledge_type":"Standard","cusip":"3138ALJS7","description":"FEDERAL
+        HOME LN MTG CORP PC GOLD","pool_number":"PLAE0988","reg_id":"88","coupon_rate":0.957,"original_par":2772301.0,"factor":0.9882824290718593,"current_par":2739816.3663983443,"price":14.617,"market_value":2747641.3663983443,"maturity_date":"2018-08-13","factor_date":"2014-03-22","price_date":"0012-10-24"},{"custody_account_number":"082131","custody_account_type":"P","security_pledge_type":"SBC","cusip":"31397MJG3","description":"FEDERAL
+        NATL MTG ASSN MEDIUM TERM","pool_number":"PLE80066","reg_id":"88","coupon_rate":1.475,"original_par":2432720.0,"factor":0.8787765505735953,"current_par":2137817.2901113965,"price":63.765,"market_value":2147082.2901113965,"maturity_date":"2019-01-07","factor_date":"2014-05-01","price_date":"0012-10-24"},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"SBC","cusip":"31394UH70","description":"PREFERRED
+        TERM SECS XIV LTD /  PFD","pool_number":"PLC01197","reg_id":"88","coupon_rate":2.501,"original_par":2441565.0,"factor":0.43550868508891116,"current_par":1063322.7627091075,"price":25.823,"market_value":1070559.7627091075,"maturity_date":"2017-10-04","factor_date":"2013-06-30","price_date":"0012-10-24"},{"custody_account_number":"082131","custody_account_type":"P","security_pledge_type":"Standard","cusip":"36202C6J7","description":"PREFERRED
+        TERM SECS XII LTD /  PFD","pool_number":"PLAE0988","reg_id":"88","coupon_rate":6.204,"original_par":2679411.0,"factor":0.1650330851948434,"current_par":442191.4638350005,"price":87.199,"market_value":444060.4638350005,"maturity_date":"2017-10-14","factor_date":"2012-11-22","price_date":"0012-10-24"},{"custody_account_number":"082131","custody_account_type":"U","security_pledge_type":"Standard","cusip":"3138A8SL1","description":"GOVT
+        NAT MTG ASSN II POOL #002615","pool_number":"PLG30485","reg_id":"88","coupon_rate":2.333,"original_par":1145366.0,"factor":0.16887018977355073,"current_par":193418.1737801727,"price":70.962,"market_value":199758.1737801727,"maturity_date":"2017-10-15","factor_date":"2012-06-27","price_date":"0012-10-24"}]}'
+    http_version: 
+  recorded_at: Mon, 29 Jun 2015 16:46:29 GMT
+recorded_with: VCR 2.9.3

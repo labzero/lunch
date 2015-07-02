@@ -55,6 +55,11 @@ $icon-print: "\e60b";
 $icon-forward: "\e60c";
 $icon-success: "\e60d";
 
+%icon-alert {
+  @extend %icon-font;
+  content: "#{$icon-alert}";
+}
+
 .icon-gear-before:before, .icon-gear-after:after {
   @extend %icon-font;
   content: "#{$icon-gear}";
@@ -113,8 +118,7 @@ $icon-success: "\e60d";
 }
 
 .icon-alert-before:before, .icon-alert-after:after {
-  @extend %icon-font;
-  content: "#{$icon-alert}";
+  @extend %icon-alert;
 }
 
 .icon-caret-before:before, .icon-caret-after:after {
@@ -137,11 +141,11 @@ $icon-success: "\e60d";
   content: "#{$icon-success}";
 }
 
-$spinner-size: 27px !default;
+$spinner-size: 30px !default;
 @mixin icon-loading {
   background-image: image-url('spinner-27x27-brandblue.gif');
   background-position: center center;
   background-repeat: no-repeat;
-  width: $spinner-size + 3px;
-  height: $spinner-size + 3px;
+  width: $spinner-size;
+  height: $spinner-size;
 }

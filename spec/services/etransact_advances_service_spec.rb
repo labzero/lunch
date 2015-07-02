@@ -21,4 +21,76 @@ describe EtransactAdvancesService do
       expect(status).to be false
     end
   end
+  describe '`signer_full_name` method', :vcr do
+    let(:signer) {'signer'}
+    let(:signer_full_name) {subject.signer_full_name(signer)}
+    it 'should return signer full name' do
+      expect(signer_full_name).to be_kind_of(String)
+    end
+    it 'should return nil if there was an API error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(signer_full_name).to eq(nil)
+    end
+    it 'should return nil if there was a connection error' do
+      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(signer_full_name).to eq(nil)
+    end
+  end
+  describe '`quick_advance_validate` method', :vcr do
+    let(:signer) {'signer'}
+    let(:member_id) {750}
+    let(:advance_term) {'someterm'}
+    let(:advance_type) {'sometype'}
+    let(:advance_rate) {'0.17'}
+    let(:amount) { 100 }
+    let(:quick_advance_validate) {subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, signer)}
+    it 'should return a hash back' do
+      expect(quick_advance_validate).to be_kind_of(Hash)
+    end
+    it 'should return nil if there was an API error' do
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(quick_advance_validate).to eq(nil)
+    end
+    it 'should return nil if there was a connection error' do
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(quick_advance_validate).to eq(nil)
+    end
+    it 'returns nil if there is a JSON parsing error' do
+      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+      allow(Rails.logger).to receive(:warn)
+      expect(quick_advance_validate).to be(nil)
+    end
+    it 'should URL encode the signer' do
+      expect(URI).to receive(:escape).with(signer)
+      quick_advance_validate
+    end
+  end
+  describe '`quick_advance_execute` method', :vcr do
+    let(:signer) {'signer'}
+    let(:member_id) {750}
+    let(:advance_term) {'someterm'}
+    let(:advance_type) {'sometype'}
+    let(:advance_rate) {'0.17'}
+    let(:amount) { 100 }
+    let(:quick_advance_execute) {subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer)}
+    it 'should return a hash back' do
+      expect(quick_advance_execute).to be_kind_of(Hash)
+    end
+    it 'should set initiated_at' do
+      expect(quick_advance_execute[:initiated_at]).to be_kind_of(DateTime)
+    end
+    it 'returns nil if there is a JSON parsing error' do
+      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+      allow(Rails.logger).to receive(:warn)
+      expect(quick_advance_execute).to be(nil)
+    end
+    before { allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED) }
+    it 'should return nil if there was a connection error' do
+      expect(quick_advance_execute).to eq(nil)
+    end
+    it 'should URL encode the signer' do
+      expect(URI).to receive(:escape).with(signer)
+      quick_advance_execute
+    end
+  end
 end

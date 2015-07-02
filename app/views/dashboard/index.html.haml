@@ -7,17 +7,27 @@
         =link_to(t('global.advances'), '')
       .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account']} do
-      - if @effective_borrowing_capacity
-        .dashboard-effective-borrowing-capacity
-          %h2= t('dashboard.your_account.effective_borrowing_capacity.title')
+      .dashboard-financing-availability
+        %h2
+          = t('dashboard.your_account.financing_availability.title')
+          %span.dashboard-gauge-total= fhlb_formatted_currency_whole(@financing_availability_gauge[:total][:amount])
           .dashboard-gauge
-            .borrowing-capacity-gauge-used.gauge-section{style: "width: #{number_to_percentage(@effective_borrowing_capacity[:used_capacity][:percentage], precision: 1)};"}
-              .inner-gauge-section
-            .borrowing-capacity-gauge-threshold{style: "left: #{@effective_borrowing_capacity[:threshold_capacity]}%"}
-              = render 'shared/tooltip', tooltip_data: {"#{@effective_borrowing_capacity[:threshold_capacity]}%" => nil}
-          .dashboard-gauge-labels
-            %span.borrowing-capacity-label-used= t('dashboard.your_account.effective_borrowing_capacity.used') + ": #{fhlb_formatted_currency_whole(@effective_borrowing_capacity[:used_capacity][:absolute], html: false)}"
-            %span= t('dashboard.your_account.effective_borrowing_capacity.unused') + ": #{fhlb_formatted_currency_whole(@effective_borrowing_capacity[:unused_capacity][:absolute], html: false)}"
+            - @financing_availability_gauge.each do |key, details|
+              - if details[:display_percentage] > 0 && key != :total
+                .gauge-section{style: "width: #{number_to_percentage(details[:display_percentage], precision: 1)};", class: key == :uncollateralized ? 'financing-availability-gauge-uncollateralized' : 'financing-availability-gauge-collateralized'}
+                  .inner-gauge-section
+                  = render 'shared/tooltip', tooltip_data: {t("dashboard.your_account.financing_availability.#{key}") => nil, number_to_percentage(details[:percentage], precision: 1) => nil, fhlb_formatted_currency(details[:amount]) => nil}
+      - if @borrowing_capacity_gauge
+        .dashboard-borrowing-capacity
+          %h2
+            = t('dashboard.your_account.borrowing_capacity.title')
+            %span.dashboard-gauge-total= fhlb_formatted_currency_whole(@borrowing_capacity_gauge[:total][:amount])
+          .dashboard-gauge
+            - @borrowing_capacity_gauge.each do |key, details|
+              - if details[:display_percentage] > 0 && key != :total
+                .gauge-section{style: "width: #{number_to_percentage(details[:display_percentage], precision: 1)};", class: key == :mortgages ? 'borrowing-capacity-gauge-standard' : 'borrowing-capacity-gauge-sbc'}
+                  .inner-gauge-section
+                  = render 'shared/tooltip', tooltip_data: {t("dashboard.your_account.borrowing_capacity.#{key}") => nil, number_to_percentage(details[:percentage], precision: 1) => nil, fhlb_formatted_currency(details[:amount]) => nil}
       .dashboard-anticipated-activity-graph
         %h2= t('dashboard.your_account.projected_sta_balance.title')
         =image_tag('anticipated-activity.png', alt: 'Anticipated Activity Graph')

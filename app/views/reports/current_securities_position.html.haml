@@ -1,0 +1,11 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.securities-report.expanding-row-table.row
+  .report-header
+    %h1= t('reports.pages.securities_position.current')
+    = render 'reports_header_buttons'
+    .report-inputs
+      = form_tag(reports_current_securities_position_url, method: 'GET') do
+        .report-filter
+          = render 'shared/dropdown', dropdown_name: 'securities_filter', default_value: @securities_filter, default_text: @securities_filter_text, dropdown_options: @securities_filter_options
+  = render 'securities_position', securities_position: @current_securities_position

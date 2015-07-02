@@ -38,19 +38,21 @@ Then(/^I should see the Your Account table breakdown$/) do
   mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
   mod.assert_selector('td', :text => I18n.t('dashboard.your_account.table.balance'))
   mod.assert_selector('td', :text => I18n.t('dashboard.your_account.table.credit_outstanding'))
-  mod.assert_selector('td', :text => I18n.t('dashboard.your_account.table.standard_program.title'))
-  mod.assert_selector('td', :text => I18n.t('dashboard.your_account.table.sbc_program.title'))
 end
 
-Then(/^I should see the Anticipated Activity graph$/) do
+Then(/^I should see an? "(.*?)" in the Account module/) do |component|
   mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
-  mod.assert_selector('.dashboard-anticipated-activity-graph')
-end
-
-Then(/^I should see an effective borrowing capacity gauge$/) do
-  mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
-  mod.assert_selector('.dashboard-effective-borrowing-capacity')
-  mod.assert_selector('.dashboard-gauge')
+  selector = case component
+    when 'borrowing capacity gauge'
+      '.dashboard-borrowing-capacity'
+    when 'financing availability gauge'
+      '.dashboard-financing-availability'
+    when 'anticipated activity graph'
+      '.dashboard-anticipated-activity-graph'
+    else
+      raise 'Unknown component for Account module'
+  end
+  mod.assert_selector(selector)
 end
 
 Then(/^I should see a flyout$/) do
@@ -125,7 +127,7 @@ end
 
 Then(/^I should see a preview of the quick advance$/) do
   page.assert_selector('.quick-advance-preview', visible: true)
-  valdiate_passed_advance_params
+  #valdiate_passed_advance_params
 end
 
 Then(/^I should not see a preview of the quick advance$/) do

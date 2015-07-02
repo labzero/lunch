@@ -10,7 +10,7 @@ Feature: Visiting the Letters of Credit Report Page
   @smoke @jira-mem-545
   Scenario: Visit letters of credit report page from header link
     Given I visit the dashboard
-    When I select "Letters of Credit Detail" from the reports dropdown
+    When I select "Letters of Credit" from the reports dropdown
     Then I should see report summary data
     And I should see a report table with multiple data rows
 

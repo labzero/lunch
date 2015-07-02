@@ -1,41 +1,57 @@
 $(function() {
-  $('.report-table[data-sortable]').each(function(ele) {
-    var $this = $(this);
-    var $columnHeaders = $this.find('th');
-    var $unsortableColumnHeaders = $this.find('th[data-unsortable]');
-    var $unsortableColumnIndices = [];
-    var missingDataMessage = $this.data('missing-data-message');
-    $.each($unsortableColumnHeaders, function(i, header){ $unsortableColumnIndices.push($columnHeaders.index(header)) });
-    $this.DataTable({
-        paging: false,
-        info: false,
-        searching: false,
-        order: $this.data('default-sort') || [[0, 'asc']],
-        autoWidth: !($this.data('disable-auto-width') === ""),
-        language: {
-          "emptyTable": missingDataMessage
-        },
-        columnDefs: [
-          {
-            targets: 'report-column-nosort',
-            orderable: false
-          }
-        ],
-        aoColumnDefs: [
-          {
-            bSortable: false,
-            aTargets: $unsortableColumnIndices
-          }
-        ]
-      })
-  });
 
-  $('.report-table .detail-view-trigger').on('click', function(event){
-    $('.report-table tr').removeClass('detail-view');
-    event.stopPropagation();
-    $(event.target).closest('tr').addClass('detail-view');
-    reportDetailEventListener();
-  });
+  function bindTables() {
+    $('.report-table').each(function() {
+      var $this = $(this);
+
+      if ($this.data('table-intialized')) {
+        return;
+      };
+
+      if ($this.is('[data-sortable]')) {
+        var $columnHeaders = $this.find('th');
+        var $unsortableColumnHeaders = $this.find('th[data-unsortable]');
+        var $unsortableColumnIndices = [];
+        var missingDataMessage = $this.data('missing-data-message');
+        $.each($unsortableColumnHeaders, function(i, header){ $unsortableColumnIndices.push($columnHeaders.index(header)) });
+        $this.DataTable({
+          paging: false,
+          info: false,
+          searching: false,
+          order: $this.data('default-sort') || [[0, 'asc']],
+          autoWidth: !($this.data('disable-auto-width') === ""),
+          language: {
+            "emptyTable": missingDataMessage
+          },
+          columnDefs: [
+            {
+              targets: 'report-column-nosort',
+              orderable: false
+            }
+          ],
+          aoColumnDefs: [
+            {
+              bSortable: false,
+              aTargets: $unsortableColumnIndices
+            }
+          ]
+        });
+      }
+
+      $this.find('.detail-view-trigger').on('click', function(event){
+        $('.report-table tr').removeClass('detail-view');
+        event.stopPropagation();
+        $(event.target).closest('tr').addClass('detail-view');
+        reportDetailEventListener();
+      });
+
+      $this.data('table-intialized', true);
+    });
+  };
+
+  bindTables();
+
+  $('body').on('table-rebind', bindTables);
 
   function reportDetailEventListener() {
     var $window = $(window);

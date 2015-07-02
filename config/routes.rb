@@ -37,6 +37,9 @@ Rails.application.routes.draw do
   get '/reports/securities-transactions' => 'reports#securities_transactions'
   get '/reports/authorizations' => 'reports#authorizations'
   get '/reports/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: 'reports_parallel_shift'
+  get '/reports/current-securities-position' => 'reports#current_securities_position'
+  get '/reports/monthly-securities-position' => 'reports#monthly_securities_position'
+  get '/reports/forward-commitments' => 'reports#forward_commitments'
 
   get '/advances' => 'advances#index'
   get '/advances/manage-advances' => 'advances#manage_advances'
@@ -61,6 +64,12 @@ Rails.application.routes.draw do
   scope 'corporate_communications/:category' do
     resources :corporate_communications, only: :show, as: :corporate_communication
     get '/' => 'corporate_communications#category', as: :corporate_communications
+  end
+
+  scope 'resources' do
+    get '/forms' => 'resources#forms'
+    get '/guides' => 'resources#guides'
+    get '/download/:file' => 'resources#download', as: :resources_download
   end
 
   devise_scope :user do

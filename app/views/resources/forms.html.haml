@@ -1,0 +1,44 @@
+- @html_class = 'white-background'
+.row.resource-forms-page
+  %h1= t('resources.forms.title')
+  %ul
+    %li= link_to(t('resources.forms.agreements.title'), '#agreements')
+    %li= link_to(t('resources.forms.authorizations.title'), '#authorizations')
+    %li= link_to(t('resources.forms.credit.title'), '#credit')
+    %li= link_to(t('resources.forms.collateral.title'), '#collateral')
+  %section
+    %a{name: 'agreements'}
+    %h2= t('resources.forms.agreements.title')
+    = render 'form_table', rows: @agreement_rows
+  %section
+    %a{name: 'authorizations'}
+    %h2= t('resources.forms.authorizations.title')
+    %h3= t('resources.forms.authorizations.signature_cards.title')
+    = render 'form_table', rows: @signature_card_rows
+    %h3= t('resources.forms.authorizations.wire_transfer.title')
+    = render 'form_table', rows: @wire_transfer_rows
+    %h3= t('resources.forms.authorizations.capital_stock.title')
+    = render 'form_table', rows: @capital_stock_rows
+    %h3= t('resources.forms.authorizations.website.title')
+    = render 'form_table', rows: @website_access_rows
+  %section
+    %a{name: 'credit'}
+    %h2= t('resources.forms.credit.title')
+    = render 'form_table', rows: @credit_rows
+  %section
+    %a{name: 'collateral'}
+    %h2= t('resources.forms.collateral.title')
+    %h3= t('resources.forms.collateral.lien_real_estate.title')
+    = render 'form_table', rows: @lien_real_estate_rows
+    %h3= t('resources.forms.collateral.lien_other.title')
+    = render 'form_table', rows: @lien_other_rows
+    %h3= t('resources.forms.collateral.specific_identification.title')
+    = render 'form_table', rows: @specific_identification_rows
+    %h3= t('resources.forms.collateral.deposits.title')
+    = render 'form_table', rows: @deposits_rows
+    %h3= t('resources.forms.collateral.securities.title')
+    = render 'form_table', rows: @securities_rows
+    %h3= t('resources.forms.collateral.loan_document.title')
+    = render 'form_table', rows: @loan_document_rows
+    %h3= t('resources.forms.collateral.creditor_relationship.title')
+    = render 'form_table', rows: @creditor_relationship_rows

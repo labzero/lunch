@@ -344,11 +344,11 @@ $breakdown-table-currency-width: 10px;
   }
 }
 
-.dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-effective-borrowing-capacity, .dashboard-anticipated-activity-graph {
+.dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-borrowing-capacity, .dashboard-anticipated-activity-graph {
   clear: both; // using instead of extending %clearfix, because we want overflow to be visible for tooltip
 }
 
-.dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-effective-borrowing-capacity {
+.dashboard-pledged-collateral, .dashboard-total-securities, .dashboard-borrowing-capacity {
   margin-bottom: 8px;
 }
 
@@ -357,7 +357,7 @@ $breakdown-table-currency-width: 10px;
   height: 25px;
   background: $white;
   border-radius: 3px;
-  padding: 4px 4px 4px 2px;
+  padding: 3px;
   border: 1px solid $light-blue;
   box-sizing: border-box;
   .gauge-section {
@@ -366,6 +366,9 @@ $breakdown-table-currency-width: 10px;
     float: left;
     padding-left: 2px;
     box-sizing: border-box;
+    &:first-child {
+      padding-left: 0;
+    }
     &:hover {
       .tooltip {
         display: block;
@@ -378,6 +381,26 @@ $breakdown-table-currency-width: 10px;
     height: 100%;
     border-radius: 3px;
   }
+  .tooltip {
+    @extend %inverted-tooltip;
+    margin-top: 5px;
+    .tooltip-pair {
+      display: inline;
+      span {
+        @extend %typography-table-total;
+        &:first-child {
+          margin-right: 5px;
+        }
+      }
+      &:first-child span {
+        font-weight: $normal-weight;
+      }
+    }
+  }
+}
+
+.dashboard-gauge-total {
+  float: right;
 }
 
 .dashboard-gauge-labels {
@@ -389,6 +412,14 @@ $breakdown-table-currency-width: 10px;
   span:last-child {
     float: right;
   }
+}
+
+.financing-availability-gauge-collateralized .inner-gauge-section {
+  background: $accent-green;
+}
+
+.financing-availability-gauge-uncollateralized .inner-gauge-section {
+  background: $medium-gray;
 }
 
 .collateral-gauge-label-mortgages {
@@ -415,42 +446,16 @@ $breakdown-table-currency-width: 10px;
   }
 }
 
-.dashboard-effective-borrowing-capacity {
+.dashboard-borrowing-capacity {
   position: relative;
 }
 
-.borrowing-capacity-gauge-threshold {
-  position: absolute;
-  top: 0;
-  margin-left: -5.5px;
-  width: 11px;
-  height: 100%;
-  background: $actionable-blue;
-  z-index: 1;
-  &:before {
-    @extend %absolute-pseudoelement;
-    left: 5px;
-    width: 1px;
-    height: 100%;
-    background: $brand-blue;
-    z-index: 0;
-  }
-  &:hover {
-    .tooltip {
-      display: block;
-      span:first-child {
-        margin-right: 0;
-      }
-    }
-  }
+.borrowing-capacity-gauge-standard .inner-gauge-section {
+  background: $light-green;
 }
 
-.borrowing-capacity-gauge-used .inner-gauge-section {
-  background: $accent-green;
-}
-
-.borrowing-capacity-label-used {
-  color: $accent-green;
+.borrowing-capacity-gauge-sbc .inner-gauge-section {
+  background: $dark-green;
 }
 
 .dashboard-module-reports {

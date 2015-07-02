@@ -1,3 +1,5 @@
+require_relative 'etransact_advances/execute_trade'
+
 module MAPI
   module Services
     module EtransactAdvances
@@ -47,10 +49,155 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/signer_full_name/{signer}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Gets Signer Full Name.'
+              key :notes, 'Returns the full name of the authorized signer.'
+              key :type, :string
+              key :nickname, :SignerFullName
+              parameter do
+                key :paramType, :path
+                key :name, :signer
+                key :required, true
+                key :type, :string
+                key :description, 'Authorized signer.'
+              end
+            end
+          end
+          api do
+            key :path, '/execute_advance/{id}/{amount}/{advance_type}/{advance_term}/{rate}/{signer}'
+            operation do
+              key :method, 'POST'
+              key :summary, 'Execute new Advance in Calypso.'
+              key :notes, 'Returns the result of execute trade.'
+              key :type, :ExecuteAdvance
+              key :nickname, :ExecuteAdvance
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :amount
+                key :required, true
+                key :type, :Numeric
+                key :description, 'Amount to execute.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :advance_type
+                key :required, true
+                key :type, :string
+                key :description, 'Collateral type.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :advance_term
+                key :required, true
+                key :type, :string
+                key :description, 'Term of the advance.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :rate
+                key :required, true
+                key :type, :Numeric
+                key :description, 'Advance rate.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :signer
+                key :required, true
+                key :type, :string
+                key :description, 'Authorized signer.'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 400
+                key :message, 'Invalid input'
+              end
+              response_message do
+                key :code, 404
+                key :message, 'No Data Found'
+              end
+            end
+          end
+          api do
+            key :path, '/{validate_advance/{id}/{amount}/{advance_type}/{advance_term}/{rate}/{signer}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Validates new Advance in Calypso.'
+              key :notes, 'Returns the result of execute trade.'
+              key :type, :ExecuteAdvance
+              key :nickname, :ExecuteAdvance
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :amount
+                key :required, true
+                key :type, :Numeric
+                key :description, 'Amount to execute.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :advance_type
+                key :required, true
+                key :type, :string
+                key :description, 'Collateral type.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :advance_term
+                key :required, true
+                key :type, :string
+                key :description, 'Term of the advance.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :rate
+                key :required, true
+                key :type, :Numeric
+                key :description, 'Advance rate.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :signer
+                key :required, true
+                key :type, :string
+                key :description, 'Authorized signer.'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 400
+                key :message, 'Invalid input'
+              end
+              response_message do
+                key :code, 404
+                key :message, 'No Data Found'
+              end
+            end
+          end
         end
 
         # etransact advances status
-        relative_get "/status" do
+        relative_get '/status' do
           etransact_advances_turn_on_string = <<-SQL
             SELECT count(*) as status_on_count
             FROM WEB_ADM.AO_SETTINGS
@@ -170,6 +317,54 @@ module MAPI
             wl_vrc_status: wl_vrc_status,
             all_loan_status: loan_status
           }.to_json
+        end
+
+        # Signer Full Name
+        relative_get '/signer_full_name/:signer' do
+          signer = params[:signer]
+          MAPI::Services::EtransactAdvances::ExecuteTrade::get_signer_full_name(self.settings.environment, signer)
+        end
+
+        # Execute Advance
+        relative_post '/execute_advance/:id/:amount/:advance_type/:advance_term/:rate/:signer' do
+          member_id = params[:id]
+          amount = params[:amount]
+          advance_type = params[:advance_type]
+          advance_term = params[:advance_term]
+          rate = params[:rate]
+          signer = params[:signer]
+          markup = 0
+          blendedcostoffunds = 0
+          costoffunds = 0
+          benchmarkrate = 0
+          begin
+            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'EXECUTE', amount, advance_term, advance_type, rate, signer, markup, blendedcostoffunds, costoffunds, benchmarkrate)
+          rescue Savon::Error => error
+            logger.error error
+            halt 503, 'Internal Service Error'
+          end
+          result
+        end
+
+        # Validate Advance
+        relative_get '/validate_advance/:id/:amount/:advance_type/:advance_term/:rate/:signer' do
+          member_id = params[:id]
+          amount = params[:amount]
+          advance_type = params[:advance_type]
+          advance_term = params[:advance_term]
+          rate = params[:rate]
+          signer = params[:signer]
+          markup = 0
+          blendedcostoffunds = 0
+          costoffunds = 0
+          benchmarkrate = 0
+          begin
+            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'VALIDATE', amount, advance_term, advance_type, rate, signer, markup, blendedcostoffunds, costoffunds, benchmarkrate)
+          rescue Savon::Error => error
+            logger.error error
+            halt 503, 'Internal Service Error'
+          end
+          result
         end
       end
     end

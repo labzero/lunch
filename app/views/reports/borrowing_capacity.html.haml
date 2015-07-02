@@ -105,7 +105,7 @@
           %tbody
             -@borrowing_capacity_summary[:sbc][:collateral].each do |type, value|
               %tr
-                %td.report-cell-narrow= t("dashboard.your_account.pledged_collateral.#{type}")
+                %td.report-cell-narrow= t("dashboard.your_account.borrowing_capacity.#{type}")
                 %td.report-cell-right= number_with_delimiter(value[:total_market_value])
                 %td.report-cell-right= number_with_delimiter(value[:total_borrowing_capacity])
                 %td.report-cell-right= number_with_delimiter(value[:advances])

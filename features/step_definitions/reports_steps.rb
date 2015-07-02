@@ -1,28 +1,9 @@
-When(/^I click on the reports link in the header$/) do
-  page.find('.page-header .secondary-nav a', text: I18n.t('reports.title')).click
-end
-
 Then(/^I should see "(.*?)" as the report page's main title$/) do |title|
   page.assert_selector('h1', text: title)
 end
 
 Then(/^I should see a table of "(.*?)" reports$/) do |title|
   page.assert_selector('.reports-table th', text: title)
-end
-
-Given(/^I don't see the reports dropdown$/) do
-  page.find('.logo').hover # make sure the mouse isn't left on top of the reports dropdown from a different test
-  report_menu = page.find('.nav-menu', text: I18n.t('reports.title'))
-  report_menu.parent.assert_selector('.nav-dropdown', visible: :hidden)
-end
-
-When(/^I hover on the reports link in the header$/) do
-  page.find('.nav-menu', text: I18n.t('reports.title')).hover
-end
-
-Then(/^I should see the reports dropdown$/) do
-  report_menu = page.find('.nav-menu', text: I18n.t('reports.title'))
-  report_menu.parent.assert_selector('.nav-dropdown', visible: true)
 end
 
 Given(/^I am on the reports summary page$/) do
@@ -66,6 +47,15 @@ Then(/^I should see (\d+) report tables with multiple data rows$/) do |count|
   end
 end
 
+Then(/^I should see a loading report table$/) do
+  page.assert_selector('.report-table.table-loading', visible: true)
+end
+
+When(/^I wait for the report to load$/) do
+  page.assert_no_selector('.report-table.table-loading', wait: 180)
+  page.assert_no_selector('.report-table.table-error')
+end
+
 
 Given(/^I am on the "(.*?)" report page$/) do |report|
   sleep_if_close_to_midnight
@@ -97,6 +87,12 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/securities-transactions'
   when 'Authorizations'
     visit '/reports/authorizations'
+  when 'Current Securities Position'
+    visit '/reports/current-securities-position'
+  when 'Forward Commitments'
+    visit '/reports/forward-commitments'
+  when 'Monthly Securities Position'
+    visit '/reports/monthly-securities-position'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
@@ -128,6 +124,10 @@ When(/^I click the "(.*?)" column heading$/) do |column_heading|
                 I18n.t('common_table_headings.settlement_date')
               when 'Outstanding Shares'
                 I18n.t('reports.pages.capital_stock_activity.shares_outstanding')
+              when 'Maturity Date'
+                I18n.t('common_table_headings.maturity_date')
+              when 'Funding Date'
+                I18n.t('common_table_headings.funding_date')
               else
                 raise Capybara::ExpectationNotMet, 'unknown column heading passed as argument'
             end
@@ -241,7 +241,7 @@ Given(/^I am showing Settlement Transaction Account activities for (\d+)$/) do |
   step %{I should see a "Settlement Transaction Account Statement" with dates between "#{start_date.strftime('%B %-d, %Y')}" and "#{end_date.strftime('%B %-d, %Y')}"}
 end
 
-When(/^I filter the Settlement Transaction Account Statement by "(.*?)"$/) do |text|
+When(/^I filter the report by "(.*?)"$/) do |text|
   page.find('.report-inputs .dropdown-selection').click
   page.find('li', text: text).click
 end
@@ -260,6 +260,18 @@ Then(/^I should only see "(.*?)" rows in the Settlement Transaction Account Stat
       expect(element.text.gsub(/\D/,'').to_f).to be > 0
       expect(element.text[0]).to eq('(') if text == 'Debit'
       expect(element.text[-1]).to eq(')') if text == 'Debit'
+    end
+  end
+end
+
+Then(/^I should see a (current|monthly) securities position report for (Pledged|Unpledged) Securities$/) do |report_type, filter_type|
+  table_header = page.find('.report-table-title').text
+  expect(table_header).to include(filter_type)
+  if !page.find(".report-table tbody tr:first-child td:first-child")['class'].split(' ').include?('dataTables_empty')
+    filter_type = filter_type == 'Pledged' ? 'P' : 'U'
+    security_types = page.evaluate_script("$('.report-detail-cell td:contains(Custody Account Type)').siblings().text()").split(//)
+    security_types.each do |security_type|
+      expect(security_type).to eq(filter_type)
     end
   end
 end
@@ -288,17 +300,27 @@ def export_report(format)
   click_button(I18n.t('dashboard.actions.download'))
 end
 
-When(/^I click on the view cell for the first (advance|cash projection)/) do |report_type|
-  column_name = report_type == 'advance' ? I18n.t('common_table_headings.advance_number') : I18n.t('reports.pages.cash_projections.cusip')
+When(/^I click on the view cell for the first (advance|cash projection|security)/) do |report_type|
+  case report_type
+    when 'advance'
+      column_name = I18n.t('common_table_headings.advance_number')
+      row_offset = 1
+    when 'cash projection'
+      column_name = I18n.t('common_table_headings.cusip')
+      row_offset = 1
+    when 'security'
+      column_name = I18n.t('reports.pages.securities_position.security_pledge_type')
+      row_offset = 2
+  end
   skip_if_table_empty do
-    column_index = page.evaluate_script("$('.report-table thead th:contains(#{column_name})').index()") + 1
+    column_index = page.evaluate_script("$('.report-table thead th:contains(#{column_name})').index()") + row_offset
     @row_identifier = page.find(".report-table tbody tr:first-child td:nth-child(#{column_index})").text
     page.find('.report-table tr:first-child .detail-view-trigger').click
   end
 end
 
-Then(/^I should see the detailed view for the first (advance|cash projection)/) do |report_type|
-  text = report_type == 'advance' ? I18n.t('reports.pages.advances_detail.record_title', advance_number: @row_identifier) : I18n.t('reports.pages.cash_projections.record_title', cusip: @row_identifier)
+Then(/^I should see the detailed view for the first (advance|cash projection|security)/) do |report_type|
+  text = report_type == 'advance' ? I18n.t('reports.pages.advances_detail.record_title', advance_number: @row_identifier) : I18n.t('common_table_headings.cusip_title', cusip: @row_identifier)
   skip_if_table_empty do
     page.assert_selector('.report-table tr:first-child .report-detail-cell', visible: true)
     page.assert_selector('.report-table tr:first-child .report-detail-cell h3', text: text, visible: true)
@@ -306,13 +328,13 @@ Then(/^I should see the detailed view for the first (advance|cash projection)/) 
   end
 end
 
-When(/^I click on the hide link for the first (advance|cash projection)$/) do |report_type|
+When(/^I click on the hide link for the first (advance|cash projection|security)$/) do |report_type|
   skip_if_table_empty do
     page.find('.report-table tr:first-child .report-detail-cell .hide-detail-view').click
   end
 end
 
-Then(/^I should not see the detailed view for the first (advance|cash projection)$/) do |report_type|
+Then(/^I should not see the detailed view for the first (advance|cash projection|security)$/) do |report_type|
   skip_if_table_empty do
     page.assert_selector('.report-table tr:first-child .report-detail-cell', visible: :hidden)
   end
@@ -380,6 +402,7 @@ end
 When(/^I select "(.*?)" from the authorizations filter$/) do |text|
   page.find('.report-inputs .dropdown-selection').click
   page.find('.authorizations-filter li', text: text).click
+  step %{I wait for the report to load}
 end
 
 When(/^I should only see users with the "(.*?)" role$/) do |role|

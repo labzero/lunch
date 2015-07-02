@@ -208,6 +208,30 @@ describe MemberBalanceService do
       expect(profile[:sbc_total_borrowing_capacity]).to be_kind_of(Integer)
       expect(profile[:sbc_remaining_borrowing_capacity]).to be_kind_of(Integer)
     end
+    describe 'calculated values' do
+      let(:json_response) { {
+        standard_total_borrowing_capacity: rand(90000000),
+        sbc_total_borrowing_capacity: rand(90000000),
+        standard_remaining_borrowing_capacity: rand(90000000),
+        sbc_remaining_borrowing_capacity: rand(90000000),
+        financial_available: rand(90000000)
+      } }
+      before do
+        allow(JSON).to receive(:parse).and_return(json_response)
+      end
+      it 'should calculate `total_borrowing_capacity`' do
+        expect(profile[:total_borrowing_capacity]).to eq(json_response[:standard_total_borrowing_capacity] + json_response[:sbc_total_borrowing_capacity])
+      end
+      it 'should calculate `remaining_borrowing_capacity`' do
+        expect(profile[:remaining_borrowing_capacity]).to eq(json_response[:standard_remaining_borrowing_capacity] + json_response[:sbc_remaining_borrowing_capacity])
+      end
+      it 'should calculate `remaining_borrowing_capacity`' do
+        expect(profile[:used_financing_availability]).to eq((json_response[:standard_total_borrowing_capacity] + json_response[:sbc_total_borrowing_capacity]) - (json_response[:standard_remaining_borrowing_capacity] + json_response[:sbc_remaining_borrowing_capacity]))
+      end
+      it 'should calculate `remaining_borrowing_capacity`' do
+        expect(profile[:uncollateralized_financing_availability]).to eq(json_response[:financial_available] - (json_response[:standard_total_borrowing_capacity] + json_response[:sbc_total_borrowing_capacity]))
+      end
+    end
     describe 'bad data' do
       before do
         expect(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'profile_with_nil_values.json'))))
@@ -415,7 +439,7 @@ describe MemberBalanceService do
             expect(borrowing_capacity_summary[:sbc_excess_capacity]).to eq(76634)
           end
           it 'should calculate total borrowing capacity and remaining borrowing capacity across all security types' do
-            expect(borrowing_capacity_summary[:total_borrowing_capacity]).to eq(2216849292)
+            expect(borrowing_capacity_summary[:total_borrowing_capacity]).to eq(2217350292)
             expect(borrowing_capacity_summary[:remaining_borrowing_capacity]).to eq(2207257094)
           end
           it 'should calculate `borrowing_capacity`/`unpaid_principal_balance` as a rounded, whole-number percentage' do
@@ -852,6 +876,7 @@ describe MemberBalanceService do
     end
   end
 
+  # TODO add vcr once MAPI endpoint is rigged up
   describe 'the `parallel_shift` method' do
     let(:parallel_shift) {subject.parallel_shift}
     it 'returns a hash with an `as_of_date` that is a date' do
@@ -882,6 +907,163 @@ describe MemberBalanceService do
         allow(File).to receive(:read).and_return('some malformed json!')
         expect(Rails.logger).to receive(:warn)
         expect(parallel_shift).to be(nil)
+      end
+    end
+  end
+
+  describe 'the `current_securities_position` method', :vcr do
+    let(:current_securities_position) {subject.current_securities_position('all')}
+    it 'returns a hash with an `as_of_date` that is a date' do
+      expect(current_securities_position[:as_of_date]).to be_kind_of(Date)
+    end
+    %w(total_original_par total_current_par total_market_value).each do |key|
+      it "returns a hash with a `#{key}` that is a float" do
+        expect(current_securities_position[key.to_sym]).to be_kind_of(Float)
+      end
+    end
+    it 'returns a hash with a `securities` array' do
+      expect(current_securities_position[:securities]).to be_kind_of(Array)
+    end
+    describe 'the `securities` array' do
+      it 'contains objects representing securities data' do
+        current_securities_position[:securities].each do |security|
+          expect(security[:custody_account_number]).to be_kind_of(String)
+          expect(security[:custody_account_type]).to be_kind_of(String)
+          expect(security[:security_pledge_type]).to be_kind_of(String)
+          expect(security[:cusip]).to be_kind_of(String)
+          expect(security[:description]).to be_kind_of(String)
+          expect(security[:reg_id]).to be_kind_of(String)
+          expect(security[:pool_number]).to be_kind_of(String)
+          expect(security[:coupon_rate]).to be_kind_of(Float)
+          expect(security[:maturity_date]).to be_kind_of(String)
+          expect(security[:original_par]).to be_kind_of(Float)
+          expect(security[:factor]).to be_kind_of(Float)
+          expect(security[:factor_date]).to be_kind_of(String)
+          expect(security[:current_par]).to be_kind_of(Float)
+          expect(security[:price]).to be_kind_of(Float)
+          expect(security[:price_date]).to be_kind_of(String)
+          expect(security[:market_value]).to be_kind_of(Float)
+        end
+      end
+    end
+    describe 'error states' do
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(current_securities_position).to be(nil)
+      end
+      it 'should log an error if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(Rails.logger).to receive(:warn)
+        current_securities_position
+      end
+      it 'should return nil if there was an API error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(current_securities_position).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(current_securities_position).to eq(nil)
+      end
+    end
+  end
+
+  describe 'the `monthly_securities_position` method', :vcr do
+    let(:monthly_securities_position) {subject.monthly_securities_position('2015-01-31','all')}
+    it 'returns a hash with an `as_of_date` that is a date' do
+      expect(monthly_securities_position[:as_of_date]).to be_kind_of(Date)
+    end
+    %w(total_original_par total_current_par total_market_value).each do |key|
+      it "returns a hash with a `#{key}` that is a float" do
+        expect(monthly_securities_position[key.to_sym]).to be_kind_of(Float)
+      end
+    end
+    it 'returns a hash with a `securities` array' do
+      expect(monthly_securities_position[:securities]).to be_kind_of(Array)
+    end
+    describe 'the `securities` array' do
+      it 'contains objects representing securities data' do
+        monthly_securities_position[:securities].each do |security|
+          expect(security[:custody_account_number]).to be_kind_of(String)
+          expect(security[:custody_account_type]).to be_kind_of(String)
+          expect(security[:security_pledge_type]).to be_kind_of(String)
+          expect(security[:cusip]).to be_kind_of(String)
+          expect(security[:description]).to be_kind_of(String)
+          expect(security[:reg_id]).to be_kind_of(String)
+          expect(security[:pool_number]).to be_kind_of(String)
+          expect(security[:coupon_rate]).to be_kind_of(Float)
+          expect(security[:maturity_date]).to be_kind_of(String)
+          expect(security[:original_par]).to be_kind_of(Float)
+          expect(security[:factor]).to be_kind_of(Float)
+          expect(security[:factor_date]).to be_kind_of(String)
+          expect(security[:current_par]).to be_kind_of(Float)
+          expect(security[:price]).to be_kind_of(Float)
+          expect(security[:price_date]).to be_kind_of(String)
+          expect(security[:market_value]).to be_kind_of(Float)
+        end
+      end
+    end
+    describe 'error states' do
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(monthly_securities_position).to be(nil)
+      end
+      it 'should log an error if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(Rails.logger).to receive(:warn)
+        monthly_securities_position
+      end
+      it 'should return nil if there was an API error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(monthly_securities_position).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(monthly_securities_position).to eq(nil)
+      end
+    end
+  end
+
+  describe 'the `forward_commitments` method', :vcr do
+    let(:forward_commitments) {subject.forward_commitments}
+    it 'returns a hash with an `as_of_date` that is a date' do
+      expect(forward_commitments[:as_of_date]).to be_kind_of(Date)
+    end
+    it "returns a hash with a `total_current_par` that is an integer" do
+      expect(forward_commitments[:total_current_par]).to be_kind_of(Integer)
+    end
+    it 'returns a hash with an `advances` array' do
+      expect(forward_commitments[:advances]).to be_kind_of(Array)
+    end
+    describe 'the `advances` array' do
+      it 'contains objects representing securities data' do
+        forward_commitments[:advances].each do |security|
+          expect(security[:trade_date]).to be_kind_of(Date)
+          expect(security[:funding_date]).to be_kind_of(Date)
+          expect(security[:maturity_date]).to be_kind_of(Date)
+          expect(security[:advance_number]).to be_kind_of(String)
+          expect(security[:advance_type]).to be_kind_of(String)
+          expect(security[:current_par]).to be_kind_of(Integer)
+          expect(security[:interest_rate]).to be_kind_of(Float)
+        end
+      end
+    end
+    describe 'error states' do
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(forward_commitments).to be(nil)
+      end
+      it 'should log an error if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(Rails.logger).to receive(:warn)
+        forward_commitments
+      end
+      it 'should return nil if there was an API error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(forward_commitments).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(forward_commitments).to eq(nil)
       end
     end
   end

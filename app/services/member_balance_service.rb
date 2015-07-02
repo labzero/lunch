@@ -223,7 +223,7 @@ class MemberBalanceService < MAPIService
           end
         end
         data[:sbc_excess_capacity] = data[:sbc_totals][:remaining_borrowing_capacity].to_i - data[:sbc][:utilized].values.sum
-        data[:total_borrowing_capacity] = data[:standard_credit_totals][:borrowing_capacity].to_i + data[:sbc_totals][:remaining_borrowing_capacity].to_i
+        data[:total_borrowing_capacity] = data[:standard_credit_totals][:borrowing_capacity].to_i + data[:sbc_totals][:total_borrowing_capacity].to_i
         data[:remaining_borrowing_capacity] = data[:standard_excess_capacity].to_i + data[:sbc_excess_capacity].to_i
       rescue => e
         Rails.logger.warn("The data[:sbc] hash in MemberBalanceService.borrowing_capacity_summary is malformed in some way. It returned #{data[:sbc]} and threw the following error: #{e}")
@@ -341,6 +341,11 @@ class MemberBalanceService < MAPIService
       Rails.logger.warn("MemberBalanceService.profile encountered a JSON parsing error: #{e}")
       return nil
     end
+
+    data[:total_borrowing_capacity] = data[:standard_total_borrowing_capacity].to_i + data[:sbc_total_borrowing_capacity].to_i
+    data[:remaining_borrowing_capacity] = data[:standard_remaining_borrowing_capacity].to_i  + data[:sbc_remaining_borrowing_capacity].to_i
+    data[:used_financing_availability] = data[:total_borrowing_capacity].to_i  - data[:remaining_borrowing_capacity].to_i
+    data[:uncollateralized_financing_availability] = data[:financial_available].to_i  - data[:total_borrowing_capacity].to_i
     data
   end
 
@@ -499,6 +504,76 @@ class MemberBalanceService < MAPIService
       return nil
     end
     data[:as_of_date] = data[:as_of_date].to_date
+    data
+  end
+
+  def current_securities_position(custody_account_type)
+    begin
+      response = @connection["member/#{@member_id}/current_securities_position/#{custody_account_type}"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.current_securities_position encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.current_securities_position encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.current_securities_position encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data[:as_of_date] = (data[:as_of_date].to_date if data[:as_of_date])
+    data
+  end
+
+  def monthly_securities_position(month_end_date, custody_account_type)
+    month_end_date = month_end_date.to_date.strftime('%Y-%m-%d')
+    begin
+      response = @connection["member/#{@member_id}/monthly_securities_position/#{month_end_date}/#{custody_account_type}"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.monthly_securities_position encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.monthly_securities_position encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.monthly_securities_position encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data[:as_of_date] = (data[:as_of_date].to_date if data[:as_of_date])
+    data
+  end
+
+  def forward_commitments
+    begin
+      response = @connection["member/#{@member_id}/forward_commitments"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.forward_commitments encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.forward_commitments encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.forward_commitments encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data[:as_of_date] = data[:as_of_date].to_date if data[:as_of_date]
+    unless data[:advances].blank?
+      data[:advances].collect do |advance|
+        %i(trade_date funding_date maturity_date).each { |date_attr| advance[date_attr] = advance[date_attr].to_date }
+        advance
+      end
+    end
     data
   end
 

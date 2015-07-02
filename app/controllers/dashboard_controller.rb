@@ -8,7 +8,12 @@ class DashboardController < ApplicationController
     authorize :advances, :show?
   end
 
+  before_action only: [:quick_advance_perform, :quick_advance_preview] do
+    session['signer_full_name'] ||= EtransactAdvancesService.new(request).signer_full_name(current_user.username)
+  end
+
   def index
+    today = Time.zone.now.to_date
     rate_service = RatesService.new(request)
     etransact_service = EtransactAdvancesService.new(request)
     member_balances = MemberBalanceService.new(current_member_id, request)
@@ -45,28 +50,42 @@ class DashboardController < ApplicationController
       [t('dashboard.your_account.table.remaining.leverage'), profile[:stock_leverage], nil, 2]
     ]
 
-    standard_program = [
-      {title: t('dashboard.your_account.table.standard_program.title')},
-      [t('dashboard.your_account.table.total_borrowing_capacity'), profile[:standard_total_borrowing_capacity]],
-      [t('dashboard.your_account.table.remaining_borrowing_capacity'), profile[:standard_remaining_borrowing_capacity]]
-    ]
-
-    sbc_program = [
-        {title: t('dashboard.your_account.table.sbc_program.title')},
-        [t('dashboard.your_account.table.total_borrowing_capacity'), profile[:sbc_total_borrowing_capacity]],
-        [t('dashboard.your_account.table.remaining_borrowing_capacity'), profile[:sbc_remaining_borrowing_capacity]]
-    ]
-
-    @account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining, standard_program: standard_program, sbc_program: sbc_program}
+    @account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining}
 
     @market_overview = [{
       name: 'Test',
       data: rate_service.overnight_vrc
     }]
 
-    @effective_borrowing_capacity = member_balances.effective_borrowing_capacity
-    @effective_borrowing_capacity.merge!({threshold_capacity: THRESHOLD_CAPACITY}) if @effective_borrowing_capacity # we'll be pulling threshold capacity from a different source than the MemberBalanceService
-    @total_maturing_today = 46500000
+    borrowing_capacity = member_balances.borrowing_capacity_summary(today)
+
+    @borrowing_capacity_gauge = if borrowing_capacity
+      total_borrowing_capacity = borrowing_capacity[:total_borrowing_capacity]
+      guage = {
+        total: total_borrowing_capacity,
+        mortgages: borrowing_capacity[:standard_credit_totals][:borrowing_capacity],
+        aa: borrowing_capacity[:sbc][:collateral][:aa][:total_borrowing_capacity],
+        aaa: borrowing_capacity[:sbc][:collateral][:aaa][:total_borrowing_capacity],
+        agency: borrowing_capacity[:sbc][:collateral][:agency][:total_borrowing_capacity]
+      }
+      calculate_gauge_percentages(guage, total_borrowing_capacity, :total)
+    else
+      nil
+    end
+
+    @financing_availability_gauge = if profile[:financial_available]
+      calculate_gauge_percentages(
+        {
+          total: profile[:financial_available],
+          used: profile[:used_financing_availability],
+          unused: profile[:remaining_borrowing_capacity],
+          uncollateralized: profile[:uncollateralized_financing_availability]
+        }, profile[:financial_available], :total)
+    else
+      nil
+    end
+
+
 
     @reports_daily = 2
     @reports_weekly = 1
@@ -96,7 +115,7 @@ class DashboardController < ApplicationController
   end
 
   def quick_advance_preview
-    preview = RatesService.new(request).quick_advance_preview(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f)
+    preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, session['signer_full_name'])
     @advance_amount = preview[:advance_amount]
     @advance_type = preview[:advance_type]
     @interest_day_count = preview[:interest_day_count]
@@ -127,7 +146,7 @@ class DashboardController < ApplicationController
     advance_success = false
     response_html = false
     if session_elevated?
-      confirmation = RatesService.new(request).quick_advance_confirmation(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f)
+      confirmation = EtransactAdvancesService.new(request).quick_advance_execute(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, session['signer_full_name'])
       if confirmation
         advance_success = true 
 
@@ -140,7 +159,7 @@ class DashboardController < ApplicationController
         @funding_date = confirmation[:funding_date]
         @maturity_date = confirmation[:maturity_date]
         @advance_rate = confirmation[:advance_rate]
-        @advance_number = confirmation[:advance_number]
+        @advance_number = confirmation[:confirmation_number]
         response_html = render_to_string layout: false
       end
     end
@@ -152,5 +171,37 @@ class DashboardController < ApplicationController
     response = RatesService.new(request).current_overnight_vrc || {}
     response[:quick_advances_active] = etransact_service.etransact_active?
     render json: response
+  end
+
+  private
+
+  def calculate_gauge_percentages(gauge_hash, total, excluded_keys)
+    excluded_keys = Array.wrap(excluded_keys)
+    largest_display_percentage_key = nil
+    largest_display_percentage = 0
+    total_display_percentage = 0
+    new_gauge_hash = gauge_hash.deep_dup
+
+    gauge_hash.each do |key, value|
+      percentage = total > 0 ? (value.to_f / total) * 100 : 0
+
+      display_percentage = percentage.ceil
+      display_percentage += display_percentage % 2
+
+      new_gauge_hash[key] = {
+        amount: value,
+        percentage: percentage,
+        display_percentage: display_percentage
+      }
+      unless excluded_keys.include?(key)
+        if display_percentage >= largest_display_percentage
+          largest_display_percentage = display_percentage
+          largest_display_percentage_key = key
+        end
+        total_display_percentage += display_percentage
+      end
+    end
+    new_gauge_hash[largest_display_percentage_key][:display_percentage] = (100 - (total_display_percentage - largest_display_percentage))
+    new_gauge_hash
   end
 end

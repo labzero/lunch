@@ -15,6 +15,9 @@ class ReportsController < ApplicationController
   LETTERS_OF_CREDIT_WEB_FLAGS = [MembersService::LETTERS_OF_CREDIT_DETAIL_REPORT]
   SECURITIES_TRANSACTION_WEB_FLAGS = [MembersService::SECURITIES_TRANSACTION_DATA]
   PARALLEL_SHIFT_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
+  CURRENT_SECURITIES_POSITION_WEB_FLAG = [MembersService::CURRENT_SECURITIES_POSITION]
+  MONTHLY_SECURITIES_WEB_FLAGS = [MembersService::MONTHLY_SECURITIES_POSITION]
+  FORWARD_COMMITMENTS_WEB_FLAG = [MembersService::ADVANCES_DETAIL_DATA]
 
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
@@ -85,7 +88,8 @@ class ReportsController < ApplicationController
         },
         forward_commitments: {
           updated: t('global.daily'),
-          available_history: t('global.all')
+          available_history: t('global.all'),
+          path: reports_forward_commitments_path
         },
         parallel_shift: {
           updated: t('global.monthly'),
@@ -136,11 +140,13 @@ class ReportsController < ApplicationController
         },
         current: {
           updated: t('reports.continuously'),
-          available_history: t('global.current_day')
+          available_history: t('global.current_day'),
+          path: reports_current_securities_position_path
         },
         monthly: {
           updated: t('global.monthly'),
-          available_history: t('reports.history.months18')
+          available_history: t('reports.history.months18'),
+          path: reports_monthly_securities_position_path
         },
         services_monthly: {
           updated: t('global.monthly'),
@@ -614,7 +620,7 @@ class ReportsController < ApplicationController
         }
       end
     else
-      {}
+      []
     end
     @loc_table_data = {
       column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('common_table_headings.trade_date'), t('common_table_headings.settlement_date'), t('common_table_headings.maturity_date'), t('common_table_headings.description')],
@@ -636,7 +642,7 @@ class ReportsController < ApplicationController
     @picker_presets = date_picker_presets(@start_date)
     @total_net = securities_transactions[:total_net]
     @final = securities_transactions[:final]
-    column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('reports.pages.securities_transactions.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('reports.pages.securities_transactions.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
+    column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('common_table_headings.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('common_table_headings.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
     rows = securities_transactions[:transactions].collect do |row|
       columns = []
       row.each do |value|
@@ -674,28 +680,49 @@ class ReportsController < ApplicationController
 
   def authorizations
     @authorizations_filter = params['authorizations_filter'] || 'all'
-    users = MembersService.new(request).signers_and_users(current_member_id) || []
-    users = users.sort_by{|x| x[:display_name]}
-    rows = []
-    users.each do |user|
-      user_roles = roles_for_signers(user)
-      if @authorizations_filter == 'user' && user_roles.include?(t('user_roles.user.title'))
-        rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
-      else
-        next if user_roles.empty? || (@authorizations_filter != 'all' && !user[:roles].include?(@authorizations_filter))
-        rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
-      end
-    end
-    @authorizations_table_data = {
-      :column_headings => [t('user_roles.user.title'), t('reports.authorizations.title')],
-      :rows => rows
-    }
+
     @authorizations_dropdown_options = AUTHORIZATIONS_DROPDOWN_MAPPING.collect{|key, value| [value, key]}
     @authorizations_dropdown_options.each do |option|
       if option.last == @authorizations_filter
         @authorizations_filter_text = option.first
         break
       end
+    end
+
+    @authorizations_table_data = {
+      :column_headings => [t('user_roles.user.title'), t('reports.authorizations.title')]
+    }
+
+    @job_status_url = false
+    @load_url = false
+    
+    if params[:job_id]
+      job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+      raise ActiveRecord::RecordNotFound unless job_status
+      users = JSON.parse(job_status.result_as_string).collect! {|o| o.with_indifferent_access}
+      job_status.destroy
+
+      users = users.sort_by{|x| x[:display_name]}
+      rows = []
+      users.each do |user|
+        user_roles = roles_for_signers(user)
+        if @authorizations_filter == 'user' && user_roles.include?(t('user_roles.user.title'))
+          rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
+        else
+          next if user_roles.empty? || (@authorizations_filter != 'all' && !user[:roles].include?(@authorizations_filter))
+          rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
+        end
+      end
+      
+      @authorizations_table_data[:rows] = rows
+
+      render layout: false if request.xhr?
+    else
+      job_status = MemberSignersAndUsersJob.perform_later(current_member_id).job_status
+      job_status.update_attributes!(user_id: current_user.id)
+      @job_status_url = job_status_url(job_status)
+      @load_url = reports_authorizations_url(job_id: job_status.id, authorizations_filter: @authorizations_filter)
+      @authorizations_table_data[:deferred] = true
     end
   end
 
@@ -731,7 +758,101 @@ class ReportsController < ApplicationController
     }
   end
 
+  def current_securities_position
+    @securities_filter = params['securities_filter'] || 'all'
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    if report_disabled?(CURRENT_SECURITIES_POSITION_WEB_FLAG)
+      @current_securities_position = {securities:[]}
+    else
+      @current_securities_position = member_balances.current_securities_position(@securities_filter)
+      raise StandardError, "There has been an error and ReportsController#current_securities_position has encountered nil. Check error logs." if @current_securities_position.nil?
+    end
+    securities_instance_variables(@current_securities_position, @securities_filter)
+  end
+
+  def monthly_securities_position
+    @securities_filter = params['securities_filter'] || 'all'
+    today = Time.zone.now
+    max_date = today.day == today.end_of_month.day ? today.end_of_month : (today - 1.month).end_of_month
+    @month_end_date = (params[:start_date] || max_date).to_date
+    @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
+    @picker_presets = date_picker_presets(@month_end_date)
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    if report_disabled?(MONTHLY_SECURITIES_WEB_FLAGS)
+      @monthly_securities_position = {securities:[]}
+    else
+      @monthly_securities_position = member_balances.monthly_securities_position(@month_end_date, @securities_filter)
+      raise StandardError, "There has been an error and ReportsController#monthly_securities_position has encountered nil. Check error logs." if @monthly_securities_position.nil?
+    end
+    securities_instance_variables(@monthly_securities_position, @securities_filter)
+  end
+
+  def forward_commitments
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    if report_disabled?(FORWARD_COMMITMENTS_WEB_FLAG)
+      forward_commitments = {}
+    else
+      forward_commitments = member_balances.forward_commitments
+      raise StandardError, "There has been an error and ReportsController#monthly_securities_position has encountered nil. Check error logs." if forward_commitments.nil?
+    end
+
+    rows = if forward_commitments[:advances]
+      forward_commitments[:advances].collect do |advance|
+        if advance[:interest_rate].nil? || advance[:interest_rate].to_f == 0
+          interest_rate = t('global.tbd')
+          interest_rate_type = nil
+        else
+          interest_rate = advance[:interest_rate]
+          interest_rate_type = :rate
+        end
+        {
+          columns: [
+            {value: advance[:trade_date], type: :date, classes: [:'report-cell-right']},
+            {value: advance[:funding_date], type: :date, classes: [:'report-cell-right']},
+            {value: advance[:maturity_date], type: :date, classes: [:'report-cell-right']},
+            {value: advance[:advance_number], type: nil},
+            {value: advance[:advance_type], type: nil},
+            {value: advance[:current_par], type: :currency_whole, classes: [:'report-cell-right']},
+            {value: interest_rate, type: interest_rate_type, classes: [:'report-cell-right']}
+          ]
+        }
+      end
+    else
+      []
+    end
+
+    @as_of_date = forward_commitments[:as_of_date]
+    @total_current_par = forward_commitments[:total_current_par]
+    @table_data = {
+      column_headings: [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%')].collect{|x| {title: x, sortable: true}},
+      rows: rows,
+      footer: [{ value: t('global.total'), colspan: 5}, {value: @total_current_par, type: :currency_whole, classes: [:'report-cell-right']}, {value: ''}]
+    }
+  end
+
   private
+  def securities_instance_variables(securities_position, filter)
+    as_of_date = securities_position[:as_of_date]
+    @headings = {
+      total_original_par: t("reports.pages.securities_position.#{filter}_securities.total_original_par_heading", date: fhlb_date_long_alpha(as_of_date)),
+      total_current_par: t("reports.pages.securities_position.#{filter}_securities.total_current_par_heading", date: fhlb_date_long_alpha(as_of_date)),
+      total_market_value: t("reports.pages.securities_position.#{filter}_securities.total_market_value_heading", date: fhlb_date_long_alpha(as_of_date)),
+      table_heading: t("reports.pages.securities_position.#{filter}_securities.table_heading", n: securities_position[:securities].length, date: fhlb_date_long_alpha(as_of_date)),
+      footer_total: t("reports.pages.securities_position.#{filter}_securities.total")
+    }
+    @securities_filter_options = [
+      [t('reports.pages.securities_position.filter.all'), 'all'],
+      [t('reports.pages.securities_position.filter.pledged'), 'pledged'],
+      [t('reports.pages.securities_position.filter.unpledged'), 'unpledged']
+    ]
+    @securities_filter_options.each do |option|
+      if option[1] == @securities_filter
+        @securities_filter_text = option[0]
+        break
+      end
+    end
+  end
+
   def report_disabled?(report_flags)
     member_info = MembersService.new(request)
     member_info.report_disabled?(current_member_id, report_flags)

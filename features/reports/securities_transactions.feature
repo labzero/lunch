@@ -10,7 +10,7 @@ Background:
 @smoke @jira-mem-410
 Scenario: Visit securities transactions from header link
   Given I visit the dashboard
-  When I select "Securities Transaction Report" from the reports dropdown
+  When I select "Securities Transaction" from the reports dropdown
   Then I should see "Securities Transaction"
   And I should see a report table with multiple data rows
 

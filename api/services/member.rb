@@ -8,6 +8,8 @@ require_relative 'member/disabled_reports'
 require_relative 'member/cash_projections'
 require_relative 'member/trade_activity'
 require_relative 'member/signer_roles'
+require_relative 'member/securities_position'
+require_relative 'member/forward_commitments'
 
 module MAPI
   module Services
@@ -364,6 +366,98 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/current_securities_position/{custody_account_type}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve current securities of a given account type'
+              key :notes, 'Returns all of the current securities, all of the current pledged securities or all of the current unpledged securities based on "custody_account_type"'
+              key :nickname, :getCurrentSecuritiesPositionForMembers
+              key :type, :MemberSecuritiesPosition
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :custody_account_type
+                key :required, true
+                key :type, :string
+                key :description, 'An argument to request either all securities, pledged securities or unpledged securities'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 400
+                key :message, 'Invalid param for custody account type'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/monthly_securities_position/{month_end_date}/{custody_account_type}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve securities of a given account type for the end of a given month'
+              key :notes, 'Returns all of the securities, all of the pledged securities or all of the unpledged securities based on "custody_account_type" for the "month_end_date"'
+              key :nickname, :getMonthlySecuritiesPositionForMembers
+              key :type, :MemberSecuritiesPosition
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :month_end_date
+                key :required, true
+                key :type, :string
+                key :description, 'The date for which the monthly securities will be returned'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :custody_account_type
+                key :required, true
+                key :type, :string
+                key :description, 'An argument to request either all securities, pledged securities or unpledged securities'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 400
+                key :message, 'Invalid param'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/forward_commitments'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve forward commitments for a given member'
+              key :notes, 'Retrieve forward commitments for a given member'
+              key :nickname, :getForwardCommitmentsForMembers
+              key :type, :MemberForwardCommitments
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -513,6 +607,47 @@ module MAPI
           member_id = params[:id]
           MAPI::Services::Member::SignerRoles.signer_roles(self, member_id).to_json
         end
+
+        # Member Current Securities Position
+        relative_get '/:id/current_securities_position/:custody_account_type' do
+          member_id = params[:id]
+          custody_account_type = MAPI::Services::Member.custody_account_type(self, params[:custody_account_type])
+          MAPI::Services::Member::SecuritiesPosition.securities_position(self, member_id, :current, {custody_account_type: custody_account_type}).to_json
+        end
+
+        # Member Monthly Securities Position
+        relative_get '/:id/monthly_securities_position/:month_end_date/:custody_account_type' do
+          member_id = params[:id]
+          month_end_date = params[:month_end_date]
+          custody_account_type = MAPI::Services::Member.custody_account_type(self, params[:custody_account_type])
+          if !month_end_date.match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+            halt 400, "Invalid Start Date format of yyyy-mm-dd"
+          else
+            start_date = Time.zone.parse(month_end_date).beginning_of_month.strftime('%Y-%m-%d')
+            end_date = Time.zone.parse(month_end_date).end_of_month.strftime('%Y-%m-%d')
+            MAPI::Services::Member::SecuritiesPosition.securities_position(self, member_id, :monthly, {start_date: start_date, end_date: end_date, custody_account_type: custody_account_type}).to_json
+          end
+        end
+
+        # Member Forward Commitments
+        relative_get '/:id/forward_commitments' do
+          member_id = params[:id]
+          MAPI::Services::Member::ForwardCommitments.forward_commitments(self, member_id).to_json
+        end
+
+      end
+
+      def self.custody_account_type(app, custody_account_type)
+        case custody_account_type
+          when 'pledged'
+            'P'
+          when 'unpledged'
+            'U'
+          when 'all'
+            nil
+          else
+            app.halt 400, 'Invalid custody_account_type: must be "all", "pledged" or "unpledged"'
+         end
       end
     end
   end
