@@ -81,17 +81,15 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     margin-bottom: 20px;
     line-height: 1;
   }
-  .dropdown-selection {
+  
+  select {
     width: 100%;
     display: block;
+    margin-bottom: 20px;
   }
-
-  .dropdown {
-    ul {
-      max-height: 285px;
-      width: 400px;
-      right: auto;
-    }
+  
+  option:disabled {
+    display: none;
   }
 
   .row {
