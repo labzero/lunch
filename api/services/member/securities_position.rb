@@ -44,6 +44,8 @@ module MAPI
                   "AND #{SECURITIES_FIELD_MAPPINGS[:custody_account_type][report_type]} =
                   #{ActiveRecord::Base.connection.quote(options[:custody_account_type])}"
                 end
+              }
+              #{
                 if report_type == :monthly
                   "AND SSX_BTC_DATE
                   BETWEEN TO_DATE(#{ActiveRecord::Base.connection.quote(options[:start_date])}, 'YYYY/MM/DD')
