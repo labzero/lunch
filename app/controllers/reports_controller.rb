@@ -18,6 +18,7 @@ class ReportsController < ApplicationController
   CURRENT_SECURITIES_POSITION_WEB_FLAG = [MembersService::CURRENT_SECURITIES_POSITION]
   MONTHLY_SECURITIES_WEB_FLAGS = [MembersService::MONTHLY_SECURITIES_POSITION]
   FORWARD_COMMITMENTS_WEB_FLAG = [MembersService::ADVANCES_DETAIL_DATA]
+  CAPITAL_STOCK_AND_LEVERAGE_WEB_FLAGS = [MembersService::FHLB_STOCK_DATA]
 
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
@@ -113,6 +114,11 @@ class ReportsController < ApplicationController
           updated: t('global.daily'),
           available_history: t('reports.history.months12'),
           route: reports_capital_stock_activity_path
+        },
+        capital_stock_and_leverage: {
+          updated: '',
+          available_history: '',
+          route: reports_capital_stock_and_leverage_path
         },
         dividend_statement: {
           updated: t('global.quarterly'),
@@ -827,6 +833,47 @@ class ReportsController < ApplicationController
       column_headings: [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%')].collect{|x| {title: x, sortable: true}},
       rows: rows,
       footer: [{ value: t('global.total'), colspan: 5}, {value: @total_current_par, type: :currency_whole, classes: [:'report-cell-right']}, {value: ''}]
+    }
+  end
+
+  def capital_stock_and_leverage
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    if report_disabled?(CAPITAL_STOCK_AND_LEVERAGE_WEB_FLAGS)
+      cap_stock_and_leverage = {}
+    else
+      cap_stock_and_leverage = member_balances.capital_stock_and_leverage
+      raise StandardError, "There has been an error and ReportsController#capital_stock_and_leverage has encountered nil. Check error logs." if cap_stock_and_leverage.nil?
+    end
+
+    position_table_headings = [t('reports.pages.capital_stock_and_leverage.stock_owned'), t('reports.pages.capital_stock_and_leverage.minimum_requirement'), t('reports.pages.capital_stock_and_leverage.excess_stock'), t('reports.pages.capital_stock_and_leverage.surplus_stock')]
+    leverage_table_headings = [t('reports.pages.capital_stock_and_leverage.stock_owned'), t('reports.pages.capital_stock_and_leverage.activity_based_requirement'), t('reports.pages.capital_stock_and_leverage.remaining_stock_html').html_safe, t('reports.pages.capital_stock_and_leverage.remaining_leverage')]
+
+    @position_table_data = {
+      column_headings: position_table_headings.collect{|heading| fhlb_add_unit_to_table_header(heading, '$')},
+      rows: [
+        {
+          columns: [
+            {value: cap_stock_and_leverage[:stock_owned], type: :number, classes: [:'report-cell-right']},
+            {value: cap_stock_and_leverage[:minimum_requirement], type: :number, classes: [:'report-cell-right']},
+            {value: cap_stock_and_leverage[:excess_stock], type: :number, classes: [:'report-cell-right']},
+            {value: cap_stock_and_leverage[:surplus_stock], type: :number, classes: [:'report-cell-right']}
+          ]
+        }
+      ]
+    }
+
+    @leverage_table_data = {
+      column_headings: leverage_table_headings.collect{|heading| fhlb_add_unit_to_table_header(heading, '$')},
+      rows: [
+        {
+          columns: [
+            {value: cap_stock_and_leverage[:stock_owned], type: :number, classes: [:'report-cell-right']},
+            {value: cap_stock_and_leverage[:activity_based_requirement], type: :number, classes: [:'report-cell-right']},
+            {value: cap_stock_and_leverage[:remaining_stock], type: :number, classes: [:'report-cell-right']},
+            {value: cap_stock_and_leverage[:remaining_leverage], type: :number, classes: [:'report-cell-right']}
+          ]
+        }
+      ]
     }
   end
 

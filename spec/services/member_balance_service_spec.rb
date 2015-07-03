@@ -1067,6 +1067,34 @@ describe MemberBalanceService do
       end
     end
   end
+  
+  describe 'the `capital_stock_and_leverage` method', :vcr do
+    let(:capital_stock_and_leverage) {subject.capital_stock_and_leverage}
+    %i(stock_owned minimum_requirement excess_stock surplus_stock activity_based_requirement remaining_stock remaining_leverage).each do |key|
+      it "returns a hash with an integer value for the #{key} key" do
+        expect(capital_stock_and_leverage[key]).to be_kind_of(Integer)
+      end
+    end
+    describe 'error states' do
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(capital_stock_and_leverage).to be(nil)
+      end
+      it 'should log an error if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(Rails.logger).to receive(:warn)
+        capital_stock_and_leverage
+      end
+      it 'should return nil if there was an API error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(capital_stock_and_leverage).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(capital_stock_and_leverage).to eq(nil)
+      end
+    end
+  end
 
   # Helper Methods
   def override_start_balance_endpoint(start_date, end_date, request_object)

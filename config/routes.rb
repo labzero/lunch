@@ -40,6 +40,7 @@ Rails.application.routes.draw do
   get '/reports/current-securities-position' => 'reports#current_securities_position'
   get '/reports/monthly-securities-position' => 'reports#monthly_securities_position'
   get '/reports/forward-commitments' => 'reports#forward_commitments'
+  get '/reports/capital-stock-and-leverage' => 'reports#capital_stock_and_leverage'
 
   get '/advances' => 'advances#index'
   get '/advances/manage-advances' => 'advances#manage_advances'

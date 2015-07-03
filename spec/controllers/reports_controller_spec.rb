@@ -845,6 +845,64 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
+    describe 'GET capital_stock_and_leverage' do
+      let(:capital_stock_and_leverage) { get :capital_stock_and_leverage }
+      let(:capital_stock_and_leverage_response) { double('Capital stock and leverage response', :[] => nil) }
+      before {
+        allow(member_balance_service_instance).to receive(:capital_stock_and_leverage).and_return(capital_stock_and_leverage_response)
+      }
+
+      it_behaves_like 'a user required action', :get, :capital_stock_and_leverage
+      %w(position_table_data leverage_table_data).each do |table|
+        describe "the @#{table} view instance variable" do
+          it 'contains a `column_headings` array containing strings' do
+            capital_stock_and_leverage
+            assigns[table.to_sym][:column_headings].each {|heading| expect(heading).to be_kind_of(String)}
+          end
+
+          it "sets @#{table}[:rows] column object value to the value returned by MemberBalanceService.capital_stock_and_leverage" do
+            row_keys = [:stock_owned, :activity_based_requirement, :remaining_stock, :remaining_leverage, :stock_owned, :minimum_requirement, :excess_stock, :surplus_stock]
+            row = {}
+            row_keys.each do |key|
+              row[key] = double(key.to_s)
+            end
+            row_keys.length.times do |i|
+              expect(capital_stock_and_leverage_response).to receive(:[]).and_return(row[row_keys[i]]) # must use `expect` to allow ordering
+            end
+            capital_stock_and_leverage
+            expect(assigns[table.to_sym][:rows].length).to eq(1)
+            if table == 'position_table_data'
+              row_keys.each_with_index do |key, i|
+                break if i > 3
+                expect(assigns[table.to_sym][:rows][0][:columns][i][:value]).to eq(row[key])
+              end
+            else
+              row_keys.each_with_index do |key, i|
+                next if (0..3).include?(i)
+                expect(assigns[table.to_sym][:rows][0][:columns][i-4][:value]).to eq(row[key])
+              end
+            end
+          end
+          it "sets @#{table}[:rows] column object type to `:number`" do
+            capital_stock_and_leverage
+            assigns[table.to_sym][:rows][0][:columns].each do |object|
+              expect(object[:type]).to eq(:number)
+            end
+          end
+        end
+        describe 'with the report disabled' do
+          before do
+            allow(controller).to receive(:report_disabled?).with(ReportsController::CAPITAL_STOCK_AND_LEVERAGE_WEB_FLAGS).and_return(true)
+          end
+          it "sets @#{table}[:rows] to have a single `columns` array with objects containing nil values" do
+            capital_stock_and_leverage
+            assigns[table.to_sym][:rows][0][:columns].each do |column|
+              expect(column[:value]).to be_nil
+            end
+          end
+        end
+      end
+    end
   end
 
   describe 'GET current_price_indications' do

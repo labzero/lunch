@@ -577,6 +577,27 @@ class MemberBalanceService < MAPIService
     data
   end
 
+  def capital_stock_and_leverage
+    begin
+      response = @connection["member/#{@member_id}/capital_stock_and_leverage"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.capital_stock_and_leverage encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.capital_stock_and_leverage encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.capital_stock_and_leverage encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data
+
+  end
+
   private
   def fake_as_of_date
     today = Time.zone.now.to_date
