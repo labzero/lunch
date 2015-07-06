@@ -154,6 +154,7 @@ en:
       mortgages: Mortgages
       securities: Securities
       resources: Resources
+      products: Products
   common_table_headings:
     trade_date: Trade Date
     settlement_date: Settlement Date
@@ -1063,6 +1064,34 @@ en:
     add_new: Add New
     status: Status
     rate: Rate (%)
+  products:
+    products_summary:
+      title: Products Summary
+    advances:
+      title: Advances
+      arc: Adjustable Rate Credit (ARC) Advance
+      ace: Advances for Community Enterprise (ACE)
+      amortizing: Amortizing Advance
+      arc_embedded: ARC Advance with Embedded Options
+      callable: Callable Advance
+      choice_libor: Choice LIBOR ARC Advance
+      cip: Community Investment Program (CIP)
+      auction_indexed: DN Auction-Indexed Advance
+      frc: Fixed Rate Credit (FRC) Advance
+      frc_embedded: FRC Advance with Embedded Cap
+      knockout: Knockout Advance
+      mpf: Mortgage Partnership Finance (MPF) Program
+      ocn: Other Cash Needs (OCN) Advance
+      putable: Putable Advance
+      sbc: Securities-Backed Credit (SBC) Program
+      vrc: Variable Rate Credit (VRC) Advance
+    standby_loc:
+      title: Standy Letters of Credit
+    mpf_program:
+      title: Mortgage Partnership Finance (MPF) Program
+      links: Links
+    community_programs:
+      title: Community Programs
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email
