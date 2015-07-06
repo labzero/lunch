@@ -74,11 +74,27 @@ Rails.application.routes.draw do
   end
 
   scope 'products' do
-    get '/summary' => 'dashboard#index', as: :product_summary
-    get '/advances' => 'dashboard#index', as: :product_advances
-    get '/letters_of_credit' => 'dashboard#index'
-    get '/mortgage_partnership_finance' => 'dashboard#index'
-    get '/community_programs' => 'dashboard#index'
+    get '/summary' => 'products#index', as: :product_summary
+    get '/letters-of-credit' => 'error#standard_error'
+    get '/community_programs' => 'error#standard_error'
+    scope 'advances' do
+      get 'adjustable-rate-credit' => 'error#standard_error', as: :arc
+      get 'advances-for-community-enterprise' => 'error#standard_error', as: :ace
+      get 'amortizing' => 'error#standard_error'
+      get 'arc-embedded' => 'error#standard_error'
+      get 'callable' => 'error#standard_error'
+      get 'choice-libor-arc' => 'error#standard_error'
+      get 'community-investment-program' => 'error#standard_error', as: :cip
+      get 'auction-indexed' => 'error#standard_error'
+      get 'fixed-rate-credit' => 'error#standard_error', as: :frc
+      get 'frc-embedded' => 'error#standard_error'
+      get 'knockout' => 'error#standard_error'
+      get 'mortgage-partnership-finance' => 'error#standard_error', as: :mpf
+      get 'other-cash-needs' => 'error#standard_error', as: :ocn
+      get 'putable' => 'error#standard_error'
+      get 'securities-backed-credit' => 'error#standard_error', as: :sbc
+      get 'variable-rate-credit' => 'error#standard_error', as: :vrc
+    end
   end
 
   devise_scope :user do

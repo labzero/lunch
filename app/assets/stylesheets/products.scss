@@ -1,0 +1,21 @@
+.products-summary-page {
+  h1 {
+    @extend %typography-page-title;
+    margin: 30px 0 10px;
+  }
+  h2 {
+    @extend %typography-section-title;
+    margin-top: 35px;
+  }
+  a {
+    text-decoration: none;
+    color: $actionable-blue;
+  }
+  ul {
+    padding-left: 30px;
+  }
+}
+
+.credit_product_list {
+  list-style: none;
+}
