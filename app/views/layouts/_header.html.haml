@@ -83,3 +83,32 @@
               %li= link_to(t('resources.membership.benefits.title'), '#')
               %li= link_to(t('resources.membership.requirements.title'), '#')
               %li= link_to(t('resources.membership.applications.title'), '#')
+      %li<>
+        = link_to(t('nav.secondary.products'), '#', class: 'nav-menu')
+        %ul.nav-dropdown<>
+          %li<>= link_to(t('products.products_summary.title'), product_summary_path)
+          %li<>
+            = link_to(t('products.advances.title'), product_advances_path)
+            %ul.nav-dropdown-nested
+              %li= link_to(t('products.advances.arc'), product_advances_path)
+              %li= link_to(t('products.advances.ace'), product_advances_path)
+              %li= link_to(t('products.advances.amortizing'), product_advances_path)
+              %li= link_to(t('products.advances.arc_embedded'), product_advances_path)
+              %li= link_to(t('products.advances.callable'), product_advances_path)
+              %li= link_to(t('products.advances.choice_libor'), product_advances_path)
+              %li= link_to(t('products.advances.cip'), product_advances_path)
+              %li= link_to(t('products.advances.auction_indexed'), product_advances_path)
+              %li= link_to(t('products.advances.frc'), product_advances_path)
+              %li= link_to(t('products.advances.frc_embedded'), product_advances_path)
+              %li= link_to(t('products.advances.knockout'), product_advances_path)
+              %li= link_to(t('products.advances.mpf'), product_advances_path)
+              %li= link_to(t('products.advances.ocn'), product_advances_path)
+              %li= link_to(t('products.advances.putable'), product_advances_path)
+              %li= link_to(t('products.advances.sbc'), product_advances_path)
+              %li= link_to(t('products.advances.vrc'), product_advances_path)
+          %li<>= link_to(t('products.standby_loc.title'), letters_of_credit_path)
+          %li<>
+            = link_to(t('products.mpf_program.title'), mortgage_partnership_finance_path)
+            %ul.nav-dropdown-nested
+              %li<>= link_to(t('products.mpf_program.links'), mortgage_partnership_finance_path)
+          %li<>= link_to(t('products.community_programs.title'), community_programs_path)

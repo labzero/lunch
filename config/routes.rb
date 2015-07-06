@@ -73,6 +73,14 @@ Rails.application.routes.draw do
     get '/download/:file' => 'resources#download', as: :resources_download
   end
 
+  scope 'products' do
+    get '/summary' => 'dashboard#index', as: :product_summary
+    get '/advances' => 'dashboard#index', as: :product_advances
+    get '/letters_of_credit' => 'dashboard#index'
+    get '/mortgage_partnership_finance' => 'dashboard#index'
+    get '/community_programs' => 'dashboard#index'
+  end
+
   devise_scope :user do
     get '/' => 'users/sessions#new', :as => :new_user_session
     post '/' => 'users/sessions#create', :as => :user_session
