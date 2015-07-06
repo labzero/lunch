@@ -1066,7 +1066,22 @@ en:
     rate: Rate (%)
   products:
     products_summary:
-      title: Products Summary
+      nav_title: Products Summary
+      title: Products
+      intro: Our products and services are designed to help your institution expand the availability of mortgage credit, compete more effectively in your local markets, and foster strong and vibrant communities.
+      advances:
+        benefits:
+          intro: "We offer a diverse array of flexible, low-cost funding options, with maturities ranging from 1 day to 30 years. Our credit products can help you:"
+          profitability: improve profitability
+          management: facilitate asset/liability management
+          liquidity: reduce on-balance sheet liquidity
+          lower_costs: lower funding costs
+          broaden_products: broaden product lines
+          risk: control interest rate risk, basis risk, and prepayment risk
+        customize_html: We can customize our credit products to meet your funding or hedging requirements. We offer flexible cash flows and payment options, including partial prepayment symmetry (an optional feature of <a href=%{frc_url}>Fixed Rate Credit Advance</a> (PDF), <a href=%{callable_url}>Callable FRC</a> (PDF), <a href=%{putable_url}>Putable Advance</a> (PDF) , and <a href=%{arc_embedded_url}>Adjustable Rate Credit Advance with embedded options</a> (PDF).
+        product_list:
+          intro: "Click the links below to find out more about the advantages, features, and requirements of each of our credit products:"
+        stand_alone_html: At this time, the Bank is not offering stand-alone interest rate swaps, caps, and floors to members. For more information, see <a href=%{url}>Interest Rate Swaps, Caps & Floors</a>.
     advances:
       title: Advances
       arc: Adjustable Rate Credit (ARC) Advance
@@ -1087,11 +1102,14 @@ en:
       vrc: Variable Rate Credit (VRC) Advance
     standby_loc:
       title: Standy Letters of Credit
+      description_html: A <a href=%{url}>standby letter of credit</a> is an obligation of the Bank to make payment to a third party if a member or housing associate does not perform its underlying obligation to that third party.
     mpf_program:
       title: Mortgage Partnership Finance (MPF) Program
       links: Links
+      description_html: The Bank’s <a href=%{url}>Mortgage Partnership Finance&reg; (MPF) Program</a> provides members with access to an alternative secondary mortgage market channel for selling their residential fixed rate mortgage loans, including conventional conforming mortgage loans, eligible jumbo mortgage loans, and government insured or guaranteed mortgage loans.
     community_programs:
       title: Community Programs
+      description_html: The Bank's <a href=%{url}>community programs</a> provide funding for projects that create an affordable place to live for low- and moderate-income individuals and that foster strong, stable, and sustainable communities. Our members use our targeted grant programs and discounted credit programs to meet a wide range of affordable housing and economic development needs in Arizona, California, Nevada, and the other regions they serve.
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email
