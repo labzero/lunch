@@ -85,79 +85,85 @@ describe MembersService do
     end
   end
 
-  describe '`users` method' do
-    let(:users) { subject.users(member_id) }
-    let(:dn) { double('A DN', end_with?: true) }
-    let(:user_entry) { double('LDAP Entry: User', dn: dn, :[] => nil) }
-    let(:group_entry) { obj = double('LDAP Entry: Group'); allow(obj).to receive(:[]).with(:member).and_return([dn]); obj }
+  describe 'ldap backed methods' do
     let(:ldap_connection) { double('LDAP Connection', search: []) }
     before do
       allow(Devise::LDAP::Connection).to receive(:admin).with('extranet').and_return(ldap_connection)
-      allow(ldap_connection).to receive(:search).with(filter: "(&(CN=FHLB#{member_id.to_i})(objectClass=group))").and_return([group_entry])
-      allow(ldap_connection).to receive(:search).with(base: dn, scope: Net::LDAP::SearchScope_BaseObject).and_return([user_entry])
-      allow(User).to receive(:find_or_create_by_ldap_entry).and_return(User.new)
-    end
-    it 'should open an admin LDAP connection to the extranet LDAP server' do
-      expect(Devise::LDAP::Connection).to receive(:admin).with('extranet')
-      users
-    end
-    it 'should search for the member banks LDAP group' do
-      expect(ldap_connection).to receive(:search).with(filter: "(&(CN=FHLB#{member_id.to_i})(objectClass=group))")
-      users
-    end
-    it 'should grab the members of the member banks group' do
-      expect(ldap_connection).to receive(:search).with(base: dn, scope: Net::LDAP::SearchScope_BaseObject)
-      users
-    end
-    it 'should return an array of Users' do
-      expect(users.count).to be > 0
-      users.each do |user|
-        expect(user).to be_kind_of(User)
-      end
-    end
-    it 'should lookup the User record or create it if not found' do
-      expect(User).to receive(:find_or_create_by_ldap_entry).with(user_entry)
-      users
-    end
-  end
-
-  describe '`signers_and_users` method' do
-    let(:signer_mapped_roles) {[User::ROLE_MAPPING['signer-etransact']]}
-    let(:signer_roles) {['signer-etransact']}
-    let(:signer) {{name: 'Some Signer', roles: signer_roles}}
-    let(:duplicate_signer) {{name: 'A Duplicate User', username: 'username', roles: signer_roles}}
-    let(:user_roles) {['user']}
-    let(:user) {double('Some User', :display_name => 'User Display Name', roles: user_roles, username: 'username')}
-    let(:member) { subject.signers_and_users(member_id) }
-
-    it 'should return nil if there was an API error' do
-      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
-      expect(member).to eq(nil)
-    end
-    it 'should return nil if there was a connection error' do
-      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
-      expect(member).to eq(nil)
+      allow(ldap_connection).to receive(:open).and_yield(ldap_connection)
     end
 
-    describe 'returns an array' do
+    describe '`users` method' do
+      let(:users) { subject.users(member_id) }
+      let(:dn) { double('A DN', end_with?: true) }
+      let(:user_entry) { double('LDAP Entry: User', dn: dn, :[] => nil) }
+      let(:group_entry) { obj = double('LDAP Entry: Group'); allow(obj).to receive(:[]).with(:member).and_return([dn]); obj }
       before do
-        allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: [signer].to_json))
-        allow(subject).to receive(:users).and_return([user])
+        allow(ldap_connection).to receive(:search).with(filter: "(&(CN=FHLB#{member_id.to_i})(objectClass=group))").and_return([group_entry])
+        allow(ldap_connection).to receive(:search).with(base: dn, scope: Net::LDAP::SearchScope_BaseObject).and_return([user_entry])
+        allow(User).to receive(:find_or_create_by_ldap_entry).and_return(User.new)
       end
-      it 'contains hashes with with a `display_name` and `roles` representing all users associated with a bank' do
-        expect(member).to include({:display_name => 'User Display Name', roles: user_roles})
+      it 'should open an admin LDAP connection to the extranet LDAP server' do
+        expect(Devise::LDAP::Connection).to receive(:admin).with('extranet')
+        users
       end
-      it 'contains hashes with with a `display_name` and `roles` representing all signers associated with a bank' do
-        expect(member).to include({:display_name => 'Some Signer', roles: signer_mapped_roles})
+      it 'should search for the member banks LDAP group' do
+        expect(ldap_connection).to receive(:search).with(filter: "(&(CN=FHLB#{member_id.to_i})(objectClass=group))")
+        users
       end
-      it 'does not add a signer to the result set if the signer is also a user' do
-        allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: [signer, duplicate_signer].to_json))
-        expect(member.length).to eq(2)
+      it 'should grab the members of the member banks group' do
+        expect(ldap_connection).to receive(:search).with(base: dn, scope: Net::LDAP::SearchScope_BaseObject)
+        users
       end
-      it 'returns an empty array if no users or signers are found' do
-        allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: '[]'))
-        allow(subject).to receive(:users).and_return([])
-        expect(member).to eq([])
+      it 'should return an array of Users' do
+        expect(users.count).to be > 0
+        users.each do |user|
+          expect(user).to be_kind_of(User)
+        end
+      end
+      it 'should lookup the User record or create it if not found' do
+        expect(User).to receive(:find_or_create_by_ldap_entry).with(user_entry)
+        users
+      end
+    end
+
+    describe '`signers_and_users` method' do
+      let(:signer_mapped_roles) {[User::ROLE_MAPPING['signer-etransact']]}
+      let(:signer_roles) {['signer-etransact']}
+      let(:signer) {{name: 'Some Signer', roles: signer_roles}}
+      let(:duplicate_signer) {{name: 'A Duplicate User', username: 'username', roles: signer_roles}}
+      let(:user_roles) {['user']}
+      let(:user) {double('Some User', :display_name => 'User Display Name', roles: user_roles, username: 'username')}
+      let(:member) { subject.signers_and_users(member_id) }
+
+      it 'should return nil if there was an API error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(member).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(member).to eq(nil)
+      end
+
+      describe 'returns an array' do
+        before do
+          allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: [signer].to_json))
+          allow(subject).to receive(:fetch_ldap_users).and_return([user])
+        end
+        it 'contains hashes with with a `display_name` and `roles` representing all users associated with a bank' do
+          expect(member).to include({:display_name => 'User Display Name', roles: user_roles})
+        end
+        it 'contains hashes with with a `display_name` and `roles` representing all signers associated with a bank' do
+          expect(member).to include({:display_name => 'Some Signer', roles: signer_mapped_roles})
+        end
+        it 'does not add a signer to the result set if the signer is also a user' do
+          allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: [signer, duplicate_signer].to_json))
+          expect(member.length).to eq(2)
+        end
+        it 'returns an empty array if no users or signers are found' do
+          allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: '[]'))
+          allow(subject).to receive(:fetch_ldap_users).and_return([])
+          expect(member).to eq([])
+        end
       end
     end
   end

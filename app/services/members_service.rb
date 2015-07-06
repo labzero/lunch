@@ -56,9 +56,11 @@ class MembersService < MAPIService
 
   def users(member_id)
     users = nil
-    ldap = Devise::LDAP::Connection.admin('extranet')
-    ldap.open do
-      users = fetch_ldap_users(ldap, member_id)
+    Devise::LDAP::Adapter.shared_connection do
+      ldap = Devise::LDAP::Connection.admin('extranet')
+      ldap.open do |ldap|
+        users = fetch_ldap_users(ldap, member_id)
+      end
     end
     users
   end
@@ -92,16 +94,18 @@ class MembersService < MAPIService
 
     signers = JSON.parse(response.body)
 
-    Devise::LDAP::Connection.admin('extranet').open do |ldap|
-      users = fetch_ldap_users(ldap, member_id)
-      usernames = users.blank? ? [] : users.collect(&:username)
-      signers.each do |signer|
-        roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact
-        signers_and_users << {display_name: signer['name'], roles: roles} unless usernames.include?(signer['username'])
-      end
+    Devise::LDAP::Adapter.shared_connection do
+      Devise::LDAP::Connection.admin('extranet').open do |ldap|
+        users = fetch_ldap_users(ldap, member_id)
+        usernames = users.blank? ? [] : users.collect(&:username)
+        signers.each do |signer|
+          roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact
+          signers_and_users << {display_name: signer['name'], roles: roles} unless usernames.include?(signer['username'])
+        end
 
-      users.each do |user|
-        signers_and_users << {display_name: user.display_name || user.username, roles: user.roles}
+        users.each do |user|
+          signers_and_users << {display_name: user.display_name || user.username, roles: user.roles}
+        end
       end
     end
     signers_and_users

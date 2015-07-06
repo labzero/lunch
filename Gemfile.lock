@@ -7,10 +7,10 @@ GIT
 
 GIT
   remote: https://github.com/labzero/devise_ldap_authenticatable.git
-  revision: 694bf5d7797bf50bf0ec87546c7d32829c8d3745
-  branch: 0.9.7
+  revision: 20f4d87b21a434701d348cc56dd93c0e1ad44b87
+  branch: 0.9.9
   specs:
-    devise_ldap_authenticatable (0.9.7)
+    devise_ldap_authenticatable (0.9.9)
       devise (>= 3.4.1)
       net-ldap (>= 0.3.1, < 0.6.0)
 
