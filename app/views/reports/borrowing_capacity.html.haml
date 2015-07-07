@@ -6,7 +6,7 @@
     - if @print_layout
       = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@date))
     - else
-      = render 'reports_header_buttons'
+      = render 'reports_header_buttons', download_formats: :pdf
   .report-main-body
     %section
       .report-summary-data
