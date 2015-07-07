@@ -223,13 +223,13 @@ $faded-opacity: 0.4 !default;
   }
 }
 
-.quick-advance-back-button {
+.quick-advance-back-button, .quick-advance-capstock-back-button {
   &:before {
     margin-right: 10px;
   }
 }
 
-.quick-advance-preview-subheading, .quick-advance-confirmation-subheading {
+.quick-advance-preview-subheading, .quick-advance-confirmation-subheading, .quick-advance-capstock-subheading {
   @extend %typography-subtitle;
   margin-bottom: 0;
 }
@@ -299,13 +299,10 @@ $faded-opacity: 0.4 !default;
     }
   }
   dl{
-    float: left;
+    float: none;
     margin: 0.5rem 0 1.5rem;
-    &:last-child {
-      padding-left: 30px;
-    }
+    width: 250px;
     &:first-child {
-      float: none;
       margin-bottom: 5px;
       dt {
         width: auto;
@@ -313,9 +310,17 @@ $faded-opacity: 0.4 !default;
       }
     }
   }
+  .large_dl {
+    width: 400px;
+    dt {
+      width: auto;
+      margin-right: 10px;
+    }
+  }
   dt {
-    @extend %typography-confirmation-label;
+    @extend %typography-error-message;
     float: left;
+    text-align: left;
     width: 80px;
     overflow: hidden;
     clear: left;
@@ -323,8 +328,9 @@ $faded-opacity: 0.4 !default;
     white-space: nowrap;
   }
   dd {
-    @extend %typography-confirmation-data;
+    @extend %typography-graph-data;
     @extend %clearfix;
+    text-align: right;
   }
   .quick-advance-loading-message {
     display: none;
@@ -356,12 +362,11 @@ $faded-opacity: 0.4 !default;
 
 .quick-advance-summary {
   @extend %clearfix;
+  padding-left: 60px;
+  padding-bottom: 30px;
   p {
     @extend %typography-confirmation-label;
     margin: 0.5rem 0 0;
-  }
-  span {
-    @extend %typography-confirmation-data;
   }
 }
 
@@ -380,4 +385,9 @@ $faded-opacity: 0.4 !default;
 .quick-advance-confirmation-button {
   @extend %horizontal-center;
   position: relative;
+}
+
+.quick-advances-footer, .rate-advances-footer {
+  @extend %typography-footer;
+  padding-top: 40px;
 }

@@ -61,6 +61,7 @@
           = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}, field_name: :amount
           %h2.quick-advance-confirmation-subheading{style: 'display: none;'}= t('dashboard.quick_advance.confirmation.title')
           %h2.quick-advance-preview-subheading{style: 'display: none;'}= t('dashboard.quick_advance.preview.title')
+          %h2.quick-advance-capstock-subheading{style: 'display: none;'}= t('dashboard.quick_advance.capitalstock.title')
         %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advances_active}"}
           = t('dashboard.quick_advance.advances_desk_closed')
           = link_to t('dashboard.quick_advance.advances_desk_closed_link'), '', data: {'flyout-trigger' => 'active'}
@@ -87,6 +88,8 @@
                 %th= t('dashboard.quick_advance.table.aa')
             %tbody
           %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.initiate')
+          %small
+            %p.rate-advances-footer= t('dashboard.quick_advance.table.footer')
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), link: {name: t('dashboard.actions.more'), path: ''}, data_available: !@previous_activity.blank?} do
       %table.table-dashboard-previous-activity
         %tbody

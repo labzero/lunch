@@ -27,9 +27,9 @@ class EtransactAdvancesService < MAPIService
     response.body
   end
 
-  def quick_advance_validate(member_id, amount, advance_type, advance_term, rate, signer)
+  def quick_advance_validate(member_id, amount, advance_type, advance_term, rate, check_capstock, signer)
     begin
-      response = @connection["etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{URI.escape(signer)}"].get
+      response = @connection["etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{URI.escape(signer)}"].get
     rescue RestClient::Exception => e
       Rails.logger.warn("EtransactAdvancesService.quick_advance_validate encountered a RestClient error: #{e.class.name}:#{e.http_code}")
       return nil

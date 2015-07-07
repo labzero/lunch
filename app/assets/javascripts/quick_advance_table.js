@@ -30,6 +30,7 @@
     // quick advance trigger
     $initiateButton.on('click', function(){
       if ($initiateButton.hasClass('active') && !$.isEmptyObject(selected_rate)) {
+        selected_rate['check_capstock'] = true;
         initiateQuickAdvance(selected_rate);
       };
     });
@@ -43,27 +44,101 @@
     };
 
     function initiateQuickAdvance(rate_data) {
-      $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function (htmlResponse) {
+      $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function(json){
         var $flyoutBottomSection = $('.flyout-bottom-section');
-        var $oldNodes = $('.flyout-top-section-body span, .flyout-bottom-section table, .flyout-bottom-section .initiate-quick-advance');
+        var $oldNodes = $('.flyout-top-section-body span, .flyout-bottom-section table, .flyout-bottom-section .initiate-quick-advance, .rate-advances-footer');
 
         // append the html response, hide old nodes and show the new ones
-        $flyoutBottomSection.append($(htmlResponse));
+        $flyoutBottomSection.append($(json.html));
         $oldNodes.hide();
+        if (json.preview_error == true) {
+          $('.flyout-top-section-body .quick-advance-preview-subheading').show();
+
+          // event listener and handler for back button click
+          $('.quick-advance-back-button').on('click', function () {
+            $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
+            $('.quick-advance-preview-subheading').hide();
+            $oldNodes.show();
+          });
+        }
+        else {
+          if (json.preview_success == true) {
+            $('.flyout-top-section-body .quick-advance-preview-subheading').show();
+
+            // event listener and handler for back button click
+            $('.quick-advance-back-button').on('click', function () {
+              $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
+              $('.quick-advance-preview-subheading').hide();
+              $oldNodes.show();
+            });
+
+            // event listener and handler for .confirm-quick-advance button click
+            $('.confirm-quick-advance').on('click', function () {
+              var $pin = $flyoutBottomSection.find('input[name=securid_pin]');
+              var $token = $flyoutBottomSection.find('input[name=securid_token]');
+              var pin = $pin.val();
+              var token = $token.val();
+              if ((!$pin.length && !$token.length) || validateSecurID($flyoutBottomSection)) {
+                var authentication_details = {
+                  securid_pin: pin,
+                  securid_token: token
+                };
+                performQuickAdvance($.extend(authentication_details, selected_rate));
+              }
+            });
+          }
+          else {
+            $('.flyout-top-section-body .quick-advance-capstock-subheading').show();
+
+            // event listener and handler for back button click
+            $('.quick-advance-capstock-back-button').on('click', function () {
+              $('.quick-advance-capstock, .quick-advance-capstock-back-button, .confirm-quick-advance-capstock').remove();
+              $('.quick-advance-capstock-subheading').hide();
+              $oldNodes.show();
+            });
+
+            // event listener and handler for .confirm-quick-advance button click
+            $('.confirm-quick-advance-capstock').on('click', function () {
+              if ($('#continue_transaction').prop('checked') == true) {
+                selected_rate['amount'] = json.authorized_amount;
+              }
+              else {
+                selected_rate['amount'] = json.gross_amount;
+              }
+              selected_rate['check_capstock'] = false;
+              initiateQuickAdvanceWithooutCapstockCheck(selected_rate);
+            });
+          }
+        }
+
+      });
+    };
+
+    function initiateQuickAdvanceWithooutCapstockCheck(rate_data) {
+      var $flyoutBottomSection = $('.flyout-bottom-section');
+      transitionToLoadingFromCapstock();
+      $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function(json){
+        var $flyoutBottomSection = $('.flyout-bottom-section');
+        var $oldNodes = $flyoutBottomSection.find('.quick-advance-capstock, .quick-advance-capstock-back-button, .confirm-quick-advance-capstock');
+
+        // append the html response, hide old nodes and show the new ones
+        $oldNodes.hide();
+        $('.quick-advance-capstock-subheading').hide();
+        $flyoutBottomSection.append($(json.html));
+
         $('.flyout-top-section-body .quick-advance-preview-subheading').show();
 
-        transitionToLoadingFromPreview();
         // event listener and handler for back button click
-        $('.quick-advance-back-button').on('click', function () {
+        $('.quick-advance-back-button').on('click', function() {
           $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
+          $('.quick-advance-preview-subheading').hide();
           $oldNodes.show();
-        }).error(function () {
-          transitionToPreviewFromLoading();
-          $flyoutBottomSection.find('p[data-error-type=unknown]').show();
+          $('.flyout-top-section-body .quick-advance-capstock-subheading').show();
+          transitionToCapstockFromLoading();
         });
 
         // event listener and handler for .confirm-quick-advance button click
-        $('.confirm-quick-advance').on('click', function () {
+        $('.confirm-quick-advance').on('click', function() {
           var $pin = $flyoutBottomSection.find('input[name=securid_pin]');
           var $token = $flyoutBottomSection.find('input[name=securid_token]');
           var pin = $pin.val();
@@ -75,13 +150,13 @@
             };
             performQuickAdvance($.extend(authentication_details, selected_rate));
           }
-        }).error(function () {
-          transitionToPreviewFromLoading();
-          $flyoutBottomSection.find('p[data-error-type=unknown]').show();
         });
-        transitionToPreviewFromLoading();
+
+      }).error(function() {
+          transitionToCapstockFromLoading();
+          $flyoutBottomSection.find('p[data-error-type=unknown]').show();
       });
-    };
+    }
 
     function validateSecurID ($form) {
       var $pin = $form.find('input.securid-field-pin');
@@ -162,6 +237,29 @@
       $flyoutBottomSection.find('button').removeAttr('disabled');
       $flyoutTopSection.find('.quick-advance-preview-subheading').show();
       $flyoutTopSection.find('.quick-advance-confirmation-subheading').hide();
+    };
+
+    function transitionToLoadingFromCapstock () {
+      var $flyoutBottomSection = $('.flyout-bottom-section');
+      var $flyoutTopSection = $('.flyout-top-section-body');
+      var $quickAdvanceCapstock= $flyoutBottomSection.find('.quick-advance-capstock');
+      $quickAdvanceCapstock.addClass('loading');
+      var height = $flyoutBottomSection.find('.quick-advance-body p:not(.quick-advance-loading-message)').height();
+      $flyoutBottomSection.find('.quick-advance-loading-message').height(height);
+      $flyoutBottomSection.find('button').attr('disabled', 'disabled');
+      $flyoutTopSection.find('.quick-advance-capstock-subheading').hide();
+      $flyoutTopSection.find('.quick-advance-preview-subheading').show();
+    };
+
+    function transitionToCapstockFromLoading () {
+      var $flyoutBottomSection = $('.flyout-bottom-section');
+      var $flyoutTopSection = $('.flyout-top-section-body');
+      var $quickAdvanceCapstock= $flyoutBottomSection.find('.quick-advance-capstock');
+      $quickAdvanceCapstock.removeClass('loading');
+      $flyoutBottomSection.find('.quick-advance-loading-message').height('auto');
+      $flyoutBottomSection.find('button').removeAttr('disabled');
+      $flyoutTopSection.find('.quick-advance-capstock-subheading').show();
+      $flyoutTopSection.find('.quick-advance-preview-subheading').hide();
     };
 
     function setRateFromElementData($element) {

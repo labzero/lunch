@@ -407,6 +407,7 @@ en:
         aa: AA
         ACTACT: Actual/Actual
         ACT360: Actual/360
+        footer: All advances are subject to the terms and conditions on the Bank's Credit Program, the Advances and Security Agreement with the Member, and the appropriate Advance Confirmation, as well as the Terms of Use.
         axes_labels:
           standard: Standard
           securities_backed: SBC
@@ -428,12 +429,15 @@ en:
         back: Back
         initiate: Initiate the selected advance
         credit: Review Credit Activity
+        continue: Continue With Request
+        rates: View Current Rates
       preview:
-        title: Confirm Advance
+        title: Initiate Advance
         intro: FHLB-SF will hedge the advance once you initiate it. It cannot be changed without a fee. Please read the details below and ensure they are correct before you confirm the advance.
         initiate: Please wait while we initiate your advance. This may take about 30 seconds.
+        footer: By executing this advance, you commit to take down the requested advance in the principal amount and upon the terms shown here.
       confirmation:
-        title: Intiate Advance
+        title: Advance Execution
         intro: "We executed your advance at %{date_time}. A Confirmation of Advance will be faxed to your institution."
       field_headings:
         advance_amount: Amount
@@ -453,6 +457,19 @@ en:
           invalid_pin: PIN invalid.
           invalid_token: Token invalid.
           unknown: An unexpected error has occurred. Please try again.
+      capitalstock:
+        title: Capital Stock Purchase Required
+        intro: The Amount Requested requires the purchase of additional Capital Stock. Please choose one of the following options to continue this request.
+        continue_transaction: Continue transaction with the original amount requested.
+        original: Original Amount Requested
+        stock: Stock Purchase Required
+        net: Net Amount Available
+        cumulative: Cumulative Stock Purchase Required
+        increase_transaction: Increase Amount Requested to cover reuired stock purchase.
+        if_this_option_html: If you select this option, the Bank will automatically debit your Settlement/Transaction Account (STA) for %{amount} today
+        footer: Cumulative Stock Purchase Required reflexts the total stock purchase for all advances transacted today, including the new advace request. To avoid an overdraft, please ensure your Settlement/Transaction Account (STA) has sufficient funds to cover this amount.
+      error:
+        exception: No Net or Gross info returned
     reports:
       title: Reports
       as_of_yesterday: As of yesterday

@@ -8,6 +8,7 @@ describe MAPI::ServiceApp do
   let(:advance_type)  {'agency'}
   let(:advance_term)  {'1week'}
   let(:rate)  {0.17}
+  let(:check_capstock)  {true}
   let(:signer)  {'local'}
 
   before do
@@ -146,7 +147,7 @@ describe MAPI::ServiceApp do
     end
   end
   describe 'Validate Trade' do
-    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
     it 'should return expected result of validate trade' do
       expect(execute_trade['status']).to be_kind_of(String)
       expect(execute_trade['confirmation_number']).to be_kind_of(String)
@@ -160,6 +161,64 @@ describe MAPI::ServiceApp do
       expect(execute_trade['maturity_date']).to be_kind_of(String)
     end
   end
+
+  describe 'Validate Trade With Capital Stock Exception' do
+    let(:amount)  {'1000000'}
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    it 'should return expected result of validate trade' do
+      expect(execute_trade['status']).to eq('CapitalStockError')
+      expect(execute_trade['authorized_amount']).to be_kind_of(Numeric)
+      expect(execute_trade['exception_message']).to be_kind_of(String)
+      expect(execute_trade['cumulative_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['current_trade_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['net_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['pre_trade_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_amount']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_cumulative_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_current_trade_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_pre_trade_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_net_stock_required']).to be_kind_of(Numeric)
+    end
+  end
+
+  describe 'Validate Trade With Capital Stock Gross Up Exception' do
+    let(:amount)  {'2000000'}
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    it 'should return expected result of validate trade' do
+      expect(execute_trade['status']).to eq('GrossUpError')
+      expect(execute_trade['authorized_amount']).to be_kind_of(Numeric)
+      expect(execute_trade['exception_message']).to be_kind_of(String)
+      expect(execute_trade['cumulative_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['current_trade_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['net_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['pre_trade_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_amount']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_cumulative_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_current_trade_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_pre_trade_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_net_stock_required']).to be_kind_of(Numeric)
+    end
+  end
+
+  describe 'Validate Trade With Capital Stock Missing Exception' do
+    let(:amount)  {'3000000'}
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    it 'should return expected result of validate trade' do
+      expect(execute_trade['status']).to eq('ExceptionError')
+      expect(execute_trade['authorized_amount']).to be_kind_of(Numeric)
+      expect(execute_trade['exception_message']).to be_kind_of(String)
+      expect(execute_trade['cumulative_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['current_trade_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['net_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['pre_trade_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_amount']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_cumulative_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_current_trade_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_pre_trade_stock_required']).to be_kind_of(Numeric)
+      expect(execute_trade['gross_net_stock_required']).to be_kind_of(Numeric)
+    end
+  end
+
   describe 'in the production environment' do
     before do
       expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
@@ -213,6 +272,24 @@ describe MAPI::ServiceApp do
         expect(execute_trade['payment_on']).to be_kind_of(String)
         expect(execute_trade['funding_date']).to be_kind_of(String)
         expect(execute_trade['maturity_date']).to be_kind_of(String)
+      end
+    end
+    describe 'capital stock exception' do
+      let(:advance_type)  {'agency'}
+      let(:advance_term)  {'1year'}
+      let(:amount)  {'1000000'}
+      let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+      it 'should return result of execute trade', vcr: {cassette_name: 'execute_trade_service_capital_stock_purchase'} do
+        expect(execute_trade['status']).to be_kind_of(String)
+        expect(execute_trade['authorized_amount']).to be_kind_of(Numeric)
+        expect(execute_trade['exception_message']).to be_kind_of(String)
+        expect(execute_trade['cumulative_stock_required']).to be_kind_of(Numeric)
+        expect(execute_trade['current_trade_stock_required']).to be_kind_of(Numeric)
+        expect(execute_trade['pre_trade_stock_required']).to be_kind_of(Numeric)
+        expect(execute_trade['gross_amount']).to be_kind_of(Numeric)
+        expect(execute_trade['gross_cumulative_stock_required']).to be_kind_of(Numeric)
+        expect(execute_trade['gross_current_trade_stock_required']).to be_kind_of(Numeric)
+        expect(execute_trade['gross_pre_trade_stock_required']).to be_kind_of(Numeric)
       end
     end
     it 'should return Internal Service Error, if execute trade service is unavailable', vcr: {cassette_name: 'execute_trade_service_unavailable'} do
