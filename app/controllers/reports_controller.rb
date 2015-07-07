@@ -185,13 +185,24 @@ class ReportsController < ApplicationController
   end
 
   def borrowing_capacity
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    date = params[:end_date] || Time.zone.now.to_date
-    if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
-      @borrowing_capacity_summary = {}
+    @date = params[:end_date] || Time.zone.now.to_date
+    export_format = params[:export_format]
+    @report_name = t('global.borrowing_capacity')
+
+    if export_format == 'pdf'
+      job_status = RenderReportPDFJob.perform_later(current_member_id, 'borrowing_capacity', 'borrowing-capacity', {end_date: @date.to_s}).job_status
+    end
+    unless job_status.nil?
+      job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
     else
-      @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(date.to_date)
-      raise StandardError, "There has been an error and ReportsController#borrowing_capacity has encountered nil. Check error logs." if @borrowing_capacity_summary.nil?
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
+        @borrowing_capacity_summary = {}
+      else
+        @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(@date.to_date)
+        raise StandardError, "There has been an error and ReportsController#borrowing_capacity has encountered nil. Check error logs." if @borrowing_capacity_summary.nil?
+      end
     end
   end
 
@@ -235,6 +246,7 @@ class ReportsController < ApplicationController
     @start_date = (params[:start_date] || Time.zone.now.to_date).to_date
     member_balances = MemberBalanceService.new(current_member_id, request)
     @advances_detail = member_balances.advances_details(@start_date)
+    @report_name = t('global.advances')
     raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
     @picker_presets = date_picker_presets(@start_date)
     if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)

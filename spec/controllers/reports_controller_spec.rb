@@ -83,18 +83,19 @@ RSpec.describe ReportsController, :type => :controller do
     end
 
     describe 'GET borrowing_capacity' do
+      before do
+        allow(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(response_hash)
+      end
       it_behaves_like 'a user required action', :get, :borrowing_capacity
       it 'should render the borrowing_capacity view' do
-        expect(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(response_hash)
         get :borrowing_capacity
         expect(response.body).to render_template('borrowing_capacity')
       end
       it 'should raise an error if @borrowing_capacity_summary is nil' do
-        expect(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(nil)
+        allow(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(nil)
         expect{get :borrowing_capacity}.to raise_error(StandardError)
       end
       it 'should set @borrowing_capacity_summary to the hash returned from MemberBalanceService' do
-        expect(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(response_hash)
         get :borrowing_capacity
         expect(assigns[:borrowing_capacity_summary]).to eq(response_hash)
       end
@@ -102,6 +103,48 @@ RSpec.describe ReportsController, :type => :controller do
         expect(controller).to receive(:report_disabled?).with(ReportsController::BORROWING_CAPACITY_WEB_FLAGS).and_return(true)
         get :borrowing_capacity
         expect(assigns[:borrowing_capacity_summary]).to eq({})
+      end
+      it 'should set @report_name' do
+        get :borrowing_capacity
+        expect(assigns[:report_name]).to be_kind_of(String)
+      end
+      it 'should set @date' do
+        get :borrowing_capacity
+        expect(assigns[:date]).to eq(today)
+      end
+      [['pdf', RenderReportPDFJob]].each do |format|
+        describe "downloading a #{format.first.upcase}" do
+          let(:member_id) { double('A Member ID') }
+          let(:job_status) { double('JobStatus', update_attributes!: nil)}
+          let(:active_job) { double('Active Job Instance', job_status: job_status) }
+          let(:user_id) { rand(1000) }
+          let(:current_user) { double('User', id: user_id)}
+
+          before do
+            allow_any_instance_of(MembersService).to receive(:report_disabled?).and_return(false)
+            allow_any_instance_of(MembersService).to receive(:member).with(anything).and_return({id: member_id, name: 'Foo'})
+            allow_any_instance_of(subject.class).to receive(:current_member_id).and_return(member_id)
+            allow(format.last).to receive(:perform_later).and_return(active_job)
+            allow(controller).to receive(:current_user).and_return(current_user)
+          end
+
+          it "should enqueue a report #{format.first} job when the requested `export_format` is `#{format.first}`" do
+            expect(format.last).to receive(:perform_later).with(member_id, 'borrowing_capacity', anything, anything).and_return(active_job)
+            get :borrowing_capacity, export_format: format.first
+          end
+          it 'should update the job_status instance with the user_id of the current user' do
+            expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
+            get :borrowing_capacity, export_format: format.first
+          end
+          it 'should return a json response with a `job_status_url`' do
+            get :borrowing_capacity, export_format: format.first
+            expect(JSON.parse(response.body).with_indifferent_access[:job_status_url]).to eq(job_status_url(job_status))
+          end
+          it 'should return a json response with a `job_cancel_url`' do
+            get :borrowing_capacity, export_format: format.first
+            expect(JSON.parse(response.body).with_indifferent_access[:job_cancel_url]).to eq(job_cancel_url(job_status))
+          end
+        end
       end
     end
 
@@ -323,6 +366,10 @@ RSpec.describe ReportsController, :type => :controller do
             expect(advance[:trade_date]).to be >= last_trade_date if last_trade_date
             last_trade_date = advance[:trade_date]
           end
+        end
+        it 'should set @report_name' do
+          get :advances_detail
+          expect(assigns[:report_name]).to be_kind_of(String)
         end
       end
 
