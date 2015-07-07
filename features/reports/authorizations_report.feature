@@ -11,8 +11,7 @@ Background:
 Scenario: Visit authorizations page from header link
   Given I visit the dashboard
   When I select "Authorizations" from the reports dropdown
-  Then I should see a loading report table
-  When I wait for the report to load
+  And I wait for the report to load
   Then I should see a report table with multiple data rows
 
 @jira-mem-585 @jira-mem-836
