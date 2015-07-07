@@ -1,6 +1,6 @@
 - @member_name ||= ''
-- @as_of ||= @end_date || @start_date || Time.zone.now.to_date
-- @report_name ||= 'Advances'
+- @as_of ||= @end_date || @start_date || @date || Time.zone.now.to_date
+- @report_name ||= t('global.report')
 .report-print-footer
   = t('global.fhlb_full')
   %span.report-bank-name

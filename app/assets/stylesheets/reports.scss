@@ -854,6 +854,9 @@ td.dataTables_empty {
   .report-header-buttons, .report-inputs {
     display: none;
   }
+  .report-summary-data {
+    margin-right: 25px;
+  }
   .report-main-body {
     margin-bottom: 0px;
     h2 {
@@ -898,7 +901,7 @@ td.dataTables_empty {
   }
   .report-table  {
     border: none;
-    width: auto;
+    width: 100%;
     margin-bottom: 15px;
     thead, .sorting_asc, .sorting_desc, tbody tr:nth-child(odd), tfoot, td, th {
       background-color: transparent;
@@ -917,6 +920,9 @@ td.dataTables_empty {
       color: $print-color;
     }
     .report-cell-narrow {
+      padding: 6px 8px;
+    }
+    .report-cell-right {
       padding: 6px 8px;
     }
     tr, td, th, thead, tfoot {
@@ -940,6 +946,26 @@ td.dataTables_empty {
       border-bottom: 1px solid $light-gray;
     }
   }
+  .report-sub-table {
+    width: 50%;
+    clear: both;
+    td, th {
+      width: auto;
+      &:first-child {
+        width: auto;
+      }
+      padding: 6px 0;
+    }
+    tbody tr:first-child td {
+      border-top: 1px solid $light-gray;
+    }
+    tbody tr td:first-child {
+      padding-left: 12px;
+    }
+    tfoot tr td {
+      border-bottom: 1px solid $light-gray;
+    }
+  }
   .row {
     width: auto;
   }
@@ -955,6 +981,11 @@ td.dataTables_empty {
           white-space: pre;
         }
       }
+    }
+  }
+  .standard-credit-borrowing-capacity-tables .report-parent-table {
+    th:last-child {
+      width: 80px;
     }
   }
   .report-print-footer {
@@ -974,5 +1005,8 @@ td.dataTables_empty {
   }
   .report-print-bank {
     @include typography-print-subheader;
+  }
+  .report-print-details {
+    margin-bottom: 50px;
   }
 }
