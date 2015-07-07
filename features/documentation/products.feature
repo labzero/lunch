@@ -7,7 +7,10 @@ Feature: Products Page
     Given I am logged in
 
   @smoke
-  Scenario: Member navigates to the products summary page via the resources dropdown
+  Scenario: Member navigates to the products pages via the resources dropdown
     Given I hover on the products link in the header
     When I click on the products summary link in the header
-    Then I should see the products summary page
+    Then I should see the "products summary" product page
+    When I hover on the products link in the header
+    And I click on the frc link in the header
+    Then I should see the "frc" product page

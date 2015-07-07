@@ -1,8 +1,14 @@
-Then(/^I should see the products summary page$/) do
-  page.assert_selector('.products-summary-page')
+Then(/^I should see the "(.*?)" product page$/) do |product|
+  text = case product
+    when 'products summary'
+      I18n.t('products.products_summary.title')
+    when 'frc'
+      I18n.t('products.advances.frc.title')
+    else
+      raise 'unknown product page'
+  end
+  page.assert_selector('.product-page h1', text: text)
 end
 
-Then(/^I should see the products summary page focused on the (advances|mpf_program) topic$/) do |topic|
-  page.assert_selector('.products-summary-page')
-  expect(current_url.ends_with?("##{topic}")).to eq(true)
-end
+
+

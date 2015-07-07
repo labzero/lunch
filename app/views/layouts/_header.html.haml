@@ -83,7 +83,7 @@
               %li= link_to(t('resources.membership.benefits.title'), '#')
               %li= link_to(t('resources.membership.requirements.title'), '#')
               %li= link_to(t('resources.membership.applications.title'), '#')
-      %li<>
+      %li.products-dropdown<>
         = link_to(t('nav.secondary.products'), '#', class: 'nav-menu')
         %ul.nav-dropdown<>
           %li<>= link_to(t('products.products_summary.nav_title'), product_summary_path)
@@ -98,7 +98,7 @@
               %li= link_to(t('products.advances.choice_libor'), choice_libor_arc_path)
               %li= link_to(t('products.advances.cip'), cip_path)
               %li= link_to(t('products.advances.auction_indexed'), auction_indexed_path)
-              %li= link_to(t('products.advances.frc'), frc_path)
+              %li= link_to(t('products.advances.frc.title'), frc_path)
               %li= link_to(t('products.advances.frc_embedded'), frc_embedded_path)
               %li= link_to(t('products.advances.knockout'), knockout_path)
               %li= link_to(t('products.advances.mpf'), mpf_path)

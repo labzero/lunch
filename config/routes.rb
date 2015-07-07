@@ -86,7 +86,7 @@ Rails.application.routes.draw do
       get 'choice-libor-arc' => 'error#standard_error'
       get 'community-investment-program' => 'error#standard_error', as: :cip
       get 'auction-indexed' => 'error#standard_error'
-      get 'fixed-rate-credit' => 'error#standard_error', as: :frc
+      get 'fixed-rate-credit' => 'products#frc', as: :frc
       get 'frc-embedded' => 'error#standard_error'
       get 'knockout' => 'error#standard_error'
       get 'mortgage-partnership-finance' => 'error#standard_error', as: :mpf

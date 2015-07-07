@@ -57,6 +57,11 @@ module CustomFormattingHelper
     date.to_date.strftime('%B %-d, %Y')
   end
 
+  def fhlb_date_short_alpha(date)
+    return t('global.missing_value') if date.nil?
+    date.to_date.strftime('%B %Y')
+  end
+
   def fhlb_date_quarter(date)
     return t('global.missing_value') if date.nil?
     date = date.to_date
