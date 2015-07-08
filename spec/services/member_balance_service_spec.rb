@@ -802,45 +802,53 @@ describe MemberBalanceService do
 
   describe '`letters_of_credit` method', :vcr do
     let(:letters_of_credit) { subject.letters_of_credit}
-    let(:data) { JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'letters_of_credit.json'))).with_indifferent_access }
+    let(:data) { JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'letters_of_credit.json'))).with_indifferent_access }
 
     it 'returns a date for its `as_of_date`' do
       expect(letters_of_credit[:as_of_date]).to be_kind_of(Date)
     end
     it 'returns a `total_current_par` that is the sum of all the current_par values' do
       allow(JSON).to receive(:parse).and_return(data)
-      total_current_par = data[:rows].inject(0) {|sum, hash| sum + hash[:current_par]}
+      total_current_par = data[:credits].inject(0) {|sum, hash| sum + hash[:current_par]}
       expect(letters_of_credit[:total_current_par]).to eq(total_current_par)
     end
-    describe '`rows` attribute' do
+    describe '`credits` attribute' do
       [:settlement_date, :maturity_date, :trade_date].each do |attr|
         it "returns a date for its '#{attr}'" do
-          letters_of_credit[:rows].each do |row|
-            expect(row[attr]).to be_kind_of(Date)
+          letters_of_credit[:credits].each do |credit|
+            expect(credit[attr]).to be_kind_of(Date)
           end
         end
       end
       [:current_par, :maintenance_charge].each do |attr|
         it "returns an integer for its '#{attr}'" do
-          letters_of_credit[:rows].each do |row|
-            expect(row[attr]).to be_kind_of(Integer)
+          letters_of_credit[:credits].each do |credit|
+            expect(credit[attr]).to be_kind_of(Integer)
           end
         end
       end
       [:lc_number, :description].each do |attr|
         it "returns a string for its '#{attr}'" do
-          letters_of_credit[:rows].each do |row|
-            expect(row[attr]).to be_kind_of(String)
+          letters_of_credit[:credits].each do |credit|
+            expect(credit[attr]).to be_kind_of(String)
           end
         end
       end
     end
 
     describe 'error states' do
-      it 'returns nil if there is a JSON parsing error' do
-        expect(File).to receive(:read).and_return('some malformed json!')
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
         expect(Rails.logger).to receive(:warn)
         expect(letters_of_credit).to be(nil)
+      end
+      it 'should return nil if there was an API error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(letters_of_credit).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(letters_of_credit).to eq(nil)
       end
     end
   end

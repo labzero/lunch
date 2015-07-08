@@ -1,0 +1,46 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/letters_of_credit
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
+      X-Request-Id:
+      - '12345'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '600'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Wed, 08 Jul 2015 23:06:49 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"as_of_date":"2015-07-07","total_current_par":500100000,"credits":[{"lc_number":"2015028","current_par":110000000,"maintenance_charge":10,"trade_date":"2015-03-13","settlement_date":"2015-03-13","maturity_date":"2015-12-15","description":"LC"},{"lc_number":"2015022","current_par":242600000,"maintenance_charge":10,"trade_date":"2015-03-04","settlement_date":"2015-03-04","maturity_date":"2015-12-15","description":"LC"},{"lc_number":"2014011","current_par":147500000,"maintenance_charge":10,"trade_date":"2014-01-29","settlement_date":"2014-01-29","maturity_date":"2015-07-30","description":"LC"}]}'
+    http_version: 
+  recorded_at: Wed, 08 Jul 2015 23:06:49 GMT
+recorded_with: VCR 2.9.3
