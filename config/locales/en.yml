@@ -1093,7 +1093,41 @@ en:
       choice_libor: Choice LIBOR ARC Advance
       cip: Community Investment Program (CIP)
       auction_indexed: DN Auction-Indexed Advance
-      frc: Fixed Rate Credit (FRC) Advance
+      frc:
+        title: Fixed Rate Credit (FRC) Advance
+        description: Use the FRC Advance to achieve a wide variety of financial management goals, taking advantage of maturities up to 30 years.
+        uses:
+          liquidity: Meet short-term liquidity needs
+          matching: Match-fund long-term assets
+          funding: Fund residential, consumer, and commercial loans
+          management: Achieve asset/liability management goals
+        advantages:
+          liquidity: Immediate access to liquidity
+          access: Access to long-term funds
+          guaranteed_rates: Guaranteed rates can be locked in for future funding purposes
+          less_expensive: Generally less expensive than other long-term liabilities
+        features:
+          term:
+            title: Term
+            description: Up to 30 years (for advances with partial prepayment symmetry, 1 to 10 years)
+          interest_rate:
+            title: Interest Rate
+            description: Fixed for the entire term of the advance. You may request immediate or forward funding.
+            spot_rate:
+              title: "Spot rate/Market rate:"
+              description: The interest rate is determined for the applicable term with same-day, next-day, or skip-day funding.
+            forward_rate:
+              title: "Forward rate/Guaranteed rate:"
+              description: The interest rate is determined on the day of the request for the applicable term and commitment period (up to 180 days forward for most maturities).
+          interest_day_count:
+            title: Interest Day Count
+            description: Actual/Actual (Actual/360 for Securities-Backed Credit Program and for advances with partial prepayment symmetry)
+          interest_payment_frequency:
+            title: Interest Payment Frequency
+            description: At monthend and at repayment (semiannually and at repayment for Securities-Backed Credit Program; quarterly and at repayment for advances with partial prepayment symmetry)
+          prepayment_features:
+            title: Prepayment Features
+            description_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the <a href=%{url}>Bank the Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       frc_embedded: FRC Advance with Embedded Cap
       knockout: Knockout Advance
       mpf: Mortgage Partnership Finance (MPF) Program
@@ -1111,6 +1145,11 @@ en:
     community_programs:
       title: Community Programs
       description_html: The Bank's <a href=%{url}>community programs</a> provide funding for projects that create an affordable place to live for low- and moderate-income individuals and that foster strong, stable, and sustainable communities. Our members use our targeted grant programs and discounted credit programs to meet a wide range of affordable housing and economic development needs in Arizona, California, Nevada, and the other regions they serve.
+    section_headings:
+      uses: Uses
+      advantages: Key Advantages
+      features: Key Features
+      last_modified: "Last Modified: %{date}"
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email

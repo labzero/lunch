@@ -1,5 +1,5 @@
 - @html_class = 'white-background'
-.row.products-summary-page
+.row.product-page
   %h1= t('products.products_summary.title')
   %p= t('products.products_summary.intro')
   %a{name: 'advances'}
@@ -14,7 +14,7 @@
     %li= t('products.products_summary.advances.benefits.risk')
   %p= t('products.products_summary.advances.customize_html', frc_url: frc_url, callable_url: callable_url, putable_url: putable_url, arc_embedded_url: arc_embedded_url)
   %p= t('products.products_summary.advances.product_list.intro')
-  %ul.credit_product_list
+  %ul.credit-product-list
     %li= link_to(t('products.advances.arc'), arc_path)
     %li= link_to(t('products.advances.ace'), ace_path)
     %li= link_to(t('products.advances.amortizing'), amortizing_path)
@@ -23,7 +23,7 @@
     %li= link_to(t('products.advances.choice_libor'), choice_libor_arc_path)
     %li= link_to(t('products.advances.cip'), cip_path)
     %li= link_to(t('products.advances.auction_indexed'), auction_indexed_path)
-    %li= link_to(t('products.advances.frc'), frc_path)
+    %li= link_to(t('products.advances.frc.title'), frc_path)
     %li= link_to(t('products.advances.frc_embedded'), frc_embedded_path)
     %li= link_to(t('products.advances.knockout'), knockout_path)
     %li= link_to(t('products.advances.mpf'), mpf_path)
