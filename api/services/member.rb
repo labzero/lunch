@@ -11,6 +11,7 @@ require_relative 'member/signer_roles'
 require_relative 'member/securities_position'
 require_relative 'member/forward_commitments'
 require_relative 'member/capital_stock_and_leverage'
+require_relative 'member/letters_of_credit'
 
 module MAPI
   module Services
@@ -484,6 +485,23 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/letters_of_credit'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve letters of credit for the last date the letters of credit were calculated by FHLB'
+              key :notes, 'Typically the last date on which the letters of credit were calculated corresponds to the last business day. A given member bank will not necessarily have any letters of credit for this date.'
+              key :nickname, :getLettersOfCreditForMember
+              key :type, :MemberLettersOfCredit
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -671,6 +689,11 @@ module MAPI
           else
             result.to_json
           end
+        end
+
+        relative_get '/:id/letters_of_credit' do
+          member_id = params[:id]
+          MAPI::Services::Member::LettersOfCredit.letters_of_credit(self, member_id).to_json
         end
       end
 

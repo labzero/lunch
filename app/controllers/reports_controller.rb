@@ -623,17 +623,17 @@ class ReportsController < ApplicationController
     end
     @as_of_date = letters_of_credit[:as_of_date]
     @total_current_par = letters_of_credit[:total_current_par]
-    rows = if letters_of_credit[:rows]
-      letters_of_credit[:rows].collect do |row|
+    rows = if letters_of_credit[:credits]
+      letters_of_credit[:credits].collect do |credit|
         {
           columns: [
-            {value: row[:lc_number], type: nil},
-            {value: row[:current_par], type: :currency_whole},
-            {value: row[:maintenance_charge], type: :number},
-            {value: row[:trade_date], type: :date, classes: [:'report-cell-right']},
-            {value: row[:settlement_date], type: :date, classes: [:'report-cell-right']},
-            {value: row[:maturity_date], type: :date, classes: [:'report-cell-right']},
-            {value: row[:description], type: nil}
+            {value: credit[:lc_number], type: nil},
+            {value: credit[:current_par], type: :currency_whole},
+            {value: credit[:maintenance_charge], type: :currency_whole},
+            {value: credit[:trade_date], type: :date, classes: [:'report-cell-right']},
+            {value: credit[:settlement_date], type: :date, classes: [:'report-cell-right']},
+            {value: credit[:maturity_date], type: :date, classes: [:'report-cell-right']},
+            {value: credit[:description], type: nil}
           ]
         }
       end
