@@ -40,12 +40,12 @@ class DashboardController < ApplicationController
     ]
 
     credit_outstanding = [
-      [t('dashboard.your_account.table.credit_outstanding'), profile[:credit_outstanding]]
+      [t('dashboard.your_account.table.credit_outstanding'), profile[:credit_outstanding][:total]]
     ]
 
     remaining = [
       {title: t('dashboard.your_account.table.remaining.title')},
-      [t('dashboard.your_account.table.remaining.available'), profile[:financial_available]],
+      [t('dashboard.your_account.table.remaining.available'), profile[:total_financing_available]],
       [t('dashboard.your_account.table.remaining.capacity'), profile[:remaining_collateral_borrowing_capacity]],
       [t('dashboard.your_account.table.remaining.leverage'), profile[:stock_leverage], nil, 2]
     ]
@@ -72,15 +72,15 @@ class DashboardController < ApplicationController
     else
       nil
     end
-
-    @financing_availability_gauge = if profile[:financial_available]
+    
+    @financing_availability_gauge = if profile[:total_financing_available]
       calculate_gauge_percentages(
         {
-          total: profile[:financial_available],
+          total: profile[:total_financing_available],
           used: profile[:used_financing_availability],
-          unused: profile[:remaining_borrowing_capacity],
+          unused: profile[:collateral_borrowing_capacity][:remaining],
           uncollateralized: profile[:uncollateralized_financing_availability]
-        }, profile[:financial_available], :total)
+        }, profile[:total_financing_available], :total)
     else
       nil
     end

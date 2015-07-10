@@ -303,6 +303,23 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve current member biographic details'
+              key :notes, 'Returns basic details about a member'
+              key :type, :MemberDetails
+              key :nickname, :getMemberDetails
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+            end
+          end
+          api do
             key :path, '/'
             operation do
               key :method, 'GET'
@@ -627,7 +644,12 @@ module MAPI
         # Member Profile
         relative_get '/:id/member_profile' do
           member_id = params[:id]
-          MAPI::Services::Member::Profile.member_profile(self, member_id)
+          profile = MAPI::Services::Member::Profile.member_profile(self, member_id)
+          if profile.nil?
+            logger.error 'Member not found'
+            halt 404
+          end
+          profile.to_json
         end
 
         relative_get '/' do
@@ -694,6 +716,17 @@ module MAPI
         relative_get '/:id/letters_of_credit' do
           member_id = params[:id]
           MAPI::Services::Member::LettersOfCredit.letters_of_credit(self, member_id).to_json
+        end
+
+        relative_get '/:id/' do
+          member_id = params[:id]
+          details = MAPI::Services::Member::Profile.member_details(self, member_id)
+          if details.nil?
+            logger.error 'Member not found'
+            halt 404
+          else
+            details.to_json
+          end
         end
       end
 

@@ -17,6 +17,7 @@ $print-font-family: 'SourceSansPro';
   font-family: $default-font-family;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'lnum';
 }
 
 @mixin print-font {

@@ -14,7 +14,7 @@ class RenderReportPDFJob < FhlbJob
     member = MembersService.new(controller.request).member(member_id)
     raise 'Member not found!' unless member
 
-    controller.session['member_id'] = member[:id]
+    controller.session['member_id'] = member_id
     controller.session['member_name'] = member[:name]
     controller.instance_variable_set(:@inline_styles, true)
     controller.instance_variable_set(:@skip_javascript, true)

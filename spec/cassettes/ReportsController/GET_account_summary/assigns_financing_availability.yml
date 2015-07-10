@@ -1,0 +1,89 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/6/disabled_reports
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      X-Request-Id:
+      - ''
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '2'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      Date:
+      - Mon, 13 Jul 2015 23:26:09 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: "[]"
+    http_version: 
+  recorded_at: Mon, 13 Jul 2015 23:26:09 GMT
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/6/member_profile
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      X-Request-Id:
+      - ''
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '1218'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      Date:
+      - Mon, 13 Jul 2015 23:26:09 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"sta_balance":190349.49,"total_financing_available":199603250,"remaining_financing_available":149603250,"mpf_credit_available":13654400,"collateral_market_value_sbc_agency":0,"collateral_market_value_sbc_aaa":15758230,"collateral_market_value_sbc_aa":0,"total_borrowing_capacity_standard":91643604,"total_borrowing_capacity_sbc_agency":15166204,"total_borrowing_capacity_sbc_aaa":0,"total_borrowing_capacity_sbc_aa":0,"collateral_delivery_status":"Y","financing_percentage":0.3,"maximum_term":120,"total_assets":162850000,"approved_long_term_credit":48855000.0,"forward_commitments":1345600,"collateral_borrowing_capacity":{"total":140000000,"remaining":106809808,"standard":{"total":123500000,"remaining":91643604},"sbc":{"total_borrowing":16500000,"remaining_borrowing":15166204,"total_market":15758230,"remaining_market":145000}},"credit_outstanding":{"total":35000000,"standard":139728255,"sbc":0,"swaps_credit":1540000,"swaps_notational":2580000,"mpf_credit":112345,"letters_of_credit":18544400,"investments":345000},"capital_stock":{"stock_owned":853700,"minimum_requirement":853700,"excess_stock":0,"surplus_stock":-128000,"activity_based_requirement":0,"remaining_stock":853700,"remaining_leverage":28456666}}'
+    http_version: 
+  recorded_at: Mon, 13 Jul 2015 23:26:09 GMT
+recorded_with: VCR 2.9.3

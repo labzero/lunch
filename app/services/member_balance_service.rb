@@ -334,18 +334,25 @@ class MemberBalanceService < MAPIService
   end
 
   def profile
-    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
     begin
-      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'profile.json'))).with_indifferent_access
+      response = @connection["/member/#{@member_id}/member_profile"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.profile encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.profile encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
     rescue JSON::ParserError => e
       Rails.logger.warn("MemberBalanceService.profile encountered a JSON parsing error: #{e}")
       return nil
     end
-
-    data[:total_borrowing_capacity] = data[:standard_total_borrowing_capacity].to_i + data[:sbc_total_borrowing_capacity].to_i
-    data[:remaining_borrowing_capacity] = data[:standard_remaining_borrowing_capacity].to_i  + data[:sbc_remaining_borrowing_capacity].to_i
-    data[:used_financing_availability] = data[:total_borrowing_capacity].to_i  - data[:remaining_borrowing_capacity].to_i
-    data[:uncollateralized_financing_availability] = data[:financial_available].to_i  - data[:total_borrowing_capacity].to_i
+    
+    data[:used_financing_availability] = data[:collateral_borrowing_capacity][:total].to_i - data[:collateral_borrowing_capacity][:remaining].to_i
+    data[:uncollateralized_financing_availability] = data[:total_financing_available].to_i - data[:used_financing_availability].to_i
     data
   end
 

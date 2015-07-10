@@ -84,8 +84,12 @@ describe EtransactAdvancesService do
       allow(Rails.logger).to receive(:warn)
       expect(quick_advance_execute).to be(nil)
     end
-    before { allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED) }
+    it 'should return nil if there was an API error' do
+      allow_any_instance_of(RestClient::Resource).to receive(:post).and_raise(RestClient::InternalServerError)
+      expect(quick_advance_execute).to eq(nil)
+    end
     it 'should return nil if there was a connection error' do
+      allow_any_instance_of(RestClient::Resource).to receive(:post).and_raise(Errno::ECONNREFUSED)
       expect(quick_advance_execute).to eq(nil)
     end
     it 'should URL encode the signer' do

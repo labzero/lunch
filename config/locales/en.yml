@@ -106,6 +106,7 @@ en:
     privacy_policy: Privacy Policy
     truncated_web_address: "fhlbsf.com"
     view_pdf: View PDF
+    view_report: View Report
     tbd: TBD
     report: Report
     dates:
@@ -669,6 +670,9 @@ en:
     share_count: # supports all CLDR rules
       one: "%{count} share"
       other: "%{count} shares"
+    month_count: # supports all CLDR rules
+      one: "%{count} month"
+      other: "%{count} months"
     history:
       months18: 18 months
       months36: 36 months
@@ -748,6 +752,62 @@ en:
       user:
         title: User Authorizations
         summary: Provides a summary of authorizations granted to bank users.
+    account_summary:
+      title: Account Summary
+      institution_details:
+        title: Institution Details
+        your_institution: 'Your Institution:'
+        sta_number: 'STA Number:'
+        fhfb_number: 'FHFB Number:'
+      collateral_delivery_required: 'Collateral Status: Delivery Required'
+      intraday_activity_notice: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{date}."
+      other_activity_notice: "Under Collateral Borrowing Capacity, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of Close of Business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today's credit activity as of %{date}."
+      financing_availability:
+        title: Financing Availability
+        footnote: 'Represents a regulatory limit on long-term advances based on call report data. The actual amount available cannot exceed the Total Financing Availability.'
+        asset_percentage: Financing Availability as % of Assets
+        maximum_term: Maximum Term
+        total_assets: Total Assets
+        total_financing_availability: Total Financing Availability
+        approved_credit: 'Approved Credit for Terms Over 5 Years*'
+        credit_outstanding: Credit Outstanding
+        forward_commitments: Forward Commitments
+        remaining_financing_availability: Remaining Financing Availability
+        mpf_credit_available: MPF Available Credit Enhancement
+      credit_outstanding:
+        title: Credit Outstanding
+        standard_advances: Standard Advances
+        sbc_advances: SBC Advances
+        swaps_credit: Swaps (credit exposure)
+        swaps_notational: Swaps (notational)
+        investments: Investments
+        letters_of_credit: Letters of Credit
+        mpf_credit: MPF Actual Credit Enhancement
+      collateral_borrowing_capacity:
+        title: Collateral Borrowing Capacity
+        standard:
+          title: Standard Credit Program*
+          total: Total Standard Program Borrowing Capacity
+          remaining: Remaining Standard Program Borrowing Capacity
+        sbc:
+          title: Securities-Backed Credit Program
+          total_market: Total Securities-Backed Credit Market Value
+          remaining_market: Remaining Securities-Backed Credit Market Value
+          total: Total Securities-Backed Credit Borrowing Capacity
+          remaining: Remaining Securities-Backed Credit Borrowing Capacity
+        totals:
+          title: Totals
+          total: Total Borrowing Capacity
+          remaining: Total Remaining Borrowing Capacity
+        footnote: 'If you are using whole loan collateral to meet the margin requirement for Securities-Backed Credit advances, the amount shown in "Remaining" is overstated. Please call the Members Services Desk at %{phone_number} to verify your actual remaining borrowing capacity.'
+      capital_stock:
+        title: Capital Stock Position and Leverage
+        stock_owned: Stock Owned
+        stock_requirement: Activity-Based Stock Requirement
+        excess_stock: Remaining Excess Stock
+        leverage: Remaining Leverage
+    your_account:
+      title: Your Account
     pages:
       price_indications:
         current:
