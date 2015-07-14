@@ -69,17 +69,23 @@ describe MembersService do
   describe '`member` method', :vcr do
     let(:member) { subject.member(member_id) }
     it 'should return nil if there was an API error' do
-      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
       expect(member).to eq(nil)
     end
     it 'should return nil if there was a connection error' do
-      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(member).to eq(nil)
+    end
+    it 'should return nil if there was a JSON parse error' do
+      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
       expect(member).to eq(nil)
     end
     it 'returns a member on success' do
       expect(member).to be_kind_of(Hash)
-      expect(member[:id]).to be_kind_of(Numeric)
-      expect(member[:id]).to be > 0
+      expect(member[:sta_number]).to be_kind_of(String)
+      expect(member[:sta_number]).to be_present
+      expect(member[:fhfb_number]).to be_kind_of(String)
+      expect(member[:fhfb_number]).to be_present
       expect(member[:name]).to be_kind_of(String)
       expect(member[:name]).to be_present
     end

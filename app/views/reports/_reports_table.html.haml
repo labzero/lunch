@@ -16,15 +16,16 @@
         %th{data: {unsortable: true}}
         %th{colspan: (table_data[:column_headings].length - 1), data: {unsortable: true}}= table_data[:table_heading]
     - if table_data[:column_sub_headings].blank?
-      %tr
-      - table_data[:column_headings].each_with_index do |heading, index|
-        - unsortable = index != 0
-        - if heading.is_a?(String)
-          - title = heading
-        - else
-          - title = heading[:title]
-          - unsortable = !heading[:sortable] if heading.has_key?(:sortable)
-        %th.report-cell-narrow{data: {unsortable: unsortable}}= title
+      - if table_data[:column_headings].present?
+        %tr
+        - table_data[:column_headings].each_with_index do |heading, index|
+          - unsortable = index != 0
+          - if heading.is_a?(String)
+            - title = heading
+          - else
+            - title = heading[:title]
+            - unsortable = !heading[:sortable] if heading.has_key?(:sortable)
+          %th.report-cell-narrow{data: {unsortable: unsortable}}= title
     - else
       %tr.table-heading-row
         %th{data: {unsortable: true}}

@@ -59,10 +59,6 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(assigns[:quick_advances_active]).to be_present
     end
-    it 'should assign @financing_availability_gauge to nil if there is no value for `financing_availability` in the profile' do
-      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return({})
-      expect(assigns[:financing_availability_gauge]).to be_nil
-    end
     it 'should assign @financing_availability_gauge' do
       get :index
       expect(assigns[:financing_availability_gauge]).to be_kind_of(Hash)
@@ -95,15 +91,15 @@ RSpec.describe DashboardController, :type => :controller do
       end
     end
     describe "MemberBalanceService failures" do
-      let(:MemberBalanceService) {class_double(MemberBalanceService)}
-      let(:member_balance_instance) {MemberBalanceService.new(750, double('request', uuid: '12345'))}
-      before do
-        expect(MemberBalanceService).to receive(:new).and_return(member_balance_instance)
-      end
       it 'should assign @borrowing_capacity_guage as nil if the balance could not be retrieved' do
-        expect(member_balance_instance).to receive(:borrowing_capacity_summary).and_return(nil)
+        allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).and_return(nil)
         get :index
         expect(assigns[:borrowing_capacity_guage]).to eq(nil)
+      end
+      it 'should assign @financing_availability_gauge to nil if there is no value for `financing_availability` in the profile' do
+        allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return({credit_outstanding: {}})
+        get :index
+        expect(assigns[:financing_availability_gauge]).to be_nil
       end
     end
   end

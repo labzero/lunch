@@ -28,6 +28,10 @@ Then(/^I take a screen grab of "(.*?)"$/) do |text|
   grab_screen("I take a screen grab of #{text}")
 end
 
+Then(/^I should see an error page$/) do
+  page.assert_selector('.error-page', visible: true)
+end
+
 def links_from_frame frame_name, opts={limit: 20}
   cur_frame = page.find("frame[name=#{frame_name}]")
 

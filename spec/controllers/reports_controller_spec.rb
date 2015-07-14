@@ -1424,6 +1424,134 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
+  describe 'GET account_summary', :vcr do
+    let(:member_id) {6}
+    let(:make_request) { get :account_summary }
+    let(:now) { Date.new(2015, 1, 12).to_time }
+    let(:profile) {MemberBalanceService.new(member_id, ActionDispatch::TestRequest.new).profile}
+    let(:member_name) { double('A Name') }
+    let(:sta_number) { double('STA Number') }
+    let(:fhfb_number) { double('FHFB Number') }
+    let(:member_details) { {name: member_name, sta_number: sta_number, fhfb_number: fhfb_number} }
+
+    before do
+      allow(subject).to receive(:current_member_id).and_return(member_id)
+      allow(Time).to receive_message_chain(:zone, :now).and_return(now)
+      allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member_details)
+    end
+
+    it 'should render the account_summary view' do
+      make_request
+      expect(response.body).to render_template('account_summary')
+    end
+
+    it 'raises an error if the report is disabled' do
+      allow(controller).to receive(:report_disabled?).with(ReportsController::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true)
+      expect {make_request}.to raise_error
+    end
+    it 'raises an error if `MemberBalanceService#profile` returns nil' do
+      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
+      expect {make_request}.to raise_error
+    end
+    it 'raises an error if `MembersService#member` returns nil' do
+      allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
+      expect {make_request}.to raise_error
+    end
+    it 'assigns @report_name' do
+      make_request
+      expect(assigns[:report_name]).to eq(I18n.t('reports.account_summary.title'))
+    end
+    it 'assigns @intraday_datetime' do
+      make_request
+      expect(assigns[:intraday_datetime]).to eq(now)
+    end
+    it 'assigns @credit_datetime' do
+      make_request
+      expect(assigns[:credit_datetime]).to eq(now)
+    end
+    it 'assigns @collateral_notice to true if the collateral_delivery_status is `Y`' do
+      profile[:collateral_delivery_status] = 'Y'
+      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile)
+      make_request
+      expect(assigns[:collateral_notice]).to be(true)
+    end
+    it 'assigns @collateral_notice to false if the collateral_delivery_status is `N`' do
+      profile[:collateral_delivery_status] = 'N'
+      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile)
+      make_request
+      expect(assigns[:collateral_notice]).to be(false)
+    end
+    it 'assigns @sta_number' do
+      make_request
+      expect(assigns[:sta_number]).to be(sta_number)
+    end
+    it 'assigns @fhfb_number' do
+      make_request
+      expect(assigns[:fhfb_number]).to be(fhfb_number)
+    end
+    it 'assigns @member_name' do
+      make_request
+      expect(assigns[:member_name]).to be(member_name)
+    end
+    it 'assigns @financing_availability' do
+      make_request
+      expect(assigns[:financing_availability]).to include(:rows, :footer)
+    end
+    it 'assigns @credit_outstanding' do
+      make_request
+      expect(assigns[:credit_outstanding]).to include(:rows, :footer)
+    end
+    it 'assigns @standard_collateral' do
+      make_request
+      expect(assigns[:standard_collateral]).to include(:rows)
+    end
+    it 'assigns @sbc_collateral' do
+      make_request
+      expect(assigns[:sbc_collateral]).to include(:rows)
+    end
+    it 'assigns @collateral_totals' do
+      make_request
+      expect(assigns[:collateral_totals]).to include(:rows)
+    end
+    it 'assigns @capital_stock_and_leverage' do
+      make_request
+      expect(assigns[:capital_stock_and_leverage]).to include(:rows)
+    end
+    context do
+      before { allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile) }
+      it 'adds a row to @credit_outstanding if there is a `mpf_credit`' do
+        profile[:credit_outstanding][:mpf_credit] = 1
+        make_request
+        expect(assigns[:credit_outstanding][:rows].length).to be(7)
+      end
+      it 'doesn\'t a row to @credit_outstanding if there is no `mpf_credit`' do
+        profile[:credit_outstanding].delete(:mpf_credit)
+        make_request
+        expect(assigns[:credit_outstanding][:rows].length).to be(6)
+      end
+      it 'doesn\'t a row to @credit_outstanding if `mpf_credit` is zero' do
+        profile[:credit_outstanding][:mpf_credit] = 0
+        make_request
+        expect(assigns[:credit_outstanding][:rows].length).to be(6)
+      end
+      it 'adds a row to @financing_availability if there is a `mpf_credit_available`' do
+        profile[:mpf_credit_available] = 1
+        make_request
+        expect(assigns[:financing_availability][:rows].length).to be(8)
+      end
+      it 'doesn\'t add a row to @financing_availability if there is no `mpf_credit_available`' do
+        profile.delete(:mpf_credit_available)
+        make_request
+        expect(assigns[:financing_availability][:rows].length).to be(7)
+      end
+      it 'doesn\'t add a row to @financing_availability if `mpf_credit_available` is zero' do
+        profile[:mpf_credit_available] = 0
+        make_request
+        expect(assigns[:financing_availability][:rows].length).to be(7)
+      end
+    end
+  end
+
   describe 'private methods' do
     describe '`report_disabled?` method' do
       let(:report_flags) {double('some report flags')}

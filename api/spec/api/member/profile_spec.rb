@@ -6,93 +6,190 @@ describe MAPI::ServiceApp do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
   end
   describe 'member profile' do
-    let(:member_financial_position) { get "/member/#{MEMBER_ID}/member_profile"; JSON.parse(last_response.body) }
+    let(:make_request) { get "/member/#{MEMBER_ID}/member_profile" }
+    let(:member_financial_position) { make_request; JSON.parse(last_response.body) }
+    let(:capital_stock) { double('Capital Stock', as_json: SecureRandom.uuid) }
+    before do
+      allow(MAPI::Services::Member::CapitalStockAndLeverage).to receive(:capital_stock_and_leverage).with(anything, MEMBER_ID).and_return(capital_stock)
+    end
     it "should return json with expected elements type" do
       expect(member_financial_position.length).to be >= 1
-      expect(member_financial_position['sta_balance']).to be_kind_of(Numeric)
-      expect(member_financial_position['credit_outstanding']).to be_kind_of(Numeric)
-      expect(member_financial_position['credit_outstanding']).to be_kind_of(Integer)
-      expect(member_financial_position['stock_leverage']).to be_kind_of(Integer)
-      expect(member_financial_position['credit_outstanding']).to be_kind_of(Integer)
-      expect(member_financial_position['collateral_market_value_sbc_agency']).to be_kind_of(Integer)
-      expect(member_financial_position['collateral_market_value_sbc_aaa']).to be_kind_of(Integer)
-      expect(member_financial_position['collateral_market_value_sbc_aa']).to be_kind_of(Integer)
-      expect(member_financial_position['borrowing_capacity_standard']).to be_kind_of(Integer)
-      expect(member_financial_position['borrowing_capacity_sbc_agency']).to be_kind_of(Integer)
-      expect(member_financial_position['borrowing_capacity_sbc_aaa']).to be_kind_of(Integer)
-      expect(member_financial_position['borrowing_capacity_sbc_aa']).to be_kind_of(Integer)
+      %w(total_financing_available remaining_financing_available mpf_credit_available collateral_market_value_sbc_agency collateral_market_value_sbc_aaa collateral_market_value_sbc_aa total_borrowing_capacity_standard total_borrowing_capacity_sbc_agency total_borrowing_capacity_sbc_aaa total_borrowing_capacity_sbc_aa maximum_term total_assets forward_commitments).each do |key|
+        expect(member_financial_position[key]).to be_kind_of(Integer)
+      end
+      expect(member_financial_position['collateral_delivery_status']).to be_kind_of(String)
+      %w(sta_balance financing_percentage approved_long_term_credit).each do |key|
+        expect(member_financial_position[key]).to be_kind_of(Float)
+      end
+      credit_outstanding = member_financial_position['credit_outstanding']
+      ['total', 'standard', 'sbc', 'swaps_credit', 'swaps_notational', 'mpf_credit', 'letters_of_credit', 'investments'].each do |key|
+        expect(credit_outstanding[key]).to be_kind_of(Integer)
+      end
+      collateral_borrowing_capacity = member_financial_position['collateral_borrowing_capacity']
+      expect(collateral_borrowing_capacity['total']).to be_kind_of(Integer)
+      expect(collateral_borrowing_capacity['remaining']).to be_kind_of(Integer)
+      expect(collateral_borrowing_capacity['standard']['total']).to be_kind_of(Integer)
+      expect(collateral_borrowing_capacity['standard']['remaining']).to be_kind_of(Integer)
+      expect(collateral_borrowing_capacity['sbc']['total_borrowing']).to be_kind_of(Integer)
+      expect(collateral_borrowing_capacity['sbc']['remaining_borrowing']).to be_kind_of(Integer)
+      expect(collateral_borrowing_capacity['sbc']['total_market']).to be_kind_of(Integer)
+      expect(collateral_borrowing_capacity['sbc']['remaining_market']).to be_kind_of(Integer)
     end
 
-    it 'should call capital_stock_requirement method and return stock_leverage' do
-     expect(member_financial_position['stock_leverage']).to be_kind_of(Integer)
+    it 'should call `MAPI::Services::Member::CapitalStockAndLeverage::capital_stock_and_leverage` method and return capital_stock' do
+      capital_stock = double('Capital Stock', as_json: SecureRandom.uuid)
+      allow(MAPI::Services::Member::CapitalStockAndLeverage).to receive(:capital_stock_and_leverage).with(anything, MEMBER_ID).and_return(capital_stock)
+      expect(member_financial_position['capital_stock']).to eq(capital_stock.as_json)
     end
 
-    it 'should return 11 column' do
-     expect(member_financial_position.count).to eq(11)
+    it 'should return a 404 if `MAPI::Services::Member::CapitalStockAndLeverage::capital_stock_and_leverage` returns nil'  do
+      allow(MAPI::Services::Member::CapitalStockAndLeverage).to receive(:capital_stock_and_leverage).with(anything, MEMBER_ID).and_return(nil)
+      make_request
+      expect(last_response.status).to be(404)
     end
 
     describe 'in the production environment' do
         let(:member_position_result) {double('Oracle Result Set', fetch: nil)}
         let(:member_sta_result) {double('Oracle Result Set', fetch: nil)}
-        let(:some_financial_data) {{"STX_LEDGER_BALANCE"=> nil, "CREDIT_OUTSTANDING"=>  5000001, "FINANCIAL_AVAILABLE"=> 169771251, "EXCESS_REG_BORR_CAP"=> 82911719,
-          "EXCESS_SBC_BORR_CAP_AG"=> 3405111, "EXCESS_SBC_BORR_CAP_AA"=> 101, "EXCESS_SBC_BORR_CAP_AAA"=>  102, "SBC_MARKET_VALUE_AAA"=>  103, "SBC_MARKET_VALUE_AA"=>  104,
-          "SBC_MARKET_VALUE_AG"=>  3584326,    "ADVANCE_OUTSTANDING"=>  15000000, "MPF_UNPAID_BALANCE"=>  0, "TOTAL_CAPITAL_STOCK"=> 1000000000,
-          "MRTG_RELATED_ASSETS"=> 3458554, "MRTG_RELATED_ASSETS_ROUND100"=> 3458600 }}
-        let(:some_sta_data) {{"STA_ACCOUNT_NUMBER"=> 25100033, "STX_UPDATE_DATE"=> "2015-02-05", "STX_CURRENT_LEDGER_BALANCE"=> 190349.49,"STX_INT_RATE"=> 0.02}}
+        let(:some_financial_data) do
+          data = {}
+          %w(RECOM_EXPOSURE_PCT MAX_TERM TOTAL_ASSETS RHFA_ADVANCES_LIMIT REG_ADVANCES_OUTS SBC_ADVANCES_OUTS SWAP_MARKET_OUTS SWAP_NOTIONAL_PRINCIPAL UNSECURED_CREDIT LCS_OUTS MPF_CE_COLLATERAL_REQ STX_LEDGER_BALANCE CREDIT_OUTSTANDING COMMITTED_FUND_LESS_MPF AVAILABLE_CREDIT RECOM_EXPOSURE REG_BORR_CAP SBC_BORR_CAP EXCESS_REG_BORR_CAP EXCESS_SBC_BORR_CAP_AG EXCESS_SBC_BORR_CAP_AAA EXCESS_SBC_BORR_CAP_AA EXCESS_SBC_BORR_CAP SBC_MARKET_VALUE_AG SBC_MARKET_VALUE_AAA SBC_MARKET_VALUE_AA SBC_MARKET_VALUE EXCESS_SBC_MARKET_VALUE ADVANCES_OUTSTANDING MPF_UNPAID_BALANCE TOTAL_CAPITAL_STOCK MRTG_RELATED_ASSETS MRTG_RELATED_ASSETS_round100).each do |key|
+            data[key] = rand(1..1000000)
+          end
+          data['DELIVERY_STATUS_FLAG'] = SecureRandom.uuid
+          data
+        end
+        let(:some_sta_data) {{"STX_CURRENT_LEDGER_BALANCE"=> rand(1..1000000)}}
         before do
-          expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
-          expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_position_result)
-          expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_sta_result)
+          allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+          allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_position_result, member_sta_result)
           allow(member_position_result).to receive(:fetch_hash).and_return(some_financial_data, nil)
           allow(member_sta_result).to receive(:fetch_hash).and_return(some_sta_data, nil)
         end
 
         it "should json with expected column (exclude stock leverage)" , vcr: {cassette_name: 'capital_stock_requirements_service'} do
-          expect(member_financial_position['sta_balance']).to eq(190349.49)
-          expect(member_financial_position['financial_available']).to eq(169771251)
-          expect(member_financial_position['credit_outstanding']).to eq(5000001)
-          expect(member_financial_position['collateral_market_value_sbc_agency']).to eq(3584326)
-          expect(member_financial_position['collateral_market_value_sbc_aaa']).to eq(103)
-          expect(member_financial_position['collateral_market_value_sbc_aa']).to eq(104)
-          expect(member_financial_position['borrowing_capacity_standard']).to eq(82911719)
-          expect(member_financial_position['borrowing_capacity_sbc_agency']).to eq(3405111)
-          expect(member_financial_position['borrowing_capacity_sbc_aaa']).to eq(102)
-          expect(member_financial_position['borrowing_capacity_sbc_aa']).to eq(101)
-          expect(member_financial_position['stock_leverage']).to eq(33330000)
+          {
+            'total_financing_available' => 'RECOM_EXPOSURE',
+            'remaining_financing_available' => 'AVAILABLE_CREDIT',
+            'collateral_market_value_sbc_agency' => 'SBC_MARKET_VALUE_AG',
+            'collateral_market_value_sbc_aaa' => 'SBC_MARKET_VALUE_AAA',
+            'collateral_market_value_sbc_aa' => 'SBC_MARKET_VALUE_AA',
+            'total_borrowing_capacity_standard' => 'EXCESS_REG_BORR_CAP',
+            'total_borrowing_capacity_sbc_agency' => 'EXCESS_SBC_BORR_CAP_AG',
+            'total_borrowing_capacity_sbc_aaa' => 'EXCESS_SBC_BORR_CAP_AAA',
+            'total_borrowing_capacity_sbc_aa' => 'EXCESS_SBC_BORR_CAP_AA',
+            'collateral_delivery_status' => 'DELIVERY_STATUS_FLAG',
+            'financing_percentage' => 'RECOM_EXPOSURE_PCT',
+            'maximum_term' => 'MAX_TERM',
+            'total_assets' => 'TOTAL_ASSETS',
+            'approved_long_term_credit' => 'RHFA_ADVANCES_LIMIT'
+          }.each do |key, value_key|
+            expect(member_financial_position[key]).to eq(some_financial_data[value_key])
+          end
+          expect(member_financial_position['sta_balance']).to eq(some_sta_data['STX_CURRENT_LEDGER_BALANCE'])
+          expect(member_financial_position['mpf_credit_available']).to eq(some_financial_data['RECOM_EXPOSURE'] - (some_financial_data['CREDIT_OUTSTANDING'] + some_financial_data['COMMITTED_FUND_LESS_MPF'] + some_financial_data['AVAILABLE_CREDIT']))
+          expect(member_financial_position['collateral_borrowing_capacity']['total']).to eq(some_financial_data['REG_BORR_CAP'] + some_financial_data['SBC_BORR_CAP'])
+          expect(member_financial_position['collateral_borrowing_capacity']['remaining']).to eq(some_financial_data['EXCESS_REG_BORR_CAP'] + some_financial_data['EXCESS_SBC_BORR_CAP'])
+          expect(member_financial_position['collateral_borrowing_capacity']['standard']['total']).to eq(some_financial_data['REG_BORR_CAP'])
+          expect(member_financial_position['collateral_borrowing_capacity']['standard']['remaining']).to eq(some_financial_data['EXCESS_REG_BORR_CAP'])
+          expect(member_financial_position['collateral_borrowing_capacity']['sbc']['total_borrowing']).to eq(some_financial_data['SBC_BORR_CAP'])
+          expect(member_financial_position['collateral_borrowing_capacity']['sbc']['remaining_borrowing']).to eq(some_financial_data['EXCESS_SBC_BORR_CAP'])
+          expect(member_financial_position['collateral_borrowing_capacity']['sbc']['total_market']).to eq(some_financial_data['SBC_MARKET_VALUE'])
+          expect(member_financial_position['collateral_borrowing_capacity']['sbc']['remaining_market']).to eq(some_financial_data['EXCESS_SBC_MARKET_VALUE'])
+          {
+            'total' => 'CREDIT_OUTSTANDING',
+            'standard' => 'REG_ADVANCES_OUTS',
+            'sbc' => 'SBC_ADVANCES_OUTS',
+            'swaps_credit' => 'SWAP_MARKET_OUTS',
+            'swaps_notational' => 'SWAP_NOTIONAL_PRINCIPAL',
+            'mpf_credit' => 'MPF_CE_COLLATERAL_REQ',
+            'letters_of_credit' => 'LCS_OUTS',
+            'investments' => 'UNSECURED_CREDIT'
+          }.each do |key, value_key|
+            expect(member_financial_position['credit_outstanding'][key]).to eq(some_financial_data[value_key])
+          end
         end
 
-        it 'should return stock_leverage column with nil value if capital_stock_requirements services is not successful' , vcr: {cassette_name: 'capital_stock_service_unavailable'} do
-          expect(member_financial_position['stock_leverage']).to eq(nil)
-          expect(member_financial_position['sta_balance']).to eq(190349.49)
-          expect(member_financial_position['financial_available']).to eq(169771251)
-          expect(member_financial_position['credit_outstanding']).to eq(5000001)
-          expect(member_financial_position['collateral_market_value_sbc_agency']).to eq(3584326)
-          expect(member_financial_position['collateral_market_value_sbc_aaa']).to eq(103)
-          expect(member_financial_position['collateral_market_value_sbc_aa']).to eq(104)
-          expect(member_financial_position['borrowing_capacity_standard']).to eq(82911719)
-          expect(member_financial_position['borrowing_capacity_sbc_agency']).to eq(3405111)
-          expect(member_financial_position['borrowing_capacity_sbc_aaa']).to eq(102)
-          expect(member_financial_position['borrowing_capacity_sbc_aa']).to eq(101)
+        it 'should return a 404 if no position data was found for the member' do
+          allow(member_position_result).to receive(:fetch_hash).and_return(nil)
+          make_request
+          expect(last_response.status).to be(404)
         end
 
-        it 'should return expected column with nil value if no data found for existing member' do
-          expect(member_position_result).to receive(:fetch_hash).and_return(nil).at_least(1).times
-          expect(member_sta_result).to receive(:fetch_hash).and_return(nil).at_least(1).times
-          expect(member_financial_position['sta_balance']).to eq(nil)
-          expect(member_financial_position['financial_available']).to eq(nil)
-          expect(member_financial_position['credit_outstanding']).to eq(nil)
-          expect(member_financial_position['collateral_market_value_sbc_agency']).to eq(nil)
-          expect(member_financial_position['collateral_market_value_sbc_aaa']).to eq(nil)
-          expect(member_financial_position['collateral_market_value_sbc_aa']).to eq(nil)
-          expect(member_financial_position['borrowing_capacity_standard']).to eq(nil)
-          expect(member_financial_position['borrowing_capacity_sbc_agency']).to eq(nil)
-          expect(member_financial_position['borrowing_capacity_sbc_aaa']).to eq(nil)
-          expect(member_financial_position['borrowing_capacity_sbc_aa']).to eq(nil)
-          expect(member_financial_position['stock_leverage']).to eq(nil)
+        it 'should return a 404 if no sta data was found for the member' do
+          allow(member_sta_result).to receive(:fetch_hash).and_return(nil)
+          make_request
+          expect(last_response.status).to be(404)
         end
 
     end
   end
+
+  describe 'member_details' do
+    let(:make_request) { get "/member/#{MEMBER_ID}/" }
+    let(:member_details) { make_request; JSON.parse(last_response.body) }
+    let(:member_name) {SecureRandom.uuid}
+    let(:member_name_cursor) { double('Member Query', fetch: [member_name])}
+    let(:sta_number) {SecureRandom.uuid}
+    let(:sta_number_cursor) { double('STA Number Query', fetch: [sta_number])}
+    let(:fhfb_number) {SecureRandom.uuid}
+    let(:fhfb_number_cursor) { double('FHFB Number Query', fetch: [fhfb_number])}
+    let(:development_json) {
+      {
+        MEMBER_ID => {
+          'name' => member_name,
+          'sta_number' => sta_number,
+          'fhfb_number' => fhfb_number
+        }
+      }
+    }
+    [:production, :development].each do |env|
+      describe "in the `#{env}` environment" do
+        before do
+          allow(File).to receive(:read) do
+            development_json.to_json
+          end
+          allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(env)
+          allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_name_cursor, sta_number_cursor, fhfb_number_cursor)
+        end
+        it 'returns a 404 if the member name isn\'t found' do
+          allow(member_name_cursor).to receive(:fetch).and_return(nil)
+          development_json[MEMBER_ID]['name'] = nil
+          make_request
+          expect(last_response.status).to be(404)
+        end
+        it 'returns a 404 if the STA number isn\'t found' do
+          allow(sta_number_cursor).to receive(:fetch).and_return(nil)
+          development_json[MEMBER_ID]['sta_number'] = nil
+          make_request
+          expect(last_response.status).to be(404)
+        end
+        it 'returns a 404 if the FHFB number isn\'t found' do
+          allow(fhfb_number_cursor).to receive(:fetch).and_return(nil)
+          development_json[MEMBER_ID]['fhfb_number'] = nil
+          make_request
+          expect(last_response.status).to be(404)
+        end
+        if env == :development
+          it 'returns a 404 if the member isn\'t found' do
+            allow(File).to receive(:read).and_return({}.to_json)
+            make_request
+            expect(last_response.status).to be(404)
+          end
+        end
+        it 'returns the member name' do
+          expect(member_details['name']).to eq(member_name)
+        end
+        it 'returns the member STA number' do
+          expect(member_details['sta_number']).to eq(sta_number)
+        end
+        it 'returns the member FHFB number' do
+          expect(member_details['fhfb_number']).to eq(fhfb_number)
+        end
+      end
+    end
+  end
+
   describe 'list of all members' do
     let(:members) { get '/member/'; JSON.parse(last_response.body) }
     [:development, :test, :production].each do |env|

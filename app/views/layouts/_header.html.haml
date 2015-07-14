@@ -44,8 +44,6 @@
               %li= link_to(t('reports.capital_stock.capital_stock_and_leverage.title'), reports_capital_stock_and_leverage_path)
               %li= link_to(t('reports.capital_stock.dividend_statement.title'), reports_dividend_statement_path)
           %li<>
-            = link_to(t('reports.settlement.account.title'), reports_settlement_transaction_account_path)
-          %li<>
             = link_to(t('reports.securities.title'), reports_path)
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.securities.transactions.title'), reports_securities_transactions_path)
@@ -54,7 +52,11 @@
               %li= link_to(t('reports.securities.monthly.title'), reports_monthly_securities_position_path)
               %li= link_to(t('reports.securities.services_monthly.title'), reports_securities_services_statement_path)
           %li<>
-            = link_to(t('reports.authorizations.title'), reports_authorizations_path)
+            = link_to(t('reports.your_account.title'), reports_path)
+            %ul.nav-dropdown-nested
+              %li= link_to(t('reports.account_summary.title'), reports_account_summary_path)
+              %li= link_to(t('reports.authorizations.title'), reports_authorizations_path)
+              %li= link_to(t('reports.settlement.account.title'), reports_settlement_transaction_account_path)
       %li<>
         = link_to(t('nav.secondary.resources'), '#', class: 'nav-menu')
         %ul.nav-dropdown<>

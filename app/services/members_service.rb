@@ -49,9 +49,23 @@ class MembersService < MAPIService
   end
 
   def member(member_id)
-    member_id = member_id.to_i
-    members = all_members
-    members.find {|member| member[:id] == member_id} if members
+    begin
+      response = @connection["member/#{member_id}/"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MembersService.member encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MembersService.member encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.member encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data
   end
 
   def users(member_id)

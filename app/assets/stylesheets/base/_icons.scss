@@ -54,6 +54,8 @@ $icon-caret: "\e60a";
 $icon-print: "\e60b";
 $icon-forward: "\e60c";
 $icon-success: "\e60d";
+$icon-error: "\e60e";
+$icon-info: "\e60f";
 
 %icon-alert {
   @extend %icon-font;
@@ -139,6 +141,16 @@ $icon-success: "\e60d";
 .icon-success-before:before, .icon-success-after:after {
   @extend %icon-font;
   content: "#{$icon-success}";
+}
+
+.icon-error-before:before, .icon-error-after:after {
+  @extend %icon-font;
+  content: "#{$icon-error}";
+}
+
+.icon-info-before:before, .icon-info-after:after {
+  @extend %icon-font;
+  content: "#{$icon-info}";
 }
 
 $spinner-size: 30px !default;

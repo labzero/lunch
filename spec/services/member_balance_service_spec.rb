@@ -3,7 +3,7 @@ require 'rails_helper'
 describe MemberBalanceService do
   RSpec::Matchers.define :be_boolean do
     match do |actual|
-      expect(actual).to satisfy { |x| x == true || x == false }
+      expect(actual).to satisfy { |x| x.instance_of?(TrueClass) || x.instance_of?(FalseClass) }
     end
   end
   let(:member_id) { 750 }
@@ -187,80 +187,50 @@ describe MemberBalanceService do
   end
 
   # TODO add vcr once MAPI endpoint is rigged up
-  describe 'profile' do
+  describe 'profile', :vcr do
     let(:profile) {subject.profile}
+    let(:response) { double('Profile Response', body: response_body) }
+    let(:response_body) { double('Response Body') }
     it 'should return profile data' do
-      expect(profile.length).to be >= 1
-      expect(profile[:sta_balance]).to be_kind_of(Integer)
-      expect(profile[:credit_outstanding]).to be_kind_of(Integer)
-      expect(profile[:financial_available]).to be_kind_of(Integer)
-      expect(profile[:stock_leverage]).to be_kind_of(Float)
-      expect(profile[:collateral_market_value_sbc_agency]).to be_kind_of(Integer)
-      expect(profile[:collateral_market_value_sbc_aaa]).to be_kind_of(Integer)
-      expect(profile[:collateral_market_value_sbc_aa]).to be_kind_of(Integer)
-      expect(profile[:borrowing_capacity_standard]).to be_kind_of(Integer)
-      expect(profile[:borrowing_capacity_sbc_agency]).to be_kind_of(Integer)
-      expect(profile[:borrowing_capacity_sbc_aaa]).to be_kind_of(Integer)
-      expect(profile[:borrowing_capacity_sbc_aa]).to be_kind_of(Integer)
-      expect(profile[:remaining_collateral_borrowing_capacity]).to be_kind_of(Integer)
-      expect(profile[:standard_total_borrowing_capacity]).to be_kind_of(Integer)
-      expect(profile[:standard_remaining_borrowing_capacity]).to be_kind_of(Integer)
-      expect(profile[:sbc_total_borrowing_capacity]).to be_kind_of(Integer)
-      expect(profile[:sbc_remaining_borrowing_capacity]).to be_kind_of(Integer)
+      decoded_results = double('Decoded Profile Results', :[]= => nil, to_i: 0)
+      allow(decoded_results).to receive(:[]).and_return(decoded_results)
+      allow(decoded_results).to receive(:with_indifferent_access).and_return(decoded_results)
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(response)
+      allow(JSON).to receive(:parse).with(response_body).and_return(decoded_results)
+      expect(profile).to be(decoded_results)
     end
     describe 'calculated values' do
       let(:json_response) { {
-        standard_total_borrowing_capacity: rand(90000000),
-        sbc_total_borrowing_capacity: rand(90000000),
-        standard_remaining_borrowing_capacity: rand(90000000),
-        sbc_remaining_borrowing_capacity: rand(90000000),
-        financial_available: rand(90000000)
+        total_financing_available: rand(1..90000000),
+        used_financing_availability: rand(1..90000000),
+        collateral_borrowing_capacity: {
+          total: rand(1..90000000),
+          remaining: rand(1..90000000)
+        }
       } }
       before do
         allow(JSON).to receive(:parse).and_return(json_response)
       end
-      it 'should calculate `total_borrowing_capacity`' do
-        expect(profile[:total_borrowing_capacity]).to eq(json_response[:standard_total_borrowing_capacity] + json_response[:sbc_total_borrowing_capacity])
+      it 'should calculate `used_financing_availability`' do
+        expect(profile[:used_financing_availability]).to eq(json_response[:collateral_borrowing_capacity][:total] - json_response[:collateral_borrowing_capacity][:remaining])
       end
-      it 'should calculate `remaining_borrowing_capacity`' do
-        expect(profile[:remaining_borrowing_capacity]).to eq(json_response[:standard_remaining_borrowing_capacity] + json_response[:sbc_remaining_borrowing_capacity])
-      end
-      it 'should calculate `remaining_borrowing_capacity`' do
-        expect(profile[:used_financing_availability]).to eq((json_response[:standard_total_borrowing_capacity] + json_response[:sbc_total_borrowing_capacity]) - (json_response[:standard_remaining_borrowing_capacity] + json_response[:sbc_remaining_borrowing_capacity]))
-      end
-      it 'should calculate `remaining_borrowing_capacity`' do
-        expect(profile[:uncollateralized_financing_availability]).to eq(json_response[:financial_available] - (json_response[:standard_total_borrowing_capacity] + json_response[:sbc_total_borrowing_capacity]))
-      end
-    end
-    describe 'bad data' do
-      before do
-        expect(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'profile_with_nil_values.json'))))
-      end
-      it 'should pass nil values if data from MAPI has nil values' do
-        expect(profile[:sta_balance]).to be(nil)
-        expect(profile[:credit_outstanding]).to be(nil)
-        expect(profile[:financial_available]).to be(nil)
-        expect(profile[:stock_leverage]).to be(nil)
-        expect(profile[:collateral_market_value_sbc_agency]).to be(nil)
-        expect(profile[:collateral_market_value_sbc_aaa]).to be(nil)
-        expect(profile[:collateral_market_value_sbc_aa]).to be(nil)
-        expect(profile[:borrowing_capacity_standard]).to be(nil)
-        expect(profile[:borrowing_capacity_sbc_agency]).to be(nil)
-        expect(profile[:borrowing_capacity_sbc_aaa]).to be(nil)
-        expect(profile[:borrowing_capacity_sbc_aa]).to be(nil)
-        expect(profile[:remaining_collateral_borrowing_capacity]).to be(nil)
-        expect(profile[:standard_total_borrowing_capacity]).to be(nil)
-        expect(profile[:standard_remaining_borrowing_capacity]).to be(nil)
-        expect(profile[:sbc_total_borrowing_capacity]).to be(nil)
-        expect(profile[:sbc_remaining_borrowing_capacity]).to be(nil)
+      it 'should calculate `uncollateralized_financing_availability`' do
+        expect(profile[:uncollateralized_financing_availability]).to eq(json_response[:total_financing_available] - (json_response[:collateral_borrowing_capacity][:total] - json_response[:collateral_borrowing_capacity][:remaining]))
       end
     end
     describe 'error states' do
       it 'returns nil if there is a JSON parsing error' do
-        # TODO change this stub once you implement the MAPI endpoint
-        expect(File).to receive(:read).and_return('some malformed json!')
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
         expect(Rails.logger).to receive(:warn)
         expect(profile).to be(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(profile).to eq(nil)
+      end
+      it 'should return nil if there was a REST error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(profile).to eq(nil)
       end
     end
   end
