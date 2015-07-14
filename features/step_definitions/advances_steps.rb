@@ -1,9 +1,3 @@
-When(/^I select "(.*?)" from the advances dropdown$/) do |advances|
-  step 'I don\'t see the advances dropdown'
-  step 'I hover on the advances link in the header'
-  page.find('.nav-dropdown').click_link(advances)
-end
-
 Then(/^I should see active advances data$/) do
   page.assert_selector('.advances-main-body', visible: true)
 end
@@ -29,7 +23,7 @@ Given(/^I don't see the advances dropdown$/) do
   advances_menu.parent.assert_selector('.nav-dropdown', visible: :hidden)
 end
 
-When(/^I hover on the advances link in the header$/) do
-  page.find('.nav-menu', text: I18n.t('global.advances')).hover
+When(/^I click on the advances link in the header$/) do
+  page.find('.secondary-nav li', text: I18n.t('global.advances')).click
 end
 
