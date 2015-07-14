@@ -587,20 +587,20 @@ en:
           person_securities: Person-Securities Services
         wire_transfer:
           title: Wire Transfer
-          repetitive: Repetitve Wire Instructions
+          repetitive: Repetitive Wire Instructions
         capital_stock:
           title: Capital Stock
           repurchase: Request for Repurchase of Excess Capital Stock
           redemption: Notice of Redemption of Capital Stock
         website:
-          title: Website Access
-          access_manager: Website Access Manager Set-up
+          title: Portal Access
+          access_manager: Portal Access Manager Set-up
           securid: eTransact SecurID Token Application
       credit:
         title: Credit
         application: 'Credit Application: CIP and ACE'
         ace_application: ACE Application for SBA Lenders
-        reimbursement: Letter of Credit Reimbursment Agreement
+        reimbursement: Letter of Credit Reimbursement Agreement
         statement_of_authority: Statement of Authority
         prepayment_symmetry: Advances with Partial Prepayment Symmetry
         putable_advances: Putable Advances
@@ -701,8 +701,8 @@ en:
         title: Forward Commitments
         summary: Shows all committed advances and their future funding.
       parallel_shift:
-        title: Putable Advance Parallel Shift Sensitivity
-        summary: A measure of held assets’ price-sesitivity given a specified shift in rates.
+        title: Putable Advance Parallel Shift Sensitivity Analysis
+        summary: A measure of held assets’ price-sensitivity given a specified shift in rates.
     collateral:
       title: Collateral
       borrowing_capacity:
@@ -729,7 +729,7 @@ en:
       title: Settlement/Transaction Account (STA)
       account:
         title: Settlement/Transaction Account (STA)
-        summary: The monthly interest earned on the STA account posts on the first business day of the following month.
+        summary: The monthly interest earned on the STA posts on the first business day of the following month.
     securities:
       title: Securities
       transactions:
@@ -756,7 +756,7 @@ en:
       title: Account Summary
       institution_details:
         title: Institution Details
-        your_institution: 'Your Institution:'
+        your_institution: 'Institution Name:'
         sta_number: 'STA Number:'
         fhfb_number: 'FHFB Number:'
       collateral_delivery_required: 'Collateral Status: Delivery Required'
@@ -1094,7 +1094,7 @@ en:
     merger_notice: In the event of a merger, this report may not include all advances from the acquired instiution.
     advances_and_securities_agreement_notice: Nothing in this report in any way ammends, modifies, or waives the terms of your Advances and Securities Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issues puruant to that Agreement. The Bank expressly disclaims and and all liability that may arise from your institution’s reliance on any information contained in, or errors or omissions made with respect to, this report. Please call (415) 616-2559 if you have any questions.
     pdf_footer: "%{report_name} as of %{date}"
-    anticipated_transactions: The records included in this report are anticipated transactions for the listed settlement dates. These transactions are subject to change prior to final settlement. Net adjustment credit and/or debit amounts will be posted to your STA account on the settlement date.
+    anticipated_transactions: The records included in this report are anticipated transactions for the listed settlement dates. These transactions are subject to change prior to final settlement. Net adjustment credit and/or debit amounts will be posted to your STA on the settlement date.
     general_information:
       title: General Information
       does_not_constitute_solicitation_html: This information does not constitute a solicitation or offer or advice (financial or otherwise) by the Bank, but is a description of generally available structures for certain products and price indications for those structures as of the time and date indicated above. This information is subject to the <a href="%{url}">Terms of Use</a> and may change without notice.
