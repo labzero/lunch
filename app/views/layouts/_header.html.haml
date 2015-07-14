@@ -12,11 +12,7 @@
   %nav.row
     %ul<>
       %li<>
-        = link_to(t('nav.secondary.advances'), '#', class: 'nav-menu')
-        %ul.nav-dropdown<>
-          %li<>= link_to(t('advances.quick_advnance.title'), dashboard_url)
-          %li<>= link_to(t('advances.add_advance.title'), dashboard_url)
-          %li<>= link_to(t('advances.manage_advances.title'), advances_manage_advances_path)
+        = link_to(t('nav.secondary.advances'), advances_manage_advances_path)
       %li<>= link_to(t('nav.secondary.letters_of_credit'), '#', class: 'nav-menu')
       %li<>= link_to(t('nav.secondary.mortgages'), '#', class: 'nav-menu')
       %li<>= link_to(t('nav.secondary.securities'), '#', class: 'nav-menu')
