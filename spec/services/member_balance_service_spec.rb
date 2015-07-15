@@ -215,7 +215,7 @@ describe MemberBalanceService do
         expect(profile[:used_financing_availability]).to eq(json_response[:collateral_borrowing_capacity][:total] - json_response[:collateral_borrowing_capacity][:remaining])
       end
       it 'should calculate `uncollateralized_financing_availability`' do
-        expect(profile[:uncollateralized_financing_availability]).to eq(json_response[:total_financing_available] - (json_response[:collateral_borrowing_capacity][:total] - json_response[:collateral_borrowing_capacity][:remaining]))
+        expect(profile[:uncollateralized_financing_availability]).to eq(json_response[:total_financing_available] - json_response[:collateral_borrowing_capacity][:total])
       end
     end
     describe 'error states' do

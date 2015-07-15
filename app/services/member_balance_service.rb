@@ -352,7 +352,7 @@ class MemberBalanceService < MAPIService
     end
     
     data[:used_financing_availability] = data[:collateral_borrowing_capacity][:total].to_i - data[:collateral_borrowing_capacity][:remaining].to_i
-    data[:uncollateralized_financing_availability] = data[:total_financing_available].to_i - data[:used_financing_availability].to_i
+    data[:uncollateralized_financing_availability] = [data[:total_financing_available].to_i - data[:collateral_borrowing_capacity][:total].to_i, 0].max
     data
   end
 
