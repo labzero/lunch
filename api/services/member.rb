@@ -233,6 +233,27 @@ module MAPI
             end
           end
           api do
+            key :path, "/{id}/current_sta_rate"
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the current rate for the member\'s Settlement Transaction Account.'
+              key :notes, 'This is the rate as of close of business on the previous day.'
+              key :type, :CurrentSTARate
+              key :nickname, :getCurrentSTARateForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
+          api do
             key :path, "/{id}/advances_details/{as_of_date}"
             operation do
               key :method, 'GET'
@@ -606,6 +627,12 @@ module MAPI
           else
             halt 400, "Invalid Start Date format of yyyy-mm-dd"
           end
+        end
+
+        # Current STA Rate
+        relative_get '/:id/current_sta_rate' do
+          member_id = params[:id]
+          MAPI::Services::Member::SettlementTransactionAccount.current_sta_rate(self, member_id).to_json
         end
 
         # Advances Details

@@ -383,11 +383,20 @@ class MemberBalanceService < MAPIService
   end
 
   def settlement_transaction_rate
-    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
     begin
-      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'settlement_transaction_rate.json'))).with_indifferent_access
+      response = @connection["/member/#{@member_id}/current_sta_rate"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.current_sta_rate encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.current_sta_rate encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
     rescue JSON::ParserError => e
-      Rails.logger.warn("MemberBalanceService.settlement_transaction_rate encountered a JSON parsing error: #{e}")
+      Rails.logger.warn("MemberBalanceService.current_sta_rate encountered a JSON parsing error: #{e}")
       return nil
     end
     data

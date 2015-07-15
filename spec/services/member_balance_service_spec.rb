@@ -186,7 +186,6 @@ describe MemberBalanceService do
 
   end
 
-  # TODO add vcr once MAPI endpoint is rigged up
   describe 'profile', :vcr do
     let(:profile) {subject.profile}
     let(:response) { double('Profile Response', body: response_body) }
@@ -235,25 +234,31 @@ describe MemberBalanceService do
     end
   end
 
-  # TODO add vcr once MAPI endpoint is rigged up
-  describe 'settlement_transaction_rate' do
+  describe 'settlement_transaction_rate', :vcr do
     let(:settlement_transaction_rate) {subject.settlement_transaction_rate}
     it 'should return settlement transaction rate data' do
       expect(settlement_transaction_rate.length).to be >= 1
-      expect(settlement_transaction_rate[:sta_rate]).to be_kind_of(Float)
+      expect(settlement_transaction_rate[:rate]).to be_kind_of(Float)
     end
     describe 'bad data' do
       it 'should pass nil values if data from MAPI has nil values' do
         allow(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'settlement_transaction_rate_with_nil_values.json'))))
-        expect(settlement_transaction_rate[:sta_rate]).to be(nil)
+        expect(settlement_transaction_rate[:rate]).to be(nil)
       end
     end
     describe 'error states' do
       it 'returns nil if there is a JSON parsing error' do
-        # TODO change this stub once you implement the MAPI endpoint
-        allow(File).to receive(:read).and_return('some malformed json!')
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
         expect(Rails.logger).to receive(:warn)
         expect(settlement_transaction_rate).to be(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(settlement_transaction_rate).to eq(nil)
+      end
+      it 'should return nil if there was a REST error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(settlement_transaction_rate).to eq(nil)
       end
     end
   end

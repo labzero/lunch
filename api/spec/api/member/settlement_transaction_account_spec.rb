@@ -188,4 +188,57 @@ describe MAPI::ServiceApp do
       end
     end
   end
+
+  describe 'current_sta_rate' do
+    let(:sta_rate_data) { JSON.parse(File.read(File.join(MAPI.root, 'spec', 'fixtures', 'current_sta_rate.json')))
+    }
+    let(:current_sta_rate) { MAPI::Services::Member::SettlementTransactionAccount.current_sta_rate(subject, MEMBER_ID) }
+
+    it 'calls the `current_sta_rate` method when the endpoint is hit' do
+      allow(MAPI::Services::Member::SettlementTransactionAccount).to receive(:current_sta_rate).and_return('a response')
+      get "/member/#{MEMBER_ID}/current_sta_rate"
+      expect(last_response.status).to eq(200)
+    end
+
+    [:test, :production].each do |env|
+      describe "`current_sta_rate` method in the #{env} environment" do
+        let(:sta_rate_result_set) {double('Oracle Result Set', fetch_hash: nil)} if env == :production
+        let(:sta_rate_result) {[sta_rate_data[0], nil]} if env == :production
+
+        before do
+          if env == :production
+            allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+            allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(sta_rate_result_set)
+            allow(sta_rate_result_set).to receive(:fetch_hash).and_return(*sta_rate_result)
+          end
+        end
+        it "returns an object with a `date` attribute" do
+          expect(current_sta_rate[:date]).to be_kind_of(Date)
+        end
+        it "returns an object with a `rate` attribute" do
+          expect(current_sta_rate[:rate]).to be_kind_of(Float)
+        end
+        it "returns an object with an `account_number` attribute" do
+          expect(current_sta_rate[:account_number]).to be_kind_of(String)
+        end
+        describe 'with no data' do
+          before do
+            if env == :production
+              allow(sta_rate_result_set).to receive(:fetch_hash).and_return(nil)
+            else
+              allow(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(MAPI.root, 'spec', 'fixtures', 'current_sta_rate_null_values.json'))))
+              allow(MAPI::Services::Member::CashProjections::Private).to receive(:fake_as_of_date).and_return(nil)
+            end
+          end
+          %w(date rate account_number).each do |attr|
+            it "returns nil for the #{attr} attribute" do
+              expect(current_sta_rate[attr.to_sym]).to be_nil
+            end
+          end
+        end
+
+      end
+    end
+
+  end
 end
