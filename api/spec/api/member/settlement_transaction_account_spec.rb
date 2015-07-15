@@ -218,9 +218,6 @@ describe MAPI::ServiceApp do
         it "returns an object with a `rate` attribute" do
           expect(current_sta_rate[:rate]).to be_kind_of(Float)
         end
-        it "returns an object with an `account_number` attribute" do
-          expect(current_sta_rate[:account_number]).to be_kind_of(String)
-        end
         describe 'with no data' do
           before do
             if env == :production
@@ -230,7 +227,7 @@ describe MAPI::ServiceApp do
               allow(MAPI::Services::Member::CashProjections::Private).to receive(:fake_as_of_date).and_return(nil)
             end
           end
-          %w(date rate account_number).each do |attr|
+          %w(date rate).each do |attr|
             it "returns nil for the #{attr} attribute" do
               expect(current_sta_rate[attr.to_sym]).to be_nil
             end

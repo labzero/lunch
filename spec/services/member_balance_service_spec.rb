@@ -200,11 +200,11 @@ describe MemberBalanceService do
     end
     describe 'calculated values' do
       let(:json_response) { {
-        total_financing_available: rand(1..90000000),
+        total_financing_available: rand(10000000..90000000),
         used_financing_availability: rand(1..90000000),
         collateral_borrowing_capacity: {
-          total: rand(1..90000000),
-          remaining: rand(1..90000000)
+          total: rand(1000..1000000),
+          remaining: rand(1000..1000000)
         }
       } }
       before do
@@ -214,11 +214,11 @@ describe MemberBalanceService do
         expect(profile[:used_financing_availability]).to eq(json_response[:collateral_borrowing_capacity][:total] - json_response[:collateral_borrowing_capacity][:remaining])
       end
       it 'should calculate `uncollateralized_financing_availability`' do
-        if json_response[:total_financing_available] > json_response[:collateral_borrowing_capacity][:total]
-          expect(profile[:uncollateralized_financing_availability]).to eq(json_response[:total_financing_available] - json_response[:collateral_borrowing_capacity][:total])
-        else
-          expect(profile[:uncollateralized_financing_availability]).to eq(0)
-        end
+        expect(profile[:uncollateralized_financing_availability]).to eq(json_response[:total_financing_available] - json_response[:collateral_borrowing_capacity][:total])
+      end
+      it 'should set `uncollateralized_financing_availability` to zero if the calculated value would be negative' do
+        json_response[:total_financing_available] = rand(1..999)
+        expect(profile[:uncollateralized_financing_availability]).to eq(0)
       end
     end
     describe 'error states' do
