@@ -370,6 +370,8 @@ $faded-opacity: 0.4 !default;
   vertical-align: top;
   padding-top: 8px;
   span {
+    line-height: 1;
+    vertical-align: top;
     display: inline-block;
     font-size: 0.7333rem; // leaving this as a one-off typography style until we receive confirmation of this design
   }
