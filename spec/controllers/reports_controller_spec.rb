@@ -965,7 +965,7 @@ RSpec.describe ReportsController, :type => :controller do
       allow(RatesService).to receive(:new).and_return(rates_service_instance)
       allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
       allow(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
-      allow(response_sta_hash).to receive(:[]).with('sta_rate')
+      allow(response_sta_hash).to receive(:[]).with(:rate)
       allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'vrc').at_least(1).and_return(vrc_response)
       allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'frc').at_least(1).and_return(frc_response)
       allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'arc').at_least(1).and_return(arc_response)

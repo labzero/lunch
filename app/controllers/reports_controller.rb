@@ -291,7 +291,7 @@ class ReportsController < ApplicationController
     @sta_data = member_balances.settlement_transaction_rate
     @sta_table_data = {
         :row_name => t('reports.pages.price_indications.current.sta_rate'),
-        :row_value => @sta_data['sta_rate']
+        :row_value => @sta_data[:rate]
     }
 
     #vrc headers
