@@ -10,7 +10,7 @@ Background:
 @smoke @jira-mem-535
 Scenario: Visit  Manage Advances Page from header link
   Given I visit the dashboard
-  When I select "Manage Advances" from the advances dropdown
+  When I click on the advances link in the header
   Then I should see active advances data
   And I should see a advances table with multiple data rows
 

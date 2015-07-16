@@ -2,11 +2,11 @@
 - @page_title = t('reports.meta_title')
 .report.advances-detail-report.row
   .report-header
-    %h1= t('global.advances')
+    %h1= @report_name
     - if @print_layout
       = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@start_date))
     - else
-      = render 'reports_header_buttons', allowed_params: :start_date
+      = render 'reports_header_buttons', allowed_params: :start_date, download_formats: [:pdf, :xlsx]
     .report-inputs
       = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_advances_url, presets: @picker_presets, single_date_picker: true, max_date: Time.zone.now.to_date
   .report-main-body

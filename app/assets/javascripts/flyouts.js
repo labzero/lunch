@@ -57,7 +57,7 @@
     });
 
     function resetFlyoutContent() {
-      $closeButton.detach().show();
+      $closeButton.detach().css('display', '');
       $flyoutTopSection.attr('class', 'flyout-top-section').empty();
       $flyoutTopSection.append($closeButton);
       $flyoutBottomSection.attr('class', 'flyout-bottom-section').empty();

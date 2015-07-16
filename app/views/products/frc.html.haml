@@ -1,0 +1,34 @@
+- @html_class = 'white-background'
+- uses = %w(liquidity matching funding management)
+- advantages = %w(liquidity access guaranteed_rates less_expensive)
+.row.product-page
+  .column-2x10-right
+    %h1= t('products.advances.frc.title')
+    %p= t('products.advances.frc.description')
+    %h2= t('products.section_headings.uses')
+    %ul.key-uses-list
+      - uses.each do |use|
+        %li= t("products.advances.frc.uses.#{use}")
+    %h2= t('products.section_headings.advantages')
+    %ul.key-advantages-list
+      - advantages.each do |advantage|
+        %li= t("products.advances.frc.advantages.#{advantage}")
+    %h2= t('products.section_headings.features')
+    %h3= t('products.advances.frc.features.term.title')
+    %p= t('products.advances.frc.features.term.description')
+    %h3= t('products.advances.frc.features.interest_rate.title')
+    %p= t('products.advances.frc.features.interest_rate.description')
+    %ul
+      %li
+        .term= t('products.advances.frc.features.interest_rate.spot_rate.title')
+        .definition= t('products.advances.frc.features.interest_rate.spot_rate.description')
+      %li
+        .term= t('products.advances.frc.features.interest_rate.forward_rate.title')
+        .definition= t('products.advances.frc.features.interest_rate.forward_rate.description')
+    %h3= t('products.advances.frc.features.interest_day_count.title')
+    %p= t('products.advances.frc.features.interest_day_count.description')
+    %h3= t('products.advances.frc.features.interest_payment_frequency.title')
+    %p= t('products.advances.frc.features.interest_payment_frequency.description')
+    %h3= t('products.advances.frc.features.prepayment_features.title')
+    %p= t('products.advances.frc.features.prepayment_features.description_html', url: '#')
+    .last-modified= t('products.section_headings.last_modified', date: fhlb_date_short_alpha(@last_modified))

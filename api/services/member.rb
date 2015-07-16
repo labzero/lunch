@@ -10,6 +10,8 @@ require_relative 'member/trade_activity'
 require_relative 'member/signer_roles'
 require_relative 'member/securities_position'
 require_relative 'member/forward_commitments'
+require_relative 'member/capital_stock_and_leverage'
+require_relative 'member/letters_of_credit'
 
 module MAPI
   module Services
@@ -301,6 +303,23 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve current member biographic details'
+              key :notes, 'Returns basic details about a member'
+              key :type, :MemberDetails
+              key :nickname, :getMemberDetails
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+            end
+          end
+          api do
             key :path, '/'
             operation do
               key :method, 'GET'
@@ -458,6 +477,48 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/capital_stock_and_leverage'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the capital stock position and leverage for a given member'
+              key :notes, 'Retrieve the capital stock position and leverage for a given member'
+              key :nickname, :getCapitalStockAndLeverageForMembers
+              key :type, :MemberCapitalStockAndLeverage
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 503
+                key :message, 'Capital Stock Requirement Parameters not available'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/letters_of_credit'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve letters of credit for the last date the letters of credit were calculated by FHLB'
+              key :notes, 'Typically the last date on which the letters of credit were calculated corresponds to the last business day. A given member bank will not necessarily have any letters of credit for this date.'
+              key :nickname, :getLettersOfCreditForMember
+              key :type, :MemberLettersOfCredit
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -583,7 +644,12 @@ module MAPI
         # Member Profile
         relative_get '/:id/member_profile' do
           member_id = params[:id]
-          MAPI::Services::Member::Profile.member_profile(self, member_id)
+          profile = MAPI::Services::Member::Profile.member_profile(self, member_id)
+          if profile.nil?
+            logger.error 'Member not found'
+            halt 404
+          end
+          profile.to_json
         end
 
         relative_get '/' do
@@ -635,6 +701,33 @@ module MAPI
           MAPI::Services::Member::ForwardCommitments.forward_commitments(self, member_id).to_json
         end
 
+        # Member Capital Stock Position and Leverage
+        relative_get '/:id/capital_stock_and_leverage' do
+          member_id = params[:id]
+          result = MAPI::Services::Member::CapitalStockAndLeverage.capital_stock_and_leverage(self, member_id)
+          if result.nil?
+            logger.error 'Capital Stock Requirement Parameters not available. QTL_APP.CAP_STOCK_REQ_PARAM table returning no results'
+            halt 503
+          else
+            result.to_json
+          end
+        end
+
+        relative_get '/:id/letters_of_credit' do
+          member_id = params[:id]
+          MAPI::Services::Member::LettersOfCredit.letters_of_credit(self, member_id).to_json
+        end
+
+        relative_get '/:id/' do
+          member_id = params[:id]
+          details = MAPI::Services::Member::Profile.member_details(self, member_id)
+          if details.nil?
+            logger.error 'Member not found'
+            halt 404
+          else
+            details.to_json
+          end
+        end
       end
 
       def self.custody_account_type(app, custody_account_type)
@@ -649,6 +742,7 @@ module MAPI
             app.halt 400, 'Invalid custody_account_type: must be "all", "pledged" or "unpledged"'
          end
       end
+      
     end
   end
 end

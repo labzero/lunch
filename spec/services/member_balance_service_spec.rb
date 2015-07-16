@@ -3,7 +3,7 @@ require 'rails_helper'
 describe MemberBalanceService do
   RSpec::Matchers.define :be_boolean do
     match do |actual|
-      expect(actual).to satisfy { |x| x == true || x == false }
+      expect(actual).to satisfy { |x| x.instance_of?(TrueClass) || x.instance_of?(FalseClass) }
     end
   end
   let(:member_id) { 750 }
@@ -187,80 +187,50 @@ describe MemberBalanceService do
   end
 
   # TODO add vcr once MAPI endpoint is rigged up
-  describe 'profile' do
+  describe 'profile', :vcr do
     let(:profile) {subject.profile}
+    let(:response) { double('Profile Response', body: response_body) }
+    let(:response_body) { double('Response Body') }
     it 'should return profile data' do
-      expect(profile.length).to be >= 1
-      expect(profile[:sta_balance]).to be_kind_of(Integer)
-      expect(profile[:credit_outstanding]).to be_kind_of(Integer)
-      expect(profile[:financial_available]).to be_kind_of(Integer)
-      expect(profile[:stock_leverage]).to be_kind_of(Float)
-      expect(profile[:collateral_market_value_sbc_agency]).to be_kind_of(Integer)
-      expect(profile[:collateral_market_value_sbc_aaa]).to be_kind_of(Integer)
-      expect(profile[:collateral_market_value_sbc_aa]).to be_kind_of(Integer)
-      expect(profile[:borrowing_capacity_standard]).to be_kind_of(Integer)
-      expect(profile[:borrowing_capacity_sbc_agency]).to be_kind_of(Integer)
-      expect(profile[:borrowing_capacity_sbc_aaa]).to be_kind_of(Integer)
-      expect(profile[:borrowing_capacity_sbc_aa]).to be_kind_of(Integer)
-      expect(profile[:remaining_collateral_borrowing_capacity]).to be_kind_of(Integer)
-      expect(profile[:standard_total_borrowing_capacity]).to be_kind_of(Integer)
-      expect(profile[:standard_remaining_borrowing_capacity]).to be_kind_of(Integer)
-      expect(profile[:sbc_total_borrowing_capacity]).to be_kind_of(Integer)
-      expect(profile[:sbc_remaining_borrowing_capacity]).to be_kind_of(Integer)
+      decoded_results = double('Decoded Profile Results', :[]= => nil, to_i: 0)
+      allow(decoded_results).to receive(:[]).and_return(decoded_results)
+      allow(decoded_results).to receive(:with_indifferent_access).and_return(decoded_results)
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(response)
+      allow(JSON).to receive(:parse).with(response_body).and_return(decoded_results)
+      expect(profile).to be(decoded_results)
     end
     describe 'calculated values' do
       let(:json_response) { {
-        standard_total_borrowing_capacity: rand(90000000),
-        sbc_total_borrowing_capacity: rand(90000000),
-        standard_remaining_borrowing_capacity: rand(90000000),
-        sbc_remaining_borrowing_capacity: rand(90000000),
-        financial_available: rand(90000000)
+        total_financing_available: rand(1..90000000),
+        used_financing_availability: rand(1..90000000),
+        collateral_borrowing_capacity: {
+          total: rand(1..90000000),
+          remaining: rand(1..90000000)
+        }
       } }
       before do
         allow(JSON).to receive(:parse).and_return(json_response)
       end
-      it 'should calculate `total_borrowing_capacity`' do
-        expect(profile[:total_borrowing_capacity]).to eq(json_response[:standard_total_borrowing_capacity] + json_response[:sbc_total_borrowing_capacity])
+      it 'should calculate `used_financing_availability`' do
+        expect(profile[:used_financing_availability]).to eq(json_response[:collateral_borrowing_capacity][:total] - json_response[:collateral_borrowing_capacity][:remaining])
       end
-      it 'should calculate `remaining_borrowing_capacity`' do
-        expect(profile[:remaining_borrowing_capacity]).to eq(json_response[:standard_remaining_borrowing_capacity] + json_response[:sbc_remaining_borrowing_capacity])
-      end
-      it 'should calculate `remaining_borrowing_capacity`' do
-        expect(profile[:used_financing_availability]).to eq((json_response[:standard_total_borrowing_capacity] + json_response[:sbc_total_borrowing_capacity]) - (json_response[:standard_remaining_borrowing_capacity] + json_response[:sbc_remaining_borrowing_capacity]))
-      end
-      it 'should calculate `remaining_borrowing_capacity`' do
-        expect(profile[:uncollateralized_financing_availability]).to eq(json_response[:financial_available] - (json_response[:standard_total_borrowing_capacity] + json_response[:sbc_total_borrowing_capacity]))
-      end
-    end
-    describe 'bad data' do
-      before do
-        expect(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'profile_with_nil_values.json'))))
-      end
-      it 'should pass nil values if data from MAPI has nil values' do
-        expect(profile[:sta_balance]).to be(nil)
-        expect(profile[:credit_outstanding]).to be(nil)
-        expect(profile[:financial_available]).to be(nil)
-        expect(profile[:stock_leverage]).to be(nil)
-        expect(profile[:collateral_market_value_sbc_agency]).to be(nil)
-        expect(profile[:collateral_market_value_sbc_aaa]).to be(nil)
-        expect(profile[:collateral_market_value_sbc_aa]).to be(nil)
-        expect(profile[:borrowing_capacity_standard]).to be(nil)
-        expect(profile[:borrowing_capacity_sbc_agency]).to be(nil)
-        expect(profile[:borrowing_capacity_sbc_aaa]).to be(nil)
-        expect(profile[:borrowing_capacity_sbc_aa]).to be(nil)
-        expect(profile[:remaining_collateral_borrowing_capacity]).to be(nil)
-        expect(profile[:standard_total_borrowing_capacity]).to be(nil)
-        expect(profile[:standard_remaining_borrowing_capacity]).to be(nil)
-        expect(profile[:sbc_total_borrowing_capacity]).to be(nil)
-        expect(profile[:sbc_remaining_borrowing_capacity]).to be(nil)
+      it 'should calculate `uncollateralized_financing_availability`' do
+        expect(profile[:uncollateralized_financing_availability]).to eq(json_response[:total_financing_available] - (json_response[:collateral_borrowing_capacity][:total] - json_response[:collateral_borrowing_capacity][:remaining]))
       end
     end
     describe 'error states' do
       it 'returns nil if there is a JSON parsing error' do
-        # TODO change this stub once you implement the MAPI endpoint
-        expect(File).to receive(:read).and_return('some malformed json!')
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
         expect(Rails.logger).to receive(:warn)
         expect(profile).to be(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(profile).to eq(nil)
+      end
+      it 'should return nil if there was a REST error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(profile).to eq(nil)
       end
     end
   end
@@ -802,45 +772,53 @@ describe MemberBalanceService do
 
   describe '`letters_of_credit` method', :vcr do
     let(:letters_of_credit) { subject.letters_of_credit}
-    let(:data) { JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'letters_of_credit.json'))).with_indifferent_access }
+    let(:data) { JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'letters_of_credit.json'))).with_indifferent_access }
 
     it 'returns a date for its `as_of_date`' do
       expect(letters_of_credit[:as_of_date]).to be_kind_of(Date)
     end
     it 'returns a `total_current_par` that is the sum of all the current_par values' do
       allow(JSON).to receive(:parse).and_return(data)
-      total_current_par = data[:rows].inject(0) {|sum, hash| sum + hash[:current_par]}
+      total_current_par = data[:credits].inject(0) {|sum, hash| sum + hash[:current_par]}
       expect(letters_of_credit[:total_current_par]).to eq(total_current_par)
     end
-    describe '`rows` attribute' do
+    describe '`credits` attribute' do
       [:settlement_date, :maturity_date, :trade_date].each do |attr|
         it "returns a date for its '#{attr}'" do
-          letters_of_credit[:rows].each do |row|
-            expect(row[attr]).to be_kind_of(Date)
+          letters_of_credit[:credits].each do |credit|
+            expect(credit[attr]).to be_kind_of(Date)
           end
         end
       end
       [:current_par, :maintenance_charge].each do |attr|
         it "returns an integer for its '#{attr}'" do
-          letters_of_credit[:rows].each do |row|
-            expect(row[attr]).to be_kind_of(Integer)
+          letters_of_credit[:credits].each do |credit|
+            expect(credit[attr]).to be_kind_of(Integer)
           end
         end
       end
       [:lc_number, :description].each do |attr|
         it "returns a string for its '#{attr}'" do
-          letters_of_credit[:rows].each do |row|
-            expect(row[attr]).to be_kind_of(String)
+          letters_of_credit[:credits].each do |credit|
+            expect(credit[attr]).to be_kind_of(String)
           end
         end
       end
     end
 
     describe 'error states' do
-      it 'returns nil if there is a JSON parsing error' do
-        expect(File).to receive(:read).and_return('some malformed json!')
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
         expect(Rails.logger).to receive(:warn)
         expect(letters_of_credit).to be(nil)
+      end
+      it 'should return nil if there was an API error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(letters_of_credit).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(letters_of_credit).to eq(nil)
       end
     end
   end
@@ -1064,6 +1042,34 @@ describe MemberBalanceService do
       it 'should return nil if there was a connection error' do
         allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
         expect(forward_commitments).to eq(nil)
+      end
+    end
+  end
+  
+  describe 'the `capital_stock_and_leverage` method', :vcr do
+    let(:capital_stock_and_leverage) {subject.capital_stock_and_leverage}
+    %i(stock_owned minimum_requirement excess_stock surplus_stock activity_based_requirement remaining_stock remaining_leverage).each do |key|
+      it "returns a hash with an integer value for the #{key} key" do
+        expect(capital_stock_and_leverage[key]).to be_kind_of(Integer)
+      end
+    end
+    describe 'error states' do
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(capital_stock_and_leverage).to be(nil)
+      end
+      it 'should log an error if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(Rails.logger).to receive(:warn)
+        capital_stock_and_leverage
+      end
+      it 'should return nil if there was an API error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(capital_stock_and_leverage).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(capital_stock_and_leverage).to eq(nil)
       end
     end
   end

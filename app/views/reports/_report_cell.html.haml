@@ -10,6 +10,10 @@
   - value = fhlb_formatted_currency(cell[:value])
 - when :currency_whole
   - value = fhlb_formatted_currency(cell[:value], precision: 0)
+- when :percentage
+  - value = fhlb_formatted_percentage(cell[:value])
+- when :months
+  - value = t('reports.month_count', count: cell[:value])
 - when :date
   - value = fhlb_date_standard_numeric(cell[:value])
   - classes = [:'report-cell-narrow']

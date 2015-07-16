@@ -56,9 +56,9 @@ $(function () {
   };
 
   function downloadJob(url) {
-    window.location.href = url;
     $reportForm.trigger('reportDownloadStarted', {download_url: url});
     closeFlyout();
+    window.location.href = url;
   };
 
   function closeFlyout() {

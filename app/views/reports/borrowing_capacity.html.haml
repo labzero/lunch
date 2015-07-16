@@ -2,8 +2,11 @@
 - @page_title = t('reports.meta_title')
 .report.row
   .report-header
-    %h1= t('global.borrowing_capacity')
-    = render 'reports_header_buttons'
+    %h1= @report_name
+    - if @print_layout
+      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@date))
+    - else
+      = render 'reports_header_buttons', download_formats: :pdf
   .report-main-body
     %section
       .report-summary-data

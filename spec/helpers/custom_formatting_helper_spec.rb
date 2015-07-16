@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe CustomFormattingHelper do
   describe '`fhlb_formatted_currency` method' do
@@ -96,6 +96,17 @@ describe CustomFormattingHelper do
     end
     it 'returns the I18n value for `missing_value` if passed nil' do
       expect(helper.fhlb_date_long_alpha(nil)).to eq(I18n.t('global.missing_value'))
+    end
+  end
+
+  describe '`fhlb_date_short_alpha` method' do
+    it 'converts a date into an alphanumeric string following the `Month YYYY` format' do
+      [Date.new(2015,1,1), Date.new(2015,1,31), Date.new(2015,1,15)].each do |date|
+        expect(helper.fhlb_date_short_alpha(date)).to eq('January 2015')
+      end
+    end
+    it 'returns the I18n value for `missing_value` if passed nil' do
+      expect(helper.fhlb_date_short_alpha(nil)).to eq(I18n.t('global.missing_value'))
     end
   end
   

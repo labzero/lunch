@@ -22,24 +22,28 @@ Rails.application.routes.draw do
 
   get '/dashboard/current_overnight_vrc' => 'dashboard#current_overnight_vrc'
 
-  get '/reports' => 'reports#index'
-  get '/reports/capital-stock-activity' => 'reports#capital_stock_activity'
-  get '/reports/borrowing-capacity' => 'reports#borrowing_capacity'
-  get '/reports/settlement-transaction-account' => 'reports#settlement_transaction_account'
-  get '/reports/advances' => 'reports#advances_detail'
-  get '/reports/historical-price-indications' => 'reports#historical_price_indications'
-  get '/reports/cash-projections' => 'reports#cash_projections'
-  get '/reports/current-price-indications' => 'reports#current_price_indications'
-  get '/reports/interest-rate-resets' => 'reports#interest_rate_resets'
-  get '/reports/dividend-statement' => 'reports#dividend_statement'
-  get '/reports/securities-services-statement' => 'reports#securities_services_statement'
-  get '/reports/letters-of-credit' => 'reports#letters_of_credit'
-  get '/reports/securities-transactions' => 'reports#securities_transactions'
-  get '/reports/authorizations' => 'reports#authorizations'
-  get '/reports/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: 'reports_parallel_shift'
-  get '/reports/current-securities-position' => 'reports#current_securities_position'
-  get '/reports/monthly-securities-position' => 'reports#monthly_securities_position'
-  get '/reports/forward-commitments' => 'reports#forward_commitments'
+  scope 'reports', as: :reports do
+    get '/' => 'reports#index'
+    get '/capital-stock-activity' => 'reports#capital_stock_activity'
+    get '/borrowing-capacity' => 'reports#borrowing_capacity'
+    get '/settlement-transaction-account' => 'reports#settlement_transaction_account'
+    get '/advances' => 'reports#advances_detail'
+    get '/historical-price-indications' => 'reports#historical_price_indications'
+    get '/cash-projections' => 'reports#cash_projections'
+    get '/current-price-indications' => 'reports#current_price_indications'
+    get '/interest-rate-resets' => 'reports#interest_rate_resets'
+    get '/dividend-statement' => 'reports#dividend_statement'
+    get '/securities-services-statement' => 'reports#securities_services_statement'
+    get '/letters-of-credit' => 'reports#letters_of_credit'
+    get '/securities-transactions' => 'reports#securities_transactions'
+    get '/authorizations' => 'reports#authorizations'
+    get '/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: :parallel_shift
+    get '/current-securities-position' => 'reports#current_securities_position'
+    get '/monthly-securities-position' => 'reports#monthly_securities_position'
+    get '/forward-commitments' => 'reports#forward_commitments'
+    get '/capital-stock-and-leverage' => 'reports#capital_stock_and_leverage'
+    get '/account-summary' => 'reports#account_summary'
+  end
 
   get '/advances' => 'advances#index'
   get '/advances/manage-advances' => 'advances#manage_advances'
@@ -70,6 +74,30 @@ Rails.application.routes.draw do
     get '/forms' => 'resources#forms'
     get '/guides' => 'resources#guides'
     get '/download/:file' => 'resources#download', as: :resources_download
+  end
+
+  scope 'products' do
+    get '/summary' => 'products#index', as: :product_summary
+    get '/letters-of-credit' => 'error#standard_error'
+    get '/community_programs' => 'error#standard_error'
+    scope 'advances' do
+      get 'adjustable-rate-credit' => 'error#standard_error', as: :arc
+      get 'advances-for-community-enterprise' => 'error#standard_error', as: :ace
+      get 'amortizing' => 'error#standard_error'
+      get 'arc-embedded' => 'error#standard_error'
+      get 'callable' => 'error#standard_error'
+      get 'choice-libor-arc' => 'error#standard_error'
+      get 'community-investment-program' => 'error#standard_error', as: :cip
+      get 'auction-indexed' => 'error#standard_error'
+      get 'fixed-rate-credit' => 'products#frc', as: :frc
+      get 'frc-embedded' => 'error#standard_error'
+      get 'knockout' => 'error#standard_error'
+      get 'mortgage-partnership-finance' => 'error#standard_error', as: :mpf
+      get 'other-cash-needs' => 'error#standard_error', as: :ocn
+      get 'putable' => 'error#standard_error'
+      get 'securities-backed-credit' => 'error#standard_error', as: :sbc
+      get 'variable-rate-credit' => 'error#standard_error', as: :vrc
+    end
   end
 
   devise_scope :user do

@@ -33,3 +33,9 @@ Scenario: The Borrowing Capacity Statement has been disabled
   Given I am on the "Borrowing Capacity Statement" report page
   When the "Borrowing Capacity Statement" report has been disabled
   Then I should see an empty report table with Data Unavailable messaging
+
+@jira-mem-416
+Scenario: Member downloads a PDF of the Borrowing Capacity report
+  Given I am on the "Borrowing Capacity Statement" report page
+  When I request a PDF
+  Then I should begin downloading a file

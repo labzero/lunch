@@ -12,11 +12,7 @@
   %nav.row
     %ul<>
       %li<>
-        = link_to(t('nav.secondary.advances'), '#', class: 'nav-menu')
-        %ul.nav-dropdown<>
-          %li<>= link_to(t('advances.quick_advnance.title'), dashboard_url)
-          %li<>= link_to(t('advances.add_advance.title'), dashboard_url)
-          %li<>= link_to(t('advances.manage_advances.title'), advances_manage_advances_path)
+        = link_to(t('nav.secondary.advances'), advances_manage_advances_path)
       %li<>= link_to(t('nav.secondary.letters_of_credit'), '#', class: 'nav-menu')
       %li<>= link_to(t('nav.secondary.mortgages'), '#', class: 'nav-menu')
       %li<>= link_to(t('nav.secondary.securities'), '#', class: 'nav-menu')
@@ -45,9 +41,8 @@
             = link_to(t('reports.capital_stock.title'), reports_path)
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.capital_stock.activity.title'), reports_capital_stock_activity_path)
+              %li= link_to(t('reports.capital_stock.capital_stock_and_leverage.title'), reports_capital_stock_and_leverage_path)
               %li= link_to(t('reports.capital_stock.dividend_statement.title'), reports_dividend_statement_path)
-          %li<>
-            = link_to(t('reports.settlement.account.title'), reports_settlement_transaction_account_path)
           %li<>
             = link_to(t('reports.securities.title'), reports_path)
             %ul.nav-dropdown-nested
@@ -57,7 +52,11 @@
               %li= link_to(t('reports.securities.monthly.title'), reports_monthly_securities_position_path)
               %li= link_to(t('reports.securities.services_monthly.title'), reports_securities_services_statement_path)
           %li<>
-            = link_to(t('reports.authorizations.title'), reports_authorizations_path)
+            = link_to(t('reports.your_account.title'), reports_path)
+            %ul.nav-dropdown-nested
+              %li= link_to(t('reports.account_summary.title'), reports_account_summary_path)
+              %li= link_to(t('reports.authorizations.title'), reports_authorizations_path)
+              %li= link_to(t('reports.settlement.account.title'), reports_settlement_transaction_account_path)
       %li<>
         = link_to(t('nav.secondary.resources'), '#', class: 'nav-menu')
         %ul.nav-dropdown<>
@@ -82,3 +81,32 @@
               %li= link_to(t('resources.membership.benefits.title'), '#')
               %li= link_to(t('resources.membership.requirements.title'), '#')
               %li= link_to(t('resources.membership.applications.title'), '#')
+      %li.products-dropdown<>
+        = link_to(t('nav.secondary.products'), '#', class: 'nav-menu')
+        %ul.nav-dropdown<>
+          %li<>= link_to(t('products.products_summary.nav_title'), product_summary_path)
+          %li<>
+            = link_to(t('products.advances.title'), product_summary_path(anchor: :advances))
+            %ul.nav-dropdown-nested
+              %li= link_to(t('products.advances.arc'), arc_path)
+              %li= link_to(t('products.advances.ace'), ace_path)
+              %li= link_to(t('products.advances.amortizing'), amortizing_path)
+              %li= link_to(t('products.advances.arc_embedded'), arc_embedded_path)
+              %li= link_to(t('products.advances.callable'), callable_path)
+              %li= link_to(t('products.advances.choice_libor'), choice_libor_arc_path)
+              %li= link_to(t('products.advances.cip'), cip_path)
+              %li= link_to(t('products.advances.auction_indexed'), auction_indexed_path)
+              %li= link_to(t('products.advances.frc.title'), frc_path)
+              %li= link_to(t('products.advances.frc_embedded'), frc_embedded_path)
+              %li= link_to(t('products.advances.knockout'), knockout_path)
+              %li= link_to(t('products.advances.mpf'), mpf_path)
+              %li= link_to(t('products.advances.ocn'), ocn_path)
+              %li= link_to(t('products.advances.putable'), putable_path)
+              %li= link_to(t('products.advances.sbc'), sbc_path)
+              %li= link_to(t('products.advances.vrc'), vrc_path)
+          %li<>= link_to(t('products.standby_loc.title'), letters_of_credit_path)
+          %li<>
+            = link_to(t('products.mpf_program.title'), product_summary_path(anchor: :mpf_program))
+            %ul.nav-dropdown-nested
+              %li<>= link_to(t('products.mpf_program.links'), mpf_path)
+          %li<>= link_to(t('products.community_programs.title'), community_programs_path)

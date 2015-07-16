@@ -49,20 +49,31 @@ class MembersService < MAPIService
   end
 
   def member(member_id)
-    member_id = member_id.to_i
-    members = all_members
-    members.find {|member| member[:id] == member_id} if members
+    begin
+      response = @connection["member/#{member_id}/"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MembersService.member encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MembersService.member encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.member encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data
   end
 
   def users(member_id)
     users = nil
-    ldap = Devise::LDAP::Connection.admin('extranet')
-    group = ldap.search(filter: "(&(CN=FHLB#{member_id.to_i})(objectClass=group))").try(:first)
-    if group
-      users = group[:member].collect do |dn|
-        ldap.search(:base => dn, :scope => Net::LDAP::SearchScope_BaseObject).try(:first)
-      end.compact.collect do |entry|
-        User.find_or_create_by_ldap_entry(entry)
+    Devise::LDAP::Adapter.shared_connection do
+      ldap = Devise::LDAP::Connection.admin('extranet')
+      ldap.open do |ldap|
+        users = fetch_ldap_users(ldap, member_id)
       end
     end
     users
@@ -96,16 +107,37 @@ class MembersService < MAPIService
     end
 
     signers = JSON.parse(response.body)
-    users = self.users(member_id)
-    usernames = users.blank? ? [] : users.collect(&:username)
-    signers.each do |signer|
-      roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact
-      signers_and_users << {display_name: signer['name'], roles: roles} unless usernames.include?(signer['username'])
-    end
-    users.each do |user|
-      signers_and_users << {display_name: user.display_name || user.username, roles: user.roles}
+
+    Devise::LDAP::Adapter.shared_connection do
+      Devise::LDAP::Connection.admin('extranet').open do |ldap|
+        users = fetch_ldap_users(ldap, member_id)
+        usernames = users.blank? ? [] : users.collect(&:username)
+        signers.each do |signer|
+          roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact
+          signers_and_users << {display_name: signer['name'], roles: roles} unless usernames.include?(signer['username'])
+        end
+
+        users.each do |user|
+          signers_and_users << {display_name: user.display_name || user.username, roles: user.roles}
+        end
+      end
     end
     signers_and_users
+  end
+
+  protected
+
+  def fetch_ldap_users(ldap, member_id)
+    users = nil
+    group = ldap.search(filter: "(&(CN=FHLB#{member_id.to_i})(objectClass=group))").try(:first)
+    if group
+      users = group[:member].collect do |dn|
+        ldap.search(:base => dn, :scope => Net::LDAP::SearchScope_BaseObject).try(:first)
+      end.compact.collect do |entry|
+        User.find_or_create_by_ldap_entry(entry)
+      end
+    end
+    users
   end
 
 end

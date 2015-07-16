@@ -170,6 +170,14 @@
   margin: 50px 0 15px;
 }
 
+%table-footer-cell {
+  @extend %typography-table-total;
+  background-color: $medium-gray;
+  border-left: 1px solid $medium-gray;
+  border-right: 1px solid $medium-gray;
+  color: $white;
+}
+
 .report-table {
   @extend %empty_table;
   margin-bottom: 50px;
@@ -200,11 +208,7 @@
   }
 
   tfoot {
-    @extend %typography-table-total;
-    background-color: $medium-gray;
-    border-left: 1px solid $medium-gray;
-    border-right: 1px solid $medium-gray;
-    color: $white;
+    @extend %table-footer-cell;
   }
 
   .report-cell-right {
@@ -802,6 +806,153 @@ td.dataTables_empty {
   }
 }
 
+.cap-stock-position-table, .cap-stock-leverage-table {
+  width: 512px;
+  td, th {
+    @include table-cell-treatment;
+  }
+  th {
+    &:nth-child(1) {
+      width: 118px;
+    }
+  }
+}
+
+.cap-stock-position-table {
+  th {
+    &:nth-child(2) {
+      width: 112px;
+    }
+    &:nth-child(3) {
+      width: 164px;
+    }
+    &:nth-child(4) {
+      width: 118px;
+    }
+  }
+}
+
+.cap-stock-leverage-table {
+  th {
+    &:nth-child(2) {
+      width: 136px;
+    }
+    &:nth-child(3) {
+      width: 140px;
+    }
+    &:nth-child(4) {
+      width: 120px;
+    }
+  }
+}
+
+.account-summary-report {
+  .report-table {
+    margin-bottom: 10px;
+    &:not(.account-summary-collateral-totals) tbody {
+      td:first-child {
+        @extend %typography-table-heading;
+        background-color: $light-gray;
+      }
+    }
+    tfoot td {
+      @extend %typography-table-heading;
+      &:first-child {
+        border-right: none;
+      }
+      &:last-child {
+        border-left: none;
+      }
+    }
+    td {
+      width: auto;
+    }
+    td:last-child {
+      width: 180px;
+    }
+  }
+  section {
+    width: 560px;
+    margin-bottom: 35px;
+  }
+  h2 {
+    @extend %typography-section-title;
+  }
+  h3 {
+    @extend %typography-subtitle;
+    margin-top: 0;
+  }
+  h2, h3 {
+    margin-bottom: 10px;
+  }
+  h2.header-with-action {
+    text-align: right;
+    span {
+      float: left;
+    }
+    a {
+      @extend %typography-table-heading;
+      text-decoration: none;
+      color: $actionable-blue;
+      text-transform: uppercase;
+    }
+  }
+  small {
+    position: relative;
+    padding-left: 10px;
+    display: block;
+    &:before {
+      content: '*';
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+  }
+  dl {
+    @extend %clearfix;
+  }
+  dt, dd {
+    @extend %typography-subtitle;
+    float: left;
+    line-height: 1.5;
+  }
+  dt {
+    width: 150px;
+    color: $medium-gray;
+    clear: left;
+  }
+  dd {
+    clear: right;
+    margin-left: 0;
+  }
+}
+
+.account-summary-collateral-totals {
+  tbody td {
+    @extend %table-footer-cell;
+    border-left: none;
+    border-right: none;
+  }
+}
+
+.account-summary-collateral-notice {
+  border: solid 1px $actionable-blue;
+  border-left: none;
+  border-right: none;
+  padding: 15px 0px 15px 60px;
+  position: relative;
+  line-height: 30px;
+  box-sizing: border-box;
+  &:before {
+    color: $actionable-blue;
+    position: absolute;
+    left: 0;
+    top: 15px;
+    font-size: 30px;
+    line-height: 30px;
+  }
+}
+
 @media print {
   .report {
     color: $print-color;
@@ -813,6 +964,9 @@ td.dataTables_empty {
   }
   .report-header-buttons, .report-inputs {
     display: none;
+  }
+  .report-summary-data {
+    margin-right: 25px;
   }
   .report-main-body {
     margin-bottom: 0px;
@@ -858,7 +1012,7 @@ td.dataTables_empty {
   }
   .report-table  {
     border: none;
-    width: auto;
+    width: 100%;
     margin-bottom: 15px;
     thead, .sorting_asc, .sorting_desc, tbody tr:nth-child(odd), tfoot, td, th {
       background-color: transparent;
@@ -877,6 +1031,9 @@ td.dataTables_empty {
       color: $print-color;
     }
     .report-cell-narrow {
+      padding: 6px 8px;
+    }
+    .report-cell-right {
       padding: 6px 8px;
     }
     tr, td, th, thead, tfoot {
@@ -900,6 +1057,26 @@ td.dataTables_empty {
       border-bottom: 1px solid $light-gray;
     }
   }
+  .report-sub-table {
+    width: 50%;
+    clear: both;
+    td, th {
+      width: auto;
+      &:first-child {
+        width: auto;
+      }
+      padding: 6px 0;
+    }
+    tbody tr:first-child td {
+      border-top: 1px solid $light-gray;
+    }
+    tbody tr td:first-child {
+      padding-left: 12px;
+    }
+    tfoot tr td {
+      border-bottom: 1px solid $light-gray;
+    }
+  }
   .row {
     width: auto;
   }
@@ -915,6 +1092,11 @@ td.dataTables_empty {
           white-space: pre;
         }
       }
+    }
+  }
+  .standard-credit-borrowing-capacity-tables .report-parent-table {
+    th:last-child {
+      width: 80px;
     }
   }
   .report-print-footer {
@@ -934,5 +1116,8 @@ td.dataTables_empty {
   }
   .report-print-bank {
     @include typography-print-subheader;
+  }
+  .report-print-details {
+    margin-bottom: 50px;
   }
 }
