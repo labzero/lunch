@@ -131,7 +131,7 @@ module MAPI
             end
           end
           api do
-            key :path, '/{validate_advance/{id}/{amount}/{advance_type}/{advance_term}/{rate}/{signer}'
+            key :path, '/validate_advance/{id}/{amount}/{advance_type}/{advance_term}/{rate}/{check_capstock}/{signer}'
             operation do
               key :method, 'GET'
               key :summary, 'Validates new Advance in Calypso.'
@@ -172,6 +172,13 @@ module MAPI
                 key :required, true
                 key :type, :Numeric
                 key :description, 'Advance rate.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :check_capstock
+                key :required, true
+                key :type, :Boolean
+                key :description, 'Check Capital Stock.'
               end
               parameter do
                 key :paramType, :path
@@ -331,6 +338,7 @@ module MAPI
           amount = params[:amount]
           advance_type = params[:advance_type]
           advance_term = params[:advance_term]
+          check_capstock = false;
           rate = params[:rate]
           signer = params[:signer]
           markup = 0
@@ -338,7 +346,7 @@ module MAPI
           costoffunds = 0
           benchmarkrate = 0
           begin
-            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'EXECUTE', amount, advance_term, advance_type, rate, signer, markup, blendedcostoffunds, costoffunds, benchmarkrate)
+            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'EXECUTE', amount, advance_term, advance_type, rate, check_capstock, signer, markup, blendedcostoffunds, costoffunds, benchmarkrate)
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
@@ -347,7 +355,7 @@ module MAPI
         end
 
         # Validate Advance
-        relative_get '/validate_advance/:id/:amount/:advance_type/:advance_term/:rate/:signer' do
+        relative_get '/validate_advance/:id/:amount/:advance_type/:advance_term/:rate/:check_capstock/:signer' do
           member_id = params[:id]
           amount = params[:amount]
           advance_type = params[:advance_type]
@@ -355,11 +363,12 @@ module MAPI
           rate = params[:rate]
           signer = params[:signer]
           markup = 0
+          check_capstock = params[:check_capstock] == 'true'
           blendedcostoffunds = 0
           costoffunds = 0
           benchmarkrate = 0
           begin
-            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'VALIDATE', amount, advance_term, advance_type, rate, signer, markup, blendedcostoffunds, costoffunds, benchmarkrate)
+            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'VALIDATE', amount, advance_term, advance_type, rate, check_capstock, signer, markup, blendedcostoffunds, costoffunds, benchmarkrate)
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'

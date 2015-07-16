@@ -1,0 +1,24 @@
+.quick-advance-preview
+  .quick-advance-body
+    .quick-advance-icon-section.icon-error-before
+      %p= t('dashboard.quick_advance.error.exception')
+      %p.quick-advance-loading-message= t('dashboard.quick_advance.preview.initiate')
+      .quick-advance-summary
+        %dl
+          %dt= t('dashboard.quick_advance.field_headings.advance_amount') +':'
+          %dd= fhlb_formatted_currency(@advance_amount, precision: 0)
+        %dl
+          %dt= t('dashboard.quick_advance.field_headings.advance_type') +':'
+          %dd= @advance_type
+          %dt= t('dashboard.quick_advance.field_headings.interest_day_count') +':'
+          %dd= '-'
+          %dt= t('dashboard.quick_advance.field_headings.payment_on') +':'
+          %dd= '-'
+        %dl
+          %dt= t('dashboard.quick_advance.field_headings.advance_term') +':'
+          %dd= @advance_term
+          %dt= t('dashboard.quick_advance.field_headings.funding_date') +':'
+          %dd= '-'
+          %dt= t('dashboard.quick_advance.field_headings.maturity_date') +':'
+          %dd= '-'
+  %button.primary-button.quick-advance-back-button.icon-arrow-left-before= t('dashboard.quick_advance.buttons.rates')

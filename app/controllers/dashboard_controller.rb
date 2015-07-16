@@ -115,17 +115,46 @@ class DashboardController < ApplicationController
   end
 
   def quick_advance_preview
-    preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, session['signer_full_name'])
-    @advance_amount = preview[:advance_amount]
-    @advance_type = preview[:advance_type]
-    @interest_day_count = preview[:interest_day_count]
-    @payment_on = preview[:payment_on]
-    @advance_term = preview[:advance_term]
-    @funding_date = preview[:funding_date]
-    @maturity_date = preview[:maturity_date]
-    @advance_rate = preview[:advance_rate]
-    @session_elevated = session_elevated?
-    render layout: false
+    preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, params[:check_capstock], session['signer_full_name'])
+    case preview[:status]
+    when 'CapitalStockError'
+      preview_success = false
+      preview_error = false
+      @authorized_amount = preview[:authorized_amount]
+      @exception_message = preview[:exception_message]
+      @cumulative_stock_required = preview[:cumulative_stock_required]
+      @current_trade_stock_required = preview[:current_trade_stock_required]
+      @pre_trade_stock_required = preview[:pre_trade_stock_required]
+      @net_stock_required = preview[:net_stock_required]
+      @gross_amount = preview[:gross_amount]
+      @gross_cumulative_stock_required = preview[:gross_cumulative_stock_required]
+      @gross_current_trade_stock_required = preview[:gross_current_trade_stock_required]
+      @gross_pre_trade_stock_required = preview[:gross_pre_trade_stock_required]
+      @gross_net_stock_required = preview[:net_stock_required]
+      response_html = render_to_string :quick_advance_capstock, layout: false
+    when 'GrossUpError', 'ExceptionError'
+      preview_success = false
+      preview_error = true
+      @advance_amount = params[:amount].to_f
+      @advance_type = params[:advance_type]
+      @advance_term = params[:advance_term]
+      @advance_rate = params[:advance_rate].to_f
+      response_html = render_to_string :quick_advance_error, layout: false
+    else
+      preview_success = true
+      preview_error = false
+      @advance_amount = preview[:advance_amount]
+      @advance_type = preview[:advance_type]
+      @interest_day_count = preview[:interest_day_count]
+      @payment_on = preview[:payment_on]
+      @advance_term = preview[:advance_term]
+      @funding_date = preview[:funding_date]
+      @maturity_date = preview[:maturity_date]
+      @advance_rate = preview[:advance_rate]
+      @session_elevated = session_elevated?
+      response_html = render_to_string layout: false
+    end
+    render json: {preview_success: preview_success, preview_error: preview_error, html: response_html, authorized_amount: @authorized_amount, gross_amount: @gross_amount}
   end
 
   def quick_advance_perform

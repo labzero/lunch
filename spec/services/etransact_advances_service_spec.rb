@@ -42,8 +42,9 @@ describe EtransactAdvancesService do
     let(:advance_term) {'someterm'}
     let(:advance_type) {'sometype'}
     let(:advance_rate) {'0.17'}
+    let(:check_capstock) {true}
     let(:amount) { 100 }
-    let(:quick_advance_validate) {subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, signer)}
+    let(:quick_advance_validate) {subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer)}
     it 'should return a hash back' do
       expect(quick_advance_validate).to be_kind_of(Hash)
     end
