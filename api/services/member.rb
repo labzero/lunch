@@ -12,6 +12,7 @@ require_relative 'member/securities_position'
 require_relative 'member/forward_commitments'
 require_relative 'member/capital_stock_and_leverage'
 require_relative 'member/letters_of_credit'
+require_relative 'member/flags'
 
 module MAPI
   module Services
@@ -373,6 +374,26 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/quick_advance_flag'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the Quick Advance Flag for the member'
+              key :notes, 'Returns `Y` if quick advances are enabled for this member'
+              key :type, :array
+              items do
+                key :type, :string
+              end
+              key :nickname, :getQuickAdvanceFlagForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+            end
+          end
+          api do
             key :path, '/{id}/cash_projections'
             operation do
               key :method, 'GET'
@@ -687,6 +708,12 @@ module MAPI
         relative_get '/:id/disabled_reports' do
           member_id = params[:id]
           MAPI::Services::Member::DisabledReports.disabled_report_ids(self, member_id)
+        end
+
+        # Member Quick Advance Flag
+        relative_get '/:id/quick_advance_flag' do
+          member_id = params[:id]
+          MAPI::Services::Member::Flags.quick_advance_flag(self, member_id).to_json
         end
 
         # Member Cash Projections

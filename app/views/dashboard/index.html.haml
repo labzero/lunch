@@ -55,7 +55,7 @@
             %tr
               %td.borrowing-capacity-note= t('dashboard.your_account.table.borrowing_capacity_note_html', url: reports_borrowing_capacity_url)
   .column-3
-    - if policy(:advance).show?
+    - if policy(:advance).show? && @quick_advance_enabled
       =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances'} do
         - if @quick_advances_active
           = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}, field_name: :amount
