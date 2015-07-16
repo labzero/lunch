@@ -2,12 +2,13 @@ require 'rails_helper'
 
 describe MembersService do
   let(:member_id) { 3 }
+  let(:request_object) {double('Request')}
+  let(:response_object) { double('Response', body: "[]")}
   subject { MembersService.new(double('request', uuid: '12345')) }
   it { expect(subject).to respond_to(:report_disabled?) }
 
   describe '`report_disabled?` method' do
     let(:report_flags) {[5, 7]}
-    let(:response_object) { double('Response')}
     let(:report_disabled?) {subject.report_disabled?(member_id, report_flags)}
 
     it 'should return nil if there was an API error' do
@@ -20,13 +21,12 @@ describe MembersService do
     end
 
     describe 'hitting the MAPI endpoint' do
-      let(:request_object) {double('Request')}
       let(:overlapping_response) {[7, 9].to_json}
       let(:non_overlapping_response) {[2, 9].to_json}
 
       before do
-        expect(request_object).to receive(:get).and_return(response_object)
-        expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/disabled_reports").and_return(request_object)
+        allow(request_object).to receive(:get).and_return(response_object)
+        allow_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/disabled_reports").and_return(request_object)
       end
       it 'returns true if any of the values it was passed in the report_flags array match any values returned by MAPI' do
         expect(response_object).to receive(:body).and_return(overlapping_response)
@@ -40,6 +40,34 @@ describe MembersService do
         expect(response_object).to receive(:body).and_return([].to_json)
         expect(report_disabled?).to be(false)
       end
+    end
+  end
+
+  describe '`quick_advance_enabled_for_member?` method' do
+    let(:method_call) { subject.quick_advance_enabled_for_member?(member_id) }
+    before do
+      allow(request_object).to receive(:get).and_return(response_object)
+      allow_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/quick_advance_flag").and_return(request_object)
+    end
+    it 'hits the MAPI endpoint' do
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/quick_advance_flag").and_return(request_object)
+      method_call
+    end
+    it 'returns `true` if the MAPI endpoint returns `Y`' do
+      allow(JSON).to receive(:parse).and_return(['Y'])
+      expect(method_call).to be(true)
+    end
+    it 'returns `false` if the MAPI endpoint does not return `Y`' do
+      allow(JSON).to receive(:parse).and_return(['N'])
+      expect(method_call).to be(false)
+    end
+    it 'should return nil if there was an API error' do
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(method_call).to eq(nil)
+    end
+    it 'should return nil if there was a connection error' do
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(method_call).to eq(nil)
     end
   end
 

@@ -17,6 +17,7 @@ class DashboardController < ApplicationController
     rate_service = RatesService.new(request)
     etransact_service = EtransactAdvancesService.new(request)
     member_balances = MemberBalanceService.new(current_member_id, request)
+    members_service = MembersService.new(request)
     current_user_roles
 
     profile = member_balances.profile
@@ -99,6 +100,7 @@ class DashboardController < ApplicationController
       nil
     end
 
+    @quick_advance_enabled= members_service.quick_advance_enabled_for_member?(current_member_id)
     @quick_advances_active = etransact_service.etransact_active?
     # TODO replace this with the timestamp from the cached quick advance rates timestamp
     date = DateTime.now - 2.hours
