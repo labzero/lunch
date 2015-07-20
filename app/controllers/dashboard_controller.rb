@@ -36,6 +36,12 @@ class DashboardController < ApplicationController
     ]
 
     # @account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
+    if !profile
+      profile = {
+        credit_outstanding: {}
+      }
+    end
+
     sta_balance = [
       [t('dashboard.your_account.table.balance'), profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
     ]
@@ -71,7 +77,7 @@ class DashboardController < ApplicationController
       }
       calculate_gauge_percentages(guage, total_borrowing_capacity, :total)
     else
-      nil
+      calculate_gauge_percentages({total: 0}, 0)
     end
     
     @financing_availability_gauge = if profile[:total_financing_available]
@@ -83,7 +89,7 @@ class DashboardController < ApplicationController
           uncollateralized: profile[:uncollateralized_financing_availability]
         }, profile[:total_financing_available], :total)
     else
-      nil
+      calculate_gauge_percentages({total: 0}, 0)
     end
 
 
@@ -206,7 +212,7 @@ class DashboardController < ApplicationController
 
   private
 
-  def calculate_gauge_percentages(gauge_hash, total, excluded_keys)
+  def calculate_gauge_percentages(gauge_hash, total, excluded_keys=[])
     excluded_keys = Array.wrap(excluded_keys)
     largest_display_percentage_key = nil
     largest_display_percentage = 0
