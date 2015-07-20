@@ -20,6 +20,7 @@ class ReportsController < ApplicationController
   FORWARD_COMMITMENTS_WEB_FLAG = [MembersService::ADVANCES_DETAIL_DATA]
   CAPITAL_STOCK_AND_LEVERAGE_WEB_FLAGS = [MembersService::FHLB_STOCK_DATA]
   ACCOUNT_SUMMARY_WEB_FLAGS = [MembersService::FINANCING_AVAILABLE_DATA, MembersService::CREDIT_OUTSTANDING_DATA, MembersService::COLLATERAL_HIGHLIGHTS_DATA, MembersService::FHLB_STOCK_DATA]
+  INTEREST_RATE_RESETS_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
 
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
@@ -537,22 +538,31 @@ class ReportsController < ApplicationController
   end
 
   def interest_rate_resets
-    rate_service = RatesService.new(request)
-    @start_date = (Time.zone.now.to_date).to_date
+    member_balances = MemberBalanceService.new(current_member_id, request)
     column_headings = [t('reports.pages.interest_rate_resets.effective_date'), t('common_table_headings.advance_number'), t('reports.pages.interest_rate_resets.prior_rate'), t('reports.pages.interest_rate_resets.new_rate'), t('reports.pages.interest_rate_resets.next_reset')]
-    irr_data = rate_service.interest_rate_resets
-    rows = irr_data.collect do |row|
-      columns = []
-      row.each do |value|
-        if value[0]=='prior_rate' || value[0]=='new_rate'
-          columns << {type: :index, value: value[1]}
-        elsif value[0]=='effective_date'
-          columns << {type: :date, value: value[1]}
-        else
-          columns << {value: value[1]}
+    irr_data = member_balances.interest_rate_resets
+    if report_disabled?(INTEREST_RATE_RESETS_WEB_FLAGS)
+      rows = []
+    else
+      raise StandardError, 'There has been an error and ReportsController#interest_rate_resets has encountered nil. Check error logs.' if irr_data.nil?
+      @date_processed = irr_data[:date_processed]
+      rows = irr_data[:interest_rate_resets].collect do |row|
+        columns = []
+        row.each do |value|
+          if value[0] == 'prior_rate' || value[0] == 'new_rate'
+            columns << {type: :index, value: value[1]}
+          elsif value[0] == 'effective_date'
+            columns << {type: :date, value: value[1]}
+          elsif value[0] == 'next_reset' && value[1]
+            columns << {type: :date, value: value[1]}
+          elsif value[0] == 'next_reset'
+            columns << {value: t('global.open')}
+          else
+            columns << {value: value[1]}
+          end
         end
+        {columns: columns}
       end
-      {columns: columns}
     end
     @irr_table_data = {
       :column_headings => column_headings,

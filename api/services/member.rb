@@ -13,6 +13,7 @@ require_relative 'member/forward_commitments'
 require_relative 'member/capital_stock_and_leverage'
 require_relative 'member/letters_of_credit'
 require_relative 'member/flags'
+require_relative 'member/interest_rate_resets'
 
 module MAPI
   module Services
@@ -561,6 +562,31 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/interest_rate_resets'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve interest rate reset data for the last date this was calculated by FHLB'
+              key :notes, 'Typically the last date on which the interest rate resets were calculated corresponds to the last business day. A given member bank will not necessarily have any interest rate reset data for this date.'
+              key :nickname, :getInterestRateResetsForMember
+              key :type, :MemberInterestRateResets
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 503
+                key :message, 'Interest Rate Resets not available'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -770,6 +796,17 @@ module MAPI
         relative_get '/:id/letters_of_credit' do
           member_id = params[:id]
           MAPI::Services::Member::LettersOfCredit.letters_of_credit(self, member_id).to_json
+        end
+
+        relative_get '/:id/interest_rate_resets' do
+          member_id = params[:id]
+          result = MAPI::Services::Member::InterestRateResets.interest_rate_resets(self, member_id)
+          if result.nil?
+            logger.error 'Interest Rate Resets returning nil.'
+            halt 503
+          else
+            result.to_json
+          end
         end
 
         relative_get '/:id/' do

@@ -145,23 +145,4 @@ describe RatesService do
     end
   end
 
-  describe '`interest_rate_resets` method' do
-    let(:irr_rates) {subject.interest_rate_resets}
-    it 'returns nil if there is a JSON parsing error' do
-      # TODO change this stub once you implement the MAPI endpoint
-      allow(File).to receive(:read).and_return('some malformed json!')
-      expect(Rails.logger).to receive(:warn)
-      expect(irr_rates).to be(nil)
-    end
-    it 'should return an array of hashes containing interest rate resets' do
-      expect(irr_rates.length).to be >= 1
-      irr_rates.each do |rate|
-        expect(rate['effective_date']).to be_kind_of(String)
-        expect(rate['advance_number']).to be_kind_of(Integer)
-        expect(rate['prior_rate']).to be_kind_of(Float)
-        expect(rate['new_rate']).to be_kind_of(Float)
-        expect(rate['next_reset']).to be_kind_of(String)
-      end
-    end
-  end
 end

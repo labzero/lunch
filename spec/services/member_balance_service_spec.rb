@@ -1083,6 +1083,39 @@ describe MemberBalanceService do
     end
   end
 
+  describe 'the `interest_rate_resets` method', :vcr do
+    let(:irr_rates) {subject.interest_rate_resets}
+    describe 'error states' do
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(irr_rates).to be(nil)
+      end
+      it 'should log an error if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(Rails.logger).to receive(:warn)
+        irr_rates
+      end
+      it 'should return nil if there was an API error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(irr_rates).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(irr_rates).to eq(nil)
+      end
+    end
+    it 'should return an array of hashes containing interest rate resets' do
+      expect(irr_rates.length).to be >= 1
+      irr_rates[:interest_rate_resets].each do |rate|
+        expect(rate[:effective_date]).to be_kind_of(String)
+        expect(rate[:advance_number]).to be_kind_of(String)
+        expect(rate[:prior_rate]).to be_kind_of(Float)
+        expect(rate[:new_rate]).to be_kind_of(Float)
+        expect(rate[:next_reset]).to be_kind_of(String)
+      end
+    end
+  end
+
   # Helper Methods
   def override_start_balance_endpoint(start_date, end_date, request_object)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/capital_stock_balance/#{start_date}").and_return(request_object)
