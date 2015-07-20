@@ -91,15 +91,20 @@ RSpec.describe DashboardController, :type => :controller do
       end
     end
     describe "MemberBalanceService failures" do
-      it 'should assign @borrowing_capacity_guage as nil if the balance could not be retrieved' do
+      it 'should assign @borrowing_capacity_guage to a zeroed out gauge if the balance could not be retrieved' do
         allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).and_return(nil)
         get :index
-        expect(assigns[:borrowing_capacity_guage]).to eq(nil)
+        expect(assigns[:borrowing_capacity_gauge]).to eq({total: {amount: 0, display_percentage: 100, percentage: 0}})
       end
-      it 'should assign @financing_availability_gauge to nil if there is no value for `financing_availability` in the profile' do
+      it 'should assign @financing_availability_gauge to a zeroed out gauge if there is no value for `financing_availability` in the profile' do
         allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return({credit_outstanding: {}})
         get :index
-        expect(assigns[:financing_availability_gauge]).to be_nil
+        expect(assigns[:financing_availability_gauge]).to eq({total: {amount: 0, display_percentage: 100, percentage: 0}})
+      end
+      it 'should respond with a 200 even if MemberBalanceService#profile returns nil' do
+        allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
+        get :index
+        expect(response).to be_success
       end
     end
   end
