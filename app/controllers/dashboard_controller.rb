@@ -128,6 +128,7 @@ class DashboardController < ApplicationController
     when 'CapitalStockError'
       preview_success = false
       preview_error = false
+      @advance_amount = params[:amount].to_f
       @authorized_amount = preview[:authorized_amount]
       @exception_message = preview[:exception_message]
       @cumulative_stock_required = preview[:cumulative_stock_required]
