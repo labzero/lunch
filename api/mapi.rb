@@ -36,6 +36,7 @@ require_relative 'models/current_price_indications'
 require_relative 'models/rates/price_indication_historical'
 require_relative 'models/member_execute_advance'
 require_relative 'models/member_capital_stock_and_leverage'
+require_relative 'models/member_interest_rate_resets'
 
 Time.zone = ENV['TIMEZONE'] || 'Pacific Time (US & Canada)'
 Time.zone_default = Time.zone

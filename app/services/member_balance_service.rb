@@ -614,4 +614,25 @@ class MemberBalanceService < MAPIService
 
   end
 
+  def interest_rate_resets
+    begin
+      response = @connection["/member/#{@member_id}/interest_rate_resets"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.interest_rate_resets encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.interest_rate_resets encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.interest_rate_resets encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data[:date_processed] = data[:date_processed].to_date if data[:date_processed]
+    data
+  end
+
 end

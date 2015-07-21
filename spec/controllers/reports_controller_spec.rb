@@ -950,6 +950,65 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
+    describe 'GET interest_rate_resets' do
+      let(:rates_service_instance) { double('RatesService') }
+      let(:response_hash) { double('RatesServiceHash') }
+      let(:effective_date) { double('effective_date') }
+      let(:advance_number) { double('advance_number') }
+      let(:prior_rate) { double('prior_rate') }
+      let(:new_rate) { double('new_rate') }
+      let(:next_reset) { double('next_reset') }
+      let(:date_processed) { double('date processed') }
+      let(:irr_response) {{date_processed: date_processed, interest_rate_resets: [{'effective_date' => effective_date, 'advance_number' => advance_number, 'prior_rate' => prior_rate, 'new_rate' => new_rate, 'next_reset' => next_reset}]}}
+      let(:interest_rate_resets) { get :interest_rate_resets }
+
+      before do
+        allow(member_balance_service_instance).to receive(:interest_rate_resets).and_return(irr_response)
+      end
+      it_behaves_like 'a user required action', :get, :interest_rate_resets
+      it 'renders the interest_rate_resets view' do
+        interest_rate_resets
+        expect(response.body).to render_template('interest_rate_resets')
+      end
+      describe 'view instance variables' do
+        it 'sets the @irr_table_data row attribute' do
+          interest_rate_resets
+          expect(assigns[:irr_table_data][:rows][0][:columns]).to eq([{:type=>:date, :value=>effective_date}, {:value=>advance_number}, {:type=>:index, :value=>prior_rate}, {:type=>:index, :value=>new_rate}, {:type=>:date, :value=>next_reset}])
+        end
+        it 'sets the @irr_table_data column_headings attribute' do
+          interest_rate_resets
+          assigns[:irr_table_data][:column_headings].each do |heading|
+            expect(heading).to be_kind_of(String)
+          end
+        end
+        it 'sets @date_processed' do
+          interest_rate_resets
+          expect(assigns[:date_processed]).to eq(date_processed)
+        end
+        it "sets the `value` attribute of the @irr_table_data[:row] cell for `next_reset` equal to #{I18n.t('global.open')} if there is no data for that cell" do
+          allow(member_balance_service_instance).to receive(:interest_rate_resets).and_return({interest_rate_resets: [{'next_reset' => nil}]})
+          interest_rate_resets
+          expect(assigns[:irr_table_data][:rows][0][:columns]).to eq([{:value=>I18n.t('global.open')}])
+        end
+      end
+      describe 'with the report disabled' do
+        before do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::INTEREST_RATE_RESETS_WEB_FLAGS).and_return(true)
+        end
+        it "sets @irr_data_table[:rows] to be an empty array" do
+          interest_rate_resets
+          expect(assigns[:irr_table_data][:rows]).to eq([])
+        end
+        it 'does not set @date_processed' do
+          interest_rate_resets
+          expect(assigns[:date_processed]).to be_nil
+        end
+      end
+      it 'raises an error if the MAPI endpoint returns nil' do
+        allow(member_balance_service_instance).to receive(:interest_rate_resets).and_return(nil)
+        expect{interest_rate_resets}.to raise_error
+      end
+    end
   end
 
   describe 'GET current_price_indications' do
@@ -992,33 +1051,6 @@ RSpec.describe ReportsController, :type => :controller do
       get :current_price_indications
       expect(assigns[:standard_arc_data]).to eq(arc_response)
       expect(assigns[:sbc_arc_data]).to eq(arc_response)
-    end
-  end
-
-  describe 'GET interest_rate_resets' do
-    let(:rates_service_instance) { double('RatesService') }
-    let(:response_hash) { double('RatesServiceHash') }
-    let(:effective_date) { double('effective_date') }
-    let(:advance_number) { double('advance_number') }
-    let(:prior_rate) { double('prior_rate') }
-    let(:new_rate) { double('new_rate') }
-    let(:next_reset) { double('next_reset') }
-    let(:irr_response) {[{'effective_date' => effective_date, 'advance_number' => advance_number, 'prior_rate' => prior_rate, 'new_rate' => new_rate, 'next_reset' => next_reset}]}
-
-    before do
-      allow(RatesService).to receive(:new).and_return(rates_service_instance)
-      allow(rates_service_instance).to receive(:interest_rate_resets).at_least(1).and_return(irr_response)
-    end
-    it_behaves_like 'a user required action', :get, :interest_rate_resets
-    it 'renders the interest_rate_resets view' do
-      allow(rates_service_instance).to receive(:interest_rate_resets).and_return(response_hash)
-      allow(response_hash).to receive(:collect)
-      get :interest_rate_resets
-      expect(response.body).to render_template('interest_rate_resets')
-    end
-    it 'should return irr data' do
-      get :interest_rate_resets
-      expect(assigns[:irr_table_data][:rows][0][:columns]).to eq([{:type=>:date, :value=>effective_date}, {:value=>advance_number}, {:type=>:index, :value=>prior_rate}, {:type=>:index, :value=>new_rate}, {:value=>next_reset}])
     end
   end
 
