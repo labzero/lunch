@@ -21,12 +21,17 @@ describe MAPI::ServiceApp do
         expect(last_response.status).to eq(200)
       end
 
+      it 'returns a 503 if the `interest_rate_resets` method returns nil' do
+        allow(MAPI::Services::Member::InterestRateResets).to receive(:interest_rate_resets).and_return(nil)
+        get "/member/#{MEMBER_ID}/interest_rate_resets"
+        expect(last_response.status).to eq(503)
+      end
+
       [:test, :production].each do |env|
         describe "in the #{env} environment" do
           if env == :production
             let(:interest_rate_reset_result_set) {double('Oracle Result Set', fetch_hash: nil, fetch: nil)}
             let(:interest_rate_reset_result) {[interest_rate_reset_data[0],interest_rate_reset_data[1], nil]}
-            let(:logger) { double('Logger', :error => nil)}
 
             before do
               allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)

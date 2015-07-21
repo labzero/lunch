@@ -672,6 +672,21 @@ td.dataTables_empty {
   }
 }
 
+.parallel-shifts-table {
+  width: 706px;
+  td, th {
+    @include table-cell-treatment;
+  }
+  th {
+    &:nth-child(1), &:nth-child(3) {
+      width: 120px;
+    }
+    &:nth-child(2) {
+      width: 82px;
+    }
+  }
+}
+
 .authorizations-report {
   p {
     width: 540px;

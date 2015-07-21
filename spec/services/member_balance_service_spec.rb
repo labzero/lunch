@@ -863,8 +863,7 @@ describe MemberBalanceService do
     end
   end
 
-  # TODO add vcr once MAPI endpoint is rigged up
-  describe 'the `parallel_shift` method' do
+  describe 'the `parallel_shift` method', :vcr do
     let(:parallel_shift) {subject.parallel_shift}
     it 'returns a hash with an `as_of_date` that is a date' do
       expect(parallel_shift[:as_of_date]).to be_kind_of(Date)
@@ -890,10 +889,18 @@ describe MemberBalanceService do
     end
 
     describe 'error states' do
-      it 'returns nil if there is a JSON parsing error' do
-        allow(File).to receive(:read).and_return('some malformed json!')
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
         expect(Rails.logger).to receive(:warn)
         expect(parallel_shift).to be(nil)
+      end
+      it 'should return nil if there was an API error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(parallel_shift).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(parallel_shift).to eq(nil)
       end
     end
   end
