@@ -770,14 +770,14 @@ class ReportsController < ApplicationController
         columns:[
           {type: nil, value: advance[:advance_number]},
           {type: :date, value: advance[:issue_date]},
-          {type: :rate, value: advance[:interest_rate]},
-          {type: (advance[:shift_neg_300].blank? ? nil : :basis_point), value: advance[:shift_neg_300] || t('global.na')},
-          {type: (advance[:shift_neg_200].blank? ? nil : :basis_point), value: advance[:shift_neg_200] || t('global.na')},
-          {type: (advance[:shift_neg_100].blank? ? nil : :basis_point), value: advance[:shift_neg_100] || t('global.na')},
-          {type: (advance[:shift_0].blank? ? nil : :basis_point), value: advance[:shift_0] || t('global.na')},
-          {type: (advance[:shift_100].blank? ? nil : :basis_point), value: advance[:shift_100] || t('global.na')},
-          {type: (advance[:shift_200].blank? ? nil : :basis_point), value: advance[:shift_200] || t('global.na')},
-          {type: (advance[:shift_300].blank? ? nil : :basis_point), value: advance[:shift_300] || t('global.na')}
+          {type: :rate, value: advance[:interest_rate] * 100},
+          {type: (advance[:shift_neg_300].blank? ? nil : :rate), value: advance[:shift_neg_300] || t('global.na'), classes: [:'report-cell-left']},
+          {type: (advance[:shift_neg_200].blank? ? nil : :rate), value: advance[:shift_neg_200] || t('global.na'), classes: [:'report-cell-left']},
+          {type: (advance[:shift_neg_100].blank? ? nil : :rate), value: advance[:shift_neg_100] || t('global.na'), classes: [:'report-cell-left']},
+          {type: (advance[:shift_0].blank? ? nil : :rate), value: advance[:shift_0] || t('global.na'), classes: [:'report-cell-left']},
+          {type: (advance[:shift_100].blank? ? nil : :rate), value: advance[:shift_100] || t('global.na'), classes: [:'report-cell-left']},
+          {type: (advance[:shift_200].blank? ? nil : :rate), value: advance[:shift_200] || t('global.na'), classes: [:'report-cell-left']},
+          {type: (advance[:shift_300].blank? ? nil : :rate), value: advance[:shift_300] || t('global.na'), classes: [:'report-cell-left']}
         ]
       }
     end

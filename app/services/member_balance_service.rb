@@ -511,12 +511,20 @@ class MemberBalanceService < MAPIService
   end
 
   def parallel_shift
-    # TODO hit MAPI endpoint
     begin
-      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'parallel_shift.json'))).with_indifferent_access
-      data[:as_of_date] = Time.zone.now.to_date # TODO remove this once you're hitting MAPI and getting an as_of_date returned to you
+      response = @connection["member/#{@member_id}/parallel_shift_analysis"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.parallel_shift encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.parallel_shift encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
     rescue JSON::ParserError => e
-      Rails.logger.warn("MemberBalanceService.active_advances encountered a JSON parsing error: #{e}")
+      Rails.logger.warn("MemberBalanceService.parallel_shift encountered a JSON parsing error: #{e}")
       return nil
     end
     data[:as_of_date] = data[:as_of_date].to_date

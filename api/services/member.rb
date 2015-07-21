@@ -14,6 +14,7 @@ require_relative 'member/capital_stock_and_leverage'
 require_relative 'member/letters_of_credit'
 require_relative 'member/flags'
 require_relative 'member/interest_rate_resets'
+require_relative 'member/parallel_shift_analysis'
 
 module MAPI
   module Services
@@ -577,6 +578,23 @@ module MAPI
                 key :type, :string
                 key :description, 'The id to find the members from'
               end
+            end
+          end
+          api do
+            key :path, '/{id}/parallel_shift_analysis'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve parallel shift analysis data for the last date the analysis was calculated by FHLB'
+              key :notes, 'A given member bank will not necessarily have any parallel shift analysis data for the last date calculated.'
+              key :nickname, :getParallelShiftAnalysisForMember
+              key :type, :MemberParallelShift
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
               response_message do
                 key :code, 200
                 key :message, 'OK'
@@ -807,6 +825,11 @@ module MAPI
           else
             result.to_json
           end
+        end
+
+        relative_get '/:id/parallel_shift_analysis' do
+          member_id = params[:id]
+          MAPI::Services::Member::ParallelShiftAnalysis.parallel_shift(self, member_id).to_json
         end
 
         relative_get '/:id/' do

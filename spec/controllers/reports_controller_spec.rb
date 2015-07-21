@@ -596,6 +596,7 @@ RSpec.describe ReportsController, :type => :controller do
       projections = %i(shift_neg_300 shift_neg_200 shift_neg_100 shift_0 shift_100 shift_200 shift_300)
       let(:make_request) { get :parallel_shift }
       let(:as_of_date) { double('some date') }
+      let(:interest_rate) { double('interest rate') }
       let(:putable_advance_data) do
         hash = {
           advance_number: nil,
@@ -606,7 +607,11 @@ RSpec.describe ReportsController, :type => :controller do
           hash[value] = nil
         end
         hash.each do |key, value|
-          hash[key] = double(key.to_s)
+          if key == :interest_rate
+            hash[key] = double(key.to_s, :* => interest_rate)
+          else
+            hash[key] = double(key.to_s)
+          end
         end
         hash
       end
@@ -657,13 +662,13 @@ RSpec.describe ReportsController, :type => :controller do
               it 'contains a `interest_rate` with type `date`' do
                 assigns[:parallel_shift_table_data][:rows].each do |row|
                   expect(row[:columns][2][:type]).to eq(:rate)
-                  expect(row[:columns][2][:value]).to eq(putable_advance_data[:interest_rate])
+                  expect(row[:columns][2][:value]).to eq(interest_rate)
                 end
               end
               projections.each_with_index do |value, i|
                 it "contains a `#{value}` value with type `basis_point`" do
                   assigns[:parallel_shift_table_data][:rows].each do |row|
-                    expect(row[:columns][i + 3][:type]).to eq(:basis_point)
+                    expect(row[:columns][i + 3][:type]).to eq(:rate)
                     expect(row[:columns][i + 3][:value]).to eq(putable_advance_data[value])
                   end
                 end
