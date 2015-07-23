@@ -15,6 +15,7 @@ require_relative 'member/letters_of_credit'
 require_relative 'member/flags'
 require_relative 'member/interest_rate_resets'
 require_relative 'member/parallel_shift_analysis'
+require_relative 'member/dividend_statement'
 
 module MAPI
   module Services
@@ -605,6 +606,34 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/dividend_statement/{date}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve dividend statement for a given member and quarter'
+              key :notes, 'Retrieve divident statement for a given member and quarter'
+              key :nickname, :getDividendStatementForMembers
+              key :type, :MemberDividendStatement
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :date
+                key :required, true
+                key :type, :string
+                key :description, 'The date (quarter) of the requested statement'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -841,6 +870,12 @@ module MAPI
           else
             details.to_json
           end
+        end
+
+        relative_get '/:id/dividend_statement/:date' do
+          member_id = params[:id]
+          date = params[:date].to_date
+          MAPI::Services::Member::DividendStatement.dividend_statement(self, member_id, date).to_json
         end
       end
 

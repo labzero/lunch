@@ -690,7 +690,7 @@ describe MemberBalanceService do
     end
   end
 
-  describe '`dividend_statement` method' do
+  describe '`dividend_statement` method', :vcr do
     let(:dividend_statement) { subject.dividend_statement(Time.zone.now) }
     it 'returns a date for its `transaction_date`' do
       expect(dividend_statement[:transaction_date]).to be_kind_of(Date)
@@ -707,8 +707,8 @@ describe MemberBalanceService do
     it 'returns a fixnum for its `shares_dividend`' do
       expect(dividend_statement[:shares_dividend]).to be_kind_of(Fixnum)
     end
-    it 'returns a fixnum for its `shares_par_value`' do
-      expect(dividend_statement[:shares_par_value]).to be_kind_of(Fixnum)
+    it 'returns a float for its `shares_par_value`' do
+      expect(dividend_statement[:shares_par_value]).to be_kind_of(Float)
     end
     it 'returns a float for its `cash_dividend`' do
       expect(dividend_statement[:cash_dividend]).to be_kind_of(Float)
@@ -726,7 +726,7 @@ describe MemberBalanceService do
         expect(detail[:issue_date]).to be_kind_of(Date)
         expect(detail[:start_date]).to be_kind_of(Date)
         expect(detail[:end_date]).to be_kind_of(Date)
-        expect(detail[:certificate_sequence]).to be_kind_of(Fixnum)
+        expect(detail[:certificate_sequence]).to be_kind_of(String)
         expect(detail[:shares_outstanding]).to be_kind_of(Fixnum)
         expect(detail[:average_shares_outstanding]).to be_kind_of(Float)
         expect(detail[:dividend]).to be_kind_of(Float)
@@ -735,10 +735,18 @@ describe MemberBalanceService do
       end
     end
     describe 'error states' do
-      it 'returns nil if there is a JSON parsing error' do
-        expect(File).to receive(:read).and_return('some malformed json!')
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
         expect(Rails.logger).to receive(:warn)
         expect(dividend_statement).to be(nil)
+      end
+      it 'should return nil if there was an API error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(dividend_statement).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(dividend_statement).to eq(nil)
       end
     end
   end
