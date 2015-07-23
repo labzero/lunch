@@ -908,11 +908,21 @@ class ReportsController < ApplicationController
 
     member_balance_service = MemberBalanceService.new(current_member_id, request)
     member_profile = member_balance_service.profile
-    raise StandardError, "There has been an error and ReportsController#account_summary has encountered nil. Check error logs." if member_profile.nil?
+    if !member_profile
+      member_profile = {
+        credit_outstanding: {},
+        collateral_borrowing_capacity: {
+          standard: {
+          },
+          sbc: {
+          }
+        },
+        capital_stock: {}
+      }
+    end
 
     members_service = MembersService.new(request)
-    member_details = members_service.member(current_member_id)
-    raise StandardError, "There has been an error and ReportsController#account_summary has encountered nil. Check error logs." if member_details.nil?
+    member_details = members_service.member(current_member_id) || {}
 
     @report_name = t('reports.account_summary.title')
     @intraday_datetime = Time.zone.now
@@ -926,7 +936,7 @@ class ReportsController < ApplicationController
         {
           columns: [
             {value: t('reports.account_summary.financing_availability.asset_percentage')},
-            {value: member_profile[:financing_percentage] * 100, type: :percentage}
+            {value: (member_profile[:financing_percentage] * 100 if member_profile[:financing_percentage]), type: :percentage}
           ]
         },
         {

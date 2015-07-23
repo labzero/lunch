@@ -1486,14 +1486,6 @@ RSpec.describe ReportsController, :type => :controller do
       allow(controller).to receive(:report_disabled?).with(ReportsController::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true)
       expect {make_request}.to raise_error
     end
-    it 'raises an error if `MemberBalanceService#profile` returns nil' do
-      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
-      expect {make_request}.to raise_error
-    end
-    it 'raises an error if `MembersService#member` returns nil' do
-      allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
-      expect {make_request}.to raise_error
-    end
     it 'assigns @report_name' do
       make_request
       expect(assigns[:report_name]).to eq(I18n.t('reports.account_summary.title'))
@@ -1585,6 +1577,32 @@ RSpec.describe ReportsController, :type => :controller do
         profile[:mpf_credit_available] = 0
         make_request
         expect(assigns[:financing_availability][:rows].length).to be(7)
+      end
+    end
+    describe "MemberBalanceService failures" do
+      describe 'the member profile could not be found' do
+        before do
+          allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
+          make_request
+        end
+        %w(financing_availability credit_outstanding standard_collateral sbc_collateral collateral_totals capital_stock_and_leverage).each do |instance_var|
+          it "should assign nil values to all columns found in @#{instance_var}" do
+            assigns[instance_var.to_sym][:rows].each do |row|
+              expect(row[:columns].last[:value]).to be_nil
+            end
+          end
+        end
+      end
+      describe 'the member details could not be found' do
+        before do
+          allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
+          make_request
+        end
+        %w(sta_number fhfb_number member_name).each do |instance_var|
+          it "should not assign @#{instance_var}" do
+            expect(assigns[instance_var.to_sym]).to be_nil
+          end
+        end
       end
     end
   end
