@@ -403,15 +403,26 @@ class MemberBalanceService < MAPIService
   end
 
   def dividend_statement(quarter)
-    # TODO: hit MAPI endpoint
+    quarter = quarter.to_date
     begin
-      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'dividend_statement.json'))).with_indifferent_access
+      response = @connection["/member/#{@member_id}/dividend_statement/#{quarter.iso8601}"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.dividend_statement encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.dividend_statement encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
     rescue JSON::ParserError => e
       Rails.logger.warn("MemberBalanceService.dividend_statement encountered a JSON parsing error: #{e}")
       return nil
     end
+    data
 
-    data[:transaction_date] = quarter.to_date
+    data[:transaction_date] = data[:transaction_date].to_date
     data[:details].each do |detail|
       detail[:issue_date] = detail[:issue_date].to_date
       detail[:start_date] = detail[:start_date].to_date
