@@ -87,8 +87,8 @@ class EtransactAdvancesService < MAPIService
     end
     limits.each do |row|
       if days_to_maturity >= row['LOW_DAYS_TO_MATURITY'].to_i && days_to_maturity <= row['HIGH_DAYS_TO_MATURITY'].to_i
-        min_amount = row['MIN_ONLINE_ADVANCE']
-        max_amount = row['TERM_DAILY_LIMIT']
+        min_amount = row['MIN_ONLINE_ADVANCE'].to_i
+        max_amount = row['TERM_DAILY_LIMIT'].to_i
         break
       end
     end
