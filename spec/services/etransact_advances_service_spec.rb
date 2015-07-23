@@ -98,4 +98,25 @@ describe EtransactAdvancesService do
       quick_advance_execute
     end
   end
+  describe '`check_limits` method', :vcr do
+    let(:advance_term) {'someterm'}
+    let(:amount) { 100 }
+    let(:check_limits) {subject.check_limits(amount, advance_term)}
+    it 'should return a hash back' do
+      expect(check_limits).to be_kind_of(Hash)
+    end
+    it 'should return nil if there was an API error' do
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(check_limits).to eq(nil)
+    end
+    it 'should return nil if there was a connection error' do
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(check_limits).to eq(nil)
+    end
+    it 'returns nil if there is a JSON parsing error' do
+      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+      allow(Rails.logger).to receive(:warn)
+      expect(check_limits).to be(nil)
+    end
+  end
 end

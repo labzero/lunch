@@ -143,16 +143,16 @@ RSpec.describe DashboardController, :type => :controller do
 
   describe "POST quick_advance_preview", :vcr do
     allow_policy :advances, :show?
-    let(:etransact_service_instance) {double('EtransactAdvancesService', quick_advance_validate: {}, signer_full_name: username)}
+    let(:etransact_service_instance) {double('EtransactAdvancesService', check_limits: {}, quick_advance_validate: {}, signer_full_name: username)}
     let(:member_id) {750}
-    let(:advance_term) {'someterm'}
+    let(:advance_term) {'1week'}
     let(:advance_type) {'sometype'}
     let(:advance_rate) {'0.17'}
     let(:username) {'Test User'}
-    let(:amount) { 100 }
+    let(:amount) { 100000 }
     let(:check_capstock) { true }
+    let(:check_result) {{:status => 'pass', :low => 100000, :high => 1000000000}}
     let(:make_request) { post :quick_advance_preview, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, check_capstock: check_capstock}
-
     it_behaves_like 'a user required action', :post, :quick_advance_preview
     it_behaves_like 'an authorization required method', :post, :quick_advance_preview, :advances, :show?
     it 'should render its view' do
@@ -201,7 +201,12 @@ RSpec.describe DashboardController, :type => :controller do
       before do
         allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
       end
+      it 'should call the EtransactAdvancesService object\'s `check_limits` method with the POSTed amount and advance_term' do
+        expect(etransact_service_instance).to receive(:check_limits).with(amount, advance_term).and_return({})
+        make_request
+      end
       it 'should call the EtransactAdvancesService object\'s `quick_advance_validate` method with the POSTed advance_type, advance_term and rate' do
+        allow(etransact_service_instance).to receive(:check_limits).with(amount, advance_term).and_return(check_result)
         expect(etransact_service_instance).to receive(:quick_advance_validate).with(member_id, amount, advance_type, advance_term, advance_rate.to_f, check_capstock, username).and_return({})
         make_request
       end
@@ -215,105 +220,141 @@ RSpec.describe DashboardController, :type => :controller do
         make_request
       end
     end
-  end
 
-  describe "POST quick_advance_capstock", :vcr do
-    allow_policy :advances, :show?
-    let(:etransact_service_instance) {double('EtransactAdvancesService', quick_advance_validate: {}, signer_full_name: username)}
-    let(:member_id) {750}
-    let(:advance_term) {'someterm'}
-    let(:advance_type) {'sometype'}
-    let(:advance_rate) {'0.17'}
-    let(:username) {'Test User'}
-    let(:amount) { 1000000 }
-    let(:check_capstock) { true }
-    let(:make_request) { post :quick_advance_preview, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, check_capstock: check_capstock}
+    describe "POST quick_advance_capstock" do
+      let(:amount) { 1000000 }
+      it 'should render its view' do
+        make_request
+        expect(response.body).to render_template('dashboard/quick_advance_capstock')
+      end
+      it 'should set @authorized_amount' do
+        make_request
+        expect(assigns[:authorized_amount]).to be_kind_of(Numeric)
+      end
+      it 'should set @exception_message' do
+        make_request
+        expect(assigns[:exception_message]).to be_kind_of(String)
+      end
+      it 'should set @cumulative_stock_required' do
+        make_request
+        expect(assigns[:cumulative_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @current_trade_stock_required' do
+        make_request
+        expect(assigns[:current_trade_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @pre_trade_stock_required' do
+        make_request
+        expect(assigns[:pre_trade_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @net_stock_required' do
+        make_request
+        expect(assigns[:net_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @gross_amount' do
+        make_request
+        expect(assigns[:gross_amount]).to be_kind_of(Numeric)
+      end
+      it 'should set @gross_cumulative_stock_required' do
+        make_request
+        expect(assigns[:gross_cumulative_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @gross_current_trade_stock_required' do
+        make_request
+        expect(assigns[:gross_current_trade_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @gross_pre_trade_stock_required' do
+        make_request
+        expect(assigns[:gross_pre_trade_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @gross_net_stock_required' do
+        make_request
+        expect(assigns[:gross_net_stock_required]).to be_kind_of(Numeric)
+      end
+    end
 
-    it_behaves_like 'a user required action', :post, :quick_advance_preview
-    it_behaves_like 'an authorization required method', :post, :quick_advance_preview, :advances, :show?
-    it 'should render its view' do
-      make_request
-      expect(response.body).to render_template('dashboard/quick_advance_capstock')
+    describe "POST quick_advance_error" do
+      let(:amount) { 2000000 }
+      it 'should render its view' do
+        make_request
+        expect(response.body).to render_template('dashboard/quick_advance_error')
+      end
+      it 'should set @advance_amount' do
+        make_request
+        expect(assigns[:advance_amount]).to be_kind_of(Numeric)
+      end
+      it 'should set @advance_type' do
+        make_request
+        expect(assigns[:advance_type]).to be_kind_of(String)
+      end
+      it 'should set @advance_term' do
+        make_request
+        expect(assigns[:advance_term]).to be_kind_of(String)
+      end
+      it 'should set @advance_rate' do
+        make_request
+        expect(assigns[:advance_rate]).to be_kind_of(Numeric)
+      end
+      it 'should set @error_message' do
+        make_request
+        expect(assigns[:error_message]).to eq('pass')
+      end
     end
-    it 'should set @authorized_amount' do
-      make_request
-      expect(assigns[:authorized_amount]).to be_kind_of(Numeric)
-    end
-    it 'should set @exception_message' do
-      make_request
-      expect(assigns[:exception_message]).to be_kind_of(String)
-    end
-    it 'should set @cumulative_stock_required' do
-      make_request
-      expect(assigns[:cumulative_stock_required]).to be_kind_of(Numeric)
-    end
-    it 'should set @current_trade_stock_required' do
-      make_request
-      expect(assigns[:current_trade_stock_required]).to be_kind_of(Numeric)
-    end
-    it 'should set @pre_trade_stock_required' do
-      make_request
-      expect(assigns[:pre_trade_stock_required]).to be_kind_of(Numeric)
-    end
-    it 'should set @net_stock_required' do
-      make_request
-      expect(assigns[:net_stock_required]).to be_kind_of(Numeric)
-    end
-    it 'should set @gross_amount' do
-      make_request
-      expect(assigns[:gross_amount]).to be_kind_of(Numeric)
-    end
-    it 'should set @gross_cumulative_stock_required' do
-      make_request
-      expect(assigns[:gross_cumulative_stock_required]).to be_kind_of(Numeric)
-    end
-    it 'should set @gross_current_trade_stock_required' do
-      make_request
-      expect(assigns[:gross_current_trade_stock_required]).to be_kind_of(Numeric)
-    end
-    it 'should set @gross_pre_trade_stock_required' do
-      make_request
-      expect(assigns[:gross_pre_trade_stock_required]).to be_kind_of(Numeric)
-    end
-    it 'should set @gross_net_stock_required' do
-      make_request
-      expect(assigns[:gross_net_stock_required]).to be_kind_of(Numeric)
-    end
-  end
 
-  describe "POST quick_advance_error", :vcr do
-    allow_policy :advances, :show?
-    let(:etransact_service_instance) {double('EtransactAdvancesService', quick_advance_validate: {}, signer_full_name: username)}
-    let(:member_id) {750}
-    let(:advance_term) {'someterm'}
-    let(:advance_type) {'sometype'}
-    let(:advance_rate) {'0.17'}
-    let(:username) {'Test User'}
-    let(:amount) { 100000000 }
-    let(:check_capstock) { true }
-    let(:make_request) { post :quick_advance_preview, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, check_capstock: check_capstock}
+    describe "POST quick_advance_low_limit_error" do
+      let(:amount) { 2000 }
+      it 'should render its view' do
+        make_request
+        expect(response.body).to render_template('dashboard/quick_advance_error')
+      end
+      it 'should set @advance_amount' do
+        make_request
+        expect(assigns[:advance_amount]).to be_kind_of(Numeric)
+      end
+      it 'should set @advance_type' do
+        make_request
+        expect(assigns[:advance_type]).to be_kind_of(String)
+      end
+      it 'should set @advance_term' do
+        make_request
+        expect(assigns[:advance_term]).to be_kind_of(String)
+      end
+      it 'should set @advance_rate' do
+        make_request
+        expect(assigns[:advance_rate]).to be_kind_of(Numeric)
+      end
+      it 'should set @error_message' do
+        make_request
+        expect(assigns[:error_message]).to eq('low')
+      end
+    end
 
-    it_behaves_like 'a user required action', :post, :quick_advance_preview
-    it_behaves_like 'an authorization required method', :post, :quick_advance_preview, :advances, :show?
-    it 'should render its view' do
-      make_request
-      expect(response.body).to render_template('dashboard/quick_advance_error')
-    end
-    it 'should set @advance_amount' do
-      make_request
-      expect(assigns[:advance_amount]).to be_kind_of(Numeric)
-    end
-    it 'should set @advance_type' do
-      make_request
-      expect(assigns[:advance_type]).to be_kind_of(String)
-    end
-    it 'should set @advance_term' do
-      make_request
-      expect(assigns[:advance_term]).to be_kind_of(String)
-    end
-    it 'should set @advance_rate' do
-      make_request
-      expect(assigns[:advance_rate]).to be_kind_of(Numeric)
+    describe "POST quick_advance_high_limit_error" do
+      let(:amount) { 20000000000 }
+      it 'should render its view' do
+        make_request
+        expect(response.body).to render_template('dashboard/quick_advance_error')
+      end
+      it 'should set @advance_amount' do
+        make_request
+        expect(assigns[:advance_amount]).to be_kind_of(Numeric)
+      end
+      it 'should set @advance_type' do
+        make_request
+        expect(assigns[:advance_type]).to be_kind_of(String)
+      end
+      it 'should set @advance_term' do
+        make_request
+        expect(assigns[:advance_term]).to be_kind_of(String)
+      end
+      it 'should set @advance_rate' do
+        make_request
+        expect(assigns[:advance_rate]).to be_kind_of(Numeric)
+      end
+      it 'should set @error_message' do
+        make_request
+        expect(assigns[:error_message]).to eq('high')
+      end
     end
   end
 
@@ -325,7 +366,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:advance_type) {'sometype'}
     let(:advance_rate) {'0.17'}
     let(:username) {'Test User'}
-    let(:amount) { 100 }
+    let(:amount) { 100000 }
     let(:securid_pin) { '1111' }
     let(:securid_token) { '222222' }
     let(:make_request) { post :quick_advance_perform, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, securid_pin: securid_pin, securid_token: securid_token }

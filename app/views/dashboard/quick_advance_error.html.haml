@@ -1,7 +1,12 @@
 .quick-advance-preview
   .quick-advance-body
     .quick-advance-icon-section.icon-error-before
-      %p= t('dashboard.quick_advance.error.exception')
+      - if @error_message == 'pass'
+        %p= t('dashboard.quick_advance.error.capital_stock_exception')
+      -elsif @error_message == 'low'
+        %p= t('dashboard.quick_advance.error.low_exception_html', amount: fhlb_formatted_currency(@min_amount, precision: 0))
+      -else
+        %p= t('dashboard.quick_advance.error.high_exception_html', amount: fhlb_formatted_currency(@max_amount, precision: 0))
       %p.quick-advance-loading-message= t('dashboard.quick_advance.preview.initiate')
       .quick-advance-summary
         %dl

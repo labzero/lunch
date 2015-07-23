@@ -10,6 +10,41 @@ describe MAPI::ServiceApp do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
   end
 
+  [:test, :production].each do |env|
+    describe "etransact advances limits in the #{env} environment" do
+      let(:etransact_advances_limits) { get '/etransact_advances/limits'; JSON.parse(last_response.body) }
+      let(:some_status_data) {{"WHOLE_LOAN_ENABLED" => "N", "SBC_AGENCY_ENABLED" => "Y", "SBC_AAA_ENABLED" => "Y", "SBC_AA_ENABLED" => "Y",
+          "LOW_DAYS_TO_MATURITY" => 0, "HIGH_DAYS_TO_MATURITY" => 1, "MIN_ONLINE_ADVANCE" => 100000, "TERM_DAILY_LIMIT" => 201000000,
+          "PRODUCT_TYPE" => "VRC", "END_TIME" => "1700", "OVERRIDE_END_DATE" => "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME" => "1700"}} if env == :production
+      let(:result_set) {double('Oracle Result Set', fetch: nil)} if env == :production
+      before do
+        if env == :production
+          allow(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
+          allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
+          allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
+          allow(result_set).to receive(:fetch_hash).and_return(some_status_data, nil)
+        end
+      end
+      it 'should return the expected limits for all types of advances' do
+        expect(etransact_advances_limits.length).to be >=1
+        etransact_advances_limits.each do |row|
+          expect(row['WHOLE_LOAN_ENABLED']).to be_kind_of(String)
+          expect(row['SBC_AGENCY_ENABLED']).to be_kind_of(String)
+          expect(row['SBC_AAA_ENABLED']).to be_kind_of(String)
+          expect(row['SBC_AA_ENABLED']).to be_kind_of(String)
+          expect(row['LOW_DAYS_TO_MATURITY']).to be_kind_of(Numeric)
+          expect(row['HIGH_DAYS_TO_MATURITY']).to be_kind_of(Numeric)
+          expect(row['MIN_ONLINE_ADVANCE']).to be_kind_of(Numeric)
+          expect(row['TERM_DAILY_LIMIT']).to be_kind_of(Numeric)
+          expect(row['PRODUCT_TYPE']).to be_kind_of(String)
+          expect(row['END_TIME']).to be_kind_of(String)
+          expect(row['OVERRIDE_END_DATE']).to be_kind_of(String)
+          expect(row['OVERRIDE_END_TIME']).to be_kind_of(String)
+        end
+      end
+    end
+  end
+
   describe "etransact advances status" do
     let(:etransact_advances_status) { get '/etransact_advances/status'; JSON.parse(last_response.body) }
     it "should return 2 etransact advances status" do

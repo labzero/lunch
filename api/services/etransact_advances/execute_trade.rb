@@ -368,7 +368,7 @@ module MAPI
             if operation == 'EXECUTE'
               JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_confirmation.json')))
             else
-              if (amount.to_i < 100000) || (!check_capstock)
+              if (amount.to_i < 1000000) || (!check_capstock)
                 JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_preview.json')))
               elsif amount.to_i < 2000000
                 JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_capstock_preview.json')))
