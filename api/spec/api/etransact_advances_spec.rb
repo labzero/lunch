@@ -14,7 +14,7 @@ describe MAPI::ServiceApp do
     describe "etransact advances limits in the #{env} environment" do
       let(:etransact_advances_limits) { get '/etransact_advances/limits'; JSON.parse(last_response.body) }
       let(:some_status_data) {{"WHOLE_LOAN_ENABLED" => "N", "SBC_AGENCY_ENABLED" => "Y", "SBC_AAA_ENABLED" => "Y", "SBC_AA_ENABLED" => "Y",
-          "LOW_DAYS_TO_MATURITY" => 0, "HIGH_DAYS_TO_MATURITY" => 1, "MIN_ONLINE_ADVANCE" => 100000, "TERM_DAILY_LIMIT" => 201000000,
+          "LOW_DAYS_TO_MATURITY" => 0, "HIGH_DAYS_TO_MATURITY" => 1, "MIN_ONLINE_ADVANCE" => "100000", "TERM_DAILY_LIMIT" => "201000000",
           "PRODUCT_TYPE" => "VRC", "END_TIME" => "1700", "OVERRIDE_END_DATE" => "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME" => "1700"}} if env == :production
       let(:result_set) {double('Oracle Result Set', fetch: nil)} if env == :production
       before do
@@ -34,8 +34,8 @@ describe MAPI::ServiceApp do
           expect(row['SBC_AA_ENABLED']).to be_kind_of(String)
           expect(row['LOW_DAYS_TO_MATURITY']).to be_kind_of(Numeric)
           expect(row['HIGH_DAYS_TO_MATURITY']).to be_kind_of(Numeric)
-          expect(row['MIN_ONLINE_ADVANCE']).to be_kind_of(Numeric)
-          expect(row['TERM_DAILY_LIMIT']).to be_kind_of(Numeric)
+          expect(row['MIN_ONLINE_ADVANCE']).to be_kind_of(String)
+          expect(row['TERM_DAILY_LIMIT']).to be_kind_of(String)
           expect(row['PRODUCT_TYPE']).to be_kind_of(String)
           expect(row['END_TIME']).to be_kind_of(String)
           expect(row['OVERRIDE_END_DATE']).to be_kind_of(String)
