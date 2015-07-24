@@ -124,6 +124,8 @@ class DashboardController < ApplicationController
   end
 
   def quick_advance_preview
+    @current_member_name = current_member_name
+    @preview = true
     check = EtransactAdvancesService.new(request).check_limits(params[:amount].to_f, params[:advance_term])
     if check[:status] == 'pass'
       preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, params[:check_capstock], session['signer_full_name'])
@@ -131,7 +133,7 @@ class DashboardController < ApplicationController
       when 'CapitalStockError'
         preview_success = false
         preview_error = false
-        @advance_amount = params[:amount].to_f
+        @advance_amount = params[:amount].to_f if params[:amount]
         @authorized_amount = preview[:authorized_amount]
         @exception_message = preview[:exception_message]
         @cumulative_stock_required = preview[:cumulative_stock_required]
@@ -148,22 +150,27 @@ class DashboardController < ApplicationController
         preview_success = false
         preview_error = true
         @error_message = check[:status]
-        @advance_amount = params[:amount].to_f
-        @advance_type = params[:advance_type]
-        @advance_term = params[:advance_term]
-        @advance_rate = params[:advance_rate].to_f
+        @advance_amount = params[:amount].to_f if params[:amount]
+        @advance_description = get_description_from_advance_term(params[:advance_term]) if params[:advance_term]
+        @advance_program = get_program_from_advance_type(params[:advance_type]) if params[:advance_type]
+        @advance_type = get_type_from_advance_type(params[:advance_type]) if params[:advance_type]
+        @advance_term = params[:advance_term].capitalize if params[:advance_term]
+        @advance_rate = params[:advance_rate].to_f if params[:advance_rate]
         response_html = render_to_string :quick_advance_error, layout: false
       else
         preview_success = true
         preview_error = false
-        @advance_amount = preview[:advance_amount]
-        @advance_type = preview[:advance_type]
+        @advance_amount = preview[:advance_amount].to_f if preview[:advance_amount]
+        @advance_description = get_description_from_advance_term(preview[:advance_term]) if preview[:advance_term]
+        @advance_program = get_program_from_advance_type(preview[:advance_type]) if preview[:advance_type]
+        @advance_type = get_type_from_advance_type(preview[:advance_type]) if preview[:advance_type]
         @interest_day_count = preview[:interest_day_count]
         @payment_on = preview[:payment_on]
-        @advance_term = preview[:advance_term]
+        @advance_term = preview[:advance_term].capitalize if preview[:advance_term]
         @funding_date = preview[:funding_date]
         @maturity_date = preview[:maturity_date]
-        @advance_rate = preview[:advance_rate]
+        @advance_rate = preview[:advance_rate].to_f if preview[:advance_rate]
+        @stock = params[:stock].to_f if params[:stock]
         @session_elevated = session_elevated?
         response_html = render_to_string layout: false
       end
@@ -173,13 +180,15 @@ class DashboardController < ApplicationController
       @error_message = check[:status]
       @min_amount = check[:low]
       @max_amount = check[:high]
-      @advance_amount = params[:amount].to_f
-      @advance_type = params[:advance_type]
-      @advance_term = params[:advance_term]
-      @advance_rate = params[:advance_rate].to_f
+      @advance_amount = params[:amount].to_f if params[:amount]
+      @advance_description = get_description_from_advance_term(params[:advance_term]) if params[:advance_term]
+      @advance_program = get_program_from_advance_type(params[:advance_type]) if params[:advance_type]
+      @advance_type = get_type_from_advance_type(params[:advance_type]) if params[:advance_type]
+      @advance_term = params[:advance_term].capitalize if params[:advance_term]
+      @advance_rate = params[:advance_rate].to_f if params[:advance_rate]
       response_html = render_to_string :quick_advance_error, layout: false
     end
-    render json: {preview_success: preview_success, preview_error: preview_error, html: response_html, authorized_amount: @authorized_amount, gross_amount: @gross_amount}
+    render json: {preview_success: preview_success, preview_error: preview_error, html: response_html, authorized_amount: @authorized_amount, gross_amount: @gross_amount, net_stock_required: @net_stock_required, gross_net_stock_required: @gross_net_stock_required}
   end
 
   def quick_advance_perform
@@ -205,15 +214,18 @@ class DashboardController < ApplicationController
         advance_success = true 
 
         @initiated_at = confirmation[:initiated_at]
-        @advance_amount = confirmation[:advance_amount]
-        @advance_type = confirmation[:advance_type]
+        @advance_amount = confirmation[:advance_amount].to_f if confirmation[:advance_amount]
+        @advance_description = get_description_from_advance_term(confirmation[:advance_term]) if confirmation[:advance_term]
+        @advance_program = get_program_from_advance_type(confirmation[:advance_type]) if confirmation[:advance_type]
+        @advance_type = get_type_from_advance_type(confirmation[:advance_type]) if confirmation[:advance_type]
         @interest_day_count = confirmation[:interest_day_count]
         @payment_on = confirmation[:payment_on]
-        @advance_term = confirmation[:advance_term]
+        @advance_term = confirmation[:advance_term].capitalize if confirmation[:advance_term]
         @funding_date = confirmation[:funding_date]
         @maturity_date = confirmation[:maturity_date]
-        @advance_rate = confirmation[:advance_rate]
+        @advance_rate = confirmation[:advance_rate].to_f if confirmation[:advance_rate]
         @advance_number = confirmation[:confirmation_number]
+        @stock = params[:stock].to_f if params[:stock]
         response_html = render_to_string layout: false
       end
     end
@@ -257,5 +269,37 @@ class DashboardController < ApplicationController
     end
     new_gauge_hash[largest_display_percentage_key][:display_percentage] = (100 - (total_display_percentage - largest_display_percentage))
     new_gauge_hash
+  end
+
+  def get_description_from_advance_term(advance_term)
+    advance_term = advance_term.upcase
+    case advance_term
+      when 'OVERNIGHT', 'OPEN'
+        I18n.t('dashboard.quick_advance.vrc_title')
+      else
+        I18n.t('dashboard.quick_advance.frc_title')
+    end
+  end
+  def get_program_from_advance_type(advance_type)
+    advance_type = advance_type.upcase.gsub(/\s+/, "")
+    case advance_type
+      when 'WHOLELOAN'
+        I18n.t('dashboard.quick_advance.table.axes_labels.standard')
+      when 'SBC-AGENCY', 'SBC-AAA', 'SBC-AA'
+        I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed')
+    end
+  end
+  def get_type_from_advance_type(advance_type)
+    advance_type = advance_type.upcase.gsub(/\s+/, "")
+    case advance_type
+      when 'WHOLELOAN'
+        I18n.t('dashboard.quick_advance.table.whole_loan')
+      when 'SBC-AGENCY'
+        I18n.t('dashboard.quick_advance.table.agency')
+      when 'SBC-AAA'
+        I18n.t('dashboard.quick_advance.table.aaa')
+      when 'SBC-AA'
+        I18n.t('dashboard.quick_advance.table.aa')
+    end
   end
 end

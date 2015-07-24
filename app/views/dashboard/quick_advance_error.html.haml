@@ -1,3 +1,5 @@
+- advance_number ||= nil
+- stock ||= nil
 .quick-advance-preview
   .quick-advance-body
     .quick-advance-icon-section.icon-error-before
@@ -8,22 +10,5 @@
       -else
         %p= t('dashboard.quick_advance.error.high_exception_html', amount: fhlb_formatted_currency(@max_amount, precision: 0))
       %p.quick-advance-loading-message= t('dashboard.quick_advance.preview.initiate')
-      .quick-advance-summary
-        %dl
-          %dt= t('dashboard.quick_advance.field_headings.advance_amount') +':'
-          %dd= fhlb_formatted_currency(@advance_amount, precision: 0)
-        %dl
-          %dt= t('dashboard.quick_advance.field_headings.advance_type') +':'
-          %dd= @advance_type
-          %dt= t('dashboard.quick_advance.field_headings.interest_day_count') +':'
-          %dd= '-'
-          %dt= t('dashboard.quick_advance.field_headings.payment_on') +':'
-          %dd= '-'
-        %dl
-          %dt= t('dashboard.quick_advance.field_headings.advance_term') +':'
-          %dd= @advance_term
-          %dt= t('dashboard.quick_advance.field_headings.funding_date') +':'
-          %dd= '-'
-          %dt= t('dashboard.quick_advance.field_headings.maturity_date') +':'
-          %dd= '-'
-  %button.primary-button.quick-advance-back-button.icon-arrow-left-before= t('dashboard.quick_advance.buttons.rates')
+    = render 'quick_advance_summary', advance_amount: @advance_amount, advance_description: @advance_description, advance_program: @advance_program, advance_type: @advance_type, advance_rate: @advance_rate, interest_day_count: @interest_day_count, payment_on: @payment_on, advance_term: @advance_term, funding_date: @funding_date, maturity_date: @maturity_date, stock: @stock
+  %button.primary-button.quick-advance-back-button.icon-arrow-left-before.quick-advance-error-button= t('dashboard.quick_advance.buttons.rates')

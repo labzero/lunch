@@ -74,6 +74,7 @@
           %p= t('dashboard.quick_advance.advance_last_updated', last_updated: @quick_advance_last_updated)
           %p= t('dashboard.quick_advance.hours_of_operation_html', url: '')
         - if @quick_advances_active
+          %p.quick-advance-instruction= t('dashboard.quick_advance.advance_instruction')
           %table
             %thead
               %tr
@@ -87,7 +88,7 @@
                 %th= t('dashboard.quick_advance.table.aaa')
                 %th= t('dashboard.quick_advance.table.aa')
             %tbody
-          %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.initiate')
+          %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.preview')
           %small
             %p.rate-advances-footer= t('dashboard.quick_advance.table.footer')
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), link: {name: t('dashboard.actions.more'), path: ''}, data_available: !@previous_activity.blank?} do

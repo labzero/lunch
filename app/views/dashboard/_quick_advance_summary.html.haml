@@ -1,22 +1,38 @@
 - advance_number ||= nil
+- stock ||= nil
+- preview ||= nil
 .quick-advance-summary
-  %dl
-    - if advance_number
+  - if advance_number
+    %dl
       %dt= t('common_table_headings.advance_number') +':'
       %dd= advance_number
+  %dl
     %dt= t('dashboard.quick_advance.field_headings.advance_amount') +':'
     %dd= fhlb_formatted_currency(advance_amount, precision: 0)
+    - if stock
+      %dt= t('dashboard.quick_advance.field_headings.cumulative') +':'
+      %dd= fhlb_formatted_currency(stock, precision: 0)
   %dl
-    %dt= t('dashboard.quick_advance.field_headings.advance_type') +':'
-    %dd= advance_type
-    %dt= t('dashboard.quick_advance.field_headings.interest_day_count') +':'
-    %dd= interest_day_count
-    %dt= t('dashboard.quick_advance.field_headings.payment_on') +':'
-    %dd= payment_on
+    %dt= t('dashboard.quick_advance.field_headings.description') +':'
+    %dd= advance_description || t('global.missing_value')
+    %dt= t('dashboard.quick_advance.field_headings.program') +':'
+    %dd= advance_program || t('global.missing_value')
+    %dt= t('dashboard.quick_advance.field_headings.security_type') +':'
+    %dd= advance_type || t('global.missing_value')
   %dl
     %dt= t('dashboard.quick_advance.field_headings.advance_term') +':'
-    %dd= advance_term
+    %dd= advance_term || t('global.missing_value')
+    %dt= t('dashboard.quick_advance.field_headings.advance_rate') +':'
+    %dd= advance_rate || t('global.missing_value')
+  %dl
+    %dt= t('dashboard.quick_advance.field_headings.interest_day_count') +':'
+    %dd= interest_day_count || t('global.missing_value')
+    %dt= t('dashboard.quick_advance.field_headings.payment_on') +':'
+    %dd= payment_on || t('global.missing_value')
+  %dl
     %dt= t('dashboard.quick_advance.field_headings.funding_date') +':'
     %dd= fhlb_date_standard_numeric(funding_date)
     %dt= t('dashboard.quick_advance.field_headings.maturity_date') +':'
     %dd= fhlb_date_standard_numeric(maturity_date)
+  - if stock && preview
+    %label.label-radio-no-padding= t('dashboard.quick_advance.field_headings.debit_sta_html', amount: fhlb_formatted_currency(stock, precision: 0))

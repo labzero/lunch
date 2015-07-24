@@ -143,4 +143,48 @@ http_interactions:
         CAPITAL STOCK","cumulative_stock_required":47000,"current_trade_stock_required":47000,"pre_trade_stock_required":-1000,"net_stock_required":46000,"gross_amount":47000000,"gross_cumulative_stock_required":49000,"gross_current_trade_stock_required":49000,"gross_pre_trade_stock_required":0,"gross_net_stock_required":49000}'
     http_version: 
   recorded_at: Thu, 23 Jul 2015 17:21:40 GMT
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/etransact_advances/validate_advance/750/1000000.0/WHOLELOAN/1week/0.17/true/Test%20User
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
+      X-Request-Id:
+      - ''
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '414'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Mon, 27 Jul 2015 16:05:31 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"status":"CapitalStockError","authorized_amount":45098900,"exception_message":"INSUFFICIENT
+        CAPITAL STOCK","cumulative_stock_required":47000,"current_trade_stock_required":47000,"pre_trade_stock_required":-1000,"net_stock_required":46000,"gross_amount":47000000,"gross_cumulative_stock_required":49000,"gross_current_trade_stock_required":49000,"gross_pre_trade_stock_required":0,"gross_net_stock_required":49000}'
+    http_version: 
+  recorded_at: Mon, 27 Jul 2015 16:05:31 GMT
 recorded_with: VCR 2.9.3
