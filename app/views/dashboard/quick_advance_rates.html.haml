@@ -15,4 +15,4 @@
         = fhlb_formatted_number(advance_rate, precision: 2)
         - date = @rate_data[advance_type][advance_term][:maturity_date].to_date
         - interest_day_count = @rate_data[advance_type][advance_term][:interest_day_count].to_s.gsub('/', '')
-        = render 'shared/tooltip', tooltip_data: {t('dashboard.quick_advance.field_headings.payment_on') => @rate_data[advance_type][advance_term][:payment_on], t('dashboard.quick_advance.field_headings.interest_day_count') => t("dashboard.quick_advance.table.#{interest_day_count}"), t('dashboard.quick_advance.field_headings.maturity_date') => date.strftime("%-d-%b-%y")}
+        = render 'shared/tooltip', tooltip_data: {t('dashboard.quick_advance.field_headings.payment_on') => @rate_data[advance_type][advance_term][:payment_on], t('dashboard.quick_advance.field_headings.interest_day_count') => t("dashboard.quick_advance.table.#{interest_day_count}"), t('dashboard.quick_advance.field_headings.maturity_date') => fhlb_date_standard_numeric(date)}
