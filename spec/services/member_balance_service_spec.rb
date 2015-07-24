@@ -691,7 +691,7 @@ describe MemberBalanceService do
   end
 
   describe '`dividend_statement` method', :vcr do
-    let(:dividend_statement) { subject.dividend_statement(Time.zone.now) }
+    let(:dividend_statement) { subject.dividend_statement(Date.new(2015,1,1)) }
     it 'returns a date for its `transaction_date`' do
       expect(dividend_statement[:transaction_date]).to be_kind_of(Date)
     end
