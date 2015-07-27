@@ -36,7 +36,6 @@ Scenario: Quick Advance flyout table
   And I open the quick advance flyout
   Then I should see the quick advance table
   And I should see a rate for the "overnight" term with a type of "whole"
-  And I should see the selected state for the cell with a term of "overnight" and a type of "whole"
 
 Scenario: Quick Advance flyout tooltip
   Given I visit the dashboard
@@ -130,8 +129,3 @@ Scenario: Users aren't required to enter a SecurID token a second time
   Then I shouldn't see the SecurID fields
   When I click on the quick advance confirm button
   Then I should see confirmation number for the advance
-
-Scenario: Default selection in Quick Advance flyout
-  Given I visit the dashboard
-  When I open the quick advance flyout
-  Then I should see the selected state for the cell with a term of "overnight" and a type of "whole"

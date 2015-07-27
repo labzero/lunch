@@ -46,7 +46,7 @@
     function initiateQuickAdvance(rate_data) {
       $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function(json){
         var $flyoutBottomSection = $('.flyout-bottom-section');
-        var $oldNodes = $('.flyout-top-section-body span, .flyout-bottom-section table, .flyout-bottom-section .initiate-quick-advance, .rate-advances-footer');
+        var $oldNodes = $('.flyout-top-section-body span, .quick-advance-instruction, .flyout-bottom-section table, .flyout-bottom-section .initiate-quick-advance, .rate-advances-footer');
 
         // append the html response, hide old nodes and show the new ones
         $flyoutBottomSection.append($(json.html));
@@ -101,9 +101,11 @@
             $('.confirm-quick-advance-capstock').on('click', function () {
               if ($('#continue_transaction').prop('checked') == true) {
                 selected_rate['amount'] = json.authorized_amount;
+                selected_rate['stock'] = json.net_stock_required;
               }
               else {
                 selected_rate['amount'] = json.gross_amount;
+                selected_rate['stock'] = json.gross_net_stock_required;
               }
               selected_rate['check_capstock'] = false;
               initiateQuickAdvanceWithooutCapstockCheck(selected_rate);
