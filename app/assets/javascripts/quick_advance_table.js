@@ -94,13 +94,14 @@
             $('.quick-advance-capstock-back-button').on('click', function () {
               $('.quick-advance-capstock, .quick-advance-capstock-back-button, .confirm-quick-advance-capstock').remove();
               $('.quick-advance-capstock-subheading').hide();
+              selected_rate['amount'] = json.original_amount;
               $oldNodes.show();
             });
 
             // event listener and handler for .confirm-quick-advance button click
             $('.confirm-quick-advance-capstock').on('click', function () {
               if ($('#continue_transaction').prop('checked') == true) {
-                selected_rate['amount'] = json.authorized_amount;
+                selected_rate['amount'] = json.original_amount;
                 selected_rate['stock'] = json.net_stock_required;
               }
               else {
@@ -134,6 +135,7 @@
         $('.quick-advance-back-button').on('click', function() {
           $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
           $('.quick-advance-preview-subheading').hide();
+          selected_rate['amount'] = json.original_amount;
           $oldNodes.show();
           $('.flyout-top-section-body .quick-advance-capstock-subheading').show();
           transitionToCapstockFromLoading();

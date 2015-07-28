@@ -134,6 +134,7 @@ class DashboardController < ApplicationController
         preview_success = false
         preview_error = false
         @advance_amount = params[:amount].to_f if params[:amount]
+        @original_amount = params[:amount].to_f if params[:amount]
         @authorized_amount = preview[:authorized_amount]
         @exception_message = preview[:exception_message]
         @cumulative_stock_required = preview[:cumulative_stock_required]
@@ -160,6 +161,7 @@ class DashboardController < ApplicationController
       else
         preview_success = true
         preview_error = false
+        @original_amount = params[:amount].to_f if params[:amount]
         @advance_amount = preview[:advance_amount].to_f if preview[:advance_amount]
         @advance_description = get_description_from_advance_term(preview[:advance_term]) if preview[:advance_term]
         @advance_program = get_program_from_advance_type(preview[:advance_type]) if preview[:advance_type]
@@ -188,7 +190,7 @@ class DashboardController < ApplicationController
       @advance_rate = params[:advance_rate].to_f if params[:advance_rate]
       response_html = render_to_string :quick_advance_error, layout: false
     end
-    render json: {preview_success: preview_success, preview_error: preview_error, html: response_html, authorized_amount: @authorized_amount, gross_amount: @gross_amount, net_stock_required: @net_stock_required, gross_net_stock_required: @gross_net_stock_required}
+    render json: {preview_success: preview_success, preview_error: preview_error, html: response_html, authorized_amount: @authorized_amount, gross_amount: @gross_amount, net_stock_required: @net_stock_required, gross_net_stock_required: @gross_net_stock_required, original_amount: @original_amount}
   end
 
   def quick_advance_perform
