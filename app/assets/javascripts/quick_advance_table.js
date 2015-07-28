@@ -101,7 +101,7 @@
             // event listener and handler for .confirm-quick-advance button click
             $('.confirm-quick-advance-capstock').on('click', function () {
               if ($('#continue_transaction').prop('checked') == true) {
-                selected_rate['amount'] = json.authorized_amount;
+                selected_rate['amount'] = json.original_amount;
                 selected_rate['stock'] = json.net_stock_required;
               }
               else {
