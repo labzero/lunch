@@ -143,15 +143,23 @@ RSpec.describe DashboardController, :type => :controller do
 
   describe "POST quick_advance_preview", :vcr do
     allow_policy :advances, :show?
-    let(:etransact_service_instance) {double('EtransactAdvancesService', quick_advance_validate: {}, signer_full_name: username)}
+    let(:etransact_service_instance) {double('EtransactAdvancesService', check_limits: {}, quick_advance_validate: {}, signer_full_name: username)}
     let(:member_id) {750}
-    let(:advance_term) {'someterm'}
+    let(:advance_term) {'1week'}
     let(:advance_type) {'sometype'}
     let(:advance_rate) {'0.17'}
     let(:username) {'Test User'}
-    let(:amount) { 100 }
-    let(:make_request) { post :quick_advance_preview, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount}
-
+    let(:advance_description) {double('some description')}
+    let(:advance_program) {double('some program')}
+    let(:amount) { 100000 }
+    let(:check_capstock) { true }
+    let(:check_result) {{:status => 'pass', :low => 100000, :high => 1000000000}}
+    let(:make_request) { post :quick_advance_preview, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, check_capstock: check_capstock}
+    before do
+      allow(subject).to receive(:get_description_from_advance_term).and_return(advance_description)
+      allow(subject).to receive(:get_type_from_advance_type).and_return(advance_type)
+      allow(subject).to receive(:get_program_from_advance_type).and_return(advance_program)
+    end
     it_behaves_like 'a user required action', :post, :quick_advance_preview
     it_behaves_like 'an authorization required method', :post, :quick_advance_preview, :advances, :show?
     it 'should render its view' do
@@ -171,6 +179,14 @@ RSpec.describe DashboardController, :type => :controller do
     it 'should set @advance_type' do
       make_request
       expect(assigns[:advance_type]).to be_kind_of(String)
+    end
+    it 'should set @advance_description' do
+      make_request
+      expect(assigns[:advance_description]).to eq(advance_description)
+    end
+    it 'should set @advance_program' do
+      make_request
+      expect(assigns[:advance_program]).to eq(advance_program)
     end
     it 'should set @interest_day_count' do
       make_request
@@ -200,8 +216,13 @@ RSpec.describe DashboardController, :type => :controller do
       before do
         allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
       end
+      it 'should call the EtransactAdvancesService object\'s `check_limits` method with the POSTed amount and advance_term' do
+        expect(etransact_service_instance).to receive(:check_limits).with(amount, advance_term).and_return({})
+        make_request
+      end
       it 'should call the EtransactAdvancesService object\'s `quick_advance_validate` method with the POSTed advance_type, advance_term and rate' do
-        expect(etransact_service_instance).to receive(:quick_advance_validate).with(member_id, amount, advance_type, advance_term, advance_rate.to_f, username).and_return({})
+        allow(etransact_service_instance).to receive(:check_limits).with(amount, advance_term).and_return(check_result)
+        expect(etransact_service_instance).to receive(:quick_advance_validate).with(member_id, amount, advance_type, advance_term, advance_rate.to_f, check_capstock, username).and_return({})
         make_request
       end
       it 'should request the signer full name' do
@@ -214,6 +235,166 @@ RSpec.describe DashboardController, :type => :controller do
         make_request
       end
     end
+
+    describe "POST quick_advance_capstock" do
+      let(:amount) { 1000000 }
+      it 'should render its view' do
+        make_request
+        expect(response.body).to render_template('dashboard/quick_advance_capstock')
+      end
+      it 'should set @authorized_amount' do
+        make_request
+        expect(assigns[:authorized_amount]).to be_kind_of(Numeric)
+      end
+      it 'should set @exception_message' do
+        make_request
+        expect(assigns[:exception_message]).to be_kind_of(String)
+      end
+      it 'should set @cumulative_stock_required' do
+        make_request
+        expect(assigns[:cumulative_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @current_trade_stock_required' do
+        make_request
+        expect(assigns[:current_trade_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @pre_trade_stock_required' do
+        make_request
+        expect(assigns[:pre_trade_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @net_stock_required' do
+        make_request
+        expect(assigns[:net_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @gross_amount' do
+        make_request
+        expect(assigns[:gross_amount]).to be_kind_of(Numeric)
+      end
+      it 'should set @gross_cumulative_stock_required' do
+        make_request
+        expect(assigns[:gross_cumulative_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @gross_current_trade_stock_required' do
+        make_request
+        expect(assigns[:gross_current_trade_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @gross_pre_trade_stock_required' do
+        make_request
+        expect(assigns[:gross_pre_trade_stock_required]).to be_kind_of(Numeric)
+      end
+      it 'should set @gross_net_stock_required' do
+        make_request
+        expect(assigns[:gross_net_stock_required]).to be_kind_of(Numeric)
+      end
+    end
+
+    describe "POST quick_advance_error" do
+      let(:amount) { 2000000 }
+      it 'should render its view' do
+        make_request
+        expect(response.body).to render_template('dashboard/quick_advance_error')
+      end
+      it 'should set @advance_amount' do
+        make_request
+        expect(assigns[:advance_amount]).to be_kind_of(Numeric)
+      end
+      it 'should set @advance_type' do
+        make_request
+        expect(assigns[:advance_type]).to be_kind_of(String)
+      end
+      it 'should set @advance_term' do
+        make_request
+        expect(assigns[:advance_term]).to be_kind_of(String)
+      end
+      it 'should set @advance_rate' do
+        make_request
+        expect(assigns[:advance_rate]).to be_kind_of(Numeric)
+      end
+      it 'should set @error_message' do
+        make_request
+        expect(assigns[:error_message]).to eq('pass')
+      end
+      it 'should set @advance_description' do
+        make_request
+        expect(assigns[:advance_description]).to eq(advance_description)
+      end
+      it 'should set @advance_program' do
+        make_request
+        expect(assigns[:advance_program]).to eq(advance_program)
+      end
+    end
+
+    describe "POST quick_advance_low_limit_error" do
+      let(:amount) { 2000 }
+      it 'should render its view' do
+        make_request
+        expect(response.body).to render_template('dashboard/quick_advance_error')
+      end
+      it 'should set @advance_amount' do
+        make_request
+        expect(assigns[:advance_amount]).to be_kind_of(Numeric)
+      end
+      it 'should set @advance_type' do
+        make_request
+        expect(assigns[:advance_type]).to be_kind_of(String)
+      end
+      it 'should set @advance_term' do
+        make_request
+        expect(assigns[:advance_term]).to be_kind_of(String)
+      end
+      it 'should set @advance_rate' do
+        make_request
+        expect(assigns[:advance_rate]).to be_kind_of(Numeric)
+      end
+      it 'should set @error_message' do
+        make_request
+        expect(assigns[:error_message]).to eq('low')
+      end
+      it 'should set @advance_description' do
+        make_request
+        expect(assigns[:advance_description]).to eq(advance_description)
+      end
+      it 'should set @advance_program' do
+        make_request
+        expect(assigns[:advance_program]).to eq(advance_program)
+      end
+    end
+
+    describe "POST quick_advance_high_limit_error" do
+      let(:amount) { 20000000000 }
+      it 'should render its view' do
+        make_request
+        expect(response.body).to render_template('dashboard/quick_advance_error')
+      end
+      it 'should set @advance_amount' do
+        make_request
+        expect(assigns[:advance_amount]).to be_kind_of(Numeric)
+      end
+      it 'should set @advance_type' do
+        make_request
+        expect(assigns[:advance_type]).to be_kind_of(String)
+      end
+      it 'should set @advance_term' do
+        make_request
+        expect(assigns[:advance_term]).to be_kind_of(String)
+      end
+      it 'should set @advance_rate' do
+        make_request
+        expect(assigns[:advance_rate]).to be_kind_of(Numeric)
+      end
+      it 'should set @error_message' do
+        make_request
+        expect(assigns[:error_message]).to eq('high')
+      end
+      it 'should set @advance_description' do
+        make_request
+        expect(assigns[:advance_description]).to eq(advance_description)
+      end
+      it 'should set @advance_program' do
+        make_request
+        expect(assigns[:advance_program]).to eq(advance_program)
+      end
+    end
   end
 
   describe "POST quick_advance_perform", :vcr do
@@ -222,9 +403,11 @@ RSpec.describe DashboardController, :type => :controller do
     let(:member_id) {750}
     let(:advance_term) {'someterm'}
     let(:advance_type) {'sometype'}
+    let(:advance_description) {double('some description')}
+    let(:advance_program) {double('some program')}
     let(:advance_rate) {'0.17'}
     let(:username) {'Test User'}
-    let(:amount) { 100 }
+    let(:amount) { 100000 }
     let(:securid_pin) { '1111' }
     let(:securid_token) { '222222' }
     let(:make_request) { post :quick_advance_perform, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, securid_pin: securid_pin, securid_token: securid_token }
@@ -234,6 +417,9 @@ RSpec.describe DashboardController, :type => :controller do
       allow(subject).to receive(:session_elevated?).and_return(true)
       allow(SecurIDService).to receive(:new).and_return(securid_service)
       allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
+      allow(subject).to receive(:get_description_from_advance_term).and_return(advance_description)
+      allow(subject).to receive(:get_type_from_advance_type).and_return(advance_type)
+      allow(subject).to receive(:get_program_from_advance_type).and_return(advance_program)
     end
 
     it_behaves_like 'a user required action', :post, :quick_advance_perform
@@ -270,6 +456,14 @@ RSpec.describe DashboardController, :type => :controller do
     it 'should set @advance_type' do
       make_request
       expect(assigns[:advance_type]).to be_kind_of(String)
+    end
+    it 'should set @advance_description' do
+      make_request
+      expect(assigns[:advance_description]).to eq(advance_description)
+    end
+    it 'should set @advance_program' do
+      make_request
+      expect(assigns[:advance_program]).to eq(advance_program)
     end
     it 'should set @interest_day_count' do
       make_request
@@ -396,6 +590,53 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'should not include the excluded keys values in calculating display_percentage' do
       expect(call_method[:total][:display_percentage]).to eq(100)
+    end
+  end
+
+  describe 'get_description_from_advance_term method' do
+    %w(OVERNIGHT overnight OPEN open).each do |term|
+      it "returns `#{I18n.t('dashboard.quick_advance.vrc_title')}` if it is passed `#{term}` as a term" do
+        expect(subject.send(:get_description_from_advance_term, term)).to eq(I18n.t('dashboard.quick_advance.vrc_title'))
+      end
+    end
+    it "returns `#{I18n.t('dashboard.quick_advance.frc_title')}` if it is passed anything other than `open` or `overnight` as a term" do
+      expect(subject.send(:get_description_from_advance_term, 'foo')).to eq(I18n.t('dashboard.quick_advance.frc_title'))
+    end
+  end
+
+  describe 'get_program_from_advance_type method' do
+    ['whole loan', 'WHOLE LOAN', 'wholeloan', 'WHOLELOAN'].each do |type|
+      it "returns `#{I18n.t('dashboard.quick_advance.table.axes_labels.standard')}` if it is passed `#{type}` as a type" do
+        expect(subject.send(:get_program_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.axes_labels.standard'))
+      end
+    end
+     ['SBC-AGENCY', 'SBC-AAA', 'SBC-AA', 'sbc-agency', 'sbc-aaa', 'sbc-aa'].each do |type|
+       it "returns `#{I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed')}` if it is passed `#{type}` as a type" do
+         expect(subject.send(:get_program_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed'))
+       end
+     end
+  end
+
+  describe 'get_type_from_advance_type method' do
+    ['whole loan', 'WHOLE LOAN', 'wholeloan', 'WHOLELOAN'].each do |type|
+      it "returns `#{I18n.t('dashboard.quick_advance.table.whole_loan')}` if it is passed `#{type}` as a type" do
+        expect(subject.send(:get_type_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.whole_loan'))
+      end
+    end
+    ['SBC-AGENCY', 'sbc-agency'].each do |type|
+      it "returns `#{I18n.t('dashboard.quick_advance.table.agency')}` if it is passed `#{type}` as a type" do
+        expect(subject.send(:get_type_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.agency'))
+      end
+    end
+    ['SBC-AAA', 'sbc-aaa'].each do |type|
+      it "returns `#{I18n.t('dashboard.quick_advance.table.aaa')}` if it is passed `#{type}` as a type" do
+        expect(subject.send(:get_type_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.aaa'))
+      end
+    end
+    ['SBC-AA', 'sbc-aa'].each do |type|
+      it "returns `#{I18n.t('dashboard.quick_advance.table.aa')}` if it is passed `#{type}` as a type" do
+        expect(subject.send(:get_type_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.aa'))
+      end
     end
   end
 

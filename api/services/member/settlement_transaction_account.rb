@@ -210,6 +210,32 @@ module MAPI
             }.to_json
           end
         end
+
+        def self.current_sta_rate(app, member_id)
+          member_id = member_id.to_i
+          current_sta_data = {account_number: nil, rate: nil, date: nil}
+          if app.settings.environment == :production
+            current_sta_rate_query = <<-SQL
+            SELECT RATE, TRANS_DATE
+            FROM PORTFOLIOS.STA_WEB_DETAIL
+              WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id)}
+              AND  DESCR = 'Interest Rate / Daily Balance'
+              AND TRANS_DATE =
+                (SELECT max(TRANS_DATE) FROM PORTFOLIOS.STA_WEB_DETAIL WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id)}
+                AND TRANS_DATE <= to_date(sysdate))
+            SQL
+            current_sta_rate_cursor = ActiveRecord::Base.connection.execute(current_sta_rate_query)
+            row = current_sta_rate_cursor.fetch_hash() || {}
+            current_sta_data[:rate] = row['RATE']
+            current_sta_data[:date] = row['TRANS_DATE']
+          else
+            current_sta_data = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'current_sta_rate.json'))).with_indifferent_access
+            current_sta_data[:date] = MAPI::Services::Member::CashProjections::Private.fake_as_of_date
+          end
+          current_sta_data[:rate] = current_sta_data[:rate].to_f if current_sta_data[:rate]
+          current_sta_data[:date] = current_sta_data[:date].to_date if current_sta_data[:date]
+          current_sta_data
+        end
       end
     end
   end

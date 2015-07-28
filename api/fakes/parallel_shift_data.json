@@ -1,0 +1,107 @@
+[
+  {
+    "DEALNO": "136559",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0294,
+    "SHOCK_BPS": -100,
+    "PRICE": 107.3681
+  },
+  {
+    "DEALNO": "136559",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0294,
+    "SHOCK_BPS": 0,
+    "PRICE": 105.1858
+  },
+  {
+    "DEALNO": "136559",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0294,
+    "SHOCK_BPS": 100,
+    "PRICE": 102.8486
+  },
+  {
+    "DEALNO": "136559",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0294,
+    "SHOCK_BPS": 200,
+    "PRICE": 101.0694
+  },
+  {
+    "DEALNO": "136559",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0294,
+    "SHOCK_BPS": 300,
+    "PRICE": 100.0865
+  },
+  {
+    "DEALNO": "136581",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0266,
+    "SHOCK_BPS": -100,
+    "PRICE": 106.6145
+  },
+  {
+    "DEALNO": "136581",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0266,
+    "SHOCK_BPS": 0,
+    "PRICE": 104.4824
+  },
+  {
+    "DEALNO": "136581",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0266,
+    "SHOCK_BPS": 100,
+    "PRICE": 102.2542
+  },
+  {
+    "DEALNO": "136581",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0266,
+    "SHOCK_BPS": 200,
+    "PRICE": 100.6704
+  },
+  {
+    "DEALNO": "136581",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0266,
+    "SHOCK_BPS": 300,
+    "PRICE": 99.95
+  },
+  {
+    "DEALNO": "136583",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0319,
+    "SHOCK_BPS": -100,
+    "PRICE": 108.0421
+  },
+  {
+    "DEALNO": "136583",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0319,
+    "SHOCK_BPS": 0,
+    "PRICE": 105.824
+  },
+  {
+    "DEALNO": "136583",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0319,
+    "SHOCK_BPS": 100,
+    "PRICE": 103.4061
+  },
+  {
+    "DEALNO": "136583",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0319,
+    "SHOCK_BPS": 200,
+    "PRICE": 101.4763
+  },
+  {
+    "DEALNO": "136583",
+    "ISSUE_DATE": "03-JAN-2008",
+    "CURRENT_COUPON": 0.0319,
+    "SHOCK_BPS": 300,
+    "PRICE": 100.2734
+  }
+]

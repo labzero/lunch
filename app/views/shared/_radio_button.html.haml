@@ -1,0 +1,8 @@
+- id ||= nil
+- id = id.parameterize if id
+- disabled ||= false
+- checked ||=false
+- name ||=false
+- text ||=nil
+%input{type: :'radio', id:"#{id}", name: name, checked: checked, disabled: disabled}
+%label.label-radio= text

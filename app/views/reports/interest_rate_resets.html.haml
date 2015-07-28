@@ -5,7 +5,7 @@
     %h1= t('reports.pages.interest_rate_resets.title')
     = render 'reports_header_buttons'
   .report-main-body
-    %h2.report-table-title= t('reports.pages.interest_rate_resets.info', date: fhlb_date_long_alpha(@start_date))
+    %h2.report-table-title= t('reports.pages.interest_rate_resets.info', date: fhlb_date_long_alpha(@date_processed))
     = render 'reports/reports_table', table_class: 'interest-rate-resets-table', table_data: @irr_table_data, sortable: false
     %small
       %p= t('reports.pages.interest_rate_resets.questions', phone_number: fhlb_formatted_phone_number('4156162559'))

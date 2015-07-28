@@ -85,6 +85,17 @@ label {
   color: $medium-gray;
 }
 
+.label-radio {
+  @extend %typography-subtitle;
+  padding-left: 7px;
+  color: $dark-gray;
+}
+
+.label-radio-no-padding {
+  @extend %typography-subtitle;
+  color: $dark-gray;
+}
+
 .form-error {
   color: $alert-red;
   @extend %typography-error-message;

@@ -68,6 +68,20 @@ class MembersService < MAPIService
     data
   end
 
+  def quick_advance_enabled_for_member?(member_id)
+    begin
+      response = @connection["member/#{member_id}/quick_advance_flag"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MembersService.quick_advance_enabled_for_member?? encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MembersService.quick_advance_enabled_for_member?? encountered a connection error: #{e.class.name}")
+      return nil
+    end
+    flag = JSON.parse(response.body).first
+    'Y' == flag.upcase unless flag.blank?
+  end
+
   def users(member_id)
     users = nil
     Devise::LDAP::Adapter.shared_connection do

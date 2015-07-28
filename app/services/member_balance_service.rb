@@ -352,7 +352,7 @@ class MemberBalanceService < MAPIService
     end
     
     data[:used_financing_availability] = data[:collateral_borrowing_capacity][:total].to_i - data[:collateral_borrowing_capacity][:remaining].to_i
-    data[:uncollateralized_financing_availability] = data[:total_financing_available].to_i - data[:used_financing_availability].to_i
+    data[:uncollateralized_financing_availability] = [data[:total_financing_available].to_i - data[:collateral_borrowing_capacity][:total].to_i, 0].max
     data
   end
 
@@ -383,26 +383,46 @@ class MemberBalanceService < MAPIService
   end
 
   def settlement_transaction_rate
-    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
     begin
-      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'settlement_transaction_rate.json'))).with_indifferent_access
+      response = @connection["/member/#{@member_id}/current_sta_rate"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.current_sta_rate encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.current_sta_rate encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
     rescue JSON::ParserError => e
-      Rails.logger.warn("MemberBalanceService.settlement_transaction_rate encountered a JSON parsing error: #{e}")
+      Rails.logger.warn("MemberBalanceService.current_sta_rate encountered a JSON parsing error: #{e}")
       return nil
     end
     data
   end
 
   def dividend_statement(quarter)
-    # TODO: hit MAPI endpoint
+    quarter = quarter.to_date
     begin
-      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'dividend_statement.json'))).with_indifferent_access
+      response = @connection["/member/#{@member_id}/dividend_statement/#{quarter.iso8601}"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.dividend_statement encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.dividend_statement encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
     rescue JSON::ParserError => e
       Rails.logger.warn("MemberBalanceService.dividend_statement encountered a JSON parsing error: #{e}")
       return nil
     end
+    data
 
-    data[:transaction_date] = quarter.to_date
+    data[:transaction_date] = data[:transaction_date].to_date
     data[:details].each do |detail|
       detail[:issue_date] = detail[:issue_date].to_date
       detail[:start_date] = detail[:start_date].to_date
@@ -502,12 +522,20 @@ class MemberBalanceService < MAPIService
   end
 
   def parallel_shift
-    # TODO hit MAPI endpoint
     begin
-      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'parallel_shift.json'))).with_indifferent_access
-      data[:as_of_date] = Time.zone.now.to_date # TODO remove this once you're hitting MAPI and getting an as_of_date returned to you
+      response = @connection["member/#{@member_id}/parallel_shift_analysis"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.parallel_shift encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.parallel_shift encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
     rescue JSON::ParserError => e
-      Rails.logger.warn("MemberBalanceService.active_advances encountered a JSON parsing error: #{e}")
+      Rails.logger.warn("MemberBalanceService.parallel_shift encountered a JSON parsing error: #{e}")
       return nil
     end
     data[:as_of_date] = data[:as_of_date].to_date
@@ -603,6 +631,27 @@ class MemberBalanceService < MAPIService
     end
     data
 
+  end
+
+  def interest_rate_resets
+    begin
+      response = @connection["/member/#{@member_id}/interest_rate_resets"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MemberBalanceService.interest_rate_resets encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MemberBalanceService.interest_rate_resets encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.interest_rate_resets encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data[:date_processed] = data[:date_processed].to_date if data[:date_processed]
+    data
   end
 
 end

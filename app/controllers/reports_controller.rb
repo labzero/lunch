@@ -20,6 +20,7 @@ class ReportsController < ApplicationController
   FORWARD_COMMITMENTS_WEB_FLAG = [MembersService::ADVANCES_DETAIL_DATA]
   CAPITAL_STOCK_AND_LEVERAGE_WEB_FLAGS = [MembersService::FHLB_STOCK_DATA]
   ACCOUNT_SUMMARY_WEB_FLAGS = [MembersService::FINANCING_AVAILABLE_DATA, MembersService::CREDIT_OUTSTANDING_DATA, MembersService::COLLATERAL_HIGHLIGHTS_DATA, MembersService::FHLB_STOCK_DATA]
+  INTEREST_RATE_RESETS_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
 
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
@@ -291,7 +292,7 @@ class ReportsController < ApplicationController
     @sta_data = member_balances.settlement_transaction_rate
     @sta_table_data = {
         :row_name => t('reports.pages.price_indications.current.sta_rate'),
-        :row_value => @sta_data['sta_rate']
+        :row_value => @sta_data[:rate]
     }
 
     #vrc headers
@@ -537,22 +538,31 @@ class ReportsController < ApplicationController
   end
 
   def interest_rate_resets
-    rate_service = RatesService.new(request)
-    @start_date = (Time.zone.now.to_date).to_date
+    member_balances = MemberBalanceService.new(current_member_id, request)
     column_headings = [t('reports.pages.interest_rate_resets.effective_date'), t('common_table_headings.advance_number'), t('reports.pages.interest_rate_resets.prior_rate'), t('reports.pages.interest_rate_resets.new_rate'), t('reports.pages.interest_rate_resets.next_reset')]
-    irr_data = rate_service.interest_rate_resets
-    rows = irr_data.collect do |row|
-      columns = []
-      row.each do |value|
-        if value[0]=='prior_rate' || value[0]=='new_rate'
-          columns << {type: :index, value: value[1]}
-        elsif value[0]=='effective_date'
-          columns << {type: :date, value: value[1]}
-        else
-          columns << {value: value[1]}
+    irr_data = member_balances.interest_rate_resets
+    if report_disabled?(INTEREST_RATE_RESETS_WEB_FLAGS)
+      rows = []
+    else
+      raise StandardError, 'There has been an error and ReportsController#interest_rate_resets has encountered nil. Check error logs.' if irr_data.nil?
+      @date_processed = irr_data[:date_processed]
+      rows = irr_data[:interest_rate_resets].collect do |row|
+        columns = []
+        row.each do |value|
+          if value[0] == 'prior_rate' || value[0] == 'new_rate'
+            columns << {type: :index, value: value[1]}
+          elsif value[0] == 'effective_date'
+            columns << {type: :date, value: value[1]}
+          elsif value[0] == 'next_reset' && value[1]
+            columns << {type: :date, value: value[1]}
+          elsif value[0] == 'next_reset'
+            columns << {value: t('global.open')}
+          else
+            columns << {value: value[1]}
+          end
         end
+        {columns: columns}
       end
-      {columns: columns}
     end
     @irr_table_data = {
       :column_headings => column_headings,
@@ -760,14 +770,14 @@ class ReportsController < ApplicationController
         columns:[
           {type: nil, value: advance[:advance_number]},
           {type: :date, value: advance[:issue_date]},
-          {type: :rate, value: advance[:interest_rate]},
-          {type: (advance[:shift_neg_300].blank? ? nil : :basis_point), value: advance[:shift_neg_300] || t('global.na')},
-          {type: (advance[:shift_neg_200].blank? ? nil : :basis_point), value: advance[:shift_neg_200] || t('global.na')},
-          {type: (advance[:shift_neg_100].blank? ? nil : :basis_point), value: advance[:shift_neg_100] || t('global.na')},
-          {type: (advance[:shift_0].blank? ? nil : :basis_point), value: advance[:shift_0] || t('global.na')},
-          {type: (advance[:shift_100].blank? ? nil : :basis_point), value: advance[:shift_100] || t('global.na')},
-          {type: (advance[:shift_200].blank? ? nil : :basis_point), value: advance[:shift_200] || t('global.na')},
-          {type: (advance[:shift_300].blank? ? nil : :basis_point), value: advance[:shift_300] || t('global.na')}
+          {type: :rate, value: advance[:interest_rate] * 100},
+          {type: (advance[:shift_neg_300].blank? ? nil : :rate), value: advance[:shift_neg_300] || t('global.na'), classes: [:'report-cell-left']},
+          {type: (advance[:shift_neg_200].blank? ? nil : :rate), value: advance[:shift_neg_200] || t('global.na'), classes: [:'report-cell-left']},
+          {type: (advance[:shift_neg_100].blank? ? nil : :rate), value: advance[:shift_neg_100] || t('global.na'), classes: [:'report-cell-left']},
+          {type: (advance[:shift_0].blank? ? nil : :rate), value: advance[:shift_0] || t('global.na'), classes: [:'report-cell-left']},
+          {type: (advance[:shift_100].blank? ? nil : :rate), value: advance[:shift_100] || t('global.na'), classes: [:'report-cell-left']},
+          {type: (advance[:shift_200].blank? ? nil : :rate), value: advance[:shift_200] || t('global.na'), classes: [:'report-cell-left']},
+          {type: (advance[:shift_300].blank? ? nil : :rate), value: advance[:shift_300] || t('global.na'), classes: [:'report-cell-left']}
         ]
       }
     end
@@ -898,11 +908,21 @@ class ReportsController < ApplicationController
 
     member_balance_service = MemberBalanceService.new(current_member_id, request)
     member_profile = member_balance_service.profile
-    raise StandardError, "There has been an error and ReportsController#account_summary has encountered nil. Check error logs." if member_profile.nil?
+    if !member_profile
+      member_profile = {
+        credit_outstanding: {},
+        collateral_borrowing_capacity: {
+          standard: {
+          },
+          sbc: {
+          }
+        },
+        capital_stock: {}
+      }
+    end
 
     members_service = MembersService.new(request)
-    member_details = members_service.member(current_member_id)
-    raise StandardError, "There has been an error and ReportsController#account_summary has encountered nil. Check error logs." if member_details.nil?
+    member_details = members_service.member(current_member_id) || {}
 
     @report_name = t('reports.account_summary.title')
     @intraday_datetime = Time.zone.now
@@ -916,7 +936,7 @@ class ReportsController < ApplicationController
         {
           columns: [
             {value: t('reports.account_summary.financing_availability.asset_percentage')},
-            {value: member_profile[:financing_percentage] * 100, type: :percentage}
+            {value: (member_profile[:financing_percentage] * 100 if member_profile[:financing_percentage]), type: :percentage}
           ]
         },
         {

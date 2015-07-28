@@ -91,7 +91,7 @@ en:
     cancel_download: Cancel Download
     prepare_table: Please wait while we retreive this data. 
     pin: PIN
-    token: Token
+    token: Token Code
     username: Username
     password: Password
     email: Email
@@ -395,10 +395,17 @@ en:
     quick_advance:
       title: Quick Advance
       advance_placeholder: Enter Dollar Amount
+      advance_instruction: Select a rate to continue.
       advances_desk_closed: The Member Services Desk is closed.
       advances_desk_closed_link: View Current Price Indications
       advance_last_updated: The following rates were last updated %{last_updated}
       hours_of_operation_html: "You may initiate an advance during the <a href=\"%{url}\">Advance Desk Hours of Operation</a>."
+      frc_title: Fixed Rate Credit (FRC) Advance
+      vrc_title: Variable Rate Credit (VRC) Advance
+      tooltip:
+        interest_day_count: "Int Day #"
+        payment_on: Payment
+        maturity_date: Maturity
       table:
         term: Term
         whole_loan: Whole Loan
@@ -407,9 +414,10 @@ en:
         aa: AA
         ACTACT: Actual/Actual
         ACT360: Actual/360
+        footer: All advances are subject to the terms and conditions on the Bank's Credit Program, the Advances and Security Agreement with the Member, and the appropriate Advance Confirmation, as well as the Terms of Use.
         axes_labels:
           standard: Standard
-          securities_backed: SBC
+          securities_backed: Securities-Backed Credit
           variable_rate: VRC
           fixed_rate: FRC
           overnight: Overnight
@@ -426,25 +434,36 @@ en:
           3year: 3 Years
       buttons:
         back: Back
+        preview: Preview the selected advance
         initiate: Initiate the selected advance
         credit: Review Credit Activity
+        continue: Continue With Request
+        rates: View Current Rates
       preview:
-        title: Confirm Advance
-        intro: FHLB-SF will hedge the advance once you initiate it. It cannot be changed without a fee. Please read the details below and ensure they are correct before you confirm the advance.
+        title: Initiate Advance
+        intro: Please review the details below. If everything looks correct, enter your SecurID credentials below and then click “Initiate Advance.” If not, click "Back."
+        elevated_intro: Please review the details below. If everything looks correct, click “Initiate Advance.” If not, click "Back."
+        lock_rate: This rate is locked for 60 seconds.
         initiate: Please wait while we initiate your advance. This may take about 30 seconds.
+        footer: By executing this advance, you commit %{bank_name} to take down the requested advance in the principal amount and upon the terms shown here.
       confirmation:
-        title: Intiate Advance
-        intro: "We executed your advance at %{date_time}. A Confirmation of Advance will be faxed to your institution."
+        title: Advance Execution
+        intro: "Thank you. We executed your advance at %{date_time}. We will send an advance confirmation to your institution later today."
       field_headings:
-        advance_amount: Amount
-        advance_type: Program
-        interest_day_count: "Int Day #"
-        payment_on: Payment
+        advance_amount: Advance Amount
+        description: Advance Description
+        program: Program
+        security_type: Securities Type
+        interest_day_count: "Interest Day Count"
+        payment_on: Interest Payment Frequency
         advance_term: Term
-        funding_date: Funding
-        maturity_date: Maturity
+        advance_rate: Advance Rate
+        funding_date: Funding Date
+        maturity_date: Maturity Date
+        debit_sta_html: Your Settlement/Transaction Account (STA) will be debited %{amount} for the capital stock purchase amount today
+        cumulative: Cumulative Stock Purchase
       securid:
-        intro: For your security, please enter your SecurID authentication credentials.
+        intro: For your security, please enter your SecurID token credentials.
         help: Get help with PIN or token
         errors:
           resynchronize: Token is not synchronized.
@@ -453,6 +472,21 @@ en:
           invalid_pin: PIN invalid.
           invalid_token: Token invalid.
           unknown: An unexpected error has occurred. Please try again.
+      capitalstock:
+        title: Capital Stock Purchase Required
+        intro: The Amount Requested requires the purchase of additional Capital Stock. Please choose one of the following options to continue this request.
+        continue_transaction: Continue transaction with the original amount requested.
+        original: Original Amount Requested
+        stock: Stock Purchase Required
+        net: Net Amount Available
+        cumulative: Cumulative Stock Purchase Required
+        increase_transaction: Increase Amount Requested to cover reuired stock purchase.
+        debit_sta_html: If you select this option, the Bank will automatically debit your Settlement/Transaction Account (STA) for %{amount} today
+        footer: Cumulative Stock Purchase Required reflexts the total stock purchase for all advances transacted today, including the new advace request. To avoid an overdraft, please ensure your Settlement/Transaction Account (STA) has sufficient funds to cover this amount.
+      error:
+        capital_stock_exception: No Net or Gross info returned
+        low_exception_html: The amount for an advance at this term must be %{amount} or higher
+        high_exception_html: The amount for an advance at this term must be %{amount} or lower
     reports:
       title: Reports
       as_of_yesterday: As of yesterday
@@ -587,20 +621,20 @@ en:
           person_securities: Person-Securities Services
         wire_transfer:
           title: Wire Transfer
-          repetitive: Repetitve Wire Instructions
+          repetitive: Repetitive Wire Instructions
         capital_stock:
           title: Capital Stock
           repurchase: Request for Repurchase of Excess Capital Stock
           redemption: Notice of Redemption of Capital Stock
         website:
-          title: Website Access
-          access_manager: Website Access Manager Set-up
+          title: Portal Access
+          access_manager: Portal Access Manager Set-up
           securid: eTransact SecurID Token Application
       credit:
         title: Credit
         application: 'Credit Application: CIP and ACE'
         ace_application: ACE Application for SBA Lenders
-        reimbursement: Letter of Credit Reimbursment Agreement
+        reimbursement: Letter of Credit Reimbursement Agreement
         statement_of_authority: Statement of Authority
         prepayment_symmetry: Advances with Partial Prepayment Symmetry
         putable_advances: Putable Advances
@@ -701,8 +735,8 @@ en:
         title: Forward Commitments
         summary: Shows all committed advances and their future funding.
       parallel_shift:
-        title: Putable Advance Parallel Shift Sensitivity
-        summary: A measure of held assets’ price-sesitivity given a specified shift in rates.
+        title: Putable Advance Parallel Shift Sensitivity Analysis
+        summary: A measure of held assets’ price-sensitivity given a specified shift in rates.
     collateral:
       title: Collateral
       borrowing_capacity:
@@ -729,7 +763,7 @@ en:
       title: Settlement/Transaction Account (STA)
       account:
         title: Settlement/Transaction Account (STA)
-        summary: The monthly interest earned on the STA account posts on the first business day of the following month.
+        summary: The monthly interest earned on the STA posts on the first business day of the following month.
     securities:
       title: Securities
       transactions:
@@ -756,7 +790,7 @@ en:
       title: Account Summary
       institution_details:
         title: Institution Details
-        your_institution: 'Your Institution:'
+        your_institution: 'Institution Name:'
         sta_number: 'STA Number:'
         fhfb_number: 'FHFB Number:'
       collateral_delivery_required: 'Collateral Status: Delivery Required'
@@ -1094,7 +1128,7 @@ en:
     merger_notice: In the event of a merger, this report may not include all advances from the acquired instiution.
     advances_and_securities_agreement_notice: Nothing in this report in any way ammends, modifies, or waives the terms of your Advances and Securities Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issues puruant to that Agreement. The Bank expressly disclaims and and all liability that may arise from your institution’s reliance on any information contained in, or errors or omissions made with respect to, this report. Please call (415) 616-2559 if you have any questions.
     pdf_footer: "%{report_name} as of %{date}"
-    anticipated_transactions: The records included in this report are anticipated transactions for the listed settlement dates. These transactions are subject to change prior to final settlement. Net adjustment credit and/or debit amounts will be posted to your STA account on the settlement date.
+    anticipated_transactions: The records included in this report are anticipated transactions for the listed settlement dates. These transactions are subject to change prior to final settlement. Net adjustment credit and/or debit amounts will be posted to your STA on the settlement date.
     general_information:
       title: General Information
       does_not_constitute_solicitation_html: This information does not constitute a solicitation or offer or advice (financial or otherwise) by the Bank, but is a description of generally available structures for certain products and price indications for those structures as of the time and date indicated above. This information is subject to the <a href="%{url}">Terms of Use</a> and may change without notice.

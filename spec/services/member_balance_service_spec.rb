@@ -186,7 +186,6 @@ describe MemberBalanceService do
 
   end
 
-  # TODO add vcr once MAPI endpoint is rigged up
   describe 'profile', :vcr do
     let(:profile) {subject.profile}
     let(:response) { double('Profile Response', body: response_body) }
@@ -201,11 +200,11 @@ describe MemberBalanceService do
     end
     describe 'calculated values' do
       let(:json_response) { {
-        total_financing_available: rand(1..90000000),
+        total_financing_available: rand(10000000..90000000),
         used_financing_availability: rand(1..90000000),
         collateral_borrowing_capacity: {
-          total: rand(1..90000000),
-          remaining: rand(1..90000000)
+          total: rand(1000..1000000),
+          remaining: rand(1000..1000000)
         }
       } }
       before do
@@ -215,7 +214,11 @@ describe MemberBalanceService do
         expect(profile[:used_financing_availability]).to eq(json_response[:collateral_borrowing_capacity][:total] - json_response[:collateral_borrowing_capacity][:remaining])
       end
       it 'should calculate `uncollateralized_financing_availability`' do
-        expect(profile[:uncollateralized_financing_availability]).to eq(json_response[:total_financing_available] - (json_response[:collateral_borrowing_capacity][:total] - json_response[:collateral_borrowing_capacity][:remaining]))
+        expect(profile[:uncollateralized_financing_availability]).to eq(json_response[:total_financing_available] - json_response[:collateral_borrowing_capacity][:total])
+      end
+      it 'should set `uncollateralized_financing_availability` to zero if the calculated value would be negative' do
+        json_response[:total_financing_available] = rand(1..999)
+        expect(profile[:uncollateralized_financing_availability]).to eq(0)
       end
     end
     describe 'error states' do
@@ -235,25 +238,31 @@ describe MemberBalanceService do
     end
   end
 
-  # TODO add vcr once MAPI endpoint is rigged up
-  describe 'settlement_transaction_rate' do
+  describe 'settlement_transaction_rate', :vcr do
     let(:settlement_transaction_rate) {subject.settlement_transaction_rate}
     it 'should return settlement transaction rate data' do
       expect(settlement_transaction_rate.length).to be >= 1
-      expect(settlement_transaction_rate[:sta_rate]).to be_kind_of(Float)
+      expect(settlement_transaction_rate[:rate]).to be_kind_of(Float)
     end
     describe 'bad data' do
       it 'should pass nil values if data from MAPI has nil values' do
         allow(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'settlement_transaction_rate_with_nil_values.json'))))
-        expect(settlement_transaction_rate[:sta_rate]).to be(nil)
+        expect(settlement_transaction_rate[:rate]).to be(nil)
       end
     end
     describe 'error states' do
       it 'returns nil if there is a JSON parsing error' do
-        # TODO change this stub once you implement the MAPI endpoint
-        allow(File).to receive(:read).and_return('some malformed json!')
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
         expect(Rails.logger).to receive(:warn)
         expect(settlement_transaction_rate).to be(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(settlement_transaction_rate).to eq(nil)
+      end
+      it 'should return nil if there was a REST error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(settlement_transaction_rate).to eq(nil)
       end
     end
   end
@@ -681,8 +690,8 @@ describe MemberBalanceService do
     end
   end
 
-  describe '`dividend_statement` method' do
-    let(:dividend_statement) { subject.dividend_statement(Time.zone.now) }
+  describe '`dividend_statement` method', :vcr do
+    let(:dividend_statement) { subject.dividend_statement(Date.new(2015,1,1)) }
     it 'returns a date for its `transaction_date`' do
       expect(dividend_statement[:transaction_date]).to be_kind_of(Date)
     end
@@ -698,8 +707,8 @@ describe MemberBalanceService do
     it 'returns a fixnum for its `shares_dividend`' do
       expect(dividend_statement[:shares_dividend]).to be_kind_of(Fixnum)
     end
-    it 'returns a fixnum for its `shares_par_value`' do
-      expect(dividend_statement[:shares_par_value]).to be_kind_of(Fixnum)
+    it 'returns a float for its `shares_par_value`' do
+      expect(dividend_statement[:shares_par_value]).to be_kind_of(Float)
     end
     it 'returns a float for its `cash_dividend`' do
       expect(dividend_statement[:cash_dividend]).to be_kind_of(Float)
@@ -717,7 +726,7 @@ describe MemberBalanceService do
         expect(detail[:issue_date]).to be_kind_of(Date)
         expect(detail[:start_date]).to be_kind_of(Date)
         expect(detail[:end_date]).to be_kind_of(Date)
-        expect(detail[:certificate_sequence]).to be_kind_of(Fixnum)
+        expect(detail[:certificate_sequence]).to be_kind_of(String)
         expect(detail[:shares_outstanding]).to be_kind_of(Fixnum)
         expect(detail[:average_shares_outstanding]).to be_kind_of(Float)
         expect(detail[:dividend]).to be_kind_of(Float)
@@ -726,10 +735,18 @@ describe MemberBalanceService do
       end
     end
     describe 'error states' do
-      it 'returns nil if there is a JSON parsing error' do
-        expect(File).to receive(:read).and_return('some malformed json!')
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
         expect(Rails.logger).to receive(:warn)
         expect(dividend_statement).to be(nil)
+      end
+      it 'should return nil if there was an API error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(dividend_statement).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(dividend_statement).to eq(nil)
       end
     end
   end
@@ -854,8 +871,7 @@ describe MemberBalanceService do
     end
   end
 
-  # TODO add vcr once MAPI endpoint is rigged up
-  describe 'the `parallel_shift` method' do
+  describe 'the `parallel_shift` method', :vcr do
     let(:parallel_shift) {subject.parallel_shift}
     it 'returns a hash with an `as_of_date` that is a date' do
       expect(parallel_shift[:as_of_date]).to be_kind_of(Date)
@@ -881,10 +897,18 @@ describe MemberBalanceService do
     end
 
     describe 'error states' do
-      it 'returns nil if there is a JSON parsing error' do
-        allow(File).to receive(:read).and_return('some malformed json!')
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
         expect(Rails.logger).to receive(:warn)
         expect(parallel_shift).to be(nil)
+      end
+      it 'should return nil if there was an API error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(parallel_shift).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(parallel_shift).to eq(nil)
       end
     end
   end
@@ -1070,6 +1094,39 @@ describe MemberBalanceService do
       it 'should return nil if there was a connection error' do
         allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
         expect(capital_stock_and_leverage).to eq(nil)
+      end
+    end
+  end
+
+  describe 'the `interest_rate_resets` method', :vcr do
+    let(:irr_rates) {subject.interest_rate_resets}
+    describe 'error states' do
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(irr_rates).to be(nil)
+      end
+      it 'should log an error if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(Rails.logger).to receive(:warn)
+        irr_rates
+      end
+      it 'should return nil if there was an API error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(irr_rates).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(irr_rates).to eq(nil)
+      end
+    end
+    it 'should return an array of hashes containing interest rate resets' do
+      expect(irr_rates.length).to be >= 1
+      irr_rates[:interest_rate_resets].each do |rate|
+        expect(rate[:effective_date]).to be_kind_of(String)
+        expect(rate[:advance_number]).to be_kind_of(String)
+        expect(rate[:prior_rate]).to be_kind_of(Float)
+        expect(rate[:new_rate]).to be_kind_of(Float)
+        expect(rate[:next_reset]).to be_kind_of(String)
       end
     end
   end

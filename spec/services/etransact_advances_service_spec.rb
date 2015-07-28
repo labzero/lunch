@@ -42,8 +42,9 @@ describe EtransactAdvancesService do
     let(:advance_term) {'someterm'}
     let(:advance_type) {'sometype'}
     let(:advance_rate) {'0.17'}
+    let(:check_capstock) {true}
     let(:amount) { 100 }
-    let(:quick_advance_validate) {subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, signer)}
+    let(:quick_advance_validate) {subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer)}
     it 'should return a hash back' do
       expect(quick_advance_validate).to be_kind_of(Hash)
     end
@@ -95,6 +96,27 @@ describe EtransactAdvancesService do
     it 'should URL encode the signer' do
       expect(URI).to receive(:escape).with(signer)
       quick_advance_execute
+    end
+  end
+  describe '`check_limits` method', :vcr do
+    let(:advance_term) {'someterm'}
+    let(:amount) { 100 }
+    let(:check_limits) {subject.check_limits(amount, advance_term)}
+    it 'should return a hash back' do
+      expect(check_limits).to be_kind_of(Hash)
+    end
+    it 'should return nil if there was an API error' do
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      expect(check_limits).to eq(nil)
+    end
+    it 'should return nil if there was a connection error' do
+      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      expect(check_limits).to eq(nil)
+    end
+    it 'returns nil if there is a JSON parsing error' do
+      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+      allow(Rails.logger).to receive(:warn)
+      expect(check_limits).to be(nil)
     end
   end
 end

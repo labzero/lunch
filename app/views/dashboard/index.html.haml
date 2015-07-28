@@ -55,12 +55,13 @@
             %tr
               %td.borrowing-capacity-note= t('dashboard.your_account.table.borrowing_capacity_note_html', url: reports_borrowing_capacity_url)
   .column-3
-    - if policy(:advance).show?
+    - if policy(:advance).show? && @quick_advance_enabled
       =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances'} do
         - if @quick_advances_active
           = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}, field_name: :amount
           %h2.quick-advance-confirmation-subheading{style: 'display: none;'}= t('dashboard.quick_advance.confirmation.title')
           %h2.quick-advance-preview-subheading{style: 'display: none;'}= t('dashboard.quick_advance.preview.title')
+          %h2.quick-advance-capstock-subheading{style: 'display: none;'}= t('dashboard.quick_advance.capitalstock.title')
         %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advances_active}"}
           = t('dashboard.quick_advance.advances_desk_closed')
           = link_to t('dashboard.quick_advance.advances_desk_closed_link'), '', data: {'flyout-trigger' => 'active'}
@@ -73,6 +74,7 @@
           %p= t('dashboard.quick_advance.advance_last_updated', last_updated: @quick_advance_last_updated)
           %p= t('dashboard.quick_advance.hours_of_operation_html', url: '')
         - if @quick_advances_active
+          %p.quick-advance-instruction= t('dashboard.quick_advance.advance_instruction')
           %table
             %thead
               %tr
@@ -86,7 +88,9 @@
                 %th= t('dashboard.quick_advance.table.aaa')
                 %th= t('dashboard.quick_advance.table.aa')
             %tbody
-          %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.initiate')
+          %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.preview')
+          %small
+            %p.rate-advances-footer= t('dashboard.quick_advance.table.footer')
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), link: {name: t('dashboard.actions.more'), path: ''}, data_available: !@previous_activity.blank?} do
       %table.table-dashboard-previous-activity
         %tbody

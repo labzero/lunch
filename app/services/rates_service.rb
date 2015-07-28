@@ -134,17 +134,6 @@ class RatesService < MAPIService
     JSON.parse(response.body).with_indifferent_access
   end
 
-  def interest_rate_resets
-    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
-    begin
-      data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'interest_rate_resets.json')))
-    rescue JSON::ParserError => e
-      Rails.logger.warn("RatesService.interest_rate_resets encountered a JSON parsing error: #{e}")
-      return nil
-    end
-    data
-  end
-
   protected
 
   def fake_quick_advance_response(data, amount, advance_type, advance_term, rate)

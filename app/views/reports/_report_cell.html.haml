@@ -13,7 +13,7 @@
 - when :percentage
   - value = fhlb_formatted_percentage(cell[:value])
 - when :months
-  - value = t('reports.month_count', count: cell[:value])
+  - value = cell[:value] ? t('reports.month_count', count: cell[:value]) : t('global.missing_value')
 - when :date
   - value = fhlb_date_standard_numeric(cell[:value])
   - classes = [:'report-cell-narrow']

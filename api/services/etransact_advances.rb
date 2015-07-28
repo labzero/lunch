@@ -49,6 +49,20 @@ module MAPI
               end
             end
           end
+          # etransact advances limits endpoint
+          api do
+            key :path, '/limits'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve limits of etransact Advances today'
+              key :type, :etransactAdvancesLimits
+              key :nickname, :getEtransactAdvancesLimits
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
           api do
             key :path, '/signer_full_name/{signer}'
             operation do
@@ -131,7 +145,7 @@ module MAPI
             end
           end
           api do
-            key :path, '/{validate_advance/{id}/{amount}/{advance_type}/{advance_term}/{rate}/{signer}'
+            key :path, '/validate_advance/{id}/{amount}/{advance_type}/{advance_term}/{rate}/{check_capstock}/{signer}'
             operation do
               key :method, 'GET'
               key :summary, 'Validates new Advance in Calypso.'
@@ -175,6 +189,13 @@ module MAPI
               end
               parameter do
                 key :paramType, :path
+                key :name, :check_capstock
+                key :required, true
+                key :type, :Boolean
+                key :description, 'Check Capital Stock.'
+              end
+              parameter do
+                key :paramType, :path
                 key :name, :signer
                 key :required, true
                 key :type, :string
@@ -194,6 +215,25 @@ module MAPI
               end
             end
           end
+        end
+
+        # etransact advances limits
+        relative_get '/limits' do
+          etransact_limits = <<-SQL
+            SELECT WHOLE_LOAN_ENABLED, SBC_AGENCY_ENABLED, SBC_AAA_ENABLED, SBC_AA_ENABLED, LOW_DAYS_TO_MATURITY,
+            HIGH_DAYS_TO_MATURITY, MIN_ONLINE_ADVANCE, TERM_DAILY_LIMIT, PRODUCT_TYPE, END_TIME, OVERRIDE_END_DATE,
+            OVERRIDE_END_TIME FROM WEB_ADM.AO_TERM_BUCKETS
+          SQL
+          etransact_limits_array = []
+          if settings.environment == :production
+            etransact_limits_cursor = ActiveRecord::Base.connection.execute(etransact_limits)
+            while row = etransact_limits_cursor.fetch_hash()
+              etransact_limits_array.push(row)
+            end
+          else
+            etransact_limits_array = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_limits.json')))
+          end
+          etransact_limits_array.to_json
         end
 
         # etransact advances status
@@ -331,6 +371,7 @@ module MAPI
           amount = params[:amount]
           advance_type = params[:advance_type]
           advance_term = params[:advance_term]
+          check_capstock = false;
           rate = params[:rate]
           signer = params[:signer]
           markup = 0
@@ -338,7 +379,7 @@ module MAPI
           costoffunds = 0
           benchmarkrate = 0
           begin
-            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'EXECUTE', amount, advance_term, advance_type, rate, signer, markup, blendedcostoffunds, costoffunds, benchmarkrate)
+            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'EXECUTE', amount, advance_term, advance_type, rate, check_capstock, signer, markup, blendedcostoffunds, costoffunds, benchmarkrate)
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
@@ -347,7 +388,7 @@ module MAPI
         end
 
         # Validate Advance
-        relative_get '/validate_advance/:id/:amount/:advance_type/:advance_term/:rate/:signer' do
+        relative_get '/validate_advance/:id/:amount/:advance_type/:advance_term/:rate/:check_capstock/:signer' do
           member_id = params[:id]
           amount = params[:amount]
           advance_type = params[:advance_type]
@@ -355,11 +396,12 @@ module MAPI
           rate = params[:rate]
           signer = params[:signer]
           markup = 0
+          check_capstock = params[:check_capstock] == 'true'
           blendedcostoffunds = 0
           costoffunds = 0
           benchmarkrate = 0
           begin
-            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'VALIDATE', amount, advance_term, advance_type, rate, signer, markup, blendedcostoffunds, costoffunds, benchmarkrate)
+            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'VALIDATE', amount, advance_term, advance_type, rate, check_capstock, signer, markup, blendedcostoffunds, costoffunds, benchmarkrate)
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'

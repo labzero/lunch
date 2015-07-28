@@ -596,6 +596,7 @@ RSpec.describe ReportsController, :type => :controller do
       projections = %i(shift_neg_300 shift_neg_200 shift_neg_100 shift_0 shift_100 shift_200 shift_300)
       let(:make_request) { get :parallel_shift }
       let(:as_of_date) { double('some date') }
+      let(:interest_rate) { double('interest rate') }
       let(:putable_advance_data) do
         hash = {
           advance_number: nil,
@@ -606,7 +607,11 @@ RSpec.describe ReportsController, :type => :controller do
           hash[value] = nil
         end
         hash.each do |key, value|
-          hash[key] = double(key.to_s)
+          if key == :interest_rate
+            hash[key] = double(key.to_s, :* => interest_rate)
+          else
+            hash[key] = double(key.to_s)
+          end
         end
         hash
       end
@@ -657,13 +662,13 @@ RSpec.describe ReportsController, :type => :controller do
               it 'contains a `interest_rate` with type `date`' do
                 assigns[:parallel_shift_table_data][:rows].each do |row|
                   expect(row[:columns][2][:type]).to eq(:rate)
-                  expect(row[:columns][2][:value]).to eq(putable_advance_data[:interest_rate])
+                  expect(row[:columns][2][:value]).to eq(interest_rate)
                 end
               end
               projections.each_with_index do |value, i|
                 it "contains a `#{value}` value with type `basis_point`" do
                   assigns[:parallel_shift_table_data][:rows].each do |row|
-                    expect(row[:columns][i + 3][:type]).to eq(:basis_point)
+                    expect(row[:columns][i + 3][:type]).to eq(:rate)
                     expect(row[:columns][i + 3][:value]).to eq(putable_advance_data[value])
                   end
                 end
@@ -950,6 +955,65 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
+    describe 'GET interest_rate_resets' do
+      let(:rates_service_instance) { double('RatesService') }
+      let(:response_hash) { double('RatesServiceHash') }
+      let(:effective_date) { double('effective_date') }
+      let(:advance_number) { double('advance_number') }
+      let(:prior_rate) { double('prior_rate') }
+      let(:new_rate) { double('new_rate') }
+      let(:next_reset) { double('next_reset') }
+      let(:date_processed) { double('date processed') }
+      let(:irr_response) {{date_processed: date_processed, interest_rate_resets: [{'effective_date' => effective_date, 'advance_number' => advance_number, 'prior_rate' => prior_rate, 'new_rate' => new_rate, 'next_reset' => next_reset}]}}
+      let(:interest_rate_resets) { get :interest_rate_resets }
+
+      before do
+        allow(member_balance_service_instance).to receive(:interest_rate_resets).and_return(irr_response)
+      end
+      it_behaves_like 'a user required action', :get, :interest_rate_resets
+      it 'renders the interest_rate_resets view' do
+        interest_rate_resets
+        expect(response.body).to render_template('interest_rate_resets')
+      end
+      describe 'view instance variables' do
+        it 'sets the @irr_table_data row attribute' do
+          interest_rate_resets
+          expect(assigns[:irr_table_data][:rows][0][:columns]).to eq([{:type=>:date, :value=>effective_date}, {:value=>advance_number}, {:type=>:index, :value=>prior_rate}, {:type=>:index, :value=>new_rate}, {:type=>:date, :value=>next_reset}])
+        end
+        it 'sets the @irr_table_data column_headings attribute' do
+          interest_rate_resets
+          assigns[:irr_table_data][:column_headings].each do |heading|
+            expect(heading).to be_kind_of(String)
+          end
+        end
+        it 'sets @date_processed' do
+          interest_rate_resets
+          expect(assigns[:date_processed]).to eq(date_processed)
+        end
+        it "sets the `value` attribute of the @irr_table_data[:row] cell for `next_reset` equal to #{I18n.t('global.open')} if there is no data for that cell" do
+          allow(member_balance_service_instance).to receive(:interest_rate_resets).and_return({interest_rate_resets: [{'next_reset' => nil}]})
+          interest_rate_resets
+          expect(assigns[:irr_table_data][:rows][0][:columns]).to eq([{:value=>I18n.t('global.open')}])
+        end
+      end
+      describe 'with the report disabled' do
+        before do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::INTEREST_RATE_RESETS_WEB_FLAGS).and_return(true)
+        end
+        it "sets @irr_data_table[:rows] to be an empty array" do
+          interest_rate_resets
+          expect(assigns[:irr_table_data][:rows]).to eq([])
+        end
+        it 'does not set @date_processed' do
+          interest_rate_resets
+          expect(assigns[:date_processed]).to be_nil
+        end
+      end
+      it 'raises an error if the MAPI endpoint returns nil' do
+        allow(member_balance_service_instance).to receive(:interest_rate_resets).and_return(nil)
+        expect{interest_rate_resets}.to raise_error
+      end
+    end
   end
 
   describe 'GET current_price_indications' do
@@ -965,7 +1029,7 @@ RSpec.describe ReportsController, :type => :controller do
       allow(RatesService).to receive(:new).and_return(rates_service_instance)
       allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
       allow(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
-      allow(response_sta_hash).to receive(:[]).with('sta_rate')
+      allow(response_sta_hash).to receive(:[]).with(:rate)
       allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'vrc').at_least(1).and_return(vrc_response)
       allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'frc').at_least(1).and_return(frc_response)
       allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'arc').at_least(1).and_return(arc_response)
@@ -992,33 +1056,6 @@ RSpec.describe ReportsController, :type => :controller do
       get :current_price_indications
       expect(assigns[:standard_arc_data]).to eq(arc_response)
       expect(assigns[:sbc_arc_data]).to eq(arc_response)
-    end
-  end
-
-  describe 'GET interest_rate_resets' do
-    let(:rates_service_instance) { double('RatesService') }
-    let(:response_hash) { double('RatesServiceHash') }
-    let(:effective_date) { double('effective_date') }
-    let(:advance_number) { double('advance_number') }
-    let(:prior_rate) { double('prior_rate') }
-    let(:new_rate) { double('new_rate') }
-    let(:next_reset) { double('next_reset') }
-    let(:irr_response) {[{'effective_date' => effective_date, 'advance_number' => advance_number, 'prior_rate' => prior_rate, 'new_rate' => new_rate, 'next_reset' => next_reset}]}
-
-    before do
-      allow(RatesService).to receive(:new).and_return(rates_service_instance)
-      allow(rates_service_instance).to receive(:interest_rate_resets).at_least(1).and_return(irr_response)
-    end
-    it_behaves_like 'a user required action', :get, :interest_rate_resets
-    it 'renders the interest_rate_resets view' do
-      allow(rates_service_instance).to receive(:interest_rate_resets).and_return(response_hash)
-      allow(response_hash).to receive(:collect)
-      get :interest_rate_resets
-      expect(response.body).to render_template('interest_rate_resets')
-    end
-    it 'should return irr data' do
-      get :interest_rate_resets
-      expect(assigns[:irr_table_data][:rows][0][:columns]).to eq([{:type=>:date, :value=>effective_date}, {:value=>advance_number}, {:type=>:index, :value=>prior_rate}, {:type=>:index, :value=>new_rate}, {:value=>next_reset}])
     end
   end
 
@@ -1449,14 +1486,6 @@ RSpec.describe ReportsController, :type => :controller do
       allow(controller).to receive(:report_disabled?).with(ReportsController::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true)
       expect {make_request}.to raise_error
     end
-    it 'raises an error if `MemberBalanceService#profile` returns nil' do
-      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
-      expect {make_request}.to raise_error
-    end
-    it 'raises an error if `MembersService#member` returns nil' do
-      allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
-      expect {make_request}.to raise_error
-    end
     it 'assigns @report_name' do
       make_request
       expect(assigns[:report_name]).to eq(I18n.t('reports.account_summary.title'))
@@ -1548,6 +1577,32 @@ RSpec.describe ReportsController, :type => :controller do
         profile[:mpf_credit_available] = 0
         make_request
         expect(assigns[:financing_availability][:rows].length).to be(7)
+      end
+    end
+    describe "MemberBalanceService failures" do
+      describe 'the member profile could not be found' do
+        before do
+          allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
+          make_request
+        end
+        %w(financing_availability credit_outstanding standard_collateral sbc_collateral collateral_totals capital_stock_and_leverage).each do |instance_var|
+          it "should assign nil values to all columns found in @#{instance_var}" do
+            assigns[instance_var.to_sym][:rows].each do |row|
+              expect(row[:columns].last[:value]).to be_nil
+            end
+          end
+        end
+      end
+      describe 'the member details could not be found' do
+        before do
+          allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
+          make_request
+        end
+        %w(sta_number fhfb_number member_name).each do |instance_var|
+          it "should not assign @#{instance_var}" do
+            expect(assigns[instance_var.to_sym]).to be_nil
+          end
+        end
       end
     end
   end

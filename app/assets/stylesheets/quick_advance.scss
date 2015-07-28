@@ -55,6 +55,9 @@ $faded-opacity: 0.4 !default;
       @extend %dashboard-module-advances-input;
     }
   }
+  .quick-advance-instruction {
+    margin: 0 0 15px;
+  }
   table {
     @extend %typography-paragraph-tight;
     width: 100%;
@@ -203,9 +206,10 @@ $faded-opacity: 0.4 !default;
 }
 
 .initiate-quick-advance {
-  opacity: $faded-opacity;
+  background-color: $secondary-gray;
   cursor: auto;
   &.active {
+    background-color: $actionable-blue;
     opacity: 1;
     cursor: pointer;
   }
@@ -223,13 +227,13 @@ $faded-opacity: 0.4 !default;
   }
 }
 
-.quick-advance-back-button {
+.quick-advance-back-button, .quick-advance-capstock-back-button {
   &:before {
     margin-right: 10px;
   }
 }
 
-.quick-advance-preview-subheading, .quick-advance-confirmation-subheading {
+.quick-advance-preview-subheading, .quick-advance-confirmation-subheading, .quick-advance-capstock-subheading {
   @extend %typography-subtitle;
   margin-bottom: 0;
 }
@@ -299,32 +303,29 @@ $faded-opacity: 0.4 !default;
     }
   }
   dl{
-    float: left;
-    margin: 0.5rem 0 1.5rem;
-    &:last-child {
-      padding-left: 30px;
-    }
-    &:first-child {
-      float: none;
-      margin-bottom: 5px;
-      dt {
-        width: auto;
-        margin-right: 10px;
-      }
+    float: none;
+    margin: 0.5rem 0 1rem;
+  }
+  .large_dl {
+    width: 400px;
+    dt {
+      width: auto;
+      margin-right: 10px;
     }
   }
   dt {
-    @extend %typography-confirmation-label;
+    @extend %typography-graph-data;
+    color: $medium-gray;
     float: left;
-    width: 80px;
+    text-align: left;
+    width: 250px;
     overflow: hidden;
     clear: left;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
   dd {
-    @extend %typography-confirmation-data;
+    @extend %typography-graph-data;
     @extend %clearfix;
+    text-align: left;
   }
   .quick-advance-loading-message {
     display: none;
@@ -348,6 +349,10 @@ $faded-opacity: 0.4 !default;
   }
 }
 
+.dashboard-quick-advance-flyout .quick-advance-error-button {
+  float: none;
+}
+
 .quick-advance-confirmation .quick-advance-body {
   &:before {
     color: $approval-green;
@@ -356,12 +361,11 @@ $faded-opacity: 0.4 !default;
 
 .quick-advance-summary {
   @extend %clearfix;
+  padding-left: 60px;
+  padding-bottom: 30px;
   p {
     @extend %typography-confirmation-label;
     margin: 0.5rem 0 0;
-  }
-  span {
-    @extend %typography-confirmation-data;
   }
 }
 
@@ -370,6 +374,8 @@ $faded-opacity: 0.4 !default;
   vertical-align: top;
   padding-top: 8px;
   span {
+    line-height: 1;
+    vertical-align: top;
     display: inline-block;
     font-size: 0.7333rem; // leaving this as a one-off typography style until we receive confirmation of this design
   }
@@ -378,4 +384,9 @@ $faded-opacity: 0.4 !default;
 .quick-advance-confirmation-button {
   @extend %horizontal-center;
   position: relative;
+}
+
+.quick-advances-footer, .rate-advances-footer {
+  @extend %typography-footer;
+  padding-top: 40px;
 }

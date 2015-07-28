@@ -12,6 +12,10 @@ require_relative 'member/securities_position'
 require_relative 'member/forward_commitments'
 require_relative 'member/capital_stock_and_leverage'
 require_relative 'member/letters_of_credit'
+require_relative 'member/flags'
+require_relative 'member/interest_rate_resets'
+require_relative 'member/parallel_shift_analysis'
+require_relative 'member/dividend_statement'
 
 module MAPI
   module Services
@@ -233,6 +237,27 @@ module MAPI
             end
           end
           api do
+            key :path, "/{id}/current_sta_rate"
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the current rate for the member\'s Settlement Transaction Account.'
+              key :notes, 'This is the rate as of close of business on the previous day.'
+              key :type, :CurrentSTARate
+              key :nickname, :getCurrentSTARateForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
+          api do
             key :path, "/{id}/advances_details/{as_of_date}"
             operation do
               key :method, 'GET'
@@ -342,6 +367,26 @@ module MAPI
                 key :type, :integer
               end
               key :nickname, :getDisabledReportIDsForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/quick_advance_flag'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the Quick Advance Flag for the member'
+              key :notes, 'Returns `Y` if quick advances are enabled for this member'
+              key :type, :array
+              items do
+                key :type, :string
+              end
+              key :nickname, :getQuickAdvanceFlagForMember
               parameter do
                 key :paramType, :path
                 key :name, :id
@@ -519,6 +564,76 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/interest_rate_resets'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve interest rate reset data for the last date this was calculated by FHLB'
+              key :notes, 'Typically the last date on which the interest rate resets were calculated corresponds to the last business day. A given member bank will not necessarily have any interest rate reset data for this date.'
+              key :nickname, :getInterestRateResetsForMember
+              key :type, :MemberInterestRateResets
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/parallel_shift_analysis'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve parallel shift analysis data for the last date the analysis was calculated by FHLB'
+              key :notes, 'A given member bank will not necessarily have any parallel shift analysis data for the last date calculated.'
+              key :nickname, :getParallelShiftAnalysisForMember
+              key :type, :MemberParallelShift
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 503
+                key :message, 'Interest Rate Resets not available'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/dividend_statement/{date}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve dividend statement for a given member and quarter'
+              key :notes, 'Retrieve divident statement for a given member and quarter'
+              key :nickname, :getDividendStatementForMembers
+              key :type, :MemberDividendStatement
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :date
+                key :required, true
+                key :type, :string
+                key :description, 'The date (quarter) of the requested statement'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -608,6 +723,12 @@ module MAPI
           end
         end
 
+        # Current STA Rate
+        relative_get '/:id/current_sta_rate' do
+          member_id = params[:id]
+          MAPI::Services::Member::SettlementTransactionAccount.current_sta_rate(self, member_id).to_json
+        end
+
         # Advances Details
         relative_get "/:id/advances_details/:as_of_date" do
           member_id = params[:id]
@@ -660,6 +781,12 @@ module MAPI
         relative_get '/:id/disabled_reports' do
           member_id = params[:id]
           MAPI::Services::Member::DisabledReports.disabled_report_ids(self, member_id)
+        end
+
+        # Member Quick Advance Flag
+        relative_get '/:id/quick_advance_flag' do
+          member_id = params[:id]
+          MAPI::Services::Member::Flags.quick_advance_flag(self, member_id).to_json
         end
 
         # Member Cash Projections
@@ -718,6 +845,22 @@ module MAPI
           MAPI::Services::Member::LettersOfCredit.letters_of_credit(self, member_id).to_json
         end
 
+        relative_get '/:id/interest_rate_resets' do
+          member_id = params[:id]
+          result = MAPI::Services::Member::InterestRateResets.interest_rate_resets(self, member_id)
+          if result.nil?
+            logger.error 'Interest Rate Resets returning nil.'
+            halt 503
+          else
+            result.to_json
+          end
+        end
+
+        relative_get '/:id/parallel_shift_analysis' do
+          member_id = params[:id]
+          MAPI::Services::Member::ParallelShiftAnalysis.parallel_shift(self, member_id).to_json
+        end
+
         relative_get '/:id/' do
           member_id = params[:id]
           details = MAPI::Services::Member::Profile.member_details(self, member_id)
@@ -727,6 +870,12 @@ module MAPI
           else
             details.to_json
           end
+        end
+
+        relative_get '/:id/dividend_statement/:date' do
+          member_id = params[:id]
+          date = params[:date].to_date
+          MAPI::Services::Member::DividendStatement.dividend_statement(self, member_id, date).to_json
         end
       end
 
