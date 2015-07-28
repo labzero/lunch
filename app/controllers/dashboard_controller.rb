@@ -115,6 +115,7 @@ class DashboardController < ApplicationController
     # TODO replace this with the timestamp from the cached quick advance rates timestamp
     date = DateTime.now - 2.hours
     @quick_advance_last_updated = date.strftime("%d %^b %Y, %l:%M %p")
+    @contacts = members_service.member_contacts(current_member_id)
   end
 
   def quick_advance_rates

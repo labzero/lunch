@@ -147,11 +147,23 @@ $faded-opacity: 0.4 !default;
       margin-bottom: 5px;
     }
   }
+  .member-services-desk {
+    border-top: 1px solid $secondary-gray;
+    padding-top: 15px;
+    .dashboard-contact {
+      min-height: 45px;
+    }
+    .dashboard-contact-avatar {
+      background: none;
+    }
+  }
 }
 
 .dashboard-contact {
   text-decoration: none;
   color: inherit;
+  min-height: 54px;
+  display: block;
   h2 {
     @extend %typography-subtitle;
     margin: 0;

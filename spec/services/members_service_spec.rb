@@ -43,6 +43,41 @@ describe MembersService do
     end
   end
 
+  describe 'the `member_contacts` method', :vcr do
+    let(:member_contacts) { subject.member_contacts(member_id)}
+
+    %i(cam rm).each do |object|
+      %i(FULL_NAME USERNAME EMAIL).each do |attr|
+        it "returns a contact hash with a `#{object}` object containing a `#{attr}` attribute" do
+          expect(member_contacts[object][attr]).to be_kind_of(String)
+        end
+      end
+    end
+    it "returns a contact hash with a `:rm` object containing a `PHONE_NUMBER` attribute" do
+      expect(member_contacts[:rm][:PHONE_NUMBER]).to be_kind_of(String)
+    end
+    it 'returns a contact hash with a `:rm`' do
+      expect(member_contacts[:cam][:FULL_NAME]).to be_kind_of(String)
+      expect(member_contacts[:cam][:USERNAME]).to be_kind_of(String)
+      expect(member_contacts[:cam][:EMAIL]).to be_kind_of(String)
+    end
+    describe 'error states' do
+      it 'should return nil if there is a JSON parsing error' do
+        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        expect(Rails.logger).to receive(:warn)
+        expect(member_contacts).to be(nil)
+      end
+      it 'should return nil if there was an API error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+        expect(member_contacts).to eq(nil)
+      end
+      it 'should return nil if there was a connection error' do
+        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+        expect(member_contacts).to eq(nil)
+      end
+    end
+  end
+
   describe '`quick_advance_enabled_for_member?` method' do
     let(:method_call) { subject.quick_advance_enabled_for_member?(member_id) }
     before do

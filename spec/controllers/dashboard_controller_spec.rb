@@ -87,6 +87,12 @@ RSpec.describe DashboardController, :type => :controller do
       expect(assigns[:financing_availability_gauge][:uncollateralized][:percentage]).to be_kind_of(Numeric)
       expect(assigns[:financing_availability_gauge][:uncollateralized][:display_percentage]).to be_kind_of(Numeric)
     end
+    it 'should assign @contacts to the result of `members_service.member_contacts`' do
+      contacts = double('contacts')
+      allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(contacts)
+      get :index
+      expect(assigns[:contacts]).to eq(contacts)
+    end
     describe "RateService failures" do
       let(:RatesService) {class_double(RatesService)}
       let(:rate_service_instance) {RatesService.new(double('request', uuid: '12345'))}

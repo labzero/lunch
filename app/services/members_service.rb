@@ -68,6 +68,26 @@ class MembersService < MAPIService
     data
   end
 
+  def member_contacts(member_id)
+    begin
+      response = @connection["member/#{member_id}/member_contacts"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MembersService.member_contacts encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MembersService.member_contacts encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.member_contacts encountered a JSON parsing error: #{e}")
+      return nil
+    end
+    data
+  end
+
   def quick_advance_enabled_for_member?(member_id)
     begin
       response = @connection["member/#{member_id}/quick_advance_flag"].get

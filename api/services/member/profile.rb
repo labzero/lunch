@@ -212,6 +212,38 @@ module MAPI
           end
           ((members.sort {|a, b| a['CP_ASSOC'] <=> b['CP_ASSOC']}).collect {|member| {id: member['FHLB_ID'].to_i, name: member['CP_ASSOC'].to_s} }).to_json
         end
+
+        def self.member_contacts(app, member_id)
+          member_id = member_id.to_i
+          quoted_member_id = ActiveRecord::Base.connection.quote(member_id)
+
+          if app.settings.environment == :production
+            # Collateral Asset Manager - TODO: pull in phone number for CAM once it's location (e.g. database) has been determined
+            cam_query = <<-SQL
+              select customer_master_id as fhlb_id, cs_user_id as USERNAME,  user_first_name || ' ' || user_last_name as FULL_NAME, email as EMAIL
+              from fhlbown.customer_profile@colaprod_link p, fhlbown.v_cs_user_profile@colaprod_link c
+              Where c.cs_user_id = p.collateral_analyst and customer_master_id = #{quoted_member_id}
+            SQL
+            cam = ActiveRecord::Base.connection.execute(cam_query).fetch_hash || {}
+
+            # Relationship Manager
+            rm_query = <<-SQL
+              select c.fhlb_id, MR_FIRST || ' ' || MR_LAST as FULL_NAME, MR_PHONE as PHONE_NUMBER, MR_EMAIL as EMAIL
+              from PORTFOLIOS.CUSTOMERS C, PORTFOLIOS.MARKETING_REPS R
+              where R.MR_INITIALS = C.CU_MARKETING_REP and fhlb_id = #{quoted_member_id}
+            SQL
+            rm = ActiveRecord::Base.connection.execute(rm_query).fetch_hash || {}
+          else
+            cam = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_contacts.json')))['CAM']
+            rm = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_contacts.json')))['RM']
+          end
+          rm['USERNAME'] = rm['EMAIL'].match(/^(.+?)@/).captures.first.downcase if rm['EMAIL'].match(/^(.+?)@/)
+          cam['USERNAME'] = cam['USERNAME'].downcase if cam['USERNAME']
+          {
+            cam: cam,
+            rm: rm
+          }
+        end
       end
     end
   end

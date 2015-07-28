@@ -111,6 +111,9 @@ describe CustomFormattingHelper do
   end
   
   describe '`fhlb_formatted_phone_number` method' do
+    it 'returns nil if it is not passed a phone number' do
+      expect(helper.fhlb_formatted_phone_number(nil)).to be_nil
+    end
     it 'converts a 10 digit phone number into the FHLB format' do
       expect(helper.fhlb_formatted_phone_number('1234567890')).to eq('(123) 456-7890')
     end

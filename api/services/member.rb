@@ -328,6 +328,23 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/member_contacts'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve current member contacts'
+              key :notes, 'Returns a hash with contact info for the member bank\'s Relationship Manager and Collateral Asset Manager'
+              key :type, :MemberContacts
+              key :nickname, :getContactsForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+            end
+          end
+          api do
             key :path, '/{id}/'
             operation do
               key :method, 'GET'
@@ -771,6 +788,12 @@ module MAPI
             halt 404
           end
           profile.to_json
+        end
+
+        # Member Contacts
+        relative_get '/:id/member_contacts' do
+          member_id = params[:id]
+          MAPI::Services::Member::Profile.member_contacts(self, member_id).to_json
         end
 
         relative_get '/' do
