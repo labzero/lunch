@@ -85,6 +85,13 @@ class MembersService < MAPIService
       Rails.logger.warn("MemberBalanceService.member_contacts encountered a JSON parsing error: #{e}")
       return nil
     end
+
+    # get CAM phone number from LDAP
+    user = nil
+    Devise::LDAP::Connection.admin('intranet').open do |ldap|
+      user = fetch_ldap_user_by_account_name(ldap, data[:cam][:USERNAME])
+    end
+    data[:cam][:PHONE_NUMBER] = user['telephoneNumber'].first if user
     data
   end
 
@@ -172,6 +179,10 @@ class MembersService < MAPIService
       end
     end
     users
+  end
+
+  def fetch_ldap_user_by_account_name(ldap, username)
+    user = ldap.search(filter: "(&(sAMAccountName=#{username})(objectClass=person))").try(:first)
   end
 
 end

@@ -45,6 +45,12 @@ describe MembersService do
 
   describe 'the `member_contacts` method', :vcr do
     let(:member_contacts) { subject.member_contacts(member_id)}
+    let(:cam_phone_number) {double('phone number')}
+    let(:ldap_connection) { double('LDAP Connection', search: []) }
+    before do
+      allow(Devise::LDAP::Connection).to receive(:admin).with('intranet').and_return(ldap_connection)
+      allow(ldap_connection).to receive(:open).and_yield(ldap_connection)
+    end
 
     %i(cam rm).each do |object|
       %i(FULL_NAME USERNAME EMAIL).each do |attr|
@@ -60,6 +66,10 @@ describe MembersService do
       expect(member_contacts[:cam][:FULL_NAME]).to be_kind_of(String)
       expect(member_contacts[:cam][:USERNAME]).to be_kind_of(String)
       expect(member_contacts[:cam][:EMAIL]).to be_kind_of(String)
+    end
+    it 'sets the `PHONE_NUMBER` attribute for the `cam` object to the result of an LDAP query' do
+      allow(subject).to receive(:fetch_ldap_user_by_account_name).and_return({'telephoneNumber' => [cam_phone_number] })
+      expect(member_contacts[:cam][:PHONE_NUMBER]).to eq(cam_phone_number)
     end
     describe 'error states' do
       it 'should return nil if there is a JSON parsing error' do
