@@ -277,7 +277,7 @@ module MAPI
             row = etransact_eod_status_on_cursor.fetch()
             if row
               etransact_no_rows_found = false 
-              etransact_eod = true if row[0].to_i > STATUS_ON_RECORD_NOTFOUND_COUNT
+              etransact_eod = true if row[0].to_i == STATUS_ON_RECORD_NOTFOUND_COUNT
             end
 
             etransact_status_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_turn_on_string)
