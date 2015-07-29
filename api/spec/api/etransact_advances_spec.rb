@@ -51,6 +51,8 @@ describe MAPI::ServiceApp do
       expect(etransact_advances_status.length).to be >=1
       expect(etransact_advances_status['etransact_advances_status']).to be_boolean
       expect(etransact_advances_status['wl_vrc_status']).to be_boolean
+      expect(etransact_advances_status['eod_reached']).to be_boolean
+      expect(etransact_advances_status['disabled']).to be_boolean
     end
     it 'should return all_loan_status hash' do
       expect(etransact_advances_status['all_loan_status'].length).to be >=1
@@ -71,16 +73,12 @@ describe MAPI::ServiceApp do
                                  "SBC_AA_ENABLED"=>  "Y", "END_TIME" => "2000",  "OVERRIDE_END_DATE" =>  "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME"=>  "0700"}}
       let(:result_set) {double('Oracle Result Set', fetch: nil)}
       let(:result_set2) {double('Oracle Result Set', fetch: nil)}
-      let(:result_set3) {double('Oracle Result Set', fetch_hash: nil)}
+      let(:result_set3) {double('Oracle Result Set', fetch: nil)}
+      let(:result_set4) {double('Oracle Result Set', fetch_hash: nil)}
       before do
-        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
+        allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
         allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
-        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
-        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set2)
-        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set3)
-        allow(result_set).to receive(:fetch).and_return(0, nil)
-        allow(result_set2).to receive(:fetch).and_return(1, nil)
-        allow(result_set3).to receive(:fetch_hash).and_return(some_status_data, nil)
+        allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set,result_set2,result_set3,result_set4)
       end
       it 'should still return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
         expect(etransact_advances_status.length).to be >=1
@@ -96,9 +94,6 @@ describe MAPI::ServiceApp do
         end
       end
       it 'should return false status if no data found' do
-          expect(result_set).to receive(:fetch).and_return(nil)
-          expect(result_set2).to receive(:fetch).and_return(nil)
-          expect(result_set3).to receive(:fetch_hash).and_return(nil)
           expect(etransact_advances_status.length).to be >=1
           expect(etransact_advances_status['etransact_advances_status']).to be false
           expect(etransact_advances_status['wl_vrc_status']).to be false
@@ -125,25 +120,19 @@ describe MAPI::ServiceApp do
       let(:result_set3) {double('Oracle Result Set', fetch: nil)}
       let(:result_set4) {double('Oracle Result Set', fetch_hash: nil)}
       before do
-        Timecop.travel Time.zone.now.at_noon
-        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
+        allow(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
         allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
-        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
-        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set2)
-        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set3)
-        expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set4)
+        allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set, result_set2, result_set3, result_set4)
         allow(result_set).to receive(:fetch).and_return(1, nil)
         allow(result_set2).to receive(:fetch).and_return(1, nil)
         allow(result_set3).to receive(:fetch).and_return(1, nil)
         allow(result_set4).to receive(:fetch_hash).and_return(some_status_data, some_status_data2, some_status_data3, nil)
       end
-      after do
-        Timecop.return
-      end
       it 'should return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
         expect(etransact_advances_status.length).to be >=1
       end
-      it 'should return etransact turn off as all products reach end time eventhought etransact is turned on' do
+      it 'should return etransact turn off as all products reach end time even though etransact is turned on' do
+        allow(result_set).to receive(:fetch).and_return(0, nil)
         expect(etransact_advances_status['etransact_advances_status']).to be true
         expect(etransact_advances_status['wl_vrc_status']).to be true
       end

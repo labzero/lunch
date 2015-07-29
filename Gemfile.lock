@@ -530,6 +530,3 @@ DEPENDENCIES
   vcr
   webmock
   wicked_pdf
-
-BUNDLED WITH
-   1.10.2

@@ -107,8 +107,11 @@ class DashboardController < ApplicationController
       nil
     end
 
-    @quick_advance_enabled= members_service.quick_advance_enabled_for_member?(current_member_id)
-    @quick_advances_active = etransact_service.etransact_active?
+    @quick_advance_enabled = members_service.quick_advance_enabled_for_member?(current_member_id)
+    etransact_status = etransact_service.status
+    quick_advance_open = etransact_service.etransact_active?(etransact_status)
+    quick_advance_terms = etransact_service.has_terms?(etransact_status)
+    @quick_advance_status = (quick_advance_open ? (quick_advance_terms ? :open : :no_terms) : :closed)
     # TODO replace this with the timestamp from the cached quick advance rates timestamp
     date = DateTime.now - 2.hours
     @quick_advance_last_updated = date.strftime("%d %^b %Y, %l:%M %p")

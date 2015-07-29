@@ -19,6 +19,7 @@ We use [Vagrant](https://www.vagrantup.com/) to manage a VM that provides all th
 * [ImageMagick](http://www.imagemagick.org/) installed.  `brew install imagemagick` if you are on a Mac with Homebrew.
 * [GhostScript](http://www.ghostscript.com/) installed.  `brew install gs` if you are on a Mac with Homebrew.
 * ACE Agent SDK v8.1 (obtained from the Bank) installed.
+* [Chrome Web Driver](https://sites.google.com/a/chromium.org/chromedriver/downloads) (for local integration tests, can skip if you plan to test via another mechanism, like SauceLabs)
 
 ### Oracle Instant Client
 
@@ -71,9 +72,9 @@ Follow these steps to get up and running:
 5. `export ORACLE_INSTALLER=PATH_TO_INSTALLER` with `PATH_TO_INSTALLER` replaced with the path to the directory containing the Oracle DB 11g RPM.
 6. `vagrant up` -- This will take 15-30 minutes, and will generate a `.deb` version of the 11g RPM in the same directory was the RPM. Save this file if you want to be able to rebuild your Vagrant system more quickly.
 7. If you want to be able to work offline, [follow these steps](http://chaos667.tumblr.com/post/20006357466/ora-21561-and-oracle-instant-client-11-2) to add a needed host entry to `/etc/hosts`.
-8. `rake db:setup` -- You will be asked for the SYSTEM password twice, which is `password`.
-9. `foreman start`
-10. `./ldap/run-server --reseed --port 3200`
+8. `rake db:setup` -- You may be asked for the SYSTEM password twice, which is `password`.
+9. `rake db:setup RAILS_ENV=test` -- You may be asked for the SYSTEM password twice, which is `password`.
+10. `foreman start`
 11. Navigate over to [http://localhost:3000](http://localhost:3000).
 12. The login details are 'local' (username) and 'development' (password).
 

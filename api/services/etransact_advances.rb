@@ -266,45 +266,49 @@ module MAPI
             FROM WEB_ADM.AO_TERM_BUCKETS
           SQL
 
+          etransact_status = false  #indicat if etransact is turn on and at least one product has not reach End Time
+          wl_vrc_status = false   #indicate if WL VRC is enabled regardless of if etransact is turn on
+          etransact_eod = false # indicates that we have reached EOD on the global eTransact flag
+          etransact_disabled = false # indiciates that eTransact has been globally disabled
+          etransact_no_rows_found = true
+
           if settings.environment == :production
-            etransact_status = false  #indicat if etransact is turn on and at least one product has not reach End Time
-            wl_vrc_status = false   #indicate if WL VRC is enabled regardless of if etransact is turn on
             etransact_eod_status_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_eod_on_string)
-            while row = etransact_eod_status_on_cursor.fetch()
-              if row[0].to_i > STATUS_ON_RECORD_NOTFOUND_COUNT
-                etransact_status = true
-                break
-              end
+            row = etransact_eod_status_on_cursor.fetch()
+            if row
+              etransact_no_rows_found = false 
+              etransact_eod = true if row[0].to_i > STATUS_ON_RECORD_NOTFOUND_COUNT
             end
-            if etransact_status
-              etransact_status_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_turn_on_string)
-              while row = etransact_status_on_cursor.fetch()
-                if row[0].to_i == STATUS_ON_RECORD_NOTFOUND_COUNT
-                  etransact_status = false
-                  break
-                end
-              end
+
+            etransact_status_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_turn_on_string)
+            row = etransact_status_on_cursor.fetch()
+            if row
+              etransact_no_rows_found = false
+              etransact_disabled = true if row[0].to_i == STATUS_ON_RECORD_NOTFOUND_COUNT
             end
+
             etransact_wl_status_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_WLVRC_on_string)
-            while row = etransact_wl_status_on_cursor.fetch()
-              if row[0].to_i > STATUS_ON_RECORD_NOTFOUND_COUNT
-                wl_vrc_status = true
-                break
-              end
+            row = etransact_wl_status_on_cursor.fetch()
+            if row && row[0].to_i > STATUS_ON_RECORD_NOTFOUND_COUNT
+              wl_vrc_status = true
             end
             term_bucket_data_array = []
-            etransct_all_product_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_all_product_on_string)
+            etransact_all_product_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_all_product_on_string)
 
-            while row = etransct_all_product_on_cursor.fetch_hash()
+            while row = etransact_all_product_on_cursor.fetch_hash()
               term_bucket_data_array.push(row)
             end
           else
             term_bucket_data_array = []
             results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_status.json'))).with_indifferent_access
-            etransact_status = results[:etransact_advances_status]
             wl_vrc_status = results[:wl_vrc_status]
+            etransact_eod = results[:eod_reached]
+            etransact_disabled = results[:disabled]
+            etransact_no_rows_found = false
             term_bucket_data_array = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_term_buckets_info.json')))
           end
+
+          etransact_status = !(etransact_no_rows_found || etransact_eod || etransact_disabled)
           # # loop thru to get status for each of the type and term
           loan_status = {}
           now = Time.zone.now
@@ -353,6 +357,8 @@ module MAPI
 
           end
           {
+            eod_reached: false,
+            disabled: false,
             etransact_advances_status: etransact_status,
             wl_vrc_status: wl_vrc_status,
             all_loan_status: loan_status

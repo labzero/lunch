@@ -1,17 +1,39 @@
 class EtransactAdvancesService < MAPIService
 
-  def etransact_active?
+  def status
     begin
       response = @connection["etransact_advances/status"].get
     rescue RestClient::Exception => e
-      Rails.logger.warn("EtransactAdvancesService.etransact_active? encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return false
+      Rails.logger.warn("EtransactAdvancesService.status encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
     rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("EtransactAdvancesService.etransact_active? encountered a connection error: #{e.class.name}")
-      return false
+      Rails.logger.warn("EtransactAdvancesService.status encountered a connection error: #{e.class.name}")
+      return nil
     end
-    data = JSON.parse(response.body).with_indifferent_access
-    data[:etransact_advances_status]
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("EtransactAdvancesService.status encountered a JSON parsing error: #{e}")
+      return nil
+    end
+
+    data
+  end
+
+  def etransact_active?(status_object=nil)
+    status_object = self.status unless status_object
+    return false unless status_object
+    status_object[:etransact_advances_status] 
+  end
+
+  def has_terms?(status_object=nil)
+    status_object = self.status unless status_object
+    return false unless status_object
+    status_object[:all_loan_status].select do |term, loans|
+      loans.select do |loan,  details|
+        details[:display_status] && details[:trade_status]
+      end.present?
+    end.present?
   end
 
   def signer_full_name(signer)

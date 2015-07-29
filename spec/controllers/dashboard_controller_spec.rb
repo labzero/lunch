@@ -55,9 +55,23 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(assigns[:current_overnight_vrc]).to be_kind_of(Float)
     end
-    it 'should assign @quick_advances_active' do
+    it 'should assign @quick_advance_status' do
       get :index
-      expect(assigns[:quick_advances_active]).to be_present
+      expect(assigns[:quick_advance_status]).to be_present
+    end
+    it 'should assign @quick_advance_status to `:open` if the desk is enabled and we have terms' do
+      get :index
+      expect(assigns[:quick_advance_status]).to eq(:open)
+    end
+    it 'should assign @quick_advance_status to `:no_terms` if the desk is enabled and we have no terms' do
+      allow_any_instance_of(EtransactAdvancesService).to receive(:has_terms?).and_return(false)
+      get :index
+      expect(assigns[:quick_advance_status]).to eq(:no_terms)
+    end
+    it 'should assign @quick_advance_status to `:open` if the desk is disabled' do
+      allow_any_instance_of(EtransactAdvancesService).to receive(:etransact_active?).and_return(false)
+      get :index
+      expect(assigns[:quick_advance_status]).to eq(:closed)
     end
     it 'should assign @financing_availability_gauge' do
       get :index
