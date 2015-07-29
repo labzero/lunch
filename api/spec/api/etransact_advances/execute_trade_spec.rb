@@ -181,6 +181,15 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe 'Validate Trade With Credit Error Exception' do
+    let(:amount)  {'100001'}
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    it 'should return expected result of validate trade' do
+      expect(execute_trade['status']).to eq('CreditError')
+      expect(execute_trade['authorized_amount']).to be_kind_of(Numeric)
+    end
+  end
+
   describe 'Validate Trade With Capital Stock Gross Up Exception' do
     let(:amount)  {'2000000'}
     let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }

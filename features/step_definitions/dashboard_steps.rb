@@ -1,6 +1,7 @@
 require 'action_view'
 require_relative '../../app/helpers/custom_formatting_helper'
 include CustomFormattingHelper
+include ActionView::Helpers::SanitizeHelper
 
 When /^I visit the dashboard$/ do
   visit "/dashboard"
@@ -64,11 +65,15 @@ Then(/^I should see "(.*?)" in the quick advance flyout input field$/) do |text|
 end
 
 
-When(/^I open the quick advance flyout$/) do
-  @amount = Random.rand(100000) + 100000
-  step "I enter \"#{@amount}\" into the \".dashboard-module-advances input\" input field"
+When(/^I open the quick advance flyout and enter (\d+)$/) do |amount|
+  step "I enter \"#{amount}\" into the \".dashboard-module-advances input\" input field"
   step "I should see a flyout"
   sleep 0.5 # we select a rate after the flyout opens, but in some cases selenium does its checks before that JS fires
+end
+
+When(/^I open the quick advance flyout$/) do
+  @amount = Random.rand(100000) + 100000
+  step "I open the quick advance flyout and enter #{@amount}"
 end
 
 When(/^I click on the flyout close button$/) do
@@ -213,6 +218,10 @@ end
 Given(/^I enter my SecurID pin and token$/) do
   step %{I enter my SecurID pin}
   step %{I enter my SecurID token}
+end
+
+Then(/^I should see a insufficient financing availability error with amount (\d+)$/) do |amount|
+  page.assert_selector('div.quick-advance-icon-section.icon-error-before p', visible: true, text: /\A#{Regexp.quote(strip_tags(I18n.t("dashboard.quick_advance.error.insufficient_financing_availability_html", amount: fhlb_formatted_currency(amount.to_i, precision: 0))))}\z/)
 end
 
 Then(/^I should see SecurID errors$/) do

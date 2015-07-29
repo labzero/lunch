@@ -161,6 +161,12 @@ class DashboardController < ApplicationController
         @advance_term = params[:advance_term].capitalize if params[:advance_term]
         @advance_rate = params[:advance_rate].to_f if params[:advance_rate]
         response_html = render_to_string :quick_advance_error, layout: false
+      when 'CreditError'
+        preview_success = false
+        preview_error = true
+        @advance_amount = params[:amount].to_f if params[:amount]
+        @error_message = preview[:status]
+        response_html = render_to_string :quick_advance_error, layout: false
       else
         preview_success = true
         preview_error = false

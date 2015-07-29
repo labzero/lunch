@@ -485,6 +485,7 @@ en:
         debit_sta_html: If you select this option, the Bank will automatically debit your Settlement/Transaction Account (STA) for %{amount} today
         footer: Cumulative Stock Purchase Required reflexts the total stock purchase for all advances transacted today, including the new advace request. To avoid an overdraft, please ensure your Settlement/Transaction Account (STA) has sufficient funds to cover this amount.
       error:
+        insufficient_financing_availability_html: The original amount requested of %{amount} is not available based on your remaining financing availability
         capital_stock_exception: No Net or Gross info returned
         low_exception_html: The amount for an advance at this term must be %{amount} or higher
         high_exception_html: The amount for an advance at this term must be %{amount} or lower
