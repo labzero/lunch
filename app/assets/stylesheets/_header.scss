@@ -32,6 +32,7 @@
   }
   li {
     display: inline-block;
+    vertical-align: top;
     .input-field-container {
       vertical-align: middle;
     }
@@ -40,10 +41,16 @@
     text-decoration: none;
     color: $white;
   }
-  .nav-logout a:before {
+  .nav-logout a:before, .header-member-name:before {
     content: "|";
     display: inline-block;
     margin: 0 15px;
+  }
+  .header-member-name {
+    width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .nav-settings, .nav-mail {
     font-size: 1.25rem;
