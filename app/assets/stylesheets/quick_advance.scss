@@ -346,6 +346,15 @@ $faded-opacity: 0.4 !default;
     .quick-advance-summary {
       opacity: $faded-opacity;
     }
+    .label-radio {
+      opacity: $faded-opacity;
+    }
+    input {
+      opacity: $faded-opacity;
+    }
+    table {
+      opacity: $faded-opacity;
+    }
   }
 }
 

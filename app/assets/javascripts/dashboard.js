@@ -27,7 +27,7 @@ $(function () {
       $('.flyout').addClass('dashboard-quick-advance-flyout');
       $('.flyout-bottom-section').addClass('column-3-span-2');
       var topContent = [$('.dashboard-module-advances header').clone(), $('<div class="flyout-top-section-body"></div>').append($('.dashboard-module-advances .input-field-container, .dashboard-module-advances h2, .quick-advance-desk-closed-message').clone())];
-      var bottomContent = $('.quick-advance-last-updated-message, .quick-advance-instruction, .dashboard-module-advances table, .dashboard-module-advances .initiate-quick-advance, .rate-advances-footer').clone();
+      var bottomContent = $('.quick-advance-rates, .quick-advance-last-updated-message, .quick-advance-instruction, .dashboard-module-advances .initiate-quick-advance, .rate-advances-footer').clone();
       $('.dashboard-module-advances').flyout({topContent:topContent, bottomContent:bottomContent, useReferenceElement:true});
       getQuickAdvanceRates();
     }

@@ -480,9 +480,9 @@ en:
         stock: Stock Purchase Required
         net: Net Amount Available
         cumulative: Cumulative Stock Purchase Required
-        increase_transaction: Increase Amount Requested to cover reuired stock purchase.
+        increase_transaction: Increase Amount Requested to cover required stock purchase.
         debit_sta_html: If you select this option, the Bank will automatically debit your Settlement/Transaction Account (STA) for %{amount} today
-        footer: Cumulative Stock Purchase Required reflexts the total stock purchase for all advances transacted today, including the new advace request. To avoid an overdraft, please ensure your Settlement/Transaction Account (STA) has sufficient funds to cover this amount.
+        footer: Cumulative Stock Purchase Required reflects the total stock purchase for all advances transacted today, including the new advace request. To avoid an overdraft, please ensure your Settlement/Transaction Account (STA) has sufficient funds to cover this amount.
       error:
         capital_stock_exception: No Net or Gross info returned
         low_exception_html: The amount for an advance at this term must be %{amount} or higher
