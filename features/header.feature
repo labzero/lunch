@@ -23,3 +23,8 @@ Scenario: Member sees products dropdown
   And I don't see the products dropdown
   When I hover on the products link in the header
   Then I should see the products dropdown
+
+Scenario: Intranet user sees bank name in header
+  Given I visit the root path
+  When I log in as a "primary user"
+  Then I should see the primary bank name in the header
