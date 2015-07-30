@@ -52,6 +52,7 @@ describe MembersService do
       allow(ldap_connection).to receive(:open).and_yield(ldap_connection)
     end
 
+    it_should_behave_like 'a MAPI backed service object method', :member_contacts, :member_id
     %i(cam rm).each do |object|
       %i(FULL_NAME USERNAME EMAIL).each do |attr|
         it "returns a contact hash with a `#{object}` object containing a `#{attr}` attribute" do
@@ -71,20 +72,13 @@ describe MembersService do
       allow(subject).to receive(:fetch_ldap_user_by_account_name).and_return({'telephoneNumber' => [cam_phone_number] })
       expect(member_contacts[:cam][:PHONE_NUMBER]).to eq(cam_phone_number)
     end
-    describe 'error states' do
-      it 'should return nil if there is a JSON parsing error' do
-        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
-        expect(Rails.logger).to receive(:warn)
-        expect(member_contacts).to be(nil)
-      end
-      it 'should return nil if there was an API error' do
-        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
-        expect(member_contacts).to eq(nil)
-      end
-      it 'should return nil if there was a connection error' do
-        expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
-        expect(member_contacts).to eq(nil)
-      end
+    it 'does not set the `PHONE_NUMBER` attribute for the `cam` object if there was no username to look up the user by' do
+      allow(JSON).to receive(:parse).and_return({cam: {}})
+      expect(member_contacts[:cam][:PHONE_NUMBER]).to be_nil
+    end
+    it 'does not set the `PHONE_NUMBER` attribute for the `cam` object if the user returned from the LDAP query has no phone number' do
+      allow(subject).to receive(:fetch_ldap_user_by_account_name).and_return({})
+      expect(member_contacts[:cam][:PHONE_NUMBER]).to be_nil
     end
   end
 
