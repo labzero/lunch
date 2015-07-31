@@ -77,19 +77,23 @@
           %p= t('dashboard.quick_advance.hours_of_operation_html', url: '')
         - if @quick_advance_status == :open
           %p.quick-advance-instruction= t('dashboard.quick_advance.advance_instruction')
-          %table
-            %thead
-              %tr
-                %th{colspan: 2}
-                %th= t('dashboard.quick_advance.table.axes_labels.standard')
-                %th{colspan: 3}= t('dashboard.quick_advance.table.axes_labels.securities_backed')
-              %tr.quick-advance-column-labels
-                %th{colspan: 2}= t('dashboard.quick_advance.table.term')
-                %th= t('dashboard.quick_advance.table.whole_loan')
-                %th= t('dashboard.quick_advance.table.agency')
-                %th= t('dashboard.quick_advance.table.aaa')
-                %th= t('dashboard.quick_advance.table.aa')
-            %tbody
+          .quick-advance-rates
+            .quick-advance-rates-body
+              .quick-advance-icon-section
+                %p.quick-advance-loading-message= t('dashboard.quick_advance.preview.initiate')
+                %table
+                  %thead
+                    %tr
+                      %th{colspan: 2}
+                      %th= t('dashboard.quick_advance.table.axes_labels.standard')
+                      %th{colspan: 3}= t('dashboard.quick_advance.table.axes_labels.securities_backed')
+                    %tr.quick-advance-column-labels
+                      %th{colspan: 2}= t('dashboard.quick_advance.table.term')
+                      %th= t('dashboard.quick_advance.table.whole_loan')
+                      %th= t('dashboard.quick_advance.table.agency')
+                      %th= t('dashboard.quick_advance.table.aaa')
+                      %th= t('dashboard.quick_advance.table.aa')
+                  %tbody
           %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.preview')
           %small
             %p.rate-advances-footer= t('dashboard.quick_advance.table.footer')
