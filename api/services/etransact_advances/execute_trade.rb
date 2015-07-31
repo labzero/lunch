@@ -305,18 +305,26 @@ module MAPI
                 }
               else
                 if (fhlbsfresponse.at_css('advanceValidation capitalStockValidations capitalStockValid').content == 'true') || (!check_capstock)
-                  hash = {
-                    'status' => fhlbsfresponse.at_css('transactionResult').content,
-                    'confirmation_number' => (operation == 'EXECUTE')? fhlbsfresponse.at_css('trade tradeHeader tradeId').content : '',
-                    'advance_rate' => rate.to_f,
-                    'advance_amount' => amount.to_i,
-                    'advance_term' => advance_term,
-                    'advance_type' => LOAN_MAPPING[advance_type],
-                    'interest_day_count' => day_count,
-                    'payment_on' => @@payment_at,
-                    'funding_date' => settlement_date,
-                    'maturity_date' => maturity_date,
-                  }
+                   if (fhlbsfresponse.at_css('advanceValidation creditValidations creditValid').content == 'true')
+                      hash = {
+                        'status' => fhlbsfresponse.at_css('transactionResult').content,
+                        'confirmation_number' => (operation == 'EXECUTE')? fhlbsfresponse.at_css('trade tradeHeader tradeId').content : '',
+                        'advance_rate' => rate.to_f,
+                        'advance_amount' => amount.to_i,
+                        'advance_term' => advance_term,
+                        'advance_type' => LOAN_MAPPING[advance_type],
+                        'interest_day_count' => day_count,
+                        'payment_on' => @@payment_at,
+                        'funding_date' => settlement_date,
+                        'maturity_date' => maturity_date,
+                      }
+                    else
+                       creditexception = response.doc.xpath('//Envelope//Body//executeTradeResponse//creditValidation//creditValid')
+                        hash = {
+                          'status' => 'CreditError',
+                          'maxAmount' => creditexception.at_css('maxAmount').content
+                        } 
+                    end    
                 else
                   capitalstockexceptions = response.doc.xpath('//Envelope//Body//executeTradeResponse//advanceValidation//capitalStockValidations')
 
@@ -368,7 +376,9 @@ module MAPI
             if operation == 'EXECUTE'
               JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_confirmation.json')))
             else
-              if (amount.to_i < 1000000) || (!check_capstock)
+              if (amount.to_i == 100001)
+                 JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_credit_error.json')))
+              elsif (amount.to_i < 1000000) || (!check_capstock)
                 JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_preview.json')))
               elsif amount.to_i < 2000000
                 JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_capstock_preview.json')))

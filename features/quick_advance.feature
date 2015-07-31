@@ -85,6 +85,14 @@ Scenario: Confirm rate from Quick Advance preview dialog
   And I should not see the quick advance preview message
   And I should see the quick advance confirmation close button
 
+@jira-mem-878
+Scenario: Users must with insufficient funds for Quick Advance get an error
+  Given I visit the dashboard
+  And I open the quick advance flyout and enter 100001
+  And I select the rate with a term of "overnight" and a type of "whole"
+  When I click on the initiate advance button
+  Then I should see a insufficient financing availability error with amount 100001
+
 @data-unavailable @jira-mem-560
 Scenario: Close flyout after finishing quick advance
   Given I visit the dashboard
