@@ -3,7 +3,6 @@ require 'swagger/blocks'
 require 'active_support/time'
 
 require_relative 'shared/constants'
-require_relative 'shared/capital_stock_services'
 
 require_relative 'services/base'
 require_relative 'services/mock_rates'
