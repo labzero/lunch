@@ -1,12 +1,12 @@
 {
-  "CAM": {
-    "USERNAME":"HICKSG",
-    "FULL_NAME":"Geoffrey Hicks",
-    "EMAIL":"hicksg@fhlbsf.com"
+  "cam": {
+    "username":"HICKSG",
+    "full_name":"Geoffrey Hicks",
+    "email":"hicksg@fhlbsf.com"
   },
-  "RM": {
-    "FULL_NAME":"John McCormack",
-    "EMAIL":"mccormaj@fhlbsf.com",
-    "PHONE_NUMBER":"(415)616-2755"
+  "rm": {
+    "full_name":"John McCormack",
+    "email":"mccormaj@fhlbsf.com",
+    "phone_number":"(415)616-2755"
   }
 }

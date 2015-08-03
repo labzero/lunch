@@ -94,8 +94,8 @@ RSpec.describe DashboardController, :type => :controller do
       let(:rm_username) { 'rm' }
       before do
         allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(contacts)
-        allow(contacts).to receive(:[]).with(:cam).and_return({USERNAME: cam_username})
-        allow(contacts).to receive(:[]).with(:rm).and_return({USERNAME: rm_username})
+        allow(contacts).to receive(:[]).with(:cam).and_return({username: cam_username})
+        allow(contacts).to receive(:[]).with(:rm).and_return({username: rm_username})
         allow(Rails.application.assets).to receive(:find_asset)
       end
       it 'is the result of the `members_service.member_contacts` method' do

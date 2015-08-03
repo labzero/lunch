@@ -220,7 +220,7 @@ module MAPI
           if app.settings.environment == :production
             # Collateral Asset Manager - TODO: pull in phone number for CAM once it's location (e.g. database) has been determined
             cam_query = <<-SQL
-              select customer_master_id as fhlb_id, cs_user_id as USERNAME,  user_first_name || ' ' || user_last_name as FULL_NAME, email as EMAIL
+              select customer_master_id as fhlb_id, cs_user_id as username,  user_first_name || ' ' || user_last_name as full_name, email as email
               from fhlbown.customer_profile@colaprod_link p, fhlbown.v_cs_user_profile@colaprod_link c
               Where c.cs_user_id = p.collateral_analyst and customer_master_id = #{quoted_member_id}
             SQL
@@ -228,21 +228,29 @@ module MAPI
 
             # Relationship Manager
             rm_query = <<-SQL
-              select c.fhlb_id, MR_FIRST || ' ' || MR_LAST as FULL_NAME, MR_PHONE as PHONE_NUMBER, MR_EMAIL as EMAIL
+              select c.fhlb_id, MR_FIRST || ' ' || MR_LAST as full_name, MR_PHONE as phone_number, MR_EMAIL as email
               from PORTFOLIOS.CUSTOMERS C, PORTFOLIOS.MARKETING_REPS R
               where R.MR_INITIALS = C.CU_MARKETING_REP and fhlb_id = #{quoted_member_id}
             SQL
             rm = ActiveRecord::Base.connection.execute(rm_query).fetch_hash || {}
           else
-            cam = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_contacts.json')))['CAM']
-            rm = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_contacts.json')))['RM']
+            cam = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_contacts.json')))['cam']
+            rm = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_contacts.json')))['rm']
           end
-          rm['USERNAME'] = rm['EMAIL'].match(/^(.+?)@/).captures.first.downcase if rm['EMAIL'].match(/^(.+?)@/)
-          cam['USERNAME'] = cam['USERNAME'].downcase if cam['USERNAME']
+          rm[:email] = rm['email'] || rm['EMAIL']
+          rm[:full_name] = rm['full_name'] || rm['FULL_NAME']
+          rm[:username] = rm[:email].match(/^(.+?)@/).captures.first.downcase if rm[:email].match(/^(.+?)@/)
+
+          cam[:email] = cam['email'] || cam['EMAIL']
+          cam[:full_name] = cam['full_name'] || cam['FULL_NAME']
+          cam[:phone_number] = cam['phone_number'] || cam['PHONE_NUMBER']
+          cam[:username] = cam['username'] || cam['USERNAME']
+          cam[:username] = cam[:username].downcase if cam[:username]
+
           {
             cam: cam,
             rm: rm
-          }
+          }.with_indifferent_access
         end
       end
     end

@@ -14,20 +14,20 @@ module MAPI
         end
       end
       swagger_model :ContactObject do
-        key :required, [:USERNAME, :FULL_NAME, :EMAIL]
-        property :USERNAME do
+        key :required, [:username, :full_name, :email]
+        property :username do
           key :type, :string
           key :description, 'The FHLB username of the contact.'
         end
-        property :FULL_NAME do
+        property :full_name do
           key :type, :string
           key :description, 'The full name of the contact.'
         end
-        property :EMAIL do
+        property :email do
           key :type, :string
           key :description, 'The email address of the contact.'
         end
-        property :PHONE_NUMBER do
+        property :phone_number do
           key :type, :string
           key :description, 'The phone number of the contact.'
         end
