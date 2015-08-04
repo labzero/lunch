@@ -163,6 +163,6 @@
         %button.split-button-right #{t('global.pdf')}
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
       %ul
-        %li= render 'dashboard/dashboard_contact', email: 'user@example.com', title: t('dashboard.contacts.type.relationship_manager'), name: 'Bob Harrison', phone_number: fhlb_formatted_phone_number('4155557283'), picture_url: image_url('bob_harrison.jpg')
-        %li= render 'dashboard/dashboard_contact', email: 'otheruser@example.com', title: t('dashboard.contacts.type.member_services_desk'), name: 'Theresa Reyes', phone_number: fhlb_formatted_phone_number('4155557283'), picture_url: image_url('theresa_reyes.jpg')
-        %li= render 'dashboard/dashboard_contact', email: 'otheruser@example.com', title: t('dashboard.contacts.type.collateral_asset_manager'), name: 'Frida Aksenova', phone_number: fhlb_formatted_phone_number('4155557283'), picture_url: image_url('frida_aksenova.jpg')
+        %li= render 'dashboard/dashboard_contact', email: @contacts[:rm][:email], title: t('dashboard.contacts.type.relationship_manager'), name: @contacts[:rm][:full_name], phone_number: fhlb_formatted_phone_number(@contacts[:rm][:phone_number]), picture_url: image_url(@contacts[:rm][:image_url])
+        %li= render 'dashboard/dashboard_contact', email: @contacts[:cam][:email], title: t('dashboard.contacts.type.collateral_asset_manager'), name: @contacts[:cam][:full_name], phone_number: fhlb_formatted_phone_number(@contacts[:cam][:phone_number]), picture_url: image_url(@contacts[:cam][:image_url])
+        %li.member-services-desk= render 'dashboard/dashboard_contact', email: 'websupport@fhlbsf.com', title: t('dashboard.contacts.type.member_services_desk'), phone_number: fhlb_formatted_phone_number('8004443452')

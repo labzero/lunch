@@ -115,6 +115,14 @@ class DashboardController < ApplicationController
     # TODO replace this with the timestamp from the cached quick advance rates timestamp
     date = DateTime.now - 2.hours
     @quick_advance_last_updated = date.strftime("%d %^b %Y, %l:%M %p")
+    @contacts = members_service.member_contacts(current_member_id)
+    if @contacts && @contacts[:rm] && @contacts[:cam]
+      default_image_path = 'placeholder-usericon.svg'
+      cam_image_path = "#{@contacts[:cam][:username]}.jpg"
+      rm_image_path = "#{@contacts[:rm][:username]}.jpg"
+      @contacts[:cam][:image_url] = Rails.application.assets.find_asset(cam_image_path) ? cam_image_path : default_image_path
+      @contacts[:rm][:image_url] = Rails.application.assets.find_asset(rm_image_path) ? rm_image_path : default_image_path
+    end
   end
 
   def quick_advance_rates

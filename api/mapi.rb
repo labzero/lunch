@@ -39,6 +39,7 @@ require_relative 'models/member_capital_stock_and_leverage'
 require_relative 'models/member_interest_rate_resets'
 require_relative 'models/member_parallel_shift'
 require_relative 'models/member_dividend_statement'
+require_relative 'models/member_contacts'
 
 Time.zone = ENV['TIMEZONE'] || 'Pacific Time (US & Canada)'
 Time.zone_default = Time.zone

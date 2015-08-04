@@ -1,8 +1,13 @@
 - picture_url ||= nil
+- phone_number ||=nil
+- name ||= nil
 = mail_to(email, class: 'dashboard-contact') do
-  .dashboard-contact-avatar{style: picture_url ? "background-image: url(#{picture_url})" : nil}
+  .dashboard-contact-avatar{style: picture_url ? "background-image: url(#{picture_url})" : nil, class: ('no-avatar' unless name)}
   .dashboard-contact-details
     = render 'dashboard/dashboard_icon', icon: :envelope, alt_text: t('dashboard.contacts.icon_alt_text')
-    %h2= name
-    %p= title
+    - if name
+      %h2= name
+      %p= title
+    - else
+      %h2= title
     %p= fhlb_formatted_phone_number(phone_number)

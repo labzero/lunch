@@ -1,0 +1,1 @@
+Sprockets.register_engine '.contact', CropContactImages::Template

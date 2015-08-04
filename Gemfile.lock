@@ -254,6 +254,7 @@ GEM
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
     mime-types (2.6.1)
+    mini_magick (4.2.7)
     mini_portile (0.6.2)
     minitest (5.7.0)
     momentjs-rails (2.10.2)
@@ -496,6 +497,7 @@ DEPENDENCIES
   jquery-rails
   logging
   mail
+  mini_magick
   momentjs-rails
   net-ping
   nokogiri
@@ -530,3 +532,6 @@ DEPENDENCIES
   vcr
   webmock
   wicked_pdf
+
+BUNDLED WITH
+   1.10.2

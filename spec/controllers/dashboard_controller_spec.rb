@@ -10,6 +10,7 @@ RSpec.describe DashboardController, :type => :controller do
     before do
       allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
       allow(subject).to receive(:current_user_roles)
+      allow_any_instance_of(MembersService).to receive(:member_contacts)
     end
     
     it_behaves_like 'a user required action', :get, :index
@@ -86,6 +87,37 @@ RSpec.describe DashboardController, :type => :controller do
       expect(assigns[:financing_availability_gauge][:uncollateralized][:amount]).to be_kind_of(Numeric)
       expect(assigns[:financing_availability_gauge][:uncollateralized][:percentage]).to be_kind_of(Numeric)
       expect(assigns[:financing_availability_gauge][:uncollateralized][:display_percentage]).to be_kind_of(Numeric)
+    end
+    describe 'the @contacts instance variable' do
+      let(:contacts) { double('some contact') }
+      let(:cam_username) { 'cam' }
+      let(:rm_username) { 'rm' }
+      before do
+        allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(contacts)
+        allow(contacts).to receive(:[]).with(:cam).and_return({username: cam_username})
+        allow(contacts).to receive(:[]).with(:rm).and_return({username: rm_username})
+        allow(Rails.application.assets).to receive(:find_asset)
+      end
+      it 'is the result of the `members_service.member_contacts` method' do
+        get :index
+        expect(assigns[:contacts]).to eq(contacts)
+      end
+      it 'contains an `image_url` for the cam' do
+        allow(Rails.application.assets).to receive(:find_asset).with("#{cam_username}.jpg").and_return(true)
+        get :index
+        expect(assigns[:contacts][:cam][:image_url]).to eq("#{cam_username}.jpg")
+      end
+      it 'contains an `image_url` for the rm' do
+        allow(Rails.application.assets).to receive(:find_asset).with("#{rm_username}.jpg").and_return(true)
+        get :index
+        expect(assigns[:contacts][:rm][:image_url]).to eq("#{rm_username}.jpg")
+      end
+      it 'assigns the default image_url if the image asset does not exist for the contact' do
+        allow(Rails.application.assets).to receive(:find_asset).and_return(false)
+        get :index
+        expect(assigns[:contacts][:rm][:image_url]).to eq('placeholder-usericon.svg')
+        expect(assigns[:contacts][:cam][:image_url]).to eq('placeholder-usericon.svg')
+      end
     end
     describe "RateService failures" do
       let(:RatesService) {class_double(RatesService)}
