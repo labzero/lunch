@@ -410,6 +410,7 @@ en:
       table:
         term: Term
         whole_loan: Whole Loan
+        mortgage: mortgage
         agency: Agency
         aaa: AAA
         aa: AA
@@ -489,6 +490,7 @@ en:
         capital_stock_exception: No Net or Gross info returned
         low_exception_html: The amount for an advance at this term must be %{amount} or higher
         high_exception_html: The amount for an advance at this term must be %{amount} or lower
+        insufficient_collateral_html: The original amount requested of %{amount} is not available based on your remaining %{collateral_type} collateral.
     reports:
       title: Reports
       as_of_yesterday: As of yesterday

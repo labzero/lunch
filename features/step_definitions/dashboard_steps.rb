@@ -220,8 +220,26 @@ Given(/^I enter my SecurID pin and token$/) do
   step %{I enter my SecurID token}
 end
 
-Then(/^I should see a insufficient financing availability error with amount (\d+)$/) do |amount|
-  page.assert_selector('div.quick-advance-icon-section.icon-error-before p', visible: true, text: /\A#{Regexp.quote(strip_tags(I18n.t("dashboard.quick_advance.error.insufficient_financing_availability_html", amount: fhlb_formatted_currency(amount.to_i, precision: 0))))}\z/)
+Then(/^I should see an? "(.*?)" error with amount (\d+) and type "(.*?)"$/) do |error_type, amount, type|
+  collateral_type = case type
+    when 'whole'
+      I18n.t('dashboard.quick_advance.table.mortgage')
+    when 'agency'
+      I18n.t('dashboard.quick_advance.table.agency')
+    when 'aaa'
+      I18n.t('dashboard.quick_advance.table.aaa')
+    when 'aa'
+      I18n.t('dashboard.quick_advance.table.aa')
+  end
+  text = case error_type
+    when 'insufficient financing availability'
+      /\A#{Regexp.quote(strip_tags(I18n.t("dashboard.quick_advance.error.insufficient_financing_availability_html", amount: fhlb_formatted_currency(amount.to_i, precision: 0))))}\z/
+    when 'insufficient collateral'
+      /\A#{Regexp.quote(strip_tags(I18n.t("dashboard.quick_advance.error.insufficient_collateral_html", amount: fhlb_formatted_currency(amount.to_i, precision: 0), collateral_type: collateral_type)))}\z/
+    else
+      raise 'Unknown error_type'
+  end
+  page.assert_selector('div.quick-advance-icon-section.icon-error-before p', visible: true, text: text)
 end
 
 Then(/^I should see SecurID errors$/) do

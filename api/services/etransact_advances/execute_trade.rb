@@ -291,8 +291,8 @@ module MAPI
               response.doc.remove_namespaces!
               fhlbsfresponse = response.doc.xpath('//Envelope//Body//executeTradeResponse')
               if fhlbsfresponse.at_css('transactionResult').content == 'Error'
-                hash = {
-                  'status' => fhlbsfresponse.at_css('transactionResult').content,
+                response_hash = {
+                  'status' => [fhlbsfresponse.at_css('transactionResult').content],
                   'confirmation_number' => '',
                   'advance_rate' => '',
                   'advance_amount' => '',
@@ -304,73 +304,28 @@ module MAPI
                   'maturity_date' => '',
                 }
               else
-                if (fhlbsfresponse.at_css('advanceValidation capitalStockValidations capitalStockValid').content == 'true') || (!check_capstock)
-                   if (fhlbsfresponse.at_css('advanceValidation creditValidations creditValid').content == 'true')
-                      hash = {
-                        'status' => fhlbsfresponse.at_css('transactionResult').content,
-                        'confirmation_number' => (operation == 'EXECUTE')? fhlbsfresponse.at_css('trade tradeHeader tradeId').content : '',
-                        'advance_rate' => rate.to_f,
-                        'advance_amount' => amount.to_i,
-                        'advance_term' => advance_term,
-                        'advance_type' => LOAN_MAPPING[advance_type],
-                        'interest_day_count' => day_count,
-                        'payment_on' => @@payment_at,
-                        'funding_date' => settlement_date,
-                        'maturity_date' => maturity_date,
-                      }
-                    else
-                       creditexception = response.doc.xpath('//Envelope//Body//executeTradeResponse//creditValidation//creditValid')
-                        hash = {
-                          'status' => 'CreditError',
-                          'maxAmount' => creditexception.at_css('maxAmount').content
-                        } 
-                    end    
-                else
-                  capitalstockexceptions = response.doc.xpath('//Envelope//Body//executeTradeResponse//advanceValidation//capitalStockValidations')
+                response_hash = {}
+                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_capital_stock(fhlbsfresponse, response, response_hash) if check_capstock
+                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_credit(fhlbsfresponse, response, response_hash)
+                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_collateral(fhlbsfresponse, response, response_hash)
 
-                  if !capitalstockexceptions.at_css('exception GrossUp')
-                    status = 'GrossUpError'
-                  elsif !capitalstockexceptions.at_css('exception')
-                    status = 'ExceptionError'
-                  else
-                    status = 'CapitalStockError'
-                  end
-                  # current stock calculations
-                  cumulative_stock_required = MAPI::Services::EtransactAdvances::ExecuteTrade::round_up_stock(capitalstockexceptions.at_css('exception cumulativeStockRequired') ? capitalstockexceptions.at_css('exception cumulativeStockRequired').content.to_i : 0)
-                  current_trade_stock_required = capitalstockexceptions.at_css('exception currentTradeStockRequired') ? capitalstockexceptions.at_css('exception currentTradeStockRequired').content.to_i : 0
-                  pre_trade_stock_required = MAPI::Services::EtransactAdvances::ExecuteTrade::round_down_stock(capitalstockexceptions.at_css('exception preTradeStockRequired') ? capitalstockexceptions.at_css('exception preTradeStockRequired').content.to_i : 0)
-                  if pre_trade_stock_required > 0
-                    net_stock_required = cumulative_stock_required
-                  else
-                    net_stock_required = cumulative_stock_required + pre_trade_stock_required
-                  end
-                  # gross up stock calculations
-                  gross_cumulative_stock_required = MAPI::Services::EtransactAdvances::ExecuteTrade::round_up_stock(capitalstockexceptions.at_css('exception GrossUp cumulativeStockRequired') ? capitalstockexceptions.at_css('exception GrossUp cumulativeStockRequired').content.to_i : 0)
-                  gross_current_trade_stock_required = capitalstockexceptions.at_css('exception GrossUp currentTradeStockRequired') ? capitalstockexceptions.at_css('exception GrossUp currentTradeStockRequired').content.to_i : 0
-                  gross_pre_trade_stock_required = MAPI::Services::EtransactAdvances::ExecuteTrade::round_down_stock(capitalstockexceptions.at_css('exception GrossUp preTradeStockRequired') ? capitalstockexceptions.at_css('exception GrossUp preTradeStockRequired').content.to_i : 0)
-                  if gross_pre_trade_stock_required > 0
-                    gross_net_stock_required = gross_cumulative_stock_required
-                  else
-                    gross_net_stock_required = gross_cumulative_stock_required + gross_pre_trade_stock_required
-                  end
-
-                  hash = {
-                    'status' => status,
-                    'authorized_amount' => capitalstockexceptions.at_css('authorizedAmount') ? capitalstockexceptions.at_css('authorizedAmount').content.to_i : 0,
-                    'exception_message' => capitalstockexceptions.at_css('exception exceptionMessage') ? capitalstockexceptions.at_css('exception exceptionMessage').content : '',
-                    'cumulative_stock_required' => cumulative_stock_required,
-                    'current_trade_stock_required' => current_trade_stock_required,
-                    'pre_trade_stock_required' => pre_trade_stock_required,
-                    'net_stock_required' => net_stock_required,
-                    'gross_amount' => capitalstockexceptions.at_css('exception GrossUp grossAmount') ? capitalstockexceptions.at_css('exception GrossUp grossAmount').content.to_i : 0,
-                    'gross_cumulative_stock_required' => gross_cumulative_stock_required,
-                    'gross_current_trade_stock_required' => gross_current_trade_stock_required,
-                    'gross_pre_trade_stock_required' => gross_pre_trade_stock_required,
-                    'gross_net_stock_required' => gross_net_stock_required
+                # passed all checks
+                if response_hash.blank?
+                  response_hash = {
+                    'status' => [fhlbsfresponse.at_css('transactionResult').content],
+                    'confirmation_number' => (operation == 'EXECUTE')? fhlbsfresponse.at_css('trade tradeHeader tradeId').content : '',
+                    'advance_rate' => rate.to_f,
+                    'advance_amount' => amount.to_i,
+                    'advance_term' => advance_term,
+                    'advance_type' => LOAN_MAPPING[advance_type],
+                    'interest_day_count' => day_count,
+                    'payment_on' => @@payment_at,
+                    'funding_date' => settlement_date,
+                    'maturity_date' => maturity_date,
                   }
                 end
               end
-              hash
+              response_hash
             end
           else
             if operation == 'EXECUTE'
@@ -378,6 +333,8 @@ module MAPI
             else
               if (amount.to_i == 100001)
                  JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_credit_error.json')))
+              elsif (amount.to_i == 100002)
+                JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_collateral_error.json')))
               elsif (amount.to_i < 1000000) || (!check_capstock)
                 JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_preview.json')))
               elsif amount.to_i < 2000000
@@ -390,6 +347,80 @@ module MAPI
             end
           end
           data.to_json
+        end
+
+        def self.check_capital_stock(fhlbsfresponse, response, hash)
+          new_hash = {}
+          if (fhlbsfresponse.at_css('advanceValidation capitalStockValidations capitalStockValid') && fhlbsfresponse.at_css('advanceValidation capitalStockValidations capitalStockValid').content != 'true')
+            capitalstockexceptions = response.doc.xpath('//Envelope//Body//executeTradeResponse//advanceValidation//capitalStockValidations')
+
+            if !capitalstockexceptions.at_css('exception GrossUp')
+              status = 'GrossUpError'
+            elsif !capitalstockexceptions.at_css('exception')
+              status = 'ExceptionError'
+            else
+              status = 'CapitalStockError'
+            end
+            # current stock calculations
+            cumulative_stock_required = MAPI::Services::EtransactAdvances::ExecuteTrade::round_up_stock(capitalstockexceptions.at_css('exception cumulativeStockRequired') ? capitalstockexceptions.at_css('exception cumulativeStockRequired').content.to_i : 0)
+            current_trade_stock_required = capitalstockexceptions.at_css('exception currentTradeStockRequired') ? capitalstockexceptions.at_css('exception currentTradeStockRequired').content.to_i : 0
+            pre_trade_stock_required = MAPI::Services::EtransactAdvances::ExecuteTrade::round_down_stock(capitalstockexceptions.at_css('exception preTradeStockRequired') ? capitalstockexceptions.at_css('exception preTradeStockRequired').content.to_i : 0)
+            if pre_trade_stock_required > 0
+              net_stock_required = cumulative_stock_required
+            else
+              net_stock_required = cumulative_stock_required + pre_trade_stock_required
+            end
+            # gross up stock calculations
+            gross_cumulative_stock_required = MAPI::Services::EtransactAdvances::ExecuteTrade::round_up_stock(capitalstockexceptions.at_css('exception GrossUp cumulativeStockRequired') ? capitalstockexceptions.at_css('exception GrossUp cumulativeStockRequired').content.to_i : 0)
+            gross_current_trade_stock_required = capitalstockexceptions.at_css('exception GrossUp currentTradeStockRequired') ? capitalstockexceptions.at_css('exception GrossUp currentTradeStockRequired').content.to_i : 0
+            gross_pre_trade_stock_required = MAPI::Services::EtransactAdvances::ExecuteTrade::round_down_stock(capitalstockexceptions.at_css('exception GrossUp preTradeStockRequired') ? capitalstockexceptions.at_css('exception GrossUp preTradeStockRequired').content.to_i : 0)
+            if gross_pre_trade_stock_required > 0
+              gross_net_stock_required = gross_cumulative_stock_required
+            else
+              gross_net_stock_required = gross_cumulative_stock_required + gross_pre_trade_stock_required
+            end
+
+            new_hash = {
+              'status' => [status],
+              'authorized_amount' => capitalstockexceptions.at_css('authorizedAmount') ? capitalstockexceptions.at_css('authorizedAmount').content.to_i : 0,
+              'exception_message' => capitalstockexceptions.at_css('exception exceptionMessage') ? capitalstockexceptions.at_css('exception exceptionMessage').content : '',
+              'cumulative_stock_required' => cumulative_stock_required,
+              'current_trade_stock_required' => current_trade_stock_required,
+              'pre_trade_stock_required' => pre_trade_stock_required,
+              'net_stock_required' => net_stock_required,
+              'gross_amount' => capitalstockexceptions.at_css('exception GrossUp grossAmount') ? capitalstockexceptions.at_css('exception GrossUp grossAmount').content.to_i : 0,
+              'gross_cumulative_stock_required' => gross_cumulative_stock_required,
+              'gross_current_trade_stock_required' => gross_current_trade_stock_required,
+              'gross_pre_trade_stock_required' => gross_pre_trade_stock_required,
+              'gross_net_stock_required' => gross_net_stock_required
+            }
+          end
+          hash.merge(new_hash){|key, old, new| old + new }
+        end
+
+        def self.check_credit(fhlbsfresponse, response, hash)
+          new_hash = {}
+          if (fhlbsfresponse.at_css('advanceValidation creditValidations creditValid') && fhlbsfresponse.at_css('advanceValidation creditValidations creditValid').content != 'true')
+            credit_exception = response.doc.xpath('//Envelope//Body//executeTradeResponse//advanceValidation//creditValidations//creditValid')
+            new_hash = {
+              'status' => ['CreditError'],
+              'credit_max_amount' => (credit_exception.at_css('maxAmount').content if credit_exception.at_css('maxAmount'))
+            }
+          end
+          hash.merge(new_hash){|key, old, new| old + new }
+        end
+
+        def self.check_collateral(fhlbsfresponse, response, hash)
+          new_hash = {}
+          if (fhlbsfresponse.at_css('advanceValidation collateralValidations collateralValid') && fhlbsfresponse.at_css('advanceValidation collateralValidations collateralValid').content != 'true')
+            collateral_exception = response.doc.xpath('//Envelope//Body//executeTradeResponse//advanceValidation//collateralValidations//collateralValid')
+            new_hash = {
+              'status' => ['CollateralError'],
+              'collateral_max_amount' => (collateral_exception.at_css('maxAmount').content if collateral_exception.at_css('maxAmount')),
+              'collateral_authorized_amount' => (collateral_exception.at_css('authorizedAmount').content if collateral_exception.at_css('authorizedAmount'))
+            }
+          end
+          hash.merge(new_hash){|key, old, new| old + new }
         end
       end
     end
