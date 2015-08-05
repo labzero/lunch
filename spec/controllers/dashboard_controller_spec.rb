@@ -189,7 +189,7 @@ RSpec.describe DashboardController, :type => :controller do
 
   describe "POST quick_advance_preview", :vcr do
     allow_policy :advances, :show?
-    let(:etransact_service_instance) {double('EtransactAdvancesService', check_limits: {}, quick_advance_validate: {}, signer_full_name: username)}
+    let(:etransact_service_instance) {double('EtransactAdvancesService', check_limits: {}, quick_advance_validate: {}, signer_full_name: username, include?: nil)}
     let(:member_id) {750}
     let(:advance_term) {'1week'}
     let(:advance_type) {'sometype'}
@@ -367,6 +367,50 @@ RSpec.describe DashboardController, :type => :controller do
       it 'should set @advance_program' do
         make_request
         expect(assigns[:advance_program]).to eq(advance_program)
+      end
+    end
+
+    describe "POST quick_advance_error of type `CreditError`" do
+      let(:amount) { 100001 }
+      it 'should render its view' do
+        make_request
+        expect(response.body).to render_template('dashboard/quick_advance_error')
+      end
+      it 'should set @advance_amount' do
+        make_request
+        expect(assigns[:advance_amount]).to be_kind_of(Numeric)
+      end
+      it 'should set @error_message' do
+        make_request
+        expect(assigns[:error_message]).to eq('CreditError')
+      end
+    end
+
+    describe "POST quick_advance_error of type `CollateralError`" do
+      let(:amount) { 100002 }
+      it 'should render its view' do
+        make_request
+        expect(response.body).to render_template('dashboard/quick_advance_error')
+      end
+      it 'should set @advance_amount' do
+        make_request
+        expect(assigns[:advance_amount]).to be_kind_of(Numeric)
+      end
+      it 'should set @error_message' do
+        make_request
+        expect(assigns[:error_message]).to eq('CollateralError')
+      end
+      it 'should set @advance_type' do
+        advance_type = double('advance_type')
+        allow(subject).to receive(:get_type_from_advance_type).and_return(advance_type)
+        make_request
+        expect(assigns[:advance_type]).to eq(advance_type)
+      end
+      it 'should set @collateral_type' do
+        collateral_type = double('collateral_type')
+        stub_const('DashboardController::COLLATERAL_ERROR_MAPPING', {"#{advance_type}": collateral_type})
+        make_request
+        expect(assigns[:collateral_type]).to eq(collateral_type)
       end
     end
 
@@ -664,22 +708,22 @@ RSpec.describe DashboardController, :type => :controller do
   end
 
   describe 'get_type_from_advance_type method' do
-    ['whole loan', 'WHOLE LOAN', 'wholeloan', 'WHOLELOAN'].each do |type|
+    ['whole loan', 'WHOLE LOAN', 'wholeloan', 'WHOLELOAN', 'whole', 'WHOLE'].each do |type|
       it "returns `#{I18n.t('dashboard.quick_advance.table.whole_loan')}` if it is passed `#{type}` as a type" do
         expect(subject.send(:get_type_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.whole_loan'))
       end
     end
-    ['SBC-AGENCY', 'sbc-agency'].each do |type|
+    ['SBC-AGENCY', 'sbc-agency', 'AGENCY', 'agency'].each do |type|
       it "returns `#{I18n.t('dashboard.quick_advance.table.agency')}` if it is passed `#{type}` as a type" do
         expect(subject.send(:get_type_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.agency'))
       end
     end
-    ['SBC-AAA', 'sbc-aaa'].each do |type|
+    ['SBC-AAA', 'sbc-aaa', 'aaa', 'AAA'].each do |type|
       it "returns `#{I18n.t('dashboard.quick_advance.table.aaa')}` if it is passed `#{type}` as a type" do
         expect(subject.send(:get_type_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.aaa'))
       end
     end
-    ['SBC-AA', 'sbc-aa'].each do |type|
+    ['SBC-AA', 'sbc-aa', 'aa', 'AA'].each do |type|
       it "returns `#{I18n.t('dashboard.quick_advance.table.aa')}` if it is passed `#{type}` as a type" do
         expect(subject.send(:get_type_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.aa'))
       end

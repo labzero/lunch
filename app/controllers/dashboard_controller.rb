@@ -3,6 +3,12 @@ class DashboardController < ApplicationController
 
   THRESHOLD_CAPACITY = 35 #this will be set by each client, probably with a default value of 35, and be stored in some as-yet-unnamed db
   ADVANCE_TYPES = [:whole, :agency, :aaa, :aa]
+  COLLATERAL_ERROR_MAPPING = {
+    whole: I18n.t('dashboard.quick_advance.table.mortgage'),
+    agency: I18n.t('dashboard.quick_advance.table.agency'),
+    aaa: I18n.t('dashboard.quick_advance.table.aaa'),
+    aa: I18n.t('dashboard.quick_advance.table.aa'),
+  }.freeze
   ADVANCE_TERMS = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
 
   before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform] do
@@ -140,8 +146,7 @@ class DashboardController < ApplicationController
     check = EtransactAdvancesService.new(request).check_limits(params[:amount].to_f, params[:advance_term])
     if check[:status] == 'pass'
       preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, params[:check_capstock], session['signer_full_name'])
-      case preview[:status]
-      when 'CapitalStockError'
+      if preview[:status] && preview[:status].include?('CapitalStockError')
         preview_success = false
         preview_error = false
         @advance_amount = params[:amount].to_f if params[:amount]
@@ -158,7 +163,7 @@ class DashboardController < ApplicationController
         @gross_pre_trade_stock_required = preview[:gross_pre_trade_stock_required]
         @gross_net_stock_required = preview[:gross_net_stock_required]
         response_html = render_to_string :quick_advance_capstock, layout: false
-      when 'GrossUpError', 'ExceptionError'
+      elsif preview[:status] && (preview[:status].include?('GrossUpError') || preview[:status].include?('ExceptionError'))
         preview_success = false
         preview_error = true
         @error_message = check[:status]
@@ -169,11 +174,19 @@ class DashboardController < ApplicationController
         @advance_term = params[:advance_term].capitalize if params[:advance_term]
         @advance_rate = params[:advance_rate].to_f if params[:advance_rate]
         response_html = render_to_string :quick_advance_error, layout: false
-      when 'CreditError'
+      elsif preview[:status] && preview[:status].include?('CreditError')
         preview_success = false
         preview_error = true
         @advance_amount = params[:amount].to_f if params[:amount]
-        @error_message = preview[:status]
+        @error_message = 'CreditError'
+        response_html = render_to_string :quick_advance_error, layout: false
+      elsif preview[:status] && preview[:status].include?('CollateralError')
+        preview_success = false
+        preview_error = true
+        @advance_amount = params[:amount].to_f if params[:amount]
+        @advance_type = get_type_from_advance_type(params[:advance_type]) if params[:advance_type]
+        @collateral_type = COLLATERAL_ERROR_MAPPING[params[:advance_type].to_sym] if params[:advance_type]
+        @error_message = 'CollateralError'
         response_html = render_to_string :quick_advance_error, layout: false
       else
         preview_success = true
@@ -311,13 +324,13 @@ class DashboardController < ApplicationController
   def get_type_from_advance_type(advance_type)
     advance_type = advance_type.upcase.gsub(/\s+/, "")
     case advance_type
-      when 'WHOLELOAN'
+      when 'WHOLELOAN', 'WHOLE'
         I18n.t('dashboard.quick_advance.table.whole_loan')
-      when 'SBC-AGENCY'
+      when 'SBC-AGENCY', 'AGENCY'
         I18n.t('dashboard.quick_advance.table.agency')
-      when 'SBC-AAA'
+      when 'SBC-AAA', 'AAA'
         I18n.t('dashboard.quick_advance.table.aaa')
-      when 'SBC-AA'
+      when 'SBC-AA', 'AA'
         I18n.t('dashboard.quick_advance.table.aa')
     end
   end

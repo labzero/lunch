@@ -1,5 +1,5 @@
 {
-  "status" : "GrossUpError",
+  "status" : ["GrossUpError"],
   "authorized_amount" : 45098900,
   "exception_message" : "INSUFFICIENT CAPITAL STOCK",
   "cumulative_stock_required" : 47000,

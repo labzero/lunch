@@ -1,5 +1,5 @@
 {
-  "status" : "ExceptionError",
+  "status" : ["ExceptionError"],
   "authorized_amount" : 0,
   "exception_message" : "",
   "cumulative_stock_required" : 0,

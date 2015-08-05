@@ -1,0 +1,5 @@
+{
+"status" : ["CollateralError"],
+"collateral_max_amount" : 45098900,
+"collateral_authorized_amount" : 45098900
+}
