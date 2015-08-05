@@ -1,0 +1,65 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/sta_activities/2015-01-01/2015-01-20
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
+      X-Request-Id:
+      - '12345'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '2815'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Wed, 05 Aug 2015 17:52:43 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"start_balance":57242.39,"start_date":"2015-01-01","end_balance":106062.47,"end_date":"2015-01-20","activities":[{"trans_date":"2015-01-02","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":57242.39},{"trans_date":"2015-01-03","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":57242.39},{"trans_date":"2015-01-04","refnumber":"9940000074","descr":"SERVICE
+        CHARGE","debit":90.0,"credit":null,"rate":0.0,"balance":null},{"trans_date":"2015-01-04","refnumber":"20140150023900","descr":"WIRE
+        TRANSFER","debit":900000.0,"credit":null,"rate":0.0,"balance":null},{"trans_date":"2015-01-04","refnumber":"795521","descr":"SECURITY
+        SAFEKEEPING","debit":null,"credit":898297.21,"rate":0.0,"balance":null},{"trans_date":"2015-01-04","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":55449.6},{"trans_date":"2015-01-05","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":106062.47},{"trans_date":"2015-01-05","refnumber":"796337","descr":"SECURITY
+        SAFEKEEPING","debit":null,"credit":50612.87,"rate":0.0,"balance":null},{"trans_date":"2015-01-06","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":106062.47},{"trans_date":"2015-01-07","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":106062.47},{"trans_date":"2015-01-08","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":106062.47},{"trans_date":"2015-01-09","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":106062.47},{"trans_date":"2015-01-12","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":106062.47},{"trans_date":"2015-01-13","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":106062.47},{"trans_date":"2015-01-14","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":106062.47},{"trans_date":"2015-01-15","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":106062.47},{"trans_date":"2015-01-16","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":106062.47},{"trans_date":"2015-01-19","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":106062.47},{"trans_date":"2015-01-20","refnumber":null,"descr":"Interest
+        Rate / Daily Balance","debit":null,"credit":null,"rate":0.01,"balance":106062.47}]}'
+    http_version: 
+  recorded_at: Wed, 05 Aug 2015 17:52:43 GMT
+recorded_with: VCR 2.9.3
