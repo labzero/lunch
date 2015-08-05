@@ -1,0 +1,10 @@
+{
+  "as_of_date":null,
+  "total_net_amount":561201.99,
+  "total_principal":52080431.86000001,
+  "total_interest":644321.69,
+  "projections":[
+    {"settlement_date":null,"custody_account":"082131","cusip":"31387A5A9","description":"FEDERAL NAT MTG ASSN REMIC POOL #F","transaction_code":"MBSD","pool_number":"PLJ12604","original_par":20769498.0,"coupon_rate":5.067,"maturity_date":null,"principal":860902.28,"interest":77061.87,"total":30352.1},
+    {"settlement_date":null,"custody_account":"082131","cusip":"31398VXP6","description":"FEDERAL HOME LN MTG PC GOLD POOL #","transaction_code":"MBSD","pool_number":"PLC91075","original_par":991779.0,"coupon_rate":0.368,"maturity_date":null,"principal":4933918.93,"interest":73280.82,"total":68204.05}
+  ]
+}

@@ -78,6 +78,7 @@ describe MemberBalanceService do
     let(:end_date) {Date.new(2014,12,31)}
     let(:capital_stock_activity) {subject.capital_stock_activity(start_date, end_date)}
     let(:activities) { File.read(File.join(Rails.root, 'spec', 'fixtures', 'capital_stock_activities.json')) }
+    let(:activities_no_date) { File.read(File.join(Rails.root, 'spec', 'fixtures', 'capital_stock_activities_no_date.json')) }
     let(:malformed_activities) { File.read(File.join(Rails.root, 'spec', 'fixtures', 'capital_stock_activities_malformed.json')) }
     let(:malformed_json) {"Some malformed JSON!!!"}
     let(:response_object) { double('Response')}
@@ -94,11 +95,23 @@ describe MemberBalanceService do
     it 'should return an array of activity hashes' do
       expect(capital_stock_activity[:activities]).to be_kind_of(Array)
     end
+    it 'should return nil for start_date if the MAPI response does not contain one' do
+      expect(JSON).to receive(:parse).and_return({}).ordered
+      expect(JSON).to receive(:parse).and_call_original.ordered
+      expect(JSON).to receive(:parse).and_call_original.ordered
+      expect(capital_stock_activity[:start_date]).to eq(nil)
+    end
+    it 'should return nil for end_date if the MAPI response does not contain one' do
+      expect(JSON).to receive(:parse).and_call_original.ordered
+      expect(JSON).to receive(:parse).and_return({}).ordered
+      expect(JSON).to receive(:parse).and_call_original.ordered
+      expect(capital_stock_activity[:end_date]).to eq(nil)
+    end
 
     describe 'activities hash happy path' do
       before do
-        expect(response_object).to receive(:body).and_return(activities)
-        expect(request_object).to receive(:get).and_return(response_object)
+        allow(response_object).to receive(:body).and_return(activities)
+        allow(request_object).to receive(:get).and_return(response_object)
         override_activities_endpoint(start_date, end_date, request_object)
       end
       it 'should classify the shares for a given activity as either debit or credit' do
@@ -117,6 +130,12 @@ describe MemberBalanceService do
         capital_stock_activity[:activities].each do |activity|
           expect(activity[:outstanding_shares]).to eq(last_outstanding + activity[:credit_shares] - activity[:debit_shares])
           last_outstanding = activity[:outstanding_shares]
+        end
+      end
+      it 'returns nil for the trans_date of an activity with no trans_date' do
+        allow(response_object).to receive(:body).and_return(activities_no_date)
+        capital_stock_activity[:activities].each do |activity|
+          expect(activity[:trans_date]).to be_nil
         end
       end
     end
@@ -561,6 +580,22 @@ describe MemberBalanceService do
       expect(settlement_transaction_account[:start_balance]).to be_kind_of(Float)
       expect(settlement_transaction_account[:end_balance]).to be_kind_of(Float)
     end
+
+    describe 'nil checks for dates' do
+      before { allow(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'settlement_transaction_account', 'sta_no_dates.json')))) }
+      it 'should return nil for `start_date` if there is no start_date in the response' do
+        expect(settlement_transaction_account[:start_date]).to be_nil
+      end
+      it 'should return nil for `end_date` if there is no end_date in the response' do
+        expect(settlement_transaction_account[:end_date]).to be_nil
+      end
+      it 'should return nil for an activity\'s trans_date if there is no trans_date in the response' do
+        settlement_transaction_account[:activities].each do |activity|
+          expect(activity[:trans_date]).to be_nil
+        end
+      end
+    end
+
     describe 'filtering by activity type' do
       # set start_date and end_date wide just to catch all activities in your mocked dataset
       let(:start_date) {Date.new(2000,1,1)}
@@ -602,6 +637,10 @@ describe MemberBalanceService do
       expect(advances_details[:total_accrued_interest]).to be_kind_of(Float)
       expect(advances_details[:estimated_next_payment]).to be_kind_of(Float)
       expect(advances_details[:advances_details]).to be_kind_of(Array)
+    end
+    it 'should return nil for as_of_date if there is no as_of_date in the response' do
+      allow(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'advances_details_no_as_of_date.json'))))
+      expect(advances_details[:as_of_date]).to be_nil
     end
     it 'should return nil if there is a JSON parsing error' do
       expect(JSON).to receive(:parse).and_raise(JSON::ParserError)
@@ -664,6 +703,19 @@ describe MemberBalanceService do
     it 'returns a total_principal that is the sum of the interest for each projection' do
       principal = cash_projections[:projections].inject(0) { |sum, projection| sum += projection[:principal] }
       expect(cash_projections[:total_principal]).to eq(principal)
+    end
+    describe 'nil check for dates' do
+      before { allow(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'cash_projections_no_dates.json')))) }
+      it 'returns nil for as_of_date if there is no as_of_date in the response' do
+        expect(cash_projections[:as_of_date]).to be_nil
+      end
+      %w(settlement_date maturity_date).each do |attr|
+        it "returns nil for the #{attr} of a projection if there is no #{attr} in the response" do
+          cash_projections[:projections].each do |projection|
+            expect(projection[attr.to_sym]).to be_nil
+          end
+        end
+      end
     end
     describe 'projection objects' do
       %w(settlement_date maturity_date).each do |property|
@@ -732,6 +784,19 @@ describe MemberBalanceService do
         expect(detail[:dividend]).to be_kind_of(Float)
         expect(detail[:days_outstanding]).to be_kind_of(Fixnum)
         expect(detail[:start_date]).to be <= detail[:end_date]
+      end
+    end
+    describe 'nil check for dates' do
+      before { allow(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'dividend_statement_no_dates.json')))) }
+      it 'returns nil for transaction_date if there is no transaction_date in the response' do
+        expect(dividend_statement[:transaction_date]).to be_nil
+      end
+      %w(issue_date start_date end_date).each do |attr|
+        it "returns nil for the #{attr} of a dividend detail if there is no #{attr} in the response" do
+          dividend_statement[:details].each do |detail|
+            expect(detail[attr.to_sym]).to be_nil
+          end
+        end
       end
     end
     describe 'error states' do
@@ -875,6 +940,10 @@ describe MemberBalanceService do
     let(:parallel_shift) {subject.parallel_shift}
     it 'returns a hash with an `as_of_date` that is a date' do
       expect(parallel_shift[:as_of_date]).to be_kind_of(Date)
+    end
+    it 'returns a hash with nil for an `as_of_date` if there is no as_of_date in the response' do
+      allow(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'parallel_shift_no_dates.json'))))
+      expect(parallel_shift[:as_of_date]).to be_nil
     end
     it 'returns a hash with a `putable_advances` array' do
       expect(parallel_shift[:putable_advances]).to be_kind_of(Array)
@@ -1046,6 +1115,19 @@ describe MemberBalanceService do
           expect(security[:advance_type]).to be_kind_of(String)
           expect(security[:current_par]).to be_kind_of(Integer)
           expect(security[:interest_rate]).to be_kind_of(Float)
+        end
+      end
+    end
+    describe 'nil checks for dates' do
+      before { allow(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'forward_commitments_no_dates.json')))) }
+      it 'should return nil for `as_of_date` if there is no as_of_date in the response' do
+        expect(forward_commitments[:as_of_date]).to be_nil
+      end
+      %w(trade_date funding_date maturity_date).each do |attr|
+        it "should return nil for an advance\'s #{attr} if there is no #{attr} in the response" do
+          forward_commitments[:advances].each do |advance|
+            expect(advance[attr.to_sym]).to be_nil
+          end
         end
       end
     end
