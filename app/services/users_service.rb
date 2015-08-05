@@ -2,15 +2,12 @@ class UsersService < MAPIService
 
   def user_roles(username)
     begin
-      response = @connection["users/#{username}/roles"].get
+      JSON.parse(@connection["users/#{username}/roles"].get.body)
     rescue RestClient::Exception => e
-      Rails.logger.warn("UsersService.user_roles encountered a RestClient error: #{e.class.name}:#{e.http_code}") unless e.http_body == 'User not found'
-      return nil
+      warn(:user_roles, "RestClient error: #{e.class.name}:#{e.http_code}") unless e.http_body == 'User not found'
     rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("UsersService.user_roles encountered a connection error: #{e.class.name}")
-      return nil
+      warn(:user_roles, "connection error: #{e.class.name}")
     end
-    JSON.parse(response.body)
   end
 
 end

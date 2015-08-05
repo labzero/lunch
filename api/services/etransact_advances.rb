@@ -4,6 +4,7 @@ module MAPI
   module Services
     module EtransactAdvances
       include MAPI::Services::Base
+      include MAPI::Services::Rates::BlackoutDates
 
       STATUS_ON_RECORD_NOTFOUND_COUNT = 0
 
@@ -49,6 +50,21 @@ module MAPI
               end
             end
           end
+          
+          # etransact advances status endpoint
+          api do
+            key :path, '/blackout_dates'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve list of blackout dates'
+              key :notes, 'Returns list of blackout dates (or [] if none exist)'
+              key :type, :array
+              items do
+                key :type, :string
+              end
+              key :nickname, :getBlackoutDates
+            end
+          end
           # etransact advances limits endpoint
           api do
             key :path, '/limits'
@@ -57,10 +73,6 @@ module MAPI
               key :summary, 'Retrieve limits of etransact Advances today'
               key :type, :etransactAdvancesLimits
               key :nickname, :getEtransactAdvancesLimits
-              response_message do
-                key :code, 200
-                key :message, 'OK'
-              end
             end
           end
           api do
@@ -234,6 +246,10 @@ module MAPI
             etransact_limits_array = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_limits.json')))
           end
           etransact_limits_array.to_json
+        end
+        
+        relative_get '/blackout_dates' do
+          blackout_dates.to_json
         end
 
         # etransact advances status

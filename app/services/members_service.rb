@@ -35,80 +35,34 @@ class MembersService < MAPIService
   SECURITIESBILLSTATEMENT = 33
 
   def report_disabled?(member_id, report_flags)
-    begin
-      response = @connection["member/#{member_id}/disabled_reports"].get
-    rescue RestClient::Exception => e
-      Rails.logger.warn("MembersService.disabled_reports encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return nil
-    rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("MembersService.disabled_reports encountered a connection error: #{e.class.name}")
-      return nil
+    if disabled_flags = get_json(:report_disabled, "member/#{member_id}/disabled_reports")
+      (disabled_flags & report_flags).length > 0
     end
-    disabled_flags = JSON.parse(response.body)
-    (disabled_flags & report_flags).length > 0
   end
 
   def member(member_id)
-    begin
-      response = @connection["member/#{member_id}/"].get
-    rescue RestClient::Exception => e
-      Rails.logger.warn("MembersService.member encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return nil
-    rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("MembersService.member encountered a connection error: #{e.class.name}")
-      return nil
-    end
-
-    begin
-      data = JSON.parse(response.body).with_indifferent_access
-    rescue JSON::ParserError => e
-      Rails.logger.warn("MemberBalanceService.member encountered a JSON parsing error: #{e}")
-      return nil
-    end
-    data
+    get_hash(:member, "member/#{member_id}/")
   end
 
   def member_contacts(member_id)
-    begin
-      response = @connection["member/#{member_id}/member_contacts"].get
-    rescue RestClient::Exception => e
-      Rails.logger.warn("MembersService.member_contacts encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return nil
-    rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("MembersService.member_contacts encountered a connection error: #{e.class.name}")
-      return nil
-    end
-
-    begin
-      data = JSON.parse(response.body).with_indifferent_access
-    rescue JSON::ParserError => e
-      Rails.logger.warn("MemberBalanceService.member_contacts encountered a JSON parsing error: #{e}")
-      return nil
-    end
-
-    # get CAM phone number from LDAP
-    user = nil
-    if data[:cam] && data[:cam][:username]
-      Devise::LDAP::Connection.admin('intranet').open do |ldap|
-        user = fetch_ldap_user_by_account_name(ldap, data[:cam][:username])
+    if data = get_hash(:member_contacts, "member/#{member_id}/member_contacts")
+      # get CAM phone number from LDAP
+      user = nil
+      if data[:cam] && data[:cam][:USERNAME]
+        Devise::LDAP::Connection.admin('intranet').open do |ldap|
+          user = fetch_ldap_user_by_account_name(ldap, data[:cam][:USERNAME])
+        end
       end
+      data[:cam][:PHONE_NUMBER] = user['telephoneNumber'].first if user && user['telephoneNumber']
+      data
     end
-    data[:cam][:phone_number] = user['telephoneNumber'].first if user && user['telephoneNumber']
-    data
   end
 
   def quick_advance_enabled_for_member?(member_id)
-    begin
-      response = @connection["member/#{member_id}/quick_advance_flag"].get
-    rescue RestClient::Exception => e
-      Rails.logger.warn("MembersService.quick_advance_enabled_for_member?? encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return nil
-    rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("MembersService.quick_advance_enabled_for_member?? encountered a connection error: #{e.class.name}")
-      return nil
+    if data = get_json(:quick_advance_enabled_for_member?, "member/#{member_id}/quick_advance_flag")
+      flag = data.first
+      'Y' == flag.upcase unless flag.blank?
     end
-    flag = JSON.parse(response.body).first
-    'Y' == flag.upcase unless flag.blank?
   end
 
   def users(member_id)
@@ -123,64 +77,43 @@ class MembersService < MAPIService
   end
 
   def all_members
-    begin
-      response = @connection["member/"].get
-    rescue RestClient::Exception => e
-      Rails.logger.warn("MembersService.all_members encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return nil
-    rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("MembersService.all_members encountered a connection error: #{e.class.name}")
-      return nil
+    if data = get_json(:all_members, "member/")
+      data.collect! { |member| member.with_indifferent_access }
     end
-
-    JSON.parse(response.body).collect! { |member| member.with_indifferent_access }
   end
 
   def signers_and_users(member_id)
-    signers_and_users = []
     # hit MAPI to get the full list of signers
-    begin
-      response = @connection["member/#{member_id}/signers"].get
-    rescue RestClient::Exception => e
-      Rails.logger.warn("MembersService.all_members encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return nil
-    rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("MembersService.all_members encountered a connection error: #{e.class.name}")
-      return nil
-    end
+    if signers = get_json(:signers_and_users, "member/#{member_id}/signers")
+      signers_and_users = []
+      Devise::LDAP::Adapter.shared_connection do
+        Devise::LDAP::Connection.admin('extranet').open do |ldap|
+          users = fetch_ldap_users(ldap, member_id)
+          usernames = users.blank? ? [] : users.collect(&:username)
+          signers.each do |signer|
+            roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact
+            signers_and_users << {display_name: signer['name'], roles: roles} unless usernames.include?(signer['username'])
+          end
 
-    signers = JSON.parse(response.body)
-
-    Devise::LDAP::Adapter.shared_connection do
-      Devise::LDAP::Connection.admin('extranet').open do |ldap|
-        users = fetch_ldap_users(ldap, member_id)
-        usernames = users.blank? ? [] : users.collect(&:username)
-        signers.each do |signer|
-          roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact
-          signers_and_users << {display_name: signer['name'], roles: roles} unless usernames.include?(signer['username'])
-        end
-
-        users.each do |user|
-          signers_and_users << {display_name: user.display_name || user.username, roles: user.roles}
+          users.each do |user|
+            signers_and_users << {display_name: user.display_name || user.username, roles: user.roles}
+          end
         end
       end
+      signers_and_users
     end
-    signers_and_users
   end
 
   protected
 
   def fetch_ldap_users(ldap, member_id)
-    users = nil
-    group = ldap.search(filter: "(&(CN=FHLB#{member_id.to_i})(objectClass=group))").try(:first)
-    if group
-      users = group[:member].collect do |dn|
+    if group = ldap.search(filter: "(&(CN=FHLB#{member_id.to_i})(objectClass=group))").try(:first)
+      group[:member].collect do |dn|
         ldap.search(:base => dn, :scope => Net::LDAP::SearchScope_BaseObject).try(:first)
       end.compact.collect do |entry|
         User.find_or_create_by_ldap_entry(entry)
       end
     end
-    users
   end
 
   def fetch_ldap_user_by_account_name(ldap, username)
