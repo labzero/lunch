@@ -96,6 +96,12 @@ class EtransactAdvancesService < MAPIService
     end
   end
 
+  def settings
+    make_request :settings do
+      @connection['etransact_advances/settings'].get
+    end
+  end
+
   protected
 
   def days_until(date)

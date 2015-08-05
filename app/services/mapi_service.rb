@@ -52,4 +52,5 @@ class MAPIService
   def get_json(name, endpoint)
     parse(name, get(name, endpoint))
   end
+
 end

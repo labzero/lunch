@@ -204,6 +204,17 @@ describe EtransactAdvancesService do
     end
   end
 
+  describe '`settings` method', :vcr do
+    let(:call_method) {subject.settings}
+    it_should_behave_like 'a MAPI backed service object method', :settings
+    it 'should return the MAPI response object' do
+      response_object = double('A MAPI Response Object')
+      allow(response_object).to receive(:with_indifferent_access).and_return(response_object)
+      allow(JSON).to receive(:parse).and_return(response_object)
+      expect(call_method).to be(response_object)
+    end
+  end
+
   describe '`has_terms?` method', :vcr do
     let(:call_method) {subject.has_terms?(status_object)}
     let(:status_object) { {all_loan_status: {foo: {bar: {trade_status: true, display_status: true}}}} }

@@ -14,6 +14,8 @@ require_relative 'services/users'
 require_relative 'services/health'
 
 require_relative 'models/member'
+require_relative 'models/etransact_advances'
+require_relative 'models/etransact_settings'
 require_relative 'models/member_balance_pledged_collateral'
 require_relative 'models/member_balance_total_securities'
 require_relative 'models/member_balance_effective_borrowing_capacity'

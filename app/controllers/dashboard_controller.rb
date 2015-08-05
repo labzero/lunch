@@ -271,25 +271,29 @@ class DashboardController < ApplicationController
     advance_success = false
     response_html = false
     if session_elevated?
-      confirmation = EtransactAdvancesService.new(request).quick_advance_execute(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, session['signer_full_name'])
-      if confirmation
-        advance_success = true 
+      expired_rate = advance_request_expired?
+      if expired_rate
+      end
+      unless expired_rate
+        confirmation = EtransactAdvancesService.new(request).quick_advance_execute(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, session['signer_full_name'])
+        if confirmation
+          advance_success = true 
 
-        @initiated_at = confirmation[:initiated_at]
-        @advance_amount = confirmation[:advance_amount].to_f if confirmation[:advance_amount]
-        @advance_description = get_description_from_advance_term(confirmation[:advance_term]) if confirmation[:advance_term]
-        @advance_program = get_program_from_advance_type(confirmation[:advance_type]) if confirmation[:advance_type]
-        @advance_type = get_type_from_advance_type(confirmation[:advance_type]) if confirmation[:advance_type]
-        @interest_day_count = confirmation[:interest_day_count]
-        @payment_on = confirmation[:payment_on]
-        @advance_term = confirmation[:advance_term].capitalize if confirmation[:advance_term]
-        @trade_date = Time.zone.now.to_date
-        @funding_date = confirmation[:funding_date]
-        @maturity_date = confirmation[:maturity_date]
-        @advance_rate = confirmation[:advance_rate].to_f if confirmation[:advance_rate]
-        @advance_number = confirmation[:confirmation_number]
-        @stock = params[:stock].to_f if params[:stock]
-        response_html = render_to_string layout: false
+          @initiated_at = confirmation[:initiated_at]
+          @advance_amount = confirmation[:advance_amount].to_f if confirmation[:advance_amount]
+          @advance_description = get_description_from_advance_term(confirmation[:advance_term]) if confirmation[:advance_term]
+          @advance_program = get_program_from_advance_type(confirmation[:advance_type]) if confirmation[:advance_type]
+          @advance_type = get_type_from_advance_type(confirmation[:advance_type]) if confirmation[:advance_type]
+          @interest_day_count = confirmation[:interest_day_count]
+          @payment_on = confirmation[:payment_on]
+          @advance_term = confirmation[:advance_term].capitalize if confirmation[:advance_term]
+          @funding_date = confirmation[:funding_date]
+          @maturity_date = confirmation[:maturity_date]
+          @advance_rate = confirmation[:advance_rate].to_f if confirmation[:advance_rate]
+          @advance_number = confirmation[:confirmation_number]
+          @stock = params[:stock].to_f if params[:stock]
+          response_html = render_to_string layout: false
+        end
       end
     end
     render json: {securid: securid_status, advance_success: advance_success, html: response_html}
@@ -303,6 +307,16 @@ class DashboardController < ApplicationController
   end
 
   private
+
+  def advance_request_expired?
+    session[:advance_request] ||= {}
+    session[:advance_request][:timestamp] && session[:advance_request][:timestamp]
+  end
+
+  def advance_request_timestamp!
+    session[:advance_request] ||= {}
+    session[:advance_request][:timestamp] = Time.now
+  end
 
   def calculate_gauge_percentages(gauge_hash, total, excluded_keys=[])
     excluded_keys = Array.wrap(excluded_keys)
