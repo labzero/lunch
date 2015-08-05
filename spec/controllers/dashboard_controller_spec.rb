@@ -273,11 +273,11 @@ RSpec.describe DashboardController, :type => :controller do
         allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
       end
       it 'should call the EtransactAdvancesService object\'s `check_limits` method with the POSTed amount and advance_term' do
-        expect(etransact_service_instance).to receive(:check_limits).with(amount, advance_term).and_return({})
+        expect(etransact_service_instance).to receive(:check_limits).with(member_id, amount, advance_term).and_return({})
         make_request
       end
       it 'should call the EtransactAdvancesService object\'s `quick_advance_validate` method with the POSTed advance_type, advance_term and rate' do
-        allow(etransact_service_instance).to receive(:check_limits).with(amount, advance_term).and_return(check_result)
+        allow(etransact_service_instance).to receive(:check_limits).with(member_id, amount, advance_term).and_return(check_result)
         expect(etransact_service_instance).to receive(:quick_advance_validate).with(member_id, amount, advance_type, advance_term, advance_rate.to_f, check_capstock, username).and_return({})
         make_request
       end

@@ -49,35 +49,51 @@ class EtransactAdvancesService < MAPIService
     data
   end
 
-  def check_limits(amount, advance_term)
-    response = get(:check_limits, "etransact_advances/limits")
-    return nil if response.nil?
-    days_to_maturity = get_days_to_maturity(advance_term)
-    min_amount = 0
-    max_amount = 0
-    begin
-      limits = JSON.parse(response.body)
-    rescue JSON::ParserError => e
-      return warn(:check_limits, "JSON parsing error: #{e}")
+  def todays_advances_amount(member_id, low_days, high_days)
+    if data = get_json(:todays_advances_amount, "member/#{member_id}/todays_advances")
+      amount = 0
+      data.each do |row|
+        days_to_maturity = get_days_to_maturity_date(row['maturity_date'])
+        if days_to_maturity >= low_days.to_i && days_to_maturity <= high_days.to_i
+          amount = amount + row['current_par'].to_i
+        end
+      end
+      amount
     end
-    limits.each do |row|
-      if days_to_maturity >= row['LOW_DAYS_TO_MATURITY'].to_i && days_to_maturity <= row['HIGH_DAYS_TO_MATURITY'].to_i
-        min_amount = row['MIN_ONLINE_ADVANCE'].to_i
-        max_amount = row['TERM_DAILY_LIMIT'].to_i
-        break
+  end
+
+  def check_limits(member_id, amount, advance_term)
+    if limits = get_json(:check_limits, 'etransact_advances/limits')
+      days_to_maturity = get_days_to_maturity(advance_term)
+      min_amount = 0
+      max_amount = 0
+      low_days = 0
+      high_days = 1105
+      limits.each do |row|
+        if days_to_maturity >= row['LOW_DAYS_TO_MATURITY'].to_i && days_to_maturity <= row['HIGH_DAYS_TO_MATURITY'].to_i
+          min_amount = row['MIN_ONLINE_ADVANCE'].to_i
+          max_amount = row['TERM_DAILY_LIMIT'].to_i
+          low_days = row['LOW_DAYS_TO_MATURITY'].to_i
+          high_days = row['HIGH_DAYS_TO_MATURITY'].to_i
+          break
+        end
+      end
+      check_limit = 'pass'
+      if todays_amount = todays_advances_amount(member_id, low_days, high_days)
+        if amount.to_i < min_amount.to_i
+          check_limit = 'low'
+        elsif amount.to_i + todays_amount.to_i > max_amount.to_i
+          check_limit = 'high'
+        end
+        {
+          status: check_limit,
+          low: min_amount,
+          high: max_amount
+        }
+      else
+        nil
       end
     end
-    check_limit = 'pass'
-    if amount < min_amount
-      check_limit = 'low'
-    elsif amount > max_amount
-      check_limit = 'high'
-    end
-    {
-      status: check_limit,
-      low: min_amount,
-      high: max_amount
-    }
   end
 
   protected
@@ -94,6 +110,15 @@ class EtransactAdvancesService < MAPIService
       maturity_date = maturity_date + (term[0].to_i).year
     end
     (maturity_date - Date.today).to_i
+  end
+
+  def get_days_to_maturity_date (trade_maturity_date)
+    if (trade_maturity_date == 'Overnight') || (trade_maturity_date == 'Open')
+      days = 1
+    else
+      days = (Date.parse(trade_maturity_date) - Date.today()).to_i
+    end
+    days
   end
 
 end
