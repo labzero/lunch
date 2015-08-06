@@ -173,20 +173,41 @@ class DashboardController < ApplicationController
         @advance_type = get_type_from_advance_type(params[:advance_type]) if params[:advance_type]
         @advance_term = params[:advance_term].capitalize if params[:advance_term]
         @advance_rate = params[:advance_rate].to_f if params[:advance_rate]
+        @interest_day_count = params[:interest_day_count]
+        @payment_on = params[:payment_on]
+        @maturity_date = params[:maturity_date]
+        @funding_date = Time.zone.now.to_date
         response_html = render_to_string :quick_advance_error, layout: false
       elsif preview[:status] && preview[:status].include?('CreditError')
         preview_success = false
         preview_error = true
         @advance_amount = params[:amount].to_f if params[:amount]
         @error_message = 'CreditError'
+        @advance_description = get_description_from_advance_term(params[:advance_term]) if params[:advance_term]
+        @advance_program = get_program_from_advance_type(params[:advance_type]) if params[:advance_type]
+        @advance_type = get_type_from_advance_type(params[:advance_type]) if params[:advance_type]
+        @advance_term = params[:advance_term].capitalize if params[:advance_term]
+        @advance_rate = params[:advance_rate].to_f if params[:advance_rate]
+        @interest_day_count = params[:interest_day_count]
+        @payment_on = params[:payment_on]
+        @maturity_date = params[:maturity_date]
+        @funding_date = Time.zone.now.to_date
         response_html = render_to_string :quick_advance_error, layout: false
       elsif preview[:status] && preview[:status].include?('CollateralError')
         preview_success = false
         preview_error = true
         @advance_amount = params[:amount].to_f if params[:amount]
-        @advance_type = get_type_from_advance_type(params[:advance_type]) if params[:advance_type]
-        @collateral_type = COLLATERAL_ERROR_MAPPING[params[:advance_type].to_sym] if params[:advance_type]
         @error_message = 'CollateralError'
+        @advance_description = get_description_from_advance_term(params[:advance_term]) if params[:advance_term]
+        @advance_program = get_program_from_advance_type(params[:advance_type]) if params[:advance_type]
+        @collateral_type = COLLATERAL_ERROR_MAPPING[params[:advance_type].to_sym] if params[:advance_type]
+        @advance_type = get_type_from_advance_type(params[:advance_type]) if params[:advance_type]
+        @advance_term = params[:advance_term].capitalize if params[:advance_term]
+        @advance_rate = params[:advance_rate].to_f if params[:advance_rate]
+        @interest_day_count = params[:interest_day_count]
+        @payment_on = params[:payment_on]
+        @maturity_date = params[:maturity_date]
+        @funding_date = Time.zone.now.to_date
         response_html = render_to_string :quick_advance_error, layout: false
       else
         preview_success = true
@@ -253,6 +274,7 @@ class DashboardController < ApplicationController
         @interest_day_count = confirmation[:interest_day_count]
         @payment_on = confirmation[:payment_on]
         @advance_term = confirmation[:advance_term].capitalize if confirmation[:advance_term]
+        @trade_date = Time.zone.now.to_date
         @funding_date = confirmation[:funding_date]
         @maturity_date = confirmation[:maturity_date]
         @advance_rate = confirmation[:advance_rate].to_f if confirmation[:advance_rate]
@@ -315,9 +337,9 @@ class DashboardController < ApplicationController
   def get_program_from_advance_type(advance_type)
     advance_type = advance_type.upcase.gsub(/\s+/, "")
     case advance_type
-      when 'WHOLELOAN'
+      when 'WHOLELOAN', 'WHOLE'
         I18n.t('dashboard.quick_advance.table.axes_labels.standard')
-      when 'SBC-AGENCY', 'SBC-AAA', 'SBC-AA'
+      when 'SBC-AGENCY', 'SBC-AAA', 'SBC-AA', 'AGENCY', 'AAA', 'AA'
         I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed')
     end
   end

@@ -292,6 +292,9 @@
       selected_rate['advance_term'] = $element.data('advance-term');
       selected_rate['advance_type'] = $element.data('advance-type');
       selected_rate['advance_rate'] = $element.data('advance-rate');
+      selected_rate['maturity_date'] = $element.data('maturity-date');
+      selected_rate['payment_on'] = $element.data('payment-on');
+      selected_rate['interest_day_count'] = $element.data('interest-day-count');
     };
 
     function packageParameters(rate_data) {

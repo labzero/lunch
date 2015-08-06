@@ -460,6 +460,7 @@ en:
         payment_on: Interest Payment Frequency
         advance_term: Term
         advance_rate: Advance Rate
+        trade_date: Trade Date
         funding_date: Funding Date
         maturity_date: Maturity Date
         debit_sta_html: Your Settlement/Transaction Account (STA) will be debited %{amount} for the capital stock purchase amount today

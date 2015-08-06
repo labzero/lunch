@@ -21,6 +21,10 @@ $faded-opacity: 0.4 !default;
   @include pseudo-background-cover($light-gray);
 }
 
+.quick-advance-instruction {
+  display: none;
+}
+
 .dashboard-quick-advance-flyout {
   .quick-advance-desk-closed-message {
     font-weight: $bold-weight;
@@ -56,6 +60,7 @@ $faded-opacity: 0.4 !default;
     }
   }
   .quick-advance-instruction {
+    display: block;
     margin: 0 0 15px;
   }
   table {

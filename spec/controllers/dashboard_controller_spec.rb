@@ -198,9 +198,12 @@ RSpec.describe DashboardController, :type => :controller do
     let(:advance_description) {double('some description')}
     let(:advance_program) {double('some program')}
     let(:amount) { 100000 }
+    let(:interest_day_count) { 'some interest_day_count' }
+    let(:payment_on) { 'some payment_on' }
+    let(:maturity_date) { 'some maturity_date' }
     let(:check_capstock) { true }
     let(:check_result) {{:status => 'pass', :low => 100000, :high => 1000000000}}
-    let(:make_request) { post :quick_advance_preview, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, check_capstock: check_capstock}
+    let(:make_request) { post :quick_advance_preview, interest_day_count: interest_day_count, payment_on: payment_on, maturity_date: maturity_date, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, check_capstock: check_capstock}
     before do
       allow(subject).to receive(:get_description_from_advance_term).and_return(advance_description)
       allow(subject).to receive(:get_type_from_advance_type).and_return(advance_type)
@@ -368,6 +371,24 @@ RSpec.describe DashboardController, :type => :controller do
         make_request
         expect(assigns[:advance_program]).to eq(advance_program)
       end
+      it 'should set @payment_on' do
+        make_request
+        expect(assigns[:payment_on]).to eq(payment_on)
+      end
+      it 'should set @interest_day_count' do
+        make_request
+        expect(assigns[:interest_day_count]).to eq(interest_day_count)
+      end
+      it 'should set @maturity_date' do
+        make_request
+        expect(assigns[:maturity_date]).to eq(maturity_date)
+      end
+      it 'should set @funding_date to today' do
+        date = Date.new(2015,1,1)
+        allow(Time.zone).to receive(:now).and_return(date)
+        make_request
+        expect(assigns[:funding_date]).to eq(date)
+      end
     end
 
     describe "POST quick_advance_error of type `CreditError`" do
@@ -380,9 +401,49 @@ RSpec.describe DashboardController, :type => :controller do
         make_request
         expect(assigns[:advance_amount]).to be_kind_of(Numeric)
       end
+      it 'should set @advance_type' do
+        advance_type = double('advance_type')
+        allow(subject).to receive(:get_type_from_advance_type).and_return(advance_type)
+        make_request
+        expect(assigns[:advance_type]).to eq(advance_type)
+      end
       it 'should set @error_message' do
         make_request
         expect(assigns[:error_message]).to eq('CreditError')
+      end
+      it 'should set @advance_description' do
+        make_request
+        expect(assigns[:advance_description]).to eq(advance_description)
+      end
+      it 'should set @advance_program' do
+        make_request
+        expect(assigns[:advance_program]).to eq(advance_program)
+      end
+      it 'should set @advance_term' do
+        make_request
+        expect(assigns[:advance_term]).to eq(advance_term)
+      end
+      it 'should set @advance_rate' do
+        make_request
+        expect(assigns[:advance_rate]).to eq(advance_rate.to_f)
+      end
+      it 'should set @payment_on' do
+        make_request
+        expect(assigns[:payment_on]).to eq(payment_on)
+      end
+      it 'should set @interest_day_count' do
+        make_request
+        expect(assigns[:interest_day_count]).to eq(interest_day_count)
+      end
+      it 'should set @maturity_date' do
+        make_request
+        expect(assigns[:maturity_date]).to eq(maturity_date)
+      end
+      it 'should set @funding_date to today' do
+        date = Date.new(2015,1,1)
+        allow(Time.zone).to receive(:now).and_return(date)
+        make_request
+        expect(assigns[:funding_date]).to eq(date)
       end
     end
 
@@ -411,6 +472,40 @@ RSpec.describe DashboardController, :type => :controller do
         stub_const('DashboardController::COLLATERAL_ERROR_MAPPING', {"#{advance_type}": collateral_type})
         make_request
         expect(assigns[:collateral_type]).to eq(collateral_type)
+      end
+      it 'should set @advance_description' do
+        make_request
+        expect(assigns[:advance_description]).to eq(advance_description)
+      end
+      it 'should set @advance_program' do
+        make_request
+        expect(assigns[:advance_program]).to eq(advance_program)
+      end
+      it 'should set @advance_term' do
+        make_request
+        expect(assigns[:advance_term]).to eq(advance_term)
+      end
+      it 'should set @advance_rate' do
+        make_request
+        expect(assigns[:advance_rate]).to eq(advance_rate.to_f)
+      end
+      it 'should set @payment_on' do
+        make_request
+        expect(assigns[:payment_on]).to eq(payment_on)
+      end
+      it 'should set @interest_day_count' do
+        make_request
+        expect(assigns[:interest_day_count]).to eq(interest_day_count)
+      end
+      it 'should set @maturity_date' do
+        make_request
+        expect(assigns[:maturity_date]).to eq(maturity_date)
+      end
+      it 'should set @funding_date to today' do
+        date = Date.new(2015,1,1)
+        allow(Time.zone).to receive(:now).and_return(date)
+        make_request
+        expect(assigns[:funding_date]).to eq(date)
       end
     end
 
@@ -695,12 +790,12 @@ RSpec.describe DashboardController, :type => :controller do
   end
 
   describe 'get_program_from_advance_type method' do
-    ['whole loan', 'WHOLE LOAN', 'wholeloan', 'WHOLELOAN'].each do |type|
+    ['whole loan', 'WHOLE LOAN', 'wholeloan', 'WHOLELOAN', 'whole', 'WHOLE'].each do |type|
       it "returns `#{I18n.t('dashboard.quick_advance.table.axes_labels.standard')}` if it is passed `#{type}` as a type" do
         expect(subject.send(:get_program_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.axes_labels.standard'))
       end
     end
-     ['SBC-AGENCY', 'SBC-AAA', 'SBC-AA', 'sbc-agency', 'sbc-aaa', 'sbc-aa'].each do |type|
+     ['SBC-AGENCY', 'SBC-AAA', 'SBC-AA', 'sbc-agency', 'sbc-aaa', 'sbc-aa', 'AGENCY', 'agency', 'AAA', 'aaa', 'AA', 'aa'].each do |type|
        it "returns `#{I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed')}` if it is passed `#{type}` as a type" do
          expect(subject.send(:get_program_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed'))
        end
