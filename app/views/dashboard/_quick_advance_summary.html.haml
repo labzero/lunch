@@ -1,6 +1,7 @@
 - advance_number ||= nil
 - stock ||= nil
 - preview ||= nil
+- trade_date ||= nil
 .quick-advance-summary
   - if advance_number
     %dl
@@ -30,6 +31,9 @@
     %dt= t('dashboard.quick_advance.field_headings.payment_on') +':'
     %dd= payment_on || t('global.missing_value')
   %dl
+    - if trade_date
+      %dt= t('dashboard.quick_advance.field_headings.trade_date') +':'
+      %dd= fhlb_date_standard_numeric(trade_date)
     %dt= t('dashboard.quick_advance.field_headings.funding_date') +':'
     %dd= fhlb_date_standard_numeric(funding_date)
     %dt= t('dashboard.quick_advance.field_headings.maturity_date') +':'
