@@ -1,0 +1,27 @@
+{
+  "start_balance" : null,
+  "start_date" : null,
+  "end_balance" : null,
+  "end_date" : null,
+  "activities" : [
+    {
+      "trans_date":null,
+      "refnumber" :null,
+      "descr":"Interest Rate / Daily Balance",
+      "debit":null,
+      "credit":null,
+      "rate":0.01,
+      "balance":55449.6
+    },
+    {
+      "trans_date":null,
+      "refnumber":796337,
+      "descr":"SECURITY SAFEKEEPING",
+      "debit":null,
+      "credit":50612.87,
+      "rate":0.01,
+      "balance":null
+    }
+  ]
+}
+

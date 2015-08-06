@@ -1,0 +1,46 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/advances_details/2015-01-20
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
+      X-Request-Id:
+      - '12345'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '1594'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Wed, 05 Aug 2015 17:57:45 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"as_of_date":"2015-01-20","structured_product_indication_date":null,"advances_details":[{"trade_date":"2013-09-23","funding_date":"2013-09-23","maturity_date":"2018-09-24","current_par":7000000,"interest_rate":1.88,"next_interest_pay_date":"2015-02-02","accrued_interest":10095.34,"estimated_next_interest_payment":11176.99,"interest_payment_frequency":"Monthend","day_count_basis":"Actual/Actual","advance_type":"FRC","advance_number":"330111","discount_program":null,"prepayment_fee_indication":null,"notes":null,"structure_product_prepay_valuation_date":null,"open_vrc_indicator":false},{"trade_date":"2013-09-23","funding_date":"2013-09-23","maturity_date":null,"current_par":3000000,"interest_rate":2.74,"next_interest_pay_date":"2015-02-28","accrued_interest":6305.75,"estimated_next_interest_payment":6981.37,"interest_payment_frequency":"Monthend","day_count_basis":"Actual/Actual","advance_type":"VRC-OPEN","advance_number":"330112","discount_program":null,"prepayment_fee_indication":null,"notes":null,"structure_product_prepay_valuation_date":null,"open_vrc_indicator":true},{"trade_date":"2014-04-29","funding_date":"2014-04-30","maturity_date":"2018-02-01","current_par":100000000,"interest_rate":0.3795,"next_interest_pay_date":"2015-02-02","accrued_interest":27408.33,"estimated_next_interest_payment":32679.17,"interest_payment_frequency":"Monthly","day_count_basis":"Actual/360","advance_type":"ARC-LIBOR","advance_number":342179,"discount_program":null,"prepayment_fee_indication":null,"notes":null,"structure_product_prepay_valuation_date":null,"open_vrc_indicator":false}]}'
+    http_version: 
+  recorded_at: Wed, 05 Aug 2015 17:57:45 GMT
+recorded_with: VCR 2.9.3
