@@ -1,0 +1,16 @@
+{
+  "transaction_date":null,
+  "annualized_rate":5.07,
+  "rate":1.25,
+  "average_shares_outstanding":131597.4,
+  "shares_dividend":0,
+  "shares_par_value":0.0,
+  "cash_dividend":164496.75,
+  "total_dividend":164496.75,
+  "sta_account_number":"25100033",
+  "details":[
+    {"issue_date":null,"certificate_sequence":"16152","start_date":null,"end_date":null,"shares_outstanding":6,"average_shares_outstanding":6.0,"dividend":7.5,"days_outstanding":90},
+    {"issue_date":null,"certificate_sequence":"17084","start_date":null,"end_date":null,"shares_outstanding":37,"average_shares_outstanding":37.0,"dividend":46.25,"days_outstanding":90},
+    {"issue_date":null,"certificate_sequence":"17577","start_date":null,"end_date":null,"shares_outstanding":10,"average_shares_outstanding":10.0,"dividend":12.5,"days_outstanding":90}
+  ]
+}

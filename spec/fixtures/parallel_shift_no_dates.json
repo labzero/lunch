@@ -1,0 +1,8 @@
+{
+  "as_of_date":null,
+  "putable_advances":[
+    {"shift_neg_300":null,"shift_neg_200":null,"shift_neg_100":107.3681,"shift_0":105.1858,"shift_100":102.8486,"shift_200":101.0694,"shift_300":100.0865,"advance_number":"136559","issue_date":null,"interest_rate":0.0294},
+    {"shift_neg_300":null,"shift_neg_200":null,"shift_neg_100":106.6145,"shift_0":104.4824,"shift_100":102.2542,"shift_200":100.6704,"shift_300":99.95,"advance_number":"136581","issue_date":null,"interest_rate":0.0266},
+    {"shift_neg_300":null,"shift_neg_200":null,"shift_neg_100":108.0421,"shift_0":105.824,"shift_100":103.4061,"shift_200":101.4763,"shift_300":100.2734,"advance_number":"136583","issue_date":null,"interest_rate":0.0319}
+  ]
+}

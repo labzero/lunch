@@ -131,9 +131,9 @@ class MemberBalanceService < MAPIService
 
     # begin building response data
     data = {}
-    data[:start_date] = opening_balance[:balance_date].to_date
+    data[:start_date] = opening_balance[:balance_date].to_date if opening_balance[:balance_date]
     data[:start_balance] = opening_balance[:open_balance].to_i
-    data[:end_date] = closing_balance[:balance_date].to_date
+    data[:end_date] = closing_balance[:balance_date].to_date if closing_balance[:balance_date]
     data[:end_balance] = closing_balance[:close_balance].to_i
     data[:activities] = activities[:activities]
 
@@ -144,7 +144,7 @@ class MemberBalanceService < MAPIService
     data[:activities].each_with_index do |row, i|
       data[:activities][i][:credit_shares] = 0
       data[:activities][i][:debit_shares] = 0
-      data[:activities][i][:trans_date]= data[:activities][i][:trans_date].to_date
+      data[:activities][i][:trans_date]= data[:activities][i][:trans_date].to_date if data[:activities][i][:trans_date]
       shares = data[:activities][i][:share_number].to_i
       begin
         if row[:dr_cr] == 'C'
@@ -261,7 +261,7 @@ class MemberBalanceService < MAPIService
     end
 
     data[:activities].each_with_index do |activity, i|
-      data[:activities][i][:trans_date] = activity[:trans_date].to_date
+      data[:activities][i][:trans_date] = activity[:trans_date].to_date if activity[:trans_date]
       data[:activities][i][:rate] = nil if activity[:rate] == 0
       if activity[:debit]
         data[:activities][i][:transaction] = activity[:debit] * -1
@@ -270,8 +270,8 @@ class MemberBalanceService < MAPIService
       end
     end
 
-    data[:start_date] = data[:start_date].to_date
-    data[:end_date] = data[:end_date].to_date
+    data[:start_date] = data[:start_date].to_date if data[:start_date]
+    data[:end_date] = data[:end_date].to_date if data[:end_date]
 
     # sort the activities array by description and then by date to wind up with the proper order
     data[:activities] = data[:activities].sort do |a, b|
@@ -325,7 +325,7 @@ class MemberBalanceService < MAPIService
       data[:estimated_next_payment] += advance[:estimated_next_interest_payment] if advance[:estimated_next_interest_payment]
     end
 
-    data[:as_of_date] = data[:as_of_date].to_date
+    data[:as_of_date] = data[:as_of_date].to_date if data[:as_of_date]
     data[:total_par] = data[:total_par].round
     data[:total_accrued_interest] = data[:total_accrued_interest].to_f
     data[:estimated_next_payment] = data[:estimated_next_payment].to_f
@@ -374,10 +374,10 @@ class MemberBalanceService < MAPIService
       return nil
     end
 
-    data[:as_of_date] = data[:as_of_date].to_date
+    data[:as_of_date] = data[:as_of_date].to_date if data[:as_of_date]
     data[:projections].each_with_index do |projection, i|
-      data[:projections][i][:settlement_date] = projection[:settlement_date].to_date
-      data[:projections][i][:maturity_date] = projection[:maturity_date].to_date
+      data[:projections][i][:settlement_date] = projection[:settlement_date].to_date if projection[:settlement_date]
+      data[:projections][i][:maturity_date] = projection[:maturity_date].to_date if projection[:maturity_date]
     end
     data
   end
@@ -422,11 +422,11 @@ class MemberBalanceService < MAPIService
     end
     data
 
-    data[:transaction_date] = data[:transaction_date].to_date
+    data[:transaction_date] = data[:transaction_date].to_date if data[:transaction_date]
     data[:details].each do |detail|
-      detail[:issue_date] = detail[:issue_date].to_date
-      detail[:start_date] = detail[:start_date].to_date
-      detail[:end_date] = detail[:end_date].to_date
+      detail[:issue_date] = detail[:issue_date].to_date if detail[:issue_date]
+      detail[:start_date] = detail[:start_date].to_date if detail[:start_date]
+      detail[:end_date] = detail[:end_date].to_date if detail[:end_date]
     end
     data
   end
@@ -538,7 +538,7 @@ class MemberBalanceService < MAPIService
       Rails.logger.warn("MemberBalanceService.parallel_shift encountered a JSON parsing error: #{e}")
       return nil
     end
-    data[:as_of_date] = data[:as_of_date].to_date
+    data[:as_of_date] = data[:as_of_date].to_date if data[:as_of_date]
     data
   end
 
@@ -605,7 +605,7 @@ class MemberBalanceService < MAPIService
     data[:as_of_date] = data[:as_of_date].to_date if data[:as_of_date]
     unless data[:advances].blank?
       data[:advances].collect do |advance|
-        %i(trade_date funding_date maturity_date).each { |date_attr| advance[date_attr] = advance[date_attr].to_date }
+        %i(trade_date funding_date maturity_date).each { |date_attr| advance[date_attr] = advance[date_attr].to_date if advance[date_attr] }
         advance
       end
     end

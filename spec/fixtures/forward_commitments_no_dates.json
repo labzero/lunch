@@ -1,0 +1,7 @@
+{
+  "as_of_date":null,
+  "total_current_par":144712429,
+  "advances":[
+    {"trade_date":null,"funding_date":null,"maturity_date":null,"advance_number":"35543","advance_type":"FRC-REGULAR W/PPS","current_par":144712429,"interest_rate":4.46}
+  ]
+}
