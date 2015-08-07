@@ -222,9 +222,12 @@ class DashboardController < ApplicationController
         @advance_term = preview[:advance_term].capitalize if preview[:advance_term]
         @funding_date = preview[:funding_date]
         @maturity_date = preview[:maturity_date]
-        @advance_rate = preview[:advance_rate].to_f if preview[:advance_rate]
         @stock = params[:stock].to_f if params[:stock]
         @session_elevated = session_elevated?
+        checked_rate = check_advance_rate(request, params[:advance_type], params[:advance_term], preview[:advance_rate])
+        @advance_rate = checked_rate[:advance_rate]
+        @old_rate = checked_rate[:old_rate]
+        @rate_changed = checked_rate[:rate_changed]
         response_html = render_to_string layout: false
       end
     else
@@ -355,5 +358,22 @@ class DashboardController < ApplicationController
       when 'SBC-AA', 'AA'
         I18n.t('dashboard.quick_advance.table.aa')
     end
+  end
+
+  def check_advance_rate(request, type, term, old_rate)
+    rate_changed = false
+    rate_service = RatesService.new(request)
+    new_rate = rate_service.rate(type, term)[:rate].to_f
+    if new_rate != old_rate.to_f
+      rate = new_rate
+      rate_changed = true
+    else
+      rate = old_rate
+    end
+    {
+      advance_rate: rate.to_f,
+      old_rate: old_rate.to_f,
+      rate_changed: rate_changed
+    }
   end
 end

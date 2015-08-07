@@ -204,10 +204,12 @@ RSpec.describe DashboardController, :type => :controller do
     let(:check_capstock) { true }
     let(:check_result) {{:status => 'pass', :low => 100000, :high => 1000000000}}
     let(:make_request) { post :quick_advance_preview, interest_day_count: interest_day_count, payment_on: payment_on, maturity_date: maturity_date, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, check_capstock: check_capstock}
+    let(:checked_rate_hash) { {rate: double('rate'), old_rate: double('old_rate'), rate_changed: double('rate_changed')} }
     before do
       allow(subject).to receive(:get_description_from_advance_term).and_return(advance_description)
       allow(subject).to receive(:get_type_from_advance_type).and_return(advance_type)
       allow(subject).to receive(:get_program_from_advance_type).and_return(advance_program)
+      allow(subject).to receive(:check_advance_rate).and_return({})
     end
     it_behaves_like 'a user required action', :post, :quick_advance_preview
     it_behaves_like 'an authorization required method', :post, :quick_advance_preview, :advances, :show?
@@ -257,9 +259,14 @@ RSpec.describe DashboardController, :type => :controller do
       make_request
       expect(assigns[:maturity_date]).to be_kind_of(String)
     end
-    it 'should set @advance_rate' do
-      make_request
-      expect(assigns[:advance_rate]).to be_kind_of(Numeric)
+    describe 'after checking the advance rate' do
+      before { allow(subject).to receive(:check_advance_rate).and_return(checked_rate_hash) }
+      %i(advance_rate old_rate rate_changed).each do |var|
+        it "should set @#{var.to_s}" do
+          make_request
+          expect(assigns[var]).to eq(checked_rate_hash[var])
+        end
+      end
     end
     describe 'stubbed service' do
       before do
@@ -821,6 +828,40 @@ RSpec.describe DashboardController, :type => :controller do
     ['SBC-AA', 'sbc-aa', 'aa', 'AA'].each do |type|
       it "returns `#{I18n.t('dashboard.quick_advance.table.aa')}` if it is passed `#{type}` as a type" do
         expect(subject.send(:get_type_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.aa'))
+      end
+    end
+  end
+
+  describe 'the `check_advance_rate` method' do
+    let(:old_rate) { rand() }
+    let(:new_rate) { rand() }
+    let(:response_hash) { {rate: old_rate} }
+    let(:service_object) { double('a service object', rate: response_hash)}
+    let(:check_advance_rate) { subject.send(:check_advance_rate, 'some request', 'some type', 'some term', old_rate)}
+    before do
+      allow(RatesService).to receive(:new).and_return(service_object)
+    end
+    it 'sets `old_rate` to the rate it was passed' do
+      expect(check_advance_rate[:old_rate]).to eq(old_rate)
+    end
+    describe 'when the rate has changed' do
+      it 'sets `advance_rate` to the new rate' do
+        new_response_hash = {rate: new_rate}
+        allow(service_object).to receive(:rate).and_return(new_response_hash)
+        expect(check_advance_rate[:advance_rate]).to eq(new_rate)
+      end
+      it 'sets `rate_changed` to true' do
+        new_response_hash = {rate: new_rate}
+        allow(service_object).to receive(:rate).and_return(new_response_hash)
+        expect(check_advance_rate[:rate_changed]).to eq(true)
+      end
+    end
+    describe 'when the rate has not changed' do
+      it 'sets `advance_rate` to the old rate' do
+        expect(check_advance_rate[:advance_rate]).to eq(old_rate)
+      end
+      it 'sets `rate_changed` to false' do
+        expect(check_advance_rate[:rate_changed]).to eq(false)
       end
     end
   end

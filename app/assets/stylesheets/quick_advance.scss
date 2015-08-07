@@ -326,11 +326,19 @@ $faded-opacity: 0.4 !default;
     width: 250px;
     overflow: hidden;
     clear: left;
+    &.quick-advance-updated-rate {
+      color: $alert-orange;
+    }
   }
   dd {
     @extend %typography-graph-data;
     @extend %clearfix;
     text-align: left;
+    p {
+      @extend %typography-graph-data;
+      color: $alert-orange;
+      margin: 0;
+    }
   }
   .quick-advance-loading-message {
     display: none;

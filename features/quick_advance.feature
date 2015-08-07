@@ -145,3 +145,12 @@ Scenario: Users aren't required to enter a SecurID token a second time
   Then I shouldn't see the SecurID fields
   When I click on the quick advance confirm button
   Then I should see confirmation number for the advance
+
+@data-unavailable @jira-mem-872
+Scenario: The rate changes from the time the user sees the table to the time they see the preview
+  Given I visit the dashboard
+  And I open the quick advance flyout
+  And I select the rate with a term of "overnight" and a type of "whole"
+  When I click on the initiate advance button
+  And the quick advance rate has changed
+  Then I should see a preview of the quick advance with a notification about the new rate
