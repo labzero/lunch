@@ -4,7 +4,6 @@ module MAPI
   module Services
     module EtransactAdvances
       include MAPI::Services::Base
-      include MAPI::Services::Rates::BlackoutDates
 
       STATUS_ON_RECORD_NOTFOUND_COUNT = 0
 
@@ -249,7 +248,7 @@ module MAPI
         end
         
         relative_get '/blackout_dates' do
-          blackout_dates.to_json
+          MAPI::Services::Rates::BlackoutDates::blackout_dates(settings.environment).to_json
         end
 
         # etransact advances status

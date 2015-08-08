@@ -2,7 +2,7 @@ module DashboardHelper
   TOOLTIP='dashboard.quick_advance.tooltip'
   TABLE='dashboard.quick_advance.table'
   
-  def mk_quick_advance_tooltip(rate_data)
+  def make_quick_advance_tooltip(rate_data)
     interest_day_count = rate_data[:interest_day_count].to_s.gsub('/', '')
     date               = rate_data[:maturity_date].to_date
     date_formatted     = fhlb_date_standard_numeric(date)
@@ -15,11 +15,5 @@ module DashboardHelper
       day_label      => day,
       maturity_label => date_formatted
     }
-  end
-  
-  def mk_blackout_date_tooltip( date )
-    reason   = t("#{TOOLTIP}.reason")
-    blackout = t("#{TOOLTIP}.blackout")
-    { reason => blackout }
   end
 end

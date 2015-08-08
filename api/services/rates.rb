@@ -592,6 +592,7 @@ module MAPI
 
           MAPI::Services::Rates.init_mds_connection(settings.environment)
           blackout_dates_list = MAPI::Services::Rates::BlackoutDates.blackout_dates(settings.environment)
+          halt 503, 'Internal Service Error' if blackout_dates_list.nil?
           data = if @@mds_connection
             request = LOAN_TYPES.collect do |type|
             {

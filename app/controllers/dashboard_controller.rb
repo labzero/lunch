@@ -136,7 +136,6 @@ class DashboardController < ApplicationController
     etransact_service = EtransactAdvancesService.new(request)
     @quick_advances_active = etransact_service.etransact_active?
     @rate_data = RatesService.new(request).quick_advance_rates(current_member_id)
-    puts "rates_data: #{@rate_data.inspect}"
     @advance_terms = ADVANCE_TERMS
     @advance_types = ADVANCE_TYPES
     render layout: false

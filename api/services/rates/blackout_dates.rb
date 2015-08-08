@@ -6,15 +6,19 @@ module MAPI
 
         def self.blackout_dates(environment)
           if environment == :production
-            v = []
-            v_cursor = ActiveRecord::Base.connection.execute(SQL)
-            while row = v_cursor.fetch()
-              v.push(row)
+            begin
+              dates = []
+              date_cursor = ActiveRecord::Base.connection.execute(SQL)
+              while date = date_cursor.fetch()
+                dates.push(date)
+              end
+              dates
+            rescue e
+              warn(:blackout_dates, e.message)
             end
-            v
           else
             JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'blackout_dates.json'))) +
-            [Date.today + 1.day, Date.today + 1.week, Date.today + 3.week, Date.today + 1.year]
+            [Date.today + 1.day, Date.today + 1.week, Date.today + 3.week, Date.today + 1.year].map{ |d| d.strftime( "%d-%^b-%y" )}
           end
         end
       end
