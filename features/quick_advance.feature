@@ -76,7 +76,7 @@ Scenario: Go back to rate table from preview in Quick Advance flyout
   And I should see the selected state for the cell with a term of "2week" and a type of "aaa"
   And I should not see a preview of the quick advance
 
-@data-unavailable @jira-mem-560
+@jira-mem-560
 Scenario: Confirm rate from Quick Advance preview dialog
   Given I visit the dashboard
   And I open the quick advance flyout
@@ -107,7 +107,7 @@ Scenario: Users with insufficient collateral for Quick Advance get an error
   When I click on the initiate advance button
   Then I should see an "insufficient collateral" error with amount 100002 and type "whole"
 
-@data-unavailable @jira-mem-560
+@jira-mem-560
 Scenario: Close flyout after finishing quick advance
   Given I visit the dashboard
   And I successfully execute a quick advance
@@ -115,7 +115,7 @@ Scenario: Close flyout after finishing quick advance
   When I click on the quick advance confirmation close button
   Then I should not see a flyout
 
-@data-unavailable @jira-mem-560
+@jira-mem-560
 Scenario: Users are required to enter a SecurID token to take out an advance
   Given I visit the dashboard
   And I am on the quick advance preview screen
@@ -138,7 +138,7 @@ Scenario: Users are informed if they enter an invalid pin or token
   And I click on the quick advance confirm button
   Then I should see SecurID errors
 
-@data-unavailable @jira-mem-560
+@jira-mem-560
 Scenario: Users aren't required to enter a SecurID token a second time
   Given I visit the dashboard
   And I am on the quick advance preview screen

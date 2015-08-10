@@ -18,7 +18,7 @@ namespace :spec do
   task :api  do
     orig_dir = Dir.pwd
     Dir.chdir('api')
-    command = 'rspec'
+    command = "rspec #{ENV['SPEC']}"
     begin
       puts command if verbose
       success = system(command)
