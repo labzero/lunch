@@ -102,6 +102,9 @@ module MAPI
 
     def error_handler(error)
       logger.error error
+      if ENV['RACK_ENV'] != 'production'
+        logger.error error.backtrace.join("\n")
+      end
       'Unexpected Server Error'
     end
 

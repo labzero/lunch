@@ -15,6 +15,6 @@
       %td.selectable-cell{data: {'advance-type' => advance_type, 'advance-term' => advance_term, 'advance-rate' => fhlb_formatted_number(advance_rate, precision: 2, html: false)}, class: "#{'disabled-cell' if !@quick_advances_active}"}
         - unless rate_data[:disabled]
           = fhlb_formatted_number(advance_rate, precision: 2)
-          = render 'shared/tooltip', tooltip_data: make_quick_advance_tooltip( rate_data )
+          = render 'shared/tooltip', tooltip_data: make_quick_advance_tooltip_data( rate_data )
         - else
           = '&mdash;'.html_safe

@@ -96,6 +96,10 @@ Then(/^I should see a rate for the "(.*?)" term with a type of "(.*?)"$/) do |te
   page.find(".dashboard-quick-advance-flyout td[data-advance-term='#{term}'][data-advance-type='#{type}']").text.should_not eql("")
 end
 
+Then(/^I should see a blacked out value for the "(.*?)" term with a type of "(.*?)"$/) do |term, type|
+  page.find(".dashboard-quick-advance-flyout td[data-advance-term='#{term}'][data-advance-type='#{type}']").text.should eql('—'.html_safe)
+end
+
 When(/^I hover on the cell with a term of "(.*?)" and a type of "(.*?)"$/) do |term, type|
   page.find(".dashboard-quick-advance-flyout td[data-advance-term='#{term}'][data-advance-type='#{type}']").hover
 end

@@ -51,13 +51,17 @@ describe MAPI::ServiceApp do
 
   describe "rate summary" do
     before do
-      allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(blackout_dates)
+      allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(blackout_strings)
     end
     let(:today) { Date.today }
     let(:one_week_away) { today + 1.week }
     let(:three_weeks_away) { today + 3.week }
     let(:blackout_dates) { [one_week_away, three_weeks_away] }
-    let(:rate_summary) { get '/rates/summary'; JSON.parse(last_response.body).with_indifferent_access }
+    let(:blackout_strings) { blackout_dates.map{ |d| d.strftime( "%d-%^b-%y" ) } }
+    let(:rate_summary) do
+      get '/rates/summary'
+      JSON.parse(last_response.body).with_indifferent_access
+    end
     let(:loan_terms) { [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year'] }
     let (:loan_types) { [:whole, :agency, :aaa, :aa] }
     it "should return rates for default loan_types at default loan_terms" do

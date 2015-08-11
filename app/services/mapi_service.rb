@@ -19,12 +19,6 @@ class MAPIService
     end
   end
   
-  # http://stackoverflow.com/questions/5100299/how-to-get-the-name-of-the-calling-method
-  # http://stackoverflow.com/questions/133357/how-do-you-find-the-namespace-module-name-programatically-in-ruby-on-rails
-  def caller(depth=2)
-    "#{self.class.to_s.demodulize}.#{caller_locations(depth,depth)[0].label}" 
-  end
-  
   def get(name, endpoint)
     begin
       @connection[endpoint].get

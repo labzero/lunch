@@ -2,7 +2,7 @@ module DashboardHelper
   TOOLTIP='dashboard.quick_advance.tooltip'
   TABLE='dashboard.quick_advance.table'
   
-  def make_quick_advance_tooltip(rate_data)
+  def make_quick_advance_tooltip_data(rate_data)
     interest_day_count = rate_data[:interest_day_count].to_s.gsub('/', '')
     date               = rate_data[:maturity_date].to_date
     date_formatted     = fhlb_date_standard_numeric(date)

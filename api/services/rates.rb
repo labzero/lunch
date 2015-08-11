@@ -591,8 +591,10 @@ module MAPI
           end
 
           MAPI::Services::Rates.init_mds_connection(settings.environment)
-          blackout_dates_list = MAPI::Services::Rates::BlackoutDates.blackout_dates(settings.environment)
-          halt 503, 'Internal Service Error' if blackout_dates_list.nil?
+          blackout_strings = MAPI::Services::Rates::BlackoutDates.blackout_dates(settings.environment)
+
+          halt 503, 'Internal Service Error' if blackout_strings.nil?
+          blackout_dates = blackout_strings.map{|s| Date.parse(s) }
           data = if @@mds_connection
             request = LOAN_TYPES.collect do |type|
             {
@@ -625,12 +627,13 @@ module MAPI
                   ctr_term = 1
                 end
                 maturity_date = MAPI::Services::Rates.get_maturity_date(Time.zone.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content), TERM_MAPPING[term][:frequency_unit])
+
                 hash[type][term] = {
                   'payment_on' => 'Maturity',
                   'interest_day_count' => fhlbsfresponse[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
                   'rate' => fhlbsfdatapoints[ctr_term-1].at_css('value').content,
                   'maturity_date' => maturity_date,
-                  'disabled'      => blackout_dates_list.include?( maturity_date )
+                  'disabled'      => blackout_dates.include?( maturity_date )
                 }
               end
             end
@@ -645,7 +648,7 @@ module MAPI
               LOAN_TERMS.each do |term|
                 maturity_date = MAPI::Services::Rates.get_maturity_date(DateTime.parse((Time.mktime(now.year, now.month, now.day, now.hour, now.min) + hash[type][term][:days_to_maturity].to_i.days).to_s), TERM_MAPPING[term][:frequency_unit])
                 hash[type][term][:maturity_date] = maturity_date
-                hash[type][term]['disabled']     = blackout_dates_list.include?( maturity_date )
+                hash[type][term]['disabled']     = blackout_dates.include?( maturity_date )
               end
             end
             hash[:timestamp] = now

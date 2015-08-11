@@ -18,7 +18,13 @@ module MAPI
             end
           else
             JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'blackout_dates.json'))) +
-            [Date.today + 1.day, Date.today + 1.week, Date.today + 3.week, Date.today + 1.year].map{ |d| d.strftime( "%d-%^b-%y" )}
+            [Date.today + 1.day, Date.today + 1.week, Date.today + 3.week, Date.today + 1.year]
+          end.map do |d|
+            if d.is_a? Date
+              d.strftime( "%d-%^b-%y" )
+            else
+              d
+            end
           end
         end
       end
