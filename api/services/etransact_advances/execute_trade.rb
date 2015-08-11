@@ -280,6 +280,11 @@ module MAPI
             settlement_date = Date.today
             day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/360' : 'ACT/ACT'
 
+            # Check to see if advance would exceed the total advance amount allowed per day
+            if MAPI::Services::EtransactAdvances::ExecuteTrade::advance_exceeds_total_daily_limit(app, amount)
+              return {status: ['ExceedsTotalDailyLimitError']}.to_json
+            end
+
             message = MAPI::Services::EtransactAdvances::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
             begin
               response = @@execute_trade_connection.call(:execute_trade, message_tag: 'executeTradeRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
@@ -335,6 +340,8 @@ module MAPI
                  JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_credit_error.json')))
               elsif (amount.to_i == 100002)
                 JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_collateral_error.json')))
+              elsif (amount.to_i == 100003)
+                JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_exceeds_total_daily_limit_error.json')))
               elsif (amount.to_i < 1000000) || (!check_capstock)
                 JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_preview.json')))
               elsif amount.to_i < 2000000
@@ -421,6 +428,25 @@ module MAPI
             }
           end
           hash.merge(new_hash){|key, old, new| old + new }
+        end
+
+        def self.advance_exceeds_total_daily_limit(app, advance_amount)
+          exceeds_limit = false
+          if app.settings.environment == :production
+            total_daily_limit_query = <<-SQL
+            SELECT SETTING_VALUE
+            FROM WEB_ADM.AO_SETTINGS
+            WHERE SETTING_NAME = 'ShareholderTotalDailyLimit'
+            SQL
+
+            total_daily_limit = ActiveRecord::Base.connection.execute(total_daily_limit_query).fetch.try(&:first)
+            current_daily_total = MAPI::Services::Member::TradeActivity.current_daily_total(app, 'ADVANCE')
+
+            if (current_daily_total.to_f + advance_amount.to_f) > total_daily_limit.to_f
+              exceeds_limit = true
+            end
+          end
+          exceeds_limit
         end
       end
     end

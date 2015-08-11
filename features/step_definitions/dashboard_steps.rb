@@ -251,6 +251,8 @@ Then(/^I should see an? "(.*?)" error with amount (\d+) and type "(.*?)"$/) do |
       /\A#{Regexp.quote(strip_tags(I18n.t("dashboard.quick_advance.error.insufficient_financing_availability_html", amount: fhlb_formatted_currency(amount.to_i, precision: 0))))}\z/
     when 'insufficient collateral'
       /\A#{Regexp.quote(strip_tags(I18n.t("dashboard.quick_advance.error.insufficient_collateral_html", amount: fhlb_formatted_currency(amount.to_i, precision: 0), collateral_type: collateral_type)))}\z/
+    when 'advance unavailable'
+      I18n.t('dashboard.quick_advance.error.advance_unavailable', phone_number: fhlb_formatted_phone_number('8004443452'))
     else
       raise 'Unknown error_type'
   end

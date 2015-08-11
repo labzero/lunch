@@ -43,4 +43,45 @@ describe MAPI::ServiceApp do
       end
     end
   end
+
+  describe 'the `current_daily_total` method' do
+    let(:app_settings) { double('app_settings', environment: nil) }
+    let(:app) { double('app', settings: app_settings)}
+    let(:current_daily_total) { MAPI::Services::Member::TradeActivity.current_daily_total(app, 'ADVANCE') }
+    describe 'in the production environment' do
+      let(:included_trade_1) { double('included trade 1', at_css: nil) }
+      let(:included_trade_2) { double('included trade 2', at_css: nil) }
+      let(:excluded_trade) { double('verified trade', at_css: nil) }
+      let(:fhlbsfresponse) { [included_trade_1, included_trade_2, excluded_trade] }
+      let(:savon_response) { double('savon response', doc: double('doc', remove_namespaces!: nil, xpath: fhlbsfresponse)) }
+      let(:trade_connection) { double('trade_connection', call: savon_response) }
+      before do
+        allow(MAPI::Services::Member::TradeActivity).to receive(:init_trade_connection).and_return(true)
+        MAPI::Services::Member::TradeActivity.class_variable_set(:@@trade_connection, trade_connection)
+      end
+      MAPI::Services::Member::TradeActivity::TODAYS_ADVANCES_ARRAY.each do |advance_type|
+        it "adds the daily advance activity for all members if a trade has type `#{advance_type}`" do
+          trade_1_amount = rand(1000..999999) + rand()
+          trade_2_amount = rand(1000..999999)  + rand()
+          expect(included_trade_1).to receive(:at_css).ordered.with('tradeHeader status').and_return(double('xml node', content: advance_type))
+          expect(included_trade_1).to receive(:at_css).ordered.with('advance par amount').and_return(double('xml node', content: trade_1_amount))
+          expect(included_trade_2).to receive(:at_css).ordered.with('tradeHeader status').and_return(double('xml node', content: advance_type))
+          expect(included_trade_2).to receive(:at_css).ordered.with('advance par amount').and_return(double('xml node', content: trade_2_amount))
+          allow(excluded_trade).to receive(:at_css).with('tradeHeader status').and_return(double('xml node', content: 'foo'))
+          expect(current_daily_total).to eq(trade_1_amount + trade_2_amount)
+        end
+      end
+      it 'raises an error if a Savon connection cannot be established' do
+        allow(trade_connection).to receive(:call).and_raise(Savon::Error)
+        expect{current_daily_total}.to raise_error(Savon::Error)
+      end
+    end
+    describe 'in the test environment' do
+      before { allow(MAPI::Services::Member::TradeActivity).to receive(:init_trade_connection).and_return(false) }
+
+      it 'returns a randomly-generated float' do
+        expect(current_daily_total).to be_kind_of(Float)
+      end
+    end
+  end
 end
