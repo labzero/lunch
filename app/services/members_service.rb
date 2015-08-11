@@ -88,12 +88,12 @@ class MembersService < MAPIService
 
     # get CAM phone number from LDAP
     user = nil
-    if data[:cam] && data[:cam][:USERNAME]
+    if data[:cam] && data[:cam][:username]
       Devise::LDAP::Connection.admin('intranet').open do |ldap|
-        user = fetch_ldap_user_by_account_name(ldap, data[:cam][:USERNAME])
+        user = fetch_ldap_user_by_account_name(ldap, data[:cam][:username])
       end
     end
-    data[:cam][:PHONE_NUMBER] = user['telephoneNumber'].first if user && user['telephoneNumber']
+    data[:cam][:phone_number] = user['telephoneNumber'].first if user && user['telephoneNumber']
     data
   end
 

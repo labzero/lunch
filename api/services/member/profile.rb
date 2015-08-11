@@ -218,7 +218,7 @@ module MAPI
           quoted_member_id = ActiveRecord::Base.connection.quote(member_id)
 
           if app.settings.environment == :production
-            # Collateral Asset Manager - TODO: pull in phone number for CAM once it's location (e.g. database) has been determined
+            # Collateral Asset Manager
             cam_query = <<-SQL
               select customer_master_id as fhlb_id, cs_user_id as username,  user_first_name || ' ' || user_last_name as full_name, email as email
               from fhlbown.customer_profile@colaprod_link p, fhlbown.v_cs_user_profile@colaprod_link c
@@ -237,13 +237,14 @@ module MAPI
             cam = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_contacts.json')))['cam']
             rm = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_contacts.json')))['rm']
           end
+
           rm[:email] = rm['email'] || rm['EMAIL']
           rm[:full_name] = rm['full_name'] || rm['FULL_NAME']
           rm[:username] = rm[:email].match(/^(.+?)@/).captures.first.downcase if rm[:email].match(/^(.+?)@/)
+          rm[:phone_number] = rm['phone_number'] || rm['PHONE_NUMBER']
 
           cam[:email] = cam['email'] || cam['EMAIL']
           cam[:full_name] = cam['full_name'] || cam['FULL_NAME']
-          cam[:phone_number] = cam['phone_number'] || cam['PHONE_NUMBER']
           cam[:username] = cam['username'] || cam['USERNAME']
           cam[:username] = cam[:username].downcase if cam[:username]
 

@@ -54,31 +54,31 @@ describe MembersService do
 
     it_should_behave_like 'a MAPI backed service object method', :member_contacts, :member_id
     %i(cam rm).each do |object|
-      %i(FULL_NAME USERNAME EMAIL).each do |attr|
+      %i(full_name username email).each do |attr|
         it "returns a contact hash with a `#{object}` object containing a `#{attr}` attribute" do
           expect(member_contacts[object][attr]).to be_kind_of(String)
         end
       end
     end
-    it "returns a contact hash with a `:rm` object containing a `PHONE_NUMBER` attribute" do
-      expect(member_contacts[:rm][:PHONE_NUMBER]).to be_kind_of(String)
+    it "returns a contact hash with a `:rm` object containing a `phone_number` attribute" do
+      expect(member_contacts[:rm][:phone_number]).to be_kind_of(String)
     end
     it 'returns a contact hash with a `:rm`' do
-      expect(member_contacts[:cam][:FULL_NAME]).to be_kind_of(String)
-      expect(member_contacts[:cam][:USERNAME]).to be_kind_of(String)
-      expect(member_contacts[:cam][:EMAIL]).to be_kind_of(String)
+      expect(member_contacts[:cam][:full_name]).to be_kind_of(String)
+      expect(member_contacts[:cam][:username]).to be_kind_of(String)
+      expect(member_contacts[:cam][:email]).to be_kind_of(String)
     end
-    it 'sets the `PHONE_NUMBER` attribute for the `cam` object to the result of an LDAP query' do
+    it 'sets the `phone_number` attribute for the `cam` object to the result of an LDAP query' do
       allow(subject).to receive(:fetch_ldap_user_by_account_name).and_return({'telephoneNumber' => [cam_phone_number] })
-      expect(member_contacts[:cam][:PHONE_NUMBER]).to eq(cam_phone_number)
+      expect(member_contacts[:cam][:phone_number]).to eq(cam_phone_number)
     end
-    it 'does not set the `PHONE_NUMBER` attribute for the `cam` object if there was no username to look up the user by' do
+    it 'does not set the `phone_number` attribute for the `cam` object if there was no username to look up the user by' do
       allow(JSON).to receive(:parse).and_return({cam: {}})
-      expect(member_contacts[:cam][:PHONE_NUMBER]).to be_nil
+      expect(member_contacts[:cam][:phone_number]).to be_nil
     end
-    it 'does not set the `PHONE_NUMBER` attribute for the `cam` object if the user returned from the LDAP query has no phone number' do
+    it 'does not set the `phone_number` attribute for the `cam` object if the user returned from the LDAP query has no phone number' do
       allow(subject).to receive(:fetch_ldap_user_by_account_name).and_return({})
-      expect(member_contacts[:cam][:PHONE_NUMBER]).to be_nil
+      expect(member_contacts[:cam][:phone_number]).to be_nil
     end
   end
 
