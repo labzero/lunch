@@ -135,15 +135,26 @@ Then(/^I should see a preview of the quick advance$/) do
   #valdiate_passed_advance_params
 end
 
+Then(/^I should see a preview of the quick advance with a notification about the new rate$/) do
+  page.assert_selector('.quick-advance-preview', visible: true)
+  page.assert_selector('.quick-advance-updated-rate')
+end
+
+When(/^the quick advance rate has changed$/) do
+  # implement code to ensure rate is displayed as having changed
+end
+
 Then(/^I should not see a preview of the quick advance$/) do
   page.assert_no_selector(".quick-advance-preview")
 end
 
 When(/^I click on the back button for the quick advance preview$/) do
+  step 'I scroll to the bottom of the screen'
   page.find(".quick-advance-back-button", visible: true).click
 end
 
 When(/^I click on the quick advance confirm button$/) do
+  step 'I scroll to the bottom of the screen'
   page.find(".confirm-quick-advance").click
 end
 

@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe RatesService do
   let(:member_id) {double('MemberID')}
@@ -82,6 +82,37 @@ describe RatesService do
       expect(quick_advance_confirmation["payment_on"]).to be_kind_of(String)
       expect(quick_advance_confirmation["funding_date"]).to be_kind_of(Date)
       expect(quick_advance_confirmation["maturity_date"]).to be_kind_of(Date)
+    end
+  end
+
+  describe 'the `rate` method', :vcr do
+    let(:mapi_response) {
+      {
+        rate: double('rate', to_f: nil),
+        updated_at: double('updated at')
+      }
+    }
+    let(:rate) { subject.rate('agency','1month') }
+    before do
+      allow(JSON).to receive(:parse).and_return(mapi_response)
+      allow(DateTime).to receive(:parse)
+    end
+    it_should_behave_like 'a MAPI backed service object method', :rate, [:agency, :'1month']
+    it 'returns a float for it\'s `rate` attribute' do
+      allow(mapi_response[:rate]).to receive(:to_f).and_return(mapi_response[:rate])
+      expect(rate[:rate]).to eq(mapi_response[:rate])
+    end
+    it 'returns nil for for it\'s `rate` attribute if there is no rate in the MAPI response' do
+      allow(JSON).to receive(:parse).and_return({})
+      expect(rate[:rate]).to be_nil
+    end
+    it 'returns a datetime for it\'s `updated_at` attribute' do
+      allow(DateTime).to receive(:parse).with(mapi_response[:updated_at]).and_return(mapi_response[:updated_at])
+      expect(rate[:updated_at]).to eq(mapi_response[:updated_at])
+    end
+    it 'returns nil for for it\'s `updated_at` attribute if there is no updated_at in the MAPI response' do
+      allow(JSON).to receive(:parse).and_return({})
+      expect(rate[:updated_at]).to be_nil
     end
   end
 

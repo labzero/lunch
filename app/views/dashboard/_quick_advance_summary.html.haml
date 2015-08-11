@@ -2,6 +2,8 @@
 - stock ||= nil
 - preview ||= nil
 - trade_date ||= nil
+- old_rate ||= nil
+- rate_changed ||= nil
 .quick-advance-summary
   - if advance_number
     %dl
@@ -23,8 +25,14 @@
   %dl
     %dt= t('dashboard.quick_advance.field_headings.advance_term') +':'
     %dd= advance_term || t('global.missing_value')
-    %dt= t('dashboard.quick_advance.field_headings.advance_rate') +':'
-    %dd= advance_rate || t('global.missing_value')
+    - if rate_changed
+      %dt.quick-advance-updated-rate= t('dashboard.quick_advance.field_headings.advance_rate') +':'
+      %dd
+        %p= fhlb_formatted_percentage(advance_rate, 2) || t('global.missing_value')
+        %p= t('dashboard.quick_advance.error.updated_rate', old_rate: fhlb_formatted_percentage(old_rate, 2), new_rate: fhlb_formatted_percentage(advance_rate, 2))
+    - else
+      %dt= t('dashboard.quick_advance.field_headings.advance_rate') +':'
+      %dd= fhlb_formatted_percentage(advance_rate, 2) || t('global.missing_value')
   %dl
     %dt= t('dashboard.quick_advance.field_headings.interest_day_count') +':'
     %dd= interest_day_count || t('global.missing_value')
