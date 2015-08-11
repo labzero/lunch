@@ -250,7 +250,7 @@ describe MAPI::ServiceApp do
     let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}"; JSON.parse(last_response.body) }
     before do
       allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
-      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:advance_exceeds_total_daily_limit).and_return(false)
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit).and_return({})
     end
     describe 'agency for 1 week' do
       let(:advance_type)  {'agency'}
@@ -316,12 +316,6 @@ describe MAPI::ServiceApp do
         expect(execute_trade['gross_cumulative_stock_required']).to be_kind_of(Numeric)
         expect(execute_trade['gross_current_trade_stock_required']).to be_kind_of(Numeric)
         expect(execute_trade['gross_pre_trade_stock_required']).to be_kind_of(Numeric)
-      end
-    end
-    describe 'when the requested advance amount would exceed the total daily limit set for all members by FHLB' do
-      it 'returns a hash with a `status` array that includes `ExceedsTotalDailyLimitError`', vcr: {cassette_name: 'execute_trade_service_whole_overnight'} do
-        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:advance_exceeds_total_daily_limit).and_return(true)
-        expect(execute_trade['status']).to include('ExceedsTotalDailyLimitError')
       end
     end
     it 'should return Internal Service Error, if execute trade service is unavailable', vcr: {cassette_name: 'execute_trade_service_unavailable'} do
@@ -563,37 +557,44 @@ describe MAPI::ServiceApp do
         end
       end
     end
-  end
 
-  describe 'the `advance_exceeds_total_daily_limit` method' do
-    let(:app_settings) { double('app_settings', environment: nil) }
-    let(:app) { double('app', settings: app_settings)}
-    let(:advance_amount) { rand(100000..9999999)}
-    let(:check_advance) { MAPI::Services::EtransactAdvances::ExecuteTrade.advance_exceeds_total_daily_limit(app, advance_amount)}
-    let(:total_daily_limit) { double('total daily limit')}
-    let(:result_set) { double('result set', fetch: [total_daily_limit]) }
+    describe 'the `check_total_daily_limit` method' do
+      let(:advance_amount) { rand(100000..9999999)}
+      let(:app_settings) { double('app_settings', environment: nil) }
+      let(:app) { double('app', settings: app_settings)}
+      let(:check_advance) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_total_daily_limit(app, advance_amount, response_hash)}
+      let(:total_daily_limit) { double('total daily limit')}
+      let(:result_set) { double('result set', fetch: [total_daily_limit]) }
 
-    describe 'in the test environment' do
-      before { allow(app_settings).to receive(:environment).and_return(:test) }
-      it 'returns false' do
-        expect(check_advance).to eq(false)
-      end
-    end
-    describe 'in the production environment' do
-      before do
-        allow(app_settings).to receive(:environment).and_return(:production)
-        allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
-        allow(MAPI::Services::Member::TradeActivity).to receive(:current_daily_total).and_return( advance_amount )
-      end
-      it 'returns true if the requested advance plus the current daily total exceeds the limit set by FHLB' do
-        daily_limit = 2 * advance_amount - 100
-        allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f)
-        expect(check_advance).to eq(true)
-      end
-      it 'returns false if the requested advance plus the current daily total does not exceed the limit set by FHLB' do
-        daily_limit = 2 * advance_amount + 100
-        allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f)
-        expect(check_advance).to eq(false)
+      before { allow(MAPI::Services::Member::TradeActivity).to receive(:current_daily_total).and_return( advance_amount ) }
+
+      [:test, :production].each do |env|
+        before { allow(app_settings).to receive(:environment).and_return(env) }
+        describe "in the #{env} environment" do
+          before do
+            allow(app_settings).to receive(:environment).and_return(:production)
+            allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
+            allow(MAPI::Services::Member::TradeActivity).to receive(:current_daily_total).and_return( advance_amount )
+          end
+          it 'returns a hash with a `status` array that includes whatever was in the `status` array for the response_hash' do
+            response_hash = {'status' => ['foo']}
+            allow(total_daily_limit).to receive(:to_f).and_return(advance_amount.to_f)
+            check_advance = MAPI::Services::EtransactAdvances::ExecuteTrade.check_total_daily_limit(app, advance_amount, response_hash)
+            expect(check_advance['status']).to include('foo')
+          end
+          it 'returns a hash with a `status` array that includes \'ExceedsTotalDailyLimitError\' if the requested advance plus the current daily total exceeds the limit set by FHLB' do
+            daily_limit = 2 * advance_amount - 100
+            allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f) # production env case
+            stub_const('MAPI::Services::EtransactAdvances::ExecuteTrade::LOCAL_TOTAL_DAILY_LIMIT', daily_limit) # test env case
+            expect(check_advance['status']).to include('ExceedsTotalDailyLimitError')
+          end
+          it 'returns the response_hash it was passed if the requested advance plus the current daily total does not exceed the limit set by FHLB' do
+            daily_limit = 2 * advance_amount + 100
+            allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f) # production env case
+            stub_const('MAPI::Services::EtransactAdvances::ExecuteTrade::LOCAL_TOTAL_DAILY_LIMIT', daily_limit) # test env case
+            expect(check_advance).to eq(response_hash)
+          end
+        end
       end
     end
   end

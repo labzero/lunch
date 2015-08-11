@@ -13,6 +13,14 @@ module MAPI
           aa: 'SBC-AA'
         }.with_indifferent_access
 
+        TOTAL_DAILY_LIMIT_QUERY = <<-SQL
+          SELECT SETTING_VALUE
+          FROM WEB_ADM.AO_SETTINGS
+          WHERE SETTING_NAME = 'ShareholderTotalDailyLimit'
+        SQL
+
+        LOCAL_TOTAL_DAILY_LIMIT = 999999999999
+
         def self.init_execute_trade_connection(environment)
           if environment == :production
             @@execute_trade_connection ||= Savon.client(
@@ -280,11 +288,6 @@ module MAPI
             settlement_date = Date.today
             day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/360' : 'ACT/ACT'
 
-            # Check to see if advance would exceed the total advance amount allowed per day
-            if MAPI::Services::EtransactAdvances::ExecuteTrade::advance_exceeds_total_daily_limit(app, amount)
-              return {status: ['ExceedsTotalDailyLimitError']}.to_json
-            end
-
             message = MAPI::Services::EtransactAdvances::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
             begin
               response = @@execute_trade_connection.call(:execute_trade, message_tag: 'executeTradeRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
@@ -310,6 +313,7 @@ module MAPI
                 }
               else
                 response_hash = {}
+                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_total_daily_limit(app, amount, response_hash)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_capital_stock(fhlbsfresponse, response, response_hash) if check_capstock
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_credit(fhlbsfresponse, response, response_hash)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_collateral(fhlbsfresponse, response, response_hash)
@@ -430,23 +434,18 @@ module MAPI
           hash.merge(new_hash){|key, old, new| old + new }
         end
 
-        def self.advance_exceeds_total_daily_limit(app, advance_amount)
-          exceeds_limit = false
-          if app.settings.environment == :production
-            total_daily_limit_query = <<-SQL
-            SELECT SETTING_VALUE
-            FROM WEB_ADM.AO_SETTINGS
-            WHERE SETTING_NAME = 'ShareholderTotalDailyLimit'
-            SQL
+        def self.check_total_daily_limit(app, advance_amount, hash)
+          new_hash = {}
+          total_daily_limit = app.settings.environment == :production ? ActiveRecord::Base.connection.execute(TOTAL_DAILY_LIMIT_QUERY).fetch.try(&:first) : LOCAL_TOTAL_DAILY_LIMIT
+          current_daily_total = MAPI::Services::Member::TradeActivity.current_daily_total(app, 'ADVANCE')
 
-            total_daily_limit = ActiveRecord::Base.connection.execute(total_daily_limit_query).fetch.try(&:first)
-            current_daily_total = MAPI::Services::Member::TradeActivity.current_daily_total(app, 'ADVANCE')
-
-            if (current_daily_total.to_f + advance_amount.to_f) > total_daily_limit.to_f
-              exceeds_limit = true
-            end
+          if (current_daily_total.to_f + advance_amount.to_f) > total_daily_limit.to_f
+            new_hash = {
+              'status' => ['ExceedsTotalDailyLimitError']
+            }
           end
-          exceeds_limit
+
+          hash.merge(new_hash){|key, old, new| old + new }
         end
       end
     end

@@ -63,10 +63,10 @@ describe MAPI::ServiceApp do
         it "adds the daily advance activity for all members if a trade has type `#{advance_type}`" do
           trade_1_amount = rand(1000..999999) + rand()
           trade_2_amount = rand(1000..999999)  + rand()
-          expect(included_trade_1).to receive(:at_css).ordered.with('tradeHeader status').and_return(double('xml node', content: advance_type))
-          expect(included_trade_1).to receive(:at_css).ordered.with('advance par amount').and_return(double('xml node', content: trade_1_amount))
-          expect(included_trade_2).to receive(:at_css).ordered.with('tradeHeader status').and_return(double('xml node', content: advance_type))
-          expect(included_trade_2).to receive(:at_css).ordered.with('advance par amount').and_return(double('xml node', content: trade_2_amount))
+          allow(included_trade_1).to receive(:at_css).with('tradeHeader status').and_return(double('xml node', content: advance_type))
+          allow(included_trade_1).to receive(:at_css).with('advance par amount').and_return(double('xml node', content: trade_1_amount))
+          allow(included_trade_2).to receive(:at_css).with('tradeHeader status').and_return(double('xml node', content: advance_type))
+          allow(included_trade_2).to receive(:at_css).with('advance par amount').and_return(double('xml node', content: trade_2_amount))
           allow(excluded_trade).to receive(:at_css).with('tradeHeader status').and_return(double('xml node', content: 'foo'))
           expect(current_daily_total).to eq(trade_1_amount + trade_2_amount)
         end
