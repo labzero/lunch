@@ -8,11 +8,13 @@
       %td.quick-advance-table-horz-axes-label{rowspan: fixed_rate_row_span}
         %span= t('dashboard.quick_advance.table.axes_labels.fixed_rate')
     -@advance_types.each_with_index do |advance_type, j|
-      - advance_rate = @rate_data[advance_type][advance_term][:rate].to_f
+      - rate_data = @rate_data[advance_type][advance_term]
+      - advance_rate = rate_data[:rate].to_f
       - if j == 0
         %td.row-label= t("dashboard.quick_advance.table.axes_labels.#{advance_term}")
-      %td.selectable-cell{data: {'maturity-date' => @rate_data[advance_type][advance_term][:maturity_date], 'payment-on' => @rate_data[advance_type][advance_term][:payment_on], 'interest-day-count' => @rate_data[advance_type][advance_term][:interest_day_count], 'advance-type' => advance_type, 'advance-term' => advance_term, 'advance-rate' => fhlb_formatted_number(advance_rate, precision: 2, html: false)}, class: "#{'disabled-cell' if !@quick_advances_active}"}
-        = fhlb_formatted_number(advance_rate, precision: 2)
-        - date = @rate_data[advance_type][advance_term][:maturity_date].to_date
-        - interest_day_count = @rate_data[advance_type][advance_term][:interest_day_count].to_s.gsub('/', '')
-        = render 'shared/tooltip', tooltip_data: {t('dashboard.quick_advance.tooltip.payment_on') => @rate_data[advance_type][advance_term][:payment_on], t('dashboard.quick_advance.tooltip.interest_day_count') => t("dashboard.quick_advance.table.#{interest_day_count}"), t('dashboard.quick_advance.tooltip.maturity_date') => fhlb_date_standard_numeric(date)}
+      %td.selectable-cell{data: {'advance-type' => advance_type, 'advance-term' => advance_term, 'advance-rate' => fhlb_formatted_number(advance_rate, precision: 2, html: false)}, class: "#{'disabled-cell' if !@quick_advances_active}"}
+        - unless rate_data[:disabled]
+          = fhlb_formatted_number(advance_rate, precision: 2)
+          = render 'shared/tooltip', tooltip_data: make_quick_advance_tooltip_data( rate_data )
+        - else
+          = t('global.missing_value')

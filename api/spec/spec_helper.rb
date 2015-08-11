@@ -33,6 +33,8 @@ require 'rack/test'
 require 'simplecov'
 require 'simplecov-rcov'
 require 'timecop'
+Dir[File.join(File.dirname(__FILE__), 'support', '*.rb')].each {|file| require file }
+
 class SimpleCov::Formatter::MergedFormatter
   def format(result)
      SimpleCov::Formatter::HTMLFormatter.new.format(result)

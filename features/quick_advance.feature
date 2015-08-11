@@ -40,8 +40,8 @@ Scenario: Quick Advance flyout table
 Scenario: Quick Advance flyout tooltip
   Given I visit the dashboard
   And I open the quick advance flyout
-  When I hover on the cell with a term of "overnight" and a type of "whole"
-  Then I should see the quick advance table tooltip for the cell with a term of "overnight" and a type of "whole"
+  When I hover on the cell with a term of "2week" and a type of "whole"
+  Then I should see the quick advance table tooltip for the cell with a term of "2week" and a type of "whole"
 
 Scenario: Select rate from Quick Advance flyout table
   Given I visit the dashboard
@@ -50,6 +50,12 @@ Scenario: Select rate from Quick Advance flyout table
   When I select the rate with a term of "open" and a type of "whole"
   Then I should see the selected state for the cell with a term of "open" and a type of "whole"
   And the initiate advance button should be active
+
+@jira-mem-737
+Scenario: Certain rates should be missing due to black out dates
+  Given I visit the dashboard
+  And I open the quick advance flyout
+  Then I should see a blacked out value for the "3week" term with a type of "aaa"
 
 Scenario: Preview rate from Quick Advance flyout table
   Given I visit the dashboard

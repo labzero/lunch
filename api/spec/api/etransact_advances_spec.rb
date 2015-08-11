@@ -1,11 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  RSpec::Matchers.define :be_boolean do
-    match do |actual|
-      expect(actual).to satisfy { |x| x.is_a?(TrueClass) || x.is_a?(FalseClass) }
-    end
-  end
   before do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
   end

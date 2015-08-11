@@ -407,6 +407,8 @@ en:
         interest_day_count: "Int Day #"
         payment_on: Payment
         maturity_date: Maturity
+        reason: Reason
+        blackout: Blackout
       table:
         term: Term
         whole_loan: Whole Loan

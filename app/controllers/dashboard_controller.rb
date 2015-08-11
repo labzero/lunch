@@ -1,5 +1,6 @@
 class DashboardController < ApplicationController
   include CustomFormattingHelper
+  include DashboardHelper
 
   THRESHOLD_CAPACITY = 35 #this will be set by each client, probably with a default value of 35, and be stored in some as-yet-unnamed db
   ADVANCE_TYPES = [:whole, :agency, :aaa, :aa]

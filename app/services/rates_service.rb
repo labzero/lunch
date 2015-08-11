@@ -35,11 +35,9 @@ class RatesService < MAPIService
     begin
       response = @connection['rates/historic/overnight'].get params: {limit: days}
     rescue RestClient::Exception => e
-      Rails.logger.warn("RatesService.overnight_vrc encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return nil
+      return warn(:overnight_vrc, "RestClient error: #{e.class.name}:#{e.http_code}")
     rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("RatesService.overnight_vrc encountered a connection error: #{e.class.name}")
-      return nil
+      return warn(:overnight_vrc, "connection error: #{e.class.name}")
     end
     data ||= JSON.parse(response.body)
     data.collect! do |row|
@@ -71,55 +69,41 @@ class RatesService < MAPIService
   end
 
   def current_overnight_vrc
-    begin
-      response = @connection['rates/whole/overnight'].get
-    rescue RestClient::Exception => e
-      Rails.logger.warn("RatesService.current_overnight_vrc encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return nil
-    rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("RatesService.overnight_vrc encountered a connection error: #{e.class.name}")
-      return nil
+    if data = get_json(:current_overnight_vrc, 'rates/whole/overnight')
+      {rate: data['rate'], updated_at: DateTime.parse(data['updated_at'])}
     end
-    data ||= JSON.parse(response.body)
-    {rate: data['rate'], updated_at: DateTime.parse(data['updated_at'])}
   end
 
   def quick_advance_rates(member_id)
     # we're not doing anything with member id right now, but presumably will need to use it at some point to check if
     # certain rates are available (e.g. member has enough collateral)
     raise ArgumentError, 'member_id must not be blank' if member_id.blank?
-    response = @connection['rates/summary'].get
-    JSON.parse(response.body).with_indifferent_access
+    
+    get_hash(:quick_advance_rates, 'rates/summary')
   end
 
   def quick_advance_preview(member_id, amount, advance_type, advance_term, rate)
-    data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_preview.json'))).with_indifferent_access
-    fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
+    if data = get_fake_hash(:quick_advance_preview, 'quick_advance_preview.json')
+      fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
+    end
   end
 
   def quick_advance_confirmation(member_id, amount, advance_type, advance_term, rate)
     # TODO: hit the proper MAPI endpoint, once it exists! In the meantime, always return the fake.
-    data = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'quick_advance_confirmation.json'))).with_indifferent_access
-    data[:advance_number] = Random.rand(999999).to_s.rjust(6, '0')
-    data[:initiated_at] = Time.zone.now.to_datetime
-    fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
+    if data = get_fake_hash(:quick_advance_confirmation, 'quick_advance_confirmation.json')
+      data[:advance_number] = Random.rand(999999).to_s.rjust(6, '0')
+      data[:initiated_at] = Time.zone.now.to_datetime
+      fake_quick_advance_response(data, amount, advance_type, advance_term, rate)
+    end
   end
 
   def current_price_indications(collateral_type, credit_type)
     collateral_type = collateral_type.to_sym
     credit_type = credit_type.to_sym
 
-    if !CURRENT_CREDIT_TYPES.include?(credit_type)
-      Rails.logger.warn("#{credit_type} was passed to RatesService.current_price_indications as the credit_type arg and is invalid. Credit type must be one of these values: #{CURRENT_CREDIT_TYPES}")
-      return nil
-    end
-    if !COLLATERAL_TYPES.include?(collateral_type)
-      Rails.logger.warn("#{collateral_type} was passed to RatesService.current_price_indications as the collateral_type arg and is invalid. Collateral type must be one of these values: #{COLLATERAL_TYPES}")
-      return nil
-    end
-    response = @connection["rates/price_indications/current/#{credit_type}/#{collateral_type}"].get
-    data ||= JSON.parse(response.body)
-    data
+    return warn(:current_price_indications, "invalid credit type: #{credit_type}. Credit type must be one of these values: #{CURRENT_CREDIT_TYPES}") unless CURRENT_CREDIT_TYPES.include?(credit_type)
+    return warn(:current_price_indications, "invalid collateral type #{collateral_type}. Collateral type must be one of these values: #{COLLATERAL_TYPES}") unless COLLATERAL_TYPES.include?(collateral_type)
+    get_json(:current_price_indications, "rates/price_indications/current/#{credit_type}/#{collateral_type}")
   end
 
   def historical_price_indications(start_date, end_date, collateral_type, credit_type)
@@ -128,33 +112,12 @@ class RatesService < MAPIService
     collateral_type = collateral_type.to_sym
     credit_type = credit_type.to_sym
 
-    if !CREDIT_TYPES.include?(credit_type)
-      Rails.logger.warn("#{credit_type} was passed to RatesService.historical_price_indications as the credit_type arg and is invalid. Credit type must be one of these values: #{CREDIT_TYPES}")
-      return nil
-    end
-    if !COLLATERAL_TYPES.include?(collateral_type)
-      Rails.logger.warn("#{collateral_type} was passed to RatesService.historical_price_indications as the collateral_type arg and is invalid. Collateral type must be one of these values: #{COLLATERAL_TYPES}")
-      return nil
-    end
-
-    # TODO remove this code once you support 'embedded_cap'
-    # START of code that should be deleted once embedded_cap is supported
-    if credit_type == :embedded_cap 
-      Rails.logger.warn("Currently, RatesService.historical_price_indications only accepts 'frc', 'vrc', '1m_libor', '3m_libor', '6m_libor' and daily_prime' as the credit_type arg. You supplied #{credit_type}, which is not yet supported.")
-      return nil
-    end
-    # END of code that should be deleted once embedded_cap is supported
-
-    begin
-      response = @connection["rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/#{credit_type}"].get
-    rescue RestClient::Exception => e
-      Rails.logger.warn("RatesService.current_overnight_vrc encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return nil
-    rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("RatesService.overnight_vrc encountered a connection error: #{e.class.name}")
-      return nil
-    end
-    JSON.parse(response.body).with_indifferent_access
+    return warn(:historical_price_indications, "invalid credit type: #{credit_type}. Credit type must be one of these values: #{CREDIT_TYPES}") unless CREDIT_TYPES.include?(credit_type)
+    return warn(:historical_price_indications, "invalid colateral type #{collateral_type}. Collateral type must be one of these values: #{COLLATERAL_TYPES}") unless COLLATERAL_TYPES.include?(collateral_type)
+    return warn(:historical_price_indications, "unsupported credit type: #{credit_type}. Currently, RatesService.historical_price_indications only accepts 'frc', 'vrc', '1m_libor', '3m_libor', '6m_libor' and daily_prime' as the credit_type arg.") if credit_type == :embedded_cap
+    # TODO remove the previous line once you support 'embedded_cap'
+    
+    get_hash(:historical_price_indications, "rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/#{credit_type}")
   end
 
   protected
