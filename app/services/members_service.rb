@@ -68,6 +68,35 @@ class MembersService < MAPIService
     data
   end
 
+  def member_contacts(member_id)
+    begin
+      response = @connection["member/#{member_id}/member_contacts"].get
+    rescue RestClient::Exception => e
+      Rails.logger.warn("MembersService.member_contacts encountered a RestClient error: #{e.class.name}:#{e.http_code}")
+      return nil
+    rescue Errno::ECONNREFUSED => e
+      Rails.logger.warn("MembersService.member_contacts encountered a connection error: #{e.class.name}")
+      return nil
+    end
+
+    begin
+      data = JSON.parse(response.body).with_indifferent_access
+    rescue JSON::ParserError => e
+      Rails.logger.warn("MemberBalanceService.member_contacts encountered a JSON parsing error: #{e}")
+      return nil
+    end
+
+    # get CAM phone number from LDAP
+    user = nil
+    if data[:cam] && data[:cam][:username]
+      Devise::LDAP::Connection.admin('intranet').open do |ldap|
+        user = fetch_ldap_user_by_account_name(ldap, data[:cam][:username])
+      end
+    end
+    data[:cam][:phone_number] = user['telephoneNumber'].first if user && user['telephoneNumber']
+    data
+  end
+
   def quick_advance_enabled_for_member?(member_id)
     begin
       response = @connection["member/#{member_id}/quick_advance_flag"].get
@@ -152,6 +181,10 @@ class MembersService < MAPIService
       end
     end
     users
+  end
+
+  def fetch_ldap_user_by_account_name(ldap, username)
+    user = ldap.search(filter: "(&(sAMAccountName=#{username})(objectClass=person))").try(:first)
   end
 
 end

@@ -361,7 +361,7 @@ en:
     intro_html: 'Contact your institution’s Access Manager or <a href="%{url}">Web Support</a> at %{phone_number} if you have questions about access.'
     logo: FHLBank San Francisco
     forgot_password: Forgot Password
-    choose_member: Choose a member institution
+    choose_member: Choose an institution
     select_bank: Select institution
   dashboard:
     meta_title: FHLB - Dashboard
@@ -398,6 +398,7 @@ en:
       advance_instruction: Select a rate to continue.
       advances_desk_closed: The Member Services Desk is closed.
       advances_desk_closed_link: View Current Price Indications
+      advances_desk_no_terms: There are no terms available right now.
       advance_last_updated: The following rates were last updated %{last_updated}
       hours_of_operation_html: "You may initiate an advance during the <a href=\"%{url}\">Advance Desk Hours of Operation</a>."
       frc_title: Fixed Rate Credit (FRC) Advance
@@ -409,6 +410,7 @@ en:
       table:
         term: Term
         whole_loan: Whole Loan
+        mortgage: mortgage
         agency: Agency
         aaa: AAA
         aa: AA
@@ -458,6 +460,7 @@ en:
         payment_on: Interest Payment Frequency
         advance_term: Term
         advance_rate: Advance Rate
+        trade_date: Trade Date
         funding_date: Funding Date
         maturity_date: Maturity Date
         debit_sta_html: Your Settlement/Transaction Account (STA) will be debited %{amount} for the capital stock purchase amount today
@@ -480,13 +483,16 @@ en:
         stock: Stock Purchase Required
         net: Net Amount Available
         cumulative: Cumulative Stock Purchase Required
-        increase_transaction: Increase Amount Requested to cover reuired stock purchase.
+        increase_transaction: Increase Amount Requested to cover required stock purchase.
         debit_sta_html: If you select this option, the Bank will automatically debit your Settlement/Transaction Account (STA) for %{amount} today
-        footer: Cumulative Stock Purchase Required reflexts the total stock purchase for all advances transacted today, including the new advace request. To avoid an overdraft, please ensure your Settlement/Transaction Account (STA) has sufficient funds to cover this amount.
+        footer: Cumulative Stock Purchase Required reflects the total stock purchase for all advances transacted today, including the new advace request. To avoid an overdraft, please ensure your Settlement/Transaction Account (STA) has sufficient funds to cover this amount.
       error:
+        insufficient_financing_availability_html: The original amount requested of %{amount} is not available based on your remaining financing availability.
         capital_stock_exception: No Net or Gross info returned
         low_exception_html: The amount for an advance at this term must be %{amount} or higher
         high_exception_html: The amount for an advance at this term must be %{amount} or lower
+        insufficient_collateral_html: The original amount requested of %{amount} is not available based on your remaining %{collateral_type} collateral.
+        updated_rate: The rate for this advance has changed from %{old_rate} to %{new_rate}.
     reports:
       title: Reports
       as_of_yesterday: As of yesterday
@@ -608,7 +614,7 @@ en:
       authorizations:
         title: Authorizations
         signature_cards:
-          title: Signature Cards
+          title: Authorizations
           member_transactions: 'Resolution and Authorization: Member Transactions'
           designated_persons: Certificate of Designated Persons
           entire_authority: Entire Authority
@@ -986,7 +992,7 @@ en:
       interest_rate_resets:
         title: Interest Rate Resets
         info: "The Bank processed the following interest rate resets effective %{date}"
-        questions: If you have any questions, contact %{phone_number}
+        questions: If you have any questions, contact %{phone_number}.
         effective_date: Effective Date
         prior_rate: Prior Rate (%)
         new_rate: New Rate (%)
@@ -1063,9 +1069,9 @@ en:
       authorizations:
         title: Authorizations
         info:
-          p1_html: The following people are authorized to use the Bank’s services. If you’d like to make changes to these authorizations, use a <a href="%{forms_url}">Signature Card Form</a> or see the <a href="%{instructions_url}">Signature Card Instructions</a>.
+          p1_html: The following people are authorized to use the Bank’s services. If you’d like to make changes to these authorizations, use an <a href="%{forms_url}">Authorization Form</a> or see the <a href="%{instructions_url}">Authorization Instructions</a>.
           p2_html: 'To confirm an authorized signer, contact <a href="%{url}">Web Support</a> or call %{phone_number}.'
-          p3_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about signature cards, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
+          p3_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about authorizations, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
       parallel_shift:
         title: Putable Advance Parallel Shift Sensitivity Analysis
         info: The valuations below are calculated using data as of %{date}
@@ -1234,7 +1240,6 @@ en:
       description_html: A <a href=%{url}>standby letter of credit</a> is an obligation of the Bank to make payment to a third party if a member or housing associate does not perform its underlying obligation to that third party.
     mpf_program:
       title: Mortgage Partnership Finance (MPF) Program
-      links: Links
       description_html: The Bank’s <a href=%{url}>Mortgage Partnership Finance&reg; (MPF) Program</a> provides members with access to an alternative secondary mortgage market channel for selling their residential fixed rate mortgage loans, including conventional conforming mortgage loans, eligible jumbo mortgage loans, and government insured or guaranteed mortgage loans.
     community_programs:
       title: Community Programs

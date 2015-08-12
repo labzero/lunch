@@ -57,37 +57,43 @@
   .column-3
     - if policy(:advance).show? && @quick_advance_enabled
       =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances'} do
-        - if @quick_advances_active
+        - if @quick_advance_status == :open
           = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}, field_name: :amount
           %h2.quick-advance-confirmation-subheading{style: 'display: none;'}= t('dashboard.quick_advance.confirmation.title')
           %h2.quick-advance-preview-subheading{style: 'display: none;'}= t('dashboard.quick_advance.preview.title')
           %h2.quick-advance-capstock-subheading{style: 'display: none;'}= t('dashboard.quick_advance.capitalstock.title')
-        %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advances_active}"}
+        %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_status != :closed}"}
           = t('dashboard.quick_advance.advances_desk_closed')
           = link_to t('dashboard.quick_advance.advances_desk_closed_link'), '', data: {'flyout-trigger' => 'active'}
-        - if @quick_advances_active
+        %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_status != :no_terms}"}
+          = t('dashboard.quick_advance.advances_desk_no_terms')
+        - if @quick_advance_status == :open
           %p.dashboard-vrc-overnight-message= t('global.vrc_overnight')
           .dashboard-advances-rate
             = @current_overnight_vrc
             %span<> %
-        .quick-advance-last-updated-message{class: "#{'show-message' unless @quick_advances_active}"}
+        .quick-advance-last-updated-message{class: "#{'show-message' unless @quick_advance_status == :open}"}
           %p= t('dashboard.quick_advance.advance_last_updated', last_updated: @quick_advance_last_updated)
           %p= t('dashboard.quick_advance.hours_of_operation_html', url: '')
-        - if @quick_advances_active
+        - if @quick_advance_status == :open
           %p.quick-advance-instruction= t('dashboard.quick_advance.advance_instruction')
-          %table
-            %thead
-              %tr
-                %th{colspan: 2}
-                %th= t('dashboard.quick_advance.table.axes_labels.standard')
-                %th{colspan: 3}= t('dashboard.quick_advance.table.axes_labels.securities_backed')
-              %tr.quick-advance-column-labels
-                %th{colspan: 2}= t('dashboard.quick_advance.table.term')
-                %th= t('dashboard.quick_advance.table.whole_loan')
-                %th= t('dashboard.quick_advance.table.agency')
-                %th= t('dashboard.quick_advance.table.aaa')
-                %th= t('dashboard.quick_advance.table.aa')
-            %tbody
+          .quick-advance-rates
+            .quick-advance-rates-body
+              .quick-advance-icon-section
+                %p.quick-advance-loading-message= t('dashboard.quick_advance.preview.initiate')
+                %table
+                  %thead
+                    %tr
+                      %th{colspan: 2}
+                      %th= t('dashboard.quick_advance.table.axes_labels.standard')
+                      %th{colspan: 3}= t('dashboard.quick_advance.table.axes_labels.securities_backed')
+                    %tr.quick-advance-column-labels
+                      %th{colspan: 2}= t('dashboard.quick_advance.table.term')
+                      %th= t('dashboard.quick_advance.table.whole_loan')
+                      %th= t('dashboard.quick_advance.table.agency')
+                      %th= t('dashboard.quick_advance.table.aaa')
+                      %th= t('dashboard.quick_advance.table.aa')
+                  %tbody
           %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.preview')
           %small
             %p.rate-advances-footer= t('dashboard.quick_advance.table.footer')
@@ -157,6 +163,6 @@
         %button.split-button-right #{t('global.pdf')}
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
       %ul
-        %li= render 'dashboard/dashboard_contact', email: 'user@example.com', title: t('dashboard.contacts.type.relationship_manager'), name: 'Bob Harrison', phone_number: fhlb_formatted_phone_number('4155557283'), picture_url: image_url('bob_harrison.jpg')
-        %li= render 'dashboard/dashboard_contact', email: 'otheruser@example.com', title: t('dashboard.contacts.type.member_services_desk'), name: 'Theresa Reyes', phone_number: fhlb_formatted_phone_number('4155557283'), picture_url: image_url('theresa_reyes.jpg')
-        %li= render 'dashboard/dashboard_contact', email: 'otheruser@example.com', title: t('dashboard.contacts.type.collateral_asset_manager'), name: 'Frida Aksenova', phone_number: fhlb_formatted_phone_number('4155557283'), picture_url: image_url('frida_aksenova.jpg')
+        %li= render 'dashboard/dashboard_contact', email: @contacts[:rm][:email], title: t('dashboard.contacts.type.relationship_manager'), name: @contacts[:rm][:full_name], phone_number: fhlb_formatted_phone_number(@contacts[:rm][:phone_number]), picture_url: image_url(@contacts[:rm][:image_url])
+        %li= render 'dashboard/dashboard_contact', email: @contacts[:cam][:email], title: t('dashboard.contacts.type.collateral_asset_manager'), name: @contacts[:cam][:full_name], phone_number: fhlb_formatted_phone_number(@contacts[:cam][:phone_number]), picture_url: image_url(@contacts[:cam][:image_url])
+        %li.member-services-desk= render 'dashboard/dashboard_contact', email: 'websupport@fhlbsf.com', title: t('dashboard.contacts.type.member_services_desk'), phone_number: fhlb_formatted_phone_number('8004443452')

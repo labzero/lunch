@@ -43,6 +43,45 @@ describe MembersService do
     end
   end
 
+  describe 'the `member_contacts` method', :vcr do
+    let(:member_contacts) { subject.member_contacts(member_id)}
+    let(:cam_phone_number) {double('phone number')}
+    let(:ldap_connection) { double('LDAP Connection', search: []) }
+    before do
+      allow(Devise::LDAP::Connection).to receive(:admin).with('intranet').and_return(ldap_connection)
+      allow(ldap_connection).to receive(:open).and_yield(ldap_connection)
+    end
+
+    it_should_behave_like 'a MAPI backed service object method', :member_contacts, :member_id
+    %i(cam rm).each do |object|
+      %i(full_name username email).each do |attr|
+        it "returns a contact hash with a `#{object}` object containing a `#{attr}` attribute" do
+          expect(member_contacts[object][attr]).to be_kind_of(String)
+        end
+      end
+    end
+    it "returns a contact hash with a `:rm` object containing a `phone_number` attribute" do
+      expect(member_contacts[:rm][:phone_number]).to be_kind_of(String)
+    end
+    it 'returns a contact hash with a `:rm`' do
+      expect(member_contacts[:cam][:full_name]).to be_kind_of(String)
+      expect(member_contacts[:cam][:username]).to be_kind_of(String)
+      expect(member_contacts[:cam][:email]).to be_kind_of(String)
+    end
+    it 'sets the `phone_number` attribute for the `cam` object to the result of an LDAP query' do
+      allow(subject).to receive(:fetch_ldap_user_by_account_name).and_return({'telephoneNumber' => [cam_phone_number] })
+      expect(member_contacts[:cam][:phone_number]).to eq(cam_phone_number)
+    end
+    it 'does not set the `phone_number` attribute for the `cam` object if there was no username to look up the user by' do
+      allow(JSON).to receive(:parse).and_return({cam: {}})
+      expect(member_contacts[:cam][:phone_number]).to be_nil
+    end
+    it 'does not set the `phone_number` attribute for the `cam` object if the user returned from the LDAP query has no phone number' do
+      allow(subject).to receive(:fetch_ldap_user_by_account_name).and_return({})
+      expect(member_contacts[:cam][:phone_number]).to be_nil
+    end
+  end
+
   describe '`quick_advance_enabled_for_member?` method' do
     let(:method_call) { subject.quick_advance_enabled_for_member?(member_id) }
     before do

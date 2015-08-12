@@ -17,6 +17,10 @@ When(/^I click on the (reports|guides|forms|agreements|authorizations|credit|col
   page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
 end
 
+Then(/^I should see the primary bank name in the header$/) do
+  page.assert_selector('.header-member-name', text: CustomConfig.env_config['primary_bank'])
+end
+
 def dropdown_title_regex(dropdown)
   title = case dropdown
   when 'reports'

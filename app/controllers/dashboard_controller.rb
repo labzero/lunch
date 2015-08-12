@@ -3,6 +3,12 @@ class DashboardController < ApplicationController
 
   THRESHOLD_CAPACITY = 35 #this will be set by each client, probably with a default value of 35, and be stored in some as-yet-unnamed db
   ADVANCE_TYPES = [:whole, :agency, :aaa, :aa]
+  COLLATERAL_ERROR_MAPPING = {
+    whole: I18n.t('dashboard.quick_advance.table.mortgage'),
+    agency: I18n.t('dashboard.quick_advance.table.agency'),
+    aaa: I18n.t('dashboard.quick_advance.table.aaa'),
+    aa: I18n.t('dashboard.quick_advance.table.aa'),
+  }.freeze
   ADVANCE_TERMS = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
 
   before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform] do
@@ -54,8 +60,8 @@ class DashboardController < ApplicationController
     remaining = [
       {title: t('dashboard.your_account.table.remaining.title')},
       [t('dashboard.your_account.table.remaining.available'), profile[:total_financing_available]],
-      [t('dashboard.your_account.table.remaining.capacity'), profile[:remaining_collateral_borrowing_capacity]],
-      [t('dashboard.your_account.table.remaining.leverage'), profile[:stock_leverage], nil, 2]
+      [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
+      [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage], nil, 2]
     ]
 
     @account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining}
@@ -107,11 +113,22 @@ class DashboardController < ApplicationController
       nil
     end
 
-    @quick_advance_enabled= members_service.quick_advance_enabled_for_member?(current_member_id)
-    @quick_advances_active = etransact_service.etransact_active?
+    @quick_advance_enabled = members_service.quick_advance_enabled_for_member?(current_member_id)
+    etransact_status = etransact_service.status
+    quick_advance_open = etransact_service.etransact_active?(etransact_status)
+    quick_advance_terms = etransact_service.has_terms?(etransact_status)
+    @quick_advance_status = (quick_advance_open ? (quick_advance_terms ? :open : :no_terms) : :closed)
     # TODO replace this with the timestamp from the cached quick advance rates timestamp
     date = DateTime.now - 2.hours
     @quick_advance_last_updated = date.strftime("%d %^b %Y, %l:%M %p")
+    @contacts = members_service.member_contacts(current_member_id)
+    if @contacts && @contacts[:rm] && @contacts[:cam]
+      default_image_path = 'placeholder-usericon.svg'
+      cam_image_path = "#{@contacts[:cam][:username]}.jpg"
+      rm_image_path = "#{@contacts[:rm][:username]}.jpg"
+      @contacts[:cam][:image_url] = Rails.application.assets.find_asset(cam_image_path) ? cam_image_path : default_image_path
+      @contacts[:rm][:image_url] = Rails.application.assets.find_asset(rm_image_path) ? rm_image_path : default_image_path
+    end
   end
 
   def quick_advance_rates
@@ -129,8 +146,7 @@ class DashboardController < ApplicationController
     check = EtransactAdvancesService.new(request).check_limits(params[:amount].to_f, params[:advance_term])
     if check[:status] == 'pass'
       preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, params[:check_capstock], session['signer_full_name'])
-      case preview[:status]
-      when 'CapitalStockError'
+      if preview[:status] && preview[:status].include?('CapitalStockError')
         preview_success = false
         preview_error = false
         @advance_amount = params[:amount].to_f if params[:amount]
@@ -147,7 +163,7 @@ class DashboardController < ApplicationController
         @gross_pre_trade_stock_required = preview[:gross_pre_trade_stock_required]
         @gross_net_stock_required = preview[:gross_net_stock_required]
         response_html = render_to_string :quick_advance_capstock, layout: false
-      when 'GrossUpError', 'ExceptionError'
+      elsif preview[:status] && (preview[:status].include?('GrossUpError') || preview[:status].include?('ExceptionError'))
         preview_success = false
         preview_error = true
         @error_message = check[:status]
@@ -157,6 +173,41 @@ class DashboardController < ApplicationController
         @advance_type = get_type_from_advance_type(params[:advance_type]) if params[:advance_type]
         @advance_term = params[:advance_term].capitalize if params[:advance_term]
         @advance_rate = params[:advance_rate].to_f if params[:advance_rate]
+        @interest_day_count = params[:interest_day_count]
+        @payment_on = params[:payment_on]
+        @maturity_date = params[:maturity_date]
+        @funding_date = Time.zone.now.to_date
+        response_html = render_to_string :quick_advance_error, layout: false
+      elsif preview[:status] && preview[:status].include?('CreditError')
+        preview_success = false
+        preview_error = true
+        @advance_amount = params[:amount].to_f if params[:amount]
+        @error_message = 'CreditError'
+        @advance_description = get_description_from_advance_term(params[:advance_term]) if params[:advance_term]
+        @advance_program = get_program_from_advance_type(params[:advance_type]) if params[:advance_type]
+        @advance_type = get_type_from_advance_type(params[:advance_type]) if params[:advance_type]
+        @advance_term = params[:advance_term].capitalize if params[:advance_term]
+        @advance_rate = params[:advance_rate].to_f if params[:advance_rate]
+        @interest_day_count = params[:interest_day_count]
+        @payment_on = params[:payment_on]
+        @maturity_date = params[:maturity_date]
+        @funding_date = Time.zone.now.to_date
+        response_html = render_to_string :quick_advance_error, layout: false
+      elsif preview[:status] && preview[:status].include?('CollateralError')
+        preview_success = false
+        preview_error = true
+        @advance_amount = params[:amount].to_f if params[:amount]
+        @error_message = 'CollateralError'
+        @advance_description = get_description_from_advance_term(params[:advance_term]) if params[:advance_term]
+        @advance_program = get_program_from_advance_type(params[:advance_type]) if params[:advance_type]
+        @collateral_type = COLLATERAL_ERROR_MAPPING[params[:advance_type].to_sym] if params[:advance_type]
+        @advance_type = get_type_from_advance_type(params[:advance_type]) if params[:advance_type]
+        @advance_term = params[:advance_term].capitalize if params[:advance_term]
+        @advance_rate = params[:advance_rate].to_f if params[:advance_rate]
+        @interest_day_count = params[:interest_day_count]
+        @payment_on = params[:payment_on]
+        @maturity_date = params[:maturity_date]
+        @funding_date = Time.zone.now.to_date
         response_html = render_to_string :quick_advance_error, layout: false
       else
         preview_success = true
@@ -171,9 +222,12 @@ class DashboardController < ApplicationController
         @advance_term = preview[:advance_term].capitalize if preview[:advance_term]
         @funding_date = preview[:funding_date]
         @maturity_date = preview[:maturity_date]
-        @advance_rate = preview[:advance_rate].to_f if preview[:advance_rate]
         @stock = params[:stock].to_f if params[:stock]
         @session_elevated = session_elevated?
+        checked_rate = check_advance_rate(request, params[:advance_type], params[:advance_term], preview[:advance_rate])
+        @advance_rate = checked_rate[:advance_rate]
+        @old_rate = checked_rate[:old_rate]
+        @rate_changed = checked_rate[:rate_changed]
         response_html = render_to_string layout: false
       end
     else
@@ -223,6 +277,7 @@ class DashboardController < ApplicationController
         @interest_day_count = confirmation[:interest_day_count]
         @payment_on = confirmation[:payment_on]
         @advance_term = confirmation[:advance_term].capitalize if confirmation[:advance_term]
+        @trade_date = Time.zone.now.to_date
         @funding_date = confirmation[:funding_date]
         @maturity_date = confirmation[:maturity_date]
         @advance_rate = confirmation[:advance_rate].to_f if confirmation[:advance_rate]
@@ -285,23 +340,40 @@ class DashboardController < ApplicationController
   def get_program_from_advance_type(advance_type)
     advance_type = advance_type.upcase.gsub(/\s+/, "")
     case advance_type
-      when 'WHOLELOAN'
+      when 'WHOLELOAN', 'WHOLE'
         I18n.t('dashboard.quick_advance.table.axes_labels.standard')
-      when 'SBC-AGENCY', 'SBC-AAA', 'SBC-AA'
+      when 'SBC-AGENCY', 'SBC-AAA', 'SBC-AA', 'AGENCY', 'AAA', 'AA'
         I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed')
     end
   end
   def get_type_from_advance_type(advance_type)
     advance_type = advance_type.upcase.gsub(/\s+/, "")
     case advance_type
-      when 'WHOLELOAN'
+      when 'WHOLELOAN', 'WHOLE'
         I18n.t('dashboard.quick_advance.table.whole_loan')
-      when 'SBC-AGENCY'
+      when 'SBC-AGENCY', 'AGENCY'
         I18n.t('dashboard.quick_advance.table.agency')
-      when 'SBC-AAA'
+      when 'SBC-AAA', 'AAA'
         I18n.t('dashboard.quick_advance.table.aaa')
-      when 'SBC-AA'
+      when 'SBC-AA', 'AA'
         I18n.t('dashboard.quick_advance.table.aa')
     end
+  end
+
+  def check_advance_rate(request, type, term, old_rate)
+    rate_changed = false
+    rate_service = RatesService.new(request)
+    new_rate = rate_service.rate(type, term)[:rate].to_f
+    if new_rate != old_rate.to_f
+      rate = new_rate
+      rate_changed = true
+    else
+      rate = old_rate
+    end
+    {
+      advance_rate: rate.to_f,
+      old_rate: old_rate.to_f,
+      rate_changed: rate_changed
+    }
   end
 end

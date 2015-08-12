@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   before_action :authenticate_user!
+  helper_method :current_member_name
 
   rescue_from Exception do |exception|
     unless Rails.env.production?

@@ -1,6 +1,7 @@
 require 'action_view'
 require_relative '../../app/helpers/custom_formatting_helper'
 include CustomFormattingHelper
+include ActionView::Helpers::SanitizeHelper
 
 When /^I visit the dashboard$/ do
   visit "/dashboard"
@@ -64,11 +65,15 @@ Then(/^I should see "(.*?)" in the quick advance flyout input field$/) do |text|
 end
 
 
-When(/^I open the quick advance flyout$/) do
-  @amount = Random.rand(100000) + 100000
-  step "I enter \"#{@amount}\" into the \".dashboard-module-advances input\" input field"
+When(/^I open the quick advance flyout and enter (\d+)$/) do |amount|
+  step "I enter \"#{amount}\" into the \".dashboard-module-advances input\" input field"
   step "I should see a flyout"
   sleep 0.5 # we select a rate after the flyout opens, but in some cases selenium does its checks before that JS fires
+end
+
+When(/^I open the quick advance flyout$/) do
+  @amount = Random.rand(100000) + 100000
+  step "I open the quick advance flyout and enter #{@amount}"
 end
 
 When(/^I click on the flyout close button$/) do
@@ -130,15 +135,26 @@ Then(/^I should see a preview of the quick advance$/) do
   #valdiate_passed_advance_params
 end
 
+Then(/^I should see a preview of the quick advance with a notification about the new rate$/) do
+  page.assert_selector('.quick-advance-preview', visible: true)
+  page.assert_selector('.quick-advance-updated-rate')
+end
+
+When(/^the quick advance rate has changed$/) do
+  # implement code to ensure rate is displayed as having changed
+end
+
 Then(/^I should not see a preview of the quick advance$/) do
   page.assert_no_selector(".quick-advance-preview")
 end
 
 When(/^I click on the back button for the quick advance preview$/) do
+  step 'I scroll to the bottom of the screen'
   page.find(".quick-advance-back-button", visible: true).click
 end
 
 When(/^I click on the quick advance confirm button$/) do
+  step 'I scroll to the bottom of the screen'
   page.find(".confirm-quick-advance").click
 end
 
@@ -213,6 +229,28 @@ end
 Given(/^I enter my SecurID pin and token$/) do
   step %{I enter my SecurID pin}
   step %{I enter my SecurID token}
+end
+
+Then(/^I should see an? "(.*?)" error with amount (\d+) and type "(.*?)"$/) do |error_type, amount, type|
+  collateral_type = case type
+    when 'whole'
+      I18n.t('dashboard.quick_advance.table.mortgage')
+    when 'agency'
+      I18n.t('dashboard.quick_advance.table.agency')
+    when 'aaa'
+      I18n.t('dashboard.quick_advance.table.aaa')
+    when 'aa'
+      I18n.t('dashboard.quick_advance.table.aa')
+  end
+  text = case error_type
+    when 'insufficient financing availability'
+      /\A#{Regexp.quote(strip_tags(I18n.t("dashboard.quick_advance.error.insufficient_financing_availability_html", amount: fhlb_formatted_currency(amount.to_i, precision: 0))))}\z/
+    when 'insufficient collateral'
+      /\A#{Regexp.quote(strip_tags(I18n.t("dashboard.quick_advance.error.insufficient_collateral_html", amount: fhlb_formatted_currency(amount.to_i, precision: 0), collateral_type: collateral_type)))}\z/
+    else
+      raise 'Unknown error_type'
+  end
+  page.assert_selector('div.quick-advance-icon-section.icon-error-before p', visible: true, text: text)
 end
 
 Then(/^I should see SecurID errors$/) do

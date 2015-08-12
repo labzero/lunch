@@ -11,7 +11,7 @@
       - advance_rate = @rate_data[advance_type][advance_term][:rate].to_f
       - if j == 0
         %td.row-label= t("dashboard.quick_advance.table.axes_labels.#{advance_term}")
-      %td.selectable-cell{data: {'advance-type' => advance_type, 'advance-term' => advance_term, 'advance-rate' => fhlb_formatted_number(advance_rate, precision: 2, html: false)}, class: "#{'disabled-cell' if !@quick_advances_active}"}
+      %td.selectable-cell{data: {'maturity-date' => @rate_data[advance_type][advance_term][:maturity_date], 'payment-on' => @rate_data[advance_type][advance_term][:payment_on], 'interest-day-count' => @rate_data[advance_type][advance_term][:interest_day_count], 'advance-type' => advance_type, 'advance-term' => advance_term, 'advance-rate' => fhlb_formatted_number(advance_rate, precision: 2, html: false)}, class: "#{'disabled-cell' if !@quick_advances_active}"}
         = fhlb_formatted_number(advance_rate, precision: 2)
         - date = @rate_data[advance_type][advance_term][:maturity_date].to_date
         - interest_day_count = @rate_data[advance_type][advance_term][:interest_day_count].to_s.gsub('/', '')

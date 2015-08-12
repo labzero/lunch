@@ -21,6 +21,10 @@ $faded-opacity: 0.4 !default;
   @include pseudo-background-cover($light-gray);
 }
 
+.quick-advance-instruction {
+  display: none;
+}
+
 .dashboard-quick-advance-flyout {
   .quick-advance-desk-closed-message {
     font-weight: $bold-weight;
@@ -56,6 +60,7 @@ $faded-opacity: 0.4 !default;
     }
   }
   .quick-advance-instruction {
+    display: block;
     margin: 0 0 15px;
   }
   table {
@@ -321,11 +326,19 @@ $faded-opacity: 0.4 !default;
     width: 250px;
     overflow: hidden;
     clear: left;
+    &.quick-advance-updated-rate {
+      color: $alert-orange;
+    }
   }
   dd {
     @extend %typography-graph-data;
     @extend %clearfix;
     text-align: left;
+    p {
+      @extend %typography-graph-data;
+      color: $alert-orange;
+      margin: 0;
+    }
   }
   .quick-advance-loading-message {
     display: none;
@@ -344,6 +357,15 @@ $faded-opacity: 0.4 !default;
       display: block;
     }
     .quick-advance-summary {
+      opacity: $faded-opacity;
+    }
+    .label-radio {
+      opacity: $faded-opacity;
+    }
+    input {
+      opacity: $faded-opacity;
+    }
+    table {
       opacity: $faded-opacity;
     }
   }

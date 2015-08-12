@@ -1,4 +1,5 @@
 {
-  "etransact_advances_status" :  true,
-  "wl_vrc_status" : false
+  "wl_vrc_status" : false,
+  "eod_reached": false,
+  "disabled": false
 }

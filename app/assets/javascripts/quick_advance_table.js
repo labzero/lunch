@@ -44,9 +44,10 @@
     };
 
     function initiateQuickAdvance(rate_data) {
+      var $flyoutBottomSection = $('.flyout-bottom-section');
+      transitionToLoadingFromRates();
       $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function(json){
-        var $flyoutBottomSection = $('.flyout-bottom-section');
-        var $oldNodes = $('.flyout-top-section-body span, .quick-advance-instruction, .flyout-bottom-section table, .flyout-bottom-section .initiate-quick-advance, .rate-advances-footer');
+        var $oldNodes = $('.flyout-top-section-body span, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer');
 
         // append the html response, hide old nodes and show the new ones
         $flyoutBottomSection.append($(json.html));
@@ -59,6 +60,7 @@
             $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
             $('.quick-advance-preview-subheading').hide();
             $oldNodes.show();
+            transitionToRatesFromLoading();
           });
         }
         else {
@@ -70,6 +72,7 @@
               $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
               $('.quick-advance-preview-subheading').hide();
               $oldNodes.show();
+              transitionToRatesFromLoading();
             });
 
             // event listener and handler for .confirm-quick-advance button click
@@ -96,6 +99,7 @@
               $('.quick-advance-capstock-subheading').hide();
               selected_rate['amount'] = json.original_amount;
               $oldNodes.show();
+              transitionToRatesFromLoading();
             });
 
             // event listener and handler for .confirm-quick-advance button click
@@ -114,6 +118,8 @@
           }
         }
 
+      }).error(function() {
+        transitionToRatesFromLoading();
       });
     };
 
@@ -157,8 +163,8 @@
         });
 
       }).error(function() {
-          transitionToCapstockFromLoading();
-          $flyoutBottomSection.find('p[data-error-type=unknown]').show();
+        transitionToCapstockFromLoading();
+        $flyoutBottomSection.find('p[data-error-type=unknown]').show();
       });
     }
 
@@ -266,10 +272,29 @@
       $flyoutTopSection.find('.quick-advance-preview-subheading').hide();
     };
 
+    function transitionToLoadingFromRates () {
+      var $flyoutBottomSection = $('.flyout-bottom-section');
+      var $quickAdvanceRates= $flyoutBottomSection.find('.quick-advance-rates');
+      $quickAdvanceRates.addClass('loading');
+      $flyoutBottomSection.find('button').removeClass('active');
+      $flyoutBottomSection.find('button').attr('disabled', 'disabled');
+    };
+
+    function transitionToRatesFromLoading () {
+      var $flyoutBottomSection = $('.flyout-bottom-section');
+      var $quickAdvanceRates= $flyoutBottomSection.find('.quick-advance-rates');
+      $quickAdvanceRates.removeClass('loading');
+      $flyoutBottomSection.find('button').addClass('active');
+      $flyoutBottomSection.find('button').removeAttr('disabled');
+    };
+
     function setRateFromElementData($element) {
       selected_rate['advance_term'] = $element.data('advance-term');
       selected_rate['advance_type'] = $element.data('advance-type');
       selected_rate['advance_rate'] = $element.data('advance-rate');
+      selected_rate['maturity_date'] = $element.data('maturity-date');
+      selected_rate['payment_on'] = $element.data('payment-on');
+      selected_rate['interest_day_count'] = $element.data('interest-day-count');
     };
 
     function packageParameters(rate_data) {

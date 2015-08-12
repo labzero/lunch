@@ -75,6 +75,7 @@ module CustomFormattingHelper
   end
 
   def fhlb_formatted_phone_number(number, ext=nil)
+    return nil unless number
     number.gsub!(/[^0-9]/, '')
     ext.gsub!(/[^0-9]/, '') if ext
     raise ArgumentError.new('number too short') if number.length < 10

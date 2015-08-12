@@ -1,3 +1,5 @@
+$faded-opacity: 0.4 !default;
+
 .dashboard {
   margin-top: $gutter-width;
   overflow: visible;
@@ -145,11 +147,23 @@
       margin-bottom: 5px;
     }
   }
+  .member-services-desk {
+    border-top: 1px solid $secondary-gray;
+    padding-top: 15px;
+    .dashboard-contact {
+      min-height: 45px;
+    }
+    .dashboard-contact-avatar {
+      background: none;
+    }
+  }
 }
 
 .dashboard-contact {
   text-decoration: none;
   color: inherit;
+  min-height: 54px;
+  display: block;
   h2 {
     @extend %typography-subtitle;
     margin: 0;
@@ -201,7 +215,7 @@
   .dashboard-module-content {
     color: $actionable-blue;
   }
-  table, .initiate-quick-advance, .rate-advances-footer {
+  table, .initiate-quick-advance, .rate-advances-footer, .quick-advance-rates {
     display: none;
   }
 }
@@ -490,4 +504,49 @@ $breakdown-table-currency-width: 10px;
   background: $white;
   text-align: center;
   padding: 13px 0;
+}
+
+.quick-advance-rates-body {
+  .quick-advance-icon-section {
+    @extend %clearfix;
+    overflow: visible;
+    position: relative;
+    &:before {
+      position: absolute;
+      top: 1rem;
+      left: 0;
+      font-size: 30px;
+      color: $alert-red;
+      .quick-advance-confirmation & {
+        color: $approval-green;
+      }
+    }
+  }
+  .quick-advance-loading-message {
+    display: none;
+  }
+  .loading & {
+    p {
+      display: none;
+    }
+    .quick-advance-icon-section {
+      &:before {
+        @include icon-loading;
+        content: '';
+      }
+    }
+    .quick-advance-loading-message {
+      padding-left: 60px;
+      display: block;
+    }
+    .quick-advance-summary {
+      opacity: $faded-opacity;
+    }
+    .label-radio {
+      opacity: $faded-opacity;
+    }
+    table {
+      opacity: $faded-opacity;
+    }
+  }
 }

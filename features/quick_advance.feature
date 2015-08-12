@@ -85,6 +85,22 @@ Scenario: Confirm rate from Quick Advance preview dialog
   And I should not see the quick advance preview message
   And I should see the quick advance confirmation close button
 
+@jira-mem-878
+Scenario: Users with insufficient funds for Quick Advance get an error
+  Given I visit the dashboard
+  And I open the quick advance flyout and enter 100001
+  And I select the rate with a term of "overnight" and a type of "whole"
+  When I click on the initiate advance button
+  Then I should see an "insufficient financing availability" error with amount 100001 and type "whole"
+
+@jira-mem-875
+Scenario: Users with insufficient collateral for Quick Advance get an error
+  Given I visit the dashboard
+  And I open the quick advance flyout and enter 100002
+  And I select the rate with a term of "overnight" and a type of "whole"
+  When I click on the initiate advance button
+  Then I should see an "insufficient collateral" error with amount 100002 and type "whole"
+
 @data-unavailable @jira-mem-560
 Scenario: Close flyout after finishing quick advance
   Given I visit the dashboard
@@ -129,3 +145,12 @@ Scenario: Users aren't required to enter a SecurID token a second time
   Then I shouldn't see the SecurID fields
   When I click on the quick advance confirm button
   Then I should see confirmation number for the advance
+
+@data-unavailable @jira-mem-872
+Scenario: The rate changes from the time the user sees the table to the time they see the preview
+  Given I visit the dashboard
+  And I open the quick advance flyout
+  And I select the rate with a term of "overnight" and a type of "whole"
+  When I click on the initiate advance button
+  And the quick advance rate has changed
+  Then I should see a preview of the quick advance with a notification about the new rate
