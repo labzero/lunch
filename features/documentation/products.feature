@@ -14,3 +14,6 @@ Feature: Products Page
     When I hover on the products link in the header
     And I click on the frc link in the header
     Then I should see the "frc" product page
+    When I hover on the products link in the header
+    And I click on the frc embedded link in the header
+    Then I should see the "frc embedded" product page

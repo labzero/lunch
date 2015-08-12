@@ -1210,7 +1210,6 @@ en:
           less_expensive: Generally less expensive than other long-term liabilities
         features:
           term:
-            title: Term
             description: Up to 30 years (for advances with partial prepayment symmetry, 1 to 10 years)
           interest_rate:
             title: Interest Rate
@@ -1222,15 +1221,48 @@ en:
               title: "Forward rate/Guaranteed rate:"
               description: The interest rate is determined on the day of the request for the applicable term and commitment period (up to 180 days forward for most maturities).
           interest_day_count:
-            title: Interest Day Count
             description: Actual/Actual (Actual/360 for Securities-Backed Credit Program and for advances with partial prepayment symmetry)
           interest_payment_frequency:
             title: Interest Payment Frequency
             description: At monthend and at repayment (semiannually and at repayment for Securities-Backed Credit Program; quarterly and at repayment for advances with partial prepayment symmetry)
           prepayment_features:
-            title: Prepayment Features
             description_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the <a href=%{url}>Bank the Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
-      frc_embedded: FRC Advance with Embedded Cap
+      frc_embedded:
+        title: FRC Advance with Embedded Cap
+        description: Available on an order-only basis, the FRC Advance with Embedded Cap is a fixed rate advance with an embedded interest rate cap that provides a benefit to the borrower when the cap index exceeds a specified strike rate on a cap observation date. When the cap index exceeds the strike rate, the borrower’s interest rate for the next accrual period is lowered by the difference between the index rate and the strike rate (subject to a minimum interest rate of 0.00%). Partial prepayment symmetry is available for this advance.
+        uses:
+          management: Achieve asset/liability management goals
+          risk: Manage interest rate risk of balance sheet in rising rate environments
+          funding: Fund long-term fixed rate assets
+        advantages:
+          protection: Protect against rising interest rates
+          guaranteed_rates: Guaranteed rates can be locked in for future funding purposes
+          funding: Meet long-term funding needs
+        features:
+          term:
+            description: 1 to 10 years
+          interest_rate:
+            title: Interest Rate as of Each Rate Reset Date
+            description: Fixed interest rate less the cap value
+          min_interest_rate:
+            title: Minimum Interest Rate
+            description: The minimum interest rate at each rate reset date will be 0.00%.
+          interest_rate_reset:
+            title: Interest Rate Reset Dates/Cap Observation Dates
+            description: Monthly, quarterly, or semiannually. The interest rate reset dates are established at the time the advance is made. The cap observation dates are two London business days prior to each rate reset day.
+          cap_index:
+            title: Cap Index Rate/Cap Strike Rate
+            description: The cap index rate and cap strike rate are established at the time the advance is made. The cap index rate is LIBOR (1, 3, or 6 months).
+          cap_value:
+            title: Cap Value
+            description: If the cap index rate exceeds the cap strike rate on the cap observation date, the cap value is the difference between the cap index rate and the cap strike rate.
+          interest_day_count:
+            description: Actual/360
+          interest_payment_dates:
+            title: Interest Payment Dates
+            description: Same as the rate reset dates
+          prepayment_features:
+            description_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=%{pdf_url}>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       knockout: Knockout Advance
       mpf: Mortgage Partnership Finance (MPF) Program
       ocn: Other Cash Needs (OCN) Advance
@@ -1251,6 +1283,10 @@ en:
       advantages: Key Advantages
       features: Key Features
       last_modified: "Last Modified: %{date}"
+    common_key_features:
+      term: Term
+      interest_day_count: Interest Day Count
+      prepayment_features: Prepayment Features
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email
