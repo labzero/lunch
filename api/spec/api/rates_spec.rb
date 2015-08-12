@@ -51,13 +51,12 @@ describe MAPI::ServiceApp do
 
   describe "rate summary" do
     before do
-      allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(blackout_strings)
+      allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(blackout_dates)
     end
     let(:today) { Date.today }
     let(:one_week_away) { today + 1.week }
     let(:three_weeks_away) { today + 3.week }
     let(:blackout_dates) { [one_week_away, three_weeks_away] }
-    let(:blackout_strings) { blackout_dates.map{ |d| d.strftime( "%d-%^b-%y" ) } }
     let(:rate_summary) do
       get '/rates/summary'
       JSON.parse(last_response.body).with_indifferent_access
