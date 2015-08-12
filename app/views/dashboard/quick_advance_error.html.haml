@@ -18,7 +18,7 @@
       -elsif @error_message == :rate_expired
         %p= t('dashboard.quick_advance.error.rate_expired')
       -else
-       %p= t('dashboard.quick_advance.error.unavailable_html', phone_number: fhlb_formatted_phone_number('8004443452'))
+        %p= t('dashboard.quick_advance.error.unavailable_html', phone_number: fhlb_formatted_phone_number('8004443452'))
       %p.quick-advance-loading-message= t('dashboard.quick_advance.preview.initiate')
     = render 'quick_advance_summary', advance_amount: @advance_amount, advance_description: @advance_description, advance_program: @advance_program, advance_type: @advance_type, advance_rate: @advance_rate, interest_day_count: @interest_day_count, payment_on: @payment_on, advance_term: @advance_term, funding_date: @funding_date, maturity_date: @maturity_date, stock: @stock
   %button.primary-button.quick-advance-back-button.icon-arrow-left-before.quick-advance-error-button= t('dashboard.quick_advance.buttons.rates')

@@ -1,52 +1,6 @@
 ---
 http_interactions:
 - request:
-    method: post
-    uri: http://localhost:3100/mapi/etransact_advances/execute_advance/750/100.0/sometype/someterm/0.17/Test%20User
-    body:
-      encoding: ASCII-8BIT
-      string: ''
-    headers:
-      Accept:
-      - "*/*; q=0.5, application/xml"
-      Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token token="4321dfghjklm"
-      X-Request-Id:
-      - ''
-      Content-Length:
-      - '0'
-      User-Agent:
-      - Ruby
-  response:
-    status:
-      code: 200
-      message: 'OK '
-    headers:
-      Content-Type:
-      - text/html;charset=utf-8
-      Content-Length:
-      - '261'
-      X-Xss-Protection:
-      - 1; mode=block
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - SAMEORIGIN
-      Server:
-      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
-      Date:
-      - Tue, 23 Jun 2015 21:02:42 GMT
-      Connection:
-      - Keep-Alive
-    body:
-      encoding: UTF-8
-      string: '{"status":"Success","confirmation_number":"843956","advance_rate":0.17,"advance_amount":46500000,"advance_term":"3
-        weeks","advance_type":"SBC:AAA","interest_day_count":"ACT/ACT","payment_on":"Maturity","funding_date":"01-Feb-2015","maturity_date":"22-Mar-2015"}'
-    http_version: 
-  recorded_at: Tue, 23 Jun 2015 21:02:43 GMT
-- request:
     method: get
     uri: http://localhost:3100/mapi/etransact_advances/signer_full_name/local
     body:
@@ -81,14 +35,57 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Mon, 29 Jun 2015 21:42:49 GMT
+      - Wed, 12 Aug 2015 21:09:21 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: Test User
     http_version: 
-  recorded_at: Mon, 29 Jun 2015 21:42:49 GMT
+  recorded_at: Wed, 12 Aug 2015 21:09:21 GMT
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/etransact_advances/settings
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      X-Request-Id:
+      - ''
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '244'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Wed, 12 Aug 2015 21:09:21 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"auto_approve":true,"end_of_day_extension":4,"rate_timeout":60,"rates_flagged":false,"rsa_timeout":20,"shareholder_total_daily_limit":880000000,"shareholder_web_daily_limit":2900000000,"maximum_online_term_days":1102,"rate_stale_check":999998}'
+    http_version: 
+  recorded_at: Wed, 12 Aug 2015 21:09:21 GMT
 - request:
     method: post
     uri: http://localhost:3100/mapi/etransact_advances/execute_advance/750/100000.0/sometype/someterm/0.17/Test%20User
@@ -101,7 +98,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="4321dfghjklm"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       Content-Length:
@@ -126,13 +123,12 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Wed, 22 Jul 2015 20:43:54 GMT
+      - Wed, 12 Aug 2015 21:09:21 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
-      string: '{"status":"Success","confirmation_number":"843956","advance_rate":0.17,"advance_amount":46500000,"advance_term":"3
-        weeks","advance_type":"SBC:AAA","interest_day_count":"ACT/ACT","payment_on":"Maturity","funding_date":"01-Feb-2015","maturity_date":"22-Mar-2015"}'
+      string: '{"advance_rate":0.17,"advance_amount":100000,"advance_term":"someterm","advance_type":"sometype","interest_day_count":"ACT/ACT","payment_on":"Maturity","funding_date":"2015-08-12","maturity_date":"2015-08-12","status":["Success"],"confirmation_number":"592747"}'
     http_version: 
-  recorded_at: Wed, 22 Jul 2015 20:43:54 GMT
+  recorded_at: Wed, 12 Aug 2015 21:09:21 GMT
 recorded_with: VCR 2.9.3

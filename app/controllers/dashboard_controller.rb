@@ -182,7 +182,7 @@ class DashboardController < ApplicationController
     else
       preview_success = false
       preview_error = true
-      @error_message = check[:status].to_sym
+      @error_message = check[:status].try(:to_sym)
       @min_amount = check[:low]
       @max_amount = check[:high]
       populate_advance_request_view_parameters

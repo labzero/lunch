@@ -97,9 +97,7 @@ class EtransactAdvancesService < MAPIService
   end
 
   def settings
-    make_request :settings do
-      @connection['etransact_advances/settings'].get
-    end
+    get_json(:settings, 'etransact_advances/settings')
   end
 
   protected

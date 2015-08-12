@@ -313,7 +313,6 @@ module MAPI
               if fhlbsfresponse.at_css('transactionResult').content == 'Error'
                 response_hash['status'] = [fhlbsfresponse.at_css('transactionResult').content]
               else
-                response_hash = {}
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_total_daily_limit(app.settings.environment, amount, response_hash)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_capital_stock(fhlbsfresponse, response, response_hash) if check_capstock
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_credit(fhlbsfresponse, response, response_hash)
@@ -333,7 +332,7 @@ module MAPI
               response_hash['confirmation_number'] = rand(100000..999999).to_s
             else
               if (amount.to_i == 100001)
-                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_credit_error.json')))
+                response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_credit_error.json')))
               elsif (amount.to_i == 100002)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_collateral_error.json')))
               elsif (amount.to_i == 100003)

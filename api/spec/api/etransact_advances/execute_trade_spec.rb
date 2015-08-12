@@ -250,7 +250,7 @@ describe MAPI::ServiceApp do
     let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}"; JSON.parse(last_response.body) }
     before do
       allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
-      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit).and_return({})
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit) {|env, amount, hash| hash }
     end
     describe 'agency for 1 week' do
       let(:advance_type)  {'agency'}
