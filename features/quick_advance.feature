@@ -160,3 +160,12 @@ Scenario: The rate changes from the time the user sees the table to the time the
   When I click on the initiate advance button
   And the quick advance rate has changed
   Then I should see a preview of the quick advance with a notification about the new rate
+
+@jira-mem-735
+Scenario: Users get an error if their requested advance would push FHLB over its total daily limit for web advances
+  Given I visit the dashboard
+  And I open the quick advance flyout and enter 100003
+  And I select the rate with a term of "overnight" and a type of "whole"
+  When I click on the initiate advance button
+  Then I should see an "advance unavailable" error with amount 100003 and type "whole"
+

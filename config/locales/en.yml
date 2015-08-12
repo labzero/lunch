@@ -495,6 +495,7 @@ en:
         high_exception_html: The amount for an advance at this term must be %{amount} or lower
         insufficient_collateral_html: The original amount requested of %{amount} is not available based on your remaining %{collateral_type} collateral.
         updated_rate: The rate for this advance has changed from %{old_rate} to %{new_rate}.
+        advance_unavailable: This advance is not available right now. For more information, call the Member Services Desk at %{phone_number}.
     reports:
       title: Reports
       as_of_yesterday: As of yesterday

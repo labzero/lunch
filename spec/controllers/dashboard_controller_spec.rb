@@ -454,6 +454,62 @@ RSpec.describe DashboardController, :type => :controller do
       end
     end
 
+    describe "POST quick_advance_error of type `ExceedsTotalDailyLimitError`" do
+      let(:amount) { 100003 }
+      it 'should render its view' do
+        make_request
+        expect(response.body).to render_template('dashboard/quick_advance_error')
+      end
+      it 'should set @advance_amount' do
+        make_request
+        expect(assigns[:advance_amount]).to be_kind_of(Numeric)
+      end
+      it 'should set @advance_type' do
+        advance_type = double('advance_type')
+        allow(subject).to receive(:get_type_from_advance_type).and_return(advance_type)
+        make_request
+        expect(assigns[:advance_type]).to eq(advance_type)
+      end
+      it 'should set @error_message' do
+        make_request
+        expect(assigns[:error_message]).to eq('ExceedsTotalDailyLimitError')
+      end
+      it 'should set @advance_description' do
+        make_request
+        expect(assigns[:advance_description]).to eq(advance_description)
+      end
+      it 'should set @advance_program' do
+        make_request
+        expect(assigns[:advance_program]).to eq(advance_program)
+      end
+      it 'should set @advance_term' do
+        make_request
+        expect(assigns[:advance_term]).to eq(advance_term)
+      end
+      it 'should set @advance_rate' do
+        make_request
+        expect(assigns[:advance_rate]).to eq(advance_rate.to_f)
+      end
+      it 'should set @payment_on' do
+        make_request
+        expect(assigns[:payment_on]).to eq(payment_on)
+      end
+      it 'should set @interest_day_count' do
+        make_request
+        expect(assigns[:interest_day_count]).to eq(interest_day_count)
+      end
+      it 'should set @maturity_date' do
+        make_request
+        expect(assigns[:maturity_date]).to eq(maturity_date)
+      end
+      it 'should set @funding_date to today' do
+        date = Date.new(2015,1,1)
+        allow(Time.zone).to receive(:now).and_return(date)
+        make_request
+        expect(assigns[:funding_date]).to eq(date)
+      end
+    end
+
     describe "POST quick_advance_error of type `CollateralError`" do
       let(:amount) { 100002 }
       it 'should render its view' do

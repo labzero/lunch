@@ -210,6 +210,22 @@ class DashboardController < ApplicationController
         @maturity_date = params[:maturity_date]
         @funding_date = Time.zone.now.to_date
         response_html = render_to_string :quick_advance_error, layout: false
+      elsif preview[:status] && preview[:status].include?('ExceedsTotalDailyLimitError')
+        preview_success = false
+        preview_error = true
+        @advance_amount = params[:amount].to_f if params[:amount]
+        @error_message = 'ExceedsTotalDailyLimitError'
+        @advance_description = get_description_from_advance_term(params[:advance_term]) if params[:advance_term]
+        @advance_program = get_program_from_advance_type(params[:advance_type]) if params[:advance_type]
+        @collateral_type = COLLATERAL_ERROR_MAPPING[params[:advance_type].to_sym] if params[:advance_type]
+        @advance_type = get_type_from_advance_type(params[:advance_type]) if params[:advance_type]
+        @advance_term = params[:advance_term].capitalize if params[:advance_term]
+        @advance_rate = params[:advance_rate].to_f if params[:advance_rate]
+        @interest_day_count = params[:interest_day_count]
+        @payment_on = params[:payment_on]
+        @maturity_date = params[:maturity_date]
+        @funding_date = Time.zone.now.to_date
+        response_html = render_to_string :quick_advance_error, layout: false
       else
         preview_success = true
         preview_error = false

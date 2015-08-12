@@ -6,6 +6,8 @@ module MAPI
     module Member
       module TradeActivity
 
+        TODAYS_ADVANCES_ARRAY = %w(VERIFIED OPS_REVIEW OPS_VERIFIED SEC_REVIEWED SEC_REVIEW COLLATERAL_AUTH AUTH_TERM PEND_TERM)
+
         def self.init_trade_connection(environment)
           if environment == :production
             @@trade_connection ||= Savon.client(
@@ -62,6 +64,37 @@ module MAPI
           data.to_json
         end
 
+        def self.current_daily_total(env, instrument)
+          data = if MAPI::Services::Member::TradeActivity::init_trade_connection(env)
+            message = {
+              'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
+              'v1:tradeRequestParameters' => [
+                {
+                  'v1:lastUpdatedDateTime' => Date.today().strftime("%Y-%m-%dT%T"),
+                  'v1:arrayOfAssetClasses' => [{'v1:assetClass' => instrument}]
+                }
+              ]
+            }
+            begin
+              response = @@trade_connection.call(:get_trade, message_tag: 'tradeRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
+            rescue Savon::Error => error
+              raise error
+            end
+            response.doc.remove_namespaces!
+            fhlbsfresponse = response.doc.xpath('//Envelope//Body//tradeResponse//trades//trade')
+            advance_daily_total = 0
+            fhlbsfresponse.each do |trade|
+              if TODAYS_ADVANCES_ARRAY.include? trade.at_css('tradeHeader status').content
+                advance_daily_total += trade.at_css('advance par amount').content.to_f
+              end
+            end
+            advance_daily_total
+          else
+            # fake an advance_daily_total locally
+            (rand(10000..999999999) + rand()).round(2)
+          end
+          data
+        end
       end
     end
   end
