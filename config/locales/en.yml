@@ -89,7 +89,7 @@ en:
     shares_outstanding: Shares Outstanding
     prepare_download: Please wait while we prepare your download. This may take up to 60 seconds.
     cancel_download: Cancel Download
-    prepare_table: Please wait while we retreive this data. 
+    prepare_table: Please wait while we retrieve this data.
     pin: PIN
     token: Token Code
     username: Username
