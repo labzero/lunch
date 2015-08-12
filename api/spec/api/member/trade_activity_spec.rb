@@ -45,9 +45,6 @@ describe MAPI::ServiceApp do
   end
 
   describe 'the `current_daily_total` method' do
-    let(:app_settings) { double('app_settings', environment: nil) }
-    let(:app) { double('app', settings: app_settings)}
-    let(:current_daily_total) { MAPI::Services::Member::TradeActivity.current_daily_total(app, 'ADVANCE') }
     describe 'in the production environment' do
       let(:included_trade_1) { double('included trade 1', at_css: nil) }
       let(:included_trade_2) { double('included trade 2', at_css: nil) }
@@ -55,6 +52,7 @@ describe MAPI::ServiceApp do
       let(:fhlbsfresponse) { [included_trade_1, included_trade_2, excluded_trade] }
       let(:savon_response) { double('savon response', doc: double('doc', remove_namespaces!: nil, xpath: fhlbsfresponse)) }
       let(:trade_connection) { double('trade_connection', call: savon_response) }
+      let(:current_daily_total) { MAPI::Services::Member::TradeActivity.current_daily_total(:production, 'ADVANCE') }
       before do
         allow(MAPI::Services::Member::TradeActivity).to receive(:init_trade_connection).and_return(true)
         MAPI::Services::Member::TradeActivity.class_variable_set(:@@trade_connection, trade_connection)
@@ -76,11 +74,14 @@ describe MAPI::ServiceApp do
         expect{current_daily_total}.to raise_error(Savon::Error)
       end
     end
-    describe 'in the test environment' do
-      before { allow(MAPI::Services::Member::TradeActivity).to receive(:init_trade_connection).and_return(false) }
+    [:development, :test].each do |env|
+      describe "in the #{env} environment" do
+        let(:current_daily_total) { MAPI::Services::Member::TradeActivity.current_daily_total(env, 'ADVANCE') }
+        before { allow(MAPI::Services::Member::TradeActivity).to receive(:init_trade_connection).and_return(false) }
 
-      it 'returns a randomly-generated float' do
-        expect(current_daily_total).to be_kind_of(Float)
+        it 'returns a randomly-generated float' do
+          expect(current_daily_total).to be_kind_of(Float)
+        end
       end
     end
   end

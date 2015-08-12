@@ -313,7 +313,7 @@ module MAPI
                 }
               else
                 response_hash = {}
-                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_total_daily_limit(app, amount, response_hash)
+                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_total_daily_limit(app.settings.environment, amount, response_hash)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_capital_stock(fhlbsfresponse, response, response_hash) if check_capstock
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_credit(fhlbsfresponse, response, response_hash)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_collateral(fhlbsfresponse, response, response_hash)
@@ -434,10 +434,10 @@ module MAPI
           hash.merge(new_hash){|key, old, new| old + new }
         end
 
-        def self.check_total_daily_limit(app, advance_amount, hash)
+        def self.check_total_daily_limit(env, advance_amount, hash)
           new_hash = {}
-          total_daily_limit = app.settings.environment == :production ? ActiveRecord::Base.connection.execute(TOTAL_DAILY_LIMIT_QUERY).fetch.try(&:first) : LOCAL_TOTAL_DAILY_LIMIT
-          current_daily_total = MAPI::Services::Member::TradeActivity.current_daily_total(app, 'ADVANCE')
+          total_daily_limit = env == :production ? ActiveRecord::Base.connection.execute(TOTAL_DAILY_LIMIT_QUERY).fetch.try(&:first) : LOCAL_TOTAL_DAILY_LIMIT
+          current_daily_total = MAPI::Services::Member::TradeActivity.current_daily_total(env, 'ADVANCE')
 
           if (current_daily_total.to_f + advance_amount.to_f) > total_daily_limit.to_f
             new_hash = {

@@ -64,8 +64,8 @@ module MAPI
           data.to_json
         end
 
-        def self.current_daily_total(app, instrument)
-          data = if MAPI::Services::Member::TradeActivity::init_trade_connection(app.settings.environment)
+        def self.current_daily_total(env, instrument)
+          data = if MAPI::Services::Member::TradeActivity::init_trade_connection(env)
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [
