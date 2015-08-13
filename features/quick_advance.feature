@@ -68,12 +68,12 @@ Scenario: Preview rate from Quick Advance flyout table
 Scenario: Go back to rate table from preview in Quick Advance flyout
   Given I visit the dashboard
   And I open the quick advance flyout
-  And I select the rate with a term of "1week" and a type of "aaa"
+  And I select the rate with a term of "2week" and a type of "aaa"
   And I click on the initiate advance button
   Then I should not see the quick advance table
   When I click on the back button for the quick advance preview
   Then I should see the quick advance table
-  And I should see the selected state for the cell with a term of "1week" and a type of "aaa"
+  And I should see the selected state for the cell with a term of "2week" and a type of "aaa"
   And I should not see a preview of the quick advance
 
 @data-unavailable @jira-mem-560

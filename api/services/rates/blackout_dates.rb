@@ -26,7 +26,7 @@ module MAPI
         end
 
         def self.fake_data_relative_to_today
-          [Date.today + 1.day, Date.today + 1.week, Date.today + 3.week, Date.today + 1.year]
+          [Date.today + 1.week, Date.today + 3.week, Date.today + 1.year]
         end
 
         def self.blackout_dates_development

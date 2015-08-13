@@ -10,6 +10,7 @@ $faded-opacity: 0.4 !default;
   @include pseudo-background-cover($brand-blue);
   &.disabled-cell {
     @include pseudo-background-cover($secondary-gray);
+    color: inherit;
     cursor: auto;
   }  
 }
@@ -157,7 +158,9 @@ $faded-opacity: 0.4 !default;
       }
       &:nth-child(odd) {
         td {
-          @include pseudo-background-cover($white);
+          &:not(.disabled-cell):not(.row-label) {
+            @include pseudo-background-cover($white);
+          }
           &.cell-selected {
             @extend %quick-advance-cell-selected;
           }
@@ -189,7 +192,7 @@ $faded-opacity: 0.4 !default;
     }
     // special styling to accommodate labels for axes
     tr.quick-advance-table-label-row {
-      td:nth-child(2) {
+      td.row-label {
         @extend %quick-advance-row-label;
         &.cell-selected {
           @extend %quick-advance-cell-selected;
@@ -208,6 +211,10 @@ $faded-opacity: 0.4 !default;
       }
     }
   }
+}
+
+.quick-advance-rate-cell.disabled-cell {
+  @include pseudo-background-cover($secondary-gray);
 }
 
 .initiate-quick-advance {
