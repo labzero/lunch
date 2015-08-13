@@ -90,7 +90,7 @@ Rails.application.routes.draw do
       get 'community-investment-program' => 'error#standard_error', as: :cip
       get 'auction-indexed' => 'error#standard_error'
       get 'fixed-rate-credit' => 'products#frc', as: :frc
-      get 'frc-embedded' => 'error#standard_error'
+      get 'frc-embedded' => 'products#frc_embedded'
       get 'knockout' => 'error#standard_error'
       get 'mortgage-partnership-finance' => 'error#standard_error', as: :mpf
       get 'other-cash-needs' => 'error#standard_error', as: :ocn

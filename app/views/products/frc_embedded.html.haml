@@ -1,0 +1,35 @@
+- @html_class = 'white-background'
+- uses = %w(management risk funding)
+- advantages = %w(protection guaranteed_rates funding)
+.row.product-page
+  .column-2x10-right
+    %h1= t('products.advances.frc_embedded.title')
+    %p= t('products.advances.frc_embedded.description')
+    %h2= t('products.section_headings.uses')
+    %ul.key-uses-list
+      - uses.each do |use|
+        %li= t("products.advances.frc_embedded.uses.#{use}")
+    %h2= t('products.section_headings.advantages')
+    %ul.key-advantages-list
+      - advantages.each do |advantage|
+        %li= t("products.advances.frc_embedded.advantages.#{advantage}")
+    %h2= t('products.section_headings.features')
+    %h3= t('products.common_key_features.term')
+    %p= t('products.advances.frc_embedded.features.term.description')
+    %h3= t('products.advances.frc_embedded.features.interest_rate.title')
+    %p= t('products.advances.frc_embedded.features.interest_rate.description')
+    %h3= t('products.advances.frc_embedded.features.min_interest_rate.title')
+    %p= t('products.advances.frc_embedded.features.min_interest_rate.description')
+    %h3= t('products.advances.frc_embedded.features.interest_rate_reset.title')
+    %p= t('products.advances.frc_embedded.features.interest_rate_reset.description')
+    %h3= t('products.advances.frc_embedded.features.cap_index.title')
+    %p= t('products.advances.frc_embedded.features.cap_index.description')
+    %h3= t('products.advances.frc_embedded.features.cap_value.title')
+    %p= t('products.advances.frc_embedded.features.cap_value.description')
+    %h3= t('products.common_key_features.interest_day_count')
+    %p= t('products.advances.frc_embedded.features.interest_day_count.description')
+    %h3= t('products.advances.frc_embedded.features.interest_payment_dates.title')
+    %p= t('products.advances.frc_embedded.features.interest_payment_dates.description')
+    %h3= t('products.common_key_features.prepayment_features')
+    %p= t('products.advances.frc_embedded.features.prepayment_features.description_html', pdf_url: asset_path('fc2215.pdf'))
+    .last-modified= t('products.section_headings.last_modified', date: fhlb_date_short_alpha(@last_modified))

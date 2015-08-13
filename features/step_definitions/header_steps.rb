@@ -13,7 +13,7 @@ Then(/^I should see the (reports|resources|products) dropdown$/) do |dropdown|
   report_menu.parent.assert_selector('.nav-dropdown', visible: true)
 end
 
-When(/^I click on the (reports|guides|forms|agreements|authorizations|credit|collateral|products summary|frc|) link in the header$/) do |link|
+When(/^I click on the (reports|guides|forms|agreements|authorizations|credit|collateral|products summary|frc|frc embedded) link in the header$/) do |link|
   page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
 end
 
@@ -45,6 +45,8 @@ def dropdown_title_regex(dropdown)
     I18n.t('products.products_summary.nav_title')
   when 'frc'
     I18n.t('products.advances.frc.title')
+  when 'frc embedded'
+    I18n.t('products.advances.frc_embedded.title')
   else
     raise 'unknown dropdown'
   end
