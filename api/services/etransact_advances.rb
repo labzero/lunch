@@ -1,4 +1,5 @@
 require_relative 'etransact_advances/execute_trade'
+require_relative 'rates/loan_terms'
 
 module MAPI
   module Services
@@ -274,13 +275,6 @@ module MAPI
             WHERE WHOLE_LOAN_ENABLED = 'Y' AND AO_TERM_BUCKET_ID = 1
           SQL
 
-          etransact_advances_all_product_on_string = <<-SQL
-            SELECT AO_TERM_BUCKET_ID, TERM_BUCKET_LABEL,
-            WHOLE_LOAN_ENABLED, SBC_AGENCY_ENABLED, SBC_AAA_ENABLED, SBC_AA_ENABLED,
-            END_TIME, trunc(OVERRIDE_END_DATE) AS OVERRIDE_END_DATE, OVERRIDE_END_TIME
-            FROM WEB_ADM.AO_TERM_BUCKETS
-          SQL
-
           etransact_status = false  #indicat if etransact is turn on and at least one product has not reach End Time
           wl_vrc_status = false   #indicate if WL VRC is enabled regardless of if etransact is turn on
           etransact_eod = false # indicates that we have reached EOD on the global eTransact flag
@@ -307,76 +301,22 @@ module MAPI
             if row && row[0].to_i > STATUS_ON_RECORD_NOTFOUND_COUNT
               wl_vrc_status = true
             end
-            term_bucket_data_array = []
-            etransact_all_product_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_all_product_on_string)
-
-            while row = etransact_all_product_on_cursor.fetch_hash()
-              term_bucket_data_array.push(row)
-            end
           else
-            term_bucket_data_array = []
             results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_status.json'))).with_indifferent_access
             wl_vrc_status = results[:wl_vrc_status]
             etransact_eod = results[:eod_reached]
             etransact_disabled = results[:disabled]
             etransact_no_rows_found = false
-            term_bucket_data_array = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_term_buckets_info.json')))
           end
 
           etransact_status = !(etransact_no_rows_found || etransact_eod || etransact_disabled)
-          # # loop thru to get status for each of the type and term
-          loan_status = {}
-          now = Time.zone.now
-          now_string = now.strftime("%H%M%S")
-          today_date = now.to_date
 
-          MAPI::Shared::Constants::LOAN_TERMS.each do |term|
-            lookup_term_id = TERM_BUCKET_MAPPING[term]
-            loan_status[term] ||= {}
-            MAPI::Shared::Constants::LOAN_TYPES.each do |type|
-              trade_status = false
-              display_status = false
-              bucket_label = 'NotFound'
-              term_bucket_data_array.each do |row|
-                if lookup_term_id == row['AO_TERM_BUCKET_ID'].to_i
-                  bucket_label = row['TERM_BUCKET_LABEL']
-                  # logic to check if manually turn off regardless of end time
-                  # based on Types, will read different column
-                  lookup_column = TYPE_BUCKET_COLUMN_NO_MAPPING[type]
-                  if row[lookup_column] == 'Y'
-                    display_status = true
-                  else
-                    break
-                  end
-                  # logic to check end time
-                  # check if there is override for today
-                  end_time = row['END_TIME'] + '00'
-                  override_date = row['OVERRIDE_END_DATE']
-                  override_end_time = row['OVERRIDE_END_TIME'] + '00'
-                  if (override_date.to_date == today_date)
-                    # check with override_end_time
-                    if (override_end_time > now_string)
-                      trade_status = true
-                    end
-                  elsif (end_time > now_string)
-                    trade_status = true
-                  end
-                end
-              end
-              loan_status[term][type] = {
-                'trade_status' => trade_status,
-                'display_status' => display_status,
-                'bucket_label' => bucket_label.to_s
-              }
-            end
-
-          end
           {
             eod_reached: false,
             disabled: false,
             etransact_advances_status: etransact_status,
             wl_vrc_status: wl_vrc_status,
-            all_loan_status: loan_status
+            all_loan_status: MAPI::Services::Rates::LoanTerms.loan_terms(settings.environment)
           }.to_json
         end
 
