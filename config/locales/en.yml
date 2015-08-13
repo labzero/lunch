@@ -406,7 +406,7 @@ en:
       tooltip:
         interest_day_count: "Int Day #"
         payment_on: Payment
-        maturity_date: Maturity
+        maturity_date: Maturity Date
         reason: Reason
         blackout: Blackout
       table:
