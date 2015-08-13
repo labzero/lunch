@@ -240,7 +240,9 @@ module MAPI
 
           rm[:email] = rm['email'] || rm['EMAIL']
           rm[:full_name] = rm['full_name'] || rm['FULL_NAME']
-          rm[:username] = rm[:email].match(/^(.+?)@/).captures.first.downcase if rm[:email].match(/^(.+?)@/)
+          if rm[:email] && (matches = rm[:email].match(/^(.+?)@/))
+            rm[:username] = matches.captures.first.downcase
+          end
           rm[:phone_number] = rm['phone_number'] || rm['PHONE_NUMBER']
 
           cam[:email] = cam['email'] || cam['EMAIL']
