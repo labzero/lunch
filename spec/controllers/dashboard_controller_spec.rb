@@ -118,6 +118,11 @@ RSpec.describe DashboardController, :type => :controller do
         expect(assigns[:contacts][:rm][:image_url]).to eq('placeholder-usericon.svg')
         expect(assigns[:contacts][:cam][:image_url]).to eq('placeholder-usericon.svg')
       end
+      it 'returns {} if nil is returned from the service object' do
+        allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(nil)
+        get :index
+        expect(assigns[:contacts]).to eq({})
+      end
     end
     describe "RateService failures" do
       let(:RatesService) {class_double(RatesService)}
