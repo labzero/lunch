@@ -933,240 +933,251 @@ class ReportsController < ApplicationController
 
   def account_summary
 
-    if report_disabled?(ACCOUNT_SUMMARY_WEB_FLAGS)
-      raise 'Report Disabled'
-    end
-
-    member_balance_service = MemberBalanceService.new(current_member_id, request)
-    member_profile = member_balance_service.profile
-    if !member_profile
-      member_profile = {
-        credit_outstanding: {},
-        collateral_borrowing_capacity: {
-          standard: {
-          },
-          sbc: {
-          }
-        },
-        capital_stock: {}
-      }
-    end
-
-    members_service = MembersService.new(request)
-    member_details = members_service.member(current_member_id) || {}
-
+    @date = params[:end_date] || Time.zone.now.to_date
+    export_format = params[:export_format]
     @report_name = t('reports.account_summary.title')
-    @intraday_datetime = Time.zone.now
-    @credit_datetime = Time.zone.now
-    @collateral_notice = member_profile[:collateral_delivery_status] == 'Y'
-    @sta_number = member_details[:sta_number]
-    @fhfb_number = member_details[:fhfb_number]
-    @member_name = member_details[:name]
-    @financing_availability = {
-      rows: [
-        {
-          columns: [
-            {value: t('reports.account_summary.financing_availability.asset_percentage')},
-            {value: (member_profile[:financing_percentage] * 100 if member_profile[:financing_percentage]), type: :percentage}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.financing_availability.maximum_term')},
-            {value: member_profile[:maximum_term], type: :months}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.financing_availability.total_assets')},
-            {value: member_profile[:total_assets], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.financing_availability.total_financing_availability')},
-            {value: member_profile[:total_financing_available], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.financing_availability.approved_credit')},
-            {value: member_profile[:approved_long_term_credit], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.financing_availability.credit_outstanding')},
-            {value: member_profile[:credit_outstanding][:total], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.financing_availability.forward_commitments')},
-            {value: member_profile[:forward_commitments], type: :currency_whole}
-          ]
-        }
-      ],
-      footer: [
-        {value: t('reports.account_summary.financing_availability.remaining_financing_availability')},
-        {value: member_profile[:remaining_financing_available], type: :currency_whole}
-      ]
-    }
 
-    if member_profile[:mpf_credit_available].present? && member_profile[:mpf_credit_available] > 0
-      @financing_availability[:rows].insert(-2, {
-        columns: [
-          {value: t('reports.account_summary.financing_availability.mpf_credit_available')},
-          {value: member_profile[:mpf_credit_available], type: :currency_whole}
-        ]
-      })
+    if export_format == 'pdf'
+      job_status = RenderReportPDFJob.perform_later(current_member_id, 'account_summary', 'account-summary', {end_date: @date.to_s}).job_status
     end
+    unless job_status.nil?
+      job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
+    else
+      if report_disabled?(ACCOUNT_SUMMARY_WEB_FLAGS)
+        raise 'Report Disabled'
+      end
 
-    @credit_outstanding = {
-      rows: [
-        {
+      member_balance_service = MemberBalanceService.new(current_member_id, request)
+      member_profile = member_balance_service.profile
+      if !member_profile
+        member_profile = {
+          credit_outstanding: {},
+          collateral_borrowing_capacity: {
+            standard: {
+            },
+            sbc: {
+            }
+          },
+          capital_stock: {}
+        }
+      end
+
+      members_service = MembersService.new(request)
+      member_details = members_service.member(current_member_id) || {}
+
+      @intraday_datetime = Time.zone.now
+      @credit_datetime = Time.zone.now
+      @collateral_notice = member_profile[:collateral_delivery_status] == 'Y'
+      @sta_number = member_details[:sta_number]
+      @fhfb_number = member_details[:fhfb_number]
+      @member_name = member_details[:name]
+      @financing_availability = {
+        rows: [
+          {
+            columns: [
+              {value: t('reports.account_summary.financing_availability.asset_percentage')},
+              {value: (member_profile[:financing_percentage] * 100 if member_profile[:financing_percentage]), type: :percentage}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.financing_availability.maximum_term')},
+              {value: member_profile[:maximum_term], type: :months}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.financing_availability.total_assets')},
+              {value: member_profile[:total_assets], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.financing_availability.total_financing_availability')},
+              {value: member_profile[:total_financing_available], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.financing_availability.approved_credit')},
+              {value: member_profile[:approved_long_term_credit], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.financing_availability.credit_outstanding')},
+              {value: member_profile[:credit_outstanding][:total], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.financing_availability.forward_commitments')},
+              {value: member_profile[:forward_commitments], type: :currency_whole}
+            ]
+          }
+        ],
+        footer: [
+          {value: t('reports.account_summary.financing_availability.remaining_financing_availability')},
+          {value: member_profile[:remaining_financing_available], type: :currency_whole}
+        ]
+      }
+
+      if member_profile[:mpf_credit_available].present? && member_profile[:mpf_credit_available] > 0
+        @financing_availability[:rows].insert(-2, {
+                                                  columns: [
+                                                    {value: t('reports.account_summary.financing_availability.mpf_credit_available')},
+                                                    {value: member_profile[:mpf_credit_available], type: :currency_whole}
+                                                  ]
+                                                })
+      end
+
+      @credit_outstanding = {
+        rows: [
+          {
+            columns: [
+              {value: t('reports.account_summary.credit_outstanding.standard_advances')},
+              {value: member_profile[:credit_outstanding][:standard], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.credit_outstanding.sbc_advances')},
+              {value: member_profile[:credit_outstanding][:sbc], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.credit_outstanding.swaps_credit')},
+              {value: member_profile[:credit_outstanding][:swaps_credit], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.credit_outstanding.swaps_notational')},
+              {value: member_profile[:credit_outstanding][:swaps_notational], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.credit_outstanding.investments')},
+              {value: member_profile[:credit_outstanding][:investments], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.credit_outstanding.letters_of_credit')},
+              {value: member_profile[:credit_outstanding][:letters_of_credit], type: :currency_whole}
+            ]
+          }
+        ],
+        footer: [
+          {value: t('reports.account_summary.credit_outstanding.title')},
+          {value: member_profile[:credit_outstanding][:total], type: :currency_whole}
+        ]
+      }
+
+      if member_profile[:credit_outstanding][:mpf_credit].present? && member_profile[:credit_outstanding][:mpf_credit] > 0
+        @credit_outstanding[:rows] << {
           columns: [
-            {value: t('reports.account_summary.credit_outstanding.standard_advances')},
-            {value: member_profile[:credit_outstanding][:standard], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.credit_outstanding.sbc_advances')},
-            {value: member_profile[:credit_outstanding][:sbc], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.credit_outstanding.swaps_credit')},
-            {value: member_profile[:credit_outstanding][:swaps_credit], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.credit_outstanding.swaps_notational')},
-            {value: member_profile[:credit_outstanding][:swaps_notational], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.credit_outstanding.investments')},
-            {value: member_profile[:credit_outstanding][:investments], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.credit_outstanding.letters_of_credit')},
-            {value: member_profile[:credit_outstanding][:letters_of_credit], type: :currency_whole}
+            {value: t('reports.account_summary.credit_outstanding.mpf_credit')},
+            {value: member_profile[:credit_outstanding][:mpf_credit], type: :currency_whole}
           ]
         }
-      ],
-      footer: [
-        {value: t('reports.account_summary.credit_outstanding.title')},
-        {value: member_profile[:credit_outstanding][:total], type: :currency_whole}
-      ]
-    }
+      end
 
-    if member_profile[:credit_outstanding][:mpf_credit].present? && member_profile[:credit_outstanding][:mpf_credit] > 0
-      @credit_outstanding[:rows] << {
-        columns: [
-          {value: t('reports.account_summary.credit_outstanding.mpf_credit')},
-          {value: member_profile[:credit_outstanding][:mpf_credit], type: :currency_whole}
+      @standard_collateral = {
+        rows: [
+          {
+            columns: [
+              {value: t('reports.account_summary.collateral_borrowing_capacity.standard.total')},
+              {value: member_profile[:collateral_borrowing_capacity][:standard][:total], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.collateral_borrowing_capacity.standard.remaining')},
+              {value: member_profile[:collateral_borrowing_capacity][:standard][:remaining], type: :currency_whole}
+            ]
+          }
+        ]
+      }
+
+      @sbc_collateral = {
+        rows: [
+          {
+            columns: [
+              {value: t('reports.account_summary.collateral_borrowing_capacity.sbc.total_market')},
+              {value: member_profile[:collateral_borrowing_capacity][:sbc][:total_market], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.collateral_borrowing_capacity.sbc.remaining_market')},
+              {value: member_profile[:collateral_borrowing_capacity][:sbc][:remaining_market], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.collateral_borrowing_capacity.sbc.total')},
+              {value: member_profile[:collateral_borrowing_capacity][:sbc][:total_borrowing], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.collateral_borrowing_capacity.sbc.remaining')},
+              {value: member_profile[:collateral_borrowing_capacity][:sbc][:remaining_borrowing], type: :currency_whole}
+            ]
+          }
+        ]
+      }
+
+      @collateral_totals = {
+        rows: [
+          {
+            columns: [
+              {value: t('reports.account_summary.collateral_borrowing_capacity.totals.total')},
+              {value: member_profile[:collateral_borrowing_capacity][:total], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.collateral_borrowing_capacity.totals.remaining')},
+              {value: member_profile[:collateral_borrowing_capacity][:remaining], type: :currency_whole}
+            ]
+          }
+        ]
+      }
+
+      @capital_stock_and_leverage = {
+        rows: [
+          {
+            columns: [
+              {value: t('reports.account_summary.capital_stock.stock_owned')},
+              {value: member_profile[:capital_stock][:stock_owned], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.capital_stock.stock_requirement')},
+              {value: member_profile[:capital_stock][:activity_based_requirement], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.capital_stock.excess_stock')},
+              {value: member_profile[:capital_stock][:remaining_stock], type: :currency_whole}
+            ]
+          },
+          {
+            columns: [
+              {value: t('reports.account_summary.capital_stock.leverage')},
+              {value: member_profile[:capital_stock][:remaining_leverage], type: :currency_whole}
+            ]
+          }
         ]
       }
     end
-
-    @standard_collateral = {
-      rows: [
-        {
-          columns: [
-            {value: t('reports.account_summary.collateral_borrowing_capacity.standard.total')},
-            {value: member_profile[:collateral_borrowing_capacity][:standard][:total], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.collateral_borrowing_capacity.standard.remaining')},
-            {value: member_profile[:collateral_borrowing_capacity][:standard][:remaining], type: :currency_whole}
-          ]
-        }
-      ]
-    }
-
-    @sbc_collateral = {
-      rows: [
-        {
-          columns: [
-            {value: t('reports.account_summary.collateral_borrowing_capacity.sbc.total_market')},
-            {value: member_profile[:collateral_borrowing_capacity][:sbc][:total_market], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.collateral_borrowing_capacity.sbc.remaining_market')},
-            {value: member_profile[:collateral_borrowing_capacity][:sbc][:remaining_market], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.collateral_borrowing_capacity.sbc.total')},
-            {value: member_profile[:collateral_borrowing_capacity][:sbc][:total_borrowing], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.collateral_borrowing_capacity.sbc.remaining')},
-            {value: member_profile[:collateral_borrowing_capacity][:sbc][:remaining_borrowing], type: :currency_whole}
-          ]
-        }
-      ]
-    }
-
-    @collateral_totals = {
-      rows: [
-        {
-          columns: [
-            {value: t('reports.account_summary.collateral_borrowing_capacity.totals.total')},
-            {value: member_profile[:collateral_borrowing_capacity][:total], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.collateral_borrowing_capacity.totals.remaining')},
-            {value: member_profile[:collateral_borrowing_capacity][:remaining], type: :currency_whole}
-          ]
-        }
-      ]
-    }
-
-    @capital_stock_and_leverage = {
-      rows: [
-        {
-          columns: [
-            {value: t('reports.account_summary.capital_stock.stock_owned')},
-            {value: member_profile[:capital_stock][:stock_owned], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.capital_stock.stock_requirement')},
-            {value: member_profile[:capital_stock][:activity_based_requirement], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.capital_stock.excess_stock')},
-            {value: member_profile[:capital_stock][:remaining_stock], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.account_summary.capital_stock.leverage')},
-            {value: member_profile[:capital_stock][:remaining_leverage], type: :currency_whole}
-          ]
-        }
-      ]
-    }
   end
 
   private
