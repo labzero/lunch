@@ -48,8 +48,6 @@ Then(/^I should see an? "(.*?)" in the Account module/) do |component|
       '.dashboard-borrowing-capacity'
     when 'financing availability gauge'
       '.dashboard-financing-availability'
-    when 'anticipated activity graph'
-      '.dashboard-anticipated-activity-graph'
     else
       raise 'Unknown component for Account module'
   end

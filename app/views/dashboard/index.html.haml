@@ -4,7 +4,6 @@
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.market_overview.title'), classes: 'dashboard-module-market', data_available: !@market_overview.first[:data].blank?} do
       .dashboard-market-graph-toggle
         =link_to(t('dashboard.market_overview.vrc'), '', class: 'active')
-        =link_to(t('global.advances'), '')
       .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account']} do
       .dashboard-financing-availability
@@ -28,9 +27,6 @@
                 .gauge-section{style: "width: #{number_to_percentage(details[:display_percentage], precision: 1)};", class: key == :mortgages ? 'borrowing-capacity-gauge-standard' : 'borrowing-capacity-gauge-sbc'}
                   .inner-gauge-section
                   = render 'shared/tooltip', tooltip_data: {t("dashboard.your_account.borrowing_capacity.#{key}") => nil, number_to_percentage(details[:percentage], precision: 1) => nil, fhlb_formatted_currency(details[:amount]) => nil}
-      .dashboard-anticipated-activity-graph
-        %h2= t('dashboard.your_account.projected_sta_balance.title')
-        =image_tag('anticipated-activity.png', alt: 'Anticipated Activity Graph')
       .dashboard-account-summary
         %h2= t('dashboard.your_account.account_summary')
         %table
@@ -106,61 +102,7 @@
                 = row[0]
                 %div.dashboard-module-content-light= fhlb_date_standard_numeric(row[2])
               %td= fhlb_formated_currency_unit(row[1])
-    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.anticipated_activity.title'), action_type: 'calendar-icon'} do
-      %table.table-dashboard-anticipated-activity
-        %tbody
-          - @anticipated_activity.each_with_index do |row, i|
-            %tr
-              %td
-                = row[0]
-                %div.dashboard-module-content-light= fhlb_date_standard_numeric(row[2])
-              %td
-                - if row[3].blank?
-                  =fhlb_formated_currency_unit(row[1], '$', 2)
-                - else
-                  =fhlb_formated_currency_unit(row[1])
-                %div.dashboard-module-content-light= row[3].upcase
-      %button.total-button
-        %span= t('dashboard.anticipated_activity.total_maturing_today')
-        %span= number_to_currency(@total_maturing_today, precision: 0)
   .column-3
-    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.reports.title'), classes: 'dashboard-module-reports'} do
-      = render 'shared/input_field', icon: :calendar, placeholder: t('dashboard.reports.as_of_yesterday'), location: :after
-      %button.edit-button #{t('dashboard.actions.edit')}
-      %table.table-dashboard-quick-reports
-        %tbody
-          %tr
-            %td
-              = render 'shared/check_box', id: t('dashboard.reports.daily')
-            %td
-              %label= t('dashboard.reports.daily') + ' (2)'
-              %div.dashboard-module-content-light #{t('dashboard.reports.advances_detail')}
-              %div.dashboard-module-content-light #{t('dashboard.reports.forward_commitments')}
-          %tr
-            %td
-              = render 'shared/check_box', id: t('dashboard.reports.weekly')
-            %td
-              %label= t('dashboard.reports.weekly') + ' (1)'
-          %tr
-            %td
-              = render 'shared/check_box', id: t('dashboard.reports.monthly')
-            %td
-              %label= t('dashboard.reports.monthly') + ' (4)'
-          %tr
-            %td
-              = render 'shared/check_box', id: t('dashboard.reports.quarterly')
-            %td
-              %label= t('dashboard.reports.quarterly') + ' (2)'
-          %tr
-            %td
-              = render 'shared/check_box', id: t('dashboard.reports.annually')
-            %td
-              %label= t('dashboard.reports.annually')
-      =link_to(t('dashboard.reports.view_reports'), reports_path)
-      %button.report-button-left #{t('global.view')}
-      .split-button
-        %button.split-button-left #{t('dashboard.actions.download')}
-        %button.split-button-right #{t('global.pdf')}
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
       %ul
         - if @contacts[:rm] && @contacts[:rm][:full_name]
