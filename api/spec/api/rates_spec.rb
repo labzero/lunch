@@ -65,10 +65,10 @@ describe MAPI::ServiceApp do
     let(:loan_terms_result) do
       inner_peace = Hash.new(Hash.new(true))
       h = Hash.new(inner_peace)
-      h[:overnight] = { whole:  { trade_status: false, display_status: true  } }
-      h[:open]      = { agency: { trade_status: true,  display_status: false } }
-      h[:overnight].default= inner_peace
-      h[:open].default= inner_peace
+      h[:'1year'] = { whole:  { trade_status: false, display_status: true  } }
+      h[:'3year']   = { agency: { trade_status: true,  display_status: false } }
+      h[:'1year'].default= inner_peace
+      h[:'3year'].default= inner_peace
       h
     end
     let(:rate_summary) do

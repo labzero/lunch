@@ -181,7 +181,7 @@ end
 
 Given(/^I am on the quick advance preview screen$/) do
   step "I open the quick advance flyout"
-  step "I select the rate with a term of \"overnight\" and a type of \"whole\""
+  step "I select the rate with a term of \"2week\" and a type of \"whole\""
   step "I click on the initiate advance button"
   step "I should not see the quick advance table"
   step "I should see a preview of the quick advance"
@@ -189,7 +189,7 @@ end
 
 Then(/^I successfully execute a quick advance$/) do
   step "I open the quick advance flyout"
-  step "I select the rate with a term of \"overnight\" and a type of \"whole\""
+  step "I select the rate with a term of \"2week\" and a type of \"whole\""
   step "I click on the initiate advance button"
   step "I should not see the quick advance table"
   step "I should see a preview of the quick advance"
