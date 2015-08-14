@@ -65,8 +65,10 @@ describe MAPI::ServiceApp do
     let(:loan_terms_result) do
       inner_peace = Hash.new(Hash.new(true))
       h = Hash.new(inner_peace)
-      h[:overnight] = { whole: { trade_status: false } }
+      h[:overnight] = { whole:  { trade_status: false, display_status: true  } }
+      h[:open]      = { agency: { trade_status: true,  display_status: false } }
       h[:overnight].default= inner_peace
+      h[:open].default= inner_peace
       h
     end
     let(:rate_summary) do
@@ -86,6 +88,7 @@ describe MAPI::ServiceApp do
           r = rate_summary[loan_type][loan_term]
           blacked_out = blackout_dates.include?(Date.parse(r[:maturity_date]))
           cutoff      = !loan_terms_result[loan_term][loan_type][:trade_status]
+          disabled    = !loan_terms_result[loan_term][loan_type][:display_status]
           expect(r[:payment_on]).to be_kind_of(String)
           expect(r[:interest_day_count]).to be_kind_of(String)
           expect(r[:maturity_date]).to be_kind_of(String)
@@ -95,7 +98,7 @@ describe MAPI::ServiceApp do
           expect(r[:rate]).to be_kind_of(String)
           expect(r[:rate]).to match(/\d+\.\d+/)
           expect(r[:disabled]).to be_boolean
-          expect(r[:disabled]).to be == (blacked_out || cutoff)
+          expect(r[:disabled]).to be == (blacked_out || cutoff || disabled)
         end
       end
     end
