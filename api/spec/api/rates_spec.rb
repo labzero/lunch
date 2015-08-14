@@ -52,28 +52,40 @@ describe MAPI::ServiceApp do
   describe "rate summary" do
     before do
       allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(blackout_dates)
+      allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(loan_terms_result)
     end
     let(:today) { Date.today }
     let(:one_week_away) { today + 1.week }
     let(:three_weeks_away) { today + 3.week }
     let(:blackout_dates) { [one_week_away, three_weeks_away] }
+    loan_terms = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
+    loan_types = [:whole, :agency, :aaa, :aa]
+    let(:loan_terms) { loan_terms }
+    let(:loan_types) { loan_types }
+    let(:loan_terms_result) do
+      inner_peace = Hash.new(Hash.new(true))
+      h = Hash.new(inner_peace)
+      h[:overnight] = { whole: { trade_status: false } }
+      h[:overnight].default= inner_peace
+      h
+    end
     let(:rate_summary) do
       get '/rates/summary'
       JSON.parse(last_response.body).with_indifferent_access
     end
-    let(:loan_terms) { [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year'] }
-    let (:loan_types) { [:whole, :agency, :aaa, :aa] }
     it "should return rates for default loan_types at default loan_terms" do
-      loan_terms.each do |loan_type|
-        loan_types.each do |loan_term|
-          expect(rate_summary[loan_term][loan_type][:rate]).to be_kind_of(String)
+      loan_types.each do |loan_type|
+        loan_terms.each do |loan_term|
+          expect(rate_summary[loan_type][loan_term][:rate]).to be_kind_of(String)
         end
       end
     end
-    it "should return other data relevant to each loan_term" do
-      loan_types.each do |loan_type|
-        loan_terms.each do |loan_term|
+    loan_types.each do |loan_type|
+      loan_terms.each do |loan_term|
+        it "should return correct data for rate_summary[#{loan_type}][#{loan_term}]" do
           r = rate_summary[loan_type][loan_term]
+          blacked_out = blackout_dates.include?(Date.parse(r[:maturity_date]))
+          cutoff      = !loan_terms_result[loan_term][loan_type][:trade_status]
           expect(r[:payment_on]).to be_kind_of(String)
           expect(r[:interest_day_count]).to be_kind_of(String)
           expect(r[:maturity_date]).to be_kind_of(String)
@@ -83,7 +95,7 @@ describe MAPI::ServiceApp do
           expect(r[:rate]).to be_kind_of(String)
           expect(r[:rate]).to match(/\d+\.\d+/)
           expect(r[:disabled]).to be_boolean
-          expect(r[:disabled]).to be == blackout_dates.include?(Date.parse(r[:maturity_date]))
+          expect(r[:disabled]).to be == (blacked_out || cutoff)
         end
       end
     end

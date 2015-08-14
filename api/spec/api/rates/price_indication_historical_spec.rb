@@ -17,6 +17,7 @@ describe MAPI::ServiceApp do
     end
     it 'should return the date at which the bank starting storing data for that credit type if the given start_date occurs before that date' do
       start_date = '1992-01-01'
+      allow(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:fake_historical_price_indications).and_return([]) # speed up tests.. we don't need to fake out date for 22 years to get the start date`
       expect((get "rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/#{credit_type}"; JSON.parse(last_response.body))['start_date'].to_date).to eq(MAPI::Shared::Constants::IRDB_CODE_TERM_MAPPING[:standard][:frc][:min_date])
     end
     it 'should return the collateral_type that was passed in' do
