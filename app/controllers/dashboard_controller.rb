@@ -146,7 +146,7 @@ class DashboardController < ApplicationController
   def quick_advance_preview
     @current_member_name = current_member_name
     @preview = true
-    check = EtransactAdvancesService.new(request).check_limits(params[:amount].to_f, params[:advance_term])
+    check = EtransactAdvancesService.new(request).check_limits(current_member_id, params[:amount].to_f, params[:advance_term])
     if check[:status] == 'pass'
       preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, params[:check_capstock], session['signer_full_name'])
       if preview[:status] && preview[:status].include?('CapitalStockError')

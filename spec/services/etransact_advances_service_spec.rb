@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe EtransactAdvancesService do
   subject { EtransactAdvancesService.new(double('request', uuid: '12345')) }
@@ -108,25 +108,78 @@ describe EtransactAdvancesService do
       quick_advance_execute
     end
   end
-  describe '`check_limits` method', :vcr do
+
+  describe '`check_limits` method' do
+    m_id = 750
+    l_amount =  Random.rand(0..10000)
+    let(:low_days) { rand(0..9999) }
+    let(:high_days) { low_days + rand(1..9999) }
+    let(:member_id) {m_id}
     let(:advance_term) {'someterm'}
-    let(:amount) { 100 }
-    let(:check_limits) {subject.check_limits(amount, advance_term)}
-    it 'should return a hash back' do
-      expect(check_limits).to be_kind_of(Hash)
+    let(:low_amount) { l_amount }
+    let(:amount) { Random.rand(100000..1000000) }
+    let(:high_amount) { Random.rand(10000000..99999999) }
+    let(:low_check_limits) {subject.check_limits(member_id, low_amount, advance_term)}
+    let(:check_limits) {subject.check_limits(member_id, amount, advance_term)}
+    let(:high_check_limits) {subject.check_limits(member_id, high_amount, advance_term)}
+    let(:low_check)  {{:status=>'low', :low=>amount, :high=>high_amount}}
+    let(:pass_result) {{:status => 'pass', :low => amount, :high => high_amount}}
+    let(:high_result) {{:status => 'high', :low => amount, :high => high_amount}}
+    let(:limits_response) {[{"WHOLE_LOAN_ENABLED" => "N","SBC_AGENCY_ENABLED" => "Y", "SBC_AAA_ENABLED" => "Y", "SBC_AA_ENABLED" => "Y", "LOW_DAYS_TO_MATURITY" => low_days,
+                             "HIGH_DAYS_TO_MATURITY" => high_days, "MIN_ONLINE_ADVANCE" => amount, "TERM_DAILY_LIMIT" => high_amount, "PRODUCT_TYPE" => "VRC",
+                             "END_TIME" => "1700", "OVERRIDE_END_DATE" => "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME" => "1700"}]}
+    let(:todays_advances_amount_response) {rand(1..9)}
+    it_should_behave_like 'a MAPI backed service object method', :check_limits, [m_id, l_amount, '1Week']
+    describe 'without service exceptions' do
+      before do
+        allow(subject).to receive(:get_days_to_maturity).with(advance_term).and_return(low_days)
+        allow(subject).to receive(:todays_advances_amount).with(member_id, anything, anything).and_return(todays_advances_amount_response)
+        allow(subject).to receive(:get_json).with(:check_limits, anything).and_return(limits_response)
+      end
+      it 'should return a hash back' do
+        expect(check_limits).to be_kind_of(Hash)
+      end
+      it 'should call EtransactAdvancesService#todays_advances_amount' do
+        expect(subject).to receive(:todays_advances_amount)
+        check_limits
+      end
+      it 'should return low if limits are not passing min tests' do
+        expect(low_check_limits).to eq(low_check)
+      end
+      it 'should return pass if limits are passing tests' do
+        expect(check_limits).to eq(pass_result)
+      end
+      it 'should return high if limits are not passing max tests' do
+        expect(high_check_limits).to eq(high_result)
+      end
     end
-    it 'should return nil if there was an API error' do
-      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
-      expect(check_limits).to eq(nil)
-    end
-    it 'should return nil if there was a connection error' do
-      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
-      expect(check_limits).to eq(nil)
-    end
-    it 'returns nil if there is a JSON parsing error' do
-      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
-      allow(Rails.logger).to receive(:warn)
-      expect(check_limits).to be(nil)
+  end
+
+  describe '`todays_advances_amount` method' do
+    l_days = 0
+    h_days = 1
+    m_id = 750
+    let(:member_id) {m_id}
+    let(:low_days) {l_days}
+    let(:high_days) {h_days}
+    let(:current_part1) {rand(0..10000)}
+    let(:current_part2) {rand(0..10000)}
+    let(:maturity_date) {double('Maturity Date')}
+    let(:todays_advances_amount) {subject.todays_advances_amount(member_id, low_days, high_days)}
+    let(:todays_advances_amount_response) {[{"maturity_date"=> maturity_date, "current_par"=> current_part1}, {"maturity_date"=> maturity_date, "current_par"=> current_part2 }]}
+    it_should_behave_like 'a MAPI backed service object method', :todays_advances_amount, [m_id, l_days, h_days]
+    describe 'without service exceptions' do
+      before do
+        allow(subject).to receive(:get_json).with(:todays_advances_amount, anything).and_return(todays_advances_amount_response)
+      end
+      it 'should return a number' do
+        allow(subject).to receive(:get_days_to_maturity_date).with(maturity_date).and_return(low_days)
+        expect(todays_advances_amount).to eq(current_part1+current_part2)
+      end
+      it 'should return zero' do
+        allow(subject).to receive(:get_days_to_maturity_date).with(maturity_date).and_return(10)
+        expect(todays_advances_amount).to eq(0)
+      end
     end
   end
 
