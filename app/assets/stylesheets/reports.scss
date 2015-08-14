@@ -207,6 +207,17 @@
     }
   }
 
+  thead + tbody,
+  &.table-dividend-summary tbody,
+  &.securities-services-table {
+    tr:nth-child(odd) {
+      background-color: transparent;
+    }
+    tr:nth-child(even) {
+      background-color: $lightest-blue;
+    }
+  }
+
   tfoot {
     @extend %table-footer-cell;
   }

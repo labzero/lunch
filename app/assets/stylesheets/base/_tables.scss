@@ -8,6 +8,16 @@
       background: $lightest-blue;
     }
   }
+  thead + tbody {
+    tr:nth-child(odd) td,
+    tr:nth-child(odd) th {
+      background: transparent;
+    }
+    tr:nth-child(even) td,
+    tr:nth-child(even) th {
+      background: $lightest-blue;
+    }
+  }
 }
 
 td {
