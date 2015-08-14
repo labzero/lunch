@@ -37,12 +37,6 @@ class DashboardController < ApplicationController
       [t('dashboard.previous_activity.overnight_vrc'), 39282021, DateTime.new(2014,2,14)]
     ]
 
-    @anticipated_activity = [
-      [t('dashboard.anticipated_activity.dividend'), 44503, DateTime.new(2014,9,3), t('dashboard.anticipated_activity.estimated')],
-      [t('dashboard.anticipated_activity.advance_interest_payment'), -45345, DateTime.new(2014,9,2), ''],
-      [t('dashboard.anticipated_activity.stock_purchase'), -37990, DateTime.new(2014,8,12), t('dashboard.anticipated_activity.estimated')],
-    ]
-
     # @account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
     if !profile
       profile = {
@@ -99,13 +93,6 @@ class DashboardController < ApplicationController
     else
       calculate_gauge_percentages({total: 0}, 0)
     end
-
-
-
-    @reports_daily = 2
-    @reports_weekly = 1
-    @reports_monthly = 4
-    @reports_quarterly = 2
 
     current_rate = rate_service.current_overnight_vrc
     @current_overnight_vrc = if current_rate

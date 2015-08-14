@@ -375,13 +375,6 @@ en:
     previous_activity:
       title: Previous Activity
       overnight_vrc: Overnight/Open VRC
-    anticipated_activity:
-      title: Anticipated Activity
-      dividend: Dividend
-      advance_interest_payment: Advance Interest Payment
-      stock_purchase: Stock Purchase
-      estimated: Estimated
-      total_maturing_today: Total Maturing Today
     contacts:
       title: Contact
       icon_alt_text: Contact
@@ -497,17 +490,6 @@ en:
         updated_rate: The rate for this advance has changed from %{old_rate} to %{new_rate}.
         advance_unavailable: This advance is not available right now. For more information, call the Member Services Desk at %{phone_number}.
         unavailable_html: This advance is unavailable online right now. Call Member Services at %{phone_number} for more information.
-    reports:
-      title: Reports
-      as_of_yesterday: As of yesterday
-      daily: Daily
-      weekly: Weekly
-      monthly: Monthly
-      quarterly: Quarterly
-      annually: Annually
-      advances_detail: Advances
-      forward_commitments: Forward Commitments
-      view_reports: View All Reports
     your_account:
       title: Your Account
       account_summary: Account Summary
@@ -526,8 +508,6 @@ en:
         agency: Agency
         aaa: AAA
         aa: AA
-      projected_sta_balance:
-        title: Projected STA Balance
       table:
         balance: 'STA Balance:*'
         balance_footnote: '*as of close of business on prior business day'
