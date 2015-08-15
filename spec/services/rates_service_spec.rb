@@ -85,7 +85,7 @@ describe RatesService do
     end
   end
 
-  describe 'the `rate` method', :vcr do
+  describe 'the `rate` method' do #, :vcr do
     let(:mapi_response) {
       {
         rate: double('rate', to_f: nil),
