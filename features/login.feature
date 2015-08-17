@@ -61,3 +61,15 @@ Scenario: User logs out without selecting a member bank
   Then I should see the member bank selector
   When I log out
   Then I should be logged out
+
+@jira-mem-671 @wip
+Scenario: User accepts the Terms of Service
+  Given I am logged out
+  And I visit the root path
+  When I fill in and submit the login form with a first-time user
+  Then I should see the Terms of Use page
+  When I accept the Terms of Use
+  Then I should see dashboard modules
+  When I log out
+  When I fill in and submit the login form with a first-time user
+  Then I should see dashboard modules

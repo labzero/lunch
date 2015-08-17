@@ -221,6 +221,10 @@ class User < ActiveRecord::Base
     Devise::LDAP::Adapter.get_groups(login_with, self.ldap_domain)
   end
 
+  def accepted_terms?
+    self.terms_accepted_at.present?
+  end
+
   protected
 
   def reload_ldap_entry

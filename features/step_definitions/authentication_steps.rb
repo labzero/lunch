@@ -40,13 +40,27 @@ Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
   end
 
   step %{I am logged in as "#{user['username']}" with password "#{user['password']}"}
+  needs_to_accept_terms = page.has_css?('.terms-row h1', text: I18n.t('terms.title'), wait: 5) rescue Capybara::ElementNotFound
+  step %{I accept the Terms of Use} if needs_to_accept_terms
   needs_member = page.has_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 5) rescue Capybara::ElementNotFound
   step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} if needs_member
   page.assert_selector('.main-nav .nav-logout')
 end
 
+Then(/^I should see the Terms of Use page$/) do
+  page.assert_selector('.terms-row h1', text: I18n.t('terms.title'))
+end
+
+When (/^I accept the Terms of Use$/) do
+  page.find(".primary-button[value=\'#{I18n.t('terms.agree')}\']").click
+end
+
 When(/^I log in$/) do
   step %{I log in as an "extranet user"}
+end
+
+When(/^I fill in and submit the login form with a first-time user$/) do
+  # implement way of simulating first-time user to test Terms of Service flow
 end
 
 When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|
@@ -60,6 +74,8 @@ When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|
   end
 
   step %{I log in as "#{user['username']}" with password "#{user['password']}"}
+  needs_to_accept_terms = page.has_css?('.terms-row h1', text: I18n.t('terms.title'), wait: 5) rescue Capybara::ElementNotFound
+  step %{I accept the Terms of Use} if needs_to_accept_terms
   needs_member = page.has_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 5) rescue Capybara::ElementNotFound
   step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} if needs_member
 end
