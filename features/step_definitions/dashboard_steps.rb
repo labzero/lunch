@@ -233,7 +233,7 @@ Given(/^I enter my SecurID pin and token$/) do
   step %{I enter my SecurID token}
 end
 
-Then(/^I should see an? "(.*?)" error with amount (\d+) and type "(.*?)"$/) do |error_type, amount, type|
+Then(/^I should see an? "(.*?)" error(?: with amount (\d+) and type "(.*?)")?$/) do |error_type, amount, type|
   collateral_type = case type
     when 'whole'
       I18n.t('dashboard.quick_advance.table.mortgage')
@@ -250,7 +250,9 @@ Then(/^I should see an? "(.*?)" error with amount (\d+) and type "(.*?)"$/) do |
     when 'insufficient collateral'
       /\A#{Regexp.quote(strip_tags(I18n.t("dashboard.quick_advance.error.insufficient_collateral_html", amount: fhlb_formatted_currency(amount.to_i, precision: 0), collateral_type: collateral_type)))}\z/
     when 'advance unavailable'
-      I18n.t('dashboard.quick_advance.error.advance_unavailable', phone_number: fhlb_formatted_phone_number('8004443452'))
+      /\A#{Regexp.quote(I18n.t('dashboard.quick_advance.error.advance_unavailable', phone_number: fhlb_formatted_phone_number('8004443452')))}\z/
+    when 'rate expired'
+      /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.rate_expired"))}\z/
     else
       raise 'Unknown error_type'
   end

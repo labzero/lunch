@@ -152,6 +152,7 @@ Scenario: Users aren't required to enter a SecurID token a second time
   When I click on the quick advance confirm button
   Then I should see confirmation number for the advance
 
+
 @data-unavailable @jira-mem-872
 Scenario: The rate changes from the time the user sees the table to the time they see the preview
   Given I visit the dashboard
@@ -169,3 +170,11 @@ Scenario: Users get an error if their requested advance would push FHLB over its
   When I click on the initiate advance button
   Then I should see an "advance unavailable" error with amount 100003 and type "whole"
 
+@jira-mem-117
+Scenario: Users who wait too long to perform an advance are told that the rate has expired.
+  Given I visit the dashboard
+  And I am on the quick advance preview screen
+  And I wait for 70 seconds
+  And I enter my SecurID pin and token
+  When I click on the quick advance confirm button
+  Then I should see a "rate expired" error

@@ -1,0 +1,91 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/etransact_advances/signer_full_name/local
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      X-Request-Id:
+      - ''
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '9'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Mon, 17 Aug 2015 22:20:32 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: Test User
+    http_version: 
+  recorded_at: Mon, 17 Aug 2015 22:20:32 GMT
+- request:
+    method: post
+    uri: http://localhost:3100/mapi/etransact_advances/execute_advance/750/100000.0/sometype/someterm/0.17/Test%20User
+    body:
+      encoding: ASCII-8BIT
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      X-Request-Id:
+      - ''
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '261'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Mon, 17 Aug 2015 22:20:32 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"advance_rate":0.17,"advance_amount":100000,"advance_term":"someterm","advance_type":"sometype","interest_day_count":"ACT/ACT","payment_on":"Maturity","funding_date":"2015-08-17","maturity_date":"2015-08-17","status":["Success"],"confirmation_number":"130977"}'
+    http_version: 
+  recorded_at: Mon, 17 Aug 2015 22:20:32 GMT
+recorded_with: VCR 2.9.3

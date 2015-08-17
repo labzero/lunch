@@ -36,6 +36,10 @@ When(/^I scroll to the bottom of the screen$/) do
   page.execute_script "window.scrollBy(0,10000)"
 end
 
+Given(/^I wait for (\d+) seconds$/) do |seconds|
+  sleep(seconds.to_f)
+end
+
 def links_from_frame frame_name, opts={limit: 20}
   cur_frame = page.find("frame[name=#{frame_name}]")
 

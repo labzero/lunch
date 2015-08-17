@@ -185,7 +185,6 @@ class DashboardController < ApplicationController
       @error_message = check[:status].try(:to_sym)
       @min_amount = check[:low]
       @max_amount = check[:high]
-      populate_advance_request_view_parameters
       response_html = render_to_string :quick_advance_error, layout: false
     end
     render json: {preview_success: preview_success, preview_error: preview_error, html: response_html, authorized_amount: @authorized_amount, gross_amount: @gross_amount, net_stock_required: @net_stock_required, gross_net_stock_required: @gross_net_stock_required, original_amount: @original_amount}
@@ -245,11 +244,11 @@ class DashboardController < ApplicationController
     raise 'No RateTimeout setting found' unless settings
     timeout = settings[:rate_timeout]
     session[:advance_request] ||= {}
-    session[:advance_request]['timestamp'] && (Time.zone.now - session[:advance_request]['timestamp'].to_datetime) >= timeout
+    session[:advance_request]['timestamp'].present? && (Time.zone.now - session[:advance_request]['timestamp'].to_datetime) >= timeout
   end
 
   def populate_advance_request_view_parameters
-    advance_params = advance_request_parameters
+    advance_params = advance_request_parameters || {}
     @authorized_amount = advance_params[:authorized_amount]
     @exception_message = advance_params[:exception_message]
     @cumulative_stock_required = advance_params[:cumulative_stock_required]
@@ -261,25 +260,25 @@ class DashboardController < ApplicationController
     @gross_current_trade_stock_required = advance_params[:gross_current_trade_stock_required]
     @gross_pre_trade_stock_required = advance_params[:gross_pre_trade_stock_required]
     @gross_net_stock_required = advance_params[:gross_net_stock_required]
-    @advance_amount = advance_params[:advance_amount].to_f if advance_params[:advance_amount]
-    @advance_description = get_description_from_advance_term(advance_params[:advance_term]) if advance_params[:advance_term]
-    @advance_program = get_program_from_advance_type(advance_params[:advance_type]) if advance_params[:advance_type]
-    @advance_type = get_type_from_advance_type(advance_params[:advance_type]) if advance_params[:advance_type]
+    @advance_amount = advance_params[:advance_amount].try(:to_f)
+    @advance_description = get_description_from_advance_term(advance_params[:advance_term])
+    @advance_program = get_program_from_advance_type(advance_params[:advance_type])
+    @advance_type = get_type_from_advance_type(advance_params[:advance_type])
     @interest_day_count = advance_params[:interest_day_count]
     @payment_on = advance_params[:payment_on]
-    @advance_term = advance_params[:advance_term].capitalize if advance_params[:advance_term]
+    @advance_term = advance_params[:advance_term].try(:capitalize)
     @funding_date = advance_params[:funding_date]
     @maturity_date = advance_params[:maturity_date]
-    @advance_rate = advance_params[:advance_rate].to_f if advance_params[:advance_rate]
+    @advance_rate = advance_params[:advance_rate].try(:to_f)
     @initiated_at = advance_params[:initiated_at]
     @advance_number = advance_params[:confirmation_number]
-    @collateral_type = COLLATERAL_TYPE_MAPPING[advance_params[:advance_type].to_sym] if advance_params[:advance_type]
+    @collateral_type = get_collateral_type_from_advance_type(advance_params[:advance_type])
   end
 
   def advance_request_parameters(advance_parameters=nil)
     session[:advance_request] ||= {}
     session[:advance_request]['parameters'] = advance_parameters if advance_parameters
-    session[:advance_request]['parameters'].with_indifferent_access
+    session[:advance_request]['parameters'].try(:with_indifferent_access)
   end
 
   def advance_request_timestamp!
@@ -318,34 +317,42 @@ class DashboardController < ApplicationController
   end
 
   def get_description_from_advance_term(advance_term)
-    advance_term = advance_term.upcase
-    case advance_term
-      when 'OVERNIGHT', 'OPEN'
-        I18n.t('dashboard.quick_advance.vrc_title')
-      else
-        I18n.t('dashboard.quick_advance.frc_title')
+    if advance_term
+      advance_term = advance_term.upcase
+      case advance_term
+        when 'OVERNIGHT', 'OPEN'
+          I18n.t('dashboard.quick_advance.vrc_title')
+        else
+          I18n.t('dashboard.quick_advance.frc_title')
+      end
     end
   end
+
   def get_program_from_advance_type(advance_type)
-    advance_type = advance_type.upcase.gsub(/\s+/, "")
-    case advance_type
-      when 'WHOLELOAN', 'WHOLE'
-        I18n.t('dashboard.quick_advance.table.axes_labels.standard')
-      when 'SBC-AGENCY', 'SBC-AAA', 'SBC-AA', 'AGENCY', 'AAA', 'AA'
-        I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed')
+    if advance_type
+      advance_type = advance_type.upcase.gsub(/\s+/, "")
+      case advance_type
+        when 'WHOLELOAN', 'WHOLE'
+          I18n.t('dashboard.quick_advance.table.axes_labels.standard')
+        when 'SBC-AGENCY', 'SBC-AAA', 'SBC-AA', 'AGENCY', 'AAA', 'AA'
+          I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed')
+      end
     end
   end
+
   def get_type_from_advance_type(advance_type)
-    advance_type = advance_type.upcase.gsub(/\s+/, "")
-    case advance_type
-      when 'WHOLELOAN', 'WHOLE'
-        I18n.t('dashboard.quick_advance.table.whole_loan')
-      when 'SBC-AGENCY', 'AGENCY'
-        I18n.t('dashboard.quick_advance.table.agency')
-      when 'SBC-AAA', 'AAA'
-        I18n.t('dashboard.quick_advance.table.aaa')
-      when 'SBC-AA', 'AA'
-        I18n.t('dashboard.quick_advance.table.aa')
+    if advance_type
+      advance_type = advance_type.upcase.gsub(/\s+/, "")
+      case advance_type
+        when 'WHOLELOAN', 'WHOLE'
+          I18n.t('dashboard.quick_advance.table.whole_loan')
+        when 'SBC-AGENCY', 'AGENCY'
+          I18n.t('dashboard.quick_advance.table.agency')
+        when 'SBC-AAA', 'AAA'
+          I18n.t('dashboard.quick_advance.table.aaa')
+        when 'SBC-AA', 'AA'
+          I18n.t('dashboard.quick_advance.table.aa')
+      end
     end
   end
 
@@ -364,5 +371,9 @@ class DashboardController < ApplicationController
       old_rate: old_rate.to_f,
       rate_changed: rate_changed
     }
+  end
+  
+  def get_collateral_type_from_advance_type(advance_type)
+    COLLATERAL_TYPE_MAPPING[advance_type.try(:to_sym)] if advance_type
   end
 end
