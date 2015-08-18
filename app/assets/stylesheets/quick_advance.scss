@@ -116,27 +116,29 @@ $faded-opacity: 0.4 !default;
         border-right: 1px solid $dark-gray;
       }
       .tooltip {
-        width: 160px;
-        padding: 10px;
+        @extend %inverted-tooltip;
+        margin-top: 10px;
         box-sizing: border-box;
         z-index: 2;
         .tooltip-pair {
           overflow: hidden;
           margin-bottom: 5px;
+          line-height: normal;
+          padding: 0 5px;
           &:last-child {
             margin-bottom: 0;
           }
         }
         span:first-child {
-          float: left;
           font-size: 0.8rem;
+          margin-right: 5px;
         }
         span:last-child {
-          float: right;
           font-size: 0.8667rem;
         }
       }
       &:hover {
+        z-index: 2;
         .tooltip {
           display: block;
         }
