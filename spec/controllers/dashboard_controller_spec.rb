@@ -1009,7 +1009,7 @@ RSpec.describe DashboardController, :type => :controller do
       initiated_at: :initiated_at,
       advance_number: :confirmation_number,
       advance_amount: {key: :advance_amount, chain: [:to_f]},
-      advance_term: {key: :advance_term, chain: [:capitalize]},
+      advance_term: :advance_term,
       advance_rate: {key: :advance_rate, chain: [:to_f]},
       advance_description: {key: :advance_term, method: :get_description_from_advance_term},
       advance_type: {key: :advance_type, method: :get_type_from_advance_type},

@@ -80,7 +80,7 @@ Scenario: Go back to rate table from preview in Quick Advance flyout
 Scenario: Confirm rate from Quick Advance preview dialog
   Given I visit the dashboard
   And I open the quick advance flyout
-  And I select the rate with a term of "overnight" and a type of "whole"
+  And I select the rate with a term of "2week" and a type of "whole"
   And I click on the initiate advance button
   And I should not see the quick advance table
   And I should see a preview of the quick advance

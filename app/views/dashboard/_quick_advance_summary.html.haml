@@ -24,7 +24,7 @@
     %dd= advance_type || t('global.missing_value')
   %dl
     %dt= t('dashboard.quick_advance.field_headings.advance_term') +':'
-    %dd= advance_term || t('global.missing_value')
+    %dd= I18n.t("dashboard.quick_advance.table.axes_labels.#{advance_term}") || t('global.missing_value')
     - if rate_changed
       %dt.quick-advance-updated-rate= t('dashboard.quick_advance.field_headings.advance_rate') +':'
       %dd

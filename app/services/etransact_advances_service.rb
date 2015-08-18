@@ -97,7 +97,7 @@ class EtransactAdvancesService < MAPIService
   end
 
   def settings
-    get_json(:settings, 'etransact_advances/settings')
+    get_hash(:settings, 'etransact_advances/settings')
   end
 
   protected
