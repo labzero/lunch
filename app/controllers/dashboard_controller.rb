@@ -112,11 +112,11 @@ class DashboardController < ApplicationController
     @contacts = members_service.member_contacts(current_member_id) || {}
     default_image_path = 'placeholder-usericon.svg'
     if @contacts[:rm] && @contacts[:rm][:username]
-      rm_image_path = "#{@contacts[:rm][:username]}.jpg"
+      rm_image_path = "#{@contacts[:rm][:username].downcase}.jpg"
       @contacts[:rm][:image_url] = Rails.application.assets.find_asset(rm_image_path) ? rm_image_path : default_image_path
     end
     if @contacts[:cam] && @contacts[:cam][:username]
-      cam_image_path = "#{@contacts[:cam][:username]}.jpg"
+      cam_image_path = "#{@contacts[:cam][:username].downcase}.jpg" 
       @contacts[:cam][:image_url] = Rails.application.assets.find_asset(cam_image_path) ? cam_image_path : default_image_path
     end
   end
