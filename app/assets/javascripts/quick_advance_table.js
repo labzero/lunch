@@ -256,7 +256,7 @@
       $quickAdvanceCapstock.addClass('loading');
       var height = $flyoutBottomSection.find('.quick-advance-body p:not(.quick-advance-loading-message)').height();
       $flyoutBottomSection.find('.quick-advance-loading-message').height(height);
-      $flyoutBottomSection.find('button').attr('disabled', 'disabled');
+      $flyoutBottomSection.find('button, input').attr('disabled', 'disabled');
       $flyoutTopSection.find('.quick-advance-capstock-subheading').hide();
       $flyoutTopSection.find('.quick-advance-preview-subheading').show();
     };
