@@ -214,8 +214,7 @@ class DashboardController < ApplicationController
         populate_advance_request_view_parameters
         @error_message = :rate_expired
         response_html = render_to_string :quick_advance_error, layout: false
-      end
-      unless expired_rate
+      else
         confirmation = EtransactAdvancesService.new(request).quick_advance_execute(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, session['signer_full_name'])
         if confirmation
           advance_request_parameters(confirmation)
