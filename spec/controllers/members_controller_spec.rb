@@ -73,7 +73,8 @@ RSpec.describe MembersController, type: :controller do
     it 'redirects to the `after_sign_in_path_for` if the session already has a selected member' do
       allow(subject).to receive(:current_member_id).and_return(1001)
       expect(subject).to receive(:after_sign_in_path_for).and_return(dashboard_path)
-      expect(subject.session).to_not receive(:[]=) # did we abort early?
+      expect(subject.session).to_not receive(:[]=).with('member_id', anything) # did we abort early?
+      expect(subject.session).to_not receive(:[]=).with('member_name', anything) # did we abort early?
       expect(make_request).to redirect_to(dashboard_path)
     end
   end
