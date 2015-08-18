@@ -98,27 +98,30 @@ class EtransactAdvancesService < MAPIService
 
   protected
 
+  def days_until(date)
+    (date - Date.today).to_i
+  end
+
   def get_days_to_maturity (term)
-    maturity_date = Date.today
-    if (term == 'overnight') || (term == 'open')
-      maturity_date = maturity_date + 1.day
-    elsif term[1].upcase == 'W'
-      maturity_date = maturity_date + (7*term[0].to_i).day
-    elsif term[1].upcase == 'M'
-      maturity_date = maturity_date + (term[0].to_i).month
-    elsif term[1].upcase == 'Y'
-      maturity_date = maturity_date + (term[0].to_i).year
+    case term
+    when /overnight|open/i
+        1
+    when /(\d+)w/i
+        7*$1.to_i
+    when /(\d+)m/i
+        days_until(Date.today + $1.to_i.month)
+    when /(\d+)y/i
+        days_until(Date.today + $1.to_i.year)
     end
-    (maturity_date - Date.today).to_i
   end
 
   def get_days_to_maturity_date (trade_maturity_date)
-    if (trade_maturity_date == 'Overnight') || (trade_maturity_date == 'Open')
-      days = 1
+    case trade_maturity_date
+    when /overnight|open/i
+      1
     else
-      days = (Date.parse(trade_maturity_date) - Date.today()).to_i
+      days_until(Date.parse(trade_maturity_date))
     end
-    days
   end
 
 end

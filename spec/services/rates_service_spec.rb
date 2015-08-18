@@ -85,7 +85,7 @@ describe RatesService do
     end
   end
 
-  describe 'the `rate` method' do #, :vcr do
+  describe 'the `rate` method', :vcr do
     let(:mapi_response) {
       {
         rate: double('rate', to_f: nil),
@@ -173,6 +173,30 @@ describe RatesService do
     end
     it 'should return a data object from the MAPI endpoint' do
       expect(subject.current_price_indications(RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)).to be_kind_of(Array)
+    end
+  end
+
+  describe '`fake_quick_advance_response` method' do
+    let(:amount){ double('amount')}
+    let(:rate){ double('rate') }
+    let(:data) do
+      {
+        funding_date: (Date.today + 1.week).to_s,
+        maturity_date: (Date.today + 1.month).to_s,
+      }
+    end
+    %w(standard securities_backed variable_rate fixed_rate overnight open 1week 2week 3week 1month 2month 3month 6month 1year 2year 3year).each do |term|
+      %w(whole aa nonsense).each do |type|
+        it "should return a fake data structure for `#{term.inspect}` and `#{type.inspect}`" do
+          result = subject.send(:fake_quick_advance_response, data, amount, type, term, rate)
+          expect(result[:funding_date]).to be_a(Date)
+          expect(result[:maturity_date]).to be_a(Date)
+          expect(result[:advance_rate]).to eq(rate)
+          expect(result[:advance_amount]).to eq(amount)
+          expect(result[:advance_term]).to be_a(String)
+          expect(result[:advance_type]).to be_a(String)
+        end
+      end
     end
   end
 
