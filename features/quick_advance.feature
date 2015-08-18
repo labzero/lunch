@@ -46,9 +46,9 @@ Scenario: Quick Advance flyout tooltip
 Scenario: Select rate from Quick Advance flyout table
   Given I visit the dashboard
   And I open the quick advance flyout
-  And I see the unselected state for the cell with a term of "open" and a type of "whole"
-  When I select the rate with a term of "open" and a type of "whole"
-  Then I should see the selected state for the cell with a term of "open" and a type of "whole"
+  And I see the unselected state for the cell with a term of "2week" and a type of "whole"
+  When I select the rate with a term of "2week" and a type of "whole"
+  Then I should see the selected state for the cell with a term of "2week" and a type of "whole"
   And the initiate advance button should be active
 
 @jira-mem-737
@@ -60,7 +60,7 @@ Scenario: Certain rates should be missing due to black out dates
 Scenario: Preview rate from Quick Advance flyout table
   Given I visit the dashboard
   And I open the quick advance flyout
-  And I select the rate with a term of "overnight" and a type of "whole"
+  And I select the rate with a term of "2week" and a type of "whole"
   When I click on the initiate advance button
   Then I should not see the quick advance table
   And I should see a preview of the quick advance
@@ -95,7 +95,7 @@ Scenario: Confirm rate from Quick Advance preview dialog
 Scenario: Users with insufficient funds for Quick Advance get an error
   Given I visit the dashboard
   And I open the quick advance flyout and enter 100001
-  And I select the rate with a term of "overnight" and a type of "whole"
+  And I select the rate with a term of "2week" and a type of "whole"
   When I click on the initiate advance button
   Then I should see an "insufficient financing availability" error with amount 100001 and type "whole"
 
@@ -103,7 +103,7 @@ Scenario: Users with insufficient funds for Quick Advance get an error
 Scenario: Users with insufficient collateral for Quick Advance get an error
   Given I visit the dashboard
   And I open the quick advance flyout and enter 100002
-  And I select the rate with a term of "overnight" and a type of "whole"
+  And I select the rate with a term of "2week" and a type of "whole"
   When I click on the initiate advance button
   Then I should see an "insufficient collateral" error with amount 100002 and type "whole"
 
@@ -165,7 +165,7 @@ Scenario: The rate changes from the time the user sees the table to the time the
 Scenario: Users get an error if their requested advance would push FHLB over its total daily limit for web advances
   Given I visit the dashboard
   And I open the quick advance flyout and enter 100003
-  And I select the rate with a term of "overnight" and a type of "whole"
+  And I select the rate with a term of "2week" and a type of "whole"
   When I click on the initiate advance button
   Then I should see an "advance unavailable" error with amount 100003 and type "whole"
 
