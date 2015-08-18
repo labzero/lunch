@@ -1007,6 +1007,9 @@ td.dataTables_empty {
       border: none;
       min-width: 0 !important;
     }
+    thead + tbody tr:nth-child(even), &.table-dividend-summary tbody tr:nth-child(even), &.securities-services-table tr:nth-child(even) { 
+      background-color: transparent;
+    }
     tbody td {
       @include typography-print-table-cell;
     }

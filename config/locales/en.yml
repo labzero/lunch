@@ -180,6 +180,7 @@ en:
     range:
       date_to_current: "%{date} to date"
       custom: Custom date range
+      print: "%{start_date} - %{end_date}"
     single:
       input: "As of %{date}"
       custom: Custom date
@@ -1137,6 +1138,7 @@ en:
     merger_notice: In the event of a merger, this report may not include all advances from the acquired instiution.
     advances_and_securities_agreement_notice: Nothing in this report in any way ammends, modifies, or waives the terms of your Advances and Securities Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issues puruant to that Agreement. The Bank expressly disclaims and and all liability that may arise from your institution’s reliance on any information contained in, or errors or omissions made with respect to, this report. Please call (415) 616-2559 if you have any questions.
     pdf_footer: "%{report_name} as of %{date}"
+    pdf_footer_range: "%{report_name} %{date}"
     anticipated_transactions: The records included in this report are anticipated transactions for the listed settlement dates. These transactions are subject to change prior to final settlement. Net adjustment credit and/or debit amounts will be posted to your STA on the settlement date.
     general_information:
       title: General Information
