@@ -104,20 +104,20 @@ class EtransactAdvancesService < MAPIService
 
   def get_days_to_maturity (term)
     case term
-    when /^overnight|open$/i
+    when /\Aovernight|open\z/i
         1
-    when /(\d+)w/i
+    when /\A(\d+)w/i
         7*$1.to_i
-    when /(\d+)m/i
+    when /\A(\d+)m/i
         days_until(Date.today + $1.to_i.month)
-    when /(\d+)y/i
+    when /\A(\d+)y/i
         days_until(Date.today + $1.to_i.year)
     end
   end
 
   def get_days_to_maturity_date (trade_maturity_date)
     case trade_maturity_date
-    when /^overnight|open$/i
+    when /\Aovernight|open\z/i
       1
     else
       days_until(Date.parse(trade_maturity_date))
