@@ -40,3 +40,14 @@ Rails.application.configure do
   # Raises error for missing translations
   config.action_view.raise_on_missing_translations = true
 end
+
+def find_available_port
+  server = TCPServer.new(nil, 0)
+  server.addr[1]
+ensure
+  server.close if server
+end
+
+port = ENV['BYEBUG_PORT'] || find_available_port
+puts "Remote debugger on port #{port}"
+Byebug.start_server 'localhost', port
