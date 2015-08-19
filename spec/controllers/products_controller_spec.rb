@@ -22,4 +22,15 @@ RSpec.describe ProductsController, :type => :controller do
     end
   end
 
+  describe 'GET frc_embedded' do
+    it_behaves_like 'a user required action', :get, :frc_embedded
+    before { get :frc_embedded }
+    it 'should render the frc_embedded view' do
+      expect(response.body).to render_template('frc_embedded')
+    end
+    it 'sets the @last_modified instance variable' do
+      expect(assigns[:last_modified]).to be_kind_of(Date)
+    end
+  end
+
 end

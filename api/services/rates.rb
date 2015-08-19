@@ -270,6 +270,13 @@ module MAPI
                 key :enum, LOAN_TERMS
                 key :description, 'The term of the loan.'
               end
+              parameter do
+                key :paramType, :path
+                key :name, :type
+                key :required, false
+                key :type, :string
+                key :description, 'The type of the loan.'
+              end
               response_message do
                 key :code, 200
                 key :message, 'OK'
@@ -521,13 +528,10 @@ module MAPI
           data_formatted.to_json
         end
 
-        relative_get "/:loan/:term" do
-          if !LOAN_MAPPING[params[:loan]]
-            halt 404, 'Loan Not Found'
-          end
-          if !TERM_MAPPING[params[:term]]
-            halt 404, 'Term Not Found'
-          end
+        relative_get '/:loan/:term/?:type?' do
+          halt 404, 'Loan Not Found' unless LOAN_MAPPING[params[:loan]]
+          halt 404, 'Term Not Found' unless TERM_MAPPING[params[:term]]
+          type = params[:type] ? params[:type] : 'Live'
 
           data = if MAPI::Services::Rates.init_mds_connection(settings.environment)
             @@mds_connection.operations
@@ -540,7 +544,7 @@ module MAPI
                     'v1:marketData' =>  [{
                       'v12:customRollingDay' => '0',
                       'v12:name' => LOAN_MAPPING[params[:loan]],
-                      'v12:pricingGroup' => [{'v12:id' => 'Live'}],
+                      'v12:pricingGroup' => [{'v12:id' => type}],
                       'v12:data' => [{
                         'v12:FhlbsfDataPoint' => [{
                         'v12:tenor' => [{

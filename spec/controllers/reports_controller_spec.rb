@@ -1088,6 +1088,12 @@ RSpec.describe ReportsController, :type => :controller do
       allow(response_hash).to receive(:[]).with(:total_interest)
     end
     it_behaves_like 'a user required action', :get, :securities_transactions
+    it 'can be disabled' do
+      allow(subject).to receive(:report_disabled?).and_return(true)
+      allow(transaction_hash).to receive(:collect)
+      get :securities_transactions
+      expect(assigns[:securities_transactions_table_data][:rows]).to eq([])
+    end
     it 'renders the securities_transactions view' do
       allow(response_hash).to receive(:[]).with(:transactions).and_return(transaction_hash)
       allow(transaction_hash).to receive(:collect)

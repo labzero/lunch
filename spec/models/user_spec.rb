@@ -598,6 +598,14 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`ldap_groups` method' do
+    let(:ldap_groups_result){ double('ldap groups result') }
+    it 'should call `Devise::LDAP::Adapter.get_groups`' do
+      allow(Devise::LDAP::Adapter).to receive(:get_groups).and_return(ldap_groups_result)
+      expect(subject.ldap_groups).to eq(ldap_groups_result)
+    end
+  end
+
   describe '`destroy_ldap_entry` method' do
     let(:call_method) {subject.send(:destroy_ldap_entry)}
     let(:username) { double('username') }

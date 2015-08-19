@@ -194,6 +194,16 @@ describe EtransactAdvancesService do
     end
   end
 
+  describe '`blackout_dates` method', :vcr do
+    let(:call_method) {subject.blackout_dates}
+    it_should_behave_like 'a MAPI backed service object method', :status
+    it 'should return the MAPI response object' do
+      response_object = double('A MAPI Response Object')
+      allow(JSON).to receive(:parse).and_return(response_object)
+      expect(call_method).to be(response_object)
+    end
+  end
+
   describe '`has_terms?` method', :vcr do
     let(:call_method) {subject.has_terms?(status_object)}
     let(:status_object) { {all_loan_status: {foo: {bar: {trade_status: true, display_status: true}}}} }
@@ -232,6 +242,59 @@ describe EtransactAdvancesService do
       expect(status_object).to receive(:[]).with(:all_loan_status).and_return(status_object[:all_loan_status])
       allow(subject).to receive(:status).and_return(status_object)
       subject.has_terms?
+    end
+  end
+
+  describe 'get_days_to_maturity' do
+    it 'should map overnight to 1' do
+      expect(subject.send(:get_days_to_maturity,'Overnight')).to eq( 1 )
+      expect(subject.send(:get_days_to_maturity,'overnight')).to eq( 1 )
+    end
+    it 'should map open to 1' do
+      expect(subject.send(:get_days_to_maturity,'Open')).to eq( 1 )
+      expect(subject.send(:get_days_to_maturity,'open')).to eq( 1 )
+    end
+    (1..4).each do |i|
+      it "should map #{i}w to #{7*i}" do
+        expect(subject.send(:get_days_to_maturity,"#{i}w")).to eq( ((Date.today + 7*i) - Date.today).to_i )
+      end
+    end
+    (1..12).each do |i|
+      it "should map #{i}m" do
+        expect(subject.send(:get_days_to_maturity,"#{i}m")).to eq( ((Date.today + i.month) - Date.today).to_i )
+      end
+    end
+    (1..10).each do |i|
+      it "should map #{i}y" do
+        expect(subject.send(:get_days_to_maturity,"#{i}y")).to eq( ((Date.today + i.year) - Date.today).to_i )
+      end
+    end
+  end
+
+  describe 'get_days_to_maturity_date' do
+    it 'should map overnight to 1' do
+      expect(subject.send(:get_days_to_maturity_date,'Overnight')).to eq( 1 )
+      expect(subject.send(:get_days_to_maturity_date,'overnight')).to eq( 1 )
+    end
+    it 'should map open to 1' do
+      expect(subject.send(:get_days_to_maturity_date,'Open')).to eq( 1 )
+      expect(subject.send(:get_days_to_maturity_date,'open')).to eq( 1 )
+    end
+    it 'should map a future date to the correct number of dates' do
+      r = (rand*100).round
+      expect(subject.send(:get_days_to_maturity_date, (Date.today + r.days).to_s)).to eq( r )
+    end
+  end
+
+  describe 'days_until' do
+    it 'should map today to 0' do
+      expect(subject.send(:days_until, Date.today)).to eq( 0 )
+    end
+    it 'should map tomorrow to 1' do
+      expect(subject.send(:days_until, Date.tomorrow)).to eq( 1 )
+    end
+    it 'should map next week to 7' do
+      expect(subject.send(:days_until, Date.today + 1.week)).to eq( 7 )
     end
   end
 end
