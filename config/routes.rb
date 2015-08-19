@@ -106,6 +106,8 @@ Rails.application.routes.draw do
     delete 'logout' => 'users/sessions#destroy', :as => :destroy_user_session
     get '/member' => 'members#select_member', :as => :members_select_member
     post '/member' => 'members#set_member', :as => :members_set_member
+    get 'member/terms' => 'members#terms', :as => :terms
+    post 'member/terms' => 'members#accept_terms', :as => :accept_terms
   end
 
   root 'users/sessions#new'

@@ -623,4 +623,17 @@ RSpec.describe User, :type => :model do
       expect{call_method}.to raise_error(ActiveRecord::Rollback)
     end
   end
+
+  describe '`accepted_terms?` method' do
+    let(:stored_value) { double('a stored value') }
+    let(:date_time) { DateTime.new(2015,1,1) }
+    it 'returns true if there is a value for the `terms_accepted_at` attr' do
+      allow(subject).to receive(:terms_accepted_at).and_return(date_time)
+      expect(subject.accepted_terms?).to eq(true)
+    end
+    it 'returns false if there is a value for the `terms_accepted_at` attr' do
+      expect(subject.accepted_terms?).to eq(false)
+    end
+  end
+
 end
