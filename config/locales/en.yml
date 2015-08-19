@@ -79,7 +79,7 @@ en:
     missing_value: –
     continue: Continue
     fhlb_full: Federal Home Loan Bank of San Francisco
-    excel: Excel
+    xlsx: Excel
     principal: Principal
     interest: Interest
     close: Close
@@ -869,8 +869,14 @@ en:
           advances_with_terms_of_180_days_or_less: Advances with terms of 180 days or less
           advances_with_terms_of_more_than: Advances with terms of more than
           vrc: VRC Advance
+          vrc_standard_xlsx: "Standard - VRC"
+          vrc_sbc_xlsx: "SBC - VRC"
           frc: FRC Advance
+          frc_standard_xlsx: "Standard - FRC"
+          frc_sbc_xlsx: "SBC - FRC"
           arc: ARC Advance (Basis Point Spread)
+          arc_standard_xlsx: "Standard - ARC"
+          arc_sbc_xlsx: "SBC - ARC"
           1_month_libor: 1 Month LIBOR
           3_month_libor: 3 Month LIBOR
           6_month_libor: 6 Month LIBOR
@@ -881,6 +887,7 @@ en:
         standard_credit_program: Standard Credit Program
         sbc_program: Securities-Backed Credit
         settlement_transaction_account: Settlement/Transaction Account
+        sta_xlsx: Settlement Transaction Account
         frc:
           dropdown: Fixed Rate Credit (FRC)
           standard_table_title: FRC (%)

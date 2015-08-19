@@ -294,7 +294,7 @@ Then(/^I should begin downloading a file$/) do
 end
 
 When(/^I request an XLSX$/) do
-  export_report I18n.t('global.excel')
+  export_report I18n.t('global.xlsx')
 end
 
 def export_report(format)
