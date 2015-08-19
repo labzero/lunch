@@ -10,79 +10,6 @@ module MAPI
     module Rates
       include MAPI::Services::Base
       include MAPI::Shared::Constants
-      
-      COLLATERAL_TYPES = [:standard, :sbc]
-      COLLATERAL_MAPPING = {
-          standard: 'REGULAR',
-          sbc: 'CREDIT'
-      }.with_indifferent_access
-
-      CURRENT_CREDIT_TYPES = [:vrc, :frc, :arc]
-      CURRENT_CREDIT_MAPPING = {
-          vrc: 'VARIABLES',
-          frc: 'FIXED',
-          arc: 'ADJUSTABLES'
-      }.with_indifferent_access
-
-      LOAN_TYPES = [:whole, :agency, :aaa, :aa]
-      LOAN_TERMS = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
-      LOAN_MAPPING = {
-        whole: 'FRC_WL',
-        agency: 'FRC_AGCY',
-        aaa: 'FRC_AAA',
-        aa: 'FRC_AA'
-      }.with_indifferent_access
-
-      TERM_MAPPING = {
-          :overnight => {
-              frequency: '1',
-              frequency_unit: 'D',
-          },
-        :open => {
-            frequency: '1',
-            frequency_unit: 'D'
-        },
-        :'1week'=> {
-            frequency: '1',
-            frequency_unit: 'W'
-        },
-        :'2week'=> {
-            frequency: '2',
-            frequency_unit: 'W'
-        },
-        :'3week'=> {
-            frequency: '3',
-            frequency_unit: 'W'
-        },
-        :'1month'=> {
-            frequency: '1',
-            frequency_unit: 'M'
-        },
-        :'2month'=> {
-            frequency: '2',
-            frequency_unit: 'M'
-        },
-        :'3month'=> {
-            frequency: '3',
-            frequency_unit: 'M'
-        },
-        :'6month'=> {
-            frequency: '6',
-            frequency_unit: 'M'
-        },
-        :'1year'=> {
-            frequency: '1',
-            frequency_unit: 'Y'
-        },
-        :'2year'=> {
-            frequency: '2',
-            frequency_unit: 'Y'
-        },
-        :'3year'=> {
-            frequency: '3',
-            frequency_unit: 'Y'
-        }
-      }.with_indifferent_access
 
       def self.holiday?(date)
         @@holidays.include?(date.strftime('%F'))
@@ -114,7 +41,9 @@ module MAPI
           @@mds_connection ||= Savon.client(
               wsdl: ENV['MAPI_MDS_ENDPOINT'],
               env_namespace: :soapenv,
-              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1', 'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'},
+              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1',
+                            'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd',
+                            'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1', 'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'},
               element_form_default: :qualified,
               namespace_identifier: :v1,
               pretty_print_xml: true
@@ -129,7 +58,9 @@ module MAPI
           @@cal_connection ||= Savon.client(
               wsdl: ENV['MAPI_CALENDAR_ENDPOINT'],
               env_namespace: :soapenv,
-              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/businessCalendar/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1'},
+              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/businessCalendar/v1',
+                            'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd',
+                            'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1'},
               element_form_default: :qualified,
               namespace_identifier: :v1,
               pretty_print_xml: true
@@ -144,7 +75,9 @@ module MAPI
           @@pi_connection ||= Savon.client(
               wsdl: ENV['MAPI_MDS_ENDPOINT'],
               env_namespace: :soapenv,
-              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/reports/msg/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/reports/contract/v1'},
+              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/reports/msg/v1',
+                            'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd',
+                            'xmlns:v11' => 'http://fhlbsf.com/reports/contract/v1'},
               element_form_default: :qualified,
               namespace_identifier: :v1,
               pretty_print_xml: true

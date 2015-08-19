@@ -1,20 +1,31 @@
 require 'active_support/core_ext/hash/indifferent_access'
+
 module MAPI
   module Shared
     module Constants
       COLLATERAL_TYPES = [:standard, :sbc]
+      COLLATERAL_MAPPING = {
+          standard: 'REGULAR',
+          sbc: 'CREDIT'
+      }.with_indifferent_access
       CREDIT_TYPES = [:frc, :vrc, :'1m_libor', :'3m_libor', :'6m_libor', :daily_prime, :embedded_cap]
+
+      CURRENT_CREDIT_TYPES = [:vrc, :frc, :arc]
+      CURRENT_CREDIT_MAPPING = {
+          vrc: 'VARIABLES',
+          frc: 'FIXED',
+          arc: 'ADJUSTABLES'
+      }.with_indifferent_access
+
       LOAN_TYPES = [:whole, :agency, :aaa, :aa]
       LOAN_TERMS = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
-      VRC_TERMS = ['1D']
-      FRC_TERMS = ['1M', '2M', '3M', '6M', '1Y', '2Y', '3Y', '5Y', '7Y', '10Y', '15Y', '20Y', '30Y']
-      LIBOR_TERMS = ['1Y', '2Y', '3Y', '5Y']
-      REPORT_PARAM_DATE_FORMAT = /\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/
-      INDEX_CREDIT_TYPES = [:vrc, :frc]
-      BASIS_POINT_CREDIT_TYPES = [:'1m_libor', :'3m_libor', :'6m_libor']
-      DAILY_PRIME_TRX_IR_CODE_INDEX = 'PRIME'
-      DAILY_PRIME_TRX_IR_CODE_BASIS_POINT = 'APRIMEAT'
-      COF_TYPES = %w(COF_FIXED COF_3L ADVANCE_BENCHMARK MU_WL MU_AGCY MU_AA MU_AAA)
+      LOAN_MAPPING = {
+          whole: 'FRC_WL',
+          agency: 'FRC_AGCY',
+          aaa: 'FRC_AAA',
+          aa: 'FRC_AA'
+      }.with_indifferent_access
+
       TERM_MAPPING = {
           :overnight => {
               frequency: '1',
@@ -65,6 +76,16 @@ module MAPI
               frequency_unit: 'Y'
           }
       }.with_indifferent_access
+
+      VRC_TERMS = ['1D']
+      FRC_TERMS = ['1M', '2M', '3M', '6M', '1Y', '2Y', '3Y', '5Y', '7Y', '10Y', '15Y', '20Y', '30Y']
+      LIBOR_TERMS = ['1Y', '2Y', '3Y', '5Y']
+      REPORT_PARAM_DATE_FORMAT = /\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/
+      INDEX_CREDIT_TYPES = [:vrc, :frc]
+      BASIS_POINT_CREDIT_TYPES = [:'1m_libor', :'3m_libor', :'6m_libor']
+      DAILY_PRIME_TRX_IR_CODE_INDEX = 'PRIME'
+      DAILY_PRIME_TRX_IR_CODE_BASIS_POINT = 'APRIMEAT'
+      COF_TYPES = %w(COF_FIXED COF_3L ADVANCE_BENCHMARK MU_WL MU_AGCY MU_AA MU_AAA)
 
       IRDB_CODE_TERM_MAPPING =
         {:standard => {
