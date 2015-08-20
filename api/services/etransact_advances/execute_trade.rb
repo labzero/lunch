@@ -328,6 +328,7 @@ module MAPI
             end
           else
             if operation == 'EXECUTE'
+              sleep(2) unless defined?(RSpec) # used to simulate performance of the actual trade service
               response_hash['status'] = ['Success']
               response_hash['confirmation_number'] = rand(100000..999999).to_s
             else
