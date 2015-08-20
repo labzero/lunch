@@ -558,50 +558,37 @@ describe MAPI::ServiceApp do
       end
     end
 
-    describe 'the `check_total_daily_limit` method' do
-      let(:advance_amount) { rand(100000..9999999)}
-      let(:total_daily_limit) { double('total daily limit')}
-      let(:result_set) { double('result set', fetch: [total_daily_limit]) }
-      let(:local_total_daily_limit) { MAPI::Services::EtransactAdvances::ExecuteTrade::LOCAL_TOTAL_DAILY_LIMIT }
-
-      before { allow(MAPI::Services::Member::TradeActivity).to receive(:current_daily_total).and_return( advance_amount ) }
-
-      [:development, :test, :production].each do |env|
-        describe "in the #{env} environment" do
-          let(:check_advance) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_total_daily_limit(env, advance_amount, response_hash)}
-
-          it 'returns a hash with a `status` array that includes whatever was in the `status` array for the response_hash' do
-            response_hash = {'status' => ['foo']}
-            allow(total_daily_limit).to receive(:to_f).and_return(advance_amount.to_f)
-            check_advance = MAPI::Services::EtransactAdvances::ExecuteTrade.check_total_daily_limit(app, advance_amount, response_hash)
-            expect(check_advance['status']).to include('foo')
-          end
-
-          if env == :production
-            before do
-              allow(ActiveRecord::Base.connection).to receive(:execute).with(MAPI::Services::EtransactAdvances::ExecuteTrade::TOTAL_DAILY_LIMIT_QUERY).and_return(result_set)
-              allow(MAPI::Services::Member::TradeActivity).to receive(:current_daily_total).and_return( advance_amount )
-            end
-            it 'returns a hash with a `status` array that includes \'ExceedsTotalDailyLimitError\' if the requested advance plus the current daily total exceeds the limit set by FHLB' do
-              daily_limit = 2 * advance_amount - 100
-              allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f)
-              expect(check_advance['status']).to include('ExceedsTotalDailyLimitError')
-            end
-            it 'returns the response_hash it was passed if the requested advance plus the current daily total does not exceed the limit set by FHLB' do
-              daily_limit = 2 * advance_amount + 100
-              allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f)
-              expect(check_advance).to eq(response_hash)
-            end
-          else
-            it 'returns a hash with a `status` array that includes \'ExceedsTotalDailyLimitError\' if the requested advance plus the current daily total exceeds the limit set by FHLB' do
-              allow(MAPI::Services::Member::TradeActivity).to receive(:current_daily_total).and_return( (local_total_daily_limit - advance_amount) + 100 )
-              expect(check_advance['status']).to include('ExceedsTotalDailyLimitError')
-            end
-            it 'returns the response_hash it was passed if the requested advance plus the current daily total does not exceed the limit set by FHLB' do
-              allow(MAPI::Services::Member::TradeActivity).to receive(:current_daily_total).and_return( (local_total_daily_limit - advance_amount) - 100 )
-              expect(check_advance).to eq(response_hash)
-            end
-          end
+    [:development, :test, :production].each do |env|
+      describe "the `check_total_daily_limit` method in the #{env} environment" do
+        let(:advance_amount) { rand(100000..9999999)}
+        let(:total_daily_limit) { double('total daily limit')}
+        let(:settings) { double('settings', :'[]' => nil) }
+        let(:local_total_daily_limit) { MAPI::Services::EtransactAdvances::ExecuteTrade::LOCAL_TOTAL_DAILY_LIMIT }
+        let(:check_advance) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_total_daily_limit(env, advance_amount, response_hash)}
+        before do
+          allow(MAPI::Services::Member::TradeActivity).to receive(:current_daily_total).and_return( advance_amount )
+          allow(settings).to receive(:'[]').with('shareholder_web_daily_limit').and_return(total_daily_limit)
+          allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(settings)
+        end
+        it 'returns a hash with a `status` array that includes whatever was in the `status` array for the response_hash' do
+          response_hash = {'status' => ['foo']}
+          allow(total_daily_limit).to receive(:to_f).and_return(advance_amount.to_f)
+          check_advance = MAPI::Services::EtransactAdvances::ExecuteTrade.check_total_daily_limit(app, advance_amount, response_hash)
+          expect(check_advance['status']).to include('foo')
+        end
+        it 'returns a hash with a `status` array that includes \'ExceedsTotalDailyLimitError\' if the requested advance plus the current daily total exceeds the limit set by FHLB' do
+          daily_limit = 2 * advance_amount - 100
+          allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f)
+          expect(check_advance['status']).to include('ExceedsTotalDailyLimitError')
+        end
+        it 'returns the response_hash it was passed if the requested advance plus the current daily total does not exceed the limit set by FHLB' do
+          daily_limit = 2 * advance_amount + 100
+          allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f)
+          expect(check_advance).to eq(response_hash)
+        end
+        it 'raises an error if the settings endpoint returns nil' do
+          allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(nil)
+          expect{check_advance}.to raise_error
         end
       end
     end
