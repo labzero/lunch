@@ -36,55 +36,107 @@ module MAPI
         candidate
       end
 
+      SOAP_HEADER = {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}}
+      COMMON = { env_namespace: :soapenv, element_form_default: :qualified, namespace_identifier: :v1, pretty_print_xml: true }
+
+      def self.soap_client(endpoint, namespaces)
+        Savon.client( COMMON.merge( wsdl: ENV[endpoint], namespaces: namespaces ) )
+      end
+
       def self.init_mds_connection(environment)
-        if environment == :production
-          @@mds_connection ||= Savon.client(
-              wsdl: ENV['MAPI_MDS_ENDPOINT'],
-              env_namespace: :soapenv,
-              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1',
-                            'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd',
-                            'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1', 'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'},
-              element_form_default: :qualified,
-              namespace_identifier: :v1,
-              pretty_print_xml: true
-          )
-        else
-          @@mds_connection = nil
-        end
+        return @@mds_connection = nil unless environment == :production
+        @@mds_connection ||= MAPI::Services::Rates.soap_client( 'MAPI_MDS_ENDPOINT',
+                                                                { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1',
+                                                                  'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd',
+                                                                  'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1',
+                                                                  'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1',
+                                                                  'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'} )
       end
 
       def self.init_cal_connection(environment)
-        if environment == :production
-          @@cal_connection ||= Savon.client(
-              wsdl: ENV['MAPI_CALENDAR_ENDPOINT'],
-              env_namespace: :soapenv,
-              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/businessCalendar/v1',
-                            'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd',
-                            'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1'},
-              element_form_default: :qualified,
-              namespace_identifier: :v1,
-              pretty_print_xml: true
-          )
-        else
-          @@cal_connection = nil
-        end
+        return @@cal_connection = nil unless environment == :production
+        @@cal_connection ||= MAPI::Services::Rates.soap_client( 'MAPI_CALENDAR_ENDPOINT',
+                                                                { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/businessCalendar/v1',
+                                                                  'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd',
+                                                                  'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1'} )
       end
 
       def self.init_pi_connection(environment)
-        if environment == :production
-          @@pi_connection ||= Savon.client(
-              wsdl: ENV['MAPI_MDS_ENDPOINT'],
-              env_namespace: :soapenv,
-              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/reports/msg/v1',
-                            'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd',
-                            'xmlns:v11' => 'http://fhlbsf.com/reports/contract/v1'},
-              element_form_default: :qualified,
-              namespace_identifier: :v1,
-              pretty_print_xml: true
-          )
-        else
-          @@pi_connection = nil
+        return @@pi_connection = nil unless environment == :production
+        @@pi_connection ||= MAPI::Services::Rates.soap_client( 'MAPI_MDS_ENDPOINT',
+                                                               { 'xmlns:v1' => 'http://fhlbsf.com/reports/msg/v1',
+                                                                 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd',
+                                                                 'xmlns:v11' => 'http://fhlbsf.com/reports/contract/v1'} )
+      end
+
+      def self.get_holidays_from_soap(logger, start, finish)
+        begin
+          @@cal_connection.call(:get_holiday,
+                                message_tag: 'holidayRequest',
+                                message: {'v1:endDate' => finish, 'v1:startDate' => start},
+                                soap_header: SOAP_HEADER )
+        rescue Savon::Error => error
+          logger.error error
+          nil
         end
+      end
+
+      def self.get_holidays(logger, environment)
+        if MAPI::Services::Rates.init_cal_connection(environment)
+          return nil unless response = MAPI::Services::Rates.get_holidays_from_soap(logger, Date.today, Date.today + 3.years)
+          response.doc.remove_namespaces!
+          response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')[0].css('days day date').map do |holiday|
+            Time.zone.parse(holiday.content)
+          end
+        else
+          JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'calendar_holidays.json')))
+        end
+      end
+
+      def self.market_data_message_for_loan_type(loan_type, live_or_start_of_day)
+        {
+            'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
+            'v1:marketData' => [{
+                                    'v12:name'         => LOAN_MAPPING[loan_type.to_s],
+                                    'v12:pricingGroup' => [{'v12:id' => live_or_start_of_day}],
+                                    'v12:data'         => ''
+                                }]
+        }
+      end
+
+      def self.get_market_data_from_soap(logger, live_or_start_of_day)
+        begin
+          @@mds_connection.call(:get_market_data,
+                                message_tag: 'marketDataRequest',
+                                message: {
+                                    'v11:caller' => [{ 'v11:id' => ENV['MAPI_COF_ACCOUNT']}],
+                                    'v1:requests' =>  [{'v1:fhlbsfMarketDataRequest' => LOAN_TYPES.map{ |lt| market_data_message_for_loan_type(lt, live_or_start_of_day)}}]
+                                },
+                                soap_header: SOAP_HEADER )
+        rescue Savon::Error => error
+          logger.error error
+          return nil
+        end
+      end
+
+      def self.extract_market_data_from_soap_response(response)
+        hash = {}
+        response.doc.remove_namespaces!
+        fhlbsf_response = response.doc.xpath('//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse')
+        LOAN_TYPES.each_with_index do |type, ctr_type|
+          hash[type] = {}
+          fhlbsf_data_points = fhlbsf_response[ctr_type].css('marketData FhlbsfMarketData data FhlbsfDataPoint')
+          LOAN_TERMS.each_with_index do |term, ctr_term|
+            ctr_term = 1 if ctr_term == 0 # why? when commented out, all tests still pass
+            hash[type][term] = {
+                'payment_on'         => 'Maturity',
+                'interest_day_count' => fhlbsf_response[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
+                'rate'               => fhlbsf_data_points[ctr_term-1].at_css('value').content,
+                'maturity_date'      => Time.zone.parse(fhlbsf_data_points[ctr_term-1].at_css('tenor maturityDate').content).to_date,
+            }
+          end
+        end
+        hash
       end
 
       def self.registered(app)
@@ -340,7 +392,10 @@ module MAPI
               'v1:subProductType' => COLLATERAL_MAPPING[params[:collateral]]
             }
             begin
-              response = @@pi_connection.call(:get_pricing_indications, message_tag: 'pricingIndicationsRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
+              response = @@pi_connection.call(:get_pricing_indications,
+                                              message_tag: 'pricingIndicationsRequest',
+                                              message: message,
+                                              soap_header: SOAP_HEADER )
             rescue Savon::Error => error
               logger.error error
               halt 503, 'Internal Service Error'
@@ -380,7 +435,10 @@ module MAPI
               'v1:subProductType' => COLLATERAL_MAPPING[params[:collateral]]
             }
             begin
-              response = @@pi_connection.call(:get_pricing_indications, message_tag: 'pricingIndicationsRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
+              response = @@pi_connection.call(:get_pricing_indications,
+                                              message_tag: 'pricingIndicationsRequest',
+                                              message: message,
+                                              soap_header: SOAP_HEADER )
             rescue Savon::Error => error
               logger.error error
               halt 503, 'Internal Service Error'
@@ -429,7 +487,10 @@ module MAPI
               'v1:subProductType' => COLLATERAL_MAPPING[params[:collateral]]
             }
             begin
-              response = @@pi_connection.call(:get_pricing_indications, message_tag: 'pricingIndicationsRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
+              response = @@pi_connection.call(:get_pricing_indications,
+                                              message_tag: 'pricingIndicationsRequest',
+                                              message: message,
+                                              soap_header: SOAP_HEADER )
             rescue Savon::Error => error
               logger.error error
               halt 503, 'Internal Service Error'
@@ -497,7 +558,7 @@ module MAPI
                 }]
               }]
             }
-            response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
+            response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, soap_header: SOAP_HEADER )
             namespaces = {'a' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns' => 'http://fhlbsf.com/schema/msg/marketdata/v1'}
             if response.success? && response.doc.search('//xmlns:transactionResult', namespaces).text != 'Error'
               {rate: response.doc.search('//a:value', namespaces).text.to_f, updated_at: DateTime.parse(response.doc.search('//a:snapTime', namespaces).text).to_time}
@@ -515,114 +576,50 @@ module MAPI
         end
 
         relative_get "/summary" do
-          MAPI::Services::Rates.init_cal_connection(settings.environment)
-          if @@cal_connection
-            message = {'v1:endDate' => Time.zone.today + 3.years, 'v1:startDate' => Time.zone.today}
-            begin
-              response = @@cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
-            rescue Savon::Error => error
-              logger.error error
-              halt 503, 'Internal Service Error'
-            end
-            response.doc.remove_namespaces!
-            @@holidays = response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')[0].css('days day date').map do |holiday|
-              Time.zone.parse(holiday.content)
-            end
-          else
-            @@holidays = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'calendar_holidays.json')))
-          end
-
-          MAPI::Services::Rates.init_mds_connection(settings.environment)
-
-          blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(logger,settings.environment)
-          halt 503, 'Internal Service Error' if blackout_dates.nil?
-
-          loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment).with_indifferent_access
-          halt 503, 'Internal Service Error' if loan_terms.nil?
-
-          data = if @@mds_connection
-            request = LOAN_TYPES.collect do |type|
-            {
-              'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
-              'v1:marketData' => [{
-                'v12:name' => LOAN_MAPPING[type.to_s],
-                'v12:pricingGroup' => [{'v12:id' => 'Live'}],
-                'v12:data' => ''
-              }]
-            }
-            end
-            message = {
-              'v11:caller' => [{ 'v11:id' => ENV['MAPI_COF_ACCOUNT']}],
-              'v1:requests' =>  [{'v1:fhlbsfMarketDataRequest' => request}]
-            }
-            begin
-              response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
-            rescue Savon::Error => error
-              logger.error error
-              halt 503, 'Internal Service Error'
-            end
-            hash = {}
-            response.doc.remove_namespaces!
-            fhlbsfresponse = response.doc.xpath('//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse')
-            LOAN_TYPES.each_with_index do |type, ctr_type|
-              hash[type] ||= {}
-              fhlbsfdatapoints = fhlbsfresponse[ctr_type].css('marketData FhlbsfMarketData data FhlbsfDataPoint')
-              LOAN_TERMS.each_with_index do |term, ctr_term|
-                if ctr_term == 0
-                  ctr_term = 1
-                end
-                maturity_date = MAPI::Services::Rates.get_maturity_date(Time.zone.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content), TERM_MAPPING[term][:frequency_unit])
-
-                hash[type][term] = {
-                  'payment_on' => 'Maturity',
-                  'interest_day_count' => fhlbsfresponse[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
-                  'rate' => fhlbsfdatapoints[ctr_term-1].at_css('value').content,
-                  'maturity_date' => maturity_date,
-                  'disabled'      => blackout_dates.include?( maturity_date ) || !loan_terms[term][type]['trade_status'] || !loan_terms[term][type]['display_status']
-                }
-              end
-            end
-            hash['timestamp'] = Time.now
-            hash
+          halt 503, 'Internal Service Error' unless holidays       = MAPI::Services::Rates.get_holidays(logger, settings.environment)
+          halt 503, 'Internal Service Error' unless blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(settings.environment)
+          halt 503, 'Internal Service Error' unless loan_terms     = MAPI::Services::Rates::LoanTerms.loan_terms(settings.environment).with_indifferent_access
+          data = if MAPI::Services::Rates.init_mds_connection(settings.environment)
+            halt 503, 'Internal Service Error' unless response = MAPI::Services::Rates.get_market_data_from_soap(logger, 'Live')
+            MAPI::Services::Rates.extract_market_data_from_soap_response(response)
           else
             # We have no real data source yet.
             hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_summary.json'))).with_indifferent_access
-            now = Time.zone.now
             # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
             LOAN_TYPES.each do |type|
               LOAN_TERMS.each do |term|
-                loan = hash[type][term]
-                maturity_date = MAPI::Services::Rates.get_maturity_date(Time.zone.today + loan[:days_to_maturity].to_i.days, TERM_MAPPING[term][:frequency_unit])
-                loan[:maturity_date] = maturity_date
-                blacked_out  = blackout_dates.include?( maturity_date )
-                dont_trade   = !loan_terms[term][type]['trade_status']
-                dont_display = !loan_terms[term][type]['display_status']
-                loan['disabled']     = blacked_out || dont_trade || dont_display
+                hash[type][term][:maturity_date] = Date.today + hash[type][term][:days_to_maturity].to_i.days
               end
             end
-            hash[:timestamp] = now
             hash
           end
-          data.to_json
+          LOAN_TYPES.each do |type|
+            LOAN_TERMS.each do |term|
+              loan                 = data[type][term]
+              maturity_date        = MAPI::Services::Rates.get_maturity_date(holidays,loan['maturity_date'], TERM_MAPPING[term][:frequency_unit])
+              blacked_out          = blackout_dates.include?( maturity_date )
+              cant_trade           = !loan_terms[term][type]['trade_status']
+              cant_display         = !loan_terms[term][type]['display_status']
+              loan[:maturity_date] = maturity_date
+              loan[:disabled]      = blacked_out || cant_trade || cant_display
+            end
+          end
+          data.merge( timestamp: Time.now ).to_json
         end
 
 
         # Price Indication Historical rates for VRC, FRC, ARC
         relative_get "/price_indication/historical/:start_date/:end_date/:collateral_type/:credit_type" do
           MAPI::Services::Rates.init_cal_connection(settings.environment)
-          start_date = params[:start_date].to_date
-          end_date = params[:end_date].to_date
+          start_date      = params[:start_date].to_date
+          end_date        = params[:end_date].to_date
           collateral_type = params[:collateral_type].to_sym
-          credit_type = params[:credit_type].to_sym
-          halt 400, 'Invalid date range: start_date must occur earlier than end_date' if start_date.to_date > end_date.to_date
-          if !MAPI::Services::Rates::PriceIndicationHistorical::IRDB_CODE_TERM_MAPPING[collateral_type]
-            halt 400, "Invalid Collateral type"
-          elsif !MAPI::Services::Rates::PriceIndicationHistorical::IRDB_CODE_TERM_MAPPING[collateral_type][credit_type]
-            halt 400, "Invalid Credit type"
-          else
-            result = MAPI::Services::Rates::PriceIndicationHistorical.price_indication_historical(self, start_date, end_date, collateral_type, credit_type)
-            result.to_json
-          end
+          credit_type     = params[:credit_type].to_sym
+          irdb_code       = MAPI::Services::Rates::PriceIndicationHistorical::IRDB_CODE_TERM_MAPPING[collateral_type]
+          halt 400, 'Invalid date range: start_date must occur earlier than end_date' unless start_date < end_date
+          halt 400, "Invalid Collateral type"                                         unless irdb_code
+          halt 400, "Invalid Credit type"                                             unless irdb_code[credit_type]
+          MAPI::Services::Rates::PriceIndicationHistorical.price_indication_historical(self, start_date, end_date, collateral_type, credit_type).to_json
         end
       end
     end

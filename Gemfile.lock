@@ -21,13 +21,6 @@ GIT
   specs:
     securid (0.2.3)
 
-GIT
-  remote: https://github.com/rsim/oracle-enhanced.git
-  revision: b3c8032c29366ef21b55315f8dac3aaf02b96bfa
-  branch: rails42
-  specs:
-    activerecord-oracle_enhanced-adapter (1.5.6)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -395,6 +388,10 @@ GEM
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 3.0)
       netrc (~> 0.7)
+    rspec (3.2.0)
+      rspec-core (~> 3.2.0)
+      rspec-expectations (~> 3.2.0)
+      rspec-mocks (~> 3.2.0)
     rspec-core (3.2.3)
       rspec-support (~> 3.2.0)
     rspec-expectations (3.2.1)

@@ -108,7 +108,7 @@ describe MAPI::ServiceApp do
     end
 
     it "should always call get_maturity_date" do
-      expect(MAPI::Services::Rates).to receive(:get_maturity_date).at_least(48).with(kind_of(Date), kind_of(String))
+      expect(MAPI::Services::Rates).to receive(:get_maturity_date).at_least(48).with(kind_of(Array), kind_of(Date), kind_of(String))
       get '/rates/summary'
     end
 
