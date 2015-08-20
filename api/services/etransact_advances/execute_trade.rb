@@ -13,14 +13,6 @@ module MAPI
           aa: 'SBC-AA'
         }.with_indifferent_access
 
-        TOTAL_DAILY_LIMIT_QUERY = <<-SQL
-          SELECT SETTING_VALUE
-          FROM WEB_ADM.AO_SETTINGS
-          WHERE SETTING_NAME = 'ShareholderTotalDailyLimit'
-        SQL
-
-        LOCAL_TOTAL_DAILY_LIMIT = 999999999999
-
         def self.init_execute_trade_connection(environment)
           if environment == :production
             @@execute_trade_connection ||= Savon.client(
@@ -430,7 +422,12 @@ module MAPI
 
         def self.check_total_daily_limit(env, advance_amount, hash)
           new_hash = {}
-          total_daily_limit = env == :production ? ActiveRecord::Base.connection.execute(TOTAL_DAILY_LIMIT_QUERY).fetch.try(&:first) : LOCAL_TOTAL_DAILY_LIMIT
+          settings = MAPI::Services::EtransactAdvances::Settings.settings(env)
+          if settings
+            total_daily_limit = settings['shareholder_web_daily_limit']
+          else
+            raise 'MAPI::Services::EtransactAdvances::Settings.settings returned nil'
+          end
           current_daily_total = MAPI::Services::Member::TradeActivity.current_daily_total(env, 'ADVANCE')
 
           if (current_daily_total.to_f + advance_amount.to_f) > total_daily_limit.to_f
