@@ -38,6 +38,7 @@ gem 'tzinfo-data'
 gem 'haml-rails'
 
 gem 'dotenv-rails'
+gem 'redis-rails'
 
 # for parsing emails into CorporateCommunication objects
 gem 'mail'

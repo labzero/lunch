@@ -216,4 +216,23 @@ describe MAPI::ServiceApp do
       end
     end
   end
+
+  describe 'eTransact Advances Settings' do
+    let(:make_request) { get '/etransact_advances/settings' }
+    it 'should call `MAPI::Services::EtransactAdvances::Settings.settings`' do
+      expect(MAPI::Services::EtransactAdvances::Settings).to receive(:settings)
+      make_request
+    end
+    it 'should call `to_json` on the settings returned' do
+      settings = double('Settings')
+      allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(settings)
+      expect(settings).to receive(:to_json)
+      make_request
+    end
+    it 'should return a 503 if no settings are found' do
+      allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(nil)
+      make_request
+      expect(last_response.status).to be(503)
+    end
+  end
 end

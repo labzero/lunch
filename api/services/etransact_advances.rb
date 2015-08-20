@@ -1,5 +1,6 @@
 require_relative 'etransact_advances/execute_trade'
 require_relative 'rates/loan_terms'
+require_relative 'etransact_advances/settings'
 
 module MAPI
   module Services
@@ -51,7 +52,6 @@ module MAPI
             end
           end
           
-          # etransact advances status endpoint
           api do
             key :path, '/blackout_dates'
             operation do
@@ -63,6 +63,21 @@ module MAPI
                 key :type, :string
               end
               key :nickname, :getBlackoutDates
+            end
+          end
+
+          api do
+            key :path, '/settings'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the settings for eTransact'
+              key :notes, 'Returns the all settings currently defined for the eTransact, as defined by the eTransact Web Admin'
+              key :type, :EtransactSettings
+              key :nickname, :getEtransactSettings
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
             end
           end
           # etransact advances limits endpoint
@@ -250,6 +265,14 @@ module MAPI
         
         relative_get '/blackout_dates' do
           MAPI::Services::Rates::BlackoutDates::blackout_dates(settings.environment).to_json
+        end
+
+        relative_get '/settings' do
+          data = MAPI::Services::EtransactAdvances::Settings.settings(settings.environment)
+          if !data
+            halt 503, 'Interal Server Error'
+          end
+          data.to_json
         end
 
         # etransact advances status

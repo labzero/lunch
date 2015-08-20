@@ -1,77 +1,6 @@
 ---
 http_interactions:
 - request:
-    method: post
-    uri: http://localhost:3100/mapi/etransact_advances/execute_advance/750/0.0///0.0/Test%20User
-    body:
-      encoding: ASCII-8BIT
-      string: ''
-    headers:
-      Accept:
-      - "*/*; q=0.5, application/xml"
-      Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token token="4321dfghjklm"
-      X-Request-Id:
-      - ''
-      Content-Length:
-      - '0'
-      User-Agent:
-      - Ruby
-  response:
-    status:
-      code: 404
-      message: 'Not Found '
-    headers:
-      Content-Type:
-      - text/html;charset=utf-8
-      X-Cascade:
-      - pass
-      Content-Length:
-      - '597'
-      X-Xss-Protection:
-      - 1; mode=block
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - SAMEORIGIN
-      Server:
-      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
-      Date:
-      - Tue, 23 Jun 2015 21:02:43 GMT
-      Connection:
-      - Keep-Alive
-    body:
-      encoding: UTF-8
-      string: |
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style type="text/css">
-          body { text-align:center;font-family:helvetica,arial;font-size:22px;
-            color:#888;margin:20px}
-          #c {margin:0 auto;width:500px;text-align:left}
-          </style>
-        </head>
-        <body>
-          <h2>Sinatra doesn&rsquo;t know this ditty.</h2>
-          <img src='http://localhost:3100/mapi/__sinatra__/404.png'>
-          <div id="c">
-            Try this:
-            <pre># in mapi.rb
-        class MAPI::ServiceApp
-          post &#x27;&#x2F;etransact_advances&#x2F;execute_advance&#x2F;750&#x2F;0.0&#x2F;0.0&#x2F;Test%20User&#x27; do
-            &quot;Hello World&quot;
-          end
-        end
-        </pre>
-          </div>
-        </body>
-        </html>
-    http_version: 
-  recorded_at: Tue, 23 Jun 2015 21:02:43 GMT
-- request:
     method: get
     uri: http://localhost:3100/mapi/etransact_advances/signer_full_name/local
     body:
@@ -106,12 +35,126 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Mon, 29 Jun 2015 21:42:49 GMT
+      - Wed, 12 Aug 2015 21:09:21 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: Test User
     http_version: 
-  recorded_at: Mon, 29 Jun 2015 21:42:49 GMT
+  recorded_at: Wed, 12 Aug 2015 21:09:21 GMT
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/etransact_advances/settings
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      X-Request-Id:
+      - ''
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '244'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Wed, 12 Aug 2015 21:09:21 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"auto_approve":true,"end_of_day_extension":4,"rate_timeout":60,"rates_flagged":false,"rsa_timeout":20,"shareholder_total_daily_limit":880000000,"shareholder_web_daily_limit":2900000000,"maximum_online_term_days":1102,"rate_stale_check":999998}'
+    http_version: 
+  recorded_at: Wed, 12 Aug 2015 21:09:21 GMT
+- request:
+    method: post
+    uri: http://localhost:3100/mapi/etransact_advances/execute_advance/750/0.0///0.0/Test%20User
+    body:
+      encoding: ASCII-8BIT
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      X-Request-Id:
+      - ''
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 404
+      message: 'Not Found '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      X-Cascade:
+      - pass
+      Content-Length:
+      - '597'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Wed, 12 Aug 2015 21:09:21 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: |
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style type="text/css">
+          body { text-align:center;font-family:helvetica,arial;font-size:22px;
+            color:#888;margin:20px}
+          #c {margin:0 auto;width:500px;text-align:left}
+          </style>
+        </head>
+        <body>
+          <h2>Sinatra doesn&rsquo;t know this ditty.</h2>
+          <img src='http://localhost:3100/mapi/__sinatra__/404.png'>
+          <div id="c">
+            Try this:
+            <pre># in mapi.rb
+        class MAPI::ServiceApp
+          post &#x27;&#x2F;etransact_advances&#x2F;execute_advance&#x2F;750&#x2F;0.0&#x2F;0.0&#x2F;Test%20User&#x27; do
+            &quot;Hello World&quot;
+          end
+        end
+        </pre>
+          </div>
+        </body>
+        </html>
+    http_version: 
+  recorded_at: Wed, 12 Aug 2015 21:09:21 GMT
 recorded_with: VCR 2.9.3

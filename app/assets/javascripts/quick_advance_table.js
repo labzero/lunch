@@ -3,6 +3,7 @@
     var $table = this;
     var $initiateButton = $(".dashboard-quick-advance-flyout .initiate-quick-advance");
     var $amountField = $('.dashboard-quick-advance-flyout input[name=amount]');
+    var $flyout = $('.dashboard-quick-advance-flyout')
     var selected_rate = {};
 
     var $flyoutTableCells = $('.dashboard-quick-advance-flyout td.selectable-cell');
@@ -43,25 +44,29 @@
       }
     };
 
+    function showQuickAdvancePreviewError() {
+      $('.flyout-top-section-body .quick-advance-preview-subheading').show();
+
+      // event listener and handler for back button click
+      $('.quick-advance-back-button').on('click', function () {
+        $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
+        $('.quick-advance-preview-subheading').hide();
+        $flyout.find('.flyout-top-section-body span, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer').show();
+        transitionToRatesFromLoading();
+      });
+    }
+
     function initiateQuickAdvance(rate_data) {
       var $flyoutBottomSection = $('.flyout-bottom-section');
       transitionToLoadingFromRates();
       $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function(json){
-        var $oldNodes = $('.flyout-top-section-body span, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer');
+        var $oldNodes = $flyout.find('.flyout-top-section-body span, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer');
 
         // append the html response, hide old nodes and show the new ones
         $flyoutBottomSection.append($(json.html));
         $oldNodes.hide();
         if (json.preview_error == true) {
-          $('.flyout-top-section-body .quick-advance-preview-subheading').show();
-
-          // event listener and handler for back button click
-          $('.quick-advance-back-button').on('click', function () {
-            $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
-            $('.quick-advance-preview-subheading').hide();
-            $oldNodes.show();
-            transitionToRatesFromLoading();
-          });
+          showQuickAdvancePreviewError();
         }
         else {
           if (json.preview_success == true) {
@@ -91,7 +96,7 @@
             });
           }
           else {
-            $('.flyout-top-section-body .quick-advance-capstock-subheading').show();
+            $flyout.find('.flyout-top-section-body .quick-advance-capstock-subheading').show();
 
             // event listener and handler for back button click
             $('.quick-advance-capstock-back-button').on('click', function () {
@@ -196,10 +201,16 @@
       transitionToLoadingFromPreview();
       $.post('/dashboard/quick_advance_perform', packageParameters(rate_data), function(json) {
         if (json.securid == 'authenticated') {
-          $quickAdvancePreview.hide();
           $flyoutBottomSection.append($(json.html));
-          $flyoutTopSection.find('.quick-advance-preview-subheading').hide();
-          $flyoutTopSection.find('.quick-advance-confirmation-subheading').show();
+          if (json.advance_success) {
+            $quickAdvancePreview.hide();
+            $flyoutTopSection.find('.quick-advance-preview-subheading').hide();
+            $flyoutTopSection.find('.quick-advance-confirmation-subheading').show();
+          } else {
+            $('.quick-advance-preview.loading').remove();
+            $('.quick-advance-confirmation-subheading').hide();
+            showQuickAdvancePreviewError();
+          }
         } else {
           var error = 'unknown';
 

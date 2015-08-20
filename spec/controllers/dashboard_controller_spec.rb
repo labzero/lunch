@@ -231,6 +231,10 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it_behaves_like 'a user required action', :post, :quick_advance_preview
     it_behaves_like 'an authorization required method', :post, :quick_advance_preview, :advances, :show?
+    it 'should populate the normal advance view parameters' do
+      expect(subject).to receive(:populate_advance_request_view_parameters)
+      make_request
+    end
     it 'should render its view' do
       make_request
       expect(response.body).to render_template('dashboard/quick_advance_preview')
@@ -386,7 +390,7 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'should set @error_message' do
         make_request
-        expect(assigns[:error_message]).to eq('pass')
+        expect(assigns[:error_message]).to eq(:pass)
       end
       it 'should set @advance_description' do
         make_request
@@ -398,21 +402,20 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'should set @payment_on' do
         make_request
-        expect(assigns[:payment_on]).to eq(payment_on)
+        expect(assigns[:payment_on]).to be_kind_of(String)
       end
       it 'should set @interest_day_count' do
         make_request
-        expect(assigns[:interest_day_count]).to eq(interest_day_count)
+        expect(assigns[:interest_day_count]).to be_kind_of(String)
       end
       it 'should set @maturity_date' do
         make_request
-        expect(assigns[:maturity_date]).to eq(maturity_date)
+        expect(assigns[:maturity_date]).to be_kind_of(String)
       end
       it 'should set @funding_date to today' do
-        date = Date.new(2015,1,1)
-        allow(Time.zone).to receive(:now).and_return(date)
+        date = Date.new(2015,8,17)
         make_request
-        expect(assigns[:funding_date]).to eq(date)
+        expect(assigns[:funding_date]).to eq(date.iso8601)
       end
     end
 
@@ -434,7 +437,7 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'should set @error_message' do
         make_request
-        expect(assigns[:error_message]).to eq('CreditError')
+        expect(assigns[:error_message]).to eq(:credit)
       end
       it 'should set @advance_description' do
         make_request
@@ -454,21 +457,20 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'should set @payment_on' do
         make_request
-        expect(assigns[:payment_on]).to eq(payment_on)
+        expect(assigns[:payment_on]).to be_kind_of(String)
       end
       it 'should set @interest_day_count' do
         make_request
-        expect(assigns[:interest_day_count]).to eq(interest_day_count)
+        expect(assigns[:interest_day_count]).to be_kind_of(String)
       end
       it 'should set @maturity_date' do
         make_request
-        expect(assigns[:maturity_date]).to eq(maturity_date)
+        expect(assigns[:maturity_date]).to be_kind_of(String)
       end
       it 'should set @funding_date to today' do
-        date = Date.new(2015,1,1)
-        allow(Time.zone).to receive(:now).and_return(date)
+        date = Date.new(2015,8,17)
         make_request
-        expect(assigns[:funding_date]).to eq(date)
+        expect(assigns[:funding_date]).to eq(date.iso8601)
       end
     end
 
@@ -490,7 +492,7 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'should set @error_message' do
         make_request
-        expect(assigns[:error_message]).to eq('ExceedsTotalDailyLimitError')
+        expect(assigns[:error_message]).to eq(:total_daily_limit)
       end
       it 'should set @advance_description' do
         make_request
@@ -510,21 +512,20 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'should set @payment_on' do
         make_request
-        expect(assigns[:payment_on]).to eq(payment_on)
+        expect(assigns[:payment_on]).to be_kind_of(String)
       end
       it 'should set @interest_day_count' do
         make_request
-        expect(assigns[:interest_day_count]).to eq(interest_day_count)
+        expect(assigns[:interest_day_count]).to be_kind_of(String)
       end
       it 'should set @maturity_date' do
         make_request
-        expect(assigns[:maturity_date]).to eq(maturity_date)
+        expect(assigns[:maturity_date]).to be_kind_of(String)
       end
       it 'should set @funding_date to today' do
-        date = Date.new(2015,1,1)
-        allow(Time.zone).to receive(:now).and_return(date)
+        date = Date.new(2015,8,17)
         make_request
-        expect(assigns[:funding_date]).to eq(date)
+        expect(assigns[:funding_date]).to eq(date.iso8601)
       end
     end
 
@@ -540,7 +541,7 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'should set @error_message' do
         make_request
-        expect(assigns[:error_message]).to eq('CollateralError')
+        expect(assigns[:error_message]).to eq(:collateral)
       end
       it 'should set @advance_type' do
         advance_type = double('advance_type')
@@ -550,7 +551,7 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'should set @collateral_type' do
         collateral_type = double('collateral_type')
-        stub_const('DashboardController::COLLATERAL_ERROR_MAPPING', {"#{advance_type}": collateral_type})
+        stub_const('DashboardController::COLLATERAL_TYPE_MAPPING', {"#{advance_type}": collateral_type})
         make_request
         expect(assigns[:collateral_type]).to eq(collateral_type)
       end
@@ -572,21 +573,20 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'should set @payment_on' do
         make_request
-        expect(assigns[:payment_on]).to eq(payment_on)
+        expect(assigns[:payment_on]).to be_kind_of(String)
       end
       it 'should set @interest_day_count' do
         make_request
-        expect(assigns[:interest_day_count]).to eq(interest_day_count)
+        expect(assigns[:interest_day_count]).to be_kind_of(String)
       end
       it 'should set @maturity_date' do
         make_request
-        expect(assigns[:maturity_date]).to eq(maturity_date)
+        expect(assigns[:maturity_date]).to be_kind_of(String)
       end
       it 'should set @funding_date to today' do
-        date = Date.new(2015,1,1)
-        allow(Time.zone).to receive(:now).and_return(date)
+        date = Date.new(2015,8,17)
         make_request
-        expect(assigns[:funding_date]).to eq(date)
+        expect(assigns[:funding_date]).to eq(date.iso8601)
       end
     end
 
@@ -614,7 +614,7 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'should set @error_message' do
         make_request
-        expect(assigns[:error_message]).to eq('low')
+        expect(assigns[:error_message]).to eq(:low)
       end
       it 'should set @advance_description' do
         make_request
@@ -650,7 +650,7 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'should set @error_message' do
         make_request
-        expect(assigns[:error_message]).to eq('high')
+        expect(assigns[:error_message]).to eq(:high)
       end
       it 'should set @advance_description' do
         make_request
@@ -711,6 +711,10 @@ RSpec.describe DashboardController, :type => :controller do
       expect(subject).to receive(:session_elevated?).at_least(:once)
       make_request
     end
+    it 'should check if the rate has expired' do
+      expect(subject).to receive(:advance_request_expired?)
+      make_request
+    end
     it 'should set @initiated_at' do
       make_request
       expect(assigns[:initiated_at]).to be_kind_of(DateTime)
@@ -768,6 +772,10 @@ RSpec.describe DashboardController, :type => :controller do
       expect(etransact_service_instance).to_not receive(:signer_full_name).with(subject.current_user.username)
       make_request
     end
+    it 'should populate the normal advance view parameters' do
+      expect(subject).to receive(:populate_advance_request_view_parameters)
+      make_request
+    end
     describe 'with unelevated session' do
       before do
         allow(subject).to receive(:session_elevated?).and_return(false)
@@ -800,6 +808,28 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'should not perform the advance if the session is not elevated' do
         expect(etransact_service_instance).to_not receive(:quick_advance_execute)
+        make_request
+      end
+    end
+
+    describe 'with an expired rate' do
+      before do
+        allow(subject).to receive(:advance_request_expired?).and_return(true)
+      end
+      it 'should render a quick advance error' do
+        make_request
+        expect(response.body).to render_template('dashboard/quick_advance_error')
+      end
+      it 'should set the error message to `rate_expired`' do
+        make_request
+        expect(assigns[:error_message]).to eq(:rate_expired)
+      end
+      it 'should populate the normal advance view parameters' do
+        expect(subject).to receive(:populate_advance_request_view_parameters)
+        make_request
+      end
+      it 'should not exeucte the advance' do
+        expect_any_instance_of(EtransactAdvancesService).to_not receive(:quick_advance_execute)
         make_request
       end
     end
@@ -868,6 +898,9 @@ RSpec.describe DashboardController, :type => :controller do
     it "returns `#{I18n.t('dashboard.quick_advance.frc_title')}` if it is passed anything other than `open` or `overnight` as a term" do
       expect(subject.send(:get_description_from_advance_term, 'foo')).to eq(I18n.t('dashboard.quick_advance.frc_title'))
     end
+    it 'should return nil if its passed nil' do
+       expect(subject.send(:get_description_from_advance_term, nil)).to be_nil
+     end
   end
 
   describe 'get_program_from_advance_type method' do
@@ -880,6 +913,9 @@ RSpec.describe DashboardController, :type => :controller do
        it "returns `#{I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed')}` if it is passed `#{type}` as a type" do
          expect(subject.send(:get_program_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed'))
        end
+     end
+     it 'should return nil if its passed nil' do
+       expect(subject.send(:get_program_from_advance_type, nil)).to be_nil
      end
   end
 
@@ -904,6 +940,173 @@ RSpec.describe DashboardController, :type => :controller do
         expect(subject.send(:get_type_from_advance_type, type)).to eq(I18n.t('dashboard.quick_advance.table.aa'))
       end
     end
+    it 'should return nil if its passed nil' do
+      expect(subject.send(:get_type_from_advance_type, nil)).to be_nil
+    end
+  end
+
+  describe '`get_type_from_advance_type` method' do
+    before do
+      stub_const('DashboardController::COLLATERAL_TYPE_MAPPING', :[] => double('A Value'))
+    end
+    it 'should call `to_sym` on the advance_type' do
+      advance_type = double('An Advance Type')
+      expect(advance_type).to receive(:to_sym)
+      subject.send(:get_collateral_type_from_advance_type, advance_type)
+    end
+    it 'should look the symbol up in the COLLATERAL_TYPE_MAPPING and return the found value' do
+      advance_type = double('An Advance Type', to_sym: double('An Advance Type Symbol'))
+      mapped_value = double('A Mapped Value')
+      allow(subject.class::COLLATERAL_TYPE_MAPPING).to receive(:[]).with(advance_type.to_sym).and_return(mapped_value)
+      expect(subject.send(:get_collateral_type_from_advance_type, advance_type)).to eq(mapped_value)
+    end
+    it 'should return nil if its passed nil' do
+      expect(subject.send(:get_collateral_type_from_advance_type, nil)).to be_nil
+    end
+  end
+
+  RSpec.shared_examples "an advance_request method" do |method|
+    it 'should initialize the advance_request hash if it doesn\'t exist' do
+      session['advance_request'] = nil
+      subject.send(method)
+      expect(session['advance_request']).to be_kind_of(Hash)
+    end
+    it 'should not initialize the advance_request hash if it exists' do
+      hash = {}
+      session['advance_request'] = hash
+      subject.send(method)
+      expect(session['advance_request']).to equal(hash)
+    end
+  end
+
+  describe '`populate_advance_request_view_parameters` method' do
+    let(:call_method) { subject.send(:populate_advance_request_view_parameters) }
+    before do
+      allow(subject).to receive(:get_description_from_advance_term).and_return(nil)
+      allow(subject).to receive(:get_program_from_advance_type).and_return(nil)
+      allow(subject).to receive(:get_type_from_advance_type).and_return(nil)
+    end
+    it 'should get the advance_request_parameters' do
+      expect(subject).to receive(:advance_request_parameters).with(no_args)
+      call_method
+    end
+    {
+      authorized_amount: :authorized_amount,
+      exception_message: :exception_message,
+      cumulative_stock_required: :cumulative_stock_required,
+      current_trade_stock_required: :current_trade_stock_required,
+      pre_trade_stock_required: :pre_trade_stock_required,
+      net_stock_required: :net_stock_required,
+      gross_amount: :gross_amount,
+      gross_cumulative_stock_required: :gross_cumulative_stock_required,
+      gross_current_trade_stock_required: :gross_current_trade_stock_required,
+      gross_pre_trade_stock_required: :gross_pre_trade_stock_required,
+      gross_net_stock_required: :gross_net_stock_required,
+      interest_day_count: :interest_day_count,
+      payment_on: :payment_on,
+      funding_date: :funding_date,
+      maturity_date: :maturity_date,
+      initiated_at: :initiated_at,
+      advance_number: :confirmation_number,
+      advance_amount: {key: :advance_amount, chain: [:to_f]},
+      advance_term: :advance_term,
+      advance_rate: {key: :advance_rate, chain: [:to_f]},
+      advance_description: {key: :advance_term, method: :get_description_from_advance_term},
+      advance_type: {key: :advance_type, method: :get_type_from_advance_type},
+      advance_program: {key: :advance_type, method: :get_program_from_advance_type},
+      collateral_type: {key: :advance_type, method: :get_collateral_type_from_advance_type}
+    }.each do |param, key|
+      if key.is_a?(Hash)
+        chain = key[:chain]
+        method = key[:method]
+        key = key[:key]
+      end
+      it "should populate the view variable `@#{param}` with the value found in the advance_request_parameters under key `#{key}`" do
+        value = double("Advance Request Parameter: #{key}")
+        if chain || method
+          intermediary_value = value
+          value = double('Processed Value')
+          allow(intermediary_value).to receive_message_chain(*chain).and_return(value) if chain
+          allow(subject).to receive(method).with(intermediary_value).and_return(value) if method
+          allow(subject).to receive(:advance_request_parameters).and_return({key => intermediary_value})
+        else
+          allow(subject).to receive(:advance_request_parameters).and_return({key => value})
+        end
+        call_method
+        expect(assigns[param]).to eq(value)
+      end
+      it "should populate the view variable `@#{param}` with nil if no value was found in the advance_request_parameters under key `#{key}`" do
+        call_method
+        expect(assigns).to include(param)
+        expect(assigns[param]).to eq(nil)
+      end
+    end
+  end
+  describe '`advance_request_expired?` method' do
+    let(:rate_timeout) { rand(3..60) }
+    let(:call_method) { subject.send(:advance_request_expired?) }
+    let(:now) { Time.zone.now }
+    before do
+      allow_any_instance_of(EtransactAdvancesService).to receive(:settings).and_return({rate_timeout: rate_timeout})
+      allow(Time.zone).to receive(:now).and_return(now)
+    end
+    it_should_behave_like 'an advance_request method', :advance_request_expired?
+    it 'should get the rate timeout from the etransact service' do
+      expect_any_instance_of(EtransactAdvancesService).to receive(:settings).and_return({})
+      call_method
+    end
+    it 'returns true if the advance_request timestamp + the rate timeout < now' do
+      session[:advance_request] = {'timestamp' => now - (rate_timeout + 0.1).seconds}
+      expect(call_method).to be(true)
+    end
+    it 'returns true if the advance_request timestamp + the rate timeout == now' do
+      session[:advance_request] = {'timestamp' => now - rate_timeout.seconds}
+      expect(call_method).to be(true)
+    end
+    it 'returns false if the advance_request timestamp + the rate timeout > now' do
+      session[:advance_request] = {'timestamp' => now - (rate_timeout - 0.1).seconds}
+      expect(call_method).to be(false)
+    end
+    it 'returns false if the advance_request timestamp is missing' do
+      expect(call_method).to be(false)
+    end
+    it 'raises an error if the etransact settings can\'t be retrieved' do
+      allow_any_instance_of(EtransactAdvancesService).to receive(:settings).and_return(nil)
+      expect{call_method}.to raise_error
+    end
+  end
+  describe '`advance_request_parameters` method' do
+    let(:request_params) { double('Request Params') }
+    before do
+      allow(request_params).to receive(:with_indifferent_access).and_return(request_params)
+    end
+    it_should_behave_like 'an advance_request method', :advance_request_parameters
+    it 'stores the supplied parameters' do
+      session[:advance_request] = {}
+      expect(session[:advance_request]).to receive(:[]=).with('parameters', request_params)
+      subject.send(:advance_request_parameters, request_params)
+    end
+    it 'returns the stored parameters when called without any arguments' do
+      session[:advance_request] = {'parameters' => request_params}
+      expect(subject.send(:advance_request_parameters)).to eq(request_params)
+    end
+    it 'returns the stored parameters when called with parameters' do
+      expect(subject.send(:advance_request_parameters, request_params)).to eq(request_params)
+    end
+    it 'returns the result of calling `with_indifferent_access` on the paramters' do
+      indifferent_request_params = double('Indifferent Request Params')
+      allow(request_params).to receive(:with_indifferent_access).and_return(indifferent_request_params)
+      expect(subject.send(:advance_request_parameters, request_params)).to eq(indifferent_request_params)
+    end
+  end
+  describe '`advance_request_timestamp!` method' do
+    it 'should set the advance request timestamp field to now' do
+      now = double('A DateTime')
+      allow(Time.zone).to receive(:now).and_return(now)
+      subject.send(:advance_request_timestamp!)
+      expect(session['advance_request']['timestamp']).to eq(now)
+    end
+    it_should_behave_like 'an advance_request method', :advance_request_timestamp!
   end
 
   describe 'the `check_advance_rate` method' do

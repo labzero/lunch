@@ -1,0 +1,11 @@
+{
+  "AutoApprove": "1",
+  "EndOfDayExtension": "4",
+  "RateTimeout": "60",
+  "RatesFlagged":  "N",
+  "RSATimeout":  "20",
+  "ShareholderTotalDailyLimit": "880,000,000",
+  "ShareholderWebDailyLimit": "2,900,000,000",
+  "MaximumOnlineTermDays": "1102",
+  "RateStaleCheck": "999998"
+}

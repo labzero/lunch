@@ -91,13 +91,13 @@ module MAPI
           # Advance payment frequency and payment day of the month
           advance_payment_day_of_month = 0
           if (term == 'overnight')
-            @@payment_at = 'Overnight'
+            payment_at = 'Overnight'
             advance_payment_frequency = {
               'v13:frequency' => 1,
               'v13:frequencyUnit' => 'T'
             }
           elsif (term == 'open')
-            @@payment_at = 'End Of Month'
+            payment_at = 'End Of Month'
             advance_payment_frequency = {
               'v13:frequency' => 1,
               'v13:frequencyUnit' => 'M'
@@ -116,16 +116,16 @@ module MAPI
                   'v13:frequencyUnit' => 'M'
                 }
               end
-              @@payment_at = 'Maturity'
+              payment_at = 'Maturity'
             else
               if (maturity_date - settlement_date).to_i <= 180
-                @@payment_at = 'Maturity'
+                payment_at = 'Maturity'
                 advance_payment_frequency = {
                   'v13:frequency' => 1,
                   'v13:frequencyUnit' => 'T'
                 }
               else
-                @@payment_at = 'Semiannual'
+                payment_at = 'Semiannual'
                 advance_payment_frequency = {
                   'v13:frequency' => 6,
                   'v13:frequencyUnit' => 'M'
@@ -134,7 +134,7 @@ module MAPI
             end
           end
           {
-            payment_at: @@payment_at,
+            payment_at: payment_at,
             advance_payment_frequency: advance_payment_frequency,
             advance_payment_day_of_month: advance_payment_day_of_month
           }
@@ -276,19 +276,31 @@ module MAPI
           message['v1:trade']['v12:advance'].deep_merge! advance_lender_amount
           message['v1:trade']['v12:advance'].deep_merge! MAPI::Services::EtransactAdvances::ExecuteTrade::get_advance_product_info(advance_term)
           message['v1:trade']['v12:advance'].deep_merge! advance_payment_coupon_markup
-          message
+          [message, payment_info]
         end
 
         def self.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate)
-          data = if MAPI::Services::EtransactAdvances::ExecuteTrade::init_execute_trade_connection(app.settings.environment)
-            member_id = member_id.to_i
-            # Calculated values
-            # True maturity date will be calculated later
-            maturity_date = MAPI::Services::EtransactAdvances::ExecuteTrade::get_maturity_date(Date.today, advance_term)
-            settlement_date = Date.today
-            day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/360' : 'ACT/ACT'
+          member_id = member_id.to_i
+          # Calculated values
+          # True maturity date will be calculated later
+          maturity_date = MAPI::Services::EtransactAdvances::ExecuteTrade::get_maturity_date(Date.today, advance_term)
+          settlement_date = Date.today
+          day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/360' : 'ACT/ACT'
 
-            message = MAPI::Services::EtransactAdvances::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
+          message, payment_info = MAPI::Services::EtransactAdvances::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
+
+          response_hash = {
+            'advance_rate' => rate.to_f,
+            'advance_amount' => amount.to_i,
+            'advance_term' => advance_term,
+            'advance_type' => advance_type,
+            'interest_day_count' => day_count,
+            'payment_on' => payment_info[:payment_at],
+            'funding_date' => settlement_date,
+            'maturity_date' => maturity_date
+          }
+
+          data = if MAPI::Services::EtransactAdvances::ExecuteTrade::init_execute_trade_connection(app.settings.environment)
             begin
               response = @@execute_trade_connection.call(:execute_trade, message_tag: 'executeTradeRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
             rescue Savon::Error => error
@@ -299,63 +311,45 @@ module MAPI
               response.doc.remove_namespaces!
               fhlbsfresponse = response.doc.xpath('//Envelope//Body//executeTradeResponse')
               if fhlbsfresponse.at_css('transactionResult').content == 'Error'
-                response_hash = {
-                  'status' => [fhlbsfresponse.at_css('transactionResult').content],
-                  'confirmation_number' => '',
-                  'advance_rate' => '',
-                  'advance_amount' => '',
-                  'advance_term' => '',
-                  'advance_type' => '',
-                  'interest_day_count' => '',
-                  'payment_on' => '',
-                  'funding_date' => '',
-                  'maturity_date' => '',
-                }
+                response_hash['status'] = [fhlbsfresponse.at_css('transactionResult').content]
               else
-                response_hash = {}
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_total_daily_limit(app.settings.environment, amount, response_hash)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_capital_stock(fhlbsfresponse, response, response_hash) if check_capstock
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_credit(fhlbsfresponse, response, response_hash)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_collateral(fhlbsfresponse, response, response_hash)
 
                 # passed all checks
-                if response_hash.blank?
-                  response_hash = {
-                    'status' => [fhlbsfresponse.at_css('transactionResult').content],
-                    'confirmation_number' => (operation == 'EXECUTE')? fhlbsfresponse.at_css('trade tradeHeader tradeId').content : '',
-                    'advance_rate' => rate.to_f,
-                    'advance_amount' => amount.to_i,
-                    'advance_term' => advance_term,
-                    'advance_type' => LOAN_MAPPING[advance_type],
-                    'interest_day_count' => day_count,
-                    'payment_on' => @@payment_at,
-                    'funding_date' => settlement_date,
-                    'maturity_date' => maturity_date,
-                  }
+                if response_hash['status'].blank?
+                  response_hash['status'] = [fhlbsfresponse.at_css('transactionResult').content]
+                  response_hash['confirmation_number'] = (operation == 'EXECUTE')? fhlbsfresponse.at_css('trade tradeHeader tradeId').content : ''
                 end
               end
               response_hash
             end
           else
             if operation == 'EXECUTE'
-              JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_confirmation.json')))
+              sleep(2) unless defined?(RSpec) # used to simulate performance of the actual trade service
+              response_hash['status'] = ['Success']
+              response_hash['confirmation_number'] = rand(100000..999999).to_s
             else
               if (amount.to_i == 100001)
-                 JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_credit_error.json')))
+                response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_credit_error.json')))
               elsif (amount.to_i == 100002)
-                JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_collateral_error.json')))
+                response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_collateral_error.json')))
               elsif (amount.to_i == 100003)
-                JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_exceeds_total_daily_limit_error.json')))
+                response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_exceeds_total_daily_limit_error.json')))
               elsif (amount.to_i < 1000000) || (!check_capstock)
-                JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_preview.json')))
+                response_hash['status'] = ['Success']
+                response_hash['confirmation_number'] = ''
               elsif amount.to_i < 2000000
-                JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_capstock_preview.json')))
+                response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_capstock_preview.json')))
               elsif amount.to_i < 3000000
-                JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_capstock_missing_gross.json')))
+                response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_capstock_missing_gross.json')))
               else
-                JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_capstock_missing_exception.json')))
+                response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_capstock_missing_exception.json')))
               end
             end
+            response_hash
           end
           data.to_json
         end

@@ -25,7 +25,8 @@ class EtransactAdvancesService < MAPIService
   end
 
   def signer_full_name(signer)
-    get(:signer_full_name, "etransact_advances/signer_full_name/#{(signer)}").try(:body)
+    signer = get(:signer_full_name, "etransact_advances/signer_full_name/#{(signer)}").try(:body)
+    String.new(signer) if signer
   end
 
   def quick_advance_validate(member_id, amount, advance_type, advance_term, rate, check_capstock, signer)
@@ -94,6 +95,10 @@ class EtransactAdvancesService < MAPIService
         nil
       end
     end
+  end
+
+  def settings
+    get_hash(:settings, 'etransact_advances/settings')
   end
 
   protected
