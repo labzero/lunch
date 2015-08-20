@@ -473,70 +473,88 @@ class ReportsController < ApplicationController
     @credit_type ||= @credit_type_options.first.last
     @credit_type_text ||= @credit_type_options.first.first
 
-    if report_disabled?(HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS)
-      @historical_price_indications = {}
+    export_format = params[:export_format]
+    @report_name = t('reports.pages.price_indications.historical')
+    filename_credit_type = (@credit_type.include?('libor') || @credit_type.include?('daily_prime')) ? "arc-#{@credit_type.gsub('_','-')}" : @credit_type
+    filename = "historical-price-indications-#{@collateral_type}-#{filename_credit_type}-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
+    excel_params = {
+      start_date: @start_date.to_s,
+      end_date: @end_date.to_s,
+      historical_price_collateral_type: @collateral_type,
+      historical_price_credit_type: @credit_type
+    }
+    if export_format == 'xlsx'
+      job_status = RenderReportExcelJob.perform_later(current_member_id, 'historical_price_indications', filename, excel_params).job_status
+    end
+    unless job_status.nil?
+      job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
     else
-      @historical_price_indications = rate_service.historical_price_indications(@start_date, @end_date, @collateral_type, @credit_type)
-      raise StandardError, "There has been an error and ReportsController#historical_price_indications has encountered nil. Check error logs." if @historical_price_indications.nil?
-    end
-
-    case @credit_type.to_sym
-    when :frc
-      column_heading_keys = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.values
-      terms = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.keys
-    when :vrc
-      column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
-      terms = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.keys
-    when *RatesService::ARC_CREDIT_TYPES
-      table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading") unless @credit_type == :daily_prime
-      column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
-      terms = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.keys
-      # TODO add statement for 'embedded_cap' when it is rigged up
-    end
-
-    column_headings = []
-    column_sub_headings = []
-    if (@credit_type.to_sym == :daily_prime)
-      column_heading_keys.each do |key|
-        column_headings << I18n.t("global.full_dates.#{key}")
-        column_sub_headings = [fhlb_add_unit_to_table_header(I18n.t("reports.pages.price_indications.daily_prime.benchmark_index"), '%'), I18n.t("reports.pages.price_indications.daily_prime.basis_point_spread")]
+      if report_disabled?(HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS)
+        @historical_price_indications = {}
+      else
+        @historical_price_indications = rate_service.historical_price_indications(@start_date, @end_date, @collateral_type, @credit_type)
+        raise StandardError, "There has been an error and ReportsController#historical_price_indications has encountered nil. Check error logs." if @historical_price_indications.nil?
       end
-      column_sub_headings_first =  I18n.t('global.date')
-    else
-      column_heading_keys.each do |key|
-        column_headings << I18n.t("global.dates.#{key}")
-      end
-      column_headings.insert(0, I18n.t('global.date'))
-    end
 
-    rows = if @historical_price_indications[:rates_by_date]
-      @historical_price_indications[:rates_by_date] = add_rate_objects_for_all_terms(@historical_price_indications[:rates_by_date], terms, @credit_type.to_sym)
+      case @credit_type.to_sym
+        when :frc
+          column_heading_keys = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.values
+          terms = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.keys
+        when :vrc
+          column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
+          terms = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.keys
+        when *RatesService::ARC_CREDIT_TYPES
+          table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading") unless @credit_type == :daily_prime
+          column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
+          terms = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.keys
+        # TODO add statement for 'embedded_cap' when it is rigged up
+      end
+
+      column_headings = []
+      column_sub_headings = []
       if (@credit_type.to_sym == :daily_prime)
-        @historical_price_indications[:rates_by_date].collect do |row|
-          columns = []
-          # need to replicate rate data for display purposes
-          row[:rates_by_term].each_with_index do |column, i|
-            next if i == 0
-            columns <<  {type: row[:rates_by_term][0][:type].to_sym, value: row[:rates_by_term][0][:value]}
-            columns <<  {type: column[:type].to_sym, value: column[:value] }
+        column_heading_keys.each do |key|
+          column_headings << I18n.t("global.full_dates.#{key}")
+          column_sub_headings = [fhlb_add_unit_to_table_header(I18n.t("reports.pages.price_indications.daily_prime.benchmark_index"), '%'), I18n.t("reports.pages.price_indications.daily_prime.basis_point_spread")]
+        end
+        column_sub_headings_first =  I18n.t('global.date')
+      else
+        column_heading_keys.each do |key|
+          column_headings << I18n.t("global.dates.#{key}")
+        end
+        column_headings.insert(0, I18n.t('global.date'))
+      end
+
+      rows = if @historical_price_indications[:rates_by_date]
+        @historical_price_indications[:rates_by_date] = add_rate_objects_for_all_terms(@historical_price_indications[:rates_by_date], terms, @credit_type.to_sym)
+        if (@credit_type.to_sym == :daily_prime)
+          @historical_price_indications[:rates_by_date].collect do |row|
+            columns = []
+            # need to replicate rate data for display purposes
+            row[:rates_by_term].each_with_index do |column, i|
+              next if i == 0
+              columns <<  {type: row[:rates_by_term][0][:type].to_sym, value: row[:rates_by_term][0][:value]}
+              columns <<  {type: column[:type].to_sym, value: column[:value] }
+            end
+            {date: row[:date], columns: columns }
           end
-          {date: row[:date], columns: columns }
+        else
+          @historical_price_indications[:rates_by_date].collect do |row|
+            {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: column[:type].to_sym, value: column[:value] } } }
+          end
         end
       else
-        @historical_price_indications[:rates_by_date].collect do |row|
-          {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: column[:type].to_sym, value: column[:value] } } }
-        end
+        []
       end
-    else
-      []
+      @table_data = {
+        :table_heading => table_heading,
+        :column_headings => column_headings,
+        :column_sub_headings => column_sub_headings,
+        :column_sub_headings_first => column_sub_headings_first,
+        :rows => rows
+      }
     end
-    @table_data = {
-      :table_heading => table_heading,
-      :column_headings => column_headings,
-      :column_sub_headings => column_sub_headings,
-      :column_sub_headings_first => column_sub_headings_first,
-      :rows => rows
-    }
   end
 
   def cash_projections
