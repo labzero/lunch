@@ -139,7 +139,7 @@ module MAPI
               'v13:initialRate' => interest,
               'v13:floatingRateSchedule' => {
                 'v13:floatingPeriod' => {
-                  'v13:startDate' => Date.today,
+                  'v13:startDate' => Time.zone.today,
                   'v13:rateIndices' => {
                     'v13:rateIndex' => {
                       'v13:index' => '',
@@ -222,7 +222,7 @@ module MAPI
             'v14:prepaymentModelCode' => 1,
             'v14:coupon' => {
               'v13:paymentDates' => {
-                'v13:firstPaymentDate' => Date.today,
+                'v13:firstPaymentDate' => Time.zone.today,
                 'v13:paymentFrequency' => payment_info[:advance_payment_frequency],
                 'v13:paymentConvention' => {
                   'v13:businessDayAdjustment' => 'FOLLOWING',
@@ -255,8 +255,8 @@ module MAPI
                    {'v13:partyId' => member_id}]
                 },
                 'v12:instrument' => instrument,
-                'v12:tradeDate' => Date.today,
-                'v12:settlementDate' => Date.today,
+                'v12:tradeDate' => Time.zone.today,
+                'v12:settlementDate' => Time.zone.today,
                 'v12:openDateMaturity' => advance_term == 'open'
               },
               'v12:advance' => {},
@@ -275,8 +275,8 @@ module MAPI
           member_id = member_id.to_i
           # Calculated values
           # True maturity date will be calculated later
-          maturity_date = MAPI::Services::EtransactAdvances::ExecuteTrade::get_maturity_date(Date.today, advance_term)
-          settlement_date = Date.today
+          maturity_date = MAPI::Services::EtransactAdvances::ExecuteTrade::get_maturity_date(Time.zone.today, advance_term)
+          settlement_date = Time.zone.today
           day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/360' : 'ACT/ACT'
 
           message, payment_info = MAPI::Services::EtransactAdvances::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)

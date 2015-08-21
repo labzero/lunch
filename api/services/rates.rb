@@ -579,7 +579,7 @@ module MAPI
         relative_get "/summary" do
           MAPI::Services::Rates.init_cal_connection(settings.environment)
           if @@cal_connection
-            message = {'v1:endDate' => Date.today + 3.years, 'v1:startDate' => Date.today}
+            message = {'v1:endDate' => Time.zone.today + 3.years, 'v1:startDate' => Time.zone.today}
             begin
               response = @@cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
             rescue Savon::Error => error
