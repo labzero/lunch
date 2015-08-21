@@ -108,13 +108,13 @@ describe MAPI::ServiceApp do
     end
 
     it "should always call get_maturity_date" do
-      expect(MAPI::Services::Rates).to receive(:get_maturity_date).at_least(48).with(kind_of(Array), kind_of(Date), kind_of(String))
+      expect(MAPI::Services::Rates).to receive(:find_nearest_business_day).at_least(48).with(kind_of(Array), kind_of(Date), kind_of(String))
       get '/rates/summary'
     end
 
     it "should set maturity date to get maturity date" do
       maturity_date = 'foobar'
-      allow(MAPI::Services::Rates).to receive(:get_maturity_date).and_return(maturity_date)
+      allow(MAPI::Services::Rates).to receive(:find_nearest_business_day).and_return(maturity_date)
       loan_types.each do |loan_type|
         loan_terms.each do |loan_term|
           expect(rate_summary[loan_type][loan_term][:maturity_date]).to eq(maturity_date)

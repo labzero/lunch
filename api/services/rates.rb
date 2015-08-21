@@ -83,7 +83,7 @@ module MAPI
 
       def self.get_holidays(logger, environment)
         if MAPI::Services::Rates.init_cal_connection(environment)
-          return nil unless response = MAPI::Services::Rates.get_holidays_from_soap(logger, Date.today, Date.today + 3.years)
+          return nil unless response = MAPI::Services::Rates.get_holidays_from_soap(logger, Time.zone.today, Time.zone.today + 3.years)
           response.doc.remove_namespaces!
           response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')[0].css('days day date').map do |holiday|
             Time.zone.parse(holiday.content)
@@ -588,23 +588,22 @@ module MAPI
             # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
             LOAN_TYPES.each do |type|
               LOAN_TERMS.each do |term|
-                hash[type][term][:maturity_date] = Date.today + hash[type][term][:days_to_maturity].to_i.days
+                hash[type][term][:maturity_date] = Time.zone.today + hash[type][term][:days_to_maturity].to_i.days
               end
             end
             hash
           end
           LOAN_TYPES.each do |type|
             LOAN_TERMS.each do |term|
-              loan                 = data[type][term]
-              maturity_date        = MAPI::Services::Rates.get_maturity_date(holidays,loan['maturity_date'], TERM_MAPPING[term][:frequency_unit])
-              blacked_out          = blackout_dates.include?( maturity_date )
-              cant_trade           = !loan_terms[term][type]['trade_status']
-              cant_display         = !loan_terms[term][type]['display_status']
-              loan[:maturity_date] = maturity_date
-              loan[:disabled]      = blacked_out || cant_trade || cant_display
+              loan                  = data[type][term]
+              loan['maturity_date'] = MAPI::Services::Rates.find_nearest_business_day(holidays, loan['maturity_date'], TERM_MAPPING[term][:frequency_unit])
+              blacked_out           = blackout_dates.include?( loan['maturity_date'] )
+              cant_trade            = !loan_terms[term][type]['trade_status']
+              cant_display          = !loan_terms[term][type]['display_status']
+              loan[:disabled]       = blacked_out || cant_trade || cant_display
             end
           end
-          data.merge( timestamp: Time.now ).to_json
+          data.merge( timestamp: Time.zone.now ).to_json
         end
 
 
