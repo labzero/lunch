@@ -485,11 +485,9 @@ en:
         insufficient_financing_availability_html: The original amount requested of %{amount} is not available based on your remaining financing availability.
         capital_stock_exception: No Net or Gross info returned
         low_exception_html: The amount for an advance at this term must be %{amount} or higher
-        high_exception_html: The amount for an advance at this term must be %{amount} or lower
         insufficient_collateral_html: The original amount requested of %{amount} is not available based on your remaining %{collateral_type} collateral.
         updated_rate: The rate for this advance has changed from %{old_rate} to %{new_rate}.
-        advance_unavailable: This advance is not available right now. For more information, call the Member Services Desk at %{phone_number}.
-        unavailable_html: This advance is unavailable online right now. Call Member Services at %{phone_number} for more information.
+        advance_unavailable: This advance is unavailable online right now. Call Member Services at %{phone_number} for more information.
         rate_expired: The rate you selected has expired. To initiate this advance, review and select from the current rates.
     reports:
       title: Reports
