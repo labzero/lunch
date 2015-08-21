@@ -24,6 +24,7 @@ html, body {
   overflow-x: hidden; // fix for IE horz scroll bug when tooltip extends past 960 grid - also allows full-bleed section backgrounds
   font-size: $default-font-size;
   color: $text-color;
+  min-width: $row-width;
   @include default-font;
 }
 

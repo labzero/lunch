@@ -69,7 +69,7 @@
 
 .column-2x10-right {
   @extend %column;
-  width:($grid-column-width * 10) + ($gutter-width * 9.5);
+  width: $column-2x10-right-width;
   margin-left: 0;
   &.column-2x10-extended {
     width:($grid-column-width * 10) + ($gutter-width * 8.5);

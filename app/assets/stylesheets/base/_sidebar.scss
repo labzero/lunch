@@ -36,6 +36,11 @@
   }
   .column-2x10-right {
     @include full-bleed-background($white);
+    @media screen and (max-width: $row-width) {
+      &:after {
+        width: $column-2x10-right-width + $row-padding;
+      }
+    }
   }
 
   a {
