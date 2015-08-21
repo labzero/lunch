@@ -104,19 +104,20 @@ class EtransactAdvancesService < MAPIService
   protected
 
   def days_until(date)
-    (date - Date.today).to_i
+    (date - Time.zone.today).to_i
   end
 
   def get_days_to_maturity (term)
+    today = Time.zone.today
     case term
     when /\Aovernight|open\z/i
         1
     when /\A(\d+)w/i
         7*$1.to_i
     when /\A(\d+)m/i
-        days_until(Date.today + $1.to_i.month)
+        days_until(today + $1.to_i.month)
     when /\A(\d+)y/i
-        days_until(Date.today + $1.to_i.year)
+        days_until(today + $1.to_i.year)
     end
   end
 

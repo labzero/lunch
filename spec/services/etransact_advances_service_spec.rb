@@ -257,6 +257,7 @@ describe EtransactAdvancesService do
   end
 
   describe 'get_days_to_maturity' do
+    let(:today) { Time.zone.today }
     it 'should map overnight to 1' do
       expect(subject.send(:get_days_to_maturity,'Overnight')).to eq( 1 )
       expect(subject.send(:get_days_to_maturity,'overnight')).to eq( 1 )
@@ -267,22 +268,23 @@ describe EtransactAdvancesService do
     end
     (1..4).each do |i|
       it "should map #{i}w to #{7*i}" do
-        expect(subject.send(:get_days_to_maturity,"#{i}w")).to eq( ((Date.today + 7*i) - Date.today).to_i )
+        expect(subject.send(:get_days_to_maturity,"#{i}w")).to eq( ((today + 7*i) - today).to_i )
       end
     end
     (1..12).each do |i|
       it "should map #{i}m" do
-        expect(subject.send(:get_days_to_maturity,"#{i}m")).to eq( ((Date.today + i.month) - Date.today).to_i )
+        expect(subject.send(:get_days_to_maturity,"#{i}m")).to eq( ((today + i.month) - today).to_i )
       end
     end
     (1..10).each do |i|
       it "should map #{i}y" do
-        expect(subject.send(:get_days_to_maturity,"#{i}y")).to eq( ((Date.today + i.year) - Date.today).to_i )
+        expect(subject.send(:get_days_to_maturity,"#{i}y")).to eq( ((today + i.year) - today).to_i )
       end
     end
   end
 
   describe 'get_days_to_maturity_date' do
+    let(:today) { Time.zone.today }
     it 'should map overnight to 1' do
       expect(subject.send(:get_days_to_maturity_date,'Overnight')).to eq( 1 )
       expect(subject.send(:get_days_to_maturity_date,'overnight')).to eq( 1 )
@@ -292,20 +294,21 @@ describe EtransactAdvancesService do
       expect(subject.send(:get_days_to_maturity_date,'open')).to eq( 1 )
     end
     it 'should map a future date to the correct number of dates' do
-      r = (rand*100).round
-      expect(subject.send(:get_days_to_maturity_date, (Date.today + r.days).to_s)).to eq( r )
+      r = rand(1..100).round
+      expect(subject.send(:get_days_to_maturity_date, (today + r.days).to_s)).to eq( r )
     end
   end
 
   describe 'days_until' do
+    let(:today) { Time.zone.today }
     it 'should map today to 0' do
-      expect(subject.send(:days_until, Date.today)).to eq( 0 )
+      expect(subject.send(:days_until, today)).to eq( 0 )
     end
     it 'should map tomorrow to 1' do
-      expect(subject.send(:days_until, Date.tomorrow)).to eq( 1 )
+      expect(subject.send(:days_until, today.tomorrow)).to eq( 1 )
     end
     it 'should map next week to 7' do
-      expect(subject.send(:days_until, Date.today + 1.week)).to eq( 7 )
+      expect(subject.send(:days_until, today + 1.week)).to eq( 7 )
     end
   end
 end
