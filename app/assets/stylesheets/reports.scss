@@ -127,6 +127,33 @@
       margin-right: 5px;
       margin-top: 10px;
     }
+    dt {
+      font-weight: $bold-weight;
+      display: inline-block;
+      white-space: nowrap;
+      padding-right: 2px;
+    }
+    dd {
+      display: inline;
+      margin: 0;
+      &:after {
+        content: "\a\a";
+        white-space: pre;
+      }
+    }
+    dd:last-child:after {
+      content: none;
+    }
+  }
+}
+
+.advances-detail-report {
+  .report-main-body {
+    small {
+      p:last-child {
+        margin-top: 1em;
+      }
+    }
   }
 }
 
@@ -988,23 +1015,6 @@ td.dataTables_empty {
       @include typography-print-footnote;
       width: 66%;
       display: block;
-      dt {
-        font-weight: $bold-weight;
-        display: inline-block;
-        white-space: nowrap;
-        padding-right: 2px;
-      }
-      dd {
-        display: inline;
-        margin: 0;
-        &:after {
-          content: "\a\a";
-          white-space: pre;
-        }
-      }
-      dd:last-child:after {
-        content: none;
-      }
       p {
         @include typography-print-footnote;
       }
@@ -1017,7 +1027,8 @@ td.dataTables_empty {
     border: none;
     width: 100%;
     margin-bottom: 15px;
-    thead, .sorting_asc, .sorting_desc, tbody tr:nth-child(odd), tfoot, td, th, thead + tbody tr:nth-child(even) {
+    thead + tbody tr:nth-child(even), &.table-dividend-summary tbody tr:nth-child(even), &.securities-services-table tr:nth-child(even),
+    thead, .sorting_asc, .sorting_desc, tbody tr:nth-child(odd), tfoot, td, th {
       background-color: transparent;
       border: none;
       min-width: 0 !important;
