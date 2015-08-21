@@ -35,14 +35,8 @@ require 'simplecov-rcov'
 require 'timecop'
 Dir[File.join(File.dirname(__FILE__), 'support', '*.rb')].each {|file| require file }
 
-class SimpleCov::Formatter::MergedFormatter
-  def format(result)
-     SimpleCov::Formatter::HTMLFormatter.new.format(result)
-     SimpleCov::Formatter::RcovFormatter.new.format(result)
-  end
-end
-SimpleCov.formatter = SimpleCov::Formatter::MergedFormatter
-SimpleCov.start
+require_relative File.join('..', '..', 'spec', 'support', 'coverage')
+FhlbMember::Coverage.simplecov_init('rspec::api')
 
 ENV['RACK_ENV'] = 'test'
 
