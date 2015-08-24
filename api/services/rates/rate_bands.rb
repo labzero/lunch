@@ -10,7 +10,16 @@ module MAPI
         end
 
         def self.rate_bands_production
-          MAPI::Shared::ActiveRecord.fetch_hashes(SQL)
+          begin
+            results = []
+            cursor  = ActiveRecord::Base.connection.execute(SQL)
+            while row = cursor.fetch_hash()
+              results.push(row)
+            end
+            results
+          rescue => e
+            warn(:term_bucket_data_production, e.message)
+          end
         end
 
         def self.rate_bands_development
