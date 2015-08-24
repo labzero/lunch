@@ -25,6 +25,7 @@ class ReportsController < ApplicationController
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
     User::Roles::SIGNER_ENTIRE_AUTHORITY => I18n.t('user_roles.entire_authority.title'),
+    User::Roles::ADVANCE_SIGNER => I18n.t('user_roles.advances.title'),
     User::Roles::AFFORDABILITY_SIGNER => I18n.t('user_roles.affordable_housing.title'),
     User::Roles::COLLATERAL_SIGNER => I18n.t('user_roles.collateral.title'),
     User::Roles::MONEYMARKET_SIGNER => I18n.t('user_roles.money_market.title'),
@@ -39,6 +40,7 @@ class ReportsController < ApplicationController
     'all' => I18n.t('user_roles.all_authorizations'),
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.dropdown'),
     User::Roles::SIGNER_ENTIRE_AUTHORITY => I18n.t('user_roles.entire_authority.dropdown'),
+    User::Roles::ADVANCE_SIGNER => I18n.t('user_roles.advances.title'),
     User::Roles::AFFORDABILITY_SIGNER => I18n.t('user_roles.affordable_housing.title'),
     User::Roles::COLLATERAL_SIGNER => I18n.t('user_roles.collateral.title'),
     User::Roles::MONEYMARKET_SIGNER => I18n.t('user_roles.money_market.title'),
