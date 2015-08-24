@@ -1,0 +1,61 @@
+- uses = %w(fund manage reduce lock shorten)
+- advantages = %w(indices maturities financing)
+- interest = %w(libor prime maturity indices)
+.row.product-page
+  .column-2x10-right
+    %h1= t('products.advances.arc.title')
+    %p= t('products.advances.arc.description')
+    %h2= t('products.section_headings.uses')
+    %ul.key-uses-list
+      - uses.each do |use|
+        %li= t("products.advances.arc.uses.#{use}")
+    %h2= t('products.section_headings.advantages')
+    %ul.key-advantages-list
+      - advantages.each do |advantage|
+        %li= t("products.advances.arc.advantages.#{advantage}")
+    %h2= t('products.section_headings.features')
+    %h3= t('products.common_key_features.maximum_term')
+    %p= t('products.advances.arc.features.term.description')
+    %h3= t('products.advances.arc.features.interest_rate.title')
+    %p= t('products.advances.arc.features.interest_rate.description')
+    %ul.key-interest-list
+      - interest.each do |interests|
+        %li= t("products.advances.arc.interest.#{interests}")
+    = simple_format(t('products.advances.arc.interest.description'))
+    %h3= t('products.advances.arc.payments.title')
+    %table
+      %thead
+        %tr
+          %th= t('products.advances.arc.payments.column1.index')
+          %th= t('products.advances.arc.payments.column2.day_count')
+          %th= t('products.advances.arc.payments.column3.rate_reset')
+          %th= t('products.advances.arc.payments.column4.payment_frequency')
+      %tbody
+        %tr
+          %td= t('products.advances.arc.payments.column1.prime_rate')
+          %td= t('products.advances.arc.payments.column2.actual_360')
+          %td= t('products.advances.arc.payments.column3.daily')
+          %td= t('products.advances.arc.payments.column4.quarterly_and_at_repayment')
+        %tr
+          %td= t('products.advances.arc.payments.column1.1_month_libor')
+          %td= t('products.advances.arc.payments.column2.actual_360')
+          %td= t('products.advances.arc.payments.column3.monthly')
+          %td= t('products.advances.arc.payments.column4.monthly_and_at_repayment')
+        %tr
+          %td= t('products.advances.arc.payments.column1.3_month_libor')
+          %td= t('products.advances.arc.payments.column2.actual_360')
+          %td= t('products.advances.arc.payments.column3.quarterly')
+          %td= t('products.advances.arc.payments.column4.quarterly_and_at_repayment')
+        %tr
+          %td= t('products.advances.arc.payments.column1.6_month_libor')
+          %td= t('products.advances.arc.payments.column2.actual_360')
+          %td= t('products.advances.arc.payments.column3.semiannually')
+          %td= t('products.advances.arc.payments.column4.semiannually_and_at_repayment')
+        %tr
+          %td= t('products.advances.arc.payments.column1.1_year_CMT')
+          %td= t('products.advances.arc.payments.column2.actual_actual')
+          %td= t('products.advances.arc.payments.column3.annually')
+          %td= t('products.advances.arc.payments.column4.semiannually_and_at_repayment')
+    %h3= t('products.advances.arc.negative.title')
+    %p= t('products.advances.arc.negative.description')
+    .last-modified= t('products.section_headings.last_modified', date: fhlb_date_short_alpha(@last_modified))

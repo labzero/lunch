@@ -33,4 +33,18 @@ RSpec.describe ProductsController, :type => :controller do
     end
   end
 
+  describe 'GET arc' do
+    it_behaves_like 'a user required action', :get, :arc
+    before { get :arc }
+    it 'should render the view' do
+      expect(response.body).to render_template('arc')
+    end
+    it 'sets the @last_modified instance variable' do
+      expect(assigns[:last_modified]).to be_kind_of(Date)
+    end
+    it 'sets the @html_class instance variable' do
+      expect(assigns[:html_class]).to eq('white-background')
+    end
+  end
+
 end
