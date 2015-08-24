@@ -80,19 +80,37 @@
               transitionToRatesFromLoading();
             });
 
+            // event listener and handler for RSA fields
+            var $initiateButton = $('.confirm-quick-advance');
+            var $secureIDTokenField = $('#securid_token');
+            var $secureIDPinField = $('#securid_pin');
+            if ($secureIDPinField.length && $secureIDTokenField.length) {
+              $.each([$secureIDPinField, $secureIDTokenField], (function(i, $element){
+                $element.on('keyup', function(){
+                  if ($secureIDTokenField.val().length == 6 && $secureIDPinField.val().length == 4) {
+                    $initiateButton.addClass('active');
+                  } else {
+                    $initiateButton.removeClass('active');
+                  };
+                });
+              }));
+            };
+
             // event listener and handler for .confirm-quick-advance button click
-            $('.confirm-quick-advance').on('click', function () {
-              var $pin = $flyoutBottomSection.find('input[name=securid_pin]');
-              var $token = $flyoutBottomSection.find('input[name=securid_token]');
-              var pin = $pin.val();
-              var token = $token.val();
-              if ((!$pin.length && !$token.length) || validateSecurID($flyoutBottomSection)) {
-                var authentication_details = {
-                  securid_pin: pin,
-                  securid_token: token
+            $initiateButton.on('click', function () {
+              if ($initiateButton.hasClass('active')) {
+                var $pin = $flyoutBottomSection.find('input[name=securid_pin]');
+                var $token = $flyoutBottomSection.find('input[name=securid_token]');
+                var pin = $pin.val();
+                var token = $token.val();
+                if ((!$pin.length && !$token.length) || validateSecurID($flyoutBottomSection)) {
+                  var authentication_details = {
+                    securid_pin: pin,
+                    securid_token: token
+                  };
+                  performQuickAdvance($.extend(authentication_details, selected_rate));
                 };
-                performQuickAdvance($.extend(authentication_details, selected_rate));
-              }
+              };
             });
           }
           else {
@@ -310,7 +328,11 @@
 
     function packageParameters(rate_data) {
       return $.extend({amount: $amountField.val()}, rate_data)
-    }
+    };
+
+    function setRsaEventListener(){
+
+    };
 
   };
 }( jQuery ));
