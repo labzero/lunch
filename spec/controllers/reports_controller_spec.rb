@@ -118,7 +118,7 @@ RSpec.describe ReportsController, :type => :controller do
         allow(response_hash).to receive(:[]).with(:activities)
       end
       it_behaves_like 'a user required action', :get, :settlement_transaction_account
-      it_behaves_like 'a report that can be downloaded as a PDF', :settlement_transaction_account
+      it_behaves_like 'a report that can be downloaded', :settlement_transaction_account, [:pdf]
       describe 'with activities array stubbed' do
         it 'should render the settlement_transaction_account view' do
           get :settlement_transaction_account

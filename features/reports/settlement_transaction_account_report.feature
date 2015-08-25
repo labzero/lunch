@@ -52,7 +52,7 @@ Scenario: The Settlement Transaction Account Statement has been disabled
   When the "Settlement Transaction Account" report has been disabled
   Then I should see an empty report table with Data Unavailable messaging
 
-@jira-mem-812
+@jira-mem-812 @resque-backed @smoke
 Scenario: Member downloads a PDF of the Settlement Transaction Account Statement
   Given I am on the "Settlement Transaction Account Statement" report page
   When I request a PDF
