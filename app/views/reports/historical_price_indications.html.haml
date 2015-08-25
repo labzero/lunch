@@ -3,10 +3,7 @@
 .report.price-indications-report.row
   .report-header
     %h1= @report_name
-    - if @print_layout
-      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@start_date))
-    - else
-      = render 'reports_header_buttons', allowed_params: [:start_date, :end_date, :historical_price_collateral_type, :historical_price_credit_type], download_formats: [:xlsx]
+    = render 'reports_header_buttons', allowed_params: [:start_date, :end_date, :historical_price_collateral_type, :historical_price_credit_type], download_formats: [:xlsx]
     .report-inputs
       = render layout: 'reports_date_picker_form', locals: {start_date: @start_date, end_date: @end_date, report_url: reports_historical_price_indications_url, presets: @picker_presets, single_date_picker: @single_date_picker, open_direction: 'left', insert_filter_before: true} do
         .report-filter.collateral-type-filter
