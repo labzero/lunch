@@ -14,6 +14,6 @@
         = render 'shared/securid_fields'
         = link_to(t('dashboard.quick_advance.securid.help'), settings_two_factor_path)
   %button.secondary-button.quick-advance-back-button.icon-arrow-left-before= t('dashboard.quick_advance.buttons.back')
-  %button.primary-button.confirm-quick-advance= t('dashboard.quick_advance.buttons.initiate')
+  %button.primary-button.confirm-quick-advance{class: ('active' if @session_elevated)}= t('dashboard.quick_advance.buttons.initiate')
   %small
     %p.quick-advances-footer= t('dashboard.quick_advance.preview.footer', bank_name: @current_member_name)

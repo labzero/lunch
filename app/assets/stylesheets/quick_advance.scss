@@ -219,7 +219,7 @@ $faded-opacity: 0.4 !default;
   @include pseudo-background-cover($secondary-gray);
 }
 
-.initiate-quick-advance {
+.initiate-quick-advance, .confirm-quick-advance {
   background-color: $secondary-gray;
   cursor: auto;
   &.active {

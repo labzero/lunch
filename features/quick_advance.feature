@@ -120,7 +120,7 @@ Scenario: Users are required to enter a SecurID token to take out an advance
   Given I visit the dashboard
   And I am on the quick advance preview screen
   When I click on the quick advance confirm button
-  Then I should see SecurID errors
+  Then I should see a preview of the quick advance
   When I enter my SecurID pin and token
   And I click on the quick advance confirm button
   Then I should see confirmation number for the advance
