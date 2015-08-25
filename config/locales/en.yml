@@ -1141,7 +1141,7 @@ en:
     general_information:
       title: General Information
       does_not_constitute_solicitation_html: This information does not constitute a solicitation or offer or advice (financial or otherwise) by the Bank, but is a description of generally available structures for certain products and price indications for those structures as of the time and date indicated above. This information is subject to the <a href="%{url}">Terms of Use</a> and may change without notice.
-      market_data_html: Market data is generally provided by Thomson Reuters. <img src="%{picture_url}" alt="Reuters Logo"> </br>Disclaimer Data provided by Thomson Reuters is for information purposes only and is not intended for trading purposes. Thomson Reuters shall not be liable for any errors or delay in the content, or for any action taken in reliance on any content.</br>The Bank may use another source of market data if necessary at its discretion. 
+      market_data_html: Market data is generally provided by Thomson Reuters. <img src="%{picture_url}" alt="Reuters Logo"> </br>Disclaimer Data provided by Thomson Reuters is for information purposes only and is not intended for trading purposes. Thomson Reuters shall not be liable for any errors or delay in the content, or for any action taken in reliance on any content.</br>The Bank may use another source of market data if necessary at its discretion.
       same_day_pricing: Same-day pricing and/or funding for amounts up to $200 million for Variable Rate Credit advances and up to $100 million per posted maturity for all other advances with maturities up to 10 years are available according to your institution's Financing Availability, subject to market conditions. For advances with maturities greater than 10 years, same-day pricing and/or funding are subject to market execution.
       interest_rates_on_securities_backed_credit_advances: Interest rates on Securities-Backed Credit advances may be lower than rates on advances offered under the Bank's Standard Credit Program and competitive with rates in the securities repurchase market. The price indications shown here are based on Agency MBS collateral. For rates using AAA or AA collateral, call the Member Services Desk at %{phone_number}.
       please_call_the_member_services_desk: "Please call the Member Services Desk at %{phone_number} for current quotes, additional information about other maturities and customized offerings, and pricing information on the following products:"
@@ -1189,7 +1189,32 @@ en:
     advances:
       title: Advances
       ace: Advances for Community Enterprise (ACE)
-      amortizing: Amortizing Advance
+
+      amortizing:
+        title: Amortizing Advance
+        description: Use the Amortizing Advance to match the scheduled amortization characteristics of any fixed rate asset.
+        uses:
+            match: Match-fund newly originated or seasoned fixed rate mortgage loans
+            finance: Finance other assets that amortize
+        advantages:
+          portfolio: Advance parameters that best suit the precise characteristics of your portfolio
+          assets: Uniquely structured to finance mortgages and other amortizing assets
+        key_features:
+        max_term:
+          years: 30 years
+        interest_rate:
+          title: Interest Rate
+          advance: Fixed for the entire term of the advance
+        interest_day_count:
+          title: Interest Day Count
+          count: 30/360
+        principal_and_interest_payment_frequency:
+          title: Principle and Interest Payment Frequency
+          frequency: Monthly and at repayment
+        amortization_schedule:
+          title: Amortization Schedule
+          schedule: Can be designed to match most amortization schedules for a variety of fixed rate loans. The borrower specifies the amortization rate of the advance, which determines the amortization schedule.
+
       arc_embedded: ARC Advance with Embedded Options
       callable: Callable Advance
       choice_libor: Choice LIBOR ARC Advance
@@ -1341,6 +1366,7 @@ en:
       last_modified: "Last Modified: %{date}"
     common_key_features:
       term: Term
+      maximum_term: Maximum Term
       interest_day_count: Interest Day Count
       prepayment_features: Prepayment Features
       maximum_term: Maximum Term

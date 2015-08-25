@@ -14,18 +14,23 @@ Feature: Products Page
 
   @smoke @jira-mem-697
   Scenario: Member navigates to the FRC product page
-    When I hover on the products link in the header
-    And I click on the frc link in the header
+    Given I hover on the products link in the header
+    When I click on the frc link in the header
     Then I should see the "frc" product page
 
   @smoke @jira-mem-851
   Scenario: Member navigates to the FRC Embedded Cap product page
-    When I hover on the products link in the header
-    And I click on the frc embedded link in the header
+    Given I hover on the products link in the header
+    When I click on the frc embedded link in the header
     Then I should see the "frc embedded" product page
 
   @smoke @jira-mem-843
   Scenario: Member navigates to the ARC product page
-    When I hover on the products link in the header
-    And I click on the arc link in the header
+    Given I hover on the products link in the header
+    When I click on the arc link in the header
     Then I should see the "arc" product page
+
+  Scenario: Member navigates to the amortizing page via the products dropdown
+    Given I hover on the products link in the header
+    When I click on the amortizing link in the header
+    Then I should see the "amortizing" product page
