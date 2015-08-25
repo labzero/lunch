@@ -1181,7 +1181,6 @@ en:
         stand_alone_html: At this time, the Bank is not offering stand-alone interest rate swaps, caps, and floors to members. For more information, see <a href=%{url}>Interest Rate Swaps, Caps & Floors</a>.
     advances:
       title: Advances
-      arc: Adjustable Rate Credit (ARC) Advance
       ace: Advances for Community Enterprise (ACE)
       amortizing: Amortizing Advance
       arc_embedded: ARC Advance with Embedded Options
@@ -1189,6 +1188,62 @@ en:
       choice_libor: Choice LIBOR ARC Advance
       cip: Community Investment Program (CIP)
       auction_indexed: DN Auction-Indexed Advance
+      arc:
+        title: Adjustable Rate Credit (ARC) Advance
+        description: Use ARC Advances to match the interest rate and payment characteristics of your adjustable rate loan portfolio.
+        uses:
+          finance: Finance adjustable rate mortgage loan portfolios
+          fund: Fund other adjustable rate loans and other interest-rate-sensitive assets
+          manage: Manage interest rate risk
+          reduce: Reduce basis risk by funding assets with financing tied to the same repricing index
+          lock: Lock in current spreads for extended terms
+          shorten: Shorten the liability structure of your balance sheet
+        advantages:
+          indices: Broad spectrum of interest rate indices
+          maturities: Wide range of maturities
+          financing: Can be tailored to meet your specific financing needs
+        features:
+          term:
+            description: 10 years
+          interest_rate:
+            title: Interest Rate
+            description: "The interest rate may be indexed to:"
+        interest:
+          libor: LIBOR (1, 3, and 6 months)
+          prime: Prime Rate
+          maturity: Constant Maturity Treasuries (1 year)
+          indices: A variety of other indices, subject to market execution
+          description: "At the time the advance is made, the interest rate index, spread, and rate reset interval are established. At the specified interval, the interest rate is determined by adding the established spread to the new index value.\n\nIf a specified index is unavailable or is fundamentally altered, the Bank will designate a replacement index that is based upon comparable information, as determined by the Bank in its sole discretion."
+        payments:
+          title: Interest Payments
+          column1:
+            index: index
+            prime_rate: Prime Rate
+            1_month_libor: 1-Month LIBOR
+            3_month_libor: 3-Month LIBOR
+            6_month_libor: 6-Month LIBOR
+            1_year_CMT: 1-year CMT
+          column2:
+            day_count: Day Count
+            actual_360: Actual/360
+            actual_actual: Actual/Actual
+          column3:
+            rate_reset: Rate Reset
+            daily: Daily
+            monthly: Monthly
+            quarterly: Quarterly
+            semiannually: Semiannually
+            annually: Annually
+          column4:
+            payment_frequency: Payment Frequency
+            quarterly_and_at_repayment: Quarterly and at repayment
+            monthly_and_at_repayment: Monthly and at repayment
+            semiannually_and_at_repayment: Semiannually and at repayment
+
+        negative:
+          title: Negative Interest Rate Convention
+          description: If the interest rate determined on any rate reset date or, if applicable, on the scheduled funding date, is a negative value, the interest rate for the accrual period that begins on that rate reset date will be equal to zero. The Bank will not be obligated under any circumstances to pay the borrower any amount relating to the application of a negative interest rate to the remaining principal amount of the advance.
+
       frc:
         title: Fixed Rate Credit (FRC) Advance
         description: Use the FRC Advance to achieve a wide variety of financial management goals, taking advantage of maturities up to 30 years.
@@ -1281,6 +1336,7 @@ en:
       term: Term
       interest_day_count: Interest Day Count
       prepayment_features: Prepayment Features
+      maximum_term: Maximum Term
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email

@@ -37,6 +37,9 @@
   .term {
     @extend %typography-subtitle;
   }
+  table {
+    @extend %table-report;
+  }
 }
 
 .credit-product-list, .key-uses-list, .key-advantages-list {
@@ -49,4 +52,3 @@
   text-transform: uppercase;
   margin-top: 40px;
 }
-
