@@ -1,9 +1,7 @@
 - allowed_params ||= [:start_date, :end_date]
 - download_params ||= params.slice(*[*allowed_params])
 - download_formats = Array.wrap(download_formats || []).collect(&:to_sym)
-- default_value = download_formats.first || :pdf
-- default_text = (t("global.#{download_formats.first}") if download_formats.first) || t('global.pdf')
-- download_options = [[t('global.pdf'), :pdf], [t('global.xlsx'), :xlsx]].select {|option| download_formats.include?(option.last)}
+- download_options = [[t('global.pdf'), :pdf], [t('global.excel'), :xlsx]].select {|option| download_formats.include?(option.last)}
 .report-header-buttons
   - if download_options.present?
     .split-button
@@ -11,5 +9,5 @@
         - download_params.each do |key, value|
           = hidden_field_tag key, value
         %button.split-button-left.download-report= t('dashboard.actions.download')
-        = render 'shared/dropdown', classes: 'split-button-right', dropdown_name: :export_format, default_value: default_value, default_text: default_text, dropdown_options: download_options, calculate_width: true
+        = render 'shared/dropdown', classes: 'split-button-right', dropdown_name: :export_format, default_value: download_options.first.try(:last), default_text: download_options.first.try(:first), dropdown_options: download_options, calculate_width: true
 = render 'report_loading_flyout'

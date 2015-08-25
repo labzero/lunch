@@ -287,7 +287,7 @@ class ReportsController < ApplicationController
   end
 
   def current_price_indications
-    today = Time.zone.now.to_date
+    today = Time.zone.today
     @report_name = t('reports.pages.price_indications.current.title')
     export_format = params[:export_format]
     if export_format == 'xlsx'
