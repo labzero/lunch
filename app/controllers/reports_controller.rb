@@ -654,7 +654,7 @@ class ReportsController < ApplicationController
   end
 
   def securities_services_statement
-    @start_date = (params[:start_date] || Time.zone.now).to_date
+    @start_date = (params[:start_date] || last_month_end).to_date
     if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
       @statement = {}
     else
@@ -663,6 +663,7 @@ class ReportsController < ApplicationController
       raise StandardError, "There has been an error and ReportsController#securities_services_statement has encountered nil. Check error logs." if @statement.nil?
     end
     @picker_presets = date_picker_presets(@start_date)
+    @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
   end
 
   def letters_of_credit
@@ -842,9 +843,7 @@ class ReportsController < ApplicationController
 
   def monthly_securities_position
     @securities_filter = params['securities_filter'] || 'all'
-    today = Time.zone.now
-    max_date = today.day == today.end_of_month.day ? today.end_of_month : (today - 1.month).end_of_month
-    @month_end_date = (params[:start_date] || max_date).to_date
+    @month_end_date = (params[:start_date] || last_month_end).to_date
     @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
     @picker_presets = date_picker_presets(@month_end_date)
     member_balances = MemberBalanceService.new(current_member_id, request)
@@ -1244,6 +1243,11 @@ class ReportsController < ApplicationController
     end
     roles.compact!
     roles.present? ? roles : [t('user_roles.user.title')]
+  end
+
+  def last_month_end
+    today = Time.zone.today
+    today == today.end_of_month ? today.end_of_month : (today - 1.month).end_of_month
   end
 
 end

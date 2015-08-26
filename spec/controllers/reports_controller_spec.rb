@@ -445,6 +445,7 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET securities_services_statement' do
       let(:make_request) { get :securities_services_statement }
       let(:response_hash) { double('A Securities Services Statement', :'[]' => nil)}
+      let(:end_of_month) { rand(500).days.ago(Time.zone.today) }
       before do
         allow(member_balance_service_instance).to receive(:securities_services_statement).with(kind_of(Date)).and_return(response_hash)
         allow(response_hash).to receive(:[]).with(:secutities_fees).and_return([{}])
@@ -455,9 +456,14 @@ RSpec.describe ReportsController, :type => :controller do
         make_request
         expect(assigns[:statement]).to be(response_hash)
       end
-      it 'should default @start_date to today' do
+      it 'should assign @date_picker_filter to the `end_of_month` filter' do
         make_request
-        expect(assigns[:start_date]).to eq(Time.zone.now.to_date)
+        expect(assigns[:date_picker_filter]).to eq(ReportsController::DATE_PICKER_FILTERS[:end_of_month])
+      end
+      it 'should default @start_date to the value returned by `last_month_end`' do
+        allow(controller).to receive(:last_month_end).and_return(end_of_month)
+        make_request
+        expect(assigns[:start_date]).to eq(end_of_month)
       end
       it 'should set @start_date to the `start_date` param' do
         get :securities_services_statement, start_date: '2012-02-11'
@@ -465,7 +471,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'should set @picker_presets to the `date_picker_presets` for the `start_date`' do
         some_presets = double('Some Presets')
-        allow(subject).to receive(:date_picker_presets).with(Time.zone.now.to_date).and_return(some_presets)
+        allow(subject).to receive(:date_picker_presets).and_return(some_presets)
         make_request
         expect(assigns[:picker_presets]).to eq(some_presets)
       end
@@ -1658,6 +1664,20 @@ RSpec.describe ReportsController, :type => :controller do
           user = {:roles => []}
           expect(controller.send(:roles_for_signers, user)).to eq([I18n.t('user_roles.user.title')])
         end
+      end
+    end
+    describe 'last_month_end' do
+      let(:end_of_july) { Date.new(2015,7,31) }
+      it 'returns a date' do
+        expect(controller.send(:last_month_end)).to be_kind_of(Date)
+      end
+      it 'returns the end of last month if today is not the end of the month' do
+        allow(Time.zone).to receive(:today).and_return(end_of_july + rand(1..30).days)
+        expect(controller.send(:last_month_end)).to eq(end_of_july)
+      end
+      it 'returns today if it is the end of the month' do
+        allow(Time.zone).to receive(:today).and_return(end_of_july)
+        expect(controller.send(:last_month_end)).to eq(end_of_july)
       end
     end
   end
