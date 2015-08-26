@@ -83,7 +83,7 @@ Rails.application.routes.draw do
     scope 'advances' do
       get 'adjustable-rate-credit' => 'products#arc', as: :arc
       get 'advances-for-community-enterprise' => 'error#standard_error', as: :ace
-      get 'amortizing' => 'error#standard_error'
+      get 'amortizing' => 'products#amortizing', as: :amortizing
       get 'arc-embedded' => 'error#standard_error'
       get 'callable' => 'error#standard_error'
       get 'choice-libor-arc' => 'error#standard_error'
