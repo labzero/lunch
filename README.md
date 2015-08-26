@@ -110,6 +110,8 @@ This is a summary of the options supported in our .env files:
 * `S3_REGION`: AWS region. Used in config/environment files to point to the proper S3 bucket.
 * `SECURID_TEST_MODE`: What test mode, if any, to use for the SecurID service. In test mode the RSA ACE server is never contacted.
 * `SECURID_USER_PREFIX`: The value to prepend to a username before connecting to the RSA ACE server.
+* `DEBUG`: Enables the ByeBug remote debugging server when set to `true`.
+* `BYEBUG_PORT`: What port to launch the ByeBug remote debugging server on. In its absence, it finds a free port and uses that.
 
 ## Running the Tests
 
