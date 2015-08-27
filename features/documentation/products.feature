@@ -70,3 +70,9 @@ Feature: Products Page
     Given I hover on the products link in the header
     When I click on the other cash needs link in the header
     Then I should see the "other cash needs" product page
+
+  @smoke @jira-mem-847
+  Scenario: Member navigates to the callable advance product page
+    Given I hover on the products link in the header
+    When I click on the callable link in the header
+    Then I should see the "callable" product page

@@ -29,6 +29,11 @@ class ProductsController < ApplicationController
   end
 
   # GET
+  def callable
+    @last_modified = Date.new(2008, 7, 1)
+  end
+
+  # GET
   def frc
     @last_modified = Date.new(2011, 4, 1)
   end

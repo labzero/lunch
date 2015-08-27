@@ -22,6 +22,8 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
       I18n.t('products.advances.ocn.title')
     when 'putable'
       I18n.t('products.advances.putable.title')
+    when 'callable'
+      I18n.t('products.advances.callable.title')
     else
       raise 'unknown product page'
   end
