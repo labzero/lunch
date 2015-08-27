@@ -1,4 +1,3 @@
-- @html_class = 'white-background'
 - uses = %w(liquidity matching funding management)
 - advantages = %w(liquidity access guaranteed_rates less_expensive)
 .row.product-page
@@ -14,7 +13,7 @@
       - advantages.each do |advantage|
         %li= t("products.advances.frc.advantages.#{advantage}")
     %h2= t('products.section_headings.features')
-    %h3= t('products.advances.frc.features.term.title')
+    %h3= t('products.common_key_features.term')
     %p= t('products.advances.frc.features.term.description')
     %h3= t('products.advances.frc.features.interest_rate.title')
     %p= t('products.advances.frc.features.interest_rate.description')
@@ -25,10 +24,10 @@
       %li
         .term= t('products.advances.frc.features.interest_rate.forward_rate.title')
         .definition= t('products.advances.frc.features.interest_rate.forward_rate.description')
-    %h3= t('products.advances.frc.features.interest_day_count.title')
+    %h3= t('products.common_key_features.interest_day_count')
     %p= t('products.advances.frc.features.interest_day_count.description')
     %h3= t('products.advances.frc.features.interest_payment_frequency.title')
     %p= t('products.advances.frc.features.interest_payment_frequency.description')
-    %h3= t('products.advances.frc.features.prepayment_features.title')
+    %h3= t('products.common_key_features.prepayment_features')
     %p= t('products.advances.frc.features.prepayment_features.description_html', url: '#')
     .last-modified= t('products.section_headings.last_modified', date: fhlb_date_short_alpha(@last_modified))

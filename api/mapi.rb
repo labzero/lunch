@@ -3,7 +3,6 @@ require 'swagger/blocks'
 require 'active_support/time'
 
 require_relative 'shared/constants'
-require_relative 'shared/capital_stock_services'
 
 require_relative 'services/base'
 require_relative 'services/mock_rates'
@@ -15,6 +14,8 @@ require_relative 'services/users'
 require_relative 'services/health'
 
 require_relative 'models/member'
+require_relative 'models/etransact_advances'
+require_relative 'models/etransact_settings'
 require_relative 'models/member_balance_pledged_collateral'
 require_relative 'models/member_balance_total_securities'
 require_relative 'models/member_balance_effective_borrowing_capacity'
@@ -102,6 +103,9 @@ module MAPI
 
     def error_handler(error)
       logger.error error
+      if ENV['RACK_ENV'] != 'production'
+        logger.error error.backtrace.join("\n")
+      end
       'Unexpected Server Error'
     end
 

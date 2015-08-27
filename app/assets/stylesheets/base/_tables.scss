@@ -8,6 +8,73 @@
       background: $lightest-blue;
     }
   }
+  thead + tbody {
+    tr:nth-child(odd) td,
+    tr:nth-child(odd) th {
+      background: transparent;
+    }
+    tr:nth-child(even) td,
+    tr:nth-child(even) th {
+      background: $lightest-blue;
+    }
+  }
+}
+
+%table-report {
+  @extend %empty_table;
+  margin-bottom: 50px;
+
+  td, th {
+    border: solid $light-blue;
+    border-width: 0 1px 1px 0;
+    padding: 10px 15px 10px 15px;
+    font-weight: inherit;
+    width: 1px; // Causes the table cell to shrink to fit
+    white-space: nowrap;
+  }
+
+  th {
+    text-align: left;
+  }
+
+  thead {
+    @extend %typography-table-heading;
+    background-color: $light-gray;
+  }
+
+  tbody {
+    @extend %typography-table-cell;
+    tr:nth-child(odd) {
+      background-color: $lightest-blue;
+    }
+  }
+
+  thead + tbody {
+    tr:nth-child(odd) {
+      background-color: transparent;
+    }
+    tr:nth-child(even) {
+      background-color: $lightest-blue;
+    }
+  }
+
+  tfoot {
+    @extend %table-footer-cell;
+  }
+}
+
+%table-footer-cell {
+  @extend %typography-table-total;
+  background-color: $medium-gray;
+  border-left: 1px solid $medium-gray;
+  border-right: 1px solid $medium-gray;
+  color: $white;
+}
+
+@mixin table-cell-treatment {
+  width: auto;
+  box-sizing: border-box;
+  padding: 10px;
 }
 
 td {

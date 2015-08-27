@@ -22,6 +22,8 @@ Scenario: Filtering the authorization report
   Then I should only see users with the "Resolution and Authorization" role
   When I select "Entire Authority" from the authorizations filter
   Then I should only see users with the "Entire Authority" role
+  When I select "Advances" from the authorizations filter
+  Then I should only see users with the "Advances" role
   When I select "Affordable Housing Program" from the authorizations filter
   Then I should only see users with the "Affordable Housing Program" role
   When I select "Collateral" from the authorizations filter

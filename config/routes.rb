@@ -81,7 +81,7 @@ Rails.application.routes.draw do
     get '/letters-of-credit' => 'error#standard_error'
     get '/community_programs' => 'error#standard_error'
     scope 'advances' do
-      get 'adjustable-rate-credit' => 'error#standard_error', as: :arc
+      get 'adjustable-rate-credit' => 'products#arc', as: :arc
       get 'advances-for-community-enterprise' => 'error#standard_error', as: :ace
       get 'amortizing' => 'error#standard_error'
       get 'arc-embedded' => 'error#standard_error'
@@ -90,7 +90,7 @@ Rails.application.routes.draw do
       get 'community-investment-program' => 'error#standard_error', as: :cip
       get 'auction-indexed' => 'error#standard_error'
       get 'fixed-rate-credit' => 'products#frc', as: :frc
-      get 'frc-embedded' => 'error#standard_error'
+      get 'frc-embedded' => 'products#frc_embedded'
       get 'knockout' => 'error#standard_error'
       get 'mortgage-partnership-finance' => 'error#standard_error', as: :mpf
       get 'other-cash-needs' => 'error#standard_error', as: :ocn
@@ -106,6 +106,8 @@ Rails.application.routes.draw do
     delete 'logout' => 'users/sessions#destroy', :as => :destroy_user_session
     get '/member' => 'members#select_member', :as => :members_select_member
     post '/member' => 'members#set_member', :as => :members_set_member
+    get 'member/terms' => 'members#terms', :as => :terms
+    post 'member/terms' => 'members#accept_terms', :as => :accept_terms
   end
 
   root 'users/sessions#new'

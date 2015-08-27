@@ -59,7 +59,7 @@ class User < ActiveRecord::Base
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :ldap_authenticatable, :recoverable, :trackable
+  devise :ldap_authenticatable, :recoverable, :trackable, :timeoutable
 
   attr_accessor :roles, :email, :surname, :given_name, :member_id, :deletion_reason
 
@@ -219,6 +219,10 @@ class User < ActiveRecord::Base
 
   def ldap_groups
     Devise::LDAP::Adapter.get_groups(login_with, self.ldap_domain)
+  end
+
+  def accepted_terms?
+    self.terms_accepted_at.present?
   end
 
   protected

@@ -73,7 +73,33 @@ RSpec.describe MembersController, type: :controller do
     it 'redirects to the `after_sign_in_path_for` if the session already has a selected member' do
       allow(subject).to receive(:current_member_id).and_return(1001)
       expect(subject).to receive(:after_sign_in_path_for).and_return(dashboard_path)
-      expect(subject.session).to_not receive(:[]=) # did we abort early?
+      expect(subject.session).to_not receive(:[]=).with('member_id', anything) # did we abort early?
+      expect(subject.session).to_not receive(:[]=).with('member_name', anything) # did we abort early?
+      expect(make_request).to redirect_to(dashboard_path)
+    end
+  end
+
+  describe 'GET terms' do
+    let (:make_request) { get :terms}
+    it_behaves_like 'a user required action', :get, :terms
+    it 'should use the `external` layout', :vcr do
+      expect(make_request).to render_template("layouts/external")
+    end
+  end
+
+  describe 'POST accept_terms' do
+    let(:make_request) {post :accept_terms}
+    let(:now) { DateTime.new(2015,1,1)}
+    let(:user) { double('user', member_id: nil, :'[]=' => nil, accepted_terms?: nil) }
+    before { allow(DateTime).to receive(:now).and_return(now) }
+    it_behaves_like 'a user required action', :post, :accept_terms
+    it 'updates the `terms_accepted_at` attribute of the current_user with the current DateTime', :vcr do
+      allow(controller).to receive(:current_user).and_return(user)
+      expect(user).to receive(:update_attribute).with(:terms_accepted_at, now)
+      make_request
+    end
+    it 'redirects to the `after_sign_in_path_for` on success', :vcr do
+      allow(subject).to receive(:after_sign_in_path_for).and_return(dashboard_path).ordered
       expect(make_request).to redirect_to(dashboard_path)
     end
   end

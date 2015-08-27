@@ -2,8 +2,8 @@
 - @page_title = t('reports.meta_title')
 .report.price-indications-report.row
   .report-header
-    %h1= t('reports.pages.price_indications.current.title')
-    = render 'reports_header_buttons'
+    %h1= @report_name
+    = render 'reports_header_buttons', download_formats: [:xlsx]
     %p= t('reports.pages.price_indications.current.summary', phone_number: fhlb_formatted_phone_number('8004443452'))
   .report-main-body
     %h2.report-table-title= t('reports.pages.price_indications.standard_credit_program')

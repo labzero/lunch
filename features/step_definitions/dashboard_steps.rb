@@ -48,8 +48,6 @@ Then(/^I should see an? "(.*?)" in the Account module/) do |component|
       '.dashboard-borrowing-capacity'
     when 'financing availability gauge'
       '.dashboard-financing-availability'
-    when 'anticipated activity graph'
-      '.dashboard-anticipated-activity-graph'
     else
       raise 'Unknown component for Account module'
   end
@@ -94,6 +92,10 @@ end
 
 Then(/^I should see a rate for the "(.*?)" term with a type of "(.*?)"$/) do |term, type|
   page.find(".dashboard-quick-advance-flyout td[data-advance-term='#{term}'][data-advance-type='#{type}']").text.should_not eql("")
+end
+
+Then(/^I should see a blacked out value for the "(.*?)" term with a type of "(.*?)"$/) do |term, type|
+  page.find(".dashboard-quick-advance-flyout td[data-advance-term='#{term}'][data-advance-type='#{type}']").text.should eql('–')
 end
 
 When(/^I hover on the cell with a term of "(.*?)" and a type of "(.*?)"$/) do |term, type|
@@ -177,7 +179,7 @@ end
 
 Given(/^I am on the quick advance preview screen$/) do
   step "I open the quick advance flyout"
-  step "I select the rate with a term of \"overnight\" and a type of \"whole\""
+  step "I select the rate with a term of \"2week\" and a type of \"whole\""
   step "I click on the initiate advance button"
   step "I should not see the quick advance table"
   step "I should see a preview of the quick advance"
@@ -185,7 +187,7 @@ end
 
 Then(/^I successfully execute a quick advance$/) do
   step "I open the quick advance flyout"
-  step "I select the rate with a term of \"overnight\" and a type of \"whole\""
+  step "I select the rate with a term of \"2week\" and a type of \"whole\""
   step "I click on the initiate advance button"
   step "I should not see the quick advance table"
   step "I should see a preview of the quick advance"
@@ -231,7 +233,7 @@ Given(/^I enter my SecurID pin and token$/) do
   step %{I enter my SecurID token}
 end
 
-Then(/^I should see an? "(.*?)" error with amount (\d+) and type "(.*?)"$/) do |error_type, amount, type|
+Then(/^I should see an? "(.*?)" error(?: with amount (\d+) and type "(.*?)")?$/) do |error_type, amount, type|
   collateral_type = case type
     when 'whole'
       I18n.t('dashboard.quick_advance.table.mortgage')
@@ -247,6 +249,10 @@ Then(/^I should see an? "(.*?)" error with amount (\d+) and type "(.*?)"$/) do |
       /\A#{Regexp.quote(strip_tags(I18n.t("dashboard.quick_advance.error.insufficient_financing_availability_html", amount: fhlb_formatted_currency(amount.to_i, precision: 0))))}\z/
     when 'insufficient collateral'
       /\A#{Regexp.quote(strip_tags(I18n.t("dashboard.quick_advance.error.insufficient_collateral_html", amount: fhlb_formatted_currency(amount.to_i, precision: 0), collateral_type: collateral_type)))}\z/
+    when 'advance unavailable'
+      /\A#{Regexp.quote(I18n.t('dashboard.quick_advance.error.advance_unavailable', phone_number: fhlb_formatted_phone_number('8004443452')))}\z/
+    when 'rate expired'
+      /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.rate_expired"))}\z/
     else
       raise 'Unknown error_type'
   end

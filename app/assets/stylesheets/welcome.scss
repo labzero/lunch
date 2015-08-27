@@ -95,6 +95,50 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
   .row {
     overflow: visible;
   }
+  .terms-row {
+    h1 {
+      @extend %typography-confirmation-label;
+      border-bottom: 1px solid $light-blue;
+      color: $text-color;
+      letter-spacing: normal;
+      padding: 20px;
+    }
+    h2 {
+      @extend %typography-subtitle;
+      line-height: 1;
+      margin: 20px 0 10px;
+    }
+    p, li {
+      @extend %typography-header-nav;
+    }
+    h2 + p, h2 + ol {
+      margin-top: 0;
+    }
+    section:not(:first-of-type) {
+      padding: 0 20px 20px 20px;
+    }
+    section:nth-of-type(2) {
+      @extend %dashboard-module-base-styling;
+      height: 320px;
+      margin: 20px;
+      overflow-y: scroll;
+    }
+    section:last-of-type {
+      @extend %clearfix;
+    }
+    form {
+      width: $column-8-width;
+      margin: 0 auto 35px;
+      padding: 0;
+      a {
+        display: inline;
+        margin-bottom: auto;
+        line-height: normal;
+        text-transform: none;
+        text-decoration: none;
+      }
+    }
+  }
 }
 
 .welcome, .error-page {

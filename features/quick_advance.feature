@@ -40,21 +40,27 @@ Scenario: Quick Advance flyout table
 Scenario: Quick Advance flyout tooltip
   Given I visit the dashboard
   And I open the quick advance flyout
-  When I hover on the cell with a term of "overnight" and a type of "whole"
-  Then I should see the quick advance table tooltip for the cell with a term of "overnight" and a type of "whole"
+  When I hover on the cell with a term of "2week" and a type of "whole"
+  Then I should see the quick advance table tooltip for the cell with a term of "2week" and a type of "whole"
 
 Scenario: Select rate from Quick Advance flyout table
   Given I visit the dashboard
   And I open the quick advance flyout
-  And I see the unselected state for the cell with a term of "open" and a type of "whole"
-  When I select the rate with a term of "open" and a type of "whole"
-  Then I should see the selected state for the cell with a term of "open" and a type of "whole"
+  And I see the unselected state for the cell with a term of "2week" and a type of "whole"
+  When I select the rate with a term of "2week" and a type of "whole"
+  Then I should see the selected state for the cell with a term of "2week" and a type of "whole"
   And the initiate advance button should be active
+
+@jira-mem-737
+Scenario: Certain rates should be missing due to black out dates
+  Given I visit the dashboard
+  And I open the quick advance flyout
+  Then I should see a blacked out value for the "3week" term with a type of "aaa"
 
 Scenario: Preview rate from Quick Advance flyout table
   Given I visit the dashboard
   And I open the quick advance flyout
-  And I select the rate with a term of "overnight" and a type of "whole"
+  And I select the rate with a term of "2week" and a type of "whole"
   When I click on the initiate advance button
   Then I should not see the quick advance table
   And I should see a preview of the quick advance
@@ -62,19 +68,19 @@ Scenario: Preview rate from Quick Advance flyout table
 Scenario: Go back to rate table from preview in Quick Advance flyout
   Given I visit the dashboard
   And I open the quick advance flyout
-  And I select the rate with a term of "1week" and a type of "aaa"
+  And I select the rate with a term of "2week" and a type of "aaa"
   And I click on the initiate advance button
   Then I should not see the quick advance table
   When I click on the back button for the quick advance preview
   Then I should see the quick advance table
-  And I should see the selected state for the cell with a term of "1week" and a type of "aaa"
+  And I should see the selected state for the cell with a term of "2week" and a type of "aaa"
   And I should not see a preview of the quick advance
 
-@data-unavailable @jira-mem-560
+@jira-mem-560
 Scenario: Confirm rate from Quick Advance preview dialog
   Given I visit the dashboard
   And I open the quick advance flyout
-  And I select the rate with a term of "overnight" and a type of "whole"
+  And I select the rate with a term of "2week" and a type of "whole"
   And I click on the initiate advance button
   And I should not see the quick advance table
   And I should see a preview of the quick advance
@@ -89,7 +95,7 @@ Scenario: Confirm rate from Quick Advance preview dialog
 Scenario: Users with insufficient funds for Quick Advance get an error
   Given I visit the dashboard
   And I open the quick advance flyout and enter 100001
-  And I select the rate with a term of "overnight" and a type of "whole"
+  And I select the rate with a term of "2week" and a type of "whole"
   When I click on the initiate advance button
   Then I should see an "insufficient financing availability" error with amount 100001 and type "whole"
 
@@ -97,11 +103,11 @@ Scenario: Users with insufficient funds for Quick Advance get an error
 Scenario: Users with insufficient collateral for Quick Advance get an error
   Given I visit the dashboard
   And I open the quick advance flyout and enter 100002
-  And I select the rate with a term of "overnight" and a type of "whole"
+  And I select the rate with a term of "2week" and a type of "whole"
   When I click on the initiate advance button
   Then I should see an "insufficient collateral" error with amount 100002 and type "whole"
 
-@data-unavailable @jira-mem-560
+@jira-mem-560
 Scenario: Close flyout after finishing quick advance
   Given I visit the dashboard
   And I successfully execute a quick advance
@@ -109,12 +115,12 @@ Scenario: Close flyout after finishing quick advance
   When I click on the quick advance confirmation close button
   Then I should not see a flyout
 
-@data-unavailable @jira-mem-560
+@jira-mem-560
 Scenario: Users are required to enter a SecurID token to take out an advance
   Given I visit the dashboard
   And I am on the quick advance preview screen
   When I click on the quick advance confirm button
-  Then I should see SecurID errors
+  Then I should see a preview of the quick advance
   When I enter my SecurID pin and token
   And I click on the quick advance confirm button
   Then I should see confirmation number for the advance
@@ -132,7 +138,7 @@ Scenario: Users are informed if they enter an invalid pin or token
   And I click on the quick advance confirm button
   Then I should see SecurID errors
 
-@data-unavailable @jira-mem-560
+@jira-mem-560
 Scenario: Users aren't required to enter a SecurID token a second time
   Given I visit the dashboard
   And I am on the quick advance preview screen
@@ -146,6 +152,7 @@ Scenario: Users aren't required to enter a SecurID token a second time
   When I click on the quick advance confirm button
   Then I should see confirmation number for the advance
 
+
 @data-unavailable @jira-mem-872
 Scenario: The rate changes from the time the user sees the table to the time they see the preview
   Given I visit the dashboard
@@ -154,3 +161,20 @@ Scenario: The rate changes from the time the user sees the table to the time the
   When I click on the initiate advance button
   And the quick advance rate has changed
   Then I should see a preview of the quick advance with a notification about the new rate
+
+@jira-mem-735
+Scenario: Users get an error if their requested advance would push FHLB over its total daily limit for web advances
+  Given I visit the dashboard
+  And I open the quick advance flyout and enter 100003
+  And I select the rate with a term of "2week" and a type of "whole"
+  When I click on the initiate advance button
+  Then I should see an "advance unavailable" error with amount 100003 and type "whole"
+
+@jira-mem-117
+Scenario: Users who wait too long to perform an advance are told that the rate has expired.
+  Given I visit the dashboard
+  And I am on the quick advance preview screen
+  And I wait for 70 seconds
+  And I enter my SecurID pin and token
+  When I click on the quick advance confirm button
+  Then I should see a "rate expired" error

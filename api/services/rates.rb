@@ -2,6 +2,7 @@ require 'date'
 require 'savon'
 require 'active_support/core_ext/hash/indifferent_access'
 require_relative 'rates/price_indication_historical'
+require_relative 'rates/blackout_dates'
 
 module MAPI
   module Services
@@ -590,6 +591,13 @@ module MAPI
           end
 
           MAPI::Services::Rates.init_mds_connection(settings.environment)
+
+          blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(settings.environment)
+          halt 503, 'Internal Service Error' if blackout_dates.nil?
+
+          loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(settings.environment).with_indifferent_access
+          halt 503, 'Internal Service Error' if loan_terms.nil?
+
           data = if @@mds_connection
             request = LOAN_TYPES.collect do |type|
             {
@@ -621,11 +629,14 @@ module MAPI
                 if ctr_term == 0
                   ctr_term = 1
                 end
+                maturity_date = MAPI::Services::Rates.get_maturity_date(Time.zone.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content), TERM_MAPPING[term][:frequency_unit])
+
                 hash[type][term] = {
                   'payment_on' => 'Maturity',
                   'interest_day_count' => fhlbsfresponse[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
                   'rate' => fhlbsfdatapoints[ctr_term-1].at_css('value').content,
-                  'maturity_date' => MAPI::Services::Rates.get_maturity_date(Time.zone.parse(fhlbsfdatapoints[ctr_term-1].at_css('tenor maturityDate').content), TERM_MAPPING[term][:frequency_unit])
+                  'maturity_date' => maturity_date,
+                  'disabled'      => blackout_dates.include?( maturity_date ) || !loan_terms[term][type]['trade_status'] || !loan_terms[term][type]['display_status']
                 }
               end
             end
@@ -638,7 +649,10 @@ module MAPI
             # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
             LOAN_TYPES.each do |type|
               LOAN_TERMS.each do |term|
-                hash[type][term][:maturity_date] = MAPI::Services::Rates.get_maturity_date(DateTime.parse((Time.mktime(now.year, now.month, now.day, now.hour, now.min) + hash[type][term][:days_to_maturity].to_i.days).to_s), TERM_MAPPING[term][:frequency_unit])
+                loan = hash[type][term]
+                maturity_date = MAPI::Services::Rates.get_maturity_date(DateTime.parse((Time.mktime(now.year, now.month, now.day, now.hour, now.min) + loan[:days_to_maturity].to_i.days).to_s), TERM_MAPPING[term][:frequency_unit])
+                loan[:maturity_date] = maturity_date
+                loan['disabled']     = blackout_dates.include?( maturity_date ) || !loan_terms[term][type]['trade_status'] || !loan_terms[term][type]['display_status']
               end
             end
             hash[:timestamp] = now

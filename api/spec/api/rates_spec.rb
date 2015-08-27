@@ -50,22 +50,55 @@ describe MAPI::ServiceApp do
   end
 
   describe "rate summary" do
-    let(:rate_summary) { get '/rates/summary'; JSON.parse(last_response.body).with_indifferent_access }
-    let(:loan_terms) { [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year'] }
-    let (:loan_types) { [:whole, :agency, :aaa, :aa] }
+    before do
+      allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(blackout_dates)
+      allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(loan_terms_result)
+    end
+    let(:today) { Date.today }
+    let(:one_week_away) { today + 1.week }
+    let(:three_weeks_away) { today + 3.week }
+    let(:blackout_dates) { [one_week_away, three_weeks_away] }
+    loan_terms = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
+    loan_types = [:whole, :agency, :aaa, :aa]
+    let(:loan_terms) { loan_terms }
+    let(:loan_types) { loan_types }
+    let(:loan_terms_result) do
+      inner_peace = Hash.new(Hash.new(true))
+      h = Hash.new(inner_peace)
+      h[:'1year'] = { whole:  { trade_status: false, display_status: true  } }
+      h[:'3year']   = { agency: { trade_status: true,  display_status: false } }
+      h[:'1year'].default= inner_peace
+      h[:'3year'].default= inner_peace
+      h
+    end
+    let(:rate_summary) do
+      get '/rates/summary'
+      JSON.parse(last_response.body).with_indifferent_access
+    end
     it "should return rates for default loan_types at default loan_terms" do
-      loan_terms.each do |loan_type|
-        loan_types.each do |loan_term|
-          expect(rate_summary[loan_term][loan_type][:rate]).to be_kind_of(String)
+      loan_types.each do |loan_type|
+        loan_terms.each do |loan_term|
+          expect(rate_summary[loan_type][loan_term][:rate]).to be_kind_of(String)
         end
       end
     end
-    it "should return other data relevant to each loan_term" do
-      loan_types.each do |loan_type|
-        loan_terms.each do |loan_term|
-          expect(rate_summary[loan_type][loan_term][:payment_on]).to be_kind_of(String)
-          expect(rate_summary[loan_type][loan_term][:interest_day_count]).to be_kind_of(String)
-          expect(rate_summary[loan_type][loan_term][:maturity_date]).to be_kind_of(String)
+    loan_types.each do |loan_type|
+      loan_terms.each do |loan_term|
+        it "should return correct data for rate_summary[#{loan_type}][#{loan_term}]" do
+          r = rate_summary[loan_type][loan_term]
+          blacked_out = blackout_dates.include?(Date.parse(r[:maturity_date]))
+          cutoff      = !loan_terms_result[loan_term][loan_type][:trade_status]
+          disabled    = !loan_terms_result[loan_term][loan_type][:display_status]
+          expect(r[:payment_on]).to be_kind_of(String)
+          expect(r[:interest_day_count]).to be_kind_of(String)
+          expect(r[:maturity_date]).to be_kind_of(String)
+          expect(r[:maturity_date]).to match(/\d{4}-\d{2}-\d{2}/)
+          expect(r[:days_to_maturity]).to be_kind_of(String)
+          expect(r[:days_to_maturity]).to match(/\d+/)
+          expect(r[:rate]).to be_kind_of(String)
+          expect(r[:rate]).to match(/\d+\.\d+/)
+          expect(r[:disabled]).to be_boolean
+          expect(r[:disabled]).to be == (blacked_out || cutoff || disabled)
         end
       end
     end
@@ -90,7 +123,8 @@ describe MAPI::ServiceApp do
 
     describe "in the production environment" do
       before do
-        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+        allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
+        allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return([])
       end
       it "should return rates for default loan_types at default loan_terms", vcr: {cassette_name: 'calendar_mds_service'} do
         loan_terms.each do |loan_type|
@@ -104,6 +138,11 @@ describe MAPI::ServiceApp do
         expect(last_response.status).to eq(503)
       end
       it "should return Internal Service Error, if mds service is unavailable", vcr: {cassette_name: 'mds_service_unavailable'} do
+        get '/rates/summary'
+        expect(last_response.status).to eq(503)
+      end
+      it "should return Internal Service Error, if blackout dates service is unavailable", vcr: {cassette_name: 'calendar_mds_service'} do
+        allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(nil)
         get '/rates/summary'
         expect(last_response.status).to eq(503)
       end

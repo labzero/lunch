@@ -3,6 +3,7 @@
     var $table = this;
     var $initiateButton = $(".dashboard-quick-advance-flyout .initiate-quick-advance");
     var $amountField = $('.dashboard-quick-advance-flyout input[name=amount]');
+    var $flyout = $('.dashboard-quick-advance-flyout')
     var selected_rate = {};
 
     var $flyoutTableCells = $('.dashboard-quick-advance-flyout td.selectable-cell');
@@ -43,25 +44,29 @@
       }
     };
 
+    function showQuickAdvancePreviewError() {
+      $('.flyout-top-section-body .quick-advance-preview-subheading').show();
+
+      // event listener and handler for back button click
+      $('.quick-advance-back-button').on('click', function () {
+        $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
+        $('.quick-advance-preview-subheading').hide();
+        $flyout.find('.flyout-top-section-body span, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer').show();
+        transitionToRatesFromLoading();
+      });
+    }
+
     function initiateQuickAdvance(rate_data) {
       var $flyoutBottomSection = $('.flyout-bottom-section');
       transitionToLoadingFromRates();
       $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function(json){
-        var $oldNodes = $('.flyout-top-section-body span, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer');
+        var $oldNodes = $flyout.find('.flyout-top-section-body span, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer');
 
         // append the html response, hide old nodes and show the new ones
         $flyoutBottomSection.append($(json.html));
         $oldNodes.hide();
         if (json.preview_error == true) {
-          $('.flyout-top-section-body .quick-advance-preview-subheading').show();
-
-          // event listener and handler for back button click
-          $('.quick-advance-back-button').on('click', function () {
-            $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
-            $('.quick-advance-preview-subheading').hide();
-            $oldNodes.show();
-            transitionToRatesFromLoading();
-          });
+          showQuickAdvancePreviewError();
         }
         else {
           if (json.preview_success == true) {
@@ -75,23 +80,41 @@
               transitionToRatesFromLoading();
             });
 
+            // event listener and handler for RSA fields
+            var $initiateButton = $('.confirm-quick-advance');
+            var $secureIDTokenField = $('#securid_token');
+            var $secureIDPinField = $('#securid_pin');
+            if ($secureIDPinField.length && $secureIDTokenField.length) {
+              $.each([$secureIDPinField, $secureIDTokenField], (function(i, $element){
+                $element.on('keyup', function(){
+                  if ($secureIDTokenField.val().length == 6 && $secureIDPinField.val().length == 4) {
+                    $initiateButton.addClass('active');
+                  } else {
+                    $initiateButton.removeClass('active');
+                  };
+                });
+              }));
+            };
+
             // event listener and handler for .confirm-quick-advance button click
-            $('.confirm-quick-advance').on('click', function () {
-              var $pin = $flyoutBottomSection.find('input[name=securid_pin]');
-              var $token = $flyoutBottomSection.find('input[name=securid_token]');
-              var pin = $pin.val();
-              var token = $token.val();
-              if ((!$pin.length && !$token.length) || validateSecurID($flyoutBottomSection)) {
-                var authentication_details = {
-                  securid_pin: pin,
-                  securid_token: token
+            $initiateButton.on('click', function () {
+              if ($initiateButton.hasClass('active')) {
+                var $pin = $flyoutBottomSection.find('input[name=securid_pin]');
+                var $token = $flyoutBottomSection.find('input[name=securid_token]');
+                var pin = $pin.val();
+                var token = $token.val();
+                if ((!$pin.length && !$token.length) || validateSecurID($flyoutBottomSection)) {
+                  var authentication_details = {
+                    securid_pin: pin,
+                    securid_token: token
+                  };
+                  performQuickAdvance($.extend(authentication_details, selected_rate));
                 };
-                performQuickAdvance($.extend(authentication_details, selected_rate));
-              }
+              };
             });
           }
           else {
-            $('.flyout-top-section-body .quick-advance-capstock-subheading').show();
+            $flyout.find('.flyout-top-section-body .quick-advance-capstock-subheading').show();
 
             // event listener and handler for back button click
             $('.quick-advance-capstock-back-button').on('click', function () {
@@ -196,10 +219,16 @@
       transitionToLoadingFromPreview();
       $.post('/dashboard/quick_advance_perform', packageParameters(rate_data), function(json) {
         if (json.securid == 'authenticated') {
-          $quickAdvancePreview.hide();
           $flyoutBottomSection.append($(json.html));
-          $flyoutTopSection.find('.quick-advance-preview-subheading').hide();
-          $flyoutTopSection.find('.quick-advance-confirmation-subheading').show();
+          if (json.advance_success) {
+            $quickAdvancePreview.hide();
+            $flyoutTopSection.find('.quick-advance-preview-subheading').hide();
+            $flyoutTopSection.find('.quick-advance-confirmation-subheading').show();
+          } else {
+            $('.quick-advance-preview.loading').remove();
+            $('.quick-advance-confirmation-subheading').hide();
+            showQuickAdvancePreviewError();
+          }
         } else {
           var error = 'unknown';
 
@@ -256,7 +285,7 @@
       $quickAdvanceCapstock.addClass('loading');
       var height = $flyoutBottomSection.find('.quick-advance-body p:not(.quick-advance-loading-message)').height();
       $flyoutBottomSection.find('.quick-advance-loading-message').height(height);
-      $flyoutBottomSection.find('button').attr('disabled', 'disabled');
+      $flyoutBottomSection.find('button, input').attr('disabled', 'disabled');
       $flyoutTopSection.find('.quick-advance-capstock-subheading').hide();
       $flyoutTopSection.find('.quick-advance-preview-subheading').show();
     };
@@ -299,7 +328,11 @@
 
     function packageParameters(rate_data) {
       return $.extend({amount: $amountField.val()}, rate_data)
-    }
+    };
+
+    function setRsaEventListener(){
+
+    };
 
   };
 }( jQuery ));

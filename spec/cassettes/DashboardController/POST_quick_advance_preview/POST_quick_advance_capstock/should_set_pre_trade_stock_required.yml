@@ -12,7 +12,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="4321dfghjklm"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       User-Agent:
@@ -35,14 +35,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Thu, 23 Jul 2015 17:21:40 GMT
+      - Mon, 17 Aug 2015 23:37:35 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: Test User
     http_version: 
-  recorded_at: Thu, 23 Jul 2015 17:21:40 GMT
+  recorded_at: Mon, 17 Aug 2015 23:37:35 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/etransact_advances/limits
@@ -55,7 +55,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="4321dfghjklm"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       User-Agent:
@@ -68,7 +68,7 @@ http_interactions:
       Content-Type:
       - text/html;charset=utf-8
       Content-Length:
-      - '4094'
+      - '4198'
       X-Xss-Protection:
       - 1; mode=block
       X-Content-Type-Options:
@@ -78,27 +78,74 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Thu, 23 Jul 2015 17:21:40 GMT
+      - Mon, 17 Aug 2015 23:37:35 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
-      string: '[{"WHOLE_LOAN_ENABLED":"N","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":0,"HIGH_DAYS_TO_MATURITY":1,"MIN_ONLINE_ADVANCE":100000,"TERM_DAILY_LIMIT":201000000,"PRODUCT_TYPE":"VRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
-        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":2,"HIGH_DAYS_TO_MATURITY":10,"MIN_ONLINE_ADVANCE":100000,"TERM_DAILY_LIMIT":110000000,"PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
-        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":11,"HIGH_DAYS_TO_MATURITY":18,"MIN_ONLINE_ADVANCE":100000,"TERM_DAILY_LIMIT":100000000,"PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
-        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":19,"HIGH_DAYS_TO_MATURITY":27,"MIN_ONLINE_ADVANCE":100000,"TERM_DAILY_LIMIT":100000000,"PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
-        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":28,"HIGH_DAYS_TO_MATURITY":45,"MIN_ONLINE_ADVANCE":100000,"TERM_DAILY_LIMIT":600000000,"PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
-        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":46,"HIGH_DAYS_TO_MATURITY":75,"MIN_ONLINE_ADVANCE":100000,"TERM_DAILY_LIMIT":100000000,"PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
-        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":76,"HIGH_DAYS_TO_MATURITY":105,"MIN_ONLINE_ADVANCE":100000,"TERM_DAILY_LIMIT":100000000,"PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
-        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":106,"HIGH_DAYS_TO_MATURITY":195,"MIN_ONLINE_ADVANCE":100000,"TERM_DAILY_LIMIT":100000000,"PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
-        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":196,"HIGH_DAYS_TO_MATURITY":285,"MIN_ONLINE_ADVANCE":100000,"TERM_DAILY_LIMIT":100000000,"PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
-        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":286,"HIGH_DAYS_TO_MATURITY":364,"MIN_ONLINE_ADVANCE":100000,"TERM_DAILY_LIMIT":100000000,"PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
-        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":365,"HIGH_DAYS_TO_MATURITY":547,"MIN_ONLINE_ADVANCE":100000,"TERM_DAILY_LIMIT":100000000,"PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
-        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":548,"HIGH_DAYS_TO_MATURITY":912,"MIN_ONLINE_ADVANCE":100000,"TERM_DAILY_LIMIT":100000000,"PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
-        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":913,"HIGH_DAYS_TO_MATURITY":1105,"MIN_ONLINE_ADVANCE":100000,"TERM_DAILY_LIMIT":101000000,"PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
+      string: '[{"WHOLE_LOAN_ENABLED":"N","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":0,"HIGH_DAYS_TO_MATURITY":1,"MIN_ONLINE_ADVANCE":"100000.0","TERM_DAILY_LIMIT":"201000000.0","PRODUCT_TYPE":"VRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
+        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":2,"HIGH_DAYS_TO_MATURITY":10,"MIN_ONLINE_ADVANCE":"100000.0","TERM_DAILY_LIMIT":"110000000.0","PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
+        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":11,"HIGH_DAYS_TO_MATURITY":18,"MIN_ONLINE_ADVANCE":"100000.0","TERM_DAILY_LIMIT":"100000000.0","PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
+        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":19,"HIGH_DAYS_TO_MATURITY":27,"MIN_ONLINE_ADVANCE":"100000.0","TERM_DAILY_LIMIT":"100000000.0","PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
+        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":28,"HIGH_DAYS_TO_MATURITY":45,"MIN_ONLINE_ADVANCE":"100000.0","TERM_DAILY_LIMIT":"600000000.0","PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
+        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":46,"HIGH_DAYS_TO_MATURITY":75,"MIN_ONLINE_ADVANCE":"100000.0","TERM_DAILY_LIMIT":"100000000.0","PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
+        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":76,"HIGH_DAYS_TO_MATURITY":105,"MIN_ONLINE_ADVANCE":"100000.0","TERM_DAILY_LIMIT":"100000000.0","PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
+        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":106,"HIGH_DAYS_TO_MATURITY":195,"MIN_ONLINE_ADVANCE":"100000.0","TERM_DAILY_LIMIT":"100000000.0","PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
+        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":196,"HIGH_DAYS_TO_MATURITY":285,"MIN_ONLINE_ADVANCE":"100000.0","TERM_DAILY_LIMIT":"100000000.0","PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
+        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":286,"HIGH_DAYS_TO_MATURITY":364,"MIN_ONLINE_ADVANCE":"100000.0","TERM_DAILY_LIMIT":"100000000.0","PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
+        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":365,"HIGH_DAYS_TO_MATURITY":547,"MIN_ONLINE_ADVANCE":"100000.0","TERM_DAILY_LIMIT":"100000000.0","PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
+        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":548,"HIGH_DAYS_TO_MATURITY":912,"MIN_ONLINE_ADVANCE":"100000.0","TERM_DAILY_LIMIT":"100000000.0","PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
+        12:00 AM","OVERRIDE_END_TIME":"1700"},{"WHOLE_LOAN_ENABLED":"Y","SBC_AGENCY_ENABLED":"Y","SBC_AAA_ENABLED":"Y","SBC_AA_ENABLED":"Y","LOW_DAYS_TO_MATURITY":913,"HIGH_DAYS_TO_MATURITY":1105,"MIN_ONLINE_ADVANCE":"100000.0","TERM_DAILY_LIMIT":"101000000.0","PRODUCT_TYPE":"FRC","END_TIME":"1700","OVERRIDE_END_DATE":"01-JAN-2006
         12:00 AM","OVERRIDE_END_TIME":"1700"}]'
     http_version: 
-  recorded_at: Thu, 23 Jul 2015 17:21:40 GMT
+  recorded_at: Mon, 17 Aug 2015 23:37:35 GMT
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/todays_advances
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      X-Request-Id:
+      - ''
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '861'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Mon, 17 Aug 2015 23:37:35 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '[{"trade_date":"2015-05-07-07:00","funding_date":"2015-05-07-07:00","maturity_date":"2015-05-13-07:00","advance_number":"469249","advance_type":"FX
+        CONSTANT","status":"Pending","interest_rate":0.21,"current_par":8000000},{"trade_date":"2015-05-07-07:00","funding_date":"2015-05-07-07:00","maturity_date":"2015-05-21-07:00","advance_number":"469250","advance_type":"FX
+        CONSTANT","status":"Outstanding","interest_rate":0.22,"current_par":5000000},{"trade_date":"2015-05-07-07:00","funding_date":"2015-05-07-07:00","maturity_date":"Open","advance_number":"469251","advance_type":"O/N
+        VRC","status":"Outstanding","interest_rate":0.17,"current_par":1000045},{"trade_date":"2015-05-07-07:00","funding_date":"2015-05-07-07:00","maturity_date":"Open","advance_number":"469252","advance_type":"O/N
+        VRC","status":"Outstanding","interest_rate":0.17,"current_par":1000055}]'
+    http_version: 
+  recorded_at: Mon, 17 Aug 2015 23:37:35 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/etransact_advances/validate_advance/750/1000000.0/sometype/1week/0.17/true/Test%20User
@@ -111,7 +158,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="4321dfghjklm"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       User-Agent:
@@ -124,7 +171,7 @@ http_interactions:
       Content-Type:
       - text/html;charset=utf-8
       Content-Length:
-      - '414'
+      - '622'
       X-Xss-Protection:
       - 1; mode=block
       X-Content-Type-Options:
@@ -134,57 +181,13 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Thu, 23 Jul 2015 17:21:41 GMT
+      - Mon, 17 Aug 2015 23:37:35 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
-      string: '{"status":"CapitalStockError","authorized_amount":45098900,"exception_message":"INSUFFICIENT
+      string: '{"advance_rate":0.17,"advance_amount":1000000,"advance_term":"1week","advance_type":"sometype","interest_day_count":"ACT/ACT","payment_on":"Maturity","funding_date":"2015-08-17","maturity_date":"2015-08-24","status":["CapitalStockError"],"authorized_amount":45098900,"exception_message":"INSUFFICIENT
         CAPITAL STOCK","cumulative_stock_required":47000,"current_trade_stock_required":47000,"pre_trade_stock_required":-1000,"net_stock_required":46000,"gross_amount":47000000,"gross_cumulative_stock_required":49000,"gross_current_trade_stock_required":49000,"gross_pre_trade_stock_required":0,"gross_net_stock_required":49000}'
     http_version: 
-  recorded_at: Thu, 23 Jul 2015 17:21:41 GMT
-- request:
-    method: get
-    uri: http://localhost:3100/mapi/etransact_advances/validate_advance/750/1000000.0/WHOLELOAN/1week/0.17/true/Test%20User
-    body:
-      encoding: US-ASCII
-      string: ''
-    headers:
-      Accept:
-      - "*/*; q=0.5, application/xml"
-      Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
-      X-Request-Id:
-      - ''
-      User-Agent:
-      - Ruby
-  response:
-    status:
-      code: 200
-      message: 'OK '
-    headers:
-      Content-Type:
-      - text/html;charset=utf-8
-      Content-Length:
-      - '414'
-      X-Xss-Protection:
-      - 1; mode=block
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - SAMEORIGIN
-      Server:
-      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
-      Date:
-      - Mon, 27 Jul 2015 16:05:31 GMT
-      Connection:
-      - Keep-Alive
-    body:
-      encoding: UTF-8
-      string: '{"status":"CapitalStockError","authorized_amount":45098900,"exception_message":"INSUFFICIENT
-        CAPITAL STOCK","cumulative_stock_required":47000,"current_trade_stock_required":47000,"pre_trade_stock_required":-1000,"net_stock_required":46000,"gross_amount":47000000,"gross_cumulative_stock_required":49000,"gross_current_trade_stock_required":49000,"gross_pre_trade_stock_required":0,"gross_net_stock_required":49000}'
-    http_version: 
-  recorded_at: Mon, 27 Jul 2015 16:05:31 GMT
+  recorded_at: Mon, 17 Aug 2015 23:37:35 GMT
 recorded_with: VCR 2.9.3

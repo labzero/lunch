@@ -1,11 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  RSpec::Matchers.define :be_boolean do
-    match do |actual|
-      expect(actual).to satisfy { |x| x.is_a?(TrueClass) || x.is_a?(FalseClass) }
-    end
-  end
   before do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
   end
@@ -219,6 +214,25 @@ describe MAPI::ServiceApp do
           end
         end
       end
+    end
+  end
+
+  describe 'eTransact Advances Settings' do
+    let(:make_request) { get '/etransact_advances/settings' }
+    it 'should call `MAPI::Services::EtransactAdvances::Settings.settings`' do
+      expect(MAPI::Services::EtransactAdvances::Settings).to receive(:settings)
+      make_request
+    end
+    it 'should call `to_json` on the settings returned' do
+      settings = double('Settings')
+      allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(settings)
+      expect(settings).to receive(:to_json)
+      make_request
+    end
+    it 'should return a 503 if no settings are found' do
+      allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(nil)
+      make_request
+      expect(last_response.status).to be(503)
     end
   end
 end

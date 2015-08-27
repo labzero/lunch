@@ -311,6 +311,27 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/todays_advances'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve Todays Advances for a member'
+              key :notes, 'Returns Todays Advances.'
+              key :type, :ActiveAdvances
+              key :nickname, :getTodaysAdvancesForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
+          api do
             key :path, '/{id}/member_profile'
             operation do
               key :method, 'GET'
@@ -772,6 +793,18 @@ module MAPI
           member_id = params[:id]
           begin
             result = MAPI::Services::Member::TradeActivity.trade_activity(self, member_id, 'ADVANCE')
+          rescue Savon::Error => error
+            logger.error error
+            halt 503, 'Internal Service Error'
+          end
+          result
+        end
+
+        # Todays Advances
+        relative_get '/:id/todays_advances' do
+          member_id = params[:id]
+          begin
+            result = MAPI::Services::Member::TradeActivity.todays_trade_activity(self, member_id, 'ADVANCE')
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'

@@ -184,9 +184,27 @@ describe MAPI::ServiceApp do
   describe 'Validate Trade With Credit Error Exception' do
     let(:amount)  {'100001'}
     let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
-    it 'should return expected result of validate trade' do
+    it 'should return a credit error response' do
       expect(execute_trade['status']).to eq(['CreditError'])
       expect(execute_trade['credit_max_amount']).to be_kind_of(Numeric)
+    end
+  end
+
+  describe 'Validate Trade With Collateral Error Exception' do
+    let(:amount)  {'100002'}
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    it 'should return a collateral exception response' do
+      expect(execute_trade['status']).to eq(['CollateralError'])
+      expect(execute_trade['collateral_max_amount']).to be_kind_of(Numeric)
+      expect(execute_trade['collateral_authorized_amount']).to be_kind_of(Numeric)
+    end
+  end
+
+  describe 'Validate Trade With Total Daily Limit Error Exception' do
+    let(:amount)  {'100003'}
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    it 'should return expected result of validate trade' do
+      expect(execute_trade['status']).to eq(['ExceedsTotalDailyLimitError'])
     end
   end
 
@@ -229,13 +247,14 @@ describe MAPI::ServiceApp do
   end
 
   describe 'in the production environment' do
+    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}"; JSON.parse(last_response.body) }
     before do
-      expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+      allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit) {|env, amount, hash| hash }
     end
     describe 'agency for 1 week' do
       let(:advance_type)  {'agency'}
       let(:advance_term)  {'1week'}
-      let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}"; JSON.parse(last_response.body) }
       it 'should return result of execute trade', vcr: {cassette_name: 'execute_trade_service_agency_1week'} do
         expect(execute_trade['status']).to be_kind_of(Array)
         expect(execute_trade['confirmation_number']).to be_kind_of(String)
@@ -252,7 +271,6 @@ describe MAPI::ServiceApp do
     describe 'agency for 1 year' do
       let(:advance_type)  {'agency'}
       let(:advance_term)  {'1year'}
-      let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}"; JSON.parse(last_response.body) }
       it 'should return result of execute trade', vcr: {cassette_name: 'execute_trade_service_agency_1year'} do
         expect(execute_trade['status']).to be_kind_of(Array)
         expect(execute_trade['confirmation_number']).to be_kind_of(String)
@@ -269,7 +287,6 @@ describe MAPI::ServiceApp do
     describe 'whole overnight' do
       let(:advance_type)  {'whole'}
       let(:advance_term)  {'overnight'}
-      let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}"; JSON.parse(last_response.body) }
       it 'should return result of execute trade', vcr: {cassette_name: 'execute_trade_service_whole_overnight'} do
         expect(execute_trade['status']).to be_kind_of(Array)
         expect(execute_trade['confirmation_number']).to be_kind_of(String)
@@ -537,6 +554,41 @@ describe MAPI::ServiceApp do
           collateral_authorized_amount = double('collateral authorized amount')
           allow(collateral_exceptions).to receive(:at_css).with('authorizedAmount').and_return(double('xml node', content: collateral_authorized_amount))
           expect(check_collateral['collateral_authorized_amount']).to eq(collateral_authorized_amount)
+        end
+      end
+    end
+
+    [:development, :test, :production].each do |env|
+      describe "the `check_total_daily_limit` method in the #{env} environment" do
+        let(:advance_amount) { rand(100000..9999999)}
+        let(:total_daily_limit) { double('total daily limit')}
+        let(:settings) { double('settings', :'[]' => nil) }
+        let(:local_total_daily_limit) { MAPI::Services::EtransactAdvances::ExecuteTrade::LOCAL_TOTAL_DAILY_LIMIT }
+        let(:check_advance) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_total_daily_limit(env, advance_amount, response_hash)}
+        before do
+          allow(MAPI::Services::Member::TradeActivity).to receive(:current_daily_total).and_return( advance_amount )
+          allow(settings).to receive(:'[]').with('shareholder_web_daily_limit').and_return(total_daily_limit)
+          allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(settings)
+        end
+        it 'returns a hash with a `status` array that includes whatever was in the `status` array for the response_hash' do
+          response_hash = {'status' => ['foo']}
+          allow(total_daily_limit).to receive(:to_f).and_return(advance_amount.to_f)
+          check_advance = MAPI::Services::EtransactAdvances::ExecuteTrade.check_total_daily_limit(app, advance_amount, response_hash)
+          expect(check_advance['status']).to include('foo')
+        end
+        it 'returns a hash with a `status` array that includes \'ExceedsTotalDailyLimitError\' if the requested advance plus the current daily total exceeds the limit set by FHLB' do
+          daily_limit = 2 * advance_amount - 100
+          allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f)
+          expect(check_advance['status']).to include('ExceedsTotalDailyLimitError')
+        end
+        it 'returns the response_hash it was passed if the requested advance plus the current daily total does not exceed the limit set by FHLB' do
+          daily_limit = 2 * advance_amount + 100
+          allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f)
+          expect(check_advance).to eq(response_hash)
+        end
+        it 'raises an error if the settings endpoint returns nil' do
+          allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(nil)
+          expect{check_advance}.to raise_error
         end
       end
     end

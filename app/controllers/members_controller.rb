@@ -18,4 +18,14 @@ class MembersController < ApplicationController
     session['member_name'] = member[:name]
     redirect_to after_sign_in_path_for(current_user)
   end
+
+  def terms
+    render layout: 'external'
+  end
+
+  # POST
+  def accept_terms
+    current_user.update_attribute(:terms_accepted_at, DateTime.now)
+    redirect_to after_sign_in_path_for(current_user)
+  end
 end

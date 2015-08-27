@@ -413,6 +413,7 @@ When(/^I should only see users with the "(.*?)" role$/) do |role|
   role_mapping = {
     'Resolution and Authorization' => I18n.t('user_roles.resolution.title'),
     'Entire Authority' => I18n.t('user_roles.entire_authority.title'),
+    'Advances' => I18n.t('user_roles.advances.title'),
     'Affordable Housing Program' => I18n.t('user_roles.affordable_housing.title'),
     'Collateral' => I18n.t('user_roles.collateral.title'),
     'Money Market Transactions' => I18n.t('user_roles.money_market.title'),

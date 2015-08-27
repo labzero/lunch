@@ -3,15 +3,54 @@ class MAPIService
   def initialize(request)
     @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint, headers: {:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"", :'X-Request-ID' => request.uuid}
   end
+  
+  def warn(name, msg)
+    Rails.logger.warn("#{self.class.name}##{name} encountered a #{msg}")
+    nil
+  end
 
   def ping
     begin
       response = @connection['healthy'].get
-      return JSON.parse(response.body)
+      JSON.parse(response.body)
     rescue Exception => e
       Rails.logger.error("MAPI PING failed: #{e.message}")
-      return false
+      false
     end
+  end
+  
+  def get(name, endpoint)
+    begin
+      @connection[endpoint].get
+    rescue RestClient::Exception => e
+      warn(name, "RestClient error: #{e.class.name}:#{e.http_code}")
+    rescue Errno::ECONNREFUSED => e
+      warn(name, "connection error: #{e.class.name}")
+    end
+  end
+  
+  def parse(name, response)
+    begin
+      response.nil? ? nil : JSON.parse(response.body)
+    rescue JSON::ParserError => e
+      warn(name, "JSON parsing error: #{e}")
+    end
+  end
+  
+  def get_fake_hash(name, filename)
+    begin
+      JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', filename))).with_indifferent_access
+    rescue JSON::ParserError => e
+      warn(name, "JSON parsing error: #{e}")
+    end
+  end
+  
+  def get_hash(name, endpoint)
+    parse(name, get(name, endpoint)).try(:with_indifferent_access)
+  end
+  
+  def get_json(name, endpoint)
+    parse(name, get(name, endpoint))
   end
 
 end
