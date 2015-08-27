@@ -155,11 +155,6 @@ RSpec.describe SettingsController, :type => :controller do
         expect(securid_service).to receive(:resynchronize).with(securid_pin, securid_next_token).and_return(true)
         make_request
       end
-      it 'should attempt to resynchronize the token if the user needs resynchronization' do
-        allow(securid_service).to receive(:resynchronize).and_raise(SecurIDService::InvalidPin)
-        make_request
-        expect(JSON.parse(response.body)['status']).to eq('invalid_pin')
-      end
     end
     it 'should return a status of `denied` if the user was not authenticated' do
       allow(SecurIDService).to receive(:new).and_return(SecurIDService.new('some_user', test_mode: :denied))
