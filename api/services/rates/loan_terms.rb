@@ -2,6 +2,8 @@ module MAPI
   module Services
     module Rates
       module LoanTerms
+        include MAPI::Shared::Utils
+        include MAPI::Shared::Constants
 
         SQL = <<-EOS
             SELECT AO_TERM_BUCKET_ID, TERM_BUCKET_LABEL,
@@ -9,10 +11,6 @@ module MAPI
             END_TIME, trunc(OVERRIDE_END_DATE) AS OVERRIDE_END_DATE, OVERRIDE_END_TIME
             FROM WEB_ADM.AO_TERM_BUCKETS
         EOS
-
-        def self.ihash(key_value_pairs)
-          Hash[key_value_pairs].with_indifferent_access
-        end
 
         def self.appropriate_end_time(bucket, now)
           now[:date] == override_end_date(bucket) ? override_end_time(bucket) : end_time(bucket)
@@ -31,7 +29,7 @@ module MAPI
         end
 
         def self.hash_for_types(bucket, label, trade_status)
-          ihash( TYPES.map { |type| [type, hash_for_type(bucket, type, label, trade_status)] } )
+          hash_from_pairs( LOAN_TYPES.map { |type| [type, hash_for_type(bucket, type, label, trade_status)] } )
         end
 
         def self.value_for_term(bucket, now)
@@ -46,15 +44,13 @@ module MAPI
           MAPI::Services::EtransactAdvances::TERM_BUCKET_MAPPING[term]
         end
 
-        TYPES=MAPI::Shared::Constants::LOAN_TYPES
-        TERMS=MAPI::Shared::Constants::LOAN_TERMS
         BLANK=loan_term(false,  false, 'NotFound')
-        BLANK_TYPES=ihash( TYPES.map{ |type| [type, BLANK] } )
+        BLANK_TYPES=hash_from_pairs( LOAN_TYPES.map{ |type| [type, BLANK] } )
 
         def self.loan_terms(logger,environment)
           now     = { date: Time.zone.now.to_date, time: Time.zone.now.strftime("%H%M%S") }
           buckets = term_bucket_data(logger, environment).index_by{ |bucket| id(bucket) }
-          ihash( TERMS.map { |term| [term, value_for_term(buckets[term_to_id(term)], now)]} )
+          hash_from_pairs( LOAN_TERMS.map { |term| [term, value_for_term(buckets[term_to_id(term)], now)]} )
         end
 
         def self.term_bucket_data(logger, environment)
@@ -77,8 +73,6 @@ module MAPI
         def self.term_bucket_data_development
           JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_term_buckets_info.json')))
         end
-
-        private
 
         def self.time(bucket, field)
           bucket[field] + '00'

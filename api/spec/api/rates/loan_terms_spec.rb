@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'date'
 
 describe MAPI::Services::Rates::LoanTerms do
-  describe 'development' do
+  describe 'production' do
     subject { MAPI::Services::Rates::LoanTerms }
 
     describe 'loan_terms' do
@@ -49,7 +49,7 @@ describe MAPI::Services::Rates::LoanTerms do
       let(:result_set) { double('Oracle Result Set', fetch_hash: nil) }
       let(:logger) { double('logger') }
       before do
-        allow(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
+        allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
         allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
         allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
         allow(result_set).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
@@ -110,7 +110,7 @@ describe MAPI::Services::Rates::LoanTerms do
          "OVERRIDE_END_TIME" => "0001"}
       end
       it 'should return trade status to false if override_end_time for the override_end_date that is set for today has passed the current time' do
-        expect(result_set).to receive(:fetch_hash).and_return(result_hash4, nil).at_least(1).times
+        allow(result_set).to receive(:fetch_hash).and_return(result_hash4, nil)
         result = subject.loan_terms(logger, :production)
         MAPI::Shared::Constants::LOAN_TYPES.each do |type|
           expect(result['2week'][type]['trade_status']).to be false
@@ -134,7 +134,9 @@ describe MAPI::Services::Rates::LoanTerms do
         MAPI::Services::Rates::LoanTerms.term_bucket_data(logger, environment)
       end
     end
+  end
 
+  describe 'development' do
     describe 'term_bucket_data_production' do
       let(:connection) { double('connection') }
       let(:cursor) { double('cursor') }

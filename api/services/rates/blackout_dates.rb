@@ -26,8 +26,6 @@ module MAPI
         end
 
         def self.fake_data_relative_to_today
-
-          JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'blackout_dates.json'))).map{ |d| Date.parse(d) }
           [Date.today + 1.week, Date.today + 3.week]
         end
 

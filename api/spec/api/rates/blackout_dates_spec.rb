@@ -19,9 +19,9 @@ describe MAPI::Services::Rates::BlackoutDates do
           expect( subject.blackout_dates_production(logger)).to be == [day1, day2, day3]
         end
 
-        it 'executes the SQL query for blackout dates query' do
+        it 'logs an error for exceptions' do
           allow(ActiveRecord::Base.connection).to receive(:execute).with(MAPI::Services::Rates::BlackoutDates::SQL).and_return(cursor)
-          allow(cursor).to receive(:fetch).and_raise( :bad_shit )
+          allow(cursor).to receive(:fetch).and_raise( :exception )
           expect( logger ).to receive(:error)
           subject.blackout_dates_production(logger)
         end
