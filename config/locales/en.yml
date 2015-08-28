@@ -1249,7 +1249,7 @@ en:
         payments:
           title: Interest Payments
           column1:
-            index: index
+            index: Index
             prime_rate: Prime Rate
             1_month_libor: 1-Month LIBOR
             3_month_libor: 3-Month LIBOR
