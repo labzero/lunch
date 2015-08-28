@@ -14,6 +14,11 @@ class ProductsController < ApplicationController
   end
 
   # GET
+  def choice_libor
+    @last_modified = Date.new(2015, 4, 1)
+  end
+
+  # GET
   def frc
     @last_modified = Date.new(2011, 4, 1)
   end
@@ -27,5 +32,6 @@ class ProductsController < ApplicationController
   def arc
     @last_modified = Date.new(2011, 2, 1)
   end
+
 
 end

@@ -34,3 +34,9 @@ Feature: Products Page
     Given I hover on the products link in the header
     When I click on the amortizing link in the header
     Then I should see the "amortizing" product page
+
+    @smoke @jira-mem-848
+    Scenario: Member navigates to the choice libor product page
+      Given I hover on the products link in the header
+      When I click on the choice libor link in the header
+      Then I should see the "choice libor" product page

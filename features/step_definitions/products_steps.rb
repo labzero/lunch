@@ -10,6 +10,8 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
       I18n.t('products.advances.frc_embedded.title')
     when 'arc'
       I18n.t('products.advances.arc.title')
+    when 'choice libor'
+      I18n.t('products.advances.choice_libor.title')
     else
       raise 'unknown product page'
   end
