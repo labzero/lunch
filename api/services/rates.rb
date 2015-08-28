@@ -83,25 +83,29 @@ module MAPI
         }
       }.with_indifferent_access
 
-      def self.is_weekend_or_holiday (maturity_date)
-        (@@holidays.include?(maturity_date.strftime('%F')) || maturity_date.saturday? || maturity_date.sunday?) ? true : false
+      def self.holiday?(date)
+        @@holidays.include?(date.strftime('%F'))
       end
 
-      def self.get_maturity_date (original_maturity_date, frequency_unit)
-        original_maturity_date = original_maturity_date.to_date
-        maturity_date = original_maturity_date
-        while MAPI::Services::Rates.is_weekend_or_holiday(maturity_date)
-          maturity_date = maturity_date + 1.day
+      def self.weekend_or_holiday?(date)
+        date.saturday? || date.sunday? || holiday?(date)
+      end
+
+      def self.get_maturity_date (original, frequency_unit)
+        candidate = original.to_date
+        while MAPI::Services::Rates.weekend_or_holiday?(candidate)
+          candidate += 1.day
         end
         if (frequency_unit == 'M' || frequency_unit == 'Y')
-          if (maturity_date > original_maturity_date.end_of_month)
-            maturity_date =  original_maturity_date.end_of_month
-            while MAPI::Services::Rates.is_weekend_or_holiday(maturity_date)
-              maturity_date = maturity_date - 1.day
+          end_of_month = original.to_date.end_of_month
+          if (candidate > end_of_month)
+            candidate = end_of_month
+            while MAPI::Services::Rates.weekend_or_holiday?(candidate)
+              candidate -= 1.day
             end
           end
         end
-        maturity_date
+        candidate
       end
 
       def self.init_mds_connection(environment)
@@ -596,10 +600,10 @@ module MAPI
 
           MAPI::Services::Rates.init_mds_connection(settings.environment)
 
-          blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(settings.environment)
+          blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(logger,settings.environment)
           halt 503, 'Internal Service Error' if blackout_dates.nil?
 
-          loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(settings.environment).with_indifferent_access
+          loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment).with_indifferent_access
           halt 503, 'Internal Service Error' if loan_terms.nil?
 
           data = if @@mds_connection
@@ -656,7 +660,10 @@ module MAPI
                 loan = hash[type][term]
                 maturity_date = MAPI::Services::Rates.get_maturity_date(DateTime.parse((Time.mktime(now.year, now.month, now.day, now.hour, now.min) + loan[:days_to_maturity].to_i.days).to_s), TERM_MAPPING[term][:frequency_unit])
                 loan[:maturity_date] = maturity_date
-                loan['disabled']     = blackout_dates.include?( maturity_date ) || !loan_terms[term][type]['trade_status'] || !loan_terms[term][type]['display_status']
+                blacked_out  = blackout_dates.include?( maturity_date )
+                dont_trade   = !loan_terms[term][type]['trade_status']
+                dont_display = !loan_terms[term][type]['display_status']
+                loan['disabled']     = blacked_out || dont_trade || dont_display
               end
             end
             hash[:timestamp] = now
