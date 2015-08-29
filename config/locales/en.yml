@@ -1339,6 +1339,49 @@ en:
         minimum_interest_rate_convention: The Bank will not be obligated to pay the borrower any amount relating to the application of a negative interest rate to the remaining principal amount of the advance.
         prepayment_features: The prepayment fee will be determined using the Bank’s standard prepayment formula.
         availability: Choice LIBOR ARC Advances are available on an order basis only, subject to the Bank’s ability to price a particular advance structure in the market.
+      auction_indexed:
+        title: DN Auction-Indexed Advance
+        description: The DN Auction-Indexed Advance is an adjustable rate advance that is indexed to the auction rate for Federal Home Loan Bank System (System) discount notes with a specified maturity. The advance may be repaid, in full or in part, on specified call dates for a premium.
+        key_advantages:
+          rate: Use of an alternative market-rate index helps you diversify the basis risk of your liabilities
+          call: Call option gives you added flexibility in managing changes in your balance sheet
+        background: "The Federal Home Loan Banks (FHLBanks) raise the funds they lend to borrowers primarily through consolidated obligations issued through the Office of Finance. Discount notes are the primary short-term debt instruments used by the System and are issued using a variety of methods, including periodic auctions. The Office of Finance currently issues discount notes with maturities of 4, 9, 13, and 26 weeks via the auction method. The discount note auctions are usually held twice a week, on Tuesdays and Thursdays. Settlement of the discount notes sold at auction is usually the business day following the auction date. However, the discount note auctions are subject to change at any time without notice, as determined by the Office of Finance."
+        product_description: "Described below are some of the DN Auction-Indexed Advance features. The actual terms and conditions are set forth in the Confirmation of Advance for each DN Auction-Indexed Advance."
+        total_amount_available: "The total amount available under this product is $2.5 billion. The Bank may change the total amount available at any time without further notice."
+        max_amount_per_auction:
+          description: "The Bank limits the aggregate amount of DN Auction-Indexed Advances that may be priced and repriced in a single auction to $250 million."
+          equal: "If the total amount of outstanding DN Auction-Indexed Advances being repriced in an auction equals $250 million, the Bank will not make available any new DN Auction-Indexed Advances to be priced in that auction."
+          less_than: "If the total amount of outstanding DN Auction-Indexed Advances being repriced in an auction is less than $250 million, the Bank will allocate the amount remaining after repricing those outstanding advances. The Bank will allocate the remaining amount equally among members requesting new DN Auction-Indexed Advances until the available amount has been allocated. The Bank intends to notify members of the amount they have been allocated by 2 p.m. on the request date."
+        min_per_auction:
+          description: "If no outstanding DN Auction-Indexed Advances are being repriced in an auction, the Bank will only make available new DN Auction-Indexed Advances priced in that auction if the auction occurs as scheduled and if the aggregate demand from all members for new DN Auction- Indexed Advances is at least $100 million."
+          individual: "Individual members may request less than $100 million in new DN Auction-Indexed Advances to be priced in a particular DN auction, and the members' requests will be pooled to determine the aggregate demand for that auction."
+          aggregate: "If the aggregate demand is less than $100 million, the Bank intends to notify members by 2 p.m. on the request date that their requests cannot be filled."
+          outstanding: "If outstanding DN Auction-Indexed Advances are being repriced in an auction, to the extent permitted under applicable laws, rules, and policies, the Bank will request issuance of a sufficient amount of discount notes so that the aggregate amount of requests by all FHLBanks in the auction is at least $100 million."
+          available: "The Bank may make available new DN Auction-Indexed Advances priced in that auction if the auction occurs as scheduled even if the new advances and the outstanding advances being repriced would total less than $100 million."
+        max_term: 5 years
+        interest_rate: The initial interest rate will be calculated by adding a specified spread to the initial index value. At each rate reset, the interest rate will be adjusted by adding the established spread to the new index value.
+        index: "The auction rate for System discount notes with a specified maturity (the money market weighted average all-in rate of the System discount note auction for a specified maturity, rounded to the third decimal place) as transmitted by the Office of Finance to the Bank (DN auction rate).\n\nIf a scheduled auction is cancelled, postponed, or rescheduled by the Office of Finance or does not occur for any other reason, the Bank may select an alternate repricing index and the Bank may also select an alternate rate reset date, as described below. In addition, if the Bank's request for issuance of discount notes is only partially filled in an auction, the Bank may select an alternate index for the initial index value and for the repricing index, as described below."
+        rate_reset: "The rate for DN Auction-Indexed Advances will be reset according to the specific maturity of the discount notes, subject to the observance of holidays by the Office of Finance (scheduled rate reset date). If a scheduled auction is cancelled, postponed, or rescheduled by the Office of Finance or does not occur as scheduled for any other reason, the Bank may select an alternate rate reset date and the Bank may also select an alternate repricing index, as described below."
+        alt_initial_index: "If the Bank has made a request for issuance of System discount notes in an auction but the Bank’s request is only partially filled in the auction, then the initial index value will be an alternate index that will be an interest rate as determined by the Bank in its sole discretion."
+        alt_repricing:
+          description: "The Bank intends to follow these general guidelines in establishing an alternate repricing index and/or alternate rate reset date: \n\n If, on the business day immediately preceding any scheduled rate reset date, the System discount note auction for the specified maturity occurs as scheduled, the repricing index for that scheduled rate reset date will be set as follows:"
+          filled: "If the Bank has made a request for issuance of System discount notes in the auction and its request is completely filled, then the repricing index will be the DN Auction-Indexed Advance rate from that auction."
+          aggregate: "If the Bank has made no request for issuance of System discount notes in the auction, but the aggregate requests of all other FHLBanks in the auction for System discount notes maturing on the next scheduled rate reset date is at least partially filled in the auction, then the repricing index will be the DN Auction-Indexed Advance rate from that auction."
+          partially: "If the Bank has made a request for issuance of System discount notes in the auction but the Bank's request is only partially filled in the auction, then the repricing index will be an alternate index that will be an interest rate as determined by the Bank in its sole discretion."
+          alt_index: "If, on the business day immediately preceding any scheduled rate reset date, the System discount note auction for the specified maturity does not occur as scheduled for any reason, then the Bank will select an alternate index for the repricing index, and the Bank may, in its sole discretion, select an alternate date for the actual rate reset date. In selecting an alternate index when the discount note auction has not occurred as scheduled for any reason, the Bank, in its sole discretion, may select as a repricing index any of the following:"
+          substitute: "an interest rate from any other auction of System discount notes designated by the Office of Finance as a substitute auction for the discount note auction that did not occur; or"
+          maturity: "an interest rate from any other issuance of System discount notes for the designated maturity issued by the Office of Finance on the actual rate reset date; or"
+          equal: "an interest rate equal to the Bank's estimated cost of alternate funding for the designated maturity as determined by the Bank in its sole discretion."
+        request_deadline: "Requests for DN Auction-Indexed Advances must be received by the Bank by noon on the business day immediately preceding the designated auction date. A member may cancel or change its request after this deadline only if the Bank agrees in writing to the cancellation or change."
+        pricing_settlement: Advances will be priced on the designated auction date for settlement the following business day, subject to the observance of holidays by the Office of Finance. The Bank intends to notify all participants of the initial interest rate on the advances by 2 p.m. on the designated auction date.
+        blackout: "The Bank reserves the right not to accept requests for new DN Auction-Indexed Advances priced in any auction for which the discount notes would mature during illiquid periods, as determined by the Bank, such as quarter-ends, yearends, and known holidays. Please contact your Relationship Manager for a list of the dates that may be available."
+        interest_payment_frequency: Every scheduled rate reset date, subject to the observance of holidays by the Office of Finance
+        interest_day_count: Actual/360
+        call_feature: The advance may be repaid, in full or in part, on specified call dates without a prepayment fee, provided that proper call notice is received by the Bank and the call option premium is paid.
+        call_option_dates: Every scheduled rate reset date, subject to the observance of holidays by the Office of Finance
+        call_notice: "At least 5 but no more than 10 business days before a call option date. The Bank must receive the call notice by 10:30 a.m. California time. Call notice may be verbal, but the verbal notification must be confirmed in writing by the borrower and received by the Bank within 2 business days after the borrower's verbal notice. A borrower may not cancel a call notice unless the Bank agrees in writing to the cancellation."
+        call_option_premium: The present value of 5 basis points per annum for the remaining term to maturity applied against the principal amount of the advance being repaid. The Bank's cost of funds, as determined by the Bank in its sole discretion, will be used to determine present values.
+        special_notice: "The DN Auction-Indexed Advance has a risk profile that may be inappropriate for some institutions. The availability of the index to which this product is tied is subject to uncertainty, and the actual interest rate charged for this advance initially and at repricing may be based on an estimated cost of alternate funding depending on market conditions and the actual results of the System discount note auction. In addition, there is no limit to the size of the Bank's request or other FHLBanks' requests for System discount notes in the auctions, and large participation by the Bank or by other FHLBanks could increase the average cost of System discount notes sold (compared to a lower participation amount). \n\n This information is not intended as investment advice. The decision to obtain an DN Auction-Indexed Advance and the analysis of how it may fit into a borrower's financial or business strategy remain solely the borrower's responsibility."
 
       frc:
         title: Fixed Rate Credit (FRC) Advance
@@ -1428,21 +1471,38 @@ en:
       advantages: Key Advantages
       features: Key Features
       last_modified: "Last Modified: %{date}"
+      background: Background
+      product_description: Product Description
     common_key_features:
       availability: Availability
-      interest_day_count: Interest Day Count
-      interest_rate: Interest Rate
-      interest_day_count: Interest Day Count
-      interest_payment_frequency: Interest Payment Frequency
-      maximum_term: Maximum Term
       minimum_term: Minimum Term
       minimum_interest_rate_convention: Minimum Interest Rate Convention
       option_types: Option Types
-      prepayment_features: Prepayment Features
-      term: Term
       termination_option: Termination option
       termination_option_date: Termination Option Date
       termination_option_notice: Termination Option Notice
+      alternate_initial_index: Alternate Initial Index
+      alternate_repricing_alt_rate: Alternate Repricing Index and Alternate Rate Reset Date
+      blackout_auction: Blacked-out Auctions
+      call_feature: Call Feature
+      call_notice: Call Notice
+      call_option_dates: Call Option Dates
+      call_option_premium: Call Option Premium
+      term: Term
+      maximum_term: Maximum Term
+      maximum_amount_per_auction: Maximum Amount Per Auction
+      minimum_amount_per_auction: Minimum Amount Per Auction
+      index: Index
+      interest_day_count: Interest Day Count
+      interest_payment_frequency: Interest Payment Frequency
+      interest_rate: Interest Rate
+      prepayment_features: Prepayment Features
+      pricing_settlement: Pricing and Settlement
+      rate_reset: Rate Reset
+      request_deadline: Request Deadline
+      special_notice: Special Notice
+      total_amount_available: Total Amount Available
+
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email

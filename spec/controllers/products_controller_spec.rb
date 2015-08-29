@@ -11,7 +11,7 @@ RSpec.describe ProductsController, :type => :controller do
     end
   end
 
-  [:arc, :frc_embedded, :frc, :amortizing, :choice_libor].each do |action|
+  [:arc, :auction_indexed, :frc_embedded, :frc, :amortizing, :choice_libor].each do |action|
     describe "GET #{action}" do
       it_behaves_like 'a product page', action
     end
