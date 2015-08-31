@@ -6,7 +6,7 @@ gem 'rails', '4.2.2'
 gem 'ruby-oci8'
 
 # IF THE DB IS ACTING STRANGE, CHECK THIS BRANCH.
-gem 'activerecord-oracle_enhanced-adapter', git: 'https://github.com/rsim/oracle-enhanced.git', branch: 'rails42' # they do not gaurantee backwards compatibility on non-patch changes
+gem 'activerecord-oracle_enhanced-adapter', '~> 1.6.0' # they do not gaurantee backwards compatibility on non-patch changes
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
 # See https://github.com/sstephenson/execjs#readme for more supported runtimes
