@@ -33,7 +33,6 @@ describe MAPI::ServiceApp do
   end
 
   describe "current rates" do
-
     MAPI::Services::Rates::LOAN_TYPES.each do |loan|
       MAPI::Services::Rates::LOAN_TERMS.each do |term|
         ['Live', 'StartOfDay', nil].each do |type|
@@ -52,8 +51,13 @@ describe MAPI::ServiceApp do
 
   describe "rate summary" do
     before do
+      allow(MAPI::Services::Rates).to receive(:get_holidays).and_return([])
       allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(blackout_dates)
-      allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(loan_terms_result)
+      allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(loan_terms_hash)
+      allow(MAPI::Services::Rates::RateBands).to receive(:rate_bands).and_return(rate_bands_hash)
+      allow(MAPI::Services::Rates).to receive(:init_mds_connection).and_return(false)
+      allow(MAPI::Services::Rates).to receive(:fake).with('market_data_live_rates').and_return(live_hash)
+      allow(MAPI::Services::Rates).to receive(:fake).with('market_data_start_of_day_rates').and_return(start_of_day_hash)
     end
     let(:today) { Time.zone.today }
     let(:one_week_away) { today + 1.week }
@@ -63,15 +67,27 @@ describe MAPI::ServiceApp do
     loan_types = [:whole, :agency, :aaa, :aa]
     let(:loan_terms) { loan_terms }
     let(:loan_types) { loan_types }
-    let(:loan_terms_result) do
-      inner_peace = Hash.new(Hash.new(true))
-      h = Hash.new(inner_peace)
+    let(:loan_terms_hash) do
+      default = Hash.new(Hash.new(true))
+      h = Hash.new(default)
       h[:'1year'] = { whole:  { trade_status: false, display_status: true  } }
       h[:'3year'] = { agency: { trade_status: true,  display_status: false } }
-      h[:'1year'].default= inner_peace
-      h[:'3year'].default= inner_peace
+      h[:'1year'].default= default
+      h[:'3year'].default= default
       h
     end
+    let(:live_hash) do
+      JSON.parse(File.read(File.join(MAPI.root, 'fakes', "market_data_live_rates.json"))).with_indifferent_access
+    end
+    let (:threshold) { 0.1 }
+
+    let(:start_of_day_hash) do
+      h = JSON.parse(File.read(File.join(MAPI.root, 'fakes', "market_data_live_rates.json"))).with_indifferent_access
+      h[:aa][:'1week'][:rate]  = (h[:aa][:'1week'][:rate].to_f + (2*threshold)).to_s
+      h[:aaa][:'1week'][:rate] = (h[:aa][:'1week'][:rate].to_f - (2*threshold)).to_s
+      h
+    end
+    let(:rate_bands_hash) { Hash.new(Hash.new( (threshold*100).to_i.to_s )) }
     let(:rate_summary) do
       get '/rates/summary'
       JSON.parse(last_response.body).with_indifferent_access
@@ -87,9 +103,17 @@ describe MAPI::ServiceApp do
       loan_terms.each do |loan_term|
         it "should return correct data for rate_summary[#{loan_type}][#{loan_term}]" do
           r = rate_summary[loan_type][loan_term]
+
+          live_rate         = live_hash[loan_type][loan_term][:rate].to_f
+          start_of_day_rate = start_of_day_hash[loan_type][loan_term][:rate].to_f
+          rate_band_lo      = rate_bands_hash[loan_term]['LOW_BAND_OFF_BP'].to_f/100.0
+          rate_band_hi      = rate_bands_hash[loan_term]['HIGH_BAND_OFF_BP'].to_f/100.0
+          below_threshold   = live_rate < start_of_day_rate - rate_band_lo
+          above_threshold   = live_rate > start_of_day_rate + rate_band_hi
+
           blacked_out = blackout_dates.include?(Date.parse(r[:maturity_date]))
-          cutoff      = !loan_terms_result[loan_term][loan_type][:trade_status]
-          disabled    = !loan_terms_result[loan_term][loan_type][:display_status]
+          cutoff      = !loan_terms_hash[loan_term][loan_type][:trade_status]
+          disabled    = !loan_terms_hash[loan_term][loan_type][:display_status]
           expect(r[:payment_on]).to be_kind_of(String)
           expect(r[:interest_day_count]).to be_kind_of(String)
           expect(r[:maturity_date]).to be_kind_of(String)
@@ -99,7 +123,7 @@ describe MAPI::ServiceApp do
           expect(r[:rate]).to be_kind_of(String)
           expect(r[:rate]).to match(/\d+\.\d+/)
           expect(r[:disabled]).to be_boolean
-          expect(r[:disabled]).to be == (blacked_out || cutoff || disabled)
+          expect(r[:disabled]).to be == (blacked_out || cutoff || disabled || below_threshold || above_threshold)
         end
       end
     end
@@ -123,29 +147,68 @@ describe MAPI::ServiceApp do
     end
 
     describe "in the production environment" do
+      let(:logger){ double('logger') }
+      let(:maturity_date){ double('maturity_date') }
+      let(:interest_day_count){ double( 'interest_day_count' ) }
+      let(:live_data_xml){ double('live_data_xml') }
+      let(:live_data_value) do
+        {
+            payment_on: 'Maturity',
+            interest_day_count: interest_day_count,
+            rate: "5.0",
+            maturity_date: maturity_date,
+        }.with_indifferent_access
+      end
+      let(:live_data){ Hash.new(Hash.new(live_data_value)) }
+      let(:start_of_day_xml){ double('start_of_day_xml') }
+      let(:start_of_day){ Hash.new(Hash.new(Hash.new("5.0"))) }
+      let(:mds_connection){ double('mds_connection') }
+      let(:rate_bands_hash) { Hash.new(Hash.new("10")) }
+      let(:trade_status){ double('trade_status') }
+      let(:display_status){ double('display_status') }
+      let(:loan_terms_hash){ Hash.new(Hash.new( { trade_status: trade_status, display_status: display_status } ) ) }
       before do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
+        allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger)
+        allow(MAPI::Services::Rates).to receive(:get_holidays).and_return([])
         allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return([])
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(loan_terms_hash)
+        allow(MAPI::Services::Rates::RateBands).to receive(:rate_bands).and_return(rate_bands_hash)
+        allow(MAPI::Services::Rates).to receive(:init_mds_connection).and_return(mds_connection)
+        allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live').and_return(live_data_xml)
+        allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay').and_return(start_of_day_xml)
+        allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data)
+        allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(start_of_day_xml).and_return(start_of_day)
+        allow(MAPI::Services::Rates).to receive(:find_nearest_business_day).and_return(maturity_date)
       end
-      it "should return rates for default loan_types at default loan_terms", vcr: {cassette_name: 'calendar_mds_service'} do
-        loan_terms.each do |loan_type|
-          loan_types.each do |loan_term|
-            expect(rate_summary[loan_term][loan_type][:rate]).to be_kind_of(String)
-          end
-        end
-      end
-      it "should return Internal Service Error, if calendar service is unavailable", vcr: {cassette_name: 'calendar_service_unavailable'} do
+
+      it "should return Internal Service Error, if calendar service is unavailable" do
+        allow(MAPI::Services::Rates).to receive(:get_holidays).and_return(nil)
         get '/rates/summary'
         expect(last_response.status).to eq(503)
       end
-      it "should return Internal Service Error, if mds service is unavailable", vcr: {cassette_name: 'mds_service_unavailable'} do
-        get '/rates/summary'
-        expect(last_response.status).to eq(503)
-      end
-      it "should return Internal Service Error, if blackout dates service is unavailable", vcr: {cassette_name: 'calendar_mds_service'} do
+
+      it "should return Internal Service Error, if blackout dates service is unavailable" do
         allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(nil)
         get '/rates/summary'
         expect(last_response.status).to eq(503)
+      end
+
+      it "should return Internal Service Error, if loan terms service is unavailable" do
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(nil)
+        get '/rates/summary'
+        expect(last_response.status).to eq(503)
+      end
+
+      it "should return Internal Service Error, if get_market_data soap endpoint is unavailable" do
+        allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live').and_return(nil)
+        get '/rates/summary'
+        expect(last_response.status).to eq(503)
+      end
+
+      it "should return 200 if all the endpoints return valid data" do
+        get '/rates/summary'
+        expect(last_response.status).to eq(200)
       end
     end
   end
@@ -156,9 +219,9 @@ describe MAPI::ServiceApp do
     let(:monday)   { double('monday')    }
     let(:holiday)  { double('holiday')   }
     let(:formatted){ double('formatted') }
+    let(:holidays) { [formatted] }
 
     before do
-      MAPI::Services::Rates.class_variable_set(:@@holidays, [formatted])
       [saturday, sunday, monday].each { |d| allow(d).to receive(:strftime).with('%F').and_return(double('random string')) }
       [sunday,monday,holiday].each { |d| allow(d).to receive(:saturday?).and_return(false) }
       [saturday,monday,holiday].each { |d| allow(d).to receive(:sunday?).and_return(false) }
@@ -167,26 +230,27 @@ describe MAPI::ServiceApp do
       allow(holiday).to receive(:strftime).with('%F').and_return(formatted)
     end
     it "should return true for saturday" do
-      expect(subject.weekend_or_holiday?(saturday)).to be_truthy
+      expect(subject.weekend_or_holiday?(holidays, saturday)).to be_truthy
     end
     it "should return true for sunday" do
-      expect(subject.weekend_or_holiday?(sunday)).to be_truthy
+      expect(subject.weekend_or_holiday?(holidays, sunday)).to be_truthy
     end
     it "should return true for monday" do
-      expect(subject.weekend_or_holiday?(monday)).to be_falsey
+      expect(subject.weekend_or_holiday?(holidays, monday)).to be_falsey
     end
     it "should return true for holiday" do
-      expect(subject.weekend_or_holiday?(holiday)).to be_truthy
+      expect(subject.weekend_or_holiday?(holidays, holiday)).to be_truthy
     end
   end
 
-  describe "get_maturity_date" do
+  describe "find_nearest_business_day" do
     let (:day1_str) { double('day1 str') }
     let (:day2_str) { double('day2 str') }
     let (:day1) { double( 'day 1' ) }
     let (:day2) { double( 'day 2' ) }
     let (:day3) { double( 'day 3' ) }
     let (:day4) { double( 'day 4' ) }
+    let(:holidays) { double( 'holidays' ) }
     before do
       [day1,day2,day3].zip([day2,day3,day4]).each do |pred,succ|
         allow(pred).to receive( '+' ).with(1.day).and_return(succ)
@@ -196,21 +260,21 @@ describe MAPI::ServiceApp do
       allow(day2_str).to receive(:to_date).and_return(day2)
     end
     it "should return the same date if is not a weekend" do
-      allow(subject).to receive(:weekend_or_holiday?).with(day1).and_return(false)
-      expect(subject.get_maturity_date(day1_str,'W')).to eq(day1)
+      allow(subject).to receive(:weekend_or_holiday?).with(holidays, day1).and_return(false)
+      expect(subject.find_nearest_business_day(holidays, day1_str, 'W')).to eq(day1)
     end
     it "should return the next non weekend date if is weekend" do
-      allow(subject).to receive(:weekend_or_holiday?).with(day1).and_return(true)
-      allow(subject).to receive(:weekend_or_holiday?).with(day2).and_return(false)
-      expect(subject.get_maturity_date(day1_str,'W')).to eq(day2)
+      allow(subject).to receive(:weekend_or_holiday?).with(holidays, day1).and_return(true)
+      allow(subject).to receive(:weekend_or_holiday?).with(holidays, day2).and_return(false)
+      expect(subject.find_nearest_business_day(holidays, day1_str, 'W')).to eq(day2)
     end
     it "should return the previous non weekend date if is weekend and month/year term and hits next month" do
-      allow(subject).to receive(:weekend_or_holiday?).with(day1).and_return(false)
-      allow(subject).to receive(:weekend_or_holiday?).with(day2).and_return(true)
-      allow(subject).to receive(:weekend_or_holiday?).with(day3).and_return(false)
+      allow(subject).to receive(:weekend_or_holiday?).with(holidays, day1).and_return(false)
+      allow(subject).to receive(:weekend_or_holiday?).with(holidays, day2).and_return(true)
+      allow(subject).to receive(:weekend_or_holiday?).with(holidays, day3).and_return(false)
       allow(day3).to receive('>').with(day2).and_return(true)
       allow(day2).to receive(:end_of_month).and_return(day2)
-      expect(subject.get_maturity_date(day2_str, 'Y')).to eq(day1)
+      expect(subject.find_nearest_business_day(holidays, day2_str, 'Y')).to eq(day1)
     end
   end
 

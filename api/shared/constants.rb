@@ -77,6 +77,14 @@ module MAPI
           }
       }.with_indifferent_access
 
+      def self.invert_term_mapping( mapping )
+        mapping.each_with_object({}) do |(term, v), h|
+          (h["#{v[:frequency]}#{v[:frequency_unit]}"] ||= []) << term
+        end.with_indifferent_access
+      end
+
+      FREQUENCY_MAPPING = invert_term_mapping( TERM_MAPPING )
+
       VRC_TERMS = ['1D']
       FRC_TERMS = ['1M', '2M', '3M', '6M', '1Y', '2Y', '3Y', '5Y', '7Y', '10Y', '15Y', '20Y', '30Y']
       LIBOR_TERMS = ['1Y', '2Y', '3Y', '5Y']

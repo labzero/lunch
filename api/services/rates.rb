@@ -1,39 +1,48 @@
 require 'date'
 require 'savon'
 require 'active_support/core_ext/hash/indifferent_access'
-require_relative 'rates/price_indication_historical'
-require_relative 'rates/blackout_dates'
-require_relative 'rates/market_data_rates'
 
 module MAPI
   module Services
     module Rates
       include MAPI::Services::Base
       include MAPI::Shared::Constants
+      include MAPI::Shared::Utils
 
-      def self.holiday?(date)
-        @@holidays.include?(date.strftime('%F'))
+      def self.holiday?(holidays, date)
+        holidays.include?(date.strftime('%F'))
       end
 
-      def self.weekend_or_holiday?(date)
-        date.saturday? || date.sunday? || holiday?(date)
+      def self.weekend_or_holiday?(holidays, date)
+        date.saturday? || date.sunday? || holiday?(holidays,date)
       end
 
-      def self.get_maturity_date (original, frequency_unit)
+      def self.find_nearest_business_day(holidays, original, frequency_unit)
         candidate = original.to_date
-        while MAPI::Services::Rates.weekend_or_holiday?(candidate)
+        while MAPI::Services::Rates.weekend_or_holiday?(holidays, candidate)
           candidate += 1.day
         end
         if (frequency_unit == 'M' || frequency_unit == 'Y')
           end_of_month = original.to_date.end_of_month
           if (candidate > end_of_month)
             candidate = end_of_month
-            while MAPI::Services::Rates.weekend_or_holiday?(candidate)
+            while MAPI::Services::Rates.weekend_or_holiday?(holidays, candidate)
               candidate -= 1.day
             end
           end
         end
         candidate
+      end
+
+      def self.disabled?(live, start_of_day, rate_band, loan_term, blackout_dates)
+        live_rate             = live[:rate].to_f
+        start_of_day_rate     = start_of_day[:rate].to_f
+        threshold_min         = start_of_day_rate - rate_band['LOW_BAND_OFF_BP'].to_f/100.0
+        threshold_max         = start_of_day_rate + rate_band['HIGH_BAND_OFF_BP'].to_f/100.0
+        blacked_out           = blackout_dates.include?( live['maturity_date'] )
+        cant_trade            = !loan_term['trade_status']
+        cant_display          = !loan_term['display_status']
+        blacked_out || cant_trade || cant_display || live_rate < threshold_min || live_rate > threshold_max
       end
 
       SOAP_HEADER = {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}}
@@ -89,7 +98,7 @@ module MAPI
             Time.zone.parse(holiday.content)
           end
         else
-          JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'calendar_holidays.json')))
+          MAPI::Services::Rates.fake('calendar_holidays')
         end
       end
 
@@ -367,7 +376,7 @@ module MAPI
             end
             rows
           else
-            rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_historic_overnight.json')))[0..(days - 1)]
+            rows = MAPI::Services::Rates.fake('rates_historic_overnight')[0..(days - 1)]
             rows.collect do |row|
               [Time.zone.parse(row[0]), row[1]]
             end
@@ -411,8 +420,7 @@ module MAPI
             }
             hash
           else
-            hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_current_price_indications_vrc.json'))).with_indifferent_access
-            hash
+            MAPI::Services::Rates.fake('rates_current_price_indications_vrc')
           end
           hash = {
             'advance_maturity' => data['advance_maturity'].to_s,
@@ -458,8 +466,7 @@ module MAPI
             end
             hash
           else
-            hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_current_price_indications_frc.json')))
-            hash
+            MAPI::Services::Rates.fake('rates_current_price_indications_frc')
           end
           data_formatted = []
           data.each do |row|
@@ -510,8 +517,7 @@ module MAPI
             end
             hash
           else
-            hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_current_price_indications_arc.json')))
-            hash
+            MAPI::Services::Rates.fake('rates_current_price_indications_arc')
           end
           data_formatted = []
           data.each do |row|
@@ -567,7 +573,7 @@ module MAPI
             end
           else
             # We have no real data source yet.
-            rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_current_overnight.json')))
+            rows = MAPI::Services::Rates.fake('rates_current_overnight')
             rate = rows.sample
             now = Time.now
             {rate: rate, updated_at: Time.mktime(now.year, now.month, now.day, now.hour, now.min).to_s}
@@ -577,33 +583,33 @@ module MAPI
 
         relative_get "/summary" do
           halt 503, 'Internal Service Error' unless holidays       = MAPI::Services::Rates.get_holidays(logger, settings.environment)
-          halt 503, 'Internal Service Error' unless blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(settings.environment)
-          halt 503, 'Internal Service Error' unless loan_terms     = MAPI::Services::Rates::LoanTerms.loan_terms(settings.environment).with_indifferent_access
-          data = if MAPI::Services::Rates.init_mds_connection(settings.environment)
-            halt 503, 'Internal Service Error' unless response = MAPI::Services::Rates.get_market_data_from_soap(logger, 'Live')
-            MAPI::Services::Rates.extract_market_data_from_soap_response(response)
+          halt 503, 'Internal Service Error' unless blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(logger,settings.environment)
+          halt 503, 'Internal Service Error' unless loan_terms     = MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment)
+          halt 503, 'Internal Service Error' unless rate_bands     = MAPI::Services::Rates::RateBands.rate_bands(logger,settings.environment)
+          if MAPI::Services::Rates.init_mds_connection(settings.environment)
+            halt 503, 'Internal Service Error' unless live_data_xml    = MAPI::Services::Rates.get_market_data_from_soap(logger, 'Live')
+            halt 503, 'Internal Service Error' unless start_of_day_xml = MAPI::Services::Rates.get_market_data_from_soap(logger, 'StartOfDay')
+            live_data    = MAPI::Services::Rates.extract_market_data_from_soap_response(live_data_xml)
+            start_of_day = MAPI::Services::Rates.extract_market_data_from_soap_response(start_of_day_xml)
           else
             # We have no real data source yet.
-            hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_summary.json'))).with_indifferent_access
+            live_data    = MAPI::Services::Rates.fake('market_data_live_rates').with_indifferent_access
+            start_of_day = MAPI::Services::Rates.fake('market_data_start_of_day_rates').with_indifferent_access
             # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
             LOAN_TYPES.each do |type|
               LOAN_TERMS.each do |term|
-                hash[type][term][:maturity_date] = Time.zone.today + hash[type][term][:days_to_maturity].to_i.days
+                live_data[type][term][:maturity_date] = Time.zone.today + live_data[type][term][:days_to_maturity].to_i.days
               end
             end
-            hash
           end
           LOAN_TYPES.each do |type|
             LOAN_TERMS.each do |term|
-              loan                  = data[type][term]
-              loan['maturity_date'] = MAPI::Services::Rates.find_nearest_business_day(holidays, loan['maturity_date'], TERM_MAPPING[term][:frequency_unit])
-              blacked_out           = blackout_dates.include?( loan['maturity_date'] )
-              cant_trade            = !loan_terms[term][type]['trade_status']
-              cant_display          = !loan_terms[term][type]['display_status']
-              loan[:disabled]       = blacked_out || cant_trade || cant_display
+              live                 = live_data[type][term]
+              live[:maturity_date] = MAPI::Services::Rates.find_nearest_business_day(holidays, live[:maturity_date], TERM_MAPPING[term][:frequency_unit])
+              live[:disabled]      = MAPI::Services::Rates.disabled?(live, start_of_day[type][term], rate_bands[term], loan_terms[term][type], blackout_dates)
             end
           end
-          data.merge( timestamp: Time.zone.now ).to_json
+          live_data.merge( timestamp: Time.zone.now ).to_json
         end
 
 

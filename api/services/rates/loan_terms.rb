@@ -49,7 +49,9 @@ module MAPI
 
         def self.loan_terms(logger,environment)
           now     = { date: Time.zone.now.to_date, time: Time.zone.now.strftime("%H%M%S") }
-          buckets = term_bucket_data(logger, environment).index_by{ |bucket| id(bucket) }
+          data = term_bucket_data(logger, environment)
+          return nil if data.nil?
+          buckets = data.index_by{ |bucket| id(bucket) }
           hash_from_pairs( LOAN_TERMS.map { |term| [term, value_for_term(buckets[term_to_id(term)], now)]} )
         end
 
@@ -58,20 +60,11 @@ module MAPI
         end
 
         def self.term_bucket_data_production(logger)
-          begin
-            results = []
-            cursor  = ActiveRecord::Base.connection.execute(SQL)
-            while row = cursor.fetch_hash()
-              results.push(row)
-            end
-            results
-          rescue => e
-            logger.error( "MAPI::Services::Rates::LoanTerms.term_bucket_data_production encountered: #{e.message}" )
-          end
+          fetch_hashes(logger, SQL)
         end
 
         def self.term_bucket_data_development
-          JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_term_buckets_info.json')))
+          fake('etransact_advances_term_buckets_info')
         end
 
         def self.time(bucket, field)

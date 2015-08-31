@@ -1,0 +1,298 @@
+{
+  "whole" : {
+    "overnight" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/ACT",
+      "days_to_maturity" : "1",
+      "rate" : "0.17"
+    },
+    "open" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/ACT",
+      "days_to_maturity" : "1",
+      "rate" : "0.17"
+    },
+    "1week" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/ACT",
+      "days_to_maturity" : "7",
+      "rate" : "0.20"
+    },
+    "2week" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/ACT",
+      "days_to_maturity" : "14",
+      "rate" : "0.20"
+    },
+    "3week" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/ACT",
+      "days_to_maturity" : "21",
+      "rate" : "0.20"
+    },
+    "1month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/ACT",
+      "days_to_maturity" : "30",
+      "rate" : "0.21"
+    },
+    "2month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/ACT",
+      "days_to_maturity" : "60",
+      "rate" : "0.21"
+    },
+    "3month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/ACT",
+      "days_to_maturity" : "90",
+      "rate" : "0.22"
+    },
+    "6month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/ACT",
+      "days_to_maturity" : "182",
+      "rate" : "0.23"
+    },
+    "1year" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/ACT",
+      "days_to_maturity" : "365",
+      "rate" : "0.34"
+    },
+    "2year" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/ACT",
+      "days_to_maturity" : "730",
+      "rate" : "0.78"
+    },
+    "3year" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/ACT",
+      "days_to_maturity" : "1095",
+      "rate" : "1.29"
+    }
+  },
+  "agency" : {
+    "overnight" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "1",
+      "rate" : "0.15"
+    },
+    "open" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "1",
+      "rate" : "0.15"
+    },
+    "1week" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "7",
+      "rate" : "0.18"
+    },
+    "2week" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "14",
+      "rate" : "0.21"
+    },
+    "3week" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "21",
+      "rate" : "0.19"
+    },
+    "1month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "30",
+      "rate" : "0.18"
+    },
+    "2month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "60",
+      "rate" : "0.19"
+    },
+    "3month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "90",
+      "rate" : "0.20"
+    },
+    "6month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "182",
+      "rate" : "0.21"
+    },
+    "1year" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "365",
+      "rate" : "0.33"
+    },
+    "2year" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "730",
+      "rate" : "0.77"
+    },
+    "3year" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "1095",
+      "rate" : "1.27"
+    }
+  },
+  "aaa" : {
+    "overnight" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "1",
+      "rate" : "0.16"
+    },
+    "open" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "1",
+      "rate" : "0.16"
+    },
+    "1week" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "7",
+      "rate" : "0.19"
+    },
+    "2week" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "14",
+      "rate" : "0.19"
+    },
+    "3week" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "21",
+      "rate" : "0.20"
+    },
+    "1month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "30",
+      "rate" : "0.19"
+    },
+    "2month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "60",
+      "rate" : "0.20"
+    },
+    "3month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "90",
+      "rate" : "0.21"
+    },
+    "6month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "182",
+      "rate" : "0.22"
+    },
+    "1year" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "365",
+      "rate" : "0.34"
+    },
+    "2year" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "730",
+      "rate" : "0.78"
+    },
+    "3year" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "1095",
+      "rate" : "1.28"
+    }
+  },
+  "aa" : {
+    "overnight" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "1",
+      "rate" : "0.06"
+    },
+    "open" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "1",
+      "rate" : "0.06"
+    },
+    "1week" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "7",
+      "rate" : "0.10"
+    },
+    "2week" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "14",
+      "rate" : "0.12"
+    },
+    "3week" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "21",
+      "rate" : "0.13"
+    },
+    "1month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "30",
+      "rate" : "0.13"
+    },
+    "2month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "60",
+      "rate" : "0.15"
+    },
+    "3month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "90",
+      "rate" : "0.16"
+    },
+    "6month" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "182",
+      "rate" : "0.18"
+    },
+    "1year" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "365",
+      "rate" : "0.32"
+    },
+    "2year" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "730",
+      "rate" : "0.77"
+    },
+    "3year" : {
+      "payment_on" : "Maturity",
+      "interest_day_count" : "ACT/360",
+      "days_to_maturity" : "1095",
+      "rate" : "1.28"
+    }
+  }
+}

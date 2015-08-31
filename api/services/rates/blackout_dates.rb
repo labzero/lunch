@@ -2,6 +2,8 @@ module MAPI
   module Services
     module Rates
       module BlackoutDates
+        include MAPI::Shared::Utils
+
         SQL='SELECT BLACKOUT_DATE FROM WEB_ADM.AO_MATURITY_BLACKOUT_DATES'
 
         def self.blackout_dates(logger, environment)
@@ -9,16 +11,7 @@ module MAPI
         end
 
         def self.blackout_dates_production(logger)
-          begin
-            dates = []
-            date_cursor = ActiveRecord::Base.connection.execute(SQL)
-            while date = date_cursor.fetch()
-              dates += date
-            end
-            dates
-          rescue => e
-            logger.error( "blackout_dates_production encountered the following error: #{e.message}" )
-          end
+          fetch_objects(logger, SQL)
         end
 
         def self.fake_data_relative_to_today
