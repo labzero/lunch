@@ -151,6 +151,11 @@ end
 
 puts "Capybara.app_host: #{Capybara.app_host}"
 
+at_exit do
+  puts "App Health Check Results: " + %x[curl -sL #{Capybara.app_host}/healthy]
+  puts "Finished run `#{sauce_name}`"
+end
+
 AfterConfiguration do
   if Capybara.app_host.nil?
     Capybara.app_host = "#{Capybara.app_host || ('http://' + Capybara.current_session.server.host)}:#{Capybara.server_port || (Capybara.current_session.server ? Capybara.current_session.server.port : false) || 80}"
@@ -168,7 +173,7 @@ AfterConfiguration do
     puts "App not serving heartbeat (#{url})... waiting #{wait_time}s (#{i + 1} tr"+(i==0 ? "y" : "ies")+")"
     sleep wait_time
   end
-  raise 'Server failed to serve heartbeat' if result != '200'
+  raise Capybara::CapybaraError.new('Server failed to serve heartbeat') unless result == '200'
   sleep 10 #sleep 10 more seconds after we get our first 200 response to let the app come up more
   if !is_parallel || is_parallel_primary
     require Rails.root.join('db', 'seeds.rb') unless custom_host
@@ -181,6 +186,8 @@ AfterConfiguration do
     end
     sleep(20) # primary runner needs to sleep to make sure secondary workers see the sentinel (in the case where the primary work exits quickly... ie no work to do)
   end
+
+  puts "Starting run `#{sauce_name}`"
 end
 
 AfterStep('@pause') do
