@@ -16,6 +16,8 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
       I18n.t('products.advances.arc.title')
     when 'choice libor'
       I18n.t('products.advances.choice_libor.title')
+    when 'knockout'
+      I18n.t('products.advances.knockout.title')
     else
       raise 'unknown product page'
   end

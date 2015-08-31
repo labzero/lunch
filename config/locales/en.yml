@@ -1455,7 +1455,28 @@ en:
             description: Same as the rate reset dates
           prepayment_features:
             description_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=%{pdf_url}>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
-      knockout: Knockout Advance
+      knockout:
+          title: Knockout Advance
+          description: "The Knockout Advance is a specially priced term advance that is automatically terminated if the specified index rate reaches or exceeds a predetermined strike rate on a specified date. This structure allows the Bank to offer the member a rate that may be significantly lower than the rate for a comparable Fixed Rate Credit Advance, but with more certainty as to when the advance will be terminated than with a Putable Advance.\n\nThe Knockout Advance has a fixed rate that may be below the market rate for a comparable Fixed Rate Credit Advance, depending on the selected strike rate. The Bank is able to offer this lower rate because the Knockout Advance will be terminated automatically on any predetermined Knockout Date without a prepayment fee or prepayment credit, if the specified index rate is greater than or equal to the predetermined strike rate on a specified observation date.\n\nIf the advance is terminated before the original maturity date, the Bank will offer the borrower the opportunity to replace the funding with another advance at the market rate in effect on the date the advance is terminated, provided that the borrower meets all requirements for obtaining advances from the Bank at that time. The maturity date of the replacement funding will be either the originally scheduled maturity date of the Knockout Advance or a maturity date that is agreed upon by the Bank and the borrower. The borrower is not obligated to accept this replacement funding. A borrower that accepts the replacement funding may borrow under any of the regular credit products available to the borrower."
+          uses:
+            lower: Lower your cost of funds
+            link: Link the maturity of your advance to a designated index rate
+          advantages:
+            lower: Take advantage of a lower interest rate
+            transparency: Greater transparency as to when the advance will be terminated early compared to the Putable Advance
+          features: "Because of the special risk characteristics of the Knockout Advance, the Bank offers this product only to preapproved borrowers on an order-only basis. The actual terms and conditions of the advance are determined when the advance is made and are set forth in the Confirmation of Advance for each Knockout Advance. General features of the advance are as follows:"
+          eligibility_html: "Members that are well capitalized, have a consistent record of good earnings, and have minimal problem assets are generally eligible to use the Knockout Advance. A <a href=%{url}>Statement of Authority: Putable Advances</a> (PDF) signed by an authorized officer must be submitted to the Bank before any transactions may be executed."
+          early_termination: "If the index rate is greater than or equal to the strike rate on an Observation Date, the entire advance will be terminated (no partial terminations) and the member must repay the entire advance on the Knockout Date. When terminating the advance, the Bank will provide at least 2 business days’ prior notice, by telephone and in writing by confirmed fax, using the modified following business day convention. The Bank will offer to make available replacement funding subject to the conditions described above."
+          total_max_per_borrow: "The total maximum amount per borrower (including outstanding Putable Advance balances) that may be available is equal to three times the borrower’s current Tier 1 capital for FDIC-insured institutions, three times the borrower’s current net worth for NCUA-insured institutions, or a comparable amount for other borrowers, as determined by the Bank."
+          maximum_term: 10 years
+          interest_day_count: "Actual/360"
+          interest_payment_frequency: Quarterly and at repayment
+          lockout_period: "Typically 3 months, 6 months, or 1 year (Other lockout periods may be available.)"
+          knockout_dates_observe_period: Typically the Knockout Dates are the same as the interest payment dates, after the  lockout period. The Observation Dates are typically five business days before the Knockout Dates.
+          interest_strike_rate: "The index rate and strike rate are established at the time the advance is made. The index rate is typically 3-month LIBOR."
+          prepayment_features_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=%{url}>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
+          special_notice: "The Knockout Advance has a complex risk profile and may be an inappropriate product for some institutions. The expected maturity of the Knockout Advance may contract or extend adversely to market movements, and the Bank makes no representations as to the expected life of the advance. This information is not intended as investment advice. The decision to obtain a Knockout Advance and the analysis of how it may fit into a borrower’s financial or business strategy remain solely the borrower’s responsibility.\n\nNotwithstanding any lockout period for the knockout option, the Bank reserves all of its rights under the Advances and Security Agreement, including, without limitation, its right to terminate the Knockout Advance and accelerate repayment of the advance and its right to liquidate collateral pledged by the borrower as security for the Knockout Advance at any time upon the occurrence of an event of default described in the Advances and Security Agreement."
+
       mpf: Mortgage Partnership Finance (MPF) Program
       ocn: Other Cash Needs (OCN) Advance
       putable: Putable Advance
@@ -1492,7 +1513,13 @@ en:
       call_notice: Call Notice
       call_option_dates: Call Option Dates
       call_option_premium: Call Option Premium
+      eligibility: Eligibility
+      early_termination: Early Termination
+      knockout_dates_observe_period: "Knockout Dates/Observation Dates"
+      lockout_period: Lockout Period
+      special_notice: Special Notice
       term: Term
+      total_max_per_borrow: Total Maximum Amount Per Borrower
       maximum_term: Maximum Term
       maximum_amount_per_auction: Maximum Amount Per Auction
       minimum_amount_per_auction: Minimum Amount Per Auction
@@ -1500,6 +1527,7 @@ en:
       interest_day_count: Interest Day Count
       interest_payment_frequency: Interest Payment Frequency
       interest_rate: Interest Rate
+      interest_strike_rate: Index Rate and Strike Rate
       prepayment_features: Prepayment Features
       pricing_settlement: Pricing and Settlement
       rate_reset: Rate Reset
