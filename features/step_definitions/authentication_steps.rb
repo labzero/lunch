@@ -5,7 +5,10 @@ Given(/^I fill in and submit the login form with username "(.*?)" and password "
   @login_flag = flag_page
   click_button(I18n.t('global.login'))
   wait_for_unflagged_page(@login_flag)
+
   terms_accepted = page.has_no_css?('.terms-row h1', text: I18n.t('terms.title'), wait: 0)
+  session_id = get_session_id
+  puts "Session ID: #{session_id}" if session_id
   step %{I accept the Terms of Use} unless terms_accepted
 end
 
@@ -212,4 +215,18 @@ def wait_for_unflagged_page(flag, timeout=5)
   end
 
   raise Capybara::ExpectationNotMet.new("#{flag} was still on page after #{timeout} seconds.")
+end
+
+def session_cookie_key
+  if Rails && Rails.respond_to?(:application)
+    Rails.application.config.session_options.fetch(:key)
+  else
+    ENV['CUCUMBER_SESSION_KEY'] || '_fhlb-member_session'
+  end
+end
+
+def get_session_id
+  key = session_cookie_key
+  cookie = (page.driver.browser.manage.all_cookies.find {|cookie| cookie[:name] == key}) || {}
+  cookie[:value]
 end
