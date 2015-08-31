@@ -185,6 +185,16 @@ class User < ActiveRecord::Base
     record
   end
 
+  def self.find_or_create_if_valid_login(attributes)
+    record = self.find_by(attributes)
+    unless record
+      username = attributes[:username]
+      ldap_domain = Devise::LDAP::Adapter.get_ldap_domain(username)
+      record = self.find_or_create_by(username: username, ldap_domain: ldap_domain) if ldap_domain
+    end
+    record
+  end
+
   def after_ldap_authentication(new_ldap_domain)
     self.update_attribute(:ldap_domain, new_ldap_domain) if self.ldap_domain.nil?
   end

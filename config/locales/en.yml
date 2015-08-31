@@ -363,6 +363,13 @@ en:
     forgot_password: Forgot Password
     choose_member: Choose an institution
     select_bank: Select institution
+  forgot_password:
+    instructions: "Enter your username, and we'll email you instructions to reset your password."
+    confirmation:
+      title: Check Your Email
+      description_html: "We sent an email to <strong>%{email}</strong>.\n\nClick the link in the email to reset your password."
+      no_email: I didn't receive the email
+      email_mask_failure: '*****'
   dashboard:
     meta_title: FHLB - Dashboard
     actions:

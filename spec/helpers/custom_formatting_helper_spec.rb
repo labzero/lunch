@@ -203,4 +203,54 @@ describe CustomFormattingHelper do
     end
   end
 
+  describe '`mask_email`' do
+    it 'returns nil if passed nil' do
+      expect(helper.mask_email(nil)).to be_nil
+    end
+    it 'returns nil if passed a malformed email' do
+      email = double('An Email')
+      matches = double('MatchData', length: 5)
+      allow(email).to receive(:match).and_return(matches)
+      expect(helper.mask_email(email)).to be_nil
+    end
+    it 'should mask the email' do
+      email = double('An Email')
+      masked_email = double('MaskedEmail')
+      matches = double('MatchData', length: 6)
+      intermediary_1 = double('Masked Email Intermiedary 1')
+      intermediary_2 = double('Masked Email Intermiedary 2')
+      intermediary_3 = double('Masked Email Intermiedary 3')
+      intermediary_4 = double('Masked Email Intermiedary 4')
+
+      allow(matches).to receive(:[]).with(1).and_return(double('MatchData:1'))
+      allow(matches).to receive(:[]).with(2).and_return(double('MatchData:2', length: rand(1..5)))
+      allow(matches).to receive(:[]).with(3).and_return(double('MatchData:3'))
+      allow(matches).to receive(:[]).with(4).and_return(double('MatchData:4', length: rand(1..5)))
+      allow(matches).to receive(:[]).with(5).and_return(double('MatchData:5'))
+      allow(matches[1]).to receive(:+).with('*' * matches[2].length).and_return(intermediary_1)
+      allow(intermediary_1).to receive(:+).with('@').and_return(intermediary_2)
+      allow(intermediary_2).to receive(:+).with(matches[3]).and_return(intermediary_3)
+      allow(intermediary_3).to receive(:+).with('*' * matches[4].length).and_return(intermediary_4)
+      allow(intermediary_4).to receive(:+).with(matches[5]).and_return(masked_email)
+      allow(email).to receive(:match).and_return(matches)
+      
+      expect(helper.mask_email(email)).to be(masked_email)
+    end
+    describe 'with fixtures' do
+      it 'returns nil if passed a malformed email' do
+        ['foo', 'foo@bar', 'foo@bar%', '@foo.com'].each do |email|
+          expect(helper.mask_email(email)).to be_nil
+        end
+      end
+    end
+    it 'should mask the email' do
+      {
+        'foo@example.com' => 'f**@e******.com',
+        'monkey@example.co.bar' => 'm*****@e*********.bar'
+      }.each do |input, output|
+        expect(helper.mask_email(input)).to eq(output)
+      end
+    end
+  end
+
 end

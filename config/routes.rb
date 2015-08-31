@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  devise_for :users, controllers: { sessions: 'users/sessions' }, :skip => [:sessions]
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -108,7 +107,11 @@ Rails.application.routes.draw do
     post '/member' => 'members#set_member', :as => :members_set_member
     get 'member/terms' => 'members#terms', :as => :terms
     post 'member/terms' => 'members#accept_terms', :as => :accept_terms
+    get 'member/password' => 'users/passwords#new', as: :new_user_password
+    post 'member/password' => 'users/passwords#create', as: :user_password
+    get 'member/password/reset' => 'users/passwords#edit', as: :edit_user_password
   end
+  devise_for :users, controllers: { sessions: 'users/sessions', passwords: 'users/passwords' }, :skip => [:sessions, :passwords]
 
   root 'users/sessions#new'
 

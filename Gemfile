@@ -109,6 +109,7 @@ group :development do
   gem 'capistrano-rvm'
   gem 'capistrano-rails'
   gem 'byebug' # debugger gem doesn't work with ruby 2.1.2
+  gem 'letter_opener'
 end
 
 

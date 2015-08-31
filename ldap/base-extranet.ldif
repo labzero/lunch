@@ -19,6 +19,7 @@ sn: Extranet
 sAMAccountName: extra
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
+mail: extra@example.com
 userAccountControl: 512
 
 # extra-chaste user
