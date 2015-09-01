@@ -257,7 +257,7 @@ Then(/^I should only see "(.*?)" rows in the Settlement Transaction Account Stat
     column_heading = text
   end
   page.assert_selector('.report-table thead th', text: column_heading)
-  column_index = page.evaluate_script("$('.report-table thead th:contains(#{column_heading})').index()") + 1
+  column_index = jquery_evaluate("$('.report-table thead th:contains(#{column_heading})').index()") + 1
   if !page.find(".report-table tbody tr:first-child td:first-child")['class'].split(' ').include?('dataTables_empty')
     page.all(".report-table tbody tr:not(.beginning-balance-row) td:nth-child(#{column_index})").each_with_index do |element, index|
       next if index == 0 # this is a hack to get around Capybara's inability to handle tr:not(.beginning-balance-row, .ending-balance-row). Apparently, Capybara can only handle one `not` selector
@@ -273,7 +273,7 @@ Then(/^I should see a (current|monthly) securities position report for (Pledged|
   expect(table_header).to include(filter_type)
   if !page.find(".report-table tbody tr:first-child td:first-child")['class'].split(' ').include?('dataTables_empty')
     filter_type = filter_type == 'Pledged' ? 'P' : 'U'
-    security_types = page.evaluate_script("$('.report-detail-cell td:contains(Custody Account Type)').siblings().text()").split(//)
+    security_types = jquery_evaluate("$('.report-detail-cell td:contains(Custody Account Type)').siblings().text()").split(//)
     security_types.each do |security_type|
       expect(security_type).to eq(filter_type)
     end
@@ -298,7 +298,7 @@ When(/^I request an XLSX$/) do
 end
 
 def export_report(format)
-  page.execute_script("$('body').on('reportDownloadStarted', function(){$('body').addClass('report-download-started')})")
+  jquery_execute("$('body').on('reportDownloadStarted', function(){$('body').addClass('report-download-started')})")
   page.find(".report-header-buttons .dropdown-selection").click
   page.find('.report-header-buttons .dropdown li', text: format, visible: true).click
   click_button(I18n.t('dashboard.actions.download'))
@@ -317,7 +317,7 @@ When(/^I click on the view cell for the first (advance|cash projection|security)
       row_offset = 2
   end
   skip_if_table_empty do
-    column_index = page.evaluate_script("$('.report-table thead th:contains(#{column_name})').index()") + row_offset
+    column_index = jquery_evaluate("$('.report-table thead th:contains(#{column_name})').index()") + row_offset
     @row_identifier = page.find(".report-table tbody tr:first-child td:nth-child(#{column_index})").text
     page.find('.report-table tr:first-child .detail-view-trigger').click
   end
