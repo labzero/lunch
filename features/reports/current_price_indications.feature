@@ -29,7 +29,7 @@ Scenario: Visiting the Current Price Indications Report Page
   And I should see STA rates report
   And I should see "General Information"
 
-@jira-mem-791
+@resque-backed @smoke @jira-mem-791
 Scenario: Member downloads an XLSX of the Current Price Indications report
   Given I am on the "Current Price Indications" report page
   When I request an XLSX
