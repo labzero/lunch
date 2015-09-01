@@ -63,6 +63,16 @@ class EtransactAdvancesService < MAPIService
     end
   end
 
+  def todays_cumulative_advances_amount(member_id)
+    if data = get_json(:todays_advances_amount, "member/#{member_id}/todays_advances")
+      amount = 0
+      data.each do |row|
+        amount = amount + row['current_par'].to_i
+      end
+      amount
+    end
+  end
+
   def check_limits(member_id, amount, advance_term)
     if limits = get_json(:check_limits, 'etransact_advances/limits')
       days_to_maturity = get_days_to_maturity(advance_term)
@@ -85,6 +95,15 @@ class EtransactAdvancesService < MAPIService
           check_limit = 'low'
         elsif amount.to_i + todays_amount.to_i > max_amount.to_i
           check_limit = 'high'
+        else
+          if todays_cumulative_amount = todays_cumulative_advances_amount(member_id)
+            settings = get_hash(:settings, 'etransact_advances/settings')
+            if amount.to_i + todays_cumulative_amount.to_i > settings['shareholder_total_daily_limit'].to_i
+              check_limit = 'high'
+            end
+          else
+            nil
+          end
         end
         {
           status: check_limit,
