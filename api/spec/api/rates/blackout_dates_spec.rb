@@ -6,9 +6,9 @@ describe MAPI::ServiceApp do
     describe 'production' do
       describe 'blackout_dates_production' do
         let(:date_cursor) { double('Blackout Dates Cursor')}
-        let(:tomorrow){ Date.today + 1.day }
-        let(:next_week){ Date.today + 1.week }
-        let(:next_month){ Date.today + 1.month }
+        let(:tomorrow){ Time.zone.today + 1.day }
+        let(:next_week){ Time.zone.today + 1.week }
+        let(:next_month){ Time.zone.today + 1.month }
         before do
           allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
         end

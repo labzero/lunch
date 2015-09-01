@@ -54,7 +54,7 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(blackout_dates)
       allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(loan_terms_result)
     end
-    let(:today) { Date.today }
+    let(:today) { Time.zone.today }
     let(:one_week_away) { today + 1.week }
     let(:three_weeks_away) { today + 3.week }
     let(:blackout_dates) { [one_week_away, three_weeks_away] }
