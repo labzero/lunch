@@ -212,11 +212,11 @@ When(/^there is no data for "(.*?)"$/) do |data|
 end
 
 Given(/^I enter my SecurID pin$/) do
-  page.find('input[name=securid_pin').set(Random.rand(9999).to_s.rjust(4, '0'))
+  page.find('input[name=securid_pin]').set(Random.rand(9999).to_s.rjust(4, '0'))
 end
 
 Given(/^I enter my SecurID token$/) do
-  page.find('input[name=securid_token').set(Random.rand(999999).to_s.rjust(6, '0'))
+  page.find('input[name=securid_token]').set(Random.rand(999999).to_s.rjust(6, '0'))
 end
 
 When(/^I enter "([^"]*)" for my SecurID (pin|token)$/) do |value, field|
