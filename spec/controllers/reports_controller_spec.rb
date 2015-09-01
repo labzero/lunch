@@ -105,10 +105,6 @@ RSpec.describe ReportsController, :type => :controller do
         get :borrowing_capacity
         expect(assigns[:borrowing_capacity_summary]).to eq({})
       end
-      it 'should set @report_name' do
-        get :borrowing_capacity
-        expect(assigns[:report_name]).to be_kind_of(String)
-      end
       it 'should set @date' do
         get :borrowing_capacity
         expect(assigns[:date]).to eq(today)
@@ -117,13 +113,14 @@ RSpec.describe ReportsController, :type => :controller do
 
     describe 'GET settlement_transaction_account' do
       let(:filter) {'some filter'}
+      before do
+        allow(member_balance_service_instance).to receive(:settlement_transaction_account).and_return(response_hash)
+        allow(response_hash).to receive(:[]).with(:activities)
+      end
       it_behaves_like 'a user required action', :get, :settlement_transaction_account
+      it_behaves_like 'a report that can be downloaded', :settlement_transaction_account, [:pdf]
       describe 'with activities array stubbed' do
-        before do
-          allow(response_hash).to receive(:[]).with(:activities)
-        end
         it 'should render the settlement_transaction_account view' do
-          expect(member_balance_service_instance).to receive(:settlement_transaction_account).and_return(response_hash)
           get :settlement_transaction_account
           expect(response.body).to render_template('settlement_transaction_account')
         end

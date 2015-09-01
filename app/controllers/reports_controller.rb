@@ -212,16 +212,18 @@ class ReportsController < ApplicationController
 
   def settlement_transaction_account
     default_dates = default_dates_hash
-    member_balances = MemberBalanceService.new(current_member_id, request)
     @start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
+    export_format = params[:export_format]
+    @report_name = t('reports.pages.settlement_transaction_account.title')
+    member_balances = MemberBalanceService.new(current_member_id, request)
     @daily_balance_key = MemberBalanceService::DAILY_BALANCE_KEY
     @picker_presets = date_picker_presets(@start_date, @end_date)
     @filter_options = [
-        [t('global.all'), 'all'],
-        [t('global.debits'), 'debit'],
-        [t('global.credits'), 'credit'],
-        [t('global.daily_balances'), 'balance']
+      [t('global.all'), 'all'],
+      [t('global.debits'), 'debit'],
+      [t('global.credits'), 'credit'],
+      [t('global.daily_balances'), 'balance']
     ]
     filter_param = params[:sta_filter]
     @filter_options.each do |option|
@@ -234,15 +236,23 @@ class ReportsController < ApplicationController
     # default filter to 'all' if invalid filter param was passed
     @filter ||= @filter_options[0][1]
     @filter_text ||= @filter_options[0][0]
-    if report_disabled?(SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS)
-      @settlement_transaction_account = {}
-    else
-      @settlement_transaction_account = member_balances.settlement_transaction_account(@start_date, @end_date, @filter)
-      raise StandardError, "There has been an error and ReportsController#settlement_transaction_account has encountered nil. Check error logs." if @settlement_transaction_account.nil?
+    if export_format == 'pdf'
+      job_status = RenderReportPDFJob.perform_later(current_member_id, 'settlement_transaction_account', 'settlement-transaction-account', {start_date: @start_date.to_s, end_date: @end_date.to_s, sta_filter: @filter}).job_status
     end
-    @show_ending_balance = false
-    if @settlement_transaction_account[:activities] && @settlement_transaction_account[:activities].length > 0
-      @show_ending_balance = @end_date != @settlement_transaction_account[:activities][0][:trans_date].to_date || @settlement_transaction_account[:activities][0][:balance].blank?
+    unless job_status.nil?
+      job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
+    else
+      if report_disabled?(SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS)
+        @settlement_transaction_account = {}
+      else
+        @settlement_transaction_account = member_balances.settlement_transaction_account(@start_date, @end_date, @filter)
+        raise StandardError, "There has been an error and ReportsController#settlement_transaction_account has encountered nil. Check error logs." if @settlement_transaction_account.nil?
+      end
+      @show_ending_balance = false
+      if @settlement_transaction_account[:activities] && @settlement_transaction_account[:activities].length > 0
+        @show_ending_balance = @end_date != @settlement_transaction_account[:activities][0][:trans_date].to_date || @settlement_transaction_account[:activities][0][:balance].blank?
+      end
     end
   end
 
