@@ -42,3 +42,9 @@ Scenario: Filtering the authorization report
   Then I should only see users with the "eTransact Holder" role
   When I select "User" from the authorizations filter
   Then I should only see users with the "User" role
+
+@resque-backed @smoke @jira-mem-824
+Scenario: Member downloads a PDF of the Authorizations report
+  Given I am on the "Authorizations" report page
+  When I request a PDF
+  Then I should begin downloading a file

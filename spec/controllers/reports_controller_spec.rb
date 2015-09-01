@@ -1238,6 +1238,7 @@ RSpec.describe ReportsController, :type => :controller do
 
   describe 'GET authorizations' do
     it_behaves_like 'a user required action', :get, :authorizations
+    it_behaves_like 'a report that can be downloaded', :authorizations, [:pdf]
     describe 'view instance variables' do
       let(:member_service_instance) {double('MembersService')}
       let(:user_no_roles) {{display_name: 'User With No Roles', roles: []}}
@@ -1298,7 +1299,6 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[:authorizations_table_data][:deferred]).to eq(true)
         end
       end
-
       describe 'when passed a Job ID' do
         let(:make_request) { get :authorizations, job_id: job_id }
         before do
@@ -1327,6 +1327,18 @@ RSpec.describe ReportsController, :type => :controller do
         it 'should render without a layout if the request is an XHR' do
           expect(subject).to receive(:render).with(layout: false).and_call_original
           xhr :get, :authorizations, job_id: job_id
+        end
+      end
+      describe 'when @print_layout is true' do
+        let(:make_request) { get :authorizations }
+        let(:service_instance) { double('service instance')}
+        before do
+          subject.instance_variable_set(:@print_layout, true)
+          allow(MembersService).to receive(:new).and_return(service_instance)
+        end
+        it 'gets signers and users from MembersService' do
+          expect(service_instance).to receive(:signers_and_users)
+          make_request
         end
       end
       

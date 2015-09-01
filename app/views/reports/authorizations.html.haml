@@ -2,8 +2,11 @@
 - @page_title = t('reports.meta_title')
 .report.authorizations-report.row{data: {deferred: @job_status_url, 'deferred-load' => @load_url}}
   .report-header
-    %h1= t('reports.authorizations.title')
-    = render 'reports_header_buttons'
+    %h1= @report_name
+    - if @print_layout
+      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@today))
+    - else
+      = render 'reports_header_buttons', allowed_params: :authorizations_filter, download_formats: [:pdf]
   .report-main-body
     %p= t('reports.pages.authorizations.info.p1_html', instructions_url: '#', forms_url: '#')
     %p= t('reports.pages.authorizations.info.p2_html', url: '#', phone_number: fhlb_formatted_phone_number('4156162610'))
@@ -11,6 +14,7 @@
       = form_tag(reports_authorizations_url, method: 'GET') do
         .report-filter.authorizations-filter
           = render 'shared/dropdown', dropdown_name: 'authorizations_filter', default_value: @authorizations_filter, default_text: @authorizations_filter_text, dropdown_options: @authorizations_dropdown_options
+    %h2.report-table-title= @authorizations_filter_text if @print_layout
     =render 'reports/reports_table', table_class: 'authorizations-table', table_data: @authorizations_table_data, sortable: false
     %small= t('reports.pages.authorizations.info.p3_html', operations_url: '#', web_support_url: '#', operations_phone_number: fhlb_formatted_phone_number('4156162616'), web_support_phone_number: fhlb_formatted_phone_number('4156162610'))
     - %w(resolution entire_authority wire_transfer advances affordable_housing collateral interest_rate_derivatives money_market securities access_manager etransact user).each do |role|
