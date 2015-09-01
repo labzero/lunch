@@ -27,15 +27,11 @@ def sauce_build
   end
 end
 
-def sauce_name
-  [ENV['JOB_NAME'] || "Local Dev (#{`whoami`.strip})", ENV['BUILD_NUMBER'], ENV['TEST_ENV_NUMBER']].compact.join('-')
-end
-
 base_opts = {
   :username => SAUCE_USERNAME,
   :access_key => SAUCE_ACCESS_KEY,
   :build => sauce_build,
-  :name => sauce_name,
+  :name => run_name,
   :'parent-tunnel' => ENV['SAUCE_PARENT_TUNNEL'],
   :'tunnel-identifier' => ENV['SAUCE_TUNNEL_IDENTIFIER'],
   :'selenium-version' => ENV['SAUCE_SELENIUM_VERSION'],
