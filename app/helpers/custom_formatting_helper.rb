@@ -74,6 +74,11 @@ module CustomFormattingHelper
     datetime.to_datetime.strftime('%l:%M%P %m/%d/%Y')
   end
 
+  def fhlb_report_date_numeric(date)
+    return t('global.missing_value') if date.nil?
+    date.to_date.strftime('%-m-%-d-%Y')
+  end
+
   def fhlb_formatted_phone_number(number, ext=nil)
     return nil unless number
     number.gsub!(/[^0-9]/, '')

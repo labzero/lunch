@@ -79,6 +79,20 @@ describe CustomFormattingHelper do
     end
   end
 
+  describe '`fhlb_report_date_numeric` method' do
+    describe 'converting a date in to a string following the MM-DD-YYYY convention' do
+      it 'should remove leading zeros from single digit months and days' do
+        expect(helper.fhlb_report_date_numeric(Date.new(2015,1,2))).to eq('1-2-2015')
+      end
+      it 'should handle double digit months and days' do
+        expect(helper.fhlb_report_date_numeric(Date.new(2015,11,20))).to eq('11-20-2015')
+      end
+      it 'returns the I18n value for `missing_value` if passed nil' do
+        expect(helper.fhlb_report_date_numeric(nil)).to eq(I18n.t('global.missing_value'))
+      end
+    end
+  end
+
   describe '`fhlb_datetime_standard_numeric` method' do
     let(:date) {DateTime.new(2015,1,2, 10, 12, 13)}
     it 'converts a datetime into a string following the `Time MM/DD/YYYY` format' do

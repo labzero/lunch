@@ -1061,6 +1061,7 @@ RSpec.describe ReportsController, :type => :controller do
 
     describe 'GET historical_price_indications' do
       it_behaves_like 'a user required action', :get, :historical_price_indications
+      it_behaves_like 'a report that can be downloaded', :historical_price_indications, [:xlsx]
       it 'renders the historical_price_indications view' do
         expect(rates_service_instance).to receive(:historical_price_indications).and_return(response_hash)
         get :historical_price_indications
