@@ -93,7 +93,7 @@ Rails.application.routes.draw do
       get 'knockout' => 'products#knockout', as: :knockout
       get 'mortgage-partnership-finance' => 'error#standard_error', as: :mpf
       get 'other-cash-needs' => 'products#ocn', as: :ocn
-      get 'putable' => 'error#standard_error'
+      get 'putable' => 'products#putable', as: :putable
       get 'securities-backed-credit' => 'error#standard_error', as: :sbc
       get 'variable-rate-credit' => 'error#standard_error', as: :vrc
     end
