@@ -7,14 +7,14 @@ Feature: Visiting the Authorizations Report Page
 Background:
   Given I am logged in
 
-@smoke @jira-mem-585 @jira-mem-836
+@resque-backed @smoke @jira-mem-585 @jira-mem-836
 Scenario: Visit authorizations page from header link
   Given I visit the dashboard
   When I select "Authorizations" from the reports dropdown
   And I wait for the report to load
   Then I should see a report table with multiple data rows
 
-@jira-mem-585 @jira-mem-836
+@resque-backed @jira-mem-585 @jira-mem-836
 Scenario: Filtering the authorization report
   Given I am on the "Authorizations" report page
   And I wait for the report to load
