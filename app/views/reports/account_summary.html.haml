@@ -3,7 +3,10 @@
 .report.account-summary-report.row
   .report-header
     %h1= @report_name
-    = render 'reports_header_buttons'
+    - if @print_layout
+      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@date))
+    - else
+      = render 'reports_header_buttons', download_formats: :pdf
   %section
     %h2= t('reports.account_summary.institution_details.title')
     %dl

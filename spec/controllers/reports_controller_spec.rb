@@ -1450,6 +1450,7 @@ RSpec.describe ReportsController, :type => :controller do
       allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member_details)
     end
 
+    it_behaves_like 'a report that can be downloaded', :account_summary, [:pdf]
     it 'should render the account_summary view' do
       make_request
       expect(response.body).to render_template('account_summary')

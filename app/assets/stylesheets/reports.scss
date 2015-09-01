@@ -942,6 +942,21 @@ td.dataTables_empty {
 }
 
 @media print {
+  .account-summary-report .report-table:not(.account-summary-collateral-totals) tbody td:first-child,
+  .account-summary-report tfoot,
+  .account-summary-collateral-totals tbody td {
+    color: $text-color;
+    background: transparent;
+  }
+  .account-summary-collateral-notice {
+    padding-left: 0;
+    &:before {
+      display: none;
+    }
+  }
+  .account-summary-report .header-with-action a {
+    display: none;
+  }
   .report {
     color: $print-color;
     h1 {
@@ -1002,7 +1017,7 @@ td.dataTables_empty {
     border: none;
     width: 100%;
     margin-bottom: 15px;
-    thead, .sorting_asc, .sorting_desc, tbody tr:nth-child(odd), tfoot, td, th {
+    thead, .sorting_asc, .sorting_desc, tbody tr:nth-child(odd), tfoot, td, th, thead + tbody tr:nth-child(even) {
       background-color: transparent;
       border: none;
       min-width: 0 !important;
