@@ -103,7 +103,7 @@ describe MAPI::ServiceApp do
       end
     end
     describe 'in the production enviroment for cases when etransact is turned on' do
-      let(:today_date) { Time.zone.now }
+      let(:today_date) { Time.zone.parse('2015-08-30 15:00:00') }
       let(:some_status_data) {{"AO_TERM_BUCKET_ID" => 1, "TERM_BUCKET_LABEL"=> "Open and O/N", "WHOLE_LOAN_ENABLED"=>  "Y", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
                                "SBC_AA_ENABLED"=>  "Y", "END_TIME" => "0001",  "OVERRIDE_END_DATE" =>  "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME"=>  "2000"}}
       let(:some_status_data2) {{"AO_TERM_BUCKET_ID" => 2, "TERM_BUCKET_LABEL"=> "1 Week", "WHOLE_LOAN_ENABLED"=>  "Y", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
@@ -122,6 +122,7 @@ describe MAPI::ServiceApp do
         allow(result_set2).to receive(:fetch).and_return([1], nil)
         allow(result_set3).to receive(:fetch).and_return([1], nil)
         allow(result_set4).to receive(:fetch_hash).and_return(some_status_data, some_status_data2, some_status_data3, nil)
+        allow(Time).to receive_message_chain(:zone, :now).and_return(today_date)
       end
       it 'should return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
         expect(etransact_advances_status.length).to be >=1
