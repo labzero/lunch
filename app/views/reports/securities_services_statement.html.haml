@@ -8,7 +8,7 @@
     - else
       = render 'reports_header_buttons', allowed_params: :start_date
     .report-inputs
-      = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_securities_services_statement_path, presets: @picker_presets, single_date_picker: true, open_direction: 'left', insert_filter_before: true
+      = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_securities_services_statement_path, presets: @picker_presets, single_date_picker: true, open_direction: 'left', insert_filter_before: true, date_picker_filter: @date_picker_filter
   .report-main-body
     .report-summary-data
       %h3
