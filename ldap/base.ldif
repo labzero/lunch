@@ -20,6 +20,7 @@ sAMAccountName: local
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 userAccountControl: 512
+mail: local@example.com
 
 # local user without signer permission
 dn: sAMAccountName=local-non-signer,dc=fhlbsf-i,dc=com
@@ -32,6 +33,7 @@ sAMAccountName: local-non-signer
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 userAccountControl: 512
+mail: local-non-signer@example.com
 
 # FCN-MemberSite-AccessManagers-R group
 dn: CN=FCN-MemberSite-AccessManagers-R,DC=fhlbsf-i,DC=com

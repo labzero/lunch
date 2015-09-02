@@ -26,6 +26,9 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
       width: $welcome-right-column-real-width; // p constrained in way that falls slightly out of grid layout
       margin-top: 0;
     }
+    form p {
+      width: 100%;
+    }
   }
   form {
     width: $welcome-right-column-real-width;
@@ -33,6 +36,9 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     padding: 0 20px 20px 20px;
     box-sizing: border-box;
     position: relative;
+    .form-flash-message {
+      display: block;
+    }
   }
   legend {
     @extend %dashboard-module-header;
@@ -62,7 +68,7 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     width: 100%;
   }
 
-  input[type=submit], .logout-link {
+  input[type=submit], .logout-link, .secondary-button {
     width: calc(50% - 10px);
   }
 
@@ -74,12 +80,24 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     color: $actionable-blue;
   }
 
-  form a:not(.logout-link) {
-    @extend %typography-table-link;
+  .welcome-login {
+    input[type=submit] {
+      width: 100%;
+    }
+    a {
+        @extend %typography-table-link;
+    }
+  }
+
+  form a:not(.secondary-button) {
     color: $actionable-blue;
     display: block;
     margin-bottom: 20px;
     line-height: 1;
+    text-decoration: none;
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
   
   select {

@@ -1,0 +1,14 @@
+= render layout: 'devise/sessions/welcome' do
+  = form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f|
+    %fieldset
+      %legend= t('welcome.forgot_password').titlecase
+      - if flash[:error]
+        .form-flash-message{data: {type: 'error'}}
+          = flash[:error]
+      = devise_error_messages!
+      %p= t('forgot_password.instructions')
+      = render 'shared/input_field', form_builder: f, field_name: :username, label: t('global.username')
+
+      .form-actions
+        = link_to(t('global.cancel'), new_user_session_path, class: 'secondary-button')
+        = f.submit t('global.continue'), class: 'primary-button'

@@ -115,4 +115,13 @@ module CustomFormattingHelper
     content_tag(:span, inner_content, class: 'currency-alignment')
   end
 
+  def mask_email(email)
+    if email
+      parts = email.match(/\A(.)(.*)@(.)(.*)(\..*)\z/)
+      if parts && parts.length > 5
+        parts[1] + ("*" * parts[2].length) + '@' + parts[3] + ("*" * parts[4].length) + parts[5]
+      end
+    end
+  end
+
 end

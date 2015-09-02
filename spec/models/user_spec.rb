@@ -565,6 +565,56 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`find_or_create_if_valid_login` class method' do
+    let(:attributes) { double('Some Attributes', :[] => nil) }
+    let(:call_method) { described_class.find_or_create_if_valid_login(attributes) }
+    let(:user) { double(described_class) }
+    let(:username)  { double('A Username') }
+    let(:ldap_domain) { double('An LDAP Domain') }
+
+    before do
+      allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain)
+    end
+
+    it 'should call `find_by` passing in the supplied attributes' do
+      expect(described_class).to receive(:find_by).with(attributes)
+      call_method
+    end
+    describe 'if a User is found' do
+      before do
+        allow(described_class).to receive(:find_by).and_return(user)
+      end
+      it 'returns the found user' do
+        expect(call_method).to be(user)
+      end
+    end
+    describe 'if a User is not found' do
+      before do
+        allow(described_class).to receive(:find_by).and_return(nil)
+        allow(attributes).to receive(:[]).with(:username).and_return(username)
+        allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain).and_return(ldap_domain)
+      end
+      it 'looks up the LDAP domain of the username' do
+        expect(Devise::LDAP::Adapter).to receive(:get_ldap_domain).with(username)
+        call_method
+      end
+      it 'returns nil if no LDAP domain was found for the username' do
+        allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain).and_return(nil)
+        expect(call_method).to be_nil
+      end
+      describe 'if an LDAP domain is found fpr the username' do
+        it 'calls `find_or_create_by` with the username and LDAP domain' do
+          expect(described_class).to receive(:find_or_create_by).with({username: username, ldap_domain: ldap_domain})
+          call_method
+        end
+        it 'returns the result of the `find_or_create_by` call' do
+          allow(described_class).to receive(:find_or_create_by).and_return(user)
+          expect(call_method).to be(user)
+        end
+      end
+    end
+  end
+
   describe '`member_id` method' do
     let(:call_method) { subject.member_id }
     let(:member_id_instance_variable) { double('@member_id') }

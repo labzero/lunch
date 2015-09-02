@@ -125,11 +125,11 @@ When(/^I log out$/) do
 end
 
 Then(/^I should see the login form$/) do
-  page.assert_selector("form.new_user input[type=submit][value='#{I18n.t('global.login')}']", visible: true)
+  page.assert_selector("form.welcome-login input[type=submit][value='#{I18n.t('global.login')}']", visible: true)
 end
 
 Then(/^I should see a bad login error$/) do
-  page.assert_selector('form.new_user .form-error', visible: true, text: I18n.t('devise.failure.invalid'))
+  page.assert_selector('form.welcome-login .form-error', visible: true, text: I18n.t('devise.failure.invalid'))
 end
 
 When(/^I log in with a bad password$/) do
