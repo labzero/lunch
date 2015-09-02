@@ -750,49 +750,64 @@ class ReportsController < ApplicationController
 
   def authorizations
     @authorizations_filter = params['authorizations_filter'] || 'all'
+    @report_name = t('reports.authorizations.title')
+    export_format = params[:export_format]
+    @today = Time.zone.today
 
-    @authorizations_dropdown_options = AUTHORIZATIONS_DROPDOWN_MAPPING.collect{|key, value| [value, key]}
-    @authorizations_dropdown_options.each do |option|
-      if option.last == @authorizations_filter
-        @authorizations_filter_text = option.first
-        break
-      end
+    if export_format == 'pdf'
+      pdf_job_status = RenderReportPDFJob.perform_later(current_member_id, 'authorizations', "authorizations", {authorizations_filter: @authorizations_filter.to_s}).job_status
     end
-
-    @authorizations_table_data = {
-      :column_headings => [t('user_roles.user.title'), t('reports.authorizations.title')]
-    }
-
-    @job_status_url = false
-    @load_url = false
-    
-    if params[:job_id]
-      job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
-      raise ActiveRecord::RecordNotFound unless job_status
-      users = JSON.parse(job_status.result_as_string).collect! {|o| o.with_indifferent_access}
-      job_status.destroy
-
-      users = users.sort_by{|x| x[:display_name]}
-      rows = []
-      users.each do |user|
-        user_roles = roles_for_signers(user)
-        if @authorizations_filter == 'user' && user_roles.include?(t('user_roles.user.title'))
-          rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
-        else
-          next if user_roles.empty? || (@authorizations_filter != 'all' && !user[:roles].include?(@authorizations_filter))
-          rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
+    unless pdf_job_status.nil?
+      pdf_job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(pdf_job_status), job_cancel_url: job_cancel_url(pdf_job_status)}
+    else
+      @authorizations_dropdown_options = AUTHORIZATIONS_DROPDOWN_MAPPING.collect{|key, value| [value, key]}
+      @authorizations_dropdown_options.each do |option|
+        if option.last == @authorizations_filter
+          @authorizations_filter_text = option.first
+          break
         end
       end
-      
-      @authorizations_table_data[:rows] = rows
 
-      render layout: false if request.xhr?
-    else
-      job_status = MemberSignersAndUsersJob.perform_later(current_member_id).job_status
-      job_status.update_attributes!(user_id: current_user.id)
-      @job_status_url = job_status_url(job_status)
-      @load_url = reports_authorizations_url(job_id: job_status.id, authorizations_filter: @authorizations_filter)
-      @authorizations_table_data[:deferred] = true
+      @authorizations_table_data = {
+        :column_headings => [t('user_roles.user.title'), @report_name]
+      }
+
+      @job_status_url = false
+      @load_url = false
+
+      if params[:job_id] || @print_layout
+        if @print_layout
+          users = MembersService.new(request).signers_and_users(current_member_id) || []
+        else
+          job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+          raise ActiveRecord::RecordNotFound unless job_status
+          users = JSON.parse(job_status.result_as_string).collect! {|o| o.with_indifferent_access}
+          job_status.destroy
+        end
+
+        users = users.sort_by{|x| x[:display_name]}
+        rows = []
+        users.each do |user|
+          user_roles = roles_for_signers(user)
+          if @authorizations_filter == 'user' && user_roles.include?(t('user_roles.user.title'))
+            rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
+          else
+            next if user_roles.empty? || (@authorizations_filter != 'all' && !user[:roles].include?(@authorizations_filter))
+            rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
+          end
+        end
+
+        @authorizations_table_data[:rows] = rows
+
+        render layout: false if request.xhr?
+      else
+        job_status = MemberSignersAndUsersJob.perform_later(current_member_id).job_status
+        job_status.update_attributes!(user_id: current_user.id)
+        @job_status_url = job_status_url(job_status)
+        @load_url = reports_authorizations_url(job_id: job_status.id, authorizations_filter: @authorizations_filter)
+        @authorizations_table_data[:deferred] = true
+      end
     end
   end
 
