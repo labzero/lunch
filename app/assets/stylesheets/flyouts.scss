@@ -11,13 +11,16 @@
 
 .flyout-row {
   @extend %row;
-  @extend %horizontal-center;
   top: $header-height;
   z-index: 100;
   margin-top: 20px;
   overflow: visible;
   padding-right: 0;
   padding-left: 0;
+  position: absolute;
+  @media screen and (min-width: $row-width + 1) {
+    @include horizontal-center;
+  }
 }
 
 .flyout {
