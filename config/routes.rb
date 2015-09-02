@@ -85,7 +85,7 @@ Rails.application.routes.draw do
       get 'amortizing' => 'products#amortizing', as: :amortizing
       get 'arc-embedded' => 'error#standard_error'
       get 'callable' => 'error#standard_error'
-      get 'choice-libor-arc' => 'error#standard_error'
+      get 'choice-libor' => 'products#choice_libor', as: :choice_libor
       get 'community-investment-program' => 'error#standard_error', as: :cip
       get 'auction-indexed' => 'error#standard_error'
       get 'fixed-rate-credit' => 'products#frc', as: :frc

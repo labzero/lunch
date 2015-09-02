@@ -1285,6 +1285,31 @@ en:
           title: Negative Interest Rate Convention
           description: If the interest rate determined on any rate reset date or, if applicable, on the scheduled funding date, is a negative value, the interest rate for the accrual period that begins on that rate reset date will be equal to zero. The Bank will not be obligated under any circumstances to pay the borrower any amount relating to the application of a negative interest rate to the remaining principal amount of the advance.
 
+      choice_libor:
+        title: Choice LIBOR Adjustable Rate Credit (ARC) Advance
+        description: Use Choice LIBOR ARC Advances to lock in the ability to repay the advance on a specified date prior to the maturity date without paying a prepayment fee.
+        uses:
+          fund: Fund adjustable rate loans and other interest-rate-sensitive assets
+          lock: Lock in current spreads for extended terms
+          increase: Increase long-term liquidity
+          meet: Meet regulatory liquidity requirements
+        key-advantages-list:
+          prepayment: No prepayment fee with proper notification and with repayment on the specified date
+          flexibility: Built-in long-term flexibility
+          maturities: Wide range of maturities
+          termination: Built-in termination option may help in managing compliance with Basel and regulatory liquidity standards
+        minimum_term: 2 years
+        maximum_term: 10 years
+        interest_rate: "The interest rate may be indexed to 1-month or 3-month LIBOR.\n\nAt the time the advance is made, the interest rate index, spread, and rate reset interval are established. At the specified interval, the interest rate is determined by adding the established spread to the new index value.\n\nIf a specified index is unavailable or is fundamentally altered, the Bank will designate a replacement index that is based upon comparable information, as determined by the Bank in its sole discretion."
+        interest_day_count: Actual/360
+        interest_payment_frequency: Same as repricing index
+        termination_option: The advance may be repaid on the termination option date without a prepayment fee, provided that the Bank receives proper notice. The Bank will charge a prepayment fee if proper notice is not received by the Bank or for prepayment on a date other than the designated termination option date.
+        termination_option_date: The termination option date will be one year prior to the maturity date of the advance.
+        termination_option_notice: At least 5 business days
+        minimum_interest_rate_convention: The Bank will not be obligated to pay the borrower any amount relating to the application of a negative interest rate to the remaining principal amount of the advance.
+        prepayment_features: The prepayment fee will be determined using the Bank’s standard prepayment formula.
+        availability: Choice LIBOR ARC Advances are available on an order basis only, subject to the Bank’s ability to price a particular advance structure in the market.
+
       frc:
         title: Fixed Rate Credit (FRC) Advance
         description: Use the FRC Advance to achieve a wide variety of financial management goals, taking advantage of maturities up to 30 years.
@@ -1374,11 +1399,20 @@ en:
       features: Key Features
       last_modified: "Last Modified: %{date}"
     common_key_features:
-      term: Term
-      maximum_term: Maximum Term
+      availability: Availability
       interest_day_count: Interest Day Count
-      prepayment_features: Prepayment Features
+      interest_rate: Interest Rate
+      interest_day_count: Interest Day Count
+      interest_payment_frequency: Interest Payment Frequency
       maximum_term: Maximum Term
+      minimum_term: Minimum Term
+      minimum_interest_rate_convention: Minimum Interest Rate Convention
+      prepayment_features: Prepayment Features
+      term: Term
+      termination_option: Termination option
+      termination_option_date: Termination Option Date
+      termination_option_notice: Termination Option Notice
+
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email
