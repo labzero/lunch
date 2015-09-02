@@ -1079,10 +1079,8 @@ en:
         total_net_amount: Total Net Amount
       authorizations:
         title: Authorizations
-        info:
-          p1_html: The following people are authorized to use the Bank’s services. If you’d like to make changes to these authorizations, use an <a href="%{forms_url}">Authorization Form</a> or see the <a href="%{instructions_url}">Authorization Instructions</a>.
-          p2_html: 'To confirm an authorized signer, contact <a href="%{url}">Web Support</a> or call %{phone_number}.'
-          p3_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about authorizations, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
+        intro_html: The following people are authorized to use the Bank's services on behalf of your institution. If you'd like to make changes to these authorizations, please fill out a <a href=%{url}>Signature Card Form</a>.
+        contact_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about authorizations, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
       parallel_shift:
         title: Putable Advance Parallel Shift Sensitivity Analysis
         info: The valuations below are calculated using data as of %{date}

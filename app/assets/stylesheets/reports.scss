@@ -1,4 +1,4 @@
-.reports {
+.reports, .report {
   h1 {
     @extend %typography-page-title;
     margin: 32px 0 17px;
@@ -70,10 +70,6 @@
 }
 
 .report {
-  h1 {
-    @extend %typography-page-title;
-    margin: 32px 0 17px;
-  }
   input {
     color: $dark-gray;
     @include typography-field-value;
