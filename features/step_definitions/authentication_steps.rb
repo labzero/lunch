@@ -77,8 +77,6 @@ When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|
   end
 
   step %{I log in as "#{user['username']}" with password "#{user['password']}"}
-  # needs_to_accept_terms = page.has_css?('.terms-row h1', text: I18n.t('terms.title'), wait: 5) rescue Capybara::ElementNotFound
-  # step %{I accept the Terms of Use} if needs_to_accept_terms
   select_member_if_needed
 end
 
@@ -191,16 +189,6 @@ def select_member_if_needed
   has_member = page.has_no_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 0)
   step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} unless has_member
 end
-
-# def missing_element_on_load?(query, options={}, timeout=5, &load_block)
-#   flag = flag_page
-#   load_block.call
-#   timeout_at = Time.zone.now + timeout
-#   while Time.zone.now < timeout_at
-#     break unless page_is_flagged?(flag)
-#   end
-#   page.has_no_css?(query, options.merge(wait: 1))
-# end
 
 def flag_page
   flag = SecureRandom.hex
