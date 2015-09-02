@@ -119,22 +119,23 @@
           %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@advances_detail[:estimated_next_payment], force_unit: true)
           - unless @print_layout
             %td.report-cell-narrow
-    - if @print_layout
-      %small
-        %p
-          = t('reports.intraday_processing_notice')
-          = t('reports.close_of_business_processing_notice')
-        %dl
-          %dt
-            #{t('common_table_headings.maturity_date')}:
-          %dd= t('reports.maturity_date_notice')
-          %dt
-            #{t('reports.pages.advances_detail.accrued_interest')}:
-          %dd= t('reports.accrued_interest_notice')
-          %dt
-            #{t('reports.pages.advances_detail.estimated_next_payment')}:
-          %dd= t('reports.estimated_next_interest_payment_notice')
-        %p
-          = t('reports.merger_notice')
-        %p
-          = t('reports.advances_and_securities_agreement_notice')
+    %small
+      %p= t('reports.intraday_processing_notice')
+      %p= t('reports.close_of_business_processing_notice')
+      %dl
+        %dt
+          #{t('common_table_headings.maturity_date')}:
+        %dd= t('reports.maturity_date_notice')
+        %dt
+          #{t('reports.pages.advances_detail.accrued_interest')}:
+        %dd= t('reports.accrued_interest_notice')
+        %dt
+          #{t('reports.pages.advances_detail.estimated_next_payment')}:
+        %dd= t('reports.estimated_next_interest_payment_notice')
+        %dt
+          #{t('reports.pages.advances_detail.prepayment_fee_indication')}:
+        %dd= t('reports.prepayment_fee_notice', phone_number: fhlb_formatted_phone_number('8004443452'))
+      %p
+        = t('reports.merger_notice')
+      %p
+        = t('reports.advances_and_securities_agreement_notice', phone_number: fhlb_formatted_phone_number('4156162559'))
