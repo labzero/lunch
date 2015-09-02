@@ -1,9 +1,12 @@
 Given(/^I fill in and submit the login form with username "(.*?)" and password "(.*?)"$/) do |user, password|
   fill_in('user[username]', with: user)
   fill_in('user[password]', with: password)
+
+  @login_flag = flag_page
   click_button(I18n.t('global.login'))
-  needs_to_accept_terms = page.has_css?('.terms-row h1', text: I18n.t('terms.title'), wait: 5) rescue Capybara::ElementNotFound
-  step %{I accept the Terms of Use} if needs_to_accept_terms
+  wait_for_unflagged_page(@login_flag)
+  terms_accepted = page.has_no_css?('.terms-row h1', text: I18n.t('terms.title'), wait: 0)
+  step %{I accept the Terms of Use} unless terms_accepted
 end
 
 Given(/^I fill in and submit the login form$/) do
@@ -42,8 +45,7 @@ Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
   end
 
   step %{I am logged in as "#{user['username']}" with password "#{user['password']}"}
-  needs_member = page.has_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 5) rescue Capybara::ElementNotFound
-  step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} if needs_member
+  select_member_if_needed
   page.assert_selector('.main-nav .nav-logout')
 end
 
@@ -52,6 +54,7 @@ Then(/^I should see the Terms of Use page$/) do
 end
 
 When (/^I accept the Terms of Use$/) do
+  @login_flag = flag_page
   page.find(".primary-button[value=\'#{I18n.t('terms.agree')}\']").click
 end
 
@@ -74,10 +77,9 @@ When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|
   end
 
   step %{I log in as "#{user['username']}" with password "#{user['password']}"}
-  needs_to_accept_terms = page.has_css?('.terms-row h1', text: I18n.t('terms.title'), wait: 5) rescue Capybara::ElementNotFound
-  step %{I accept the Terms of Use} if needs_to_accept_terms
-  needs_member = page.has_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 5) rescue Capybara::ElementNotFound
-  step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} if needs_member
+  # needs_to_accept_terms = page.has_css?('.terms-row h1', text: I18n.t('terms.title'), wait: 5) rescue Capybara::ElementNotFound
+  # step %{I accept the Terms of Use} if needs_to_accept_terms
+  select_member_if_needed
 end
 
 When(/^I log in as "(.*?)" with password "(.*?)"$/) do |user, password|
@@ -86,6 +88,7 @@ When(/^I log in as "(.*?)" with password "(.*?)"$/) do |user, password|
 end
 
 When(/^I select the (\d+)(?:st|rd|th) member bank$/) do |num|
+  @login_flag = flag_page
   dropdown = page.find('select[name=member_id]')
   dropdown.click
   dropdown.find("option:nth-child(#{num.to_i})").click
@@ -94,6 +97,7 @@ end
 
 When(/^I select the "(.*?)" member bank$/) do |bank_name|
   # remove the rack_test branch once we have users tied to a specific bank
+  @login_flag = flag_page
   if Capybara.current_driver == :rack_test
     page.find('select[name=member_id] option', text: bank_name).select_option
     form = page.find('.welcome form')
@@ -180,4 +184,44 @@ end
 
 def deletable_user
   CustomConfig.env_config['deletable']
+end
+
+def select_member_if_needed
+  wait_for_unflagged_page(@login_flag)
+  has_member = page.has_no_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 0)
+  step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} unless has_member
+end
+
+# def missing_element_on_load?(query, options={}, timeout=5, &load_block)
+#   flag = flag_page
+#   load_block.call
+#   timeout_at = Time.zone.now + timeout
+#   while Time.zone.now < timeout_at
+#     break unless page_is_flagged?(flag)
+#   end
+#   page.has_no_css?(query, options.merge(wait: 1))
+# end
+
+def flag_page
+  flag = SecureRandom.hex
+  page.execute_script("#{page_flag_var(flag)} = true;")
+  flag
+end
+
+def page_is_flagged?(flag)
+  page.evaluate_script(page_flag_var(flag))
+end
+
+def page_flag_var(flag)
+  "window.capybara_flag_#{flag}"
+end
+
+# returns true if an unflagged version of the page was found before the timeout, raises a ExpectationNotMet otherwise
+def wait_for_unflagged_page(flag, timeout=5)
+  timeout_at = Time.zone.now + timeout
+  while Time.zone.now < timeout_at
+    return true unless page_is_flagged?(flag)
+  end
+
+  raise Capybara::ExpectationNotMet.new("#{flag} was still on page after #{timeout} seconds.")
 end

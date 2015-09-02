@@ -159,7 +159,9 @@ end
 puts "Capybara.app_host: #{Capybara.app_host}"
 
 at_exit do
-  puts "App Health Check Results: " + %x[curl -sL #{Capybara.app_host}/healthy]
+  puts "App Health Check Results: "
+  STDOUT.flush
+  puts %x[curl -m 10 -sL #{Capybara.app_host}/healthy]
   puts "Finished run `#{run_name}`"
 end
 
