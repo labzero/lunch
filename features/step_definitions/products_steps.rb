@@ -18,8 +18,6 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
       I18n.t('products.advances.choice_libor.title')
     when 'knockout'
       I18n.t('products.advances.knockout.title')
-    when 'other cash needs'
-      I18n.t('products.advances.ocn.title')
     when 'putable'
       I18n.t('products.advances.putable.title')
     else

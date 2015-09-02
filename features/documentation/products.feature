@@ -59,12 +59,6 @@ Feature: Products Page
     When I click on the knockout link in the header
     Then I should see the "knockout" product page
 
-  @smoke @jira-mem-854
-  Scenario: Member navigates to the other cash needs product page
-    Given I hover on the products link in the header
-    When I click on the other cash needs link in the header
-    Then I should see the "other cash needs" product page
-    
   @smoke @jira-mem-855
   Scenario: Member navigates to the putable product page
     Given I hover on the products link in the header

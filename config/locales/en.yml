@@ -1474,22 +1474,7 @@ en:
           prepayment_features_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=%{url}>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
           special_notice: "The Knockout Advance has a complex risk profile and may be an inappropriate product for some institutions. The expected maturity of the Knockout Advance may contract or extend adversely to market movements, and the Bank makes no representations as to the expected life of the advance. This information is not intended as investment advice. The decision to obtain a Knockout Advance and the analysis of how it may fit into a borrower’s financial or business strategy remain solely the borrower’s responsibility.\n\nNotwithstanding any lockout period for the knockout option, the Bank reserves all of its rights under the Advances and Security Agreement, including, without limitation, its right to terminate the Knockout Advance and accelerate repayment of the advance and its right to liquidate collateral pledged by the borrower as security for the Knockout Advance at any time upon the occurrence of an event of default described in the Advances and Security Agreement."
       mpf: Mortgage Partnership Finance (MPF) Program
-      ocn:
-        title: Other Cash Needs (OCN) Advance
-        description: The OCN Advance is a Variable Rate Credit (VRC) Advance option for members that, as a result of an unexpected development, need a short-term advance and either do not have a Financing Availability or have used it fully. In addition, the Bank, in its sole discretion, may fund an OCN Advance to cover the amount of any Settlement/Transaction Account (STA) overdraft.
-        uses:
-          financing: To meet funding needs that exceed a member's Financing Availability
-        advantages:
-          fund: Fund unexpected cash needs
-          same_day: Same-day access if notice received by 10 a.m.
-        eligibility: The Bank will determine member eligibility for an OCN Advance on a case-by-case basis. The member must identify the need for the OCN and the repayment sources.
-        maximum_ammount: "5% of member's total assets."
-        maximum_term: "45 days"
-        interest_rate: The initial interest rate is the rate set for VRC Advances on the date of funding. OCN Advances are repriced daily.
-        interest_day_count: "Actual/Actual (Actual/360 for Securities-Backed Credit Program)"
-        interest_payment_frequency: At monthend and at repayment
-        repayment: The Bank must receive notice of intention to repay by 2 p.m. on the business day preceding the repayment date.
-        renewal: OCN advances may not be renewed.
+      ocn: Other Cash Needs (OCN) Advance
       putable:
         title: Putable Advance
         description: "The Putable Advance is a specially priced term advance in which the Bank retains the right to “put” (terminate) the advance at the Bank’s discretion. This structure allows the Bank to offer the member a rate that may be significantly lower than the rate for a comparable Fixed Rate Credit Advance.\n\nThe Putable Advance has a fixed rate that is below the market rate for a comparable Fixed Rate Credit Advance. The Bank is able to offer this lower rate because with the Putable Advance, the Bank retains the right to terminate, at the Bank’s discretion, the advance before its originally scheduled maturity on any predetermined Put Date. If the Bank exercises its right to terminate before maturity, the Bank will offer the borrower the opportunity to replace the funding with another advance at the market rate in effect on the Put Date when the Bank exercises its right, provided that the borrower meets all requirements for obtaining advances from the Bank at that time. The maturity date of the replacement funding will be either the originally scheduled maturity date of the Putable Advance or a maturity date that is agreed upon by the Bank and the borrower. The borrower is not obligated to accept this replacement funding. A borrower that accepts the replacement funding may borrow under any of the regular credit options available to the borrower."
