@@ -114,9 +114,12 @@ This is a summary of the options supported in our .env files:
 * `BYEBUG_PORT`: What port to launch the ByeBug remote debugging server on. In its absence, it finds a free port and uses that.
 * `SMTP_HOSTNAME`: The hostname of the SMTP server.
 * `SMTP_PORT`: The port of the SMTP server.
+* `SMTP_DOMAIN`: The domain to use as part of the HELO to the SMTP server.
 * `SMTP_USERNAME`: The username used to authenticate with the STMP server.
 * `SMTP_PASSWORD`: The password used to authenticate with the STMP server.
 * `SMTP_AUTHENTICATION_MODE`: The SMTP authentication mode to use (`plain`, `login` or `cram_md5`).
+* `SMTP_SSL_VERIFICATION`: The SMTP SSL verification mode to use. Defaults to 'verify'.
+
 
 
 ## Running the Tests
