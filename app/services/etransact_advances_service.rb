@@ -102,7 +102,7 @@ class EtransactAdvancesService < MAPIService
               check_limit = 'high'
             end
           else
-            nil
+            return nil
           end
         end
         {

@@ -165,6 +165,10 @@ describe EtransactAdvancesService do
       it 'should return high if limits are not passing cumulative tests' do
         expect(cumulative_check_limits).to eq(high_result)
       end
+      it 'should return nil if todays_cumulative_advances_amount returns nil' do
+        allow(subject).to receive(:todays_cumulative_advances_amount).with(member_id).and_return(nil)
+        expect(check_limits).to eq(nil)
+      end
     end
   end
 
