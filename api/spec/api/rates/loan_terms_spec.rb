@@ -6,7 +6,14 @@ describe MAPI::Services::Rates::LoanTerms do
     subject { MAPI::Services::Rates::LoanTerms }
 
     describe 'loan_terms' do
-      let(:today_date) { Time.zone.now }
+      let(:now_time_string) { double( 'now time as HHMMSS')}# { '010000' }
+      let(:now) { double( 'Time.zone.now' ) } #Time.zone.parse( now_string ) }
+      let(:today_as_date) { double( 'today_as_date') }
+      let(:today_as_time) { double( 'today_as_time') }
+      let(:today_as_string) { double( 'today_as_string') }
+      let(:long_ago_string) { double( 'long ago string' ) }
+      let(:long_ago) { double( 'long ago' ) }
+      let(:long_ago_date) { double( 'long ago date' ) }
       let(:hash1) do
         {
             "AO_TERM_BUCKET_ID"  => 1,
@@ -16,7 +23,7 @@ describe MAPI::Services::Rates::LoanTerms do
             "SBC_AAA_ENABLED"    => "Y",
             "SBC_AA_ENABLED"     => "Y",
             "END_TIME"           => "0001",
-            "OVERRIDE_END_DATE"  => "01-JAN-2006 12:00 AM",
+            "OVERRIDE_END_DATE"  => long_ago_string,
             "OVERRIDE_END_TIME"  => "2000"
         }
       end
@@ -29,7 +36,7 @@ describe MAPI::Services::Rates::LoanTerms do
             "SBC_AAA_ENABLED"    => "Y",
             "SBC_AA_ENABLED"     => "N",
             "END_TIME"           => "2000",
-            "OVERRIDE_END_DATE"  => "01-JAN-2006 12:00 AM",
+            "OVERRIDE_END_DATE"  => long_ago_string,
             "OVERRIDE_END_TIME"  => "0700"
         }
       end
@@ -42,7 +49,7 @@ describe MAPI::Services::Rates::LoanTerms do
             "SBC_AAA_ENABLED"    => "Y",
             "SBC_AA_ENABLED"     => "Y",
             "END_TIME"           => "2000",
-            "OVERRIDE_END_DATE"  => today_date,
+            "OVERRIDE_END_DATE"  => today_as_string,
             "OVERRIDE_END_TIME"  => "2359"
         }
       end
@@ -53,6 +60,16 @@ describe MAPI::Services::Rates::LoanTerms do
         allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
         allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
         allow(result_set).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
+        allow(now).to receive(:to_date).and_return(today_as_date)
+        allow(today_as_time).to receive(:to_date).and_return(today_as_date)
+        allow(long_ago).to receive(:to_date).and_return(long_ago_date)
+        allow(now).to receive(:strftime).with("%H%M%S").and_return(now_time_string)
+        allow(Time.zone).to receive(:now).and_return(now)
+        allow(Time.zone).to receive(:parse).with(today_as_string).and_return(today_as_time)
+        allow(Time.zone).to receive(:parse).with(long_ago_string).and_return(long_ago)
+        allow(now_time_string).to receive(:<).with('000100').and_return(false)
+        allow(now_time_string).to receive(:<).with('200000').and_return(true)
+        allow(now_time_string).to receive(:<).with('235900').and_return(true)
       end
 
       it 'should return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
@@ -106,7 +123,7 @@ describe MAPI::Services::Rates::LoanTerms do
          "SBC_AAA_ENABLED" => "Y",
          "SBC_AA_ENABLED" => "Y",
          "END_TIME" => "2359",
-         "OVERRIDE_END_DATE" => today_date,
+         "OVERRIDE_END_DATE" => today_as_string,
          "OVERRIDE_END_TIME" => "0001"}
       end
       it 'should return trade status to false if override_end_time for the override_end_date that is set for today has passed the current time' do
