@@ -1,0 +1,9 @@
+<% if defined?(@resource) %>
+<%= @resource.display_name || @resource.username %>
+<% end %>
+<% if defined?(@member_name) %>
+<%= @member_name %>
+<% end %>
+
+
+<%= yield %>

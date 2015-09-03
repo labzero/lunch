@@ -89,5 +89,14 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
-  config.action_mailer.default_url_options = { host: ENV['APP_DOMAIN_PUBLIC'], port: ENV['APP_PORT_PUBLIC'] }
+  config.action_mailer.default_url_options = { host: ENV['APP_DOMAIN_PUBLIC'], port: ENV['APP_PORT_PUBLIC'], protocol: ENV['APP_PORT_PUBLIC'] == '443' ? 'https' : 'http' }
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address: ENV['SMTP_HOSTNAME'],
+    port: ENV['SMTP_PORT'] || 25,
+    username: ENV['SMTP_USERNAME'],
+    password: ENV['SMTP_PASSWORD'],
+    authentication: (ENV['SMTP_AUTHENTICATION_MODE'] || :plain).to_sym,
+    openssl_verify_mode: OpenSSL::SSL::VERIFY_PEER
+  }
 end
