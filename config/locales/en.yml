@@ -1223,7 +1223,38 @@ en:
           title: Amortization Schedule
           schedule: Can be designed to match most amortization schedules for a variety of fixed rate loans. The borrower specifies the amortization rate of the advance, which determines the amortization schedule.
 
-      arc_embedded: ARC Advance with Embedded Options
+      arc_embedded:
+        title: ARC Advance with Embedded Options
+        description: Use ARC Advances with Embedded Options to match the interest rate and payment characteristics of your adjustable rate loan portfolio while managing your interest rate risk exposure.
+        uses:
+          finance: Finance adjustable rate mortgage loan portfolios
+          fund: Fund other adjustable rate loans and other interest-rate-sensitive assets
+          manage: Manage interest rate risk in rising or falling rate environments
+          lock: Lock in current spreads for extended terms
+          shorten: Shorten the liability structure of your balance sheet
+        advantages:
+          maturities: Wide range of maturities
+          tailored: Can be tailored to meet your specific financing or hedging needs
+        max_term: 10 years
+        interest_rate:
+          description: "The interest rate may be indexed to:"
+          uses:
+            libor: LIBOR (1, 3, and 6 months)
+            variety: A variety of other indices, subject to market execution
+          description2: "At the time the advance is made, the interest rate index, spread, and rate reset interval are established. At the specified interval, the interest rate is determined by adding the established spread to the new index value. \n\n If a specified index is unavailable or is fundamentally altered, the Bank will designate a replacement index that is based upon comparable information, as determined by the Bank in its sole discretion."
+        option_types:
+          title: Option types
+          uses:
+            caps: Interest rate caps (levered and unlevered)
+            collars: Interest rate collars
+            corridors: Interest rate corridors
+            collar_corridors: Interest rate collar-corridors
+            floors: Interest rate floors
+            other: A variety of other types may be developed, subject to market execution and product approval
+        min_interest_rate:
+          description: If the interest rate determined on any rate reset date or, if applicable, on the scheduled funding date, is less than the amount of the unamortized premium (the annuitized value of the option premium, if not paid upfront), the interest rate for the accrual period that begins on that rate reset date will be equal to the unamortized premium. The Bank will not be obligated to pay the borrower any amount relating to the application of a negative interest rate to the remaining principal amount of the advance.
+        prepayment_features:
+          description: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the Statement of Authority: Advances with Partial Prepayment Symmetry (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       callable: Callable Advance
       choice_libor: Choice LIBOR ARC Advance
       cip: Community Investment Program (CIP)
@@ -1406,12 +1437,12 @@ en:
       maximum_term: Maximum Term
       minimum_term: Minimum Term
       minimum_interest_rate_convention: Minimum Interest Rate Convention
+      option_types: Option Types
       prepayment_features: Prepayment Features
       term: Term
       termination_option: Termination option
       termination_option_date: Termination Option Date
       termination_option_notice: Termination Option Notice
-
   messages:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email

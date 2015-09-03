@@ -1,0 +1,37 @@
+.row.product-page
+  .column-2x10-right
+    %h1= t('products.advances.arc_embedded.title')
+    %p= t('products.advances.arc_embedded.description')
+    %h2= t('products.section_headings.uses')
+    %ul
+      %li= t('products.advances.arc_embedded.uses.finance')
+      %li= t('products.advances.arc_embedded.uses.fund')
+      %li= t('products.advances.arc_embedded.uses.manage')
+      %li= t('products.advances.arc_embedded.uses.lock')
+      %li= t('products.advances.arc_embedded.uses.shorten')
+    %h2= t('products.section_headings.advantages')
+    %ul
+      %li= t('products.advances.arc_embedded.advantages.maturities')
+      %li= t('products.advances.arc_embedded.advantages.tailored')
+    %h2= t('products.section_headings.features')
+    %h3= t('products.common_key_features.maximum_term')
+    %p= t('products.advances.arc_embedded.max_term')
+    %h3= t('products.common_key_features.interest_rate')
+    %p= t('products.advances.arc_embedded.interest_rate.description')
+    %ul
+      %li= t('products.advances.arc_embedded.interest_rate.uses.libor')
+      %li= t('products.advances.arc_embedded.interest_rate.uses.variety')
+    %p= simple_format(t('products.advances.arc_embedded.interest_rate.description2'))
+    %h3= t('products.common_key_features.option_types')
+    %ul
+      %li= t('products.advances.arc_embedded.option_types.uses.caps')
+      %li= t('products.advances.arc_embedded.option_types.uses.collars')
+      %li= t('products.advances.arc_embedded.option_types.uses.corridors')
+      %li= t('products.advances.arc_embedded.option_types.uses.collar_corridors')
+      %li= t('products.advances.arc_embedded.option_types.uses.floors')
+      %li= t('products.advances.arc_embedded.option_types.uses.other')
+    %h3= t('products.common_key_features.minimum_interest_rate_convention')
+    %p= t('products.advances.arc_embedded.min_interest_rate.description')
+    %h3= t('products.common_key_features.prepayment_features')
+    %p= t('products.advances.arc_embedded.prepayment_features.description')
+    .last-modified= t('products.section_headings.last_modified', date: fhlb_date_short_alpha(@last_modified))

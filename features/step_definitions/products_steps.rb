@@ -2,6 +2,8 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
   text = case product
     when 'products summary'
       I18n.t('products.products_summary.title')
+    when 'arc embedded'
+      I18n.t('products.advances.arc_embedded.title')
     when 'amortizing'
       I18n.t('products.advances.amortizing.title')
     when 'frc'

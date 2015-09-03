@@ -12,6 +12,12 @@ Feature: Products Page
     When I click on the products summary link in the header
     Then I should see the "products summary" product page
 
+  @smoke @jira-mem-846
+  Scenario: Member navigates to the ARC embedded product page
+    Given I hover on the products link in the header
+    When I click on the arc embedded link in the header
+    Then I should see the "arc embedded" product page
+
   @smoke @jira-mem-697
   Scenario: Member navigates to the FRC product page
     Given I hover on the products link in the header
