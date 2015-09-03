@@ -210,7 +210,6 @@ en:
     all_authorizations: All Authorizations
     user:
       title: User
-      description: The designated individual can log into the member website and view reports.
     access_manager:
       title: Access Manager
       description: Identifies your institution's Access Manager(s), who will add and delete users, reset passwords, and lock or unlock website access accounts for individuals
@@ -245,7 +244,6 @@ en:
       description: The designated individuals listed are authorized to move securities to and from their unpledged account (safekeeping account). Employees listed on this form are authorized to provide instructions regarding the purchase and sale of unpledged securities, but are not authorized to pledge or de-pledge securities.
     etransact:
       title: eTransact Holder
-      description: Use to request a SecurID token, a security device that allows authorized signers to use eTransact, the Bank's secure online transaction service.
   settings:
     title: Settings
     save: Save
