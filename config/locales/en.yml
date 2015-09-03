@@ -109,6 +109,8 @@ en:
     view_report: View Report
     tbd: TBD
     report: Report
+    sta_number: Settlement/Transaction Account No. %{sta_number}
+    all_transactions: All Transactions
     dates:
       1_day: 1 day
       1_month: 1 mo

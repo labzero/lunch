@@ -3,7 +3,8 @@ require 'rails_helper'
 RSpec.describe RenderReportPDFJob, type: :job do
   let(:member_id) { double('A Member ID') }
   let(:member_name) { double('A Member Name') }
-  let(:member) { {id: member_id, name: member_name} }
+  let(:sta_number) { double('STA Number')}
+  let(:member) { {id: member_id, name: member_name, sta_number: sta_number} }
   let(:start_date) { double('A Date', to_date: Date.today) }
   let(:report_name) { :advances_detail }
   let(:report_html) { double('Some Report HTML') }
@@ -61,6 +62,7 @@ RSpec.describe RenderReportPDFJob, type: :job do
       allow(reports_controller).to receive(:session).and_return(session)
       expect(session).to receive(:[]=).with('member_id', member_id).ordered # technically we should let the order of these two vary, but RSpec doesn't have support for that
       expect(session).to receive(:[]=).with('member_name', member_name).ordered
+      expect(session).to receive(:[]=).with('sta_number', sta_number).ordered
       run_job
     end
     it 'should set @inline_styles to `true`' do
