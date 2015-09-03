@@ -1,9 +1,14 @@
 require 'rails_helper'
 
 RSpec.describe Users::PasswordsController, :type => :controller do
+  before do
+    @request.env["devise.mapping"] = Devise.mappings[:user]
+    allow(subject).to receive(:warden).and_return(double('Warden', authenticated?: false))
+  end
+
   describe 'layout' do
     it 'should use the `external` layout' do
-      expect(subject.class._layout).to eq('external')
+      expect(described_class._layout).to eq('external')
     end
   end
 
@@ -14,8 +19,6 @@ RSpec.describe Users::PasswordsController, :type => :controller do
     let(:resource_class)  { subject.send(:resource_class) }
 
     before do
-      @request.env["devise.mapping"] = Devise.mappings[:user]
-      allow(subject).to receive(:warden).and_return(double('Warden', authenticated?: false))
       allow(subject).to receive(:new_password_path).and_return('')
       allow(resource_class).to receive(:find_or_create_if_valid_login)
     end
@@ -135,5 +138,26 @@ RSpec.describe Users::PasswordsController, :type => :controller do
         make_request
       end
     end
+  end
+
+  describe 'GET edit' do
+    let(:make_request) { get :edit, reset_password_token: SecureRandom.hex }
+    let(:resource_class) { subject.send(:resource_class) }
+    it 'calls `super`' do
+      expect_any_instance_of(described_class.superclass).to receive(:edit)
+      make_request
+    end
+
+    it 'renders `timeout` if the reset_password_period has expired' do
+      allow_any_instance_of(resource_class).to receive(:reset_password_period_valid?).and_return(false)
+      make_request
+      expect(response.body).to render_template(:timeout)
+    end
+    it 'renders `edit` if the reset_password_period has not expired' do
+      allow_any_instance_of(resource_class).to receive(:reset_password_period_valid?).and_return(true)
+      make_request
+      expect(response.body).to render_template(:edit)
+    end
+
   end
 end

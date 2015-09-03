@@ -15,7 +15,7 @@ Scenario: Requesting a password reset
   And I submit the form
   Then I should see the forgot password confirmation page
 
-@jira-mem-714
+@smoke @jira-mem-714
 Scenario: Requesting a password reset for an unknown user
   Given I visit the root path
   When I follow the forgot password link
@@ -24,3 +24,9 @@ Scenario: Requesting a password reset for an unknown user
   And I submit the form
   Then I should see the forgot password page
   And I should see an unknown user error flash
+
+@smoke @jira-mem-716
+Scenario: Using an expired/invalid reset password link
+  Given I visit the root path
+  When I follow an invalid password link
+  Then I should see the forgot password request expired page

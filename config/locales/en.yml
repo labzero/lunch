@@ -373,6 +373,10 @@ en:
       email_mask_failure: '*****'
     reset_email:
       body_html: "Hi %{name},\n\nWe've received a request to reset your Member Portal password. You can choose a new password by clicking the following link.\n\n<a href=\"%{url}\">%{url}</a>\n\nYou'll be taken to a page where you can enter a new password.\n\nIf you have any questions, please feel free to contact your relationship manager.\n\nThank you,\nFHLBSF"
+    timeout:
+      title: Request Expired
+      description: Sorry, the link in your password reset email has expired.
+      request_again: Send a new reset password email
   dashboard:
     meta_title: FHLB - Dashboard
     actions:
