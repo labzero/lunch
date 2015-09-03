@@ -112,6 +112,12 @@ This is a summary of the options supported in our .env files:
 * `SECURID_USER_PREFIX`: The value to prepend to a username before connecting to the RSA ACE server.
 * `DEBUG`: Enables the ByeBug remote debugging server when set to `true`.
 * `BYEBUG_PORT`: What port to launch the ByeBug remote debugging server on. In its absence, it finds a free port and uses that.
+* `SMTP_HOSTNAME`: The hostname of the SMTP server.
+* `SMTP_PORT`: The port of the SMTP server.
+* `SMTP_USERNAME`: The username used to authenticate with the STMP server.
+* `SMTP_PASSWORD`: The password used to authenticate with the STMP server.
+* `SMTP_AUTHENTICATION_MODE`: The SMTP authentication mode to use (`plain`, `login` or `cram_md5`).
+
 
 ## Running the Tests
 
