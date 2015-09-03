@@ -1123,12 +1123,12 @@ td.dataTables_empty {
       float: right;
     }
   }
-  .report-print-date {
+  .report-print-date, .report-print-sta, .report-print-filter-text {
     @include typography-print-details;
-    margin-bottom: 10px;
   }
   .report-print-bank {
     @include typography-print-subheader;
+    margin-top: 10px;
   }
   .report-print-details {
     margin-bottom: 50px;
