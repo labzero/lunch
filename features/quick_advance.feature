@@ -178,3 +178,11 @@ Scenario: Users who wait too long to perform an advance are told that the rate h
   And I enter my SecurID pin and token
   When I click on the quick advance confirm button
   Then I should see a "rate expired" error
+
+@jira-mem-883
+  Scenario: Users gets an error if advance causes per-term cumulative amount to exceed limit
+    Given I visit the dashboard
+    And I open the quick advance flyout and enter 1000000000000
+    And I select the rate with a term of "2week" and a type of "whole"
+    When I click on the initiate advance button
+    Then I should see an "advance unavailable" error with amount 1000000000000 and type "whole"
