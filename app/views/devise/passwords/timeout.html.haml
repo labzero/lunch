@@ -1,0 +1,7 @@
+= render layout: 'devise/sessions/welcome' do
+  %form
+    %fieldset
+      %legend= t('forgot_password.timeout.title')
+      %p= t('forgot_password.timeout.description')
+      = link_to(t('forgot_password.timeout.request_again'), new_user_password_path)
+      

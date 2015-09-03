@@ -26,3 +26,11 @@ end
 Then(/^I should see an unknown user error flash$/) do
   page.assert_selector('form .form-flash-message', exact: true, visible: true, text: I18n.t('devise.passwords.username_not_found'))
 end
+
+When(/^I follow an invalid password link$/) do
+  visit("/member/password/reset?reset_password_token=#{SecureRandom.hex}")
+end
+
+Then(/^I should see the forgot password request expired page$/) do
+  page.assert_selector('form legend', exact: true, visible: true, text: I18n.t('forgot_password.timeout.title'))
+end

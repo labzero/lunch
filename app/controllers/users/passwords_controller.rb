@@ -10,4 +10,9 @@ class Users::PasswordsController < Devise::PasswordsController
       redirect_to(new_password_path(resource || resource_class.new))
     end
   end
+
+  def edit
+    super
+    render :timeout unless self.resource.reset_password_period_valid?
+  end
 end
