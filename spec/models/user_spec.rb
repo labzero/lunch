@@ -547,9 +547,11 @@ RSpec.describe User, :type => :model do
     let(:dn) { double('A DN', end_with?: true) }
     let(:ldap_entry) { double('LDAP Entry: User', is_a?: true, dn: dn) }
     let(:call_method) { described_class.find_or_create_by_ldap_entry(ldap_entry) }
+    let(:user) { double(described_class) }
     before do
       allow(ldap_entry).to receive(:[]).with(:samaccountname).and_return([samaccountname])
       allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
+      allow(described_class).to receive(:find_or_create_by).and_return(user)
     end
     it 'calls `find_or_create_by` with a `username` of the entries `samaccountname`' do
       expect(described_class).to receive(:find_or_create_by).with(hash_including(username: samaccountname))
@@ -574,6 +576,7 @@ RSpec.describe User, :type => :model do
 
     before do
       allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain)
+      allow(described_class).to receive(:find_or_create_by).and_return(user)
     end
 
     it 'should call `find_by` passing in the supplied attributes' do
