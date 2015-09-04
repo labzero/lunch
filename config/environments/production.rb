@@ -94,9 +94,10 @@ Rails.application.configure do
   config.action_mailer.smtp_settings = {
     address: ENV['SMTP_HOSTNAME'],
     port: ENV['SMTP_PORT'] || 25,
-    username: ENV['SMTP_USERNAME'],
+    domain: ENV['SMTP_DOMAIN'],
+    user_name: ENV['SMTP_USERNAME'],
     password: ENV['SMTP_PASSWORD'],
     authentication: (ENV['SMTP_AUTHENTICATION_MODE'] || :plain).to_sym,
-    openssl_verify_mode: OpenSSL::SSL::VERIFY_PEER
+    openssl_verify_mode: ENV['SMTP_SSL_VERIFICATION'] || OpenSSL::SSL::VERIFY_PEER
   }
 end
