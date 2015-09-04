@@ -27,6 +27,30 @@ authorizations_extranet: &AUTHORIZATIONS_EXTRANET
         objectCategory: person
         primaryGroupID: 513 # magic number that means 'Domain Users'
 
+extranet_ssl_config: &EXTRANET_SSL
+  <% if ENV['LDAP_EXTRANET_SSL_MODE'] %>
+  ssl:
+    :method: <%= ENV['LDAP_EXTRANET_SSL_MODE'] %>
+    <% if ENV['LDAP_CA_BUNDLE_PATH'] %>
+    :tls_options:
+      ca_file: <%= ENV['LDAP_CA_BUNDLE_PATH'] %>
+    <% else %>
+    :tls_options: {}
+    <% end %>
+  <% end %>
+
+ssl_config: &SSL
+  <% if ENV['LDAP_SSL_MODE'] %>
+  ssl:
+    :method: <%= ENV['LDAP_SSL_MODE'] %>
+    <% if ENV['LDAP_CA_BUNDLE_PATH'] %>
+    :tls_options:
+      ca_file: <%= ENV['LDAP_CA_BUNDLE_PATH'] %>
+    <% else %>
+    :tls_options: {}
+    <% end %>
+  <% end %>
+
 ## Environment
 
 development: &development
@@ -38,7 +62,7 @@ development: &development
     base: dc=extranet,dc=fhlbsf,dc=com
     admin_user: <%= ENV['LDAP_EXTRANET_ADMIN_USERNAME'] || 'cn=admin,dc=extranet,dc=fhlbsf,dc=com' %>
     admin_password: <%= ENV['LDAP_EXTRANET_ADMIN_PASSWORD'] || 'secret' %>
-    ssl: false
+    <<: *EXTRANET_SSL
     <<: *AUTHORIZATIONS_EXTRANET
   -
     name: intranet
@@ -48,7 +72,7 @@ development: &development
     base: dc=fhlbsf-i,dc=com
     admin_user: <%= ENV['LDAP_ADMIN_USERNAME'] || 'cn=admin,dc=fhlbsf-i,dc=com' %>
     admin_password: <%= ENV['LDAP_ADMIN_PASSWORD'] || 'secret' %>
-    ssl: false
+    <<: *SSL
     <<: *AUTHORIZATIONS
 
 test:
@@ -63,7 +87,7 @@ production:
     base: dc=extranet,dc=fhlbsf,dc=com
     admin_user: <%= ENV['LDAP_EXTRANET_ADMIN_USERNAME'] %>
     admin_password: <%= ENV['LDAP_EXTRANET_ADMIN_PASSWORD'] %>
-    ssl: false
+    <<: *EXTRANET_SSL
     <<: *AUTHORIZATIONS_EXTRANET
   -
     name: intranet
@@ -73,5 +97,5 @@ production:
     base: dc=fhlbsf-i,dc=com
     admin_user: <%= ENV['LDAP_ADMIN_USERNAME'] %>
     admin_password: <%= ENV['LDAP_ADMIN_PASSWORD'] %>
-    ssl: false
+    <<: *SSL
     <<: *AUTHORIZATIONS
