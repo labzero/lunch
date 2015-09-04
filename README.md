@@ -98,6 +98,7 @@ This is a summary of the options supported in our .env files:
 * `MAPI_CALENDAR_ENDPOINT`: FHLBSF endpoint for Market Data Service.
 * `MAPI_CAPITALSTOCK_ENDPOINT`: FHLBSF endpoint for Capital Stock Service.
 * `MAPI_TRADE_ENDPOINT`: FHLBSF endpoint for Trade Service.
+* `MAPI_TRADE_ACTIVITY_ENDPOINT`: FHLBSF endpoint for Trade Activity Service
 * `LDAP_HOST`: Hostname of the LDAP server.
 * `LDAP_PORT`: Port of the LDAP server.
 * `LDAP_ADMIN_USERNAME`: Username of the LDAP service account.

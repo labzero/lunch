@@ -76,6 +76,11 @@ class ReportsController < ApplicationController
         }
       },
       credit: {
+        todays_credit: {
+          updated: t('reports.continuously'),
+          available_history: t('global.current_day'),
+          route: reports_todays_credit_path
+        },
         advances_detail: {
           updated: t('global.daily'),
           available_history: t('global.all'),
@@ -1209,6 +1214,36 @@ class ReportsController < ApplicationController
         ]
       }
     end
+  end
+
+  def todays_credit
+    #TODO: ask Siew which web flags disable this report
+    if report_disabled?(PARALLEL_SHIFT_WEB_FLAGS)
+      activities = {}
+    else
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      activities = member_balances.todays_credit_activity
+      raise StandardError, "There has been an error and ReportsController#todays_credit has encountered nil. Check error logs." if activities.nil?
+    end
+    rows = []
+    activities.each do |activity|
+      activity = activity.with_indifferent_access
+      rows << {
+        columns:[
+          {type: nil, value: activity[:transaction_number]},
+          {type: :number, value: activity[:current_par]},
+          {type: :index, value: (activity[:interest_rate] * 100 if activity[:interest_rate])},
+          {type: :date, value: activity[:funding_date]},
+          {type: :date, value: activity[:maturity_date]},
+          {type: :nil, value: activity[:product_description]}
+        ]
+      }
+    end
+    column_headings = [t('common_table_headings.transaction_number'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.product_type')]
+    @todays_credit = {
+      column_headings: column_headings,
+      rows: rows
+    }
   end
 
   private
