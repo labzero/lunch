@@ -6,6 +6,8 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
       I18n.t('products.advances.arc_embedded.title')
     when 'amortizing'
       I18n.t('products.advances.amortizing.title')
+    when 'auction indexed'
+      I18n.t('products.advances.auction_indexed.title')
     when 'frc'
       I18n.t('products.advances.frc.title')
     when 'frc embedded'
