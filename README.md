@@ -88,6 +88,7 @@ This is a summary of the options supported in our .env files:
 * `DATABASE_PASSWORD`: The password to use to connect to the DB (overrides the values found in database.yml).
 * `SAUCE_USERNAME`: The username of the SauceLabs user, used when cucumber tests are run via SauceLabs.
 * `SAUCE_ACCESS_KEY`: The access key associated with the SauceLabs user (`SAUCE_USERNAME`). Only used when running cucumber tests via SauceLabs.
+* `MAPI_ENDPOINT`: The endpoint of the MAPI service.
 * `MAPI_SECRET_TOKEN`: The shared secret between MAPI and Rails.
 * `MAPI_COF_ACCOUNT`: FHLBSF account for getting COF data.
 * `MAPI_FHLBSF_ACCOUNT`: FHLBSF account for getting Calypso data.
