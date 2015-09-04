@@ -653,12 +653,12 @@ module MAPI
           else
             # We have no real data source yet.
             hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_summary.json'))).with_indifferent_access
-            now = Time.now
+            now = Time.zone.now
             # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
             LOAN_TYPES.each do |type|
               LOAN_TERMS.each do |term|
                 loan = hash[type][term]
-                maturity_date = MAPI::Services::Rates.get_maturity_date(DateTime.parse((Time.mktime(now.year, now.month, now.day, now.hour, now.min) + loan[:days_to_maturity].to_i.days).to_s), TERM_MAPPING[term][:frequency_unit])
+                maturity_date = MAPI::Services::Rates.get_maturity_date(Time.zone.today + loan[:days_to_maturity].to_i.days, TERM_MAPPING[term][:frequency_unit])
                 loan[:maturity_date] = maturity_date
                 blacked_out  = blackout_dates.include?( maturity_date )
                 dont_trade   = !loan_terms[term][type]['trade_status']
