@@ -1,8 +1,10 @@
 require 'sinatra/base'
 require 'swagger/blocks'
+require 'active_support/concern'
 require 'active_support/time'
 
 require_relative 'shared/constants'
+require_relative 'shared/utils'
 
 require_relative 'services/base'
 require_relative 'services/mock_rates'
