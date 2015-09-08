@@ -891,7 +891,7 @@ td.dataTables_empty {
   }
   h3 {
     @extend %typography-subtitle;
-    margin-top: 0;
+    margin-top: 15px;
   }
   h2, h3 {
     margin-bottom: 10px;
@@ -973,12 +973,39 @@ td.dataTables_empty {
   }
   .account-summary-collateral-notice {
     padding-left: 0;
+    border-color: $print-color;
     &:before {
       display: none;
     }
   }
-  .account-summary-report .header-with-action a {
-    display: none;
+  .account-summary-report {
+    .header-with-action {
+      text-align: left;
+      width: 100%;
+      margin-left: 0;
+      display: block;
+      a {
+        visibility: hidden;
+      }
+      span {
+        float: none;
+      }
+    }
+    .report-table:not(.account-summary-collateral-totals) tbody td:first-child {
+      color: $print-color;
+      @include typography-print-table-cell;
+    }
+    h2 {
+      @include typography-print-subheader;
+    }
+    dt, dd  {
+      @include typography-print-details;
+      color: $print-color;
+    }
+    tfoot td, .account-summary-collateral-totals  {
+      color: $print-color;
+      @include typography-print-table-total;
+    }
   }
   .report {
     color: $print-color;
@@ -991,9 +1018,6 @@ td.dataTables_empty {
   .report-header-buttons, .report-inputs {
     display: none;
   }
-  .report-summary-data {
-    margin-right: 25px;
-  }
   .report-main-body {
     margin-bottom: 0px;
     h2 {
@@ -1003,10 +1027,8 @@ td.dataTables_empty {
       @include typography-print-summary-title;
     }
     p {
-      color: $print-color;
-      @include typography-print-summary-data;
+      @include typography-print-table-cell;
     }
-
     small {
       @include typography-print-footnote;
       width: 66%;
@@ -1017,6 +1039,12 @@ td.dataTables_empty {
     }
     .report-table-title {
       margin-bottom: 25px;
+    }
+  }
+  .report-summary-data {
+    margin-right: 25px;
+    p {
+      @include typography-print-summary-data;
     }
   }
   .report-table  {

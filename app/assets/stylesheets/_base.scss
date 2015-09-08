@@ -80,3 +80,9 @@ body {
     }
   }
 }
+
+@media print {
+  html, body {
+    min-width: initial;
+  }
+}
