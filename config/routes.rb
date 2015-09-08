@@ -90,7 +90,7 @@ Rails.application.routes.draw do
       get 'auction-indexed' => 'products#auction_indexed', as: :auction_indexed
       get 'fixed-rate-credit' => 'products#frc', as: :frc
       get 'frc-embedded' => 'products#frc_embedded'
-      get 'knockout' => 'error#standard_error'
+      get 'knockout' => 'products#knockout', as: :knockout
       get 'mortgage-partnership-finance' => 'error#standard_error', as: :mpf
       get 'other-cash-needs' => 'error#standard_error', as: :ocn
       get 'putable' => 'error#standard_error'

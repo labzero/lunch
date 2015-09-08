@@ -52,3 +52,9 @@ Feature: Products Page
     Given I hover on the products link in the header
     When I click on the auction indexed link in the header
     Then I should see the "auction indexed" product page
+
+  @smoke @jira-mem-851
+  Scenario: Member navigates to the knockout product page
+    Given I hover on the products link in the header
+    When I click on the knockout link in the header
+    Then I should see the "knockout" product page
