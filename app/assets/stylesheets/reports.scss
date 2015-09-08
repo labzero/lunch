@@ -1044,6 +1044,7 @@ td.dataTables_empty {
   .report-summary-data {
     margin-right: 25px;
     p {
+      color: $print-color;
       @include typography-print-summary-data;
     }
   }
