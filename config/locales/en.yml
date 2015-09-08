@@ -804,7 +804,7 @@ en:
       title: Account Summary
       institution_details:
         title: Institution Details
-        your_institution: 'Institution Name:'
+        your_institution: 'Your Institution:'
         sta_number: 'STA Number:'
         fhfb_number: 'FHFB Number:'
       collateral_delivery_required: 'Collateral Status: Delivery Required'
