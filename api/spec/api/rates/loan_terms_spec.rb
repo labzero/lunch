@@ -10,8 +10,6 @@ describe MAPI::Services::Rates::LoanTerms do
       let(:now) { double( 'Time.zone.now' ) } #Time.zone.parse( now_string ) }
       let(:today_as_date) { double( 'today_as_date') }
       let(:today_as_time) { double( 'today_as_time') }
-      let(:today_as_string) { double( 'today_as_string') }
-      let(:long_ago_string) { double( 'long ago string' ) }
       let(:long_ago) { double( 'long ago' ) }
       let(:long_ago_date) { double( 'long ago date' ) }
       let(:hash1) do
@@ -23,7 +21,7 @@ describe MAPI::Services::Rates::LoanTerms do
             "SBC_AAA_ENABLED"    => "Y",
             "SBC_AA_ENABLED"     => "Y",
             "END_TIME"           => "0001",
-            "OVERRIDE_END_DATE"  => long_ago_string,
+            "OVERRIDE_END_DATE"  => long_ago_date,
             "OVERRIDE_END_TIME"  => "2000"
         }
       end
@@ -36,7 +34,7 @@ describe MAPI::Services::Rates::LoanTerms do
             "SBC_AAA_ENABLED"    => "Y",
             "SBC_AA_ENABLED"     => "N",
             "END_TIME"           => "2000",
-            "OVERRIDE_END_DATE"  => long_ago_string,
+            "OVERRIDE_END_DATE"  => long_ago_date,
             "OVERRIDE_END_TIME"  => "0700"
         }
       end
@@ -49,7 +47,7 @@ describe MAPI::Services::Rates::LoanTerms do
             "SBC_AAA_ENABLED"    => "Y",
             "SBC_AA_ENABLED"     => "Y",
             "END_TIME"           => "2000",
-            "OVERRIDE_END_DATE"  => today_as_string,
+            "OVERRIDE_END_DATE"  => today_as_date,
             "OVERRIDE_END_TIME"  => "2359"
         }
       end
@@ -65,8 +63,6 @@ describe MAPI::Services::Rates::LoanTerms do
         allow(long_ago).to receive(:to_date).and_return(long_ago_date)
         allow(now).to receive(:strftime).with("%H%M%S").and_return(now_time_string)
         allow(Time.zone).to receive(:now).and_return(now)
-        allow(Time.zone).to receive(:parse).with(today_as_string).and_return(today_as_time)
-        allow(Time.zone).to receive(:parse).with(long_ago_string).and_return(long_ago)
         allow(now_time_string).to receive(:<).with('000100').and_return(false)
         allow(now_time_string).to receive(:<).with('200000').and_return(true)
         allow(now_time_string).to receive(:<).with('235900').and_return(true)
@@ -123,7 +119,7 @@ describe MAPI::Services::Rates::LoanTerms do
          "SBC_AAA_ENABLED" => "Y",
          "SBC_AA_ENABLED" => "Y",
          "END_TIME" => "2359",
-         "OVERRIDE_END_DATE" => today_as_string,
+         "OVERRIDE_END_DATE" => today_as_date,
          "OVERRIDE_END_TIME" => "0001"}
       end
       it 'should return trade status to false if override_end_time for the override_end_date that is set for today has passed the current time' do
