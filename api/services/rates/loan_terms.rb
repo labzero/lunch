@@ -87,7 +87,7 @@ module MAPI
         end
 
         def self.override_end_date(bucket)
-          Time.zone.parse(bucket['OVERRIDE_END_DATE']).to_date
+          bucket['OVERRIDE_END_DATE'].in_time_zone(Time.zone).to_date
         end
 
         def self.bucket_label(bucket)
