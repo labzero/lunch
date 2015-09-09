@@ -7,10 +7,10 @@ GIT
 
 GIT
   remote: https://github.com/labzero/devise_ldap_authenticatable.git
-  revision: 26cd163a52b8c2adadaa700df7f691abc8f9b923
-  branch: 0.9.12
+  revision: 2b61ebfdae58081798701989814d2d86a7d7bd78
+  branch: feature/unicode-password-change
   specs:
-    devise_ldap_authenticatable (0.9.12)
+    devise_ldap_authenticatable (0.9.13)
       devise (>= 3.4.1)
       net-ldap (>= 0.11)
 
