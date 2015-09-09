@@ -57,6 +57,13 @@ Scenario: Certain rates should be missing due to black out dates
   And I open the quick advance flyout
   Then I should see a blacked out value for the "3week" term with a type of "aaa"
 
+@jira-mem-733
+Scenario: Certain rates should be missing due to rate bands
+  Given I visit the dashboard
+  And I open the quick advance flyout
+  Then I should see a blacked out value for the "2year" term with a type of "aa"
+  And I should see a blacked out value for the "3year" term with a type of "aa"
+
 Scenario: Preview rate from Quick Advance flyout table
   Given I visit the dashboard
   And I open the quick advance flyout

@@ -286,13 +286,13 @@
       "payment_on" : "Maturity",
       "interest_day_count" : "ACT/360",
       "days_to_maturity" : "730",
-      "rate" : "0.78"
+      "rate" : "0.58"
     },
     "3year" : {
       "payment_on" : "Maturity",
       "interest_day_count" : "ACT/360",
       "days_to_maturity" : "1095",
-      "rate" : "1.28"
+      "rate" : "1.58"
     }
   }
 }
