@@ -49,6 +49,11 @@ class ProductsController < ApplicationController
   end
 
   # GET
+  def ocn
+    @last_modified = Date.new(2011, 2, 1)
+  end
+
+  # GET
   def putable
     @last_modified = Date.new(2012, 12, 1)
   end
