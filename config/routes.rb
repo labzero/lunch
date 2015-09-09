@@ -92,7 +92,7 @@ Rails.application.routes.draw do
       get 'frc-embedded' => 'products#frc_embedded'
       get 'knockout' => 'products#knockout', as: :knockout
       get 'mortgage-partnership-finance' => 'error#standard_error', as: :mpf
-      get 'other-cash-needs' => 'error#standard_error'
+      get 'other-cash-needs' => 'error#standard_error', as: :ocn
       get 'putable' => 'products#putable', as: :putable
       get 'securities-backed-credit' => 'error#standard_error'
       get 'variable-rate-credit' => 'error#standard_error', as: :vrc
