@@ -94,7 +94,7 @@ Rails.application.routes.draw do
       get 'mortgage-partnership-finance' => 'error#standard_error', as: :mpf
       get 'other-cash-needs' => 'error#standard_error', as: :ocn
       get 'putable' => 'products#putable', as: :putable
-      get 'securities-backed-credit' => 'error#standard_error'
+      get 'securities-backed-credit' => 'error#standard_error', as: :sbc
       get 'variable-rate-credit' => 'error#standard_error', as: :vrc
     end
   end
