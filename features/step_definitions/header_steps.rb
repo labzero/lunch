@@ -13,7 +13,7 @@ Then(/^I should see the (reports|resources|products) dropdown$/) do |dropdown|
   report_menu.parent.assert_selector('.nav-dropdown', visible: true)
 end
 
-When(/^I click on the (reports|guides|forms|agreements|authorizations|credit|collateral|products summary|arc embedded|frc|frc embedded|arc|amortizing|choice libor|auction indexed|knockout|other cash needs|putable) link in the header$/) do |link|
+When(/^I click on the (reports|guides|forms|agreements|authorizations|credit|collateral|products summary|arc embedded|frc|frc embedded|arc|amortizing|choice libor|auction indexed|knockout|putable) link in the header$/) do |link|
   page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
 end
 
