@@ -1478,7 +1478,23 @@ en:
           special_notice: "The Knockout Advance has a complex risk profile and may be an inappropriate product for some institutions. The expected maturity of the Knockout Advance may contract or extend adversely to market movements, and the Bank makes no representations as to the expected life of the advance. This information is not intended as investment advice. The decision to obtain a Knockout Advance and the analysis of how it may fit into a borrower’s financial or business strategy remain solely the borrower’s responsibility.\n\nNotwithstanding any lockout period for the knockout option, the Bank reserves all of its rights under the Advances and Security Agreement, including, without limitation, its right to terminate the Knockout Advance and accelerate repayment of the advance and its right to liquidate collateral pledged by the borrower as security for the Knockout Advance at any time upon the occurrence of an event of default described in the Advances and Security Agreement."
 
       mpf: Mortgage Partnership Finance (MPF) Program
-      ocn: Other Cash Needs (OCN) Advance
+      ocn:
+        title: Other Cash Needs (OCN) Advance
+        description: The OCN Advance is a Variable Rate Credit (VRC) Advance option for members that, as a result of an unexpected development, need a short-term advance and either do not have a Financing Availability or have used it fully. In addition, the Bank, in its sole discretion, may fund an OCN Advance to cover the amount of any Settlement/Transaction Account (STA) overdraft.
+        uses:
+          financing: To meet funding needs that exceed a member's Financing Availability
+        advantages:
+          fund: Fund unexpected cash needs
+          same_day: Same-day access if notice received by 10 a.m.
+        eligibility: The Bank will determine member eligibility for an OCN Advance on a case-by-case basis. The member must identify the need for the OCN and the repayment sources.
+        maximum_ammount: "5% of member's total assets."
+        maximum_term: "45 days"
+        interest_rate: The initial interest rate is the rate set for VRC Advances on the date of funding. OCN Advances are repriced daily.
+        interest_day_count: "Actual/Actual (Actual/360 for Securities-Backed Credit Program)"
+        interest_payment_frequency: At monthend and at repayment
+        repayment: The Bank must receive notice of intention to repay by 2 p.m. on the business day preceding the repayment date.
+        renewal: OCN advances may not be renewed.
+
       putable: Putable Advance
       sbc: Securities-Backed Credit (SBC) Program
       vrc: Variable Rate Credit (VRC) Advance
@@ -1492,6 +1508,7 @@ en:
       title: Community Programs
       description_html: The Bank's <a href=%{url}>community programs</a> provide funding for projects that create an affordable place to live for low- and moderate-income individuals and that foster strong, stable, and sustainable communities. Our members use our targeted grant programs and discounted credit programs to meet a wide range of affordable housing and economic development needs in Arizona, California, Nevada, and the other regions they serve.
     section_headings:
+      use: Use
       uses: Uses
       advantages: Key Advantages
       features: Key Features
@@ -1534,6 +1551,9 @@ en:
       request_deadline: Request Deadline
       special_notice: Special Notice
       total_amount_available: Total Amount Available
+      maximum_ammount: Maximum Amount
+      renewal: Renewal
+      repayment: Repayment
 
   messages:
     meta_title: FHLB - Messages
