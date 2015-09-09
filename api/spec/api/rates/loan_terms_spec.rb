@@ -68,8 +68,8 @@ describe MAPI::Services::Rates::LoanTerms do
         allow(now_time_string).to receive(:<).with('000100').and_return(false)
         allow(now_time_string).to receive(:<).with('200000').and_return(true)
         allow(now_time_string).to receive(:<).with('235900').and_return(true)
-        allow(long_ago_time).to receive(:in_time_zone).with("Pacific Time (US & Canada)").and_return(long_ago_time_with_TZ)
-        allow(today_time).to receive(:in_time_zone).with("Pacific Time (US & Canada)").and_return(today_time_with_TZ)
+        allow(long_ago_time).to receive(:in_time_zone).with(Time.zone).and_return(long_ago_time_with_TZ)
+        allow(today_time).to receive(:in_time_zone).with(Time.zone).and_return(today_time_with_TZ)
       end
 
       it 'should return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
