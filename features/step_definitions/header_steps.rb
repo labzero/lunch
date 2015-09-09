@@ -15,7 +15,6 @@ end
 
 When(/^I click on the (reports|guides|forms|agreements|authorizations|credit|collateral|products summary|arc embedded|frc|frc embedded|arc|amortizing|choice libor|auction indexed|knockout|other cash needs) link in the header$/) do |link|
   page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
-When(/^I click on the (reports|guides|forms|agreements|authorizations|credit|collateral|products summary|arc embedded|frc|frc embedded|arc|amortizing|choice libor|auction indexed|knockout|other cash needs) link in the header$/) do |link|
 end
 
 Then(/^I should see the primary bank name in the header$/) do
