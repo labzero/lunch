@@ -68,4 +68,9 @@ class ProductsController < ApplicationController
     @last_modified = Date.new(2011, 2, 1)
   end
 
+  # GET
+  def sbc
+    @last_modified = Date.new(2015, 7, 1)
+  end
+
 end

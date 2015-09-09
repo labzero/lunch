@@ -26,6 +26,8 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
       I18n.t('products.advances.callable.title')
     when 'variable rate credit'
       I18n.t('products.advances.vrc.title')
+    when 'securities backed credit'
+      I18n.t('products.advances.sbc.title')
     else
       raise 'unknown product page'
   end
