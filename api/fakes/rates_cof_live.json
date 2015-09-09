@@ -1,0 +1,9 @@
+{
+  "COF_FIXED" : "0.20",
+  "COF_3L" : "-8",
+  "ADVANCE_BENCHMARK" : "0.20",
+  "MU_WL" : "16",
+  "MU_AGCY" : "17",
+  "MU_AA" : "18",
+  "MU_AAA" : "19"
+}

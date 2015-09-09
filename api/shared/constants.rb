@@ -1,3 +1,4 @@
+require 'active_support/core_ext/hash/indifferent_access'
 module MAPI
   module Shared
     module Constants
@@ -13,6 +14,57 @@ module MAPI
       BASIS_POINT_CREDIT_TYPES = [:'1m_libor', :'3m_libor', :'6m_libor']
       DAILY_PRIME_TRX_IR_CODE_INDEX = 'PRIME'
       DAILY_PRIME_TRX_IR_CODE_BASIS_POINT = 'APRIMEAT'
+      COF_TYPES = %w(COF_FIXED COF_3L ADVANCE_BENCHMARK MU_WL MU_AGCY MU_AA MU_AAA)
+      TERM_MAPPING = {
+          :overnight => {
+              frequency: '1',
+              frequency_unit: 'D',
+          },
+          :open => {
+              frequency: '1',
+              frequency_unit: 'D'
+          },
+          :'1week'=> {
+              frequency: '1',
+              frequency_unit: 'W'
+          },
+          :'2week'=> {
+              frequency: '2',
+              frequency_unit: 'W'
+          },
+          :'3week'=> {
+              frequency: '3',
+              frequency_unit: 'W'
+          },
+          :'1month'=> {
+              frequency: '1',
+              frequency_unit: 'M'
+          },
+          :'2month'=> {
+              frequency: '2',
+              frequency_unit: 'M'
+          },
+          :'3month'=> {
+              frequency: '3',
+              frequency_unit: 'M'
+          },
+          :'6month'=> {
+              frequency: '6',
+              frequency_unit: 'M'
+          },
+          :'1year'=> {
+              frequency: '1',
+              frequency_unit: 'Y'
+          },
+          :'2year'=> {
+              frequency: '2',
+              frequency_unit: 'Y'
+          },
+          :'3year'=> {
+              frequency: '3',
+              frequency_unit: 'Y'
+          }
+      }.with_indifferent_access
 
       IRDB_CODE_TERM_MAPPING =
         {:standard => {
