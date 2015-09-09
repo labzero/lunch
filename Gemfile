@@ -77,6 +77,9 @@ gem 'fog-aws'
 gem 'nokogiri'
 gem 'premailer-rails'
 
+# for profiling
+gem 'ruby-prof', require: false
+
 group :development, :test do
   gem 'rspec-rails'
   gem 'cucumber', '>= 2.0.0.rc1'
