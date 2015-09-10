@@ -204,19 +204,11 @@ class MemberBalanceService < MAPIService
 
   def advances_details(as_of_date)
     if data = get_hash(:advances_details, "/member/#{@member_id}/advances_details/#{as_of_date.to_date.iso8601}")
-      data[:total_par] = 0
-      data[:total_accrued_interest] = 0
-      data[:estimated_next_payment] = 0
-      data[:advances_details].each do |advance|
-        data[:total_par] += advance[:current_par] if advance[:current_par]
-        data[:total_accrued_interest] += advance[:accrued_interest] if advance[:accrued_interest]
-        data[:estimated_next_payment] += advance[:estimated_next_interest_payment] if advance[:estimated_next_interest_payment]
-      end
+      data[:total_par]              = lenient_sum( data[:advances_details], :current_par ).round
+      data[:total_accrued_interest] = lenient_sum( data[:advances_details], :accrued_interest ).to_f
+      data[:estimated_next_payment] = lenient_sum( data[:advances_details], :estimated_next_interest_payment ).to_f
 
       fix_date(data)
-      data[:total_par] = data[:total_par].round
-      data[:total_accrued_interest] = data[:total_accrued_interest].to_f
-      data[:estimated_next_payment] = data[:estimated_next_payment].to_f
     end
     data
   end
@@ -256,18 +248,17 @@ class MemberBalanceService < MAPIService
     data
   end
 
+  def lenient_sum(hashes, field)
+    hashes.map{|hash| hash[field]}.compact.sum
+  end
+
   def securities_transactions(as_of_date)
     # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
 
     if data = get_fake_hash(:securities_transactions, 'securities_transactions.json')
-      data[:total_payment_or_principal] = 0
-      data[:total_interest] = 0
-      data[:total_net] = 0
-      data[:transactions].each do |security|
-        data[:total_payment_or_principal] += security[:payment_or_principal] if security[:payment_or_principal]
-        data[:total_interest] += security[:interest] if security[:interest]
-        data[:total_net] += security[:total] if security[:total]
-      end
+      data[:total_payment_or_principal] = lenient_sum(data[:transactions], :payment_or_principal)
+      data[:total_interest]             = lenient_sum(data[:transactions], :interest)
+      data[:total_net]                  = lenient_sum(data[:transactions], :total)
     end
     data
   end

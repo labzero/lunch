@@ -1092,6 +1092,25 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
+  describe 'most_recent_business_day' do
+    let (:fri) { double('fri', saturday?: false, sunday?: false) }
+    let (:sat) { double('sat', saturday?: true,  sunday?: false) }
+    let (:sun) { double('sun', saturday?: false, sunday?: true)  }
+    before do
+      allow(sun).to receive(:-).with(1.day).and_return(sat)
+      allow(sat).to receive(:-).with(1.day).and_return(fri)
+    end
+    it 'should return fri for sun' do
+      expect(subject.most_recent_business_day(sun)).to be(fri)
+    end
+    it 'should return fri for sat' do
+      expect(subject.most_recent_business_day(sat)).to be(fri)
+    end
+    it 'should return fri for fri' do
+      expect(subject.most_recent_business_day(fri)).to be(fri)
+    end
+  end
+
   describe 'requests hitting RatesService' do
     let(:rates_service_instance) { double('RatesService') }
     let(:response_hash) { double('RatesServiceHash') }

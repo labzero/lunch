@@ -700,8 +700,13 @@ class ReportsController < ApplicationController
     }
   end
 
+  def most_recent_business_day(d)
+    return d unless d.saturday? || d.sunday?
+    most_recent_business_day(d - 1.day)
+  end
+
   def securities_transactions
-    @start_date = (params[:start_date] || Time.zone.now.to_date).to_date
+    @start_date = (params[:start_date] || most_recent_business_day(Time.zone.now.to_date - 1.day)).to_date
     member_balances = MemberBalanceService.new(current_member_id, request)
     if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
       securities_transactions = {}
