@@ -38,7 +38,7 @@ def get_selector_for_table_section(table_type)
 end
 
 def compare_sort_order(column_name, sort_order, table_selector='.report-table')
-  column_index = page.evaluate_script("$('#{table_selector} thead th:contains(#{column_name})').index()") + 1 # will throw error if column name not present, which is good
+  column_index = jquery_evaluate("$('#{table_selector} thead th:contains(#{column_name})').index()") + 1 # will throw error if column name not present, which is good
 
   if !page.find("#{table_selector} tbody tr:first-child td:first-child")['class'].split(' ').include?('dataTables_empty')
     last_value = nil

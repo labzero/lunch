@@ -74,6 +74,11 @@ module CustomFormattingHelper
     datetime.to_datetime.strftime('%l:%M%P %m/%d/%Y')
   end
 
+  def fhlb_report_date_numeric(date)
+    return t('global.missing_value') if date.nil?
+    date.to_date.strftime('%-m-%-d-%Y')
+  end
+
   def fhlb_formatted_phone_number(number, ext=nil)
     return nil unless number
     number.gsub!(/[^0-9]/, '')
@@ -108,6 +113,15 @@ module CustomFormattingHelper
     number_class = content_tag(:span, fhlb_formatted_number(number, precision: precision), class: 'alignright')
     inner_content = number.blank?? number_class : unit_class + number_class
     content_tag(:span, inner_content, class: 'currency-alignment')
+  end
+
+  def mask_email(email)
+    if email
+      parts = email.match(/\A(.)(.*)@(.)(.*)(\..*)\z/)
+      if parts && parts.length > 5
+        parts[1] + ("*" * parts[2].length) + '@' + parts[3] + ("*" * parts[4].length) + parts[5]
+      end
+    end
   end
 
 end

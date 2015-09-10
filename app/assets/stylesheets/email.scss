@@ -1,0 +1,25 @@
+@import "base/normalize";
+@import "base/colors";
+@import "base/fonts";
+
+body {
+  font-size: $default-font-size;
+  font-family: $default-font-family;
+}
+
+a {
+  text-decoration: none;
+  color: $actionable-blue;
+}
+
+header {
+  margin-bottom: 2.5 * $default-font-size;
+  img {
+    display: block;
+    margin-bottom: 1.5 * $default-font-size;
+  }
+}
+
+.member-name, .user-name {
+  font-weight: $bold-weight;
+}

@@ -105,10 +105,6 @@ RSpec.describe ReportsController, :type => :controller do
         get :borrowing_capacity
         expect(assigns[:borrowing_capacity_summary]).to eq({})
       end
-      it 'should set @report_name' do
-        get :borrowing_capacity
-        expect(assigns[:report_name]).to be_kind_of(String)
-      end
       it 'should set @date' do
         get :borrowing_capacity
         expect(assigns[:date]).to eq(today)
@@ -117,13 +113,14 @@ RSpec.describe ReportsController, :type => :controller do
 
     describe 'GET settlement_transaction_account' do
       let(:filter) {'some filter'}
+      before do
+        allow(member_balance_service_instance).to receive(:settlement_transaction_account).and_return(response_hash)
+        allow(response_hash).to receive(:[]).with(:activities)
+      end
       it_behaves_like 'a user required action', :get, :settlement_transaction_account
+      it_behaves_like 'a report that can be downloaded', :settlement_transaction_account, [:pdf]
       describe 'with activities array stubbed' do
-        before do
-          allow(response_hash).to receive(:[]).with(:activities)
-        end
         it 'should render the settlement_transaction_account view' do
-          expect(member_balance_service_instance).to receive(:settlement_transaction_account).and_return(response_hash)
           get :settlement_transaction_account
           expect(response.body).to render_template('settlement_transaction_account')
         end
@@ -248,6 +245,46 @@ RSpec.describe ReportsController, :type => :controller do
         expect(response.body).to render_template('advances_detail')
       end
 
+      [['pdf', RenderReportPDFJob], ['xlsx', RenderReportExcelJob]].each do |format|
+        describe "downloading a #{format.first.upcase}" do
+          let(:member_id) { double('A Member ID') }
+          let(:start_date) { Time.zone.today - 3.years }
+          let(:job_status) { double('JobStatus', update_attributes!: nil)}
+          let(:active_job) { double('Active Job Instance', job_status: job_status) }
+          let(:user_id) { rand(1000) }
+          let(:current_user) { double('User', id: user_id)}
+
+          before do
+            allow_any_instance_of(MembersService).to receive(:report_disabled?).and_return(false)
+            allow_any_instance_of(MembersService).to receive(:member).with(anything).and_return({id: member_id, name: 'Foo'})
+            allow_any_instance_of(subject.class).to receive(:current_member_id).and_return(member_id)
+            allow(format.last).to receive(:perform_later).and_return(active_job)
+            allow(controller).to receive(:current_user).and_return(current_user)
+          end
+
+          it "should enqueue a report #{format.first} job when the requested `export_format` is `#{format.first}`" do
+            expect(format.last).to receive(:perform_later).with(member_id, 'advances_detail', anything, anything).and_return(active_job)
+            get :advances_detail, export_format: format.first
+          end
+          it 'should enqueue a report #{format.first} job using the requested start_date' do
+            expect(format.last).to receive(:perform_later).with(anything, anything, anything, hash_including(start_date: start_date.to_s)).and_return(active_job)
+            get :advances_detail, export_format: format.first, start_date: start_date
+          end
+          it 'should update the job_status instance with the user_id of the current user' do
+            expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
+            get :advances_detail, export_format: format.first
+          end
+          it 'should return a json response with a `job_status_url`' do
+            get :advances_detail, export_format: format.first
+            expect(JSON.parse(response.body).with_indifferent_access[:job_status_url]).to eq(job_status_url(job_status))
+          end
+          it 'should return a json response with a `job_cancel_url`' do
+            get :advances_detail, export_format: format.first
+            expect(JSON.parse(response.body).with_indifferent_access[:job_cancel_url]).to eq(job_cancel_url(job_status))
+          end
+        end
+      end
+
       describe 'view instance variables' do
         it 'sets @start_date to param[:start_date] if available' do
           get :advances_detail, start_date: start_date
@@ -282,10 +319,10 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'should order the advances found in @advances_detail[:advances_details] by `trade_date` ascending' do
           unsorted_advances = [
-            {trade_date: Date.today},
-            {trade_date: Date.today + 1.years},
-            {trade_date: Date.today - 1.years},
-            {trade_date: Date.today - 3.years}
+            {trade_date: Time.zone.today},
+            {trade_date: Time.zone.today + 1.years},
+            {trade_date: Time.zone.today - 1.years},
+            {trade_date: Time.zone.today - 3.years}
           ]
           allow(advances_detail).to receive(:[]).with(:advances_details).and_return(unsorted_advances)
           get :advances_detail
@@ -408,6 +445,7 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET securities_services_statement' do
       let(:make_request) { get :securities_services_statement }
       let(:response_hash) { double('A Securities Services Statement', :'[]' => nil)}
+      let(:end_of_month) { rand(500).days.ago(Time.zone.today) }
       before do
         allow(member_balance_service_instance).to receive(:securities_services_statement).with(kind_of(Date)).and_return(response_hash)
         allow(response_hash).to receive(:[]).with(:secutities_fees).and_return([{}])
@@ -418,9 +456,14 @@ RSpec.describe ReportsController, :type => :controller do
         make_request
         expect(assigns[:statement]).to be(response_hash)
       end
-      it 'should default @start_date to today' do
+      it 'should assign @date_picker_filter to the `end_of_month` filter' do
         make_request
-        expect(assigns[:start_date]).to eq(Time.zone.now.to_date)
+        expect(assigns[:date_picker_filter]).to eq(ReportsController::DATE_PICKER_FILTERS[:end_of_month])
+      end
+      it 'should default @start_date to the value returned by `last_month_end`' do
+        allow(controller).to receive(:last_month_end).and_return(end_of_month)
+        make_request
+        expect(assigns[:start_date]).to eq(end_of_month)
       end
       it 'should set @start_date to the `start_date` param' do
         get :securities_services_statement, start_date: '2012-02-11'
@@ -428,7 +471,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'should set @picker_presets to the `date_picker_presets` for the `start_date`' do
         some_presets = double('Some Presets')
-        allow(subject).to receive(:date_picker_presets).with(Time.zone.now.to_date).and_return(some_presets)
+        allow(subject).to receive(:date_picker_presets).and_return(some_presets)
         make_request
         expect(assigns[:picker_presets]).to eq(some_presets)
       end
@@ -1017,6 +1060,12 @@ RSpec.describe ReportsController, :type => :controller do
       allow(response_hash).to receive(:[]).with(:total_interest)
     end
     it_behaves_like 'a user required action', :get, :securities_transactions
+    it 'can be disabled' do
+      allow(subject).to receive(:report_disabled?).and_return(true)
+      allow(transaction_hash).to receive(:collect)
+      get :securities_transactions
+      expect(assigns[:securities_transactions_table_data][:rows]).to eq([])
+    end
     it 'renders the securities_transactions view' do
       allow(response_hash).to receive(:[]).with(:transactions).and_return(transaction_hash)
       allow(transaction_hash).to receive(:collect)
@@ -1055,6 +1104,7 @@ RSpec.describe ReportsController, :type => :controller do
 
     describe 'GET historical_price_indications' do
       it_behaves_like 'a user required action', :get, :historical_price_indications
+      it_behaves_like 'a report that can be downloaded', :historical_price_indications, [:xlsx]
       it 'renders the historical_price_indications view' do
         expect(rates_service_instance).to receive(:historical_price_indications).and_return(response_hash)
         get :historical_price_indications
@@ -1231,6 +1281,7 @@ RSpec.describe ReportsController, :type => :controller do
 
   describe 'GET authorizations' do
     it_behaves_like 'a user required action', :get, :authorizations
+    it_behaves_like 'a report that can be downloaded', :authorizations, [:pdf]
     describe 'view instance variables' do
       let(:member_service_instance) {double('MembersService')}
       let(:user_no_roles) {{display_name: 'User With No Roles', roles: []}}
@@ -1291,7 +1342,6 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[:authorizations_table_data][:deferred]).to eq(true)
         end
       end
-
       describe 'when passed a Job ID' do
         let(:make_request) { get :authorizations, job_id: job_id }
         before do
@@ -1320,6 +1370,18 @@ RSpec.describe ReportsController, :type => :controller do
         it 'should render without a layout if the request is an XHR' do
           expect(subject).to receive(:render).with(layout: false).and_call_original
           xhr :get, :authorizations, job_id: job_id
+        end
+      end
+      describe 'when @print_layout is true' do
+        let(:make_request) { get :authorizations }
+        let(:service_instance) { double('service instance')}
+        before do
+          subject.instance_variable_set(:@print_layout, true)
+          allow(MembersService).to receive(:new).and_return(service_instance)
+        end
+        it 'gets signers and users from MembersService' do
+          expect(service_instance).to receive(:signers_and_users)
+          make_request
         end
       end
       
@@ -1406,6 +1468,7 @@ RSpec.describe ReportsController, :type => :controller do
       allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member_details)
     end
 
+    it_behaves_like 'a report that can be downloaded', :account_summary, [:pdf]
     it 'should render the account_summary view' do
       make_request
       expect(response.body).to render_template('account_summary')
@@ -1613,6 +1676,20 @@ RSpec.describe ReportsController, :type => :controller do
           user = {:roles => []}
           expect(controller.send(:roles_for_signers, user)).to eq([I18n.t('user_roles.user.title')])
         end
+      end
+    end
+    describe 'last_month_end' do
+      let(:end_of_july) { Date.new(2015,7,31) }
+      it 'returns a date' do
+        expect(controller.send(:last_month_end)).to be_kind_of(Date)
+      end
+      it 'returns the end of last month if today is not the end of the month' do
+        allow(Time.zone).to receive(:today).and_return(end_of_july + rand(1..30).days)
+        expect(controller.send(:last_month_end)).to eq(end_of_july)
+      end
+      it 'returns today if it is the end of the month' do
+        allow(Time.zone).to receive(:today).and_return(end_of_july)
+        expect(controller.send(:last_month_end)).to eq(end_of_july)
       end
     end
   end

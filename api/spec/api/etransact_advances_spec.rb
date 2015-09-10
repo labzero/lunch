@@ -103,13 +103,53 @@ describe MAPI::ServiceApp do
       end
     end
     describe 'in the production enviroment for cases when etransact is turned on' do
-      let(:today_date) { Time.zone.now }
-      let(:some_status_data) {{"AO_TERM_BUCKET_ID" => 1, "TERM_BUCKET_LABEL"=> "Open and O/N", "WHOLE_LOAN_ENABLED"=>  "Y", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
-                               "SBC_AA_ENABLED"=>  "Y", "END_TIME" => "0001",  "OVERRIDE_END_DATE" =>  "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME"=>  "2000"}}
-      let(:some_status_data2) {{"AO_TERM_BUCKET_ID" => 2, "TERM_BUCKET_LABEL"=> "1 Week", "WHOLE_LOAN_ENABLED"=>  "Y", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
-                                "SBC_AA_ENABLED"=>  "N", "END_TIME" => "2000",  "OVERRIDE_END_DATE" =>  "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME"=>  "0700"}}
-      let(:some_status_data3) {{"AO_TERM_BUCKET_ID" => 3, "TERM_BUCKET_LABEL"=> "2 Weeks", "WHOLE_LOAN_ENABLED"=>  "Y", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
-                                "SBC_AA_ENABLED"=>  "Y", "END_TIME" => "2000",  "OVERRIDE_END_DATE" =>  today_date, "OVERRIDE_END_TIME"=>  "2359"}}
+      let(:now_time_string)       { double( 'now time as HHMMSS')}# { '010000' }
+      let(:now)                   { double( 'Time.zone.now' ) } #Time.zone.parse( now_string ) }
+      let(:today_time)            { double( 'today time') }
+      let(:today_time_with_TZ)    { double( 'today time with TZ') }
+      let(:today_date_with_TZ)    { double( 'today date withn TZ') }
+      let(:long_ago_time)         { double( 'long ago time' ) }
+      let(:long_ago_time_with_TZ) { double( 'long ago time with TZ' ) }
+      let(:long_ago_date_with_TZ) { double( 'long ago date with TZ' ) }
+      let(:hash1) do
+        {
+            "AO_TERM_BUCKET_ID"  => 1,
+            "TERM_BUCKET_LABEL"  => "Open and O/N",
+            "WHOLE_LOAN_ENABLED" => "Y",
+            "SBC_AGENCY_ENABLED" => "Y",
+            "SBC_AAA_ENABLED"    => "Y",
+            "SBC_AA_ENABLED"     => "Y",
+            "END_TIME"           => "0001",
+            "OVERRIDE_END_DATE"  => long_ago_time,
+            "OVERRIDE_END_TIME"  => "2000"
+        }
+      end
+      let(:hash2) do
+        {
+            "AO_TERM_BUCKET_ID"  => 2,
+            "TERM_BUCKET_LABEL"  => "1 Week",
+            "WHOLE_LOAN_ENABLED" => "Y",
+            "SBC_AGENCY_ENABLED" => "Y",
+            "SBC_AAA_ENABLED"    => "Y",
+            "SBC_AA_ENABLED"     => "N",
+            "END_TIME"           => "2000",
+            "OVERRIDE_END_DATE"  => long_ago_time,
+            "OVERRIDE_END_TIME"  => "0700"
+        }
+      end
+      let(:hash3) do
+        {
+            "AO_TERM_BUCKET_ID"  => 3,
+            "TERM_BUCKET_LABEL"  => "2 Weeks",
+            "WHOLE_LOAN_ENABLED" => "Y",
+            "SBC_AGENCY_ENABLED" => "Y",
+            "SBC_AAA_ENABLED"    => "Y",
+            "SBC_AA_ENABLED"     => "Y",
+            "END_TIME"           => "2000",
+            "OVERRIDE_END_DATE"  => today_time,
+            "OVERRIDE_END_TIME"  => "2359"
+        }
+      end
       let(:result_set) {double('Oracle Result Set', fetch: nil)}
       let(:result_set2) {double('Oracle Result Set', fetch: nil)}
       let(:result_set3) {double('Oracle Result Set', fetch: nil)}
@@ -121,98 +161,51 @@ describe MAPI::ServiceApp do
         allow(result_set).to receive(:fetch).and_return([1], nil)
         allow(result_set2).to receive(:fetch).and_return([1], nil)
         allow(result_set3).to receive(:fetch).and_return([1], nil)
-        allow(result_set4).to receive(:fetch_hash).and_return(some_status_data, some_status_data2, some_status_data3, nil)
-      end
+        allow(result_set4).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
+        allow(now).to receive(:to_date).and_return(today_date_with_TZ)
+        allow(today_time).to receive(:in_time_zone).with( Time.zone ).and_return(today_time_with_TZ)
+        allow(long_ago_time).to receive(:in_time_zone).with( Time.zone ).and_return(long_ago_time_with_TZ)
+        allow(today_time_with_TZ).to receive(:to_date).and_return(today_date_with_TZ)
+        allow(long_ago_time_with_TZ).to receive(:to_date).and_return(long_ago_date_with_TZ)
+        allow(now).to receive(:strftime).with("%H%M%S").and_return(now_time_string)
+        allow(Time.zone).to receive(:now).and_return(now)
+        allow(now_time_string).to receive(:<).with('000100').and_return(false)
+        allow(now_time_string).to receive(:<).with('120000').and_return(true)
+        allow(now_time_string).to receive(:<).with('200000').and_return(true)
+        allow(now_time_string).to receive(:<).with('235900').and_return(true)      end
+
       it 'should return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
         expect(etransact_advances_status.length).to be >=1
       end
+
       it 'should return etransact turn off as all products reach end time even though etransact is turned on' do
         allow(result_set).to receive(:fetch).and_return([0], nil)
         expect(etransact_advances_status['etransact_advances_status']).to be false
         expect(etransact_advances_status['wl_vrc_status']).to be true
       end
+
       it 'should return etransact turn on when EOD has been enabled and EOD hasnt been reached' do
         allow(result_set).to receive(:fetch).and_return([13], nil)
         allow(result_set2).to receive(:fetch).and_return([1], nil)
         expect(etransact_advances_status['etransact_advances_status']).to be true
       end
-      it 'should return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
-        result = etransact_advances_status['all_loan_status']
-        MAPI::Services::Rates::LOAN_TERMS.each do |term|
-          MAPI::Services::Rates::LOAN_TYPES.each do |type|
-            expect(result[term.to_s][type.to_s]['trade_status']).to be_boolean
-            expect(result[term.to_s][type.to_s]['display_status']).to be_boolean
-            expect(result[term.to_s][type.to_s]['bucket_label']).to be_kind_of(String)
-          end
-        end
-      end
-      it 'should return trade status false if passed end time but display_status is true and there is no override for today' do
-        result = etransact_advances_status['all_loan_status']
-        MAPI::Shared::Constants::LOAN_TERMS.each do |term|
-          MAPI::Shared::Constants::LOAN_TYPES.each do |type|
-            if term.to_s == 'overnight' then
-              expect(result[term.to_s][type.to_s]['trade_status']).to be false
-              expect(result[term.to_s][type.to_s]['display_status']).to be true
-              expect(result[term.to_s][type.to_s]['bucket_label']).to eq('Open and O/N')
-            end
-          end
-        end
-      end
-      it 'should return trade status and display status to be false if type and term is disabled' do
-        result = etransact_advances_status['all_loan_status']
-        MAPI::Shared::Constants::LOAN_TERMS.each do |term|
-          MAPI::Shared::Constants::LOAN_TYPES.each do |type|
-            if term.to_s == '1week' then
-              if type.to_s == 'aa' then
-                expect(result[term.to_s][type.to_s]['trade_status']).to be false
-                expect(result[term.to_s][type.to_s]['display_status']). to be false
-              else
-                expect(result[term.to_s][type.to_s]['trade_status']).to be true
-                expect(result[term.to_s][type.to_s]['display_status']). to be true
-              end
-              expect(result[term.to_s][type.to_s]['bucket_label']).to eq('1 Week')
-            end
-          end
-        end
-      end
-      it 'should return trade status and display status to true if override_end_time for the override_end_date is not over regardless of end_time' do
-        result = etransact_advances_status['all_loan_status']
-        MAPI::Shared::Constants::LOAN_TERMS.each do |term|
-          MAPI::Shared::Constants::LOAN_TYPES.each do |type|
-            if term.to_s == "2week" then
-              expect(result[term.to_s][type.to_s]['trade_status']).to be true
-              expect(result[term.to_s][type.to_s]['display_status']).to be true
-              expect(result[term.to_s][type.to_s]['bucket_label']).to eq('2 Weeks')
-            end
-          end
-        end
-      end
+
       it 'should return etransact status = false if etransact is turn on but no product is available' do
         expect(result_set).to receive(:fetch).and_return([1], nil).at_least(1).times
         expect(result_set2).to receive(:fetch).and_return([0], nil).at_least(1).times
         expect(result_set3).to receive(:fetch).and_return([1], nil).at_least(1).times
-        expect(result_set4).to receive(:fetch_hash).and_return({"AO_TERM_BUCKET_ID" => 3, "TERM_BUCKET_LABEL"=> "2 Week", "WHOLE_LOAN_ENABLED"=>  "Y", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
-                                                                "SBC_AA_ENABLED"=>  "Y", "END_TIME" => "1200",  "OVERRIDE_END_DATE" =>  "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME"=>  "0700"}, nil).at_least(1).times
+        expect(result_set4).to receive(:fetch_hash).and_return(
+                                   {"AO_TERM_BUCKET_ID" => 3,
+                                    "TERM_BUCKET_LABEL" => "2 Week",
+                                    "WHOLE_LOAN_ENABLED"=> "Y",
+                                    "SBC_AGENCY_ENABLED"=> "Y",
+                                    "SBC_AAA_ENABLED"   => "Y",
+                                    "SBC_AA_ENABLED"    => "Y",
+                                    "END_TIME"          => "1200",
+                                    "OVERRIDE_END_DATE" => long_ago_time,
+                                    "OVERRIDE_END_TIME" => "0700"}, nil).at_least(1).times
         expect(etransact_advances_status['etransact_advances_status']).to be false
         expect(etransact_advances_status['wl_vrc_status']).to be true
-      end
-      it 'should return trade status to false if override_end_time for the override_end_date that is set for today has passed the current time' do
-        expect(result_set).to receive(:fetch).and_return([1], nil).at_least(1).times
-        expect(result_set2).to receive(:fetch).and_return([0], nil).at_least(1).times
-        expect(result_set3).to receive(:fetch).and_return([1], nil).at_least(1).times
-        # expect(result_set4).to receive(:fetch).and_return([3, '2 Week', 'Y', 'Y', 'Y', 'Y', '2359', today_date, '0001'], nil).at_least(1).times
-        expect(result_set4).to receive(:fetch_hash).and_return({"AO_TERM_BUCKET_ID" => 3, "TERM_BUCKET_LABEL"=> "2 Week", "WHOLE_LOAN_ENABLED"=>  "Y", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
-         "SBC_AA_ENABLED"=>  "Y", "END_TIME" => "2359",  "OVERRIDE_END_DATE" =>  today_date, "OVERRIDE_END_TIME"=>  "0001"}, nil).at_least(1).times
-        result = etransact_advances_status['all_loan_status']
-        MAPI::Shared::Constants::LOAN_TERMS.each do |term|
-          MAPI::Shared::Constants::LOAN_TYPES.each do |type|
-            if term.to_s == "2week" then
-              expect(result[term.to_s][type.to_s]['trade_status']).to be false
-              expect(result[term.to_s][type.to_s]['display_status']).to be true
-              expect(result[term.to_s][type.to_s]['bucket_label']).to eq('2 Week')
-            end
-          end
-        end
       end
     end
   end

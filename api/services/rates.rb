@@ -83,25 +83,29 @@ module MAPI
         }
       }.with_indifferent_access
 
-      def self.is_weekend_or_holiday (maturity_date)
-        (@@holidays.include?(maturity_date.strftime('%F')) || maturity_date.saturday? || maturity_date.sunday?) ? true : false
+      def self.holiday?(date)
+        @@holidays.include?(date.strftime('%F'))
       end
 
-      def self.get_maturity_date (original_maturity_date, frequency_unit)
-        original_maturity_date = original_maturity_date.to_date
-        maturity_date = original_maturity_date
-        while MAPI::Services::Rates.is_weekend_or_holiday(maturity_date)
-          maturity_date = maturity_date + 1.day
+      def self.weekend_or_holiday?(date)
+        date.saturday? || date.sunday? || holiday?(date)
+      end
+
+      def self.get_maturity_date (original, frequency_unit)
+        candidate = original.to_date
+        while MAPI::Services::Rates.weekend_or_holiday?(candidate)
+          candidate += 1.day
         end
         if (frequency_unit == 'M' || frequency_unit == 'Y')
-          if (maturity_date > original_maturity_date.end_of_month)
-            maturity_date =  original_maturity_date.end_of_month
-            while MAPI::Services::Rates.is_weekend_or_holiday(maturity_date)
-              maturity_date = maturity_date - 1.day
+          end_of_month = original.to_date.end_of_month
+          if (candidate > end_of_month)
+            candidate = end_of_month
+            while MAPI::Services::Rates.weekend_or_holiday?(candidate)
+              candidate -= 1.day
             end
           end
         end
-        maturity_date
+        candidate
       end
 
       def self.init_mds_connection(environment)
@@ -269,6 +273,13 @@ module MAPI
                 key :type, :string
                 key :enum, LOAN_TERMS
                 key :description, 'The term of the loan.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :type
+                key :required, false
+                key :type, :string
+                key :description, 'The type of the loan.'
               end
               response_message do
                 key :code, 200
@@ -521,13 +532,10 @@ module MAPI
           data_formatted.to_json
         end
 
-        relative_get "/:loan/:term" do
-          if !LOAN_MAPPING[params[:loan]]
-            halt 404, 'Loan Not Found'
-          end
-          if !TERM_MAPPING[params[:term]]
-            halt 404, 'Term Not Found'
-          end
+        relative_get '/:loan/:term/?:type?' do
+          halt 404, 'Loan Not Found' unless LOAN_MAPPING[params[:loan]]
+          halt 404, 'Term Not Found' unless TERM_MAPPING[params[:term]]
+          type = params[:type] ? params[:type] : 'Live'
 
           data = if MAPI::Services::Rates.init_mds_connection(settings.environment)
             @@mds_connection.operations
@@ -540,7 +548,7 @@ module MAPI
                     'v1:marketData' =>  [{
                       'v12:customRollingDay' => '0',
                       'v12:name' => LOAN_MAPPING[params[:loan]],
-                      'v12:pricingGroup' => [{'v12:id' => 'Live'}],
+                      'v12:pricingGroup' => [{'v12:id' => type}],
                       'v12:data' => [{
                         'v12:FhlbsfDataPoint' => [{
                         'v12:tenor' => [{
@@ -575,7 +583,7 @@ module MAPI
         relative_get "/summary" do
           MAPI::Services::Rates.init_cal_connection(settings.environment)
           if @@cal_connection
-            message = {'v1:endDate' => Date.today + 3.years, 'v1:startDate' => Date.today}
+            message = {'v1:endDate' => Time.zone.today + 3.years, 'v1:startDate' => Time.zone.today}
             begin
               response = @@cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
             rescue Savon::Error => error
@@ -592,10 +600,10 @@ module MAPI
 
           MAPI::Services::Rates.init_mds_connection(settings.environment)
 
-          blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(settings.environment)
+          blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(logger,settings.environment)
           halt 503, 'Internal Service Error' if blackout_dates.nil?
 
-          loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(settings.environment).with_indifferent_access
+          loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment).with_indifferent_access
           halt 503, 'Internal Service Error' if loan_terms.nil?
 
           data = if @@mds_connection
@@ -645,14 +653,17 @@ module MAPI
           else
             # We have no real data source yet.
             hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'rates_summary.json'))).with_indifferent_access
-            now = Time.now
+            now = Time.zone.now
             # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
             LOAN_TYPES.each do |type|
               LOAN_TERMS.each do |term|
                 loan = hash[type][term]
-                maturity_date = MAPI::Services::Rates.get_maturity_date(DateTime.parse((Time.mktime(now.year, now.month, now.day, now.hour, now.min) + loan[:days_to_maturity].to_i.days).to_s), TERM_MAPPING[term][:frequency_unit])
+                maturity_date = MAPI::Services::Rates.get_maturity_date(Time.zone.today + loan[:days_to_maturity].to_i.days, TERM_MAPPING[term][:frequency_unit])
                 loan[:maturity_date] = maturity_date
-                loan['disabled']     = blackout_dates.include?( maturity_date ) || !loan_terms[term][type]['trade_status'] || !loan_terms[term][type]['display_status']
+                blacked_out  = blackout_dates.include?( maturity_date )
+                dont_trade   = !loan_terms[term][type]['trade_status']
+                dont_display = !loan_terms[term][type]['display_status']
+                loan['disabled']     = blacked_out || dont_trade || dont_display
               end
             end
             hash[:timestamp] = now

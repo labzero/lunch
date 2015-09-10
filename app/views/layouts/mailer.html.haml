@@ -1,0 +1,16 @@
+!!!
+%html.email
+  %head
+    %meta{charset: "utf-8"}
+    %style
+      = FhlbMember::Application.assets.find_asset('email.css').source
+  %body
+    %header
+      = image_tag 'logo-black-140x50.png', size: '140x50'
+      - if defined?(@resource)
+        .user-name
+          = @resource.display_name || @resource.username
+      - if defined?(@member_name)
+        .member-name
+          = @member_name 
+    = yield

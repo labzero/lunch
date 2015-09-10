@@ -13,7 +13,7 @@ Then(/^I should see the (reports|resources|products) dropdown$/) do |dropdown|
   report_menu.parent.assert_selector('.nav-dropdown', visible: true)
 end
 
-When(/^I click on the (reports|guides|forms|agreements|authorizations|credit|collateral|products summary|frc|frc embedded|arc) link in the header$/) do |link|
+When(/^I click on the (reports|guides|forms|agreements|authorizations|credit|collateral|products summary|arc embedded|frc|frc embedded|arc|amortizing|choice libor|auction indexed|knockout|putable|other cash needs) link in the header$/) do |link|
   page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
 end
 
@@ -43,12 +43,26 @@ def dropdown_title_regex(dropdown)
     I18n.t('nav.secondary.products')
   when 'products summary'
     I18n.t('products.products_summary.nav_title')
+  when 'arc embedded'
+    I18n.t('products.advances.arc_embedded.title')
+  when 'amortizing'
+    I18n.t('products.advances.amortizing.title')
+  when 'auction indexed'
+    I18n.t('products.advances.auction_indexed.title')
   when 'frc'
     I18n.t('products.advances.frc.title')
   when 'frc embedded'
     I18n.t('products.advances.frc_embedded.title')
   when 'arc'
     I18n.t('products.advances.arc.title')
+  when 'choice libor'
+    I18n.t('products.advances.choice_libor.title')
+  when 'knockout'
+    I18n.t('products.advances.knockout.title')
+  when 'other cash needs'
+    I18n.t('products.advances.ocn.title')
+  when 'putable'
+    I18n.t('products.advances.putable.title')
   else
     raise 'unknown dropdown'
   end

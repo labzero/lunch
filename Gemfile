@@ -2,11 +2,11 @@ source 'https://rubygems.org'
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.2.2'
+gem 'rails', '4.2.4'
 gem 'ruby-oci8'
 
 # IF THE DB IS ACTING STRANGE, CHECK THIS BRANCH.
-gem 'activerecord-oracle_enhanced-adapter', git: 'https://github.com/rsim/oracle-enhanced.git', branch: 'rails42' # they do not gaurantee backwards compatibility on non-patch changes
+gem 'activerecord-oracle_enhanced-adapter', '~> 1.6.0' # they do not gaurantee backwards compatibility on non-patch changes
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
 # See https://github.com/sstephenson/execjs#readme for more supported runtimes
@@ -60,7 +60,6 @@ gem 'sinatra', require: false
 gem 'sinatra-activerecord', require: false
 gem 'swagger-blocks', require: false
 gem 'savon', require: false
-gem 'nokogiri', require: false
 gem 'rack-token_auth', require: false
 gem 'logging', require: false
 
@@ -73,6 +72,13 @@ gem 'resque-pool'
 # for AWS assets
 gem 'paperclip'
 gem 'fog-aws'
+
+# for ActionMailer
+gem 'nokogiri'
+gem 'premailer-rails'
+
+# for profiling
+gem 'ruby-prof', require: false
 
 group :development, :test do
   gem 'rspec-rails'
@@ -109,6 +115,7 @@ group :development do
   gem 'capistrano-rvm'
   gem 'capistrano-rails'
   gem 'byebug' # debugger gem doesn't work with ruby 2.1.2
+  gem 'letter_opener'
 end
 
 

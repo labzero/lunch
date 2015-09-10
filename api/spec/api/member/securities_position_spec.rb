@@ -29,7 +29,7 @@ describe MAPI::ServiceApp do
         let(:member_securities_position) { MAPI::Services::Member::SecuritiesPosition.securities_position(subject, MEMBER_ID, report_type, {start_date: '2015-01-01', end_date: '2015-01-31', custody_account_type: nil}) }
 
         it 'calls the `securities_position` method with a start_date and end_date corresponding to the `month_end_date` param' do
-          month_end_date = rand(365).days.ago(Date.today).strftime('%Y-%m-%d')
+          month_end_date = rand(365).days.ago(Time.zone.today).strftime('%Y-%m-%d')
           start_date = month_end_date.to_date.beginning_of_month.strftime('%Y-%m-%d')
           end_date = month_end_date.to_date.end_of_month.strftime('%Y-%m-%d')
           expect(MAPI::Services::Member::SecuritiesPosition).to receive(:securities_position).with(an_instance_of(MAPI::ServiceApp), MEMBER_ID.to_s, report_type.to_sym, {start_date: start_date, end_date: end_date, custody_account_type: nil})

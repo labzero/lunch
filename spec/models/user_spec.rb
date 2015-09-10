@@ -547,9 +547,11 @@ RSpec.describe User, :type => :model do
     let(:dn) { double('A DN', end_with?: true) }
     let(:ldap_entry) { double('LDAP Entry: User', is_a?: true, dn: dn) }
     let(:call_method) { described_class.find_or_create_by_ldap_entry(ldap_entry) }
+    let(:user) { double(described_class) }
     before do
       allow(ldap_entry).to receive(:[]).with(:samaccountname).and_return([samaccountname])
       allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
+      allow(described_class).to receive(:find_or_create_by).and_return(user)
     end
     it 'calls `find_or_create_by` with a `username` of the entries `samaccountname`' do
       expect(described_class).to receive(:find_or_create_by).with(hash_including(username: samaccountname))
@@ -562,6 +564,57 @@ RSpec.describe User, :type => :model do
     it 'should call `Devise::LDAP::Adapter.get_ldap_domain_from_dn` to find the `ldap_domain`' do
       expect(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
       call_method
+    end
+  end
+
+  describe '`find_or_create_if_valid_login` class method' do
+    let(:attributes) { double('Some Attributes', :[] => nil) }
+    let(:call_method) { described_class.find_or_create_if_valid_login(attributes) }
+    let(:user) { double(described_class) }
+    let(:username)  { double('A Username') }
+    let(:ldap_domain) { double('An LDAP Domain') }
+
+    before do
+      allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain)
+      allow(described_class).to receive(:find_or_create_by).and_return(user)
+    end
+
+    it 'should call `find_by` passing in the supplied attributes' do
+      expect(described_class).to receive(:find_by).with(attributes)
+      call_method
+    end
+    describe 'if a User is found' do
+      before do
+        allow(described_class).to receive(:find_by).and_return(user)
+      end
+      it 'returns the found user' do
+        expect(call_method).to be(user)
+      end
+    end
+    describe 'if a User is not found' do
+      before do
+        allow(described_class).to receive(:find_by).and_return(nil)
+        allow(attributes).to receive(:[]).with(:username).and_return(username)
+        allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain).and_return(ldap_domain)
+      end
+      it 'looks up the LDAP domain of the username' do
+        expect(Devise::LDAP::Adapter).to receive(:get_ldap_domain).with(username)
+        call_method
+      end
+      it 'returns nil if no LDAP domain was found for the username' do
+        allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain).and_return(nil)
+        expect(call_method).to be_nil
+      end
+      describe 'if an LDAP domain is found fpr the username' do
+        it 'calls `find_or_create_by` with the username and LDAP domain' do
+          expect(described_class).to receive(:find_or_create_by).with({username: username, ldap_domain: ldap_domain})
+          call_method
+        end
+        it 'returns the result of the `find_or_create_by` call' do
+          allow(described_class).to receive(:find_or_create_by).and_return(user)
+          expect(call_method).to be(user)
+        end
+      end
     end
   end
 
@@ -595,6 +648,14 @@ RSpec.describe User, :type => :model do
     it 'sets the @member_id attribute to the returned bank id' do
       call_method
       expect(subject.instance_variable_get(:@member_id)).to eq(bank_id)
+    end
+  end
+
+  describe '`ldap_groups` method' do
+    let(:ldap_groups_result){ double('ldap groups result') }
+    it 'should call `Devise::LDAP::Adapter.get_groups`' do
+      allow(Devise::LDAP::Adapter).to receive(:get_groups).and_return(ldap_groups_result)
+      expect(subject.ldap_groups).to eq(ldap_groups_result)
     end
   end
 

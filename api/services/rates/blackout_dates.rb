@@ -4,11 +4,11 @@ module MAPI
       module BlackoutDates
         SQL='SELECT BLACKOUT_DATE FROM WEB_ADM.AO_MATURITY_BLACKOUT_DATES'
 
-        def self.blackout_dates(environment)
-          environment == :production ? blackout_dates_production : blackout_dates_development
+        def self.blackout_dates(logger, environment)
+          environment == :production ? blackout_dates_production(logger) : blackout_dates_development
         end
 
-        def self.blackout_dates_production
+        def self.blackout_dates_production(logger)
           begin
             dates = []
             date_cursor = ActiveRecord::Base.connection.execute(SQL)
@@ -17,7 +17,7 @@ module MAPI
             end
             dates
           rescue => e
-            warn(:blackout_dates_production, e.message)
+            logger.error( "blackout_dates_production encountered the following error: #{e.message}" )
           end
         end
 
@@ -26,11 +26,17 @@ module MAPI
         end
 
         def self.fake_data_relative_to_today
-          [Date.today + 1.week, Date.today + 3.week, Date.today + 1.year]
+          today = Time.zone.today
+          [today + 1.week, today + 3.week]
         end
 
         def self.blackout_dates_development
-          fake_data_relative_to_today + fake_data_fixed
+          (fake_data_relative_to_today + fake_data_fixed).map { |d| nearest_business_day(d) }
+        end
+
+        def self.nearest_business_day(d)
+          return d unless d.saturday? || d.sunday?
+          self.nearest_business_day(d + 1.day)
         end
       end
     end

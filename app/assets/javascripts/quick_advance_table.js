@@ -136,7 +136,7 @@
                 selected_rate['stock'] = json.gross_net_stock_required;
               }
               selected_rate['check_capstock'] = false;
-              initiateQuickAdvanceWithooutCapstockCheck(selected_rate);
+              initiateQuickAdvanceWithoutCapstockCheck(selected_rate);
             });
           }
         }
@@ -146,7 +146,7 @@
       });
     };
 
-    function initiateQuickAdvanceWithooutCapstockCheck(rate_data) {
+    function initiateQuickAdvanceWithoutCapstockCheck(rate_data) {
       var $flyoutBottomSection = $('.flyout-bottom-section');
       transitionToLoadingFromCapstock();
       $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function(json){
@@ -327,7 +327,7 @@
     };
 
     function packageParameters(rate_data) {
-      return $.extend({amount: $amountField.val()}, rate_data)
+      return $.extend(rate_data, {amount: $amountField.val()})
     };
 
     function setRsaEventListener(){

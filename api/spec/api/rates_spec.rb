@@ -2,33 +2,32 @@ require 'spec_helper'
 require 'date'
 
 describe MAPI::ServiceApp do
+  subject { MAPI::Services::Rates }
   before do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
   end
   describe "historic overnight rates" do
-    let(:rates) { get '/rates/historic/overnight'; JSON.parse(last_response.body) }
-    it "should return an array of rates" do
-      expect(rates.length).to be >= 1
-      rates.each do |rate|
-        expect(rate.first).to match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/)
-        expect(rate.last).to be_kind_of(Float)
-      end
-    end
-    it "should return 30 rates by default" do
-      expect(rates.length).to eq(30)
-    end
-    it "should allow the number of rates returned to be overridden" do
-      get '/rates/historic/overnight', limit: 5
-      expect(JSON.parse(last_response.body).length).to eq(5)
-    end
-    it "should return the rates in ascending date order" do
-      last_date = nil
-      rates.each do |rate|
-        date = Time.zone.parse(rate.first)
-        if last_date
-          expect(date).to be > last_date
+    describe "development" do
+      let(:rates) { get '/rates/historic/overnight'; JSON.parse(last_response.body) }
+      it "should return an array of rates" do
+        expect(rates.length).to be >= 1
+        rates.each do |rate|
+          expect(rate.first).to match(/\A\d\d\d\d-(0\d|1[012])-([0-2]\d|3[01])\Z/)
+          expect(rate.last).to be_kind_of(Float)
         end
-        last_date = date
+      end
+
+      it "should return 30 rates by default" do
+        expect(rates.length).to eq(30)
+      end
+
+      it "should allow the number of rates returned to be overridden" do
+        get '/rates/historic/overnight', limit: 5
+        expect(JSON.parse(last_response.body).length).to eq(5)
+      end
+
+      it "should return the rates in ascending date order" do
+        expect( rates ).to be == rates.sort_by{|r| Time.zone.parse(r.first) }
       end
     end
   end
@@ -54,7 +53,7 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(blackout_dates)
       allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(loan_terms_result)
     end
-    let(:today) { Date.today }
+    let(:today) { Time.zone.today }
     let(:one_week_away) { today + 1.week }
     let(:three_weeks_away) { today + 3.week }
     let(:blackout_dates) { [one_week_away, three_weeks_away] }
@@ -66,7 +65,7 @@ describe MAPI::ServiceApp do
       inner_peace = Hash.new(Hash.new(true))
       h = Hash.new(inner_peace)
       h[:'1year'] = { whole:  { trade_status: false, display_status: true  } }
-      h[:'3year']   = { agency: { trade_status: true,  display_status: false } }
+      h[:'3year'] = { agency: { trade_status: true,  display_status: false } }
       h[:'1year'].default= inner_peace
       h[:'3year'].default= inner_peace
       h
@@ -149,24 +148,67 @@ describe MAPI::ServiceApp do
     end
   end
 
-  describe "is_weekend_or_holiday" do
-    it "should return true if date is a weekend" do
-      expect(MAPI::Services::Rates.is_weekend_or_holiday(Time.zone.parse('2015-02-01').to_date)).to be true
+  describe "weekend_or_holiday?" do
+    let(:saturday) { double('saturday')  }
+    let(:sunday)   { double('sunday')    }
+    let(:monday)   { double('monday')    }
+    let(:holiday)  { double('holiday')   }
+    let(:formatted){ double('formatted') }
+
+    before do
+      MAPI::Services::Rates.class_variable_set(:@@holidays, [formatted])
+      [saturday, sunday, monday].each { |d| allow(d).to receive(:strftime).with('%F').and_return(double('random string')) }
+      [sunday,monday,holiday].each { |d| allow(d).to receive(:saturday?).and_return(false) }
+      [saturday,monday,holiday].each { |d| allow(d).to receive(:sunday?).and_return(false) }
+      allow(saturday).to receive(:saturday?).and_return(true)
+      allow(sunday).to receive(:sunday?).and_return(true)
+      allow(holiday).to receive(:strftime).with('%F').and_return(formatted)
     end
-    it "should return false if date is not a weekend" do
-      expect(MAPI::Services::Rates.is_weekend_or_holiday(Time.zone.parse('2015-02-03').to_date)).to be false
+    it "should return true for saturday" do
+      expect(subject.weekend_or_holiday?(saturday)).to be_truthy
+    end
+    it "should return true for sunday" do
+      expect(subject.weekend_or_holiday?(sunday)).to be_truthy
+    end
+    it "should return true for monday" do
+      expect(subject.weekend_or_holiday?(monday)).to be_falsey
+    end
+    it "should return true for holiday" do
+      expect(subject.weekend_or_holiday?(holiday)).to be_truthy
     end
   end
 
   describe "get_maturity_date" do
+    let (:day1_str) { double('day1 str') }
+    let (:day2_str) { double('day2 str') }
+    let (:day1) { double( 'day 1' ) }
+    let (:day2) { double( 'day 2' ) }
+    let (:day3) { double( 'day 3' ) }
+    let (:day4) { double( 'day 4' ) }
+    before do
+      [day1,day2,day3].zip([day2,day3,day4]).each do |pred,succ|
+        allow(pred).to receive( '+' ).with(1.day).and_return(succ)
+        allow(succ).to receive( '-' ).with(1.day).and_return(pred)
+      end
+      allow(day1_str).to receive(:to_date).and_return(day1)
+      allow(day2_str).to receive(:to_date).and_return(day2)
+    end
     it "should return the same date if is not a weekend" do
-      expect(MAPI::Services::Rates.get_maturity_date(Time.zone.parse('2015-02-03').to_date, 'D')).to eq(Time.zone.parse('2015-02-03').to_date)
+      allow(subject).to receive(:weekend_or_holiday?).with(day1).and_return(false)
+      expect(subject.get_maturity_date(day1_str,'W')).to eq(day1)
     end
     it "should return the next non weekend date if is weekend" do
-      expect(MAPI::Services::Rates.get_maturity_date(Time.zone.parse('2015-02-01').to_date, 'Y')).to eq(Time.zone.parse('2015-02-02').to_date)
+      allow(subject).to receive(:weekend_or_holiday?).with(day1).and_return(true)
+      allow(subject).to receive(:weekend_or_holiday?).with(day2).and_return(false)
+      expect(subject.get_maturity_date(day1_str,'W')).to eq(day2)
     end
     it "should return the previous non weekend date if is weekend and month/year term and hits next month" do
-      expect(MAPI::Services::Rates.get_maturity_date(Time.zone.parse('2015-01-31').to_date, 'Y')).to eq(Time.zone.parse('2015-01-30').to_date)
+      allow(subject).to receive(:weekend_or_holiday?).with(day1).and_return(false)
+      allow(subject).to receive(:weekend_or_holiday?).with(day2).and_return(true)
+      allow(subject).to receive(:weekend_or_holiday?).with(day3).and_return(false)
+      allow(day3).to receive('>').with(day2).and_return(true)
+      allow(day2).to receive(:end_of_month).and_return(day2)
+      expect(subject.get_maturity_date(day2_str, 'Y')).to eq(day1)
     end
   end
 

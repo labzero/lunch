@@ -11,10 +11,8 @@
         %p= t('dashboard.quick_advance.error.insufficient_financing_availability_html', amount: fhlb_formatted_currency(@advance_amount, precision: 0))
       -elsif @error_message == :collateral
         %p= t('dashboard.quick_advance.error.insufficient_collateral_html', amount: fhlb_formatted_currency(@advance_amount, precision: 0), collateral_type: @collateral_type)
-      -elsif @error_message == :total_daily_limit
+      -elsif @error_message == :total_daily_limit || @error_message == :high
         %p= t('dashboard.quick_advance.error.advance_unavailable', phone_number: fhlb_formatted_phone_number('8004443452'))
-      -elsif @error_message == :high
-        %p= t('dashboard.quick_advance.error.high_exception_html', amount: fhlb_formatted_currency(@max_amount, precision: 0))
       -elsif @error_message == :rate_expired
         %p= t('dashboard.quick_advance.error.rate_expired')
       -else

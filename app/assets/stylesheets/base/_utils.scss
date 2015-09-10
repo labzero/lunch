@@ -1,3 +1,9 @@
+@mixin horizontal-center {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
 %absolute-pseudoelement {
   content: '';
   position: absolute;
@@ -16,9 +22,7 @@
 }
 
 %horizontal-center {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, 0);
+  @include horizontal-center;
 }
 
 %vertical-center {

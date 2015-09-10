@@ -63,6 +63,16 @@ class EtransactAdvancesService < MAPIService
     end
   end
 
+  def todays_cumulative_advances_amount(member_id)
+    if data = get_json(:todays_advances_amount, "member/#{member_id}/todays_advances")
+      amount = 0
+      data.each do |row|
+        amount = amount + row['current_par'].to_i
+      end
+      amount
+    end
+  end
+
   def check_limits(member_id, amount, advance_term)
     if limits = get_json(:check_limits, 'etransact_advances/limits')
       days_to_maturity = get_days_to_maturity(advance_term)
@@ -85,6 +95,15 @@ class EtransactAdvancesService < MAPIService
           check_limit = 'low'
         elsif amount.to_i + todays_amount.to_i > max_amount.to_i
           check_limit = 'high'
+        else
+          if todays_cumulative_amount = todays_cumulative_advances_amount(member_id)
+            settings = get_hash(:settings, 'etransact_advances/settings')
+            if amount.to_i + todays_cumulative_amount.to_i > settings['shareholder_total_daily_limit'].to_i
+              check_limit = 'high'
+            end
+          else
+            return nil
+          end
         end
         {
           status: check_limit,
@@ -103,27 +122,31 @@ class EtransactAdvancesService < MAPIService
 
   protected
 
+  def days_until(date)
+    (date - Time.zone.today).to_i
+  end
+
   def get_days_to_maturity (term)
-    maturity_date = Date.today
-    if (term == 'overnight') || (term == 'open')
-      maturity_date = maturity_date + 1.day
-    elsif term[1].upcase == 'W'
-      maturity_date = maturity_date + (7*term[0].to_i).day
-    elsif term[1].upcase == 'M'
-      maturity_date = maturity_date + (term[0].to_i).month
-    elsif term[1].upcase == 'Y'
-      maturity_date = maturity_date + (term[0].to_i).year
+    today = Time.zone.today
+    case term
+    when /\Aovernight|open\z/i
+        1
+    when /\A(\d+)w/i
+        7*$1.to_i
+    when /\A(\d+)m/i
+        days_until(today + $1.to_i.month)
+    when /\A(\d+)y/i
+        days_until(today + $1.to_i.year)
     end
-    (maturity_date - Date.today).to_i
   end
 
   def get_days_to_maturity_date (trade_maturity_date)
-    if (trade_maturity_date == 'Overnight') || (trade_maturity_date == 'Open')
-      days = 1
+    case trade_maturity_date
+    when /\Aovernight|open\z/i
+      1
     else
-      days = (Date.parse(trade_maturity_date) - Date.today()).to_i
+      days_until(Date.parse(trade_maturity_date))
     end
-    days
   end
 
 end

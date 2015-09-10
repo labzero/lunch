@@ -39,15 +39,20 @@ Rails.application.configure do
 
   # Raises error for missing translations
   config.action_view.raise_on_missing_translations = true
+
+  config.action_mailer.delivery_method = :letter_opener
+  config.action_mailer.asset_host = "http://localhost:#{ENV['PORT']}"
 end
 
-def find_available_port
-  server = TCPServer.new(nil, 0)
-  server.addr[1]
-ensure
-  server.close if server
-end
+if ENV['DEBUG'] == 'true'
+  def find_available_port
+    server = TCPServer.new(nil, 0)
+    server.addr[1]
+  ensure
+    server.try(:close)
+  end
 
-port = ENV['BYEBUG_PORT'] || find_available_port
-puts "Remote debugger on port #{port}"
-Byebug.start_server 'localhost', port
+  port = ENV['BYEBUG_PORT'] || find_available_port
+  puts "Remote debugger on port #{port}"
+  Byebug.start_server 'localhost', port
+end

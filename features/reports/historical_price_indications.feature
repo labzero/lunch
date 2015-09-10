@@ -97,3 +97,9 @@ Scenario: The Historical Price Indications report has been disabled
   Given I am on the "Historical Price Indications" report page
   When the "Historical Price Indications" report has been disabled
   Then I should see an empty report table with Data Unavailable messaging
+
+@resque-backed @smoke @jira-mem-793
+Scenario: Member downloads an XLSX of the Historical Price Indications report
+  Given I am on the "Historical Price Indications" report page
+  When I request an XLSX
+  Then I should begin downloading a file

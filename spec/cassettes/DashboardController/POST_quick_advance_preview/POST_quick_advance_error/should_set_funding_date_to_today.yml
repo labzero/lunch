@@ -190,4 +190,94 @@ http_interactions:
         CAPITAL STOCK","cumulative_stock_required":47000,"current_trade_stock_required":47000,"pre_trade_stock_required":-1000,"net_stock_required":46000,"gross_amount":47000000,"gross_cumulative_stock_required":0,"gross_current_trade_stock_required":0,"gross_pre_trade_stock_required":0,"gross_net_stock_required":0}'
     http_version: 
   recorded_at: Mon, 17 Aug 2015 23:37:37 GMT
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/todays_advances
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="4321dfghjklm"
+      X-Request-Id:
+      - ''
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '863'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Thu, 03 Sep 2015 17:01:33 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '[{"trade_date":"2015-05-07-07:00","funding_date":"2015-05-07-07:00","maturity_date":"2015-05-13-07:00","advance_number":"469249","advance_type":"FX
+        CONSTANT","status":"Pending","interest_rate":0.21,"current_par":8000000},{"trade_date":"2015-05-07-07:00","funding_date":"2015-05-07-07:00","maturity_date":"2015-05-21-07:00","advance_number":"469250","advance_type":"FX
+        CONSTANT","status":"Outstanding","interest_rate":0.22,"current_par":5000000},{"trade_date":"2015-05-07-07:00","funding_date":"2015-05-07-07:00","maturity_date":"Open","advance_number":"469251","advance_type":"O/N
+        VRC","status":"Outstanding","interest_rate":0.17,"current_par":1000045},{"trade_date":"2015-05-07-07:00","funding_date":"2015-05-07-07:00","maturity_date":"Open","advance_number":"469252","advance_type":"O/N
+        VRC","status":"Outstanding","interest_rate":0.17,"current_par":799000000}]'
+    http_version: 
+  recorded_at: Thu, 03 Sep 2015 17:01:33 GMT
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/etransact_advances/settings
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="4321dfghjklm"
+      X-Request-Id:
+      - ''
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '244'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Thu, 03 Sep 2015 17:01:33 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"auto_approve":true,"end_of_day_extension":4,"rate_timeout":60,"rates_flagged":false,"rsa_timeout":20,"shareholder_total_daily_limit":880000000,"shareholder_web_daily_limit":2900000000,"maximum_online_term_days":1102,"rate_stale_check":999998}'
+    http_version: 
+  recorded_at: Thu, 03 Sep 2015 17:01:33 GMT
 recorded_with: VCR 2.9.3

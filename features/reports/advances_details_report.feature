@@ -88,13 +88,13 @@ Scenario: Member interacts with the 'report loading' flyout when downloading an 
   When I cancel the report download from the flyout
   Then I should not see the report download flyout
 
-@smoke @jira-mem-415 @jira-mem-543
+@resque-backed @smoke @jira-mem-415 @jira-mem-543
 Scenario: Member downloads a PDF of the Advances Detail report
   Given I am on the "Advances Detail" report page
   When I request a PDF
   Then I should begin downloading a file
 
-@smoke @jira-mem-538 @jira-mem-543
+@resque-backed @smoke @jira-mem-538 @jira-mem-543
 Scenario: Member downloads an XLSX of the Advances Detail report
   Given I am on the "Advances Detail" report page
   When I request an XLSX

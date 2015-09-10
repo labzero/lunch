@@ -3,7 +3,10 @@
 .report.account-summary-report.row
   .report-header
     %h1= @report_name
-    = render 'reports_header_buttons'
+    - if @print_layout
+      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@date))
+    - else
+      = render 'reports_header_buttons', download_formats: :pdf
   %section
     %h2= t('reports.account_summary.institution_details.title')
     %dl
@@ -16,29 +19,30 @@
   - if @collateral_notice
     %section.account-summary-collateral-notice.icon-info-before
       = t('reports.account_summary.collateral_delivery_required')
-  %section
-    %p= t('reports.account_summary.intraday_activity_notice', date: fhlb_datetime_standard_numeric(@intraday_datetime))
-    %p= t('reports.account_summary.other_activity_notice', date: fhlb_datetime_standard_numeric(@credit_datetime))
-  %section
-    %h2= t('reports.account_summary.financing_availability.title')
-    = render 'reports_table', sortable: false, table_data: @financing_availability
-    %small= t('reports.account_summary.financing_availability.footnote')
-  %section
-    %h2= t('reports.account_summary.credit_outstanding.title')
-    = render 'reports_table', sortable: false, table_data: @credit_outstanding
-  %section
-    %h2.header-with-action
-      %span= t('reports.account_summary.collateral_borrowing_capacity.title')
-      = link_to(t('global.view_report'), reports_borrowing_capacity_path)
-    %h3= t('reports.account_summary.collateral_borrowing_capacity.standard.title')
-    = render 'reports_table', sortable: false, table_data: @standard_collateral
-    %h3= t('reports.account_summary.collateral_borrowing_capacity.sbc.title')
-    = render 'reports_table', sortable: false, table_data: @sbc_collateral
-    %h3= t('reports.account_summary.collateral_borrowing_capacity.totals.title')
-    = render 'reports_table', sortable: false, table_data: @collateral_totals, table_class: 'account-summary-collateral-totals'
-    %small= t('reports.account_summary.collateral_borrowing_capacity.footnote')
-  %section
-    %h2.header-with-action
-      %span= t('reports.account_summary.capital_stock.title')
-      = link_to(t('global.view_report'), reports_capital_stock_and_leverage_path)
-    = render 'reports_table', sortable: false, table_data: @capital_stock_and_leverage
+  .report-main-body
+    %section
+      %p= t('reports.account_summary.intraday_activity_notice', date: fhlb_datetime_standard_numeric(@intraday_datetime))
+      %p= t('reports.account_summary.other_activity_notice', date: fhlb_datetime_standard_numeric(@credit_datetime))
+    %section
+      %h2= t('reports.account_summary.financing_availability.title')
+      = render 'reports_table', sortable: false, table_data: @financing_availability
+      %small= t('reports.account_summary.financing_availability.footnote')
+    %section
+      %h2= t('reports.account_summary.credit_outstanding.title')
+      = render 'reports_table', sortable: false, table_data: @credit_outstanding
+    %section
+      %h2.header-with-action
+        %span= t('reports.account_summary.collateral_borrowing_capacity.title')
+        = link_to(t('global.view_report'), reports_borrowing_capacity_path)
+      %h3= t('reports.account_summary.collateral_borrowing_capacity.standard.title')
+      = render 'reports_table', sortable: false, table_data: @standard_collateral
+      %h3= t('reports.account_summary.collateral_borrowing_capacity.sbc.title')
+      = render 'reports_table', sortable: false, table_data: @sbc_collateral
+      %h3= t('reports.account_summary.collateral_borrowing_capacity.totals.title')
+      = render 'reports_table', sortable: false, table_data: @collateral_totals, table_class: 'account-summary-collateral-totals'
+      %small= t('reports.account_summary.collateral_borrowing_capacity.footnote')
+    %section
+      %h2.header-with-action
+        %span= t('reports.account_summary.capital_stock.title')
+        = link_to(t('global.view_report'), reports_capital_stock_and_leverage_path)
+      = render 'reports_table', sortable: false, table_data: @capital_stock_and_leverage

@@ -88,6 +88,7 @@ This is a summary of the options supported in our .env files:
 * `DATABASE_PASSWORD`: The password to use to connect to the DB (overrides the values found in database.yml).
 * `SAUCE_USERNAME`: The username of the SauceLabs user, used when cucumber tests are run via SauceLabs.
 * `SAUCE_ACCESS_KEY`: The access key associated with the SauceLabs user (`SAUCE_USERNAME`). Only used when running cucumber tests via SauceLabs.
+* `MAPI_ENDPOINT`: The endpoint of the MAPI service.
 * `MAPI_SECRET_TOKEN`: The shared secret between MAPI and Rails.
 * `MAPI_COF_ACCOUNT`: FHLBSF account for getting COF data.
 * `MAPI_FHLBSF_ACCOUNT`: FHLBSF account for getting Calypso data.
@@ -110,6 +111,17 @@ This is a summary of the options supported in our .env files:
 * `S3_REGION`: AWS region. Used in config/environment files to point to the proper S3 bucket.
 * `SECURID_TEST_MODE`: What test mode, if any, to use for the SecurID service. In test mode the RSA ACE server is never contacted.
 * `SECURID_USER_PREFIX`: The value to prepend to a username before connecting to the RSA ACE server.
+* `DEBUG`: Enables the ByeBug remote debugging server when set to `true`.
+* `BYEBUG_PORT`: What port to launch the ByeBug remote debugging server on. In its absence, it finds a free port and uses that.
+* `SMTP_HOSTNAME`: The hostname of the SMTP server.
+* `SMTP_PORT`: The port of the SMTP server.
+* `SMTP_DOMAIN`: The domain to use as part of the HELO to the SMTP server.
+* `SMTP_USERNAME`: The username used to authenticate with the STMP server.
+* `SMTP_PASSWORD`: The password used to authenticate with the STMP server.
+* `SMTP_AUTHENTICATION_MODE`: The SMTP authentication mode to use (`plain`, `login` or `cram_md5`).
+* `SMTP_SSL_VERIFICATION`: The SMTP SSL verification mode to use. Defaults to 'verify'.
+* `PROFILE_MODE`: Set to `true` to enable profiling of the site. A new log file (`performance.log`) will be created to capture all profiling details.
+
 
 ## Running the Tests
 

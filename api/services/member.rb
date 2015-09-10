@@ -182,7 +182,7 @@ module MAPI
               parameter do
                 key :paramType, :path
                 key :name, :as_of_date
-                key :defaultValue,  Date.today()
+                key :defaultValue,  Time.zone.today()
                 key :required, true
                 key :type, :date
                 key :description, 'As of date for the Borrowing Capacity data.  If not provided, will retrieve intraday position.'

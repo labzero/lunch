@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  devise_for :users, controllers: { sessions: 'users/sessions' }, :skip => [:sessions]
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -83,18 +82,18 @@ Rails.application.routes.draw do
     scope 'advances' do
       get 'adjustable-rate-credit' => 'products#arc', as: :arc
       get 'advances-for-community-enterprise' => 'error#standard_error', as: :ace
-      get 'amortizing' => 'error#standard_error'
-      get 'arc-embedded' => 'error#standard_error'
+      get 'amortizing' => 'products#amortizing', as: :amortizing
+      get 'arc-embedded' => 'products#arc_embedded', as: :arc_embedded
       get 'callable' => 'error#standard_error'
-      get 'choice-libor-arc' => 'error#standard_error'
+      get 'choice-libor' => 'products#choice_libor', as: :choice_libor
       get 'community-investment-program' => 'error#standard_error', as: :cip
-      get 'auction-indexed' => 'error#standard_error'
+      get 'auction-indexed' => 'products#auction_indexed', as: :auction_indexed
       get 'fixed-rate-credit' => 'products#frc', as: :frc
       get 'frc-embedded' => 'products#frc_embedded'
-      get 'knockout' => 'error#standard_error'
+      get 'knockout' => 'products#knockout', as: :knockout
       get 'mortgage-partnership-finance' => 'error#standard_error', as: :mpf
-      get 'other-cash-needs' => 'error#standard_error', as: :ocn
-      get 'putable' => 'error#standard_error'
+      get 'other-cash-needs' => 'products#ocn', as: :ocn
+      get 'putable' => 'products#putable', as: :putable
       get 'securities-backed-credit' => 'error#standard_error', as: :sbc
       get 'variable-rate-credit' => 'error#standard_error', as: :vrc
     end
@@ -108,7 +107,11 @@ Rails.application.routes.draw do
     post '/member' => 'members#set_member', :as => :members_set_member
     get 'member/terms' => 'members#terms', :as => :terms
     post 'member/terms' => 'members#accept_terms', :as => :accept_terms
+    get 'member/password' => 'users/passwords#new', as: :new_user_password
+    post 'member/password' => 'users/passwords#create', as: :user_password
+    get 'member/password/reset' => 'users/passwords#edit', as: :edit_user_password
   end
+  devise_for :users, controllers: { sessions: 'users/sessions', passwords: 'users/passwords' }, :skip => [:sessions, :passwords]
 
   root 'users/sessions#new'
 

@@ -1,0 +1,44 @@
+xlsx_package.use_shared_strings = true
+workbook = xlsx_package.workbook
+workbook.styles do |styles|
+  date_format = styles.add_style format_code: 'mm/dd/yyyy'
+  benchmark_format = styles.add_style num_fmt: 1
+  index_format = styles.add_style format_code: "#,##0.00000"
+
+  frc_styles = Array.new(13, index_format).unshift(date_format)
+  vrc_styles = [date_format, index_format]
+  libor_styles = [date_format, benchmark_format, benchmark_format, benchmark_format, benchmark_format]
+  daily_prime_styles = [date_format, index_format, benchmark_format, index_format, benchmark_format, index_format, benchmark_format, index_format, benchmark_format]
+
+  case @credit_type
+    when 'frc'
+      styles = frc_styles
+      column_headings = @table_data[:column_headings]
+    when 'vrc'
+      styles = vrc_styles
+      column_headings = @table_data[:column_headings]
+    when /libor/
+      styles = libor_styles
+      column_headings = @table_data[:column_headings]
+    when 'daily_prime'
+      styles = daily_prime_styles
+      column_headings = [@table_data[:column_sub_headings_first]]
+      @table_data[:column_headings].each do |heading|
+        column_headings << "#{heading} #{@table_data[:column_sub_headings].first}"
+        column_headings << "#{heading} #{@table_data[:column_sub_headings].last}"
+      end
+    else
+      raise 'Unknown @credit_type'
+  end
+
+  workbook_name = @credit_type.include?('libor') ? I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading") : t("reports.pages.price_indications.#{@credit_type}.#{@collateral_type}_table_title")
+
+  workbook.add_worksheet(name: workbook_name) do |sheet|
+    sheet.add_row column_headings
+    @table_data[:rows].each do |row|
+      values = [row[:date].to_date] + row[:columns].collect { |column| column[:value]}
+      sheet.add_row values, style: styles
+    end
+  end
+
+end

@@ -1,5 +1,11 @@
+- filter_text ||= nil
 .report-print-details
   .report-print-date
     = date
+  - if filter_text
+    .report-print-filter-text
+      = filter_text
   .report-print-bank
     = name
+  .report-print-sta
+    = t('global.sta_number', sta_number: @sta_number)

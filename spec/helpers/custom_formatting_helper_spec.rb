@@ -79,6 +79,20 @@ describe CustomFormattingHelper do
     end
   end
 
+  describe '`fhlb_report_date_numeric` method' do
+    describe 'converting a date in to a string following the MM-DD-YYYY convention' do
+      it 'should remove leading zeros from single digit months and days' do
+        expect(helper.fhlb_report_date_numeric(Date.new(2015,1,2))).to eq('1-2-2015')
+      end
+      it 'should handle double digit months and days' do
+        expect(helper.fhlb_report_date_numeric(Date.new(2015,11,20))).to eq('11-20-2015')
+      end
+      it 'returns the I18n value for `missing_value` if passed nil' do
+        expect(helper.fhlb_report_date_numeric(nil)).to eq(I18n.t('global.missing_value'))
+      end
+    end
+  end
+
   describe '`fhlb_datetime_standard_numeric` method' do
     let(:date) {DateTime.new(2015,1,2, 10, 12, 13)}
     it 'converts a datetime into a string following the `Time MM/DD/YYYY` format' do
@@ -186,6 +200,56 @@ describe CustomFormattingHelper do
     end
     it 'returns no currency span and a span with the I18n value for missing value when passed nil' do
       expect(helper.fhlb_formated_currency_unit(nil)).to eq("<span class=\"currency-alignment\"><span class=\"alignright\">#{I18n.t('global.missing_value')}</span></span>")
+    end
+  end
+
+  describe '`mask_email`' do
+    it 'returns nil if passed nil' do
+      expect(helper.mask_email(nil)).to be_nil
+    end
+    it 'returns nil if passed a malformed email' do
+      email = double('An Email')
+      matches = double('MatchData', length: 5)
+      allow(email).to receive(:match).and_return(matches)
+      expect(helper.mask_email(email)).to be_nil
+    end
+    it 'should mask the email' do
+      email = double('An Email')
+      masked_email = double('MaskedEmail')
+      matches = double('MatchData', length: 6)
+      intermediary_1 = double('Masked Email Intermiedary 1')
+      intermediary_2 = double('Masked Email Intermiedary 2')
+      intermediary_3 = double('Masked Email Intermiedary 3')
+      intermediary_4 = double('Masked Email Intermiedary 4')
+
+      allow(matches).to receive(:[]).with(1).and_return(double('MatchData:1'))
+      allow(matches).to receive(:[]).with(2).and_return(double('MatchData:2', length: rand(1..5)))
+      allow(matches).to receive(:[]).with(3).and_return(double('MatchData:3'))
+      allow(matches).to receive(:[]).with(4).and_return(double('MatchData:4', length: rand(1..5)))
+      allow(matches).to receive(:[]).with(5).and_return(double('MatchData:5'))
+      allow(matches[1]).to receive(:+).with('*' * matches[2].length).and_return(intermediary_1)
+      allow(intermediary_1).to receive(:+).with('@').and_return(intermediary_2)
+      allow(intermediary_2).to receive(:+).with(matches[3]).and_return(intermediary_3)
+      allow(intermediary_3).to receive(:+).with('*' * matches[4].length).and_return(intermediary_4)
+      allow(intermediary_4).to receive(:+).with(matches[5]).and_return(masked_email)
+      allow(email).to receive(:match).and_return(matches)
+      
+      expect(helper.mask_email(email)).to be(masked_email)
+    end
+    describe 'with fixtures' do
+      it 'returns nil if passed a malformed email' do
+        ['foo', 'foo@bar', 'foo@bar%', '@foo.com'].each do |email|
+          expect(helper.mask_email(email)).to be_nil
+        end
+      end
+    end
+    it 'should mask the email' do
+      {
+        'foo@example.com' => 'f**@e******.com',
+        'monkey@example.co.bar' => 'm*****@e*********.bar'
+      }.each do |input, output|
+        expect(helper.mask_email(input)).to eq(output)
+      end
     end
   end
 

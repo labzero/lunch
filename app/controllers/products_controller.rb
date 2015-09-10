@@ -9,6 +9,26 @@ class ProductsController < ApplicationController
   end
 
   # GET
+  def arc_embedded
+    @last_modified = Date.new(2012,12,1)
+  end
+
+  # GET
+  def amortizing
+    @last_modified = Date.new(2003, 12, 1)
+  end
+
+  # GET
+  def auction_indexed
+    @last_modified = Date.new(2011, 4, 1)
+  end
+
+  # GET
+  def choice_libor
+    @last_modified = Date.new(2015, 4, 1)
+  end
+
+  # GET
   def frc
     @last_modified = Date.new(2011, 4, 1)
   end
@@ -21,6 +41,21 @@ class ProductsController < ApplicationController
   # GET
   def arc
     @last_modified = Date.new(2011, 2, 1)
+  end
+
+  # GET
+  def knockout
+    @last_modified = Date.new(2012, 12, 1)
+  end
+
+  # GET
+  def ocn
+    @last_modified = Date.new(2011, 2, 1)
+  end
+
+  # GET
+  def putable
+    @last_modified = Date.new(2012, 12, 1)
   end
 
 end

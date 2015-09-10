@@ -1,9 +1,15 @@
 Given(/^I fill in and submit the login form with username "(.*?)" and password "(.*?)"$/) do |user, password|
   fill_in('user[username]', with: user)
   fill_in('user[password]', with: password)
+
+  @login_flag = flag_page
   click_button(I18n.t('global.login'))
-  needs_to_accept_terms = page.has_css?('.terms-row h1', text: I18n.t('terms.title'), wait: 5) rescue Capybara::ElementNotFound
-  step %{I accept the Terms of Use} if needs_to_accept_terms
+  wait_for_unflagged_page(@login_flag)
+
+  terms_accepted = page.has_no_css?('.terms-row h1', text: I18n.t('terms.title'), wait: 0)
+  session_id = get_session_id
+  puts "Session ID: #{session_id}" if session_id
+  step %{I accept the Terms of Use} unless terms_accepted
 end
 
 Given(/^I fill in and submit the login form$/) do
@@ -42,8 +48,7 @@ Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
   end
 
   step %{I am logged in as "#{user['username']}" with password "#{user['password']}"}
-  needs_member = page.has_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 5) rescue Capybara::ElementNotFound
-  step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} if needs_member
+  select_member_if_needed
   page.assert_selector('.main-nav .nav-logout')
 end
 
@@ -52,6 +57,7 @@ Then(/^I should see the Terms of Use page$/) do
 end
 
 When (/^I accept the Terms of Use$/) do
+  @login_flag = flag_page
   page.find(".primary-button[value=\'#{I18n.t('terms.agree')}\']").click
 end
 
@@ -74,10 +80,7 @@ When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|
   end
 
   step %{I log in as "#{user['username']}" with password "#{user['password']}"}
-  needs_to_accept_terms = page.has_css?('.terms-row h1', text: I18n.t('terms.title'), wait: 5) rescue Capybara::ElementNotFound
-  step %{I accept the Terms of Use} if needs_to_accept_terms
-  needs_member = page.has_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 5) rescue Capybara::ElementNotFound
-  step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} if needs_member
+  select_member_if_needed
 end
 
 When(/^I log in as "(.*?)" with password "(.*?)"$/) do |user, password|
@@ -86,6 +89,7 @@ When(/^I log in as "(.*?)" with password "(.*?)"$/) do |user, password|
 end
 
 When(/^I select the (\d+)(?:st|rd|th) member bank$/) do |num|
+  @login_flag = flag_page
   dropdown = page.find('select[name=member_id]')
   dropdown.click
   dropdown.find("option:nth-child(#{num.to_i})").click
@@ -94,6 +98,7 @@ end
 
 When(/^I select the "(.*?)" member bank$/) do |bank_name|
   # remove the rack_test branch once we have users tied to a specific bank
+  @login_flag = flag_page
   if Capybara.current_driver == :rack_test
     page.find('select[name=member_id] option', text: bank_name).select_option
     form = page.find('.welcome form')
@@ -125,11 +130,11 @@ When(/^I log out$/) do
 end
 
 Then(/^I should see the login form$/) do
-  page.assert_selector("form.new_user input[type=submit][value='#{I18n.t('global.login')}']", visible: true)
+  page.assert_selector("form.welcome-login input[type=submit][value='#{I18n.t('global.login')}']", visible: true)
 end
 
 Then(/^I should see a bad login error$/) do
-  page.assert_selector('form.new_user .form-error', visible: true, text: I18n.t('devise.failure.invalid'))
+  page.assert_selector('form.welcome-login .form-error', visible: true, text: I18n.t('devise.failure.invalid'))
 end
 
 When(/^I log in with a bad password$/) do
@@ -180,4 +185,48 @@ end
 
 def deletable_user
   CustomConfig.env_config['deletable']
+end
+
+def select_member_if_needed
+  wait_for_unflagged_page(@login_flag)
+  has_member = page.has_no_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 0)
+  step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} unless has_member
+end
+
+def flag_page
+  flag = SecureRandom.hex
+  page.execute_script("#{page_flag_var(flag)} = true;")
+  flag
+end
+
+def page_is_flagged?(flag)
+  page.evaluate_script(page_flag_var(flag))
+end
+
+def page_flag_var(flag)
+  "window.capybara_flag_#{flag}"
+end
+
+# returns true if an unflagged version of the page was found before the timeout, raises a ExpectationNotMet otherwise
+def wait_for_unflagged_page(flag, timeout=5)
+  timeout_at = Time.zone.now + timeout
+  while Time.zone.now < timeout_at
+    return true unless page_is_flagged?(flag)
+  end
+
+  raise Capybara::ExpectationNotMet.new("#{flag} was still on page after #{timeout} seconds.")
+end
+
+def session_cookie_key
+  if Rails && Rails.respond_to?(:application)
+    Rails.application.config.session_options.fetch(:key)
+  else
+    ENV['CUCUMBER_SESSION_KEY'] || '_fhlb-member_session'
+  end
+end
+
+def get_session_id
+  key = session_cookie_key
+  cookie = (page.driver.browser.manage.all_cookies.find {|cookie| cookie[:name] == key}) || {}
+  cookie[:value]
 end

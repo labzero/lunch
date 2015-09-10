@@ -13,17 +13,19 @@ I18n.load_path += Dir.glob('config/locales/*.yml')
 require 'active_support/all'
 Time.zone = ENV['TIMEZONE'] || 'Pacific Time (US & Canada)'
 
-is_parallel_primary = ENV['TEST_ENV_NUMBER'] == ''
-is_parallel_secondary = ENV['TEST_ENV_NUMBER'] && ENV['TEST_ENV_NUMBER'].length > 0
+require_relative 'utils'
+
+is_parallel_primary = parallel_test_number == 1
+is_parallel_secondary = !is_parallel_primary && parallel_test_number.present?
 is_parallel = is_parallel_primary || is_parallel_secondary
 
 custom_host = ENV['APP_HOST'] || env_config['app_host']
 
 if is_parallel_secondary && !custom_host
-  now = Time.now
+  timeout_at = Time.now + 30
   while !File.exists?('cucumber-primary-ready')
-    if Time.now - now > 30
-      raise "Cucumber runner #{ENV['TEST_ENV_NUMBER']} timed out waiting for the primary runner to start!"
+    if Time.now > timeout_at
+      raise "Cucumber runner #{parallel_test_number} timed out waiting for the primary runner to start!"
     end
     sleep(1)
   end
@@ -32,6 +34,11 @@ end
 if !custom_host
   ENV['RAILS_ENV'] ||= 'test' # for some reason we default to development in some cases
   ENV['RACK_ENV'] ||= 'test'
+  ENV['REDIS_URL'] ||= 'redis://localhost:6379/'
+
+  require_relative '../../lib/redis_helper'
+  resque_namespace = ['resque', ENV['RAILS_ENV'], 'cucumber', parallel_test_number, Process.pid].compact.join('-')
+  ENV['RESQUE_REDIS_URL'] ||= RedisHelper.add_url_namespace(ENV['REDIS_URL'], resque_namespace)
 
   require 'open3'
   require ::File.expand_path('../../../config/environment',  __FILE__)
@@ -119,7 +126,7 @@ if !custom_host
   verbose = ENV['VERBOSE'] # Need to remove the VERBOSE env variable due to a conflict with Resque::VerboseFormatter and ActiveJob logging
   begin
     ENV.delete('VERBOSE')
-    puts "Starting resque-pool..."
+    puts "Starting resque-pool (#{ENV['RESQUE_REDIS_URL']})..."
     resque_pool = "resque-pool -i"
     resque_stdin, resque_stdout, resque_stderr, resque_thr = Open3.popen3({'RAILS_ENV' => ENV['RAILS_ENV'] || ENV['RACK_ENV'], 'TERM_CHILD' => '1'}, resque_pool)
   ensure
@@ -151,6 +158,13 @@ end
 
 puts "Capybara.app_host: #{Capybara.app_host}"
 
+at_exit do
+  puts "App Health Check Results: "
+  STDOUT.flush
+  puts %x[curl -m 10 -sL #{Capybara.app_host}/healthy]
+  puts "Finished run `#{run_name}`"
+end
+
 AfterConfiguration do
   if Capybara.app_host.nil?
     Capybara.app_host = "#{Capybara.app_host || ('http://' + Capybara.current_session.server.host)}:#{Capybara.server_port || (Capybara.current_session.server ? Capybara.current_session.server.port : false) || 80}"
@@ -168,7 +182,7 @@ AfterConfiguration do
     puts "App not serving heartbeat (#{url})... waiting #{wait_time}s (#{i + 1} tr"+(i==0 ? "y" : "ies")+")"
     sleep wait_time
   end
-  raise 'Server failed to serve heartbeat' if result != '200'
+  raise Capybara::CapybaraError.new('Server failed to serve heartbeat') unless result == '200'
   sleep 10 #sleep 10 more seconds after we get our first 200 response to let the app come up more
   if !is_parallel || is_parallel_primary
     require Rails.root.join('db', 'seeds.rb') unless custom_host
@@ -181,6 +195,8 @@ AfterConfiguration do
     end
     sleep(20) # primary runner needs to sleep to make sure secondary workers see the sentinel (in the case where the primary work exits quickly... ie no work to do)
   end
+
+  puts "Starting run `#{run_name}`"
 end
 
 AfterStep('@pause') do

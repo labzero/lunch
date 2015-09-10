@@ -119,21 +119,27 @@ describe EtransactAdvancesService do
     let(:low_amount) { l_amount }
     let(:amount) { Random.rand(100000..1000000) }
     let(:high_amount) { Random.rand(10000000..99999999) }
+    let(:cumulative_amount) { Random.rand(1000000..9999998) }
     let(:low_check_limits) {subject.check_limits(member_id, low_amount, advance_term)}
     let(:check_limits) {subject.check_limits(member_id, amount, advance_term)}
     let(:high_check_limits) {subject.check_limits(member_id, high_amount, advance_term)}
+    let(:cumulative_check_limits) {subject.check_limits(member_id, cumulative_amount, advance_term)}
     let(:low_check)  {{:status=>'low', :low=>amount, :high=>high_amount}}
     let(:pass_result) {{:status => 'pass', :low => amount, :high => high_amount}}
     let(:high_result) {{:status => 'high', :low => amount, :high => high_amount}}
     let(:limits_response) {[{"WHOLE_LOAN_ENABLED" => "N","SBC_AGENCY_ENABLED" => "Y", "SBC_AAA_ENABLED" => "Y", "SBC_AA_ENABLED" => "Y", "LOW_DAYS_TO_MATURITY" => low_days,
                              "HIGH_DAYS_TO_MATURITY" => high_days, "MIN_ONLINE_ADVANCE" => amount, "TERM_DAILY_LIMIT" => high_amount, "PRODUCT_TYPE" => "VRC",
                              "END_TIME" => "1700", "OVERRIDE_END_DATE" => "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME" => "1700"}]}
+    let(:settings_response) {{"shareholder_total_daily_limit" => cumulative_amount}}
     let(:todays_advances_amount_response) {rand(1..9)}
+    let(:todays_cumulative_advances_amount_response) {rand(1..9)}
     it_should_behave_like 'a MAPI backed service object method', :check_limits, [m_id, l_amount, '1Week']
     describe 'without service exceptions' do
       before do
         allow(subject).to receive(:get_days_to_maturity).with(advance_term).and_return(low_days)
         allow(subject).to receive(:todays_advances_amount).with(member_id, anything, anything).and_return(todays_advances_amount_response)
+        allow(subject).to receive(:get_hash).with(:settings, anything).and_return(settings_response)
+        allow(subject).to receive(:todays_cumulative_advances_amount).with(member_id).and_return(todays_cumulative_advances_amount_response)
         allow(subject).to receive(:get_json).with(:check_limits, anything).and_return(limits_response)
       end
       it 'should return a hash back' do
@@ -141,6 +147,10 @@ describe EtransactAdvancesService do
       end
       it 'should call EtransactAdvancesService#todays_advances_amount' do
         expect(subject).to receive(:todays_advances_amount)
+        check_limits
+      end
+      it 'should call EtransactAdvancesService#todays_cumulative_advances_amount' do
+        expect(subject).to receive(:todays_cumulative_advances_amount)
         check_limits
       end
       it 'should return low if limits are not passing min tests' do
@@ -151,6 +161,13 @@ describe EtransactAdvancesService do
       end
       it 'should return high if limits are not passing max tests' do
         expect(high_check_limits).to eq(high_result)
+      end
+      it 'should return high if limits are not passing cumulative tests' do
+        expect(cumulative_check_limits).to eq(high_result)
+      end
+      it 'should return nil if todays_cumulative_advances_amount returns nil' do
+        allow(subject).to receive(:todays_cumulative_advances_amount).with(member_id).and_return(nil)
+        expect(check_limits).to eq(nil)
       end
     end
   end
@@ -179,6 +196,29 @@ describe EtransactAdvancesService do
       it 'should return zero' do
         allow(subject).to receive(:get_days_to_maturity_date).with(maturity_date).and_return(10)
         expect(todays_advances_amount).to eq(0)
+      end
+    end
+  end
+
+  describe '`todays_cumulative_advances_amount` method' do
+    m_id = 750
+    let(:member_id) {m_id}
+    let(:current_part1) {rand(0..10000)}
+    let(:current_part2) {rand(0..10000)}
+    let(:maturity_date) {double('Maturity Date')}
+    let(:todays_cumulative_advances_amount) {subject.todays_cumulative_advances_amount(member_id)}
+    let(:todays_advances_amount_response) {[{"maturity_date"=> maturity_date, "current_par"=> current_part1}, {"maturity_date"=> maturity_date, "current_par"=> current_part2 }]}
+    it_should_behave_like 'a MAPI backed service object method', :todays_cumulative_advances_amount, [m_id]
+    describe 'without service exceptions' do
+      before do
+        allow(subject).to receive(:get_json).with(:todays_advances_amount, anything).and_return(todays_advances_amount_response)
+      end
+      it 'should return a number' do
+        expect(todays_cumulative_advances_amount).to eq(current_part1+current_part2)
+      end
+      it 'should return zero' do
+        allow(subject).to receive(:get_json).with(:todays_advances_amount, anything).and_return([])
+        expect(todays_cumulative_advances_amount).to eq(0)
       end
     end
   end
@@ -253,6 +293,62 @@ describe EtransactAdvancesService do
       expect(status_object).to receive(:[]).with(:all_loan_status).and_return(status_object[:all_loan_status])
       allow(subject).to receive(:status).and_return(status_object)
       subject.has_terms?
+    end
+  end
+
+  describe 'get_days_to_maturity' do
+    let(:today) { Time.zone.today }
+    it 'should map overnight to 1' do
+      expect(subject.send(:get_days_to_maturity,'Overnight')).to eq( 1 )
+      expect(subject.send(:get_days_to_maturity,'overnight')).to eq( 1 )
+    end
+    it 'should map open to 1' do
+      expect(subject.send(:get_days_to_maturity,'Open')).to eq( 1 )
+      expect(subject.send(:get_days_to_maturity,'open')).to eq( 1 )
+    end
+    (1..4).each do |i|
+      it "should map #{i}w to #{7*i}" do
+        expect(subject.send(:get_days_to_maturity,"#{i}w")).to eq( ((today + 7*i) - today).to_i )
+      end
+    end
+    (1..12).each do |i|
+      it "should map #{i}m" do
+        expect(subject.send(:get_days_to_maturity,"#{i}m")).to eq( ((today + i.month) - today).to_i )
+      end
+    end
+    (1..10).each do |i|
+      it "should map #{i}y" do
+        expect(subject.send(:get_days_to_maturity,"#{i}y")).to eq( ((today + i.year) - today).to_i )
+      end
+    end
+  end
+
+  describe 'get_days_to_maturity_date' do
+    let(:today) { Time.zone.today }
+    it 'should map overnight to 1' do
+      expect(subject.send(:get_days_to_maturity_date,'Overnight')).to eq( 1 )
+      expect(subject.send(:get_days_to_maturity_date,'overnight')).to eq( 1 )
+    end
+    it 'should map open to 1' do
+      expect(subject.send(:get_days_to_maturity_date,'Open')).to eq( 1 )
+      expect(subject.send(:get_days_to_maturity_date,'open')).to eq( 1 )
+    end
+    it 'should map a future date to the correct number of dates' do
+      r = rand(1..100).round
+      expect(subject.send(:get_days_to_maturity_date, (today + r.days).to_s)).to eq( r )
+    end
+  end
+
+  describe 'days_until' do
+    let(:today) { Time.zone.today }
+    it 'should map today to 0' do
+      expect(subject.send(:days_until, today)).to eq( 0 )
+    end
+    it 'should map tomorrow to 1' do
+      expect(subject.send(:days_until, today.tomorrow)).to eq( 1 )
+    end
+    it 'should map next week to 7' do
+      expect(subject.send(:days_until, today + 1.week)).to eq( 7 )
     end
   end
 end

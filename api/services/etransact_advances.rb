@@ -264,7 +264,7 @@ module MAPI
         end
         
         relative_get '/blackout_dates' do
-          MAPI::Services::Rates::BlackoutDates::blackout_dates(settings.environment).to_json
+          MAPI::Services::Rates::BlackoutDates::blackout_dates(logger, settings.environment).to_json
         end
 
         relative_get '/settings' do
@@ -339,7 +339,7 @@ module MAPI
             disabled: false,
             etransact_advances_status: etransact_status,
             wl_vrc_status: wl_vrc_status,
-            all_loan_status: MAPI::Services::Rates::LoanTerms.loan_terms(settings.environment)
+            all_loan_status: MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment)
           }.to_json
         end
 

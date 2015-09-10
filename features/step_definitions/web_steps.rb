@@ -40,6 +40,23 @@ Given(/^I wait for (\d+) seconds$/) do |seconds|
   sleep(seconds.to_f)
 end
 
+def jquery_guard(timeout=10)
+  times_out_at = Time.now + timeout
+  while page.evaluate_script('typeof $') == 'undefined'
+    raise Capybara::CapybaraError.new('jQuery was not found') if Time.now > times_out_at
+  end
+end
+
+def jquery_execute(script)
+  jquery_guard
+  page.execute_script(script)
+end
+
+def jquery_evaluate(script)
+  jquery_guard
+  page.evaluate_script(script)
+end
+
 def links_from_frame frame_name, opts={limit: 20}
   cur_frame = page.find("frame[name=#{frame_name}]")
 

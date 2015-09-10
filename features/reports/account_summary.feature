@@ -18,3 +18,9 @@ Scenario: The Account Summary has been disabled
   Given I am on the "Account Summary" report page
   When the "Account Summary" report has been disabled
   Then I should see an error page
+
+@jira-mem-826 @resque-backed @smoke
+Scenario: Member downloads a PDF of the Account Summary report
+  Given I am on the "Account Summary" report page
+  When I request a PDF
+  Then I should begin downloading a file

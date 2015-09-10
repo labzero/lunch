@@ -182,31 +182,31 @@
 
 @mixin typography-print-table-heading {
   @include print-font;
-  font-size: 6pt;
+  font-size: 7.5pt;
   font-weight: $bold-weight;
 }
 
 @mixin typography-print-table-cell {
   @include print-font;
-  font-size: 6pt;
+  font-size: 7.5pt;
   font-weight: $normal-weight;
 }
 
 @mixin typography-print-table-total {
   @include print-font;
-  font-size: 6pt;
+  font-size: 7.5pt;
   font-weight: $bold-weight;
 }
 
 @mixin typography-print-footnote {
   @include print-font;
-  font-size: 5.5pt;
+  font-size: 7pt;
   font-weight: $normal-weight;
 }
 
 @mixin typography-print-footer {
   @include print-font;
-  font-size: 5pt;
+  font-size: 6pt;
   font-weight: $normal-weight;
 }
 

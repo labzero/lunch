@@ -45,27 +45,12 @@ class RatesService < MAPIService
     end
   end
 
-  def rate(type, term)
-    begin
-      response = @connection["rates/#{type}/#{term}"].get
-    rescue RestClient::Exception => e
-      Rails.logger.warn("RatesService.rate encountered a RestClient error: #{e.class.name}:#{e.http_code}")
-      return nil
-    rescue Errno::ECONNREFUSED => e
-      Rails.logger.warn("RatesService.rate encountered a connection error: #{e.class.name}")
-      return nil
+  def rate(loan, term, type='Live') # type=Live|StartOfDay
+    if data = get_json(:rate, "rates/#{loan}/#{term}/#{type}")
+      data[:rate] = data[:rate].to_f if data[:rate]
+      data[:updated_at] = DateTime.parse(data[:updated_at]) if data[:updated_at]
+      data
     end
-
-    begin
-      data = JSON.parse(response.body).with_indifferent_access
-    rescue JSON::ParserError => e
-      Rails.logger.warn("RatesService.rate encountered a JSON parsing error: #{e}")
-      return nil
-    end
-
-    data[:rate] = data[:rate].to_f if data[:rate]
-    data[:updated_at] = DateTime.parse(data[:updated_at]) if data[:updated_at]
-    data
   end
 
   def current_overnight_vrc

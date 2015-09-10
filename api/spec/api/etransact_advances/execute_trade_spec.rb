@@ -55,10 +55,10 @@ describe MAPI::ServiceApp do
     let(:whole_1_week_response) {{:payment_at=>'Maturity', :advance_payment_frequency=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'T'}, :advance_payment_day_of_month=>0}}
     let(:next_month_response) {{:payment_at=>'Maturity', :advance_payment_frequency=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'M'}, :advance_payment_day_of_month=>0}}
     it 'should return overnight payment info' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('overnight', 'whole', Date.today, Date.today)).to eq(overnight_response)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('overnight', 'whole', Time.zone.today, Time.zone.today)).to eq(overnight_response)
     end
     it 'should return open payment info' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('open', 'whole', Date.today, Date.today)).to eq(open_response)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('open', 'whole', Time.zone.today, Time.zone.today)).to eq(open_response)
     end
     it 'should return whole loan 1 week payment info' do
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('1week', 'whole', Date.new(2015,6,7), Date.new(2015,6,7))).to eq(whole_1_week_response)
@@ -67,7 +67,7 @@ describe MAPI::ServiceApp do
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('1week', 'whole', Date.new(2015,6,30), Date.new(2015,6,30))).to eq(next_month_response)
     end
     it 'should return next month payment info' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('1week', 'whole', Date.today, Date.today+32.days)).to eq(next_month_response)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('1week', 'whole', Time.zone.today, Time.zone.today+32.days)).to eq(next_month_response)
     end
   end
 
@@ -79,7 +79,7 @@ describe MAPI::ServiceApp do
         'v13:initialRate'=>rate,
         'v13:floatingRateSchedule'=>{
           'v13:floatingPeriod'=>{
-            'v13:startDate'=>Date.today,
+            'v13:startDate'=>Time.zone.today,
             'v13:rateIndices'=>{
               'v13:rateIndex'=>{
                 'v13:index'=>'',
@@ -103,8 +103,8 @@ describe MAPI::ServiceApp do
         'v13:initialRate'=>rate,
         'v13:fixedRateSchedule'=>{
           'v13:step'=>{
-            'v13:startDate'=>Date.today,
-            'v13:endDate'=>Date.today,
+            'v13:startDate'=>Time.zone.today,
+            'v13:endDate'=>Time.zone.today,
             'v13:rate'=>rate,
             'v13:dayCountBasis'=>day_count
           }
@@ -113,10 +113,10 @@ describe MAPI::ServiceApp do
       }
     }
     it 'should return overnight advance rate schedule' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_rate_schedule('overnight', rate, day_count, Date.today, Date.today)).to eq(overnight_response)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_rate_schedule('overnight', rate, day_count, Time.zone.today, Time.zone.today)).to eq(overnight_response)
     end
     it 'should return week advance rate schedule' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_rate_schedule('1week', rate, day_count, Date.today, Date.today)).to eq(week_response)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_rate_schedule('1week', rate, day_count, Time.zone.today, Time.zone.today)).to eq(week_response)
     end
   end
 

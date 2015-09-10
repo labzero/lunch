@@ -16,10 +16,12 @@ class RenderReportPDFJob < FhlbJob
 
     controller.session['member_id'] = member_id
     controller.session['member_name'] = member[:name]
+    controller.session['sta_number'] = member[:sta_number]
     controller.instance_variable_set(:@inline_styles, true)
     controller.instance_variable_set(:@skip_javascript, true)
     controller.instance_variable_set(:@print_layout, true)
     controller.instance_variable_set(:@member_name, controller.session['member_name'])
+    controller.instance_variable_set(:@sta_number, controller.session['sta_number'])
     controller.params = params
     controller.class_eval { layout 'print' }
     return if job_status.canceled?

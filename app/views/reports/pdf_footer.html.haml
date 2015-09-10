@@ -1,10 +1,15 @@
 - @member_name ||= ''
-- @as_of ||= @end_date || @start_date || @date || Time.zone.now.to_date
+- @as_of ||= @date || Time.zone.now.to_date
 - @report_name ||= t('global.report')
+- @start_date ||= nil
+- @end_date ||= nil
 .report-print-footer
   = t('global.fhlb_full')
   %span.report-bank-name
     = @member_name
   %span.report-as-of
-    = t('reports.pdf_footer', date: fhlb_date_standard_numeric(@as_of), report_name: @report_name)
+    - if @start_date && @end_date
+      = t('reports.pdf_footer_range', date: t('datepicker.range.print', start_date: fhlb_date_standard_numeric(@start_date), end_date: fhlb_date_standard_numeric(@end_date)), report_name: @report_name)
+    - else
+      = t('reports.pdf_footer', date: fhlb_date_standard_numeric(@as_of), report_name: @report_name)
   %span.page 1
