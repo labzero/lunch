@@ -13,8 +13,9 @@ Then(/^I should see the (reports|resources|products) dropdown$/) do |dropdown|
   report_menu.parent.assert_selector('.nav-dropdown', visible: true)
 end
 
-When(/^I click on the (reports|guides|forms|agreements|authorizations|credit|collateral|products summary|arc embedded|frc|frc embedded|arc|amortizing|choice libor|auction indexed|knockout|putable|other cash needs|callable) link in the header$/) do |link|
+When(/^I click on the (reports|guides|forms|agreements|authorizations|credit|collateral|products summary|arc embedded|frc|frc embedded|arc|amortizing|choice libor|auction indexed|knockout|putable|other cash needs|callable|variable rate credit) link in the header$/) do |link|
   page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
+When(/^I click on the (reports|guides|forms|agreements|authorizations|credit|collateral|products summary|arc embedded|frc|frc embedded|arc|amortizing|choice libor|auction indexed|knockout|putable|other cash needs|callable|variable rate credit) link in the header$/) do |link|
 end
 
 Then(/^I should see the primary bank name in the header$/) do
@@ -65,6 +66,8 @@ def dropdown_title_regex(dropdown)
     I18n.t('products.advances.putable.title')
   when 'callable'
     I18n.t('products.advances.callable.title')
+  when 'variable rate credit'
+    I18n.t('products.advances.vrc.title')
   else
     raise 'unknown dropdown'
   end

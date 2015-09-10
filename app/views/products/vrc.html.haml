@@ -1,0 +1,26 @@
+.row.product-page
+  .column-2x10-right
+    %h1= t('products.advances.vrc.title')
+    %p= t('products.advances.vrc.description')
+    %h2= t('products.section_headings.uses')
+    %ul
+      %li= t('products.advances.vrc.uses.manage')
+      %li= t('products.advances.vrc.uses.obtain')
+      %li= t('products.advances.vrc.uses.access')
+      %li= t('products.advances.vrc.uses.offset')
+    %h2= t('products.section_headings.advantages')
+    %ul
+      %li= t('products.advances.vrc.advantages.same_day')
+      %li= t('products.advances.vrc.advantages.flexible')
+    %h2= t('products.section_headings.features')
+    %h3= t('products.common_key_features.maturity')
+    %p= t('products.advances.vrc.maturity')
+    %h3= t('products.common_key_features.interest_rate')
+    %p= t('products.advances.vrc.interest_rate')
+    %h3= t('products.common_key_features.interest_day_count')
+    %p= t('products.advances.vrc.interest_day_count')
+    %h3= t('products.common_key_features.interest_payment_frequency')
+    %p= t('products.advances.vrc.interest_payment_frequency')
+    %h3= t('products.common_key_features.repayment')
+    %p= t('products.advances.vrc.repayment')
+    .last-modified= t('products.section_headings.last_modified', date: fhlb_date_short_alpha(@last_modified))
