@@ -9,24 +9,24 @@ module MAPI
       include MAPI::Shared::Constants
       include MAPI::Shared::Utils
 
-      def self.holiday?(holidays, date)
+      def self.holiday?(date, holidays)
         holidays.include?(date.strftime('%F'))
       end
 
-      def self.weekend_or_holiday?(holidays, date)
-        date.saturday? || date.sunday? || holiday?(holidays,date)
+      def self.weekend_or_holiday?(date, holidays)
+        date.saturday? || date.sunday? || holiday?(date, holidays)
       end
 
-      def self.find_nearest_business_day(holidays, original, frequency_unit)
+      def self.find_nearest_business_day(original, frequency_unit, holidays)
         candidate = original.to_date
-        while MAPI::Services::Rates.weekend_or_holiday?(holidays, candidate)
+        while MAPI::Services::Rates.weekend_or_holiday?(candidate, holidays)
           candidate += 1.day
         end
         if (frequency_unit == 'M' || frequency_unit == 'Y')
           end_of_month = original.to_date.end_of_month
           if (candidate > end_of_month)
             candidate = end_of_month
-            while MAPI::Services::Rates.weekend_or_holiday?(holidays, candidate)
+            while MAPI::Services::Rates.weekend_or_holiday?(candidate, holidays)
               candidate -= 1.day
             end
           end
@@ -44,9 +44,6 @@ module MAPI
         cant_display          = !loan_term['display_status']
         blacked_out || cant_trade || cant_display || live_rate < threshold_min || live_rate > threshold_max
       end
-
-      SOAP_HEADER = {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}}
-      COMMON = { env_namespace: :soapenv, element_form_default: :qualified, namespace_identifier: :v1, pretty_print_xml: true }
 
       def self.soap_client(endpoint, namespaces)
         Savon.client( COMMON.merge( wsdl: ENV[endpoint], namespaces: namespaces ) )
@@ -122,7 +119,7 @@ module MAPI
                                     'v1:requests' =>  [{'v1:fhlbsfMarketDataRequest' => LOAN_TYPES.map{ |lt| market_data_message_for_loan_type(lt, live_or_start_of_day)}}]
                                 },
                                 soap_header: SOAP_HEADER )
-        rescue Savon::Error => error
+        rescue => error
           logger.error error
           return nil
         end
@@ -605,7 +602,7 @@ module MAPI
           LOAN_TYPES.each do |type|
             LOAN_TERMS.each do |term|
               live                 = live_data[type][term]
-              live[:maturity_date] = MAPI::Services::Rates.find_nearest_business_day(holidays, live[:maturity_date], TERM_MAPPING[term][:frequency_unit])
+              live[:maturity_date] = MAPI::Services::Rates.find_nearest_business_day(live[:maturity_date], TERM_MAPPING[term][:frequency_unit], holidays)
               live[:disabled]      = MAPI::Services::Rates.disabled?(live, start_of_day[type][term], rate_bands[term], loan_terms[term][type], blackout_dates)
             end
           end

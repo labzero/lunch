@@ -6,6 +6,7 @@ module MAPI
         include MAPI::Shared::Constants
 
         SQL = 'select * from web_adm.ao_rate_bands'
+        # uses FOBO_TERM_FREQUENCY, FOBO_TERM_UNIT, LOW_BAND_OFF_BP, HI_BAND_OFF_BP
 
         def self.get_terms(rate_band)
           FREQUENCY_MAPPING.fetch( "#{rate_band["FOBO_TERM_FREQUENCY"]}#{rate_band["FOBO_TERM_UNIT"]}", [] )

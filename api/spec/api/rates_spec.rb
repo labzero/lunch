@@ -72,14 +72,15 @@ describe MAPI::ServiceApp do
       h = Hash.new(default)
       h[:'1year'] = { whole:  { trade_status: false, display_status: true  } }
       h[:'3year'] = { agency: { trade_status: true,  display_status: false } }
-      h[:'1year'].default= default
-      h[:'3year'].default= default
+      h[:'1year'].default = default
+      h[:'3year'].default = default
       h
     end
     let(:live_hash) do
       JSON.parse(File.read(File.join(MAPI.root, 'fakes', "market_data_live_rates.json"))).with_indifferent_access
     end
     let (:threshold) { 0.1 }
+    let (:threshold_as_BPS) { (threshold*100).to_i.to_s }
 
     let(:start_of_day_hash) do
       h = JSON.parse(File.read(File.join(MAPI.root, 'fakes', "market_data_live_rates.json"))).with_indifferent_access
@@ -87,7 +88,7 @@ describe MAPI::ServiceApp do
       h[:aaa][:'1week'][:rate] = (h[:aa][:'1week'][:rate].to_f - (2*threshold)).to_s
       h
     end
-    let(:rate_bands_hash) { Hash.new(Hash.new( (threshold*100).to_i.to_s )) }
+    let(:rate_bands_hash) { Hash.new(Hash.new( threshold_as_BPS )) }
     let(:rate_summary) do
       get '/rates/summary'
       JSON.parse(last_response.body).with_indifferent_access
@@ -132,7 +133,7 @@ describe MAPI::ServiceApp do
     end
 
     it "should always call get_maturity_date" do
-      expect(MAPI::Services::Rates).to receive(:find_nearest_business_day).at_least(48).with(kind_of(Array), kind_of(Date), kind_of(String))
+      expect(MAPI::Services::Rates).to receive(:find_nearest_business_day).at_least(48).with(kind_of(Date), kind_of(String), kind_of(Array))
       get '/rates/summary'
     end
 
@@ -230,16 +231,16 @@ describe MAPI::ServiceApp do
       allow(holiday).to receive(:strftime).with('%F').and_return(formatted)
     end
     it "should return true for saturday" do
-      expect(subject.weekend_or_holiday?(holidays, saturday)).to be_truthy
+      expect(subject.weekend_or_holiday?(saturday, holidays)).to be_truthy
     end
     it "should return true for sunday" do
-      expect(subject.weekend_or_holiday?(holidays, sunday)).to be_truthy
+      expect(subject.weekend_or_holiday?(sunday, holidays)).to be_truthy
     end
     it "should return true for monday" do
-      expect(subject.weekend_or_holiday?(holidays, monday)).to be_falsey
+      expect(subject.weekend_or_holiday?(monday, holidays)).to be_falsey
     end
     it "should return true for holiday" do
-      expect(subject.weekend_or_holiday?(holidays, holiday)).to be_truthy
+      expect(subject.weekend_or_holiday?(holiday, holidays)).to be_truthy
     end
   end
 
@@ -260,21 +261,21 @@ describe MAPI::ServiceApp do
       allow(day2_str).to receive(:to_date).and_return(day2)
     end
     it "should return the same date if is not a weekend" do
-      allow(subject).to receive(:weekend_or_holiday?).with(holidays, day1).and_return(false)
-      expect(subject.find_nearest_business_day(holidays, day1_str, 'W')).to eq(day1)
+      allow(subject).to receive(:weekend_or_holiday?).with(day1, holidays).and_return(false)
+      expect(subject.find_nearest_business_day(day1_str, 'W', holidays)).to eq(day1)
     end
     it "should return the next non weekend date if is weekend" do
-      allow(subject).to receive(:weekend_or_holiday?).with(holidays, day1).and_return(true)
-      allow(subject).to receive(:weekend_or_holiday?).with(holidays, day2).and_return(false)
-      expect(subject.find_nearest_business_day(holidays, day1_str, 'W')).to eq(day2)
+      allow(subject).to receive(:weekend_or_holiday?).with(day1, holidays).and_return(true)
+      allow(subject).to receive(:weekend_or_holiday?).with(day2, holidays).and_return(false)
+      expect(subject.find_nearest_business_day(day1_str, 'W', holidays)).to eq(day2)
     end
     it "should return the previous non weekend date if is weekend and month/year term and hits next month" do
-      allow(subject).to receive(:weekend_or_holiday?).with(holidays, day1).and_return(false)
-      allow(subject).to receive(:weekend_or_holiday?).with(holidays, day2).and_return(true)
-      allow(subject).to receive(:weekend_or_holiday?).with(holidays, day3).and_return(false)
+      allow(subject).to receive(:weekend_or_holiday?).with(day1, holidays).and_return(false)
+      allow(subject).to receive(:weekend_or_holiday?).with(day2, holidays).and_return(true)
+      allow(subject).to receive(:weekend_or_holiday?).with(day3, holidays).and_return(false)
       allow(day3).to receive('>').with(day2).and_return(true)
       allow(day2).to receive(:end_of_month).and_return(day2)
-      expect(subject.find_nearest_business_day(holidays, day2_str, 'Y')).to eq(day1)
+      expect(subject.find_nearest_business_day(day2_str, 'Y', holidays)).to eq(day1)
     end
   end
 

@@ -3,6 +3,9 @@ require 'active_support/core_ext/hash/indifferent_access'
 module MAPI
   module Shared
     module Constants
+      SOAP_HEADER = {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}}
+      COMMON = { env_namespace: :soapenv, element_form_default: :qualified, namespace_identifier: :v1, pretty_print_xml: true }
+
       COLLATERAL_TYPES = [:standard, :sbc]
       COLLATERAL_MAPPING = {
           standard: 'REGULAR',
