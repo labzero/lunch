@@ -248,8 +248,8 @@ class MemberBalanceService < MAPIService
     data
   end
 
-  def lenient_sum(xs, field)
-    xs.map{|x| x[field]}.compact.sum
+  def lenient_sum(hashes, field)
+    hashes.map{|hash| hash[field]}.compact.sum
   end
 
   def securities_transactions(as_of_date)
