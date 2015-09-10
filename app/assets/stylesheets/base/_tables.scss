@@ -63,6 +63,12 @@
   }
 }
 
+%table-nested-rows {
+  .nested-row td:first-child {
+    padding-left: 40px;
+  }
+}
+
 %table-footer-cell {
   @extend %typography-table-total;
   background-color: $medium-gray;
