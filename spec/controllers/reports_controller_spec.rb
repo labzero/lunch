@@ -1093,18 +1093,12 @@ RSpec.describe ReportsController, :type => :controller do
   end
 
   describe 'most_recent_business_day' do
-    let (:fri) { double('fri') }
-    let (:sat) { double('sat') }
-    let (:sun) { double('sun') }
+    let (:fri) { double('fri', saturday?: false, sunday?: false) }
+    let (:sat) { double('sat', saturday?: true,  sunday?: false) }
+    let (:sun) { double('sun', saturday?: false, sunday?: true)  }
     before do
       allow(sun).to receive(:-).with(1.day).and_return(sat)
       allow(sat).to receive(:-).with(1.day).and_return(fri)
-      allow(sun).to receive(:saturday?).and_return(false)
-      allow(sun).to receive(:sunday?).and_return(true)
-      allow(sat).to receive(:saturday?).and_return(true)
-      allow(sat).to receive(:sunday?).and_return(false)
-      allow(fri).to receive(:saturday?).and_return(false)
-      allow(fri).to receive(:sunday?).and_return(false)
     end
     it 'should return fri for sun' do
       expect(subject.most_recent_business_day(sun)).to be(fri)
