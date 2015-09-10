@@ -290,6 +290,16 @@ describe MemberBalanceService do
     end
   end
 
+  describe 'lenient_sum' do
+    let (:sample) { [{a: 1, b: 2}, {a:-1, c:3}, {b:-10, c:5}]}
+
+    [[:a,0],[:b,-8],[:c,8],[:d,0]].each do |(sym,sum)|
+      it "should return #{sum} for #{sym}" do
+        expect(subject.lenient_sum(sample,sym)).to be(sum)
+      end
+    end
+  end
+
   # TODO add vcr once MAPI endpoint is rigged up
   describe 'securities_transactions' do
     let(:as_of_date) {Date.new(2015,1,20)}
