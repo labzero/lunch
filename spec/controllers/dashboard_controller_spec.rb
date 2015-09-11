@@ -7,6 +7,8 @@ RSpec.describe DashboardController, :type => :controller do
   end
 
   describe "GET index", :vcr do
+    let(:member_id) {750}
+    let(:empty_financing_availability_gauge) {{total: {amount: 0, display_percentage: 100, percentage: 0}}}
     before do
       allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
       allow(subject).to receive(:current_user_roles)
@@ -158,17 +160,52 @@ RSpec.describe DashboardController, :type => :controller do
       it 'should assign @borrowing_capacity_guage to a zeroed out gauge if the balance could not be retrieved' do
         allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).and_return(nil)
         get :index
-        expect(assigns[:borrowing_capacity_gauge]).to eq({total: {amount: 0, display_percentage: 100, percentage: 0}})
+        expect(assigns[:borrowing_capacity_gauge]).to eq(empty_financing_availability_gauge)
       end
       it 'should assign @financing_availability_gauge to a zeroed out gauge if there is no value for `financing_availability` in the profile' do
         allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return({credit_outstanding: {}})
         get :index
-        expect(assigns[:financing_availability_gauge]).to eq({total: {amount: 0, display_percentage: 100, percentage: 0}})
+        expect(assigns[:financing_availability_gauge]).to eq(empty_financing_availability_gauge)
       end
       it 'should respond with a 200 even if MemberBalanceService#profile returns nil' do
         allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
         get :index
         expect(response).to be_success
+      end
+    end
+    describe "Member Service flags" do
+      before do
+        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, anything).and_return(false)
+      end
+      it 'should set @financing_availability_gauge to be zeroed out if the report is disabled' do
+        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::FINANCING_AVAILABLE_DATA]).and_return(true)
+        get :index
+        expect(assigns[:financing_availability_gauge]).to eq(empty_financing_availability_gauge)
+      end
+      it 'should set @account_overview to have zero sta balance if the report is disabled' do
+        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]).and_return(true)
+        get :index
+        expect(assigns[:account_overview][:sta_balance][0]).to eq(["STA Balance:*", nil, "*as of close of business on prior business day"])
+      end
+      it 'should set @account_overview to have zero credit outstanding balance if the report is disabled' do
+        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::CREDIT_OUTSTANDING_DATA]).and_return(true)
+        get :index
+        expect(assigns[:account_overview][:credit_outstanding][0]).to eq(["Credit Outstanding:", nil])
+      end
+      it 'should set @account_overview to have zero capital stock remaining balance if the report is disabled' do
+        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::FHLB_STOCK_DATA]).and_return(true)
+        get :index
+        expect(assigns[:account_overview][:remaining][3]).to eq(["Stock Leverage", nil, nil, 2])
+      end
+      it 'should set @account_overview to have zero collateral borrowing capacity if the report is disabled' do
+        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA]).and_return(true)
+        get :index
+        expect(assigns[:account_overview][:remaining][2]).to eq(["Collateral Borrowing Capacity", nil])
+      end
+      it 'should set @borrowing_capacity to be nil if the report is disabled' do
+        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_REPORT_DATA]).and_return(true)
+        get :index
+        expect(assigns[:borrowing_capacity]).to eq(nil)
       end
     end
   end
