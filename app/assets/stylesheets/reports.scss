@@ -965,10 +965,13 @@ td.dataTables_empty {
 }
 
 @media print {
+  a, .report-main-body small a, .advances-main-body small a, .authorizations-report a, .reports a, .report a {
+    color: $print-link-color;
+  }
   .account-summary-report .report-table:not(.account-summary-collateral-totals) tbody td:first-child,
   .account-summary-report tfoot,
   .account-summary-collateral-totals tbody td {
-    color: $text-color;
+    color: $print-color;
     background: transparent;
   }
   .account-summary-collateral-notice {
@@ -979,15 +982,13 @@ td.dataTables_empty {
     }
   }
   .account-summary-report {
-    .header-with-action {
+    h2.header-with-action {
       text-align: left;
-      width: 100%;
-      margin-left: 0;
-      display: block;
       a {
-        visibility: hidden;
+        display: none;
       }
       span {
+        display: block;
         float: none;
       }
     }
@@ -1002,7 +1003,7 @@ td.dataTables_empty {
       @include typography-print-details;
       color: $print-color;
     }
-    tfoot td, .account-summary-collateral-totals  {
+    tfoot td, .account-summary-collateral-totals tbody td {
       color: $print-color;
       @include typography-print-table-total;
     }
