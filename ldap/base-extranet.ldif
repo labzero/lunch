@@ -65,6 +65,20 @@ userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: chaste-delete@example.com
 
+# extra-chaste-reset user
+dn: sAMAccountName=extra-chaste-reset,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet User Reset - Chaste Manhatten
+displayName: Chaste Reset
+givenName: Chaste
+sn: Reset
+sAMAccountName: extra-chaste-reset
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: chaste-reset@example.com
+
 # extra-wells user
 dn: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
 objectClass: user
@@ -88,6 +102,7 @@ objectClass: top
 member: sAMAccountName=extra-chaste,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-delete,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-chaste-reset,dc=extranet,dc=fhlbsf,dc=com
 
 # Wells Faygo
 dn: CN=FHLB5,dc=extranet,dc=fhlbsf,dc=com

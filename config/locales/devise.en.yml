@@ -31,7 +31,7 @@ en:
       send_instructions: "You will receive an email with instructions on how to reset your password in a few minutes."
       send_paranoid_instructions: "If your email address exists in our database, you will receive a password recovery link at your email address in a few minutes."
       updated: "Your password has been changed successfully. You are now signed in."
-      updated_not_active: "Your password has been changed successfully."
+      updated_not_active: "Your password has been updated."
       username_not_found: The username you entered was not found. Please verify your username and try again.
     registrations:
       destroyed: "Bye! Your account has been successfully cancelled. We hope to see you again soon."
