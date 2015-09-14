@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe DatePickerHelper do
   let(:today) { Date.new(2013, 1, 1) }
-  let(:zone) {double('Time.zone', now: double('Time.zone.now', to_date: today))}
+  let(:zone) {double('Time.zone', today: today)}
   before do
     allow(Time).to receive(:zone).at_least(1).and_return(zone)
   end
@@ -35,7 +35,7 @@ describe DatePickerHelper do
     describe 'when the current quarter is a q1_date' do
       let(:today) { q1_date }
       before do
-        allow(Time).to receive(:zone).at_least(1).and_return(double('Time.zone', now: double('Time.zone.now', to_date: today)))
+        allow(Time).to receive(:zone).at_least(1).and_return(double('Time.zone', today: today))
       end
       it 'returns 4 as the quarter' do
         expect(helper.last_quarter[:quarter]).to eq(4)
@@ -48,7 +48,7 @@ describe DatePickerHelper do
       describe "when the current quarter is a #{date}" do
         let(:today) {date}
         before do
-          allow(Time).to receive(:zone).at_least(1).and_return(double('Time.zone', now: double('Time.zone.now', to_date: today)))
+          allow(Time).to receive(:zone).at_least(1).and_return(double('Time.zone', today: today))
         end
         it 'returns the current quarter minus 1 as the quarter' do
           expect(helper.last_quarter[:quarter]).to eq(((today.month / 3.0).ceil) - 1)
@@ -92,11 +92,13 @@ describe DatePickerHelper do
   describe '`date_picker_presets` method' do
     let(:start_date) { Date.new(2013, 1, 1) }
     let(:end_date) { Date.new(2015, 12, 16) }
+    let(:date_history) { 6.months }
+    let(:min_date) { Time.zone.today - date_history }
     let(:presets_array_single) {double('presets array', each: nil)}
     let(:presets_array_range) {double('presets array', each: nil)}
     before do
-      allow(helper).to receive(:date_picker_single).with(start_date).and_return(presets_array_single)
-      allow(helper).to receive(:date_picker_range).with(start_date, end_date).and_return(presets_array_range)
+      allow(helper).to receive(:date_picker_single).with(start_date, nil).and_return(presets_array_single)
+      allow(helper).to receive(:date_picker_range).with(start_date, end_date, nil).and_return(presets_array_range)
     end
     describe 'when passed only a start date' do
       it 'should return the result of `date_picker_single`' do
@@ -108,9 +110,13 @@ describe DatePickerHelper do
         expect(helper.date_picker_presets(start_date).first[:is_default]).to be(true)
         expect(helper.date_picker_presets(start_date).last[:is_default]).to be_falsey
       end
+      it 'passes min_date to `date_picker_single` if a date_history argument is provided' do
+        expect(helper).to receive(:date_picker_single).with(start_date, min_date ).and_return(presets_array_single)
+        helper.date_picker_presets(start_date, nil, date_history)
+      end
     end
     describe 'when passed a start date and an end date' do
-      it 'should return the result of `date_picker_single`' do
+      it 'should return the result of `date_picker_range`' do
         expect(helper.date_picker_presets(start_date, end_date)).to eq(presets_array_range)
       end
       it 'marks a preset as `is_default` if its start_date and end date matches the the provided start date' do
@@ -120,86 +126,102 @@ describe DatePickerHelper do
         expect(helper.date_picker_presets(start_date, end_date)[1][:is_default]).to be_falsey
         expect(helper.date_picker_presets(start_date, end_date).last[:is_default]).to be_falsey
       end
+      it 'passes min_date to `date_picker_range` if given' do
+        expect(helper).to receive(:date_picker_range).with(start_date, end_date, min_date).and_return(presets_array_range)
+        helper.date_picker_presets(start_date, end_date, date_history)
+      end
     end
   end
 
   describe '`date_picker_range` method' do
     let(:start_date) { Date.new(2013, 1, 1) }
     let(:end_date) { Date.new(2015, 12, 16) }
+    let(:min_date) { Date.new(2012, 6, 1) }
     it 'returns an array of presets' do
-      expect(helper.date_picker_range(start_date, end_date)).to be_kind_of(Array)
+      expect(helper.date_picker_range(start_date, end_date, nil)).to be_kind_of(Array)
     end
     describe 'a preset object' do
       it 'has a label' do
-        helper.date_picker_range(start_date, end_date).each do |preset|
+        helper.date_picker_range(start_date, end_date, nil).each do |preset|
           expect(preset[:label]).to be_kind_of(String)
         end
       end
       it 'has a label' do
-        helper.date_picker_range(start_date, end_date).each do |preset|
+        helper.date_picker_range(start_date, end_date, nil).each do |preset|
           expect(preset[:label]).to be_kind_of(String)
         end
       end
       it 'has a start_date' do
-        helper.date_picker_range(start_date, end_date).each do |preset|
+        helper.date_picker_range(start_date, end_date, nil).each do |preset|
           expect(preset[:start_date]).to be_kind_of(Date)
         end
       end
       it 'has an end_date' do
-        helper.date_picker_range(start_date, end_date).each do |preset|
+        helper.date_picker_range(start_date, end_date, nil).each do |preset|
           expect(preset[:end_date]).to be_kind_of(Date)
         end
       end
       describe 'the last preset object' do
         it 'has a start_date that is the same as the one provided to the method' do
-          expect(helper.date_picker_range(start_date, end_date).last[:start_date]).to eq(start_date)
+          expect(helper.date_picker_range(start_date, end_date, nil).last[:start_date]).to eq(start_date)
         end
         it 'has a end_date that is the same as the one provided to the method' do
-          expect(helper.date_picker_range(start_date, end_date).last[:end_date]).to eq(end_date)
+          expect(helper.date_picker_range(start_date, end_date, nil).last[:end_date]).to eq(end_date)
         end
         it 'is marked as `is_custom`' do
-          expect(helper.date_picker_range(start_date, end_date).last[:is_custom]).to be(true)
+          expect(helper.date_picker_range(start_date, end_date, nil).last[:is_custom]).to be(true)
         end
+      end
+    end
+    it 'excludes any presets that have a start date less than the min date provided' do
+      helper.date_picker_range(start_date, today, min_date).each do |preset|
+        expect(preset[:start_date]).to be > min_date
       end
     end
   end
 
   describe '`date_picker_single` method' do
     let(:start_date) { Date.new(2013, 1, 1) }
+    let(:min_date) { Date.new(2012, 6, 1) }
     it 'returns an array of presets' do
-      expect(helper.date_picker_single(start_date)).to be_kind_of(Array)
+      expect(helper.date_picker_single(start_date, nil)).to be_kind_of(Array)
     end
     describe 'a preset object' do
       it 'has a label' do
-        helper.date_picker_single(start_date).each do |preset|
+        helper.date_picker_single(start_date, nil).each do |preset|
           expect(preset[:label]).to be_kind_of(String)
         end
       end
       it 'has a label' do
-        helper.date_picker_single(start_date).each do |preset|
+        helper.date_picker_single(start_date, nil).each do |preset|
           expect(preset[:label]).to be_kind_of(String)
         end
       end
       it 'has a start_date' do
-        helper.date_picker_single(start_date).each do |preset|
+        helper.date_picker_single(start_date, nil).each do |preset|
           expect(preset[:start_date]).to be_kind_of(Date)
         end
       end
       it 'has an end_date' do
-        helper.date_picker_single(start_date).each do |preset|
+        helper.date_picker_single(start_date, nil).each do |preset|
           expect(preset[:end_date]).to be_kind_of(Date)
         end
       end
       describe 'the last preset object' do
         it 'has a start_date that is the same as the one provided to the method' do
-          expect(helper.date_picker_single(start_date).last[:start_date]).to eq(start_date)
+          expect(helper.date_picker_single(start_date, nil).last[:start_date]).to eq(start_date)
         end
         it 'has a end_date that is the same as the start date provided to the method' do
-          expect(helper.date_picker_single(start_date).last[:end_date]).to eq(start_date)
+          expect(helper.date_picker_single(start_date, nil).last[:end_date]).to eq(start_date)
         end
         it 'is marked as `is_custom`' do
-          expect(helper.date_picker_single(start_date).last[:is_custom]).to be(true)
+          expect(helper.date_picker_single(start_date, nil).last[:is_custom]).to be(true)
         end
+      end
+    end
+    it 'excludes any presets that have a start date less than the min date provided' do
+      helper.date_picker_single(start_date, min_date).each do |preset|
+        expect(preset[:start_date]).to be > min_date
       end
     end
   end
