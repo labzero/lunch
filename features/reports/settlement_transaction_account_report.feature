@@ -32,7 +32,7 @@ Then I should see a "Settlement Transaction Account Statement" with data for dat
 @jira-mem-247, @jira-mem-503
 Scenario: Member filters the Settlement Transaction Account Statement
 Given I am on the "Settlement Transaction Account Statement" report page
-And I am showing Settlement Transaction Account activities for 2014
+And I am showing Settlement Transaction Account activities for the last 3 months
 When I filter the report by "Credits"
 Then I should only see "Credit" rows in the Settlement Transaction Account Statement table
 When I filter the report by "Debits"

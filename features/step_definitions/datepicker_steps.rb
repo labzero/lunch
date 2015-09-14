@@ -53,8 +53,8 @@ end
 When(/^I select a start date of "(.*?)" and an end date of "(.*?)"$/) do |start_date, end_date|
   start_date = start_date.to_date
   end_date = end_date.to_date
-  step %{I select the 1st of "#{start_date.strftime("%b %Y")}" in the left calendar}
-  step %{I select the 31st of "#{end_date.strftime("%b %Y")}" in the right calendar}
+  step %{I select the #{start_date.strftime('%-d')}th of "#{start_date.strftime("%b %Y")}" in the left calendar}
+  step %{I select the #{end_date.strftime('%-d')}th of "#{end_date.strftime("%b %Y")}" in the right calendar}
 end
 
 When(/^I select all of last year including today$/) do
@@ -110,6 +110,17 @@ end
 When(/^I write "(.*?)" in the datepicker (start|end) input field$/) do |date, input|
   page.fill_in("daterangepicker_#{input}", with: ' ') # Capybara doesn't always clear input
   page.fill_in("daterangepicker_#{input}", with: date.to_s)
+end
+
+When(/^I write today's date in the datepicker end input field$/) do
+  page.fill_in('daterangepicker_end', with: ' ') # Capybara doesn't always clear input
+  page.fill_in('daterangepicker_end', with: Time.zone.today.strftime('%_m/%-d/%Y'))
+end
+
+When(/^I write a date from one month ago in the datepicker start input field$/) do
+  date = Time.zone.today - 1.month
+  page.fill_in('daterangepicker_start', with: ' ') # Capybara doesn't always clear input
+  page.fill_in('daterangepicker_start', with: date.strftime('%_m/%-d/%Y'))
 end
 
 def get_datepicker_preset_label(preset)
