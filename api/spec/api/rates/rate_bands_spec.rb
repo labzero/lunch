@@ -37,10 +37,11 @@ describe MAPI::Services::Rates::RateBands do
 
   describe 'development' do
     describe 'rate_bands_development' do
-      let(:json) { double('json') }
+      let(:json) { double('json', with_indifferent_access: hash) }
+      let(:hash) { double('json') }
       it 'should parse some JSON' do
         allow(JSON).to receive(:parse).and_return(json)
-        expect(subject.rate_bands_development).to be == json
+        expect(subject.rate_bands_development).to be == hash
       end
     end
   end

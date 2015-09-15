@@ -591,8 +591,8 @@ module MAPI
             start_of_day = MAPI::Services::Rates.extract_market_data_from_soap_response(start_of_day_xml)
           else
             # We have no real data source yet.
-            live_data    = MAPI::Services::Rates.fake('market_data_live_rates').with_indifferent_access
-            start_of_day = MAPI::Services::Rates.fake('market_data_start_of_day_rates').with_indifferent_access
+            live_data    = MAPI::Services::Rates.fake_hash('market_data_live_rates')
+            start_of_day = MAPI::Services::Rates.fake_hash('market_data_start_of_day_rates')
             # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
             LOAN_TYPES.each do |type|
               LOAN_TERMS.each do |term|

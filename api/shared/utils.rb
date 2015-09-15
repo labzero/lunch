@@ -12,6 +12,10 @@ module MAPI
           JSON.parse(File.read(File.join(MAPI.root, 'fakes', "#{filename}.json")))
         end
 
+        def fake_hash(filename)
+          fake(filename).with_indifferent_access
+        end
+
         def fetch_hashes(logger, sql)
           begin
             results = []
