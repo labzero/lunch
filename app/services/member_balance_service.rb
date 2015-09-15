@@ -339,29 +339,37 @@ class MemberBalanceService < MAPIService
 
   def todays_credit_activity
     if data = get_json(:todays_credit_activity, "/member/#{@member_id}/todays_credit_activity")
-      #TODO - check for no maturity date, add 'Open' if that's the case
-      # Handling for Advances that have been EXERCISED
-      # if (instrument_type == 'ADVANCE' || instrument_type == 'LC') && status == 'EXERCISED'
-      #   product_description = termination_full_partial
-      #   interest_rate = nil
-      # else
-      #   # handling for Termination Par
-      #   if !termination_par.blank?
-      #     if !termination_full_partial.blank?
-      #       product_description = if instrument_type == 'ADVANCE' || instrument_type == 'LC'
-      #                               termination_full_partial
-      #                             elsif status == 'TERMINATED'
-      #                               'TERMINATION'
-      #                             end
-      #     else
-      #
-      #     end
-      #   else
-      #
-      #   end
-      #
-      # end
+      processed_data = []
+      data.each do |activity|
+        activity = activity.with_indifferent_access
+        # Handling for Advances that have been EXERCISED
+        if (activity[:instrument_type] == 'ADVANCE' || activity[:instrument_type] == 'LC') && activity[:status] == 'EXERCISED'
+          activity[:product_description] = activity[:termination_full_partial]
+          activity[:interest_rate] = nil
+        else
+          activity[:product_description] =
+            # handling for Termination Par
+          if !activity[:termination_par].blank?
+            if !activity[:termination_full_partial].blank?
+              if activity[:instrument_type] == 'ADVANCE' || activity[:instrument_type] == 'LC'
+                           activity[:termination_full_partial]
+              elsif activity[:status] == 'TERMINATED'
+                'TERMINATION'
+              else
+                activity[:instrument_type]
+              end
+            # else - leave the product_description as-is
+            end
+          elsif activity[:instrument_type] == 'ADVANCE'
+            activity[:instrument_type] + ' ' + activity[:sub_product]
+          else
+            activity[:instrument_type]
+          end
+        end
+        %i(funding_date maturity_date).each { |date_attr| fix_date(activity, date_attr) }
+        processed_data.push(activity)
+      end
+      processed_data
     end
-    data
   end
 end

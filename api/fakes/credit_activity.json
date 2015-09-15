@@ -1,26 +1,47 @@
 [
   {
-    "transaction_number": 348992,
-    "current_par": 5250000,
-    "interest_rate": null,
-    "funding_date": "2014-09-03-07:00",
-    "maturity_date": "2015-09-03-07:00",
-    "product_description": "LC LC LC"
+    "tradeID": 348992,
+    "amount": 5250000,
+    "rate": null,
+    "fundingDate": "2014-09-03-07:00",
+    "maturityDate": "2015-09-03-07:00",
+    "productDescription": "LC LC LC",
+    "instrumentType": "LC",
+    "status": "VERIFIED",
+    "terminationPar": null,
+    "terminationFee": null,
+    "terminationFullPartial": null,
+    "product": "LC",
+    "subProduct": "LC"
   },
   {
-    "transaction_number": 387183,
-    "current_par": 1000000.0,
-    "interest_rate": 0.22,
-    "funding_date": "2015-08-04-07:00",
-    "maturity_date": "2015-09-03-07:00",
-    "product_description": "ADVANCE FX CONSTANT FRC - Wholeloan"
+    "tradeID": 387183,
+    "amount": 1000000.0,
+    "rate": 0.22,
+    "fundingDate": "2015-08-04-07:00",
+    "maturityDate": "2015-09-03-07:00",
+    "productDescription": "ADVANCE FX CONSTANT FRC - Wholeloan",
+    "instrumentType": "ADVANCE",
+    "status": "EXERCISED",
+    "terminationPar": 5000000.0,
+    "terminationFee": 0,
+    "terminationFullPartial": "PARTIAL PREPAYMENT",
+    "product": "FX CONSTANT FRC",
+    "subProduct": "FRC - Wholeloan"
   },
   {
-    "transaction_number": 500638,
-    "current_par": 100.0,
-    "interest_rate": 1.29,
-    "funding_date": "2015-09-03-07:00",
-    "maturity_date": null,
-    "product_description": "ADVANCE OPEN VRC VRC Open - WL"
+    "tradeID": 500638,
+    "amount": 100.0,
+    "rate": 1.29,
+    "fundingDate": "2015-09-03-07:00",
+    "maturityDate": null,
+    "productDescription": "ADVANCE OPEN VRC VRC Open - WL",
+    "instrumentType": "ADVANCE",
+    "status": "VERIFIED",
+    "terminationPar": null,
+    "terminationFee": null,
+    "terminationFullPartial": null,
+    "product": "OPEN VRC",
+    "subProduct": "VRC Open - WL"
   }
 ]

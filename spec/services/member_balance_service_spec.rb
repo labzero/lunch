@@ -1227,6 +1227,64 @@ describe MemberBalanceService do
     end
   end
 
+  describe 'the `todays_credit_activity` method' do
+    it_behaves_like 'a MAPI backed service object method', :todays_credit_activity
+    let(:todays_credit_activity) { subject.todays_credit_activity }
+    let(:exercised_advance) { {instrument_type: 'ADVANCE', status: 'EXERCISED', termination_full_partial: double('termination_full_partial'), interest_rate: double('interest_rate')} }
+    let(:non_exercised_advance) { {instrument_type: 'ADVANCE', sub_product: 'Open VRC'} }
+    let(:non_exercised_activity) { {instrument_type: double('instrument_type')} }
+    let(:exercised_lc) { {instrument_type: 'LC', status: 'EXERCISED', termination_full_partial: double('termination_full_partial'), interest_rate: double('interest_rate')} }
+    let(:terminated_advance) { {instrument_type: 'ADVANCE', termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+    let(:terminated_lc) { {instrument_type: 'LC', termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+    let(:terminated_activity_with_status) { {status: 'TERMINATED', termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+    let(:terminated_activity_without_status) { {instrument_type: double('some instrument'), termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+
+    it 'should call `get_json` with the appropriate endpoint' do
+      expect(subject).to receive(:get_json).with(:todays_credit_activity, "/member/#{member_id}/todays_credit_activity")
+      todays_credit_activity
+    end
+    it 'sets the `product_description` of an EXERCISED ADVANCE to its `termination_full_partial` value' do
+      allow(subject).to receive(:get_json).and_return([exercised_advance])
+      expect(todays_credit_activity.first[:product_description]).to eq(exercised_advance[:termination_full_partial])
+    end
+    it 'sets the `product_description` of an EXERCISED LC to its `termination_full_partial` value' do
+      allow(subject).to receive(:get_json).and_return([exercised_lc])
+      expect(todays_credit_activity.first[:product_description]).to eq(exercised_lc[:termination_full_partial])
+    end
+    it 'sets the `interest_rate` of an EXERCISED ADVANCE to nil' do
+      allow(subject).to receive(:get_json).and_return([exercised_advance])
+      expect(todays_credit_activity.first[:interest_rate]).to be_nil
+    end
+    it 'sets the `interest_rate` of an EXERCISED LC to nil' do
+      allow(subject).to receive(:get_json).and_return([exercised_lc])
+      expect(todays_credit_activity.first[:interest_rate]).to be_nil
+    end
+    it 'sets the `product_description` of a TERMINATED ADVANCE to its `termination_full_partial` value' do
+      allow(subject).to receive(:get_json).and_return([terminated_advance])
+      expect(todays_credit_activity.first[:product_description]).to eq(terminated_advance[:termination_full_partial])
+    end
+    it 'sets the `product_description` of a TERMINATED LC to its `termination_full_partial` value' do
+      allow(subject).to receive(:get_json).and_return([terminated_lc])
+      expect(todays_credit_activity.first[:product_description]).to eq(terminated_lc[:termination_full_partial])
+    end
+    it 'sets the `product_description` to `TERMINATION` for TERMINATED activities that are not ADVANCEs or LCs' do
+      allow(subject).to receive(:get_json).and_return([terminated_activity_with_status])
+      expect(todays_credit_activity.first[:product_description]).to eq('TERMINATION')
+    end
+    it 'sets the `product_description` to an activity\'s `instrument_type` if the activity has a `termination_par` and `termination_full_partial` but its status is not TERMINATED' do
+      allow(subject).to receive(:get_json).and_return([terminated_activity_without_status])
+      expect(todays_credit_activity.first[:product_description]).to eq(terminated_activity_without_status[:instrument_type])
+    end
+    it 'sets the `product_description` of an non-EXERCISED, non-TERMINATED ADVANCE to its `instrument_type` and `sub_product`' do
+      allow(subject).to receive(:get_json).and_return([non_exercised_advance])
+      expect(todays_credit_activity.first[:product_description]).to eq('ADVANCE Open VRC')
+    end
+    it 'sets the `product_description` of an non-EXERCISED, non-TERMINATED, activity to its `instrument_type` if the activity is not an ADVANCE' do
+      allow(subject).to receive(:get_json).and_return([non_exercised_activity])
+      expect(todays_credit_activity.first[:product_description]).to eq(non_exercised_activity[:instrument_type])
+    end
+  end
+
   # Helper Methods
   def expect_capital_stock_balance_to_receive(date)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with( "member/#{member_id}/capital_stock_balance/#{date}" )

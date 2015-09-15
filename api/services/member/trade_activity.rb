@@ -7,34 +7,43 @@ module MAPI
       module TradeActivity
 
         TODAYS_ADVANCES_ARRAY = %w(VERIFIED OPS_REVIEW OPS_VERIFIED SEC_REVIEWED SEC_REVIEW COLLATERAL_AUTH AUTH_TERM PEND_TERM)
+        TODAYS_CREDIT_ARRAY = TODAYS_ADVANCES_ARRAY + %w(TERMINATED EXERCISED)
+        TODAYS_CREDIT_KEYS = %w(instrumentType status terminationPar fundingDate maturityDate tradeID amount rate productDescription terminationFee terminationFullPartial product subProduct)
 
-        def self.init_trade_connection(environment, type)
+        def self.init_trade_connection(environment)
           if environment == :production
-            endpoint = case type
-              when :trade
-                ENV['MAPI_TRADE_ENDPOINT']
-              when :credit
-                ENV['MAPI_TRADE_ACTIVITY_ENDPOINT']
-              else
-                raise "Unknown type for init_trade_connection"
-            end
             @@trade_connection ||= Savon.client(
-                wsdl: endpoint,
-                env_namespace: :soapenv,
-                namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/trade/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1'},
-                element_form_default: :qualified,
-                namespace_identifier: :v1,
-                pretty_print_xml: true
+              wsdl: ENV['MAPI_TRADE_ENDPOINT'],
+              env_namespace: :soapenv,
+              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/trade/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1'},
+              element_form_default: :qualified,
+              namespace_identifier: :v1,
+              pretty_print_xml: true
             )
           else
             @@trade_connection = nil
           end
         end
 
+        def self.init_trade_activity_connection(environment)
+          if environment == :production
+            @@trade_activity_connection ||= Savon.client(
+              wsdl: ENV['MAPI_TRADE_ACTIVITY_ENDPOINT'],
+              env_namespace: :soapenv,
+              namespaces: { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/trade/v1', 'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd', 'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1'},
+              element_form_default: :qualified,
+              namespace_identifier: :v1,
+              pretty_print_xml: true
+            )
+          else
+            @@trade_activity_connection = nil
+          end
+        end
+
         def self.trade_activity(app, member_id, instrument)
           member_id = member_id.to_i
           trade_activity = []
-          data = if MAPI::Services::Member::TradeActivity::init_trade_connection(app.settings.environment, :trade)
+          data = if MAPI::Services::Member::TradeActivity::init_trade_connection(app.settings.environment)
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [{
@@ -73,7 +82,7 @@ module MAPI
         end
 
         def self.current_daily_total(env, instrument)
-          data = if MAPI::Services::Member::TradeActivity::init_trade_connection(env, :trade)
+          data = if MAPI::Services::Member::TradeActivity::init_trade_connection(env)
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [
@@ -107,7 +116,7 @@ module MAPI
         def self.todays_trade_activity(app, member_id, instrument)
           member_id = member_id.to_i
           trade_activity = []
-          data = if MAPI::Services::Member::TradeActivity::init_trade_connection(app.settings.environment, :trade)
+          data = if MAPI::Services::Member::TradeActivity::init_trade_connection(app.settings.environment)
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [{
@@ -149,7 +158,8 @@ module MAPI
         def self.todays_credit_activity(env, member_id)
           member_id = member_id.to_i
           credit_activity = []
-          data = if MAPI::Services::Member::TradeActivity::init_trade_connection(env, :credit)
+
+          activities = if MAPI::Services::Member::TradeActivity::init_trade_activity_connection(env)
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [{
@@ -158,44 +168,66 @@ module MAPI
               }]
             }
             begin
-              response = @@trade_connection.call(:get_trade, message_tag: 'tradeRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
+              response = @@trade_activity_connection.call(:get_trade_activity, message_tag: 'tradeRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
             rescue Savon::Error => error
               raise error
             end
             response.doc.remove_namespaces!
-            activities = response.doc.xpath('//Envelope//Body//tradeActivityResponse//tradeActivities//tradeActivity')
-            activities.each do |activity|
-              instrument_type = activity.at_css('instrumentType').content.to_s if activity.at_css('instrumentType')
-              status = activity.at_css('status').content if activity.at_css('status')
-              termination_par = activity.at_css('terminationPar').content.to_f if activity.at_css('terminationPar')
-              funding_date = activity.at_css('fundingDate').content if activity.at_css('fundingDate')
-              maturity_date = activity.at_css('maturityDate').content if activity.at_css('maturityDate')
-
-              if TODAYS_ADVANCES_ARRAY.include? status && !(instrument_type == 'ADVANCE' && status != 'EXERCISED' && termination_par.blank? && !funding_date.blank? && Time.zone.parse(funding_date) < Time.zone.today)
-                hash = {
-                  transaction_number: (activity.at_css('tradeID').content.to_s if activity.at_css('tradeID')),
-                  current_par: (activity.at_css('amount').content.to_f if activity.at_css('amount')),
-                  interest_rate: (activity.at_css('rate').content.to_f if activity.at_css('rate')),
-                  funding_date: (Time.zone.parse(funding_date).to_date if funding_date),
-                  maturity_date: (Time.zone.parse(maturity_date).to_date if maturity_date),
-                  product_description: (activity.at_css('productDescription').content.to_s if activity.at_css('productDescription')),
-                  instrument_type: instrument_type,
-                  status: status,
-                  termination_par: termination_par,
-                  termination_fee: (activity.at_css('terminationFee').content.to_f if activity.at_css('terminationFee')),
-                  termination_full_partial: (activity.at_css('terminationFullPartial').content.to_s if activity.at_css('terminationFullPartial')),
-                  product: (activity.at_css('product').content.to_f if activity.at_css('product')),
-                  sub_product: (activity.at_css('subProduct').content.to_f if activity.at_css('subProduct')),
-                }
-                credit_activity.push(hash)
+            soap_activities_array = []
+            soap_activities = response.doc.xpath('//Envelope//Body//tradeActivityResponse//tradeActivities//tradeActivity')
+            soap_activities.each do |activity|
+              hash = {}
+              TODAYS_CREDIT_KEYS.each do |key|
+                node = activity.at_css(key)
+                hash[key] = node.content if node
               end
+              soap_activities_array.push(hash)
             end
-            credit_activity
+            soap_activities_array
           else
-            # fake Today's Credit Activity
-            JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'credit_activity.json')))
+            activities = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'credit_activity.json')))
+            activities.each do |activity|
+              today_string = Time.zone.today.to_s
+              activity['fundingDate'], activity['maturityDate'] = [today_string, today_string]
+            end
           end
-          data
+
+          activities.each do |activity|
+            instrument_type = activity['instrumentType'].to_s if activity['instrumentType'].present?
+            status = activity['status'].to_s if activity['status'].present?
+            termination_par = activity['terminationPar'].to_f if activity['terminationPar'].present?
+            funding_date = Time.zone.parse(activity['fundingDate']).to_date if activity['fundingDate'].present?
+            maturity_date = Time.zone.parse(activity['maturityDate']).to_date if activity['maturityDate'].present?
+            transaction_number = activity['tradeID'].to_s if activity['tradeID'].present?
+            current_par = activity['amount'].to_f if activity['amount'].present?
+            interest_rate = activity['rate'].to_f if activity['rate'].present?
+            product_description = activity['productDescription'].to_s if activity['productDescription'].present?
+            termination_fee = activity['terminationFee'].to_f if activity['terminationFee'].present?
+            termination_full_partial = activity['terminationFullPartial'].to_s if activity['terminationFullPartial'].present?
+            product = activity['product'].to_s if activity['product'].present?
+            sub_product = activity['subProduct'].to_s if activity['subProduct'].present?
+
+            # skip the trade if it is an old Advance that is not prepaid, but rather Amended
+            if TODAYS_CREDIT_ARRAY.include?(status) && !(instrument_type == 'ADVANCE' && status != 'EXERCISED' && termination_par.blank? && !funding_date.blank? && funding_date < Time.zone.today)
+              hash = {
+                transaction_number: transaction_number,
+                current_par: current_par,
+                interest_rate: interest_rate,
+                funding_date: funding_date,
+                maturity_date: maturity_date,
+                product_description: product_description,
+                instrument_type: instrument_type,
+                status: status,
+                termination_par: termination_par,
+                termination_fee: termination_fee,
+                termination_full_partial: termination_full_partial,
+                product: product,
+                sub_product: sub_product
+              }
+              credit_activity.push(hash)
+            end
+          end
+          credit_activity
         end
       end
     end

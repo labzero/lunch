@@ -951,9 +951,15 @@ module MAPI
           MAPI::Services::Member::DividendStatement.dividend_statement(self, member_id, date).to_json
         end
 
+        # Today's Credit Activity
         relative_get '/:id/todays_credit_activity' do
           member_id = params[:id]
-          MAPI::Services::Member::TradeActivity.todays_credit_activity(self.settings.environment, member_id).to_json
+          begin
+            MAPI::Services::Member::TradeActivity.todays_credit_activity(self.settings.environment, member_id).to_json
+          rescue Savon::Error => error
+            logger.error error
+            halt 503, 'Internal Service Error'
+          end
         end
       end
 

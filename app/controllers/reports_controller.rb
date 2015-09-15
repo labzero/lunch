@@ -21,6 +21,7 @@ class ReportsController < ApplicationController
   CAPITAL_STOCK_AND_LEVERAGE_WEB_FLAGS = [MembersService::FHLB_STOCK_DATA]
   ACCOUNT_SUMMARY_WEB_FLAGS = [MembersService::FINANCING_AVAILABLE_DATA, MembersService::CREDIT_OUTSTANDING_DATA, MembersService::COLLATERAL_HIGHLIGHTS_DATA, MembersService::FHLB_STOCK_DATA]
   INTEREST_RATE_RESETS_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
+  TODAYS_CREDIT_ACTIVITY_WEB_FLAGS = [MembersService::TODAYS_CREDIT_ACTIVITY]
 
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
@@ -1217,9 +1218,8 @@ class ReportsController < ApplicationController
   end
 
   def todays_credit
-    #TODO: ask Siew which web flags disable this report
-    if report_disabled?(PARALLEL_SHIFT_WEB_FLAGS)
-      activities = {}
+    if report_disabled?(TODAYS_CREDIT_ACTIVITY_WEB_FLAGS)
+      activities = []
     else
       member_balances = MemberBalanceService.new(current_member_id, request)
       activities = member_balances.todays_credit_activity
@@ -1227,15 +1227,19 @@ class ReportsController < ApplicationController
     end
     rows = []
     activities.each do |activity|
-      activity = activity.with_indifferent_access
+      maturity_date = if activity[:instrument_type] == 'ADVANCE'
+        activity[:maturity_date] || t('global.open')
+      else
+        activity[:maturity_date]
+      end
       rows << {
         columns:[
-          {type: nil, value: activity[:transaction_number]},
+          {value: activity[:transaction_number]},
           {type: :number, value: activity[:current_par]},
           {type: :index, value: (activity[:interest_rate] * 100 if activity[:interest_rate])},
           {type: :date, value: activity[:funding_date]},
-          {type: :date, value: activity[:maturity_date]},
-          {type: :nil, value: activity[:product_description]}
+          {type: (:date if maturity_date.is_a?(Date)), value: maturity_date},
+          {value: activity[:product_description]}
         ]
       }
     end
