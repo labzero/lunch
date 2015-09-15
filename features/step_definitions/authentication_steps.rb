@@ -163,6 +163,11 @@ Then(/^I should see the name for the "(.*?)" in the header$/) do |user_type|
   page.assert_selector('.main-nav li', text: user_type['given_name'])
 end
 
+Then(/^I should be logged in$/) do
+  step %{I visit the dashboard}
+  step %{I should see dashboard modules}
+end
+
 def primary_user
   CustomConfig.env_config['primary_user']
 end
@@ -185,6 +190,10 @@ end
 
 def deletable_user
   CustomConfig.env_config['deletable']
+end
+
+def resetable_user
+  CustomConfig.env_config['resetable']
 end
 
 def select_member_if_needed

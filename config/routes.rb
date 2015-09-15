@@ -110,6 +110,7 @@ Rails.application.routes.draw do
     get 'member/password' => 'users/passwords#new', as: :new_user_password
     post 'member/password' => 'users/passwords#create', as: :user_password
     get 'member/password/reset' => 'users/passwords#edit', as: :edit_user_password
+    put 'member/password' => 'users/passwords#update'
   end
   devise_for :users, controllers: { sessions: 'users/sessions', passwords: 'users/passwords' }, :skip => [:sessions, :passwords]
 

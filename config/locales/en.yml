@@ -207,6 +207,19 @@ en:
             email_confirmation:
               blank: You must confirm your email address.
               confirmation: Confirmation email address does not match.
+            password:
+              non_atomic: You can't change a password and other attributes at the same time.
+              too_short:
+                one: Passwords must be at least one character long.
+                other: Passwords must be at least %{count} characters long.
+              capital_letter_needed: Passwords must contain at least one capital letter.
+              lowercase_letter_needed: Passwords must contain at least one lowercase letter.
+              number_needed: Passwords must contain at least one number.
+              symbol_needed: "Passwords must contain at least symbol (!@#$%*)."
+              confirmation: Passwords do not match.
+              ldap_update_failed: We failed to update your password. Most likely you used a password that was used before.
+            password_confirmation:
+              confirmation: Passwords do not match.
   user_roles:
     authorized_signer: Authorized Signer
     all_authorizations: All Authorizations
@@ -377,6 +390,11 @@ en:
       title: Request Expired
       description: Sorry, the link in your password reset email has expired.
       request_again: Send a new reset password email
+    update:
+      title: Enter New Password
+      instructions: "Passwords should contain at least 8 characters, including one capital letter, one number and one special character (!@#$%*)."
+      password_field: New password
+      confirm_field: Re-enter new password
   dashboard:
     meta_title: FHLB - Dashboard
     actions:

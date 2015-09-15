@@ -4,6 +4,10 @@ class User < ActiveRecord::Base
   validates :surname, presence: {on: :update}
   validates :email, presence: {on: :update}, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, allow_blank: true }, confirmation: {if: :email_changed?, on: :update}
   validates :email_confirmation, presence: {if: :email_changed?, on: :update}
+  validates :password, confirmation: true, length: {minimum: 8, allow_nil: true}, format: { with: /\A(?=.*[A-Z]).*\z/, message: :capital_letter_needed, allow_nil: true }
+  validates :password, format: { with: /\A(?=.*[a-z]).*\z/, message: :lowercase_letter_needed, allow_nil: true }
+  validates :password, format: { with: /\A(?=.*\d).*\z/, message: :number_needed, allow_nil: true }
+  validates :password, format: { with: /\A(?=.*[!@#$%*]).*\z/, message: :symbol_needed, allow_nil: true }
 
   def self.policy_class
     AccessManagerPolicy
@@ -65,6 +69,7 @@ class User < ActiveRecord::Base
 
   after_save :save_ldap_attributes
   after_destroy :destroy_ldap_entry
+  before_save :check_password_change
 
   def display_name
     @display_name ||= (ldap_entry[:displayname].try(:first) if ldap_entry)
@@ -280,6 +285,13 @@ class User < ActiveRecord::Base
   # this is needed for devise recoverable since we don't have the column on our table
   def encrypted_password_changed?
     false
+  end
+
+  def check_password_change
+    if password_changed? && (changed.select{|key| LDAP_ATTRIBUTES_MAPPING.include?(key)}).count > 0 # we don't allow password changes to be mixed with other LDAP changes
+      errors.add(:password, :non_atomic)
+      raise ActiveRecord::Rollback
+    end
   end
 
 end

@@ -57,9 +57,13 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     &:last-of-type:not(.dropdown) {
       margin-bottom: 10px;
     }
+    label.label-error {
+      margin-bottom: 0;
+    }
   }
 
   label {
+    @extend %typography-subtitle;
     margin-bottom: 3px;
     display: block;
   }
@@ -81,11 +85,20 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
   }
 
   .welcome-login {
+    a {
+        @extend %typography-table-link;
+    }
+  }
+
+  .welcome-login, .welcome-password-change {
     input[type=submit] {
       width: 100%;
     }
-    a {
-        @extend %typography-table-link;
+  }
+
+  .welcome-password-change {
+    .input-field-container:last-of-type {
+      margin-bottom: 20px;
     }
   }
 

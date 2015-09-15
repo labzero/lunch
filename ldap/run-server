@@ -4,13 +4,17 @@ require 'erb'
 require 'fileutils'
 require 'optparse'
 
-def reseed(port)
+def reseed(port, ssl)
+  base_cmd = 'ldapadd'
+  base_cmd += ' -Z' if ssl
   [
     ['cn=admin,dc=fhlbsf-i,dc=com', ['clear.ldif', 'base.ldif']],
     ['cn=admin,dc=extranet,dc=fhlbsf,dc=com', ['clear-extranet.ldif', 'base-extranet.ldif']]
   ].each do |dc|
     dc.last.each do |file|
-      puts `ldapadd -x -h localhost -p #{port} -D "#{dc.first}" -w secret -f #{file}`
+      cmd = "#{base_cmd} -x -h localhost -p #{port} -D \"#{dc.first}\" -w secret -f #{file}"
+      puts cmd
+      puts `#{cmd}`
     end
   end
 end
@@ -84,15 +88,16 @@ end
 cmd += ":#{options[:port]}"
 
 if options[:reseed]
-  reseed(options[:port])
+  reseed(options[:port], options[:ssl])
 else
   if options[:fresh]
     pid = Process.fork do
       sleep 3
-      reseed(options[:port])
+      reseed(options[:port], options[:ssl])
     end
     Process.detach(pid)
   end
   puts(cmd)
+  STDOUT.flush
   exec(cmd)
 end

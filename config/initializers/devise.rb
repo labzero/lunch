@@ -10,6 +10,7 @@ Devise.setup do |config|
   # config.ldap_check_attributes = false
   config.ldap_use_admin_to_bind = true
   # config.ldap_ad_group_check = true
+  config.ldap_password_attribute = :unicodePwd if Rails.env.production?
   
   # The secret key used by Devise. Devise uses this key to generate
   # random tokens. Changing this key will render invalid all existing
@@ -162,9 +163,6 @@ Devise.setup do |config|
   # time the user will be asked for credentials again. Default is 30 minutes.
   config.timeout_in = 20.minutes
 
-  # If true, expires auth token on session timeout.
-  config.expire_auth_token_on_timeout = true
-
   # ==> Configuration for :lockable
   # Defines which strategy will be used to lock an account.
   # :failed_attempts = Locks an account after a number of failed attempts to sign in.
@@ -200,6 +198,8 @@ Devise.setup do |config|
   # Don't put a too small interval or your users won't have the time to
   # change their passwords.
   config.reset_password_within = 1.hours
+
+  config.sign_in_after_reset_password = false
 
   # ==> Configuration for :encryptable
   # Allow you to use another encryption algorithm besides bcrypt (default). You can use

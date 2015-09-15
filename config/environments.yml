@@ -20,6 +20,9 @@ default: &default
   deletable:
     username: <%= ENV['CUCUMBER_DELETABLE_USERNAME'] || 'extra-chaste-delete' %>
     password: <%= ENV['CUCUMBER_DELETABLE_PASSWORD'] || 'development' %>
+  resetable:
+    username: <%= ENV['CUCUMBER_RESETABLE_USERNAME'] || 'extra-chaste-reset' %>
+    password: <%= ENV['CUCUMBER_RESETABLE_PASSWORD'] || 'development' %>
   primary_bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Meridian Bank, National Association' %>
 
 local:
