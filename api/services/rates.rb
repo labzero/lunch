@@ -111,6 +111,7 @@ module MAPI
       end
 
       def self.get_market_data_from_soap(logger, live_or_start_of_day)
+        return nil if @@mds_connection.nil?
         begin
           @@mds_connection.call(:get_market_data,
                                 message_tag: 'marketDataRequest',
@@ -119,7 +120,7 @@ module MAPI
                                     'v1:requests' =>  [{'v1:fhlbsfMarketDataRequest' => LOAN_TYPES.map{ |lt| market_data_message_for_loan_type(lt, live_or_start_of_day)}}]
                                 },
                                 soap_header: SOAP_HEADER )
-        rescue => error
+        rescue Savon::Error => error
           logger.error error
           return nil
         end
