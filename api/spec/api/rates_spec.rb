@@ -1,6 +1,11 @@
 require 'spec_helper'
 require 'date'
 
+
+def n_level_hash_with_default(default, n)
+  n == 0 ? default : n_level_hash_with_default(Hash.new(default), n-1)
+end
+
 describe MAPI::ServiceApp do
   subject { MAPI::Services::Rates }
   before do
@@ -68,7 +73,7 @@ describe MAPI::ServiceApp do
     let(:loan_terms) { loan_terms }
     let(:loan_types) { loan_types }
     let(:loan_terms_hash) do
-      default = Hash.new(Hash.new(true))
+      default = n_level_hash_with_default(true, 2)
       h = Hash.new(default)
       h[:'1year'] = { whole:  { trade_status: false, display_status: true  } }
       h[:'3year'] = { agency: { trade_status: true,  display_status: false } }
@@ -88,7 +93,7 @@ describe MAPI::ServiceApp do
       h[:aaa][:'1week'][:rate] = (h[:aa][:'1week'][:rate].to_f - (2*threshold)).to_s
       h
     end
-    let(:rate_bands_hash) { Hash.new(Hash.new( threshold_as_BPS )) }
+    let(:rate_bands_hash) { n_level_hash_with_default(threshold_as_BPS, 2) }
     let(:rate_summary) do
       get '/rates/summary'
       JSON.parse(last_response.body).with_indifferent_access
@@ -160,14 +165,14 @@ describe MAPI::ServiceApp do
             maturity_date: maturity_date,
         }.with_indifferent_access
       end
-      let(:live_data){ Hash.new(Hash.new(live_data_value)) }
+      let(:live_data){ n_level_hash_with_default(live_data_value, 2) }
       let(:start_of_day_xml){ double('start_of_day_xml') }
-      let(:start_of_day){ Hash.new(Hash.new(Hash.new("5.0"))) }
+      let(:start_of_day){ n_level_hash_with_default("5.0", 3) }
       let(:mds_connection){ double('mds_connection') }
-      let(:rate_bands_hash) { Hash.new(Hash.new("10")) }
+      let(:rate_bands_hash) { n_level_hash_with_default("10", 2) }
       let(:trade_status){ double('trade_status') }
       let(:display_status){ double('display_status') }
-      let(:loan_terms_hash){ Hash.new(Hash.new( { trade_status: trade_status, display_status: display_status } ) ) }
+      let(:loan_terms_hash){ n_level_hash_with_default({ trade_status: trade_status, display_status: display_status }, 2) }
       before do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
         allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger)

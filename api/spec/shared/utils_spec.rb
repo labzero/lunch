@@ -14,7 +14,7 @@ describe MAPI::Shared::Utils::ClassMethods do
     let(:hash2)  { double('hash2') }
     let(:hash3)  { double('hash3') }
 
-    it 'executes the SQL query for blackout dates query' do
+    it 'executes a SQL query and performs fetch_hash on the resulting cursor' do
       allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
       allow(cursor).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
       expect(subject.fetch_hashes(logger, sql)).to be == [hash1, hash2, hash3]
@@ -36,7 +36,7 @@ describe MAPI::Shared::Utils::ClassMethods do
     let(:object2){ double('object2') }
     let(:object3){ double('object3') }
 
-    it 'executes the SQL query for blackout dates query' do
+    it 'executes a SQL query and performs fetch on the resulting cursor' do
       allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
       allow(cursor).to receive(:fetch).and_return([object1], [object2, object3], nil)
       expect(subject.fetch_objects(logger, sql)).to be == [object1, object2, object3]
