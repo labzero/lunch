@@ -1543,7 +1543,22 @@ en:
         prepayment_features_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=%{url}>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
         special_notice: "The Putable Advance has a complex risk profile and may be an inappropriate product for some institutions. The expected maturity of the Putable Advance may contract or extend adversely to market movements, and the Bank makes no representations as to (i) the expected life of the advance or (ii) the criteria behind the exercise of the Bank’s right to terminate the Putable Advance. This information is not intended as investment advice. The decision to obtain a Putable Advance and the analysis of how it may fit into a borrower’s financial or business strategy remain solely the borrower’s responsibility.\n\nNotwithstanding any lockout period for exercising its right to terminate the Putable Advance, the Bank reserves all of its rights under the Advances and Security Agreement, including, without limitation, its right to terminate the Putable Advance and accelerate repayment of the advance and its right to liquidate collateral pledged by the borrower as security for the Putable Advance at any time upon the occurrence of an event of default described in the Advances and Security Agreement.\n\n* If the period end date falls on a non-business day, the period end date will be the first following business day, unless that day falls in the next calendar month, in which case the period end date will be the first preceding business day."
       sbc: Securities-Backed Credit (SBC) Program
-      vrc: Variable Rate Credit (VRC) Advance
+      vrc:
+        title: Variable Rate Credit (VRC) Advance
+        description: Use the VRC Advance to obtain overnight funding for daily cash needs. The VRC Advance may be renewed on a daily basis at prevailing rates, at the Bank's discretion. Funds may be repaid at any time, without a fee, with 1 business day’s notice.
+        uses:
+          manage: Manage liquidity
+          obtain: Obtain low-cost, market-rate funding
+          access: Access immediate funds for short-term cash needs
+          offset: Offset temporary deposit outflows
+        advantages:
+          same_day: Same-day access
+          flexible: Flexible maturity
+        maturity: Overnight or open
+        interest_rate: The initial interest rate is set on the funding date. VRC Advances are repriced daily.
+        interest_day_count: "Actual/Actual (Actual/360 for Securities-Backed Credit Program)"
+        interest_payment_frequency: "Overnight: At maturity, Open: At monthend and at repayment"
+        repayment: The Bank must receive notice of intention to repay by 2 p.m. on the preceding business day.
     standby_loc:
       title: Standy Letters of Credit
       description_html: A <a href=%{url}>standby letter of credit</a> is an obligation of the Bank to make payment to a third party if a member or housing associate does not perform its underlying obligation to that third party.
@@ -1585,6 +1600,7 @@ en:
       special_notice: Special Notice
       term: Term
       total_max_per_borrow: Total Maximum Amount Per Borrower
+      maturity: Maturity
       maximum_term: Maximum Term
       maximum_amount_per_auction: Maximum Amount Per Auction
       minimum_amount_per_auction: Minimum Amount Per Auction

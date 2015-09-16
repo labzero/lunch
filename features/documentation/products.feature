@@ -76,3 +76,9 @@ Feature: Products Page
     Given I hover on the products link in the header
     When I click on the callable link in the header
     Then I should see the "callable" product page
+    
+  @smoke @jira-mem-854
+  Scenario: Member navigates to the variable rate credit product page
+    Given I hover on the products link in the header
+    When I click on the variable rate credit link in the header
+    Then I should see the "variable rate credit" product page

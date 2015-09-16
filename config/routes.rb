@@ -95,7 +95,7 @@ Rails.application.routes.draw do
       get 'other-cash-needs' => 'products#ocn', as: :ocn
       get 'putable' => 'products#putable', as: :putable
       get 'securities-backed-credit' => 'error#standard_error', as: :sbc
-      get 'variable-rate-credit' => 'error#standard_error', as: :vrc
+      get 'variable-rate-credit' => 'products#vrc', as: :vrc
     end
   end
 
