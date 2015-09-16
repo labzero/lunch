@@ -97,13 +97,11 @@ $resource-page-padding: 140px !default;
 
 .resource-form-table {
   @extend %table-striped;
+  @extend %table-nested-rows;
   border-bottom: 1px solid $light-blue;
   border-top: 1px solid $light-blue;
   margin-bottom: 40px;
   width: 100%;
-  .resource-form-nested-row td:first-child {
-    padding-left: 40px;
-  }
   .resource-form-number {
     margin-left: 25px;
   }
@@ -117,4 +115,3 @@ $resource-page-padding: 140px !default;
     }
   }
 }
-

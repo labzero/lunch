@@ -39,6 +39,7 @@
   }
   table {
     @extend %table-report;
+    @extend %table-nested-rows;
   }
 }
 

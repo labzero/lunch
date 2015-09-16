@@ -1542,7 +1542,6 @@ en:
         put_dates: Typically the Put Dates are the same as the interest payment dates, after the put lockout period.
         prepayment_features_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=%{url}>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
         special_notice: "The Putable Advance has a complex risk profile and may be an inappropriate product for some institutions. The expected maturity of the Putable Advance may contract or extend adversely to market movements, and the Bank makes no representations as to (i) the expected life of the advance or (ii) the criteria behind the exercise of the Bank’s right to terminate the Putable Advance. This information is not intended as investment advice. The decision to obtain a Putable Advance and the analysis of how it may fit into a borrower’s financial or business strategy remain solely the borrower’s responsibility.\n\nNotwithstanding any lockout period for exercising its right to terminate the Putable Advance, the Bank reserves all of its rights under the Advances and Security Agreement, including, without limitation, its right to terminate the Putable Advance and accelerate repayment of the advance and its right to liquidate collateral pledged by the borrower as security for the Putable Advance at any time upon the occurrence of an event of default described in the Advances and Security Agreement.\n\n* If the period end date falls on a non-business day, the period end date will be the first following business day, unless that day falls in the next calendar month, in which case the period end date will be the first preceding business day."
-      sbc: Securities-Backed Credit (SBC) Program
       vrc:
         title: Variable Rate Credit (VRC) Advance
         description: Use the VRC Advance to obtain overnight funding for daily cash needs. The VRC Advance may be renewed on a daily basis at prevailing rates, at the Bank's discretion. Funds may be repaid at any time, without a fee, with 1 business day’s notice.
@@ -1559,6 +1558,129 @@ en:
         interest_day_count: "Actual/Actual (Actual/360 for Securities-Backed Credit Program)"
         interest_payment_frequency: "Overnight: At maturity, Open: At monthend and at repayment"
         repayment: The Bank must receive notice of intention to repay by 2 p.m. on the preceding business day.
+      sbc:
+        title: Securities-Backed Credit (SBC) Program
+        description: Under the SBC Program, you can pledge your high-grade securities as collateral to the Bank. Interest rates on SBC advances may be lower than rates on advances offered under the Bank's Standard Credit Program and competitive with rates in the securities repurchase market.
+        uses:
+          secure: Secure short- and long-term borrowings with a variety of securities collateral
+          action: Access an attractive alternative to securities repurchase transactions with dealers
+          leverage: Leverage securities collateral more effectively
+        advantages:
+          pricing: Pricing may be competitive with Agency securities repurchase transactions
+          calls: You may be able to hold a smaller number of securities in portfolio to meet margin calls
+          substitute: Substitute like or better securities collateral at any time
+        maximum_term: Depends on the type of credit product
+        credit_products_available:
+          fixed: Fixed Rate Credit (FRC) Advance
+          frc: FRC Advance with Embedded Cap
+          amortizing: Amortizing Advance
+          callable: Callable Advance
+          putable: Putable Advance
+          knockout: Knockout Advance
+          variable: Variable Rate Credit Advance
+          arc: Adjustable Rate Credit (ARC) Advance
+          arc_embedded: ARC Advance with Embedded Options
+        interest_rate: "Interest rates may be lower than rates on advances under the Bank's Standard Credit Program and competitive with rates in the securities repurchase market."
+        interest_day_count: Actual/360 for most credit products and 30/360 for Amortizing Advances.
+        interest_payment_frequency: For fixed rate advances with terms of 180 days or less, interest is payable at maturity. For fixed rate advances with terms of more than 180 days, interest is payable semiannually and at maturity. For adjustable rate advances, interest is payable at repricing and at maturity.
+        eligible_capacity: The following table lists the eligible securities types and borrowing capacities for the SBC Program for all members except insurance companies. Not all securities of each type are eligible; please review the Bank's Collateral Guide or contact the Bank for specific eligibility information.
+        column1:
+          eligible_securities: Eligible Securities
+          treasury:
+            title: Treasury
+            t_bills: Treasury Bills
+            t_notes_less: "Treasury Notes and Bonds (remaining maturity < 5yrs)"
+            t_notes_greater: "Treasury Notes and Bonds (remaining maturity ≥ 5yrs)"
+          agency:
+            title: Agency
+            discount_notes: Discount Notes
+            debenture_notes: "Debenture Notes & Bonds"
+            agency_mbs: Agency MBS Passthrough Securities
+            gnma: GNMA Home Equity Conversion Mortgage (HECM) MBS Passthrough Securities
+            agency_cmo: Agency CMOs (FHLMC, FNMA, GNMA)
+            gnma_hecm: GNMA HECM Real Estate Mortgage Investment Conduit (REMIC) Securities
+            agency_cmo_low: "Agency CMO Accrual Bonds (Z-tranches) with low price sensitivity1"
+            agency_cmo_high: "Agency CMO Accrual Bonds (Z-tranches) with high price sensitivity1"
+            structured_notes: Structured Notes
+            index_notes: "Index Amortization Notes (P.S.A. Linked Notes)"
+            small_business: Small Business Administration Pools
+            sba_cdc: SBA-Guaranteed CDC Participation Certificates
+            sba_sbic: SBA-Guaranteed SBIC Debenture Participation Certificates
+            fdic: FDIC Structured Sale Guaranteed Notes
+            ncua: NCUA Guaranteed Notes
+          public:
+            title: Private Label Non-Agency MBS
+            publicly_registered: Publicly Registered
+            aaa_senior_residential_mbs: AAA Senior Residential MBS
+            aa_senior_residential_mbs: AA Senior Residential MBS
+            aaa_sub_mezz_residential_mbs: AAA Subordinated and Mezzanine Residential MBS
+            aa_sub_mezz_residential_mbs: AA Subordinated and Mezzanine Residential MBS
+            aaa_senior_home: AAA Senior Home Equity ABS
+            aaa_sub_mezz_home: AAA Subordinated and Mezzanine Home Equity ABS
+            aa_sub_mezz_home: AA Subordinated and Mezzanine Home Equity ABS
+            aaa_senior_commercial: AAA Senior Commercial MBS
+            aaa_sub_mezz_commercial: AAA Subordinated and Mezzanine Commercial MBS
+          private:
+            title: Private Label Non-Agency MBS
+            private_placement: Private Placement – Book Entry or Physical Delivery
+            aaa_senior_residential_mbs: AAA Senior Residential MBS
+            aa_senior_residential_mbs: AA Senior Residential MBS
+          muni_bonds: AAA or AA Mortgage-Related Municipal Bonds
+          mutual_fund_shares: Mutual Fund Shares
+          bank_term_deposits: Bank Term Deposits
+        column2:
+          borrowing_capacity: Borrowing Capacity as a Percentage of Market Value
+          treasury:
+            t_bills: "98"
+            t_notes_less: "98"
+            t_notes_greater: "95"
+          agency:
+            discount_notes: "97"
+            debenture_notes: "97"
+            agency_mbs: "95"
+            gnma: "93"
+            agency_cmo: "93"
+            gnma_hecm: "93"
+            agency_cmo_low: "93"
+            agency_cmo_high: "55"
+            structured_notes: "90"
+            index_notes: "95"
+            small_business: "93"
+            sba_cdc: "93"
+            sba_sbic: "93"
+            fdic: "95"
+            ncua: "95"
+          public:
+            aaa_senior_residential_mbs: "80"
+            aa_senior_residential_mbs: "70"
+            aaa_sub_mezz_residential_mbs: "70"
+            aa_sub_mezz_residential_mbs: "55"
+            aaa_senior_home: "70"
+            aaa_sub_mezz_home: "65"
+            aa_sub_mezz_home: "55"
+            aaa_senior_commercial: "80"
+            aaa_sub_mezz_commercial: "75"
+          private:
+            aaa_senior_residential_mbs: "75"
+            aa_senior_residential_mbs: "65"
+          muni_bonds: "80"
+          mutual_fund_shares: "75"
+          bank_term_deposits: "100"
+        agency_cmo: Agency CMO accrual bonds (Z-tranches) with low price sensitivity are identified as those that pass the Federal Financial Institutions Examination Council (FFIEC) High Risk Security test. Agency CMO accrual bonds (Z-tranches) with high price sensitivity are identified as those that do not pass the FFIEC High Risk Security test.
+        market_value: The market value for securities pledged as collateral under the SBC Program is determined by the Bank on the basis of market prices (bid side) for the same or comparable securities, if available, or as otherwise determined by the Bank. A readily available price is a precondition for acceptance of a security as collateral. This means, in general, that the security is either priced by a third-party pricing service or that its cash flow is modeled on Bloomberg or Yield Book.
+        private_label_non_mbs: If the custodian of the notes supporting a non-Agency MBS transaction is the Issuer or a related party and the notes have not been endorsed to the trustee by name, the Bank requires that the party that has control over the notes (as determined by the Bank) must have a long-term debt rating of at least BBB. The Bank will monitor the creditworthiness of the entity that has control over the notes; if the entity's credit rating falls below BBB, the Bank will require the member to substitute collateral in place of the MBS unless the underlying notes have been endorsed or delivered to the trustee.
+        review_ratings: The Bank will periodically re-evaluate non-Agency securities and municipal bonds to validate or establish the ratings at intervals deemed appropriate by the Bank.
+        borrowing_market_securities: If a member pledges loan collateral to the Bank, the member may be able to borrow up to 100% of the current market value of its eligible securities pledged under the SBC Program by using the borrowing capacity of that loan collateral to meet its margin requirements. If a member pledges only securities collateral, the member may borrow an amount equal to the borrowing capacity assigned to its pledged securities collateral.
+        bms_list:
+          margin_call: The Bank manages the margin calls for SBC securities collateral on an aggregate basis for each borrower.
+          additional_pledge_reason: "Loan collateral may be used to secure up to 10% of the amount of all SBC advances outstanding. The borrower will be required to pledge additional eligible securities if:"
+          falls_below: "the borrower’s borrowing capacity for securities pledged under the SBC Program falls below 90% of the current amount of the borrower's total SBC advances outstanding, or"
+          sufficient_excess: the borrower’s loan collateral does not have sufficient excess borrowing capacity.
+          current_borrowing: When the current borrowing capacity of a borrower's SBC securities collateral falls below 90% of its SBC advances outstanding, the borrower is required to pledge additional eligible securities under the SBC Program to increase the current borrowing capacity of SBC securities collateral to 95% or greater of the total amount of the borrower’s SBC advances outstanding.
+          margin_requirement: Loan collateral that is being used to meet a borrower's margin requirement under the SBC Program is not available to collateralize other Bank credit.
+          not_release: The Bank will not release securities collateral pledged under the SBC Program if the borrower is using loan collateral to meet the margin requirements.
+        delivery: All securities pledged to the Bank must be delivered to the Bank's securities custodian, Citibank, N.A. (Citibank).
+        substitution: Borrowers may substitute like or better securities collateral, in the Bank's discretion, subject to the Bank's standard securities services fees.
     standby_loc:
       title: Standy Letters of Credit
       description_html: A <a href=%{url}>standby letter of credit</a> is an obligation of the Bank to make payment to a third party if a member or housing associate does not perform its underlying obligation to that third party.
@@ -1579,9 +1701,24 @@ en:
       product_description: Product Description
     common_key_features:
       availability: Availability
+      borrowing_market_securities: "100% Borrowing on the Market Value of Securities"
+      delivery: Delivery
+      interest_day_count: Interest Day Count
+      interest_rate: Interest Rate
+      interest_day_count: Interest Day Count
+      interest_payment_frequency: Interest Payment Frequency
+      credit_products_available: Credit Products Available
+      eligible_capacity: Eligible Securities and Borrowing Capacity
+      market_value: Market Value
+      maximum_term: Maximum Term
       minimum_term: Minimum Term
       minimum_interest_rate_convention: Minimum Interest Rate Convention
       option_types: Option Types
+      prepayment_features: Prepayment Features
+      private_label_non_mbs: Private Label Non-Agency MBS
+      review_ratings: Review of Ratings
+      substitution: Substitution
+      term: Term
       termination_option: Termination option
       termination_option_date: Termination Option Date
       termination_option_notice: Termination Option Notice
