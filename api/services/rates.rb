@@ -17,21 +17,17 @@ module MAPI
         date.saturday? || date.sunday? || holiday?(date, holidays)
       end
 
-      def self.find_nearest_business_day(original, frequency_unit, holidays)
-        candidate = original.to_date
-        while MAPI::Services::Rates.weekend_or_holiday?(candidate, holidays)
-          candidate += 1.day
+      def self.find_next_business_day(candidate, delta, holidays)
+        weekend_or_holiday?(candidate, holidays) ? find_next_business_day(candidate + delta, delta, holidays) : candidate
+      end
+
+      def self.get_maturity_date(original, frequency_unit, holidays)
+        candidate = find_next_business_day(original.to_date, 1.day, holidays)
+        if %w(M Y).include?(frequency_unit) && candidate > original.to_date.end_of_month
+          find_next_business_day(original.to_date, -1.day, holidays)
+        else
+          candidate
         end
-        if (frequency_unit == 'M' || frequency_unit == 'Y')
-          end_of_month = original.to_date.end_of_month
-          if (candidate > end_of_month)
-            candidate = end_of_month
-            while MAPI::Services::Rates.weekend_or_holiday?(candidate, holidays)
-              candidate -= 1.day
-            end
-          end
-        end
-        candidate
       end
 
       def self.disabled?(live, start_of_day, rate_band, loan_term, blackout_dates)
@@ -111,18 +107,19 @@ module MAPI
       end
 
       def self.get_market_data_from_soap(logger, live_or_start_of_day)
-        return nil if @@mds_connection.nil?
-        begin
-          @@mds_connection.call(:get_market_data,
-                                message_tag: 'marketDataRequest',
-                                message: {
-                                    'v11:caller' => [{ 'v11:id' => ENV['MAPI_COF_ACCOUNT']}],
-                                    'v1:requests' =>  [{'v1:fhlbsfMarketDataRequest' => LOAN_TYPES.map{ |lt| market_data_message_for_loan_type(lt, live_or_start_of_day)}}]
-                                },
-                                soap_header: SOAP_HEADER )
-        rescue Savon::Error => error
-          logger.error error
-          return nil
+        if !@@mds_connection.nil?
+          begin
+            @@mds_connection.call(:get_market_data,
+                                  message_tag: 'marketDataRequest',
+                                  message: {
+                                      'v11:caller' => [{'v11:id' => ENV['MAPI_COF_ACCOUNT']}],
+                                      'v1:requests' => [{'v1:fhlbsfMarketDataRequest' => LOAN_TYPES.map { |lt| market_data_message_for_loan_type(lt, live_or_start_of_day) }}]
+                                  },
+                                  soap_header: SOAP_HEADER)
+          rescue Savon::Error => error
+            logger.error error
+            return nil
+          end
         end
       end
 
@@ -603,7 +600,7 @@ module MAPI
           LOAN_TYPES.each do |type|
             LOAN_TERMS.each do |term|
               live                 = live_data[type][term]
-              live[:maturity_date] = MAPI::Services::Rates.find_nearest_business_day(live[:maturity_date], TERM_MAPPING[term][:frequency_unit], holidays)
+              live[:maturity_date] = MAPI::Services::Rates.get_maturity_date(live[:maturity_date], TERM_MAPPING[term][:frequency_unit], holidays)
               live[:disabled]      = MAPI::Services::Rates.disabled?(live, start_of_day[type][term], rate_bands[term], loan_terms[term][type], blackout_dates)
             end
           end

@@ -24,7 +24,7 @@ module MAPI
         end
 
         def self.rate_bands_development
-          fake_hash('rate_bands')
+          fake('rate_bands')
         end
       end
     end

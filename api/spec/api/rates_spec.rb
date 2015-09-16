@@ -138,13 +138,13 @@ describe MAPI::ServiceApp do
     end
 
     it "should always call get_maturity_date" do
-      expect(MAPI::Services::Rates).to receive(:find_nearest_business_day).at_least(48).with(kind_of(Date), kind_of(String), kind_of(Array))
+      expect(MAPI::Services::Rates).to receive(:get_maturity_date).at_least(48).with(kind_of(Date), kind_of(String), kind_of(Array))
       get '/rates/summary'
     end
 
     it "should set maturity date to get maturity date" do
       maturity_date = 'foobar'
-      allow(MAPI::Services::Rates).to receive(:find_nearest_business_day).and_return(maturity_date)
+      allow(MAPI::Services::Rates).to receive(:get_maturity_date).and_return(maturity_date)
       loan_types.each do |loan_type|
         loan_terms.each do |loan_term|
           expect(rate_summary[loan_type][loan_term][:maturity_date]).to eq(maturity_date)
@@ -185,7 +185,7 @@ describe MAPI::ServiceApp do
         allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay').and_return(start_of_day_xml)
         allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data)
         allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(start_of_day_xml).and_return(start_of_day)
-        allow(MAPI::Services::Rates).to receive(:find_nearest_business_day).and_return(maturity_date)
+        allow(MAPI::Services::Rates).to receive(:get_maturity_date).and_return(maturity_date)
       end
 
       it "should return Internal Service Error, if calendar service is unavailable" do
@@ -249,9 +249,9 @@ describe MAPI::ServiceApp do
     end
   end
 
-  describe "find_nearest_business_day" do
-    let (:day1_str) { double('day1 str') }
-    let (:day2_str) { double('day2 str') }
+  describe "get_maturity_date" do
+    let (:day1_str) { double('day1 str', to_date: day1) }
+    let (:day2_str) { double('day2 str', to_date: day2) }
     let (:day1) { double( 'day 1' ) }
     let (:day2) { double( 'day 2' ) }
     let (:day3) { double( 'day 3' ) }
@@ -260,19 +260,17 @@ describe MAPI::ServiceApp do
     before do
       [day1,day2,day3].zip([day2,day3,day4]).each do |pred,succ|
         allow(pred).to receive( '+' ).with(1.day).and_return(succ)
-        allow(succ).to receive( '-' ).with(1.day).and_return(pred)
+        allow(succ).to receive( '+' ).with(-1.day).and_return(pred)
       end
-      allow(day1_str).to receive(:to_date).and_return(day1)
-      allow(day2_str).to receive(:to_date).and_return(day2)
     end
     it "should return the same date if is not a weekend" do
       allow(subject).to receive(:weekend_or_holiday?).with(day1, holidays).and_return(false)
-      expect(subject.find_nearest_business_day(day1_str, 'W', holidays)).to eq(day1)
+      expect(subject.get_maturity_date(day1_str, 'W', holidays)).to eq(day1)
     end
     it "should return the next non weekend date if is weekend" do
       allow(subject).to receive(:weekend_or_holiday?).with(day1, holidays).and_return(true)
       allow(subject).to receive(:weekend_or_holiday?).with(day2, holidays).and_return(false)
-      expect(subject.find_nearest_business_day(day1_str, 'W', holidays)).to eq(day2)
+      expect(subject.get_maturity_date(day1_str, 'W', holidays)).to eq(day2)
     end
     it "should return the previous non weekend date if is weekend and month/year term and hits next month" do
       allow(subject).to receive(:weekend_or_holiday?).with(day1, holidays).and_return(false)
@@ -280,7 +278,7 @@ describe MAPI::ServiceApp do
       allow(subject).to receive(:weekend_or_holiday?).with(day3, holidays).and_return(false)
       allow(day3).to receive('>').with(day2).and_return(true)
       allow(day2).to receive(:end_of_month).and_return(day2)
-      expect(subject.find_nearest_business_day(day2_str, 'Y', holidays)).to eq(day1)
+      expect(subject.get_maturity_date(day2_str, 'Y', holidays)).to eq(day1)
     end
   end
 
