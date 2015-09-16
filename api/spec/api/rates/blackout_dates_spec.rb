@@ -41,13 +41,6 @@ describe MAPI::Services::Rates::BlackoutDates do
     end
 
     describe 'development' do
-      describe 'fake_data_fixed' do
-        it 'should return a list of Date' do
-          subject.fake_data_fixed.each do |date|
-            expect(date).to be_instance_of Date
-          end
-        end
-      end
 
       describe 'fake_data_relative_to_today' do
         it 'should return a list of Date' do
