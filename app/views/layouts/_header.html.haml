@@ -103,7 +103,7 @@
               %li= link_to(t('products.advances.putable.title'), putable_path)
               %li= link_to(t('products.advances.sbc'), sbc_path)
               %li= link_to(t('products.advances.vrc'), vrc_path)
-          %li<>= link_to(t('products.standby_loc.title'), letters_of_credit_path)
+          %li= link_to(t('products.standby_loc.title'), 'http://fhlbsf.com/community/credit/lc-profile.aspx')
           %li<>
             = link_to(t('products.mpf_program.title'), product_summary_path(anchor: :mpf_program))
-          %li<>= link_to(t('products.community_programs.title'), community_programs_path)
+          %li= link_to(t('products.community_programs.title'), 'http://fhlbsf.com/community/default.aspx')
