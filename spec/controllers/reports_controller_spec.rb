@@ -1097,7 +1097,7 @@ RSpec.describe ReportsController, :type => :controller do
     let (:sat) { double('sat', saturday?: true,  sunday?: false) }
     let (:sun) { double('sun', saturday?: false, sunday?: true)  }
     before do
-      allow(sun).to receive(:-).with(1.day).and_return(sat)
+      allow(sun).to receive(:-).with(2.day).and_return(fri)
       allow(sat).to receive(:-).with(1.day).and_return(fri)
     end
     it 'should return fri for sun' do

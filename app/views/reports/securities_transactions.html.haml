@@ -5,7 +5,7 @@
     %h1= t('reports.pages.securities_transactions.title')
     = render 'reports_header_buttons'
     .report-inputs
-      = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_securities_transactions_url, presets: @picker_presets, single_date_picker: true, max_date: Time.zone.now.to_date
+      = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_securities_transactions_url, presets: @picker_presets, single_date_picker: true, max_date: @max_date
   .report-main-body
     -if @final
       .report-summary-data
