@@ -65,7 +65,7 @@ http_interactions:
         binding="tns:ClearUsernameBinding_IMarketDataService"><soap:address location="http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc"/></wsdl:port><wsdl:port
         name="ClearUsernameBinding_IPricingIndicationsService" binding="tns:ClearUsernameBinding_IPricingIndicationsService"><soap:address
         location="http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc"/></wsdl:port></wsdl:service></wsdl:definitions>
-    http_version: 
+    http_version:
   recorded_at: Thu, 03 Sep 2015 22:51:16 GMT
 - request:
     method: post
@@ -92,7 +92,7 @@ http_interactions:
       - Ruby
   response:
     status:
-      code: 200
+      code: 500
       message: OK
     headers:
       Cache-Control:
@@ -192,7 +192,7 @@ http_interactions:
         i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
         i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
         i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2015-09-24T15:51:15.9283397-07:00</a:maturityDate></a:tenor><a:value>15</a:value></a:FhlbsfDataPoint></a:data></a:FhlbsfMarketData></marketData></fhlbsfMarketDataResponse></responses></marketDataResponse></s:Body></s:Envelope>
-    http_version: 
+    http_version:
   recorded_at: Thu, 03 Sep 2015 22:51:17 GMT
 - request:
     method: get
@@ -277,7 +277,7 @@ http_interactions:
         name="TradeResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation></wsdl:binding><wsdl:service
         name="ConsolidatedService"><wsdl:port name="ClearUsernameBinding_IConsolidatedService"
         binding="tns:ClearUsernameBinding_IConsolidatedService"><soap:address location="http://sfdw64netapp1.fhlbsf-i.com/TradeServiceConsolidatedAuth/ConsolidatedService.svc"/></wsdl:port></wsdl:service></wsdl:definitions>
-    http_version: 
+    http_version:
   recorded_at: Thu, 03 Sep 2015 22:51:17 GMT
 - request:
     method: post
@@ -312,7 +312,7 @@ http_interactions:
       - Ruby
   response:
     status:
-      code: 500
+      code: 200
       message: OK
     headers:
       Cache-Control:
@@ -366,6 +366,6 @@ http_interactions:
         xmlns="http://fhlbsf.com/schema/canonical/shared/v1">0</intermediateRounding><finalRounding
         xmlns="http://fhlbsf.com/schema/canonical/shared/v1">0</finalRounding><roundingConvention
         xmlns="http://fhlbsf.com/schema/canonical/shared/v1">UP</roundingConvention></b:coupon><b:constantAdjustedSpread>0</b:constantAdjustedSpread><b:markup>0.0015</b:markup><b:embeddedCapFloorCost>0</b:embeddedCapFloorCost><b:blendedCostOfFundsToLibor>-0.00080</b:blendedCostOfFundsToLibor><b:lowCostBlendRatio>0.0</b:lowCostBlendRatio><b:costOfFunds>0.0060</b:costOfFunds><b:cofForwardAdj>0</b:cofForwardAdj><b:cofParSizeAdj>0.0</b:cofParSizeAdj><b:cofRate>0.0060</b:cofRate><b:optionCost>0</b:optionCost><b:cofSpread>0</b:cofSpread><b:putableAdjustment>0</b:putableAdjustment><b:ppsAdjustment>0</b:ppsAdjustment><b:moneyStatus>NEW</b:moneyStatus><b:daysToMaturity>0</b:daysToMaturity><b:valuationMethod>Benchmark</b:valuationMethod><b:benchmarkRate>0.0060</b:benchmarkRate><b:agreementType>A</b:agreementType><b:webTrade>true</b:webTrade></a:advance></trade></executeTradeResponse></s:Body></s:Envelope>
-    http_version: 
+    http_version:
   recorded_at: Thu, 03 Sep 2015 22:51:18 GMT
 recorded_with: VCR 2.9.3

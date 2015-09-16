@@ -3,6 +3,7 @@ require 'savon'
 require 'active_support/core_ext/hash/indifferent_access'
 require_relative 'rates/price_indication_historical'
 require_relative 'rates/blackout_dates'
+require_relative 'rates/market_data_rates'
 
 module MAPI
   module Services

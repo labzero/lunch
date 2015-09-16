@@ -1,5 +1,6 @@
 require_relative 'etransact_advances/execute_trade'
 require_relative 'rates/loan_terms'
+require_relative 'rates/market_data_rates'
 require_relative 'etransact_advances/settings'
 
 module MAPI
@@ -30,6 +31,13 @@ module MAPI
         :aaa => 'SBC_AAA_ENABLED',
         :aa => 'SBC_AA_ENABLED'
       }
+
+      MARKUP_MAPPING = {
+          whole: 'MU_WL',
+          agency: 'MU_AGCY',
+          aaa: 'MU_AA',
+          aa: 'MU_AAA'
+      }.with_indifferent_access
 
       def self.registered(app)
 
@@ -358,12 +366,16 @@ module MAPI
           check_capstock = false;
           rate = params[:rate]
           signer = params[:signer]
-          markup = 0
-          blendedcostoffunds = 0
-          costoffunds = 0
-          benchmarkrate = 0
+
           begin
-            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'EXECUTE', amount, advance_term, advance_type, rate, check_capstock, signer, markup, blendedcostoffunds, costoffunds, benchmarkrate)
+            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term), advance_type)
+          rescue Savon::Error => error
+            logger.error error
+            halt 503, 'Internal Service Error'
+          end
+
+          begin
+            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'EXECUTE', amount, advance_term, advance_type, rate, check_capstock, signer, cof_data[:markup], cof_data[:blended_cost_of_funds], cof_data[:cost_of_funds], cof_data[:benchmark_rate])
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
@@ -379,13 +391,17 @@ module MAPI
           advance_term = params[:advance_term]
           rate = params[:rate]
           signer = params[:signer]
-          markup = 0
           check_capstock = params[:check_capstock] == 'true'
-          blendedcostoffunds = 0
-          costoffunds = 0
-          benchmarkrate = 0
+
           begin
-            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'VALIDATE', amount, advance_term, advance_type, rate, check_capstock, signer, markup, blendedcostoffunds, costoffunds, benchmarkrate)
+            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term), advance_type)
+          rescue Savon::Error => error
+            logger.error error
+            halt 503, 'Internal Service Error'
+          end
+
+          begin
+            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'VALIDATE', amount, advance_term, advance_type, rate, check_capstock, signer, cof_data[:markup], cof_data[:blended_cost_of_funds], cof_data[:cost_of_funds], cof_data[:benchmark_rate])
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
@@ -393,6 +409,16 @@ module MAPI
           result
         end
       end
+
+      def self.cof_data_cleanup(cof_data, advance_type)
+        {
+          markup: cof_data[MARKUP_MAPPING[advance_type]].to_f / 10000,
+          blended_cost_of_funds: cof_data['COF_3L'].to_f / 10000,
+          cost_of_funds: cof_data['COF_FIXED'].to_f / 100,
+          benchmark_rate: cof_data['ADVANCE_BENCHMARK'].to_f / 100
+        }
+      end
+
     end
   end
 end
