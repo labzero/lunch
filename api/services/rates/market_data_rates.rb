@@ -44,8 +44,16 @@ module MAPI
             fhlbsfresponse = response.doc.xpath('//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse')
             hash = {}
             COF_TYPES.each_with_index do |type, ctr_type|
-              fhlbsfdatapoints = fhlbsfresponse[ctr_type].css('marketData FhlbsfMarketData data FhlbsfDataPoint')
-              hash[type] = fhlbsfdatapoints.at_css('value').content
+              if fhlbsfresponse.present?
+                if fhlbsfresponse[ctr_type].css('marketData FhlbsfMarketData data FhlbsfDataPoint')
+                  fhlbsfdatapoints = fhlbsfresponse[ctr_type].css('marketData FhlbsfMarketData data FhlbsfDataPoint')
+                  hash[type] = fhlbsfdatapoints.at_css('value').content
+                else
+                  raise 'Missing Data'
+                end
+              else
+                raise 'Missing Response'
+              end
             end
             hash
           else
