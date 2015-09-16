@@ -707,8 +707,8 @@ class ReportsController < ApplicationController
   end
 
   def securities_transactions
-    @max_date       = most_recent_business_day(Time.zone.now.to_date - 1.day)
-    @start_date     = params[:start_date].try(:to_date) || @max_date
+    @max_date   = most_recent_business_day(Time.zone.now.to_date - 1.day)
+    @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
     member_balances = MemberBalanceService.new(current_member_id, request)
     if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
       securities_transactions = {}
