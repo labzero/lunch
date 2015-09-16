@@ -21,17 +21,13 @@ module MAPI
           end
         end
 
-        def self.fake_data_fixed
-          JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'blackout_dates.json'))).map{ |d| Date.parse(d) }
-        end
-
         def self.fake_data_relative_to_today
           today = Time.zone.today
           [today + 1.week, today + 3.week]
         end
 
         def self.blackout_dates_development
-          (fake_data_relative_to_today + fake_data_fixed).map { |d| nearest_business_day(d) }
+          fake_data_relative_to_today.map { |d| nearest_business_day(d) }
         end
 
         def self.nearest_business_day(d)
