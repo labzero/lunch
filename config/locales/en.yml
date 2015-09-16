@@ -1219,7 +1219,6 @@ en:
     advances:
       title: Advances
       ace: Advances for Community Enterprise (ACE)
-
       amortizing:
         title: Amortizing Advance
         description: Use the Amortizing Advance to match the scheduled amortization characteristics of any fixed rate asset.
@@ -1244,7 +1243,28 @@ en:
         amortization_schedule:
           title: Amortization Schedule
           schedule: Can be designed to match most amortization schedules for a variety of fixed rate loans. The borrower specifies the amortization rate of the advance, which determines the amortization schedule.
-
+          description: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the Statement of Authority: Advances with Partial Prepayment Symmetry (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
+      callable:
+        title: Callable advance
+        description: Use the Callable Advance—with built-in prepayment options—to reduce interest rate risk and prepayment risk at minimal added cost. You may "call" (repay) the advance at predetermined dates without paying the standard prepayment fee.
+        uses:
+          fixed: Match-fund fixed rate mortgages
+          short: Match-fund short-term loans
+          address: Address the problem of uncertain principal repayments
+          manage: Manage prepayment risk of your assets
+        advantages:
+          fee: No prepayment fee with notification on predetermined dates
+          hedge: Hedge against asset prepayment risk
+          risk: Reduce risks associated with declining interest rate environments
+          flexibility: Built-in long-term flexibility
+        max_term: 10 years
+        interest_rate: Fixed for the entire term of the advance
+        interest_day_count: Actual/360
+        interest_payment_frequency: Quarterly and at repayment
+        call_dates: You specify the initial call date, with quarterly call dates thereafter.
+        call_feature: The advance may be repaid on any call date without a prepayment fee, provided that the Bank receives proper call notice. The Bank will charge a prepayment fee if proper call notice is not received by the Bank or for prepayment on a date other than a designated call date.
+        call_notice: At least 9 business days but no more than 60 calendar days before the specified call date.
+        prepayment_features_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=\"%{url}\">Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       arc_embedded:
         title: ARC Advance with Embedded Options
         description: Use ARC Advances with Embedded Options to match the interest rate and payment characteristics of your adjustable rate loan portfolio while managing your interest rate risk exposure.
@@ -1277,8 +1297,6 @@ en:
           description: If the interest rate determined on any rate reset date or, if applicable, on the scheduled funding date, is less than the amount of the unamortized premium (the annuitized value of the option premium, if not paid upfront), the interest rate for the accrual period that begins on that rate reset date will be equal to the unamortized premium. The Bank will not be obligated to pay the borrower any amount relating to the application of a negative interest rate to the remaining principal amount of the advance.
         prepayment_features:
           description: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the Statement of Authority: Advances with Partial Prepayment Symmetry (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
-      callable: Callable Advance
-      choice_libor: Choice LIBOR ARC Advance
       cip: Community Investment Program (CIP)
       auction_indexed: DN Auction-Indexed Advance
       arc:
@@ -1555,6 +1573,7 @@ en:
       alternate_initial_index: Alternate Initial Index
       alternate_repricing_alt_rate: Alternate Repricing Index and Alternate Rate Reset Date
       blackout_auction: Blacked-out Auctions
+      call_dates: Call Dates
       call_feature: Call Feature
       call_notice: Call Notice
       call_option_dates: Call Option Dates

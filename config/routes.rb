@@ -84,7 +84,7 @@ Rails.application.routes.draw do
       get 'advances-for-community-enterprise' => 'error#standard_error', as: :ace
       get 'amortizing' => 'products#amortizing', as: :amortizing
       get 'arc-embedded' => 'products#arc_embedded', as: :arc_embedded
-      get 'callable' => 'error#standard_error'
+      get 'callable' => 'products#callable', as: :callable
       get 'choice-libor' => 'products#choice_libor', as: :choice_libor
       get 'community-investment-program' => 'error#standard_error', as: :cip
       get 'auction-indexed' => 'products#auction_indexed', as: :auction_indexed
