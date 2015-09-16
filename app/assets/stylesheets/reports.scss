@@ -1034,7 +1034,7 @@ td.dataTables_empty {
       @include typography-print-footnote;
       width: 66%;
       display: block;
-      p {
+      p, span, span:first-child {
         @include typography-print-footnote;
       }
     }
@@ -1048,6 +1048,9 @@ td.dataTables_empty {
       color: $print-color;
       @include typography-print-summary-data;
     }
+  }
+  .authorizations-report .report-table tbody td {
+    @include typography-print-table-cell;
   }
   .report-table  {
     border: none;
