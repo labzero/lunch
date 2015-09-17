@@ -1,7 +1,7 @@
 module DatePickerHelper
 
   def default_dates_hash
-    today = Time.zone.now.to_date
+    today = Time.zone.today
     {
       this_month_start: today.beginning_of_month,
       today: today,
@@ -14,12 +14,12 @@ module DatePickerHelper
   end
 
   def current_quarter
-    today = Time.zone.now.to_date
+    today = Time.zone.today
     {quarter: (today.month / 3.0).ceil, year: today.year}
   end
 
   def last_quarter
-    today = Time.zone.now.to_date
+    today = Time.zone.today
     quarter = (today.month / 3.0).ceil
     if quarter == 1
       quarter = 4
@@ -49,11 +49,12 @@ module DatePickerHelper
     {start_date: start_date, end_date: end_date}
   end
 
-  def date_picker_presets(custom_start_date, custom_end_date = nil)
+  def date_picker_presets(custom_start_date, custom_end_date = nil, date_history = nil)
+    min_date = Time.zone.today - date_history if date_history
     presets = if custom_end_date.nil?
-      date_picker_single(custom_start_date)
+      date_picker_single(custom_start_date, min_date)
     else
-      date_picker_range(custom_start_date, custom_end_date)
+      date_picker_range(custom_start_date, custom_end_date, min_date)
     end
     presets.each do |preset|
       if preset[:start_date] == custom_start_date && (preset[:end_date] == custom_end_date || custom_end_date.nil?)
@@ -64,7 +65,7 @@ module DatePickerHelper
     presets
   end
 
-  def date_picker_range(custom_start_date, custom_end_date)
+  def date_picker_range(custom_start_date, custom_end_date, min_date)
     [
       {
         label: t('datepicker.range.date_to_current', date: default_dates_hash[:this_month_start].to_date.strftime('%B')),
@@ -102,10 +103,12 @@ module DatePickerHelper
         end_date: custom_end_date,
         is_custom: true
       }
-    ]
+    ].delete_if do |preset|
+      preset[:start_date] < min_date if min_date
+    end
   end
 
-  def date_picker_single(custom_start_date)
+  def date_picker_single(custom_start_date, min_date)
     [
       {
         label: t('global.today'),
@@ -133,7 +136,9 @@ module DatePickerHelper
         end_date: custom_start_date,
         is_custom: true
       }
-    ]
+    ].delete_if do |preset|
+      preset[:start_date] < min_date if min_date
+    end
   end
 
 end

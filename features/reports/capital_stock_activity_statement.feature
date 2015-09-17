@@ -66,19 +66,38 @@ Scenario: Member chooses a custom date range on Capital Stock Activity Statement
   And I click the datepicker field
   When I choose the "custom date range" preset in the datepicker
   Then I should see two calendars
-  When I select the 15th of "this month" in the left calendar
-  And I select the 20th of "this month" in the right calendar
+  When I select the 15th of "last month" in the left calendar
+  And I select the 20th of "last month" in the right calendar
   And I click the datepicker apply button
-  Then I should see a "Capital Stock Activity Statement" for the 15th through the 20th of this month
+  Then I should see a "Capital Stock Activity Statement" for the 15th through the 20th of last month
+
 
 @jira-mem-630
 Scenario: Entering text in the datepicker input fields
   Given I am on the "Capital Stock Activity Statement" report page
   When I click the datepicker field
-  And I write "1/10/2014" in the datepicker start input field
-  And I write "7/13/2014" in the datepicker end input field
+  And I write a date from one month ago in the datepicker start input field
+  And I write today's date in the datepicker end input field
   And I click the datepicker apply button
-  Then I should see a "Capital Stock Activity Statement" starting on "January 10, 2014" and ending on "July 13, 2014"
+  Then I should see a "Capital Stock Activity Statement" starting 1 month ago and ending today
+
+@jira-mem-890
+Scenario: Member enters a date occurring before the minimum allowed date
+  Given I am on the "Capital Stock Activity Statement" report page
+  When I click the datepicker field
+  And I write "1/10/2014" in the datepicker start input field
+  And I write today's date in the datepicker end input field
+  And I click the datepicker apply button
+  Then I should see a "Capital Stock Activity Statement" starting 12 months ago and ending today
+
+@jira-mem-890
+Scenario: Member enters a date occurring after the maximum allowed date
+  Given I am on the "Capital Stock Activity Statement" report page
+  When I click the datepicker field
+  And I write a date from one month ago in the datepicker start input field
+  And I write tomorrow's date in the datepicker end input field
+  And I click the datepicker apply button
+  Then I should see a "Capital Stock Activity Statement" starting 1 month ago and ending today
 
 @data-unavailable @jira-mem-283
 Scenario: No data is available to show in the Capital Stock Activity Statement

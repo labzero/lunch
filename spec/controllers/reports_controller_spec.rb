@@ -1,17 +1,22 @@
 require 'rails_helper'
 include CustomFormattingHelper
 include ActionView::Helpers::NumberHelper
+include DatePickerHelper
 
 RSpec.describe ReportsController, :type => :controller do
   login_user
 
-  let(:today) {Date.new(2015,1,20)}
-  let(:start_date) {Date.new(2014,12,01)}
-  let(:end_date) {Date.new(2014,12,31)}
+  let(:today) { Time.zone.today }
+  let(:start_date) { today - 2.months }
+  let(:restricted_start_date) { double('a restricted date')}
+  let(:end_date) { today - 1.month }
+  let(:min_date) { double('min date') }
   let(:picker_preset_hash) {double(Hash)}
+  let(:min_and_start_dates_array) { [min_date, restricted_start_date] }
+  let(:date_picker_presets) {double('date_picker_presets')}
 
   before do
-    allow(Time.zone).to receive(:now).and_return(today)
+    allow(controller).to receive(:date_picker_presets).and_return(date_picker_presets)
   end
 
   describe 'GET index' do
@@ -28,54 +33,46 @@ RSpec.describe ReportsController, :type => :controller do
 
     before do
       allow(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
+      allow(controller).to receive(:min_and_start_dates).and_return(min_and_start_dates_array)
     end
 
     describe 'GET capital_stock_activity' do
+      before { allow(member_balance_service_instance).to receive(:capital_stock_activity).and_return(response_hash) }
       it_behaves_like 'a user required action', :get, :capital_stock_activity
+      it_behaves_like 'a date restricted report', :capital_stock_activity, :last_month_start
 
       it 'should render the capital_stock_activity view' do
-        expect(member_balance_service_instance).to receive(:capital_stock_activity).and_return(response_hash)
         get :capital_stock_activity
         expect(response.body).to render_template('capital_stock_activity')
       end
       it 'should set @capital_stock_activity' do
-        expect(member_balance_service_instance).to receive(:capital_stock_activity).and_return(response_hash)
         get :capital_stock_activity
         expect(assigns[:capital_stock_activity]).to eq(response_hash)
       end
       it 'should set @capital_stock_activity to {} if the report is disabled' do
-        expect(controller).to receive(:report_disabled?).with(ReportsController::CAPITAL_STOCK_ACTIVITY_WEB_FLAGS).and_return(true)
+        allow(controller).to receive(:report_disabled?).with(ReportsController::CAPITAL_STOCK_ACTIVITY_WEB_FLAGS).and_return(true)
         get :capital_stock_activity
         expect(assigns[:capital_stock_activity]).to eq({})
       end
-      it 'should use the start_date and end_date provided in the params hash if available' do
-        expect(member_balance_service_instance).to receive(:capital_stock_activity).with(start_date, end_date).and_return(response_hash)
-        get :capital_stock_activity, start_date: start_date, end_date: end_date
-      end
-      it 'should use the last full month if no params are passed' do
-        start_of_month = (today - 1.month).beginning_of_month
-        end_of_month = start_of_month.end_of_month
-        expect(member_balance_service_instance).to receive(:capital_stock_activity).with(start_of_month, end_of_month).and_return(response_hash)
-        get :capital_stock_activity
-      end
       it 'should raise an error if @capital_stock_activity is nil' do
-        expect(member_balance_service_instance).to receive(:capital_stock_activity).and_return(nil)
+        allow(member_balance_service_instance).to receive(:capital_stock_activity).and_return(nil)
         expect{get :capital_stock_activity}.to raise_error(StandardError)
       end
       describe "view instance variables" do
-        before {
-          allow(member_balance_service_instance).to receive(:capital_stock_activity).with(kind_of(Date), kind_of(Date)).and_return(response_hash)
-        }
-        it 'should set @start_date to the start_date param' do
-          get :capital_stock_activity, start_date: start_date, end_date: end_date
-          expect(assigns[:start_date]).to eq(start_date)
+        it 'should set @start_date to the `start_date` attribute of the `min_and_start_dates` hash' do
+          get :capital_stock_activity
+          expect(assigns[:start_date]).to eq(restricted_start_date)
         end
         it 'should set @end_date to the end_date param' do
           get :capital_stock_activity, start_date: start_date, end_date: end_date
           expect(assigns[:end_date]).to eq(end_date)
         end
-        it 'should pass @start_date and @end_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-          expect(controller).to receive(:date_picker_presets).with(start_date, end_date).and_return(picker_preset_hash)
+        it 'should set @end_date to the end of last month if no end_date param is provided' do
+          get :capital_stock_activity
+          expect(assigns[:end_date]).to eq(default_dates_hash[:last_month_end])
+        end
+        it 'should pass @start_date, @end_date and the `date_restriction` to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+          allow(controller).to receive(:date_picker_presets).with(restricted_start_date, end_date, ReportsController::DATE_RESTRICTION_MAPPING[:capital_stock_activity]).and_return(picker_preset_hash)
           get :capital_stock_activity, start_date: start_date, end_date: end_date
           expect(assigns[:picker_presets]).to eq(picker_preset_hash)
         end
@@ -119,6 +116,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it_behaves_like 'a user required action', :get, :settlement_transaction_account
       it_behaves_like 'a report that can be downloaded', :settlement_transaction_account, [:pdf]
+      it_behaves_like 'a date restricted report', :settlement_transaction_account, :last_month_start
       describe 'with activities array stubbed' do
         it 'should render the settlement_transaction_account view' do
           get :settlement_transaction_account
@@ -142,16 +140,20 @@ RSpec.describe ReportsController, :type => :controller do
             get :settlement_transaction_account
             expect(assigns[:settlement_transaction_account]).to eq({})
           end
-          it 'should set @start_date to the start_date param' do
-            get :settlement_transaction_account, start_date: start_date, end_date: end_date
-            expect(assigns[:start_date]).to eq(start_date)
+          it 'should set @start_date to the `start_date` attribute of the `min_and_start_dates` hash' do
+            get :settlement_transaction_account
+            expect(assigns[:start_date]).to eq(restricted_start_date)
           end
           it 'should set @end_date to the end_date param' do
             get :settlement_transaction_account, start_date: start_date, end_date: end_date
             expect(assigns[:end_date]).to eq(end_date)
           end
-          it 'should pass @start_date and @end_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-            expect(controller).to receive(:date_picker_presets).with(start_date, end_date).and_return(picker_preset_hash)
+          it 'should set @end_date to the end of last month if no end_date param is provided' do
+            get :settlement_transaction_account
+            expect(assigns[:end_date]).to eq(default_dates_hash[:last_month_end])
+          end
+          it 'should pass @start_date, @end_date and `date_restriction` to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+            expect(controller).to receive(:date_picker_presets).with(restricted_start_date, end_date, ReportsController::DATE_RESTRICTION_MAPPING[:settlement_transaction_account]).and_return(picker_preset_hash)
             get :settlement_transaction_account, start_date: start_date, end_date: end_date, sta_filter: filter
             expect(assigns[:picker_presets]).to eq(picker_preset_hash)
           end
@@ -233,13 +235,13 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET advances_detail' do
       it_behaves_like 'a user required action', :get, :advances_detail
       let(:advances_detail) {double('Advances Detail object')}
-      let(:start_date) { Date.new(2014,12,31) }
       before do
         allow(member_balance_service_instance).to receive(:advances_details).and_return(advances_detail)
         allow(advances_detail).to receive(:[]).with(:advances_details).and_return([])
       end
 
       it_behaves_like 'a report that can be downloaded', :advances_detail, [:pdf, :xlsx]
+      it_behaves_like 'a date restricted report', :advances_detail
       it 'should render the advances_detail view' do
         get :advances_detail
         expect(response.body).to render_template('advances_detail')
@@ -248,7 +250,6 @@ RSpec.describe ReportsController, :type => :controller do
       [['pdf', RenderReportPDFJob], ['xlsx', RenderReportExcelJob]].each do |format|
         describe "downloading a #{format.first.upcase}" do
           let(:member_id) { double('A Member ID') }
-          let(:start_date) { Time.zone.today - 3.years }
           let(:job_status) { double('JobStatus', update_attributes!: nil)}
           let(:active_job) { double('Active Job Instance', job_status: job_status) }
           let(:user_id) { rand(1000) }
@@ -267,7 +268,7 @@ RSpec.describe ReportsController, :type => :controller do
             get :advances_detail, export_format: format.first
           end
           it 'should enqueue a report #{format.first} job using the requested start_date' do
-            expect(format.last).to receive(:perform_later).with(anything, anything, anything, hash_including(start_date: start_date.to_s)).and_return(active_job)
+            expect(format.last).to receive(:perform_later).with(anything, anything, anything, hash_including(start_date: restricted_start_date.to_s)).and_return(active_job)
             get :advances_detail, export_format: format.first, start_date: start_date
           end
           it 'should update the job_status instance with the user_id of the current user' do
@@ -286,21 +287,17 @@ RSpec.describe ReportsController, :type => :controller do
       end
 
       describe 'view instance variables' do
-        it 'sets @start_date to param[:start_date] if available' do
-          get :advances_detail, start_date: start_date
-          expect(assigns[:start_date]).to eq(start_date)
-        end
-        it 'sets @start_date to today\'s date if param[:start_date] is not available' do
+        it 'sets @start_date to the `start_date` attribute of the `min_and_start_dates` hash' do
           get :advances_detail
-          expect(assigns[:start_date]).to eq(today)
+          expect(assigns[:start_date]).to eq(restricted_start_date)
         end
-        it 'should pass @as_of_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-          expect(controller).to receive(:date_picker_presets).with(start_date).and_return(picker_preset_hash)
+        it 'should pass @as_of_date and `date_restriction` to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+          expect(controller).to receive(:date_picker_presets).with(restricted_start_date, nil, ReportsController::DATE_RESTRICTION_MAPPING[:advances_detail]).and_return(picker_preset_hash)
           get :advances_detail, start_date: start_date
           expect(assigns[:picker_presets]).to eq(picker_preset_hash)
         end
         it 'should call the method `advances_details` on a MemberBalanceService instance with the `start` argument and set @advances_detail to its result' do
-          expect(member_balance_service_instance).to receive(:advances_details).with(start_date).and_return(advances_detail)
+          expect(member_balance_service_instance).to receive(:advances_details).with(restricted_start_date).and_return(advances_detail)
           get :advances_detail, start_date: start_date
           expect(assigns[:advances_detail]).to eq(advances_detail)
         end
@@ -445,13 +442,19 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET securities_services_statement' do
       let(:make_request) { get :securities_services_statement }
       let(:response_hash) { double('A Securities Services Statement', :'[]' => nil)}
-      let(:end_of_month) { rand(500).days.ago(Time.zone.today) }
+      let(:end_of_month) { (start_date - 1.month).end_of_month }
       before do
         allow(member_balance_service_instance).to receive(:securities_services_statement).with(kind_of(Date)).and_return(response_hash)
         allow(response_hash).to receive(:[]).with(:secutities_fees).and_return([{}])
         allow(response_hash).to receive(:[]).with(:transaction_fees).and_return([{}])
+        allow(restricted_start_date).to receive(:end_of_month).and_return(end_of_month)
       end
       it_behaves_like 'a user required action', :get, :securities_services_statement
+      it_behaves_like 'a date restricted report', :securities_services_statement, :last_month_end
+      it 'should set @start_date to the end of the month for the `start_date` attribute of the `min_and_start_dates` hash' do
+        make_request
+        expect(assigns[:start_date]).to eq(end_of_month)
+      end
       it 'should assign `@statement` to the result of calling MemberBalanceService.securities_services_statement' do
         make_request
         expect(assigns[:statement]).to be(response_hash)
@@ -464,10 +467,6 @@ RSpec.describe ReportsController, :type => :controller do
         allow(controller).to receive(:last_month_end).and_return(end_of_month)
         make_request
         expect(assigns[:start_date]).to eq(end_of_month)
-      end
-      it 'should set @start_date to the `start_date` param' do
-        get :securities_services_statement, start_date: '2012-02-11'
-        expect(assigns[:start_date]).to eq(Date.new(2012, 2, 11))
       end
       it 'should set @picker_presets to the `date_picker_presets` for the `start_date`' do
         some_presets = double('Some Presets')
@@ -740,10 +739,13 @@ RSpec.describe ReportsController, :type => :controller do
         ]
         let(:securities_position_response) { double('Monthly Securities Position response', :[] => nil) }
         let(:as_of_date) { Date.new(2014,1,1) }
+        let(:end_of_month) { (start_date - 1.month).end_of_month }
         before {
           allow(securities_position_response).to receive(:[]).with(:securities).and_return([])
           allow(member_balance_service_instance).to receive(:monthly_securities_position).and_return(securities_position_response)
+          allow(restricted_start_date).to receive(:end_of_month).and_return(end_of_month)
         }
+        it_behaves_like 'a date restricted report', :monthly_securities_position, :last_month_end
         it 'sets @current_securities_position to the hash returned from MemberBalanceService' do
           get :monthly_securities_position
           expect(assigns[:monthly_securities_position]).to eq(securities_position_response)
@@ -1709,6 +1711,24 @@ RSpec.describe ReportsController, :type => :controller do
       it 'returns today if it is the end of the month' do
         allow(Time.zone).to receive(:today).and_return(end_of_july)
         expect(controller.send(:last_month_end)).to eq(end_of_july)
+      end
+    end
+    describe 'min_and_start_dates' do
+      let(:min_date_range) { 18.months }
+      let(:min_date) { today - min_date_range }
+      let(:valid_start_date) { today - 6.months }
+      let(:invalid_start_date) { today - 20.months }
+      it 'sets the min_date to today minus the min_date_range' do
+        expect(controller.send(:min_and_start_dates, min_date_range).first).to eq(min_date)
+      end
+      it 'sets the start_date to today if no param is passed' do
+        expect(controller.send(:min_and_start_dates, min_date_range).last).to eq(today)
+      end
+      it 'sets the start_date to the param given if it does not occur before the min_date' do
+        expect(controller.send(:min_and_start_dates, min_date_range, valid_start_date).last).to eq(valid_start_date)
+      end
+      it 'sets the start_date to the min_date if the param given occurs before the min_date' do
+        expect(controller.send(:min_and_start_dates, min_date_range, invalid_start_date).last).to eq(min_date)
       end
     end
   end

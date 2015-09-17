@@ -168,9 +168,17 @@ Then(/^I should see a "([^"]*)" for the (\d+)(?:st|rd|th) of the last month$/) d
   page.assert_selector('.report-summary-data h3', text: footer) if footer
 end
 
-Then(/^I should see a "(.*?)" for the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of this month$/) do |report_type, start_day, end_day|
-  start_date = Date.new(@today.year, @today.month, start_day.to_i).strftime('%B %-d, %Y')
-  end_date = Date.new(@today.year, @today.month, end_day.to_i).strftime('%B %-d, %Y')
+Then(/^I should see a "(.*?)" for the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of (this|last) month$/) do |report_type, start_day, end_day, month|
+  month = case month
+    when 'this'
+      @today.month
+    when 'last'
+      (@today - 1.month).month
+    else
+      raise 'Month not recognized'
+  end
+  start_date = Date.new(@today.year, month, start_day.to_i).strftime('%B %-d, %Y')
+  end_date = Date.new(@today.year, month, end_day.to_i).strftime('%B %-d, %Y')
   step %{I should see a "#{report_type}" starting on "#{start_date}" and ending on "#{end_date}"}
 end
 
@@ -192,15 +200,44 @@ Then(/^I should see a "(.*?)" starting on "(.*?)" and ending on "(.*?)"$/) do |r
   report_dates_in_range?(start_date_obj, end_date_obj)
 end
 
+Then(/^I should see a "(.*?)" starting (\d+) months? ago and ending today$/) do |report_type, month|
+  month = month.to_i
+  start_date = month.months.ago
+  step %{I should see a "#{report_type}" starting on "#{start_date}" and ending on "#{@today}"}
+end
+
+Then(/^I should see a "(.*?)" report as of (\d+) months? ago$/) do |report_type, month|
+  end_of_month_reports = ['Securities Services Monthly Statement', 'Monthly Securities Position']
+  month = month.to_i
+  as_of_date = month.months.ago
+  if end_of_month_reports.include?(report_type)
+    as_of_date = as_of_date.end_of_month
+  end
+  step %{I should see a "#{report_type}" report as of "#{as_of_date}"}
+end
+
+Then(/^I should see a "(.*?)" report as of today$/) do |report_type|
+  step %{I should see a "#{report_type}" report as of "#{Time.zone.today}"}
+end
+
 Then(/^I should see a "(.*?)" report as of "(.*?)"$/) do |report_type, as_of_date|
   as_of_date = as_of_date.to_date
-  case report_type
+  summary_statement = case report_type
     when "Advances Detail"
-      summary_statement = I18n.t('reports.pages.advances_detail.total_current_par_heading', date: as_of_date.strftime('%B %-d, %Y'))
+      I18n.t('reports.pages.advances_detail.total_current_par_heading', date: fhlb_date_long_alpha(as_of_date))
+    when 'Securities Services Monthly Statement'
+      I18n.t('reports.pages.securities_services_statement.heading', date: fhlb_date_long_alpha(as_of_date))
+    when 'Monthly Securities Position'
+      I18n.t("reports.pages.securities_position.all_securities.total_original_par_heading", date: fhlb_date_long_alpha(as_of_date))
     else raise "unknown report type"
   end
-  expect(page.find(".datepicker-trigger input").value).to eq(I18n.t('datepicker.single.input', date: as_of_date.strftime('%m/%d/%Y')))
+  expect(page.find(".datepicker-trigger input").value).to eq(I18n.t('datepicker.single.input', date: fhlb_date_standard_numeric(as_of_date)))
   step %{I should see "#{summary_statement}"}
+end
+
+Then(/^I should see a "(.*?)" report as of the end of the last valid month$/) do |report_type|
+  end_of_month = @today == @today.end_of_month ? @today : (@today - 1.month).end_of_month
+  step %{I should see a "#{report_type}" report as of "#{end_of_month}"}
 end
 
 Then(/^I should see a "(.*?)" with data for dates between the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of (this|last) month$/) do |report_type, start_day, end_day, month|
@@ -235,9 +272,10 @@ Then(/^I should see a "(.*?)" with dates between "(.*?)" and "(.*?)"$/) do |repo
   report_dates_in_range?(start_date_obj, end_date_obj)
 end
 
-Given(/^I am showing Settlement Transaction Account activities for (\d+)$/) do |year|
-  start_date = Time.zone.parse("#{year}-01-01")
-  end_date = Time.zone.parse("#{year}-12-31")
+Given(/^I am showing Settlement Transaction Account activities for the last (\d+) months$/) do |month|
+  end_date = Time.zone.today
+  month = month.to_i
+  start_date = month.months.ago
   step 'I click the datepicker field'
   step %{I choose the "custom date range" preset in the datepicker}
   step %{I select a start date of "#{start_date}" and an end date of "#{end_date}"}

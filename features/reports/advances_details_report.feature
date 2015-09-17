@@ -56,9 +56,25 @@ Scenario: Member can't select a date in the future
 Scenario: Entering text in the datepicker input field
   Given I am on the "Advances Detail" report page
   When I click the datepicker field
-  And I write "1/10/2014" in the datepicker start input field
+  And I write a date from one month ago in the datepicker start input field
   And I click the datepicker apply button
-  Then I should see a "Advances Detail" report as of "January 10, 2014"
+  Then I should see a "Advances Detail" report as of 1 month ago
+
+@jira-mem-890
+Scenario: Member enters a date occurring before the minimum allowed date
+  Given I am on the "Advances Detail" report page
+  When I click the datepicker field
+  And I write "1/10/2013" in the datepicker start input field
+  And I click the datepicker apply button
+  Then I should see a "Advances Detail" report as of 18 months ago
+
+@jira-mem-890
+Scenario: Member enters a date occurring after the maximum allowed date
+  Given I am on the "Advances Detail" report page
+  When I click the datepicker field
+  And I write tomorrow's date in the datepicker start input field
+  And I click the datepicker apply button
+  Then I should see a "Advances Detail" report as of today
 
 @data-unavailable @jira-mem-283
 Scenario: No data is available to show in the Advances Detail Report

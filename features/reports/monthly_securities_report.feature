@@ -38,6 +38,22 @@ Feature: Visiting the Monthly Securities Position Report Page
     When I filter the report by "Unpledged Securities"
     Then I should see a monthly securities position report for Unpledged Securities
 
+  @jira-mem-890
+  Scenario: Member enters a date occurring before the minimum allowed date
+    Given I am on the "Monthly Securities Position" report page
+    When I click the datepicker field
+    And I write "1/10/2013" in the datepicker start input field
+    And I click the datepicker apply button
+    Then I should see a "Monthly Securities Position" report as of 18 months ago
+
+  @jira-mem-890
+  Scenario: Member enters a date occurring after the maximum allowed date
+    Given I am on the "Monthly Securities Position" report page
+    When I click the datepicker field
+    And I write tomorrow's date in the datepicker start input field
+    And I click the datepicker apply button
+    Then I should see a "Monthly Securities Position" report as of the end of the last valid month
+
   @data-unavailable @jira-mem-283
   Scenario: No data is available to show in the monthly securities position report
     Given I am on the "Monthly Securities Position" report page
