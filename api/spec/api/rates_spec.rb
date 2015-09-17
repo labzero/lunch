@@ -223,7 +223,7 @@ describe MAPI::ServiceApp do
         expect(last_response.status).to eq(503)
       end
 
-      it "should return Internal Service Error, if the hash returned from get_market_data soap endpoint is uses string keys instead of symbol keys" do
+      it "should return Internal Service Error, if the hash returned from get_market_data soap endpoint uses string keys instead of symbol keys" do
         allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data_hash_with_string_keys)
         expect(logger).to receive(:error).at_least(1).times
         get '/rates/summary'
