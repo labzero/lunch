@@ -162,7 +162,7 @@ describe MAPI::ServiceApp do
       let(:maturity_date_after){ double('maturity_date_after') }
       let(:interest_day_count){ double( 'interest_day_count' ) }
       let(:live_data_xml){ double('live_data_xml') }
-      let(:live_data_value) do
+      let(:live_data_value_with_string_keys) do
         {
             'payment_on' => 'Maturity',
             'interest_day_count' => interest_day_count,
@@ -170,11 +170,12 @@ describe MAPI::ServiceApp do
             'maturity_date' => maturity_date_before,
         }
       end
-      let(:live_data_bad) do
-        types_and_terms_hash { |_type, _term| live_data_value.clone }
+      let(:live_data_value_with_symbol_keys) { live_data_value_with_string_keys.with_indifferent_access }
+      let(:live_data_hash_with_string_keys) do
+        types_and_terms_hash { |_type, _term| live_data_value_with_string_keys.clone }
       end
-      let(:live_data_good) do
-        types_and_terms_hash { |_type, _term| live_data_value.clone.with_indifferent_access }
+      let(:live_data_hash_with_symbol_keys) do
+        types_and_terms_hash { |_type, _term| live_data_value_with_symbol_keys.clone }
       end
       let(:start_of_day_xml){ double('start_of_day_xml') }
       let(:start_of_day){ n_level_hash_with_default("5.0", 3) }
@@ -193,7 +194,7 @@ describe MAPI::ServiceApp do
         allow(MAPI::Services::Rates).to receive(:init_mds_connection).and_return(mds_connection)
         allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live').and_return(live_data_xml)
         allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay').and_return(start_of_day_xml)
-        allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data_good)
+        allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data_hash_with_symbol_keys)
         allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(start_of_day_xml).and_return(start_of_day)
         allow(MAPI::Services::Rates).to receive(:get_maturity_date).with(maturity_date_before, kind_of(String), []).and_return(maturity_date_after)
       end
@@ -222,8 +223,8 @@ describe MAPI::ServiceApp do
         expect(last_response.status).to eq(503)
       end
 
-      it "should return Internal Service Error, if the hash returned from get_market_data soap endpoint is not with_indifferent_access" do
-        allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data_bad)
+      it "should return Internal Service Error, if the hash returned from get_market_data soap endpoint is uses string keys instead of symbol keys" do
+        allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data_hash_with_string_keys)
         expect(logger).to receive(:error).at_least(1).times
         get '/rates/summary'
       end
