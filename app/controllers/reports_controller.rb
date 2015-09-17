@@ -21,6 +21,7 @@ class ReportsController < ApplicationController
   CAPITAL_STOCK_AND_LEVERAGE_WEB_FLAGS = [MembersService::FHLB_STOCK_DATA]
   ACCOUNT_SUMMARY_WEB_FLAGS = [MembersService::FINANCING_AVAILABLE_DATA, MembersService::CREDIT_OUTSTANDING_DATA, MembersService::COLLATERAL_HIGHLIGHTS_DATA, MembersService::FHLB_STOCK_DATA]
   INTEREST_RATE_RESETS_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
+  TODAYS_CREDIT_ACTIVITY_WEB_FLAGS = [MembersService::TODAYS_CREDIT_ACTIVITY]
 
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
@@ -84,6 +85,11 @@ class ReportsController < ApplicationController
         }
       },
       credit: {
+        todays_credit: {
+          updated: t('reports.continuously'),
+          available_history: t('global.current_day'),
+          route: reports_todays_credit_path
+        },
         advances_detail: {
           updated: t('global.daily'),
           available_history: t('global.all'),
@@ -1231,6 +1237,39 @@ class ReportsController < ApplicationController
         ]
       }
     end
+  end
+
+  def todays_credit
+    if report_disabled?(TODAYS_CREDIT_ACTIVITY_WEB_FLAGS)
+      activities = []
+    else
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      activities = member_balances.todays_credit_activity
+      raise StandardError, "There has been an error and ReportsController#todays_credit has encountered nil. Check error logs." if activities.nil?
+    end
+    rows = []
+    activities.each do |activity|
+      maturity_date = if activity[:instrument_type] == 'ADVANCE'
+        activity[:maturity_date] || t('global.open')
+      else
+        activity[:maturity_date]
+      end
+      rows << {
+        columns:[
+          {value: activity[:transaction_number]},
+          {type: :number, value: activity[:current_par]},
+          {type: :index, value: (activity[:interest_rate] * 100 if activity[:interest_rate])},
+          {type: :date, value: activity[:funding_date]},
+          {type: (:date if maturity_date.is_a?(Date)), value: maturity_date},
+          {value: activity[:product_description]}
+        ]
+      }
+    end
+    column_headings = [t('common_table_headings.transaction_number'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.product_type')]
+    @todays_credit = {
+      column_headings: column_headings,
+      rows: rows
+    }
   end
 
   private

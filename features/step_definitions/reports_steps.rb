@@ -97,6 +97,8 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/capital-stock-and-leverage'
   when 'Account Summary'
     visit '/reports/account-summary'
+  when 'Today\'s Credit'
+    visit '/reports/todays-credit'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end

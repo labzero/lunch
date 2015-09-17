@@ -987,6 +987,48 @@ RSpec.describe ReportsController, :type => :controller do
         expect{interest_rate_resets}.to raise_error
       end
     end
+    describe 'GET todays_credit' do
+      let(:todays_credit) { get :todays_credit }
+      let(:interest_rate) { double('interest_rate')}
+      let(:credit_activity) { {transaction_number: double('transaction_number'), current_par: double('current_par'), interest_rate: double('interest_rate', :* => interest_rate), funding_date: double('funding_date'), maturity_date: double('maturity_date', is_a?: true), product_description: double('product_description')} }
+      let(:credit_activity_advance) { {instrument_type: 'ADVANCE'} }
+      let(:todays_credit_response) { [credit_activity] }
+      before do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return(todays_credit_response)
+      end
+      it_behaves_like 'a user required action', :get, :todays_credit
+      describe 'view instance variables' do
+        it 'sets the @todays_credit row attribute' do
+          todays_credit
+          expect(assigns[:todays_credit][:rows][0][:columns]).to eq([{value: credit_activity[:transaction_number]}, {type: :number, value: credit_activity[:current_par]}, {type: :index, value: interest_rate}, {type: :date, value: credit_activity[:funding_date]}, {type: :date, value: credit_activity[:maturity_date]}, {value: credit_activity[:product_description]}])
+        end
+        it 'sets the @todays_credit column_headings attribute' do
+          todays_credit
+          assigns[:todays_credit][:column_headings].each do |heading|
+            expect(heading).to be_kind_of(String)
+          end
+        end
+        it "sets the `maturity_date` attribute of a given activity to #{I18n.t('global.open')} and its type to nil if the activity is an advance with no maturity date" do
+          allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([credit_activity_advance])
+          todays_credit
+          expect(assigns[:todays_credit][:rows][0][:columns][4][:value]).to eq(I18n.t('global.open'))
+          expect(assigns[:todays_credit][:rows][0][:columns][4][:type]).to be_nil
+        end
+      end
+      describe 'with the report disabled' do
+        before do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::TODAYS_CREDIT_ACTIVITY_WEB_FLAGS).and_return(true)
+        end
+        it "sets @todays_credit[:rows] to be an empty array" do
+          todays_credit
+          expect(assigns[:todays_credit][:rows]).to eq([])
+        end
+      end
+      it 'raises an error if the MAPI endpoint returns nil' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return(nil)
+        expect{todays_credit}.to raise_error
+      end
+    end
   end
 
   describe 'GET current_price_indications' do

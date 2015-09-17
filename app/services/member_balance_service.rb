@@ -336,4 +336,40 @@ class MemberBalanceService < MAPIService
   def interest_rate_resets
     fix_date(get_hash(:interest_rate_resets, "/member/#{@member_id}/interest_rate_resets"), :date_processed)
   end
+
+  def todays_credit_activity
+    if data = get_json(:todays_credit_activity, "/member/#{@member_id}/todays_credit_activity")
+      processed_data = []
+      data.each do |activity|
+        activity = activity.with_indifferent_access
+        # Handling for Advances that have been EXERCISED
+        if (activity[:instrument_type] == 'ADVANCE' || activity[:instrument_type] == 'LC') && activity[:status] == 'EXERCISED'
+          activity[:product_description] = activity[:termination_full_partial]
+          activity[:interest_rate] = nil
+        else
+          activity[:product_description] =
+            # handling for Termination Par
+          if !activity[:termination_par].blank?
+            if !activity[:termination_full_partial].blank?
+              if activity[:instrument_type] == 'ADVANCE' || activity[:instrument_type] == 'LC'
+                           activity[:termination_full_partial]
+              elsif activity[:status] == 'TERMINATED'
+                'TERMINATION'
+              else
+                activity[:instrument_type]
+              end
+            # else - leave the product_description as-is
+            end
+          elsif activity[:instrument_type] == 'ADVANCE'
+            activity[:instrument_type] + ' ' + activity[:sub_product]
+          else
+            activity[:instrument_type]
+          end
+        end
+        %i(funding_date maturity_date).each { |date_attr| fix_date(activity, date_attr) }
+        processed_data.push(activity)
+      end
+      processed_data
+    end
+  end
 end

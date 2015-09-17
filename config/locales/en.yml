@@ -166,6 +166,7 @@ en:
     description: Description
     current_par: Current Par
     advance_number: Advance Number
+    transaction_number: Transaction Number
     interest_rate: Interest Rate
     cusip: CUSIP
     cusip_title: "CUSIP %{cusip}"
@@ -178,6 +179,7 @@ en:
     pool_number: Pool
     funding_date: Funding Date
     advance_type: Advance Type
+    product_type: Product Type
   datepicker:
     range:
       date_to_current: "%{date} to date"
@@ -754,6 +756,9 @@ en:
         summary: Historical price indications reflect the price indications posted at the beginning of the day, not actual prices.
     credit:
       title: Credit
+      todays_credit:
+        title: Today's Credit Activity
+        summary: Displays advances, letters of credit and investment transactions conducted today.
       advances_detail:
         title: Advances
         summary: Your institution’s outstanding advances such as maturity, date, estimated next payment, and prepayment fee indications. The data is downloadable, and the columns can be sorted in ascending and descending order.
@@ -1165,6 +1170,8 @@ en:
     prepayment_fee_notice: Prepayment fee indications are not based on rates as of today. Please call %{phone_number} by 10:30 a.m. to obtain a prepayment fee indication as of today.
     merger_notice: In the event of a merger, this report may not include all advances from the acquired institution.
     advances_and_securities_agreement_notice: Nothing in this report in any way amends, modifies, or waives the terms of your Advances and Security Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issued pursuant to that Agreement. The Bank expressly disclaims any and all liability that may arise from your institution's reliance on any information contained in, or errors or omissions made with respect to, this report. Please call Operations at %{phone_number} if you have any questions.
+    data_notice: Data reflects activty as on the date and time shown above.
+    refresh_notice: Refresh your browser for current information.
     pdf_footer: "%{report_name} as of %{date}"
     pdf_footer_range: "%{report_name} %{date}"
     anticipated_transactions: The records included in this report are anticipated transactions for the listed settlement dates. These transactions are subject to change prior to final settlement. Net adjustment credit and/or debit amounts will be posted to your STA on the settlement date.

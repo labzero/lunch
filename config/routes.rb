@@ -42,6 +42,7 @@ Rails.application.routes.draw do
     get '/forward-commitments' => 'reports#forward_commitments'
     get '/capital-stock-and-leverage' => 'reports#capital_stock_and_leverage'
     get '/account-summary' => 'reports#account_summary'
+    get '/todays-credit' => 'reports#todays_credit'
   end
 
   get '/advances' => 'advances#index'

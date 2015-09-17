@@ -672,6 +672,23 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/todays_credit_activity'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve today\'s credit activty for a given member'
+              key :notes, 'Retrieve today\'s credit activty for a given member'
+              key :nickname, :getTodaysCreditActivityForMember
+              key :type, :memberTodaysCreditActivity
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -932,6 +949,17 @@ module MAPI
           member_id = params[:id]
           date = params[:date].to_date
           MAPI::Services::Member::DividendStatement.dividend_statement(self, member_id, date).to_json
+        end
+
+        # Today's Credit Activity
+        relative_get '/:id/todays_credit_activity' do
+          member_id = params[:id]
+          begin
+            MAPI::Services::Member::TradeActivity.todays_credit_activity(self.settings.environment, member_id).to_json
+          rescue Savon::Error => error
+            logger.error error
+            halt 503, 'Internal Service Error'
+          end
         end
       end
 

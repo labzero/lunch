@@ -26,6 +26,7 @@
           %li<>
             = link_to(t('reports.credit.title'), reports_path)
             %ul.nav-dropdown-nested
+              %li= link_to(t('reports.credit.todays_credit.title'), reports_todays_credit_path)
               %li= link_to(t('reports.credit.advances_detail.title'), reports_advances_path)
               %li= link_to(t('reports.credit.interest_rate.title'), reports_interest_rate_resets_path)
               %li= link_to(t('reports.credit.letters_of_credit.title'), reports_letters_of_credit_path)
