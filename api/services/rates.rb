@@ -9,6 +9,10 @@ module MAPI
       include MAPI::Shared::Constants
       include MAPI::Shared::Utils
 
+      def self.types_and_terms_hash
+        Hash[LOAN_TYPES.map { |type| [type, Hash[LOAN_TERMS.map{ |term| [term, yield(type, term)] }]] }]
+      end
+
       def self.holiday?(date, holidays)
         holidays.include?(date.strftime('%F'))
       end
@@ -126,18 +130,17 @@ module MAPI
       def self.extract_market_data_from_soap_response(response)
         hash = {}
         response.doc.remove_namespaces!
-        fhlbsf_response = response.doc.xpath('//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse')
-        LOAN_TYPES.each_with_index do |type, ctr_type|
+        response.doc.xpath('//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse').each do |type_data|
+          day_count_basis = type_data.at_css('marketData FhlbsfMarketData dayCountBasis').content
+          type            = type_data.at_css('marketData FhlbsfMarketData name').content
           hash[type] = {}
-          fhlbsf_data_points = fhlbsf_response[ctr_type].css('marketData FhlbsfMarketData data FhlbsfDataPoint')
-          LOAN_TERMS.each_with_index do |term, ctr_term|
-            ctr_term = 1 if ctr_term == 0 # why? when commented out, all tests still pass
-            hash[type][term] = {
-                payment_on:         'Maturity',
-                interest_day_count: fhlbsf_response[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
-                rate:               fhlbsf_data_points[ctr_term-1].at_css('value').content,
-                maturity_date:      Time.zone.parse(fhlbsf_data_points[ctr_term-1].at_css('tenor maturityDate').content).to_date,
-            }
+          type_data.css('marketData FhlbsfMarketData data FhlbsfDataPoint').each do |term_data|
+            rate          = term_data.at_css('value').content
+            maturity_date = Time.zone.parse(term_data.at_css('tenor maturityDate').content).to_date
+            frequency     = term_data.at_css('tenor interval frequency').content
+            unit          = term_data.at_css('tenor interval frequencyUnit').content
+            term          = FREQUENCY_MAPPING["#{frequency}#{unit}"]
+            hash[type][term] = { rate: rate, maturity_date: maturity_date, payment_on: 'Maturity', interest_day_count: day_count_basis } if term
           end
         end
         hash
