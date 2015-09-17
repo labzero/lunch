@@ -6,6 +6,10 @@ def n_level_hash_with_default(default, n)
   n == 0 ? default : n_level_hash_with_default(Hash.new(default), n-1)
 end
 
+def types_and_terms_hash
+  Hash[loan_types.map { |type| [type, Hash[loan_terms.map{ |term| [term, yield(type, term)] }]] }]
+end
+
 describe MAPI::ServiceApp do
   subject { MAPI::Services::Rates }
   before do
@@ -167,10 +171,10 @@ describe MAPI::ServiceApp do
         }
       end
       let(:live_data_bad) do
-        Hash[loan_types.map { |type| [type, Hash[loan_terms.map{ |term| [term, live_data_value.clone] }]] }]
+        types_and_terms_hash { |_type, _term| live_data_value.clone }
       end
       let(:live_data_good) do
-        Hash[loan_types.map { |type| [type, Hash[loan_terms.map{ |term| [term, live_data_value.clone.with_indifferent_access] }]] }]
+        types_and_terms_hash { |_type, _term| live_data_value.clone.with_indifferent_access }
       end
       let(:start_of_day_xml){ double('start_of_day_xml') }
       let(:start_of_day){ n_level_hash_with_default("5.0", 3) }
