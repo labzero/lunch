@@ -79,6 +79,7 @@ Rails.application.routes.draw do
     get '/summary' => 'products#index', as: :product_summary
     get '/letters-of-credit' => 'error#standard_error'
     get '/community_programs' => 'error#standard_error'
+    get '/product-mpf-pfi' => 'error#standard_error', as: :product_mpf_pfi
     scope 'advances' do
       get 'adjustable-rate-credit' => 'products#arc', as: :arc
       get 'advances-for-community-enterprise' => 'error#standard_error', as: :ace
@@ -89,14 +90,15 @@ Rails.application.routes.draw do
       get 'community-investment-program' => 'error#standard_error', as: :cip
       get 'auction-indexed' => 'products#auction_indexed', as: :auction_indexed
       get 'fixed-rate-credit' => 'products#frc', as: :frc
-      get 'frc-embedded' => 'products#frc_embedded'
+      get 'frc-embedded' => 'products#frc_embedded', as: :frc_embedded
       get 'knockout' => 'products#knockout', as: :knockout
-      get 'mortgage-partnership-finance' => 'error#standard_error', as: :mpf
+      get 'mortgage-partnership-finance' => 'products#mpf', as: :mpf
       get 'other-cash-needs' => 'products#ocn', as: :ocn
       get 'putable' => 'products#putable', as: :putable
       get 'securities-backed-credit' => 'products#sbc', as: :sbc
       get 'variable-rate-credit' => 'products#vrc', as: :vrc
     end
+
   end
 
   devise_scope :user do

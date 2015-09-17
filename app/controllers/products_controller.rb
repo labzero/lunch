@@ -73,4 +73,9 @@ class ProductsController < ApplicationController
     @last_modified = Date.new(2015, 7, 1)
   end
 
+  # GET
+  def mpf
+    @last_modified = Date.new(2015, 8, 1)
+  end
+
 end
