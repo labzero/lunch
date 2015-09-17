@@ -30,6 +30,9 @@ $button-vertical-padding: 7px;
   &[disabled] {
     background-color: $secondary-gray;
   }
+  &:visited {
+    color: $white;
+  }
 }
 
 .secondary-button {

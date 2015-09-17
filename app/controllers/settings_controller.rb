@@ -30,6 +30,8 @@ class SettingsController < ApplicationController
     authorize @user, :delete?
   end
 
+  skip_before_action :check_password_change, only: [:expired_password, :update_password]
+
   def index
     @email_options = ['reports'] + CorporateCommunication::VALID_CATEGORIES
   end
@@ -187,6 +189,33 @@ class SettingsController < ApplicationController
       end
     end
     render json: {status: status}
+  end
+
+  def expired_password
+    if session['password_expired']
+      render layout: 'external'
+    else
+      redirect_to settings_path
+    end
+  end
+
+  def update_password
+    expiration_flow = session['password_expired']
+
+    current_user.password = params[:user][:password]
+    current_user.password_confirmation = params[:user][:password_confirmation]
+
+    if current_user.save
+      if expiration_flow
+        session['password_expired'] = false
+        @next_location = after_sign_in_path_for(current_user)
+        render :update_password_success, layout: 'external'
+      else
+        redirect_to settings_path
+      end
+    else
+      render :expired_password, layout: expiration_flow ? 'external' : nil
+    end
   end
 
   private

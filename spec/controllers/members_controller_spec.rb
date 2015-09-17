@@ -90,7 +90,7 @@ RSpec.describe MembersController, type: :controller do
   describe 'POST accept_terms' do
     let(:make_request) {post :accept_terms}
     let(:now) { DateTime.new(2015,1,1)}
-    let(:user) { double('user', member_id: nil, :'[]=' => nil, accepted_terms?: nil) }
+    let(:user) { double('user', member_id: nil, :'[]=' => nil, accepted_terms?: nil, password_expired?: false) }
     before { allow(DateTime).to receive(:now).and_return(now) }
     it_behaves_like 'a user required action', :post, :accept_terms
     it 'updates the `terms_accepted_at` attribute of the current_user with the current DateTime', :vcr do
