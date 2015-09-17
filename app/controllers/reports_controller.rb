@@ -186,11 +186,9 @@ class ReportsController < ApplicationController
     date_restriction = DATE_RESTRICTION_MAPPING[:capital_stock_activity]
     default_dates = default_dates_hash
     member_balances = MemberBalanceService.new(current_member_id, request)
-    start_date = params[:start_date] || default_dates[:last_month_start]
+    start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
-    min_and_start_dates_hash = min_and_start_dates(date_restriction, start_date)
-    @start_date = min_and_start_dates_hash[:start_date]
-    @min_date = min_and_start_dates_hash[:min_date]
+    @min_date, @start_date = min_and_start_dates(date_restriction, start_date)
 
     if report_disabled?(CAPITAL_STOCK_ACTIVITY_WEB_FLAGS)
       @capital_stock_activity = {}
@@ -226,10 +224,8 @@ class ReportsController < ApplicationController
   def settlement_transaction_account
     date_restriction = DATE_RESTRICTION_MAPPING[:settlement_transaction_account]
     default_dates = default_dates_hash
-    start_date = params[:start_date] || default_dates[:last_month_start]
-    min_and_start_dates_hash = min_and_start_dates(date_restriction, start_date)
-    @start_date = min_and_start_dates_hash[:start_date]
-    @min_date = min_and_start_dates_hash[:min_date]
+    start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
+    @min_date, @start_date = min_and_start_dates(date_restriction, start_date)
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
     export_format = params[:export_format]
     @report_name = t('reports.pages.settlement_transaction_account.title')
@@ -275,9 +271,7 @@ class ReportsController < ApplicationController
 
   def advances_detail
     date_restriction = DATE_RESTRICTION_MAPPING[:advances_detail]
-    min_and_start_dates_hash = min_and_start_dates(date_restriction, params[:start_date])
-    @start_date = min_and_start_dates_hash[:start_date]
-    @min_date = min_and_start_dates_hash[:min_date]
+    @min_date, @start_date = min_and_start_dates(date_restriction, (params[:start_date].to_date if params[:start_date]))
     member_balances = MemberBalanceService.new(current_member_id, request)
     @advances_detail = member_balances.advances_details(@start_date)
     @report_name = t('global.advances')
@@ -675,10 +669,10 @@ class ReportsController < ApplicationController
 
   def securities_services_statement
     date_restriction = DATE_RESTRICTION_MAPPING[:securities_services_statement]
-    start_date = params[:start_date] || last_month_end
-    min_and_start_dates_hash = min_and_start_dates(date_restriction, start_date)
-    @start_date = min_and_start_dates_hash[:start_date].end_of_month
-    @min_date = min_and_start_dates_hash[:min_date]
+    start_date = (params[:start_date] || last_month_end).to_date
+    min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
+    @min_date = min_and_start_dates_array.first
+    @start_date = min_and_start_dates_array.last.end_of_month
     if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
       @statement = {}
     else
@@ -890,10 +884,10 @@ class ReportsController < ApplicationController
   def monthly_securities_position
     date_restriction = DATE_RESTRICTION_MAPPING[:monthly_securities_position]
     @securities_filter = params['securities_filter'] || 'all'
-    start_date = params[:start_date] || last_month_end
-    min_and_start_dates_hash = min_and_start_dates(date_restriction, start_date)
-    @month_end_date = min_and_start_dates_hash[:start_date].end_of_month
-    @min_date = min_and_start_dates_hash[:min_date]
+    start_date = (params[:start_date] || last_month_end).to_date
+    min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
+    @min_date = min_and_start_dates_array.first
+    @month_end_date = min_and_start_dates_array.last.end_of_month
     @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
     @picker_presets = date_picker_presets(@month_end_date, nil, date_restriction)
     member_balances = MemberBalanceService.new(current_member_id, request)
@@ -1301,11 +1295,11 @@ class ReportsController < ApplicationController
   end
 
   def min_and_start_dates(min_date_range, start_date_param=nil)
-    now = Time.zone.now.to_date
+    now = Time.zone.today
     start_date = (start_date_param || now).to_date
     min_date = now - min_date_range
     start_date = min_date < start_date ? start_date : min_date
-    {min_date: min_date, start_date: start_date}
+    [min_date, start_date]
   end
 
 end

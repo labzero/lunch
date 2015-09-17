@@ -15,7 +15,7 @@ RSpec.shared_examples 'a date restricted report' do |action, default_start_selec
     end
   end
   it 'should pass the `min_and_start_dates` method the `start_date` param if provided' do
-    expect(controller).to receive(:min_and_start_dates).with(anything, start_date.to_s)
+    expect(controller).to receive(:min_and_start_dates).with(anything, start_date)
     get action, start_date: start_date
   end
   it 'should set @min_date to the `min_date` attribute of the `min_and_start_dates` hash' do

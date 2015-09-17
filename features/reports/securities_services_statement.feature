@@ -20,6 +20,22 @@ Scenario: The datepicker on the Securities Services Monthly Statement defaults t
   When I click the datepicker field
   Then I should see the end of last month as the default datepicker option
 
+@jira-mem-890
+Scenario: Member enters a date occurring before the minimum allowed date
+  Given I am on the "Securities Services Monthly Statement" report page
+  When I click the datepicker field
+  And I write "1/10/2013" in the datepicker start input field
+  And I click the datepicker apply button
+  Then I should see a "Securities Services Monthly Statement" report as of 18 months ago
+
+@jira-mem-890
+Scenario: Member enters a date occurring after the maximum allowed date
+  Given I am on the "Securities Services Monthly Statement" report page
+  When I click the datepicker field
+  And I write tomorrow's date in the datepicker start input field
+  And I click the datepicker apply button
+  Then I should see a "Securities Services Monthly Statement" report as of the end of the last valid month
+
 @data-unavailable @jira-mem-536
 Scenario: No data is available to show in the Securities Services Statement
   Given I am on the "Securities Services Statement" report page

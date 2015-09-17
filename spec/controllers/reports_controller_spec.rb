@@ -12,7 +12,7 @@ RSpec.describe ReportsController, :type => :controller do
   let(:end_date) { today - 1.month }
   let(:min_date) { double('min date') }
   let(:picker_preset_hash) {double(Hash)}
-  let(:min_and_start_dates_hash) { {min_date: min_date, start_date: restricted_start_date}}
+  let(:min_and_start_dates_array) { [min_date, restricted_start_date] }
   let(:date_picker_presets) {double('date_picker_presets')}
 
   before do
@@ -33,7 +33,7 @@ RSpec.describe ReportsController, :type => :controller do
 
     before do
       allow(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
-      allow(controller).to receive(:min_and_start_dates).and_return(min_and_start_dates_hash)
+      allow(controller).to receive(:min_and_start_dates).and_return(min_and_start_dates_array)
     end
 
     describe 'GET capital_stock_activity' do
@@ -1719,16 +1719,16 @@ RSpec.describe ReportsController, :type => :controller do
       let(:valid_start_date) { today - 6.months }
       let(:invalid_start_date) { today - 20.months }
       it 'sets the min_date to today minus the min_date_range' do
-        expect(controller.send(:min_and_start_dates, min_date_range)[:min_date]).to eq(min_date)
+        expect(controller.send(:min_and_start_dates, min_date_range).first).to eq(min_date)
       end
       it 'sets the start_date to today if no param is passed' do
-        expect(controller.send(:min_and_start_dates, min_date_range)[:start_date]).to eq(today)
+        expect(controller.send(:min_and_start_dates, min_date_range).last).to eq(today)
       end
       it 'sets the start_date to the param given if it does not occur before the min_date' do
-        expect(controller.send(:min_and_start_dates, min_date_range, valid_start_date)[:start_date]).to eq(valid_start_date)
+        expect(controller.send(:min_and_start_dates, min_date_range, valid_start_date).last).to eq(valid_start_date)
       end
       it 'sets the start_date to the min_date if the param given occurs before the min_date' do
-        expect(controller.send(:min_and_start_dates, min_date_range, invalid_start_date)[:start_date]).to eq(min_date)
+        expect(controller.send(:min_and_start_dates, min_date_range, invalid_start_date).last).to eq(min_date)
       end
     end
   end

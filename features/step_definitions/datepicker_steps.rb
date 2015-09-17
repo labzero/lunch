@@ -112,13 +112,28 @@ When(/^I write "(.*?)" in the datepicker (start|end) input field$/) do |date, in
   page.fill_in("daterangepicker_#{input}", with: date.to_s)
 end
 
-When(/^I write today's date in the datepicker end input field$/) do
+When(/^I write (today|tomorrow)'s date in the datepicker end input field$/) do |day|
+  today = Time.zone.today
+  time = case day
+    when 'today'
+      today
+    when 'tomorrow'
+      today + 1.day
+    else
+      raise 'Unknown day given as argument'
+  end
   page.fill_in('daterangepicker_end', with: ' ') # Capybara doesn't always clear input
-  page.fill_in('daterangepicker_end', with: Time.zone.today.strftime('%_m/%-d/%Y'))
+  page.fill_in('daterangepicker_end', with: time.strftime('%_m/%-d/%Y'))
 end
 
 When(/^I write a date from one month ago in the datepicker start input field$/) do
   date = Time.zone.today - 1.month
+  page.fill_in('daterangepicker_start', with: ' ') # Capybara doesn't always clear input
+  page.fill_in('daterangepicker_start', with: date.strftime('%_m/%-d/%Y'))
+end
+
+When(/^I write tomorrow's date in the datepicker start input field$/) do
+  date = Time.zone.today + 1.day
   page.fill_in('daterangepicker_start', with: ' ') # Capybara doesn't always clear input
   page.fill_in('daterangepicker_start', with: date.strftime('%_m/%-d/%Y'))
 end
