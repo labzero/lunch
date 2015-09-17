@@ -114,6 +114,9 @@ group :development do
   gem 'capistrano', '~> 3.2.0'
   gem 'capistrano-rvm'
   gem 'capistrano-rails'
+  gem 'guard'
+  gem 'guard-rspec'
+  gem 'growl'
   gem 'byebug' # debugger gem doesn't work with ruby 2.1.2
   gem 'letter_opener'
 end
