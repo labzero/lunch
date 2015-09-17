@@ -133,10 +133,10 @@ module MAPI
           LOAN_TERMS.each_with_index do |term, ctr_term|
             ctr_term = 1 if ctr_term == 0 # why? when commented out, all tests still pass
             hash[type][term] = {
-                'payment_on'         => 'Maturity',
-                'interest_day_count' => fhlbsf_response[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
-                'rate'               => fhlbsf_data_points[ctr_term-1].at_css('value').content,
-                'maturity_date'      => Time.zone.parse(fhlbsf_data_points[ctr_term-1].at_css('tenor maturityDate').content).to_date,
+                payment_on:         'Maturity',
+                interest_day_count: fhlbsf_response[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
+                rate:               fhlbsf_data_points[ctr_term-1].at_css('value').content,
+                maturity_date:      Time.zone.parse(fhlbsf_data_points[ctr_term-1].at_css('tenor maturityDate').content).to_date,
             }
           end
         end

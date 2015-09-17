@@ -154,18 +154,24 @@ describe MAPI::ServiceApp do
 
     describe "in the production environment" do
       let(:logger){ double('logger') }
-      let(:maturity_date){ double('maturity_date') }
+      let(:maturity_date_before){ double('maturity_date_before') }
+      let(:maturity_date_after){ double('maturity_date_after') }
       let(:interest_day_count){ double( 'interest_day_count' ) }
       let(:live_data_xml){ double('live_data_xml') }
       let(:live_data_value) do
         {
-            payment_on: 'Maturity',
-            interest_day_count: interest_day_count,
-            rate: "5.0",
-            maturity_date: maturity_date,
-        }.with_indifferent_access
+            'payment_on' => 'Maturity',
+            'interest_day_count' => interest_day_count,
+            'rate' => "5.0",
+            'maturity_date' => maturity_date_before,
+        }
       end
-      let(:live_data){ n_level_hash_with_default(live_data_value, 2) }
+      let(:live_data_bad) do
+        Hash[loan_types.map { |type| [type, Hash[loan_terms.map{ |term| [term, live_data_value.clone] }]] }]
+      end
+      let(:live_data_good) do
+        Hash[loan_types.map { |type| [type, Hash[loan_terms.map{ |term| [term, live_data_value.clone.with_indifferent_access] }]] }]
+      end
       let(:start_of_day_xml){ double('start_of_day_xml') }
       let(:start_of_day){ n_level_hash_with_default("5.0", 3) }
       let(:mds_connection){ double('mds_connection') }
@@ -183,9 +189,9 @@ describe MAPI::ServiceApp do
         allow(MAPI::Services::Rates).to receive(:init_mds_connection).and_return(mds_connection)
         allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live').and_return(live_data_xml)
         allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay').and_return(start_of_day_xml)
-        allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data)
+        allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data_good)
         allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(start_of_day_xml).and_return(start_of_day)
-        allow(MAPI::Services::Rates).to receive(:get_maturity_date).and_return(maturity_date)
+        allow(MAPI::Services::Rates).to receive(:get_maturity_date).with(maturity_date_before, kind_of(String), []).and_return(maturity_date_after)
       end
 
       it "should return Internal Service Error, if calendar service is unavailable" do
@@ -212,6 +218,12 @@ describe MAPI::ServiceApp do
         expect(last_response.status).to eq(503)
       end
 
+      it "should return Internal Service Error, if the hash returned from get_market_data soap endpoint is not with_indifferent_access" do
+        allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data_bad)
+        expect(logger).to receive(:error).at_least(1).times
+        get '/rates/summary'
+      end
+
       it "should return 200 if all the endpoints return valid data" do
         get '/rates/summary'
         expect(last_response.status).to eq(200)
@@ -220,21 +232,14 @@ describe MAPI::ServiceApp do
   end
 
   describe "weekend_or_holiday?" do
-    let(:saturday) { double('saturday')  }
-    let(:sunday)   { double('sunday')    }
-    let(:monday)   { double('monday')    }
-    let(:holiday)  { double('holiday')   }
+    let(:saturday) { double('saturday', saturday?: true,  sunday?: false, strftime: nonholiday) }
+    let(:sunday)   { double('sunday',   saturday?: false, sunday?: true,  strftime: nonholiday) }
+    let(:monday)   { double('monday',   saturday?: false, sunday?: false, strftime: nonholiday) }
+    let(:holiday)  { double('holiday',  saturday?: false, sunday?: false, strftime: formatted)  }
     let(:formatted){ double('formatted') }
+    let(:nonholiday) { double('nonholiday') }
     let(:holidays) { [formatted] }
 
-    before do
-      [saturday, sunday, monday].each { |d| allow(d).to receive(:strftime).with('%F').and_return(double('random string')) }
-      [sunday,monday,holiday].each { |d| allow(d).to receive(:saturday?).and_return(false) }
-      [saturday,monday,holiday].each { |d| allow(d).to receive(:sunday?).and_return(false) }
-      allow(saturday).to receive(:saturday?).and_return(true)
-      allow(sunday).to receive(:sunday?).and_return(true)
-      allow(holiday).to receive(:strftime).with('%F').and_return(formatted)
-    end
     it "should return true for saturday" do
       expect(subject.weekend_or_holiday?(saturday, holidays)).to be_truthy
     end
