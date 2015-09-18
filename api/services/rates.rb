@@ -132,7 +132,7 @@ module MAPI
         response.doc.remove_namespaces!
         response.doc.xpath('//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse').each do |type_data|
           day_count_basis = type_data.at_css('marketData FhlbsfMarketData dayCountBasis').content
-          type            = type_data.at_css('marketData FhlbsfMarketData name').content
+          type            = LOAN_MAPPING_INVERTED[type_data.at_css('marketData FhlbsfMarketData name').content]
           hash[type] = {}
           type_data.css('marketData FhlbsfMarketData data FhlbsfDataPoint').each do |term_data|
             rate          = term_data.at_css('value').content
