@@ -1647,8 +1647,8 @@ en:
             gnma: GNMA Home Equity Conversion Mortgage (HECM) MBS Passthrough Securities
             agency_cmo: Agency CMOs (FHLMC, FNMA, GNMA)
             gnma_hecm: GNMA HECM Real Estate Mortgage Investment Conduit (REMIC) Securities
-            agency_cmo_low: "Agency CMO Accrual Bonds (Z-tranches) with low price sensitivity1"
-            agency_cmo_high: "Agency CMO Accrual Bonds (Z-tranches) with high price sensitivity1"
+            agency_cmo_low_html: "Agency CMO Accrual Bonds (Z-tranches) with low price sensitivity<sup>1</sup>"
+            agency_cmo_high_html: "Agency CMO Accrual Bonds (Z-tranches) with high price sensitivity<sup>1</sup>"
             structured_notes: Structured Notes
             index_notes: "Index Amortization Notes (P.S.A. Linked Notes)"
             small_business: Small Business Administration Pools
@@ -1714,7 +1714,7 @@ en:
           muni_bonds: "80"
           mutual_fund_shares: "75"
           bank_term_deposits: "100"
-        agency_cmo: Agency CMO accrual bonds (Z-tranches) with low price sensitivity are identified as those that pass the Federal Financial Institutions Examination Council (FFIEC) High Risk Security test. Agency CMO accrual bonds (Z-tranches) with high price sensitivity are identified as those that do not pass the FFIEC High Risk Security test.
+        agency_cmo_html: "Agency CMO accrual bonds (Z-tranches) with low price sensitivity are identified as those that pass the Federal Financial Institutions Examination Council (FFIEC) High Risk Security test. Agency CMO accrual bonds (Z-tranches) with high price sensitivity are identified as those that do not pass the FFIEC High Risk Security test."
         market_value: The market value for securities pledged as collateral under the SBC Program is determined by the Bank on the basis of market prices (bid side) for the same or comparable securities, if available, or as otherwise determined by the Bank. A readily available price is a precondition for acceptance of a security as collateral. This means, in general, that the security is either priced by a third-party pricing service or that its cash flow is modeled on Bloomberg or Yield Book.
         private_label_non_mbs: If the custodian of the notes supporting a non-Agency MBS transaction is the Issuer or a related party and the notes have not been endorsed to the trustee by name, the Bank requires that the party that has control over the notes (as determined by the Bank) must have a long-term debt rating of at least BBB. The Bank will monitor the creditworthiness of the entity that has control over the notes; if the entity's credit rating falls below BBB, the Bank will require the member to substitute collateral in place of the MBS unless the underlying notes have been endorsed or delivered to the trustee.
         review_ratings: The Bank will periodically re-evaluate non-Agency securities and municipal bonds to validate or establish the ratings at intervals deemed appropriate by the Bank.
