@@ -12,7 +12,7 @@
   :'date-picker-open-direction' => open_direction, |
   :'date-picker-form' => form, |
   :'date-picker-single-date-picker' => single_date_picker.to_s, |
-  :'date-picker-max-date' => max_date, |
+  :'date-picker-max-date' => max_date || Time.zone.today, |
   :'date-picker-min-date' => min_date, |
   :'date-picker-filter-options' => ReportsController::DATE_PICKER_FILTERS.to_json, |
   :'date-picker-filter' => date_picker_filter }
