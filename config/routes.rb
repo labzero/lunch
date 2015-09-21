@@ -43,6 +43,8 @@ Rails.application.routes.draw do
     get '/capital-stock-and-leverage' => 'reports#capital_stock_and_leverage'
     get '/account-summary' => 'reports#account_summary'
     get '/todays-credit' => 'reports#todays_credit'
+    get '/trial-balance' => 'error#standard_error'
+    get '/mortgage-collateral-update' => 'error#standard_error'
   end
 
   get '/advances' => 'advances#index'
