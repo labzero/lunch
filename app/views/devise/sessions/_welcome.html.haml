@@ -10,5 +10,5 @@
   .row
     .column-4x8-left
     .column-4x8-right
-      %p= t('welcome.intro_html', url: 'mailto:websupport@fhlbsf.com', phone_number: fhlb_formatted_phone_number('4156162610'))
+      %p= t('welcome.intro_html', url: web_support_email, phone_number: web_support_phone_number)
       = yield
