@@ -1,8 +1,8 @@
 class User < ActiveRecord::Base
 
-  validates :given_name, presence: {on: :update}
-  validates :surname, presence: {on: :update}
-  validates :email, presence: {on: :update}, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, allow_blank: true }, confirmation: {if: :email_changed?, on: :update}
+  validates :given_name, presence: {on: :update, unless: :password_changed?}
+  validates :surname, presence: {on: :update, unless: :password_changed?}
+  validates :email, presence: {on: :update, unless: :password_changed?}, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, allow_blank: true }, confirmation: {if: :email_changed?, on: :update}
   validates :email_confirmation, presence: {if: :email_changed?, on: :update}
   validates :password, confirmation: true, length: {minimum: 8, allow_nil: true}, format: { with: /\A(?=.*[A-Z]).*\z/, message: :capital_letter_needed, allow_nil: true }
   validates :password, format: { with: /\A(?=.*[a-z]).*\z/, message: :lowercase_letter_needed, allow_nil: true }
@@ -22,6 +22,7 @@ class User < ActiveRecord::Base
   }.with_indifferent_access.freeze
 
   LDAP_LOCK_BIT = 0x2
+  LDAP_PASSWORD_EXPIRATION_ATTRIBUTE = :passwordExpired
 
   module Roles
     MEMBER_USER = 'member_user'
@@ -70,6 +71,7 @@ class User < ActiveRecord::Base
   after_save :save_ldap_attributes
   after_destroy :destroy_ldap_entry
   before_save :check_password_change
+  set_callback :ldap_password_save, :after, :clear_password_expiration
 
   def display_name
     @display_name ||= (ldap_entry[:displayname].try(:first) if ldap_entry)
@@ -157,6 +159,10 @@ class User < ActiveRecord::Base
     else
       false
     end
+  end
+
+  def password_expired?
+    ldap_entry[LDAP_PASSWORD_EXPIRATION_ATTRIBUTE].try(:first).try(:downcase) == 'true' if ldap_entry
   end
 
   def reload
@@ -290,6 +296,14 @@ class User < ActiveRecord::Base
   def check_password_change
     if password_changed? && (changed.select{|key| LDAP_ATTRIBUTES_MAPPING.include?(key)}).count > 0 # we don't allow password changes to be mixed with other LDAP changes
       errors.add(:password, :non_atomic)
+      raise ActiveRecord::Rollback
+    end
+  end
+
+  def clear_password_expiration
+    if Devise::LDAP::Adapter.set_ldap_params(username, {LDAP_PASSWORD_EXPIRATION_ATTRIBUTE => 'false'}, nil, ldap_domain)
+      reload_ldap_entry
+    else
       raise ActiveRecord::Rollback
     end
   end

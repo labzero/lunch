@@ -6,10 +6,10 @@ Given(/^I fill in and submit the login form with username "(.*?)" and password "
   click_button(I18n.t('global.login'))
   wait_for_unflagged_page(@login_flag)
 
-  terms_accepted = page.has_no_css?('.terms-row h1', text: I18n.t('terms.title'), wait: 0)
   session_id = get_session_id
   puts "Session ID: #{session_id}" if session_id
-  step %{I accept the Terms of Use} unless terms_accepted
+
+  accept_terms_if_needed
 end
 
 Given(/^I fill in and submit the login form$/) do
@@ -69,6 +69,10 @@ When(/^I fill in and submit the login form with a first-time user$/) do
   # implement way of simulating first-time user to test Terms of Service flow
 end
 
+When(/^I fill in and submit the login form with an expired user$/) do
+  step %{I fill in and submit the login form with username "#{expired_user['username']}" and password "#{expired_user['password']}"}
+end
+
 When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|
   user = case user_type
     when 'primary user'
@@ -86,6 +90,11 @@ end
 When(/^I log in as "(.*?)" with password "(.*?)"$/) do |user, password|
   step %{I am logged out}
   step %{I fill in and submit the login form with username "#{user}" and password "#{password}"}
+end
+
+When(/^I login with as the expired user with the new password$/) do
+  step %{I log in as "#{expired_user['username']}" with password "#{valid_password}"}
+  select_member_if_needed
 end
 
 When(/^I select the (\d+)(?:st|rd|th) member bank$/) do |num|
@@ -168,6 +177,52 @@ Then(/^I should be logged in$/) do
   step %{I should see dashboard modules}
 end
 
+Then(/^I should see the change password form$/) do
+  page.assert_selector('form legend', exact: true, visible: true, text: I18n.t('settings.change_password.title'))
+  page.assert_selector('form p', exact: true, visible: true, text: I18n.t('settings.change_password.instructions'))
+end
+
+
+Then(/^I should see the change password success page$/) do
+  page.assert_selector('.welcome .password-change-success')
+end
+
+Then(/^I should see password change validations$/) do
+  step %{I enter a password of "123abcd3!"}
+  step %{I should see a capital letter required password error}
+  step %{I enter a password of "123ABCD3!"}
+  step %{I should see a lowercase required password error}
+  step %{I enter a password of "ABCDefGH!"}
+  step %{I should see a number required password error}
+  step %{I enter a password of "123Abcd3"}
+  step %{I should see a symbol required password error}
+  step %{I enter a password of "123Cd3!"}
+  step %{I should see a minimum length required password error}
+  step %{I enter a password of "123Abcd3!"}
+  step %{I should see a confirmation required password error}
+  step %{I enter a password confirmation of "123Abcd3!"}
+  step %{I should see no password errors}
+end
+
+When(/^I enter a valid new password$/) do
+  step %{I enter a password of "#{valid_password}"}
+  step %{I enter a password confirmation of "#{valid_password}"}
+end
+
+When(/^I dismiss the change password success page$/) do
+  @login_flag = flag_page
+  click_link(I18n.t('global.continue'))
+end
+
+Then(/^I proceed through the login flow$/) do
+  accept_terms_if_needed
+  select_member_if_needed
+end
+
+When(/^I fill in and submit the login form with an expired user and the new password$/) do
+  step %{I fill in and submit the login form with username "#{expired_user['username']}" and password "#{valid_password}"}
+end
+
 def primary_user
   CustomConfig.env_config['primary_user']
 end
@@ -196,10 +251,24 @@ def resetable_user
   CustomConfig.env_config['resetable']
 end
 
+def expired_user
+  CustomConfig.env_config['expired']
+end
+
+def valid_password
+  CustomConfig.env_config['valid_password']
+end
+
 def select_member_if_needed
   wait_for_unflagged_page(@login_flag)
   has_member = page.has_no_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 0)
   step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} unless has_member
+end
+
+def accept_terms_if_needed
+  wait_for_unflagged_page(@login_flag)
+  terms_accepted = page.has_no_css?('.terms-row h1', text: I18n.t('terms.title'), wait: 0)
+  step %{I accept the Terms of Use} unless terms_accepted
 end
 
 def flag_page

@@ -23,7 +23,11 @@ default: &default
   resetable:
     username: <%= ENV['CUCUMBER_RESETABLE_USERNAME'] || 'extra-chaste-reset' %>
     password: <%= ENV['CUCUMBER_RESETABLE_PASSWORD'] || 'development' %>
+  expired:
+    username: <%= ENV['CUCUMBER_EXPIRED_USERNAME'] || 'local-expired' %>
+    password: <%= ENV['CUCUMBER_EXPIRED_PASSWORD'] || 'development' %>
   primary_bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Meridian Bank, National Association' %>
+  valid_password: <%= ENV['CUCUMBER_VALID_PASSWORD'] || '123Abcd3!' %>
 
 local:
   <<: *default

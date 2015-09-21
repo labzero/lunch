@@ -308,6 +308,11 @@ en:
       title: Quick Advance
     quick_report:
       title: Quick Reports
+    change_password:
+      title: Change Your Password
+      instructions: "Passwords should contain at least 8 characters, including one capital letter, one number and one special character (!@#$%*). Passwords expire every 60 days. You may not reuse a password that you have used within the last eight 60-day periods."
+      password_field: New password
+      confirm_field: Re-enter new password
     two_factor:
       title: 2-Step Verification
       description: Manage authentication with your SecurID token.

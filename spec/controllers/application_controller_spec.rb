@@ -3,6 +3,8 @@ require 'rails_helper'
 RSpec.describe ApplicationController, :type => :controller do
   let(:error) {StandardError.new}
 
+  it { should use_before_action(:check_password_change) }
+
   describe '`handle_exception` method' do
     let(:backtrace) {%w(some backtrace array returned by the error)}
     it 'captures all StandardErrors and displays the 500 error view' do
@@ -27,17 +29,19 @@ RSpec.describe ApplicationController, :type => :controller do
 
   describe '`after_sign_in_path_for(resource)` method' do
     let(:member_id) { rand(9999) }
-    let(:user) { double('User', member_id: nil, accepted_terms?: nil) }
+    let(:user) { double('User', member_id: nil, accepted_terms?: nil, password_expired?: false) }
     let(:call_method) { controller.send(:after_sign_in_path_for, 'some resource') }
     before do
       allow(controller).to receive(:current_user).and_return(user)
     end
+
     describe 'user has not accepted terms' do
       it 'redirects to the `terms_path`' do
         expect(controller).to receive(:terms_path)
         call_method
       end
     end
+
     describe 'user has accepted terms' do
       before { allow(user).to receive(:accepted_terms?).and_return(true) }
       describe 'with a member_id in the session' do
@@ -67,6 +71,51 @@ RSpec.describe ApplicationController, :type => :controller do
       it 'raises an error if there is no member_id in the session and the current user is not an intranet user' do
         allow(user).to receive(:ldap_domain).and_return('extranet')
         expect{call_method}.to raise_error
+      end
+    end
+
+    describe 'user has an expired password' do
+      before do
+        allow(user).to receive(:password_expired?).and_return(true)
+      end
+      it 'calls `password_expired?` on the current user' do
+        expect(user).to receive(:password_expired?)
+        call_method
+      end
+      it 'flags the users session as having an expired password' do
+        call_method
+        expect(session['password_expired']).to be(true)
+      end
+      it 'returns the `user_expired_password_path`' do
+        expect(call_method).to eq(subject.user_expired_password_path)
+      end
+    end
+
+    describe 'the password_expired session key' do
+      describe 'with a value of false' do
+        before do
+          session['password_expired'] = false
+        end
+        it 'does not call `password_expired?`' do
+          expect(user).to_not receive(:password_expired?)
+          call_method
+        end
+        it 'does not return the `user_expired_password_path`' do
+          expect(call_method).to_not eq(subject.user_expired_password_path)
+        end
+      end
+
+      describe 'with a value of true' do
+        before do
+          session['password_expired'] = true
+        end
+        it 'does not call `password_expired?`' do
+          expect(user).to_not receive(:password_expired?)
+          call_method
+        end
+        it 'returns the `user_expired_password_path`' do
+          expect(call_method).to eq(subject.user_expired_password_path)
+        end
       end
     end
   end
@@ -138,6 +187,19 @@ RSpec.describe ApplicationController, :type => :controller do
       session['roles'] = session_roles
       expect(user).not_to receive(:roles)
       controller.send(:current_user_roles)
+    end
+  end
+
+  describe '`check_password_change` method' do
+    let(:call_method) { subject.check_password_change }
+    it 'redirects to the `user_expired_password_path` if the session is flagged as having an expired password' do
+      session['password_expired'] = true
+      expect(subject).to receive(:redirect_to).with(subject.user_expired_password_path)
+      call_method
+    end
+    it 'does not redirect if the session is not flagged as having an expired password' do
+      expect(subject).to_not receive(:redirect_to)
+      call_method
     end
   end
 end
