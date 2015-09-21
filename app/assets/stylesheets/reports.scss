@@ -9,6 +9,16 @@
   }
 }
 
+.reports {
+  nav {
+    text-transform: uppercase;
+    @include typography-subtitle;
+    a {
+      display: block;
+    }
+  }
+}
+
 .reports-table {
   @extend %table-striped;
   border-bottom: 1px solid $light-blue;
@@ -34,33 +44,44 @@
       color: $text-color;
     }
   }
+  a {
+    display: block;
+    color: $text-color;
+    padding: 15px 20px;
+  }
   td {
     @extend %typography-subtitle;
-    padding-top: 15px;
     height: 100px;
+    position: relative;
     h3 {
       @extend %typography-subtitle;
       margin: 0 0 5px;
     }
     p {
-      margin: 0;
       font-size: 0.8667rem;
       font-weight: $normal-weight;
+      margin: 5px 0 15px;
+      &:last-child {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        @extend %typography-subtitle;
+        color: $actionable-blue;
+        text-transform: uppercase;
+      }
     }
-    &:last-child {
-      text-transform: uppercase;
+    .report-info {
+      @extend %typography-table-total;
+      color: $medium-gray;
+      span:first-child {
+        display: inline-block;
+        width: 120px;
+        text-transform: uppercase;
+      }
     }
-  }
-  td:first-child, th:first-child {
-    width: (8 * $grid-column-width) + (7 * $gutter-width);
-    padding-right: $grid-column-width + $gutter-width;
-    padding-left: $gutter-width;
-  }
-  .updated-cell {
-    width: $grid-column-width + (2 * $gutter-width);
-  }
-  .history-cell {
-    width: ( 2 * $grid-column-width) + (2 * $gutter-width);
+    p, .report-info {
+      max-width: 840px;
+    }
   }
 }
 

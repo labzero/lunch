@@ -1459,7 +1459,7 @@ RSpec.describe ReportsController, :type => :controller do
       describe '`@authorizations_table_data`' do
         it 'returns a hash with `column_headings`' do
           get :authorizations
-          expect(assigns[:authorizations_table_data][:column_headings]).to eq([I18n.t('user_roles.user.title'), I18n.t('reports.authorizations.title')])
+          expect(assigns[:authorizations_table_data][:column_headings]).to eq([I18n.t('user_roles.user.title'), I18n.t('reports.account.authorizations.title')])
         end
         describe '`rows`' do
           let(:make_request) {get :authorizations, job_id: job_id}

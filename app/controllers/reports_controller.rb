@@ -74,115 +74,125 @@ class ReportsController < ApplicationController
     @reports = {
       price_indications: {
         current: {
-          updated: t('global.daily'),
-          available_history: t('global.current_day'),
-          summary: t('reports.price_indications.current.summary', phone_number: fhlb_formatted_phone_number('8004443452'))
+          updated: t('reports.updated.daily_morning'),
+          available_history: t('reports.price_indications.current.history'),
+          summary: t('reports.price_indications.current.summary'),
+          route: reports_current_price_indications_path
         },
         historical: {
-          updated: t('global.daily'),
-          available_history: t('global.various'),
+          updated: t('reports.updated.daily_morning'),
+          available_history: t('reports.price_indications.historical.history'),
           route: reports_historical_price_indications_path
         }
       },
       credit: {
         todays_credit: {
-          updated: t('reports.continuously'),
-          available_history: t('global.current_day'),
+          updated: t('reports.updated.intraday'),
+          available_history: t('reports.history.current_report'),
           route: reports_todays_credit_path
         },
         advances_detail: {
-          updated: t('global.daily'),
-          available_history: t('global.all'),
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.months', months: 18),
           route: reports_advances_path
         },
         interest_rate: {
-          updated: t('global.daily'),
-          available_history: t('reports.history.months12'),
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.current_report'),
           route: reports_interest_rate_resets_path
         },
         letters_of_credit: {
-          updated: t('global.daily'),
-          available_history: t('global.all'),
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.current_report'),
           route: reports_letters_of_credit_path
         },
         forward_commitments: {
-          updated: t('global.daily'),
-          available_history: t('global.all'),
-          path: reports_forward_commitments_path
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.current_report'),
+          route: reports_forward_commitments_path
         },
         parallel_shift: {
-          updated: t('global.monthly'),
-          available_history: t('global.all'),
+          updated: t('reports.updated.monthly'),
+          available_history: t('reports.history.current_report'),
           route: reports_parallel_shift_path
         }
       },
       collateral: {
         borrowing_capacity: {
-          updated: t('global.daily'),
-          available_history: t('global.all'),
+          updated: t('reports.collateral.borrowing_capacity.updated'),
+          available_history: t('reports.history.current_report'),
           route: reports_borrowing_capacity_path
         },
         mcu: {
-          updated: t('global.daily'),
-          available_history: t('global.all')
+          updated: t('reports.collateral.mcu.updated'),
+          available_history: t('reports.history.current_report'),
+          route: reports_mortgage_collateral_update_path
         }
       },
       capital_stock: {
         activity: {
-          updated: t('global.daily'),
-          available_history: t('reports.history.months12'),
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.months', months: 12),
           route: reports_capital_stock_activity_path
         },
+        trial_balance: {
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.back_to', date: fhlb_date_long_alpha(Date.new(2002,1,1))),
+          route: reports_trial_balance_path
+        },
         capital_stock_and_leverage: {
-          updated: '',
-          available_history: '',
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.current_report'),
           route: reports_capital_stock_and_leverage_path
         },
         dividend_statement: {
-          updated: t('global.quarterly'),
-          available_history: t('reports.history.months36'),
+          updated: t('reports.updated.quarterly'),
+          available_history: t('reports.history.months', months: 36),
           route: reports_dividend_statement_path
-        }
-      },
-      settlement: {
-        account: {
-          updated: t('global.daily'),
-          available_history: t('global.all'),
-          route: reports_settlement_transaction_account_path
         }
       },
       securities: {
         transactions: {
-          updated: t('reports.twice_daily'),
-          available_history: t('global.all'),
+          updated: t('reports.securities.transactions.updated'),
+          available_history: t('reports.securities.transactions.history'),
           route: reports_securities_transactions_path
         },
         cash_projections: {
-          updated: t('global.daily'),
-          available_history: t('global.current_day'),
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.current_report'),
           route: reports_cash_projections_path
         },
         current: {
-          updated: t('reports.continuously'),
-          available_history: t('global.current_day'),
-          path: reports_current_securities_position_path
+          updated: t('reports.updated.intraday'),
+          available_history: t('reports.history.current_report'),
+          route: reports_current_securities_position_path
         },
         monthly: {
-          updated: t('global.monthly'),
-          available_history: t('reports.history.months18'),
-          path: reports_monthly_securities_position_path
+          updated: t('reports.securities.monthly.updated'),
+          available_history: t('reports.history.months', months: 18),
+          route: reports_monthly_securities_position_path
         },
         services_monthly: {
-          updated: t('global.monthly'),
-          available_history: t('reports.history.months18'),
+          updated: t('reports.securities.services_monthly.updated'),
+          available_history: t('reports.history.months', months: 18),
           route: reports_securities_services_statement_path
         }
       },
-      authorizations: {
-        user: {
-          updated: t('reports.continuously'),
-          available_history: t('global.current_day'),
+      account: {
+        account_summary: {
+          updated: t('reports.account.account_summary.updated'),
+          available_history: t('reports.history.current_report'),
+          route: reports_account_summary_path
+        },
+        authorizations: {
+          updated: t('reports.updated.intraday'),
+          available_history: t('reports.history.current_report'),
           route: reports_authorizations_path
+        },
+        settlement_transaction_account: {
+          updated: t('reports.account.settlement_transaction_account.updated'),
+          available_history: t('reports.account.settlement_transaction_account.history'),
+          route: reports_settlement_transaction_account_path
         }
       }
     }
@@ -782,7 +792,7 @@ class ReportsController < ApplicationController
 
   def authorizations
     @authorizations_filter = params['authorizations_filter'] || 'all'
-    @report_name = t('reports.authorizations.title')
+    @report_name = t('reports.account.authorizations.title')
     export_format = params[:export_format]
     @today = Time.zone.today
 

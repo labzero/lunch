@@ -25,9 +25,7 @@ en:
     currency:
       thousand: T
       million: MM
-    updated: Updated
     view: View
-    available_history: Available History
     temporarily_unavailable: Temporarily Unavailable
     overnight: Overnight
     daily: Daily
@@ -730,30 +728,34 @@ en:
     meta_title: FHLB - Reports
     title: Reports
     shared_table_values:
-      updated_th: Updated
-      available_history_th: Available History
-      link_td: View
-    continuously: Continuously
-    twice_daily: Twice Daily
+      updated: 'Report Updated:'
+      available_history: 'Available History:'
+    updated:
+      daily_morning: '6:00 am daily'
+      intraday: Intraday
+      daily: Daily, as of the end of the prior business day
+      monthly: Monthly
+      quarterly: Quarterly
+    history:
+      current_report: Current report only
+      months: '%{months} months'
+      back_to: Back to %{date}
     share_count: # supports all CLDR rules
       one: "%{count} share"
       other: "%{count} shares"
     month_count: # supports all CLDR rules
       one: "%{count} month"
       other: "%{count} months"
-    history:
-      months18: 18 months
-      months36: 36 months
-      months12: 12 months
-      present2007: 2007-present
     price_indications:
       title: Price Indications
       current:
         title: Current
-        summary: Current price indications are subject to change. For current quotes call %{phone_number} between 7:00 am and 2:00 pm PT. Variable Rate Credit advances are available until 2:00 pm, and all other advances are generally available until 12 noon.
+        summary: Reflects the price indications published at the beginning of the day; not actual prices. Actual prices are subject to change throughout the day.
+        history: Current day only
       historical:
         title: Historical
-        summary: Historical price indications reflect the price indications posted at the beginning of the day, not actual prices.
+        summary: Reflects the price indications published at the beginning of the day,  not actual prices.
+        history: Various, depending on the credit product
     credit:
       title: Credit
       todays_credit:
@@ -761,68 +763,78 @@ en:
         summary: Displays advances, letters of credit and investment transactions conducted today.
       advances_detail:
         title: Advances
-        summary: Your institution’s outstanding advances such as maturity, date, estimated next payment, and prepayment fee indications. The data is downloadable, and the columns can be sorted in ascending and descending order.
+        summary: Provides details regarding current outstanding advances and historical advances that were outstanding on a specific date, including maturity date, accrued interest, estimated next interest payment amount, and prepayment fee indications.
       interest_rate:
         title: Interest Rate Resets
-        summary: Shows advances with an interest rate reset on the effective date.
+        summary: Displays outstanding advances with an interest rate reset on the effective date, including Open VRC Advances, even when the rate has not changed.
       letters_of_credit:
         title: Letters of Credit
-        summary: Details any outstanding letters of credit.
+        summary: Provides details regarding outstanding letters of credit, including current par, annual maintenance charge, and maturity date.
       forward_commitments:
         title: Forward Commitments
-        summary: Shows all committed advances and their future funding.
+        summary: Displays committed advances and their future funding dates.
       parallel_shift:
         title: Putable Advance Parallel Shift Sensitivity Analysis
-        summary: A measure of held assets’ price-sensitivity given a specified shift in rates.
+        summary: Provides a static measure of a Putable Advance’s price sensitivity given specific parallel shifts in interest rates. Valuations are derived using proprietary pricing models and estimates and assumptions about relevant future market conditions.
     collateral:
       title: Collateral
       borrowing_capacity:
         title: Borrowing Capacity
-        summary: Covers both the Standard Credit Program and the Securities-Backed Credit Program. The loan collateral data in the Standard Credit section of the report is updated during the day to reflect the processing of new MCUs.
+        summary: Includes total and remaining borrowing capacity for both the Standard and SBC Credit Programs. Mortgage loan collateral data, except for Market Value, is updated during the day to reflect processing of new MCUs.
+        updated: Intraday for newly processed MCU data, except Market Value; other data as of the end of the prior business day
       mcu:
         title: MCU Status
-        summary: Shows data from the most recently processed MCU from your institution, including summary information and detailed information on rejected loans and loan data inconsistencies.
+        summary: Provides data from your institution's most recently processed MCU, including information about total loans submitted, newly pledged or reported loans, rejected loans, and loans depledged or not reported. A more detailed report is emailed to your institution.
+        updated: Intraday, after an MCU is processed
     capital_stock:
       title: Capital Stock
-      trial_balance:
-        title: Capital Stock Trial Balance
-        summary: Shows all shares owned as of a specific day.
       activity:
         title: Capital Stock Activity Statement
-        summary: Shows all stock activity for a specified period.
+        summary: Provides stock activity for a specified period and shares owned as of a specified date.
+      trial_balance:
+        title: Capital Stock Trial Balance
+        summary: This report shows all shares owned as of a specific day and is updated at the end of each business day.
       capital_stock_and_leverage:
         title: Capital Stock Position and Leverage Statement
-        summary: ''
+        summary: Includes stock owned, minimum and activity-based stock requirements, stock excess/deficiency, surplus stock, remaining stock, and remaining leverage.
       dividend_statement:
         title: Dividend Transaction Statement
-        summary: Includes the date the last dividend was paid, the dividend rate, the number and amount of shares received, and the amount of each cash dividend paid.
-    settlement:
-      title: Settlement/Transaction Account (STA)
-      account:
-        title: Settlement/Transaction Account (STA)
-        summary: The monthly interest earned on the STA posts on the first business day of the following month.
+        summary: Includes the most recent dividend payment date, dividend rate, amount of cash dividend paid, and detailed dividend calculation for each certificate owned during the dividend period.
     securities:
       title: Securities
       transactions:
         title: Securities Transaction
-        summary: Reflects transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm on the settlement day. The final report reflects all transactions that have settled that day and is generally available at the end of the business day.
+        summary: Preliminary report reflects transactions settled as of 11:30 am. Final report reflects all transactions settled during the day.
+        updated: 'Twice daily: preliminary report is available at approximately 1:00 pm, and the final report is available at the end of the business day'
+        history: Current report only, either the preliminary report or the final report
       cash_projections:
         title: Cash Projections
-        summary: Lists securities transactions that the custodian anticipates posting to your account over the next five days. The report reflects estimated information as of the close of business on the previous business day and is available at the beginning of the current business day.
+        summary: Lists securities transactions that the custodian anticipates posting to your account over the next five days.
       current:
         title: Current Securities Position
-        summary: Provides totals and summaries for pledged and unpledged securities as of the current day. The report is updated throughout the day and reflects changes in your securities position.
+        summary: Provides summaries and totals for pledged and unpledged securities as of the current day.
       monthly:
         title: Monthly Securities Position
-        summary: Provides totals and summaries for pledged and unpledged securities as of the prior monthend. The report reflects securities information as of the close of business on the last business day of the month and is generally available one business day following monthend.
+        summary: Provides summaries and totals for pledged and unpledged securities as of the prior monthend.
+        updated: Monthly, 1 business day following monthend
       services_monthly:
         title: Securities Services Monthly Statement
-        summary: Provides a breakdown of the securities services fees that will be debited from your institution’s Settlement/Transaction Account on the last business day of the month. It is updated for the prior month approximately five to seven days before monthend.
-    authorizations:
-      title: Authorizations
-      user:
-        title: User Authorizations
-        summary: Provides a summary of authorizations granted to bank users.
+        summary: Provides securities services fees for the prior month, which will be debited from your institution’s Settlement/Transaction Account on the last business day of the month.
+        updated: Monthly, approximately 5 to 7 days before monthend
+    account:
+      title: Your Account
+      account_summary:
+        title: Account Summary
+        summary: Provides a summary of your institution's Financing Availability, Credit Outstanding, Borrowing Capacity, and Capital Stock Position and Leverage.
+        updated: Intraday, except for Market Value and Total Borrowing Capacity, which are as of close of business on the prior business day
+      authorizations:
+        title: Authorizations
+        summary: Provides a summary of authorizations granted to individual member users.
+      settlement_transaction_account:
+        title: Settlement/Transaction Account (STA)
+        summary: Displays debits and credits based on your institution's activity with the Bank. Interest earned is provided on the first business day of the following month.
+        updated: Daily for current month, as of the end of the prior business day
+        history: Current month to date. Prior statements are available for the previous 6 months.
     account_summary:
       title: Account Summary
       institution_details:
