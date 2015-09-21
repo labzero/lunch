@@ -10,6 +10,10 @@ def types_and_terms_hash
   Hash[loan_types.map { |type| [type, Hash[loan_terms.map{ |term| [term, yield(type, term)] }]] }]
 end
 
+def term_data(frequency, unit, rate, maturity_date)
+  d = double("term data for #{frequency} #{unit}")
+end
+
 describe MAPI::ServiceApp do
   subject { MAPI::Services::Rates }
   before do
@@ -55,6 +59,57 @@ describe MAPI::ServiceApp do
           end
         end
       end
+    end
+  end
+
+  describe "extract_market_data_from_soap_response" do
+    let (:response) { double('response') }
+    let (:xml_aa)   { double('xml_aa')   }
+    let (:day_count_basis_aa)  { double('day_count_basis_aa')  }
+    let (:xml_1w)   { double('xml_1w')   }
+    let (:rate_1w)  { double('rate_1w')  }
+    let (:xml_1m)   { double('xml_1m')   }
+    let (:rate_1m)  { double('rate_1m')  }
+    let (:xml_4m)   { double('xml_4m')   }
+    let (:rate_4m)  { double('rate_4m')  }
+    let (:maturity_date_string)  { double('maturity_date_string')  }
+    let (:maturity_date_time)  { double('maturity_date_time')  }
+    let (:maturity_date)  { double('maturity_date')  }
+    let (:type_data_list) { [xml_aa] }
+    let (:term_data_list) { [xml_1w, xml_1m, xml_4m] }
+    let (:result)   { subject.extract_market_data_from_soap_response(response) }
+    before do
+      allow(response).to receive_message_chain(:doc,:remove_namespaces!)
+      allow(response).to receive_message_chain(:doc,:xpath).with(subject::PATHS[:type_data]).and_return(type_data_list)
+      allow(xml_aa).to  receive(:css).with(subject::PATHS[:term_data]).and_return(term_data_list)
+      allow(subject).to receive(:extract_text).with(xml_aa,  :type_long).and_return(subject::LOAN_MAPPING[:aa])
+      allow(subject).to receive(:extract_text).with(xml_aa,  :day_count_basis).and_return(day_count_basis_aa)
+      allow(subject).to receive(:extract_text).with(xml_1w, :frequency).and_return('1')
+      allow(subject).to receive(:extract_text).with(xml_1m, :frequency).and_return('1')
+      allow(subject).to receive(:extract_text).with(xml_4m, :frequency).and_return('4')
+      allow(subject).to receive(:extract_text).with(xml_1w, :unit).and_return('W')
+      allow(subject).to receive(:extract_text).with(xml_1m, :unit).and_return('M')
+      allow(subject).to receive(:extract_text).with(xml_4m, :unit).and_return('M')
+      allow(subject).to receive(:extract_text).with(xml_1w, :rate).and_return(rate_1w)
+      allow(subject).to receive(:extract_text).with(xml_1m, :rate).and_return(rate_1m)
+      allow(subject).to receive(:extract_text).with(xml_4m, :rate).and_return(rate_4m)
+      allow(subject).to receive(:extract_text).with(xml_1w, :maturity_date).and_return(maturity_date_string)
+      allow(subject).to receive(:extract_text).with(xml_1m, :maturity_date).and_return(maturity_date_string)
+      allow(subject).to receive(:extract_text).with(xml_4m, :maturity_date).and_return(maturity_date_string)
+      allow(Time).to receive_message_chain(:zone,:parse).with(maturity_date_string).and_return(maturity_date_time)
+      allow(maturity_date_time).to receive(:to_date).and_return(:maturity_date)
+    end
+
+    it 'should return correct rate for aa/1w' do
+      expect(result[:aa][:'1week'][:rate]).to be == rate_1w
+    end
+
+    it 'should return correct rate for aa/1m' do
+      expect(result[:aa][:'1month'][:rate]).to be == rate_1m
+    end
+
+    it 'should not return rates for for aa/4m' do
+      expect(result[:aa][:'4month']).to be_nil
     end
   end
 

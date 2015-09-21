@@ -26,9 +26,10 @@ module MAPI
       end
 
       def self.get_maturity_date(original, frequency_unit, holidays)
-        candidate = find_next_business_day(original.to_date, 1.day, holidays)
-        if %w(M Y).include?(frequency_unit) && candidate > original.to_date.end_of_month
-          find_next_business_day(original.to_date, -1.day, holidays)
+        original_date = original.to_date
+        candidate = find_next_business_day(original_date, 1.day, holidays)
+        if %w(M Y).include?(frequency_unit) && candidate > original_date.end_of_month
+          find_next_business_day(original_date, -1.day, holidays)
         else
           candidate
         end
@@ -127,20 +128,46 @@ module MAPI
         end
       end
 
+      PATHS = {
+          type_data:       '//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse',
+          term_data:       'marketData FhlbsfMarketData data FhlbsfDataPoint',
+          day_count_basis: 'marketData FhlbsfMarketData dayCountBasis',
+          type_long:       'marketData FhlbsfMarketData name',
+          frequency:       'tenor interval frequency',
+          unit:            'tenor interval frequencyUnit',
+          maturity_date:   'tenor maturityDate',
+          rate:            'value',
+      }
+
+      def self.extract_text(xml, field)
+        xml.at_css(PATHS[field]).content
+      end
+
+      def self.extract_texts(xml, fields)
+        Hash[fields.map{ |field| [field, extract_text(xml, field)]}]
+      end
+
       def self.extract_market_data_from_soap_response(response)
-        hash = {}
+        hash = {}.with_indifferent_access
         response.doc.remove_namespaces!
-        response.doc.xpath('//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse').each do |type_data|
-          day_count_basis = type_data.at_css('marketData FhlbsfMarketData dayCountBasis').content
-          type            = LOAN_MAPPING_INVERTED[type_data.at_css('marketData FhlbsfMarketData name').content]
-          hash[type] = {}
-          type_data.css('marketData FhlbsfMarketData data FhlbsfDataPoint').each do |term_data|
-            rate          = term_data.at_css('value').content
-            maturity_date = Time.zone.parse(term_data.at_css('tenor maturityDate').content).to_date
-            frequency     = term_data.at_css('tenor interval frequency').content
-            unit          = term_data.at_css('tenor interval frequencyUnit').content
-            term          = FREQUENCY_MAPPING["#{frequency}#{unit}"]
-            hash[type][term] = { rate: rate, maturity_date: maturity_date, payment_on: 'Maturity', interest_day_count: day_count_basis } if term
+        response.doc.xpath(PATHS[:type_data]).each do |type_data|
+          day_count_basis = extract_text(type_data, :day_count_basis)
+          type_long       = extract_text(type_data, :type_long)
+          type            = LOAN_MAPPING_INVERTED[type_long]
+          hash[type]      = {}
+          type_data.css(PATHS[:term_data]).each do |term_data|
+            frequency     = extract_text(term_data, :frequency)
+            unit          = extract_text(term_data, :unit)
+            if term = FREQUENCY_MAPPING["#{frequency}#{unit}"].try(:first)
+              rate          = extract_text(term_data, :rate)
+              maturity_date = extract_text(term_data, :maturity_date)
+              hash[type][term] = {
+                  rate: rate,
+                  maturity_date: Time.zone.parse(maturity_date).to_date,
+                  payment_on: 'Maturity',
+                  interest_day_count: day_count_basis
+              }
+            end
           end
         end
         hash
