@@ -9,6 +9,10 @@ module MAPI
       include MAPI::Shared::Constants
       include MAPI::Shared::Utils
 
+      def self.types_and_terms_hash
+        Hash[LOAN_TYPES.map { |type| [type, Hash[LOAN_TERMS.map{ |term| [term, yield(type, term)] }]] }]
+      end
+
       def self.holiday?(date, holidays)
         holidays.include?(date.strftime('%F'))
       end
@@ -22,9 +26,10 @@ module MAPI
       end
 
       def self.get_maturity_date(original, frequency_unit, holidays)
-        candidate = find_next_business_day(original.to_date, 1.day, holidays)
-        if %w(M Y).include?(frequency_unit) && candidate > original.to_date.end_of_month
-          find_next_business_day(original.to_date, -1.day, holidays)
+        original_date = original.to_date
+        candidate = find_next_business_day(original_date, 1.day, holidays)
+        if %w(M Y).include?(frequency_unit) && candidate > original_date.end_of_month
+          find_next_business_day(original_date, -1.day, holidays)
         else
           candidate
         end
@@ -123,21 +128,51 @@ module MAPI
         end
       end
 
+      PATHS = {
+          type_data:       '//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse',
+          term_data:       'marketData FhlbsfMarketData data FhlbsfDataPoint',
+          day_count_basis: 'marketData FhlbsfMarketData dayCountBasis',
+          type_long:       'marketData FhlbsfMarketData name',
+          frequency:       'tenor interval frequency',
+          unit:            'tenor interval frequencyUnit',
+          maturity_string: 'tenor maturityDate',
+          rate:            'value',
+      }.with_indifferent_access
+
+      def self.extract_text(xml, field)
+        xml.at_css(PATHS[field]).content
+      end
+
+      PERIOD_TO_TERM= {
+          '1W' => :'1week',  '2W' => :'2week',  '3W' => :'3week',
+          '1M' => :'1month', '2M' => :'2month', '3M' => :'3month', '6M' => :'6month',
+          '1Y' => :'1year',  '2Y' => :'2year',  '3Y' => :'3year'
+        }
+
       def self.extract_market_data_from_soap_response(response)
-        hash = {}
+        hash = {}.with_indifferent_access
         response.doc.remove_namespaces!
-        fhlbsf_response = response.doc.xpath('//Envelope//Body//marketDataResponse//responses//fhlbsfMarketDataResponse')
-        LOAN_TYPES.each_with_index do |type, ctr_type|
-          hash[type] = {}
-          fhlbsf_data_points = fhlbsf_response[ctr_type].css('marketData FhlbsfMarketData data FhlbsfDataPoint')
-          LOAN_TERMS.each_with_index do |term, ctr_term|
-            ctr_term = 1 if ctr_term == 0 # why? when commented out, all tests still pass
-            hash[type][term] = {
-                payment_on:         'Maturity',
-                interest_day_count: fhlbsf_response[ctr_type].at_css('marketData FhlbsfMarketData dayCountBasis').content,
-                rate:               fhlbsf_data_points[ctr_term-1].at_css('value').content,
-                maturity_date:      Time.zone.parse(fhlbsf_data_points[ctr_term-1].at_css('tenor maturityDate').content).to_date,
-            }
+        response.doc.xpath(PATHS[:type_data]).each do |type_data|
+          daily           = [:open, :overnight]
+          day_count_basis = extract_text(type_data, :day_count_basis)
+          type_long       = extract_text(type_data, :type_long)
+          type            = LOAN_MAPPING_INVERTED[type_long]
+          hash[type]      = {}
+          type_data.css(PATHS[:term_data]).each do |term_data|
+            frequency       = extract_text(term_data, :frequency)
+            unit            = extract_text(term_data, :unit)
+            rate            = extract_text(term_data, :rate)
+            maturity_string = extract_text(term_data, :maturity_string)
+            period          = "#{frequency}#{unit}"
+            term            = period == '1D' ? daily.pop : PERIOD_TO_TERM[period]
+            if term
+              hash[type][term] = {
+                  rate: rate,
+                  maturity_date: Time.zone.parse(maturity_string).to_date,
+                  payment_on: 'Maturity',
+                  interest_day_count: day_count_basis
+              }
+            end
           end
         end
         hash

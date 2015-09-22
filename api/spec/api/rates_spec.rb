@@ -10,6 +10,28 @@ def types_and_terms_hash
   Hash[loan_types.map { |type| [type, Hash[loan_terms.map{ |term| [term, yield(type, term)] }]] }]
 end
 
+def mk_term(frequency, unit, term)
+  {
+      xml: double("#{term}/xml"),
+      rate: double("#{term}/rate"),
+      maturity_date: double("#{term}/maturity_date"),
+      maturity_string: double("#{term}/maturity_string"),
+      maturity_time: double("#{term}/maturity_time"),
+      frequency: frequency,
+      unit: unit,
+      term: term.to_sym
+  }
+end
+
+def mk_type(type)
+  {
+      xml: double("#{type}/xml"),
+      type_long: subject::LOAN_MAPPING[type],
+      type: type.to_sym,
+      day_count_basis: double("#{type}/day_count_basis")
+  }
+end
+
 describe MAPI::ServiceApp do
   subject { MAPI::Services::Rates }
   before do
@@ -53,6 +75,69 @@ describe MAPI::ServiceApp do
             date = Time.zone.parse(rate['updated_at'])
             expect(date).to be <= Time.zone.now
           end
+        end
+      end
+    end
+  end
+
+  describe "extract_market_data_from_soap_response" do
+    let (:types)     { %w(whole agency aa aaa).map{ |type| mk_type(type) } }
+    let (:types_xml) { types.map{ |type| type[:xml] } }
+
+    let (:overnight) { mk_term('1', 'D', 'overnight') }
+    let (:open_day)  { mk_term('1', 'D', 'open') }
+    let (:w1)        { mk_term('1', 'W', '1week') }
+    let (:w2)        { mk_term('2', 'W', '2week') }
+    let (:w3)        { mk_term('3', 'W', '3week') }
+    let (:m1)        { mk_term('1', 'M', '1month') }
+    let (:m2)        { mk_term('2', 'M', '2month') }
+    let (:m3)        { mk_term('3', 'M', '3month') }
+    let (:m4)        { mk_term('4', 'M', '4month') }
+    let (:m5)        { mk_term('5', 'M', '5month') }
+    let (:m6)        { mk_term('6', 'M', '6month') }
+    let (:y1)        { mk_term('1', 'Y', '1year') }
+    let (:y2)        { mk_term('2', 'Y', '2year') }
+    let (:y3)        { mk_term('3', 'Y', '3year') }
+    let (:terms) { [overnight,open_day,w1,w2,w3,m1,m2,m3,m4,m5,m6,y1,y2,y3] }
+    let (:invalid_terms) { [m4,m5] }
+    let (:valid_terms) { terms - invalid_terms }
+    let (:terms_xml) { terms.map{ |term| term[:xml] } }
+
+    let (:response) { double('response') }
+    let (:result)   { subject.extract_market_data_from_soap_response(response) }
+    before do
+      allow(response).to receive_message_chain(:doc,:remove_namespaces!)
+      allow(response).to receive_message_chain(:doc,:xpath).with(subject::PATHS[:type_data]).and_return(types_xml)
+
+      types.each do |type|
+        allow(type[:xml]).to  receive(:css).with(subject::PATHS[:term_data]).and_return(terms_xml)
+        allow(subject).to receive(:extract_text).with(type[:xml], :type_long).and_return(type[:type_long])
+        allow(subject).to receive(:extract_text).with(type[:xml], :day_count_basis).and_return(type[:day_count_basis])
+      end
+
+      terms.each do |term|
+        [:frequency, :unit, :rate, :maturity_string].each do |field|
+          allow(subject).to receive(:extract_text).with(term[:xml], field).and_return(term[field])
+        end
+        allow(Time).to receive_message_chain(:zone,:parse).with(term[:maturity_string]).and_return(term[:maturity_time])
+        allow(term[:maturity_time]).to receive(:to_date).and_return(term[:maturity_date])
+      end
+    end
+
+    it 'should return correct rate, maturity_data and interest_day_count for valid terms' do
+      types.each do |type|
+        valid_terms.each do |term|
+          expect(result[type[:type]][term[:term]][:rate]).to eq(term[:rate])
+          expect(result[type[:type]][term[:term]][:maturity_date]).to eq(term[:maturity_date])
+          expect(result[type[:type]][term[:term]][:interest_day_count]).to eq(type[:day_count_basis])
+        end
+      end
+    end
+
+    it 'should not return anything for invalid terms' do
+      types.each do |type|
+        invalid_terms.each do |term|
+          expect(result[type[:type]][term[:term]]).to be_nil
         end
       end
     end
