@@ -143,17 +143,17 @@ module MAPI
         xml.at_css(PATHS[field]).content
       end
 
-      def self.fresh_period_to_terms
-        terms = FREQUENCY_MAPPING.deep_dup
-        terms.each_value{ |v| v.reverse! }
-        terms
-      end
+      PERIOD_TO_TERM= {
+          '1W' => :'1week',  '2W' => :'2week',  '3W' => :'3week',
+          '1M' => :'1month', '2M' => :'2month', '3M' => :'3month', '6M' => :'6month',
+          '1Y' => :'1year',  '2Y' => :'2year',  '3Y' => :'3year'
+        }
 
       def self.extract_market_data_from_soap_response(response)
         hash = {}.with_indifferent_access
         response.doc.remove_namespaces!
         response.doc.xpath(PATHS[:type_data]).each do |type_data|
-          period_to_terms = fresh_period_to_terms
+          daily           = [:open, :overnight]
           day_count_basis = extract_text(type_data, :day_count_basis)
           type_long       = extract_text(type_data, :type_long)
           type            = LOAN_MAPPING_INVERTED[type_long]
@@ -164,7 +164,8 @@ module MAPI
             rate            = extract_text(term_data, :rate)
             maturity_string = extract_text(term_data, :maturity_string)
             period          = "#{frequency}#{unit}"
-            if term = period_to_terms[period].try(:pop)
+            term            = period == '1D' ? daily.pop : PERIOD_TO_TERM[period]
+            if term
               hash[type][term] = {
                   rate: rate,
                   maturity_date: Time.zone.parse(maturity_string).to_date,

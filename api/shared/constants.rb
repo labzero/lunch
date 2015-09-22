@@ -29,7 +29,7 @@ module MAPI
           aa: 'FRC_AA'
       }.with_indifferent_access
 
-        LOAN_MAPPING_INVERTED = LOAN_MAPPING.invert.with_indifferent_access
+      LOAN_MAPPING_INVERTED = LOAN_MAPPING.invert.with_indifferent_access
 
       TERM_MAPPING = {
           :overnight => {
