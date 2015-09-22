@@ -144,7 +144,7 @@ module MAPI
       end
 
       def self.fresh_period_to_terms
-        terms = Marshal.load(Marshal.dump(FREQUENCY_MAPPING))
+        terms = FREQUENCY_MAPPING.deep_dup
         terms.each_value{ |v| v.reverse! }
         terms
       end
