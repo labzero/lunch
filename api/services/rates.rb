@@ -135,35 +135,39 @@ module MAPI
           type_long:       'marketData FhlbsfMarketData name',
           frequency:       'tenor interval frequency',
           unit:            'tenor interval frequencyUnit',
-          maturity_date:   'tenor maturityDate',
+          maturity_string: 'tenor maturityDate',
           rate:            'value',
-      }
+      }.with_indifferent_access
 
       def self.extract_text(xml, field)
         xml.at_css(PATHS[field]).content
       end
 
-      def self.extract_texts(xml, fields)
-        Hash[fields.map{ |field| [field, extract_text(xml, field)]}]
+      def self.fresh_period_to_terms
+        terms = Marshal.load(Marshal.dump(FREQUENCY_MAPPING))
+        terms.each_value{ |v| v.reverse! }
+        terms
       end
 
       def self.extract_market_data_from_soap_response(response)
         hash = {}.with_indifferent_access
         response.doc.remove_namespaces!
         response.doc.xpath(PATHS[:type_data]).each do |type_data|
+          period_to_terms = fresh_period_to_terms
           day_count_basis = extract_text(type_data, :day_count_basis)
           type_long       = extract_text(type_data, :type_long)
           type            = LOAN_MAPPING_INVERTED[type_long]
           hash[type]      = {}
           type_data.css(PATHS[:term_data]).each do |term_data|
-            frequency     = extract_text(term_data, :frequency)
-            unit          = extract_text(term_data, :unit)
-            if term = FREQUENCY_MAPPING["#{frequency}#{unit}"].try(:first)
-              rate          = extract_text(term_data, :rate)
-              maturity_date = extract_text(term_data, :maturity_date)
+            frequency       = extract_text(term_data, :frequency)
+            unit            = extract_text(term_data, :unit)
+            rate            = extract_text(term_data, :rate)
+            maturity_string = extract_text(term_data, :maturity_string)
+            period          = "#{frequency}#{unit}"
+            if term = period_to_terms[period].try(:pop)
               hash[type][term] = {
                   rate: rate,
-                  maturity_date: Time.zone.parse(maturity_date).to_date,
+                  maturity_date: Time.zone.parse(maturity_string).to_date,
                   payment_on: 'Maturity',
                   interest_day_count: day_count_basis
               }

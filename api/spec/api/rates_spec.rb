@@ -63,53 +63,89 @@ describe MAPI::ServiceApp do
   end
 
   describe "extract_market_data_from_soap_response" do
+    let (:mk_type) do
+      ->(type) do
+        {
+            xml: double( "#{type}/xml"),
+            type_long: subject::LOAN_MAPPING[type],
+            type: type.to_sym,
+            day_count_basis: double( "#{type}/day_count_basis")
+        }
+      end
+    end
+    let (:types)     { %w(whole agency aa aaa).map{ |type| mk_type.call(type) } }
+    let (:types_xml) { types.map{ |type| type[:xml] } }
+
+    let (:mk_term) do
+      ->(frequency,unit,term) do
+        {
+            xml:  double("#{term}/xml"),
+            rate: double("#{term}/rate"),
+            maturity_date: double("#{term}/maturity_date"),
+            maturity_string: double("#{term}/maturity_string"),
+            maturity_time:   double("#{term}/maturity_time"),
+            frequency: frequency,
+            unit: unit,
+            term: term.to_sym
+        }
+      end
+    end
+    let (:overnight) { mk_term.call('1', 'D', 'overnight') }
+    let (:open_day)  { mk_term.call('1', 'D', 'open') }
+    let (:w1)        { mk_term.call('1', 'W', '1week') }
+    let (:w2)        { mk_term.call('2', 'W', '2week') }
+    let (:w3)        { mk_term.call('3', 'W', '3week') }
+    let (:m1)        { mk_term.call('1', 'M', '1month') }
+    let (:m2)        { mk_term.call('2', 'M', '2month') }
+    let (:m3)        { mk_term.call('3', 'M', '3month') }
+    let (:m4)        { mk_term.call('4', 'M', '4month') }
+    let (:m5)        { mk_term.call('5', 'M', '5month') }
+    let (:m6)        { mk_term.call('6', 'M', '6month') }
+    let (:y1)        { mk_term.call('1', 'Y', '1year') }
+    let (:y2)        { mk_term.call('2', 'Y', '2year') }
+    let (:y3)        { mk_term.call('3', 'Y', '3year') }
+    let (:terms) { [overnight,open_day,w1,w2,w3,m1,m2,m3,m4,m5,m6,y1,y2,y3] }
+    let (:invalid_terms) { [m4,m5] }
+    let (:valid_terms) { terms - invalid_terms }
+    let (:terms_xml) { terms.map{ |term| term[:xml] } }
+
     let (:response) { double('response') }
-    let (:xml_aa)   { double('xml_aa')   }
-    let (:day_count_basis_aa)  { double('day_count_basis_aa')  }
-    let (:xml_1w)   { double('xml_1w')   }
-    let (:rate_1w)  { double('rate_1w')  }
-    let (:xml_1m)   { double('xml_1m')   }
-    let (:rate_1m)  { double('rate_1m')  }
-    let (:xml_4m)   { double('xml_4m')   }
-    let (:rate_4m)  { double('rate_4m')  }
-    let (:maturity_date_string)  { double('maturity_date_string')  }
-    let (:maturity_date_time)  { double('maturity_date_time')  }
-    let (:maturity_date)  { double('maturity_date')  }
-    let (:type_data_list) { [xml_aa] }
-    let (:term_data_list) { [xml_1w, xml_1m, xml_4m] }
     let (:result)   { subject.extract_market_data_from_soap_response(response) }
     before do
       allow(response).to receive_message_chain(:doc,:remove_namespaces!)
-      allow(response).to receive_message_chain(:doc,:xpath).with(subject::PATHS[:type_data]).and_return(type_data_list)
-      allow(xml_aa).to  receive(:css).with(subject::PATHS[:term_data]).and_return(term_data_list)
-      allow(subject).to receive(:extract_text).with(xml_aa,  :type_long).and_return(subject::LOAN_MAPPING[:aa])
-      allow(subject).to receive(:extract_text).with(xml_aa,  :day_count_basis).and_return(day_count_basis_aa)
-      allow(subject).to receive(:extract_text).with(xml_1w, :frequency).and_return('1')
-      allow(subject).to receive(:extract_text).with(xml_1m, :frequency).and_return('1')
-      allow(subject).to receive(:extract_text).with(xml_4m, :frequency).and_return('4')
-      allow(subject).to receive(:extract_text).with(xml_1w, :unit).and_return('W')
-      allow(subject).to receive(:extract_text).with(xml_1m, :unit).and_return('M')
-      allow(subject).to receive(:extract_text).with(xml_4m, :unit).and_return('M')
-      allow(subject).to receive(:extract_text).with(xml_1w, :rate).and_return(rate_1w)
-      allow(subject).to receive(:extract_text).with(xml_1m, :rate).and_return(rate_1m)
-      allow(subject).to receive(:extract_text).with(xml_4m, :rate).and_return(rate_4m)
-      allow(subject).to receive(:extract_text).with(xml_1w, :maturity_date).and_return(maturity_date_string)
-      allow(subject).to receive(:extract_text).with(xml_1m, :maturity_date).and_return(maturity_date_string)
-      allow(subject).to receive(:extract_text).with(xml_4m, :maturity_date).and_return(maturity_date_string)
-      allow(Time).to receive_message_chain(:zone,:parse).with(maturity_date_string).and_return(maturity_date_time)
-      allow(maturity_date_time).to receive(:to_date).and_return(:maturity_date)
+      allow(response).to receive_message_chain(:doc,:xpath).with(subject::PATHS[:type_data]).and_return(types_xml)
+
+      types.each do |type|
+        allow(type[:xml]).to  receive(:css).with(subject::PATHS[:term_data]).and_return(terms_xml)
+        allow(subject).to receive(:extract_text).with(type[:xml],  :type_long).and_return(type[:type_long])
+        allow(subject).to receive(:extract_text).with(type[:xml],  :day_count_basis).and_return(type[:day_count_basis])
+      end
+
+      terms.each do |term|
+        [:frequency, :unit, :rate, :maturity_string].each do |field|
+          allow(subject).to receive(:extract_text).with(term[:xml], field).and_return(term[field])
+        end
+        allow(Time).to receive_message_chain(:zone,:parse).with(term[:maturity_string]).and_return(term[:maturity_time])
+        allow(term[:maturity_time]).to receive(:to_date).and_return(term[:maturity_date])
+      end
     end
 
-    it 'should return correct rate for aa/1w' do
-      expect(result[:aa][:'1week'][:rate]).to be == rate_1w
+    it 'should return correct rate, maturity_data and interest_day_count for valid terms' do
+      types.each do |type|
+        valid_terms.each do |term|
+          expect(result[type[:type]][term[:term]][:rate]).to be == term[:rate]
+          expect(result[type[:type]][term[:term]][:maturity_date]).to be == term[:maturity_date]
+          expect(result[type[:type]][term[:term]][:interest_day_count]).to be == type[:day_count_basis]
+        end
+      end
     end
 
-    it 'should return correct rate for aa/1m' do
-      expect(result[:aa][:'1month'][:rate]).to be == rate_1m
-    end
-
-    it 'should not return rates for for aa/4m' do
-      expect(result[:aa][:'4month']).to be_nil
+    it 'should not return anything for invalid terms' do
+      types.each do |type|
+        invalid_terms.each do |term|
+          expect(result[type[:type]][term[:term]]).to be_nil
+        end
+      end
     end
   end
 
