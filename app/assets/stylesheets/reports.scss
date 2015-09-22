@@ -1,4 +1,4 @@
-.reports, .report {
+.reports, .report, .resource-guide-page, .resource-forms-page, .product-page {
   h1 {
     @extend %typography-page-title;
     margin: 32px 0 17px;
@@ -9,22 +9,12 @@
   }
 }
 
-.reports {
-  nav {
-    text-transform: uppercase;
-    @include typography-subtitle;
-    a {
-      display: block;
-    }
-  }
-}
-
 .reports-table {
   @extend %table-striped;
   border-bottom: 1px solid $light-blue;
-  margin-top: 70px;
+  margin-top: 60px;
   &:last-child {
-    margin-bottom: 70px;
+    margin-bottom: 60px;
   }
   thead {
     border-bottom: 1px solid $light-blue;
@@ -65,7 +55,7 @@
         position: absolute;
         top: 15px;
         right: 20px;
-        @extend %typography-subtitle;
+        @include typography-dropdown-selector;
         color: $actionable-blue;
         text-transform: uppercase;
       }

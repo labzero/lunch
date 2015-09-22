@@ -2,10 +2,6 @@
   .column-2x10-right {
     padding-right: 10px;
   }
-  h1 {
-    @extend %typography-page-title;
-    margin: 30px 0 10px;
-  }
   h2 {
     @extend %typography-section-title;
     margin: 25px 0 10px;
