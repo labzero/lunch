@@ -989,8 +989,7 @@ RSpec.describe ReportsController, :type => :controller do
     end
     describe 'GET todays_credit' do
       let(:todays_credit) { get :todays_credit }
-      let(:interest_rate) { double('interest_rate')}
-      let(:credit_activity) { {transaction_number: double('transaction_number'), current_par: double('current_par'), interest_rate: double('interest_rate', :* => interest_rate), funding_date: double('funding_date'), maturity_date: double('maturity_date', is_a?: true), product_description: double('product_description')} }
+      let(:credit_activity) { {transaction_number: double('transaction_number'), current_par: double('current_par'), interest_rate: double('interest_rate'), funding_date: double('funding_date'), maturity_date: double('maturity_date', is_a?: true), product_description: double('product_description')} }
       let(:credit_activity_advance) { {instrument_type: 'ADVANCE'} }
       let(:todays_credit_response) { [credit_activity] }
       before do
@@ -1000,7 +999,7 @@ RSpec.describe ReportsController, :type => :controller do
       describe 'view instance variables' do
         it 'sets the @todays_credit row attribute' do
           todays_credit
-          expect(assigns[:todays_credit][:rows][0][:columns]).to eq([{value: credit_activity[:transaction_number]}, {type: :number, value: credit_activity[:current_par]}, {type: :index, value: interest_rate}, {type: :date, value: credit_activity[:funding_date]}, {type: :date, value: credit_activity[:maturity_date]}, {value: credit_activity[:product_description]}])
+          expect(assigns[:todays_credit][:rows][0][:columns]).to eq([{value: credit_activity[:transaction_number]}, {type: :number, value: credit_activity[:current_par]}, {type: :index, value: credit_activity[:interest_rate]}, {type: :date, value: credit_activity[:funding_date]}, {type: :date, value: credit_activity[:maturity_date]}, {value: credit_activity[:product_description]}])
         end
         it 'sets the @todays_credit column_headings attribute' do
           todays_credit
