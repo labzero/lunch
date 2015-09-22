@@ -2,7 +2,7 @@
 - @page_title = t('reports.meta_title')
 .reports.row
   %h1= t('reports.title')
-  %nav
+  %nav.nav-toc
     - @reports.each do |category, reports|
       =link_to(t("reports.#{category}.title"), "##{category}")
   - @reports.each do |category, reports|

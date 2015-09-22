@@ -1,11 +1,11 @@
 - @html_class = 'white-background'
 .row.resource-forms-page
   %h1= t('resources.forms.title')
-  %ul
-    %li= link_to(t('resources.forms.agreements.title'), '#agreements')
-    %li= link_to(t('resources.forms.authorizations.title'), '#authorizations')
-    %li= link_to(t('resources.forms.credit.title'), '#credit')
-    %li= link_to(t('resources.forms.collateral.title'), '#collateral')
+  %nav.nav-toc
+    = link_to(t('resources.forms.agreements.title'), '#agreements')
+    = link_to(t('resources.forms.authorizations.title'), '#authorizations')
+    = link_to(t('resources.forms.credit.title'), '#credit')
+    = link_to(t('resources.forms.collateral.title'), '#collateral')
   %section
     %a{name: 'agreements'}
     %h2= t('resources.forms.agreements.title')

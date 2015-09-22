@@ -72,14 +72,8 @@ $resource-page-padding: 140px !default;
 .resource-forms-page {
   padding-right: $resource-page-padding;
   a {
+    @include typography-dropdown-selector;
     text-transform: uppercase;
-    text-decoration: none;
-    color: $actionable-blue;
-  }
-  ul {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 60px;
   }
   h2, h3 {
     padding-left: 20px;
@@ -92,6 +86,9 @@ $resource-page-padding: 140px !default;
   }
   h2 ~ h3 {
     margin-top: 25px;
+  }
+  section:first-of-type {
+    margin-top: 60px;
   }
 }
 
