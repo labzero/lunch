@@ -36,6 +36,18 @@
   table {
     @extend %table-report;
     @extend %table-nested-rows;
+    margin-bottom: 15px;
+  }
+  small {
+    position: relative;
+    padding-left: 10px;
+    display: block;
+    &:before {
+      content: '1';
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
   }
 }
 
