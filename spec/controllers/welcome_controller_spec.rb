@@ -143,6 +143,34 @@ RSpec.describe WelcomeController, :type => :controller do
     end
   end
 
+  describe "GET session_status" do
+    let(:response_body) { get :session_status; JSON.parse(response.body).with_indifferent_access }
+    let(:request_env) { double('request environment', :[] => nil, :'[]=' => nil) }
+    before do
+      allow(controller).to receive(:user_signed_in?)
+    end
+    it_behaves_like 'a user not required action', :get, :session_status
+
+    # Check to see that `devise.skip_trackable` config is turned off before the request, then turned back on afterwards
+    it 'should skip resetting the session timer in Devise' do
+      allow(request.env).to receive(:'[]=').and_call_original
+      expect(request.env).to receive(:'[]=').with('devise.skip_trackable', false)
+      expect(request.env).to receive(:'[]=').with('devise.skip_trackable', true)
+      get :session_status
+    end
+    it 'should return a JSON hash with `new_session_path` set to the new_session_path' do
+      expect(response_body[:new_session_path]).to eq(new_user_session_path)
+    end
+    it 'should return a JSON hash with `user_signed_in` set to true if the user is signed in' do
+      allow(controller).to receive(:user_signed_in?).and_return(true)
+      expect(response_body[:user_signed_in]).to eq(true)
+    end
+    it 'should return a JSON hash with `user_signed_in` set to false if the user is not signed in' do
+      allow(controller).to receive(:user_signed_in?).and_return(false)
+      expect(response_body[:user_signed_in]).to eq(false)
+    end
+  end
+
   describe '`get_revision` method' do
     let(:call_method) { subject.send(:get_revision) }
     describe 'without a REVISION file' do

@@ -1,6 +1,7 @@
 class WelcomeController < ApplicationController
 
   skip_before_action :authenticate_user!
+  around_action :skip_timeout, only: [:session_status]
 
   layout 'external'
 
@@ -67,6 +68,16 @@ class WelcomeController < ApplicationController
       madmax: ldap_intranet_status, # LDAP Intranet
       roadwarrior: ldap_extranet_status # LDAP Extranet
     }
+  end
+
+  def session_status
+    render json: {user_signed_in: user_signed_in?, new_session_path: new_user_session_path}
+  end
+
+  def skip_timeout
+    request.env["devise.skip_trackable"] = true # tells Warden not to reset Timeoutable timer for this request
+    yield
+    request.env["devise.skip_trackable"] = false
   end
 
   protected

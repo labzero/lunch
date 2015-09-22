@@ -6,6 +6,8 @@ Rails.application.routes.draw do
 
   get '/details' => 'welcome#details'
   get '/healthy' => 'welcome#healthy'
+  get '/session_status' => 'welcome#session_status'
+  get '/terms-of-use' => 'error#standard_error', as: :terms_of_use
   get '/disclaimer-reuters' => 'error#standard_error', as: :disclaimer_reuters
   get '/online-security' => 'error#standard_error', as: :online_security
   get '/grid_demo' => 'welcome#grid_demo'

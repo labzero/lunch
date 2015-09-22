@@ -4,7 +4,7 @@
 - css_manifest ||= 'application'
 - js_manifest ||= 'application'
 !!!
-%html{class: @html_class}
+%html{class: @html_class, data: {authenticated_action: @authenticated_action, session_status_path: session_status_path}}
   %head
     %meta{charset: "utf-8"}
     %meta{content: "IE=edge,chrome=1", :'http-equiv' => "X-UA-Compatible"}
