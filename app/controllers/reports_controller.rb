@@ -1268,7 +1268,7 @@ class ReportsController < ApplicationController
         columns:[
           {value: activity[:transaction_number]},
           {type: :number, value: activity[:current_par]},
-          {type: :index, value: (activity[:interest_rate] * 100 if activity[:interest_rate])},
+          {type: :index, value: activity[:interest_rate]},
           {type: :date, value: activity[:funding_date]},
           {type: (:date if maturity_date.is_a?(Date)), value: maturity_date},
           {value: activity[:product_description]}
