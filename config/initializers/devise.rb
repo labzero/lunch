@@ -24,7 +24,7 @@ Devise.setup do |config|
   config.mailer_sender = '"FHLBSF Member Portal" <websupport@fhlbsf.com>'
 
   # Configure the class responsible to send e-mails.
-  config.mailer = 'FHLBMailer'
+  config.mailer = 'MemberMailer'
 
   # ==> ORM configuration
   # Load and configure the ORM. Supports :active_record (default) and
