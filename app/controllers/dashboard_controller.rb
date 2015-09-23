@@ -189,10 +189,10 @@ class DashboardController < ApplicationController
       else
         preview_success = true
         preview_error = false
-        @original_amount = params[:amount].to_f if params[:amount]
+        @original_amount = @advance_amount.to_f
         @stock = params[:stock].to_f if params[:stock]
         @session_elevated = session_elevated?
-        checked_rate = check_advance_rate(request, params[:advance_type], params[:advance_term], preview[:advance_rate])
+        checked_rate = check_advance_rate(request, @advance_type_raw, @advance_term, @advance_rate)
         @advance_rate = checked_rate[:advance_rate]
         @old_rate = checked_rate[:old_rate]
         @rate_changed = checked_rate[:rate_changed]
@@ -281,6 +281,7 @@ class DashboardController < ApplicationController
     @gross_net_stock_required = advance_params[:gross_net_stock_required]
     @advance_amount = advance_params[:advance_amount].try(:to_f)
     @advance_description = get_description_from_advance_term(advance_params[:advance_term])
+    @advance_type_raw = advance_params[:advance_type]
     @advance_program = get_program_from_advance_type(advance_params[:advance_type])
     @advance_type = get_type_from_advance_type(advance_params[:advance_type])
     @interest_day_count = advance_params[:interest_day_count]

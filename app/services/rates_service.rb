@@ -46,7 +46,7 @@ class RatesService < MAPIService
   end
 
   def rate(loan, term, type='Live') # type=Live|StartOfDay
-    if data = get_json(:rate, "rates/#{loan}/#{term}/#{type}")
+    if data = get_hash(:rate, "rates/#{loan}/#{term}/#{type}")
       data[:rate] = data[:rate].to_f if data[:rate]
       data[:updated_at] = DateTime.parse(data[:updated_at]) if data[:updated_at]
       data

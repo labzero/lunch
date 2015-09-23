@@ -1050,6 +1050,7 @@ RSpec.describe DashboardController, :type => :controller do
       advance_rate: {key: :advance_rate, chain: [:to_f]},
       advance_description: {key: :advance_term, method: :get_description_from_advance_term},
       advance_type: {key: :advance_type, method: :get_type_from_advance_type},
+      advance_type_raw: :advance_type,
       advance_program: {key: :advance_type, method: :get_program_from_advance_type},
       collateral_type: {key: :advance_type, method: :get_collateral_type_from_advance_type}
     }.each do |param, key|
