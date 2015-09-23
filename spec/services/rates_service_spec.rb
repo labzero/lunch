@@ -114,6 +114,9 @@ describe RatesService do
       allow(JSON).to receive(:parse).and_return({})
       expect(rate[:updated_at]).to be_nil
     end
+    it 'returns a HashWithIndifferentAccess' do
+      expect(rate['updated_at']).to be(rate[:updated_at])
+    end
   end
 
   describe "`current_overnight_vrc` method", :vcr do
