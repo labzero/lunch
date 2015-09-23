@@ -21,4 +21,5 @@ RSpec.describe Users::SessionsController, :type => :controller do
       make_request
     end
   end
+  
 end

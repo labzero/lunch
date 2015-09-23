@@ -202,4 +202,24 @@ RSpec.describe ApplicationController, :type => :controller do
       call_method
     end
   end
+
+  describe '`authenticate_user_with_authentication_flag!` method' do
+    let(:call_method) { controller.authenticate_user_with_authentication_flag! }
+    before do
+      allow(controller).to receive(:authenticate_user_without_authentication_flag!)
+    end
+    it 'sets @authenticated_action to true if it has not already been set' do
+      call_method
+      expect(controller.instance_variable_get(:@authenticated_action)).to eq(true)
+    end
+    it 'does not set @authenticated_action if it has already been set' do
+      controller.instance_variable_set(:@authenticated_action, false)
+      call_method
+      expect(controller.instance_variable_get(:@authenticated_action)).to eq(false)
+    end
+    it 'calls `authenticate_user_without_authentication_flag!`' do
+      expect(controller).to receive(:authenticate_user_without_authentication_flag!)
+      call_method
+    end
+  end
 end

@@ -43,6 +43,13 @@ class ApplicationController < ActionController::Base
     redirect_to user_expired_password_path if session['password_expired']
   end
 
+  def authenticate_user_with_authentication_flag!(*args, &block)
+    @authenticated_action = true unless instance_variable_defined?(:@authenticated_action)
+    authenticate_user_without_authentication_flag!(*args, &block)
+  end
+
+  alias_method_chain :authenticate_user!, :authentication_flag
+
   private
 
   def after_sign_out_path_for(resource)

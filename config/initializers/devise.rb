@@ -267,3 +267,14 @@ Devise.setup do |config|
   # so you need to do it manually. For the users scope, it would be:
   # config.omniauth_path_prefix = '/my_engine/users/auth'
 end
+
+ActiveSupport.on_load :devise_controller do
+  class DeviseController
+    def require_no_authentication_with_authentication_flag(*args, &block)
+      @authenticated_action = false
+      require_no_authentication_without_authentication_flag(*args, &block)
+    end
+
+    alias_method_chain :require_no_authentication, :authentication_flag
+  end
+end
