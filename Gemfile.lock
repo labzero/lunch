@@ -432,8 +432,6 @@ GEM
     sinatra-activerecord (2.0.6)
       activerecord (>= 3.2)
       sinatra (~> 1.0)
-    source-sans-pro-rails (0.6.1)
-      railties (>= 3.2, < 5.0)
     sprockets (3.3.4)
       rack (~> 1.0)
     sprockets-rails (2.3.2)
@@ -548,7 +546,6 @@ DEPENDENCIES
   simplecov-rcov
   sinatra
   sinatra-activerecord
-  source-sans-pro-rails
   swagger-blocks
   timecop
   turbolinks
