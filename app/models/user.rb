@@ -8,6 +8,7 @@ class User < ActiveRecord::Base
   validates :password, format: { with: /\A(?=.*[a-z]).*\z/, message: :lowercase_letter_needed, allow_nil: true }
   validates :password, format: { with: /\A(?=.*\d).*\z/, message: :number_needed, allow_nil: true }
   validates :password, format: { with: /\A(?=.*[!@#$%*]).*\z/, message: :symbol_needed, allow_nil: true }
+  validates :current_password, {presence: true, if: :virtual_validators?}
 
   def self.policy_class
     AccessManagerPolicy
@@ -244,6 +245,14 @@ class User < ActiveRecord::Base
 
   def accepted_terms?
     self.terms_accepted_at.present?
+  end
+
+  def enable_virtual_validators!
+    @virtual_validators = true
+  end
+
+  def virtual_validators?
+    @virtual_validators || false
   end
 
   protected

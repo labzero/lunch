@@ -36,6 +36,23 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe 'virtual validators' do
+    describe 'are disabled' do
+      it 'does not validate `current_password`' do
+        expect(subject.valid?).to be(true)
+      end
+    end
+    describe 'are enabled' do
+      before do
+        subject.enable_virtual_validators!
+      end
+      it 'validates presence of `current_password`' do
+        subject.valid?
+        expect(subject.errors[:current_password]).to include(I18n.t('activerecord.errors.models.user.attributes.current_password.blank'))
+      end
+    end
+  end
+
   describe 'validating passwords' do
     it { should validate_confirmation_of(:password) }
     it { should validate_length_of(:password).is_at_least(8) }
@@ -720,6 +737,17 @@ RSpec.describe User, :type => :model do
     end
     it 'returns false if there is a value for the `terms_accepted_at` attr' do
       expect(subject.accepted_terms?).to eq(false)
+    end
+  end
+
+  describe '`virtual_validators?` method' do
+    let(:call_method) { subject.virtual_validators? }
+    it 'returns false by default' do
+      expect(call_method).to be(false)
+    end
+    it 'returns true by after `enable_virtual_validators!` is called' do
+      subject.enable_virtual_validators!
+      expect(call_method).to be(true)
     end
   end
 

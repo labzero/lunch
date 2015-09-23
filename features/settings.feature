@@ -105,3 +105,18 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
     Given I visit the dashboard
     When I click on the gear icon in the header
     Then I should not see "Access Manager" in the sidebar nav
+
+  @jira-mem-920
+  Scenario: User changes their password
+    Given I am logged in as a "password change user"
+    When I am on the change password page
+    Then I should see current password validations
+    When I fill in the current password field with the password change user's password
+    Then I should see password change validations
+    When I enter a valid new password
+    And I submit the form
+    Then I should see the change password page
+    And I should see a success flash
+    When I log out
+    And I login with as the password change user with the new password
+    Then I should be logged in
