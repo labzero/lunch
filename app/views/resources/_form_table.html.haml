@@ -1,5 +1,5 @@
 - row_renderer = Proc.new do |row, nested|
-  %tr{class: nested ? 'resource-form-nested-row' : nil}
+  %tr{class: nested ? 'nested-row' : nil}
     %td
       = row[:title]
       - if row[:form_number]

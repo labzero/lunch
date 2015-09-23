@@ -22,7 +22,7 @@ is_parallel = is_parallel_primary || is_parallel_secondary
 custom_host = ENV['APP_HOST'] || env_config['app_host']
 
 if is_parallel_secondary && !custom_host
-  timeout_at = Time.now + 30
+  timeout_at = Time.now + 60.seconds
   while !File.exists?('cucumber-primary-ready')
     if Time.now > timeout_at
       raise "Cucumber runner #{parallel_test_number} timed out waiting for the primary runner to start!"
@@ -127,8 +127,8 @@ if !custom_host
   begin
     ENV.delete('VERBOSE')
     puts "Starting resque-pool (#{ENV['RESQUE_REDIS_URL']})..."
-    resque_pool = "resque-pool -i"
-    resque_stdin, resque_stdout, resque_stderr, resque_thr = Open3.popen3({'RAILS_ENV' => ENV['RAILS_ENV'] || ENV['RACK_ENV'], 'TERM_CHILD' => '1'}, resque_pool)
+    resque_pool = "resque-pool -i -E #{ENV['RAILS_ENV'] || ENV['RACK_ENV']}"
+    resque_stdin, resque_stdout, resque_stderr, resque_thr = Open3.popen3({'TERM_CHILD' => '1'}, resque_pool)
   ensure
     ENV['VERBOSE'] = verbose # reset the VERBOSE env variable after resque process is finished.
   end
@@ -139,8 +139,16 @@ if !custom_host
     resque_thr.value # wait for the thread to finish
   end
 
-  sleep 5
-  unless resque_thr.alive?
+  resque_time_out_at = Time.now + 15.seconds
+
+  while Time.now < resque_time_out_at && Resque.workers.count == 0
+    Resque.workers.each do |worker|
+      worker.prune_dead_workers # helps ensure we have an accurate count
+    end
+    sleep 1
+  end
+
+  unless Resque.workers.count > 0
     IO.copy_stream(resque_stdout, STDOUT)
     IO.copy_stream(resque_stderr, STDERR)
     raise 'resque-pool failed to start'
@@ -193,7 +201,7 @@ AfterConfiguration do
     at_exit do
       FileUtils.rm_rf('cucumber-primary-ready')
     end
-    sleep(20) # primary runner needs to sleep to make sure secondary workers see the sentinel (in the case where the primary work exits quickly... ie no work to do)
+    sleep(30) # primary runner needs to sleep to make sure secondary workers see the sentinel (in the case where the primary work exits quickly... ie no work to do)
   end
 
   puts "Starting run `#{run_name}`"

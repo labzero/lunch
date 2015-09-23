@@ -56,7 +56,8 @@ $form-input-field-height: 30px !default;
   .label-error {
     display: none;
     width: 100%;
-    color: $alert-red;
+    margin-top: 10px;
+    @extend %typography-paragraph-tight;
   }
   &.input-field-container-error {
     .label-error {
@@ -83,6 +84,9 @@ fieldset {
 label {
   @extend %typography-field-label;
   color: $medium-gray;
+  &.label-error {
+    color: $alert-red;
+  }
 }
 
 .label-radio {

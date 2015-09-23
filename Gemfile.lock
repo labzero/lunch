@@ -7,12 +7,12 @@ GIT
 
 GIT
   remote: https://github.com/labzero/devise_ldap_authenticatable.git
-  revision: 20f4d87b21a434701d348cc56dd93c0e1ad44b87
-  branch: 0.9.9
+  revision: f05cfed933727ed2348581c77e12e11a7fc4754b
+  branch: 0.9.15
   specs:
-    devise_ldap_authenticatable (0.9.9)
+    devise_ldap_authenticatable (0.9.15)
       devise (>= 3.4.1)
-      net-ldap (>= 0.3.1, < 0.6.0)
+      net-ldap (>= 0.11)
 
 GIT
   remote: https://github.com/labzero/securid.git
@@ -139,7 +139,7 @@ GEM
     cucumber-core (1.1.3)
       gherkin (~> 2.12.0)
     database_cleaner (1.4.1)
-    devise (3.5.1)
+    devise (3.5.2)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
       railties (>= 3.2.6, < 5)
@@ -191,6 +191,7 @@ GEM
       multi_json (~> 1.3)
     globalid (0.3.6)
       activesupport (>= 4.1.0)
+    growl (1.0.3)
     gyoku (1.3.1)
       builder (>= 2.1.2)
     haml (4.0.6)
@@ -258,7 +259,7 @@ GEM
     mono_logger (1.1.0)
     multi_json (1.11.0)
     multi_test (0.1.2)
-    net-ldap (0.5.1)
+    net-ldap (0.11)
     net-ping (1.7.7)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
@@ -508,6 +509,7 @@ DEPENDENCIES
   faker
   fog-aws
   foreman
+  growl
   haml-rails
   highcharts-rails
   jbuilder

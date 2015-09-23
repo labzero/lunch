@@ -26,7 +26,7 @@ gem 'rest-client'
 gem 'securid', git: 'https://github.com/labzero/securid.git', branch: '0.2.3'
 
 # For authentication/authorization
-gem 'devise_ldap_authenticatable', git: 'https://github.com/labzero/devise_ldap_authenticatable.git', branch: '0.9.9'
+gem 'devise_ldap_authenticatable', git: 'https://github.com/labzero/devise_ldap_authenticatable.git', branch: '0.9.15'
 gem 'pundit'
 
 # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
@@ -114,6 +114,7 @@ group :development do
   gem 'capistrano', '~> 3.2.0'
   gem 'capistrano-rvm'
   gem 'capistrano-rails'
+  gem 'growl'
   gem 'byebug' # debugger gem doesn't work with ruby 2.1.2
   gem 'letter_opener'
 end

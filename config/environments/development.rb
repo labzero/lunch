@@ -55,4 +55,5 @@ if ENV['DEBUG'] == 'true'
   port = ENV['BYEBUG_PORT'] || find_available_port
   puts "Remote debugger on port #{port}"
   Byebug.start_server 'localhost', port
+  Byebug::Breakpoint.add(ENV['BYEBUG_FILE'], ENV['BUYBUG_LINE'].to_i) if ENV['BYEBUG_FILE'] && ENV['BUYBUG_LINE']
 end

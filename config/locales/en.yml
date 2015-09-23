@@ -25,9 +25,7 @@ en:
     currency:
       thousand: T
       million: MM
-    updated: Updated
     view: View
-    available_history: Available History
     temporarily_unavailable: Temporarily Unavailable
     overnight: Overnight
     daily: Daily
@@ -166,6 +164,7 @@ en:
     description: Description
     current_par: Current Par
     advance_number: Advance Number
+    transaction_number: Transaction Number
     interest_rate: Interest Rate
     cusip: CUSIP
     cusip_title: "CUSIP %{cusip}"
@@ -178,6 +177,7 @@ en:
     pool_number: Pool
     funding_date: Funding Date
     advance_type: Advance Type
+    product_type: Product Type
   datepicker:
     range:
       date_to_current: "%{date} to date"
@@ -207,6 +207,19 @@ en:
             email_confirmation:
               blank: You must confirm your email address.
               confirmation: Confirmation email address does not match.
+            password:
+              non_atomic: You can't change a password and other attributes at the same time.
+              too_short:
+                one: Passwords must be at least one character long.
+                other: Passwords must be at least %{count} characters long.
+              capital_letter_needed: Passwords must contain at least one capital letter.
+              lowercase_letter_needed: Passwords must contain at least one lowercase letter.
+              number_needed: Passwords must contain at least one number.
+              symbol_needed: "Passwords must contain at least symbol (!@#$%*)."
+              confirmation: Passwords do not match.
+              ldap_update_failed: We failed to update your password. Most likely you used a password that was used before.
+            password_confirmation:
+              confirmation: Passwords do not match.
   user_roles:
     authorized_signer: Authorized Signer
     all_authorizations: All Authorizations
@@ -295,6 +308,11 @@ en:
       title: Quick Advance
     quick_report:
       title: Quick Reports
+    change_password:
+      title: Change Your Password
+      instructions: "Passwords should contain at least 8 characters, including one capital letter, one number and one special character (!@#$%*). Passwords expire every 60 days. You may not reuse a password that you have used within the last eight 60-day periods."
+      password_field: New password
+      confirm_field: Re-enter new password
     two_factor:
       title: 2-Step Verification
       description: Manage authentication with your SecurID token.
@@ -377,6 +395,11 @@ en:
       title: Request Expired
       description: Sorry, the link in your password reset email has expired.
       request_again: Send a new reset password email
+    update:
+      title: Enter New Password
+      instructions: "Passwords should contain at least 8 characters, including one capital letter, one number and one special character (!@#$%*)."
+      password_field: New password
+      confirm_field: Re-enter new password
   dashboard:
     meta_title: FHLB - Dashboard
     actions:
@@ -710,96 +733,113 @@ en:
     meta_title: FHLB - Reports
     title: Reports
     shared_table_values:
-      updated_th: Updated
-      available_history_th: Available History
-      link_td: View
-    continuously: Continuously
-    twice_daily: Twice Daily
+      updated: 'Report Updated:'
+      available_history: 'Available History:'
+    updated:
+      daily_morning: '6:00 am daily'
+      intraday: Intraday
+      daily: Daily, as of the end of the prior business day
+      monthly: Monthly
+      quarterly: Quarterly
+    history:
+      current_report: Current report only
+      months: '%{months} months'
+      back_to: Back to %{date}
     share_count: # supports all CLDR rules
       one: "%{count} share"
       other: "%{count} shares"
     month_count: # supports all CLDR rules
       one: "%{count} month"
       other: "%{count} months"
-    history:
-      months18: 18 months
-      months36: 36 months
-      months12: 12 months
-      present2007: 2007-present
     price_indications:
       title: Price Indications
       current:
         title: Current
-        summary: Current price indications are subject to change. For current quotes call %{phone_number} between 7:00 am and 2:00 pm PT. Variable Rate Credit advances are available until 2:00 pm, and all other advances are generally available until 12 noon.
+        summary: Reflects the price indications published at the beginning of the day; not actual prices. Actual prices are subject to change throughout the day.
+        history: Current day only
       historical:
         title: Historical
-        summary: Historical price indications reflect the price indications posted at the beginning of the day, not actual prices.
+        summary: Reflects the price indications published at the beginning of the day,  not actual prices.
+        history: Various, depending on the credit product
     credit:
       title: Credit
+      todays_credit:
+        title: Today's Credit Activity
+        summary: Displays advances, letters of credit and investment transactions conducted today.
       advances_detail:
         title: Advances
-        summary: Your institution’s outstanding advances such as maturity, date, estimated next payment, and prepayment fee indications. The data is downloadable, and the columns can be sorted in ascending and descending order.
+        summary: Provides details regarding current outstanding advances and historical advances that were outstanding on a specific date, including maturity date, accrued interest, estimated next interest payment amount, and prepayment fee indications.
       interest_rate:
         title: Interest Rate Resets
-        summary: Shows advances with an interest rate reset on the effective date.
+        summary: Displays outstanding advances with an interest rate reset on the effective date, including Open VRC Advances, even when the rate has not changed.
       letters_of_credit:
         title: Letters of Credit
-        summary: Details any outstanding letters of credit.
+        summary: Provides details regarding outstanding letters of credit, including current par, annual maintenance charge, and maturity date.
       forward_commitments:
         title: Forward Commitments
-        summary: Shows all committed advances and their future funding.
+        summary: Displays committed advances and their future funding dates.
       parallel_shift:
         title: Putable Advance Parallel Shift Sensitivity Analysis
-        summary: A measure of held assets’ price-sensitivity given a specified shift in rates.
+        summary: Provides a static measure of a Putable Advance’s price sensitivity given specific parallel shifts in interest rates. Valuations are derived using proprietary pricing models and estimates and assumptions about relevant future market conditions.
     collateral:
       title: Collateral
       borrowing_capacity:
         title: Borrowing Capacity
-        summary: Covers both the Standard Credit Program and the Securities-Backed Credit Program. The loan collateral data in the Standard Credit section of the report is updated during the day to reflect the processing of new MCUs.
+        summary: Includes total and remaining borrowing capacity for both the Standard and SBC Credit Programs. Mortgage loan collateral data, except for Market Value, is updated during the day to reflect processing of new MCUs.
+        updated: Intraday for newly processed MCU data, except Market Value; other data as of the end of the prior business day
       mcu:
         title: MCU Status
-        summary: Shows data from the most recently processed MCU from your institution, including summary information and detailed information on rejected loans and loan data inconsistencies.
+        summary: Provides data from your institution's most recently processed MCU, including information about total loans submitted, newly pledged or reported loans, rejected loans, and loans depledged or not reported. A more detailed report is emailed to your institution.
+        updated: Intraday, after an MCU is processed
     capital_stock:
       title: Capital Stock
-      trial_balance:
-        title: Capital Stock Trial Balance
-        summary: Shows all shares owned as of a specific day.
       activity:
         title: Capital Stock Activity Statement
-        summary: Shows all stock activity for a specified period.
+        summary: Provides stock activity for a specified period and shares owned as of a specified date.
+      trial_balance:
+        title: Capital Stock Trial Balance
+        summary: This report shows all shares owned as of a specific day and is updated at the end of each business day.
       capital_stock_and_leverage:
         title: Capital Stock Position and Leverage Statement
-        summary: ''
+        summary: Includes stock owned, minimum and activity-based stock requirements, stock excess/deficiency, surplus stock, remaining stock, and remaining leverage.
       dividend_statement:
         title: Dividend Transaction Statement
-        summary: Includes the date the last dividend was paid, the dividend rate, the number and amount of shares received, and the amount of each cash dividend paid.
-    settlement:
-      title: Settlement/Transaction Account (STA)
-      account:
-        title: Settlement/Transaction Account (STA)
-        summary: The monthly interest earned on the STA posts on the first business day of the following month.
+        summary: Includes the most recent dividend payment date, dividend rate, amount of cash dividend paid, and detailed dividend calculation for each certificate owned during the dividend period.
     securities:
       title: Securities
       transactions:
         title: Securities Transaction
-        summary: Reflects transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm on the settlement day. The final report reflects all transactions that have settled that day and is generally available at the end of the business day.
+        summary: Preliminary report reflects transactions settled as of 11:30 am. Final report reflects all transactions settled during the day.
+        updated: 'Twice daily: preliminary report is available at approximately 1:00 pm, and the final report is available at the end of the business day'
+        history: Current report only, either the preliminary report or the final report
       cash_projections:
         title: Cash Projections
-        summary: Lists securities transactions that the custodian anticipates posting to your account over the next five days. The report reflects estimated information as of the close of business on the previous business day and is available at the beginning of the current business day.
+        summary: Lists securities transactions that the custodian anticipates posting to your account over the next five days.
       current:
         title: Current Securities Position
-        summary: Provides totals and summaries for pledged and unpledged securities as of the current day. The report is updated throughout the day and reflects changes in your securities position.
+        summary: Provides summaries and totals for pledged and unpledged securities as of the current day.
       monthly:
         title: Monthly Securities Position
-        summary: Provides totals and summaries for pledged and unpledged securities as of the prior monthend. The report reflects securities information as of the close of business on the last business day of the month and is generally available one business day following monthend.
+        summary: Provides summaries and totals for pledged and unpledged securities as of the prior monthend.
+        updated: Monthly, 1 business day following monthend
       services_monthly:
         title: Securities Services Monthly Statement
-        summary: Provides a breakdown of the securities services fees that will be debited from your institution’s Settlement/Transaction Account on the last business day of the month. It is updated for the prior month approximately five to seven days before monthend.
-    authorizations:
-      title: Authorizations
-      user:
-        title: User Authorizations
-        summary: Provides a summary of authorizations granted to bank users.
+        summary: Provides securities services fees for the prior month, which will be debited from your institution’s Settlement/Transaction Account on the last business day of the month.
+        updated: Monthly, approximately 5 to 7 days before monthend
+    account:
+      title: Your Account
+      account_summary:
+        title: Account Summary
+        summary: Provides a summary of your institution's Financing Availability, Credit Outstanding, Borrowing Capacity, and Capital Stock Position and Leverage.
+        updated: Intraday, except for Market Value and Total Borrowing Capacity, which are as of close of business on the prior business day
+      authorizations:
+        title: Authorizations
+        summary: Provides a summary of authorizations granted to individual member users.
+      settlement_transaction_account:
+        title: Settlement/Transaction Account (STA)
+        summary: Displays debits and credits based on your institution's activity with the Bank. Interest earned is provided on the first business day of the following month.
+        updated: Daily for current month, as of the end of the prior business day
+        history: Current month to date. Prior statements are available for the previous 6 months.
     account_summary:
       title: Account Summary
       institution_details:
@@ -1147,6 +1187,8 @@ en:
     prepayment_fee_notice: Prepayment fee indications are not based on rates as of today. Please call %{phone_number} by 10:30 a.m. to obtain a prepayment fee indication as of today.
     merger_notice: In the event of a merger, this report may not include all advances from the acquired institution.
     advances_and_securities_agreement_notice: Nothing in this report in any way amends, modifies, or waives the terms of your Advances and Security Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issued pursuant to that Agreement. The Bank expressly disclaims any and all liability that may arise from your institution's reliance on any information contained in, or errors or omissions made with respect to, this report. Please call Operations at %{phone_number} if you have any questions.
+    data_notice: Data reflects activty as on the date and time shown above.
+    refresh_notice: Refresh your browser for current information.
     pdf_footer: "%{report_name} as of %{date}"
     pdf_footer_range: "%{report_name} %{date}"
     anticipated_transactions: The records included in this report are anticipated transactions for the listed settlement dates. These transactions are subject to change prior to final settlement. Net adjustment credit and/or debit amounts will be posted to your STA on the settlement date.
@@ -1201,7 +1243,6 @@ en:
     advances:
       title: Advances
       ace: Advances for Community Enterprise (ACE)
-
       amortizing:
         title: Amortizing Advance
         description: Use the Amortizing Advance to match the scheduled amortization characteristics of any fixed rate asset.
@@ -1226,7 +1267,28 @@ en:
         amortization_schedule:
           title: Amortization Schedule
           schedule: Can be designed to match most amortization schedules for a variety of fixed rate loans. The borrower specifies the amortization rate of the advance, which determines the amortization schedule.
-
+          description: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the Statement of Authority: Advances with Partial Prepayment Symmetry (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
+      callable:
+        title: Callable Advance
+        description: Use the Callable Advance—with built-in prepayment options—to reduce interest rate risk and prepayment risk at minimal added cost. You may "call" (repay) the advance at predetermined dates without paying the standard prepayment fee.
+        uses:
+          fixed: Match-fund fixed rate mortgages
+          short: Match-fund short-term loans
+          address: Address the problem of uncertain principal repayments
+          manage: Manage prepayment risk of your assets
+        advantages:
+          fee: No prepayment fee with notification on predetermined dates
+          hedge: Hedge against asset prepayment risk
+          risk: Reduce risks associated with declining interest rate environments
+          flexibility: Built-in long-term flexibility
+        max_term: 10 years
+        interest_rate: Fixed for the entire term of the advance
+        interest_day_count: Actual/360
+        interest_payment_frequency: Quarterly and at repayment
+        call_dates: You specify the initial call date, with quarterly call dates thereafter.
+        call_feature: The advance may be repaid on any call date without a prepayment fee, provided that the Bank receives proper call notice. The Bank will charge a prepayment fee if proper call notice is not received by the Bank or for prepayment on a date other than a designated call date.
+        call_notice: At least 9 business days but no more than 60 calendar days before the specified call date.
+        prepayment_features_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=\"%{url}\">Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       arc_embedded:
         title: ARC Advance with Embedded Options
         description: Use ARC Advances with Embedded Options to match the interest rate and payment characteristics of your adjustable rate loan portfolio while managing your interest rate risk exposure.
@@ -1259,8 +1321,6 @@ en:
           description: If the interest rate determined on any rate reset date or, if applicable, on the scheduled funding date, is less than the amount of the unamortized premium (the annuitized value of the option premium, if not paid upfront), the interest rate for the accrual period that begins on that rate reset date will be equal to the unamortized premium. The Bank will not be obligated to pay the borrower any amount relating to the application of a negative interest rate to the remaining principal amount of the advance.
         prepayment_features:
           description: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the Statement of Authority: Advances with Partial Prepayment Symmetry (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
-      callable: Callable Advance
-      choice_libor: Choice LIBOR ARC Advance
       cip: Community Investment Program (CIP)
       auction_indexed: DN Auction-Indexed Advance
       arc:
@@ -1473,7 +1533,31 @@ en:
           interest_strike_rate: "The index rate and strike rate are established at the time the advance is made. The index rate is typically 3-month LIBOR."
           prepayment_features_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=%{url}>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
           special_notice: "The Knockout Advance has a complex risk profile and may be an inappropriate product for some institutions. The expected maturity of the Knockout Advance may contract or extend adversely to market movements, and the Bank makes no representations as to the expected life of the advance. This information is not intended as investment advice. The decision to obtain a Knockout Advance and the analysis of how it may fit into a borrower’s financial or business strategy remain solely the borrower’s responsibility.\n\nNotwithstanding any lockout period for the knockout option, the Bank reserves all of its rights under the Advances and Security Agreement, including, without limitation, its right to terminate the Knockout Advance and accelerate repayment of the advance and its right to liquidate collateral pledged by the borrower as security for the Knockout Advance at any time upon the occurrence of an event of default described in the Advances and Security Agreement."
-      mpf: Mortgage Partnership Finance (MPF) Program
+      mpf:
+        title: "Mortgage Partnership Finance (MPF) Program"
+        description_html: "The Mortgage Partnership Finance&#174; (MPF&#174;) Program offers members a competitive alternative to traditional investors when selling residential mortgage loans in the secondary market. The Bank offers the following MPF products:"
+        description_list:
+          mpf_original_html: "<a href=%{url}>MPF Original</a>: The Bank purchases conventional, conforming fixed rate mortgage loans and holds them in the Bank’s portfolio."
+          mpf_government_html: "<a href=%{url}>MPF Government</a>: The Bank purchases FHA/VA-insured mortgage loans and holds them in the Bank’s portfolio."
+          mpf_xtra_html: "<a href=%{url}>MPF Xtra</a>&#174;: The Bank facilitates the purchase of conventional, conforming fixed rate mortgage loans for concurrent sale to Fannie Mae."
+          mpf_direct_html: "<a href=%{url}>MPF Direct</a>: The Bank facilitates the purchase of jumbo fixed rate mortgage loans for concurrent sale into the secondary market through an exclusive arrangement with Redwood Trust, Inc."
+        member_eligibility_html: "To participate in the MPF Program, a member must be approved as a Participating Financial Institution (PFI) by the Bank. The member must submit a <a href=%{url}>PFI Application</a> and meet the loan origination, servicing, reporting, credit, and collateral standards established for the MPF Program. Eligibility criteria include:"
+        eligibility_list:
+          creditworthiness: "Overall satisfactory creditworthiness according to the Bank’s credit quality standards, including an acceptable exam rating from the member's primary regulator, a \"Well Capitalized\" PCA status, satisfactory asset quality, and positive net income in four of the most recent six quarters"
+          lending: Acceptable lending policies, procedures, and practices
+          servicing: The ability to originate and service first-lien, one- to four-family residential mortgage loans in accordance with GSE guidelines for loans typically sold in the secondary market
+          mpf_direct: For MPF Direct, the ability to manually underwrite loans in accordance with MPF Direct guidelines
+        agreement_header: MPF Participating Financial Institution Agreement
+        agreement_html: "Members approved by the Bank to participate in the MPF Program will be required to execute a Participating Financial Institution Agreement (PFI Agreement). The PFI Agreement sets forth the basic terms and conditions governing the PFI’s participation in the MPF Program through the Bank and incorporates additional program terms and requirements that the PFI must follow, including those established in the MPF Origination Guide and the MPF Servicing Guide. These program guides are available through the eMPF&#174; website or All-Regs&#174;."
+        enhancement_header: "Credit Enhancement: MPF Original"
+        enhancement: Under the MPF Original product, the Bank and the PFI share in the credit risk of loans purchased by the Bank. Loans sold into MPF Original are credit enhanced by the PFI, with credit enhancement fees generally paid to the PFI based on the performance of the loans. The Bank manages the liquidity, interest rate, and prepayment risks of the loans while the PFI manages the credit risk of the loans. The credit risk sharing feature of MPF Original allocates future loan losses, if any, between the PFI and the Bank after borrower equity and private mortgage insurance are depleted.
+        collateral: "The credit enhancement obligation under MPF Original must be fully secured by eligible collateral.\n\nFor all MPF products, the Bank may require loans sold that become subject to repurchase or subject to an indemnification agreement to be secured by eligible collateral."
+        servicing_header: Servicing of MPF Loans
+        servicing: Under most MPF product types, the PFI may sell loans servicing retained or servicing released. Loans sold under the MPF Direct product must be sold servicing released.
+        remittance: Remittance options for MPF loans may include actual/actual, actual/actual single remittance, and scheduled/scheduled.
+        training_html: "After a member is approved as a PFI, the Bank contacts the member to schedule training on MPF products, pricing, and master commitments; MPF loan delivery; use of eMPF and the MPF Guides; and MPF servicing and reporting. For MPF Direct, training on underwriting and exceptions is provided. In addition, a representative of the PFI is required to take and pass a one-hour online tutorial on MPF Pre-Closing Quality Control offered through AllRegs. For MPF Xtra, Fannie Mae Desktop Underwriter&#174; (DU&#174;) training is also required."
+        ongoing: Outstanding loans sold to the Bank under the MPF Program and held by the Bank, including loans sold under the MPF Original and MPF Plus products between 2002 and 2006, remain subject to the credit enhancement requirements in effect when the loans were sold to the Bank and to the Bank’s current collateral and capital stock requirements.
+        additional_information_html: "For more information on the MPF Program, including access to the MPF guides, visit the <a href=%{url}>MPF Program website</a>.\n\n\"Mortgage Partnership Finance,\" \"MPF,\" \"MPF Xtra,\" and \"eMPF\" are registered trademarks of the Federal Home Loan Bank of Chicago."
       ocn:
         title: Other Cash Needs (OCN) Advance
         description: The OCN Advance is a Variable Rate Credit (VRC) Advance option for members that, as a result of an unexpected development, need a short-term advance and either do not have a Financing Availability or have used it fully. In addition, the Bank, in its sole discretion, may fund an OCN Advance to cover the amount of any Settlement/Transaction Account (STA) overdraft.
@@ -1506,8 +1590,145 @@ en:
         put_dates: Typically the Put Dates are the same as the interest payment dates, after the put lockout period.
         prepayment_features_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=%{url}>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
         special_notice: "The Putable Advance has a complex risk profile and may be an inappropriate product for some institutions. The expected maturity of the Putable Advance may contract or extend adversely to market movements, and the Bank makes no representations as to (i) the expected life of the advance or (ii) the criteria behind the exercise of the Bank’s right to terminate the Putable Advance. This information is not intended as investment advice. The decision to obtain a Putable Advance and the analysis of how it may fit into a borrower’s financial or business strategy remain solely the borrower’s responsibility.\n\nNotwithstanding any lockout period for exercising its right to terminate the Putable Advance, the Bank reserves all of its rights under the Advances and Security Agreement, including, without limitation, its right to terminate the Putable Advance and accelerate repayment of the advance and its right to liquidate collateral pledged by the borrower as security for the Putable Advance at any time upon the occurrence of an event of default described in the Advances and Security Agreement.\n\n* If the period end date falls on a non-business day, the period end date will be the first following business day, unless that day falls in the next calendar month, in which case the period end date will be the first preceding business day."
-      sbc: Securities-Backed Credit (SBC) Program
-      vrc: Variable Rate Credit (VRC) Advance
+      vrc:
+        title: Variable Rate Credit (VRC) Advance
+        description: Use the VRC Advance to obtain overnight funding for daily cash needs. The VRC Advance may be renewed on a daily basis at prevailing rates, at the Bank's discretion. Funds may be repaid at any time, without a fee, with 1 business day’s notice.
+        uses:
+          manage: Manage liquidity
+          obtain: Obtain low-cost, market-rate funding
+          access: Access immediate funds for short-term cash needs
+          offset: Offset temporary deposit outflows
+        advantages:
+          same_day: Same-day access
+          flexible: Flexible maturity
+        maturity: Overnight or open
+        interest_rate: The initial interest rate is set on the funding date. VRC Advances are repriced daily.
+        interest_day_count: "Actual/Actual (Actual/360 for Securities-Backed Credit Program)"
+        interest_payment_frequency: "Overnight: At maturity, Open: At monthend and at repayment"
+        repayment: The Bank must receive notice of intention to repay by 2 p.m. on the preceding business day.
+      sbc:
+        title: Securities-Backed Credit (SBC) Program
+        description: Under the SBC Program, you can pledge your high-grade securities as collateral to the Bank. Interest rates on SBC advances may be lower than rates on advances offered under the Bank's Standard Credit Program and competitive with rates in the securities repurchase market.
+        uses:
+          secure: Secure short- and long-term borrowings with a variety of securities collateral
+          action: Access an attractive alternative to securities repurchase transactions with dealers
+          leverage: Leverage securities collateral more effectively
+        advantages:
+          pricing: Pricing may be competitive with Agency securities repurchase transactions
+          calls: You may be able to hold a smaller number of securities in portfolio to meet margin calls
+          substitute: Substitute like or better securities collateral at any time
+        maximum_term: Depends on the type of credit product
+        credit_products_available:
+          fixed: Fixed Rate Credit (FRC) Advance
+          frc: FRC Advance with Embedded Cap
+          amortizing: Amortizing Advance
+          callable: Callable Advance
+          putable: Putable Advance
+          knockout: Knockout Advance
+          variable: Variable Rate Credit Advance
+          arc: Adjustable Rate Credit (ARC) Advance
+          arc_embedded: ARC Advance with Embedded Options
+        interest_rate: "Interest rates may be lower than rates on advances under the Bank's Standard Credit Program and competitive with rates in the securities repurchase market."
+        interest_day_count: Actual/360 for most credit products and 30/360 for Amortizing Advances.
+        interest_payment_frequency: For fixed rate advances with terms of 180 days or less, interest is payable at maturity. For fixed rate advances with terms of more than 180 days, interest is payable semiannually and at maturity. For adjustable rate advances, interest is payable at repricing and at maturity.
+        eligible_capacity: The following table lists the eligible securities types and borrowing capacities for the SBC Program for all members except insurance companies. Not all securities of each type are eligible; please review the Bank's Collateral Guide or contact the Bank for specific eligibility information.
+        column1:
+          eligible_securities: Eligible Securities
+          treasury:
+            title: Treasury
+            t_bills: Treasury Bills
+            t_notes_less: "Treasury Notes and Bonds (remaining maturity < 5yrs)"
+            t_notes_greater: "Treasury Notes and Bonds (remaining maturity ≥ 5yrs)"
+          agency:
+            title: Agency
+            discount_notes: Discount Notes
+            debenture_notes: "Debenture Notes & Bonds"
+            agency_mbs: Agency MBS Passthrough Securities
+            gnma: GNMA Home Equity Conversion Mortgage (HECM) MBS Passthrough Securities
+            agency_cmo: Agency CMOs (FHLMC, FNMA, GNMA)
+            gnma_hecm: GNMA HECM Real Estate Mortgage Investment Conduit (REMIC) Securities
+            agency_cmo_low_html: "Agency CMO Accrual Bonds (Z-tranches) with low price sensitivity<sup>1</sup>"
+            agency_cmo_high_html: "Agency CMO Accrual Bonds (Z-tranches) with high price sensitivity<sup>1</sup>"
+            structured_notes: Structured Notes
+            index_notes: "Index Amortization Notes (P.S.A. Linked Notes)"
+            small_business: Small Business Administration Pools
+            sba_cdc: SBA-Guaranteed CDC Participation Certificates
+            sba_sbic: SBA-Guaranteed SBIC Debenture Participation Certificates
+            fdic: FDIC Structured Sale Guaranteed Notes
+            ncua: NCUA Guaranteed Notes
+          public:
+            title: Private Label Non-Agency MBS
+            publicly_registered: Publicly Registered
+            aaa_senior_residential_mbs: AAA Senior Residential MBS
+            aa_senior_residential_mbs: AA Senior Residential MBS
+            aaa_sub_mezz_residential_mbs: AAA Subordinated and Mezzanine Residential MBS
+            aa_sub_mezz_residential_mbs: AA Subordinated and Mezzanine Residential MBS
+            aaa_senior_home: AAA Senior Home Equity ABS
+            aaa_sub_mezz_home: AAA Subordinated and Mezzanine Home Equity ABS
+            aa_sub_mezz_home: AA Subordinated and Mezzanine Home Equity ABS
+            aaa_senior_commercial: AAA Senior Commercial MBS
+            aaa_sub_mezz_commercial: AAA Subordinated and Mezzanine Commercial MBS
+          private:
+            title: Private Label Non-Agency MBS
+            private_placement: Private Placement – Book Entry or Physical Delivery
+            aaa_senior_residential_mbs: AAA Senior Residential MBS
+            aa_senior_residential_mbs: AA Senior Residential MBS
+          muni_bonds: AAA or AA Mortgage-Related Municipal Bonds
+          mutual_fund_shares: Mutual Fund Shares
+          bank_term_deposits: Bank Term Deposits
+        column2:
+          borrowing_capacity: Borrowing Capacity as a Percentage of Market Value
+          treasury:
+            t_bills: "98"
+            t_notes_less: "98"
+            t_notes_greater: "95"
+          agency:
+            discount_notes: "97"
+            debenture_notes: "97"
+            agency_mbs: "95"
+            gnma: "93"
+            agency_cmo: "93"
+            gnma_hecm: "93"
+            agency_cmo_low: "93"
+            agency_cmo_high: "55"
+            structured_notes: "90"
+            index_notes: "95"
+            small_business: "93"
+            sba_cdc: "93"
+            sba_sbic: "93"
+            fdic: "95"
+            ncua: "95"
+          public:
+            aaa_senior_residential_mbs: "80"
+            aa_senior_residential_mbs: "70"
+            aaa_sub_mezz_residential_mbs: "70"
+            aa_sub_mezz_residential_mbs: "55"
+            aaa_senior_home: "70"
+            aaa_sub_mezz_home: "65"
+            aa_sub_mezz_home: "55"
+            aaa_senior_commercial: "80"
+            aaa_sub_mezz_commercial: "75"
+          private:
+            aaa_senior_residential_mbs: "75"
+            aa_senior_residential_mbs: "65"
+          muni_bonds: "80"
+          mutual_fund_shares: "75"
+          bank_term_deposits: "100"
+        agency_cmo_html: "Agency CMO accrual bonds (Z-tranches) with low price sensitivity are identified as those that pass the Federal Financial Institutions Examination Council (FFIEC) High Risk Security test. Agency CMO accrual bonds (Z-tranches) with high price sensitivity are identified as those that do not pass the FFIEC High Risk Security test."
+        market_value: The market value for securities pledged as collateral under the SBC Program is determined by the Bank on the basis of market prices (bid side) for the same or comparable securities, if available, or as otherwise determined by the Bank. A readily available price is a precondition for acceptance of a security as collateral. This means, in general, that the security is either priced by a third-party pricing service or that its cash flow is modeled on Bloomberg or Yield Book.
+        private_label_non_mbs: If the custodian of the notes supporting a non-Agency MBS transaction is the Issuer or a related party and the notes have not been endorsed to the trustee by name, the Bank requires that the party that has control over the notes (as determined by the Bank) must have a long-term debt rating of at least BBB. The Bank will monitor the creditworthiness of the entity that has control over the notes; if the entity's credit rating falls below BBB, the Bank will require the member to substitute collateral in place of the MBS unless the underlying notes have been endorsed or delivered to the trustee.
+        review_ratings: The Bank will periodically re-evaluate non-Agency securities and municipal bonds to validate or establish the ratings at intervals deemed appropriate by the Bank.
+        borrowing_market_securities: If a member pledges loan collateral to the Bank, the member may be able to borrow up to 100% of the current market value of its eligible securities pledged under the SBC Program by using the borrowing capacity of that loan collateral to meet its margin requirements. If a member pledges only securities collateral, the member may borrow an amount equal to the borrowing capacity assigned to its pledged securities collateral.
+        bms_list:
+          margin_call: The Bank manages the margin calls for SBC securities collateral on an aggregate basis for each borrower.
+          additional_pledge_reason: "Loan collateral may be used to secure up to 10% of the amount of all SBC advances outstanding. The borrower will be required to pledge additional eligible securities if:"
+          falls_below: "the borrower’s borrowing capacity for securities pledged under the SBC Program falls below 90% of the current amount of the borrower's total SBC advances outstanding, or"
+          sufficient_excess: the borrower’s loan collateral does not have sufficient excess borrowing capacity.
+          current_borrowing: When the current borrowing capacity of a borrower's SBC securities collateral falls below 90% of its SBC advances outstanding, the borrower is required to pledge additional eligible securities under the SBC Program to increase the current borrowing capacity of SBC securities collateral to 95% or greater of the total amount of the borrower’s SBC advances outstanding.
+          margin_requirement: Loan collateral that is being used to meet a borrower's margin requirement under the SBC Program is not available to collateralize other Bank credit.
+          not_release: The Bank will not release securities collateral pledged under the SBC Program if the borrower is using loan collateral to meet the margin requirements.
+        delivery: All securities pledged to the Bank must be delivered to the Bank's securities custodian, Citibank, N.A. (Citibank).
+        substitution: Borrowers may substitute like or better securities collateral, in the Bank's discretion, subject to the Bank's standard securities services fees.
     standby_loc:
       title: Standy Letters of Credit
       description_html: A <a href=%{url}>standby letter of credit</a> is an obligation of the Bank to make payment to a third party if a member or housing associate does not perform its underlying obligation to that third party.
@@ -1520,23 +1741,45 @@ en:
     section_headings:
       use: Use
       uses: Uses
+      additional_information: Additional Information
       advantage: Key Advantage
       advantages: Key Advantages
+      collateral_requirements: Collateral Requirements
       features: Key Features
       last_modified: "Last Modified: %{date}"
       background: Background
+      member_eligibility: Member Elegibility
+      ongoing_requirements: Ongoing Requirements
       product_description: Product Description
+      remittance: Remittance Options
+      training: Training
     common_key_features:
       availability: Availability
+      borrowing_market_securities: "100% Borrowing on the Market Value of Securities"
+      delivery: Delivery
+      interest_day_count: Interest Day Count
+      interest_rate: Interest Rate
+      interest_day_count: Interest Day Count
+      interest_payment_frequency: Interest Payment Frequency
+      credit_products_available: Credit Products Available
+      eligible_capacity: Eligible Securities and Borrowing Capacity
+      market_value: Market Value
+      maximum_term: Maximum Term
       minimum_term: Minimum Term
       minimum_interest_rate_convention: Minimum Interest Rate Convention
       option_types: Option Types
+      prepayment_features: Prepayment Features
+      private_label_non_mbs: Private Label Non-Agency MBS
+      review_ratings: Review of Ratings
+      substitution: Substitution
+      term: Term
       termination_option: Termination option
       termination_option_date: Termination Option Date
       termination_option_notice: Termination Option Notice
       alternate_initial_index: Alternate Initial Index
       alternate_repricing_alt_rate: Alternate Repricing Index and Alternate Rate Reset Date
       blackout_auction: Blacked-out Auctions
+      call_dates: Call Dates
       call_feature: Call Feature
       call_notice: Call Notice
       call_option_dates: Call Option Dates
@@ -1548,6 +1791,7 @@ en:
       special_notice: Special Notice
       term: Term
       total_max_per_borrow: Total Maximum Amount Per Borrower
+      maturity: Maturity
       maximum_term: Maximum Term
       maximum_amount_per_auction: Maximum Amount Per Auction
       minimum_amount_per_auction: Minimum Amount Per Auction

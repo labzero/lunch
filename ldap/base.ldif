@@ -35,6 +35,21 @@ primaryGroupID: 513
 userAccountControl: 512
 mail: local-non-signer@example.com
 
+# local user with an expired password
+dn: sAMAccountName=local-expired,dc=fhlbsf-i,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Local User Expired Password
+sn: User Expired Password
+givenname: Local
+sAMAccountName: local-expired
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+userAccountControl: 512
+mail: local-expired@example.com
+passwordExpired: true
+
 # FCN-MemberSite-AccessManagers-R group
 dn: CN=FCN-MemberSite-AccessManagers-R,DC=fhlbsf-i,DC=com
 cn: FCN-MemberSite-AccessManagers-R

@@ -2,6 +2,200 @@
 http_interactions:
 - request:
     method: get
+    uri: http://appservices/MarketDataServicesAuth/MarketDataService.svc?wsdl
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - private
+      Content-Type:
+      - text/xml; charset=UTF-8
+      Server:
+      - Microsoft-IIS/7.5
+      X-Aspnet-Version:
+      - 2.0.50727
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Wed, 09 Sep 2015 17:25:42 GMT
+      Content-Length:
+      - '3299'
+    body:
+      encoding: UTF-8
+      string: <?xml version="1.0" encoding="utf-8"?><wsdl:definitions name="MarketDataService"
+        targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:i1="http://fhlbsf.com/reports/contract/v1"
+        xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:tns="http://tempuri.org/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract"
+        xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+        xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+        xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:i0="http://fhlbsf.com/contract/marketdata/v1"
+        xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"
+        xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+        xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"><wsdl:import namespace="http://fhlbsf.com/contract/marketdata/v1"
+        location="http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc?wsdl=wsdl0"/><wsdl:import
+        namespace="http://fhlbsf.com/reports/contract/v1" location="http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc?wsdl=wsdl1"/><wsdl:types/><wsdl:binding
+        name="ClearUsernameBinding_IMarketDataService" type="i0:IMarketDataService"><soap:binding
+        transport="http://schemas.xmlsoap.org/soap/http"/><wsdl:operation name="getMarketData"><soap:operation
+        soapAction="http://fhlbsf.com/contract/marketdata/v1/IMarketDataService/getMarketData"
+        style="document"/><wsdl:input name="MarketDataRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="MarketDataResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation><wsdl:operation
+        name="fakeMarketData"><soap:operation soapAction="http://fhlbsf.com/contract/marketdata/v1/IMarketDataService/fakeMarketData"
+        style="document"/><wsdl:input><soap:body use="literal"/></wsdl:input><wsdl:output><soap:body
+        use="literal"/></wsdl:output></wsdl:operation></wsdl:binding><wsdl:binding
+        name="ClearUsernameBinding_IPricingIndicationsService" type="i1:IPricingIndicationsService"><soap:binding
+        transport="http://schemas.xmlsoap.org/soap/http"/><wsdl:operation name="getPricingIndications"><soap:operation
+        soapAction="http://fhlbsf.com/reports/contract/v1/IPricingIndicationsService/getPricingIndications"
+        style="document"/><wsdl:input name="PricingIndicationsRequest"><soap:body
+        use="literal"/></wsdl:input><wsdl:output name="PricingIndicationsResponse"><soap:body
+        use="literal"/></wsdl:output></wsdl:operation></wsdl:binding><wsdl:service
+        name="MarketDataService"><wsdl:port name="ClearUsernameBinding_IMarketDataService"
+        binding="tns:ClearUsernameBinding_IMarketDataService"><soap:address location="http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc"/></wsdl:port><wsdl:port
+        name="ClearUsernameBinding_IPricingIndicationsService" binding="tns:ClearUsernameBinding_IPricingIndicationsService"><soap:address
+        location="http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc"/></wsdl:port></wsdl:service></wsdl:definitions>
+    http_version: 
+  recorded_at: Wed, 09 Sep 2015 17:25:42 GMT
+- request:
+    method: post
+    uri: http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc
+    body:
+      encoding: UTF-8
+      string: <?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:v1="http://fhlbsf.com/schema/msg/marketdata/v1"
+        xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+        xmlns:v11="http://fhlbsf.com/schema/canonical/common/v1" xmlns:v12="http://fhlbsf.com/schema/canonical/marketdata/v1"
+        xmlns:v13="http://fhlbsf.com/schema/canonical/shared/v1"><soapenv:Header><wsse:Security><wsse:UsernameToken><wsse:Username>FHLBSF\\svcsys_fobo_mdtest</wsse:Username><wsse:Password>RiYPHJfc9g2L6eAisIQX3QWu4DJs75</wsse:Password></wsse:UsernameToken></wsse:Security></soapenv:Header><soapenv:Body><v1:marketDataRequest><v11:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v11:caller><v1:requests><v1:fhlbsfMarketDataRequest><v1:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v1:caller><v1:marketData><v12:name>COF_FIXED</v12:name><v12:pricingGroup><v12:id>Live</v12:id></v12:pricingGroup><v12:data><v12:FhlbsfDataPoint><v12:tenor><v12:interval><v13:frequency>1</v13:frequency><v13:frequencyUnit>D</v13:frequencyUnit></v12:interval></v12:tenor></v12:FhlbsfDataPoint></v12:data></v1:marketData></v1:fhlbsfMarketDataRequest><v1:fhlbsfMarketDataRequest><v1:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v1:caller><v1:marketData><v12:name>COF_3L</v12:name><v12:pricingGroup><v12:id>Live</v12:id></v12:pricingGroup><v12:data><v12:FhlbsfDataPoint><v12:tenor><v12:interval><v13:frequency>1</v13:frequency><v13:frequencyUnit>D</v13:frequencyUnit></v12:interval></v12:tenor></v12:FhlbsfDataPoint></v12:data></v1:marketData></v1:fhlbsfMarketDataRequest><v1:fhlbsfMarketDataRequest><v1:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v1:caller><v1:marketData><v12:name>ADVANCE_BENCHMARK</v12:name><v12:pricingGroup><v12:id>Live</v12:id></v12:pricingGroup><v12:data><v12:FhlbsfDataPoint><v12:tenor><v12:interval><v13:frequency>1</v13:frequency><v13:frequencyUnit>D</v13:frequencyUnit></v12:interval></v12:tenor></v12:FhlbsfDataPoint></v12:data></v1:marketData></v1:fhlbsfMarketDataRequest><v1:fhlbsfMarketDataRequest><v1:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v1:caller><v1:marketData><v12:name>MU_WL</v12:name><v12:pricingGroup><v12:id>Live</v12:id></v12:pricingGroup><v12:data><v12:FhlbsfDataPoint><v12:tenor><v12:interval><v13:frequency>1</v13:frequency><v13:frequencyUnit>D</v13:frequencyUnit></v12:interval></v12:tenor></v12:FhlbsfDataPoint></v12:data></v1:marketData></v1:fhlbsfMarketDataRequest><v1:fhlbsfMarketDataRequest><v1:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v1:caller><v1:marketData><v12:name>MU_AGCY</v12:name><v12:pricingGroup><v12:id>Live</v12:id></v12:pricingGroup><v12:data><v12:FhlbsfDataPoint><v12:tenor><v12:interval><v13:frequency>1</v13:frequency><v13:frequencyUnit>D</v13:frequencyUnit></v12:interval></v12:tenor></v12:FhlbsfDataPoint></v12:data></v1:marketData></v1:fhlbsfMarketDataRequest><v1:fhlbsfMarketDataRequest><v1:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v1:caller><v1:marketData><v12:name>MU_AA</v12:name><v12:pricingGroup><v12:id>Live</v12:id></v12:pricingGroup><v12:data><v12:FhlbsfDataPoint><v12:tenor><v12:interval><v13:frequency>1</v13:frequency><v13:frequencyUnit>D</v13:frequencyUnit></v12:interval></v12:tenor></v12:FhlbsfDataPoint></v12:data></v1:marketData></v1:fhlbsfMarketDataRequest><v1:fhlbsfMarketDataRequest><v1:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v1:caller><v1:marketData><v12:name>MU_AAA</v12:name><v12:pricingGroup><v12:id>Live</v12:id></v12:pricingGroup><v12:data><v12:FhlbsfDataPoint><v12:tenor><v12:interval><v13:frequency>1</v13:frequency><v13:frequencyUnit>D</v13:frequencyUnit></v12:interval></v12:tenor></v12:FhlbsfDataPoint></v12:data></v1:marketData></v1:fhlbsfMarketDataRequest></v1:requests></v1:marketDataRequest></soapenv:Body></soapenv:Envelope>
+    headers:
+      Soapaction:
+      - '"http://fhlbsf.com/contract/marketdata/v1/IMarketDataService/getMarketData"'
+      Content-Type:
+      - text/xml;charset=UTF-8
+      Content-Length:
+      - '3950'
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - private
+      Content-Type:
+      - text/xml; charset=utf-8
+      Server:
+      - Microsoft-IIS/7.5
+      X-Aspnet-Version:
+      - 2.0.50727
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Wed, 09 Sep 2015 17:25:42 GMT
+      Content-Length:
+      - '12231'
+    body:
+      encoding: UTF-8
+      string: <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"><s:Header><o:Security
+        s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"><u:Timestamp
+        u:Id="_0"><u:Created>2015-09-09T17:25:42.192Z</u:Created><u:Expires>2015-09-09T17:30:42.192Z</u:Expires></u:Timestamp></o:Security></s:Header><s:Body><marketDataResponse
+        xmlns="http://fhlbsf.com/schema/msg/marketdata/v1"><responses xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><fhlbsfMarketDataResponse><description/><requestTime>2015-09-09T10:25:42.1927461-07:00</requestTime><transactionResult>Success</transactionResult><marketData
+        xmlns:a="http://fhlbsf.com/schema/canonical/marketdata/v1"><a:FhlbsfMarketData><a:dayCountBasis>ACT/ACT</a:dayCountBasis><a:paymentFrequency
+        xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>0</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:paymentFrequency><a:snapTime>2015-09-09T10:25:42.1927461-07:00</a:snapTime><a:valueUnit
+        i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide i:nil="true"/><a:businessDayConvention
+        i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:name>COF_FIXED</a:name><a:pricingGroup><a:id>Live</a:id></a:pricingGroup><a:data><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2015-09-30T10:25:42.1927461-07:00</a:maturityDate></a:tenor><a:value>0.96</a:value></a:FhlbsfDataPoint></a:data></a:FhlbsfMarketData></marketData></fhlbsfMarketDataResponse><fhlbsfMarketDataResponse><description/><requestTime>2015-09-09T10:25:42.1927461-07:00</requestTime><transactionResult>Success</transactionResult><marketData
+        xmlns:a="http://fhlbsf.com/schema/canonical/marketdata/v1"><a:FhlbsfMarketData><a:dayCountBasis>ACT/360</a:dayCountBasis><a:paymentFrequency
+        xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>0</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:paymentFrequency><a:snapTime>2015-09-09T10:25:42.1927461-07:00</a:snapTime><a:valueUnit
+        i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide i:nil="true"/><a:businessDayConvention
+        i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:name>COF_3L</a:name><a:pricingGroup><a:id>Live</a:id></a:pricingGroup><a:data><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2016-03-07T10:25:42.1927461-08:00</a:maturityDate></a:tenor><a:value>-24</a:value></a:FhlbsfDataPoint></a:data></a:FhlbsfMarketData></marketData></fhlbsfMarketDataResponse><fhlbsfMarketDataResponse><description/><requestTime>2015-09-09T10:25:42.1927461-07:00</requestTime><transactionResult>Success</transactionResult><marketData
+        xmlns:a="http://fhlbsf.com/schema/canonical/marketdata/v1"><a:FhlbsfMarketData><a:dayCountBasis>ACT/360</a:dayCountBasis><a:paymentFrequency
+        xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>0</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:paymentFrequency><a:snapTime>2015-09-09T10:25:42.1927461-07:00</a:snapTime><a:valueUnit
+        i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide i:nil="true"/><a:businessDayConvention
+        i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:name>ADVANCE_BENCHMARK</a:name><a:pricingGroup><a:id>Live</a:id></a:pricingGroup><a:data><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2015-09-30T10:25:42.1927461-07:00</a:maturityDate></a:tenor><a:value>0.96</a:value></a:FhlbsfDataPoint></a:data></a:FhlbsfMarketData></marketData></fhlbsfMarketDataResponse><fhlbsfMarketDataResponse><description/><requestTime>2015-09-09T10:25:42.1927461-07:00</requestTime><transactionResult>Success</transactionResult><marketData
+        xmlns:a="http://fhlbsf.com/schema/canonical/marketdata/v1"><a:FhlbsfMarketData><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>0</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:paymentFrequency><a:snapTime>2015-09-09T10:25:42.1927461-07:00</a:snapTime><a:valueUnit
+        i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide i:nil="true"/><a:businessDayConvention
+        i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:name>MU_WL</a:name><a:pricingGroup><a:id>Live</a:id></a:pricingGroup><a:data><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2016-03-07T10:25:42.1927461-08:00</a:maturityDate></a:tenor><a:value>13</a:value></a:FhlbsfDataPoint></a:data></a:FhlbsfMarketData></marketData></fhlbsfMarketDataResponse><fhlbsfMarketDataResponse><description/><requestTime>2015-09-09T10:25:42.1927461-07:00</requestTime><transactionResult>Success</transactionResult><marketData
+        xmlns:a="http://fhlbsf.com/schema/canonical/marketdata/v1"><a:FhlbsfMarketData><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>0</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:paymentFrequency><a:snapTime>2015-09-09T10:25:42.1927461-07:00</a:snapTime><a:valueUnit
+        i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide i:nil="true"/><a:businessDayConvention
+        i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:name>MU_AGCY</a:name><a:pricingGroup><a:id>Live</a:id></a:pricingGroup><a:data><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2016-03-07T10:25:42.1927461-08:00</a:maturityDate></a:tenor><a:value>13</a:value></a:FhlbsfDataPoint></a:data></a:FhlbsfMarketData></marketData></fhlbsfMarketDataResponse><fhlbsfMarketDataResponse><description/><requestTime>2015-09-09T10:25:42.1927461-07:00</requestTime><transactionResult>Success</transactionResult><marketData
+        xmlns:a="http://fhlbsf.com/schema/canonical/marketdata/v1"><a:FhlbsfMarketData><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>0</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:paymentFrequency><a:snapTime>2015-09-09T10:25:42.1927461-07:00</a:snapTime><a:valueUnit
+        i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide i:nil="true"/><a:businessDayConvention
+        i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:name>MU_AA</a:name><a:pricingGroup><a:id>Live</a:id></a:pricingGroup><a:data><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2016-03-07T10:25:42.1927461-08:00</a:maturityDate></a:tenor><a:value>13</a:value></a:FhlbsfDataPoint></a:data></a:FhlbsfMarketData></marketData></fhlbsfMarketDataResponse><fhlbsfMarketDataResponse><description/><requestTime>2015-09-09T10:25:42.1927461-07:00</requestTime><transactionResult>Success</transactionResult><marketData
+        xmlns:a="http://fhlbsf.com/schema/canonical/marketdata/v1"><a:FhlbsfMarketData><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>0</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:paymentFrequency><a:snapTime>2015-09-09T10:25:42.1927461-07:00</a:snapTime><a:valueUnit
+        i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide i:nil="true"/><a:businessDayConvention
+        i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:name>MU_AAA</a:name><a:pricingGroup><a:id>Live</a:id></a:pricingGroup><a:data><a:FhlbsfDataPoint><a:dayCountBasis
+        i:nil="true"/><a:paymentFrequency i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:snapTime
+        i:nil="true"/><a:valueUnit i:nil="true"/><a:quoteType i:nil="true"/><a:tradeSide
+        i:nil="true"/><a:businessDayConvention i:nil="true" xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"/><a:source
+        i:nil="true"/><a:description i:nil="true"/><a:spotDate i:nil="true"/><a:customRollingDay
+        i:nil="true"/><a:tenor><a:interval xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><b:frequency>1</b:frequency><b:frequencyUnit>D</b:frequencyUnit></a:interval><a:maturityDate>2016-03-07T10:25:42.1927461-08:00</a:maturityDate></a:tenor><a:value>13</a:value></a:FhlbsfDataPoint></a:data></a:FhlbsfMarketData></marketData></fhlbsfMarketDataResponse></responses></marketDataResponse></s:Body></s:Envelope>
+    http_version: 
+  recorded_at: Wed, 09 Sep 2015 17:25:42 GMT
+- request:
+    method: get
     uri: http://appservices/TradeServiceConsolidatedAuth/ConsolidatedService.svc?wsdl
     body:
       encoding: US-ASCII
@@ -29,7 +223,7 @@ http_interactions:
       X-Powered-By:
       - ASP.NET
       Date:
-      - Fri, 12 Jun 2015 21:58:29 GMT
+      - Wed, 09 Sep 2015 17:25:43 GMT
       Content-Length:
       - '5666'
     body:
@@ -83,8 +277,8 @@ http_interactions:
         name="TradeResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation></wsdl:binding><wsdl:service
         name="ConsolidatedService"><wsdl:port name="ClearUsernameBinding_IConsolidatedService"
         binding="tns:ClearUsernameBinding_IConsolidatedService"><soap:address location="http://sfdw64netapp1.fhlbsf-i.com/TradeServiceConsolidatedAuth/ConsolidatedService.svc"/></wsdl:port></wsdl:service></wsdl:definitions>
-    http_version:
-  recorded_at: Fri, 12 Jun 2015 21:58:29 GMT
+    http_version: 
+  recorded_at: Wed, 09 Sep 2015 17:25:43 GMT
 - request:
     method: post
     uri: http://sfdw64netapp1.fhlbsf-i.com/TradeServiceConsolidatedAuth/ConsolidatedService.svc
@@ -99,16 +293,17 @@ http_interactions:
         xmlns:v17="http://fhlbsf.com/schema/canonical/swaption/v1" xmlns:v18="http://fhlbsf.com/schema/canonical/capfloor/v1"
         xmlns:v19="http://fhlbsf.com/schema/canonical/moneyMarket/v1" xmlns:v110="http://fhlbsf.com/schema/canonical/lc/v1"
         xmlns:v111="http://fhlbsf.com/schema/canonical/simpleTransfer/v1"><soapenv:Header><wsse:Security><wsse:UsernameToken><wsse:Username>FHLBSF\\svcsys_fobo_mdtest</wsse:Username><wsse:Password>RiYPHJfc9g2L6eAisIQX3QWu4DJs75</wsse:Password></wsse:UsernameToken></wsse:Security></soapenv:Header><soapenv:Body><v1:executeTradeRequest><v11:caller><v11:id>WEB-AO</v11:id></v11:caller><v1:operationType>EXECUTE</v1:operationType><v1:trade><v12:tradeHeader><v12:tradeId>1133</v12:tradeId><v12:parties><v12:party><v13:partyId>1133</v13:partyId><v13:partyName>FHLBank
-        San Francisco</v13:partyName><v12:trader>WEB-AO</v12:trader></v12:party><v12:party><v13:partyId>750</v13:partyId></v12:party></v12:parties><v12:instrument>ADVANCE</v12:instrument><v12:tradeDate>2015-06-12</v12:tradeDate><v12:settlementDate>2015-06-12</v12:settlementDate><v12:openDateMaturity>false</v12:openDateMaturity></v12:tradeHeader><v12:advance><v14:lender>1133</v14:lender><v14:borrower>750</v14:borrower><v14:par><v13:currency>USD</v13:currency><v13:amount>100</v13:amount></v14:par><v14:product>FX
-        CONSTANT</v14:product><v14:subProduct>FRC</v14:subProduct><v14:term><v13:frequency>1</v13:frequency><v13:frequencyUnit>W</v13:frequencyUnit></v14:term><v14:maturityDate>2015-06-19</v14:maturityDate><v14:collateralType>SBC-AGENCY</v14:collateralType><v14:subsidyProgram>N/A</v14:subsidyProgram><v14:prepaymentSymmetry>false</v14:prepaymentSymmetry><v14:prepaymentModelCode>1</v14:prepaymentModelCode><v14:coupon><v13:paymentDates><v13:firstPaymentDate>2015-06-12</v13:firstPaymentDate><v13:paymentFrequency><v13:frequency>1</v13:frequency><v13:frequencyUnit>T</v13:frequencyUnit></v13:paymentFrequency><v13:paymentConvention><v13:businessDayAdjustment>FOLLOWING</v13:businessDayAdjustment><v13:businessDayCalendar>USNY</v13:businessDayCalendar></v13:paymentConvention><v13:paymentDayOfMonth>0</v13:paymentDayOfMonth></v13:paymentDates><v13:initialRate>0.14</v13:initialRate><v13:fixedRateSchedule><v13:step><v13:startDate>2015-06-12</v13:startDate><v13:endDate>2015-06-19</v13:endDate><v13:rate>0.14</v13:rate><v13:dayCountBasis>ACT/ACT</v13:dayCountBasis></v13:step></v13:fixedRateSchedule><v13:roundingConvention>NEAREST</v13:roundingConvention></v14:coupon><v14:markup>0</v14:markup><v14:blendedCostOfFundsToLibor>0</v14:blendedCostOfFundsToLibor><v14:costOfFunds>0</v14:costOfFunds><v14:moneyStatus>ROLL</v14:moneyStatus><v14:benchmarkRate>0</v14:benchmarkRate></v12:advance></v1:trade><v1:arrayOfSigners><v1:signer>Ruth
-        Back</v1:signer></v1:arrayOfSigners></v1:executeTradeRequest></soapenv:Body></soapenv:Envelope>
+        San Francisco</v13:partyName><v12:trader>WEB-AO</v12:trader></v12:party><v12:party><v13:partyId>772</v13:partyId></v12:party></v12:parties><v12:instrument>ADVANCE</v12:instrument><v12:tradeDate>2015-09-09</v12:tradeDate><v12:settlementDate>2015-09-09</v12:settlementDate><v12:openDateMaturity>true</v12:openDateMaturity></v12:tradeHeader><v12:advance><v14:lender>1133</v14:lender><v14:borrower>772</v14:borrower><v14:par><v13:currency>USD</v13:currency><v13:amount>100</v13:amount></v14:par><v14:product>OPEN
+        VRC</v14:product><v14:subProduct>VRC</v14:subProduct><v14:term><v13:frequency>1</v13:frequency><v13:frequencyUnit>D</v13:frequencyUnit></v14:term><v14:maturityDate>2015-09-10</v14:maturityDate><v14:collateralType>WHOLE
+        LOAN</v14:collateralType><v14:subsidyProgram>N/A</v14:subsidyProgram><v14:prepaymentSymmetry>false</v14:prepaymentSymmetry><v14:prepaymentModelCode>1</v14:prepaymentModelCode><v14:coupon><v13:paymentDates><v13:firstPaymentDate>2015-09-09</v13:firstPaymentDate><v13:paymentFrequency><v13:frequency>1</v13:frequency><v13:frequencyUnit>M</v13:frequencyUnit></v13:paymentFrequency><v13:paymentConvention><v13:businessDayAdjustment>FOLLOWING</v13:businessDayAdjustment><v13:businessDayCalendar>USNY</v13:businessDayCalendar></v13:paymentConvention><v13:paymentDayOfMonth>31</v13:paymentDayOfMonth></v13:paymentDates><v13:initialRate>0.14</v13:initialRate><v13:floatingRateSchedule><v13:floatingPeriod><v13:startDate>2015-09-09</v13:startDate><v13:rateIndices><v13:rateIndex><v13:index></v13:index><v13:tenor><v13:frequency>1</v13:frequency><v13:frequencyUnit>D</v13:frequencyUnit></v13:tenor><v13:weight>1</v13:weight></v13:rateIndex></v13:rateIndices><v13:periodicCap>100</v13:periodicCap><v13:periodicFloor>0</v13:periodicFloor><v13:dayCountBasis>ACT/360</v13:dayCountBasis><v13:maximumRate>100</v13:maximumRate><v13:minimumRate>0</v13:minimumRate></v13:floatingPeriod></v13:floatingRateSchedule><v13:roundingConvention>NEAREST</v13:roundingConvention></v14:coupon><v14:markup>0.0013</v14:markup><v14:blendedCostOfFundsToLibor>-0.0024</v14:blendedCostOfFundsToLibor><v14:costOfFunds>0.0096</v14:costOfFunds><v14:moneyStatus>ROLL</v14:moneyStatus><v14:benchmarkRate>0.0096</v14:benchmarkRate></v12:advance></v1:trade><v1:arrayOfSigners><v1:signer>Lydia
+        E. Shaw</v1:signer></v1:arrayOfSigners></v1:executeTradeRequest></soapenv:Body></soapenv:Envelope>
     headers:
       Soapaction:
       - '"http://fhlbsf.com/contract/tradeservices/v1/IConsolidatedService/executeTrade"'
       Content-Type:
       - text/xml;charset=UTF-8
       Content-Length:
-      - '3518'
+      - '3866'
       Accept-Encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       Accept:
@@ -131,42 +326,46 @@ http_interactions:
       X-Powered-By:
       - ASP.NET
       Date:
-      - Fri, 12 Jun 2015 21:58:43 GMT
+      - Wed, 09 Sep 2015 17:25:44 GMT
       Content-Length:
-      - '6831'
+      - '7700'
     body:
       encoding: UTF-8
       string: <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"><s:Header><o:Security
         s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"><u:Timestamp
-        u:Id="_0"><u:Created>2015-06-12T21:58:43.293Z</u:Created><u:Expires>2015-06-12T22:03:43.293Z</u:Expires></u:Timestamp></o:Security></s:Header><s:Body><executeTradeResponse
+        u:Id="_0"><u:Created>2015-09-09T17:25:44.505Z</u:Created><u:Expires>2015-09-09T17:30:44.505Z</u:Expires></u:Timestamp></o:Security></s:Header><s:Body><executeTradeResponse
         xmlns="http://fhlbsf.com/schema/msg/trade/v1"><description xmlns="http://fhlbsf.com/schema/canonical/common/v1">Trade
         Successfully Executed|#Par/Rate Valid-true#Term Valid-true#Signers Valid-true#Credit
         Valid-true#CapitalStock Valid-false#RHFA Valid-true#Collateral Valid-true|</description><requestTime
-        xmlns="http://fhlbsf.com/schema/canonical/common/v1">2015-06-12T14:58:30.2-07:00</requestTime><transactionResult
+        xmlns="http://fhlbsf.com/schema/canonical/common/v1">2015-09-09T10:25:44.027-07:00</requestTime><transactionResult
         xmlns="http://fhlbsf.com/schema/canonical/common/v1">Success</transactionResult><operationType>EXECUTE</operationType><advanceValidation
-        xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><advanceValidations><amountValid>true</amountValid><fundingDateValid>true</fundingDateValid><advanceRateValid>true</advanceRateValid></advanceValidations><signersValid>true</signersValid><creditValidations><creditValid>true</creditValid><authorizedAmount>100.0</authorizedAmount><maxAmount>167289390</maxAmount></creditValidations><collateralValidations><collateralValid>true</collateralValid><authorizedAmount>100.0</authorizedAmount><maxAmount>100.0</maxAmount></collateralValidations><capitalStockValidations><capitalStockValid>true</capitalStockValid><authorizedAmount>0.0</authorizedAmount></capitalStockValidations><termValidations><termValid>true</termValid><termMonths>360</termMonths></termValidations><rhfaValidations><rhfaValid>true</rhfaValid><maxAmount>0.0</maxAmount></rhfaValidations></advanceValidation><fixedIncomValidation
+        xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><advanceValidations><amountValid>true</amountValid><fundingDateValid>true</fundingDateValid><advanceRateValid>true</advanceRateValid></advanceValidations><signersValid>true</signersValid><creditValidations><creditValid>true</creditValid><authorizedAmount>100.0</authorizedAmount><maxAmount>299355250</maxAmount></creditValidations><collateralValidations><collateralValid>true</collateralValid><authorizedAmount>100.0</authorizedAmount><maxAmount>198660568</maxAmount></collateralValidations><capitalStockValidations><capitalStockValid>false</capitalStockValid><authorizedAmount>0.0</authorizedAmount></capitalStockValidations><termValidations><termValid>true</termValid><termMonths>360</termMonths></termValidations><rhfaValidations><rhfaValid>true</rhfaValid><maxAmount>0.0</maxAmount></rhfaValidations></advanceValidation><fixedIncomValidation
         i:nil="true" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"/><moneyMarketValidation
         i:nil="true" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"/><swapValidation
         i:nil="true" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"/><capFloorValidation
         i:nil="true" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"/><trade xmlns:a="http://fhlbsf.com/schema/canonical/trade/v1"
-        xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><a:tradeHeader><a:tradeId>486117</a:tradeId><a:parties><a:party><partyId
-        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">750</partyId><partyName
-        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">MERIDIAN BANK, N.A.</partyName><partyCode
-        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">750</partyCode><a:enteredDateTime>0001-01-01T00:00:00</a:enteredDateTime><a:verifiedTradeTime>0001-01-01T00:00:00</a:verifiedTradeTime><a:signers><a:signer>Ruth
-        Back</a:signer></a:signers></a:party><a:party><partyId xmlns="http://fhlbsf.com/schema/canonical/shared/v1">1133</partyId><partyName
-        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">FHLB - SAN FRANCISCO</partyName><a:trader>WEB-AO</a:trader><a:enteredDateTime>0001-01-01T00:00:00</a:enteredDateTime><a:verifiedBy>WEB-AO</a:verifiedBy><a:verifiedTradeTime>0001-01-01T00:00:00</a:verifiedTradeTime></a:party></a:parties><a:status>VERIFIED</a:status><a:instrument>ADVANCE</a:instrument><a:tradeDate>2015-06-12-07:00</a:tradeDate><a:tradeTime>14:58:30.200-07:00</a:tradeTime><a:settlementDate>2015-06-12-07:00</a:settlementDate><a:segments
-        xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><a:segment><b:segmentCode>CORE</b:segmentCode><b:allocationPercent>100.0</b:allocationPercent><b:allocationEffectiveDate>2015-06-12-07:00</b:allocationEffectiveDate></a:segment></a:segments><a:fvoFlag>false</a:fvoFlag><a:openDateMaturity>false</a:openDateMaturity><a:lastUpdateDateTime>2015-06-12T14:58:32.888-07:00</a:lastUpdateDateTime><a:version>0</a:version></a:tradeHeader><a:advance
-        xmlns:b="http://fhlbsf.com/schema/canonical/advance/v1"><b:advanceNumber>486117</b:advanceNumber><b:lender>1133</b:lender><b:borrower>750</b:borrower><b:par
-        xmlns:c="http://fhlbsf.com/schema/canonical/shared/v1"><c:currency>USD</c:currency><c:amount>100.0</c:amount></b:par><b:product>FX
-        CONSTANT</b:product><b:subProduct>FRC - SBC &lt;=6mo</b:subProduct><b:term
-        xmlns:c="http://fhlbsf.com/schema/canonical/shared/v1"><c:frequency>1.0</c:frequency><c:frequencyUnit>W</c:frequencyUnit></b:term><b:maturityDate>2015-06-19-07:00</b:maturityDate><b:collateralType>SBC-AGENCY</b:collateralType><b:rhfaAdvance>false</b:rhfaAdvance><b:prepaymentSymmetry>false</b:prepaymentSymmetry><b:prepaymentModelCode>1</b:prepaymentModelCode><b:coupon><calculationDates
-        xmlns="http://fhlbsf.com/schema/canonical/shared/v1"><accrualFrequency><frequency>1.0</frequency><frequencyUnit>T</frequencyUnit></accrualFrequency><accrualConvention><businessDayAdjustment>NONE</businessDayAdjustment><businessDayCalendar>USNY</businessDayCalendar></accrualConvention></calculationDates><paymentDates
-        xmlns="http://fhlbsf.com/schema/canonical/shared/v1"><firstPaymentDate>2015-06-19-07:00</firstPaymentDate><paymentFrequency><frequency>1.0</frequency><frequencyUnit>T</frequencyUnit></paymentFrequency><paymentConvention><businessDayAdjustment>FOLLOWING</businessDayAdjustment><businessDayCalendar>USNY</businessDayCalendar></paymentConvention><paymentAtMaturity>true</paymentAtMaturity><paymentDayOfMonth>19</paymentDayOfMonth></paymentDates><initialRate
-        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">0.1400000000</initialRate><fixedRateSchedule
-        xmlns="http://fhlbsf.com/schema/canonical/shared/v1"><step><startDate>2015-06-12-07:00</startDate><endDate>2015-06-19-07:00</endDate><rate>0.14</rate><dayCountBasis>ACT/ACT</dayCountBasis></step></fixedRateSchedule><intermediateRounding
+        xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><a:tradeHeader><a:tradeId>501104</a:tradeId><a:parties><a:party><partyId
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">772</partyId><partyName
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">CENTRAL VALLEY COMMUNITY
+        BANK</partyName><partyCode xmlns="http://fhlbsf.com/schema/canonical/shared/v1">772</partyCode><a:enteredDateTime>0001-01-01T00:00:00</a:enteredDateTime><a:verifiedTradeTime>0001-01-01T00:00:00</a:verifiedTradeTime><a:signers><a:signer>Lydia
+        E. Shaw</a:signer></a:signers></a:party><a:party><partyId xmlns="http://fhlbsf.com/schema/canonical/shared/v1">1133</partyId><partyName
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">FHLB - SAN FRANCISCO</partyName><a:trader>WEB-AO</a:trader><a:enteredDateTime>0001-01-01T00:00:00</a:enteredDateTime><a:verifiedBy>WEB-AO</a:verifiedBy><a:verifiedTradeTime>0001-01-01T00:00:00</a:verifiedTradeTime></a:party></a:parties><a:status>VERIFIED</a:status><a:instrument>ADVANCE</a:instrument><a:tradeDate>2015-09-09-07:00</a:tradeDate><a:tradeTime>10:25:44.027-07:00</a:tradeTime><a:settlementDate>2015-09-09-07:00</a:settlementDate><a:segments
+        xmlns:b="http://fhlbsf.com/schema/canonical/shared/v1"><a:segment><b:segmentCode>CORE</b:segmentCode><b:allocationPercent>100.0</b:allocationPercent><b:allocationEffectiveDate>2015-09-09-07:00</b:allocationEffectiveDate></a:segment></a:segments><a:fvoFlag>false</a:fvoFlag><a:openDateMaturity>true</a:openDateMaturity><a:lastUpdateDateTime>2015-09-09T10:25:44.761-07:00</a:lastUpdateDateTime><a:version>0</a:version></a:tradeHeader><a:advance
+        xmlns:b="http://fhlbsf.com/schema/canonical/advance/v1"><b:advanceNumber>501104</b:advanceNumber><b:lender>1133</b:lender><b:borrower>772</b:borrower><b:par
+        xmlns:c="http://fhlbsf.com/schema/canonical/shared/v1"><c:currency>USD</c:currency><c:amount>100.0</c:amount></b:par><b:product>OPEN
+        VRC</b:product><b:subProduct>VRC Open - WL</b:subProduct><b:collateralType>WHOLE
+        LOAN</b:collateralType><b:rhfaAdvance>false</b:rhfaAdvance><b:prepaymentSymmetry>false</b:prepaymentSymmetry><b:prepaymentModelCode>1</b:prepaymentModelCode><b:coupon><calculationDates
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1"><accrualFrequency><frequency>1.0</frequency><frequencyUnit>M</frequencyUnit></accrualFrequency><accrualConvention><businessDayAdjustment>FOLLOWING</businessDayAdjustment><businessDayCalendar>USNY</businessDayCalendar></accrualConvention></calculationDates><paymentDates
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1"><firstPaymentDate>2015-09-30-07:00</firstPaymentDate><paymentFrequency><frequency>1.0</frequency><frequencyUnit>M</frequencyUnit></paymentFrequency><paymentConvention><businessDayAdjustment>FOLLOWING</businessDayAdjustment><businessDayCalendar>USNY</businessDayCalendar></paymentConvention><paymentAtMaturity>false</paymentAtMaturity><paymentDayOfMonth>31</paymentDayOfMonth></paymentDates><resetDates
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1"><firstResetDate>2015-09-10-07:00</firstResetDate><regularResetStartDate>2015-09-10-07:00</regularResetStartDate><resetFrequency><frequency>1.0</frequency><frequencyUnit>D</frequencyUnit></resetFrequency><resetDayOfMonth>0</resetDayOfMonth><lookbackDays>0</lookbackDays><resetConvention><businessDayAdjustment>FOLLOWING</businessDayAdjustment><businessDayCalendar>USNY</businessDayCalendar></resetConvention><rateCutOffDays>0</rateCutOffDays><resetDetermination>PROSPECTIVE</resetDetermination><averagingMethod>WEIGHTED</averagingMethod></resetDates><initialRate
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">0.0109</initialRate><floatingRateSchedule
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1"><floatingPeriod><startDate>2015-09-09-07:00</startDate><rateIndices><rateIndex><index>USD-VRC-FHLBSF</index><tenor><frequency>1.0</frequency><frequencyUnit>D</frequencyUnit></tenor><weight>1.0</weight></rateIndex></rateIndices><spread>0.0</spread><variableSpread>false</variableSpread><periodicCap
+        i:nil="true"/><periodicFloor i:nil="true"/><dayCountBasis>ACT/360</dayCountBasis><maximumRate
+        i:nil="true"/><maxRateIncludesSpread>false</maxRateIncludesSpread><minimumRate
+        i:nil="true"/><minRateIncludesSpread>false</minRateIncludesSpread></floatingPeriod></floatingRateSchedule><intermediateRounding
         xmlns="http://fhlbsf.com/schema/canonical/shared/v1">0</intermediateRounding><finalRounding
-        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">5</finalRounding><roundingConvention
-        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">NEAREST</roundingConvention></b:coupon><b:constantAdjustedSpread>0</b:constantAdjustedSpread><b:markup>0.0</b:markup><b:embeddedCapFloorCost>0</b:embeddedCapFloorCost><b:blendedCostOfFundsToLibor>0.0</b:blendedCostOfFundsToLibor><b:lowCostBlendRatio>0.0</b:lowCostBlendRatio><b:costOfFunds>0.0</b:costOfFunds><b:cofForwardAdj>0</b:cofForwardAdj><b:cofParSizeAdj>0.0</b:cofParSizeAdj><b:cofRate>0.0</b:cofRate><b:optionCost>0</b:optionCost><b:cofSpread>0</b:cofSpread><b:putableAdjustment>0</b:putableAdjustment><b:ppsAdjustment>0</b:ppsAdjustment><b:moneyStatus>NEW</b:moneyStatus><b:daysToMaturity>0</b:daysToMaturity><b:valuationMethod>Benchmark</b:valuationMethod><b:benchmarkRate>0</b:benchmarkRate><b:agreementType>A</b:agreementType><b:webTrade>true</b:webTrade></a:advance></trade></executeTradeResponse></s:Body></s:Envelope>
-    http_version:
-  recorded_at: Fri, 12 Jun 2015 21:58:43 GMT
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">0</finalRounding><roundingConvention
+        xmlns="http://fhlbsf.com/schema/canonical/shared/v1">UP</roundingConvention></b:coupon><b:constantAdjustedSpread>0</b:constantAdjustedSpread><b:markup>0.0013</b:markup><b:embeddedCapFloorCost>0</b:embeddedCapFloorCost><b:blendedCostOfFundsToLibor>-0.0024</b:blendedCostOfFundsToLibor><b:lowCostBlendRatio>0.0</b:lowCostBlendRatio><b:costOfFunds>0.0096</b:costOfFunds><b:cofForwardAdj>0</b:cofForwardAdj><b:cofParSizeAdj>0.0</b:cofParSizeAdj><b:cofRate>0.0096</b:cofRate><b:optionCost>0</b:optionCost><b:cofSpread>0</b:cofSpread><b:putableAdjustment>0</b:putableAdjustment><b:ppsAdjustment>0</b:ppsAdjustment><b:moneyStatus>NEW</b:moneyStatus><b:daysToMaturity>0</b:daysToMaturity><b:valuationMethod>Benchmark</b:valuationMethod><b:benchmarkRate>0.0096</b:benchmarkRate><b:agreementType>A</b:agreementType><b:webTrade>true</b:webTrade></a:advance></trade></executeTradeResponse></s:Body></s:Envelope>
+    http_version: 
+  recorded_at: Wed, 09 Sep 2015 17:25:45 GMT
 recorded_with: VCR 2.9.3

@@ -73,3 +73,23 @@ Scenario: User accepts the Terms of Service
   When I log out
   When I fill in and submit the login form with a first-time user
   Then I should see dashboard modules
+
+@jira-mem-859
+Scenario: User logs in with expired password
+  Given I am logged out
+  And I visit the root path
+  When I fill in and submit the login form with an expired user
+  Then I should see the change password form
+  When I visit the dashboard
+  Then I should see the change password form
+  And I should see password change validations
+  When I enter a valid new password
+  And I submit the form
+  Then I should see the change password success page
+  When I dismiss the change password success page
+  Then I proceed through the login flow
+  And I should be logged in
+  When I log out
+  And I login with as the expired user with the new password
+  Then I should be logged in
+

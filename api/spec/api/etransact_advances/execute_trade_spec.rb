@@ -322,6 +322,10 @@ describe MAPI::ServiceApp do
       post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}"
       expect(last_response.status).to eq(503)
     end
+    it 'should return Internal Service Error, if execute mds service is unavailable', vcr: {cassette_name: 'execute_trade_market_data_service_unavailable'} do
+      post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}"
+      expect(last_response.status).to eq(503)
+    end
   end
 
   describe 'execute trade checks' do

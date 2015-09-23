@@ -294,7 +294,10 @@ module MAPI
 
           data = if MAPI::Services::EtransactAdvances::ExecuteTrade::init_execute_trade_connection(app.settings.environment)
             begin
-              response = @@execute_trade_connection.call(:execute_trade, message_tag: 'executeTradeRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
+              response = @@execute_trade_connection.call(:execute_trade,
+                                                         message_tag: 'executeTradeRequest',
+                                                         message: message,
+                                                         :soap_header => MAPI::Services::Rates::SOAP_HEADER)
             rescue Savon::Error => error
               raise error
             end

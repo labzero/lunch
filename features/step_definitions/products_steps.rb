@@ -22,8 +22,20 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
       I18n.t('products.advances.ocn.title')
     when 'putable'
       I18n.t('products.advances.putable.title')
+    when 'callable'
+      I18n.t('products.advances.callable.title')
+    when 'variable rate credit'
+      I18n.t('products.advances.vrc.title')
+    when 'securities backed credit'
+      I18n.t('products.advances.sbc.title')
+    when 'mortgage partnership finance'
+      I18n.t('products.advances.mpf.title')
     else
       raise 'unknown product page'
   end
   page.assert_selector('.product-page h1', text: text)
+end
+
+When(/^I click on the (arc embedded|frc|frc embedded|arc|amortizing|choice libor|auction indexed|knockout|putable|other cash needs|mortgage partnership finance) link in the products advances dropdown$/) do |link|
+  page.find('.page-header .products-dropdown .nav-dropdown-nested a', text: dropdown_title_regex(link)).click
 end

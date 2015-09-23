@@ -98,10 +98,14 @@ This is a summary of the options supported in our .env files:
 * `MAPI_CALENDAR_ENDPOINT`: FHLBSF endpoint for Market Data Service.
 * `MAPI_CAPITALSTOCK_ENDPOINT`: FHLBSF endpoint for Capital Stock Service.
 * `MAPI_TRADE_ENDPOINT`: FHLBSF endpoint for Trade Service.
+* `MAPI_TRADE_ACTIVITY_ENDPOINT`: FHLBSF endpoint for Trade Activity Service
 * `LDAP_HOST`: Hostname of the LDAP server.
 * `LDAP_PORT`: Port of the LDAP server.
 * `LDAP_ADMIN_USERNAME`: Username of the LDAP service account.
 * `LDAP_ADMIN_PASSWORD`: Password for the LDAP service account.
+* `LDAP_EXTRANET_SSL_MODE`: The SSL mode to use for Extranet LDAP. Options are `start_tls` and `simple_tls`.
+* `LDAP_SSL_MODE`: The SSL mode to use for Intranet LDAP. Options are `start_tls` and `simple_tls`.
+* `LDAP_CA_BUNDLE_PATH`: The optional CA bundle path for LDAP over SSL.
 * `TIMEZONE`: The time zone to use when we create new Time.zone objects. Defaults to "Pacific Time (US & Canada)" and should not deviate from this.
 * `RESQUE_WORKER_COUNT`: How many Resque workers to start
 * `REDIS_URL`: The URL of the Redis server to use.

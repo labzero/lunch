@@ -61,7 +61,7 @@ module MAPI
             return {as_of_date: nil, total_original_par: nil, total_current_par: nil, total_market_value: nil, securities:[]} if securities.blank?
             as_of_date = securities.first[SECURITIES_QUERY_MAPPINGS[:as_of_date][report_type]]
           else
-            as_of_date = MAPI::Services::Member::CashProjections::Private.fake_as_of_date((options[:end_date].to_date if options[:end_date]))
+            as_of_date = options[:end_date] ? options[:end_date].to_date : (Time.zone.today - 1.month).end_of_month
             securities = Private.fake_securities(member_id, as_of_date, report_type, options[:custody_account_type])
           end
 

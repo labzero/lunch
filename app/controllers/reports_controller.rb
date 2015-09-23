@@ -21,6 +21,7 @@ class ReportsController < ApplicationController
   CAPITAL_STOCK_AND_LEVERAGE_WEB_FLAGS = [MembersService::FHLB_STOCK_DATA]
   ACCOUNT_SUMMARY_WEB_FLAGS = [MembersService::FINANCING_AVAILABLE_DATA, MembersService::CREDIT_OUTSTANDING_DATA, MembersService::COLLATERAL_HIGHLIGHTS_DATA, MembersService::FHLB_STOCK_DATA]
   INTEREST_RATE_RESETS_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
+  TODAYS_CREDIT_ACTIVITY_WEB_FLAGS = [MembersService::TODAYS_CREDIT_ACTIVITY]
 
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
@@ -57,6 +58,14 @@ class ReportsController < ApplicationController
     end_of_quarter: 'endOfQuarter'
   }
 
+  DATE_RESTRICTION_MAPPING = {
+    capital_stock_activity: 12.months,
+    settlement_transaction_account: 6.months,
+    advances_detail: 18.months,
+    securities_services_statement: 18.months,
+    monthly_securities_position: 18.months
+  }
+
   before_action do
     @member_name = current_member_name
   end
@@ -65,127 +74,145 @@ class ReportsController < ApplicationController
     @reports = {
       price_indications: {
         current: {
-          updated: t('global.daily'),
-          available_history: t('global.current_day'),
-          summary: t('reports.price_indications.current.summary', phone_number: fhlb_formatted_phone_number('8004443452'))
+          updated: t('reports.updated.daily_morning'),
+          available_history: t('reports.price_indications.current.history'),
+          summary: t('reports.price_indications.current.summary'),
+          route: reports_current_price_indications_path
         },
         historical: {
-          updated: t('global.daily'),
-          available_history: t('global.various'),
+          updated: t('reports.updated.daily_morning'),
+          available_history: t('reports.price_indications.historical.history'),
           route: reports_historical_price_indications_path
         }
       },
       credit: {
+        todays_credit: {
+          updated: t('reports.updated.intraday'),
+          available_history: t('reports.history.current_report'),
+          route: reports_todays_credit_path
+        },
         advances_detail: {
-          updated: t('global.daily'),
-          available_history: t('global.all'),
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.months', months: 18),
           route: reports_advances_path
         },
         interest_rate: {
-          updated: t('global.daily'),
-          available_history: t('reports.history.months12'),
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.current_report'),
           route: reports_interest_rate_resets_path
         },
         letters_of_credit: {
-          updated: t('global.daily'),
-          available_history: t('global.all'),
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.current_report'),
           route: reports_letters_of_credit_path
         },
         forward_commitments: {
-          updated: t('global.daily'),
-          available_history: t('global.all'),
-          path: reports_forward_commitments_path
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.current_report'),
+          route: reports_forward_commitments_path
         },
         parallel_shift: {
-          updated: t('global.monthly'),
-          available_history: t('global.all'),
+          updated: t('reports.updated.monthly'),
+          available_history: t('reports.history.current_report'),
           route: reports_parallel_shift_path
         }
       },
       collateral: {
         borrowing_capacity: {
-          updated: t('global.daily'),
-          available_history: t('global.all'),
+          updated: t('reports.collateral.borrowing_capacity.updated'),
+          available_history: t('reports.history.current_report'),
           route: reports_borrowing_capacity_path
         },
         mcu: {
-          updated: t('global.daily'),
-          available_history: t('global.all')
+          updated: t('reports.collateral.mcu.updated'),
+          available_history: t('reports.history.current_report'),
+          route: reports_mortgage_collateral_update_path
         }
       },
       capital_stock: {
         activity: {
-          updated: t('global.daily'),
-          available_history: t('reports.history.months12'),
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.months', months: 12),
           route: reports_capital_stock_activity_path
         },
+        trial_balance: {
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.back_to', date: fhlb_date_long_alpha(Date.new(2002,1,1))),
+          route: reports_trial_balance_path
+        },
         capital_stock_and_leverage: {
-          updated: '',
-          available_history: '',
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.current_report'),
           route: reports_capital_stock_and_leverage_path
         },
         dividend_statement: {
-          updated: t('global.quarterly'),
-          available_history: t('reports.history.months36'),
+          updated: t('reports.updated.quarterly'),
+          available_history: t('reports.history.months', months: 36),
           route: reports_dividend_statement_path
-        }
-      },
-      settlement: {
-        account: {
-          updated: t('global.daily'),
-          available_history: t('global.all'),
-          route: reports_settlement_transaction_account_path
         }
       },
       securities: {
         transactions: {
-          updated: t('reports.twice_daily'),
-          available_history: t('global.all'),
+          updated: t('reports.securities.transactions.updated'),
+          available_history: t('reports.securities.transactions.history'),
           route: reports_securities_transactions_path
         },
         cash_projections: {
-          updated: t('global.daily'),
-          available_history: t('global.current_day'),
+          updated: t('reports.updated.daily'),
+          available_history: t('reports.history.current_report'),
           route: reports_cash_projections_path
         },
         current: {
-          updated: t('reports.continuously'),
-          available_history: t('global.current_day'),
-          path: reports_current_securities_position_path
+          updated: t('reports.updated.intraday'),
+          available_history: t('reports.history.current_report'),
+          route: reports_current_securities_position_path
         },
         monthly: {
-          updated: t('global.monthly'),
-          available_history: t('reports.history.months18'),
-          path: reports_monthly_securities_position_path
+          updated: t('reports.securities.monthly.updated'),
+          available_history: t('reports.history.months', months: 18),
+          route: reports_monthly_securities_position_path
         },
         services_monthly: {
-          updated: t('global.monthly'),
-          available_history: t('reports.history.months18'),
+          updated: t('reports.securities.services_monthly.updated'),
+          available_history: t('reports.history.months', months: 18),
           route: reports_securities_services_statement_path
         }
       },
-      authorizations: {
-        user: {
-          updated: t('reports.continuously'),
-          available_history: t('global.current_day'),
+      account: {
+        account_summary: {
+          updated: t('reports.account.account_summary.updated'),
+          available_history: t('reports.history.current_report'),
+          route: reports_account_summary_path
+        },
+        authorizations: {
+          updated: t('reports.updated.intraday'),
+          available_history: t('reports.history.current_report'),
           route: reports_authorizations_path
+        },
+        settlement_transaction_account: {
+          updated: t('reports.account.settlement_transaction_account.updated'),
+          available_history: t('reports.account.settlement_transaction_account.history'),
+          route: reports_settlement_transaction_account_path
         }
       }
     }
   end
 
   def capital_stock_activity
+    date_restriction = DATE_RESTRICTION_MAPPING[:capital_stock_activity]
     default_dates = default_dates_hash
     member_balances = MemberBalanceService.new(current_member_id, request)
-    @start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
+    start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
+    @min_date, @start_date = min_and_start_dates(date_restriction, start_date)
+
     if report_disabled?(CAPITAL_STOCK_ACTIVITY_WEB_FLAGS)
       @capital_stock_activity = {}
     else
       @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
       raise StandardError, "There has been an error and ReportsController#capital_stock_activity has encountered nil. Check error logs." if @capital_stock_activity.nil?
     end
-    @picker_presets = date_picker_presets(@start_date, @end_date)
+    @picker_presets = date_picker_presets(@start_date, @end_date, date_restriction)
   end
 
   def borrowing_capacity
@@ -211,14 +238,16 @@ class ReportsController < ApplicationController
   end
 
   def settlement_transaction_account
+    date_restriction = DATE_RESTRICTION_MAPPING[:settlement_transaction_account]
     default_dates = default_dates_hash
-    @start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
+    start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
+    @min_date, @start_date = min_and_start_dates(date_restriction, start_date)
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
     export_format = params[:export_format]
     @report_name = t('reports.pages.settlement_transaction_account.title')
     member_balances = MemberBalanceService.new(current_member_id, request)
     @daily_balance_key = MemberBalanceService::DAILY_BALANCE_KEY
-    @picker_presets = date_picker_presets(@start_date, @end_date)
+    @picker_presets = date_picker_presets(@start_date, @end_date, date_restriction)
     @filter_options = [
       [t('global.all'), 'all'],
       [t('global.debits'), 'debit'],
@@ -257,12 +286,13 @@ class ReportsController < ApplicationController
   end
 
   def advances_detail
-    @start_date = (params[:start_date] || Time.zone.now.to_date).to_date
+    date_restriction = DATE_RESTRICTION_MAPPING[:advances_detail]
+    @min_date, @start_date = min_and_start_dates(date_restriction, (params[:start_date].to_date if params[:start_date]))
     member_balances = MemberBalanceService.new(current_member_id, request)
     @advances_detail = member_balances.advances_details(@start_date)
     @report_name = t('global.advances')
     raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
-    @picker_presets = date_picker_presets(@start_date)
+    @picker_presets = date_picker_presets(@start_date, nil, date_restriction)
     if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)
       @advances_detail = {}
     else
@@ -654,7 +684,11 @@ class ReportsController < ApplicationController
   end
 
   def securities_services_statement
-    @start_date = (params[:start_date] || last_month_end).to_date
+    date_restriction = DATE_RESTRICTION_MAPPING[:securities_services_statement]
+    start_date = (params[:start_date] || last_month_end).to_date
+    min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
+    @min_date = min_and_start_dates_array.first
+    @start_date = min_and_start_dates_array.last.end_of_month
     if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
       @statement = {}
     else
@@ -662,7 +696,7 @@ class ReportsController < ApplicationController
       @statement = member_balances.securities_services_statement(@start_date)
       raise StandardError, "There has been an error and ReportsController#securities_services_statement has encountered nil. Check error logs." if @statement.nil?
     end
-    @picker_presets = date_picker_presets(@start_date)
+    @picker_presets = date_picker_presets(@start_date, nil, date_restriction)
     @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
   end
 
@@ -700,8 +734,15 @@ class ReportsController < ApplicationController
     }
   end
 
+  def most_recent_business_day(d)
+    return d - 1.day if d.saturday?
+    return d - 2.day if d.sunday?
+    d
+  end
+
   def securities_transactions
-    @start_date = (params[:start_date] || Time.zone.now.to_date).to_date
+    @max_date   = most_recent_business_day(Time.zone.now.to_date - 1.day)
+    @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
     member_balances = MemberBalanceService.new(current_member_id, request)
     if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
       securities_transactions = {}
@@ -751,7 +792,7 @@ class ReportsController < ApplicationController
 
   def authorizations
     @authorizations_filter = params['authorizations_filter'] || 'all'
-    @report_name = t('reports.authorizations.title')
+    @report_name = t('reports.account.authorizations.title')
     export_format = params[:export_format]
     @today = Time.zone.today
 
@@ -857,10 +898,14 @@ class ReportsController < ApplicationController
   end
 
   def monthly_securities_position
+    date_restriction = DATE_RESTRICTION_MAPPING[:monthly_securities_position]
     @securities_filter = params['securities_filter'] || 'all'
-    @month_end_date = (params[:start_date] || last_month_end).to_date
+    start_date = (params[:start_date] || last_month_end).to_date
+    min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
+    @min_date = min_and_start_dates_array.first
+    @month_end_date = min_and_start_dates_array.last.end_of_month
     @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
-    @picker_presets = date_picker_presets(@month_end_date)
+    @picker_presets = date_picker_presets(@month_end_date, nil, date_restriction)
     member_balances = MemberBalanceService.new(current_member_id, request)
     if report_disabled?(MONTHLY_SECURITIES_WEB_FLAGS)
       @monthly_securities_position = {securities:[]}
@@ -1204,6 +1249,39 @@ class ReportsController < ApplicationController
     end
   end
 
+  def todays_credit
+    if report_disabled?(TODAYS_CREDIT_ACTIVITY_WEB_FLAGS)
+      activities = []
+    else
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      activities = member_balances.todays_credit_activity
+      raise StandardError, "There has been an error and ReportsController#todays_credit has encountered nil. Check error logs." if activities.nil?
+    end
+    rows = []
+    activities.each do |activity|
+      maturity_date = if activity[:instrument_type] == 'ADVANCE'
+        activity[:maturity_date] || t('global.open')
+      else
+        activity[:maturity_date]
+      end
+      rows << {
+        columns:[
+          {value: activity[:transaction_number]},
+          {type: :number, value: activity[:current_par]},
+          {type: :index, value: activity[:interest_rate]},
+          {type: :date, value: activity[:funding_date]},
+          {type: (:date if maturity_date.is_a?(Date)), value: maturity_date},
+          {value: activity[:product_description]}
+        ]
+      }
+    end
+    column_headings = [t('common_table_headings.transaction_number'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.product_type')]
+    @todays_credit = {
+      column_headings: column_headings,
+      rows: rows
+    }
+  end
+
   private
   def securities_instance_variables(securities_position, filter)
     as_of_date = securities_position[:as_of_date]
@@ -1263,6 +1341,14 @@ class ReportsController < ApplicationController
   def last_month_end
     today = Time.zone.today
     today == today.end_of_month ? today.end_of_month : (today - 1.month).end_of_month
+  end
+
+  def min_and_start_dates(min_date_range, start_date_param=nil)
+    now = Time.zone.today
+    start_date = (start_date_param || now).to_date
+    min_date = now - min_date_range
+    start_date = min_date < start_date ? start_date : min_date
+    [min_date, start_date]
   end
 
 end

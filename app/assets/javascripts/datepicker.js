@@ -17,7 +17,8 @@ $(function () {
       var ranges = {};
       var lastCustomLabel;
       var defaultPreset = 1;
-      var maxDate = $wrapper.data('date-picker-max-date') ? moment($wrapper.data('date-picker-max-date')) : false;
+      var maxDate = moment($wrapper.data('date-picker-max-date'));
+      var minDate = $wrapper.data('date-picker-min-date') ? moment($wrapper.data('date-picker-min-date')) : false;
       var filter = $wrapper.data('date-picker-filter');
       var filterOptions = $wrapper.data('date-picker-filter-options');
       $.each(presets, function(index, preset) {
@@ -49,6 +50,7 @@ $(function () {
         endDate: endDate,
         singleDatePicker: singleDatePicker,
         maxDate: maxDate,
+        minDate: minDate,
         filter: filter,
         filterOptions: filterOptions
       });
@@ -78,6 +80,7 @@ $(function () {
       endDate: options.endDate,
       ranges: options.ranges,
       maxDate: options.maxDate,
+      minDate: options.minDate,
       parentEl: $datePickerWrapper,
       locale: {
         customRangeLabel: options.customLabel,

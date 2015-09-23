@@ -29,6 +29,11 @@ class ProductsController < ApplicationController
   end
 
   # GET
+  def callable
+    @last_modified = Date.new(2008, 7, 1)
+  end
+
+  # GET
   def frc
     @last_modified = Date.new(2011, 4, 1)
   end
@@ -56,6 +61,21 @@ class ProductsController < ApplicationController
   # GET
   def putable
     @last_modified = Date.new(2012, 12, 1)
+  end
+
+  # GET
+  def vrc
+    @last_modified = Date.new(2011, 2, 1)
+  end
+
+  # GET
+  def sbc
+    @last_modified = Date.new(2015, 7, 1)
+  end
+
+  # GET
+  def mpf
+    @last_modified = Date.new(2015, 8, 1)
   end
 
 end

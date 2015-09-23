@@ -2,21 +2,26 @@
 - @page_title = t('reports.meta_title')
 .reports.row
   %h1= t('reports.title')
+  %nav.nav-toc
+    - @reports.each do |category, reports|
+      =link_to(t("reports.#{category}.title"), "##{category}")
   - @reports.each do |category, reports|
+    %a{name: category}
     %table.reports-table.table-striped
       %thead
         %tr
           %th= t("reports.#{category}.title")
-          %th= t('global.updated')
-          %th= t('global.available_history')
-          %th
       %tbody
         - reports.each do |report, details|
           %tr
             %td.description-cell
-              %h3= details[:title] || t("reports.#{category}.#{report}.title")
-              %p= details[:summary] || t("reports.#{category}.#{report}.summary")
-            %td.updated-cell= details[:updated]
-            %td.history-cell= details[:available_history]
-            %td
-              =link_to t('global.view'), details[:route] || '#'
+              =link_to details[:route] || '#' do
+                %h3= details[:title] || t("reports.#{category}.#{report}.title")
+                %p= details[:summary] || t("reports.#{category}.#{report}.summary")
+                .report-info
+                  %span= t('reports.shared_table_values.updated')
+                  %span= details[:updated]
+                .report-info
+                  %span= t('reports.shared_table_values.available_history')
+                  %span= details[:available_history]
+                %p= t('global.view')

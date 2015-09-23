@@ -42,6 +42,9 @@ Rails.application.routes.draw do
     get '/forward-commitments' => 'reports#forward_commitments'
     get '/capital-stock-and-leverage' => 'reports#capital_stock_and_leverage'
     get '/account-summary' => 'reports#account_summary'
+    get '/todays-credit' => 'reports#todays_credit'
+    get '/trial-balance' => 'error#standard_error'
+    get '/mortgage-collateral-update' => 'error#standard_error'
   end
 
   get '/advances' => 'advances#index'
@@ -59,6 +62,8 @@ Rails.application.routes.draw do
   patch '/settings/users/:id' => 'settings#update_user'
   get '/settings/users/:id/confirm_delete' => 'settings#confirm_delete', as: 'user_confirm_delete'
   delete '/settings/users/:id' => 'settings#delete_user'
+  get '/settings/expired-password' => 'settings#expired_password', as: :user_expired_password
+  put '/settings/expired-password' => 'settings#update_password', as: :user_update_password
 
   get '/jobs/:job_status_id' => 'jobs#status', as: 'job_status'
   get '/jobs/:job_status_id/download' => 'jobs#download', as: 'job_download'
@@ -79,24 +84,26 @@ Rails.application.routes.draw do
     get '/summary' => 'products#index', as: :product_summary
     get '/letters-of-credit' => 'error#standard_error'
     get '/community_programs' => 'error#standard_error'
+    get '/product-mpf-pfi' => 'error#standard_error', as: :product_mpf_pfi
     scope 'advances' do
       get 'adjustable-rate-credit' => 'products#arc', as: :arc
       get 'advances-for-community-enterprise' => 'error#standard_error', as: :ace
       get 'amortizing' => 'products#amortizing', as: :amortizing
       get 'arc-embedded' => 'products#arc_embedded', as: :arc_embedded
-      get 'callable' => 'error#standard_error'
+      get 'callable' => 'products#callable', as: :callable
       get 'choice-libor' => 'products#choice_libor', as: :choice_libor
       get 'community-investment-program' => 'error#standard_error', as: :cip
       get 'auction-indexed' => 'products#auction_indexed', as: :auction_indexed
       get 'fixed-rate-credit' => 'products#frc', as: :frc
-      get 'frc-embedded' => 'products#frc_embedded'
+      get 'frc-embedded' => 'products#frc_embedded', as: :frc_embedded
       get 'knockout' => 'products#knockout', as: :knockout
-      get 'mortgage-partnership-finance' => 'error#standard_error', as: :mpf
+      get 'mortgage-partnership-finance' => 'products#mpf', as: :mpf
       get 'other-cash-needs' => 'products#ocn', as: :ocn
       get 'putable' => 'products#putable', as: :putable
-      get 'securities-backed-credit' => 'error#standard_error', as: :sbc
-      get 'variable-rate-credit' => 'error#standard_error', as: :vrc
+      get 'securities-backed-credit' => 'products#sbc', as: :sbc
+      get 'variable-rate-credit' => 'products#vrc', as: :vrc
     end
+
   end
 
   devise_scope :user do
@@ -110,6 +117,7 @@ Rails.application.routes.draw do
     get 'member/password' => 'users/passwords#new', as: :new_user_password
     post 'member/password' => 'users/passwords#create', as: :user_password
     get 'member/password/reset' => 'users/passwords#edit', as: :edit_user_password
+    put 'member/password' => 'users/passwords#update'
   end
   devise_for :users, controllers: { sessions: 'users/sessions', passwords: 'users/passwords' }, :skip => [:sessions, :passwords]
 

@@ -9,7 +9,7 @@ module MAPI
         if cal_connection
           message = {'v1:endDate' => '1991-01-01'}
           begin
-            response = cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
+            response = cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER)
             response.doc.remove_namespaces!
             nodes = response.doc.xpath('//Envelope//Body//holidayResponse//transactionResult')
             cal_status = nodes[0].text == 'Success' if nodes.count > 0
@@ -25,7 +25,7 @@ module MAPI
         pi_connection = MAPI::Services::Rates.init_pi_connection(environment)
         if pi_connection
           begin
-            response = pi_connection.call(:get_pricing_indications, message_tag: 'pricingIndicationsRequest', message: {}, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
+            response = pi_connection.call(:get_pricing_indications, message_tag: 'pricingIndicationsRequest', message: {}, :soap_header => MAPI::Services::Rates::SOAP_HEADER )
             response.doc.remove_namespaces!
             pi_status = response.doc.xpath('//Envelope//Body//pricingIndicationsResponse//response//Items').count > 0
           rescue Savon::Error => error
@@ -56,7 +56,7 @@ module MAPI
             }]
           }
           begin
-            response = mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}} )
+            response = mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER )
             response.doc.remove_namespaces!
             mds_status = response.doc.xpath('//fhlbsfMarketDataResponse').count > 0
           rescue Savon::Error => error

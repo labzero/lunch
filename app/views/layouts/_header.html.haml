@@ -19,31 +19,33 @@
         = link_to(t('reports.title'), reports_path, class: 'nav-menu')
         %ul.nav-dropdown<>
           %li<>
-            = link_to(t('reports.price_indications.title'), reports_path)
+            = link_to(t('reports.price_indications.title'), reports_path(anchor: 'price_indications'))
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.price_indications.current.title'), reports_current_price_indications_path)
               %li= link_to(t('reports.price_indications.historical.title'), reports_historical_price_indications_path)
           %li<>
-            = link_to(t('reports.credit.title'), reports_path)
+            = link_to(t('reports.credit.title'), reports_path(anchor: 'credit'))
             %ul.nav-dropdown-nested
+              %li= link_to(t('reports.credit.todays_credit.title'), reports_todays_credit_path)
               %li= link_to(t('reports.credit.advances_detail.title'), reports_advances_path)
               %li= link_to(t('reports.credit.interest_rate.title'), reports_interest_rate_resets_path)
               %li= link_to(t('reports.credit.letters_of_credit.title'), reports_letters_of_credit_path)
               %li= link_to(t('reports.credit.forward_commitments.title'), reports_forward_commitments_path)
               %li= link_to(t('reports.credit.parallel_shift.title'), reports_parallel_shift_path)
           %li<>
-            = link_to(t('reports.collateral.title'), reports_path)
+            = link_to(t('reports.collateral.title'), reports_path(anchor: 'collateral'))
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.collateral.borrowing_capacity.title'), reports_borrowing_capacity_path)
-              %li= link_to(t('reports.collateral.mcu.title'), reports_path)
+              %li= link_to(t('reports.collateral.mcu.title'), reports_mortgage_collateral_update_path)
           %li<>
-            = link_to(t('reports.capital_stock.title'), reports_path)
+            = link_to(t('reports.capital_stock.title'), reports_path(anchor: 'capital_stock'))
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.capital_stock.activity.title'), reports_capital_stock_activity_path)
+              %li= link_to(t('reports.capital_stock.trial_balance.title'), reports_trial_balance_path)
               %li= link_to(t('reports.capital_stock.capital_stock_and_leverage.title'), reports_capital_stock_and_leverage_path)
               %li= link_to(t('reports.capital_stock.dividend_statement.title'), reports_dividend_statement_path)
           %li<>
-            = link_to(t('reports.securities.title'), reports_path)
+            = link_to(t('reports.securities.title'), reports_path(anchor: 'securities'))
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.securities.transactions.title'), reports_securities_transactions_path)
               %li= link_to(t('reports.securities.cash_projections.title'), reports_cash_projections_path)
@@ -51,11 +53,11 @@
               %li= link_to(t('reports.securities.monthly.title'), reports_monthly_securities_position_path)
               %li= link_to(t('reports.securities.services_monthly.title'), reports_securities_services_statement_path)
           %li<>
-            = link_to(t('reports.your_account.title'), reports_path)
+            = link_to(t('reports.your_account.title'), reports_path(anchor: 'account'))
             %ul.nav-dropdown-nested
-              %li= link_to(t('reports.account_summary.title'), reports_account_summary_path)
-              %li= link_to(t('reports.authorizations.title'), reports_authorizations_path)
-              %li= link_to(t('reports.settlement.account.title'), reports_settlement_transaction_account_path)
+              %li= link_to(t('reports.account.account_summary.title'), reports_account_summary_path)
+              %li= link_to(t('reports.account.authorizations.title'), reports_authorizations_path)
+              %li= link_to(t('reports.account.settlement_transaction_account.title'), reports_settlement_transaction_account_path)
       %li<>
         = link_to(t('nav.secondary.resources'), '#', class: 'nav-menu')
         %ul.nav-dropdown<>
@@ -70,9 +72,9 @@
               %li= link_to(t('resources.forms.collateral.title'), forms_path(anchor: :collateral))
           %li<>= link_to(t('resources.faq.title'), '#')
           %li<>= link_to(t('resources.capital_plan.title'), '#')
-          %li<>= link_to(t('resources.investor_relations.title'), '#')
-          %li<>= link_to(t('resources.newsroom.title'), '#')
-          %li<>= link_to(t('resources.regulatory_updates.title'), '#')
+          %li= link_to(t('resources.investor_relations.title'), 'http://www.fhlbsf.com/about/investor/default.aspx')
+          %li= link_to(t('resources.newsroom.title'), 'http://www.fhlbsf.com/about/news/releases/default.aspx')
+          %li= link_to(t('resources.regulatory_updates.title'), 'http://www.fhlbsf.com/resource-center/regulatory/default.aspx')
           %li<>= link_to(t('resources.business_continuity.title'), '#')
           %li<>
             = link_to(t('resources.membership.title'), '#')
@@ -88,22 +90,22 @@
             = link_to(t('products.advances.title'), product_summary_path(anchor: :advances))
             %ul.nav-dropdown-nested
               %li= link_to(t('products.advances.arc.title'), arc_path)
-              %li= link_to(t('products.advances.ace'), ace_path)
+              %li= link_to(t('products.advances.ace'), 'http://fhlbsf.com/community/credit/ace-profile.aspx')
               %li= link_to(t('products.advances.amortizing.title'), amortizing_path)
               %li= link_to(t('products.advances.arc_embedded.title'), arc_embedded_path)
-              %li= link_to(t('products.advances.callable'), callable_path)
+              %li= link_to(t('products.advances.callable.title'), callable_path)
               %li= link_to(t('products.advances.choice_libor.title'), choice_libor_path)
-              %li= link_to(t('products.advances.cip'), cip_path)
+              %li= link_to(t('products.advances.cip'), 'http://www.fhlbsf.com/community/credit/cip-profile.aspx')
               %li= link_to(t('products.advances.auction_indexed.title'), auction_indexed_path)
               %li= link_to(t('products.advances.frc.title'), frc_path)
               %li= link_to(t('products.advances.frc_embedded.title'), frc_embedded_path)
               %li= link_to(t('products.advances.knockout.title'), knockout_path)
-              %li= link_to(t('products.advances.mpf'), mpf_path)
+              %li= link_to(t('products.advances.mpf.title'), mpf_path)
               %li= link_to(t('products.advances.ocn.title'), ocn_path)
               %li= link_to(t('products.advances.putable.title'), putable_path)
-              %li= link_to(t('products.advances.sbc'), sbc_path)
-              %li= link_to(t('products.advances.vrc'), vrc_path)
-          %li<>= link_to(t('products.standby_loc.title'), letters_of_credit_path)
+              %li= link_to(t('products.advances.sbc.title'), sbc_path)
+              %li= link_to(t('products.advances.vrc.title'), vrc_path)
+          %li= link_to(t('products.standby_loc.title'), 'http://fhlbsf.com/community/credit/lc-profile.aspx')
           %li<>
-            = link_to(t('products.mpf_program.title'), product_summary_path(anchor: :mpf_program))
-          %li<>= link_to(t('products.community_programs.title'), community_programs_path)
+            = link_to(t('products.mpf_program.title'), mpf_path)
+          %li= link_to(t('products.community_programs.title'), 'http://fhlbsf.com/community/default.aspx')

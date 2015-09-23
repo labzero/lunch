@@ -44,6 +44,26 @@ class DashboardController < ApplicationController
       }
     end
 
+    if members_service.report_disabled?(current_member_id, [MembersService::FINANCING_AVAILABLE_DATA])
+      profile[:total_financing_available] = nil
+    end
+
+    if members_service.report_disabled?(current_member_id, [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA])
+      profile[:sta_balance] = nil
+    end
+
+    if members_service.report_disabled?(current_member_id, [MembersService::CREDIT_OUTSTANDING_DATA])
+      profile[:credit_outstanding][:total] = nil
+    end
+
+    if members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA])
+      profile[:collateral_borrowing_capacity][:remaining] = nil
+    end
+
+    if members_service.report_disabled?(current_member_id, [MembersService::FHLB_STOCK_DATA])
+      profile[:capital_stock] = nil
+    end
+
     sta_balance = [
       [t('dashboard.your_account.table.balance'), profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
     ]
@@ -63,10 +83,10 @@ class DashboardController < ApplicationController
 
     @market_overview = [{
       name: 'Test',
-      data: rate_service.overnight_vrc
+      data: members_service.report_disabled?(current_member_id, [MembersService::IRDB_RATES_DATA]) ? nil : rate_service.overnight_vrc
     }]
 
-    borrowing_capacity = member_balances.borrowing_capacity_summary(today)
+    borrowing_capacity = members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_REPORT_DATA]) ? nil : member_balances.borrowing_capacity_summary(today)
 
     @borrowing_capacity_gauge = if borrowing_capacity
       total_borrowing_capacity = borrowing_capacity[:total_borrowing_capacity]

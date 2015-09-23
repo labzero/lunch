@@ -1,4 +1,4 @@
-.reports, .report {
+.reports, .report, .resource-guide-page, .resource-forms-page, .product-page {
   h1 {
     @extend %typography-page-title;
     margin: 32px 0 17px;
@@ -12,9 +12,9 @@
 .reports-table {
   @extend %table-striped;
   border-bottom: 1px solid $light-blue;
-  margin-top: 70px;
+  margin-top: 60px;
   &:last-child {
-    margin-bottom: 70px;
+    margin-bottom: 60px;
   }
   thead {
     border-bottom: 1px solid $light-blue;
@@ -34,33 +34,44 @@
       color: $text-color;
     }
   }
+  a {
+    display: block;
+    color: $text-color;
+    padding: 15px 20px;
+  }
   td {
     @extend %typography-subtitle;
-    padding-top: 15px;
     height: 100px;
+    position: relative;
     h3 {
       @extend %typography-subtitle;
       margin: 0 0 5px;
     }
     p {
-      margin: 0;
       font-size: 0.8667rem;
       font-weight: $normal-weight;
+      margin: 5px 0 15px;
+      &:last-child {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        @include typography-dropdown-selector;
+        color: $actionable-blue;
+        text-transform: uppercase;
+      }
     }
-    &:last-child {
-      text-transform: uppercase;
+    .report-info {
+      @extend %typography-table-total;
+      color: $medium-gray;
+      span:first-child {
+        display: inline-block;
+        width: 120px;
+        text-transform: uppercase;
+      }
     }
-  }
-  td:first-child, th:first-child {
-    width: (8 * $grid-column-width) + (7 * $gutter-width);
-    padding-right: $grid-column-width + $gutter-width;
-    padding-left: $gutter-width;
-  }
-  .updated-cell {
-    width: $grid-column-width + (2 * $gutter-width);
-  }
-  .history-cell {
-    width: ( 2 * $grid-column-width) + (2 * $gutter-width);
+    p, .report-info {
+      max-width: 840px;
+    }
   }
 }
 
@@ -965,10 +976,13 @@ td.dataTables_empty {
 }
 
 @media print {
+  a, .report-main-body small a, .advances-main-body small a, .authorizations-report a, .reports a, .report a {
+    color: $print-link-color;
+  }
   .account-summary-report .report-table:not(.account-summary-collateral-totals) tbody td:first-child,
   .account-summary-report tfoot,
   .account-summary-collateral-totals tbody td {
-    color: $text-color;
+    color: $print-color;
     background: transparent;
   }
   .account-summary-collateral-notice {
@@ -979,15 +993,13 @@ td.dataTables_empty {
     }
   }
   .account-summary-report {
-    .header-with-action {
+    h2.header-with-action {
       text-align: left;
-      width: 100%;
-      margin-left: 0;
-      display: block;
       a {
-        visibility: hidden;
+        display: none;
       }
       span {
+        display: block;
         float: none;
       }
     }
@@ -1002,7 +1014,7 @@ td.dataTables_empty {
       @include typography-print-details;
       color: $print-color;
     }
-    tfoot td, .account-summary-collateral-totals  {
+    tfoot td, .account-summary-collateral-totals tbody td {
       color: $print-color;
       @include typography-print-table-total;
     }
@@ -1033,7 +1045,7 @@ td.dataTables_empty {
       @include typography-print-footnote;
       width: 66%;
       display: block;
-      p {
+      p, span, span:first-child {
         @include typography-print-footnote;
       }
     }
@@ -1047,6 +1059,9 @@ td.dataTables_empty {
       color: $print-color;
       @include typography-print-summary-data;
     }
+  }
+  .authorizations-report .report-table tbody td {
+    @include typography-print-table-cell;
   }
   .report-table  {
     border: none;

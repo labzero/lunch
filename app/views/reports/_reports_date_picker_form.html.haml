@@ -4,6 +4,7 @@
 - presets ||= []
 - single_date_picker ||= false
 - max_date ||= false
+- min_date ||= false
 - open_direction ||= 'right'
 - insert_filter_before ||=nil
 - date_picker_filter ||=nil
@@ -16,6 +17,6 @@
   - if insert_filter_before
     = yield
   .report-datepicker
-    = render 'shared/date_picker', presets: presets, form: '.report-inputs form', single_date_picker: single_date_picker, max_date: max_date, open_direction: open_direction, date_picker_filter: date_picker_filter
+    = render 'shared/date_picker', presets: presets, form: '.report-inputs form', single_date_picker: single_date_picker, max_date: max_date, min_date: min_date, open_direction: open_direction, date_picker_filter: date_picker_filter
   - if !insert_filter_before
     = yield

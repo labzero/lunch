@@ -86,7 +86,7 @@ module MAPI
           if cal_connection
             message = {'v1:endDate' => end_date.to_date.strftime('%F') , 'v1:startDate' => start_date.to_date.strftime('%F') }
             begin
-              response = cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
+              response = cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER )
             rescue Savon::Error => error
               raise 'Internal Service Error: the holiday calendar service could not be reached'
             end

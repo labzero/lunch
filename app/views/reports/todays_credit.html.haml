@@ -1,0 +1,11 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.row
+  .report-header
+    %h1= t('reports.credit.todays_credit.title')
+    = render 'reports_header_buttons'
+  .report-main-body
+    = render 'reports/reports_table', table_class: 'todays-credit-table', table_data: @todays_credit, sortable: false
+    %small
+      %p= t('reports.data_notice')
+      %p= t('reports.refresh_notice')

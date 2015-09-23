@@ -1,0 +1,12 @@
+%nav-toc {
+  text-transform: uppercase;
+  @include typography-dropdown-selector;
+  a {
+    display: block;
+    margin-bottom: 5px;
+  }
+}
+
+.nav-toc {
+  @extend %nav-toc;
+}

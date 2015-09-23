@@ -29,10 +29,28 @@ And I select the 20th of "last month" in the right calendar
 And I click the datepicker apply button
 Then I should see a "Settlement Transaction Account Statement" with data for dates between the 1st through the 20th of last month
 
+@jira-mem-890
+Scenario: Member enters a date occurring before the minimum allowed date
+Given I am on the "Settlement Transaction Account Statement" report page
+When I click the datepicker field
+And I write "1/10/2014" in the datepicker start input field
+And I write today's date in the datepicker end input field
+And I click the datepicker apply button
+Then I should see a "Settlement Transaction Account Statement" starting 6 months ago and ending today
+
+@jira-mem-890
+Scenario: Member enters a date occurring after the maximum allowed date
+Given I am on the "Settlement Transaction Account Statement" report page
+When I click the datepicker field
+And I write a date from one month ago in the datepicker start input field
+And I write tomorrow's date in the datepicker end input field
+And I click the datepicker apply button
+Then I should see a "Settlement Transaction Account Statement" starting 1 month ago and ending today
+
 @jira-mem-247, @jira-mem-503
 Scenario: Member filters the Settlement Transaction Account Statement
 Given I am on the "Settlement Transaction Account Statement" report page
-And I am showing Settlement Transaction Account activities for 2014
+And I am showing Settlement Transaction Account activities for the last 3 months
 When I filter the report by "Credits"
 Then I should only see "Credit" rows in the Settlement Transaction Account Statement table
 When I filter the report by "Debits"

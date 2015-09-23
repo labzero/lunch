@@ -57,9 +57,13 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     &:last-of-type:not(.dropdown) {
       margin-bottom: 10px;
     }
+    label.label-error {
+      margin-bottom: 0;
+    }
   }
 
   label {
+    @extend %typography-subtitle;
     margin-bottom: 3px;
     display: block;
   }
@@ -76,20 +80,29 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     float: right;
   }
 
-  a {
+  a:not(.secondary-button):not(.primary-button) {
     color: $actionable-blue;
   }
 
   .welcome-login {
-    input[type=submit] {
-      width: 100%;
-    }
     a {
         @extend %typography-table-link;
     }
   }
 
-  form a:not(.secondary-button) {
+  .welcome-login, .welcome-password-change {
+    input[type=submit] {
+      width: 100%;
+    }
+  }
+
+  .welcome-password-change {
+    .input-field-container:last-of-type {
+      margin-bottom: 20px;
+    }
+  }
+
+  form a:not(.secondary-button):not(.primary-button) {
     color: $actionable-blue;
     display: block;
     margin-bottom: 20px;
@@ -98,6 +111,11 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     &:last-child {
       margin-bottom: 0;
     }
+  }
+
+  form a.primary-button {
+    display: block;
+    color: $white;
   }
   
   select {
@@ -155,6 +173,14 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
         text-transform: none;
         text-decoration: none;
       }
+    }
+  }
+  .password-change-success {
+    padding-top: 0;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    &:before {
+      content: $icon-success;
     }
   }
 }

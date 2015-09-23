@@ -9,6 +9,7 @@ RSpec.describe User, :type => :model do
 
   it { is_expected.to callback(:save_ldap_attributes).after(:save) }
   it { is_expected.to callback(:destroy_ldap_entry).after(:destroy) }
+  it { is_expected.to callback(:check_password_change).before(:save) }
   it { should validate_confirmation_of(:email).on(:update) }
   it { should validate_presence_of(:email).on(:update) }
   it { subject.email = 'foo' ; should validate_presence_of(:email_confirmation).on(:update) }
@@ -19,6 +20,39 @@ RSpec.describe User, :type => :model do
   end
   ['foo@example.com', 'foo@example.co', 'bar@example.org'].each do |value|
     it { should allow_value(value).for(:email) }
+  end
+
+  describe 'password changes surpress some validations' do
+    before do
+      subject.password = 'Fooo123!'
+      subject.password_confirmation = subject.password
+    end
+
+    [:given_name, :surname, :email].each do |attr|
+      it "does not validate the presence of `#{attr}`" do
+        subject.send("#{attr}=", nil)
+        expect(subject.valid?).to be(true)
+      end
+    end
+  end
+
+  describe 'validating passwords' do
+    it { should validate_confirmation_of(:password) }
+    it { should validate_length_of(:password).is_at_least(8) }
+    it 'requires at least one capital letter' do
+      should_not allow_value('abcder12!').for(:password)
+    end
+    it 'requires at least one lowercase letter' do
+      should_not allow_value('ABCDER12!').for(:password)
+    end
+    it 'requires at least one number' do
+      should_not allow_value('Abcderrr!').for(:password)
+    end
+    it 'requires at least one symbol' do
+      should_not allow_value('Abcder121').for(:password)
+    end
+    it { should allow_value('Abcder121!').for(:password) }
+    it { should allow_value(nil).for(:password) }
   end
 
   describe '`after_ldap_authentication` method' do
@@ -686,6 +720,60 @@ RSpec.describe User, :type => :model do
     end
     it 'returns false if there is a value for the `terms_accepted_at` attr' do
       expect(subject.accepted_terms?).to eq(false)
+    end
+  end
+
+  describe '`check_password_change` protected method' do
+    let(:call_method) { subject.send(:check_password_change) }
+    it 'checks if the password has changed' do
+      expect(subject).to receive(:password_changed?)
+      call_method
+    end
+    it 'checks if any LDAP backed attributes have changed' do
+      attribute = SecureRandom.hex
+      ldap_attributes = double('Some LDAP Attributes')
+      stub_const("#{described_class.name}::LDAP_ATTRIBUTES_MAPPING", ldap_attributes)
+      allow(subject).to receive(:password_changed?).and_return(true)
+      allow(subject).to receive(:changed).and_return([attribute])
+      expect(ldap_attributes).to receive(:include?).with(attribute)
+      call_method
+    end
+    describe 'if both a password and an LDAP attribute have changed' do
+      before do
+        allow(subject).to receive(:password_changed?).and_return(true)
+        allow(subject).to receive(:changed).and_return([described_class::LDAP_ATTRIBUTES_MAPPING.keys.sample])
+      end
+
+      it 'raises an ActiveRecord::Rollback' do
+        expect{call_method}.to raise_error(ActiveRecord::Rollback)
+      end
+      it 'adds an error to the password field if a rollback is raised' do
+        expect(subject.errors).to receive(:add).with(:password, :non_atomic)
+        call_method rescue ActiveRecord::Rollback
+      end
+    end
+  end
+
+  describe '`clear_password_expiration` protected method' do
+    let(:call_method) { subject.send(:clear_password_expiration) }
+    it 'calls `Devise::LDAP::Adapter.set_ldap_param` with the `LDAP_PASSWORD_EXPIRATION_ATTRIBUTE` set to `false`' do
+      expect(Devise::LDAP::Adapter).to receive(:set_ldap_params).with(subject.username, {described_class::LDAP_PASSWORD_EXPIRATION_ATTRIBUTE => 'false'}, nil, subject.ldap_domain).and_return(true)
+      call_method
+    end
+    it 'calls `reload_ldap_entry` if the update succeeds' do
+      allow(Devise::LDAP::Adapter).to receive(:set_ldap_params).and_return(true)
+      expect(subject).to receive(:reload_ldap_entry)
+      call_method
+    end
+    it 'raises `ActiveRecord::rollback` if the LDAP update fails' do
+      allow(Devise::LDAP::Adapter).to receive(:set_ldap_params).and_return(false)
+      expect{call_method}.to raise_error(ActiveRecord::Rollback)
+    end
+    it 'is called after `ldap_password_save`' do
+      callbacks = described_class.send(:get_callbacks, :ldap_password_save).select do |callback|
+        callback.kind == :after && callback.filter == :clear_password_expiration
+      end
+      expect(callbacks.length).to eq(1)
     end
   end
 

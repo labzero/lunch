@@ -3,8 +3,8 @@ class ApplicationController < ActionController::Base
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
-
   before_action :authenticate_user!
+  before_action :check_password_change
   helper_method :current_member_name
 
   rescue_from Exception do |exception|
@@ -39,6 +39,10 @@ class ApplicationController < ActionController::Base
     current_user.roles = session['roles']
   end
 
+  def check_password_change
+    redirect_to user_expired_password_path if session['password_expired']
+  end
+
   private
 
   def after_sign_out_path_for(resource)
@@ -46,17 +50,26 @@ class ApplicationController < ActionController::Base
   end
 
   def after_sign_in_path_for(resource)
-    session['member_id'] = current_user.member_id if !session['member_id'].present? && current_user && !current_user.member_id.nil?
-    if current_user.accepted_terms?
-      if session['member_id'].present?
-        stored_location_for(resource) || dashboard_path
-      elsif current_user && current_user.ldap_domain == 'intranet'
-        members_select_member_path
-      else
-        raise 'Sign in error: Only intranet users can select a bank.  The current_user is not an intranet user but is also not associated with a member bank.'
-      end
+    # We care about the presence of the 'password_expired' key, as well as its value,
+    # as we only want to check for password expiration once per session.
+    password_expired = session['password_expired']
+    password_expired = current_user.password_expired? unless session.has_key?('password_expired')
+    if password_expired
+      session['password_expired'] = true
+      user_expired_password_path
     else
-      terms_path
+      session['member_id'] = current_user.member_id if !session['member_id'].present? && current_user && !current_user.member_id.nil?
+      if current_user.accepted_terms?
+        if session['member_id'].present?
+          stored_location_for(resource) || dashboard_path
+        elsif current_user && current_user.ldap_domain == 'intranet'
+          members_select_member_path
+        else
+          raise 'Sign in error: Only intranet users can select a bank.  The current_user is not an intranet user but is also not associated with a member bank.'
+        end
+      else
+        terms_path
+      end
     end
   end
 
