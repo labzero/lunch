@@ -1,11 +1,4 @@
 - @page_title = t('welcome.meta_title')
-- intro = %w(definition agree right alert)
-- access = %w(website agreement login data authorized violation member)
-- disclaimers = %w(title sources warranty download responsibility risk)
-- liabilities = %w(liability damages)
-- securities = %w(sale obligations information)
-- advances = %w(members_only extend_credit act_upon_html liability indemnity authorization questions_html obligations consultations)
-- beneficiaries = %w(no_third_party no_transfer)
 %section.welcome
   .row
     .column-4x8-left
@@ -24,57 +17,6 @@
         %section
           %h1= t('terms.title')
         %section
-          - intro.each do |section|
-            %p= t("terms.intro.#{section}")
-          %h2= t('terms.access.title')
-          %ol
-            - access.each do |section|
-              %li= t("terms.access.#{section}")
-          %h2= t('terms.false_information.title')
-          %p= t('terms.false_information.description')
-          %h2= t('terms.privacy.title')
-          %p= t('terms.privacy.description_html', url: 'https://member.fhlbsf.com/member/privacy.aspx')
-          %h2= t('terms.disclaimers.title')
-          - disclaimers.each do |section|
-            %p= t("terms.disclaimers.#{section}")
-          %h2= t('terms.ownership.title')
-          %p= t('terms.ownership.description')
-          %h2= t('terms.liability.title')
-          - liabilities.each do |section|
-            %p= t("terms.liability.#{section}")
-          %h2= t('terms.indemnity.title')
-          %p= t('terms.indemnity.description')
-          %h2= t('terms.links.title')
-          %p= t('terms.links.description')
-          %h2= t('terms.modifications.title')
-          %p= t('terms.modifications.description')
-          %h2= t('terms.governing_law.title')
-          %p= t('terms.governing_law.description')
-          %h2= t('terms.termination_of_access.title')
-          %p= t('terms.termination_of_access.take_effect_html', email: 'websupport@fhlbsf.com', phone: fhlb_formatted_phone_number('4156162610'))
-          %p= t('terms.termination_of_access.member_agreements')
-          %h2= t('terms.infringement.title')
-          %p= t('terms.infringement.description_html', email: 'websupport@fhlbsf.com', phone: fhlb_formatted_phone_number('4156162610'))
-          %h2= t('terms.securities_transactions.title')
-          - securities.each do |section|
-            %p= t("terms.securities_transactions.#{section}")
-          %h2= t('terms.advance_transactions.title')
-          - advances.each do |section|
-            - if section == 'act_upon_html'
-              %p= t("terms.advance_transactions.#{section}", url: 'www.fhlbsf.com/security.asp')
-            - elsif section == 'questions_html'
-              %p= t("terms.advance_transactions.#{section}", email: 'websupport@fhlbsf.com', phone: fhlb_formatted_phone_number('4156162610'))
-            - else
-              %p= t("terms.advance_transactions.#{section}")
-          %h2= t('terms.other_agreements.title')
-          %p= t('terms.other_agreements.description')
-          %h2= t('terms.waiver.title')
-          %p= t('terms.waiver.description')
-          %h2= t('terms.limitations.title')
-          %p= t('terms.limitations.description')
-          %h2= t('terms.beneficiaries.title')
-          - beneficiaries.each do |section|
-            %p= t("terms.beneficiaries.#{section}")
-          %p= t('terms.section_headings_disclaimer')
+          = render 'terms'
         %section
           = submit_tag t('terms.agree'), class: 'primary-button'

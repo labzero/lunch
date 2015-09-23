@@ -6,7 +6,6 @@ Rails.application.routes.draw do
 
   get '/details' => 'welcome#details'
   get '/healthy' => 'welcome#healthy'
-  get '/terms-of-use' => 'error#standard_error', as: :terms_of_use
   get '/disclaimer-reuters' => 'error#standard_error', as: :disclaimer_reuters
   get '/online-security' => 'error#standard_error', as: :online_security
   get '/grid_demo' => 'welcome#grid_demo'
@@ -118,6 +117,7 @@ Rails.application.routes.draw do
     post 'member/password' => 'users/passwords#create', as: :user_password
     get 'member/password/reset' => 'users/passwords#edit', as: :edit_user_password
     put 'member/password' => 'users/passwords#update'
+    get '/terms-of-use' => 'members#terms_of_use', as: :terms_of_use
   end
   devise_for :users, controllers: { sessions: 'users/sessions', passwords: 'users/passwords' }, :skip => [:sessions, :passwords]
 
