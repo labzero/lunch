@@ -1227,7 +1227,7 @@ en:
           schedule: Can be designed to match most amortization schedules for a variety of fixed rate loans. The borrower specifies the amortization rate of the advance, which determines the amortization schedule.
           description: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the Statement of Authority: Advances with Partial Prepayment Symmetry (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       callable:
-        title: Callable advance
+        title: Callable Advance
         description: Use the Callable Advance—with built-in prepayment options—to reduce interest rate risk and prepayment risk at minimal added cost. You may "call" (repay) the advance at predetermined dates without paying the standard prepayment fee.
         uses:
           fixed: Match-fund fixed rate mortgages
