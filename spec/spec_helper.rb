@@ -72,6 +72,7 @@ RSpec.configure do |config|
   config.include Devise::TestHelpers, :type => :controller
   config.include FactoryGirl::Syntax::Methods
   config.extend AuthenticationHelpers, :type => :controller
+  config.include UserHelpers, :type => :controller
   config.include Paperclip::Shoulda::Matchers
   config.extend AuthorizationHelpers, :type => :controller
 

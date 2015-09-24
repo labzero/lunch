@@ -63,7 +63,9 @@ Rails.application.routes.draw do
   get '/settings/users/:id/confirm_delete' => 'settings#confirm_delete', as: 'user_confirm_delete'
   delete '/settings/users/:id' => 'settings#delete_user'
   get '/settings/expired-password' => 'settings#expired_password', as: :user_expired_password
-  put '/settings/expired-password' => 'settings#update_password', as: :user_update_password
+  put '/settings/expired-password' => 'settings#update_expired_password'
+  get '/settings/password' => 'settings#change_password', as: :settings_password
+  put '/settings/password' => 'settings#update_password'
 
   get '/jobs/:job_status_id' => 'jobs#status', as: 'job_status'
   get '/jobs/:job_status_id/download' => 'jobs#download', as: 'job_download'

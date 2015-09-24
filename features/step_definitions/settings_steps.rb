@@ -27,6 +27,20 @@ When(/^I am on the email settings page$/) do
   step "I should be on the email settings page"
 end
 
+Given(/^I am on the change password page$/) do
+  visit "/settings"
+  step "I click on \"#{I18n.t('settings.password.title')}\" in the sidebar nav"
+  step %{I should see the change password page}
+end
+
+Then(/^I should see the change password page$/) do
+  page.assert_selector('.settings-password form', visible: true)
+end
+
+Given(/^I fill in the current password field with the (password change user)'s password$/) do |user_type|
+  fill_in(:user_current_password, with: user_for_type(user_type)['password'])
+end
+
 Given(/^I see the unselected state for the "(.*?)" option$/) do |option|
   page.assert_selector(".settings-email-#{option}-row td:nth-child(3) .settings-selected-item-message", :visible => :hidden)
 end
@@ -153,4 +167,18 @@ end
 
 Then(/^I should see the failed to resynchronize token message$/) do
     page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(I18n.t('settings.two_factor.resynchronize.error'))}\z/, visible: true)
+end
+
+Then(/^I should see current password validations$/) do
+  step %{I enter a current password of ""}
+  step %{I should see a current password required error}
+end
+
+When(/^I enter a current password of "([^"]*)"$/) do |password|
+  fill_in(:user_current_password, with: password)
+  page.find('body').click
+end
+
+Then(/^I should see a current password required error$/) do
+  page.assert_selector('label.label-error', exact: true, visible: true, text: I18n.t('activerecord.errors.models.user.attributes.current_password.blank'))
 end

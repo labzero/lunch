@@ -2,7 +2,7 @@ class SettingsController < ApplicationController
 
   before_action do
     @sidebar_options = [
-        [t("settings.password.title"), '#'],
+        [t("settings.password.title"), settings_password_path],
         [t("settings.quick_advance.title"), '#'],
         [t("settings.quick_report.title"), '#'],
         [t("settings.two_factor.title"), settings_two_factor_path],
@@ -30,7 +30,7 @@ class SettingsController < ApplicationController
     authorize @user, :delete?
   end
 
-  skip_before_action :check_password_change, only: [:expired_password, :update_password]
+  skip_before_action :check_password_change, only: [:expired_password, :update_expired_password]
 
   def index
     @email_options = ['reports'] + CorporateCommunication::VALID_CATEGORIES
@@ -199,22 +199,39 @@ class SettingsController < ApplicationController
     end
   end
 
-  def update_password
-    expiration_flow = session['password_expired']
+  def change_password
+    current_user.enable_virtual_validators!
+  end
 
+  def update_expired_password
+    raise 'Updating non-expired password!' unless session['password_expired']
+    
     current_user.password = params[:user][:password]
     current_user.password_confirmation = params[:user][:password_confirmation]
 
     if current_user.save
-      if expiration_flow
-        session['password_expired'] = false
-        @next_location = after_sign_in_path_for(current_user)
-        render :update_password_success, layout: 'external'
+      session['password_expired'] = false
+      @next_location = after_sign_in_path_for(current_user)
+      render :update_password_success, layout: 'external'
+    else
+      render :expired_password, layout: 'external'
+    end
+  end
+
+  def update_password
+    if current_user.valid_ldap_authentication?(params[:user][:current_password])
+      current_user.password = params[:user][:password]
+      current_user.password_confirmation = params[:user][:password_confirmation]
+
+      if current_user.save
+        flash[:notice] = t('devise.passwords.updated_not_active')
+        redirect_to(settings_password_path)
       else
-        redirect_to settings_path
+        render :change_password
       end
     else
-      render :expired_password, layout: expiration_flow ? 'external' : nil
+      current_user.errors.add(:current_password)
+      render :change_password
     end
   end
 

@@ -218,6 +218,9 @@ en:
               symbol_needed: "Passwords must contain at least symbol (!@#$%*)."
               confirmation: Passwords do not match.
               ldap_update_failed: We failed to update your password. Most likely you used a password that was used before.
+            current_password:
+              invalid: Password is incorrect.
+              blank: Please enter your current password.
             password_confirmation:
               confirmation: Passwords do not match.
   user_roles:
@@ -304,6 +307,7 @@ en:
         success_html: User access for <strong>%{name}</strong> has been deleted.
     password:
       title: Password
+      instructions: "Change your Member Portal password.\n\nIf you have questions about account access, contact your institution’s Access Manager or <a href=\"%{url}\">Web Support</a> at %{phone_number}."
     quick_advance:
       title: Quick Advance
     quick_report:
@@ -313,6 +317,10 @@ en:
       instructions: "Passwords should contain at least 8 characters, including one capital letter, one number and one special character (!@#$%*). Passwords expire every 60 days. You may not reuse a password that you have used within the last eight 60-day periods."
       password_field: New password
       confirm_field: Re-enter new password
+      current_password_field: Current password
+      current_password_step: Enter your current password.
+      new_password_step: Enter your new password.
+      save_button: Save new password
     two_factor:
       title: 2-Step Verification
       description: Manage authentication with your SecurID token.

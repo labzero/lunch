@@ -50,6 +50,20 @@ userAccountControl: 512
 mail: local-expired@example.com
 passwordExpired: true
 
+# local user with a password we can change
+dn: sAMAccountName=local-password,dc=fhlbsf-i,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Local User Changeable Password
+sn: User Changeable Password
+givenname: Local
+sAMAccountName: local-password
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+userAccountControl: 512
+mail: local-password@example.com
+
 # FCN-MemberSite-AccessManagers-R group
 dn: CN=FCN-MemberSite-AccessManagers-R,DC=fhlbsf-i,DC=com
 cn: FCN-MemberSite-AccessManagers-R

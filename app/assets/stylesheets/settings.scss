@@ -130,6 +130,9 @@
       pointer-events: none;
     }
   }
+  .form-flash-message {
+    display: block;
+  }
 }
 
 .settings-users {
@@ -333,5 +336,37 @@
       padding-left: 1px;
       box-sizing: border-box;
     }
+  }
+}
+
+.settings-password {
+  h1 + p {
+    margin-bottom: 25px;
+  }
+  p {
+    margin-bottom: 20px;
+  }
+  ol {
+    margin: 0;
+  }
+  label {
+    @extend %typography-subtitle;
+  }
+  .input-field-container input {
+    width: 288px;
+    display: block;
+  }
+  .form-actions {
+    float: right;
+  }
+  .secondary-button {
+    margin-right: 20px;
+    min-width: 100px;
+  }
+  .input-field-container:last-of-type {
+    margin-bottom: 20px;
+  }
+  fieldset {
+    margin-top: 10px;
   }
 }
