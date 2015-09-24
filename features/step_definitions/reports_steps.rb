@@ -385,7 +385,7 @@ Then(/^I should not see the detailed view for the first (advance|cash projection
 end
 
 def sleep_if_close_to_midnight
-  now = DateTime.now
+  now = Time.zone.now
   seconds_till_tomorrow = (now.tomorrow.beginning_of_day - now) * 1.days
   if seconds_till_tomorrow <= 30
     sleep(seconds_till_tomorrow + 1)
