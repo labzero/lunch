@@ -204,7 +204,7 @@ AfterConfiguration do
     sleep(30) # primary runner needs to sleep to make sure secondary workers see the sentinel (in the case where the primary work exits quickly... ie no work to do)
   end
 
-  sleep(parallel_test_number) # stagger runners to avoid certain race conditions
+  sleep(parallel_test_number.to_i) # stagger runners to avoid certain race conditions
 
   puts "Starting run `#{run_name}`"
 end
