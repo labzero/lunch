@@ -1911,7 +1911,10 @@ en:
     agree: I agree to the terms of use
   errors:
     format: '%{message}'
-    assistance: "If you need assistance, contact our Web Support team at %{phone_number}."
+    assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."
+    "404":
+      headline: The page you're looking for doesn't exist.
+      summary: Please double-check the URL you entered. If you followed a link to get here, let us know and we'll fix it.
     "500":
       headline: Sorry for the inconvenience.
       summary: We have encountered an error and are working on fixing the problem as quickly as possible.

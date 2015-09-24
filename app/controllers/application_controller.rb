@@ -7,6 +7,8 @@ class ApplicationController < ActionController::Base
   before_action :check_password_change
   helper_method :current_member_name
 
+  HTTP_404_ERRORS = [ActionController::RoutingError, ActionController::UnknownController, ::AbstractController::ActionNotFound, ActiveRecord::RecordNotFound]
+
   rescue_from Exception do |exception|
     unless Rails.env.production?
       raise exception
@@ -84,7 +86,11 @@ class ApplicationController < ActionController::Base
     Rails.logger.error exception
     Rails.logger.error exception.backtrace.join("\n")
     begin
-      render 'error/500', layout: 'error', status: 500
+      if HTTP_404_ERRORS.include?(exception.class)
+        render 'error/404', layout: 'error', status: 404
+      else
+        render 'error/500', layout: 'error', status: 500
+      end
     rescue => e
       render text: e, status: 500
     end
