@@ -1,22 +1,38 @@
 require 'rails_helper'
 
 RSpec.describe ApplicationController, :type => :controller do
-  let(:error) {StandardError.new}
-
   it { should use_before_action(:check_password_change) }
 
   describe '`handle_exception` method' do
     let(:backtrace) {%w(some backtrace array returned by the error)}
-    it 'captures all StandardErrors and displays the 500 error view' do
-      expect(error).to receive(:backtrace).and_return(backtrace)
-      expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500})
-      controller.send(:handle_exception, error)
+    describe 'StandardError' do
+      let(:error) {StandardError.new}
+      before { allow(error).to receive(:backtrace).and_return(backtrace) }
+      it 'captures all StandardErrors and displays the 500 error view' do
+        expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500})
+        controller.send(:handle_exception, error)
+      end
+      it 'rescues any exceptions raised when rendering the `error/500` view' do
+        expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500}).and_raise(error)
+        expect(controller).to receive(:render).with({:text=>error, :status=>500})
+        controller.send(:handle_exception, error)
+      end
     end
-    it 'rescues any exceptions raised when rendering the `error/500` view' do
-      expect(error).to receive(:backtrace).at_least(1).and_return(backtrace)
-      expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500}).and_raise(error)
-      expect(controller).to receive(:render).with({:text=>error, :status=>500})
-      controller.send(:handle_exception, error)
+
+    ApplicationController::HTTP_404_ERRORS.each do |error_type|
+      describe "#{error_type}" do
+        let(:error) { error_type.new('some error') }
+        before { allow(error).to receive(:backtrace).and_return(backtrace) }
+        it "captures #{error_type}s and displays the 404 error view" do
+          expect(controller).to receive(:render).with('error/404', {:layout=>"error", :status=>404})
+          controller.send(:handle_exception, error)
+        end
+        it 'rescues any exceptions raised when rendering the `error/404` view' do
+          allow(controller).to receive(:render).with('error/404', {:layout=>"error", :status=>404}).and_raise(error)
+          expect(controller).to receive(:render).with({:text=>error, :status=>500})
+          controller.send(:handle_exception, error)
+        end
+      end
     end
   end
 

@@ -7,8 +7,8 @@ Rails.application.routes.draw do
   get '/details' => 'welcome#details'
   get '/healthy' => 'welcome#healthy'
   get '/session_status' => 'welcome#session_status'
-  get '/disclaimer-reuters' => 'error#standard_error', as: :disclaimer_reuters
-  get '/online-security' => 'error#standard_error', as: :online_security
+  get '/disclaimer-reuters' => 'error#not_found', as: :disclaimer_reuters
+  get '/online-security' => 'error#not_found', as: :online_security
   get '/grid_demo' => 'welcome#grid_demo'
 
   get '/dashboard' => 'dashboard#index'
@@ -43,8 +43,8 @@ Rails.application.routes.draw do
     get '/capital-stock-and-leverage' => 'reports#capital_stock_and_leverage'
     get '/account-summary' => 'reports#account_summary'
     get '/todays-credit' => 'reports#todays_credit'
-    get '/trial-balance' => 'error#standard_error'
-    get '/mortgage-collateral-update' => 'error#standard_error'
+    get '/trial-balance' => 'error#not_found'
+    get '/mortgage-collateral-update' => 'error#not_found'
   end
 
   get '/advances' => 'advances#index'
@@ -84,17 +84,17 @@ Rails.application.routes.draw do
 
   scope 'products' do
     get '/summary' => 'products#index', as: :product_summary
-    get '/letters-of-credit' => 'error#standard_error'
-    get '/community_programs' => 'error#standard_error'
-    get '/product-mpf-pfi' => 'error#standard_error', as: :product_mpf_pfi
+    get '/letters-of-credit' => 'error#not_found'
+    get '/community_programs' => 'error#not_found'
+    get '/product-mpf-pfi' => 'error#not_found', as: :product_mpf_pfi
     scope 'advances' do
       get 'adjustable-rate-credit' => 'products#arc', as: :arc
-      get 'advances-for-community-enterprise' => 'error#standard_error', as: :ace
+      get 'advances-for-community-enterprise' => 'error#not_found', as: :ace
       get 'amortizing' => 'products#amortizing', as: :amortizing
       get 'arc-embedded' => 'products#arc_embedded', as: :arc_embedded
       get 'callable' => 'products#callable', as: :callable
       get 'choice-libor' => 'products#choice_libor', as: :choice_libor
-      get 'community-investment-program' => 'error#standard_error', as: :cip
+      get 'community-investment-program' => 'error#not_found', as: :cip
       get 'auction-indexed' => 'products#auction_indexed', as: :auction_indexed
       get 'fixed-rate-credit' => 'products#frc', as: :frc
       get 'frc-embedded' => 'products#frc_embedded', as: :frc_embedded
@@ -128,6 +128,10 @@ Rails.application.routes.draw do
 
   get '/error' => 'error#standard_error' unless Rails.env.production?
   get '/maintenance' => 'error#maintenance' unless Rails.env.production?
+  get '/not-found' => 'error#not_found' unless Rails.env.production?
+
+  # This catchall route MUST be listed here last to avoid catching previously-named routes
+  get '*unmatched_route' => 'error#not_found'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

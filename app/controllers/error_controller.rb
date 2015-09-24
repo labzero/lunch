@@ -11,4 +11,8 @@ class ErrorController < ApplicationController
     render 'maintenance', layout: 'error', :status => 503
   end
 
+  def not_found
+    raise ActionController::RoutingError.new('Not Found')
+  end
+
 end
