@@ -1,5 +1,4 @@
 $(function () {
-
   function bindDatepickers() {
     // set up all date-pickers on the page
     $('.datepicker-trigger').each(function(i, datePickerTrigger) {
@@ -231,7 +230,7 @@ $(function () {
 
   function snapToValidDate(e, picker, options){
     //  if date is in the future, snap to today
-    var today = moment();
+    var today = moment('<%=Time.zone.today%>');
     var thisMonth = moment().month();
     var $el = $(e.target);
     var date = moment($el.val());
