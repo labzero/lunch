@@ -90,6 +90,6 @@ Scenario: User logs in with expired password
   Then I proceed through the login flow
   And I should be logged in
   When I log out
-  And I login with as the expired user with the new password
+  And I login as the expired user with the new password
   Then I should be logged in
 
