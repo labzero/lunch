@@ -77,7 +77,7 @@ When(/^I log in as "(.*?)" with password "(.*?)"$/) do |user, password|
   step %{I fill in and submit the login form with username "#{user}" and password "#{password}"}
 end
 
-When(/^I login with as the (password change user|expired user) with the new password$/) do |user_type|
+When(/^I login as the (password change user|expired user) with the new password$/) do |user_type|
   user = user_for_type(user_type)
   step %{I log in as "#{user['username']}" with password "#{valid_password}"}
   select_member_if_needed

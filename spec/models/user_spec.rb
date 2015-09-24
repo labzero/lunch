@@ -745,7 +745,7 @@ RSpec.describe User, :type => :model do
     it 'returns false by default' do
       expect(call_method).to be(false)
     end
-    it 'returns true by after `enable_virtual_validators!` is called' do
+    it 'returns true after `enable_virtual_validators!` is called' do
       subject.enable_virtual_validators!
       expect(call_method).to be(true)
     end

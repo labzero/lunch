@@ -118,5 +118,5 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
     Then I should see the change password page
     And I should see a success flash
     When I log out
-    And I login with as the password change user with the new password
+    And I login as the password change user with the new password
     Then I should be logged in
