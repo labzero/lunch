@@ -716,9 +716,8 @@ class ReportsController < ApplicationController
           columns: [
             {value: credit[:lc_number], type: nil},
             {value: credit[:current_par], type: :currency_whole},
-            {value: credit[:maintenance_charge], type: :currency_whole},
+            {value: credit[:maintenance_charge], type: :basis_point},
             {value: credit[:trade_date], type: :date, classes: [:'report-cell-right']},
-            {value: credit[:settlement_date], type: :date, classes: [:'report-cell-right']},
             {value: credit[:maturity_date], type: :date, classes: [:'report-cell-right']},
             {value: credit[:description], type: nil}
           ]
@@ -728,9 +727,9 @@ class ReportsController < ApplicationController
       []
     end
     @loc_table_data = {
-      column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('common_table_headings.trade_date'), t('common_table_headings.settlement_date'), t('common_table_headings.maturity_date'), t('common_table_headings.description')],
+      column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), fhlb_add_unit_to_table_header(t('reports.pages.letters_of_credit.headers.current_amount'), '$'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('reports.pages.letters_of_credit.headers.issuance_date'), t('common_table_headings.maturity_date'), t('reports.pages.letters_of_credit.headers.credit_program')],
       rows: rows,
-      footer: [{value: t('global.total')}, {value: @total_current_par, type: :currency_whole}, {value: nil, colspan: 5}]
+      footer: [{value: t('global.total')}, {value: @total_current_par, type: :currency_whole}, {value: nil, colspan: 4}]
     }
   end
 

@@ -525,7 +525,7 @@ RSpec.describe ReportsController, :type => :controller do
           end
         end
         it 'sets @loc_table_data[:rows] to the formatted value returned by MemberBalanceService.letters_of_credit' do
-          credit_keys = [:lc_number, :current_par, :maintenance_charge, :trade_date, :settlement_date, :maturity_date, :description]
+          credit_keys = [:lc_number, :current_par, :maintenance_charge, :trade_date, :maturity_date, :description]
           credit = {}
           credit_keys.each do |key|
             credit[key] = double(key.to_s)
