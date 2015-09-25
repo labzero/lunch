@@ -20,6 +20,7 @@ $(function () {
       var minDate = $wrapper.data('date-picker-min-date') ? moment($wrapper.data('date-picker-min-date')) : false;
       var filter = $wrapper.data('date-picker-filter');
       var filterOptions = $wrapper.data('date-picker-filter-options');
+      var today = $wrapper.data('date-picker-today');
       $.each(presets, function(index, preset) {
         if (preset.start_date) {
           preset.start_date = moment(preset.start_date);
@@ -51,7 +52,8 @@ $(function () {
         maxDate: maxDate,
         minDate: minDate,
         filter: filter,
-        filterOptions: filterOptions
+        filterOptions: filterOptions,
+        today: today
       });
       datePickerSelectionHandler($datePickerTrigger, $wrapper, presets);
       setDatePickerApplyListener($datePickerTrigger, $form);
@@ -80,6 +82,7 @@ $(function () {
       ranges: options.ranges,
       maxDate: options.maxDate,
       minDate: options.minDate,
+      today: options.today,
       parentEl: $datePickerWrapper,
       locale: {
         customRangeLabel: options.customLabel,
@@ -230,7 +233,7 @@ $(function () {
 
   function snapToValidDate(e, picker, options){
     //  if date is in the future, snap to today
-    var today = moment('<%=Time.zone.today%>');
+    var today = moment(options.today);
     var thisMonth = moment().month();
     var $el = $(e.target);
     var date = moment($el.val());
