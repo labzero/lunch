@@ -1,0 +1,57 @@
+{
+  "final": true,
+  "transactions":[
+  {
+    "fhlb_id":564,
+    "custody_account_no":"082011",
+    "new_transaction":"Y",
+    "cusip":"31393RVW7",
+    "transaction_code":"DELD",
+    "security_description":"FEDERAL HOME LN MTG GD REMIC",
+    "units":10700000,
+    "maturity_date":"15-JUN-18",
+    "payment_or_principal":1609041.64,
+    "interest":0,
+    "total":1609041.64
+  },
+  {
+    "fhlb_id":564,
+    "custody_account_no":"082011",
+    "new_transaction":"Y",
+    "cusip":"31398J7L1",
+    "transaction_code":"DELD",
+    "security_description":"FEDERAL HOME LN MTG GD REMIC",
+    "units":10000000,
+    "maturity_date":"15-AUG-19",
+    "payment_or_principal":1449488.15,
+    "interest":0,
+    "total":1449488.15
+  },
+  {
+    "fhlb_id":564,
+    "custody_account_no":"082011",
+    "new_transaction":"Y",
+    "cusip":"31398KQH6",
+    "transaction_code":"DELD",
+    "security_description":"FEDERAL HOME LN MTG GD REMIC",
+    "units":20900000,
+    "maturity_date":"15-DEC-17",
+    "payment_or_principal":1407430.68,
+    "interest":0,
+    "total":1407430.68
+  },
+    {
+      "fhlb_id":564,
+      "custody_account_no":"082011",
+      "new_transaction":"Y",
+      "cusip":"31398M7H3",
+      "transaction_code":"DELD",
+      "security_description":"FEDERAL NAT MTG ASSN REMIC",
+      "units":10000000,
+      "maturity_date":"25-JUL-24",
+      "payment_or_principal":439472.71,
+      "interest":0,
+      "total":439472.71
+    }
+  ]
+}

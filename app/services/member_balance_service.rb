@@ -254,14 +254,13 @@ class MemberBalanceService < MAPIService
   end
 
   def securities_transactions(as_of_date)
-    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
-
-    if data = get_fake_hash(:securities_transactions, 'securities_transactions.json')
-      data[:total_payment_or_principal] = lenient_sum(data[:transactions], :payment_or_principal)
-      data[:total_interest]             = lenient_sum(data[:transactions], :interest)
-      data[:total_net]                  = lenient_sum(data[:transactions], :total)
+    if data = get_hash(:securities_transactions, "/member/#{@member_id}/securities_transactions/#{as_of_date.to_date.iso8601}")
+      data.merge(
+          total_payment_or_principal: lenient_sum(data[:transactions], :payment_or_principal),
+          total_interest:             lenient_sum(data[:transactions], :interest),
+          total_net:                  lenient_sum(data[:transactions], :total)
+      )
     end
-    data
   end
 
   def securities_services_statement(month)
