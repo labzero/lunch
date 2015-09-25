@@ -1913,3 +1913,11 @@ en:
     table_data_unavailable: This information is currently unavailable
     no_messages: No Messages
     error_occurred: An error has occurred.
+    emails:
+      calypso_error:
+        subject: 'Notice: System error occured'
+        error_class: Error Class
+        error_message: Error Message
+        error_inspection: Error Details
+        error_backtrace: Backtrace
+        body_html: "The Member Portal has encountered an error talking to Calypso for request <strong>%{request_id}</strong>, issued by <strong>%{user}</strong> on behalf of <strong>%{member}</strong>.\n\nThe error details are:"
