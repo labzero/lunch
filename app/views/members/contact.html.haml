@@ -1,0 +1,236 @@
+- @html_class = 'white-background'
+.row.contact-page
+  .column-2x10-right
+    %h1= t('global.contact')
+    %nav.nav-toc
+      = link_to(t('contact.general_information.title'), '#general')
+      = link_to(t('contact.member_financial_services.title'), '#services')
+      = link_to(t('contact.collateral_departments.title'), '#collateral')
+      = link_to(t('contact.electronic_funds_management.title'), '#efunds')
+      = link_to(t('contact.operations.title'), '#operations')
+      = link_to(t('contact.financial_accounting_reporting.title'), '#reporting')
+      = link_to(t('contact.community_investment.title'), '#community')
+      = link_to(t('contact.cofi.title'), '#cofi')
+      = link_to(t('contact.web_support.title'), '#support')
+    %section
+      %a{name: 'general'}
+      %h2= t('contact.general_information.title')
+      %p= simple_format(t('contact.general_information.address'))
+    %table
+      %tbody
+        %tr
+          %td= t('global.phone')
+          %td= t('contact.general_information.phone.toll_free')
+        %tr
+          %td
+          %td= t('contact.general_information.phone.sf')
+    %section
+      %a{name: 'services'}
+      %h2= t('contact.member_financial_services.title')
+      %h3= t('contact.member_financial_services.service_desk.title')
+      %table
+        %tbody
+          %tr
+            %td= t('global.phone')
+            %td= t('contact.member_financial_services.service_desk.phone.toll_free')
+          %tr
+            %td
+            %td= t('contact.member_financial_services.service_desk.phone.sf')
+          %tr
+            %td= t('global.fax')
+            %td= t('contact.member_financial_services.service_desk.phone.fax')
+      %h3= t('contact.member_financial_services.relationship_managers.title')
+      %table
+        %tbody
+          %tr
+            %td= t('contact.member_financial_services.relationship_managers.cibull_html', url:'mailto:cibulls@fhlbsf.com')
+            %td= t('contact.member_financial_services.relationship_managers.cibull_phone')
+          %tr
+            %td= t('contact.member_financial_services.relationship_managers.mccormack_html', url:'mailto:mccormaj@fhlbsf.com')
+            %td= t('contact.member_financial_services.relationship_managers.mccormack_phone')
+          %tr
+            %td= t('contact.member_financial_services.relationship_managers.remch_html', url:'mailto:remchp@fhlbsf.com')
+            %td= t('contact.member_financial_services.relationship_managers.remch_phone')
+          %tr
+            %td= t('contact.member_financial_services.relationship_managers.wilson_html', url:'mailto:wilsont@fhlbsf.com')
+            %td= t('contact.member_financial_services.relationship_managers.wilson_phone')
+          %tr
+            %td= t('global.fax')
+            %td= t('contact.member_financial_services.relationship_managers.fax_phone')
+      %h3= t('contact.member_financial_services.mortgage_purchases.title')
+      %table
+        %tbody
+          %tr
+            %td= t('contact.member_financial_services.mortgage_purchases.cox_html', url:'mailto:coxt@fhlbsf.com')
+            %td= t('contact.member_financial_services.mortgage_purchases.cox_phone')
+          %tr
+            %td= t('contact.member_financial_services.mortgage_purchases.turturice_html', url:'mailto:turturik@fhlbsf.com')
+            %td= t('contact.member_financial_services.mortgage_purchases.turturice_phone')
+          %tr
+            %td= t('contact.member_financial_services.mortgage_purchases.wong_html', url:'mailto:wongt@fhlbsf.com')
+            %td= t('contact.member_financial_services.mortgage_purchases.wong_phone')
+          %tr
+            %td= t('contact.member_financial_services.mortgage_purchases.yue_html', url:'mailto:yuer@fhlbsf.com')
+            %td= t('contact.member_financial_services.mortgage_purchases.yue_phone')
+          %tr
+            %td= t('global.fax')
+            %td= t('contact.member_financial_services.mortgage_purchases.fax_phone')
+    %section
+      %a{name: 'collateral'}
+      %h2= t('contact.collateral_departments.title')
+      %h3= t('contact.collateral_departments.collateral_operations.title')
+      %table
+        %tbody
+          %tr
+            %td= t('global.phone')
+            %td= t('contact.collateral_departments.collateral_operations.phone')
+          %tr
+            %td= t('global.fax')
+            %td= t('contact.collateral_departments.collateral_operations.fax')
+          %tr
+            %td= t('global.email')
+            %td= t('contact.collateral_departments.collateral_operations.email_html', url: 'mailto:collateraloperations@fhlbsf.com')
+          %tr
+            %td
+            %td= t('contact.collateral_departments.collateral_operations.email_mcu_html', url: 'mailto:cmsmcu@fhlbsf.com')
+      %ul
+        %li= t('contact.collateral_departments.collateral_operations.blanket')
+        %li= t('contact.collateral_departments.collateral_operations.pledge')
+        %li= t('contact.collateral_departments.collateral_operations.deficiency')
+        %li= t('contact.collateral_departments.collateral_operations.vault')
+        %li= t('contact.collateral_departments.collateral_operations.mcu')
+    %h3= t('contact.collateral_departments.collateral_services.title')
+    %table
+      %tbody
+        %tr
+          %td= t('global.phone')
+          %td= t('contact.collateral_departments.collateral_services.phone')
+        %tr
+          %td
+          %td= t('contact.collateral_departments.collateral_services.phone_b')
+        %tr
+          %td= t('global.fax')
+          %td= t('contact.collateral_departments.collateral_services.fax')
+        %tr
+          %td= t('global.email')
+          %td= t('contact.collateral_departments.collateral_services.email_html', url: 'mailto:collateral@fhlbsf.com')
+    %ul
+      %li= t('contact.collateral_departments.collateral_services.eligibility')
+      %li= t('contact.collateral_departments.collateral_services.reviews')
+    %h3= t('contact.collateral_departments.securities_services.title')
+    %table
+      %tbody
+        %tr
+          %td= t('global.phone')
+          %td= t('contact.collateral_departments.securities_services.phone')
+        %tr
+          %td= t('global.fax')
+          %td= t('contact.collateral_departments.securities_services.fax')
+        %tr
+          %td= t('global.email')
+          %td= t('contact.collateral_departments.securities_services.email_html', url:'mailto:securitiesservices@fhlbsf.com')
+    %ul
+      %li= t('contact.collateral_departments.securities_services.safekeeping')
+      %li= t('contact.collateral_departments.securities_services.settlement')
+      %li= t('contact.collateral_departments.securities_services.principal')
+      %li= t('contact.collateral_departments.securities_services.cash')
+    %section
+      %a{name: 'efunds'}
+      %h2= t('contact.electronic_funds_management.title')
+      %table
+        %tbody
+          %tr
+            %td= t('global.phone')
+            %td= t('contact.electronic_funds_management.phone')
+          %tr
+            %td= t('global.fax')
+            %td= t('contact.electronic_funds_management.fax')
+          %tr
+            %td= t('global.email')
+            %td= t('contact.electronic_funds_management.email_html', url:'mailto:wireroom@fhlbsf.com')
+      %p= t('contact.electronic_funds_management.wire')
+    %section
+      %a{name: 'operations'}
+      %h2= t('contact.operations.title')
+      %table
+        %tbody
+          %tr
+            %td= t('global.phone')
+            %td= t('contact.operations.phone')
+          %tr
+            %td= t('contact.operations.sta_rate')
+            %td= t('contact.operations.sta')
+          %tr
+            %td= t('contact.operations.norman_html', url:'mailto:normanb@fhlbsf.com')
+            %td= t('contact.operations.norman')
+          %tr
+            %td= t('contact.operations.oneil_html', url:'mailto:oneilg@fhlbsf.com')
+            %td= t('contact.operations.oneil')
+          %tr
+            %td= t('contact.operations.taruc_html', url:'mailto:tarucm@fhlbsf.com')
+            %td= t('contact.operations.taruc')
+    %section
+      %a{name: 'reporting'}
+      %h2= t('contact.financial_accounting_reporting.title')
+      %table
+        %tbody
+          %tr
+            %td= t('contact.financial_accounting_reporting.tung_html', url:'mailto:tungc@fhlbsf.com')
+            %td= t('contact.financial_accounting_reporting.tung')
+          %tr
+            %td= t('global.email')
+            %td= t('contact.financial_accounting_reporting.capstock_html', url:'mailto:capitalstock@fhlbsf.com')
+    %section
+      %a{name: 'community'}
+      %h2= t('contact.community_investment.title')
+      %table
+        %tbody
+          %tr
+            %td= t('global.phone')
+            %td= t('contact.community_investment.phone')
+          %tr
+            %td= t('global.fax')
+            %td= t('contact.community_investment.fax')
+          %tr
+            %td= t('global.email')
+            %td= t('contact.community_investment.email_html', url:'mailto:communityinvestment@fhlbsf.com')
+      %h3= t('contact.community_investment.ahp.title')
+      %table
+        %tbody
+          %tr
+            %td= t('contact.community_investment.ahp.email_html', url:'mailto:adamsa@fhlbsf.com')
+            %td= t('contact.community_investment.ahp.phone')
+      %h3= t('contact.community_investment.cip_ace.title')
+      %table
+        %tbody
+          %tr
+            %td= t('contact.community_investment.cip_ace.email_html', url:'mailto:orosar@fhlbsf.com')
+            %td= t('contact.community_investment.cip_ace.phone')
+      %h3= t('contact.community_investment.programs.title')
+      %table
+        %tbody
+          %tr
+            %td= t('contact.community_investment.programs.email_html', url:'mailto:nunezm@fhlbsf.com')
+            %td= t('contact.community_investment.programs.phone')
+      %section
+        %a{name: 'cofi'}
+        %h2= t('contact.cofi.title')
+        %table
+          %tbody
+            %tr
+              %td= t('contact.cofi.website')
+              %td= t('contact.cofi.cofi_html', url:'http://fhlbsf.com/resource-center/cofi/default.aspx')
+            %tr
+              %td= t('global.phone')
+              %td= t('contact.cofi.phone')
+      %section
+        %a{name: 'support'}
+        %h2= t('contact.web_support.title')
+        %table
+          %tbody
+            %tr
+              %td= t('global.phone')
+              %td= t('contact.web_support.phone')
+            %tr
+              %td= t('global.email')
+              %td= t('contact.web_support.email_html', url:'mailto:websupport@fhlbsf.com')

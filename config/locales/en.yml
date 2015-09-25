@@ -97,6 +97,8 @@ en:
     role: Role
     name: Name
     edit: Edit
+    phone: Phone
+    fax: Fax
     copyright_html: "&copy;"
     copyright_date: 2000-2015
     contact: Contact
@@ -1826,6 +1828,121 @@ en:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email
     edit_email_settings_html: Edit your <a href=%{url}>Email Settings</a> to choose which messages you want to receive via email.
+  contact:
+    general_information:
+      title: General Information
+      address: "Federal Home Loan Bank of San Francisco\n\nP.O. Box 7948\nSan Francisco, CA 94120-7948\n\n600 California Street\nSan Francisco, CA 94108"
+      phone:
+        toll_free: "(800) 283-0700"
+        sf: "(415) 616-1000"
+    member_financial_services:
+      title: Member Financial Services
+      service_desk:
+        title: Member Services Desk
+        phone:
+          toll_free: "(800) 444-3452"
+          sf: "(415) 616-2500"
+          fax: "(415) 616-2650"
+      relationship_managers:
+        title: Relationship Managers
+        cibull_html: <a href=%{url}>Steve Cibull</a>
+        cibull_phone: "(415) 616-2535"
+        mccormack_html: <a href=%{url}>John McCormack</a>
+        mccormack_phone: "(415) 616-2755"
+        remch_html: <a href=%{url}>Patricia Remch</a>
+        remch_phone: "(415) 616-2642"
+        wilson_html: <a href=%{url}>Tom C. Wilson</a>
+        wilson_phone: "(415) 616-2748"
+        fax_phone: "(415) 616-2613"
+      mortgage_purchases:
+        title: Mortgage Purchases
+        cox_html: <a href=%{url}>Terry Cox</a>
+        cox_phone: "(415) 616-2608"
+        turturice_html: <a href=%{url}>Kathleen Turturice</a>
+        turturice_phone: "(415) 616-2592"
+        wong_html: <a href=%{url}>Tony Wong</a>
+        wong_phone: "(415) 616-2584"
+        yue_html: <a href=%{url}>Robert Yue</a>
+        yue_phone: "(415) 616-2667"
+        fax_phone: "(415) 616-2613"
+    collateral_departments:
+      title: Collateral Departments
+      collateral_operations:
+        title: Collateral Operations
+        phone: (415) 616-2980
+        fax: (415) 616-2835
+        email_html: <a href="%{url}">collateraloperations@fhlbsf.com</a>
+        email_mcu_html: <a href="%{url}">cmsmcu@fhlbsf.com</a>
+        blanket: Blanket lien pledges and certifications
+        pledge: Collateral pledge and release (mortgages and securities)
+        deficiency: Collateral deficiencies
+        vault: Collateral vault deposits and withdrawals
+        mcu: Mortgage Collateral Updates (MCUs)
+      collateral_services:
+        title: Collateral Services
+        phone: (415) 616-2801
+        phone_b: (415) 616-2893
+        fax: (415) 616-2689
+        email_html: <a href="%{url}">collateral@fhlbsf.com</a>
+        eligibility: Collateral eligibility
+        reviews: Field reviews
+      securities_services:
+        title: Securities Services
+        phone: (415) 616-2970
+        fax: (415) 616-2836
+        email_html: <a href="%{url}">securitiesservices@fhlbsf.com</a>
+        safekeeping: Safekeeping services for pledged and unpledged securities
+        settlement: Settlement of securities transactions
+        principal: Securities principal and interest payments
+        cash: Securities cash projections, transaction confirmations and holdings reports
+    electronic_funds_management:
+      title: Electronic Funds Management
+      phone: (415) 616-2940
+      fax: (415) 616-2836
+      email_html: <a href="%{url}">wireroom@fhlbsf.com</a>
+      wire: "You can wire funds or send drawdown requests to your Settlement/Transaction Account at the Bank by indicating: FHLB SF, ABA Routing 1210-0070-1, Credit/Debit: Settlement/Transaction Account Number, and Member Name."
+    operations:
+      title: Operations
+      phone: (415) 616-2616
+      sta: (800) 419-2047
+      sta_rate: STA Rate
+      norman_html: <a href="%{url}">Betty Norman</a>
+      norman: (415) 616-2945
+      oneil_html: "<a href='%{url}'>Gregory O'Neill</a>"
+      oneil: (415) 616-2941
+      taruc_html: <a href="%{url}">Manny Taruc</a>
+      taruc: (415) 616-2559
+    financial_accounting_reporting:
+      title: Financial Accounting and Reporting Department
+      tung_html: <a href="%{url}">Curtis Tung</a>
+      tung: (415) 616-2589
+      capstock_html: <a href="%{url}">capitalstock@fhlbsf.com</a>
+    community_investment:
+      title: Community Investment
+      phone: (415) 616-2542
+      fax: (415) 616-2767
+      email_html: <a href="%{url}">communityinvestment@fhlbsf.com</a>
+      ahp:
+        title: AHP Competitive Program
+        email_html: <a href="%{url}">Anita Adams</a>
+        phone: (415) 616-2749
+      cip_ace:
+        title: CIP and ACE
+        email_html: <a href="%{url}">Reena Orosa</a>
+        phone: (415) 616-2754
+      programs:
+        title: AHEAD, IDEA, and WISH Programs
+        email_html: <a href="%{url}">Marietta Núñez</a>
+        phone: (415) 616-2633
+    cofi:
+      title: 11th District Cost of Funds Indices
+      website: Website
+      cofi_html: <a href="%{url}">11th District Cost of Funds Indices</a>
+      phone: (415) 616-2600
+    web_support:
+      title: Web Support
+      phone: (415) 616-2610
+      email_html: <a href="%{url}">websupport@fhlbsf.com</a>
   terms:
     title: Terms of Use
     intro:
