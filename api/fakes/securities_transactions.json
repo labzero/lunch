@@ -4,7 +4,7 @@
   {
     "fhlb_id":564,
     "custody_account_no":"082011",
-    "new_transaction":"Y",
+    "new_transaction":true,
     "cusip":"31393RVW7",
     "transaction_code":"DELD",
     "security_description":"FEDERAL HOME LN MTG GD REMIC",
@@ -17,7 +17,7 @@
   {
     "fhlb_id":564,
     "custody_account_no":"082011",
-    "new_transaction":"Y",
+    "new_transaction":true,
     "cusip":"31398J7L1",
     "transaction_code":"DELD",
     "security_description":"FEDERAL HOME LN MTG GD REMIC",
@@ -30,7 +30,7 @@
   {
     "fhlb_id":564,
     "custody_account_no":"082011",
-    "new_transaction":"Y",
+    "new_transaction":true,
     "cusip":"31398KQH6",
     "transaction_code":"DELD",
     "security_description":"FEDERAL HOME LN MTG GD REMIC",
@@ -43,7 +43,7 @@
     {
       "fhlb_id":564,
       "custody_account_no":"082011",
-      "new_transaction":"Y",
+      "new_transaction":true,
       "cusip":"31398M7H3",
       "transaction_code":"DELD",
       "security_description":"FEDERAL NAT MTG ASSN REMIC",

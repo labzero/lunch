@@ -1212,7 +1212,7 @@ RSpec.describe ReportsController, :type => :controller do
     let(:securities_transactions_hash) do
       {
           'custody_account_no'   => custody_account_no,
-          'new_transaction'      => 'N',
+          'new_transaction'      => false,
           'cusip'                => cusip,
           'transaction_code'     => transaction_code,
           'security_description' => security_description,
@@ -1227,7 +1227,7 @@ RSpec.describe ReportsController, :type => :controller do
       [securities_transactions_hash]
     end
     let(:securities_transactions_response_with_new_transaction) do
-      [securities_transactions_hash.merge('custody_account_no' => "12345", 'new_transaction' => 'Y')]
+      [securities_transactions_hash.merge('custody_account_no' => "12345", 'new_transaction' => true)]
     end
     let(:common_table_data) do
       [{:type=>nil, :value=>cusip},

@@ -682,13 +682,13 @@ module MAPI
             end
           end
           api do
-            key :path, '/{id}/securities_transaction/{date}'
+            key :path, '/{id}/securities_transactions/{date}'
             operation do
               key :method, 'GET'
               key :summary, 'Retrieve securities transaction for a given member and date'
               key :notes, 'Retrieve securities transaction for a given member and date'
               key :nickname, :getSecuritiesTransactionForMembers
-              key :type, :MemberDividendStatement
+              key :type, :MemberSecuritiesTransactions
               parameter do
                 key :paramType, :path
                 key :name, :id

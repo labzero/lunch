@@ -43,8 +43,10 @@ module MAPI
           SQL
         end
 
-        def self.translate_fields(hash, mapping=SECURITIES_FIELD_MAPPINGS)
-          Hash[hash.map{ |k,v| [mapping[k.downcase],v]}].with_indifferent_access
+        def self.translate_securities_transactions_fields(hash, mapping=SECURITIES_FIELD_MAPPINGS)
+          h = Hash[hash.map{ |k,v| [mapping[k.downcase],v]}].with_indifferent_access
+          h[:new_transaction] = h[:new_transaction]=='Y'
+          h
         end
 
         def self.securities_transactions(environment, logger, fhlb_id, rundate)
@@ -58,7 +60,7 @@ module MAPI
         def self.securities_transactions_production(logger, fhlb_id, rundate)
           final      = fetch_hashes(logger, securities_count_sql(fhlb_id, rundate)).first['RECORDSCOUNT'] > 0
           originals  = fetch_hashes(logger, securities_transactions_sql(fhlb_id, rundate, final))
-          translated = originals.map{ |h| translate_fields(h) }
+          translated = originals.map{ |h| translate_securities_transactions_fields(h) }
           { final: final, transactions: translated }
         end
 

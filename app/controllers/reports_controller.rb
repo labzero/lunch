@@ -757,22 +757,7 @@ class ReportsController < ApplicationController
     return d - 2.day if d.sunday?
     d
   end
-
-  def map_column(field,value,is_new)
-    case field
-      when 'units'
-        {type: :basis_point, value: value}
-      when 'maturity_date'
-        {type: :date, value: value}
-      when 'payment_or_principal', 'interest', 'total'
-        {type: :rate, value: value}
-      when 'custody_account_no'
-        {type: nil, value: is_new ? "#{value}*" : value}
-      when 'cusip', 'transaction_code', 'security_description'
-        {type: nil, value: value}
-    end
-  end
-
+  
   def securities_transactions
     @max_date   = most_recent_business_day(Time.zone.now.to_date - 1.day)
     @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
@@ -789,8 +774,8 @@ class ReportsController < ApplicationController
     @final = securities_transactions[:final]
     column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('common_table_headings.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('common_table_headings.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
     rows = securities_transactions[:transactions].collect do |row|
-      is_new = row['new_transaction'] == 'Y'
-      { columns: row.map{ |field,value| map_column(field, value, is_new) }.compact }
+      is_new = row['new_transaction']
+      { columns: row.map{ |field,value| map_securities_transactions_column(field, value, is_new) }.compact }
     end
     footer = [
         { value: t('reports.pages.securities_transactions.total_net_amount'), colspan: 6},
@@ -1383,4 +1368,18 @@ class ReportsController < ApplicationController
     end
   end
 
+  def map_securities_transactions_column(field,value,is_new)
+    case field
+      when 'units'
+        {type: :basis_point, value: value}
+      when 'maturity_date'
+        {type: :date, value: value}
+      when 'payment_or_principal', 'interest', 'total'
+        {type: :rate, value: value}
+      when 'custody_account_no'
+        {type: nil, value: is_new ? "#{value}*" : value}
+      when 'cusip', 'transaction_code', 'security_description'
+        {type: nil, value: value}
+    end
+  end
 end
