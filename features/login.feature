@@ -93,3 +93,10 @@ Scenario: User logs in with expired password
   And I login as the expired user with the new password
   Then I should be logged in
 
+@jira-mem-668
+Scenario: User tries to log in as an extranet user without required role
+  Given I am logged out
+  And I visit the root path
+  When I fill in and submit the login form with an extranet no role user
+  Then I should see a bad login error
+
