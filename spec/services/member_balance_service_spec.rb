@@ -301,9 +301,9 @@ describe MemberBalanceService do
   end
 
   # TODO add vcr once MAPI endpoint is rigged up
-  describe 'securities_transactions' do
+  describe 'securities_transactions'do
     let(:as_of_date) { Date.new(2015, 1, 20) }
-    describe 'happy path' do
+    describe 'happy path', :vcr  do
       let(:securities_transactions) { subject.securities_transactions(as_of_date) }
       it 'should return securities transactions data' do
         expect(securities_transactions.length).to be >= 1
@@ -330,21 +330,19 @@ describe MemberBalanceService do
     describe 'bad data' do
       let(:bad_data) do
         {
-            final: nil,
-            transactions: [
-                {
-                    custody_account_no: nil,
-                    new_transaction: nil,
-                    cusip: nil,
-                    transaction_code: nil,
-                    security_description: nil,
-                    units: nil,
-                    maturity_date: nil,
-                    payment_or_principal: nil,
-                    interest: nil,
-                    total: nil
-                }
-            ]
+          final: nil,
+          transactions: [{
+            custody_account_no: nil,
+            new_transaction: nil,
+            cusip: nil,
+            transaction_code: nil,
+            security_description: nil,
+            units: nil,
+            maturity_date: nil,
+            payment_or_principal: nil,
+            interest: nil,
+            total: nil
+          }]
         }.with_indifferent_access
       end
       let(:securities_transactions) { subject.securities_transactions(as_of_date) }
