@@ -54,8 +54,9 @@ When(/^I fill in and submit the login form with a first-time user$/) do
   # implement way of simulating first-time user to test Terms of Service flow
 end
 
-When(/^I fill in and submit the login form with an expired user$/) do
-  step %{I fill in and submit the login form with username "#{expired_user['username']}" and password "#{expired_user['password']}"}
+When(/^I fill in and submit the login form with an (expired user|extranet no role user)$/) do |user_type|
+  user = user_for_type(user_type)
+  step %{I fill in and submit the login form with username "#{user['username']}" and password "#{user['password']}"}
 end
 
 When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|
@@ -227,6 +228,8 @@ def user_for_type(user_type)
     password_changable_user
   when 'expired user'
     expired_user
+  when 'extranet no role user'
+    extranet_no_role_user
   else
     raise 'unknown user type'
   end
@@ -270,6 +273,10 @@ end
 
 def password_changable_user
   CustomConfig.env_config['password_changable']
+end
+
+def extranet_no_role_user
+  CustomConfig.env_config['extranet_no_role']
 end
 
 def select_member_if_needed

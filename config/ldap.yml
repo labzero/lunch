@@ -22,6 +22,7 @@ authorizations: &AUTHORIZATIONS
 authorizations_extranet: &AUTHORIZATIONS_EXTRANET
       group_base: dc=extranet,dc=fhlbsf,dc=com
       required_groups:
+        - ["member", "CN=FCN-MemberSite-Users,dc=extranet,dc=fhlbsf,dc=com"]
       require_attribute:
         objectClass: user
         objectCategory: person
@@ -62,6 +63,7 @@ development: &development
     base: dc=extranet,dc=fhlbsf,dc=com
     admin_user: <%= ENV['LDAP_EXTRANET_ADMIN_USERNAME'] || 'cn=admin,dc=extranet,dc=fhlbsf,dc=com' %>
     admin_password: <%= ENV['LDAP_EXTRANET_ADMIN_PASSWORD'] || 'secret' %>
+    check_group_membership: true
     <<: *EXTRANET_SSL
     <<: *AUTHORIZATIONS_EXTRANET
   -

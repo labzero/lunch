@@ -26,7 +26,7 @@ gem 'rest-client'
 gem 'securid', git: 'https://github.com/labzero/securid.git', branch: '0.2.3'
 
 # For authentication/authorization
-gem 'devise_ldap_authenticatable', git: 'https://github.com/labzero/devise_ldap_authenticatable.git', branch: '0.9.15'
+gem 'devise_ldap_authenticatable', git: 'https://github.com/labzero/devise_ldap_authenticatable.git', branch: '0.9.16'
 gem 'pundit'
 
 # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
@@ -52,7 +52,7 @@ gem 'highcharts-rails'
 gem 'jquery-placeholder-rails'
 gem 'jquery-datatables-rails'
 gem 'client_side_validations', git: 'https://github.com/DavyJonesLocker/client_side_validations.git', branch: '4-2-stable'
-gem "mini_magick" # for manipulating images during asset precompile
+gem 'mini_magick' # for manipulating images during asset precompile
 
 # for MAPI
 gem 'sinatra', require: false
