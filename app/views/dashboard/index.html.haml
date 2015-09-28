@@ -63,7 +63,7 @@
           = link_to t('dashboard.quick_advance.advances_desk_closed_link'), '', data: {'flyout-trigger' => 'active'}
         %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_status != :no_terms}"}
           = t('dashboard.quick_advance.advances_desk_no_terms')
-        - if @quick_advance_status == :open
+        - if [:open, :closed].include?( @quick_advance_status )
           %p.dashboard-vrc-overnight-message= t('global.vrc_overnight')
           .dashboard-advances-rate
             = @current_overnight_vrc
