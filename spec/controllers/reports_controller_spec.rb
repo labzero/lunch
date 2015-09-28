@@ -1654,6 +1654,14 @@ RSpec.describe ReportsController, :type => :controller do
       make_request
       expect(assigns[:capital_stock_and_leverage]).to include(:rows)
     end
+    it 'assigns @date' do
+      make_request
+      expect(assigns[:date]).to eq(now.to_date)
+    end
+    it 'assigns @now' do
+      make_request
+      expect(assigns[:now]).to be(now)
+    end
     context do
       before { allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile) }
       it 'adds a row to @credit_outstanding if there is a `mpf_credit`' do

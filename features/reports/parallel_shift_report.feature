@@ -11,7 +11,8 @@ Given I am logged in
 Scenario: Visit putable advances parallel shift sensitivity analysis report page from header link
   Given I visit the dashboard
   When I select "Putable Advance Parallel Shift Sensitivity" from the reports dropdown
-  And I should see a report table with multiple data rows
+  Then I should see a report table with multiple data rows
+  And I should see a report header
 
 @data-unavailable @jira-mem-283
 Scenario: No data is available to show in the putable advances parallel shift sensitivity analysis report

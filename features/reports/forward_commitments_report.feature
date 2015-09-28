@@ -12,6 +12,7 @@ Feature: Visiting the Forward Commitments Page
     Given I visit the dashboard
     When I select "Forward Commitments" from the reports dropdown
     Then I should see report summary data
+    And I should see a report header
     And I should see a report table with multiple data rows
 
   @jira-mem-546

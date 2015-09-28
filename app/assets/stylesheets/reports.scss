@@ -80,6 +80,20 @@
   margin-top: 32px;
 }
 
+.report-details {
+  clear: both;
+  margin-bottom: 20px;
+  h2 {
+    @extend %typography-subtitle;
+    margin-bottom: 0;
+  }
+  p {
+    @extend %typography-dashboard-account-summary;
+    margin: 0;
+    color: $medium-gray;
+  }
+}
+
 .report {
   input {
     color: $dark-gray;

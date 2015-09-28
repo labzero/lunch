@@ -12,6 +12,7 @@ Scenario: Member sees Securities Services Statement
   Given I visit the dashboard
   When I select "Securities Services Monthly Statement" from the reports dropdown
   Then I should see report summary data
+  And I should see a report header
   And I should see 4 report tables with multiple data rows
 
 @smoke @jira-mem-931

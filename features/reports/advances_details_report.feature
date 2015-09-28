@@ -12,6 +12,7 @@ Scenario: Visit advances details page from header link
   Given I visit the dashboard
   When I select "Advances" from the reports dropdown
   Then I should see report summary data
+  And I should see a report header
   And I should see a report table with multiple data rows
 
 # NOTE: If this is changed to a smoke test and run against production data, "as_of_date" as returned by MAPI could be either today or yesterday depending on when the test is run

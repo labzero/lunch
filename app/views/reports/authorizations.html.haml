@@ -7,6 +7,7 @@
       = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@today))
     - else
       = render 'reports_header_buttons', allowed_params: :authorizations_filter, download_formats: [:pdf]
+      = render 'report_details', name: @member_name, freshness: t('reports.freshness.current'), availability: t('reports.availability.current')
   .report-main-body
     %p= t('reports.pages.authorizations.intro_html', url: forms_path(anchor: 'authorizations'))
     .report-inputs

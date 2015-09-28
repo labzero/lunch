@@ -12,6 +12,7 @@ Scenario: Visit historical price indications from header link
   Given I visit the dashboard
   When I select "Historical" from the reports dropdown
   Then I should see "Historical Price Indications"
+  And I should see a report header
   And I should see a report table with multiple data rows
 
 @jira-mem-311

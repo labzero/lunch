@@ -12,6 +12,7 @@ Scenario: Member sees Capital Stock Activity Statement
   Given I visit the dashboard
   When I select "Capital Stock Activity Statement" from the reports dropdown
   Then I should see report summary data
+  And I should see a report header
   And I should see a report table with multiple data rows
 
 @smoke @jira-mem-353

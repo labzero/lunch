@@ -4,6 +4,7 @@
   .report-header
     %h1= t('reports.pages.parallel_shift.title')
     = render 'reports_header_buttons'
+    = render 'report_details', name: @member_name, freshness: t('reports.freshness.monthend'), availability: t('reports.availability.current')
   .report-main-body
     %p= t('reports.pages.parallel_shift.info', date: fhlb_date_long_alpha(@as_of_date))
     = render 'reports/reports_table', table_class: 'parallel-shifts-table', table_data: @parallel_shift_table_data, sortable: false

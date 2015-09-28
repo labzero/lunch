@@ -3,6 +3,7 @@
 .report.row
   .report-header
     %h1= t('reports.pages.capital_stock_and_leverage.title')
+    = render 'report_details', name: @member_name, freshness: t('reports.freshness.prior_day'), availability: t('reports.availability.current')
   .report-main-body
     %h2.report-table-title= t('reports.pages.capital_stock_and_leverage.cap_stock_position')
     = render 'reports/reports_table', table_class: 'cap-stock-position-table', table_data: @position_table_data, sortable: false

@@ -12,6 +12,7 @@ Scenario: Member sees Dividend Transaction Statement
   Given I visit the dashboard
   When I select "Dividend Transaction Statement" from the reports dropdown
   Then I should see report summary data
+  And I should see a report header
   And I should see 2 report tables with multiple data rows
 
 @smoke @jira-mem-264

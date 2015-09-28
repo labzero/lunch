@@ -22,6 +22,7 @@ class ApplicationController < ActionController::Base
   end
 
   def current_member_name
+    session['member_name'] ||= MembersService.new(request).member(current_member_id).try(:[], :name) if current_member_id
     session['member_name']
   end
 
