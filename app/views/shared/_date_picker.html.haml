@@ -7,13 +7,15 @@
 - max_date ||= false
 - min_date ||= false
 - date_picker_filter ||= nil
+- today = Time.zone.today
 - date_picker_data = { |
   :'date-picker-presets' => presets.to_json, |
   :'date-picker-open-direction' => open_direction, |
   :'date-picker-form' => form, |
   :'date-picker-single-date-picker' => single_date_picker.to_s, |
-  :'date-picker-max-date' => max_date || Time.zone.today, |
+  :'date-picker-max-date' => max_date || today, |
   :'date-picker-min-date' => min_date, |
+  :'date-picker-today' => today, |
   :'date-picker-filter-options' => ReportsController::DATE_PICKER_FILTERS.to_json, |
   :'date-picker-filter' => date_picker_filter }
 
