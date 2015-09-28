@@ -35,9 +35,9 @@ class RatesService < MAPIService
     begin
       response = @connection['rates/historic/overnight'].get params: {limit: days}
     rescue RestClient::Exception => e
-      return warn(:overnight_vrc, "RestClient error: #{e.class.name}:#{e.http_code}")
+      return warn(:overnight_vrc, "RestClient error: #{e.class.name}:#{e.http_code}", e)
     rescue Errno::ECONNREFUSED => e
-      return warn(:overnight_vrc, "connection error: #{e.class.name}")
+      return warn(:overnight_vrc, "connection error: #{e.class.name}", e)
     end
     data ||= JSON.parse(response.body)
     data.collect! do |row|
@@ -86,8 +86,8 @@ class RatesService < MAPIService
     collateral_type = collateral_type.to_sym
     credit_type = credit_type.to_sym
 
-    return warn(:current_price_indications, "invalid credit type: #{credit_type}. Credit type must be one of these values: #{CURRENT_CREDIT_TYPES}") unless CURRENT_CREDIT_TYPES.include?(credit_type)
-    return warn(:current_price_indications, "invalid collateral type #{collateral_type}. Collateral type must be one of these values: #{COLLATERAL_TYPES}") unless COLLATERAL_TYPES.include?(collateral_type)
+    return warn(:current_price_indications, "invalid credit type: #{credit_type}. Credit type must be one of these values: #{CURRENT_CREDIT_TYPES}", nil) unless CURRENT_CREDIT_TYPES.include?(credit_type)
+    return warn(:current_price_indications, "invalid collateral type #{collateral_type}. Collateral type must be one of these values: #{COLLATERAL_TYPES}", nil) unless COLLATERAL_TYPES.include?(collateral_type)
     get_json(:current_price_indications, "rates/price_indications/current/#{credit_type}/#{collateral_type}")
   end
 
@@ -97,9 +97,9 @@ class RatesService < MAPIService
     collateral_type = collateral_type.to_sym
     credit_type = credit_type.to_sym
 
-    return warn(:historical_price_indications, "invalid credit type: #{credit_type}. Credit type must be one of these values: #{CREDIT_TYPES}") unless CREDIT_TYPES.include?(credit_type)
-    return warn(:historical_price_indications, "invalid colateral type #{collateral_type}. Collateral type must be one of these values: #{COLLATERAL_TYPES}") unless COLLATERAL_TYPES.include?(collateral_type)
-    return warn(:historical_price_indications, "unsupported credit type: #{credit_type}. Currently, RatesService.historical_price_indications only accepts 'frc', 'vrc', '1m_libor', '3m_libor', '6m_libor' and daily_prime' as the credit_type arg.") if credit_type == :embedded_cap
+    return warn(:historical_price_indications, "invalid credit type: #{credit_type}. Credit type must be one of these values: #{CREDIT_TYPES}", nil) unless CREDIT_TYPES.include?(credit_type)
+    return warn(:historical_price_indications, "invalid colateral type #{collateral_type}. Collateral type must be one of these values: #{COLLATERAL_TYPES}", nil) unless COLLATERAL_TYPES.include?(collateral_type)
+    return warn(:historical_price_indications, "unsupported credit type: #{credit_type}. Currently, RatesService.historical_price_indications only accepts 'frc', 'vrc', '1m_libor', '3m_libor', '6m_libor' and daily_prime' as the credit_type arg.", nil) if credit_type == :embedded_cap
     # TODO remove the previous line once you support 'embedded_cap'
     
     get_hash(:historical_price_indications, "rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/#{credit_type}")

@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe EtransactAdvancesService do
-  subject { EtransactAdvancesService.new(double('request', uuid: '12345')) }
+  subject { EtransactAdvancesService.new(double('request', uuid: '12345', session: double('A Session', :[] => nil))) }
   it { expect(subject).to respond_to(:etransact_active?) }
   describe '`etransact_active?` method', :vcr do
     let(:call_method) {subject.etransact_active?(status_object)}
@@ -46,6 +46,7 @@ describe EtransactAdvancesService do
       expect(signer_full_name).to eq(nil)
     end
   end
+
   describe '`quick_advance_validate` method', :vcr do
     let(:signer) {'signer'}
     let(:member_id) {750}
@@ -54,28 +55,38 @@ describe EtransactAdvancesService do
     let(:advance_rate) {'0.17'}
     let(:check_capstock) {true}
     let(:amount) { 100 }
-    let(:quick_advance_validate) {subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer)}
+    let(:call_method) {subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer)}
+    
+    before do
+      allow(subject).to receive(:calypso_error_handler).and_return(nil)
+    end
+
     it 'should return a hash back' do
-      expect(quick_advance_validate).to be_kind_of(Hash)
+      expect(call_method).to be_kind_of(Hash)
     end
-    it 'should return nil if there was an API error' do
-      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
-      expect(quick_advance_validate).to eq(nil)
+    it 'calls `get_hash`' do
+      expect(subject).to receive(:get_hash).with(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{check_capstock}/#{signer}")
+      call_method
     end
-    it 'should return nil if there was a connection error' do
-      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
-      expect(quick_advance_validate).to eq(nil)
-    end
-    it 'returns nil if there is a JSON parsing error' do
-      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
-      allow(Rails.logger).to receive(:warn)
-      expect(quick_advance_validate).to be(nil)
+    it 'returns the results of `get_hash`' do
+      result = double('A Result')
+      allow(subject).to receive(:get_hash).and_return(result)
+      expect(call_method).to be(result)
     end
     it 'should URL encode the signer' do
       expect(URI).to receive(:escape).with(signer)
-      quick_advance_validate
+      call_method
+    end
+    it 'passes a `calypso_error_handler` to the `get_hash` method' do
+      error_handler = -> (n, m, e) {}
+      allow(subject).to receive(:calypso_error_handler).with(member_id).and_return(error_handler)
+      allow(subject).to receive(:get_hash).with(anything, anything) do |*args, &block|
+        expect(block).to be(error_handler)
+      end
+      call_method
     end
   end
+
   describe '`quick_advance_execute` method', :vcr do
     let(:signer) {'signer'}
     let(:member_id) {750}
@@ -83,29 +94,39 @@ describe EtransactAdvancesService do
     let(:advance_type) {'sometype'}
     let(:advance_rate) {'0.17'}
     let(:amount) { 100 }
-    let(:quick_advance_execute) {subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer)}
+    let(:call_method) {subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer)}
+    
+    before do
+      allow(subject).to receive(:calypso_error_handler).and_return(nil)
+    end
+
     it 'should return a hash back' do
-      expect(quick_advance_execute).to be_kind_of(Hash)
+      expect(call_method).to be_kind_of(Hash)
     end
     it 'should set initiated_at' do
-      expect(quick_advance_execute[:initiated_at]).to be_kind_of(DateTime)
+      expect(call_method[:initiated_at]).to be_kind_of(DateTime)
     end
-    it 'returns nil if there is a JSON parsing error' do
-      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
-      allow(Rails.logger).to receive(:warn)
-      expect(quick_advance_execute).to be(nil)
+    it 'calls `post_hash`' do
+      expect(subject).to receive(:post_hash).with(:quick_advance_execute, "etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{signer}", '')
+      call_method
     end
-    it 'should return nil if there was an API error' do
-      allow_any_instance_of(RestClient::Resource).to receive(:post).and_raise(RestClient::InternalServerError)
-      expect(quick_advance_execute).to eq(nil)
-    end
-    it 'should return nil if there was a connection error' do
-      allow_any_instance_of(RestClient::Resource).to receive(:post).and_raise(Errno::ECONNREFUSED)
-      expect(quick_advance_execute).to eq(nil)
+    it 'returns the result of `post_hash`' do
+      result = double('A Result', :[]= => nil)
+      allow(subject).to receive(:post_hash).and_return(result)
+      expect(call_method).to be(result)
     end
     it 'should URL encode the signer' do
       expect(URI).to receive(:escape).with(signer)
-      quick_advance_execute
+      call_method
+    end
+    it 'passes a `calypso_error_handler` to the `post_hash` method' do
+      error_handler = -> (n, m, e) {}
+      allow(subject).to receive(:calypso_error_handler).with(member_id).and_return(error_handler)
+      allow(subject).to receive(:post_hash).with(anything, anything, anything) do |*args, &block|
+        expect(block).to be(error_handler)
+        nil
+      end
+      call_method
     end
   end
 
@@ -349,6 +370,33 @@ describe EtransactAdvancesService do
     end
     it 'should map next week to 7' do
       expect(subject.send(:days_until, today + 1.week)).to eq( 7 )
+    end
+  end
+
+  describe '`calypso_error_handler` protected method' do
+    let(:member_id) { double('A Member ID') }
+    let(:error_handler) { subject.send(:calypso_error_handler, member_id) }
+    let(:call_error_handler) { error_handler.call(:some_name, 'a message', error) }
+    let(:error) { double('An Error') }
+    let(:request_user) { double('A User') }
+    let(:request_uuid) { double('A UUID') }
+    let(:member_name) { double('A Member Name') }
+    let(:mail) { double('An Email', deliver_now: nil)}
+
+    it 'returns a Proc' do
+      expect(error_handler).to be_kind_of(Proc)
+    end
+    it 'builds a `calypso_error` email when the Proc is called' do
+      allow(subject).to receive(:request_uuid).and_return(request_uuid)
+      allow(subject).to receive(:request_user).and_return(request_user)
+      allow(subject).to receive(:member_id_to_name).with(member_id).and_return(member_name)
+      expect(InternalMailer).to receive(:calypso_error).with(error, request_uuid, request_user, member_name).and_return(mail)
+      call_error_handler
+    end
+    it 'sends the email immediately' do
+      allow(InternalMailer).to receive(:calypso_error).and_return(mail)
+      expect(mail).to receive(:deliver_now)
+      call_error_handler
     end
   end
 end

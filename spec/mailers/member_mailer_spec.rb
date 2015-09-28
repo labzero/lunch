@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe FHLBMailer, :type => :mailer do
+RSpec.describe MemberMailer, :type => :mailer do
   describe 'layout' do
     it 'should use the `mailer` layout' do
       expect(described_class._layout).to eq('mailer')

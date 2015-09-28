@@ -87,7 +87,7 @@ class MemberBalanceService < MAPIService
           raise StandardError, "MemberBalanceService.capital_stock_activity returned '#{row[:dr_cr]}' for share type on row number #{i}. Share type should be either 'C' for Credit or 'D' for Debit."
         end
       rescue StandardError => e
-        return warn(:capital_stock_activity, e)
+        return warn(:capital_stock_activity, e.message, e)
       end
       row[:outstanding_shares] = outstanding
     end
@@ -119,7 +119,7 @@ class MemberBalanceService < MAPIService
         data[:net_loan_collateral] = data[:standard_credit_totals][:borrowing_capacity].to_i - data[:standard][:excluded].values.sum
         data[:standard_excess_capacity] = data[:net_loan_collateral].to_i - data[:standard][:utilized].values.reduce(:+)
       rescue => e
-        return warn(:borrowing_capacity_summary, "malformed data[:standard] hash. It returned #{data[:standard]} and threw the following error: #{e}")
+        return warn(:borrowing_capacity_summary, "malformed data[:standard] hash. It returned #{data[:standard]} and threw the following error: #{e}", e)
       end
 
       # second table - Securities Backed Collateral
@@ -136,7 +136,7 @@ class MemberBalanceService < MAPIService
         data[:total_borrowing_capacity] = data[:standard_credit_totals][:borrowing_capacity].to_i + data[:sbc_totals][:total_borrowing_capacity].to_i
         data[:remaining_borrowing_capacity] = data[:standard_excess_capacity].to_i + data[:sbc_excess_capacity].to_i
       rescue => e
-        return warn(:borrowing_capacity_summary, "malformed data[:sbc] hash: #{data[:sbc]} and threw the following error: #{e}")
+        return warn(:borrowing_capacity_summary, "malformed data[:sbc] hash: #{data[:sbc]} and threw the following error: #{e}", e)
       end
     else
       data[:total_borrowing_capacity] = 0
@@ -154,16 +154,16 @@ class MemberBalanceService < MAPIService
     begin
       response = @connection["member/#{@member_id}/sta_activities/#{start_date.iso8601}/#{end_date.iso8601}"].get
     rescue RestClient::Exception => e
-      warn(:settlement_transaction_account, "RestClient error: #{e.class.name}:#{e.http_code}")
+      warn(:settlement_transaction_account, "RestClient error: #{e.class.name}:#{e.http_code}", e)
       return e.http_code == 404 ? {} : nil
     rescue Errno::ECONNREFUSED => e
-      return warn(:settlement_transaction_account, "connection error: #{e.class.name}")
+      return warn(:settlement_transaction_account, "connection error: #{e.class.name}", e)
     end
 
     begin
       data = JSON.parse(response.body).with_indifferent_access
     rescue JSON::ParserError => e
-      return warn(:settlement_transaction_account, "JSON parsing error: #{e}")
+      return warn(:settlement_transaction_account, "JSON parsing error: #{e}", e)
     end
 
     data[:activities].each do |activity|
@@ -185,7 +185,7 @@ class MemberBalanceService < MAPIService
         if a[:descr] == DAILY_BALANCE_KEY && b[:descr] != DAILY_BALANCE_KEY
           -1
         elsif a[:descr] == DAILY_BALANCE_KEY && b[:descr] == DAILY_BALANCE_KEY
-          warn(:settlement_transaction_account, "activities array that contains duplicate `end of day balance` entries for the date: #{a[:trans_date]}")
+          warn(:settlement_transaction_account, "activities array that contains duplicate `end of day balance` entries for the date: #{a[:trans_date]}", e)
           0
         else
           1
