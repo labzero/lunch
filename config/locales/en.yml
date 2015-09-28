@@ -1916,14 +1916,14 @@ en:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."
     "404":
-      headline: The page you're looking for doesn't exist.
-      summary: Please double-check the URL you entered. If you followed a link to get here, let us know and we'll fix it.
+      headline: The page you’re looking for doesn’t exist.
+      summary: Please double-check the URL you entered. If you followed a link to get here, let us know and we’ll fix it.
     "500":
       headline: Sorry for the inconvenience.
       summary: We have encountered an error and are working on fixing the problem as quickly as possible.
     maintenance:
       headline: Scheduled Downtime
-      summary: We're currently performing maintenance on the Member Portal. We'll have things up and running again soon.
+      summary: We’re currently performing maintenance on the Member Portal. We’ll have things up and running again soon.
     table_data_unavailable: This information is currently unavailable
     no_messages: No Messages
     error_occurred: An error has occurred.
