@@ -125,6 +125,7 @@ Rails.application.routes.draw do
     put 'member/password' => 'users/passwords#update'
     get '/terms-of-use' => 'members#terms_of_use', as: :terms_of_use
     get '/contact' => 'members#contact', as: :contact
+    get '/privacy-policy' => 'members#privacy_policy', as: :privacy_policy
   end
   devise_for :users, controllers: { sessions: 'users/sessions', passwords: 'users/passwords' }, :skip => [:sessions, :passwords]
 
