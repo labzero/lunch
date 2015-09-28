@@ -1,7 +1,8 @@
 require 'rails_helper'
 
 describe EtransactAdvancesService do
-  subject { EtransactAdvancesService.new(double('request', uuid: '12345', session: double('A Session', :[] => nil))) }
+  let(:request) { double('request', uuid: '12345', session: double('A Session', :[] => nil)) }
+  subject { EtransactAdvancesService.new(request) }
   it { expect(subject).to respond_to(:etransact_active?) }
   describe '`etransact_active?` method', :vcr do
     let(:call_method) {subject.etransact_active?(status_object)}
@@ -159,7 +160,7 @@ describe EtransactAdvancesService do
       before do
         allow(subject).to receive(:get_days_to_maturity).with(advance_term).and_return(low_days)
         allow(subject).to receive(:todays_advances_amount).with(member_id, anything, anything).and_return(todays_advances_amount_response)
-        allow(subject).to receive(:get_hash).with(:settings, anything).and_return(settings_response)
+        allow(subject).to receive(:settings).and_return(settings_response)
         allow(subject).to receive(:todays_cumulative_advances_amount).with(member_id).and_return(todays_cumulative_advances_amount_response)
         allow(subject).to receive(:get_json).with(:check_limits, anything).and_return(limits_response)
       end
@@ -273,6 +274,15 @@ describe EtransactAdvancesService do
       allow(response_object).to receive(:with_indifferent_access).and_return(response_object)
       allow(JSON).to receive(:parse).and_return(response_object)
       expect(call_method).to be(response_object)
+    end
+    it 'caches its settings for the lifecycle of the object' do
+      expect(subject).to receive(:get_hash)
+      call_method
+      expect(subject).to_not receive(:get_hash)
+      call_method
+      new_subject = described_class.new(request)
+      expect(new_subject).to receive(:get_hash)
+      new_subject.settings
     end
   end
 
