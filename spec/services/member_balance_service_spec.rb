@@ -757,7 +757,13 @@ describe MemberBalanceService do
   end
 
   describe '`dividend_statement` method', :vcr do
-    let(:dividend_statement) { subject.dividend_statement(Date.new(2015,1,1)) }
+    let(:start_date) { Date.new(2015,1,1) }
+    let(:dividend_statement) { subject.dividend_statement(start_date, '2015Q1') }
+    it_should_behave_like 'a MAPI backed service object method', :dividend_statement, [Date.new(2015,1,1), '2015Q1']
+    it 'passes `current` as an argument if no div_id is given' do
+      expect(subject).to receive(:get_hash).with(:dividend_statement, "/member/#{member_id}/dividend_statement/#{start_date.to_date.iso8601}/current")
+      subject.dividend_statement(start_date, nil)
+    end
     it 'returns a date for its `transaction_date`' do
       expect(dividend_statement[:transaction_date]).to be_kind_of(Date)
     end

@@ -645,7 +645,7 @@ module MAPI
             end
           end
           api do
-            key :path, '/{id}/dividend_statement/{date}'
+            key :path, '/{id}/dividend_statement/{date}/{div_id}'
             operation do
               key :method, 'GET'
               key :summary, 'Retrieve dividend statement for a given member and quarter'
@@ -664,7 +664,15 @@ module MAPI
                 key :name, :date
                 key :required, true
                 key :type, :string
-                key :description, 'The date (quarter) of the requested statement'
+                key :description, 'The date of the earliest allowed report'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :div_id
+                key :required, true
+                key :type, :string
+                key :description, 'The div_id of the desired dividend statement'
+                key :notes, 'If `current` is passed as a value, the endpoint will return the most recent dividend statement'
               end
               response_message do
                 key :code, 200
@@ -945,10 +953,11 @@ module MAPI
           end
         end
 
-        relative_get '/:id/dividend_statement/:date' do
+        relative_get '/:id/dividend_statement/:date/:div_id' do
           member_id = params[:id]
+          div_id = params[:div_id]
           date = params[:date].to_date
-          MAPI::Services::Member::DividendStatement.dividend_statement(self, member_id, date).to_json
+          MAPI::Services::Member::DividendStatement.dividend_statement(self.settings.environment, member_id, date, div_id).to_json
         end
 
         # Today's Credit Activity

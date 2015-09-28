@@ -63,7 +63,8 @@ class ReportsController < ApplicationController
     settlement_transaction_account: 6.months,
     advances_detail: 18.months,
     securities_services_statement: 18.months,
-    monthly_securities_position: 18.months
+    monthly_securities_position: 18.months,
+    dividend_statement: 36.months
   }
 
   before_action do
@@ -642,6 +643,7 @@ class ReportsController < ApplicationController
   end
 
   def dividend_statement
+    @div_id = params[:dividend_transaction_filter]
     member_balances = MemberBalanceService.new(current_member_id, request)
     @dividend_statement_details = {
       column_headings: [
@@ -659,7 +661,7 @@ class ReportsController < ApplicationController
       @dividend_statement = {}
       @dividend_statement_details[:rows] = []
     else
-      @dividend_statement = member_balances.dividend_statement(Time.zone.now.to_date)
+      @dividend_statement = member_balances.dividend_statement(DATE_RESTRICTION_MAPPING[:dividend_statement].ago.to_date, @div_id)
       raise StandardError, "There has been an error and ReportsController#dividend_statement has encountered nil. Check error logs." if @dividend_statement.nil?
       @dividend_statement_details[:rows] = @dividend_statement[:details].collect do |detail|
         {
@@ -680,6 +682,23 @@ class ReportsController < ApplicationController
         { value: @dividend_statement[:average_shares_outstanding], type: :shares_fractional},
         { value: @dividend_statement[:total_dividend], type: :currency}
       ]
+      @dropdown_options = @dividend_statement[:div_ids].collect do |div_id|
+        label = if %w(1 2 3 4).include?(div_id.last)
+          I18n.t("dates.quarters.#{div_id.last}", year: div_id[0..3])
+        else
+          I18n.t('reports.pages.dividend_statement.special_dividend', year: div_id[0..3])
+        end
+        [label, div_id]
+      end
+      @dropdown_options.each do |option|
+        if option[1] == @div_id
+          @dropdown_options_text = option[0]
+          break
+        end
+      end
+      @dropdown_options_text ||= @dropdown_options[0][0]
+      @div_id ||= @dropdown_options[0][1]
+      @show_summary_data = true if %w(1 2 3 4).include?(@div_id.last)
     end
   end
 

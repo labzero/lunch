@@ -470,3 +470,17 @@ When(/^I should only see users with the "(.*?)" role$/) do |role|
     cell.assert_selector('li', text: role_name)
   end
 end
+
+When(/^I click on the dividend transaction dropdown selector$/) do
+  page.find('.dropdown-selection').click
+end
+
+When(/^I click on the last option in the dividend transaction dropdown selector$/) do
+  page.find('.dropdown li:last-child').click
+end
+
+Then(/^I should see a dividend summary for the last option in the dividend transaction dropdown selector$/) do
+  page.find('.dropdown-selection').click
+  text = page.find('.dropdown li:last-child').text
+  page.assert_selector('.table-dividend-summary tr:first-child td:last-child', text: text)
+end
