@@ -66,12 +66,18 @@ describe MAPIService do
 
   describe '`request_member_name` method' do
     it 'returns the member name assocaited with the request' do
-      member_name = double('A Member Name')
-      allow(session).to receive(:[]).with('member_name').and_return(member_name)
-      expect(subject.request_member_name).to be(member_name)
+      expect(subject.request).to be(request)
     end
     it 'returns nil if no member name is associated' do
       expect(subject.request_member_name).to be_nil
+    end
+  end
+
+  describe '`request` method' do
+    it 'returns the request bound to the service object' do
+      member_name = double('A Member Name')
+      allow(session).to receive(:[]).with('member_name').and_return(member_name)
+      expect(subject.request_member_name).to be(member_name)
     end
   end
 

@@ -5,6 +5,10 @@ class MAPIService
     @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint, headers: {:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"", :'X-Request-ID' => request_uuid}
   end
 
+  def request
+    @request
+  end
+
   def request_uuid
     @request.try(:uuid)
   end

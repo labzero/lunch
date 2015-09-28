@@ -1935,3 +1935,6 @@ en:
         error_inspection: Error Details
         error_backtrace: Backtrace
         body_html: "The Member Portal has encountered an error talking to Calypso for request <strong>%{request_id}</strong>, issued by <strong>%{user}</strong> on behalf of <strong>%{member}</strong>.\n\nThe error details are:"
+      stale_rate:
+        subject: 'Notice: eTransact encountered stale rates'
+        body_html: The eTransact system has encountered rates that are older than <strong>%{rate_timeout} seconds</strong> when getting rates from Market Data Services for request <strong>%{request_id}</strong>, issued by <strong>%{user}</strong>.

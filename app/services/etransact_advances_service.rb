@@ -88,7 +88,7 @@ class EtransactAdvancesService < MAPIService
           check_limit = 'high'
         else
           if todays_cumulative_amount = todays_cumulative_advances_amount(member_id)
-            settings = get_hash(:settings, 'etransact_advances/settings')
+            settings = self.settings
             if amount.to_i + todays_cumulative_amount.to_i > settings['shareholder_total_daily_limit'].to_i
               check_limit = 'high'
             end
@@ -108,7 +108,7 @@ class EtransactAdvancesService < MAPIService
   end
 
   def settings
-    get_hash(:settings, 'etransact_advances/settings')
+    @settings ||= get_hash(:settings, 'etransact_advances/settings')
   end
 
   protected

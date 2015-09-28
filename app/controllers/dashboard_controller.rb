@@ -153,7 +153,8 @@ class DashboardController < ApplicationController
   def quick_advance_preview
     @current_member_name = current_member_name
     @preview = true
-    check = EtransactAdvancesService.new(request).check_limits(current_member_id, params[:amount].to_f, params[:advance_term])
+    etransact_service = EtransactAdvancesService.new(request)
+    check = etransact_service.check_limits(current_member_id, params[:amount].to_f, params[:advance_term])
     preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, params[:check_capstock], session['signer_full_name'])
     advance_request_parameters(preview)
     populate_advance_request_view_parameters
@@ -187,17 +188,23 @@ class DashboardController < ApplicationController
         @error_message = :total_daily_limit
         response_html = render_to_string :quick_advance_error, layout: false
       else
-        preview_success = true
-        preview_error = false
-        @original_amount = @advance_amount.to_f
-        @stock = params[:stock].to_f if params[:stock]
-        @session_elevated = session_elevated?
-        checked_rate = check_advance_rate(request, @advance_type_raw, @advance_term, @advance_rate)
-        @advance_rate = checked_rate[:advance_rate]
-        @old_rate = checked_rate[:old_rate]
-        @rate_changed = checked_rate[:rate_changed]
-        advance_request_timestamp!
-        response_html = render_to_string layout: false
+        checked_rate = check_advance_rate(etransact_service, @advance_type_raw, @advance_term, @advance_rate)
+        if checked_rate[:stale_rate]
+          preview_success = false
+          preview_error = true
+          response_html = render_to_string :quick_advance_error, layout: false
+        else
+          preview_success = true
+          preview_error = false
+          @original_amount = @advance_amount.to_f
+          @stock = params[:stock].to_f if params[:stock]
+          @session_elevated = session_elevated?
+          @advance_rate = checked_rate[:advance_rate]
+          @old_rate = checked_rate[:old_rate]
+          @rate_changed = checked_rate[:rate_changed]
+          advance_request_timestamp!
+          response_html = render_to_string layout: false
+        end
       end
     else
       preview_success = false
@@ -376,10 +383,16 @@ class DashboardController < ApplicationController
     end
   end
 
-  def check_advance_rate(request, type, term, old_rate)
+  def check_advance_rate(etransact_service, type, term, old_rate)
     rate_changed = false
-    rate_service = RatesService.new(request)
-    new_rate = rate_service.rate(type, term)[:rate].to_f
+    settings = etransact_service.settings
+    rate_service = RatesService.new(etransact_service.request)
+    rate_details = rate_service.rate(type, term)
+    stale_rate = rate_details[:updated_at] + settings[:rate_stale_check] < Time.zone.now if settings && settings[:rate_stale_check]
+    if stale_rate
+      InternalMailer.stale_rate(settings[:rate_stale_check], rate_service.request_uuid, current_user).deliver_now
+    end
+    new_rate = rate_details[:rate].to_f
     if new_rate != old_rate.to_f
       rate = new_rate
       rate_changed = true
@@ -389,7 +402,8 @@ class DashboardController < ApplicationController
     {
       advance_rate: rate.to_f,
       old_rate: old_rate.to_f,
-      rate_changed: rate_changed
+      rate_changed: rate_changed,
+      stale_rate: stale_rate
     }
   end
   
