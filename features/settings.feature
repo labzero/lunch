@@ -41,7 +41,7 @@ Scenario: Remembering Email Settings
 Scenario: Users can view Two Factor settings
   Given I visit the dashboard
     And I click on the gear icon in the header
-  When I click on "2-Step Verification" in the sidebar nav
+  When I click on "Manage Token" in the sidebar nav
   Then I should be on the two factor settings page
 
 @jira-mem-600

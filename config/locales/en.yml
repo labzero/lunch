@@ -322,7 +322,7 @@ en:
       new_password_step: Enter your new password.
       save_button: Save new password
     two_factor:
-      title: 2-Step Verification
+      title: Manage Token
       description: Manage authentication with your SecurID token.
       help_html: 'To request a new SecurID token or get help with an existing one, <a href="%{url}">email Web Support</a> or call them at %{phone_number}.'
       reset_pin:
