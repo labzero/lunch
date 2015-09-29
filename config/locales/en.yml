@@ -306,7 +306,7 @@ en:
         title: User Access Deleted
         success_html: User access for <strong>%{name}</strong> has been deleted.
     password:
-      title: Password
+      title: Manage Password
       instructions: "Change your Member Portal password.\n\nIf you have questions about account access, contact your institution’s Access Manager or <a href=\"%{url}\">Web Support</a> at %{phone_number}."
     quick_advance:
       title: Quick Advance
