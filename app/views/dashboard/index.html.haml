@@ -111,4 +111,4 @@
           %li= render 'dashboard/dashboard_contact', email: @contacts[:rm][:email], title: t('dashboard.contacts.type.relationship_manager'), name: @contacts[:rm][:full_name], phone_number: fhlb_formatted_phone_number(@contacts[:rm][:phone_number]), picture_url: image_url(@contacts[:rm][:image_url])
         -if @contacts[:cam] && @contacts[:cam][:full_name]
           %li= render 'dashboard/dashboard_contact', email: @contacts[:cam][:email], title: t('dashboard.contacts.type.collateral_asset_manager'), name: @contacts[:cam][:full_name], phone_number: fhlb_formatted_phone_number(@contacts[:cam][:phone_number]), picture_url: image_url(@contacts[:cam][:image_url])
-        %li.member-services-desk= render 'dashboard/dashboard_contact', email: ContactInformationHelper::WEB_SUPPORT_EMAIL, title: t('dashboard.contacts.type.member_services_desk'), phone_number: fhlb_formatted_phone_number('8004443452')
+        %li.member-services-desk= render 'dashboard/dashboard_contact', email: ContactInformationHelper::WEB_SUPPORT_EMAIL, title: t('dashboard.contacts.type.member_services_desk'), phone_number: service_desk_phone_number

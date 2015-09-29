@@ -1,6 +1,8 @@
 require 'action_view'
 require_relative '../../app/helpers/custom_formatting_helper'
+require_relative '../../app/helpers/contact_information_helper'
 include CustomFormattingHelper
+include ContactInformationHelper
 include ActionView::Helpers::SanitizeHelper
 
 When /^I visit the dashboard$/ do
@@ -250,7 +252,7 @@ Then(/^I should see an? "(.*?)" error(?: with amount (\d+) and type "(.*?)")?$/)
     when 'insufficient collateral'
       /\A#{Regexp.quote(strip_tags(I18n.t("dashboard.quick_advance.error.insufficient_collateral_html", amount: fhlb_formatted_currency(amount.to_i, precision: 0), collateral_type: collateral_type)))}\z/
     when 'advance unavailable'
-      /\A#{Regexp.quote(I18n.t('dashboard.quick_advance.error.advance_unavailable', phone_number: fhlb_formatted_phone_number('8004443452')))}\z/
+      /\A#{Regexp.quote(I18n.t('dashboard.quick_advance.error.advance_unavailable', phone_number: service_desk_phone_number))}\z/
     when 'rate expired'
       /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.rate_expired"))}\z/
     else
