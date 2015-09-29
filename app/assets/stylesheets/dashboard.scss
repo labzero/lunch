@@ -252,20 +252,12 @@ p.dashboard-vrc-overnight-message {
   }
 }
 
-.dashboard-module-your-account {
-  @extend %dashboard-module-chromeless;
-  table {
-    width: 100%;
-  }
-  header {
-    padding-bottom: 10px;
-  }
-  h2 {
-    margin: 0;
-  }
-  .dashboard-module-content > div {
-    margin-bottom: 15px;
-  }
+p.dashboard-vrc-overnight-message, .dashboard-advances-rate-desk-closed {
+  color: $medium-gray;
+}
+
+.dashboard-advances-rate, .dashboard-advances-rate-desk-closed {
+  color: $medium-gray;
 }
 
 $breakdown-table-label-width: 195px;
