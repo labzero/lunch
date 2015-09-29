@@ -28,3 +28,7 @@ Scenario: Intranet user sees bank name in header
   Given I visit the root path
   When I log in as a "primary user"
   Then I should see the primary bank name in the header
+
+Scenario: Member sees render time in navigation header
+  Given I visit the dashboard
+  Then I should see a datestamp in the navigation header

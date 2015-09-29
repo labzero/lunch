@@ -21,6 +21,10 @@ Then(/^I should see the primary bank name in the header$/) do
   page.assert_selector('.header-member-name', text: CustomConfig.env_config['primary_bank'])
 end
 
+Then(/^I should see a datestamp in the navigation header$/) do
+  page.find('nav time')
+end
+
 def dropdown_title_regex(dropdown)
   title = case dropdown
   when 'reports'

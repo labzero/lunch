@@ -12,6 +12,7 @@
         = render 'shared/input_field', icon: :magnify, placeholder: t('nav.primary.search'), field_class: :'nav-search'
 .secondary-nav
   %nav.row
+    %time{datetime:@render_time.iso8601}= fhlb_datetime_standard_numeric(@render_time)
     %ul<>
       %li<>
         = link_to(t('nav.secondary.advances'), advances_manage_advances_path)

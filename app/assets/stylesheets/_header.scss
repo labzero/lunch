@@ -95,6 +95,10 @@
     overflow: visible;
     position: relative;
     z-index: 1;
+    time {
+      float: right;
+      color: $medium_gray;
+    }
   }
   ul {
     list-style: none;

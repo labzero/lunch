@@ -136,6 +136,15 @@ RSpec.describe ApplicationController, :type => :controller do
     end
   end
 
+  describe 'save_render_time' do
+    let (:now) { double('Time.zone.now') }
+    before{ allow(Time).to receive_message_chain(:zone, :now).and_return(now) }
+    it 'should set @render_time' do
+      controller.save_render_time
+      expect(controller.instance_variable_get(:@render_time)).to eq(now)
+    end
+  end
+
   describe '`current_member_id` method' do
     let(:member_id) { double('A Member ID') }
     it 'should return the `member_id` from the session' do
