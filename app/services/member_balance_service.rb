@@ -236,8 +236,9 @@ class MemberBalanceService < MAPIService
     get_hash(:settlement_transaction_rate, "/member/#{@member_id}/current_sta_rate")
   end
 
-  def dividend_statement(quarter)
-    if data = get_hash(:dividend_statement, "/member/#{@member_id}/dividend_statement/#{quarter.to_date.iso8601}")
+  def dividend_statement(start_date, div_id)
+    div_id ||= 'current'
+    if data = get_hash(:dividend_statement, "/member/#{@member_id}/dividend_statement/#{start_date.to_date.iso8601}/#{div_id}")
       fix_date(data, :transaction_date)
       data[:details].each do |detail|
         fix_date(detail, :issue_date)

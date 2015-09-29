@@ -410,11 +410,25 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET dividend_statement' do
       let(:make_request) { get :dividend_statement }
       let(:response_hash) { double('A Dividend Statement', :'[]' => nil)}
+      let(:year) { Array(2000..2015).sample }
+      let(:quarter) { Array(1..4).sample }
+      let(:div_id_regular) { "#{year}Q#{quarter}" }
+      let(:div_id_special) { "#{year}Q#{quarter}#{['b', 'c', 'd'].sample}" }
+      div_ids = ['2015Q2', '2015Q1', '2014Q4']
       before do
-        allow(member_balance_service_instance).to receive(:dividend_statement).with(kind_of(Date)).and_return(response_hash)
+        allow(member_balance_service_instance).to receive(:dividend_statement).and_return(response_hash)
         allow(response_hash).to receive(:[]).with(:details).and_return([{}])
+        allow(response_hash).to receive(:[]).with(:div_ids).and_return(div_ids)
       end
       it_behaves_like 'a user required action', :get, :dividend_statement
+      it 'calls MemberBalanceService.dividend_statement with the proper date restriction' do
+        expect(member_balance_service_instance).to receive(:dividend_statement).with(ReportsController::DATE_RESTRICTION_MAPPING[:dividend_statement].ago.to_date, anything)
+        make_request
+      end
+      it 'calls MemberBalanceService.dividend_statement with the dividend_transaction_filter parameter' do
+        expect(member_balance_service_instance).to receive(:dividend_statement).with(anything, div_id_regular)
+        get :dividend_statement, dividend_transaction_filter: div_id_regular
+      end
       it 'should assign `@dividend_statement` to the result of calling MemberBalanceService.dividend_statement' do
         make_request
         expect(assigns[:dividend_statement]).to be(response_hash)
@@ -436,6 +450,46 @@ RSpec.describe ReportsController, :type => :controller do
         make_request
         expect(assigns[:dividend_statement_details][:rows]).to eq([])
         expect(assigns[:dividend_statement_details][:footer]).to be_nil
+      end
+      it 'sets @dropdown_options labels from the div_ids returned by MemberBalanceService.dividend_statement' do
+        allow(response_hash).to receive(:[]).with(:div_ids).and_return([div_id_regular])
+        make_request
+        expect(assigns[:dropdown_options][0][0]).to eq(I18n.t("dates.quarters.#{div_id_regular.last}", year: div_id_regular[0..3]))
+      end
+      it 'sets @dropdown_options labels for special dividends based on their div_id' do
+        allow(response_hash).to receive(:[]).with(:div_ids).and_return([div_id_special])
+        make_request
+        I18n.t('reports.pages.dividend_statement.special_dividend', year: div_id_special[0..3])
+      end
+      it 'defaults @dropdown_options_text to the first label in @dropdown_options' do
+        allow(response_hash).to receive(:[]).with(:div_ids).and_return(div_ids)
+        make_request
+        expect(assigns[:dropdown_options_text]).to eq(I18n.t("dates.quarters.#{div_ids.first.last}", year: div_ids.first[0..3]))
+      end
+      it 'defaults @div_id to the first value in @dropdown_options' do
+        allow(response_hash).to receive(:[]).with(:div_ids).and_return(div_ids)
+        make_request
+        expect(assigns[:div_id]).to eq(div_ids.first)
+      end
+      div_ids.each do |div_id|
+        it "sets @dropdown_options_text to the appropriate value when @div_id equals `#{div_id}`" do
+          get :dividend_statement, dividend_transaction_filter: div_id
+          expect(assigns[:dropdown_options_text]).to eq(I18n.t("dates.quarters.#{div_id.last}", year: div_id[0..3]))
+        end
+      end
+      %w(1 2 3 4).each do |i|
+        it "sets @show_summary_data to true if the @div_id ends in #{i}" do
+          div_id = "#{year}Q#{i}"
+          get :dividend_statement, dividend_transaction_filter: div_id
+          expect(assigns[:show_summary_data]).to be(true)
+        end
+      end
+      it 'does not set @show_summary_date if the @div_id ends in anything other than the numbers 1 through 4' do
+        (Array(5..9) + ('a'..'z').to_a + ('A'..'Z').to_a).each do |i|
+          div_id = "#{year}Q#{i}"
+          get :dividend_statement, dividend_transaction_filter: div_id
+          expect(assigns[:show_summary_data]).to be_nil
+        end
       end
     end
 

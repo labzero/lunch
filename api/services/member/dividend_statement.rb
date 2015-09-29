@@ -2,28 +2,31 @@ module MAPI
   module Services
     module Member
       module DividendStatement
-        def self.dividend_statement(app, member_id, date)
+        def self.dividend_statement(env, member_id, start_date, div_id)
           member_id = member_id.to_i
 
-          # TODO rig up `date` param to query after design figures out how we will be inputting this.  It might end up being `div_id` instead of date.
-          if app.settings.environment == :production
-
-            # TODO replace this with the real mechanism for grabbing a dividend statement once it's designed.  For now, we'll just show the latest
-            # div_id based on date_end.  '1-Jan-2013' is hardcoded in to reduce scope of query and has no special significance
+          # get div_ids
+          if env == :production
             div_id_query = <<-SQL
               SELECT div_id, date_end, date_paid
               FROM capstock.capstock_div_fhlb
-              WHERE date_end >= '1-Jan-2013' ORDER BY DATE_PAID DESC
+              WHERE date_end >= #{ ActiveRecord::Base.connection.quote(start_date)} ORDER BY DATE_PAID DESC
             SQL
 
+            div_ids = []
             div_id_cursor = ActiveRecord::Base.connection.execute(div_id_query)
-            div_id_row = div_id_cursor.fetch()
-            if div_id_row
-              div_id = div_id_row.first
-            else
-              return nil
+            while row = div_id_cursor.fetch_hash()
+              div_ids.push(row['DIV_ID'])
             end
+          else
+            div_ids = Private.fake_div_ids(start_date)
+          end
+          div_id = div_ids.first if div_id == 'current'
 
+          r = Random.new(div_id[0..3].to_i * div_id.last.to_i) unless env == :production # used in the creation of fake data for development
+
+          # get STA number
+          if env == :production
             quoted_member_id = ActiveRecord::Base.connection.quote(member_id)
             quoted_div_id = ActiveRecord::Base.connection.quote(div_id)
             
@@ -61,8 +64,13 @@ module MAPI
 
             sta_account_number_cursor = ActiveRecord::Base.connection.execute(sta_account_number_query)
             sta_account_number_row = sta_account_number_cursor.fetch()
-            sta_account_number = sta_account_number_row.first if sta_account_number_row
+          else
+            sta_account_number_row = [r.rand(10000000..99999999).to_s]
+          end
+          sta_account_number = sta_account_number_row.first if sta_account_number_row
 
+          # get dividend_summary
+          if env == :production
             dividend_summary_query = <<-SQL
               SELECT h.fhlb_id, h.div_id as div_id, tran_date, div_rate, total_div_hist, avg_shr_os, no_share, no_share_par_value,
                 cash_dividend, total_div_tran, QYear, Qtr, div_per_shr, annual_div_rate
@@ -85,11 +93,15 @@ module MAPI
                 GROUP BY a.trans_type, a.fhlb_id, a.div_id) x
               WHERE h.fhlb_id = x.fhlb_id And h.div_id = x.div_id
             SQL
-
             dividend_summary_cursor = ActiveRecord::Base.connection.execute(dividend_summary_query)
             dividend_summary = dividend_summary_cursor.fetch_hash() || {}
+          else
+            dividend_summary = Private.fake_div_summary(div_id, r)
+          end
             dividend_summary = dividend_summary.with_indifferent_access
 
+          # get dividend_details
+          if env == :production
             dividend_details_query = <<-SQL
               SELECT cert_id, issue_date, eff_from, eff_to, no_share_holding, eff_days, nvl(avg_shr_os, 0.00)  avg_shr_os_par_value,
                 nvl(dividend, 0) dividend
@@ -106,14 +118,17 @@ module MAPI
               dividend_details << row.with_indifferent_access
             end
           else
-            dividend_summary = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'dividend_summary_data.json'))).with_indifferent_access
-            dividend_summary[:TRAN_DATE] = MAPI::Services::Member::CashProjections::Private.fake_as_of_date # TODO change this to reflect whatever mechanism we will use for historic dividend statements
-            dividend_details = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'dividend_details.json')))
-            dividend_details = dividend_details.collect{ |x| x.with_indifferent_access}
-            sta_account_number = '25100033'
+            dividend_details = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'dividend_details.json')))[r.rand(0..2)]
+            dividend_details.each_index do |i|
+              dividend_details[i]['EFF_FROM'] = Private.start_date_from_div_id(div_id)
+              dividend_details[i]['EFF_TO'] = Private.end_date_from_div_id(div_id)
+            end
+
           end
+          dividend_details = dividend_details.collect{ |x| x.with_indifferent_access}
 
           {
+            div_ids: div_ids,
             transaction_date: (dividend_summary[:TRAN_DATE].to_date if dividend_summary[:TRAN_DATE]),
             annualized_rate: (dividend_summary[:ANNUAL_DIV_RATE].to_f if dividend_summary[:ANNUAL_DIV_RATE]),
             rate: (dividend_summary[:DIV_PER_SHR].to_f if dividend_summary[:DIV_PER_SHR]),
@@ -143,6 +158,77 @@ module MAPI
               }
             end
           end
+
+          def self.fake_div_ids(start_date)
+            div_ids = []
+            (start_date..last_quarter_end_date).each do |date|
+              quarter = (date.month / 3.0).ceil
+              div_id = "#{date.year}Q#{quarter}"
+              div_ids.push(div_id) unless div_ids.include?(div_id)
+            end
+            div_ids.reverse
+          end
+
+          def self.last_quarter_end_date
+            today = Time.zone.today
+            last_quarter = (today.month / 3.0).ceil - 1
+            Time.zone.parse(
+              case last_quarter
+              when 0
+                "#{today.year - 1}-12-31"
+              when 1
+                "#{today.year}-3-31"
+              when 2
+                "#{today.year}-6-30"
+              when 3
+                "#{today.year}-9-30"
+              end
+            ).to_date
+          end
+
+          def self.fake_div_summary(div_id, r)
+            cash_dividend = r.rand(111111..999999) + r.rand().round(2)
+            {
+              "TRAN_DATE" => end_date_from_div_id(div_id),
+              "DIV_RATE" => (1 + r.rand().round(2)),
+              "ANNUAL_DIV_RATE" => (r.rand(3..6) + r.rand().round(2)),
+              "DIV_PER_SHR" => (1 + r.rand().round(2)),
+              "AVG_SHR_OS" => r.rand(11111111..99999999),
+              "NO_SHARE" => 0,
+              "NO_SHARE_PAR_VALUE" => 0,
+              "CASH_DIVIDEND" => cash_dividend,
+              "TOTAL_DIV_TRAN" => cash_dividend
+            }
+          end
+
+          def self.start_date_from_div_id(div_id)
+            year = div_id[0..3]
+            case div_id.last.to_i
+              when 1
+                "#{year}-1-1"
+              when 2
+                "#{year}-4-1"
+              when 3
+                "#{year}-7-1"
+              when 4
+                "#{year}-10-1"
+            end
+          end
+
+          def self.end_date_from_div_id(div_id)
+            year = div_id[0..3]
+            case div_id.last.to_i
+              when 1
+                "#{year}-3-31"
+              when 2
+                "#{year}-6-30"
+              when 3
+                "#{year}-9-30"
+              when 4
+                "#{year}-12-31"
+            end
+          end
+
         end
       end
     end

@@ -1065,6 +1065,7 @@ en:
         dividend_amount_heading: 'Total Dividend Amount as of the end of the %{quarter}:'
         summary: Dividend Summary
         details: Dividend Details
+        special_dividend: Special Dividend %{year}
         headers:
           period: Dividend Period
           date: Transaction Date

@@ -1,0 +1,32 @@
+[
+  {
+    "ISSUE_DATE": "20-OCT-1999",
+    "CERT_ID": "16152",
+    "EFF_FROM": "01-JAN-2015",
+    "EFF_TO": "31-MAR-2015",
+    "NO_SHARE_HOLDING" : 6,
+    "AVG_SHR_OS_PAR_VALUE": 600,
+    "DIVIDEND": 7.5,
+    "EFF_DAYS": 90
+  },
+  {
+    "ISSUE_DATE": "20-APR-2000",
+    "CERT_ID": "17084",
+    "EFF_FROM": "01-JAN-2015",
+    "EFF_TO": "31-MAR-2015",
+    "NO_SHARE_HOLDING" : 37,
+    "AVG_SHR_OS_PAR_VALUE": 3700,
+    "DIVIDEND": 46.25,
+    "EFF_DAYS": 90
+  },
+  {
+    "ISSUE_DATE": "20-JUL-2000",
+    "CERT_ID": "17577",
+    "EFF_FROM": "01-JAN-2015",
+    "EFF_TO": "31-MAR-2015",
+    "NO_SHARE_HOLDING" : 10,
+    "AVG_SHR_OS_PAR_VALUE": 1000,
+    "DIVIDEND": 12.5,
+    "EFF_DAYS": 90
+  }
+]

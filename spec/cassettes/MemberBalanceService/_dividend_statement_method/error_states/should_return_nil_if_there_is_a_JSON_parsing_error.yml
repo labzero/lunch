@@ -86,4 +86,47 @@ http_interactions:
       string: '{"transaction_date":"2015-07-23","annualized_rate":5.07,"rate":1.25,"average_shares_outstanding":131597.4,"shares_dividend":0,"shares_par_value":0.0,"cash_dividend":164496.75,"total_dividend":164496.75,"sta_account_number":"25100033","details":[{"issue_date":"1999-10-20","certificate_sequence":"16152","start_date":"2015-01-01","end_date":"2015-03-31","shares_outstanding":6,"average_shares_outstanding":6.0,"dividend":7.5,"days_outstanding":90},{"issue_date":"2000-04-20","certificate_sequence":"17084","start_date":"2015-01-01","end_date":"2015-03-31","shares_outstanding":37,"average_shares_outstanding":37.0,"dividend":46.25,"days_outstanding":90},{"issue_date":"2000-07-20","certificate_sequence":"17577","start_date":"2015-01-01","end_date":"2015-03-31","shares_outstanding":10,"average_shares_outstanding":10.0,"dividend":12.5,"days_outstanding":90}]}'
     http_version: 
   recorded_at: Fri, 24 Jul 2015 15:42:59 GMT
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/dividend_statement/2015-01-01/2015Q1
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
+      X-Request-Id:
+      - '12345'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '989'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Mon, 28 Sep 2015 15:45:33 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"div_ids":["2015Q2","2015Q1b","2015Q1","2014Q4","2014Q3","2014Q2","2014Q1","2013Q4","2013Q3","2013Q2","2013Q1","2012Q4","2012Q3"],"transaction_date":"2015-09-25","annualized_rate":5.07,"rate":1.25,"average_shares_outstanding":131597.4,"shares_dividend":0,"shares_par_value":0.0,"cash_dividend":164496.75,"total_dividend":164496.75,"sta_account_number":"25100033","details":[{"issue_date":"1999-10-20","certificate_sequence":"16152","start_date":"2015-01-01","end_date":"2015-03-31","shares_outstanding":6,"average_shares_outstanding":6.0,"dividend":7.5,"days_outstanding":90},{"issue_date":"2000-04-20","certificate_sequence":"17084","start_date":"2015-01-01","end_date":"2015-03-31","shares_outstanding":37,"average_shares_outstanding":37.0,"dividend":46.25,"days_outstanding":90},{"issue_date":"2000-07-20","certificate_sequence":"17577","start_date":"2015-01-01","end_date":"2015-03-31","shares_outstanding":10,"average_shares_outstanding":10.0,"dividend":12.5,"days_outstanding":90}]}'
+    http_version: 
+  recorded_at: Mon, 28 Sep 2015 15:45:33 GMT
 recorded_with: VCR 2.9.3
