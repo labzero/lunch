@@ -3,8 +3,6 @@ class SettingsController < ApplicationController
   before_action do
     @sidebar_options = [
         [t("settings.password.title"), settings_password_path],
-        [t("settings.quick_advance.title"), '#'],
-        [t("settings.quick_report.title"), '#'],
         [t("settings.two_factor.title"), settings_two_factor_path],
         [t("settings.email.title"), settings_path]
     ]
