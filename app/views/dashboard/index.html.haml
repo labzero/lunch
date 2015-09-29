@@ -52,7 +52,9 @@
               %td.borrowing-capacity-note= t('dashboard.your_account.table.borrowing_capacity_note_html', url: reports_borrowing_capacity_url)
   .column-3
     - if policy(:advance).show? && @quick_advance_enabled
-      =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances'} do
+      - classes = ['dashboard-module-advances']
+      - classes << 'dashboard-module-advances-closed' if @quick_advance_status == :closed
+      =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: classes} do
         - if @quick_advance_status == :open
           = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}, field_name: :amount
           %h2.quick-advance-confirmation-subheading{style: 'display: none;'}= t('dashboard.quick_advance.confirmation.title')
@@ -63,7 +65,7 @@
           = link_to t('dashboard.quick_advance.advances_desk_closed_link'), '', data: {'flyout-trigger' => 'active'}
         %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_status != :no_terms}"}
           = t('dashboard.quick_advance.advances_desk_no_terms')
-        - if @quick_advance_status == :open
+        - if [:open,:closed].include?(@quick_advance_status)
           %p.dashboard-vrc-overnight-message= t('global.vrc_overnight')
           .dashboard-advances-rate
             = @current_overnight_vrc
