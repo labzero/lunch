@@ -13,7 +13,7 @@
         = @headings[:total_market_value]
       %p= fhlb_formatted_currency(securities_position[:total_market_value], force_unit: true, precision: 2)
   %h2.report-table-title= @headings[:table_heading]
-  %table.table-allow-wrapping.report-table.securities-position-report-table{data: {sortable: true, :'default-sort' => [[0, 'desc']], :'disable-auto-width' => true, :'missing-data-message' => t('errors.table_data_unavailable')}}
+  %table.table-allow-wrapping.report-table.securities-position-report-table{data: {sortable: true, :'default-sort' => [[0, 'desc']], :'disable-auto-width' => true, :'missing-data-message' => @no_data_message}}
     %thead
       %tr
         %th.report-cell-narrow= t('reports.pages.securities_position.security_pledge_type')

@@ -32,6 +32,19 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
+  shared_examples 'a report with instance variables set in a before_filter' do |action|
+    let(:member_name) { double('member name') }
+    it 'has a @member_name' do
+      allow(controller).to receive(:current_member_name).and_return(member_name)
+      get action
+      expect(assigns[:member_name]).to eq(member_name)
+    end
+    it "has a default @no_data_message of '#{I18n.t('errors.table_data_no_records')}'" do
+      get action
+      expect(assigns[:no_data_message]).to eq(I18n.t('errors.table_data_no_records'))
+    end
+  end
+
   login_user
 
   let(:today) { Time.zone.today }
@@ -49,6 +62,7 @@ RSpec.describe ReportsController, :type => :controller do
 
   describe 'GET index' do
     it_behaves_like 'a user required action', :get, :index
+    it_behaves_like 'a report with instance variables set in a before_filter', :index
     it 'should render the index view' do
       get :index
       expect(response.body).to render_template('index')
@@ -68,6 +82,7 @@ RSpec.describe ReportsController, :type => :controller do
       before { allow(member_balance_service_instance).to receive(:capital_stock_activity).and_return(response_hash) }
       it_behaves_like 'a user required action', :get, :capital_stock_activity
       it_behaves_like 'a date restricted report', :capital_stock_activity, :last_month_start
+      it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_activity
 
       it 'should render the capital_stock_activity view' do
         get :capital_stock_activity
@@ -113,6 +128,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it_behaves_like 'a user required action', :get, :borrowing_capacity
       it_behaves_like 'a report that can be downloaded', :borrowing_capacity, [:pdf]
+      it_behaves_like 'a report with instance variables set in a before_filter', :borrowing_capacity
       it 'should render the borrowing_capacity view' do
         get :borrowing_capacity
         expect(response.body).to render_template('borrowing_capacity')
@@ -145,6 +161,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :settlement_transaction_account
       it_behaves_like 'a report that can be downloaded', :settlement_transaction_account, [:pdf]
       it_behaves_like 'a date restricted report', :settlement_transaction_account, :last_month_start
+      it_behaves_like 'a report with instance variables set in a before_filter', :settlement_transaction_account
       describe 'with activities array stubbed' do
         it 'should render the settlement_transaction_account view' do
           get :settlement_transaction_account
@@ -270,6 +287,7 @@ RSpec.describe ReportsController, :type => :controller do
 
       it_behaves_like 'a report that can be downloaded', :advances_detail, [:pdf, :xlsx]
       it_behaves_like 'a date restricted report', :advances_detail
+      it_behaves_like 'a report with instance variables set in a before_filter', :advances_detail
       it 'should render the advances_detail view' do
         get :advances_detail
         expect(response.body).to render_template('advances_detail')
@@ -407,6 +425,12 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET cash_projections' do
       let(:as_of_date) { '2014-12-12'.to_date }
       it_behaves_like 'a user required action', :get, :cash_projections
+
+
+      before do
+        allow(member_balance_service_instance).to receive(:cash_projections).and_return({})
+      end
+      it_behaves_like 'a report with instance variables set in a before_filter', :cash_projections
       describe 'view instance variables' do
         before {
           allow(response_hash).to receive(:[]).with(:as_of_date).and_return(as_of_date)
@@ -449,6 +473,7 @@ RSpec.describe ReportsController, :type => :controller do
         allow(response_hash).to receive(:[]).with(:div_ids).and_return(div_ids)
       end
       it_behaves_like 'a user required action', :get, :dividend_statement
+      it_behaves_like 'a report with instance variables set in a before_filter', :dividend_statement
       it 'calls MemberBalanceService.dividend_statement with the proper date restriction' do
         expect(member_balance_service_instance).to receive(:dividend_statement).with(ReportsController::DATE_RESTRICTION_MAPPING[:dividend_statement].ago.to_date, anything)
         make_request
@@ -535,6 +560,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it_behaves_like 'a user required action', :get, :securities_services_statement
       it_behaves_like 'a date restricted report', :securities_services_statement, :last_month_end
+      it_behaves_like 'a report with instance variables set in a before_filter', :securities_services_statement
       it 'should set @start_date to the end of the month for the `start_date` attribute of the `min_and_start_dates` hash' do
         make_request
         expect(assigns[:start_date]).to eq(end_of_month)
@@ -591,20 +617,21 @@ RSpec.describe ReportsController, :type => :controller do
     end
 
     describe 'GET letters_of_credit' do
-      it_behaves_like 'a user required action', :get, :letters_of_credit
-
       let(:make_request) { get :letters_of_credit }
       let(:as_of_date) { double('some date') }
       let(:total_current_par) { double('total current par') }
       let(:maturity_date) {double('maturity date')}
+      before do
+        allow(response_hash).to receive(:[]).with(:as_of_date)
+        allow(response_hash).to receive(:[]).with(:total_current_par)
+        allow(response_hash).to receive(:[]).with(:credits)
+        allow(member_balance_service_instance).to receive(:letters_of_credit).and_return(response_hash)
+      end
+
+      it_behaves_like 'a user required action', :get, :letters_of_credit
+      it_behaves_like 'a report with instance variables set in a before_filter', :letters_of_credit
 
       describe 'view instance variables' do
-        before do
-          allow(response_hash).to receive(:[]).with(:as_of_date)
-          allow(response_hash).to receive(:[]).with(:total_current_par)
-          allow(response_hash).to receive(:[]).with(:credits)
-          allow(member_balance_service_instance).to receive(:letters_of_credit).and_return(response_hash)
-        end
         it 'sets @as_of_date to the value returned by MemberBalanceService.letters_of_credit' do
           expect(response_hash).to receive(:[]).with(:as_of_date).and_return(as_of_date)
           make_request
@@ -660,6 +687,7 @@ RSpec.describe ReportsController, :type => :controller do
 
     describe 'GET parallel_shift' do
       it_behaves_like 'a user required action', :get, :parallel_shift
+      it_behaves_like 'a report with instance variables set in a before_filter', :parallel_shift
       projections = %i(shift_neg_300 shift_neg_200 shift_neg_100 shift_0 shift_100 shift_200 shift_300)
       let(:make_request) { get :parallel_shift }
       let(:as_of_date) { double('some date') }
@@ -775,19 +803,22 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
     describe 'GET current_securities_position' do
+      dropdown_options = [
+        [I18n.t('reports.pages.securities_position.filter.all'), 'all'],
+        [I18n.t('reports.pages.securities_position.filter.pledged'), 'pledged'],
+        [I18n.t('reports.pages.securities_position.filter.unpledged'), 'unpledged']
+      ]
+      let(:securities_position_response) { double('Current Securities Position response', :[] => nil) }
+      let(:as_of_date) { Date.new(2014,1,1) }
+      before {
+        allow(securities_position_response).to receive(:[]).with(:securities).and_return([])
+        allow(member_balance_service_instance).to receive(:current_securities_position).and_return(securities_position_response)
+      }
+
       it_behaves_like 'a user required action', :get, :current_securities_position
+      it_behaves_like 'a report with instance variables set in a before_filter', :current_securities_position
+
       describe 'view instance variables' do
-        dropdown_options = [
-          [I18n.t('reports.pages.securities_position.filter.all'), 'all'],
-          [I18n.t('reports.pages.securities_position.filter.pledged'), 'pledged'],
-          [I18n.t('reports.pages.securities_position.filter.unpledged'), 'unpledged']
-        ]
-        let(:securities_position_response) { double('Current Securities Position response', :[] => nil) }
-        let(:as_of_date) { Date.new(2014,1,1) }
-        before {
-          allow(securities_position_response).to receive(:[]).with(:securities).and_return([])
-          allow(member_balance_service_instance).to receive(:current_securities_position).and_return(securities_position_response)
-        }
         it 'sets @current_securities_position to the hash returned from MemberBalanceService' do
           get :current_securities_position
           expect(assigns[:current_securities_position]).to eq(securities_position_response)
@@ -827,25 +858,27 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
     describe 'GET monthly_securities_position' do
+      dropdown_options = [
+        [I18n.t('reports.pages.securities_position.filter.all'), 'all'],
+        [I18n.t('reports.pages.securities_position.filter.pledged'), 'pledged'],
+        [I18n.t('reports.pages.securities_position.filter.unpledged'), 'unpledged']
+      ]
+      let(:securities_position_response) { double('Monthly Securities Position response', :[] => nil) }
+      let(:as_of_date) { Date.new(2014,1,1) }
+      let(:end_of_month) { (start_date - 1.month).end_of_month }
+      let(:month_restricted_start_date) { Date.today - rand(10000) }
+      let(:start_date_param) { Date.today - rand(10000) }
+      before {
+        allow(securities_position_response).to receive(:[]).with(:securities).and_return([])
+        allow(member_balance_service_instance).to receive(:monthly_securities_position).and_return(securities_position_response)
+        allow(restricted_start_date).to receive(:end_of_month).and_return(end_of_month)
+        allow(controller).to receive(:month_restricted_start_date).and_return(end_of_month)
+      }
+
       it_behaves_like 'a user required action', :get, :monthly_securities_position
+      it_behaves_like 'a date restricted report', :monthly_securities_position, :last_month_end
+      it_behaves_like 'a report with instance variables set in a before_filter', :monthly_securities_position
       describe 'view instance variables' do
-        dropdown_options = [
-          [I18n.t('reports.pages.securities_position.filter.all'), 'all'],
-          [I18n.t('reports.pages.securities_position.filter.pledged'), 'pledged'],
-          [I18n.t('reports.pages.securities_position.filter.unpledged'), 'unpledged']
-        ]
-        let(:securities_position_response) { double('Monthly Securities Position response', :[] => nil) }
-        let(:as_of_date) { Date.new(2014,1,1) }
-        let(:end_of_month) { (start_date - 1.month).end_of_month }
-        let(:month_restricted_start_date) { Date.today - rand(10000) }
-        let(:start_date_param) { Date.today - rand(10000) }
-        before {
-          allow(securities_position_response).to receive(:[]).with(:securities).and_return([])
-          allow(member_balance_service_instance).to receive(:monthly_securities_position).and_return(securities_position_response)
-          allow(restricted_start_date).to receive(:end_of_month).and_return(end_of_month)
-          allow(controller).to receive(:month_restricted_start_date).and_return(end_of_month)
-        }
-        it_behaves_like 'a date restricted report', :monthly_securities_position, :last_month_end
         it "should pass `#{ReportsController::DATE_RESTRICTION_MAPPING[:monthly_securities_position]}` to `min_and_start_dates`" do
           expect(controller).to receive(:min_and_start_dates).with(ReportsController::DATE_RESTRICTION_MAPPING[:monthly_securities_position], anything)
           get :monthly_securities_position
@@ -904,15 +937,16 @@ RSpec.describe ReportsController, :type => :controller do
     end
     describe 'GET forward_commitments' do
       let(:forward_commitments) { get :forward_commitments }
+      let(:forward_commitments_response) { double('Forward Commitments response', :[] => nil) }
+      let(:as_of_date) { double('Date') }
+      let(:total_current_par) { double('Total current par') }
+      before {
+        allow(member_balance_service_instance).to receive(:forward_commitments).and_return(forward_commitments_response)
+      }
 
       it_behaves_like 'a user required action', :get, :forward_commitments
+      it_behaves_like 'a report with instance variables set in a before_filter', :forward_commitments
       describe 'view instance variables' do
-        let(:forward_commitments_response) { double('Forward Commitments response', :[] => nil) }
-        let(:as_of_date) { double('Date') }
-        let(:total_current_par) { double('Total current par') }
-        before {
-          allow(member_balance_service_instance).to receive(:forward_commitments).and_return(forward_commitments_response)
-        }
         it 'sets @as_of_date to the value returned from the service endpoint' do
           allow(forward_commitments_response).to receive(:[]).with(:as_of_date).and_return(as_of_date)
           forward_commitments
@@ -996,6 +1030,7 @@ RSpec.describe ReportsController, :type => :controller do
       }
 
       it_behaves_like 'a user required action', :get, :capital_stock_and_leverage
+      it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_and_leverage
       %w(position_table_data leverage_table_data).each do |table|
         describe "the @#{table} view instance variable" do
           it 'contains a `column_headings` array containing strings' do
@@ -1062,6 +1097,7 @@ RSpec.describe ReportsController, :type => :controller do
         allow(member_balance_service_instance).to receive(:interest_rate_resets).and_return(irr_response)
       end
       it_behaves_like 'a user required action', :get, :interest_rate_resets
+      it_behaves_like 'a report with instance variables set in a before_filter', :interest_rate_resets
       it 'renders the interest_rate_resets view' do
         interest_rate_resets
         expect(response.body).to render_template('interest_rate_resets')
@@ -1114,6 +1150,7 @@ RSpec.describe ReportsController, :type => :controller do
         allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return(todays_credit_response)
       end
       it_behaves_like 'a user required action', :get, :todays_credit
+      it_behaves_like 'a report with instance variables set in a before_filter', :todays_credit
       describe 'view instance variables' do
         it 'sets the @todays_credit row attribute' do
           todays_credit
@@ -1168,6 +1205,7 @@ RSpec.describe ReportsController, :type => :controller do
     end
     it_behaves_like 'a user required action', :get, :current_price_indications
     it_behaves_like 'a report that can be downloaded', :current_price_indications, [:xlsx]
+    it_behaves_like 'a report with instance variables set in a before_filter', :current_price_indications
     it 'renders the current_price_indications view' do
       allow(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
       allow(response_cpi_hash).to receive(:collect)
@@ -1252,8 +1290,11 @@ RSpec.describe ReportsController, :type => :controller do
       allow(response_hash).to receive(:[]).with(:final).and_return(final)
       allow(response_hash).to receive(:[]).with(:total_payment_or_principal)
       allow(response_hash).to receive(:[]).with(:total_interest)
+      allow(response_hash).to receive(:[]).with(:transactions).and_return(transaction_hash)
+      allow(transaction_hash).to receive(:collect)
     end
     it_behaves_like 'a user required action', :get, :securities_transactions
+    it_behaves_like 'a report with instance variables set in a before_filter', :securities_transactions
     it 'can be disabled' do
       allow(subject).to receive(:report_disabled?).and_return(true)
       allow(transaction_hash).to receive(:collect)
@@ -1261,8 +1302,6 @@ RSpec.describe ReportsController, :type => :controller do
       expect(assigns[:securities_transactions_table_data][:rows]).to eq([])
     end
     it 'renders the securities_transactions view' do
-      allow(response_hash).to receive(:[]).with(:transactions).and_return(transaction_hash)
-      allow(transaction_hash).to receive(:collect)
       get :securities_transactions
       expect(response.body).to render_template('securities_transactions')
     end
@@ -1318,6 +1357,7 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET historical_price_indications' do
       it_behaves_like 'a user required action', :get, :historical_price_indications
       it_behaves_like 'a report that can be downloaded', :historical_price_indications, [:xlsx]
+      it_behaves_like 'a report with instance variables set in a before_filter', :historical_price_indications
       it 'renders the historical_price_indications view' do
         expect(rates_service_instance).to receive(:historical_price_indications).and_return(response_hash)
         get :historical_price_indications
@@ -1495,6 +1535,7 @@ RSpec.describe ReportsController, :type => :controller do
   describe 'GET authorizations' do
     it_behaves_like 'a user required action', :get, :authorizations
     it_behaves_like 'a report that can be downloaded', :authorizations, [:pdf]
+    it_behaves_like 'a report with instance variables set in a before_filter', :authorizations
     describe 'view instance variables' do
       let(:member_service_instance) {double('MembersService')}
       let(:user_no_roles) {{display_name: 'User With No Roles', roles: []}}
@@ -1682,6 +1723,7 @@ RSpec.describe ReportsController, :type => :controller do
     end
 
     it_behaves_like 'a report that can be downloaded', :account_summary, [:pdf]
+    it_behaves_like 'a report with instance variables set in a before_filter', :account_summary
     it 'should render the account_summary view' do
       make_request
       expect(response.body).to render_template('account_summary')
@@ -1835,6 +1877,12 @@ RSpec.describe ReportsController, :type => :controller do
         expect(MembersService).to receive(:new).and_return(member_service_instance)
         expect(member_service_instance).to receive(:report_disabled?).with(750, report_flags).and_return(response)
         expect(method_call).to eq(response)
+      end
+      it "sets the instance variable @no_data_message to '#{I18n.t('errors.table_data_unavailable')}' if `report_disabled?` is true" do
+        allow(MembersService).to receive(:new).and_return(member_service_instance)
+        allow(member_service_instance).to receive(:report_disabled?).and_return(true)
+        method_call
+        expect(controller.instance_variable_get(:@no_data_message)).to eq(I18n.t('errors.table_data_unavailable'))
       end
     end
 
