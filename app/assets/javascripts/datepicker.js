@@ -59,7 +59,7 @@ $(function () {
       setDatePickerApplyListener($datePickerTrigger, $form);
       setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
       if (filter !== undefined) {
-        disablePresets($datePickerTrigger, filter, filterOptions);
+        disablePresets($datePickerTrigger, filter, filterOptions, today);
         if (singleDatePicker) {
           $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(){
             filterDates(filter, filterOptions);
@@ -218,11 +218,14 @@ $(function () {
     };
   };
 
-  function disablePresets($picker, filter, filterOptions) {
+  function disablePresets($picker, filter, filterOptions, today) {
     var picker = $picker.data('daterangepicker');
+    var today = moment(today);
     switch (filter) {
       case filterOptions['end_of_month']:
-        $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
+        if (today !== today.endOf('month')) {
+          $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
+        };
         break;
       case filterOptions['end_of_quarter']:
         $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
@@ -239,8 +242,8 @@ $(function () {
     var date = moment($el.val());
     if (date > today) {
       date = today;
-      options.singleDatePicker ? picker.setEndDate(today.format('MM/DD/YYYY')) : null;
-      $el.val(today.format('MM/DD/YYYY'));
+      options.singleDatePicker ? picker.setEndDate(date.format('MM/DD/YYYY')) : null;
+      $el.val(date.format('MM/DD/YYYY'));
     } else if (options.singleDatePicker) {
       picker.setEndDate(date.format('MM/DD/YYYY'));
       $el.val(date.format('MM/DD/YYYY'));
@@ -252,7 +255,7 @@ $(function () {
       switch (options.filter) {
         // Snap to end of month
         case options.filterOptions['end_of_month']:
-          if (inputMonth >= thisMonth) {
+          if (date !== date.endOf('month') && inputMonth >= thisMonth) {
             picker.setEndDate((date.subtract(1, 'month')).endOf('month'));
           } else {
             picker.setEndDate(date.endOf('month').format('MM/DD/YYYY'));
