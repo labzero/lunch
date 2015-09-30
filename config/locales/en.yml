@@ -267,7 +267,7 @@ en:
     save: Save
     save_message: Last auto-saved
     account:
-      title: Manage Users
+      title: Manage Access
       actions:
         lock: Lock
         unlock: Unlock
