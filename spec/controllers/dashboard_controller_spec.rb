@@ -195,7 +195,7 @@ RSpec.describe DashboardController, :type => :controller do
       it 'should set @account_overview to have zero capital stock remaining balance if the report is disabled' do
         allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::FHLB_STOCK_DATA]).and_return(true)
         get :index
-        expect(assigns[:account_overview][:remaining][3]).to eq(["Stock Leverage", nil, nil, 2])
+        expect(assigns[:account_overview][:remaining][3]).to eq(["Stock Leverage", nil])
       end
       it 'should set @account_overview to have zero collateral borrowing capacity if the report is disabled' do
         allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA]).and_return(true)
