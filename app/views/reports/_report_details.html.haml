@@ -1,0 +1,6 @@
+.report-details
+  %h2= name
+  - if defined? freshness
+    %p.report-details-freshness= freshness
+  - if defined? availability
+    %p.report-details-availability= availability

@@ -7,6 +7,7 @@
       = render 'print_details', name: @member_name, date: t('datepicker.range.print', start_date: fhlb_date_standard_numeric(@start_date), end_date: fhlb_date_standard_numeric(@end_date)), filter_text: (@filter_text == t('global.all') ? t('global.all_transactions') : @filter_text)
     - else
       = render 'reports_header_buttons', download_formats: :pdf, allowed_params: [:start_date, :end_date, :sta_filter]
+      = render 'report_details', name: @member_name, freshness: t('reports.freshness.prior_day'), availability: t('reports.availability.months', months: 6)
     .report-inputs
       = render layout: 'reports_date_picker_form', locals: {start_date: @start_date, end_date: @end_date, report_url: reports_settlement_transaction_account_url, presets: @picker_presets, single_date_picker: @single_date_picker, min_date: @min_date} do
         .report-filter

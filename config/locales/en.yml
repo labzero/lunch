@@ -740,6 +740,13 @@ en:
   reports:
     meta_title: FHLB - Reports
     title: Reports
+    freshness:
+      current: This report reflects data as of the current date and time.
+      prior_day: This report reflects data as of close of business on the prior business day.
+      monthend: This report reflects data as of close of business at monthend.
+    availability:
+      current: Only the current report is available.
+      months: Historical data is available for the previous %{months} months.
     shared_table_values:
       updated: 'Report Updated:'
       available_history: 'Available History:'
@@ -850,6 +857,7 @@ en:
         history: Current month to date. Prior statements are available for the previous 6 months.
     account_summary:
       title: Account Summary
+      freshness: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{now}. Under Collateral Borrowing Capacity, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of close of business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today’s credit activity as of %{now}."
       institution_details:
         title: Institution Details
         your_institution: 'Your Institution:'
@@ -943,7 +951,11 @@ en:
           prime: Daily Prime
           sta_info: Published STA rate is applied to previous business day's ending STA balance
           sta_rate: Effective Rate for Prior Business Day (%)
-        historical: Historical Price Indications
+          freshness: This report reflects the price indications published at 6:00 am on the current business day.
+        historical:
+          title: Historical Price Indications
+          freshness: This report reflects historical price indications published at 6:00 am, not actual rates. 
+          availability: Historical data available varies by credit product.
         standard_credit_program: Standard Credit Program
         sbc_program: Securities-Backed Credit
         settlement_transaction_account: Settlement/Transaction Account
@@ -1004,6 +1016,7 @@ en:
         bc_upb: BC/UPB
         net_loan_collateral: Net Loan Collateral Borrowing Capacity
         excess_capacity: Excess Borrowing Capacity
+        freshness: Loan collateral data reflects intraday processing of Mortgage Collateral Updates, except for Market Value. Market Value and all other data is as of close of business on the prior business day.
         less_line_items:
           blanket_lien: Less Excluded Blanket Lien Borrowing Capacity
           bank_borrowing_capacity: Less Excluded Bank Borrowing Capacity
@@ -1066,6 +1079,7 @@ en:
         summary: Dividend Summary
         details: Dividend Details
         special_dividend: Special Dividend %{year}
+        freshness: This report reflects the data for the most recent dividend transaction.
         headers:
           period: Dividend Period
           date: Transaction Date
@@ -1084,6 +1098,8 @@ en:
         footnote: '%{footnote}Fees will be charged based on the specific transaction and the amount of staff time required.'
         questions_html: 'If you have questions regarding this statement, please email <a href=%{mailto_url}>Securities Services</a> or call %{phone_number}.'
         footer: 'Total amount to be debited from Settlement/Transaction Account No. %{account_number} as of %{date}:'
+        freshness: This statement reflects fees for the prior month and is posted approximately 5 to 7 days before the debit date, which is the last business day of the month.
+        availability: Statements are available for the previous 18 months.
         tables:
           maintenance: Monthly Account Maintenance Fee
           securities: Monthly Securities Fees
@@ -1133,6 +1149,7 @@ en:
         interest: Interest
         total: Total
         total_net_amount: Total Net Amount
+        freshness: This report is updated twice a day. The preliminary report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm. The final report reflects all transactions settled during the day and is generally available at the end of the business day.
       authorizations:
         title: Authorizations
         intro_html: The following people are authorized to use the Bank's services on behalf of your institution. If you'd like to make changes to these authorizations, please fill out a <a href=%{url}>Signature Card Form</a>.
@@ -1144,6 +1161,7 @@ en:
       securities_position:
         current: Current Securities Position
         monthly: Monthly Securities Position
+        freshness: This report reflects data as of the close of business on the last business day of the month and is generally available one business day after monthend.
         filter:
           all: All Securities
           pledged: Pledged Securities

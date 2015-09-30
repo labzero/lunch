@@ -17,6 +17,7 @@ Then I should see "Settlement/Transaction Account (STA)" in the reports dropdown
 Scenario: Member sees Settlement Transaction Account Statement
 Given I am on the "Settlement Transaction Account Statement" report page
 Then I should see report summary data
+And I should see a report header
 And I should see a report table with multiple data rows
 
 Scenario: Member chooses a custom date range on the Settlement Transaction Account Statement

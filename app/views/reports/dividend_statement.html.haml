@@ -7,6 +7,7 @@
       = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@start_date))
     - else
       = render 'reports_header_buttons', allowed_params: :start_date
+      = render 'report_details', name: @member_name, freshness: t('reports.pages.dividend_statement.freshness'), availability: t('reports.availability.months', months: 36)
     .report-inputs
       = form_tag(reports_dividend_statement_path, method: 'GET') do
         .report-filter

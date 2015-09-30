@@ -56,6 +56,25 @@ When(/^I wait for the report to load$/) do
   page.assert_no_selector('.report-table.table-error')
 end
 
+Then(/^I should see a report header(?: with just (freshness|availability))?$/) do |expected_details|
+  page.assert_selector('.report-header .report-details h2', visible: true, exact: true, text: current_member_name)
+
+  freshness_selector = '.report-header .report-details .report-details-freshness'
+  availability_selector = '.report-header .report-details .report-details-availability'
+
+  case expected_details
+  when 'freshness'
+    page.assert_selector(freshness_selector, visible: true)
+    page.assert_no_selector(availability_selector)
+  when 'availability'
+    page.assert_selector(availability_selector, visible: true)
+    page.assert_no_selector(freshness_selector)
+  when nil
+    page.assert_selector(freshness_selector, visible: true)
+    page.assert_selector(availability_selector, visible: true)
+  end
+end
+
 
 Given(/^I am on the "(.*?)" report page$/) do |report|
   sleep_if_close_to_midnight

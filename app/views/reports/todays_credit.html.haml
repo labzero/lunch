@@ -4,6 +4,7 @@
   .report-header
     %h1= t('reports.credit.todays_credit.title')
     = render 'reports_header_buttons'
+    = render 'report_details', name: @member_name, freshness: t('reports.freshness.current'), availability: t('reports.availability.current')
   .report-main-body
     = render 'reports/reports_table', table_class: 'todays-credit-table', table_data: @todays_credit, sortable: false
     %small

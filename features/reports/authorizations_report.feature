@@ -13,6 +13,7 @@ Scenario: Visit authorizations page from header link
   When I select "Authorizations" from the reports dropdown
   And I wait for the report to load
   Then I should see a report table with multiple data rows
+  And I should see a report header
 
 @resque-backed @jira-mem-585 @jira-mem-836
 Scenario: Filtering the authorization report

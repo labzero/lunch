@@ -515,7 +515,7 @@ class ReportsController < ApplicationController
     @credit_type_text ||= @credit_type_options.first.first
 
     export_format = params[:export_format]
-    @report_name = t('reports.pages.price_indications.historical')
+    @report_name = t('reports.pages.price_indications.historical.title')
     filename_credit_type = (@credit_type.include?('libor') || @credit_type.include?('daily_prime')) ? "arc-#{@credit_type.gsub('_','-')}" : @credit_type
     filename = "historical-price-indications-#{@collateral_type}-#{filename_credit_type}-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
     excel_params = {
@@ -1020,7 +1020,8 @@ class ReportsController < ApplicationController
 
   def account_summary
 
-    @date = params[:end_date] || Time.zone.now.to_date
+    @now = Time.zone.now
+    @date = @now.to_date
     export_format = params[:export_format]
     @report_name = t('reports.account_summary.title')
 
@@ -1053,8 +1054,8 @@ class ReportsController < ApplicationController
       members_service = MembersService.new(request)
       member_details = members_service.member(current_member_id) || {}
 
-      @intraday_datetime = Time.zone.now
-      @credit_datetime = Time.zone.now
+      @intraday_datetime = @now
+      @credit_datetime = @now
       @collateral_notice = member_profile[:collateral_delivery_status] == 'Y'
       @sta_number = member_details[:sta_number]
       @fhfb_number = member_details[:fhfb_number]

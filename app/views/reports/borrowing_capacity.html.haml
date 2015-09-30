@@ -7,6 +7,7 @@
       = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@date))
     - else
       = render 'reports_header_buttons', download_formats: :pdf
+      = render 'report_details', name: @member_name, freshness: t('reports.pages.borrowing_capacity_summary.freshness'), availability: t('reports.availability.current')
   .report-main-body
     %section
       .report-summary-data

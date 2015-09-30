@@ -232,10 +232,19 @@ describe MembersService do
           allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: [signer, duplicate_signer].to_json))
           expect(member.length).to eq(2)
         end
-        it 'returns an empty array if no users or signers are found' do
-          allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: '[]'))
-          allow(subject).to receive(:fetch_ldap_users).and_return([])
-          expect(member).to eq([])
+        describe 'when no signers were found' do
+          before do
+            allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: '[]'))
+          end
+          
+          it 'returns an empty array if no users are found' do
+            allow(subject).to receive(:fetch_ldap_users).and_return([])
+            expect(member).to eq([])
+          end
+          it 'returns an empty array if `fetch_ldap_users` returns nil' do
+            allow(subject).to receive(:fetch_ldap_users).and_return(nil)
+            expect(member).to eq([])
+          end
         end
       end
     end

@@ -12,6 +12,7 @@ Scenario: Visit account summary report page from header link
   Given I visit the dashboard
   When I select "Account Summary" from the reports dropdown
   Then I should see 6 report tables with multiple data rows
+  And I should see a report header with just freshness
 
 @data-unavailable @jira-mem-727
 Scenario: The Account Summary has been disabled

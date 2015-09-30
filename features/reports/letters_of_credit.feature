@@ -12,6 +12,7 @@ Feature: Visiting the Letters of Credit Report Page
     Given I visit the dashboard
     When I select "Letters of Credit" from the reports dropdown
     Then I should see report summary data
+    And I should see a report header
     And I should see a report table with multiple data rows
 
   @data-unavailable @jira-mem-283

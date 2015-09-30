@@ -12,6 +12,7 @@ Feature: Visiting the Current Securities Position Report Page
     Given I visit the dashboard
     When I select "Current Securities Position" from the reports dropdown
     Then I should see report summary data
+    And I should see a report header
     And I should see a report table with multiple data rows
 
   @jira-mem-580

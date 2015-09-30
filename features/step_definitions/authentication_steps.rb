@@ -95,6 +95,7 @@ end
 When(/^I select the "(.*?)" member bank$/) do |bank_name|
   # remove the rack_test branch once we have users tied to a specific bank
   @login_flag = flag_page
+  @member_name = bank_name
   if Capybara.current_driver == :rack_test
     page.find('select[name=member_id] option', text: bank_name).select_option
     form = page.find('.welcome form')
@@ -277,6 +278,10 @@ end
 
 def extranet_no_role_user
   CustomConfig.env_config['extranet_no_role']
+end
+
+def current_member_name
+  @member_name ||= CustomConfig.env_config['primary_bank']
 end
 
 def select_member_if_needed

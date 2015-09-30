@@ -4,6 +4,7 @@
   .report-header
     %h1= t('reports.pages.securities_position.current')
     = render 'reports_header_buttons'
+    = render 'report_details', name: @member_name, freshness: t('reports.freshness.current'), availability: t('reports.availability.current')
     .report-inputs
       = form_tag(reports_current_securities_position_url, method: 'GET') do
         .report-filter

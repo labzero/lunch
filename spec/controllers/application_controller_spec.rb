@@ -165,11 +165,27 @@ RSpec.describe ApplicationController, :type => :controller do
 
   describe '`current_member_name` method' do
     let(:member_name) { double('A Member Name') }
+    let(:member_id) { double('A Member ID') }
     it 'should return the `member_name` from the session' do
       session['member_name'] = member_name
       expect(controller.current_member_name).to eq(member_name)
     end
-    it 'should return nil if there is no `member_name`' do
+    it 'does not fecth the member details if `member_name` is in the session' do
+      session['member_name'] = member_name
+      expect_any_instance_of(MembersService).to_not receive(:member)
+      controller.current_member_name
+    end
+    it 'should return nil if there is no `current_member_id`' do
+      allow(subject).to receive(:current_member_id).and_return(nil)
+      expect(controller.current_member_name).to be_nil
+    end
+    it 'fetches the member name if its absent' do
+      allow(controller).to receive(:current_member_id).and_return(member_id)
+      allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return({name: member_name})
+      expect(controller.current_member_name).to eq(member_name)
+    end
+    it 'returns nil if the member name lookup fails' do
+      allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
       expect(controller.current_member_name).to be_nil
     end
   end
