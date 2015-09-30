@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe ApplicationController, :type => :controller do
   it { should use_before_action(:check_password_change) }
+  it { should use_before_action(:save_render_time) }
 
   describe '`handle_exception` method' do
     let(:backtrace) {%w(some backtrace array returned by the error)}
@@ -133,6 +134,15 @@ RSpec.describe ApplicationController, :type => :controller do
           expect(call_method).to eq(subject.user_expired_password_path)
         end
       end
+    end
+  end
+
+  describe 'save_render_time' do
+    let (:now) { double('Time.zone.now') }
+    before{ allow(Time).to receive_message_chain(:zone, :now).and_return(now) }
+    it 'should set @render_time' do
+      controller.save_render_time
+      expect(controller.instance_variable_get(:@render_time)).to eq(now)
     end
   end
 

@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
   before_action :authenticate_user!
   before_action :check_password_change
+  before_action :save_render_time
   helper_method :current_member_name
 
   HTTP_404_ERRORS = [ActionController::RoutingError, ActionController::UnknownController, ::AbstractController::ActionNotFound, ActiveRecord::RecordNotFound]
@@ -15,6 +16,10 @@ class ApplicationController < ActionController::Base
     else
       handle_exception(exception)
     end
+  end
+
+  def save_render_time
+    @render_time = Time.zone.now
   end
 
   def current_member_id
