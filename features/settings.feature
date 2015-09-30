@@ -12,7 +12,7 @@ Scenario: Navigate to settings page
   When I click on the gear icon in the header
   Then I should see "Settings" as the sidebar title
 
-@wip
+@wip @smoke
 Scenario: Email Settings
   Given I visit the dashboard
     And I click on the gear icon in the header
