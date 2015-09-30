@@ -22,7 +22,7 @@ Then(/^I should see the primary bank name in the header$/) do
 end
 
 Then(/^I should see a datestamp in the navigation header$/) do
-  page.find('nav time')
+  page.assert_selector('nav time')
 end
 
 def dropdown_title_regex(dropdown)

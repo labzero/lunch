@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe ApplicationController, :type => :controller do
   it { should use_before_action(:check_password_change) }
+  it { should use_before_action(:save_render_time) }
 
   describe '`handle_exception` method' do
     let(:backtrace) {%w(some backtrace array returned by the error)}
