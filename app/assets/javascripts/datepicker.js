@@ -239,9 +239,8 @@ $(function () {
     var date = moment($el.val());
     if (date > today) {
       date = today;
-      options.singleDatePicker ? picker.setEndDate(today.format('MM/DD/YYYY')) : null;
-      $el.val(today.format('MM/DD/YYYY'));
-    } else if (options.singleDatePicker) {
+    };
+    if (options.singleDatePicker) {
       picker.setEndDate(date.format('MM/DD/YYYY'));
       $el.val(date.format('MM/DD/YYYY'));
     };
@@ -252,7 +251,7 @@ $(function () {
       switch (options.filter) {
         // Snap to end of month
         case options.filterOptions['end_of_month']:
-          if (inputMonth >= thisMonth) {
+          if (date !== date.endOf('month') && inputMonth >= thisMonth) {
             picker.setEndDate((date.subtract(1, 'month')).endOf('month'));
           } else {
             picker.setEndDate(date.endOf('month').format('MM/DD/YYYY'));
