@@ -59,7 +59,7 @@ $(function () {
       setDatePickerApplyListener($datePickerTrigger, $form);
       setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
       if (filter !== undefined) {
-        disablePresets($datePickerTrigger, filter, filterOptions);
+        disablePresets($datePickerTrigger, filter, filterOptions, today);
         if (singleDatePicker) {
           $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(){
             filterDates(filter, filterOptions);
@@ -218,11 +218,14 @@ $(function () {
     };
   };
 
-  function disablePresets($picker, filter, filterOptions) {
+  function disablePresets($picker, filter, filterOptions, today) {
     var picker = $picker.data('daterangepicker');
+    var today = moment(today);
     switch (filter) {
       case filterOptions['end_of_month']:
-        $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
+        if (today !== today.endOf('month')) {
+          $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
+        };
         break;
       case filterOptions['end_of_quarter']:
         $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
