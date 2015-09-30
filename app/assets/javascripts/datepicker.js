@@ -239,8 +239,9 @@ $(function () {
     var date = moment($el.val());
     if (date > today) {
       date = today;
-    };
-    if (options.singleDatePicker) {
+      options.singleDatePicker ? picker.setEndDate(date.format('MM/DD/YYYY')) : null;
+      $el.val(date.format('MM/DD/YYYY'));
+    } else if (options.singleDatePicker) {
       picker.setEndDate(date.format('MM/DD/YYYY'));
       $el.val(date.format('MM/DD/YYYY'));
     };
