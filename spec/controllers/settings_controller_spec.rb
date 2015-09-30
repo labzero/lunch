@@ -4,7 +4,7 @@ RSpec.describe SettingsController, :type => :controller do
   login_user
   deny_policy(:access_manager, :show?)
   
-  describe 'GET index' do
+  describe 'GET index', :skip do
     it_behaves_like 'a user required action', :get, :index
     it "should render the index view" do
       get :index
