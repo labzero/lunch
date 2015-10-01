@@ -3,6 +3,7 @@ Dotenv.load
 
 require 'capybara/rspec'
 require 'capybara/cucumber'
+require 'cucumber/rspec/doubles'
 
 require_relative 'custom_config'
 include CustomConfig
