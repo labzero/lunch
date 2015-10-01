@@ -27,7 +27,7 @@ module MAPI
           <<-SQL
           SELECT COUNT(*) AS RECORDSCOUNT FROM SAFEKEEPING.ACCOUNT_DOCKET_XREF ADX, SAFEKEEPING.CURRENT_DAY, SAFEKEEPING.CUSTOMER_PROFILE CP
           WHERE CP.CP_ID = ADX.CP_ID AND CUR_BTC_ACCOUNT_NUMBER = RTRIM(ADX_BTC_ACCOUNT_NUMBER)
-          AND CUR_BTC_DATE = TO_DATE(#{quote(rundate)}, 'mm/dd/yyyy') AND FHLB_ID = #{quote(fhlb_id)}  AND CUR_FILE_TYPE = 'PM'
+          AND CUR_BTC_DATE = #{quote(rundate)} AND FHLB_ID = #{quote(fhlb_id)}  AND CUR_FILE_TYPE = 'PM'
           SQL
         end
 
@@ -38,7 +38,7 @@ module MAPI
           FROM SAFEKEEPING.account_docket_xref dx,  SAFEKEEPING.current_day cd, SAFEKEEPING.customer_profile cp, web_adm.web_member_data wmd
           WHERE cp.CP_ID = dx.CP_ID AND cp.fhlb_id = #{quote(fhlb_id)} AND cp.fhlb_id = wmd.fhlb_id AND
                 RTRIM(cd.cur_btc_account_number) = RTRIM(dx.adx_btc_account_number) AND
-                cd.cur_btc_date = TO_DATE(#{quote(rundate)}, 'mm/dd/yyyy') AND cd.cur_file_type = #{quote(final ? 'PM' : 'AM')}
+                cd.cur_btc_date = #{quote(rundate)} AND cd.cur_file_type = #{quote(final ? 'PM' : 'AM')}
           ORDER BY cd.CUR_DEBIT_CREDIT_IND,dx.ADX_BTC_ACCOUNT_NUMBER ASC, cd.CUR_CUSIP ASC
           SQL
         end
