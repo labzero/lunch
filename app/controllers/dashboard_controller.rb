@@ -76,7 +76,7 @@ class DashboardController < ApplicationController
       {title: t('dashboard.your_account.table.remaining.title')},
       [t('dashboard.your_account.table.remaining.available'), profile[:total_financing_available]],
       [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
-      [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage], nil, 2]
+      [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
     ]
 
     @account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining}
