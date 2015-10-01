@@ -507,6 +507,9 @@
 }
 
 .report-dividend-statement {
+  .report-filter {
+    margin-left: 0;
+  }
   .table-dividend-summary {
     width: 500px;
     td:last-of-type {
