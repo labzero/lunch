@@ -455,7 +455,7 @@ Then(/^I should see Securities Transactions report$/) do
 end
 
 Then(/^I should see a security that is indicated as a new transaction$/) do
-  page.find('.securities-transactions-table tbody tr td', text: /.\*\z/)
+  page.first('.securities-transactions-table tbody tr td', text: /.\*\z/)
 end
 
 When(/^I cancel the report download from the flyout$/) do

@@ -1,0 +1,50 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/securities_transactions/2015-01-20
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="uauUX5iV032oxWIMi0DaEiWZGTV6QA"
+      X-Request-Id:
+      - '12345'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '1147'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Mon, 28 Sep 2015 22:05:25 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"final":true,"transactions":[{"fhlb_id":564,"custody_account_no":"082011","new_transaction":true,"cusip":"31393RVW7","transaction_code":"DELD","security_description":"FEDERAL
+        HOME LN MTG GD REMIC","units":10700000,"maturity_date":"15-JUN-18","payment_or_principal":1609041.64,"interest":0,"total":1609041.64},{"fhlb_id":564,"custody_account_no":"082011","new_transaction":true,"cusip":"31398J7L1","transaction_code":"DELD","security_description":"FEDERAL
+        HOME LN MTG GD REMIC","units":10000000,"maturity_date":"15-AUG-19","payment_or_principal":1449488.15,"interest":0,"total":1449488.15},{"fhlb_id":564,"custody_account_no":"082011","new_transaction":true,"cusip":"31398KQH6","transaction_code":"DELD","security_description":"FEDERAL
+        HOME LN MTG GD REMIC","units":20900000,"maturity_date":"15-DEC-17","payment_or_principal":1407430.68,"interest":0,"total":1407430.68},{"fhlb_id":564,"custody_account_no":"082011","new_transaction":true,"cusip":"31398M7H3","transaction_code":"DELD","security_description":"FEDERAL
+        NAT MTG ASSN REMIC","units":10000000,"maturity_date":"25-JUL-24","payment_or_principal":439472.71,"interest":0,"total":439472.71}]}'
+    http_version: 
+  recorded_at: Mon, 28 Sep 2015 22:05:25 GMT
+recorded_with: VCR 2.9.3
