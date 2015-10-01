@@ -525,11 +525,13 @@ RSpec.describe ReportsController, :type => :controller do
       let(:make_request) { get :securities_services_statement }
       let(:response_hash) { double('A Securities Services Statement', :'[]' => nil)}
       let(:end_of_month) { (start_date - 1.month).end_of_month }
+      let(:month_restricted_start_date) { Date.today - rand(10000) }
+      let(:start_date_param) { Date.today - rand(10000) }
       before do
         allow(member_balance_service_instance).to receive(:securities_services_statement).with(kind_of(Date)).and_return(response_hash)
         allow(response_hash).to receive(:[]).with(:secutities_fees).and_return([{}])
         allow(response_hash).to receive(:[]).with(:transaction_fees).and_return([{}])
-        allow(restricted_start_date).to receive(:end_of_month).and_return(end_of_month)
+        allow(controller).to receive(:month_restricted_start_date).and_return(end_of_month)
       end
       it_behaves_like 'a user required action', :get, :securities_services_statement
       it_behaves_like 'a date restricted report', :securities_services_statement, :last_month_end
@@ -545,10 +547,23 @@ RSpec.describe ReportsController, :type => :controller do
         make_request
         expect(assigns[:date_picker_filter]).to eq(ReportsController::DATE_PICKER_FILTERS[:end_of_month])
       end
-      it 'should default @start_date to the value returned by `last_month_end`' do
-        allow(controller).to receive(:last_month_end).and_return(end_of_month)
+      it "should pass `#{ReportsController::DATE_RESTRICTION_MAPPING[:securities_services_statement]}` to `min_and_start_dates`" do
+        expect(controller).to receive(:min_and_start_dates).with(ReportsController::DATE_RESTRICTION_MAPPING[:securities_services_statement], anything)
         make_request
-        expect(assigns[:start_date]).to eq(end_of_month)
+      end
+      it 'should pass `last_month_end` to `min_and_start_dates` if no start_date param is given' do
+        allow(controller).to receive(:last_month_end).and_return(end_of_month)
+        expect(controller).to receive(:min_and_start_dates).with(anything, end_of_month)
+        make_request
+      end
+      it 'should pass the start_date param to `min_and_start_dates` if one is provided' do
+        expect(controller).to receive(:min_and_start_dates).with(anything, start_date_param)
+        get :securities_services_statement, start_date: start_date_param
+      end
+      it 'should set @start_date to the value returned by `month_restricted_start_date`' do
+        allow(controller).to receive(:month_restricted_start_date).and_return(month_restricted_start_date)
+        make_request
+        expect(assigns[:start_date]).to eq(month_restricted_start_date)
       end
       it 'should set @picker_presets to the `date_picker_presets` for the `start_date`' do
         some_presets = double('Some Presets')
@@ -822,12 +837,33 @@ RSpec.describe ReportsController, :type => :controller do
         let(:securities_position_response) { double('Monthly Securities Position response', :[] => nil) }
         let(:as_of_date) { Date.new(2014,1,1) }
         let(:end_of_month) { (start_date - 1.month).end_of_month }
+        let(:month_restricted_start_date) { Date.today - rand(10000) }
+        let(:start_date_param) { Date.today - rand(10000) }
         before {
           allow(securities_position_response).to receive(:[]).with(:securities).and_return([])
           allow(member_balance_service_instance).to receive(:monthly_securities_position).and_return(securities_position_response)
           allow(restricted_start_date).to receive(:end_of_month).and_return(end_of_month)
+          allow(controller).to receive(:month_restricted_start_date).and_return(end_of_month)
         }
         it_behaves_like 'a date restricted report', :monthly_securities_position, :last_month_end
+        it "should pass `#{ReportsController::DATE_RESTRICTION_MAPPING[:monthly_securities_position]}` to `min_and_start_dates`" do
+          expect(controller).to receive(:min_and_start_dates).with(ReportsController::DATE_RESTRICTION_MAPPING[:monthly_securities_position], anything)
+          get :monthly_securities_position
+        end
+        it 'should pass `last_month_end` to `min_and_start_dates` if no start_date param is given' do
+          allow(controller).to receive(:last_month_end).and_return(end_of_month)
+          expect(controller).to receive(:min_and_start_dates).with(anything, end_of_month)
+          get :monthly_securities_position
+        end
+        it 'should pass the start_date param to `min_and_start_dates` if one is provided' do
+          expect(controller).to receive(:min_and_start_dates).with(anything, start_date_param)
+          get :monthly_securities_position, start_date: start_date_param
+        end
+        it 'should set @month_end_date to the value returned by `month_restricted_start_date`' do
+          allow(controller).to receive(:month_restricted_start_date).and_return(month_restricted_start_date)
+          get :monthly_securities_position
+          expect(assigns[:month_end_date]).to eq(month_restricted_start_date)
+        end
         it 'sets @current_securities_position to the hash returned from MemberBalanceService' do
           get :monthly_securities_position
           expect(assigns[:monthly_securities_position]).to eq(securities_position_response)
@@ -1860,6 +1896,30 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'sets the start_date to the min_date if the param given occurs before the min_date' do
         expect(controller.send(:min_and_start_dates, min_date_range, invalid_start_date).last).to eq(min_date)
+      end
+      it 'sets the start_date to today if the start_date provided is in the future' do
+        expect(controller.send(:min_and_start_dates, min_date_range, (today + 1.day)).last).to eq(today)
+      end
+    end
+
+    describe 'month_restricted_start_date' do
+      before { allow(Time.zone).to receive(:today).and_return(Date.new(2015,1,1)) }
+      describe 'when the start_date occurs during the current month' do
+        it 'returns the end of last month unless the start_date is the last day of this month' do
+          start_date = Date.new(2015,1,15)
+          expect(controller.send(:month_restricted_start_date, start_date)).to eq(Date.new(2014,12,31))
+        end
+
+        it 'returns the start_date if the start_date is the last day of this month' do
+          start_date = Date.new(2015,1,31)
+          expect(controller.send(:month_restricted_start_date, start_date)).to eq(start_date)
+        end
+      end
+      describe 'when the start date occurs before the current month' do
+        it 'returns the last day of the month for the given start_date' do
+          start_date = Date.new(2013,4,17)
+          expect(controller.send(:month_restricted_start_date, start_date)).to eq(start_date.end_of_month)
+        end
       end
     end
   end

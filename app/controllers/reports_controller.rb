@@ -707,7 +707,7 @@ class ReportsController < ApplicationController
     start_date = (params[:start_date] || last_month_end).to_date
     min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
     @min_date = min_and_start_dates_array.first
-    @start_date = min_and_start_dates_array.last.end_of_month
+    @start_date = month_restricted_start_date(min_and_start_dates_array.last)
     if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
       @statement = {}
     else
@@ -921,7 +921,7 @@ class ReportsController < ApplicationController
     start_date = (params[:start_date] || last_month_end).to_date
     min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
     @min_date = min_and_start_dates_array.first
-    @month_end_date = min_and_start_dates_array.last.end_of_month
+    @month_end_date = month_restricted_start_date(min_and_start_dates_array.last)
     @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
     @picker_presets = date_picker_presets(@month_end_date, nil, date_restriction)
     member_balances = MemberBalanceService.new(current_member_id, request)
@@ -1366,8 +1366,24 @@ class ReportsController < ApplicationController
     now = Time.zone.today
     start_date = (start_date_param || now).to_date
     min_date = now - min_date_range
-    start_date = min_date < start_date ? start_date : min_date
+
+    start_date = if min_date < start_date && start_date <= now
+      start_date
+    elsif start_date > now
+      now
+    else
+      min_date
+    end
     [min_date, start_date]
+  end
+
+  def month_restricted_start_date(start_date)
+    today = Time.zone.today
+    if start_date > today.beginning_of_month && start_date != today.end_of_month
+      (start_date - 1.month).end_of_month
+    else
+      start_date.end_of_month
+    end
   end
 
 end
