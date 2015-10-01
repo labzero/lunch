@@ -28,7 +28,7 @@ When(/^I am on the email settings page$/) do
 end
 
 Given(/^I am on the change password page$/) do
-  page.find( 'ul li.nav-settings .icon-gear-after' ).click
+  page.find( '.page-header .nav-settings a' ).click
   step %{I should see the change password page}
 end
 
