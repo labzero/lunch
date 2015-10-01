@@ -28,8 +28,7 @@ When(/^I am on the email settings page$/) do
 end
 
 Given(/^I am on the change password page$/) do
-  visit "/settings"
-  step "I click on \"#{I18n.t('settings.password.title')}\" in the sidebar nav"
+  page.find( '.icon-gear-after' ).click
   step %{I should see the change password page}
 end
 
