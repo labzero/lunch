@@ -221,9 +221,10 @@ $(function () {
   function disablePresets($picker, filter, filterOptions, today) {
     var picker = $picker.data('daterangepicker');
     var today = moment(today);
+    var endOfMonth = moment(today).endOf('month'); // clone so that `endOf` does not mutate original `date`
     switch (filter) {
       case filterOptions['end_of_month']:
-        if (today !== today.endOf('month')) {
+        if (today !== endOfMonth) {
           $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
         };
         break;
@@ -252,15 +253,16 @@ $(function () {
     // apply filters if necessary
     if (options.singleDatePicker && options.filter !== undefined && options.filterOptions !== undefined) {
       var inputMonth = date.month();
+      var endOfMonth = moment(date).endOf('month'); // clone so that `endOf` does not mutate original `date`
       switch (options.filter) {
         // Snap to end of month
         case options.filterOptions['end_of_month']:
-          if (date !== date.endOf('month') && inputMonth >= thisMonth) {
+          if (date !== endOfMonth && inputMonth >= thisMonth) {
             picker.setEndDate((date.subtract(1, 'month')).endOf('month'));
           } else {
             picker.setEndDate(date.endOf('month').format('MM/DD/YYYY'));
           };
-          $el.val(date.endOf('month').format('MM/DD/YYYY'));
+          $el.val(date.format('MM/DD/YYYY')); // uses the mutated value of `date` set in the if/else statement above
           break;
         // Snap to end of quarter
         case options.filterOptions['end_of_quarter']:
