@@ -1308,9 +1308,7 @@ class ReportsController < ApplicationController
 
   def report_disabled?(report_flags)
     member_info = MembersService.new(request)
-    report_disabled = member_info.report_disabled?(current_member_id, report_flags)
-    @report_disabled = true if report_disabled
-    report_disabled
+    @report_disabled = member_info.report_disabled?(current_member_id, report_flags)
   end
 
   def add_rate_objects_for_all_terms(rates_by_date_array, terms, credit_type)
