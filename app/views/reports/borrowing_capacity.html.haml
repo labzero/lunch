@@ -20,7 +20,7 @@
         %p= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:remaining_borrowing_capacity], force_unit: true)
     %section.standard-credit-borrowing-capacity-tables.report-tables-section
       %h2.report-table-title= t('reports.pages.borrowing_capacity_summary.standard_credit_program')
-      %table.report-table.report-parent-table{data: {sortable: true, :'default-sort' => [[1, 'desc']], :'missing-data-message' => t('errors.table_data_unavailable')}}
+      %table.report-table.report-parent-table{data: {sortable: true, :'default-sort' => [[1, 'desc']], :'missing-data-message' => missing_data_message}}
         %thead
           %tr
             %th.report-cell-narrow= t('global.collateral_type')
@@ -127,7 +127,7 @@
               %td.report-cell-right= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:sbc_totals][:remaining_borrowing_capacity])
         - else
           %tr
-            %td.dataTables_empty{colspan: 7}= t('errors.table_data_unavailable')
+            %td.dataTables_empty{colspan: 7}= missing_data_message
       - if @borrowing_capacity_summary[:sbc].to_h.length > 0
         %table.report-table.report-sub-table{data: {sortable: false}}
           %tbody

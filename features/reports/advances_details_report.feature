@@ -77,13 +77,13 @@ Scenario: Member enters a date occurring after the maximum allowed date
   And I click the datepicker apply button
   Then I should see a "Advances Detail" report as of today
 
-@data-unavailable @jira-mem-283
+@data-unavailable @jira-mem-283 @jira-mem-1053
 Scenario: No data is available to show in the Advances Detail Report
   Given I am on the "Advances Detail" report page
   When the "Advances Detail" table has no data
-  Then I should see an empty report table with Data Unavailable messaging
+  Then I should see an empty report table with No Records messaging
 
-@data-unavailable @jira-mem-282
+@data-unavailable @jira-mem-282 @jira-mem-1053
 Scenario: The Advances Detail Report has been disabled
   Given I am on the "Advances Detail" report page
   When the "Advances Detail" report has been disabled

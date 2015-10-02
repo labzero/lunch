@@ -22,7 +22,7 @@
         %h3
           = t('reports.pages.cash_projections.total_interest', date: fhlb_date_long_alpha(@as_of_date))
         %p= fhlb_formatted_currency(@cash_projections[:total_interest], force_unit: true, precision: 2)
-    %table.table-allow-wrapping.report-table.cash-projections-report-table{data: {sortable: true, :'disable-auto-width' => true, :'missing-data-message' => t('errors.table_data_unavailable')}}
+    %table.table-allow-wrapping.report-table.cash-projections-report-table{data: {sortable: true, :'disable-auto-width' => true, :'missing-data-message' => missing_data_message}}
       %thead
         %tr
           %th.report-cell-narrow= t('common_table_headings.settlement_date')

@@ -17,7 +17,7 @@
         = t('reports.pages.capital_stock_activity.closing_balance_heading', date: fhlb_date_long_alpha(@capital_stock_activity[:end_date]))
       %p= t('reports.share_count', count: fhlb_formatted_number(@capital_stock_activity[:end_balance], html: false))
     %h2.report-table-title= t('reports.pages.capital_stock_activity.table_title')
-    %table.report-table{data: {sortable: true, :'missing-data-message' => t('errors.table_data_unavailable')}}
+    %table.report-table{data: {sortable: true, :'missing-data-message' => missing_data_message}}
       %thead
         %tr
           %th.report-cell-narrow= t("global.issue_date")

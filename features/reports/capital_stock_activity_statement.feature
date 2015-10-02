@@ -100,13 +100,13 @@ Scenario: Member enters a date occurring after the maximum allowed date
   And I click the datepicker apply button
   Then I should see a "Capital Stock Activity Statement" starting 1 month ago and ending today
 
-@data-unavailable @jira-mem-283
+@data-unavailable @jira-mem-283 @jira-mem-1053
 Scenario: No data is available to show in the Capital Stock Activity Statement
   Given I am on the "Capital Stock Activity Statement" report page
   When the "Capital Stock Activity" table has no data
-  Then I should see an empty report table with Data Unavailable messaging
+  Then I should see an empty report table with No Records messaging
 
-@data-unavailable @jira-mem-282
+@data-unavailable @jira-mem-282 @jira-mem-1053
 Scenario: The Capital Stock Activity Statement has been disabled
   Given I am on the "Capital Stock Activity Statement" report page
   When the "Capital Stock Activity" report has been disabled

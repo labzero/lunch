@@ -1939,7 +1939,8 @@ en:
     maintenance:
       headline: Scheduled Downtime
       summary: We’re currently performing maintenance on the Member Portal. We’ll have things up and running again soon.
-    table_data_unavailable: This information is currently unavailable
+    table_data_unavailable: This information is currently unavailable.
+    table_data_no_records: There are no records to display.
     no_messages: No Messages
     error_occurred: An error has occurred.
     emails:

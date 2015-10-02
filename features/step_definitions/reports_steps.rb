@@ -36,6 +36,10 @@ Then(/^I should see an empty report table with Data Unavailable messaging$/) do
   page.assert_selector('.report-table tbody tr:first-child .dataTables_empty', text: I18n.t('errors.table_data_unavailable'))
 end
 
+Then(/^I should see an empty report table with No Records messaging$/) do
+  page.assert_selector('.report-table tbody tr:first-child .dataTables_empty', text: I18n.t('errors.table_data_no_records'))
+end
+
 Then(/^I should see a report table with multiple data rows$/) do
   page.assert_selector('.report-table tbody tr')
 end
@@ -485,7 +489,7 @@ When(/^I should only see users with the "(.*?)" role$/) do |role|
   }
   role_name = role_mapping[role]
   page.all('.report-table tbody td:last-child').each do |cell|
-    next if cell.text == I18n.t('errors.table_data_unavailable')
+    next if cell.text == I18n.t('errors.table_data_no_records')
     cell.assert_selector('li', text: role_name)
   end
 end

@@ -14,13 +14,13 @@ Feature: Visiting the Capital Stock Position and Leverage Report
     Then I should see 2 report tables with multiple data rows
     And I should see a report header
 
-  @data-unavailable @jira-mem-283
+  @data-unavailable @jira-mem-283 @jira-mem-1053
   Scenario: No data is available to show in the putable advances parallel shift sensitivity analysis report
     Given I am on the "Capital Stock Position and Leverage Statement" report page
     When the "Capital Stock Position and Leverage Statement" table has no data
-    Then I should see an empty report table with Data Unavailable messaging
+    Then I should see an empty report table with No Records messaging
 
-  @data-unavailable @jira-mem-282
+  @data-unavailable @jira-mem-282 @jira-mem-1053
   Scenario: The putable advances parallel shift sensitivity analysis report has been disabled
     Given I am on the "Capital Stock Position and Leverage Statement" report page
     When the "Capital Stock Position and Leverage Statement" report has been disabled

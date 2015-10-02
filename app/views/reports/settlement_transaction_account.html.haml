@@ -34,7 +34,7 @@
       %tbody
         - if @settlement_transaction_account[:end_balance].blank? && @settlement_transaction_account[:start_balance].blank? && @settlement_transaction_account[:activities].blank?
           %tr
-            %td.dataTables_empty{colspan: 6}= t('errors.table_data_unavailable')
+            %td.dataTables_empty{colspan: 6}= missing_data_message
         - else
           - if @show_ending_balance
             %tr.ending-balance-row

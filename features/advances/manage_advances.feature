@@ -14,8 +14,8 @@ Scenario: Visit  Manage Advances Page from header link
   Then I should see active advances data
   And I should see a advances table with multiple data rows
 
-@data-unavailable @jira-mem-535
+@data-unavailable @jira-mem-535 @jira-mem-1053
 Scenario: No data is available to show in the Manage Advances Page
   Given I am on the "Manage Advances" advances page
   When the "Manage Advances" table has no data
-  Then I should see an empty report table with Data Unavailable messaging
+  Then I should see an empty report table with No Records messaging
