@@ -2,15 +2,15 @@ require 'spec_helper'
 require 'date'
 
 describe MAPI::ServiceApp do
-
+  let(:member_id) { 750 }
   before do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
   end
 
   describe 'Trade Activity' do
-    let(:advances) { get "/member/#{MEMBER_ID}/active_advances"; JSON.parse(last_response.body) }
+    let(:call_method) { MAPI::Services::Member::TradeActivity.trade_activity(subject, member_id, 'ADVANCE') }
     it 'should return expected advances detail hash where value could not be nil' do
-      advances.each do |row|
+      call_method.each do |row|
         expect(row['trade_date']).to be_kind_of(String)
         expect(row['funding_date']).to be_kind_of(String)
         expect(row['maturity_date']).to be_kind_of(String)
@@ -23,10 +23,11 @@ describe MAPI::ServiceApp do
     end
     describe 'in the production environment' do
       before do
-        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+        allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
       end
       it 'should return active advances', vcr: {cassette_name: 'trade_activity_service'} do
-        advances.each do |row|
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
+        call_method.each do |row|
           expect(row['trade_date']).to be_kind_of(String)
           expect(row['funding_date']).to be_kind_of(String)
           expect(row['maturity_date']).to be_kind_of(String)
@@ -37,9 +38,89 @@ describe MAPI::ServiceApp do
           expect(row['current_par']).to be_kind_of(Numeric)
         end
       end
+      it 'should return active advances for large members', vcr: {cassette_name: 'trade_activity_service', :allow_playback_repeats => true} do
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(true)
+        call_method.each do |row|
+          expect(row['trade_date']).to be_kind_of(String)
+          expect(row['funding_date']).to be_kind_of(String)
+          expect(row['maturity_date']).to be_kind_of(String)
+          expect(row['advance_number']).to be_kind_of(String)
+          expect(row['advance_type']).to be_kind_of(String)
+          expect(row['status']).to be_kind_of(String)
+          expect(row['interest_rate']).to be_kind_of(Numeric)
+          expect(row['current_par']).to be_kind_of(Numeric)
+        end
+      end
+      it 'should call `get_trade_activity_trades` only 1 time for small members', vcr: {cassette_name: 'trade_activity_service'} do
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
+        expect(MAPI::Services::Member::TradeActivity).to receive(:get_trade_activity_trades).once
+        MAPI::Services::Member::TradeActivity.trade_activity(subject, member_id, 'ADVANCE')
+      end
+      it 'should call `get_trade_activity_trades` for all trade types in `ACTIVE_ADVANCES_ARRAY` array for large members', vcr: {cassette_name: 'trade_activity_service'} do
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(true)
+        expect(MAPI::Services::Member::TradeActivity).to receive(:get_trade_activity_trades).exactly(MAPI::Services::Member::TradeActivity::ACTIVE_ADVANCES_ARRAY.count).times
+        MAPI::Services::Member::TradeActivity.trade_activity(subject, member_id, 'ADVANCE')
+      end
       it 'should return Internal Service Error, if trade service is unavailable', vcr: {cassette_name: 'trade_activity_service_unavailable'} do
-        get "/member/#{MEMBER_ID}/active_advances"
-        expect(last_response.status).to eq(503)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
+        expect{call_method}.to raise_error
+      end
+      it 'should return Internal Service Error, if trade service is unavailable for large members', vcr: {cassette_name: 'trade_activity_service_unavailable'} do
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(true)
+        expect{call_method}.to raise_error
+      end
+    end
+  end
+
+  describe 'the `get_trade_activity_trades` method' do
+    describe 'in the production environment' do
+      let(:message) {
+        {
+          'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
+          'v1:tradeRequestParameters' => [{
+            'v1:status' => 'VERIFIED',
+            'v1:arrayOfCustomers' => [{'v1:fhlbId' => 750}],
+            'v1:arrayOfAssetClasses' => [{'v1:assetClass' => 'ADVANCE'}]
+          }]
+        }
+      }
+      let(:advances) { MAPI::Services::Member::TradeActivity.get_trade_activity_trades(message) }
+      before do
+        MAPI::Services::Member::TradeActivity.init_trade_connection(:production)
+      end
+      it 'should return active advances', vcr: {cassette_name: 'trade_activity_service'} do
+        expect(advances[0]['trade_date']).to eq('2011-05-05-07:00')
+        expect(advances[0]['funding_date']).to eq('2011-05-06-07:00')
+        expect(advances[0]['maturity_date']).to eq('2016-05-06-07:00')
+        expect(advances[0]['advance_number']).to eq('188367')
+        expect(advances[0]['advance_type']).to eq('FX CONSTANT')
+        expect(advances[0]['status']).to eq('Outstanding')
+        expect(advances[0]['interest_rate']).to eq(0.022)
+        expect(advances[0]['current_par']).to eq(2500000.0)
+      end
+    end
+  end
+
+  describe 'the `is_large_member` method' do
+    describe 'in the development environment' do
+      let(:is_large_member) { MAPI::Services::Member::TradeActivity.is_large_member(:development, 750) }
+      it 'should return false' do
+        expect(is_large_member).to eq(false)
+      end
+    end
+    describe 'in the production environment' do
+      let(:is_large_member) { MAPI::Services::Member::TradeActivity.is_large_member(:production, 750) }
+      it 'should return false if there are no records found' do
+        allow(ActiveRecord::Base.connection).to receive(:execute).and_return(double('Results', fetch: nil))
+        expect(is_large_member).to eq(false)
+      end
+      it 'should return false if the number of records is less than 300' do
+        allow(ActiveRecord::Base.connection).to receive(:execute).and_return(double('Results', fetch: [100]))
+        expect(is_large_member).to eq(false)
+      end
+      it 'should return true if the number of records is greater than 300' do
+        allow(ActiveRecord::Base.connection).to receive(:execute).and_return(double('Results', fetch: [400]))
+        expect(is_large_member).to eq(true)
       end
     end
   end
@@ -87,7 +168,7 @@ describe MAPI::ServiceApp do
   end
 
   describe 'Todays Trade Activity' do
-    let(:todays_advances) { get "/member/#{MEMBER_ID}/todays_advances"; JSON.parse(last_response.body) }
+    let(:todays_advances) { get "/member/#{member_id}/todays_advances"; JSON.parse(last_response.body) }
     it 'should return expected today advances detail hash where value could not be nil' do
       todays_advances.each do |row|
         expect(row['trade_date']).to be_kind_of(String)
@@ -117,7 +198,7 @@ describe MAPI::ServiceApp do
         end
       end
       it 'should return Internal Service Error, if trade service is unavailable', vcr: {cassette_name: 'trade_activity_service_unavailable'} do
-        get "/member/#{MEMBER_ID}/todays_advances"
+        get "/member/#{member_id}/todays_advances"
         expect(last_response.status).to eq(503)
       end
     end
@@ -134,11 +215,11 @@ describe MAPI::ServiceApp do
     let(:non_exercised_status) { MAPI::Services::Member::TradeActivity::TODAYS_CREDIT_ARRAY - ['EXERCISED'] }
     it 'should call `MAPI::Services::Member::TradeActivity.todays_credit_activity` when the endpoint is hit' do
       expect(MAPI::Services::Member::TradeActivity).to receive(:todays_credit_activity)
-      get "/member/#{MEMBER_ID}/todays_credit_activity"
+      get "/member/#{member_id}/todays_credit_activity"
     end
     it 'returns an array of activity objects', vcr: {cassette_name: 'todays_credit_activity'} do
       allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
-      get "/member/#{MEMBER_ID}/todays_credit_activity"
+      get "/member/#{member_id}/todays_credit_activity"
       activity = JSON.parse(last_response.body).first.with_indifferent_access
       expect(activity[:transaction_number]).to eq('318614')
       expect(activity[:current_par]).to eq(10600000.to_f)
@@ -156,12 +237,12 @@ describe MAPI::ServiceApp do
     end
     it 'should return Internal Service Error, if service is unavailable', vcr: {cassette_name: 'todays_credit_activity_service_unavailable'} do
       allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
-      get "/member/#{MEMBER_ID}/todays_credit_activity"
+      get "/member/#{member_id}/todays_credit_activity"
       expect(last_response.status).to eq(503)
     end
     %w(development test).each do |env|
       describe "in the #{env} environment" do
-        let(:todays_credit_activity) { MAPI::Services::Member::TradeActivity.todays_credit_activity(env, MEMBER_ID) }
+        let(:todays_credit_activity) { MAPI::Services::Member::TradeActivity.todays_credit_activity(env, member_id) }
         before do
           allow(MAPI::ServiceApp).to receive(:environment).and_return(env.to_sym)
           allow(JSON).to receive(:parse).and_return(activity_hash)
@@ -222,7 +303,7 @@ describe MAPI::ServiceApp do
     describe 'in the production environment' do
       let(:savon_response) { double('savon response', doc: double('doc', remove_namespaces!: nil, xpath: activity_hash)) }
       let(:trade_activity_connection) { double('trade_connection', call: savon_response) }
-      let(:todays_credit_activity) { MAPI::Services::Member::TradeActivity.todays_credit_activity(:production, MEMBER_ID) }
+      let(:todays_credit_activity) { MAPI::Services::Member::TradeActivity.todays_credit_activity(:production, member_id) }
       it 'initiates a Savon client connection' do
         expect(Savon).to receive(:client).and_return(trade_activity_connection)
         todays_credit_activity
