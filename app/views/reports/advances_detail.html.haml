@@ -9,7 +9,7 @@
       = render 'reports_header_buttons', allowed_params: :start_date, download_formats: [:pdf, :xlsx]
       = render 'report_details', name: @member_name, freshness: t('reports.freshness.prior_day'), availability: t('reports.availability.months', months: 18)
     .report-inputs
-      = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_advances_url, presets: @picker_presets, single_date_picker: true, min_date: @min_date
+      = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_advances_url, presets: @picker_presets, single_date_picker: true, min_date: @min_date, max_date: @max_date
   .report-main-body
     .report-summary-data
       %h3
