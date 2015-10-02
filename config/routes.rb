@@ -50,7 +50,7 @@ Rails.application.routes.draw do
   get '/advances' => 'advances#index'
   get '/advances/manage-advances' => 'advances#manage_advances'
 
-  get '/settings' => 'settings#index'
+  get '/settings' => 'error#not_found'
   post '/settings/save' => 'settings#save'
   get '/settings/two-factor' => 'settings#two_factor'
   post '/settings/two-factor/pin' => 'settings#reset_pin'

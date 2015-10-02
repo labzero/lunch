@@ -12,13 +12,14 @@ Scenario: Navigate to settings page
   When I click on the gear icon in the header
   Then I should see "Settings" as the sidebar title
 
-@smoke
+@wip @smoke
 Scenario: Email Settings
   Given I visit the dashboard
     And I click on the gear icon in the header
   When I click on "Emails" in the sidebar nav
   Then I should be on the email settings page
 
+@wip
 Scenario: Changing Email Settings
   Given I am on the email settings page
     And I see the unselected state for the "reports" option
@@ -26,6 +27,7 @@ Scenario: Changing Email Settings
     Then I should see the selected state for the "reports" option
     And I should see the auto-save message for the email settings page
 
+@wip
 Scenario: Remembering Email Settings
   Given I am on the email settings page
     And I see the unselected state for the "reports" option

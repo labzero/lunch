@@ -3,8 +3,7 @@ class SettingsController < ApplicationController
   before_action do
     @sidebar_options = [
         [t("settings.password.title"), settings_password_path],
-        [t("settings.two_factor.title"), settings_two_factor_path],
-        [t("settings.email.title"), settings_path]
+        [t("settings.two_factor.title"), settings_two_factor_path]
     ]
     @sidebar_options.unshift([t("settings.account.title"), settings_users_path]) if policy(:access_manager).show?
   end
