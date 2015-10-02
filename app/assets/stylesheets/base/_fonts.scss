@@ -10,9 +10,9 @@ $loose-line-height: 1.538;
   font-family: 'SourceSansPro';
   src: font-url('SourceSansPro-Regular.eot');
   src:font-url('SourceSansPro-Regular') format('embedded-opentype'),
-  url('SourceSansPro-Regular.woff') format('woff'),
-  url('SourceSansPro-Regular.ttf') format('truetype'),
-  url('SourceSansPro-Regular.svg') format('svg');
+  font-url('SourceSansPro-Regular.woff') format('woff'),
+  font-url('SourceSansPro-Regular.ttf') format('truetype'),
+  font-url('SourceSansPro-Regular.svg') format('svg');
   font-weight: $normal-weight;
   font-style: normal;
 }
@@ -21,9 +21,9 @@ $loose-line-height: 1.538;
   font-family: 'SourceSansPro';
   src: font-url('SourceSansPro-ExtraLight.eot');
   src:font-url('SourceSansPro-ExtraLight') format('embedded-opentype'),
-  url('SourceSansPro-ExtraLight.woff') format('woff'),
-  url('SourceSansPro-ExtraLight.ttf') format('truetype'),
-  url('SourceSansPro-ExtraLight.svg') format('svg');
+  font-url('SourceSansPro-ExtraLight.woff') format('woff'),
+  font-url('SourceSansPro-ExtraLight.ttf') format('truetype'),
+  font-url('SourceSansPro-ExtraLight.svg') format('svg');
   font-weight: $extralight-weight;
   font-style: normal;
 }
@@ -32,9 +32,9 @@ $loose-line-height: 1.538;
   font-family: 'SourceSansPro';
   src: font-url('SourceSansPro-Light.eot');
   src:font-url('SourceSansPro-Light') format('embedded-opentype'),
-  url('SourceSansPro-Light.woff') format('woff'),
-  url('SourceSansPro-Light.ttf') format('truetype'),
-  url('SourceSansPro-Light.svg') format('svg');
+  font-url('SourceSansPro-Light.woff') format('woff'),
+  font-url('SourceSansPro-Light.ttf') format('truetype'),
+  font-url('SourceSansPro-Light.svg') format('svg');
   font-weight: $light-weight;
   font-style: normal;
 }
@@ -43,9 +43,9 @@ $loose-line-height: 1.538;
   font-family: 'SourceSansPro';
   src: font-url('SourceSansPro-Semibold.eot');
   src:font-url('SourceSansPro-Semibold') format('embedded-opentype'),
-  url('SourceSansPro-Semibold.woff') format('woff'),
-  url('SourceSansPro-Semibold.ttf') format('truetype'),
-  url('SourceSansPro-Semibold.svg') format('svg');
+  font-url('SourceSansPro-Semibold.woff') format('woff'),
+  font-url('SourceSansPro-Semibold.ttf') format('truetype'),
+  font-url('SourceSansPro-Semibold.svg') format('svg');
   font-weight: $semibold-weight;
   font-style: normal;
 }
@@ -54,9 +54,9 @@ $loose-line-height: 1.538;
   font-family: 'SourceSansPro';
   src: font-url('SourceSansPro-Bold.eot');
   src:font-url('SourceSansPro-Bold') format('embedded-opentype'),
-    url('SourceSansPro-Bold.woff') format('woff'),
-    url('SourceSansPro-Bold.ttf') format('truetype'),
-    url('SourceSansPro-Bold.svg') format('svg');
+    font-url('SourceSansPro-Bold.woff') format('woff'),
+    font-url('SourceSansPro-Bold.ttf') format('truetype'),
+    font-url('SourceSansPro-Bold.svg') format('svg');
   font-weight: $bold-weight;
   font-style: normal;
 }
