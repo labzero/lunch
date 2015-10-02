@@ -241,6 +241,16 @@ Then(/^I should see a "(.*?)" report as of today$/) do |report_type|
   step %{I should see a "#{report_type}" report as of "#{Time.zone.today}"}
 end
 
+Then(/^I should see a "(.*?)" report as of last business day$/) do |report_type|
+  step %{I should see a "#{report_type}" report as of "#{most_recent_business_day(Time.zone.today - 1)}"}
+end
+
+def most_recent_business_day(d)
+  return d - 1.day if d.saturday?
+  return d - 2.day if d.sunday?
+  d
+end
+
 Then(/^I should see a "(.*?)" report as of "(.*?)"$/) do |report_type, as_of_date|
   as_of_date = as_of_date.to_date
   summary_statement = case report_type
