@@ -39,10 +39,6 @@ RSpec.describe ReportsController, :type => :controller do
       get action
       expect(assigns[:member_name]).to eq(member_name)
     end
-    it "has a default @no_data_message of '#{I18n.t('errors.table_data_no_records')}'" do
-      get action
-      expect(assigns[:no_data_message]).to eq(I18n.t('errors.table_data_no_records'))
-    end
   end
 
   login_user
@@ -1878,11 +1874,11 @@ RSpec.describe ReportsController, :type => :controller do
         expect(member_service_instance).to receive(:report_disabled?).with(750, report_flags).and_return(response)
         expect(method_call).to eq(response)
       end
-      it "sets the instance variable @no_data_message to '#{I18n.t('errors.table_data_unavailable')}' if `report_disabled?` is true" do
+      it "sets the instance variable @report_disabled to true if `report_disabled?` is true" do
         allow(MembersService).to receive(:new).and_return(member_service_instance)
         allow(member_service_instance).to receive(:report_disabled?).and_return(true)
         method_call
-        expect(controller.instance_variable_get(:@no_data_message)).to eq(I18n.t('errors.table_data_unavailable'))
+        expect(controller.instance_variable_get(:@report_disabled)).to eq(true)
       end
     end
 
