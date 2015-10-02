@@ -1021,6 +1021,7 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET capital_stock_and_leverage' do
       let(:capital_stock_and_leverage) { get :capital_stock_and_leverage }
       let(:capital_stock_and_leverage_response) { double('Capital stock and leverage response', :[] => nil) }
+      let(:surplus_stock) { rand(1..999999999) }
       before {
         allow(member_balance_service_instance).to receive(:capital_stock_and_leverage).and_return(capital_stock_and_leverage_response)
       }
@@ -1035,20 +1036,26 @@ RSpec.describe ReportsController, :type => :controller do
           end
 
           it "sets @#{table}[:rows] column object value to the value returned by MemberBalanceService.capital_stock_and_leverage" do
-            row_keys = [:stock_owned, :activity_based_requirement, :remaining_stock, :remaining_leverage, :stock_owned, :minimum_requirement, :excess_stock, :surplus_stock]
+            row_keys = [:stock_owned, :minimum_requirement, :excess_stock, :surplus_stock, :stock_owned, :activity_based_requirement, :remaining_stock, :remaining_leverage]
             row = {}
             row_keys.each do |key|
               row[key] = double(key.to_s)
-            end
-            row_keys.length.times do |i|
-              expect(capital_stock_and_leverage_response).to receive(:[]).and_return(row[row_keys[i]]) # must use `expect` to allow ordering
+              if key == :surplus_stock
+                allow(capital_stock_and_leverage_response).to receive(:[]).with(key).and_return(surplus_stock)
+              else
+                allow(capital_stock_and_leverage_response).to receive(:[]).with(key).and_return(row[key])
+              end
             end
             capital_stock_and_leverage
             expect(assigns[table.to_sym][:rows].length).to eq(1)
             if table == 'position_table_data'
               row_keys.each_with_index do |key, i|
                 break if i > 3
-                expect(assigns[table.to_sym][:rows][0][:columns][i][:value]).to eq(row[key])
+                if key == :surplus_stock
+                  expect(assigns[table.to_sym][:rows][0][:columns][i][:value]).to eq(surplus_stock)
+                else
+                  expect(assigns[table.to_sym][:rows][0][:columns][i][:value]).to eq(row[key])
+                end
               end
             else
               row_keys.each_with_index do |key, i|
@@ -1056,6 +1063,12 @@ RSpec.describe ReportsController, :type => :controller do
                 expect(assigns[table.to_sym][:rows][0][:columns][i-4][:value]).to eq(row[key])
               end
             end
+          end
+          it 'returns 0 for surplus_stock that is negative' do
+            surplus_stock = rand(-99999999..-1)
+            allow(capital_stock_and_leverage_response).to receive(:[]).with(:surplus_stock).and_return(surplus_stock)
+            capital_stock_and_leverage
+            expect(assigns[:position_table_data][:rows][0][:columns].last[:value]).to eq(0)
           end
           it "sets @#{table}[:rows] column object type to `:number`" do
             capital_stock_and_leverage

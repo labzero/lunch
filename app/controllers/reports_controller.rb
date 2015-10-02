@@ -973,6 +973,7 @@ class ReportsController < ApplicationController
     position_table_headings = [t('reports.pages.capital_stock_and_leverage.stock_owned'), t('reports.pages.capital_stock_and_leverage.minimum_requirement'), t('reports.pages.capital_stock_and_leverage.excess_stock'), t('reports.pages.capital_stock_and_leverage.surplus_stock')]
     leverage_table_headings = [t('reports.pages.capital_stock_and_leverage.stock_owned'), t('reports.pages.capital_stock_and_leverage.activity_based_requirement'), t('reports.pages.capital_stock_and_leverage.remaining_stock_html').html_safe, t('reports.pages.capital_stock_and_leverage.remaining_leverage')]
 
+    surplus_stock = [cap_stock_and_leverage[:surplus_stock], 0].max if cap_stock_and_leverage[:surplus_stock]
     @position_table_data = {
       column_headings: position_table_headings.collect{|heading| fhlb_add_unit_to_table_header(heading, '$')},
       rows: [
@@ -981,7 +982,7 @@ class ReportsController < ApplicationController
             {value: cap_stock_and_leverage[:stock_owned], type: :number, classes: [:'report-cell-right']},
             {value: cap_stock_and_leverage[:minimum_requirement], type: :number, classes: [:'report-cell-right']},
             {value: cap_stock_and_leverage[:excess_stock], type: :number, classes: [:'report-cell-right']},
-            {value: cap_stock_and_leverage[:surplus_stock], type: :number, classes: [:'report-cell-right']}
+            {value: surplus_stock, type: :number, classes: [:'report-cell-right']}
           ]
         }
       ]
