@@ -20,9 +20,10 @@ authorizations: &AUTHORIZATIONS
     primaryGroupID: 513 # magic number that means 'Domain Users'
 
 authorizations_extranet: &AUTHORIZATIONS_EXTRANET
+      check_group_membership: true
       group_base: dc=extranet,dc=fhlbsf,dc=com
       required_groups:
-        - ["member", "CN=FCN-MemberSite-Users,dc=extranet,dc=fhlbsf,dc=com"]
+        - ["member", "CN=FCN-MemberSite-Users,CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com"]
       require_attribute:
         objectClass: user
         objectCategory: person
@@ -63,7 +64,6 @@ development: &development
     base: dc=extranet,dc=fhlbsf,dc=com
     admin_user: <%= ENV['LDAP_EXTRANET_ADMIN_USERNAME'] || 'cn=admin,dc=extranet,dc=fhlbsf,dc=com' %>
     admin_password: <%= ENV['LDAP_EXTRANET_ADMIN_PASSWORD'] || 'secret' %>
-    check_group_membership: true
     <<: *EXTRANET_SSL
     <<: *AUTHORIZATIONS_EXTRANET
   -
