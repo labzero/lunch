@@ -1,23 +1,8 @@
+$link-fonts: false;
 $extralight-weight: 100; // Bug fix for wkhtmltopdf
 $light-weight: 200; // Bug fix for wkhtmltopdf
 
 @import 'application';
-
-@mixin font-inline($name, $weight, $style, $family: 'SourceSansPro') {
-  @font-face {
-   font-family: $family;
-      src: asset-data-url("#{$name}.ttf") format("truetype"), asset-data-url("#{$name}.ttf") format("truetype");
-   font-weight: $weight;
-   font-style: $style;
-  }
-}
-
-@include font-inline('SourceSansPro-Regular', $normal-weight, normal);
-@include font-inline('SourceSansPro-Semibold', $semibold-weight, normal);
-@include font-inline('SourceSansPro-Bold', $bold-weight, normal);
-@include font-inline('SourceSansPro-Light', $light-weight, normal);
-@include font-inline('SourceSansPro-ExtraLight', $extralight-weight, normal);
-@include font-inline('fhlbsf-icons', normal, normal, 'fhlbsf-icons');
 
 @media print { // This is here so that normal page prints don't loose the formatting
   html, body {
