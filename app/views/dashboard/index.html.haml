@@ -62,7 +62,7 @@
           %h2.quick-advance-capstock-subheading{style: 'display: none;'}= t('dashboard.quick_advance.capitalstock.title')
         %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_status != :closed}"}
           = t('dashboard.quick_advance.advances_desk_closed')
-          = link_to t('dashboard.quick_advance.advances_desk_closed_link'), '', data: {'flyout-trigger' => 'active'}
+          = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
         %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_status != :no_terms}"}
           = t('dashboard.quick_advance.advances_desk_no_terms')
         - if [:open,:closed].include?(@quick_advance_status)

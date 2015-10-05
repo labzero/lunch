@@ -22,10 +22,6 @@ $(function () {
     openQuickAdvanceFlyout(event, $(this));
   });
 
-  $('.quick-advance-desk-closed-message a').on('click', function(event){
-    openQuickAdvanceFlyout(event, $(this));
-  });
-
   $('.dashboard-module-advances').on('flyout-initialized', function(){
     var $flyoutInput = $('.flyout-top-section input');
     if ($flyoutInput.length > 0) {
