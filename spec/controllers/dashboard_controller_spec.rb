@@ -1211,7 +1211,7 @@ RSpec.describe DashboardController, :type => :controller do
       let(:current_user) { double('A User', display_name: SecureRandom.hex) }
       before do
         allow(etransact_service_instance).to receive(:settings).and_return({rate_stale_check: rate_timeout})
-        response_hash[:updated_at] = Time.zone.now - 30.seconds
+        response_hash[:updated_at] = Time.zone.now.to_datetime - 30.seconds
         allow(subject).to receive(:current_user).and_return(current_user)
       end
       it 'sets `stale_rate` to true' do

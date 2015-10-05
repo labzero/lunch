@@ -388,7 +388,7 @@ class DashboardController < ApplicationController
     settings = etransact_service.settings
     rate_service = RatesService.new(etransact_service.request)
     rate_details = rate_service.rate(type, term)
-    stale_rate = rate_details[:updated_at] + settings[:rate_stale_check] < Time.zone.now if settings && settings[:rate_stale_check]
+    stale_rate = rate_details[:updated_at] + settings[:rate_stale_check].seconds < Time.zone.now if settings && settings[:rate_stale_check]
     if stale_rate
       InternalMailer.stale_rate(settings[:rate_stale_check], rate_service.request_uuid, current_user).deliver_now
     end
