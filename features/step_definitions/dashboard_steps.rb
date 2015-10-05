@@ -81,7 +81,7 @@ When(/^I click on the flyout close button$/) do
 end
 
 When(/^I click on the View Recent Price Indications link$/) do
-  page.find('.quick-advance-desk-closed-message a').click
+  page.find('.quick-advance-desk-closed-message a', text: I18n.t('dashboard.quick_advance.advances_desk_closed_link').upcase ).click
 end
 
 Then(/^I should not see a flyout$/) do
