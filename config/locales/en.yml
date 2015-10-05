@@ -491,7 +491,7 @@ en:
         advance_amount: Advance Amount
         description: Advance Description
         program: Program
-        security_type: Collateral Type
+        collateral_type: Collateral Type
         interest_day_count: "Interest Day Count"
         payment_on: Interest Payment Frequency
         advance_term: Term
