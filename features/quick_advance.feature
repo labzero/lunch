@@ -176,6 +176,13 @@ Scenario: The rate changes from the time the user sees the table to the time the
   And the quick advance rate has changed
   Then I should see a preview of the quick advance with a notification about the new rate
 
+@data-unavailable @jira-mem-577
+Scenario: The View Recent Price Indications link is displayed when the desk is closed
+  Given I visit the dashboard
+  And the desk has closed
+  When I click on the View Recent Price Indications link
+  Then I am on the "Current Price Indications" report page
+
 @jira-mem-735
 Scenario: Users get an error if their requested advance would push FHLB over its total daily limit for web advances
   Given I visit the dashboard

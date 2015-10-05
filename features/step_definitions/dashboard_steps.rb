@@ -80,6 +80,10 @@ When(/^I click on the flyout close button$/) do
   page.find('.flyout-close-button').click
 end
 
+When(/^I click on the View Recent Price Indications link$/) do
+  page.find('.quick-advance-desk-closed-message a').click
+end
+
 Then(/^I should not see a flyout$/) do
   page.assert_selector('.flyout', :visible => :hidden)
 end
@@ -146,6 +150,10 @@ end
 
 When(/^the quick advance rate has changed$/) do
   # implement code to ensure rate is displayed as having changed
+end
+
+When(/^the desk has closed$/) do
+  # implement code to ensure desk has closed
 end
 
 Then(/^I should not see a preview of the quick advance$/) do

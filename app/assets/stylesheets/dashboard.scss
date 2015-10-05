@@ -222,6 +222,9 @@ $faded-opacity: 0.4 !default;
 
 .quick-advance-desk-closed-message {
   margin-bottom: 0;
+  a {
+    text-transform: uppercase;
+  }
 }
 
 .quick-advance-last-updated-message {
