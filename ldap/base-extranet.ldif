@@ -134,8 +134,15 @@ objectClass: group
 objectClass: top
 member: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
 
+# eBiz Groups
+dn: CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
+cn: Groups
+objectClass: group
+objectClass: top
+member: CN=FCN-MemberSite-Users,CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
+
 # FCN-MemberSite-Users group
-dn: CN=FCN-MemberSite-Users,dc=extranet,dc=fhlbsf,dc=com
+dn: CN=FCN-MemberSite-Users,CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
 cn: FCN-MemberSite-Users
 objectClass: group
 objectClass: top

@@ -13,6 +13,9 @@ changetype: delete
 dn: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
+dn: sAMAccountName=extra-chaste-norole,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
+
 dn: CN=FHLB6,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
@@ -23,6 +26,12 @@ dn: CN=FHLB5,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
 dn: CN=FCN-MemberSite-AccessManagers,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
+
+dn: CN=FCN-MemberSite-Users,CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
+changetype: delete
+
+dn: CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
 changetype: delete
 
 dn: dc=extranet,dc=fhlbsf,dc=com
