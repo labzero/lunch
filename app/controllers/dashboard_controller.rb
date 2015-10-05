@@ -154,16 +154,17 @@ class DashboardController < ApplicationController
     @current_member_name = current_member_name
     @preview = true
     etransact_service = EtransactAdvancesService.new(request)
-    check = etransact_service.check_limits(current_member_id, params[:amount].to_f, params[:advance_term])
-    preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, params[:check_capstock], session['signer_full_name'])
+    params_amount = params[:amount].gsub(/\D/, '').to_f if params[:amount]
+    check = etransact_service.check_limits(current_member_id, params_amount, params[:advance_term])
+    preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params_amount, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, params[:check_capstock], session['signer_full_name'])
     advance_request_parameters(preview)
     populate_advance_request_view_parameters
     if check[:status] == 'pass'
       if preview[:status] && preview[:status].include?('CapitalStockError')
         preview_success = false
         preview_error = false
-        @advance_amount = params[:amount].to_f if params[:amount]
-        @original_amount = params[:amount].to_f if params[:amount]
+        @advance_amount = params_amount
+        @original_amount = params_amount
         response_html = render_to_string :quick_advance_capstock, layout: false
       elsif preview[:status] && (preview[:status].include?('GrossUpError') || preview[:status].include?('ExceptionError'))
         preview_success = false
@@ -173,7 +174,7 @@ class DashboardController < ApplicationController
       elsif preview[:status] && preview[:status].include?('CreditError')
         preview_success = false
         preview_error = true
-        @advance_amount = params[:amount].to_f if params[:amount]
+        @advance_amount = params_amount
         @error_message = :credit
         response_html = render_to_string :quick_advance_error, layout: false
       elsif preview[:status] && preview[:status].include?('CollateralError')
@@ -184,7 +185,7 @@ class DashboardController < ApplicationController
       elsif preview[:status] && preview[:status].include?('ExceedsTotalDailyLimitError')
         preview_success = false
         preview_error = true
-        @advance_amount = params[:amount].to_f if params[:amount]
+        @advance_amount = params_amount
         @error_message = :total_daily_limit
         response_html = render_to_string :quick_advance_error, layout: false
       else
@@ -242,7 +243,7 @@ class DashboardController < ApplicationController
         @error_message = :rate_expired
         response_html = render_to_string :quick_advance_error, layout: false
       else
-        confirmation = EtransactAdvancesService.new(request).quick_advance_execute(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, session['signer_full_name'])
+        confirmation = EtransactAdvancesService.new(request).quick_advance_execute(current_member_id, params[:amount].gsub(/\D/, '').to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, session['signer_full_name'])
         if confirmation
           advance_request_parameters(confirmation)
           advance_success = true

@@ -18,16 +18,23 @@ Scenario: See dashboard quick advance module if I am an advance-signer
   Then I should see a dollar amount field
   And I should see an advance rate.
 
-Scenario: Quick Advance flyout opens
+@jira-mem-924
+Scenario: Quick Advance flyout opens with commas in the amount field
   When I visit the dashboard
   And I enter "56503000" into the ".dashboard-module-advances input" input field
   Then I should see a flyout
-  And I should see "56503000" in the quick advance flyout input field
+  And I should see "56,503,000" in the quick advance flyout input field
 
 Scenario: Quick Advance flyout closes
   When I visit the dashboard
   And I open the quick advance flyout
   And I click on the flyout close button
+  Then I should not see a flyout
+
+@jira-mem-924
+Scenario: Quick Advance flyout does not open when letters are entered
+  When I visit the dashboard
+  And I enter "asdfsdf" into the ".dashboard-module-advances input" input field
   Then I should not see a flyout
 
 @jira-mem-229 @jira-mem-506
