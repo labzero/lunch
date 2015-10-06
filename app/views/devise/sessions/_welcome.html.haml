@@ -2,13 +2,13 @@
 %section.welcome
   .row
     .column-4x8-left
-      &nbsp;
       .logo-container
         .logo= t('welcome.logo')
     .column-4x8-right
       %h1= t('welcome.title')
   .row
     .column-4x8-left
+      &nbsp;
     .column-4x8-right
       %p= t('welcome.intro_html', url: web_support_email, phone_number: web_support_phone_number)
       = yield
