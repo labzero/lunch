@@ -27,20 +27,20 @@ Oracle Instant Client is needed for the Oracle DB adapter used by ActiveRecord. 
 
 1. [Download](http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html) the Oracle Instant Client (11g release 2, currently 11.2.0.4.0) for your platform, as well as the SDK package and SQL*Plus package for your platform (found on the same page).
 2. Extract all three zip files into the same directory.
-3. Place that directory somewhere in your system in a path that **contains no spaces**. If there are any spaces anywhere in the path the gem install will not work. You will get an obtuse error saying that `DYLD_LIBRARY_PATH` needs to be defined.
+3. Place that directory somewhere in your system in a path that **contains no spaces**. If there are any spaces anywhere in the path the gem install will not work. If you are on `OS X` version `10.11 (El Capitan)` or later, you need to either place the OCI in `~/lib` or symlink its libraries there.
 4. `cd` into the Oracle Instant Client directory in your shell and run `ln -s libclntsh.dylib.11.1 libclntsh.dylib` (OS X) or `ln -s libclntsh.so.11.1 libclntsh.so` (Linux), which creates a needed symlink.
 5. Open `~/.bash_profile` (or `~/.bashrc` depending on your OS/shell) and add the following lines (replacing `YOUR_PATH` with the absolute path to the Oracle Instant Client directory):
 
    OS X:
    ```
-   export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:YOUR_PATH
+   export OCI_DIR=$OCI_DIR:YOUR_PATH
    export NLS_LANG="AMERICAN_AMERICA.UTF8"
    export PATH=$PATH:YOUR_PATH
    ```
 
    Linux:
    ```
-   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:YOUR_PATH
+   export OCI_DIR=$OCI_DIR:YOUR_PATH
    export NLS_LANG="AMERICAN_AMERICA.UTF8"
    export PATH=$PATH:YOUR_PATH
    ```
