@@ -431,7 +431,7 @@ en:
       advance_placeholder: Enter Dollar Amount
       advance_instruction: Select a rate to continue.
       advances_desk_closed: The Member Services Desk is closed.
-      advances_desk_closed_link: View rates as of close of business
+      advances_desk_closed_link: View recent price indications
       advances_desk_no_terms: There are no terms available right now.
       advance_last_updated: The following rates were last updated %{last_updated}
       hours_of_operation_html: "You may initiate an advance during the <a href=\"%{url}\">Advance Desk Hours of Operation</a>."
