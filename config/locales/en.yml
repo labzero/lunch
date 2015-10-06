@@ -500,7 +500,7 @@ en:
         funding_date: Funding Date
         maturity_date: Maturity Date
         debit_sta_html: Your Settlement/Transaction Account (STA) will be debited %{amount} for the capital stock purchase amount today
-        cumulative: Cumulative Stock Purchase
+        cumulative: Cumulative Stock Purchase.
       securid:
         intro: For your security, please enter your SecurID token credentials.
         help: Get help with PIN or token
