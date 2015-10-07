@@ -1,4 +1,4 @@
-@jira-mem-69
+@jira-mem-69 @wip
 Feature: Visiting the Securities Services Monthly Statement Page
   As a user
   I want to use visit the Securities Services Monthly Statement page for the FHLB Member Portal
@@ -7,7 +7,7 @@ Feature: Visiting the Securities Services Monthly Statement Page
 Background:
   Given I am logged in
 
-@smoke @jira-mem-536
+@smoke @jira-mem-536 @wip
 Scenario: Member sees Securities Services Statement
   Given I visit the dashboard
   When I select "Securities Services Monthly Statement" from the reports dropdown
@@ -15,13 +15,13 @@ Scenario: Member sees Securities Services Statement
   And I should see a report header
   And I should see 4 report tables with multiple data rows
 
-@smoke @jira-mem-931
+@smoke @jira-mem-931 @wip
 Scenario: The datepicker on the Securities Services Monthly Statement defaults to end of the last full month
   Given I am on the "Securities Services Monthly Statement" report page
   When I click the datepicker field
   Then I should see the end of the last full month as the default datepicker option
 
-@jira-mem-890
+@jira-mem-890 @wip
 Scenario: Member enters a date occurring before the minimum allowed date
   Given I am on the "Securities Services Monthly Statement" report page
   When I click the datepicker field
@@ -29,7 +29,7 @@ Scenario: Member enters a date occurring before the minimum allowed date
   And I click the datepicker apply button
   Then I should see a "Securities Services Monthly Statement" report as of 18 months ago
 
-@jira-mem-890
+@jira-mem-890 @wip
 Scenario: Member enters a date occurring after the maximum allowed date
   Given I am on the "Securities Services Monthly Statement" report page
   When I click the datepicker field
@@ -37,7 +37,7 @@ Scenario: Member enters a date occurring after the maximum allowed date
   And I click the datepicker apply button
   Then I should see a "Securities Services Monthly Statement" report as of the end of the last valid month
 
-@data-unavailable @jira-mem-536
+@data-unavailable @jira-mem-536 @wip
 Scenario: No data is available to show in the Securities Services Statement
   Given I am on the "Securities Services Statement" report page
   When the "Dividend Summary" table has no data
@@ -45,7 +45,7 @@ Scenario: No data is available to show in the Securities Services Statement
   When the "Dividend Details" table has no data
   Then I should see the "Dividend Details" report table with Data Unavailable messaging
 
-@data-unavailable @jira-mem-536
+@data-unavailable @jira-mem-536 @wip
 Scenario: The Securities Services Statement has been disabled
   Given I am on the "Securities Services Statement" report page
   When the "Dividend Transaction Statement" report has been disabled

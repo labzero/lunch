@@ -87,6 +87,10 @@
   }
 }
 
+.disabled {
+  color: $medium-gray;
+}
+
 .secondary-nav {
   height: $header-secondary-nav-height;
   line-height: $header-secondary-nav-height;

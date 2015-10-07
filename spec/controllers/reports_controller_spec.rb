@@ -418,7 +418,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
 
-    describe 'GET cash_projections' do
+    describe 'GET cash_projections', skip: true do
       let(:as_of_date) { '2014-12-12'.to_date }
       it_behaves_like 'a user required action', :get, :cash_projections
 
@@ -455,7 +455,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
 
-    describe 'GET dividend_statement' do
+    describe 'GET dividend_statement', skip: true do
       let(:make_request) { get :dividend_statement }
       let(:response_hash) { double('A Dividend Statement', :'[]' => nil)}
       let(:year) { Array(2000..2015).sample }
@@ -542,7 +542,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
 
-    describe 'GET securities_services_statement' do
+    describe 'GET securities_services_statement', skip: true do
       let(:make_request) { get :securities_services_statement }
       let(:response_hash) { double('A Securities Services Statement', :'[]' => nil)}
       let(:end_of_month) { (start_date - 1.month).end_of_month }
@@ -798,7 +798,8 @@ RSpec.describe ReportsController, :type => :controller do
         expect{make_request}.to raise_error(StandardError)
       end
     end
-    describe 'GET current_securities_position' do
+
+    describe 'GET current_securities_position', skip: true do
       dropdown_options = [
         [I18n.t('reports.pages.securities_position.filter.all'), 'all'],
         [I18n.t('reports.pages.securities_position.filter.pledged'), 'pledged'],
@@ -853,7 +854,8 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
-    describe 'GET monthly_securities_position' do
+
+    describe 'GET monthly_securities_position', skip: true do
       dropdown_options = [
         [I18n.t('reports.pages.securities_position.filter.all'), 'all'],
         [I18n.t('reports.pages.securities_position.filter.pledged'), 'pledged'],
@@ -1018,7 +1020,8 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
-    describe 'GET capital_stock_and_leverage' do
+
+    describe 'GET capital_stock_and_leverage', skip: true do
       let(:capital_stock_and_leverage) { get :capital_stock_and_leverage }
       let(:capital_stock_and_leverage_response) { double('Capital stock and leverage response', :[] => nil) }
       let(:surplus_stock) { rand(1..999999999) }
@@ -1653,7 +1656,7 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
-  describe 'GET authorizations' do
+  describe 'GET authorizations', skip: true do
     it_behaves_like 'a user required action', :get, :authorizations
     it_behaves_like 'a report that can be downloaded', :authorizations, [:pdf]
     it_behaves_like 'a report with instance variables set in a before_filter', :authorizations
