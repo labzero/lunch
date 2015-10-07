@@ -267,14 +267,14 @@ class ResourcesController < ApplicationController
     @loan_document_rows = [
       {
         title: t('resources.forms.collateral.loan_document.assignment'),
-        pdf_link: resources_download_path(file: :corporation_assignment)
+        word_link: resources_download_path(file: :corporation_assignment)
       }
     ]
 
     @creditor_relationship_rows = [
       {
         title: t('resources.forms.collateral.creditor_relationship.amendment'),
-        pdf_link: resources_download_path(file: :credit_union_amendment)
+        word_link: resources_download_path(file: :credit_union_amendment)
       },
       {
         title: t('resources.forms.collateral.creditor_relationship.agreement'),
