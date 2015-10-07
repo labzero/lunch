@@ -74,7 +74,7 @@ class DashboardController < ApplicationController
 
     remaining = [
       {title: t('dashboard.your_account.table.remaining.title')},
-      [t('dashboard.your_account.table.remaining.available'), profile[:total_financing_available]],
+      [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
       [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
       [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
     ]
