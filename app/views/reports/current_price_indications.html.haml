@@ -4,7 +4,8 @@
   .report-header
     %h1= @report_name
     = render 'reports_header_buttons', download_formats: [:xlsx]
-    %p= t('reports.pages.price_indications.current.summary', phone_number: fhlb_formatted_phone_number('8004443452'))
+    = render 'report_details', name: @member_name, freshness: t('reports.pages.price_indications.current.freshness')
+    %p= t('reports.pages.price_indications.current.summary', phone_number: service_desk_phone_number)
   .report-main-body
     %h2.report-table-title= t('reports.pages.price_indications.standard_credit_program')
     .report-table-title
@@ -77,8 +78,8 @@
         %li= t('reports.general_information.does_not_constitute_solicitation_html', url: terms_of_use_path)
         %li= t('reports.general_information.market_data_html', url: disclaimer_reuters_path, picture_url: image_url('thomson_reuters.gif'))
         %li= t('reports.general_information.same_day_pricing')
-        %li= t('reports.general_information.interest_rates_on_securities_backed_credit_advances', phone_number: fhlb_formatted_phone_number('8004443452'))
-        %li= t('reports.general_information.please_call_the_member_services_desk', phone_number: fhlb_formatted_phone_number('8004443452'))
+        %li= t('reports.general_information.interest_rates_on_securities_backed_credit_advances', phone_number: service_desk_phone_number)
+        %li= t('reports.general_information.please_call_the_member_services_desk', phone_number: service_desk_phone_number)
         %ul
           %li= t('reports.general_information.callable_advance')
           %li= t('reports.general_information.putable_advance')

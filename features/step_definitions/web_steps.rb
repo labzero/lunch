@@ -40,6 +40,10 @@ Given(/^I wait for (\d+) seconds$/) do |seconds|
   sleep(seconds.to_f)
 end
 
+Then(/^I should see a success flash$/) do
+  page.assert_selector('.form-flash-message[data-type=success]')
+end
+
 def jquery_guard(timeout=10)
   times_out_at = Time.now + timeout
   while page.evaluate_script('typeof $') == 'undefined'

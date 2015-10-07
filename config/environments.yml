@@ -26,6 +26,12 @@ default: &default
   expired:
     username: <%= ENV['CUCUMBER_EXPIRED_USERNAME'] || 'local-expired' %>
     password: <%= ENV['CUCUMBER_EXPIRED_PASSWORD'] || 'development' %>
+  password_changable:
+    username: <%= ENV['CUCUMBER_PASSWORD_CHANGE_USERNAME'] || 'local-password' %>
+    password: <%= ENV['CUCUMBER_PASSWORD_CHANGE_PASSWORD'] || 'development' %>
+  extranet_no_role:
+    username: <%= ENV['CUCUMBER_EXTRANET_NOROLE_USERNAME'] || 'extra-chaste-norole' %>
+    password: <%= ENV['CUCUMBER_EXTRANET_NOROLE_PASSWORD'] || 'development' %>
   primary_bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Meridian Bank, National Association' %>
   valid_password: <%= ENV['CUCUMBER_VALID_PASSWORD'] || '123Abcd3!' %>
 

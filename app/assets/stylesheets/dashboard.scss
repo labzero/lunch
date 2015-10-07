@@ -222,6 +222,9 @@ $faded-opacity: 0.4 !default;
 
 .quick-advance-desk-closed-message {
   margin-bottom: 0;
+  a {
+    text-transform: uppercase;
+  }
 }
 
 .quick-advance-last-updated-message {
@@ -265,6 +268,15 @@ p.dashboard-vrc-overnight-message {
   }
   .dashboard-module-content > div {
     margin-bottom: 15px;
+  }
+}
+
+.dashboard-module-advances-closed {
+  .dashboard-vrc-overnight-message, .dashboard-advances-rate {
+    color: $medium-gray;
+  }
+  a {
+    text-transform: uppercase
   }
 }
 

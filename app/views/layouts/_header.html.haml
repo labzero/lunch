@@ -6,12 +6,13 @@
       - if current_user.ldap_domain == 'intranet'
         %li.header-member-name= current_member_name
       %li.nav-logout= link_to(t('nav.primary.logout'), destroy_user_session_url, method: :delete)
-      %li.nav-settings= link_to('', '/settings', class: 'icon-gear-after')
+      %li.nav-settings= link_to('', settings_password_path, class: 'icon-gear-after')
       %li.nav-mail= link_to('', corporate_communications_path('all'), class: 'icon-envelope-after')
       %li
         = render 'shared/input_field', icon: :magnify, placeholder: t('nav.primary.search'), field_class: :'nav-search'
 .secondary-nav
   %nav.row
+    %time{datetime:@render_time.iso8601}= fhlb_datetime_standard_numeric(@render_time)
     %ul<>
       %li<>
         = link_to(t('nav.secondary.advances'), advances_manage_advances_path)

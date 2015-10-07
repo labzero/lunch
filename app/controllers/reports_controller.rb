@@ -63,7 +63,8 @@ class ReportsController < ApplicationController
     settlement_transaction_account: 6.months,
     advances_detail: 18.months,
     securities_services_statement: 18.months,
-    monthly_securities_position: 18.months
+    monthly_securities_position: 18.months,
+    dividend_statement: 36.months
   }
 
   before_action do
@@ -287,7 +288,9 @@ class ReportsController < ApplicationController
 
   def advances_detail
     date_restriction = DATE_RESTRICTION_MAPPING[:advances_detail]
-    @min_date, @start_date = min_and_start_dates(date_restriction, (params[:start_date].to_date if params[:start_date]))
+    @max_date = most_recent_business_day(Time.zone.now.to_date - 1.day)
+    advance_start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
+    @min_date, @start_date = min_and_start_dates(date_restriction, advance_start_date)
     member_balances = MemberBalanceService.new(current_member_id, request)
     @advances_detail = member_balances.advances_details(@start_date)
     @report_name = t('global.advances')
@@ -514,7 +517,7 @@ class ReportsController < ApplicationController
     @credit_type_text ||= @credit_type_options.first.first
 
     export_format = params[:export_format]
-    @report_name = t('reports.pages.price_indications.historical')
+    @report_name = t('reports.pages.price_indications.historical.title')
     filename_credit_type = (@credit_type.include?('libor') || @credit_type.include?('daily_prime')) ? "arc-#{@credit_type.gsub('_','-')}" : @credit_type
     filename = "historical-price-indications-#{@collateral_type}-#{filename_credit_type}-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
     excel_params = {
@@ -642,6 +645,7 @@ class ReportsController < ApplicationController
   end
 
   def dividend_statement
+    @div_id = params[:dividend_transaction_filter]
     member_balances = MemberBalanceService.new(current_member_id, request)
     @dividend_statement_details = {
       column_headings: [
@@ -659,7 +663,7 @@ class ReportsController < ApplicationController
       @dividend_statement = {}
       @dividend_statement_details[:rows] = []
     else
-      @dividend_statement = member_balances.dividend_statement(Time.zone.now.to_date)
+      @dividend_statement = member_balances.dividend_statement(DATE_RESTRICTION_MAPPING[:dividend_statement].ago.to_date, @div_id)
       raise StandardError, "There has been an error and ReportsController#dividend_statement has encountered nil. Check error logs." if @dividend_statement.nil?
       @dividend_statement_details[:rows] = @dividend_statement[:details].collect do |detail|
         {
@@ -680,6 +684,23 @@ class ReportsController < ApplicationController
         { value: @dividend_statement[:average_shares_outstanding], type: :shares_fractional},
         { value: @dividend_statement[:total_dividend], type: :currency}
       ]
+      @dropdown_options = @dividend_statement[:div_ids].collect do |div_id|
+        label = if %w(1 2 3 4).include?(div_id.last)
+          I18n.t("dates.quarters.#{div_id.last}", year: div_id[0..3])
+        else
+          I18n.t('reports.pages.dividend_statement.special_dividend', year: div_id[0..3])
+        end
+        [label, div_id]
+      end
+      @dropdown_options.each do |option|
+        if option[1] == @div_id
+          @dropdown_options_text = option[0]
+          break
+        end
+      end
+      @dropdown_options_text ||= @dropdown_options[0][0]
+      @div_id ||= @dropdown_options[0][1]
+      @show_summary_data = true if %w(1 2 3 4).include?(@div_id.last)
     end
   end
 
@@ -688,7 +709,7 @@ class ReportsController < ApplicationController
     start_date = (params[:start_date] || last_month_end).to_date
     min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
     @min_date = min_and_start_dates_array.first
-    @start_date = min_and_start_dates_array.last.end_of_month
+    @start_date = month_restricted_start_date(min_and_start_dates_array.last)
     if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
       @statement = {}
     else
@@ -716,9 +737,8 @@ class ReportsController < ApplicationController
           columns: [
             {value: credit[:lc_number], type: nil},
             {value: credit[:current_par], type: :currency_whole},
-            {value: credit[:maintenance_charge], type: :currency_whole},
+            {value: credit[:maintenance_charge], type: :basis_point},
             {value: credit[:trade_date], type: :date, classes: [:'report-cell-right']},
-            {value: credit[:settlement_date], type: :date, classes: [:'report-cell-right']},
             {value: credit[:maturity_date], type: :date, classes: [:'report-cell-right']},
             {value: credit[:description], type: nil}
           ]
@@ -728,9 +748,9 @@ class ReportsController < ApplicationController
       []
     end
     @loc_table_data = {
-      column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('common_table_headings.trade_date'), t('common_table_headings.settlement_date'), t('common_table_headings.maturity_date'), t('common_table_headings.description')],
+      column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), fhlb_add_unit_to_table_header(t('reports.pages.letters_of_credit.headers.current_amount'), '$'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('reports.pages.letters_of_credit.headers.issuance_date'), t('common_table_headings.maturity_date'), t('reports.pages.letters_of_credit.headers.credit_program')],
       rows: rows,
-      footer: [{value: t('global.total')}, {value: @total_current_par, type: :currency_whole}, {value: nil, colspan: 5}]
+      footer: [{value: t('global.total')}, {value: @total_current_par, type: :currency_whole}, {value: nil, colspan: 4}]
     }
   end
 
@@ -739,7 +759,7 @@ class ReportsController < ApplicationController
     return d - 2.day if d.sunday?
     d
   end
-
+  
   def securities_transactions
     @max_date   = most_recent_business_day(Time.zone.now.to_date - 1.day)
     @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
@@ -756,26 +776,8 @@ class ReportsController < ApplicationController
     @final = securities_transactions[:final]
     column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('common_table_headings.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('common_table_headings.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
     rows = securities_transactions[:transactions].collect do |row|
-      columns = []
-      row.each do |value|
-        case value[0]
-        when 'units'
-          columns << {type: :basis_point, value: value[1]}
-        when 'maturity_date'
-          columns << {type: :date, value: value[1]}
-        when 'payment_or_principal', 'interest', 'total'
-          columns << {type: :rate, value: value[1]}
-        when 'custody_account_no'
-          if row['new_transaction']
-            columns << {type: nil, value: "#{value[1]}*"}
-          else
-            columns << {type: nil, value: value[1]}
-          end
-        when 'cusip', 'transaction_code', 'security_description'
-          columns << {type: nil, value: value[1]}
-        end
-      end
-      {columns: columns}
+      is_new = row['new_transaction']
+      { columns: row.map{ |field,value| map_securities_transactions_column(field, value, is_new) }.compact }
     end
     footer = [
         { value: t('reports.pages.securities_transactions.total_net_amount'), colspan: 6},
@@ -903,7 +905,7 @@ class ReportsController < ApplicationController
     start_date = (params[:start_date] || last_month_end).to_date
     min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
     @min_date = min_and_start_dates_array.first
-    @month_end_date = min_and_start_dates_array.last.end_of_month
+    @month_end_date = month_restricted_start_date(min_and_start_dates_array.last)
     @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
     @picker_presets = date_picker_presets(@month_end_date, nil, date_restriction)
     member_balances = MemberBalanceService.new(current_member_id, request)
@@ -971,6 +973,7 @@ class ReportsController < ApplicationController
     position_table_headings = [t('reports.pages.capital_stock_and_leverage.stock_owned'), t('reports.pages.capital_stock_and_leverage.minimum_requirement'), t('reports.pages.capital_stock_and_leverage.excess_stock'), t('reports.pages.capital_stock_and_leverage.surplus_stock')]
     leverage_table_headings = [t('reports.pages.capital_stock_and_leverage.stock_owned'), t('reports.pages.capital_stock_and_leverage.activity_based_requirement'), t('reports.pages.capital_stock_and_leverage.remaining_stock_html').html_safe, t('reports.pages.capital_stock_and_leverage.remaining_leverage')]
 
+    surplus_stock = [cap_stock_and_leverage[:surplus_stock], 0].max if cap_stock_and_leverage[:surplus_stock]
     @position_table_data = {
       column_headings: position_table_headings.collect{|heading| fhlb_add_unit_to_table_header(heading, '$')},
       rows: [
@@ -979,7 +982,7 @@ class ReportsController < ApplicationController
             {value: cap_stock_and_leverage[:stock_owned], type: :number, classes: [:'report-cell-right']},
             {value: cap_stock_and_leverage[:minimum_requirement], type: :number, classes: [:'report-cell-right']},
             {value: cap_stock_and_leverage[:excess_stock], type: :number, classes: [:'report-cell-right']},
-            {value: cap_stock_and_leverage[:surplus_stock], type: :number, classes: [:'report-cell-right']}
+            {value: surplus_stock, type: :number, classes: [:'report-cell-right']}
           ]
         }
       ]
@@ -1002,7 +1005,8 @@ class ReportsController < ApplicationController
 
   def account_summary
 
-    @date = params[:end_date] || Time.zone.now.to_date
+    @now = Time.zone.now
+    @date = @now.to_date
     export_format = params[:export_format]
     @report_name = t('reports.account_summary.title')
 
@@ -1035,8 +1039,8 @@ class ReportsController < ApplicationController
       members_service = MembersService.new(request)
       member_details = members_service.member(current_member_id) || {}
 
-      @intraday_datetime = Time.zone.now
-      @credit_datetime = Time.zone.now
+      @intraday_datetime = @now
+      @credit_datetime = @now
       @collateral_notice = member_profile[:collateral_delivery_status] == 'Y'
       @sta_number = member_details[:sta_number]
       @fhfb_number = member_details[:fhfb_number]
@@ -1307,7 +1311,7 @@ class ReportsController < ApplicationController
 
   def report_disabled?(report_flags)
     member_info = MembersService.new(request)
-    member_info.report_disabled?(current_member_id, report_flags)
+    @report_disabled = member_info.report_disabled?(current_member_id, report_flags)
   end
 
   def add_rate_objects_for_all_terms(rates_by_date_array, terms, credit_type)
@@ -1347,8 +1351,38 @@ class ReportsController < ApplicationController
     now = Time.zone.today
     start_date = (start_date_param || now).to_date
     min_date = now - min_date_range
-    start_date = min_date < start_date ? start_date : min_date
+
+    start_date = if min_date < start_date && start_date <= now
+      start_date
+    elsif start_date > now
+      now
+    else
+      min_date
+    end
     [min_date, start_date]
   end
 
+  def month_restricted_start_date(start_date)
+    today = Time.zone.today
+    if start_date > today.beginning_of_month && start_date != today.end_of_month
+      (start_date - 1.month).end_of_month
+    else
+      start_date.end_of_month
+    end
+  end
+
+  def map_securities_transactions_column(field,value,is_new)
+    case field
+      when 'units'
+        {type: :basis_point, value: value}
+      when 'maturity_date'
+        {type: :date, value: value}
+      when 'payment_or_principal', 'interest', 'total'
+        {type: :rate, value: value}
+      when 'custody_account_no'
+        {type: nil, value: is_new ? "#{value}*" : value}
+      when 'cusip', 'transaction_code', 'security_description'
+        {type: nil, value: value}
+    end
+  end
 end

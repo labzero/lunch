@@ -21,10 +21,10 @@ Devise.setup do |config|
   # Configure the e-mail address which will be shown in Devise::Mailer,
   # note that it will be overwritten if you use your own mailer class
   # with default "from" parameter.
-  config.mailer_sender = '"FHLBSF Member Portal" <websupport@fhlbsf.com>'
+  config.mailer_sender = "\"FHLBSF Member Portal\" <#{ContactInformationHelper::WEB_SUPPORT_EMAIL}>"
 
   # Configure the class responsible to send e-mails.
-  config.mailer = 'FHLBMailer'
+  config.mailer = 'MemberMailer'
 
   # ==> ORM configuration
   # Load and configure the ORM. Supports :active_record (default) and
@@ -73,7 +73,7 @@ Devise.setup do |config|
   # config.http_authenticatable = false
 
   # If 401 status code should be returned for AJAX requests. True by default.
-  # config.http_authenticatable_on_xhr = true
+  config.http_authenticatable_on_xhr = false
 
   # The realm used in Http Basic Authentication. 'Application' by default.
   # config.http_authentication_realm = 'Application'
@@ -266,4 +266,15 @@ Devise.setup do |config|
   # When using omniauth, Devise cannot automatically set Omniauth path,
   # so you need to do it manually. For the users scope, it would be:
   # config.omniauth_path_prefix = '/my_engine/users/auth'
+end
+
+ActiveSupport.on_load :devise_controller do
+  class DeviseController
+    def require_no_authentication_with_authentication_flag(*args, &block)
+      @authenticated_action = false
+      require_no_authentication_without_authentication_flag(*args, &block)
+    end
+
+    alias_method_chain :require_no_authentication, :authentication_flag
+  end
 end

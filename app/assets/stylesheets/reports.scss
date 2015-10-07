@@ -80,6 +80,20 @@
   margin-top: 32px;
 }
 
+.report-details {
+  clear: both;
+  margin-bottom: 20px;
+  h2 {
+    @extend %typography-subtitle;
+    margin-bottom: 0;
+  }
+  p {
+    @extend %typography-dashboard-account-summary;
+    margin: 0;
+    color: $medium-gray;
+  }
+}
+
 .report {
   input {
     color: $dark-gray;
@@ -468,6 +482,7 @@
 }
 
 .price-indications-report {
+  min-height: 470px; // Must be tall enough to allow datepicker without flowing into footer
   .report-filter:first-of-type {
     margin-left: 0;
   }
@@ -492,6 +507,9 @@
 }
 
 .report-dividend-statement {
+  .report-filter {
+    margin-left: 0;
+  }
   .table-dividend-summary {
     width: 500px;
     td:last-of-type {
@@ -657,19 +675,13 @@ td.dataTables_empty {
       width: 85px;
     }
     &:nth-child(2) {
-      width: 105px;
+      width: 130px;
     }
     &:nth-child(3) {
       width: 140px;
     }
-    &:nth-child(4) {
-      width: 86px;
-    }
-    &:nth-child(5) {
+    &:nth-child(4), &:nth-child(5) {
       width: 115px;
-    }
-    &:nth-child(6) {
-      width: 100px;
     }
   }
   tfoot {

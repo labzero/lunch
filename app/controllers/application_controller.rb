@@ -5,7 +5,10 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
   before_action :authenticate_user!
   before_action :check_password_change
+  before_action :save_render_time
   helper_method :current_member_name
+
+  HTTP_404_ERRORS = [ActionController::RoutingError, ActionController::UnknownController, ::AbstractController::ActionNotFound, ActiveRecord::RecordNotFound]
 
   rescue_from Exception do |exception|
     unless Rails.env.production?
@@ -15,11 +18,16 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def save_render_time
+    @render_time = Time.zone.now
+  end
+
   def current_member_id
     session['member_id']
   end
 
   def current_member_name
+    session['member_name'] ||= MembersService.new(request).member(current_member_id).try(:[], :name) if current_member_id
     session['member_name']
   end
 
@@ -42,6 +50,13 @@ class ApplicationController < ActionController::Base
   def check_password_change
     redirect_to user_expired_password_path if session['password_expired']
   end
+
+  def authenticate_user_with_authentication_flag!(*args, &block)
+    @authenticated_action = true unless instance_variable_defined?(:@authenticated_action)
+    authenticate_user_without_authentication_flag!(*args, &block)
+  end
+
+  alias_method_chain :authenticate_user!, :authentication_flag
 
   private
 
@@ -77,7 +92,11 @@ class ApplicationController < ActionController::Base
     Rails.logger.error exception
     Rails.logger.error exception.backtrace.join("\n")
     begin
-      render 'error/500', layout: 'error', status: 500
+      if HTTP_404_ERRORS.include?(exception.class)
+        render 'error/404', layout: 'error', status: 404
+      else
+        render 'error/500', layout: 'error', status: 500
+      end
     rescue => e
       render text: e, status: 500
     end

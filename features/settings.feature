@@ -12,13 +12,14 @@ Scenario: Navigate to settings page
   When I click on the gear icon in the header
   Then I should see "Settings" as the sidebar title
 
-@smoke
+@wip @smoke
 Scenario: Email Settings
   Given I visit the dashboard
     And I click on the gear icon in the header
   When I click on "Emails" in the sidebar nav
   Then I should be on the email settings page
 
+@wip
 Scenario: Changing Email Settings
   Given I am on the email settings page
     And I see the unselected state for the "reports" option
@@ -26,6 +27,7 @@ Scenario: Changing Email Settings
     Then I should see the selected state for the "reports" option
     And I should see the auto-save message for the email settings page
 
+@wip
 Scenario: Remembering Email Settings
   Given I am on the email settings page
     And I see the unselected state for the "reports" option
@@ -41,7 +43,7 @@ Scenario: Remembering Email Settings
 Scenario: Users can view Two Factor settings
   Given I visit the dashboard
     And I click on the gear icon in the header
-  When I click on "2-Step Verification" in the sidebar nav
+  When I click on "Manage Token" in the sidebar nav
   Then I should be on the two factor settings page
 
 @jira-mem-600
@@ -105,3 +107,18 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
     Given I visit the dashboard
     When I click on the gear icon in the header
     Then I should not see "Access Manager" in the sidebar nav
+
+  @jira-mem-920
+  Scenario: User changes their password
+    Given I am logged in as a "password change user"
+    When I am on the change password page
+    Then I should see current password validations
+    When I fill in the current password field with the password change user's password
+    Then I should see password change validations
+    When I enter a valid new password
+    And I submit the form
+    Then I should see the change password page
+    And I should see a success flash
+    When I log out
+    And I login as the password change user with the new password
+    Then I should be logged in

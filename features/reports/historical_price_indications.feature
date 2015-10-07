@@ -12,6 +12,7 @@ Scenario: Visit historical price indications from header link
   Given I visit the dashboard
   When I select "Historical" from the reports dropdown
   Then I should see "Historical Price Indications"
+  And I should see a report header
   And I should see a report table with multiple data rows
 
 @jira-mem-311
@@ -86,13 +87,13 @@ Scenario: Choosing different presets in the datepicker
   And I click the datepicker apply button
   Then I should see a report with dates for "last year"
 
-@data-unavailable @jira-mem-283
+@data-unavailable @jira-mem-283 @jira-mem-1053
 Scenario: No data is available to show in the Historical Price Indications report
   Given I am on the "Historical Price Indications" report page
   When the "Historical Price Indications" table has no data
-  Then I should see an empty report table with Data Unavailable messaging
+  Then I should see an empty report table with No Records messaging
 
-@data-unavailable @jira-mem-282
+@data-unavailable @jira-mem-282 @jira-mem-1053
 Scenario: The Historical Price Indications report has been disabled
   Given I am on the "Historical Price Indications" report page
   When the "Historical Price Indications" report has been disabled

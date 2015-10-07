@@ -12,13 +12,14 @@ Scenario: Member sees Securities Services Statement
   Given I visit the dashboard
   When I select "Securities Services Monthly Statement" from the reports dropdown
   Then I should see report summary data
+  And I should see a report header
   And I should see 4 report tables with multiple data rows
 
 @smoke @jira-mem-931
-Scenario: The datepicker on the Securities Services Monthly Statement defaults to end of last month
+Scenario: The datepicker on the Securities Services Monthly Statement defaults to end of the last full month
   Given I am on the "Securities Services Monthly Statement" report page
   When I click the datepicker field
-  Then I should see the end of last month as the default datepicker option
+  Then I should see the end of the last full month as the default datepicker option
 
 @jira-mem-890
 Scenario: Member enters a date occurring before the minimum allowed date

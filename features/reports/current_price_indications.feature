@@ -12,6 +12,7 @@ Scenario: Visit current price indications from header link
   Given I visit the dashboard
   When I select "Current" from the reports dropdown
   Then I should see "Current Price Indications"
+  And I should see a report header with just freshness
   And I should see a report table with multiple data rows
 
 @smoke @jira-mem-315

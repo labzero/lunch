@@ -195,7 +195,7 @@ RSpec.describe DashboardController, :type => :controller do
       it 'should set @account_overview to have zero capital stock remaining balance if the report is disabled' do
         allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::FHLB_STOCK_DATA]).and_return(true)
         get :index
-        expect(assigns[:account_overview][:remaining][3]).to eq(["Stock Leverage", nil, nil, 2])
+        expect(assigns[:account_overview][:remaining][3]).to eq(["Stock Leverage", nil])
       end
       it 'should set @account_overview to have zero collateral borrowing capacity if the report is disabled' do
         allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA]).and_return(true)
@@ -324,6 +324,27 @@ RSpec.describe DashboardController, :type => :controller do
         it "should set @#{var.to_s}" do
           make_request
           expect(assigns[var]).to eq(checked_rate_hash[var])
+        end
+      end
+      describe 'the rate is stale' do
+        before do
+          checked_rate_hash[:stale_rate] = true
+        end
+        it 'renders the quick_advance_error' do
+          make_request
+          expect(response).to render_template(:quick_advance_error)
+        end
+        it 'renders the quick_advance_error withoiut a layout' do
+          expect(subject).to receive(:render_to_string).with(:quick_advance_error, layout: false)
+          make_request
+        end
+        it 'sets preview_success to `false`' do
+          data = JSON.parse(make_request.body)
+          expect(data['preview_success']).to be false
+        end
+        it 'sets preview_error to `true`' do
+          data = JSON.parse(make_request.body)
+          expect(data['preview_error']).to be true
         end
       end
     end
@@ -1050,6 +1071,7 @@ RSpec.describe DashboardController, :type => :controller do
       advance_rate: {key: :advance_rate, chain: [:to_f]},
       advance_description: {key: :advance_term, method: :get_description_from_advance_term},
       advance_type: {key: :advance_type, method: :get_type_from_advance_type},
+      advance_type_raw: :advance_type,
       advance_program: {key: :advance_type, method: :get_program_from_advance_type},
       collateral_type: {key: :advance_type, method: :get_collateral_type_from_advance_type}
     }.each do |param, key|
@@ -1149,9 +1171,11 @@ RSpec.describe DashboardController, :type => :controller do
   describe 'the `check_advance_rate` method' do
     let(:old_rate) { rand() }
     let(:new_rate) { rand() }
-    let(:response_hash) { {rate: old_rate} }
-    let(:service_object) { double('a service object', rate: response_hash)}
-    let(:check_advance_rate) { subject.send(:check_advance_rate, 'some request', 'some type', 'some term', old_rate)}
+    let(:request_uuid) { double('A Request UUID') }
+    let(:response_hash) { {rate: old_rate, updated_at: Time.zone.now} }
+    let(:service_object) { double('a service object', rate: response_hash, request_uuid: request_uuid)}
+    let(:etransact_service_instance) { double('an eTransact Service Instance', settings: {}, request: 'some request')}
+    let(:check_advance_rate) { subject.send(:check_advance_rate, etransact_service_instance, 'some type', 'some term', old_rate)}
     before do
       allow(RatesService).to receive(:new).and_return(service_object)
     end
@@ -1177,6 +1201,32 @@ RSpec.describe DashboardController, :type => :controller do
       it 'sets `rate_changed` to false' do
         expect(check_advance_rate[:rate_changed]).to eq(false)
       end
+    end
+    it 'fetches the eTransact settings' do
+      expect(etransact_service_instance).to receive(:settings)
+      check_advance_rate
+    end
+    describe 'when the rate is stale' do
+      let(:rate_timeout) { rand(1..20) }
+      let(:current_user) { double('A User', display_name: SecureRandom.hex) }
+      before do
+        allow(etransact_service_instance).to receive(:settings).and_return({rate_stale_check: rate_timeout})
+        response_hash[:updated_at] = Time.zone.now.to_datetime - 30.seconds
+        allow(subject).to receive(:current_user).and_return(current_user)
+      end
+      it 'sets `stale_rate` to true' do
+        expect(check_advance_rate[:stale_rate]).to be true
+      end
+      it 'sends a stale rate warning email' do
+        mail_message = double('A Mail Message')
+        allow(InternalMailer).to receive(:stale_rate).with(rate_timeout, request_uuid, current_user).and_return(mail_message)
+        expect(mail_message).to receive(:deliver_now)
+        check_advance_rate
+      end
+    end
+    it 'sets `stale_rate` to false when the rate is fresh' do
+      allow(etransact_service_instance).to receive(:settings).and_return({rate_stale_check: 20})
+      expect(check_advance_rate[:stale_rate]).to be false
     end
   end
 

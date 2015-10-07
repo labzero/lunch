@@ -36,6 +36,10 @@ Then(/^I should see an empty report table with Data Unavailable messaging$/) do
   page.assert_selector('.report-table tbody tr:first-child .dataTables_empty', text: I18n.t('errors.table_data_unavailable'))
 end
 
+Then(/^I should see an empty report table with No Records messaging$/) do
+  page.assert_selector('.report-table tbody tr:first-child .dataTables_empty', text: I18n.t('errors.table_data_no_records'))
+end
+
 Then(/^I should see a report table with multiple data rows$/) do
   page.assert_selector('.report-table tbody tr')
 end
@@ -54,6 +58,25 @@ end
 When(/^I wait for the report to load$/) do
   page.assert_no_selector('.report-table.table-loading', wait: 180)
   page.assert_no_selector('.report-table.table-error')
+end
+
+Then(/^I should see a report header(?: with just (freshness|availability))?$/) do |expected_details|
+  page.assert_selector('.report-header .report-details h2', visible: true, exact: true, text: current_member_name)
+
+  freshness_selector = '.report-header .report-details .report-details-freshness'
+  availability_selector = '.report-header .report-details .report-details-availability'
+
+  case expected_details
+  when 'freshness'
+    page.assert_selector(freshness_selector, visible: true)
+    page.assert_no_selector(availability_selector)
+  when 'availability'
+    page.assert_selector(availability_selector, visible: true)
+    page.assert_no_selector(freshness_selector)
+  when nil
+    page.assert_selector(freshness_selector, visible: true)
+    page.assert_selector(availability_selector, visible: true)
+  end
 end
 
 
@@ -222,6 +245,16 @@ Then(/^I should see a "(.*?)" report as of today$/) do |report_type|
   step %{I should see a "#{report_type}" report as of "#{Time.zone.today}"}
 end
 
+Then(/^I should see a "(.*?)" report as of last business day$/) do |report_type|
+  step %{I should see a "#{report_type}" report as of "#{most_recent_business_day(Time.zone.today - 1)}"}
+end
+
+def most_recent_business_day(d)
+  return d - 1.day if d.saturday?
+  return d - 2.day if d.sunday?
+  d
+end
+
 Then(/^I should see a "(.*?)" report as of "(.*?)"$/) do |report_type, as_of_date|
   as_of_date = as_of_date.to_date
   summary_statement = case report_type
@@ -385,7 +418,7 @@ Then(/^I should not see the detailed view for the first (advance|cash projection
 end
 
 def sleep_if_close_to_midnight
-  now = DateTime.now
+  now = Time.zone.now
   seconds_till_tomorrow = (now.tomorrow.beginning_of_day - now) * 1.days
   if seconds_till_tomorrow <= 30
     sleep(seconds_till_tomorrow + 1)
@@ -436,7 +469,7 @@ Then(/^I should see Securities Transactions report$/) do
 end
 
 Then(/^I should see a security that is indicated as a new transaction$/) do
-  page.find('.securities-transactions-table tbody tr td', text: /.\*\z/)
+  page.first('.securities-transactions-table tbody tr td', text: /.\*\z/)
 end
 
 When(/^I cancel the report download from the flyout$/) do
@@ -466,7 +499,21 @@ When(/^I should only see users with the "(.*?)" role$/) do |role|
   }
   role_name = role_mapping[role]
   page.all('.report-table tbody td:last-child').each do |cell|
-    next if cell.text == I18n.t('errors.table_data_unavailable')
+    next if cell.text == I18n.t('errors.table_data_no_records')
     cell.assert_selector('li', text: role_name)
   end
+end
+
+When(/^I click on the dividend transaction dropdown selector$/) do
+  page.find('.dropdown-selection').click
+end
+
+When(/^I click on the last option in the dividend transaction dropdown selector$/) do
+  page.find('.dropdown li:last-child').click
+end
+
+Then(/^I should see a dividend summary for the last option in the dividend transaction dropdown selector$/) do
+  page.find('.dropdown-selection').click
+  text = page.find('.dropdown li:last-child').text
+  page.assert_selector('.table-dividend-summary tr:first-child td:last-child', text: text)
 end

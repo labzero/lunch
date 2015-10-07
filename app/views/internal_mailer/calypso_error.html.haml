@@ -1,0 +1,12 @@
+= simple_format(t('errors.emails.calypso_error.body_html', request_id: @request_id || t('global.missing_value'), user: @user, member: @member))
+%dl
+  %dt= t('errors.emails.calypso_error.error_class')
+  %dd= @error.class
+  %dt= t('errors.emails.calypso_error.error_message')
+  %dd= @error.message
+  %dt= t('errors.emails.calypso_error.error_inspection')
+  %dd
+    %pre= @error.inspect
+  %dt= t('errors.emails.calypso_error.error_backtrace')
+  %dd
+    %pre= @error.backtrace.join("\n")

@@ -2,7 +2,7 @@
   %section.settings-two-factor
     %h1= t('settings.two_factor.title')
     %p= t('settings.two_factor.description')
-    %p= t('settings.two_factor.help_html', phone_number: fhlb_formatted_phone_number('4156162610'), url: 'mailto:websupport@fhlbsf.com')
+    %p= t('settings.two_factor.help_html', phone_number: web_support_phone_number, url: web_support_email)
     .settings-group.settings-reset-pin
       %h2= t('settings.two_factor.reset_pin.title')
       .form-flash-message{data: {type: 'success'}}= t('settings.two_factor.reset_pin.success')

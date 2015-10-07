@@ -4,7 +4,7 @@ RSpec.describe SettingsController, :type => :controller do
   login_user
   deny_policy(:access_manager, :show?)
   
-  describe 'GET index' do
+  describe 'GET index', :skip do
     it_behaves_like 'a user required action', :get, :index
     it "should render the index view" do
       get :index
@@ -505,16 +505,33 @@ RSpec.describe SettingsController, :type => :controller do
     end
   end
 
-  describe 'PUT update_password' do
+  describe 'GET change_password' do
+    let(:make_request) { get :change_password }
+
+    it_behaves_like 'a user required action', :get, :change_password
+
+    it 'renders the `change_password` template' do
+      make_request
+      expect(response).to render_template(:change_password)
+    end
+    it 'enabled virtual validations on the current user' do
+      expect(subject.current_user).to receive(:enable_virtual_validators!)
+      make_request
+    end
+  end
+
+  describe 'PUT update_expired_password' do
     let(:password) { SecureRandom.hex }
-    let(:make_request) { put :update_password, user: { password: password, password_confirmation: password } }
+    let(:make_request) { put :update_expired_password, user: { password: password, password_confirmation: password } }
     let(:user) { double('A User', save: false, :password= => nil, :password_confirmation= => nil) }
 
     before do
+      session['password_expired'] = true
       allow(subject).to receive(:current_user).and_return(user)
     end
 
-    it_behaves_like 'a user required action', :get, :expired_password
+    it_behaves_like 'a user required action', :put, :update_expired_password
+    
     it 'skips the `check_password_change` before action' do
       expect(subject).to_not receive(:check_password_change)
       make_request
@@ -534,38 +551,35 @@ RSpec.describe SettingsController, :type => :controller do
       make_request
     end
     describe 'if save is successful' do
+      let(:next_location) { double('A Location') }
       before do
+        allow(subject).to receive(:after_sign_in_path_for).with(user).and_return(next_location)
         allow(user).to receive(:save).and_return(true)
       end
-      describe 'and the password was expired' do
-        let(:next_location) { double('A Location') }
-        before do
-          session['password_expired'] = true
-          allow(subject).to receive(:after_sign_in_path_for).with(user).and_return(next_location)
-        end
 
-        it 'sets the `password_expired` key to false in the session' do
-          make_request
-          expect(session['password_expired']).to be(false)
-        end
-        it 'renders the `update_password_success` template' do
-          make_request
-          expect(response).to render_template(:update_password_success)
-        end
-        it 'renders using the `external` layout' do
-          make_request
-          expect(response).to render_with_layout(:external)
-        end
-        it 'sets @next_location to the result of calling `after_sign_in_path_for` with the user' do
-          make_request
-          expect(assigns[:next_location]).to be(next_location)
-        end
+      it 'sets the `password_expired` key to false in the session' do
+        make_request
+        expect(session['password_expired']).to be(false)
       end
-      describe 'and the password was not expired' do
-        it 'redirects to the settings index page' do
-          make_request
-          expect(response).to redirect_to(subject.settings_path)
-        end
+      it 'renders the `update_password_success` template' do
+        make_request
+        expect(response).to render_template(:update_password_success)
+      end
+      it 'renders using the `external` layout' do
+        make_request
+        expect(response).to render_with_layout(:external)
+      end
+      it 'sets @next_location to the result of calling `after_sign_in_path_for` with the user' do
+        make_request
+        expect(assigns[:next_location]).to be(next_location)
+      end
+    end
+    describe 'and the password was not expired' do
+      before do
+        session['password_expired'] = false
+      end
+      it 'raises an error' do
+        expect{make_request}.to raise_error
       end
     end
     describe 'if save is unsuccessful' do
@@ -573,16 +587,75 @@ RSpec.describe SettingsController, :type => :controller do
         make_request
         expect(response).to render_template(:expired_password)
       end
-      it 'renders using the `external` layout if the password was expired' do
-        session['password_expired'] = true
+      it 'renders using the `external` layout' do
         make_request
         expect(response).to render_with_layout(:external)
       end
-      it 'renders using the default layout if the password was not expired' do
+    end
+  end
+
+  describe 'PUT update_password' do
+    let(:password) { SecureRandom.hex }
+    let(:current_password) { SecureRandom.hex }
+    let(:make_request) { put :update_password, user: { password: password, password_confirmation: password, current_password: current_password } }
+    let(:user) { double('A User', save: false, :password= => nil, :password_confirmation= => nil, valid_ldap_authentication?: false, errors: double('Errors', add: nil)) }
+  
+    before do
+      allow(subject).to receive(:current_user).and_return(user)
+    end
+
+    it_behaves_like 'a user required action', :put, :update_password
+
+    describe 'with a valid current password' do
+      before do
+        allow(user).to receive(:valid_ldap_authentication?).with(current_password).and_return(true)
+      end
+
+      it 'sets the password attribute on the user' do
+        expect(user).to receive(:password=).with(password)
         make_request
-        expect(response).to_not render_with_layout
+      end
+      it 'sets the password_confirmation attribute on the user' do
+        expect(user).to receive(:password_confirmation=).with(password)
+        make_request
+      end
+      it 'calls save on the user after setting the password' do
+        expect(user).to receive(:password=).ordered
+        expect(user).to receive(:password_confirmation=).ordered
+        expect(user).to receive(:save).ordered
+        make_request
+      end
+      describe 'if save is successful' do
+        before do
+          allow(user).to receive(:save).and_return(true)
+        end
+        it 'set a flash notice' do
+          make_request
+          expect(flash[:notice]).to eq(I18n.t('devise.passwords.updated_not_active'))
+        end
+        it 'redirects to the password change page' do
+          make_request
+          expect(response).to redirect_to(subject.settings_password_path)
+        end
+      end
+      describe 'if save is unsuccessful' do
+        it 'renders `change_password`' do
+          make_request
+          expect(response).to render_template(:change_password)
+        end
       end
     end
+    describe 'with an invalid current password' do
+      it 'sets an error on the `current_password` field' do
+        expect(user).to receive_message_chain(:errors, :add).with(:current_password)
+        make_request
+      end
+      it 'renders the `change_password` template' do
+        make_request
+        expect(response).to render_template(:change_password)
+      end
+    end
+
   end
 
   describe '`roles_for_user` private method' do

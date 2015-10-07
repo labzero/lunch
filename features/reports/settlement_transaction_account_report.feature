@@ -17,6 +17,7 @@ Then I should see "Settlement/Transaction Account (STA)" in the reports dropdown
 Scenario: Member sees Settlement Transaction Account Statement
 Given I am on the "Settlement Transaction Account Statement" report page
 Then I should see report summary data
+And I should see a report header
 And I should see a report table with multiple data rows
 
 Scenario: Member chooses a custom date range on the Settlement Transaction Account Statement
@@ -58,13 +59,13 @@ Then I should only see "Debit" rows in the Settlement Transaction Account Statem
 When I filter the report by "Daily Balances"
 Then I should only see "Balance ($)" rows in the Settlement Transaction Account Statement table
 
-@data-unavailable @jira-mem-283
+@data-unavailable @jira-mem-283 @jira-mem-1053
 Scenario: No data is available to show in the Settlement Transaction Account Statement
   Given I am on the "Settlement Transaction Account Statement" report page
   When the "Settlement Transaction Account" table has no data
-  Then I should see an empty report table with Data Unavailable messaging
+  Then I should see an empty report table with No Records messaging
 
-@data-unavailable @jira-mem-282
+@data-unavailable @jira-mem-282 @jira-mem-1053
 Scenario: The Settlement Transaction Account Statement has been disabled
   Given I am on the "Settlement Transaction Account Statement" report page
   When the "Settlement Transaction Account" report has been disabled

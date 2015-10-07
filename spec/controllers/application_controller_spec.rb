@@ -1,22 +1,39 @@
 require 'rails_helper'
 
 RSpec.describe ApplicationController, :type => :controller do
-  let(:error) {StandardError.new}
-
   it { should use_before_action(:check_password_change) }
+  it { should use_before_action(:save_render_time) }
 
   describe '`handle_exception` method' do
     let(:backtrace) {%w(some backtrace array returned by the error)}
-    it 'captures all StandardErrors and displays the 500 error view' do
-      expect(error).to receive(:backtrace).and_return(backtrace)
-      expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500})
-      controller.send(:handle_exception, error)
+    describe 'StandardError' do
+      let(:error) {StandardError.new}
+      before { allow(error).to receive(:backtrace).and_return(backtrace) }
+      it 'captures all StandardErrors and displays the 500 error view' do
+        expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500})
+        controller.send(:handle_exception, error)
+      end
+      it 'rescues any exceptions raised when rendering the `error/500` view' do
+        expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500}).and_raise(error)
+        expect(controller).to receive(:render).with({:text=>error, :status=>500})
+        controller.send(:handle_exception, error)
+      end
     end
-    it 'rescues any exceptions raised when rendering the `error/500` view' do
-      expect(error).to receive(:backtrace).at_least(1).and_return(backtrace)
-      expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500}).and_raise(error)
-      expect(controller).to receive(:render).with({:text=>error, :status=>500})
-      controller.send(:handle_exception, error)
+
+    ApplicationController::HTTP_404_ERRORS.each do |error_type|
+      describe "#{error_type}" do
+        let(:error) { error_type.new('some error') }
+        before { allow(error).to receive(:backtrace).and_return(backtrace) }
+        it "captures #{error_type}s and displays the 404 error view" do
+          expect(controller).to receive(:render).with('error/404', {:layout=>"error", :status=>404})
+          controller.send(:handle_exception, error)
+        end
+        it 'rescues any exceptions raised when rendering the `error/404` view' do
+          allow(controller).to receive(:render).with('error/404', {:layout=>"error", :status=>404}).and_raise(error)
+          expect(controller).to receive(:render).with({:text=>error, :status=>500})
+          controller.send(:handle_exception, error)
+        end
+      end
     end
   end
 
@@ -120,6 +137,15 @@ RSpec.describe ApplicationController, :type => :controller do
     end
   end
 
+  describe 'save_render_time' do
+    let (:now) { double('Time.zone.now') }
+    before{ allow(Time).to receive_message_chain(:zone, :now).and_return(now) }
+    it 'should set @render_time' do
+      controller.save_render_time
+      expect(controller.instance_variable_get(:@render_time)).to eq(now)
+    end
+  end
+
   describe '`current_member_id` method' do
     let(:member_id) { double('A Member ID') }
     it 'should return the `member_id` from the session' do
@@ -149,11 +175,27 @@ RSpec.describe ApplicationController, :type => :controller do
 
   describe '`current_member_name` method' do
     let(:member_name) { double('A Member Name') }
+    let(:member_id) { double('A Member ID') }
     it 'should return the `member_name` from the session' do
       session['member_name'] = member_name
       expect(controller.current_member_name).to eq(member_name)
     end
-    it 'should return nil if there is no `member_name`' do
+    it 'does not fecth the member details if `member_name` is in the session' do
+      session['member_name'] = member_name
+      expect_any_instance_of(MembersService).to_not receive(:member)
+      controller.current_member_name
+    end
+    it 'should return nil if there is no `current_member_id`' do
+      allow(subject).to receive(:current_member_id).and_return(nil)
+      expect(controller.current_member_name).to be_nil
+    end
+    it 'fetches the member name if its absent' do
+      allow(controller).to receive(:current_member_id).and_return(member_id)
+      allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return({name: member_name})
+      expect(controller.current_member_name).to eq(member_name)
+    end
+    it 'returns nil if the member name lookup fails' do
+      allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
       expect(controller.current_member_name).to be_nil
     end
   end
@@ -199,6 +241,26 @@ RSpec.describe ApplicationController, :type => :controller do
     end
     it 'does not redirect if the session is not flagged as having an expired password' do
       expect(subject).to_not receive(:redirect_to)
+      call_method
+    end
+  end
+
+  describe '`authenticate_user_with_authentication_flag!` method' do
+    let(:call_method) { controller.authenticate_user_with_authentication_flag! }
+    before do
+      allow(controller).to receive(:authenticate_user_without_authentication_flag!)
+    end
+    it 'sets @authenticated_action to true if it has not already been set' do
+      call_method
+      expect(controller.instance_variable_get(:@authenticated_action)).to eq(true)
+    end
+    it 'does not set @authenticated_action if it has already been set' do
+      controller.instance_variable_set(:@authenticated_action, false)
+      call_method
+      expect(controller.instance_variable_get(:@authenticated_action)).to eq(false)
+    end
+    it 'calls `authenticate_user_without_authentication_flag!`' do
+      expect(controller).to receive(:authenticate_user_without_authentication_flag!)
       call_method
     end
   end

@@ -12,6 +12,7 @@ Scenario: Visit advances details page from header link
   Given I visit the dashboard
   When I select "Advances" from the reports dropdown
   Then I should see report summary data
+  And I should see a report header
   And I should see a report table with multiple data rows
 
 # NOTE: If this is changed to a smoke test and run against production data, "as_of_date" as returned by MAPI could be either today or yesterday depending on when the test is run
@@ -19,7 +20,7 @@ Scenario: Visit advances details page from header link
 Scenario: Defaults to current advances details
   Given I visit the dashboard
   When I select "Advances" from the reports dropdown
-  Then I should see advances details for today
+  Then I should see advances details for last business day
 
 @jira-mem-405
 Scenario: Viewing historic advances details
@@ -74,15 +75,15 @@ Scenario: Member enters a date occurring after the maximum allowed date
   When I click the datepicker field
   And I write tomorrow's date in the datepicker start input field
   And I click the datepicker apply button
-  Then I should see a "Advances Detail" report as of today
+  Then I should see a "Advances Detail" report as of last business day
 
-@data-unavailable @jira-mem-283
+@data-unavailable @jira-mem-283 @jira-mem-1053
 Scenario: No data is available to show in the Advances Detail Report
   Given I am on the "Advances Detail" report page
   When the "Advances Detail" table has no data
-  Then I should see an empty report table with Data Unavailable messaging
+  Then I should see an empty report table with No Records messaging
 
-@data-unavailable @jira-mem-282
+@data-unavailable @jira-mem-282 @jira-mem-1053
 Scenario: The Advances Detail Report has been disabled
   Given I am on the "Advances Detail" report page
   When the "Advances Detail" report has been disabled

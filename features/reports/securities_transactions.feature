@@ -12,6 +12,7 @@ Scenario: Visit securities transactions from header link
   Given I visit the dashboard
   When I select "Securities Transaction" from the reports dropdown
   Then I should see "Securities Transaction"
+  And I should see a report header
   And I should see a report table with multiple data rows
 
 @smoke @jira-mem-410
@@ -31,7 +32,7 @@ Scenario: Visiting the Securities Transactions Report Page before the desk is cl
   Given I am on the "Securities Transactions" report page
   Then I should see "Preliminary Securities Transactions settled as of 11:30 a.m. on"
 
-@data-unavailable @smoke @jira-mem-410
+@data-unavailable @smoke @jira-mem-410 @jira-mem-1053
 Scenario: Securities Transactions Report has been disabled
   Given I am on the "Securities Transactions" report page
   When the "Securities Transactions" report has been disabled

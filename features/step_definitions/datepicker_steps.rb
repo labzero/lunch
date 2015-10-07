@@ -20,10 +20,11 @@ When(/^I choose the "(.*?)" preset in the datepicker$/) do |preset|
   page.first('.daterangepicker .ranges li', text: text).click
 end
 
-Then(/^I should see the end of last month as the default datepicker option$/) do
+Then(/^I should see the end of the last full month as the default datepicker option$/) do
   today = Time.zone.today
-  month = today == today.end_of_month ? today.end_of_month.strftime("%B") : (today - 1.month).end_of_month.strftime("%B")
-  page.assert_selector('li.active', text: I18n.t('datepicker.single.end_of', date: month))
+  last_month = (today - 1.month).end_of_month.strftime("%B")
+  text = today == today.end_of_month ? I18n.t('global.today') : I18n.t('datepicker.single.end_of', date: last_month)
+  page.assert_selector('li.active', text: text)
 end
 
 When(/^I click the datepicker apply button$/) do

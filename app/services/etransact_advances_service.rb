@@ -30,23 +30,14 @@ class EtransactAdvancesService < MAPIService
   end
 
   def quick_advance_validate(member_id, amount, advance_type, advance_term, rate, check_capstock, signer)
-    get_hash(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{URI.escape(signer)}")
+    error_handler = calypso_error_handler(member_id)
+    get_hash(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{URI.escape(signer)}", &error_handler)
   end
 
   def quick_advance_execute(member_id, amount, advance_type, advance_term, rate, signer)
-    begin
-      response = @connection["etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{URI.escape(signer)}"].post ''
-    rescue RestClient::Exception => e
-      return warn(:quick_advance_execute, "RestClient error: #{e.class.name}:#{e.http_code}")
-    rescue Errno::ECONNREFUSED => e
-      return warn(:quick_advance_execute, "connection error: #{e.class.name}")
-    end
-    begin
-      data = JSON.parse(response.body).with_indifferent_access
-    rescue JSON::ParserError => e
-      return warn(:quick_advance_execute, "JSON parsing error: #{e}")
-    end
-    data[:initiated_at] = Time.zone.now.to_datetime
+    error_handler = calypso_error_handler(member_id)
+    data = post_hash(:quick_advance_execute, "etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{URI.escape(signer)}", '', &error_handler)
+    data[:initiated_at] = Time.zone.now.to_datetime if data
     data
   end
 
@@ -97,7 +88,7 @@ class EtransactAdvancesService < MAPIService
           check_limit = 'high'
         else
           if todays_cumulative_amount = todays_cumulative_advances_amount(member_id)
-            settings = get_hash(:settings, 'etransact_advances/settings')
+            settings = self.settings
             if amount.to_i + todays_cumulative_amount.to_i > settings['shareholder_total_daily_limit'].to_i
               check_limit = 'high'
             end
@@ -117,7 +108,7 @@ class EtransactAdvancesService < MAPIService
   end
 
   def settings
-    get_hash(:settings, 'etransact_advances/settings')
+    @settings ||= get_hash(:settings, 'etransact_advances/settings')
   end
 
   protected
@@ -146,6 +137,12 @@ class EtransactAdvancesService < MAPIService
       1
     else
       days_until(Date.parse(trade_maturity_date))
+    end
+  end
+
+  def calypso_error_handler(member_id)
+    -> (name, msg, err) do
+      InternalMailer.calypso_error(err, request_uuid, request_user, member_id_to_name(member_id)).deliver_now
     end
   end
 

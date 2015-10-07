@@ -9,7 +9,7 @@
   - table_class << 'table-allow-wrapping'
 - if deferred
   - table_class << 'table-loading'
-%table.report-table{data: {sortable: is_sortable, :'default-sort' => [default_sort], :'disable-auto-width' => true, :'missing-data-message' => t('errors.table_data_unavailable')}, class: table_class}
+%table.report-table{data: {sortable: is_sortable, :'default-sort' => [default_sort], :'disable-auto-width' => true, :'missing-data-message' => missing_data_message}, class: table_class}
   %thead
     - if table_data[:table_heading]
       %tr.table-heading-row
@@ -43,7 +43,7 @@
         %td.table-error-cell.icon-alert-before{colspan: table_data[:column_headings].count}= t('errors.error_occurred')
     - elsif table_data[:rows].blank? && !is_sortable
       %tr
-        %td.dataTables_empty{colspan: table_data[:column_headings].count}= t('errors.table_data_unavailable')
+        %td.dataTables_empty{colspan: table_data[:column_headings].count}= missing_data_message
     - else
       - table_data[:rows].each do |row|
         %tr

@@ -7,6 +7,7 @@ module MAPI
       module TradeActivity
 
         TODAYS_ADVANCES_ARRAY = %w(VERIFIED OPS_REVIEW OPS_VERIFIED SEC_REVIEWED SEC_REVIEW COLLATERAL_AUTH AUTH_TERM PEND_TERM)
+        ACTIVE_ADVANCES_ARRAY = %w(VERIFIED OPS_REVIEW OPS_VERIFIED COLLATERAL_AUTH AUTH_TERM PEND_TERM)
         TODAYS_CREDIT_ARRAY = TODAYS_ADVANCES_ARRAY + %w(TERMINATED EXERCISED)
         TODAYS_CREDIT_KEYS = %w(instrumentType status terminationPar fundingDate maturityDate tradeID amount rate productDescription terminationFee terminationFullPartial product subProduct)
 
@@ -40,49 +41,89 @@ module MAPI
           end
         end
 
+        def self.is_large_member(environment, member_id)
+
+          if environment == :production
+            number_of_advances_query = <<-SQL
+              select count(*)
+              FROM ODS.DEAL@ODS_LK
+              WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id)} AND instrument = 'ADVS'
+            SQL
+            number_of_advances_cursor = ActiveRecord::Base.connection.execute(number_of_advances_query)
+            number_of_advances = number_of_advances_cursor.fetch().try(:first).to_i
+            if number_of_advances > 300
+              return true
+            else
+              return false
+            end
+          else
+            return false
+          end
+        end
+
+        def self.get_trade_activity_trades(message)
+          trade_activity = []
+          begin
+            response = @@trade_connection.call(:get_trade, message_tag: 'tradeRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER)
+          rescue Savon::Error => error
+            raise error
+          end
+          response.doc.remove_namespaces!
+          fhlbsfresponse = response.doc.xpath('//Envelope//Body//tradeResponse//trades//trade')
+          fhlbsfresponse.each do |trade|
+            if ACTIVE_ADVANCES_ARRAY.include? trade.at_css('tradeHeader status').content
+              hash = {
+                'trade_date' => trade.at_css('tradeHeader tradeDate').content,
+                'funding_date' => trade.at_css('tradeHeader settlementDate').content,
+                'maturity_date' => trade.at_css('advance maturityDate') ? trade.at_css('advance maturityDate').content : 'Open',
+                'advance_number' => trade.at_css('advance advanceNumber').content,
+                'advance_type' => trade.at_css('advance product').content,
+                'status' => Date.parse(trade.at_css('tradeHeader tradeDate').content) < Time.zone.today ? 'Outstanding' : 'Pending',
+                'interest_rate' => (trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate') : trade.at_css('advance coupon initialRate')).content.to_f.round(5),
+                'current_par' => trade.at_css('advance par amount').content.to_f
+              }
+              trade_activity.push(hash)
+            end
+          end
+          trade_activity
+        end
+
         def self.trade_activity(app, member_id, instrument)
           member_id = member_id.to_i
           trade_activity = []
-          data = if MAPI::Services::Member::TradeActivity::init_trade_connection(app.settings.environment)
-            message = {
-              'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
-              'v1:tradeRequestParameters' => [{
-                'v1:arrayOfCustomers' => [{'v1:fhlbId' => member_id}],
-                'v1:arrayOfAssetClasses' => [{'v1:assetClass' => instrument}]
-              }]
-            }
-            begin
-              response = @@trade_connection.call(:get_trade, message_tag: 'tradeRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER)
-            rescue Savon::Error => error
-              raise error
-            end
-            response.doc.remove_namespaces!
-            fhlbsfresponse = response.doc.xpath('//Envelope//Body//tradeResponse//trades//trade')
-            fhlbsfresponse.each do |trade|
-              if %w{VERIFIED OPS_REVIEW OPS_VERIFIED COLLATERAL_AUTH AUTH_TERM PEND_TERM}.include? trade.at_css('tradeHeader status').content
-                hash = {
-                  'trade_date' => trade.at_css('tradeHeader tradeDate').content,
-                  'funding_date' => trade.at_css('tradeHeader settlementDate').content,
-                  'maturity_date' => trade.at_css('advance maturityDate') ? trade.at_css('advance maturityDate').content : 'Open',
-                  'advance_number' => trade.at_css('advance advanceNumber').content,
-                  'advance_type' => trade.at_css('advance product').content,
-                  'status' => Date.parse(trade.at_css('tradeHeader tradeDate').content) < Time.zone.today ? 'Outstanding' : 'Pending',
-                  'interest_rate' => trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate').content.to_f.round(5) : trade.at_css('advance coupon initialRate').content.to_f.round(5),
-                  'current_par' => trade.at_css('advance par amount').content.to_f
+          data = if MAPI::Services::Member::TradeActivity.init_trade_connection(app.settings.environment)
+            if MAPI::Services::Member::TradeActivity.is_large_member(app.settings.environment, member_id)
+              ACTIVE_ADVANCES_ARRAY.each do |status|
+                message = {
+                  'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
+                  'v1:tradeRequestParameters' => [{
+                    'v1:status' => status,
+                    'v1:arrayOfCustomers' => [{'v1:fhlbId' => member_id}],
+                    'v1:arrayOfAssetClasses' => [{'v1:assetClass' => instrument}]
+                  }]
                 }
-                trade_activity.push(hash)
+                trade_activity.push(*MAPI::Services::Member::TradeActivity.get_trade_activity_trades(message))
               end
+            else
+              message = {
+                'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
+                'v1:tradeRequestParameters' => [{
+                  'v1:arrayOfCustomers' => [{'v1:fhlbId' => member_id}],
+                  'v1:arrayOfAssetClasses' => [{'v1:assetClass' => instrument}]
+                }]
+              }
+              trade_activity.push(*MAPI::Services::Member::TradeActivity.get_trade_activity_trades(message))
             end
             trade_activity
           else
             trade_activity = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_active.json')))
             trade_activity
           end
-          data.to_json
+          data
         end
 
         def self.current_daily_total(env, instrument)
-          data = if MAPI::Services::Member::TradeActivity::init_trade_connection(env)
+          data = if MAPI::Services::Member::TradeActivity.init_trade_connection(env)
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [
@@ -116,7 +157,7 @@ module MAPI
         def self.todays_trade_activity(app, member_id, instrument)
           member_id = member_id.to_i
           trade_activity = []
-          data = if MAPI::Services::Member::TradeActivity::init_trade_connection(app.settings.environment)
+          data = if MAPI::Services::Member::TradeActivity.init_trade_connection(app.settings.environment)
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [{
@@ -159,7 +200,7 @@ module MAPI
           member_id = member_id.to_i
           credit_activity = []
 
-          activities = if MAPI::Services::Member::TradeActivity::init_trade_activity_connection(env)
+          activities = if MAPI::Services::Member::TradeActivity.init_trade_activity_connection(env)
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [{

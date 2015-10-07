@@ -76,7 +76,7 @@ class DashboardController < ApplicationController
       {title: t('dashboard.your_account.table.remaining.title')},
       [t('dashboard.your_account.table.remaining.available'), profile[:total_financing_available]],
       [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
-      [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage], nil, 2]
+      [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
     ]
 
     @account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining}
@@ -153,16 +153,18 @@ class DashboardController < ApplicationController
   def quick_advance_preview
     @current_member_name = current_member_name
     @preview = true
-    check = EtransactAdvancesService.new(request).check_limits(current_member_id, params[:amount].to_f, params[:advance_term])
-    preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, params[:check_capstock], session['signer_full_name'])
+    etransact_service = EtransactAdvancesService.new(request)
+    params_amount = params[:amount].gsub(/\D/, '').to_f if params[:amount]
+    check = etransact_service.check_limits(current_member_id, params_amount, params[:advance_term])
+    preview = EtransactAdvancesService.new(request).quick_advance_validate(current_member_id, params_amount, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, params[:check_capstock], session['signer_full_name'])
     advance_request_parameters(preview)
     populate_advance_request_view_parameters
     if check[:status] == 'pass'
       if preview[:status] && preview[:status].include?('CapitalStockError')
         preview_success = false
         preview_error = false
-        @advance_amount = params[:amount].to_f if params[:amount]
-        @original_amount = params[:amount].to_f if params[:amount]
+        @advance_amount = params_amount
+        @original_amount = params_amount
         response_html = render_to_string :quick_advance_capstock, layout: false
       elsif preview[:status] && (preview[:status].include?('GrossUpError') || preview[:status].include?('ExceptionError'))
         preview_success = false
@@ -172,7 +174,7 @@ class DashboardController < ApplicationController
       elsif preview[:status] && preview[:status].include?('CreditError')
         preview_success = false
         preview_error = true
-        @advance_amount = params[:amount].to_f if params[:amount]
+        @advance_amount = params_amount
         @error_message = :credit
         response_html = render_to_string :quick_advance_error, layout: false
       elsif preview[:status] && preview[:status].include?('CollateralError')
@@ -183,21 +185,27 @@ class DashboardController < ApplicationController
       elsif preview[:status] && preview[:status].include?('ExceedsTotalDailyLimitError')
         preview_success = false
         preview_error = true
-        @advance_amount = params[:amount].to_f if params[:amount]
+        @advance_amount = params_amount
         @error_message = :total_daily_limit
         response_html = render_to_string :quick_advance_error, layout: false
       else
-        preview_success = true
-        preview_error = false
-        @original_amount = params[:amount].to_f if params[:amount]
-        @stock = params[:stock].to_f if params[:stock]
-        @session_elevated = session_elevated?
-        checked_rate = check_advance_rate(request, params[:advance_type], params[:advance_term], preview[:advance_rate])
-        @advance_rate = checked_rate[:advance_rate]
-        @old_rate = checked_rate[:old_rate]
-        @rate_changed = checked_rate[:rate_changed]
-        advance_request_timestamp!
-        response_html = render_to_string layout: false
+        checked_rate = check_advance_rate(etransact_service, @advance_type_raw, @advance_term, @advance_rate)
+        if checked_rate[:stale_rate]
+          preview_success = false
+          preview_error = true
+          response_html = render_to_string :quick_advance_error, layout: false
+        else
+          preview_success = true
+          preview_error = false
+          @original_amount = @advance_amount.to_f
+          @stock = params[:stock].to_f if params[:stock]
+          @session_elevated = session_elevated?
+          @advance_rate = checked_rate[:advance_rate]
+          @old_rate = checked_rate[:old_rate]
+          @rate_changed = checked_rate[:rate_changed]
+          advance_request_timestamp!
+          response_html = render_to_string layout: false
+        end
       end
     else
       preview_success = false
@@ -235,7 +243,7 @@ class DashboardController < ApplicationController
         @error_message = :rate_expired
         response_html = render_to_string :quick_advance_error, layout: false
       else
-        confirmation = EtransactAdvancesService.new(request).quick_advance_execute(current_member_id, params[:amount].to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, session['signer_full_name'])
+        confirmation = EtransactAdvancesService.new(request).quick_advance_execute(current_member_id, params[:amount].gsub(/\D/, '').to_f, params[:advance_type], params[:advance_term], params[:advance_rate].to_f, session['signer_full_name'])
         if confirmation
           advance_request_parameters(confirmation)
           advance_success = true
@@ -281,6 +289,7 @@ class DashboardController < ApplicationController
     @gross_net_stock_required = advance_params[:gross_net_stock_required]
     @advance_amount = advance_params[:advance_amount].try(:to_f)
     @advance_description = get_description_from_advance_term(advance_params[:advance_term])
+    @advance_type_raw = advance_params[:advance_type]
     @advance_program = get_program_from_advance_type(advance_params[:advance_type])
     @advance_type = get_type_from_advance_type(advance_params[:advance_type])
     @interest_day_count = advance_params[:interest_day_count]
@@ -375,10 +384,16 @@ class DashboardController < ApplicationController
     end
   end
 
-  def check_advance_rate(request, type, term, old_rate)
+  def check_advance_rate(etransact_service, type, term, old_rate)
     rate_changed = false
-    rate_service = RatesService.new(request)
-    new_rate = rate_service.rate(type, term)[:rate].to_f
+    settings = etransact_service.settings
+    rate_service = RatesService.new(etransact_service.request)
+    rate_details = rate_service.rate(type, term)
+    stale_rate = rate_details[:updated_at] + settings[:rate_stale_check].seconds < Time.zone.now if settings && settings[:rate_stale_check]
+    if stale_rate
+      InternalMailer.stale_rate(settings[:rate_stale_check], rate_service.request_uuid, current_user).deliver_now
+    end
+    new_rate = rate_details[:rate].to_f
     if new_rate != old_rate.to_f
       rate = new_rate
       rate_changed = true
@@ -388,7 +403,8 @@ class DashboardController < ApplicationController
     {
       advance_rate: rate.to_f,
       old_rate: old_rate.to_f,
-      rate_changed: rate_changed
+      rate_changed: rate_changed,
+      stale_rate: stale_rate
     }
   end
   

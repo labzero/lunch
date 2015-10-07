@@ -1,6 +1,6 @@
 .error-page
   %h1= t('errors.500.headline')
   %p= t('errors.500.summary')
-  %p= t('errors.assistance', phone_number: fhlb_formatted_phone_number('4156162610'))
+  %p= t('errors.assistance_html', email: web_support_email, phone_number: web_support_phone_number)
   .logo-container
     .logo= t('welcome.logo')

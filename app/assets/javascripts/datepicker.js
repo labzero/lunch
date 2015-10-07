@@ -1,5 +1,4 @@
 $(function () {
-
   function bindDatepickers() {
     // set up all date-pickers on the page
     $('.datepicker-trigger').each(function(i, datePickerTrigger) {
@@ -21,6 +20,7 @@ $(function () {
       var minDate = $wrapper.data('date-picker-min-date') ? moment($wrapper.data('date-picker-min-date')) : false;
       var filter = $wrapper.data('date-picker-filter');
       var filterOptions = $wrapper.data('date-picker-filter-options');
+      var today = $wrapper.data('date-picker-today');
       $.each(presets, function(index, preset) {
         if (preset.start_date) {
           preset.start_date = moment(preset.start_date);
@@ -52,13 +52,14 @@ $(function () {
         maxDate: maxDate,
         minDate: minDate,
         filter: filter,
-        filterOptions: filterOptions
+        filterOptions: filterOptions,
+        today: today
       });
       datePickerSelectionHandler($datePickerTrigger, $wrapper, presets);
       setDatePickerApplyListener($datePickerTrigger, $form);
       setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
       if (filter !== undefined) {
-        disablePresets($datePickerTrigger, filter, filterOptions);
+        disablePresets($datePickerTrigger, filter, filterOptions, today);
         if (singleDatePicker) {
           $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(){
             filterDates(filter, filterOptions);
@@ -81,6 +82,7 @@ $(function () {
       ranges: options.ranges,
       maxDate: options.maxDate,
       minDate: options.minDate,
+      today: options.today,
       parentEl: $datePickerWrapper,
       locale: {
         customRangeLabel: options.customLabel,
@@ -216,11 +218,15 @@ $(function () {
     };
   };
 
-  function disablePresets($picker, filter, filterOptions) {
+  function disablePresets($picker, filter, filterOptions, today) {
     var picker = $picker.data('daterangepicker');
+    var today = moment(today);
+    var endOfMonth = moment(today).endOf('month'); // clone so that `endOf` does not mutate original `date`
     switch (filter) {
       case filterOptions['end_of_month']:
-        $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
+        if (today !== endOfMonth) {
+          $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
+        };
         break;
       case filterOptions['end_of_quarter']:
         $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
@@ -231,14 +237,14 @@ $(function () {
 
   function snapToValidDate(e, picker, options){
     //  if date is in the future, snap to today
-    var today = moment();
+    var today = moment(options.today);
     var thisMonth = moment().month();
     var $el = $(e.target);
     var date = moment($el.val());
     if (date > today) {
       date = today;
-      options.singleDatePicker ? picker.setEndDate(today.format('MM/DD/YYYY')) : null;
-      $el.val(today.format('MM/DD/YYYY'));
+      options.singleDatePicker ? picker.setEndDate(date.format('MM/DD/YYYY')) : null;
+      $el.val(date.format('MM/DD/YYYY'));
     } else if (options.singleDatePicker) {
       picker.setEndDate(date.format('MM/DD/YYYY'));
       $el.val(date.format('MM/DD/YYYY'));
@@ -247,15 +253,16 @@ $(function () {
     // apply filters if necessary
     if (options.singleDatePicker && options.filter !== undefined && options.filterOptions !== undefined) {
       var inputMonth = date.month();
+      var endOfMonth = moment(date).endOf('month'); // clone so that `endOf` does not mutate original `date`
       switch (options.filter) {
         // Snap to end of month
         case options.filterOptions['end_of_month']:
-          if (inputMonth >= thisMonth) {
+          if (date !== endOfMonth && inputMonth >= thisMonth) {
             picker.setEndDate((date.subtract(1, 'month')).endOf('month'));
           } else {
             picker.setEndDate(date.endOf('month').format('MM/DD/YYYY'));
           };
-          $el.val(date.endOf('month').format('MM/DD/YYYY'));
+          $el.val(date.format('MM/DD/YYYY')); // uses the mutated value of `date` set in the if/else statement above
           break;
         // Snap to end of quarter
         case options.filterOptions['end_of_quarter']:

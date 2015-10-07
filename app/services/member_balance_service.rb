@@ -87,7 +87,7 @@ class MemberBalanceService < MAPIService
           raise StandardError, "MemberBalanceService.capital_stock_activity returned '#{row[:dr_cr]}' for share type on row number #{i}. Share type should be either 'C' for Credit or 'D' for Debit."
         end
       rescue StandardError => e
-        return warn(:capital_stock_activity, e)
+        return warn(:capital_stock_activity, e.message, e)
       end
       row[:outstanding_shares] = outstanding
     end
@@ -119,7 +119,7 @@ class MemberBalanceService < MAPIService
         data[:net_loan_collateral] = data[:standard_credit_totals][:borrowing_capacity].to_i - data[:standard][:excluded].values.sum
         data[:standard_excess_capacity] = data[:net_loan_collateral].to_i - data[:standard][:utilized].values.reduce(:+)
       rescue => e
-        return warn(:borrowing_capacity_summary, "malformed data[:standard] hash. It returned #{data[:standard]} and threw the following error: #{e}")
+        return warn(:borrowing_capacity_summary, "malformed data[:standard] hash. It returned #{data[:standard]} and threw the following error: #{e}", e)
       end
 
       # second table - Securities Backed Collateral
@@ -136,7 +136,7 @@ class MemberBalanceService < MAPIService
         data[:total_borrowing_capacity] = data[:standard_credit_totals][:borrowing_capacity].to_i + data[:sbc_totals][:total_borrowing_capacity].to_i
         data[:remaining_borrowing_capacity] = data[:standard_excess_capacity].to_i + data[:sbc_excess_capacity].to_i
       rescue => e
-        return warn(:borrowing_capacity_summary, "malformed data[:sbc] hash: #{data[:sbc]} and threw the following error: #{e}")
+        return warn(:borrowing_capacity_summary, "malformed data[:sbc] hash: #{data[:sbc]} and threw the following error: #{e}", e)
       end
     else
       data[:total_borrowing_capacity] = 0
@@ -154,16 +154,16 @@ class MemberBalanceService < MAPIService
     begin
       response = @connection["member/#{@member_id}/sta_activities/#{start_date.iso8601}/#{end_date.iso8601}"].get
     rescue RestClient::Exception => e
-      warn(:settlement_transaction_account, "RestClient error: #{e.class.name}:#{e.http_code}")
+      warn(:settlement_transaction_account, "RestClient error: #{e.class.name}:#{e.http_code}", e)
       return e.http_code == 404 ? {} : nil
     rescue Errno::ECONNREFUSED => e
-      return warn(:settlement_transaction_account, "connection error: #{e.class.name}")
+      return warn(:settlement_transaction_account, "connection error: #{e.class.name}", e)
     end
 
     begin
       data = JSON.parse(response.body).with_indifferent_access
     rescue JSON::ParserError => e
-      return warn(:settlement_transaction_account, "JSON parsing error: #{e}")
+      return warn(:settlement_transaction_account, "JSON parsing error: #{e}", e)
     end
 
     data[:activities].each do |activity|
@@ -185,7 +185,7 @@ class MemberBalanceService < MAPIService
         if a[:descr] == DAILY_BALANCE_KEY && b[:descr] != DAILY_BALANCE_KEY
           -1
         elsif a[:descr] == DAILY_BALANCE_KEY && b[:descr] == DAILY_BALANCE_KEY
-          warn(:settlement_transaction_account, "activities array that contains duplicate `end of day balance` entries for the date: #{a[:trans_date]}")
+          warn(:settlement_transaction_account, "activities array that contains duplicate `end of day balance` entries for the date: #{a[:trans_date]}", e)
           0
         else
           1
@@ -236,8 +236,9 @@ class MemberBalanceService < MAPIService
     get_hash(:settlement_transaction_rate, "/member/#{@member_id}/current_sta_rate")
   end
 
-  def dividend_statement(quarter)
-    if data = get_hash(:dividend_statement, "/member/#{@member_id}/dividend_statement/#{quarter.to_date.iso8601}")
+  def dividend_statement(start_date, div_id)
+    div_id ||= 'current'
+    if data = get_hash(:dividend_statement, "/member/#{@member_id}/dividend_statement/#{start_date.to_date.iso8601}/#{div_id}")
       fix_date(data, :transaction_date)
       data[:details].each do |detail|
         fix_date(detail, :issue_date)
@@ -249,18 +250,17 @@ class MemberBalanceService < MAPIService
   end
 
   def lenient_sum(hashes, field)
-    hashes.map{|hash| hash[field]}.compact.sum
+    hashes.nil? ? 0 : hashes.map{|hash| hash[field]}.compact.sum
   end
 
   def securities_transactions(as_of_date)
-    # TODO: hit MAPI endpoint or enpoints to retrieve/construct an object similar to the fake one below. Pass date along, though it won't be used as of yet.
-
-    if data = get_fake_hash(:securities_transactions, 'securities_transactions.json')
-      data[:total_payment_or_principal] = lenient_sum(data[:transactions], :payment_or_principal)
-      data[:total_interest]             = lenient_sum(data[:transactions], :interest)
-      data[:total_net]                  = lenient_sum(data[:transactions], :total)
+    if data = get_hash(:securities_transactions, "/member/#{@member_id}/securities_transactions/#{as_of_date.to_date.iso8601}")
+      data.merge(
+          total_payment_or_principal: lenient_sum(data[:transactions], :payment_or_principal),
+          total_interest:             lenient_sum(data[:transactions], :interest),
+          total_net:                  lenient_sum(data[:transactions], :total)
+      )
     end
-    data
   end
 
   def securities_services_statement(month)

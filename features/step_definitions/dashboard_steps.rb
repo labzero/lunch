@@ -1,6 +1,8 @@
 require 'action_view'
 require_relative '../../app/helpers/custom_formatting_helper'
+require_relative '../../app/helpers/contact_information_helper'
 include CustomFormattingHelper
+include ContactInformationHelper
 include ActionView::Helpers::SanitizeHelper
 
 When /^I visit the dashboard$/ do
@@ -78,6 +80,10 @@ When(/^I click on the flyout close button$/) do
   page.find('.flyout-close-button').click
 end
 
+When(/^I click on the View Recent Price Indications link$/) do
+  page.find('.quick-advance-desk-closed-message a', text: I18n.t('dashboard.quick_advance.advances_desk_closed_link').upcase ).click
+end
+
 Then(/^I should not see a flyout$/) do
   page.assert_selector('.flyout', :visible => :hidden)
 end
@@ -144,6 +150,10 @@ end
 
 When(/^the quick advance rate has changed$/) do
   # implement code to ensure rate is displayed as having changed
+end
+
+When(/^the desk has closed$/) do
+  # implement code to ensure desk has closed
 end
 
 Then(/^I should not see a preview of the quick advance$/) do
@@ -250,7 +260,7 @@ Then(/^I should see an? "(.*?)" error(?: with amount (\d+) and type "(.*?)")?$/)
     when 'insufficient collateral'
       /\A#{Regexp.quote(strip_tags(I18n.t("dashboard.quick_advance.error.insufficient_collateral_html", amount: fhlb_formatted_currency(amount.to_i, precision: 0), collateral_type: collateral_type)))}\z/
     when 'advance unavailable'
-      /\A#{Regexp.quote(I18n.t('dashboard.quick_advance.error.advance_unavailable', phone_number: fhlb_formatted_phone_number('8004443452')))}\z/
+      /\A#{Regexp.quote(I18n.t('dashboard.quick_advance.error.advance_unavailable', phone_number: service_desk_phone_number))}\z/
     when 'rate expired'
       /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.rate_expired"))}\z/
     else

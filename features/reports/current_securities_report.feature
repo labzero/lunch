@@ -12,6 +12,7 @@ Feature: Visiting the Current Securities Position Report Page
     Given I visit the dashboard
     When I select "Current Securities Position" from the reports dropdown
     Then I should see report summary data
+    And I should see a report header
     And I should see a report table with multiple data rows
 
   @jira-mem-580
@@ -38,13 +39,13 @@ Feature: Visiting the Current Securities Position Report Page
     When I filter the report by "Unpledged Securities"
     Then I should see a current securities position report for Unpledged Securities
 
-  @data-unavailable @jira-mem-283
+  @data-unavailable @jira-mem-283 @jira-mem-1053
   Scenario: No data is available to show in the current securities position report
     Given I am on the "Current Securities Position" report page
     When the "Current Securities Position" table has no data
-    Then I should see an empty report table with Data Unavailable messaging
+    Then I should see an empty report table with No Records messaging
 
-  @data-unavailable @jira-mem-282
+  @data-unavailable @jira-mem-282 @jira-mem-1053
   Scenario: The current securities position report has been disabled
     Given I am on the "Current Securities Position" report page
     When the "Current Securities Position" report has been disabled

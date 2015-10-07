@@ -94,6 +94,20 @@ primaryGroupID: 513
 mail: wells@example.com
 userAccountControl: 512
 
+# extra-chaste-norole
+dn: sAMAccountName=extra-chaste-norole,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet User No Role - Chaste Manhatten
+displayName: Chaste No Role
+givenName: Chaste
+sn: No Role
+sAMAccountName: extra-chaste-norole
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: chaste-norole@example.com
+
 # Chaste Manhatten
 dn: CN=FHLB6,dc=extranet,dc=fhlbsf,dc=com
 cn: FHLB6
@@ -103,6 +117,7 @@ member: sAMAccountName=extra-chaste,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-delete,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-reset,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-chaste-norole,dc=extranet,dc=fhlbsf,dc=com
 
 # Wells Faygo
 dn: CN=FHLB5,dc=extranet,dc=fhlbsf,dc=com
@@ -118,3 +133,23 @@ cn: FCN-MemberSite-AccessManagers
 objectClass: group
 objectClass: top
 member: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
+
+# eBiz Groups
+dn: CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
+cn: Groups
+objectClass: group
+objectClass: top
+member: CN=FCN-MemberSite-Users,CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
+
+# FCN-MemberSite-Users group
+dn: CN=FCN-MemberSite-Users,CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
+cn: FCN-MemberSite-Users
+objectClass: group
+objectClass: top
+member: sAMAccountName=extra,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-chaste,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-chaste-delete,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-chaste-reset,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
+

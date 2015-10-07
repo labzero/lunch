@@ -14,6 +14,7 @@ require_relative 'member/capital_stock_and_leverage'
 require_relative 'member/letters_of_credit'
 require_relative 'member/flags'
 require_relative 'member/interest_rate_resets'
+require_relative 'member/securities_transactions'
 require_relative 'member/parallel_shift_analysis'
 require_relative 'member/dividend_statement'
 
@@ -645,7 +646,7 @@ module MAPI
             end
           end
           api do
-            key :path, '/{id}/dividend_statement/{date}'
+            key :path, '/{id}/dividend_statement/{date}/{div_id}'
             operation do
               key :method, 'GET'
               key :summary, 'Retrieve dividend statement for a given member and quarter'
@@ -664,7 +665,43 @@ module MAPI
                 key :name, :date
                 key :required, true
                 key :type, :string
-                key :description, 'The date (quarter) of the requested statement'
+                key :description, 'The date of the earliest allowed report'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :div_id
+                key :required, true
+                key :type, :string
+                key :description, 'The div_id of the desired dividend statement'
+                key :notes, 'If `current` is passed as a value, the endpoint will return the most recent dividend statement'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/securities_transactions/{date}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve securities transaction for a given member and date'
+              key :notes, 'Retrieve securities transaction for a given member and date'
+              key :nickname, :getSecuritiesTransactionForMembers
+              key :type, :MemberSecuritiesTransactions
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :date
+                key :required, true
+                key :type, :string
+                key :description, 'The date of the requested statement'
               end
               response_message do
                 key :code, 200
@@ -814,7 +851,7 @@ module MAPI
             logger.error error
             halt 503, 'Internal Service Error'
           end
-          result
+          result.to_json
         end
 
         # Todays Advances
@@ -945,10 +982,17 @@ module MAPI
           end
         end
 
-        relative_get '/:id/dividend_statement/:date' do
+        relative_get '/:id/dividend_statement/:date/:div_id' do
+          member_id = params[:id]
+          div_id = params[:div_id]
+          date = params[:date].to_date
+          MAPI::Services::Member::DividendStatement.dividend_statement(self.settings.environment, member_id, date, div_id).to_json
+        end
+
+        relative_get '/:id/securities_transactions/:date' do
           member_id = params[:id]
           date = params[:date].to_date
-          MAPI::Services::Member::DividendStatement.dividend_statement(self, member_id, date).to_json
+          MAPI::Services::Member::SecuritiesTransactions.securities_transactions(self.settings.environment, logger, member_id, date).to_json
         end
 
         # Today's Credit Activity

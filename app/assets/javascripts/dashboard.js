@@ -1,10 +1,24 @@
 $(function () {
 
-  $('.dashboard-module-advances input').on('input', function(event){
-    openQuickAdvanceFlyout(event, $(this));
+  $('.dashboard-module-advances input').on('keypress', function(e){
+    onlyAllowDigits(e);
   });
 
-  $('.quick-advance-desk-closed-message a').on('click', function(event){
+  function onlyAllowDigits(e) {
+    var allowedKeycodes = [8, 13, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45]; // see http://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes for mapping
+    var keycode = e.which;
+
+    // allow digits
+    for (i = 48; i < 58; i++) {
+      allowedKeycodes.push(i);
+    };
+    if (!(allowedKeycodes.indexOf(keycode)>=0)) {
+      e.preventDefault();
+    };
+  };
+
+  $('.dashboard-module-advances input').on('input', function(event){
+    addCommasToInputField(event);
     openQuickAdvanceFlyout(event, $(this));
   });
 
@@ -29,8 +43,29 @@ $(function () {
       var topContent = [$('.dashboard-module-advances header').clone(), $('<div class="flyout-top-section-body"></div>').append($('.dashboard-module-advances .input-field-container, .dashboard-module-advances h2, .quick-advance-desk-closed-message').clone())];
       var bottomContent = $('.quick-advance-rates, .quick-advance-last-updated-message, .quick-advance-instruction, .dashboard-module-advances .initiate-quick-advance, .rate-advances-footer').clone();
       $('.dashboard-module-advances').flyout({topContent:topContent, bottomContent:bottomContent, useReferenceElement:true});
+      var $amountField = $('.dashboard-quick-advance-flyout input[name=amount]');
+      $amountField.on('keypress', function(e){
+        onlyAllowDigits(e);
+      });
+      $amountField.on('keyup', function(e){
+        addCommasToInputField(e);
+      });
       getQuickAdvanceRates();
-    }
+    };
+  };
+
+  function addCommasToInputField(e) {
+    var rememberPositionKeycodes = [8,37,38,39,40];
+    var target = e.target;
+    var position = target.selectionStart;
+    var currentVal = $(target).val();
+    var newVal = currentVal.replace(/\D/g,'').replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+    if (currentVal !== newVal) {
+      $(target).val(newVal);
+      if (rememberPositionKeycodes.indexOf(e.which) >= 0) {
+        target.selectionEnd = position;
+      };
+    };
   };
 
   function getQuickAdvanceRates() {

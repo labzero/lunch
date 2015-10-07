@@ -52,7 +52,9 @@
               %td.borrowing-capacity-note= t('dashboard.your_account.table.borrowing_capacity_note_html', url: reports_borrowing_capacity_url)
   .column-3
     - if policy(:advance).show? && @quick_advance_enabled
-      =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: 'dashboard-module-advances'} do
+      - classes = ['dashboard-module-advances']
+      - classes << 'dashboard-module-advances-closed' if @quick_advance_status == :closed
+      =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: classes} do
         - if @quick_advance_status == :open
           = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}, field_name: :amount
           %h2.quick-advance-confirmation-subheading{style: 'display: none;'}= t('dashboard.quick_advance.confirmation.title')
@@ -60,10 +62,10 @@
           %h2.quick-advance-capstock-subheading{style: 'display: none;'}= t('dashboard.quick_advance.capitalstock.title')
         %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_status != :closed}"}
           = t('dashboard.quick_advance.advances_desk_closed')
-          = link_to t('dashboard.quick_advance.advances_desk_closed_link'), '', data: {'flyout-trigger' => 'active'}
+          = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
         %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_status != :no_terms}"}
           = t('dashboard.quick_advance.advances_desk_no_terms')
-        - if @quick_advance_status == :open
+        - if [:open,:closed].include?(@quick_advance_status)
           %p.dashboard-vrc-overnight-message= t('global.vrc_overnight')
           .dashboard-advances-rate
             = @current_overnight_vrc
@@ -109,4 +111,4 @@
           %li= render 'dashboard/dashboard_contact', email: @contacts[:rm][:email], title: t('dashboard.contacts.type.relationship_manager'), name: @contacts[:rm][:full_name], phone_number: fhlb_formatted_phone_number(@contacts[:rm][:phone_number]), picture_url: image_url(@contacts[:rm][:image_url])
         -if @contacts[:cam] && @contacts[:cam][:full_name]
           %li= render 'dashboard/dashboard_contact', email: @contacts[:cam][:email], title: t('dashboard.contacts.type.collateral_asset_manager'), name: @contacts[:cam][:full_name], phone_number: fhlb_formatted_phone_number(@contacts[:cam][:phone_number]), picture_url: image_url(@contacts[:cam][:image_url])
-        %li.member-services-desk= render 'dashboard/dashboard_contact', email: 'websupport@fhlbsf.com', title: t('dashboard.contacts.type.member_services_desk'), phone_number: fhlb_formatted_phone_number('8004443452')
+        %li.member-services-desk= render 'dashboard/dashboard_contact', email: ContactInformationHelper::WEB_SUPPORT_EMAIL, title: t('dashboard.contacts.type.member_services_desk'), phone_number: service_desk_phone_number

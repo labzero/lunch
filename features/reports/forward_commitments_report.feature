@@ -12,6 +12,7 @@ Feature: Visiting the Forward Commitments Page
     Given I visit the dashboard
     When I select "Forward Commitments" from the reports dropdown
     Then I should see report summary data
+    And I should see a report header
     And I should see a report table with multiple data rows
 
   @jira-mem-546
@@ -21,13 +22,13 @@ Feature: Visiting the Forward Commitments Page
     When I click the "Funding Date" column heading
     Then I should see the "Funding Date" column values in "descending" order
 
-  @data-unavailable @jira-mem-283
+  @data-unavailable @jira-mem-283 @jira-mem-1053
   Scenario: No data is available to show in the forward commitments report
     Given I am on the "Forward Commitments" report page
     When the "Forward Commitments" table has no data
-    Then I should see an empty report table with Data Unavailable messaging
+    Then I should see an empty report table with No Records messaging
 
-  @data-unavailable @jira-mem-282
+  @data-unavailable @jira-mem-282 @jira-mem-1053
   Scenario: The forward commitments has been disabled
     Given I am on the "Forward Commitments" report page
     When the "Forward Commitments" report has been disabled

@@ -1,11 +1,38 @@
 class MAPIService
 
   def initialize(request)
-    @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint, headers: {:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"", :'X-Request-ID' => request.uuid}
+    @request = request
+    @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint, headers: {:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"", :'X-Request-ID' => request_uuid}
+  end
+
+  def request
+    @request
+  end
+
+  def request_uuid
+    @request.try(:uuid)
+  end
+
+  def request_user
+    warden_user = @request.session['warden.user.user.key']
+    User.find(warden_user[0][0]) if warden_user
+  end
+
+  def request_member_id
+    @request.session['member_id']
+  end
+
+  def request_member_name
+    @request.session['member_name']
+  end
+
+  def member_id_to_name(member_id)
+    (member_id == request_member_id ? request_member_name : nil) || member_id
   end
   
-  def warn(name, msg)
+  def warn(name, msg, error, &error_handler)
     Rails.logger.warn("#{self.class.name}##{name} encountered a #{msg}")
+    error_handler.call(name, msg, error) if error_handler
     nil
   end
 
@@ -19,38 +46,56 @@ class MAPIService
     end
   end
   
-  def get(name, endpoint)
+  def get(name, endpoint, &error_handler)
     begin
       @connection[endpoint].get
     rescue RestClient::Exception => e
-      warn(name, "RestClient error: #{e.class.name}:#{e.http_code}")
+      warn(name, "RestClient error: #{e.class.name}:#{e.http_code}", e, &error_handler)
     rescue Errno::ECONNREFUSED => e
-      warn(name, "connection error: #{e.class.name}")
+      warn(name, "connection error: #{e.class.name}", e, &error_handler)
+    end
+  end
+
+  def post(name, endpoint, body, &error_handler)
+    begin
+      @connection[endpoint].post body
+    rescue RestClient::Exception => e
+      warn(name, "RestClient error: #{e.class.name}:#{e.http_code}", e, &error_handler)
+    rescue Errno::ECONNREFUSED => e
+      warn(name, "connection error: #{e.class.name}", e, &error_handler)
     end
   end
   
-  def parse(name, response)
+  def parse(name, response, &error_handler)
     begin
       response.nil? ? nil : JSON.parse(response.body)
     rescue JSON::ParserError => e
-      warn(name, "JSON parsing error: #{e}")
+      warn(name, "JSON parsing error: #{e}", e, &error_handler)
     end
   end
   
-  def get_fake_hash(name, filename)
+  def get_fake_hash(name, filename, &error_handler)
     begin
       JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', filename))).with_indifferent_access
     rescue JSON::ParserError => e
-      warn(name, "JSON parsing error: #{e}")
+      warn(name, "JSON parsing error: #{e}", e, &error_handler)
     end
   end
   
-  def get_hash(name, endpoint)
-    parse(name, get(name, endpoint)).try(:with_indifferent_access)
+  def get_hash(name, endpoint, &error_handler)
+    get_json(name, endpoint, &error_handler).try(:with_indifferent_access)
   end
   
-  def get_json(name, endpoint)
-    parse(name, get(name, endpoint))
+  def get_json(name, endpoint, &error_handler)
+    parse(name, get(name, endpoint, &error_handler), &error_handler)
+  end
+
+  def post_hash(name, endpoint, body, &error_handler)
+    post_json(name, endpoint, body, &error_handler).try(:with_indifferent_access)
+  end
+
+  def post_json(name, endpoint, body, &error_handler)
+    parse(name, post(name, endpoint, body, &error_handler), &error_handler)
   end
 
 end

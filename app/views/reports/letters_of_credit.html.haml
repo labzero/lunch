@@ -4,6 +4,7 @@
   .report-header
     %h1= t('reports.pages.letters_of_credit.title')
     = render 'reports_header_buttons'
+    = render 'report_details', name: @member_name, freshness: t('reports.freshness.prior_day'), availability: t('reports.availability.current')
   .report-main-body
     .report-summary-data
       %h3

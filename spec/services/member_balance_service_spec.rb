@@ -301,32 +301,53 @@ describe MemberBalanceService do
   end
 
   # TODO add vcr once MAPI endpoint is rigged up
-  describe 'securities_transactions' do
-    let(:as_of_date) {Date.new(2015,1,20)}
-    let(:securities_transactions) {subject.securities_transactions(as_of_date)}
-    it 'should return securities transactions data' do
-      expect(securities_transactions.length).to be >= 1
-      expect(securities_transactions[:final]).to be_boolean
-      expect(securities_transactions[:total_payment_or_principal]).to be_kind_of(Numeric)
-      expect(securities_transactions[:total_net]).to be_kind_of(Numeric)
-      expect(securities_transactions[:total_interest]).to be_kind_of(Numeric)
-      expect(securities_transactions[:transactions]).to be_kind_of(Array)
-      securities_transactions[:transactions].each do |security|
-        expect(security[:custody_account_no]).to be_kind_of(String)
-        expect(security[:new_transaction]).to be_boolean
-        expect(security[:cusip]).to be_kind_of(String)
-        expect(security[:transaction_code]).to be_kind_of(String)
-        expect(security[:security_description]).to be_kind_of(String)
-        expect(security[:units]).to be_kind_of(Integer)
-        expect(security[:maturity_date]).to be_kind_of(String)
-        expect(security[:payment_or_principal]).to be_kind_of(Numeric)
-        expect(security[:interest]).to be_kind_of(Numeric)
-        expect(security[:total]).to be_kind_of(Numeric)
+  describe 'securities_transactions'do
+    let(:as_of_date) { Date.new(2015, 1, 20) }
+    describe 'happy path', :vcr  do
+      let(:securities_transactions) { subject.securities_transactions(as_of_date) }
+      it 'should return securities transactions data' do
+        expect(securities_transactions.length).to be >= 1
+        expect(securities_transactions[:final]).to be_boolean
+        expect(securities_transactions[:total_payment_or_principal]).to be_kind_of(Numeric)
+        expect(securities_transactions[:total_net]).to be_kind_of(Numeric)
+        expect(securities_transactions[:total_interest]).to be_kind_of(Numeric)
+        expect(securities_transactions[:transactions]).to be_kind_of(Array)
+        securities_transactions[:transactions].each do |security|
+          expect(security[:custody_account_no]).to be_kind_of(String)
+          expect(security[:new_transaction]).to be_boolean
+          expect(security[:cusip]).to be_kind_of(String)
+          expect(security[:transaction_code]).to be_kind_of(String)
+          expect(security[:security_description]).to be_kind_of(String)
+          expect(security[:units]).to be_kind_of(Integer)
+          expect(security[:maturity_date]).to be_kind_of(String)
+          expect(security[:payment_or_principal]).to be_kind_of(Numeric)
+          expect(security[:interest]).to be_kind_of(Numeric)
+          expect(security[:total]).to be_kind_of(Numeric)
+        end
       end
     end
+
     describe 'bad data' do
+      let(:bad_data) do
+        {
+          final: nil,
+          transactions: [{
+            custody_account_no: nil,
+            new_transaction: nil,
+            cusip: nil,
+            transaction_code: nil,
+            security_description: nil,
+            units: nil,
+            maturity_date: nil,
+            payment_or_principal: nil,
+            interest: nil,
+            total: nil
+          }]
+        }.with_indifferent_access
+      end
+      let(:securities_transactions) { subject.securities_transactions(as_of_date) }
       it 'should pass nil values if data from MAPI has nil values' do
-        allow(JSON).to receive(:parse).at_least(:once).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'securities_transactions_with_nil_values.json'))))
+        allow(subject).to receive(:get_hash).and_return(bad_data)
         expect(securities_transactions[:final]).to be(nil)
         expect(securities_transactions[:total_payment_or_principal]).to be(0)
         expect(securities_transactions[:total_net]).to be(0)
@@ -345,12 +366,11 @@ describe MemberBalanceService do
         end
       end
     end
+
     describe 'error states' do
-      it 'returns nil if there is a JSON parsing error' do
-        # TODO change this stub once you implement the MAPI endpoint
-        allow(File).to receive(:read).and_return('some malformed json!')
-        expect(Rails.logger).to receive(:warn)
-        expect(securities_transactions).to be(nil)
+      it 'returns nil when the endpoint returns nil' do
+        allow(subject).to receive(:parse).and_return(nil)
+        expect(subject.securities_transactions(as_of_date)).to be(nil)
       end
     end
   end
@@ -757,7 +777,13 @@ describe MemberBalanceService do
   end
 
   describe '`dividend_statement` method', :vcr do
-    let(:dividend_statement) { subject.dividend_statement(Date.new(2015,1,1)) }
+    let(:start_date) { Date.new(2015,1,1) }
+    let(:dividend_statement) { subject.dividend_statement(start_date, '2015Q1') }
+    it_should_behave_like 'a MAPI backed service object method', :dividend_statement, [Date.new(2015,1,1), '2015Q1']
+    it 'passes `current` as an argument if no div_id is given' do
+      expect(subject).to receive(:get_hash).with(:dividend_statement, "/member/#{member_id}/dividend_statement/#{start_date.to_date.iso8601}/current")
+      subject.dividend_statement(start_date, nil)
+    end
     it 'returns a date for its `transaction_date`' do
       expect(dividend_statement[:transaction_date]).to be_kind_of(Date)
     end

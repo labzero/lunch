@@ -88,7 +88,7 @@ class MembersService < MAPIService
       signers_and_users = []
       Devise::LDAP::Adapter.shared_connection do
         Devise::LDAP::Connection.admin('extranet').open do |ldap|
-          users = fetch_ldap_users(ldap, member_id)
+          users = fetch_ldap_users(ldap, member_id) || []
           usernames = users.blank? ? [] : users.collect(&:username)
           signers.each do |signer|
             roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact

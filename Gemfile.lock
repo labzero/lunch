@@ -7,10 +7,10 @@ GIT
 
 GIT
   remote: https://github.com/labzero/devise_ldap_authenticatable.git
-  revision: f05cfed933727ed2348581c77e12e11a7fc4754b
-  branch: 0.9.15
+  revision: 2cd00dc59e6fad918216db4ea75f9b803986eb46
+  branch: 0.9.17
   specs:
-    devise_ldap_authenticatable (0.9.15)
+    devise_ldap_authenticatable (0.9.17)
       devise (>= 3.4.1)
       net-ldap (>= 0.11)
 
@@ -380,7 +380,7 @@ GEM
       rspec-mocks (~> 3.2.0)
       rspec-support (~> 3.2.0)
     rspec-support (3.2.2)
-    ruby-oci8 (2.1.8)
+    ruby-oci8 (2.2.0)
     ruby-prof (0.15.8)
     ruby2ruby (2.1.4)
       ruby_parser (~> 3.1)
@@ -432,8 +432,6 @@ GEM
     sinatra-activerecord (2.0.6)
       activerecord (>= 3.2)
       sinatra (~> 1.0)
-    source-sans-pro-rails (0.6.1)
-      railties (>= 3.2, < 5.0)
     sprockets (3.3.4)
       rack (~> 1.0)
     sprockets-rails (2.3.2)
@@ -548,7 +546,6 @@ DEPENDENCIES
   simplecov-rcov
   sinatra
   sinatra-activerecord
-  source-sans-pro-rails
   swagger-blocks
   timecop
   turbolinks

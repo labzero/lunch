@@ -1,4 +1,4 @@
-class FHLBMailer < Devise::Mailer
+class MemberMailer < Devise::Mailer
   layout 'mailer'
 
   def reset_password_instructions(record, token, opts={})

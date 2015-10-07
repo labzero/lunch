@@ -30,22 +30,7 @@ Given(/^I am logged in$/) do
 end
 
 Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
-  user = case user_type
-    when 'primary user'
-      primary_user
-    when 'quick-advance signer'
-      quick_advance_signer
-    when 'quick-advance non-signer'
-      quick_advance_non_signer
-    when 'access manager'
-      access_manager
-    when 'extranet user'
-      extranet_user
-    when 'deletable user'
-      deletable_user
-    else
-      raise 'unknown user type'
-  end
+  user = user_for_type(user_type)
 
   step %{I am logged in as "#{user['username']}" with password "#{user['password']}"}
   select_member_if_needed
@@ -69,8 +54,9 @@ When(/^I fill in and submit the login form with a first-time user$/) do
   # implement way of simulating first-time user to test Terms of Service flow
 end
 
-When(/^I fill in and submit the login form with an expired user$/) do
-  step %{I fill in and submit the login form with username "#{expired_user['username']}" and password "#{expired_user['password']}"}
+When(/^I fill in and submit the login form with an (expired user|extranet no role user)$/) do |user_type|
+  user = user_for_type(user_type)
+  step %{I fill in and submit the login form with username "#{user['username']}" and password "#{user['password']}"}
 end
 
 When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|
@@ -92,8 +78,9 @@ When(/^I log in as "(.*?)" with password "(.*?)"$/) do |user, password|
   step %{I fill in and submit the login form with username "#{user}" and password "#{password}"}
 end
 
-When(/^I login with as the expired user with the new password$/) do
-  step %{I log in as "#{expired_user['username']}" with password "#{valid_password}"}
+When(/^I login as the (password change user|expired user) with the new password$/) do |user_type|
+  user = user_for_type(user_type)
+  step %{I log in as "#{user['username']}" with password "#{valid_password}"}
   select_member_if_needed
 end
 
@@ -108,6 +95,7 @@ end
 When(/^I select the "(.*?)" member bank$/) do |bank_name|
   # remove the rack_test branch once we have users tied to a specific bank
   @login_flag = flag_page
+  @member_name = bank_name
   if Capybara.current_driver == :rack_test
     page.find('select[name=member_id] option', text: bank_name).select_option
     form = page.find('.welcome form')
@@ -223,6 +211,31 @@ When(/^I fill in and submit the login form with an expired user and the new pass
   step %{I fill in and submit the login form with username "#{expired_user['username']}" and password "#{valid_password}"}
 end
 
+def user_for_type(user_type)
+  case user_type
+  when 'primary user'
+    primary_user
+  when 'quick-advance signer'
+    quick_advance_signer
+  when 'quick-advance non-signer'
+    quick_advance_non_signer
+  when 'access manager'
+    access_manager
+  when 'extranet user'
+    extranet_user
+  when 'deletable user'
+    deletable_user
+  when 'password change user'
+    password_changable_user
+  when 'expired user'
+    expired_user
+  when 'extranet no role user'
+    extranet_no_role_user
+  else
+    raise 'unknown user type'
+  end
+end
+
 def primary_user
   CustomConfig.env_config['primary_user']
 end
@@ -257,6 +270,18 @@ end
 
 def valid_password
   CustomConfig.env_config['valid_password']
+end
+
+def password_changable_user
+  CustomConfig.env_config['password_changable']
+end
+
+def extranet_no_role_user
+  CustomConfig.env_config['extranet_no_role']
+end
+
+def current_member_name
+  @member_name ||= CustomConfig.env_config['primary_bank']
 end
 
 def select_member_if_needed

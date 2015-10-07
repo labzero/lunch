@@ -1,3 +1,4 @@
+$link-fonts: true !default;
 $extralight-weight: 200 !default;
 $light-weight: 300 !default;
 $normal-weight: 400 !default;
@@ -5,6 +6,42 @@ $semibold-weight: 600 !default;
 $bold-weight: 700 !default;
 $tight-line-height: 1.2;
 $loose-line-height: 1.538;
+
+@mixin link-font($name, $weight, $style, $family: 'SourceSansPro') {
+  @font-face {
+    font-family: $family;
+    src: font-url("#{$name}.eot");
+    src:font-url("#{$name}") format('embedded-opentype'),
+    font-url("#{$name}.woff") format('woff'),
+    font-url("#{$name}.ttf") format('truetype'),
+    font-url("#{$name}.svg") format('svg');
+    font-weight: $weight;
+    font-style: $style;
+  }
+}
+
+@mixin inline-font($name, $weight, $style, $family: 'SourceSansPro') {
+  @font-face {
+    font-family: $family;
+    src: asset-data-url("#{$name}.ttf") format("truetype");
+    font-weight: $weight;
+    font-style: $style;
+  }
+}
+
+@if ($link-fonts) {
+  @include link-font('SourceSansPro-Regular', $normal-weight, normal);
+  @include link-font('SourceSansPro-ExtraLight', $extralight-weight, normal);
+  @include link-font('SourceSansPro-Light', $light-weight, normal);
+  @include link-font('SourceSansPro-Semibold', $semibold-weight, normal);
+  @include link-font('SourceSansPro-Bold', $bold-weight, normal);
+} @else {
+  @include inline-font('SourceSansPro-Regular', $normal-weight, normal);
+  @include inline-font('SourceSansPro-Semibold', $semibold-weight, normal);
+  @include inline-font('SourceSansPro-Bold', $bold-weight, normal);
+  @include inline-font('SourceSansPro-Light', $light-weight, normal);
+  @include inline-font('SourceSansPro-ExtraLight', $extralight-weight, normal);
+}
 
 // From Cooper Style Guide
 $default-font-family: 'SourceSansPro', 'Segoe UI', 'Myriad Pro', sans-serif;
@@ -17,7 +54,6 @@ $print-font-family: 'SourceSansPro';
   font-family: $default-font-family;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: 'lnum';
 }
 
 @mixin print-font {

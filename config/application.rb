@@ -41,5 +41,9 @@ module FhlbMember
 
     # hide securid details
     config.filter_parameters << [:securid_pin, :securid_token, :securid_new_pin, :securid_confirm_pin]
+
+    config.action_view.field_error_proc = Proc.new { |html_tag, instance|
+      "#{html_tag}".html_safe
+    }
   end
 end

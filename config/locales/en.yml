@@ -218,6 +218,9 @@ en:
               symbol_needed: "Passwords must contain at least symbol (!@#$%*)."
               confirmation: Passwords do not match.
               ldap_update_failed: We failed to update your password. Most likely you used a password that was used before.
+            current_password:
+              invalid: Password is incorrect.
+              blank: Please enter your current password.
             password_confirmation:
               confirmation: Passwords do not match.
   user_roles:
@@ -264,7 +267,7 @@ en:
     save: Save
     save_message: Last auto-saved
     account:
-      title: Manage Users
+      title: Manage Access
       actions:
         lock: Lock
         unlock: Unlock
@@ -303,18 +306,19 @@ en:
         title: User Access Deleted
         success_html: User access for <strong>%{name}</strong> has been deleted.
     password:
-      title: Password
-    quick_advance:
-      title: Quick Advance
-    quick_report:
-      title: Quick Reports
+      title: Manage Password
+      instructions: "Change your Member Portal password.\n\nIf you have questions about account access, contact your institution’s Access Manager or <a href=\"%{url}\">Web Support</a> at %{phone_number}."
     change_password:
       title: Change Your Password
       instructions: "Passwords should contain at least 8 characters, including one capital letter, one number and one special character (!@#$%*). Passwords expire every 60 days. You may not reuse a password that you have used within the last eight 60-day periods."
       password_field: New password
       confirm_field: Re-enter new password
+      current_password_field: Current password
+      current_password_step: Enter your current password.
+      new_password_step: Enter your new password.
+      save_button: Save new password
     two_factor:
-      title: 2-Step Verification
+      title: Manage Token
       description: Manage authentication with your SecurID token.
       help_html: 'To request a new SecurID token or get help with an existing one, <a href="%{url}">email Web Support</a> or call them at %{phone_number}.'
       reset_pin:
@@ -427,7 +431,7 @@ en:
       advance_placeholder: Enter Dollar Amount
       advance_instruction: Select a rate to continue.
       advances_desk_closed: The Member Services Desk is closed.
-      advances_desk_closed_link: View Current Price Indications
+      advances_desk_closed_link: View recent price indications
       advances_desk_no_terms: There are no terms available right now.
       advance_last_updated: The following rates were last updated %{last_updated}
       hours_of_operation_html: "You may initiate an advance during the <a href=\"%{url}\">Advance Desk Hours of Operation</a>."
@@ -487,7 +491,7 @@ en:
         advance_amount: Advance Amount
         description: Advance Description
         program: Program
-        security_type: Securities Type
+        collateral_type: Collateral Type
         interest_day_count: "Interest Day Count"
         payment_on: Interest Payment Frequency
         advance_term: Term
@@ -495,7 +499,7 @@ en:
         trade_date: Trade Date
         funding_date: Funding Date
         maturity_date: Maturity Date
-        debit_sta_html: Your Settlement/Transaction Account (STA) will be debited %{amount} for the capital stock purchase amount today
+        debit_sta_html: Your Settlement/Transaction Account (STA) will be debited %{amount} for the capital stock purchase amount today.
         cumulative: Cumulative Stock Purchase
       securid:
         intro: For your security, please enter your SecurID token credentials.
@@ -516,7 +520,7 @@ en:
         net: Net Amount Available
         cumulative: Cumulative Stock Purchase Required
         increase_transaction: Increase Amount Requested to cover required stock purchase.
-        debit_sta_html: If you select this option, the Bank will automatically debit your Settlement/Transaction Account (STA) for %{amount} today
+        debit_sta_html: If you select this option, the Bank will automatically debit your Settlement/Transaction Account (STA) for %{amount} today.
         footer: Cumulative Stock Purchase Required reflects the total stock purchase for all advances transacted today, including the new advace request. To avoid an overdraft, please ensure your Settlement/Transaction Account (STA) has sufficient funds to cover this amount.
       error:
         insufficient_financing_availability_html: The original amount requested of %{amount} is not available based on your remaining financing availability.
@@ -732,6 +736,13 @@ en:
   reports:
     meta_title: FHLB - Reports
     title: Reports
+    freshness:
+      current: This report reflects data as of the current date and time.
+      prior_day: This report reflects data as of close of business on the prior business day.
+      monthend: This report reflects data as of close of business at monthend.
+    availability:
+      current: Only the current report is available.
+      months: Historical data is available for the previous %{months} months.
     shared_table_values:
       updated: 'Report Updated:'
       available_history: 'Available History:'
@@ -842,6 +853,7 @@ en:
         history: Current month to date. Prior statements are available for the previous 6 months.
     account_summary:
       title: Account Summary
+      freshness: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{now}. Under Collateral Borrowing Capacity, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of close of business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today’s credit activity as of %{now}."
       institution_details:
         title: Institution Details
         your_institution: 'Your Institution:'
@@ -935,7 +947,11 @@ en:
           prime: Daily Prime
           sta_info: Published STA rate is applied to previous business day's ending STA balance
           sta_rate: Effective Rate for Prior Business Day (%)
-        historical: Historical Price Indications
+          freshness: This report reflects the price indications published at 6:00 am on the current business day.
+        historical:
+          title: Historical Price Indications
+          freshness: This report reflects historical price indications published at 6:00 am, not actual rates. 
+          availability: Historical data available varies by credit product.
         standard_credit_program: Standard Credit Program
         sbc_program: Securities-Backed Credit
         settlement_transaction_account: Settlement/Transaction Account
@@ -996,6 +1012,7 @@ en:
         bc_upb: BC/UPB
         net_loan_collateral: Net Loan Collateral Borrowing Capacity
         excess_capacity: Excess Borrowing Capacity
+        freshness: Loan collateral data reflects intraday processing of Mortgage Collateral Updates, except for Market Value. Market Value and all other data is as of close of business on the prior business day.
         less_line_items:
           blanket_lien: Less Excluded Blanket Lien Borrowing Capacity
           bank_borrowing_capacity: Less Excluded Bank Borrowing Capacity
@@ -1057,6 +1074,8 @@ en:
         dividend_amount_heading: 'Total Dividend Amount as of the end of the %{quarter}:'
         summary: Dividend Summary
         details: Dividend Details
+        special_dividend: Special Dividend %{year}
+        freshness: This report reflects the data for the most recent dividend transaction.
         headers:
           period: Dividend Period
           date: Transaction Date
@@ -1075,6 +1094,8 @@ en:
         footnote: '%{footnote}Fees will be charged based on the specific transaction and the amount of staff time required.'
         questions_html: 'If you have questions regarding this statement, please email <a href=%{mailto_url}>Securities Services</a> or call %{phone_number}.'
         footer: 'Total amount to be debited from Settlement/Transaction Account No. %{account_number} as of %{date}:'
+        freshness: This statement reflects fees for the prior month and is posted approximately 5 to 7 days before the debit date, which is the last business day of the month.
+        availability: Statements are available for the previous 18 months.
         tables:
           maintenance: Monthly Account Maintenance Fee
           securities: Monthly Securities Fees
@@ -1099,10 +1120,13 @@ en:
           per_hour: '%{number} @ %{cost} per hour'
       letters_of_credit:
         title: Letters of Credit
-        total_current_par_summary: 'Total Current Par as of close of business on %{date}:'
+        total_current_par_summary: 'Total Current Amount as of close of business on %{date}:'
         headers:
           lc_number: LC Number
+          current_amount: Current Amount
           annual_maintenance_charge: Annual Maintenance Charge (bps)*
+          issuance_date: Issuance Date
+          credit_program: CICA Credit Program
         minimum_maintenance_charge: '*The minimum annual maintenance charge is $500.'
       securities_transactions:
         title: Securities Transaction
@@ -1121,6 +1145,7 @@ en:
         interest: Interest
         total: Total
         total_net_amount: Total Net Amount
+        freshness: This report is updated twice a day. The preliminary report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm. The final report reflects all transactions settled during the day and is generally available at the end of the business day.
       authorizations:
         title: Authorizations
         intro_html: The following people are authorized to use the Bank's services on behalf of your institution. If you'd like to make changes to these authorizations, please fill out a <a href=%{url}>Signature Card Form</a>.
@@ -1132,6 +1157,7 @@ en:
       securities_position:
         current: Current Securities Position
         monthly: Monthly Securities Position
+        freshness: This report reflects data as of the close of business on the last business day of the month and is generally available one business day after monthend.
         filter:
           all: All Securities
           pledged: Pledged Securities
@@ -1903,13 +1929,28 @@ en:
     agree: I agree to the terms of use
   errors:
     format: '%{message}'
-    assistance: "If you need assistance, contact our Web Support team at %{phone_number}."
+    assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."
+    "404":
+      headline: The page you’re looking for doesn’t exist.
+      summary: Please double-check the URL you entered. If you followed a link to get here, let us know and we’ll fix it.
     "500":
       headline: Sorry for the inconvenience.
       summary: We have encountered an error and are working on fixing the problem as quickly as possible.
     maintenance:
       headline: Scheduled Downtime
-      summary: We're currently performing maintenance on the Member Portal. We'll have things up and running again soon.
-    table_data_unavailable: This information is currently unavailable
+      summary: We’re currently performing maintenance on the Member Portal. We’ll have things up and running again soon.
+    table_data_unavailable: This information is currently unavailable.
+    table_data_no_records: There are no records to display.
     no_messages: No Messages
     error_occurred: An error has occurred.
+    emails:
+      calypso_error:
+        subject: 'Notice: System error occured'
+        error_class: Error Class
+        error_message: Error Message
+        error_inspection: Error Details
+        error_backtrace: Backtrace
+        body_html: "The Member Portal has encountered an error talking to Calypso for request <strong>%{request_id}</strong>, issued by <strong>%{user}</strong> on behalf of <strong>%{member}</strong>.\n\nThe error details are:"
+      stale_rate:
+        subject: 'Notice: eTransact encountered stale rates'
+        body_html: The eTransact system has encountered rates that are older than <strong>%{rate_timeout} seconds</strong> when getting rates from Market Data Services for request <strong>%{request_id}</strong>, issued by <strong>%{user}</strong>.
