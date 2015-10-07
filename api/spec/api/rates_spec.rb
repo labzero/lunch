@@ -85,7 +85,7 @@ describe MAPI::ServiceApp do
     let (:types_xml) { types.map{ |type| type[:xml] } }
 
     let (:overnight) { mk_term('1', 'D', 'overnight') }
-    let (:open_day)  { mk_term('1', 'D', 'open') }
+    let (:open_day)  { overnight.clone }
     let (:w1)        { mk_term('1', 'W', '1week') }
     let (:w2)        { mk_term('2', 'W', '2week') }
     let (:w3)        { mk_term('3', 'W', '3week') }

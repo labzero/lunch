@@ -144,6 +144,7 @@ module MAPI
       end
 
       PERIOD_TO_TERM= {
+          '1D' => :overnight,
           '1W' => :'1week',  '2W' => :'2week',  '3W' => :'3week',
           '1M' => :'1month', '2M' => :'2month', '3M' => :'3month', '6M' => :'6month',
           '1Y' => :'1year',  '2Y' => :'2year',  '3Y' => :'3year'
@@ -153,7 +154,6 @@ module MAPI
         hash = {}.with_indifferent_access
         response.doc.remove_namespaces!
         response.doc.xpath(PATHS[:type_data]).each do |type_data|
-          daily           = [:open, :overnight]
           day_count_basis = extract_text(type_data, :day_count_basis)
           type_long       = extract_text(type_data, :type_long)
           type            = LOAN_MAPPING_INVERTED[type_long]
@@ -164,7 +164,7 @@ module MAPI
             rate            = extract_text(term_data, :rate)
             maturity_string = extract_text(term_data, :maturity_string)
             period          = "#{frequency}#{unit}"
-            term            = period == '1D' ? daily.pop : PERIOD_TO_TERM[period]
+            term            = PERIOD_TO_TERM[period]
             if term
               hash[type][term] = {
                   rate: rate,
@@ -173,6 +173,7 @@ module MAPI
                   interest_day_count: day_count_basis
               }
             end
+            hash[type][:open] = hash[type][:overnight].clone
           end
         end
         hash
