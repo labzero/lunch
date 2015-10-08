@@ -78,6 +78,11 @@ describe MAPI::ServiceApp do
             expect(capital_stock_and_leverage[:activity_based_requirement]).to eq(adv_and_mpf_stock_requirement)
           end
         end
+        describe 'the `remaining_stock` value' do
+          it 'is equal to the `total_capital_stock` minus the `activity_based_requirement`' do
+            expect(capital_stock_and_leverage[:remaining_stock]).to eq( cap_stock_member_details.first[:TOTAL_CAPITAL_STOCK] - adv_and_mpf_stock_requirement)
+          end
+        end
         describe 'the `remaining_leverage` value' do
           describe 'when `total_capital_stock` is greater than `minimum_stock_requirement`' do
             before { cap_stock_member_details.first[:TOTAL_CAPITAL_STOCK] = adv_and_mpf_stock_requirement + 500 }
@@ -127,11 +132,6 @@ describe MAPI::ServiceApp do
           describe 'the `surplus_stock` value' do
             it 'is equal to the `total_capital_stock` minus the `minimum_stock_requirement` times the cap_stock_requirements[:SURPLUS_PCT] and rounded up to the nearest 100' do
               expect(capital_stock_and_leverage[:surplus_stock]).to eq( ((cap_stock_member_details.first[:TOTAL_CAPITAL_STOCK]  - (minimum_stock_requirement * cap_stock_requirements.first[:SURPLUS_PCT])) / 100).ceil * 100 )
-            end
-          end
-          describe 'the `remaining_stock` value' do
-            it 'is equal to the `total_capital_stock` minus the `minimum_stock_requirement`' do
-              expect(capital_stock_and_leverage[:remaining_stock]).to eq( cap_stock_member_details.first[:TOTAL_CAPITAL_STOCK] - minimum_stock_requirement)
             end
           end
         end
