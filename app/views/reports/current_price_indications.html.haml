@@ -1,6 +1,6 @@
 - @html_class = 'white-background'
 - @page_title = t('reports.meta_title')
-.report.price-indications-report.row
+.report.price-indications-report.report-current-price-indication.row
   .report-header
     %h1= @report_name
     = render 'reports_header_buttons', download_formats: [:xlsx]
@@ -22,23 +22,33 @@
     = render 'reports/reports_table', table_class: 'current-price-frc-table', table_data: @standard_frc_table_data, sortable: false
     %small
       %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_actual')}
-      %p #{t('global.open')}: #{t('reports.pages.price_indications.current.at_monthend_and_at_repayment')}
+      %p #{t('reports.pages.price_indications.current.payment_frequency')}: #{t('reports.pages.price_indications.current.at_monthend_and_at_repayment')}
     .report-table-title-with-margins
       %h3= t('reports.pages.price_indications.current.arc')
+      .sub-title
+        =t('reports.pages.price_indications.current.basis_point_spread')
     = render 'reports/reports_table', table_class: 'current-price-arc-table', table_data: @standard_arc_table_data, sortable: false
     %small
       %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_360')}
-      %p #{t('reports.pages.price_indications.current.interest_rate_reset')}: #{t('global.monthly')}, #{t('global.quarterly')}, #{t('global.semiannually')}, #{t('global.daily')}
-      %p #{t('reports.pages.price_indications.current.payment_frequency')}: #{t('reports.pages.price_indications.current.monthly_and_at_repayment')}, #{t('reports.pages.price_indications.current.quarterly_and_at_repayment')}
+      %p #{t('reports.pages.price_indications.current.interest_rate_reset')}:
       .report-info-indent
-        %p #{t('reports.pages.price_indications.current.semiannually_and_at_repayment')}, #{t('reports.pages.price_indications.current.quarterly_and_at_repayment')}
+        %p #{t('reports.pages.price_indications.current.1_month_libor')}: #{t('global.monthly')}
+        %p #{t('reports.pages.price_indications.current.3_month_libor')}: #{t('global.quarterly')}
+        %p #{t('reports.pages.price_indications.current.6_month_libor')}: #{t('global.semiannually')}
+        %p #{t('reports.pages.price_indications.current.prime')}: #{t('global.daily')}
+      %p #{t('reports.pages.price_indications.current.payment_frequency')}:
+      .report-info-indent
+        %p #{t('reports.pages.price_indications.current.1_month_libor')}: #{t('reports.pages.price_indications.current.monthly_and_at_repayment')}
+        %p #{t('reports.pages.price_indications.current.3_month_libor')}: #{t('reports.pages.price_indications.current.quarterly_and_at_repayment')}
+        %p #{t('reports.pages.price_indications.current.6_month_libor')}: #{t('reports.pages.price_indications.current.semiannually_and_at_repayment')}
+        %p #{t('reports.pages.price_indications.current.prime')}: #{t('reports.pages.price_indications.current.quarterly_and_at_repayment')}
   .report-main-body
     %h2.report-table-title= t('reports.pages.price_indications.sbc_program')
     .report-table-title
       %h3= t('reports.pages.price_indications.current.vrc')
     = render 'reports/reports_table', table_class: 'current-price-vrc-table', table_data: @sbc_vrc_table_data, sortable: false
     %small
-      %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_actual')}
+      %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_360')}
       %p #{t('reports.pages.price_indications.current.payment_frequency')}:
       .report-info-indent
         %p #{t('global.overnight')}: #{t('reports.pages.price_indications.current.at_maturity')}
@@ -47,18 +57,28 @@
       %h3= t('reports.pages.price_indications.current.frc')
     = render 'reports/reports_table', table_class: 'current-price-frc-table', table_data: @sbc_frc_table_data, sortable: false
     %small
-      %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_360')}
+      %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_actual')}
       %p #{t('reports.pages.price_indications.current.payment_frequency')}:
       .report-info-indent
         %p #{t('reports.pages.price_indications.current.advances_with_terms_of_180_days_or_less')}: #{t('reports.pages.price_indications.current.at_repayment')}
         %p #{t('reports.pages.price_indications.current.advances_with_terms_of_more_than')}: #{t('reports.pages.price_indications.current.semiannually_and_at_repayment')}
     .report-table-title-with-margins
       %h3= t('reports.pages.price_indications.current.arc')
+      .sub-title
+        =t('reports.pages.price_indications.current.basis_point_spread')
     = render 'reports/reports_table', table_class: 'current-price-arc-sbc-table', table_data: @sbc_arc_table_data, sortable: false
     %small
       %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_360')}
-      %p #{t('reports.pages.price_indications.current.interest_rate_reset')}: #{t('global.monthly')}, #{t('global.quarterly')}, #{t('global.semiannually')}
-      %p #{t('reports.pages.price_indications.current.payment_frequency')}: #{t('reports.pages.price_indications.current.monthly_and_at_repayment')}, #{t('reports.pages.price_indications.current.quarterly_and_at_repayment')}
+      %p #{t('reports.pages.price_indications.current.interest_rate_reset')}:
+      .report-info-indent
+        %p #{t('reports.pages.price_indications.current.1_month_libor')}: #{t('global.monthly')}
+        %p #{t('reports.pages.price_indications.current.3_month_libor')}: #{t('global.quarterly')}
+        %p #{t('reports.pages.price_indications.current.6_month_libor')}: #{t('global.semiannually')}
+      %p #{t('reports.pages.price_indications.current.payment_frequency')}:
+      .report-info-indent
+        %p #{t('reports.pages.price_indications.current.1_month_libor')}: #{t('reports.pages.price_indications.current.monthly_and_at_repayment')}
+        %p #{t('reports.pages.price_indications.current.3_month_libor')}: #{t('reports.pages.price_indications.current.quarterly_and_at_repayment')}
+        %p #{t('reports.pages.price_indications.current.6_month_libor')}: #{t('reports.pages.price_indications.current.semiannually_and_at_repayment')}
       .report-info-indent
         %p= t('reports.pages.price_indications.current.semiannually_and_at_repayment')
   .report-main-body
@@ -87,7 +107,6 @@
           %li= t('reports.general_information.lc')
           %li= t('reports.general_information.ace')
           %li= t('reports.general_information.cip')
-          %li= t('reports.general_information.hpa')
           %li= t('reports.general_information.advances_with_embedded_options')
           %li= t('reports.general_information.advances_with_partial_prepayment_symmetry')
         %li= t('reports.general_information.reduced_prices')

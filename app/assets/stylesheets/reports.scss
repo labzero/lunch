@@ -168,6 +168,12 @@
   }
 }
 
+.report-current-price-indication {
+  .report-main-body {
+    margin-bottom: 50px;
+  }
+}
+
 .advances-detail-report {
   .report-main-body {
     small {
@@ -209,7 +215,10 @@
 
 .report-table-title-with-margins {
   @extend %typography-section-title;
-  margin: 50px 0 15px;
+  margin: 25px 0 10px;
+  .sub-title {
+    @extend %typography-table-cell;
+  }
 }
 
 .report-table {
@@ -543,6 +552,7 @@
 
 .current-price-vrc-table {
   width: 480px;
+  margin-bottom: 15px;
   th {
     &:nth-child(2) {
       min-width: 150px;
@@ -555,6 +565,7 @@
 
 .current-price-frc-table {
   width: 480px;
+  margin-bottom: 15px;
   th {
     &:nth-child(2) {
       min-width: 90px;
@@ -570,14 +581,17 @@
 
 .current-price-arc-table {
   width: 380px;
+  margin-bottom: 15px;
 }
 
 .current-price-arc-sbc-table {
   width: 310px;
+  margin-bottom: 15px;
 }
 
 .sta-rate-table {
   width: 350px;
+  margin-bottom: 15px;
 }
 
 .report-securities-services-statement {
