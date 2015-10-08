@@ -40,9 +40,6 @@
     padding: 15px 20px;
   }
 
-  span.disabled, span.disabled p {
-     color: $medium-gray;
-  }
   td {
     @extend %typography-subtitle;
     height: 100px;

@@ -87,10 +87,6 @@
   }
 }
 
-.disabled {
-  color: $medium-gray;
-}
-
 .secondary-nav {
   height: $header-secondary-nav-height;
   line-height: $header-secondary-nav-height;
@@ -132,6 +128,9 @@
       .nav-dropdown {
         display: block;
       }
+    }
+    .disabled {
+      color: $medium-gray;
     }
   }
   a {

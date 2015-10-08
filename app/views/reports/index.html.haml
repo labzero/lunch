@@ -26,6 +26,6 @@
                   %span= details[:available_history]
                 %p= t('global.view')
               - if details[:disabled]
-                %span.disabled= html
+                .disabled= html
               - else
                 =link_to html, details[:route] || '#'
