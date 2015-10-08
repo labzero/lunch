@@ -9,7 +9,7 @@ $faded-opacity: 0.4 !default;
   color: $white;
   @include pseudo-background-cover($brand-blue);
   &.disabled-cell {
-    @include pseudo-background-cover($secondary-gray);
+    @include pseudo-background-cover($light-gray);
     color: inherit;
     cursor: auto;
   }  
@@ -160,8 +160,9 @@ $faded-opacity: 0.4 !default;
       }
       &:nth-child(odd) {
         td {
-          &:not(.disabled-cell):not(.row-label) {
-            @include pseudo-background-cover($white);
+          @include pseudo-background-cover($white);
+          &.disabled-cell {
+            @include pseudo-background-cover($light-gray);
           }
           &.cell-selected {
             @extend %quick-advance-cell-selected;
@@ -216,7 +217,7 @@ $faded-opacity: 0.4 !default;
 }
 
 .quick-advance-rate-cell.disabled-cell {
-  @include pseudo-background-cover($secondary-gray);
+  @include pseudo-background-cover($light-gray);
 }
 
 .initiate-quick-advance, .confirm-quick-advance {
