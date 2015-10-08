@@ -69,7 +69,7 @@ module MAPI
               excess_stock: (excess_deficiency.to_i if excess_deficiency),
               surplus_stock: (surplus_stock.to_i if surplus_stock),
               activity_based_requirement: (adv_and_mpf_stock_requirement.to_i if adv_and_mpf_stock_requirement),
-              remaining_stock: ((total_capital_stock - minimum_stock_requirement).to_i if total_capital_stock && minimum_stock_requirement),
+              remaining_stock: ((total_capital_stock.to_i - adv_and_mpf_stock_requirement.to_i) if total_capital_stock && adv_and_mpf_stock_requirement),
               remaining_leverage: (additional_advances.to_i if additional_advances)
             }.with_indifferent_access
           else
