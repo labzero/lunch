@@ -13,7 +13,7 @@ Scenario: Member sees Borrowing Capacity Statement
   When I select "Borrowing Capacity" from the reports dropdown
   Then I should see report summary data
   And I should see a report header
-  And I should see the "Standard Credit Program" table and "2" subtables
+  And I should see the "Standard Credit Program" table and "3" subtables
   And I should see the "Securities-Backed Credit Program" table and "1" subtable
 
 Scenario: Member sorts the Standard Credit Program table on the Borrowing Capacity Statement by original amount

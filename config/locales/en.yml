@@ -44,7 +44,7 @@ en:
     borrowing_capacity: Borrowing Capacity
     advances: Advances
     total_market_value: Total Market Value
-    collateral_type: Collateral Type
+    loan_collateral_type: Loan Collateral Type
     count: Count
     original_amount: Original Amount
     unpaid_principal: Unpaid Principal
@@ -1013,7 +1013,7 @@ en:
         remaining_borrowing_capacity: Borrowing Capacity Remaining
         bc_upb: BC/UPB
         net_loan_collateral: Net Loan Collateral Borrowing Capacity
-        excess_capacity: Excess Borrowing Capacity
+        remaining_capacity: Remaining Borrowing Capacity
         freshness: Loan collateral data reflects intraday processing of Mortgage Collateral Updates, except for Market Value. Market Value and all other data is as of close of business on the prior business day.
         less_line_items:
           blanket_lien: Less Excluded Blanket Lien Borrowing Capacity
@@ -1023,9 +1023,11 @@ en:
           letters_of_credit: Less Letters of Credit
           swap_collateral: Less SWAP Collateral Required
           cover_sbc_type: Less Cover SBC Type Deficiencies
-          payment_fees: Less Potential Payment Fees
+          payment_fees: Less Potential Prepayment Fees
           other_collateral: Less Other Collateral Required
           mpf_ce_collateral: Less MPF CE Collateral Required
+        plus_line_items:
+          securities: Plus Securities Borrowing Capacity 
       settlement_transaction_account:
         title: Settlement/Transaction Account (STA) Statement
         opening_balance_heading: "Beginning balance of as of %{date}:"

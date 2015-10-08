@@ -86,6 +86,7 @@ module MAPI
           {  date: as_of_date.to_date,
              standard: {
                  collateral: standard_breakdown_formatted,
+                 securities: (balance_hash['STD_SECURITIES_BC'] || 0).to_f.round,
                  excluded: {
                      blanket_lien: (balance_hash['STD_EXCL_BL_BC'] || 0).to_f.round,
                      bank: (balance_hash['STD_EXCL_BANK_BC'] || 0).to_f.round,
