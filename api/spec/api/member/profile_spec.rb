@@ -158,17 +158,17 @@ describe MAPI::ServiceApp do
           make_request
           expect(last_response.status).to be(404)
         end
-        it 'returns a 404 if the STA number isn\'t found' do
+        it 'returns a 200 if the STA number isn\'t found' do
           allow(sta_number_cursor).to receive(:fetch).and_return(nil)
           development_json[MEMBER_ID]['sta_number'] = nil
           make_request
-          expect(last_response.status).to be(404)
+          expect(last_response.status).to be(200)
         end
-        it 'returns a 404 if the FHFB number isn\'t found' do
+        it 'returns a 200 if the FHFB number isn\'t found' do
           allow(fhfb_number_cursor).to receive(:fetch).and_return(nil)
           development_json[MEMBER_ID]['fhfb_number'] = nil
           make_request
-          expect(last_response.status).to be(404)
+          expect(last_response.status).to be(200)
         end
         if env == :development
           it 'returns a 404 if the member isn\'t found' do
