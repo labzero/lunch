@@ -142,6 +142,7 @@ describe MAPI::ServiceApp do
       expect(execute_trade['advance_type']).to be_kind_of(String)
       expect(execute_trade['interest_day_count']).to be_kind_of(String)
       expect(execute_trade['payment_on']).to be_kind_of(String)
+      expect(execute_trade['trade_date']).to be_kind_of(String)
       expect(execute_trade['funding_date']).to be_kind_of(String)
       expect(execute_trade['maturity_date']).to be_kind_of(String)
     end
@@ -157,6 +158,7 @@ describe MAPI::ServiceApp do
       expect(execute_trade['advance_type']).to be_kind_of(String)
       expect(execute_trade['interest_day_count']).to be_kind_of(String)
       expect(execute_trade['payment_on']).to be_kind_of(String)
+      expect(execute_trade['trade_date']).to be_kind_of(String)
       expect(execute_trade['funding_date']).to be_kind_of(String)
       expect(execute_trade['maturity_date']).to be_kind_of(String)
     end
@@ -264,6 +266,7 @@ describe MAPI::ServiceApp do
         expect(execute_trade['advance_type']).to be_kind_of(String)
         expect(execute_trade['interest_day_count']).to be_kind_of(String)
         expect(execute_trade['payment_on']).to be_kind_of(String)
+        expect(execute_trade['trade_date']).to be_kind_of(String)
         expect(execute_trade['funding_date']).to be_kind_of(String)
         expect(execute_trade['maturity_date']).to be_kind_of(String)
       end
@@ -280,6 +283,7 @@ describe MAPI::ServiceApp do
         expect(execute_trade['advance_type']).to be_kind_of(String)
         expect(execute_trade['interest_day_count']).to be_kind_of(String)
         expect(execute_trade['payment_on']).to be_kind_of(String)
+        expect(execute_trade['trade_date']).to be_kind_of(String)
         expect(execute_trade['funding_date']).to be_kind_of(String)
         expect(execute_trade['maturity_date']).to be_kind_of(String)
       end
@@ -296,6 +300,7 @@ describe MAPI::ServiceApp do
         expect(execute_trade['advance_type']).to be_kind_of(String)
         expect(execute_trade['interest_day_count']).to be_kind_of(String)
         expect(execute_trade['payment_on']).to be_kind_of(String)
+        expect(execute_trade['trade_date']).to be_kind_of(String)
         expect(execute_trade['funding_date']).to be_kind_of(String)
         expect(execute_trade['maturity_date']).to be_kind_of(String)
       end
@@ -595,6 +600,25 @@ describe MAPI::ServiceApp do
           expect{check_advance}.to raise_error
         end
       end
+    end
+  end
+  
+  describe 'the `execute_trade` method' do
+    let(:app) { double('app', settings: double('settings', environment: nil)) }
+    let(:today) { Time.zone.today }
+    let(:built_message) { [double('message'), {}] }
+    let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(app, member_id, double('instrument'), 'EXECUTE', 234234, advance_term, advance_type, rate, false, double('signer'), double('markup'), double('blended_cost_of_funds'), double('cost_of_funds'), double('benchmark_rate')) }
+    before do
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:get_maturity_date)
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:init_execute_trade_connection)
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:build_message).and_return(built_message)
+    end
+    
+    it 'returns today\'s date as a string for `trade_date`' do
+      expect(execute_trade['trade_date']).to eq(today)
+    end
+    it 'returns today\'s date as a string for `funding_date`' do
+      expect(execute_trade['funding_date']).to eq(today)
     end
   end
 end
