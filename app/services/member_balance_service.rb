@@ -116,8 +116,9 @@ class MemberBalanceService < MAPIService
             row[:bc_upb] = 0
           end
         end
-        data[:net_loan_collateral] = data[:standard_credit_totals][:borrowing_capacity].to_i - data[:standard][:excluded].values.sum
-        data[:standard_excess_capacity] = data[:net_loan_collateral].to_i - data[:standard][:utilized].values.reduce(:+)
+        data[:net_loan_collateral] = data[:standard_credit_totals][:borrowing_capacity].to_i - data[:standard][:excluded].values.sum 
+        data[:net_plus_securities_capacity] = data[:net_loan_collateral] + data[:standard][:securities].to_i
+        data[:standard_excess_capacity] = data[:net_plus_securities_capacity].to_i - data[:standard][:utilized].values.sum 
       rescue => e
         return warn(:borrowing_capacity_summary, "malformed data[:standard] hash. It returned #{data[:standard]} and threw the following error: #{e}", e)
       end
