@@ -148,6 +148,10 @@ Then(/^I should see a preview of the quick advance with a notification about the
   page.assert_selector('.quick-advance-updated-rate')
 end
 
+Then(/^I should see an initiate advance button with a notification about the new rate$/) do
+  page.assert_selector('.confirm-quick-advance', text: I18n.t('dashboard.quick_advance.buttons.new_rate'))
+end
+
 When(/^the quick advance rate has changed$/) do
   # implement code to ensure rate is displayed as having changed
 end

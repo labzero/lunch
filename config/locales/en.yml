@@ -475,6 +475,7 @@ en:
         back: Back
         preview: Preview the selected advance
         initiate: Initiate the selected advance
+        new_rate: Initiate Advance with New Rate
         credit: Review Credit Activity
         continue: Continue With Request
         rates: View Current Rates

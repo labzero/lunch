@@ -167,7 +167,7 @@ Scenario: Users aren't required to enter a SecurID token a second time
   Then I should see confirmation number for the advance
 
 
-@data-unavailable @jira-mem-872
+@data-unavailable @jira-mem-872 @jira-mem-1028
 Scenario: The rate changes from the time the user sees the table to the time they see the preview
   Given I visit the dashboard
   And I open the quick advance flyout
@@ -175,6 +175,7 @@ Scenario: The rate changes from the time the user sees the table to the time the
   When I click on the initiate advance button
   And the quick advance rate has changed
   Then I should see a preview of the quick advance with a notification about the new rate
+  And I should see an initiate advance button with a notification about the new rate
 
 @data-unavailable @jira-mem-577
 Scenario: The View Recent Price Indications link is displayed when the desk is closed
