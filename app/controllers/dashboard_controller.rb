@@ -295,6 +295,7 @@ class DashboardController < ApplicationController
     @interest_day_count = advance_params[:interest_day_count]
     @payment_on = advance_params[:payment_on]
     @advance_term = advance_params[:advance_term]
+    @trade_date = advance_params[:trade_date]
     @funding_date = advance_params[:funding_date]
     @maturity_date = advance_params[:maturity_date]
     @advance_rate = advance_params[:advance_rate].try(:to_f)

@@ -276,7 +276,7 @@ module MAPI
           # Calculated values
           # True maturity date will be calculated later
           maturity_date = MAPI::Services::EtransactAdvances::ExecuteTrade::get_maturity_date(Time.zone.today, advance_term)
-          settlement_date = Time.zone.today
+          settlement_date = Time.zone.today # currently both `trade_date` and `funding_date` are set to today, as we only allow same-day funding/trading at this time
           day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/360' : 'ACT/ACT'
 
           message, payment_info = MAPI::Services::EtransactAdvances::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
@@ -288,6 +288,7 @@ module MAPI
             'advance_type' => advance_type,
             'interest_day_count' => day_count,
             'payment_on' => payment_info[:payment_at],
+            'trade_date' => settlement_date,
             'funding_date' => settlement_date,
             'maturity_date' => maturity_date
           }
@@ -346,7 +347,7 @@ module MAPI
             end
             response_hash
           end
-          data.to_json
+          data
         end
 
         def self.check_capital_stock(fhlbsfresponse, response, hash)
