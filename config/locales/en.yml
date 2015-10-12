@@ -933,7 +933,7 @@ en:
           quarterly_and_at_repayment: Quarterly and at repayment
           semiannually_and_at_repayment: Semiannually and at repayment
           advances_with_terms_of_180_days_or_less: Advances with terms of 180 days or less
-          advances_with_terms_of_more_than: Advances with terms of more than
+          advances_with_terms_of_more_than: Advances with terms of more than 180 days
           vrc: Variable Rate Credit (VRC) Advance
           vrc_standard_xlsx: "Standard - VRC"
           vrc_sbc_xlsx: "SBC - VRC"

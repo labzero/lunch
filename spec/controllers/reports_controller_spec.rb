@@ -1195,6 +1195,7 @@ RSpec.describe ReportsController, :type => :controller do
   end
 
   describe 'GET current_price_indications' do
+    let(:current_price_indications) { get :current_price_indications }
     let(:rates_service_instance) { double('RatesService') }
     let(:member_balances_service_instance) { double('MemberBalanceService') }
     let(:response_cpi_hash) { double('RatesServiceHash') }
@@ -1219,23 +1220,49 @@ RSpec.describe ReportsController, :type => :controller do
       allow(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
       allow(response_cpi_hash).to receive(:collect)
       allow(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
-      get :current_price_indications
+      current_price_indications
       expect(response.body).to render_template('current_price_indications')
     end
     it 'should return vrc data' do
-      get :current_price_indications
+      current_price_indications
       expect(assigns[:standard_vrc_data]).to eq(vrc_response)
       expect(assigns[:sbc_vrc_data]).to eq(vrc_response)
     end
     it 'should return frc data' do
-      get :current_price_indications
+      current_price_indications
       expect(assigns[:standard_frc_data]).to eq(frc_response)
       expect(assigns[:sbc_frc_data]).to eq(frc_response)
     end
     it 'should return arc data' do
-      get :current_price_indications
+      current_price_indications
       expect(assigns[:standard_arc_data]).to eq(arc_response)
       expect(assigns[:sbc_arc_data]).to eq(arc_response)
+    end
+    describe 'table data' do
+      interest_day_count_key = I18n.t('reports.pages.price_indications.current.interest_day_count') 
+      payment_frequency_key = I18n.t('reports.pages.price_indications.current.payment_frequency') 
+      interest_rate_reset_key = I18n.t('reports.pages.price_indications.current.interest_rate_reset') 
+      before { current_price_indications }
+      %w(standard_vrc_table_data sbc_vrc_table_data standard_frc_table_data sbc_frc_table_data standard_arc_table_data sbc_arc_table_data).each do |table_data|
+        it "@#{table_data} should contain a notes hash with a #{interest_day_count_key} key" do
+          expect(assigns[table_data.to_sym][:notes][interest_day_count_key]).to be_a_kind_of(String)
+        end
+        if table_data == 'standard_frc_table_data'
+          it "@#{table_data} should contain a notes hash with a #{payment_frequency_key} key" do
+            expect(assigns[table_data.to_sym][:notes][payment_frequency_key]).to be_a_kind_of(String)
+          end
+        else
+          it "@#{table_data} should contain a notes hash with a #{payment_frequency_key} key" do
+            expect(assigns[table_data.to_sym][:notes][payment_frequency_key]).to be_a_kind_of(Array)
+          end
+        end
+        if ['standard_arc_table_data', 'sbc_arc_table_data'].include?(table_data)
+          it "@#{table_data} should contain a notes hash with a #{interest_rate_reset_key} key" do
+            expect(assigns[table_data.to_sym][:notes][interest_rate_reset_key]).to be_a_kind_of(Array)
+          end
+        end
+      end
+
     end
   end
 
@@ -1492,6 +1519,9 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[:credit_type_options]).to eq(options_array)
         end
         describe '@table_data' do
+          interest_day_count_key = I18n.t('reports.pages.price_indications.current.interest_day_count')
+          payment_frequency_key = I18n.t('reports.pages.price_indications.current.payment_frequency')
+          interest_rate_reset_key = I18n.t('reports.pages.price_indications.current.interest_rate_reset')
           describe 'table_heading' do
             ['1m_libor', '3m_libor', '6m_libor'].each do |credit_type|
               it "should set table_heading to the I18n translation for #{credit_type} table heading if the credit type is `#{credit_type}`" do
@@ -1534,6 +1564,20 @@ RSpec.describe ReportsController, :type => :controller do
               allow(response_hash).to receive(:[]=)
               get :historical_price_indications, historical_price_credit_type: 'frc'
               expect((assigns[:table_data])[:rows]).to eq(formatted_rows)
+            end
+          end
+          it "has a notes hash with an #{interest_day_count_key}" do
+            get :historical_price_indications
+            expect(assigns[:table_data][:notes][interest_day_count_key]).to be_a_kind_of(String)
+          end
+          it "has a notes hash with an #{payment_frequency_key}" do
+            get :historical_price_indications
+            expect(assigns[:table_data][:notes][payment_frequency_key]).to be_a_kind_of(String)
+          end
+          RatesService::ARC_CREDIT_TYPES.each do |credit_type|
+            it "has a notes hash with an #{interest_rate_reset_key} if it is a `#{credit_type}` credit type" do
+              get :historical_price_indications, historical_price_credit_type: credit_type
+              expect(assigns[:table_data][:notes][interest_rate_reset_key]).to be_a_kind_of(String)
             end
           end
         end
