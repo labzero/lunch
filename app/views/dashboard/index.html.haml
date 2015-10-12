@@ -83,14 +83,21 @@
                   %thead
                     %tr
                       %th{colspan: 2}
-                      %th= t('dashboard.quick_advance.table.axes_labels.standard')
-                      %th{colspan: 3}= t('dashboard.quick_advance.table.axes_labels.securities_backed')
+                      %th
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.axes_labels.standard')
+                      %th{colspan: 3}
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.axes_labels.securities_backed')
                     %tr.quick-advance-column-labels
-                      %th{colspan: 2}= t('dashboard.quick_advance.table.term')
-                      %th= t('dashboard.quick_advance.table.whole_loan')
-                      %th= t('dashboard.quick_advance.table.agency')
-                      %th= t('dashboard.quick_advance.table.aaa')
-                      %th= t('dashboard.quick_advance.table.aa')
+                      %th{colspan: 2}
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.term')
+                      %th
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.whole_loan')
+                      %th
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.agency')
+                      %th
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.aaa')
+                      %th
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.aa')
                   %tbody
           %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.preview')
           %small
