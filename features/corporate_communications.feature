@@ -6,7 +6,7 @@ Feature: Visiting the Messages Page
   Background:
     Given I am logged in
 
-@smoke
+@smoke @wip 
 Scenario: Visit the messages page from the header
   Given I visit the dashboard
   When I click on the messages icon in the header
