@@ -2,6 +2,7 @@ module MAPI
   module Services
     module Member
       module AdvancesDetails
+        include MAPI::Shared::Utils
 
         ADVANCES_PAYMENT_FREQUENCY_MAPPING = {
             'D'=> 'Daily',
@@ -101,37 +102,24 @@ module MAPI
                   end
                 end
               else
-                latest_row_found = false
                 # if date is yesterday or later, get data from the lastest view
-                if as_of_date >  today_date  - 2.days
-                  rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_latest.json'))).sample
-                  rows.collect! do |details|
-                    if details['ADVDET_MATURITY_DATE'].to_date < as_of_date
-                      details['ADVDET_MATURITY_DATE'] = as_of_date + (1 + rand(30))
-                    end
-                    if details['ADVDET_ISSUE_DATE'].to_date  > as_of_date
-                      details['ADVDET_ISSUE_DATE'] = as_of_date - (1 + rand(7))
-                      details['TRADE_DATE'] = details['ADVDET_ISSUE_DATE']
-                    end
-                    details
-                  end
-                  latest_row_found = true
-                  advances_details_records = rows
+                rows = if latest_row_found = as_of_date >  today_date  - 2.days
+                  fake('member_advances_latest').sample
+                elsif as_of_date < today_date
+                  fake('member_advances_historical').sample
+                else
+                  []
                 end
-                if as_of_date < today_date  && !latest_row_found
-                  rows = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_historical.json'))).sample
-                  rows.collect! do |details|
-                    if details['ADVDET_MATURITY_DATE'].to_date < as_of_date
-                      details['ADVDET_MATURITY_DATE'] = as_of_date + (1 + rand(30))
-                    end
-                    if details['ADVDET_ISSUE_DATE'].to_date  > as_of_date
-                      details['ADVDET_ISSUE_DATE'] = as_of_date - (1 + rand(7))
-                      details['TRADE_DATE'] = details['ADVDET_ISSUE_DATE']
-                    end
-                    details
+                rows.each do |row|
+                  if row['ADVDET_MATURITY_DATE'].to_date < as_of_date
+                    row['ADVDET_MATURITY_DATE'] = as_of_date + (1 + rand(30))
                   end
-                  advances_details_records = rows
+                  if row['ADVDET_ISSUE_DATE'].to_date  > as_of_date
+                    row['ADVDET_ISSUE_DATE'] = as_of_date - (1 + rand(7))
+                    row['TRADE_DATE'] = row['ADVDET_ISSUE_DATE']
+                  end
                 end
+                advances_details_records = rows
               end
 
               # format the result sets with some business logic
