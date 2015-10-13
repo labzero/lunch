@@ -15,9 +15,7 @@
     .report-table-title-with-margins
       %h3= t('reports.pages.price_indications.current.frc')
     = render 'reports/reports_table', table_class: 'current-price-frc-table', table_data: @standard_frc_table_data, sortable: false
-    %small
-      %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_actual')}
-      %p #{t('reports.pages.price_indications.current.payment_frequency')}: #{t('reports.pages.price_indications.current.at_monthend_and_at_repayment')}
+    = render 'reports_table_notes', notes: @standard_frc_table_data[:notes]
     .report-table-title-with-margins
       %h3= t('reports.pages.price_indications.current.arc')
       .sub-title
@@ -47,9 +45,10 @@
         %tr
           %td= @sta_table_data[:row_name]
           %td.report-cell-right.report-cell-expanding= fhlb_formatted_number(@sta_table_data[:row_value], precision: 5)
-    %small
-      %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_360')}
-      %p= t('reports.pages.price_indications.current.sta_info')
+    %dl
+      %dt= t('reports.pages.price_indications.current.interest_day_count')
+      %dd= t('reports.pages.price_indications.current.actual_360')
+      %dd= t('reports.pages.price_indications.current.sta_info')
   .report-main-body
     %h2.report-table-title= t('reports.general_information.title')
     %small

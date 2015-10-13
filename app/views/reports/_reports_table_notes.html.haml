@@ -1,11 +1,11 @@
 %dl
   - notes.each do |term, description|
-    %dt= term + ':'
+    %dt= term 
     - if description.is_a?(Array) 
       - description.each do |line|
         %dd
           %dl
-            %dt= line.first + ':' 
+            %dt= line.first 
             %dd= line.last
     - else
       %dd= description

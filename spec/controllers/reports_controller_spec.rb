@@ -1243,26 +1243,84 @@ RSpec.describe ReportsController, :type => :controller do
       payment_frequency_key = I18n.t('reports.pages.price_indications.current.payment_frequency') 
       interest_rate_reset_key = I18n.t('reports.pages.price_indications.current.interest_rate_reset') 
       before { current_price_indications }
-      %w(standard_vrc_table_data sbc_vrc_table_data standard_frc_table_data sbc_frc_table_data standard_arc_table_data sbc_arc_table_data).each do |table_data|
-        it "@#{table_data} should contain a notes hash with a #{interest_day_count_key} key" do
-          expect(assigns[table_data.to_sym][:notes][interest_day_count_key]).to be_a_kind_of(String)
+      describe '@standard_vrc_table_data' do
+        it "should contain a notes hash with a #{interest_day_count_key} key and a value of '#{ReportsController::INTEREST_DAY_COUNT_MAPPINGS[:standard][:vrc]}'" do
+          expect(assigns[:standard_vrc_table_data][:notes][interest_day_count_key]).to eq(ReportsController::INTEREST_DAY_COUNT_MAPPINGS[:standard][:vrc])
         end
-        if table_data == 'standard_frc_table_data'
-          it "@#{table_data} should contain a notes hash with a #{payment_frequency_key} key" do
-            expect(assigns[table_data.to_sym][:notes][payment_frequency_key]).to be_a_kind_of(String)
-          end
-        else
-          it "@#{table_data} should contain a notes hash with a #{payment_frequency_key} key" do
-            expect(assigns[table_data.to_sym][:notes][payment_frequency_key]).to be_a_kind_of(Array)
-          end
-        end
-        if ['standard_arc_table_data', 'sbc_arc_table_data'].include?(table_data)
-          it "@#{table_data} should contain a notes hash with a #{interest_rate_reset_key} key" do
-            expect(assigns[table_data.to_sym][:notes][interest_rate_reset_key]).to be_a_kind_of(Array)
-          end
+        it "should contain a notes hash with a #{payment_frequency_key} key and an array of the correct values" do
+          expect(assigns[:standard_vrc_table_data][:notes][payment_frequency_key]).to eq([
+            [I18n.t('reports.pages.price_indications.current.overnight'), ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:vrc]],
+            [I18n.t('reports.pages.price_indications.current.open'), ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:vrc_open]]
+          ])
         end
       end
-
+      describe '@sbc_vrc_table_data' do
+        it "should contain a notes hash with a #{interest_day_count_key} key and a value of '#{ReportsController::INTEREST_DAY_COUNT_MAPPINGS[:sbc][:vrc]}'" do
+          expect(assigns[:sbc_vrc_table_data][:notes][interest_day_count_key]).to eq(ReportsController::INTEREST_DAY_COUNT_MAPPINGS[:sbc][:vrc])
+        end
+        it "should contain a notes hash with a #{payment_frequency_key} key and an array of the correct values" do
+          expect(assigns[:sbc_vrc_table_data][:notes][payment_frequency_key]).to eq([
+            [I18n.t('reports.pages.price_indications.current.overnight'), ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:vrc]],
+            [I18n.t('reports.pages.price_indications.current.open'), ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:vrc_open]]
+          ])
+        end
+      end
+      describe '@standard_frc_table_data' do
+        it "should contain a notes hash with a #{interest_day_count_key} key and a value of '#{ReportsController::INTEREST_DAY_COUNT_MAPPINGS[:standard][:frc]}'" do
+          expect(assigns[:standard_frc_table_data][:notes][interest_day_count_key]).to eq(ReportsController::INTEREST_DAY_COUNT_MAPPINGS[:standard][:vrc])
+        end
+        it "should contain a notes hash with a #{payment_frequency_key} key and a value of '#{ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:frc]}'" do
+          expect(assigns[:standard_frc_table_data][:notes][payment_frequency_key]).to eq(ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:frc])
+        end
+      end
+      describe '@sbc_frc_table_data' do
+        it "should contain a notes hash with a #{interest_day_count_key} key and a value of '#{ReportsController::INTEREST_DAY_COUNT_MAPPINGS[:sbc][:frc]}'" do
+          expect(assigns[:sbc_frc_table_data][:notes][interest_day_count_key]).to eq(ReportsController::INTEREST_DAY_COUNT_MAPPINGS[:sbc][:frc])
+        end
+        it "should contain a notes hash with a #{payment_frequency_key} key and a value of '#{ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:frc]}'" do
+          expect(assigns[:sbc_frc_table_data][:notes][payment_frequency_key]).to eq(ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:frc])
+        end
+      end
+      describe '@standard_arc_table_data' do
+        it "should contain a notes hash with a #{interest_day_count_key} key and a value of '#{ReportsController::INTEREST_DAY_COUNT_MAPPINGS[:standard][:arc]}'" do
+          expect(assigns[:standard_arc_table_data][:notes][interest_day_count_key]).to eq(ReportsController::INTEREST_DAY_COUNT_MAPPINGS[:standard][:arc])
+        end
+        it "should contain a notes hash with a #{payment_frequency_key} key and an array of the correct values" do
+          expect(assigns[:standard_arc_table_data][:notes][payment_frequency_key]).to eq([
+            [I18n.t('reports.pages.price_indications.current.1_month_libor'), ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:'1m_libor']],
+            [I18n.t('reports.pages.price_indications.current.3_month_libor'), ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:'3m_libor']],
+            [I18n.t('reports.pages.price_indications.current.6_month_libor'), ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:'6m_libor']],
+            [I18n.t('reports.pages.price_indications.current.prime'), ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:'daily_prime']]
+          ])
+        end
+        it "should contain a notes hash with a #{interest_rate_reset_key} key and an array of the correct values" do
+          expect(assigns[:standard_arc_table_data][:notes][interest_rate_reset_key]).to eq([
+           [I18n.t('reports.pages.price_indications.current.1_month_libor'), ReportsController::INTEREST_RATE_RESET_MAPPINGS[:'1m_libor']],
+           [I18n.t('reports.pages.price_indications.current.3_month_libor'), ReportsController::INTEREST_RATE_RESET_MAPPINGS[:'3m_libor']],
+           [I18n.t('reports.pages.price_indications.current.6_month_libor'), ReportsController::INTEREST_RATE_RESET_MAPPINGS[:'6m_libor']],
+           [I18n.t('reports.pages.price_indications.current.prime'), ReportsController::INTEREST_RATE_RESET_MAPPINGS[:'daily_prime']]
+         ])
+        end
+      end
+      describe '@sbc_arc_table_data' do
+        it "should contain a notes hash with a #{interest_day_count_key} key and a value of '#{ReportsController::INTEREST_DAY_COUNT_MAPPINGS[:sbc][:arc]}'" do
+          expect(assigns[:sbc_arc_table_data][:notes][interest_day_count_key]).to eq(ReportsController::INTEREST_DAY_COUNT_MAPPINGS[:sbc][:arc])
+        end
+        it "should contain a notes hash with a #{payment_frequency_key} key and an array of the correct values" do
+          expect(assigns[:sbc_arc_table_data][:notes][payment_frequency_key]).to eq([
+            [I18n.t('reports.pages.price_indications.current.1_month_libor'), ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:'1m_libor']],
+            [I18n.t('reports.pages.price_indications.current.3_month_libor'), ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:'3m_libor']],
+            [I18n.t('reports.pages.price_indications.current.6_month_libor'), ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:'6m_libor']]
+          ])
+        end
+        it "should contain a notes hash with a #{interest_rate_reset_key} key and an array of the correct values" do
+          expect(assigns[:sbc_arc_table_data][:notes][interest_rate_reset_key]).to eq([
+            [I18n.t('reports.pages.price_indications.current.1_month_libor'), ReportsController::INTEREST_RATE_RESET_MAPPINGS[:'1m_libor']],
+            [I18n.t('reports.pages.price_indications.current.3_month_libor'), ReportsController::INTEREST_RATE_RESET_MAPPINGS[:'3m_libor']],
+            [I18n.t('reports.pages.price_indications.current.6_month_libor'), ReportsController::INTEREST_RATE_RESET_MAPPINGS[:'6m_libor']]
+          ])
+        end
+      end
     end
   end
 
@@ -1566,18 +1624,28 @@ RSpec.describe ReportsController, :type => :controller do
               expect((assigns[:table_data])[:rows]).to eq(formatted_rows)
             end
           end
-          it "has a notes hash with an #{interest_day_count_key}" do
-            get :historical_price_indications
-            expect(assigns[:table_data][:notes][interest_day_count_key]).to be_a_kind_of(String)
-          end
-          it "has a notes hash with an #{payment_frequency_key}" do
-            get :historical_price_indications
-            expect(assigns[:table_data][:notes][payment_frequency_key]).to be_a_kind_of(String)
-          end
-          RatesService::ARC_CREDIT_TYPES.each do |credit_type|
-            it "has a notes hash with an #{interest_rate_reset_key} if it is a `#{credit_type}` credit type" do
-              get :historical_price_indications, historical_price_credit_type: credit_type
-              expect(assigns[:table_data][:notes][interest_rate_reset_key]).to be_a_kind_of(String)
+          describe 'the notes hash' do
+            collateral_types = [:standard, :sbc]
+            credit_types = [:frc, :vrc, :'1m_libor', :'3m_libor', :'6m_libor']
+            collateral_types.each do |collateral_type|
+              credit_types.each do |credit_type|
+                describe "when the collateral type is #{collateral_type} and the credit_type is #{credit_type}" do
+                  it "has an #{interest_day_count_key} key with a value of #{ReportsController::INTEREST_DAY_COUNT_MAPPINGS[collateral_type][credit_type]}" do
+                    get :historical_price_indications, historical_price_collateral_type: collateral_type, historical_price_credit_type: credit_type
+                    expect(assigns[:table_data][:notes][interest_day_count_key]).to eq(ReportsController::INTEREST_DAY_COUNT_MAPPINGS[collateral_type][credit_type])
+                  end
+                  it "has an #{payment_frequency_key} key with a value of #{ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[collateral_type][credit_type]}" do
+                    get :historical_price_indications, historical_price_collateral_type: collateral_type, historical_price_credit_type: credit_type
+                    expect(assigns[:table_data][:notes][payment_frequency_key]).to eq(ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[collateral_type][credit_type])
+                  end
+                  if RatesService::ARC_CREDIT_TYPES.include?(credit_type)
+                    it "has an #{interest_rate_reset_key} key with a value of #{ReportsController::INTEREST_RATE_RESET_MAPPINGS[credit_type]}" do
+                      get :historical_price_indications, historical_price_collateral_type: collateral_type, historical_price_credit_type: credit_type
+                      expect(assigns[:table_data][:notes][interest_rate_reset_key]).to eq(ReportsController::INTEREST_RATE_RESET_MAPPINGS[credit_type])
+                    end
+                  end
+                end
+              end
             end
           end
         end

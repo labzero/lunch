@@ -422,8 +422,8 @@ class ReportsController < ApplicationController
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:standard][:vrc],
           t('reports.pages.price_indications.current.payment_frequency') => [
-            [t('global.overnight'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:vrc]],
-            [t('global.open'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:vrc_open]]
+            [t('reports.pages.price_indications.current.overnight'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:vrc]],
+            [t('reports.pages.price_indications.current.open'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:vrc_open]]
           ]  
         }
       }
@@ -447,8 +447,8 @@ class ReportsController < ApplicationController
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:sbc][:vrc],
           t('reports.pages.price_indications.current.payment_frequency') => [
-            [t('global.overnight'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:vrc]],
-            [t('global.open'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:vrc_open]]
+            [t('reports.pages.price_indications.current.overnight'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:vrc]],
+            [t('reports.pages.price_indications.current.open'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:vrc_open]]
           ]
         }
       }
@@ -503,7 +503,7 @@ class ReportsController < ApplicationController
       }
 
       #arc headers for standard collateral
-      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor'), t('reports.pages.price_indications.current.3_month_libor'), t('reports.pages.price_indications.current.6_month_libor'), t('reports.pages.price_indications.current.prime')]
+      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor_header'), t('reports.pages.price_indications.current.3_month_libor_header'), t('reports.pages.price_indications.current.6_month_libor_header'), t('reports.pages.price_indications.current.prime_header')]
       #arc data for standard collateral
       @standard_arc_data = rate_service.current_price_indications('standard', 'arc')
       rows = @standard_arc_data.collect do |row|
@@ -537,7 +537,7 @@ class ReportsController < ApplicationController
         }
       }
       #arc headers for sbc collateral
-      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor'), t('reports.pages.price_indications.current.3_month_libor'), t('reports.pages.price_indications.current.6_month_libor')]
+      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor_header'), t('reports.pages.price_indications.current.3_month_libor_header'), t('reports.pages.price_indications.current.6_month_libor_header')]
       #arc data for sbc collateral
       @sbc_arc_data = rate_service.current_price_indications('sbc', 'arc')
       rows = @sbc_arc_data.collect do |row|
