@@ -121,6 +121,7 @@ Rails.application.routes.draw do
     get 'member/password/reset' => 'users/passwords#edit', as: :edit_user_password
     put 'member/password' => 'users/passwords#update'
     get '/terms-of-use' => 'members#terms_of_use', as: :terms_of_use
+    get '/contact' => 'members#contact', as: :contact
   end
   devise_for :users, controllers: { sessions: 'users/sessions', passwords: 'users/passwords' }, :skip => [:sessions, :passwords]
 

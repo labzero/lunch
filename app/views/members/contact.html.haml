@@ -1,0 +1,236 @@
+- @html_class = 'white-background'
+.row.contact-page
+  .column-2x10-right
+    %h1= t('global.contact')
+    %nav.nav-toc
+      = link_to(t('contact.general_information.title'), '#general')
+      = link_to(t('contact.member_financial_services.title'), '#services')
+      = link_to(t('contact.collateral_departments.title'), '#collateral')
+      = link_to(t('contact.electronic_funds_management.title'), '#efunds')
+      = link_to(t('contact.operations.title'), '#operations')
+      = link_to(t('contact.financial_accounting_reporting.title'), '#reporting')
+      = link_to(t('contact.community_investment.title'), '#community')
+      = link_to(t('contact.cofi.title'), '#cofi')
+      = link_to(t('contact.web_support.title'), '#support')
+    %section
+      %a{name: 'general'}
+      %h2= t('contact.general_information.title')
+      %p= simple_format(t('contact.general_information.address'))
+    %table
+      %tbody
+        %tr
+          %td= t('global.phone')
+          %td= fhlb_formatted_phone_number('8002830700')
+        %tr
+          %td
+          %td= fhlb_formatted_phone_number('4156161000')
+    %section
+      %a{name: 'services'}
+      %h2= t('contact.member_financial_services.title')
+      %h3= t('contact.member_financial_services.service_desk.title')
+      %table
+        %tbody
+          %tr
+            %td= t('global.phone')
+            %td= fhlb_formatted_phone_number('8004443452')
+          %tr
+            %td
+            %td= fhlb_formatted_phone_number('4156162500')
+          %tr
+            %td= t('global.fax')
+            %td= fhlb_formatted_phone_number('4156162605')
+      %h3= t('contact.member_financial_services.relationship_managers.title')
+      %table
+        %tbody
+          %tr
+            %td= mail_to('cibulls@fhlbsf.com', 'Steve Cibull')
+            %td= fhlb_formatted_phone_number('4156162535')
+          %tr
+            %td= mail_to('mccormaj@fhlbsf.com', 'John McCormack')
+            %td= fhlb_formatted_phone_number('4156162755')
+          %tr
+            %td= mail_to('remchp@fhlbsf.com', 'Patricia Remch')
+            %td= fhlb_formatted_phone_number('4156162642')
+          %tr
+            %td= mail_to('wilsont@fhlbsf.com', 'Tom Wilson')
+            %td= fhlb_formatted_phone_number('4156162748')
+          %tr
+            %td= t('global.fax')
+            %td= fhlb_formatted_phone_number('4156162613')
+      %h3= t('contact.member_financial_services.mortgage_purchases.title')
+      %table
+        %tbody
+          %tr
+            %td= mail_to('coxt@fhlbsf.com', 'Terry Cox')
+            %td= fhlb_formatted_phone_number('4156162608')
+          %tr
+            %td= mail_to('turturik@fhlbsf.com', 'Kathleen Turturice')
+            %td= fhlb_formatted_phone_number('4156162592')
+          %tr
+            %td= mail_to('wongt@fhlbsf.com', 'Tony Wong')
+            %td= fhlb_formatted_phone_number('4156162584')
+          %tr
+            %td= mail_to('yuer@fhlbsf.com', 'Rober Yue')
+            %td= fhlb_formatted_phone_number('4156162667')
+          %tr
+            %td= t('global.fax')
+            %td= fhlb_formatted_phone_number('4156162613')
+    %section
+      %a{name: 'collateral'}
+      %h2= t('contact.collateral_departments.title')
+      %h3= t('contact.collateral_departments.collateral_operations.title')
+      %table
+        %tbody
+          %tr
+            %td= t('global.phone')
+            %td= fhlb_formatted_phone_number('4156162980')
+          %tr
+            %td= t('global.fax')
+            %td= fhlb_formatted_phone_number('4156162835')
+          %tr
+            %td= t('global.email')
+            %td= mail_to('collateraloperations@fhlbsf.com')
+          %tr
+            %td= t('contact.collateral_departments.collateral_operations.email')
+            %td= mail_to('cmsmcu@fhlbsf.com')
+      %ul
+        %li= t('contact.collateral_departments.collateral_operations.blanket')
+        %li= t('contact.collateral_departments.collateral_operations.pledge')
+        %li= t('contact.collateral_departments.collateral_operations.deficiency')
+        %li= t('contact.collateral_departments.collateral_operations.vault')
+        %li= t('contact.collateral_departments.collateral_operations.mcu')
+    %h3= t('contact.collateral_departments.collateral_services.title')
+    %table
+      %tbody
+        %tr
+          %td= t('global.phone')
+          %td= fhlb_formatted_phone_number('4156162801')
+        %tr
+          %td
+          %td= fhlb_formatted_phone_number('4156162893')
+        %tr
+          %td= t('global.fax')
+          %td= fhlb_formatted_phone_number('4156162689')
+        %tr
+          %td= t('global.email')
+          %td= mail_to('collateral@fhlbsf.com')
+    %ul
+      %li= t('contact.collateral_departments.collateral_services.eligibility')
+      %li= t('contact.collateral_departments.collateral_services.reviews')
+    %h3= t('contact.collateral_departments.securities_services.title')
+    %table
+      %tbody
+        %tr
+          %td= t('global.phone')
+          %td= fhlb_formatted_phone_number('4156162970')
+        %tr
+          %td= t('global.fax')
+          %td= fhlb_formatted_phone_number('4156162836')
+        %tr
+          %td= t('global.email')
+          %td= mail_to('securitiesservices@fhlbsf.com')
+    %ul
+      %li= t('contact.collateral_departments.securities_services.safekeeping')
+      %li= t('contact.collateral_departments.securities_services.settlement')
+      %li= t('contact.collateral_departments.securities_services.principal')
+      %li= t('contact.collateral_departments.securities_services.cash')
+    %section
+      %a{name: 'efunds'}
+      %h2= t('contact.electronic_funds_management.title')
+      %table
+        %tbody
+          %tr
+            %td= t('global.phone')
+            %td= fhlb_formatted_phone_number('4156162940')
+          %tr
+            %td= t('global.fax')
+            %td= fhlb_formatted_phone_number('4156162836')
+          %tr
+            %td= t('global.email')
+            %td= mail_to('wireroom@fhlbsf.com')
+      %p= t('contact.electronic_funds_management.wire')
+    %section
+      %a{name: 'operations'}
+      %h2= t('contact.operations.title')
+      %table
+        %tbody
+          %tr
+            %td= t('global.phone')
+            %td= fhlb_formatted_phone_number('4156162616')
+          %tr
+            %td= t('contact.operations.sta_rate')
+            %td= fhlb_formatted_phone_number('8004192047')
+          %tr
+            %td= mail_to('normanb@fhlbsf.com', 'Betty Norman')
+            %td= fhlb_formatted_phone_number('4156162945')
+          %tr
+            %td= mail_to('oneilg@fhlbsf.com', "Gregory O'Neill")
+            %td= fhlb_formatted_phone_number('4156162941')
+          %tr
+            %td= mail_to('tarucm@fhlbsf.com', 'Manny Taruc')
+            %td= fhlb_formatted_phone_number('4156162559')
+    %section
+      %a{name: 'reporting'}
+      %h2= t('contact.financial_accounting_reporting.title')
+      %table
+        %tbody
+          %tr
+            %td= mail_to('tungc@fhlbsf.com', 'Curtis Tung')
+            %td= fhlb_formatted_phone_number('4156162589')
+          %tr
+            %td= t('global.email')
+            %td= mail_to('capitalstock@fhlbsf.com')
+    %section
+      %a{name: 'community'}
+      %h2= t('contact.community_investment.title')
+      %table
+        %tbody
+          %tr
+            %td= t('global.phone')
+            %td= fhlb_formatted_phone_number('4156162542')
+          %tr
+            %td= t('global.fax')
+            %td= fhlb_formatted_phone_number('4156162767')
+          %tr
+            %td= t('global.email')
+            %td= mail_to('communityinvestment@fhlbsf.com')
+      %h3= t('contact.community_investment.ahp.title')
+      %table
+        %tbody
+          %tr
+            %td= mail_to('adamsa@fhlbsf.com', 'Anita Adams')
+            %td= fhlb_formatted_phone_number('4156162749')
+      %h3= t('contact.community_investment.cip_ace.title')
+      %table
+        %tbody
+          %tr
+            %td= mail_to('orosar@fhlbsf.com', 'Reena Orosa')
+            %td= fhlb_formatted_phone_number('4156162754')
+      %h3= t('contact.community_investment.programs.title')
+      %table
+        %tbody
+          %tr
+            %td= mail_to('nunezm@fhlbsf.com', 'Marietta Núñez')
+            %td= fhlb_formatted_phone_number('4156162633')
+      %section
+        %a{name: 'cofi'}
+        %h2= t('contact.cofi.title')
+        %table
+          %tbody
+            %tr
+              %td= t('contact.cofi.website')
+              %td= t('contact.cofi.cofi_html', url:'http://fhlbsf.com/resource-center/cofi/default.aspx')
+            %tr
+              %td= t('global.phone')
+              %td= fhlb_formatted_phone_number('4156162600')
+      %section
+        %a{name: 'support'}
+        %h2= t('contact.web_support.title')
+        %table
+          %tbody
+            %tr
+              %td= t('global.phone')
+              %td= fhlb_formatted_phone_number('4156162610')
+            %tr
+              %td= t('global.email')
+              %td= mail_to('websupport@fhlbsf.com')

@@ -97,6 +97,8 @@ en:
     role: Role
     name: Name
     edit: Edit
+    phone: Phone
+    fax: Fax
     copyright_html: "&copy;"
     copyright_date: 2000-2015
     contact: Contact
@@ -1851,6 +1853,60 @@ en:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email
     edit_email_settings_html: Edit your <a href=%{url}>Email Settings</a> to choose which messages you want to receive via email.
+  contact:
+    general_information:
+      title: General Information
+      address: "Federal Home Loan Bank of San Francisco\n\nP.O. Box 7948\nSan Francisco, CA 94120-7948\n\n600 California Street\nSan Francisco, CA 94108"
+    member_financial_services:
+      title: Member Financial Services
+      service_desk:
+        title: Member Services Desk
+      relationship_managers:
+        title: Relationship Managers
+      mortgage_purchases:
+        title: Mortgage Purchases
+    collateral_departments:
+      title: Collateral Departments
+      collateral_operations:
+        title: Collateral Operations
+        email: Email (MCUs)
+        blanket: Blanket lien pledges and certifications
+        pledge: Collateral pledge and release (mortgages and securities)
+        deficiency: Collateral deficiencies
+        vault: Collateral vault deposits and withdrawals
+        mcu: Mortgage Collateral Updates (MCUs)
+      collateral_services:
+        title: Collateral Services
+        eligibility: Collateral eligibility
+        reviews: Field reviews
+      securities_services:
+        title: Securities Services
+        safekeeping: Safekeeping services for pledged and unpledged securities
+        settlement: Settlement of securities transactions
+        principal: Securities principal and interest payments
+        cash: Securities cash projections, transaction confirmations and holdings reports
+    electronic_funds_management:
+      title: Electronic Funds Management
+      wire: "You can wire funds or send drawdown requests to your Settlement/Transaction Account at the Bank by indicating: FHLB SF, ABA Routing 1210-0070-1, Credit/Debit: Settlement/Transaction Account Number, and Member Name."
+    operations:
+      title: Operations
+      sta_rate: STA Rate
+    financial_accounting_reporting:
+      title: Financial Accounting and Reporting Department
+    community_investment:
+      title: Community Investment
+      ahp:
+        title: AHP Competitive Program
+      cip_ace:
+        title: CIP and ACE
+      programs:
+        title: AHEAD, IDEA, and WISH Programs
+    cofi:
+      title: 11th District Cost of Funds Indices
+      website: Website
+      cofi_html: <a href="%{url}">11th District Cost of Funds Indices</a>
+    web_support:
+      title: Web Support
   terms:
     title: Terms of Use
     intro:
