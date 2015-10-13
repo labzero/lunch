@@ -71,6 +71,15 @@ Scenario: Certain rates should be missing due to rate bands
   Then I should see a blacked out value for the "2year" term with a type of "aa"
   And I should see a blacked out value for the "3year" term with a type of "aa"
 
+@jira-mem-1056
+Scenario: 2 year rates should be missing due to override_end_date/override_end_time
+  Given I visit the dashboard
+  And I open the quick advance flyout
+  Then I should see a blacked out value for the "2year" term with a type of "whole"
+  And I should see a blacked out value for the "2year" term with a type of "aa"
+  And I should see a blacked out value for the "2year" term with a type of "aaa"
+  And I should see a blacked out value for the "2year" term with a type of "agency"
+
 Scenario: Preview rate from Quick Advance flyout table
   Given I visit the dashboard
   And I open the quick advance flyout

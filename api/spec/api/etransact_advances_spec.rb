@@ -10,7 +10,7 @@ describe MAPI::ServiceApp do
       let(:etransact_advances_limits) { get '/etransact_advances/limits'; JSON.parse(last_response.body) }
       let(:some_status_data) {{"WHOLE_LOAN_ENABLED" => "N", "SBC_AGENCY_ENABLED" => "Y", "SBC_AAA_ENABLED" => "Y", "SBC_AA_ENABLED" => "Y",
                                "LOW_DAYS_TO_MATURITY" => 0, "HIGH_DAYS_TO_MATURITY" => 1, "MIN_ONLINE_ADVANCE" => "100000", "TERM_DAILY_LIMIT" => "201000000",
-                               "PRODUCT_TYPE" => "VRC", "END_TIME" => "1700", "OVERRIDE_END_DATE" => "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME" => "1700"}} if env == :production
+                               "PRODUCT_TYPE" => "VRC", "END_TIME" => "1700", "OVERRIDE_END_DATE" => "2006-01-01", "OVERRIDE_END_TIME" => "1700"}} if env == :production
       let(:result_set) {double('Oracle Result Set', fetch: nil)} if env == :production
       before do
         if env == :production
@@ -65,7 +65,7 @@ describe MAPI::ServiceApp do
     describe 'in the production environment for cases when etransact is turned off' do
       # let!(:some_status_data) {[1, 'Open and O/N', 'N', 'Y', 'Y', 'Y', '2000', '01-JAN-2006 12:00 AM', '0700']}
       let!(:some_status_data) {{"AO_TERM_BUCKET_ID" => 1, "TERM_BUCKET_LABEL"=> "Open and O/N", "WHOLE_LOAN_ENABLED"=>  "N", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
-                                 "SBC_AA_ENABLED"=>  "Y", "END_TIME" => "2000",  "OVERRIDE_END_DATE" =>  "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME"=>  "0700"}}
+                                 "SBC_AA_ENABLED"=>  "Y", "END_TIME" => "2000",  "OVERRIDE_END_DATE" =>  "2006-01-01", "OVERRIDE_END_TIME"=>  "0700"}}
       let(:result_set) {double('Oracle Result Set', fetch: nil)}
       let(:result_set2) {double('Oracle Result Set', fetch: nil)}
       let(:result_set3) {double('Oracle Result Set', fetch: nil)}
@@ -103,14 +103,10 @@ describe MAPI::ServiceApp do
       end
     end
     describe 'in the production enviroment for cases when etransact is turned on' do
-      let(:now_time_string)       { double( 'now time as HHMMSS')}# { '010000' }
-      let(:now)                   { double( 'Time.zone.now' ) } #Time.zone.parse( now_string ) }
-      let(:today_time)            { double( 'today time') }
-      let(:today_time_with_TZ)    { double( 'today time with TZ') }
-      let(:today_date_with_TZ)    { double( 'today date withn TZ') }
-      let(:long_ago_time)         { double( 'long ago time' ) }
-      let(:long_ago_time_with_TZ) { double( 'long ago time with TZ' ) }
-      let(:long_ago_date_with_TZ) { double( 'long ago date with TZ' ) }
+      let(:now_time_string)       { double( 'now time as HHMM')}
+      let(:now)                   { double( 'Time.zone.now' ) }
+      let(:now_date)              { double( 'now date') }
+      let(:long_ago_date)         { double( 'long ago date' ) }
       let(:hash1) do
         {
             "AO_TERM_BUCKET_ID"  => 1,
@@ -120,7 +116,7 @@ describe MAPI::ServiceApp do
             "SBC_AAA_ENABLED"    => "Y",
             "SBC_AA_ENABLED"     => "Y",
             "END_TIME"           => "0001",
-            "OVERRIDE_END_DATE"  => long_ago_time,
+            "OVERRIDE_END_DATE"  => long_ago_date,
             "OVERRIDE_END_TIME"  => "2000"
         }
       end
@@ -133,7 +129,7 @@ describe MAPI::ServiceApp do
             "SBC_AAA_ENABLED"    => "Y",
             "SBC_AA_ENABLED"     => "N",
             "END_TIME"           => "2000",
-            "OVERRIDE_END_DATE"  => long_ago_time,
+            "OVERRIDE_END_DATE"  => long_ago_date,
             "OVERRIDE_END_TIME"  => "0700"
         }
       end
@@ -146,7 +142,7 @@ describe MAPI::ServiceApp do
             "SBC_AAA_ENABLED"    => "Y",
             "SBC_AA_ENABLED"     => "Y",
             "END_TIME"           => "2000",
-            "OVERRIDE_END_DATE"  => today_time,
+            "OVERRIDE_END_DATE"  => now_date,
             "OVERRIDE_END_TIME"  => "2359"
         }
       end
@@ -162,17 +158,13 @@ describe MAPI::ServiceApp do
         allow(result_set2).to receive(:fetch).and_return([1], nil)
         allow(result_set3).to receive(:fetch).and_return([1], nil)
         allow(result_set4).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
-        allow(now).to receive(:to_date).and_return(today_date_with_TZ)
-        allow(today_time).to receive(:in_time_zone).with( Time.zone ).and_return(today_time_with_TZ)
-        allow(long_ago_time).to receive(:in_time_zone).with( Time.zone ).and_return(long_ago_time_with_TZ)
-        allow(today_time_with_TZ).to receive(:to_date).and_return(today_date_with_TZ)
-        allow(long_ago_time_with_TZ).to receive(:to_date).and_return(long_ago_date_with_TZ)
-        allow(now).to receive(:strftime).with("%H%M%S").and_return(now_time_string)
+        allow(now).to receive(:to_date).and_return(now_date)
+        allow(now).to receive(:strftime).with("%H%M").and_return(now_time_string)
         allow(Time.zone).to receive(:now).and_return(now)
-        allow(now_time_string).to receive(:<).with('000100').and_return(false)
-        allow(now_time_string).to receive(:<).with('120000').and_return(true)
-        allow(now_time_string).to receive(:<).with('200000').and_return(true)
-        allow(now_time_string).to receive(:<).with('235900').and_return(true)      end
+        allow(now_time_string).to receive(:<).with('0001').and_return(false)
+        allow(now_time_string).to receive(:<).with('1200').and_return(true)
+        allow(now_time_string).to receive(:<).with('2000').and_return(true)
+        allow(now_time_string).to receive(:<).with('2359').and_return(true)      end
 
       it 'should return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
         expect(etransact_advances_status.length).to be >=1
@@ -202,7 +194,7 @@ describe MAPI::ServiceApp do
                                     "SBC_AAA_ENABLED"   => "Y",
                                     "SBC_AA_ENABLED"    => "Y",
                                     "END_TIME"          => "1200",
-                                    "OVERRIDE_END_DATE" => long_ago_time,
+                                    "OVERRIDE_END_DATE" => long_ago_date,
                                     "OVERRIDE_END_TIME" => "0700"}, nil).at_least(1).times
         expect(etransact_advances_status['etransact_advances_status']).to be false
         expect(etransact_advances_status['wl_vrc_status']).to be true
