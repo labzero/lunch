@@ -40,7 +40,7 @@ workbook.styles do |styles|
         details[:day_count_basis],
         details[:interest_rate],
         details[:accrued_interest],
-        details[:next_interest_pay_date].to_date,
+        details[:next_interest_pay_date].try(:to_date),
         details[:estimated_next_interest_payment],
         details[:prepayment_fee_indication],
         strip_tags(details[:prepayment_fee_indication_notes]),
