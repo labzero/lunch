@@ -99,6 +99,11 @@ RSpec.describe InternalMailer, :type => :mailer do
     let(:user) { double('A User', display_name: nil, username: nil)}
     let(:call_method) { subject.send(:user_name_from_user, user) }
 
+    it 'returns the user directly if its a string' do
+      user = double('A String')
+      allow(user).to receive(:is_a?).with(String).and_return(true)
+      expect(subject.send(:user_name_from_user, user)).to be(user)
+    end
     it 'return the `display_name` if found' do
       display_name = double('A Display Name')
       allow(user).to receive(:display_name).and_return(display_name)

@@ -3,7 +3,7 @@
     .quick-advance-icon-section.icon-error-before
       %p= t('dashboard.quick_advance.capitalstock.intro')
       %p.quick-advance-loading-message= t('dashboard.quick_advance.preview.initiate')
-      = render 'shared/radio_button', id: 'continue_transaction', name: 'capstock_option', checked: true, text: t('dashboard.quick_advance.capitalstock.continue_transaction')
+      = render 'shared/radio_button', id: 'continue_transaction', name: 'stock_choice', checked: true, text: t('dashboard.quick_advance.capitalstock.continue_transaction'), value: :continue
       .quick-advance-summary
         %dl.large_dl
           %dt= t('dashboard.quick_advance.capitalstock.original') +':'
@@ -16,7 +16,7 @@
           %dt= t('dashboard.quick_advance.capitalstock.cumulative') +':'
           %dd= fhlb_formatted_currency(@cumulative_stock_required, precision: 0)
         %label.label-radio-no-padding= t('dashboard.quick_advance.capitalstock.debit_sta_html', amount: fhlb_formatted_currency(@cumulative_stock_required, precision: 0))
-      = render 'shared/radio_button', id: 'increase_transaction', name: 'capstock_option', checked: false, text: t('dashboard.quick_advance.capitalstock.increase_transaction')
+      = render 'shared/radio_button', id: 'increase_transaction', name: 'stock_choice', checked: false, text: t('dashboard.quick_advance.capitalstock.increase_transaction'), value: :purchase
       .quick-advance-summary
         %dl.large_dl
           %dt= t('dashboard.quick_advance.capitalstock.original') +':'
