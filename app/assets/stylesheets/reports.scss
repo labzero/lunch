@@ -34,11 +34,12 @@
       color: $text-color;
     }
   }
-  a {
+  a, .disabled {
     display: block;
     color: $text-color;
     padding: 15px 20px;
   }
+
   td {
     @extend %typography-subtitle;
     height: 100px;
@@ -59,6 +60,9 @@
         color: $actionable-blue;
         text-transform: uppercase;
       }
+    }
+    .disabled p {
+      color: $medium-gray;
     }
     .report-info {
       @extend %typography-table-total;

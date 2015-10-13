@@ -15,7 +15,7 @@
         - reports.each do |report, details|
           %tr
             %td.description-cell
-              =link_to details[:route] || '#' do
+              - html = capture do
                 %h3= details[:title] || t("reports.#{category}.#{report}.title")
                 %p= details[:summary] || t("reports.#{category}.#{report}.summary")
                 .report-info
@@ -25,3 +25,7 @@
                   %span= t('reports.shared_table_values.available_history')
                   %span= details[:available_history]
                 %p= t('global.view')
+              - if details[:disabled]
+                .disabled= html
+              - else
+                =link_to html, details[:route] || '#'

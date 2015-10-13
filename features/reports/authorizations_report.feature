@@ -1,4 +1,4 @@
-@jira-mem-69
+@jira-mem-69 @wip
 Feature: Visiting the Authorizations Report Page
   As a user
   I want to use visit the authorizations report page for the FHLB Member Portal
@@ -7,7 +7,7 @@ Feature: Visiting the Authorizations Report Page
 Background:
   Given I am logged in
 
-@resque-backed @smoke @jira-mem-585 @jira-mem-836
+@resque-backed @smoke @jira-mem-585 @jira-mem-836 @wip
 Scenario: Visit authorizations page from header link
   Given I visit the dashboard
   When I select "Authorizations" from the reports dropdown
@@ -15,7 +15,7 @@ Scenario: Visit authorizations page from header link
   Then I should see a report table with multiple data rows
   And I should see a report header
 
-@resque-backed @jira-mem-585 @jira-mem-836
+@resque-backed @jira-mem-585 @jira-mem-836 @wip
 Scenario: Filtering the authorization report
   Given I am on the "Authorizations" report page
   And I wait for the report to load
@@ -44,7 +44,7 @@ Scenario: Filtering the authorization report
   When I select "User" from the authorizations filter
   Then I should only see users with the "User" role
 
-@resque-backed @smoke @jira-mem-824
+@resque-backed @smoke @jira-mem-824 @wip
 Scenario: Member downloads a PDF of the Authorizations report
   Given I am on the "Authorizations" report page
   When I request a PDF
