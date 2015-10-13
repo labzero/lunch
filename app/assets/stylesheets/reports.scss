@@ -184,10 +184,6 @@
   }
 }
 
-.report-info-indent {
-  margin-left: 40px;
-}
-
 .report-summary-data {
   display: inline-block;
   width: (3 * $grid-column-width) + (2 * $gutter-width);
@@ -511,6 +507,21 @@
       position: relative;
       top: 3px;
       margin-left: 10px;
+    }
+  }
+  dl {
+    @extend %typography-table-cell;
+    margin: -5px 0 15px; // neg top margin so we can leave .report-table-title style as-is for other reports
+  }
+  dt {
+    float: left;
+    margin-right: 8px;
+  }
+  dd {
+    margin-left: 0;
+    dl {
+      clear: both;
+      margin: 0 0 0 40px;
     }
   }
 }

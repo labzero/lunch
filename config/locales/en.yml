@@ -921,19 +921,21 @@ en:
           basis_point_spread_to_benchmark: Basis Point Spread to Benchmark
           nominal_yield_of_benchmark: Nominal Yield of Benchmark* (%)
           advance_rate: Advance Rate (%)
-          interest_day_count: Interest Day Count
-          interest_rate_reset: Interest Rate Reset
+          interest_day_count: 'Interest Day Count:'
+          interest_rate_reset: 'Interest Rate Reset:'
           actual_actual: Actual/Actual
           actual_360: Actual/360
-          payment_frequency: Interest Payment Frequency
+          payment_frequency: 'Interest Payment Frequency:'
+          overnight: 'Overnight:'
+          open: 'Open:'
           at_maturity: At maturity
           at_repayment: At repayment
           at_monthend_and_at_repayment: At monthend and at repayment
           monthly_and_at_repayment: Monthly and at repayment
           quarterly_and_at_repayment: Quarterly and at repayment
           semiannually_and_at_repayment: Semiannually and at repayment
-          advances_with_terms_of_180_days_or_less: Advances with terms of 180 days or less
-          advances_with_terms_of_more_than: Advances with terms of more than
+          advances_with_terms_of_180_days_or_less: 'Advances with terms of 180 days or less:'
+          advances_with_terms_of_more_than: 'Advances with terms of more than 180 days:'
           vrc: Variable Rate Credit (VRC) Advance
           vrc_standard_xlsx: "Standard - VRC"
           vrc_sbc_xlsx: "SBC - VRC"
@@ -944,10 +946,14 @@ en:
           basis_point_spread: (Basis Point Spread)
           arc_standard_xlsx: "Standard - ARC"
           arc_sbc_xlsx: "SBC - ARC"
-          1_month_libor: 1 Month LIBOR
-          3_month_libor: 3 Month LIBOR
-          6_month_libor: 6 Month LIBOR
-          prime: Daily Prime
+          1_month_libor: '1 Month LIBOR:'
+          3_month_libor: '3 Month LIBOR:'
+          6_month_libor: '6 Month LIBOR:'
+          prime: 'Daily Prime:'
+          1_month_libor_header: 1 Month LIBOR
+          3_month_libor_header: 3 Month LIBOR
+          6_month_libor_header: 6 Month LIBOR
+          prime_header: Daily Prime
           sta_info: Published STA rate is applied to previous business day's ending STA balance
           sta_rate: Effective Rate for Prior Business Day (%)
           freshness: This report reflects the price indications published at 6:00 am on the current business day.
