@@ -2,24 +2,40 @@ $faded-opacity: 0.4 !default;
 
 %quick-advance-cell-selected {
   color: $white;
-  @include pseudo-background-cover($actionable-blue);
+  .quick-advance-cell-wrapper {
+    @include pseudo-background-cover($actionable-blue);
+  }
 }
 
 @mixin quick-advance-cell-hovered {
   color: $white;
-  @include pseudo-background-cover($brand-blue);
+  .quick-advance-cell-wrapper {
+    @include pseudo-background-cover($brand-blue);
+  }
   &.disabled-cell {
-    @include pseudo-background-cover($light-gray);
+    .quick-advance-cell-wrapper {
+      @include pseudo-background-cover($light-gray);
+    }
     color: inherit;
     cursor: auto;
-  }  
+  }
 }
 
 %quick-advance-row-label {
   border-right: 1px solid $light-blue;
   text-transform: capitalize;
   cursor: auto;
-  @include pseudo-background-cover($light-gray);
+  .quick-advance-cell-wrapper {
+    @include pseudo-background-cover($light-gray);
+  }
+}
+
+.quick-advance-cell-wrapper {
+  position: relative;
+  z-index: 1;
+  &:hover {
+    z-index: 2;
+  }
 }
 
 .quick-advance-instruction {
@@ -81,8 +97,6 @@ $faded-opacity: 0.4 !default;
       background: $light-gray; // fix for IE11 incongruity in the way height is measured for cells with rowspan
     }
     td, th {
-      position: relative;
-      z-index: 1;
       border: 1px solid $light-blue;
       height: 30px;
       line-height: 30px;
@@ -97,17 +111,22 @@ $faded-opacity: 0.4 !default;
     th {
       @extend %typography-table-heading;
       color: $white;
-      @include pseudo-background-cover($medium-gray);
+      .quick-advance-cell-wrapper {
+        @include pseudo-background-cover($medium-gray);
+      }
       &:first-child {
         color: $text-color;
-        @include pseudo-background-cover($secondary-gray);
+        .quick-advance-cell-wrapper {
+          @include pseudo-background-cover($secondary-gray);
+        }
       }
     }
     td {
       @extend %typography-table-cell;
-      position: relative;
       &:first-child {
-        @include pseudo-background-cover($light-gray);
+        .quick-advance-cell-wrapper {
+          @include pseudo-background-cover($light-gray);
+        }
       }
       &:not(:first-child) {
         width: 110px;
@@ -147,11 +166,13 @@ $faded-opacity: 0.4 !default;
     tr {
       td {
         cursor: pointer;
-        @include pseudo-background-cover($lightest-blue);
+        .quick-advance-cell-wrapper {
+          @include pseudo-background-cover($lightest-blue);
+        }
       }
       td:first-child {
         @extend %quick-advance-row-label;
-        &.cell-selected {
+        &.cell-selected, &.row-label.cell-selected {
           @extend %quick-advance-cell-selected;
         }
         &.cell-hovered {
@@ -160,11 +181,15 @@ $faded-opacity: 0.4 !default;
       }
       &:nth-child(odd) {
         td {
-          @include pseudo-background-cover($white);
-          &.disabled-cell {
-            @include pseudo-background-cover($light-gray);
+          .quick-advance-cell-wrapper {
+            @include pseudo-background-cover($white);
           }
-          &.cell-selected {
+          &.disabled-cell {
+            .quick-advance-cell-wrapper {
+              @include pseudo-background-cover($light-gray);
+            }
+          }
+          &.cell-selected, &.cell-selected.selectable-cell {
             @extend %quick-advance-cell-selected;
           }
           &.cell-hovered {
@@ -172,7 +197,9 @@ $faded-opacity: 0.4 !default;
           }
         }
         td:first-child {
-          @include pseudo-background-cover($light-gray);
+          .quick-advance-cell-wrapper {
+            @include pseudo-background-cover($light-gray);
+          }
           &.cell-selected {
             @extend %quick-advance-cell-selected;
           }
@@ -189,7 +216,9 @@ $faded-opacity: 0.4 !default;
       &:first-child {
         th:first-child {
           border: none;
-          @include pseudo-background-cover;
+          .quick-advance-cell-wrapper {
+            @include pseudo-background-cover;
+          }
         }
       }
     }
@@ -217,7 +246,9 @@ $faded-opacity: 0.4 !default;
 }
 
 .quick-advance-rate-cell.disabled-cell {
-  @include pseudo-background-cover($light-gray);
+  .quick-advance-cell-wrapper {
+    @include pseudo-background-cover($light-gray);
+  }
 }
 
 .initiate-quick-advance, .confirm-quick-advance {
