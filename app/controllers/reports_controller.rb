@@ -608,10 +608,7 @@ class ReportsController < ApplicationController
         [t('reports.pages.price_indications.6m_libor.dropdown'), '6m_libor']
     ]
     if @collateral_type == 'standard'
-      @credit_type_options.push(
-        [t('reports.pages.price_indications.daily_prime.dropdown'), 'daily_prime'],
-        [t('reports.pages.price_indications.embedded_cap.dropdown'), 'embedded_cap']
-      )
+      @credit_type_options.push( [t('reports.pages.price_indications.daily_prime.dropdown'), 'daily_prime'] )
     end
     credit_type = params[:historical_price_credit_type]
     @credit_type_options.each do |option|
