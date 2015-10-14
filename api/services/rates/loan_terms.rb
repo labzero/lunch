@@ -37,7 +37,7 @@ module MAPI
         end
 
         def self.display_status(bucket, type)
-          bucket[MAPI::Services::EtransactAdvances::TYPE_BUCKET_COLUMN_NO_MAPPING[type]] == 'Y'
+          bucket[MAPI::Services::EtransactAdvances::TYPE_BUCKET_COLUMN_NO_MAPPING[type]] == 'Y' #veverything else mapping to false is intentional
         end
 
         def self.term_to_id(term)
@@ -48,11 +48,12 @@ module MAPI
         BLANK_TYPES=hash_from_pairs( LOAN_TYPES.map{ |type| [type, BLANK] } )
 
         def self.loan_terms(logger,environment)
-          now     = { date: Time.zone.now.to_date, time: Time.zone.now.strftime("%H%M%S") }
-          data = term_bucket_data(logger, environment)
+          now      = Time.zone.now
+          now_hash = { date: now.to_date, time: now.strftime('%H%M') }
+          data     = term_bucket_data(logger, environment)
           return nil if data.nil?
           buckets = data.index_by{ |bucket| id(bucket) }
-          hash_from_pairs( LOAN_TERMS.map { |term| [term, value_for_term(buckets[term_to_id(term)], now)]} )
+          hash_from_pairs( LOAN_TERMS.map { |term| [term, value_for_term(buckets[term_to_id(term)], now_hash)]} )
         end
 
         def self.term_bucket_data(logger, environment)
@@ -64,11 +65,14 @@ module MAPI
         end
 
         def self.term_bucket_data_development
-          fake('etransact_advances_term_buckets_info')
+          rows = fake('etransact_advances_term_buckets_info')
+          rows.each{ |row| row['OVERRIDE_END_DATE'] = row['OVERRIDE_END_DATE'].to_date }
+          rows[rows.index{ |row| /2 years/i === row['TERM_BUCKET_LABEL'] }]['OVERRIDE_END_DATE'] = Date.today
+          rows
         end
 
         def self.time(bucket, field)
-          bucket[field] + '00'
+          bucket[field]
         end
 
         def self.override_end_time(bucket)
@@ -80,7 +84,7 @@ module MAPI
         end
 
         def self.override_end_date(bucket)
-          bucket['OVERRIDE_END_DATE'].in_time_zone(Time.zone).to_date
+          bucket['OVERRIDE_END_DATE']
         end
 
         def self.bucket_label(bucket)
@@ -88,7 +92,7 @@ module MAPI
         end
 
         def self.id(bucket)
-          bucket['AO_TERM_BUCKET_ID'].to_i
+          bucket['AO_TERM_BUCKET_ID']
         end
       end
     end
