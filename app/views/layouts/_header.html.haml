@@ -63,7 +63,7 @@
         = link_to(t('nav.secondary.resources'), '#', class: 'nav-menu')
         %ul.nav-dropdown<>
           %li<>= link_to(t('resources.guides.title'), guides_path)
-          %li<>= link_to(t('resources.fee_schedules.title'), '#')
+          %li.disabled<>= t('resources.fee_schedules.title')
           %li<>
             = link_to(t('resources.forms.title'), forms_path)
             %ul.nav-dropdown-nested
@@ -71,18 +71,18 @@
               %li= link_to(t('resources.forms.authorizations.title'), forms_path(anchor: :authorizations))
               %li= link_to(t('resources.forms.credit.title'), forms_path(anchor: :credit))
               %li= link_to(t('resources.forms.collateral.title'), forms_path(anchor: :collateral))
-          %li<>= link_to(t('resources.faq.title'), '#')
-          %li<>= link_to(t('resources.capital_plan.title'), '#')
+          %li.disabled<>= t('resources.faq.title')
+          %li.disabled<>= t('resources.capital_plan.title')
           %li= link_to(t('resources.investor_relations.title'), 'http://www.fhlbsf.com/about/investor/default.aspx')
           %li= link_to(t('resources.newsroom.title'), 'http://www.fhlbsf.com/about/news/releases/default.aspx')
           %li= link_to(t('resources.regulatory_updates.title'), 'http://www.fhlbsf.com/resource-center/regulatory/default.aspx')
-          %li<>= link_to(t('resources.business_continuity.title'), '#')
+          %li.disabled<>= t('resources.business_continuity.title')
           %li<>
-            = link_to(t('resources.membership.title'), '#')
+            .disabled= t('resources.membership.title')
             %ul.nav-dropdown-nested
-              %li= link_to(t('resources.membership.benefits.title'), '#')
-              %li= link_to(t('resources.membership.requirements.title'), '#')
-              %li= link_to(t('resources.membership.applications.title'), '#')
+              %li.disabled= t('resources.membership.benefits.title')
+              %li.disabled= t('resources.membership.requirements.title')
+              %li.disabled= t('resources.membership.applications.title')
       %li.products-dropdown<>
         = link_to(t('nav.secondary.products'), '#', class: 'nav-menu')
         %ul.nav-dropdown<>
