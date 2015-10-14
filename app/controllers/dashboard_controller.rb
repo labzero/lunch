@@ -117,6 +117,7 @@ class DashboardController < ApplicationController
       nil
     end
 
+    @quick_advance_message = MessageService.new.todays_quick_advance_message
     @quick_advance_enabled = members_service.quick_advance_enabled_for_member?(current_member_id)
     etransact_status = etransact_service.status
     quick_advance_open = etransact_service.etransact_active?(etransact_status)

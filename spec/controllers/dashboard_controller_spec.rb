@@ -13,6 +13,7 @@ RSpec.describe DashboardController, :type => :controller do
       allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
       allow(subject).to receive(:current_user_roles)
       allow_any_instance_of(MembersService).to receive(:member_contacts)
+      allow(MessageService).to receive(:new).and_return(double('service instance', todays_quick_advance_message: nil))
     end
     
     it_behaves_like 'a user required action', :get, :index
@@ -137,6 +138,21 @@ RSpec.describe DashboardController, :type => :controller do
         allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(nil)
         get :index
         expect(assigns[:contacts]).to eq({})
+      end
+    end
+    describe 'the @quick_advance_message instance variable' do
+      let(:message) { double('message') }
+      let(:service_instance) { double('service instance') }
+      before { allow(MessageService).to receive(:new).and_return(service_instance) }
+      it 'is set to the value returned by the `todays_quick_advance_message` MessageService instance method' do
+        allow(service_instance).to receive(:todays_quick_advance_message).and_return(message)
+        get :index
+        expect(assigns[:quick_advance_message]).to eq(message)
+      end
+      it 'is nil if the `todays_quick_advance_message` MessageService instance method returns nil' do
+        allow(service_instance).to receive(:todays_quick_advance_message)
+        get :index
+        expect(assigns[:quick_advance_message]).to be_nil
       end
     end
     describe "RateService failures" do

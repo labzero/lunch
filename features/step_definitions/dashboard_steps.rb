@@ -160,6 +160,18 @@ When(/^the desk has closed$/) do
   # implement code to ensure desk has closed
 end
 
+When(/^there is limited pricing today$/) do
+  # implement code to ensure there is a limited pricing message for today
+end
+
+When (/^I click on the link to view limited pricing information$/) do
+  page.find('.quick-advance-limited-pricing-notice').click
+end
+
+Then (/^I should see the limited pricing information message$/) do
+  page.assert_selector('.quick-advance-limited-pricing-message', visible: true)
+end
+
 Then(/^I should not see a preview of the quick advance$/) do
   page.assert_no_selector(".quick-advance-preview")
 end
