@@ -1573,8 +1573,7 @@ RSpec.describe ReportsController, :type => :controller do
               [I18n.t('reports.pages.price_indications.1m_libor.dropdown'), '1m_libor'],
               [I18n.t('reports.pages.price_indications.3m_libor.dropdown'), '3m_libor'],
               [I18n.t('reports.pages.price_indications.6m_libor.dropdown'), '6m_libor'],
-              [I18n.t('reports.pages.price_indications.daily_prime.dropdown'), 'daily_prime'],
-              [I18n.t('reports.pages.price_indications.embedded_cap.dropdown'), 'embedded_cap']
+              [I18n.t('reports.pages.price_indications.daily_prime.dropdown'), 'daily_prime']
           ]
           get :historical_price_indications
           expect(assigns[:credit_type_options]).to eq(options_array)
