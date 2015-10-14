@@ -77,8 +77,8 @@
           %li= link_to(t('resources.newsroom.title'), 'http://www.fhlbsf.com/about/news/releases/default.aspx')
           %li= link_to(t('resources.regulatory_updates.title'), 'http://www.fhlbsf.com/resource-center/regulatory/default.aspx')
           %li.disabled<>= t('resources.business_continuity.title')
-          %li<>
-            .disabled= t('resources.membership.title')
+          %li.disabled
+            = t('resources.membership.title')
             %ul.nav-dropdown-nested
               %li.disabled= t('resources.membership.benefits.title')
               %li.disabled= t('resources.membership.requirements.title')
