@@ -6,7 +6,7 @@
       - if @error_message == :pass
         %p= t('dashboard.quick_advance.error.capital_stock_exception')
       -elsif @error_message == :low
-        %p= t('dashboard.quick_advance.error.low_exception_html', amount: fhlb_formatted_currency(@min_amount, precision: 0))
+        %p= t('dashboard.quick_advance.error.low_exception_html', amount: fhlb_formatted_currency(@error_value, precision: 0))
       -elsif @error_message == :credit
         %p= t('dashboard.quick_advance.error.insufficient_financing_availability_html', amount: fhlb_formatted_currency(@advance_amount, precision: 0))
       -elsif @error_message == :collateral

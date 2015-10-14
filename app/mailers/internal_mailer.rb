@@ -24,6 +24,8 @@ class InternalMailer < ActionMailer::Base
   protected
 
   def user_name_from_user(user)
+    return user if user.is_a?(String)
+
     begin
       name = user.display_name 
     rescue

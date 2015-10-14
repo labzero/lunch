@@ -31,7 +31,6 @@
     // quick advance trigger
     $initiateButton.on('click', function(){
       if ($initiateButton.hasClass('active') && !$.isEmptyObject(selected_rate)) {
-        selected_rate['check_capstock'] = true;
         initiateQuickAdvance(selected_rate);
       };
     });
@@ -108,7 +107,7 @@
                     securid_pin: pin,
                     securid_token: token
                   };
-                  performQuickAdvance($.extend(authentication_details, selected_rate));
+                  performQuickAdvance(authentication_details);
                 };
               };
             });
@@ -120,23 +119,13 @@
             $('.quick-advance-capstock-back-button').on('click', function () {
               $('.quick-advance-capstock, .quick-advance-capstock-back-button, .confirm-quick-advance-capstock').remove();
               $('.quick-advance-capstock-subheading').hide();
-              selected_rate['amount'] = json.original_amount;
               $oldNodes.show();
               transitionToRatesFromLoading();
             });
 
             // event listener and handler for .confirm-quick-advance button click
             $('.confirm-quick-advance-capstock').on('click', function () {
-              if ($('#continue_transaction').prop('checked') == true) {
-                selected_rate['amount'] = json.original_amount;
-                selected_rate['stock'] = json.net_stock_required;
-              }
-              else {
-                selected_rate['amount'] = json.gross_amount;
-                selected_rate['stock'] = json.gross_net_stock_required;
-              }
-              selected_rate['check_capstock'] = false;
-              initiateQuickAdvanceWithoutCapstockCheck(selected_rate);
+              initiateQuickAdvanceWithoutCapstockCheck({stock_choice: $flyout.find('input[name=stock_choice]:checked').val()});
             });
           }
         }
@@ -146,10 +135,10 @@
       });
     };
 
-    function initiateQuickAdvanceWithoutCapstockCheck(rate_data) {
+    function initiateQuickAdvanceWithoutCapstockCheck(params) {
       var $flyoutBottomSection = $('.flyout-bottom-section');
       transitionToLoadingFromCapstock();
-      $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function(json){
+      $.post('/dashboard/quick_advance_preview', params, function(json){
         var $flyoutBottomSection = $('.flyout-bottom-section');
         var $oldNodes = $flyoutBottomSection.find('.quick-advance-capstock, .quick-advance-capstock-back-button, .confirm-quick-advance-capstock');
 
@@ -164,7 +153,6 @@
         $('.quick-advance-back-button').on('click', function() {
           $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
           $('.quick-advance-preview-subheading').hide();
-          selected_rate['amount'] = json.original_amount;
           $oldNodes.show();
           $('.flyout-top-section-body .quick-advance-capstock-subheading').show();
           transitionToCapstockFromLoading();
@@ -181,7 +169,7 @@
               securid_pin: pin,
               securid_token: token
             };
-            performQuickAdvance($.extend(authentication_details, selected_rate));
+            performQuickAdvance(authentication_details);
           }
         });
 
@@ -297,6 +285,7 @@
       $quickAdvanceCapstock.removeClass('loading');
       $flyoutBottomSection.find('.quick-advance-loading-message').height('auto');
       $flyoutBottomSection.find('button').removeAttr('disabled');
+      $flyoutBottomSection.find('input[type=radio]').removeAttr('disabled');
       $flyoutTopSection.find('.quick-advance-capstock-subheading').show();
       $flyoutTopSection.find('.quick-advance-preview-subheading').hide();
     };
@@ -320,10 +309,6 @@
     function setRateFromElementData($element) {
       selected_rate['advance_term'] = $element.data('advance-term');
       selected_rate['advance_type'] = $element.data('advance-type');
-      selected_rate['advance_rate'] = $element.data('advance-rate');
-      selected_rate['maturity_date'] = $element.data('maturity-date');
-      selected_rate['payment_on'] = $element.data('payment-on');
-      selected_rate['interest_day_count'] = $element.data('interest-day-count');
     };
 
     function packageParameters(rate_data) {

@@ -24,6 +24,7 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
+    aasm (4.3.0)
     actionmailer (4.2.4)
       actionpack (= 4.2.4)
       actionview (= 4.2.4)
@@ -487,6 +488,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  aasm
   activerecord-oracle_enhanced-adapter (~> 1.6.0)
   autoprefixer-rails
   axlsx_rails (>= 0.3.0)
