@@ -19,10 +19,10 @@
     %table
       %tbody
         %tr
-          %td.left= t('global.phone')
+          %td.contact-cell-left= t('global.phone')
           %td= fhlb_formatted_phone_number('8002830700')
         %tr
-          %td.left
+          %td.contact-cell-left
           %td= fhlb_formatted_phone_number('4156161000')
     %section
       %a{name: 'services'}
@@ -31,49 +31,49 @@
       %table
         %tbody
           %tr
-            %td.left= t('global.phone')
+            %td.contact-cell-left= t('global.phone')
             %td= fhlb_formatted_phone_number('8004443452')
           %tr
-            %td.left
+            %td.contact-cell-left
             %td= fhlb_formatted_phone_number('4156162500')
           %tr
-            %td.left= t('global.fax')
+            %td.contact-cell-left= t('global.fax')
             %td= fhlb_formatted_phone_number('4156162605')
       %h3= t('contact.member_financial_services.relationship_managers.title')
       %table
         %tbody
           %tr
-            %td.left= mail_to('cibulls@fhlbsf.com', 'Steve Cibull')
+            %td.contact-cell-left= mail_to('cibulls@fhlbsf.com', 'Steve Cibull')
             %td= fhlb_formatted_phone_number('4156162535')
           %tr
-            %td.left= mail_to('mccormaj@fhlbsf.com', 'John McCormack')
+            %td.contact-cell-left= mail_to('mccormaj@fhlbsf.com', 'John McCormack')
             %td= fhlb_formatted_phone_number('4156162755')
           %tr
-            %td.left= mail_to('remchp@fhlbsf.com', 'Patricia Remch')
+            %td.contact-cell-left= mail_to('remchp@fhlbsf.com', 'Patricia Remch')
             %td= fhlb_formatted_phone_number('4156162642')
           %tr
-            %td.left= mail_to('wilsont@fhlbsf.com', 'Tom Wilson')
+            %td.contact-cell-left= mail_to('wilsont@fhlbsf.com', 'Tom Wilson')
             %td= fhlb_formatted_phone_number('4156162748')
           %tr
-            %td.left= t('global.fax')
+            %td.contact-cell-left= t('global.fax')
             %td= fhlb_formatted_phone_number('4156162613')
       %h3= t('contact.member_financial_services.mortgage_purchases.title')
       %table
         %tbody
           %tr
-            %td.left= mail_to('coxt@fhlbsf.com', 'Terry Cox')
+            %td.contact-cell-left= mail_to('coxt@fhlbsf.com', 'Terry Cox')
             %td= fhlb_formatted_phone_number('4156162608')
           %tr
-            %td.left= mail_to('turturik@fhlbsf.com', 'Kathleen Turturice')
+            %td.contact-cell-left= mail_to('turturik@fhlbsf.com', 'Kathleen Turturice')
             %td= fhlb_formatted_phone_number('4156162592')
           %tr
-            %td.left= mail_to('wongt@fhlbsf.com', 'Tony Wong')
+            %td.contact-cell-left= mail_to('wongt@fhlbsf.com', 'Tony Wong')
             %td= fhlb_formatted_phone_number('4156162584')
           %tr
-            %td.left= mail_to('yuer@fhlbsf.com', 'Rober Yue')
+            %td.contact-cell-left= mail_to('yuer@fhlbsf.com', 'Rober Yue')
             %td= fhlb_formatted_phone_number('4156162667')
           %tr
-            %td.left= t('global.fax')
+            %td.contact-cell-left= t('global.fax')
             %td= fhlb_formatted_phone_number('4156162613')
     %section
       %a{name: 'collateral'}
@@ -82,16 +82,16 @@
       %table
         %tbody
           %tr
-            %td.left= t('global.phone')
+            %td.contact-cell-left= t('global.phone')
             %td= fhlb_formatted_phone_number('4156162980')
           %tr
-            %td.left= t('global.fax')
+            %td.contact-cell-left= t('global.fax')
             %td= fhlb_formatted_phone_number('4156162835')
           %tr
-            %td.left= t('global.email')
+            %td.contact-cell-left= t('global.email')
             %td= mail_to('collateraloperations@fhlbsf.com')
           %tr
-            %td.left= t('contact.collateral_departments.collateral_operations.email')
+            %td.contact-cell-left= t('contact.collateral_departments.collateral_operations.email')
             %td= mail_to('cmsmcu@fhlbsf.com')
       %ul
         %li= t('contact.collateral_departments.collateral_operations.blanket')
@@ -103,16 +103,16 @@
     %table
       %tbody
         %tr
-          %td.left= t('global.phone')
+          %td.contact-cell-left= t('global.phone')
           %td= fhlb_formatted_phone_number('4156162801')
         %tr
-          %td.left
+          %td.contact-cell-left
           %td= fhlb_formatted_phone_number('4156162893')
         %tr
-          %td.left= t('global.fax')
+          %td.contact-cell-left= t('global.fax')
           %td= fhlb_formatted_phone_number('4156162689')
         %tr
-          %td.left= t('global.email')
+          %td.contact-cell-left= t('global.email')
           %td= mail_to('collateral@fhlbsf.com')
     %ul
       %li= t('contact.collateral_departments.collateral_services.eligibility')
@@ -121,13 +121,13 @@
     %table
       %tbody
         %tr
-          %td.left= t('global.phone')
+          %td.contact-cell-left= t('global.phone')
           %td= fhlb_formatted_phone_number('4156162970')
         %tr
-          %td.left= t('global.fax')
+          %td.contact-cell-left= t('global.fax')
           %td= fhlb_formatted_phone_number('4156162836')
         %tr
-          %td.left= t('global.email')
+          %td.contact-cell-left= t('global.email')
           %td= mail_to('securitiesservices@fhlbsf.com')
     %ul
       %li= t('contact.collateral_departments.securities_services.safekeeping')
@@ -140,13 +140,13 @@
       %table
         %tbody
           %tr
-            %td.left= t('global.phone')
+            %td.contact-cell-left= t('global.phone')
             %td= fhlb_formatted_phone_number('4156162940')
           %tr
-            %td.left= t('global.fax')
+            %td.contact-cell-left= t('global.fax')
             %td= fhlb_formatted_phone_number('4156162836')
           %tr
-            %td.left= t('global.email')
+            %td.contact-cell-left= t('global.email')
             %td= mail_to('wireroom@fhlbsf.com')
       %p= t('contact.electronic_funds_management.wire')
     %section
@@ -155,19 +155,19 @@
       %table
         %tbody
           %tr
-            %td.left= t('global.phone')
+            %td.contact-cell-left= t('global.phone')
             %td= fhlb_formatted_phone_number('4156162616')
           %tr
-            %td.left= t('contact.operations.sta_rate')
+            %td.contact-cell-left= t('contact.operations.sta_rate')
             %td= fhlb_formatted_phone_number('8004192047')
           %tr
-            %td.left= mail_to('normanb@fhlbsf.com', 'Betty Norman')
+            %td.contact-cell-left= mail_to('normanb@fhlbsf.com', 'Betty Norman')
             %td= fhlb_formatted_phone_number('4156162945')
           %tr
-            %td.left= mail_to('oneilg@fhlbsf.com', "Gregory O'Neill")
+            %td.contact-cell-left= mail_to('oneilg@fhlbsf.com', "Gregory O'Neill")
             %td= fhlb_formatted_phone_number('4156162941')
           %tr
-            %td.left= mail_to('tarucm@fhlbsf.com', 'Manny Taruc')
+            %td.contact-cell-left= mail_to('tarucm@fhlbsf.com', 'Manny Taruc')
             %td= fhlb_formatted_phone_number('4156162559')
     %section
       %a{name: 'reporting'}
@@ -175,10 +175,10 @@
       %table
         %tbody
           %tr
-            %td.left= mail_to('tungc@fhlbsf.com', 'Curtis Tung')
+            %td.contact-cell-left= mail_to('tungc@fhlbsf.com', 'Curtis Tung')
             %td= fhlb_formatted_phone_number('4156162589')
           %tr
-            %td.left= t('global.email')
+            %td.contact-cell-left= t('global.email')
             %td= mail_to('capitalstock@fhlbsf.com')
     %section
       %a{name: 'community'}
@@ -186,31 +186,31 @@
       %table
         %tbody
           %tr
-            %td.left= t('global.phone')
+            %td.contact-cell-left= t('global.phone')
             %td= fhlb_formatted_phone_number('4156162542')
           %tr
-            %td.left= t('global.fax')
+            %td.contact-cell-left= t('global.fax')
             %td= fhlb_formatted_phone_number('4156162767')
           %tr
-            %td.left= t('global.email')
+            %td.contact-cell-left= t('global.email')
             %td= mail_to('communityinvestment@fhlbsf.com')
       %h3= t('contact.community_investment.ahp.title')
       %table
         %tbody
           %tr
-            %td.left= mail_to('adamsa@fhlbsf.com', 'Anita Adams')
+            %td.contact-cell-left= mail_to('adamsa@fhlbsf.com', 'Anita Adams')
             %td= fhlb_formatted_phone_number('4156162749')
       %h3= t('contact.community_investment.cip_ace.title')
       %table
         %tbody
           %tr
-            %td.left= mail_to('orosar@fhlbsf.com', 'Reena Orosa')
+            %td.contact-cell-left= mail_to('orosar@fhlbsf.com', 'Reena Orosa')
             %td= fhlb_formatted_phone_number('4156162754')
       %h3= t('contact.community_investment.programs.title')
       %table
         %tbody
           %tr
-            %td.left= mail_to('nunezm@fhlbsf.com', 'Marietta Núñez')
+            %td.contact-cell-left= mail_to('nunezm@fhlbsf.com', 'Marietta Núñez')
             %td= fhlb_formatted_phone_number('4156162633')
       %section
         %a{name: 'cofi'}
@@ -218,10 +218,10 @@
         %table
           %tbody
             %tr
-              %td.left= t('contact.cofi.website')
+              %td.contact-cell-left= t('contact.cofi.website')
               %td= t('contact.cofi.cofi_html', url:'http://fhlbsf.com/resource-center/cofi/default.aspx')
             %tr
-              %td.left= t('global.phone')
+              %td.contact-cell-left= t('global.phone')
               %td= fhlb_formatted_phone_number('4156162600')
       %section
         %a{name: 'support'}
@@ -229,8 +229,8 @@
         %table
           %tbody
             %tr
-              %td.left= t('global.phone')
+              %td.contact-cell-left= t('global.phone')
               %td= fhlb_formatted_phone_number('4156162610')
             %tr
-              %td.left= t('global.email')
+              %td.contact-cell-left= t('global.email')
               %td= mail_to('websupport@fhlbsf.com')
