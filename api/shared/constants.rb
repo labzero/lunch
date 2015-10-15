@@ -35,50 +35,62 @@ module MAPI
           :overnight => {
               frequency: '1',
               frequency_unit: 'D',
+              time: 1.day
           },
           :open => {
               frequency: '1',
-              frequency_unit: 'D'
+              frequency_unit: 'D',
+              time: 1.day
           },
           :'1week'=> {
               frequency: '1',
-              frequency_unit: 'W'
+              frequency_unit: 'W',
+              time: 1.week
           },
           :'2week'=> {
               frequency: '2',
-              frequency_unit: 'W'
+              frequency_unit: 'W',
+              time: 2.weeks
           },
           :'3week'=> {
               frequency: '3',
-              frequency_unit: 'W'
+              frequency_unit: 'W',
+              time: 3.weeks
           },
           :'1month'=> {
               frequency: '1',
-              frequency_unit: 'M'
+              frequency_unit: 'M',
+              time: 1.month
           },
           :'2month'=> {
               frequency: '2',
-              frequency_unit: 'M'
+              frequency_unit: 'M',
+              time: 2.months
           },
           :'3month'=> {
               frequency: '3',
-              frequency_unit: 'M'
+              frequency_unit: 'M',
+              time: 3.months
           },
           :'6month'=> {
               frequency: '6',
-              frequency_unit: 'M'
+              frequency_unit: 'M',
+              time: 6.months
           },
           :'1year'=> {
               frequency: '1',
-              frequency_unit: 'Y'
+              frequency_unit: 'Y',
+              time: 1.year
           },
           :'2year'=> {
               frequency: '2',
-              frequency_unit: 'Y'
+              frequency_unit: 'Y',
+              time: 2.years
           },
           :'3year'=> {
               frequency: '3',
-              frequency_unit: 'Y'
+              frequency_unit: 'Y',
+              time: 3.years
           }
       }.with_indifferent_access
 
