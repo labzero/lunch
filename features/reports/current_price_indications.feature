@@ -36,3 +36,9 @@ Scenario: Member downloads an XLSX of the Current Price Indications report
   Given I am on the "Current Price Indications" report page
   When I request an XLSX
   Then I should begin downloading a file
+
+@data-unavailable @jira-mem-1065
+Scenario: A message is displayed when there is limited pricing
+  Given I am on the "Current Price Indications" report page
+  When there is limited pricing today
+  Then I should see the limited pricing information message  

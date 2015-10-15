@@ -10,6 +10,27 @@ RSpec.describe AdvanceMessage, :type => :model do
         expect(message).to be_a_kind_of(AdvanceMessage)
       end
     end
+    describe 'seeding the data' do
+      let(:date) { double('date') }
+      let(:content) { double('content') }
+      let(:seed) { [double('date string', to_date: date), content] }
+      before { allow(JSON).to receive(:parse) }
+
+      it 'reads the json file located at `#{Rails.root}db/service_fakes/advance_messages.json`' do
+        expect(File).to receive(:read).with(File.join(Rails.root, 'db', 'service_fakes', 'advance_messages.json'))
+        AdvanceMessage.all
+      end
+      it 'returns an empty array if no seeds are found in the file' do
+        expect(AdvanceMessage.all).to eq([])
+      end
+      it 'populates an array of AdvanceMessage instances with the seed data provided by the json file' do
+        allow(JSON).to receive(:parse).and_return([seed])
+        advance_messages = AdvanceMessage.all
+        expect(advance_messages.first).to be_a_kind_of(AdvanceMessage)
+        expect(advance_messages.first.date).to eq(date)
+        expect(advance_messages.first.content).to eq(content)
+      end
+    end
   end
 
   describe 'the `quick_advance_message_for` class method' do

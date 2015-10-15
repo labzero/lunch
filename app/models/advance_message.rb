@@ -9,8 +9,10 @@ class AdvanceMessage
   def self.all
     messages = []
     message_seeds = JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', 'advance_messages.json')))
-    message_seeds.each do |seed|
-      messages << new({date: seed.first.to_date, content: seed.last})
+    if message_seeds
+      message_seeds.each do |seed|
+        messages << new({date: seed.first.to_date, content: seed.last})
+      end
     end
     messages
   end

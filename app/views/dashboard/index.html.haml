@@ -77,9 +77,7 @@
           %p= t('dashboard.quick_advance.hours_of_operation_html', url: '')
         - if @quick_advance_status == :open
           - if @quick_advance_message
-            .quick-advance-limited-pricing-message.icon-info-before
-              = simple_format(@quick_advance_message)
-              %p= t('dashboard.quick_advance.deadline')
+            = render 'shared/quick_advance_message', message: @quick_advance_message
           %p.quick-advance-instruction= t('dashboard.quick_advance.advance_instruction')
           .quick-advance-rates
             .quick-advance-rates-body
