@@ -629,7 +629,7 @@ module MAPI
             # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
             LOAN_TYPES.each do |type|
               LOAN_TERMS.each do |term|
-                live_data[type][term][:maturity_date] = Time.zone.today + live_data[type][term][:days_to_maturity].to_i.days
+                live_data[type][term][:maturity_date] = Time.zone.today + TERM_MAPPING[term][:time]
               end
             end
           end

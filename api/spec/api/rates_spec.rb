@@ -351,6 +351,9 @@ describe MAPI::ServiceApp do
     let (:day2) { double( 'day 2' ) }
     let (:day3) { double( 'day 3' ) }
     let (:day4) { double( 'day 4' ) }
+    let (:start_date)  { '2015-09-30'.to_date }
+    let (:end_date_3m) { '2015-12-30'.to_date }
+    let (:end_date_1y) { '2016-09-30'.to_date }
     let(:holidays) { double( 'holidays' ) }
     before do
       [day1,day2,day3].zip([day2,day3,day4]).each do |pred,succ|
@@ -374,6 +377,11 @@ describe MAPI::ServiceApp do
       allow(day3).to receive('>').with(day2).and_return(true)
       allow(day2).to receive(:end_of_month).and_return(day2)
       expect(subject.get_maturity_date(day2_str, 'Y', holidays)).to eq(day1)
+    end
+
+    it 'test particular data points' do
+      expect(subject.get_maturity_date(start_date + MAPI::Services::Rates::TERM_MAPPING[:'3month'][:time], 'M', [])).to eq(end_date_3m)
+      expect(subject.get_maturity_date(start_date + MAPI::Services::Rates::TERM_MAPPING[:'1year'][:time], 'Y', [])).to eq(end_date_1y)
     end
   end
 
