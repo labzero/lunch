@@ -42,9 +42,10 @@ Scenario: Remembering Email Settings
 @smoke @jira-mem-599
 Scenario: Users can view Two Factor settings
   Given I visit the dashboard
-    And I click on the gear icon in the header
+  And I click on the gear icon in the header
   When I click on "Manage Token" in the sidebar nav
   Then I should be on the two factor settings page
+  And I should not see any success or failure messages
 
 @jira-mem-600
 Scenario: Users can reset their SecurID PIN
