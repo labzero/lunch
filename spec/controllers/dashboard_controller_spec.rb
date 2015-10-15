@@ -13,9 +13,11 @@ RSpec.describe DashboardController, :type => :controller do
       allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
       allow(subject).to receive(:current_user_roles)
       allow_any_instance_of(MembersService).to receive(:member_contacts)
+      allow(MessageService).to receive(:new).and_return(double('service instance', todays_quick_advance_message: nil))
     end
     
     it_behaves_like 'a user required action', :get, :index
+    it_behaves_like 'a controller action with quick advance messaging', :index
     it "should render the index view" do
       get :index
       expect(response.body).to render_template("index")

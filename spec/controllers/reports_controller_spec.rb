@@ -1219,6 +1219,7 @@ RSpec.describe ReportsController, :type => :controller do
     it_behaves_like 'a user required action', :get, :current_price_indications
     it_behaves_like 'a report that can be downloaded', :current_price_indications, [:xlsx]
     it_behaves_like 'a report with instance variables set in a before_filter', :current_price_indications
+    it_behaves_like 'a controller action with quick advance messaging', :current_price_indications
     it 'renders the current_price_indications view' do
       allow(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
       allow(response_cpi_hash).to receive(:collect)

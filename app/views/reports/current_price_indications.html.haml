@@ -6,6 +6,8 @@
     = render 'reports_header_buttons', download_formats: [:xlsx]
     = render 'report_details', name: @member_name, freshness: t('reports.pages.price_indications.current.freshness')
     %p= t('reports.pages.price_indications.current.summary', phone_number: service_desk_phone_number)
+    - if @quick_advance_message
+      = render 'shared/quick_advance_message', message: @quick_advance_message
   .report-main-body
     %h2.report-table-title= t('reports.pages.price_indications.standard_credit_program')
     .report-table-title

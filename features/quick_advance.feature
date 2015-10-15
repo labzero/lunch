@@ -192,6 +192,13 @@ Scenario: The View Recent Price Indications link is displayed when the desk is c
   And the desk has closed
   When I click on the View Recent Price Indications link
   Then I am on the "Current Price Indications" report page
+  
+@data-unavailable @jira-mem-569
+Scenario: A message is displayed when there is limited pricing
+  Given I visit the dashboard
+  And there is limited pricing today
+  When I click on the link to view limited pricing information
+  Then I should see the limited pricing information message
 
 @jira-mem-735
 Scenario: Users get an error if their requested advance would push FHLB over its total daily limit for web advances

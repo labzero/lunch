@@ -1,6 +1,7 @@
 $(function () {
+  var $quickAdvancesInputField = $('.dashboard-module-advances input');
 
-  $('.dashboard-module-advances input').on('keypress', function(e){
+  $quickAdvancesInputField.on('keypress', function(e){
     onlyAllowDigits(e);
   });
 
@@ -17,9 +18,13 @@ $(function () {
     };
   };
 
-  $('.dashboard-module-advances input').on('input', function(event){
+  $quickAdvancesInputField.on('input', function(event){
     addCommasToInputField(event);
     openQuickAdvanceFlyout(event, $(this));
+  });
+  
+  $('.quick-advance-limited-pricing-notice').on('click', function(event){
+    openQuickAdvanceFlyout(event, $quickAdvancesInputField);
   });
 
   $('.dashboard-module-advances').on('flyout-initialized', function(){
@@ -29,7 +34,7 @@ $(function () {
       $flyoutInput[0].setSelectionRange(1, 1);
     }
   }).on('flyout-reset-initiated', function(){
-    $('.dashboard-module-advances input').val('').data('flyout-trigger', 'active');
+    $quickAdvancesInputField.val('').data('flyout-trigger', 'active');
     $('.quick-advance-desk-closed-message a').data('flyout-trigger', 'active');
   });
 
@@ -41,7 +46,7 @@ $(function () {
       $('.flyout').addClass('dashboard-quick-advance-flyout');
       $('.flyout-bottom-section').addClass('column-3-span-2');
       var topContent = [$('.dashboard-module-advances header').clone(), $('<div class="flyout-top-section-body"></div>').append($('.dashboard-module-advances .input-field-container, .dashboard-module-advances h2, .quick-advance-desk-closed-message').clone())];
-      var bottomContent = $('.quick-advance-rates, .quick-advance-last-updated-message, .quick-advance-instruction, .dashboard-module-advances .initiate-quick-advance, .rate-advances-footer').clone();
+      var bottomContent = $('.quick-advance-rates, .quick-advance-last-updated-message, .quick-advance-limited-pricing-message, .quick-advance-instruction, .dashboard-module-advances .initiate-quick-advance, .rate-advances-footer').clone();
       $('.dashboard-module-advances').flyout({topContent:topContent, bottomContent:bottomContent, useReferenceElement:true});
       var $amountField = $('.dashboard-quick-advance-flyout input[name=amount]');
       $amountField.on('keypress', function(e){

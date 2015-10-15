@@ -576,6 +576,7 @@ class ReportsController < ApplicationController
           ]          
         }
       }
+      @quick_advance_message = MessageService.new.todays_quick_advance_message
     end
   end
 

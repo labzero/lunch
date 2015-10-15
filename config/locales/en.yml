@@ -438,6 +438,8 @@ en:
       advances_desk_no_terms: There are no terms available right now.
       advance_last_updated: The following rates were last updated %{last_updated}
       hours_of_operation_html: "You may initiate an advance during the <a href=\"%{url}\">Advance Desk Hours of Operation</a>."
+      limited_pricing: View limited pricing information
+      deadline: The Member Portal observes the same deadlines for advance transactions as the Member Service Desk.
       frc_title: Fixed Rate Credit (FRC) Advance
       vrc_title: Variable Rate Credit (VRC) Advance
       tooltip:

@@ -50,7 +50,7 @@
       $('.quick-advance-back-button').on('click', function () {
         $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
         $('.quick-advance-preview-subheading').hide();
-        $flyout.find('.flyout-top-section-body span, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer').show();
+        $flyout.find('.flyout-top-section-body span, .quick-advance-limited-pricing-message, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer').show();
         transitionToRatesFromLoading();
       });
     }
@@ -59,7 +59,7 @@
       var $flyoutBottomSection = $('.flyout-bottom-section');
       transitionToLoadingFromRates();
       $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function(json){
-        var $oldNodes = $flyout.find('.flyout-top-section-body span, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer');
+        var $oldNodes = $flyout.find('.flyout-top-section-body span, .quick-advance-limited-pricing-message, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer');
 
         // append the html response, hide old nodes and show the new ones
         $flyoutBottomSection.append($(json.html));
