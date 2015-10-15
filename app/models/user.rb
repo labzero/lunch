@@ -172,6 +172,11 @@ class User < ActiveRecord::Base
     super
   end
 
+  def valid_ldap_authentication?(password, strategy)
+    result = super
+    result && InternalUserPolicy.new(self, strategy.request).access?
+  end
+
   def self.create(*args, &block)
     ldap_entry = args.try(:first)
     if ldap_entry.is_a?(Net::LDAP::Entry)

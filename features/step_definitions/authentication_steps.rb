@@ -54,21 +54,13 @@ When(/^I fill in and submit the login form with a first-time user$/) do
   # implement way of simulating first-time user to test Terms of Service flow
 end
 
-When(/^I fill in and submit the login form with an (expired user|extranet no role user)$/) do |user_type|
+When(/^I fill in and submit the login form with an? (expired user|extranet no role user|primary user|offsite user)$/) do |user_type|
   user = user_for_type(user_type)
   step %{I fill in and submit the login form with username "#{user['username']}" and password "#{user['password']}"}
 end
 
 When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|
-  user = case user_type
-    when 'primary user'
-      primary_user
-    when 'extranet user'
-      extranet_user
-    else
-      raise 'unknown user type'
-  end
-
+  user = user_for_type(user_type)
   step %{I log in as "#{user['username']}" with password "#{user['password']}"}
   select_member_if_needed
 end
@@ -231,6 +223,8 @@ def user_for_type(user_type)
     expired_user
   when 'extranet no role user'
     extranet_no_role_user
+  when 'offsite user'
+    offsite_user
   else
     raise 'unknown user type'
   end
@@ -278,6 +272,10 @@ end
 
 def extranet_no_role_user
   CustomConfig.env_config['extranet_no_role']
+end
+
+def offsite_user
+  CustomConfig.env_config['offsite']
 end
 
 def current_member_name
@@ -332,4 +330,26 @@ def get_session_id
   key = session_cookie_key
   cookie = (page.driver.browser.manage.all_cookies.find {|cookie| cookie[:name] == key}) || {}
   cookie[:value]
+end
+
+def silent_class_reload(file)
+  original_verbose, $VERBOSE = $VERBOSE, nil
+  begin
+    load file
+  ensure
+    $VERBOSE = original_verbose
+  end
+end
+
+
+Around('@offsite-ip') do |scenario, block|
+  old_env = ENV['FHLB_INTERNAL_IPS']
+  begin
+    ENV['FHLB_INTERNAL_IPS'] = ''
+    silent_class_reload 'internal_user_policy.rb'
+    block.call
+  ensure
+    ENV['FHLB_INTERNAL_IPS'] = old_env
+    silent_class_reload 'internal_user_policy.rb'
+  end
 end
