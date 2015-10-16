@@ -225,7 +225,7 @@ describe AdvanceRequest do
         allow(subject).to receive(:rate_service).and_return(rate_service)
       end
       it 'fetches the rates from the RatesService' do
-        expect(rate_service).to receive(:quick_advance_rates).with(member_id)
+        expect(rate_service).to receive(:quick_advance_rates).with(member_id, subject)
         call_method
       end
       it 'returns the rates' do
@@ -628,6 +628,46 @@ describe AdvanceRequest do
         allow(described_class).to receive(:new).and_return(instance)
         expect(call_method).to be(instance)
       end
+    end
+  end
+  
+  describe '`notify_if_rate_bands_exceeded` method' do
+    let(:request_uuid) { double('Some UUID') }
+    let(:mail_message) { double('A Mail Message', deliver_now: nil) }
+    let(:rate_band_info) { double('rate band info', :[] => nil) }
+    let(:rate_data) { double('rate_data', :[]= => nil, :[] => nil) }
+    let(:rates) { double('hash double', with_indifferent_access: double('advance type', :[] => double('advance term', :[] => rate_data))) }
+    let(:call_method) { subject.notify_if_rate_bands_exceeded(rates) }
+    
+    before do
+      allow(request).to receive(:uuid).and_return(request_uuid)
+      allow(InternalMailer).to receive(:exceeds_rate_band).and_return(mail_message)
+    end
+    describe 'when a rate is disabled' do
+      before do 
+        allow(rate_data).to receive(:[]).with(:disabled).and_return(true)
+        allow(rate_data).to receive(:[]).with(:rate_band_info).and_return(rate_band_info)
+      end
+      it 'sends the `exceeds_rate_band` email if a rate is disabled and has exceeded its minimum threshold' do
+        allow(rate_band_info).to receive(:[]).with(:min_threshold_exceeded).and_return(true)
+        allow(InternalMailer).to receive(:exceeds_rate_band).with(rate_data, request_uuid, signer).and_return(mail_message)
+        expect(mail_message).to receive(:deliver_now)
+        call_method
+      end
+      it 'sends the `exceeds_rate_band` email if a rate is disabled and has exceeded its maximum threshold' do
+        allow(rate_band_info).to receive(:[]).with(:max_threshold_exceeded).and_return(true)        
+        allow(InternalMailer).to receive(:exceeds_rate_band).with(rate_data, request_uuid, signer).and_return(mail_message)
+        expect(mail_message).to receive(:deliver_now)
+        call_method
+      end
+      it 'does not send an email if a rate has not exceeded its thresholds' do
+        expect(InternalMailer).to_not receive(:exceeds_rate_band)
+        call_method
+      end
+    end
+    it 'does not send an email if a rate is not disabled' do
+      expect(InternalMailer).to_not receive(:exceeds_rate_band)
+      call_method
     end
   end
 

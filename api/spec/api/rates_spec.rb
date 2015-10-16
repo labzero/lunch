@@ -219,6 +219,8 @@ describe MAPI::ServiceApp do
           expect(r[:rate]).to match(/\d+\.\d+/)
           expect(r[:disabled]).to be_boolean
           expect(r[:disabled]).to be == (blacked_out || cutoff || disabled || below_threshold || above_threshold)
+          expect(r[:start_of_day_rate]).to eq(start_of_day_rate)
+          expect(r[:rate_band_info]).to eq(MAPI::Services::Rates.rate_band_info(live_hash[loan_type][loan_term], rate_bands_hash[loan_term]))
         end
       end
     end
@@ -317,6 +319,99 @@ describe MAPI::ServiceApp do
       it "should return 200 if all the endpoints return valid data" do
         get '/rates/summary'
         expect(last_response.status).to eq(200)
+      end
+    end
+  end
+  
+  describe '`disabled?` class method' do
+    let(:date) { (Date.new(2000,1,1)..Date.new(2015,1,1)).to_a.sample }
+    let(:rate_band_info) { double('rate band info', :[] => nil) }
+    let(:rate_info) { double('a rate object', :[] => nil) }
+    let(:loan_term) { double('a loan term object', :[] => nil) }
+    let(:blackout_dates) { [date] }
+    let(:call_method) { subject.disabled?(rate_info, loan_term, blackout_dates) }
+    before do
+      allow(rate_info).to receive(:[]).with(:rate_band_info).and_return(rate_band_info)
+    end
+    
+    it 'returns true if the maturity date of the rate is included in the blackout dates array' do
+      allow(rate_info).to receive(:[]).with('maturity_date').and_return(date)
+      expect(call_method).to eq(true)
+    end
+    it 'returns true if the loan status `trade_status` is false' do
+      allow(loan_term).to receive(:[]).with('trade_status').and_return(false)
+      expect(call_method).to eq(true)
+    end
+    it 'returns true if the loan status `display_status` is false' do
+      allow(loan_term).to receive(:[]).with('display_status').and_return(false)
+      expect(call_method).to eq(true)
+    end
+    it 'returns true if the `min_threshold_exceeded` value in rate band info is true' do
+      allow(rate_band_info).to receive(:[]).with(:min_threshold_exceeded).and_return(true)
+      expect(call_method).to eq(true)
+    end
+    it 'returns true if the `max_threshold_exceeded` value in rate band info is true' do
+      allow(rate_band_info).to receive(:[]).with(:max_threshold_exceeded).and_return(true)
+      expect(call_method).to eq(true)
+    end
+    it 'returns false if no thresholds have been exceeded, trade_status and display_status are not false, and the maturity date is not blacked out' do
+      allow(loan_term).to receive(:[]).and_return(true)
+      allow(rate_band_info).to receive(:[]).and_return(false)
+      expect(call_method).to eq(false)
+    end
+  end
+  
+  describe '`rate_band_info` class method' do
+    let(:rate_info) { double('a rate object', :[] => nil) }
+    let(:band_info) { double('a rate band object', :[] => nil) }
+    let(:delta) { rand(1..50) }
+    let(:rate) { rand() }
+    let(:call_method) { subject.rate_band_info(rate_info, band_info) }
+    
+    [
+      ['low_band_off', 'LOW_BAND_OFF_BP', 'subtracting'],
+      ['low_band_warn', 'LOW_BAND_WARN_BP', 'subtracting'],
+      ['high_band_off', 'HIGH_BAND_OFF_BP', 'adding'],
+      ['high_band_warn', 'HIGH_BAND_WARN_BP', 'adding'],
+    ].each do |threshold|
+      before do 
+        allow(band_info).to receive(:[]).with(threshold[1]).and_return(delta) 
+        allow(rate_info).to receive(:[]).with(:start_of_day_rate).and_return(rate)
+      end
+      it "returns a hash with a `#{threshold[0]}_delta` key that expresses the provided #{threshold[1]} rate band basis point as a float" do
+        expect(call_method["#{threshold[0]}_delta".to_sym]).to eq(delta.to_f/100.0)
+      end
+      it "calculates the `#{threshold[0]}_rate` by #{threshold[2]} the `#{threshold[0]}_delta` from the start_rate" do
+        expected_value = threshold[2] == 'subtracting' ? rate_info[:start_of_day_rate] - delta.to_f/100.0 : rate_info[:start_of_day_rate] + delta.to_f/100.0
+        expect(call_method["#{threshold[0]}_rate".to_sym]).to eq(expected_value)
+      end
+    end
+    describe 'min_threshold_exceeded' do
+      before do
+        allow(band_info).to receive(:[]).with('LOW_BAND_OFF_BP').and_return(delta)
+        allow(rate_info).to receive(:[]).with(:start_of_day_rate).and_return(rate)
+      end
+      it 'is true if the live rate is less than the low_band_off_rate' do
+        allow(rate_info).to receive(:[]).with(:rate).and_return(rate - delta)
+        expect(call_method[:min_threshold_exceeded]).to eq(true)
+      end
+      it 'is false if the live rate is not less than the low_band_off_rate' do
+        allow(rate_info).to receive(:[]).with(:rate).and_return(rate + delta)
+        expect(call_method[:min_threshold_exceeded]).to eq(false)
+      end
+    end
+    describe 'max_threshold_exceeded' do
+      before do
+        allow(band_info).to receive(:[]).with('HIGH_BAND_OFF_BP').and_return(delta)
+        allow(rate_info).to receive(:[]).with(:start_of_day_rate).and_return(rate)
+      end
+      it 'is true if the live rate is more than the high_band_off_rate' do
+        allow(rate_info).to receive(:[]).with(:rate).and_return(rate + delta)
+        expect(call_method[:max_threshold_exceeded]).to eq(true)
+      end
+      it 'is false if the live rate is not more than the high_band_off_rate' do
+        allow(rate_info).to receive(:[]).with(:rate).and_return(rate - delta)
+        expect(call_method[:max_threshold_exceeded]).to eq(false)
       end
     end
   end

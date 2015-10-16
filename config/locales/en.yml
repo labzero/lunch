@@ -2022,3 +2022,13 @@ en:
       stale_rate:
         subject: 'Notice: eTransact encountered stale rates'
         body_html: The eTransact system has encountered rates that are older than <strong>%{rate_timeout} seconds</strong> when getting rates from Market Data Services for request <strong>%{request_id}</strong>, issued by <strong>%{user}</strong>.
+      exceeds_rate_band:
+        subject: 'Notice: Rate Band Shut-Down Threshold Exceeded'
+        body_html: The product, %{type} VRC/FRC - %{term} - triggered an alert at %{timestamp}, when the rate band shutoff limits were exceeded. The alert was triggered when getting rates from Market Data Services for request <strong>%{request_id}</strong>, issued by <strong>%{user}</strong>.
+        start_of_day_rate: 'Rate at start of day: %{rate}'
+        current_rate: 'Current Rate: %{rate}'
+        low_band_off: 'Low Band Shutoff Rate (delta of %{delta}): %{rate}'
+        high_band_off: 'High Band Shutoff Rate (delta of %{delta}): %{rate}'
+        low_band_warn: 'Low Band Warning Rate (delta of %{delta}): %{rate}'
+        high_band_warn: 'High Band Warning Rate (delta of %{delta}): %{rate}'
+        
