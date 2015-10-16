@@ -108,7 +108,7 @@ When(/^I select the "(.*?)" member bank$/) do |bank_name|
   else
     dropdown = page.find('select[name=member_id]')
     dropdown.click
-    dropdown.find('option', text: bank_name, exact: true).click
+    dropdown.find('option', text: /\A#{Regexp.quote(bank_name)}\z/).click
     click_button(I18n.t('global.continue'))
   end
 end
