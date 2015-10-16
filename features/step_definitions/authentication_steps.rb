@@ -116,6 +116,7 @@ end
 
 When(/^I log out$/) do
   click_link(I18n.t('nav.primary.logout'))
+  page.assert_selector('form.welcome-login')
 end
 
 Then(/^I should see the login form$/) do

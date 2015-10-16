@@ -111,3 +111,10 @@ Scenario: User logs in as an internal user with external access from an offsite 
   Given I am logged out
   When I log in as an "offsite user"
   Then I should be logged in
+
+@jira-mem-519
+Scenario: User tries to navigate back after logout
+  Given I am logged in
+  When I log out
+  And I use the browser back button
+  Then I should be logged out

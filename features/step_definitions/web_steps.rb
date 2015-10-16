@@ -49,6 +49,10 @@ Then(/^I should not see any success or failure messages$/) do
   page.assert_no_selector('.form-flash-message[data-type=error]', visible: true)
 end
 
+When(/^I use the browser back button$/) do
+  page.driver.go_back
+end
+
 def jquery_guard(timeout=10)
   times_out_at = Time.now + timeout
   while page.evaluate_script('typeof $') == 'undefined'
