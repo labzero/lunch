@@ -93,7 +93,7 @@ class DashboardController < ApplicationController
         aaa: borrowing_capacity[:sbc][:collateral][:aaa][:total_borrowing_capacity],
         agency: borrowing_capacity[:sbc][:collateral][:agency][:total_borrowing_capacity]
       }
-      calculate_gauge_percentages(guage, total_borrowing_capacity, :total)
+      calculate_gauge_percentages(guage, :total)
     else
       calculate_gauge_percentages({total: 0}, 0)
     end
@@ -105,9 +105,9 @@ class DashboardController < ApplicationController
           used: profile[:used_financing_availability],
           unused: profile[:collateral_borrowing_capacity][:remaining],
           uncollateralized: profile[:uncollateralized_financing_availability]
-        }, profile[:total_financing_available], :total)
+        }, :total)
     else
-      calculate_gauge_percentages({total: 0}, 0)
+      calculate_gauge_percentages({total: 0})
     end
 
     current_rate = rate_service.current_overnight_vrc
@@ -314,12 +314,16 @@ class DashboardController < ApplicationController
     @advance_request = nil
   end
 
-  def calculate_gauge_percentages(gauge_hash, total, excluded_keys=[])
+  def calculate_gauge_percentages(gauge_hash, excluded_keys=[])
+    total = 0
     excluded_keys = Array.wrap(excluded_keys)
     largest_display_percentage_key = nil
     largest_display_percentage = 0
     total_display_percentage = 0
     new_gauge_hash = gauge_hash.deep_dup
+    gauge_hash.each do |key, value|
+      total += value unless excluded_keys.include?(key) || value.nil?
+    end
 
     gauge_hash.each do |key, value|
       percentage = total > 0 ? (value.to_f / total) * 100 : 0
