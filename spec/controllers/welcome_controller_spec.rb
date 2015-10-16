@@ -2,6 +2,8 @@ require 'rails_helper'
 
 RSpec.describe WelcomeController, :type => :controller do
   let(:revision) { SecureRandom.hex }
+
+  it { should use_around_filter(:skip_timeout_reset) }
   
   describe "GET details" do
     let(:make_request) { get :details }

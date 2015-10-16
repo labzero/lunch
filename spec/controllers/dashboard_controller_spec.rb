@@ -6,6 +6,8 @@ RSpec.describe DashboardController, :type => :controller do
     session['member_id'] = 750
   end
 
+  it { should use_around_filter(:skip_timeout_reset) }
+
   describe "GET index", :vcr do
     let(:member_id) {750}
     let(:empty_financing_availability_gauge) {{total: {amount: 0, display_percentage: 100, percentage: 0}}}
