@@ -204,7 +204,7 @@ describe MAPI::Services::Rates::LoanTerms do
       end
       let (:fake_result) do
         [{ 'TERM_BUCKET_LABEL' => '1 year',  'OVERRIDE_END_DATE' => override_end_date1},
-         { 'TERM_BUCKET_LABEL' => '2 years', 'OVERRIDE_END_DATE' => Date.today}]
+         { 'TERM_BUCKET_LABEL' => '2 years', 'OVERRIDE_END_DATE' => Time.zone.today}]
       end
       before do
         allow(subject).to receive(:fake).and_return(fake_data)
