@@ -49,5 +49,10 @@ module FhlbMember
 
     trusted_proxies = (ENV['TRUSTED_PROXIES'] || '').split.collect { |proxy| IPAddr.new(proxy) }
     config.action_dispatch.trusted_proxies = trusted_proxies + ActionDispatch::RemoteIp::TRUSTED_PROXIES
+
+    config.action_dispatch.default_headers = {
+      'Pragma' => 'no-cache',
+      'Cache-Control' => 'no-store'
+    }
   end
 end
