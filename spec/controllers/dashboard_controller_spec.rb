@@ -502,9 +502,20 @@ RSpec.describe DashboardController, :type => :controller do
         bar: bar_capacity
       }
     end
-    let(:call_method) { subject.send(:calculate_gauge_percentages, capacity_hash, total_borrowing_capacity, :total) }
+    let(:call_method) { subject.send(:calculate_gauge_percentages, capacity_hash, :total) }
     it 'should not raise an exception if total_borrowing_capacity is zero' do
-      expect {subject.send(:calculate_gauge_percentages, capacity_hash, 0, :total)}.to_not raise_error
+      capacity_hash[:total] = 0
+      expect {subject.send(:calculate_gauge_percentages, capacity_hash, :total)}.to_not raise_error
+    end
+    it 'should not raise an exception if a key has `nil` for a value' do
+      capacity_hash[:foo] = nil
+      expect {subject.send(:calculate_gauge_percentages, capacity_hash, :total)}.to_not raise_error
+    end
+    it 'should not return a total percentage > 100% even if the total is less than the sum of all the keys' do
+      capacity_hash[:total] = 0
+      call_method.each do |key, segment|
+        expect(segment[:display_percentage]).to be <= 100
+      end
     end
     it 'should convert the capacties into gauge hashes' do
       gauge_hash = call_method
