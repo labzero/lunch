@@ -67,7 +67,7 @@ module MAPI
         def self.term_bucket_data_development
           rows = fake('etransact_advances_term_buckets_info')
           rows.each{ |row| row['OVERRIDE_END_DATE'] = row['OVERRIDE_END_DATE'].to_date }
-          rows[rows.index{ |row| /2 years/i === row['TERM_BUCKET_LABEL'] }]['OVERRIDE_END_DATE'] = Date.today
+          rows[rows.index{ |row| /2 years/i === row['TERM_BUCKET_LABEL'] }]['OVERRIDE_END_DATE'] = Time.zone.today
           rows
         end
 
