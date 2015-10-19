@@ -12,7 +12,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      - Token token="302063F480BBCAFDF9DF394FBA8F9CB080AD1220D1D17BA23C50857A8744CA96"
       X-Request-Id:
       - ''
       User-Agent:
@@ -35,12 +35,12 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Tue, 13 Oct 2015 17:28:24 GMT
+      - Mon, 19 Oct 2015 21:13:32 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Tue, 13 Oct 2015 17:28:24 GMT
+  recorded_at: Mon, 19 Oct 2015 21:13:32 GMT
 recorded_with: VCR 2.9.3
