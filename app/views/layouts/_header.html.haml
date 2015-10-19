@@ -48,7 +48,7 @@
           %li<>
             = link_to(t('reports.securities.title'), reports_path(anchor: 'securities'))
             %ul.nav-dropdown-nested
-              %li= link_to(t('reports.securities.transactions.title'), reports_securities_transactions_path)
+              %li.disabled= t('reports.securities.transactions.title')
               %li.disabled= t('reports.securities.cash_projections.title')
               %li.disabled= t('reports.securities.current.title')
               %li.disabled= t('reports.securities.monthly.title')
