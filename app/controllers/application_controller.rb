@@ -102,4 +102,10 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def skip_timeout_reset
+    request.env["devise.skip_trackable"] = true # tells Warden not to reset Timeoutable timer for this request
+    yield
+    request.env["devise.skip_trackable"] = false
+  end
+
 end
