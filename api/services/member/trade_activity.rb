@@ -78,7 +78,7 @@ module MAPI
                 'maturity_date' => trade.at_css('advance maturityDate') ? trade.at_css('advance maturityDate').content : 'Open',
                 'advance_number' => trade.at_css('advance advanceNumber').content,
                 'advance_type' => trade.at_css('advance product').content,
-                'status' => Date.parse(trade.at_css('tradeHeader tradeDate').content) < Time.zone.today ? 'Outstanding' : 'Pending',
+                'status' => Date.parse(trade.at_css('tradeHeader tradeDate').content) < Time.zone.today ? 'Outstanding' : 'Processing',
                 'interest_rate' => (trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate') : trade.at_css('advance coupon initialRate')).content.to_f.round(5),
                 'current_par' => trade.at_css('advance par amount').content.to_f
               }
@@ -181,7 +181,7 @@ module MAPI
                   'maturity_date' => trade.at_css('advance maturityDate') ? trade.at_css('advance maturityDate').content : 'Open',
                   'advance_number' => trade.at_css('advance advanceNumber').content,
                   'advance_type' => trade.at_css('advance product').content,
-                  'status' => Date.parse(trade.at_css('tradeHeader tradeDate').content) < Time.zone.today ? 'Outstanding' : 'Pending',
+                  'status' => Date.parse(trade.at_css('tradeHeader tradeDate').content) < Time.zone.today ? 'Outstanding' : 'Processing',
                   'interest_rate' => trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate').content.to_f.round(5) : trade.at_css('advance coupon initialRate').content.to_f.round(5),
                   'current_par' => trade.at_css('advance par amount').content.to_f
                 }

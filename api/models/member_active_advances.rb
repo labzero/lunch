@@ -25,7 +25,7 @@ module MAPI
         end
         property :status do
           key :type, :string
-          key :description, 'Pending or Outstanding'
+          key :description, 'Processing or Outstanding'
         end
         property :interest_rate do
           key :type, :Numeric
