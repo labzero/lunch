@@ -100,3 +100,14 @@ Scenario: User tries to log in as an extranet user without required role
   When I fill in and submit the login form with an extranet no role user
   Then I should see a bad login error
 
+@local-only @offsite-ip @jira-mem-642
+Scenario: User tries to log in as an internal user without external access from an offsite IP
+  Given I am logged out
+  When I fill in and submit the login form with a primary user
+  Then I should see a bad login error
+
+@local-only @offsite-ip @jira-mem-642
+Scenario: User logs in as an internal user with external access from an offsite IP
+  Given I am logged out
+  When I log in as an "offsite user"
+  Then I should be logged in

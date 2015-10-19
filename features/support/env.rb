@@ -32,6 +32,7 @@ if is_parallel_secondary && !custom_host
 end
 
 if !custom_host
+  ENV['FHLB_INTERNAL_IPS'] = '0.0.0.0/0 0::0/0' # all IPs are internal
   ENV['RAILS_ENV'] ||= 'test' # for some reason we default to development in some cases
   ENV['RACK_ENV'] ||= 'test'
   ENV['REDIS_URL'] ||= 'redis://localhost:6379/'

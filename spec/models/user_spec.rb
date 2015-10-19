@@ -457,6 +457,36 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`valid_ldap_authentication?` method' do
+    let(:password) { double('A Password') }
+    let(:strategy) { double('A Strategy', request: double('A Request')) }
+    let(:call_method) { subject.valid_ldap_authentication?(password, strategy) }
+
+    before do
+      allow(subject).to receive(:ldap_domain_name)
+    end
+
+    it 'returns false if `Devise::LDAP::Adapter.valid_credentials?` returns false' do
+      allow(Devise::LDAP::Adapter).to receive(:valid_credentials?).and_return(false)
+      expect(call_method).to be(false)
+    end
+    describe 'if `Devise::LDAP::Adapter.valid_credentials?` returns true' do
+      let(:policy) { double(InternalUserPolicy) }
+      before do
+        allow(Devise::LDAP::Adapter).to receive(:valid_credentials?).and_return(true)
+        allow(InternalUserPolicy).to receive(:new).with(subject, strategy.request).and_return(policy)
+      end
+      it 'returns false if the user is not approved by the `InternalUserPolicy`' do
+        allow(policy).to receive(:access?).and_return(false)
+        expect(call_method).to be(false)
+      end
+      it 'returns true if the user is approved by the `InternalUserPolicy`' do
+        allow(policy).to receive(:access?).and_return(true)
+        expect(call_method).to be(true)
+      end
+    end
+  end
+
 
   describe '`reload_ldap_entry` protected method' do
     let(:call_method) { subject.send(:reload_ldap_entry) }
