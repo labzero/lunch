@@ -56,54 +56,39 @@ class ResourcesController < ApplicationController
         pdf_link: resources_download_path(file: :form_2065)
       },
       {
-        title: t('resources.forms.authorizations.signature_cards.designated_persons'),
-        rows: [
-          {
-            title: t('resources.forms.authorizations.signature_cards.entire_authority'),
-            form_number: 2066,
-            pdf_link: resources_download_path(file: :form_2066)
-          },
-          {
-            title: t('resources.forms.authorizations.signature_cards.wire_transfer'),
-            form_number: 2108,
-            pdf_link: resources_download_path(file: :form_2108)
-          },
-          {
-            title: t('resources.forms.authorizations.signature_cards.advances'),
-            form_number: 2067,
-            pdf_link: resources_download_path(file: :form_2067)
-          },
-          {
-            title: t('resources.forms.authorizations.signature_cards.affordable_housing'),
-            form_number: 2153,
-            pdf_link: resources_download_path(file: :form_2153)
-          },
-          {
-            title: t('resources.forms.authorizations.signature_cards.collateral'),
-            form_number: 2068,
-            pdf_link: resources_download_path(file: :form_2068)
-          },
-          {
-            title: t('resources.forms.authorizations.signature_cards.interest_rate'),
-            form_number: 2070,
-            pdf_link: resources_download_path(file: :form_2070)
-          },
-          {
-            title: t('resources.forms.authorizations.signature_cards.money_market'),
-            form_number: 2071,
-            pdf_link: resources_download_path(file: :form_2071)
-          },
-          {
-            title: t('resources.forms.authorizations.signature_cards.member_transactions'),
-            form_number: 2065,
-            pdf_link: resources_download_path(file: :form_2065)
-          },
-          {
-            title: t('resources.forms.authorizations.signature_cards.person_securities'),
-            form_number: 2109,
-            pdf_link: resources_download_path(file: :form_2109)
-          }
-        ]
+        title: t('resources.forms.authorizations.signature_cards.entire_authority'),
+        form_number: 2066,
+        pdf_link: resources_download_path(file: :form_2066)
+      },
+      {
+        title: t('resources.forms.authorizations.signature_cards.wire_transfer'),
+        form_number: 2108,
+        pdf_link: resources_download_path(file: :form_2108)
+      },
+      {
+        title: t('resources.forms.authorizations.signature_cards.advances'),
+        form_number: 2067,
+        pdf_link: resources_download_path(file: :form_2067)
+      },
+      {
+        title: t('resources.forms.authorizations.signature_cards.affordable_housing'),
+        form_number: 2153,
+        pdf_link: resources_download_path(file: :form_2153)
+      },
+      {
+        title: t('resources.forms.authorizations.signature_cards.collateral'),
+        form_number: 2068,
+        pdf_link: resources_download_path(file: :form_2068)
+      },
+      {
+        title: t('resources.forms.authorizations.signature_cards.interest_rate'),
+        form_number: 2070,
+        pdf_link: resources_download_path(file: :form_2070)
+      },
+      {
+        title: t('resources.forms.authorizations.signature_cards.money_market'),
+        form_number: 2071,
+        pdf_link: resources_download_path(file: :form_2071)
       }
     ]
 
