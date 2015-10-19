@@ -59,14 +59,12 @@ class RatesService < MAPIService
     end
   end
 
-  def quick_advance_rates(member_id, advance_request=nil)
+  def quick_advance_rates(member_id)
     # we're not doing anything with member id right now, but presumably will need to use it at some point to check if
     # certain rates are available (e.g. member has enough collateral)
     raise ArgumentError, 'member_id must not be blank' if member_id.blank?
     
-    data = get_hash(:quick_advance_rates, 'rates/summary')
-    advance_request.notify_if_rate_bands_exceeded(data) if advance_request # callback to notify FHLB if rate bands exceeded. Only want to do this when rates are fetched from endpoint.
-    data
+    get_hash(:quick_advance_rates, 'rates/summary')
   end
 
   def quick_advance_preview(member_id, amount, advance_type, advance_term, rate)

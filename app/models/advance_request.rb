@@ -89,7 +89,11 @@ class AdvanceRequest
   end
 
   def rates
-    @rates ||= rate_service.quick_advance_rates(member_id, self)
+    unless @rates
+      @rates = rate_service.quick_advance_rates(member_id)
+      notify_if_rate_bands_exceeded(@rates)
+    end
+    @rates 
   end
 
   def term=(term)

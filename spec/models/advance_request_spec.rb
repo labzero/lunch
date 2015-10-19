@@ -223,9 +223,10 @@ describe AdvanceRequest do
     describe 'with no stored rates' do
       before do
         allow(subject).to receive(:rate_service).and_return(rate_service)
+        allow(subject).to receive(:notify_if_rate_bands_exceeded)
       end
       it 'fetches the rates from the RatesService' do
-        expect(rate_service).to receive(:quick_advance_rates).with(member_id, subject)
+        expect(rate_service).to receive(:quick_advance_rates).with(member_id)
         call_method
       end
       it 'returns the rates' do
@@ -234,6 +235,10 @@ describe AdvanceRequest do
       it 'stores the rates' do
         expect(rate_service).to receive(:quick_advance_rates).once
         call_method
+        call_method
+      end
+      it 'passes the rates to `notify_if_rate_bands_exceeded`' do
+        expect(subject).to receive(:notify_if_rate_bands_exceeded).with(rate_table)
         call_method
       end
     end
