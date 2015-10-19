@@ -1225,4 +1225,7 @@ td.dataTables_empty {
   .report-print-details {
     margin-bottom: 50px;
   }
+  .sbc-borrowing-capacity-tables {
+    page-break-inside: avoid; 
+  }
 }
