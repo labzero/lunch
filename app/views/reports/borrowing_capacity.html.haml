@@ -155,7 +155,3 @@
         %h3
           = t('reports.pages.borrowing_capacity_summary.remaining_borrowing_capacity_heading')
         %p= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:remaining_borrowing_capacity], force_unit: true)
-    %section
-      %small
-        %p= t('reports.intraday_processing_notice')
-        %p= t('reports.close_of_business_processing_notice')
