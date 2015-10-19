@@ -33,5 +33,5 @@
     %h3= t('products.common_key_features.minimum_interest_rate_convention')
     %p= t('products.advances.arc_embedded.min_interest_rate.description')
     %h3= t('products.common_key_features.prepayment_features')
-    %p= t('products.advances.arc_embedded.prepayment_features.description')
+    %p= t('products.advances.arc_embedded.prepayment_features.description_html', download_link: link_to_download_resource(t('downloads.statement_of_authority.partial_prepayment_symmetry'), resources_download_path(file: :form_2215)))
     .last-modified= t('products.section_headings.last_modified', date: fhlb_date_short_alpha(@last_modified))
