@@ -52,12 +52,6 @@
   }
 }
 
-.settings-two-factor {
-  p {
-    margin-bottom: 25px;
-  }
-}
-
 .settings-reset-pin {
   li:first-child {
     margin-bottom: 20px; 
@@ -178,6 +172,15 @@
       padding-right: 10px;
       color: $medium-gray;
     }
+  }
+}
+
+.settings-two-factor {
+  p {
+    margin-bottom: 25px;
+  }
+  .form-flash-message {
+    display: none;
   }
 }
 
