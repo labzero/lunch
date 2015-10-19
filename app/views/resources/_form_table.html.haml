@@ -6,9 +6,9 @@
         %span.resource-form-number= row[:form_number]
     %td
       - if row[:pdf_link]
-        = link_to(t('global.view_pdf'), row[:pdf_link])
+        = link_to_download_resource(t('global.view_pdf'), row[:pdf_link])
       - elsif row[:word_link]
-        = link_to(t('global.view_doc'), row[:word_link])
+        = link_to_download_resource(t('global.view_doc'), row[:word_link])
   - if row[:rows]
     - row[:rows].each do |row|
       - row_renderer.call(row, true)
