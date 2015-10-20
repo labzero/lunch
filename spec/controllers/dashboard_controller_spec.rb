@@ -505,28 +505,37 @@ RSpec.describe DashboardController, :type => :controller do
       }
     end
     let(:call_method) { subject.send(:calculate_gauge_percentages, capacity_hash, :total) }
-    it 'should not raise an exception if total_borrowing_capacity is zero' do
+    it 'does not raise an exception if total_borrowing_capacity is zero' do
       capacity_hash[:total] = 0
       expect {subject.send(:calculate_gauge_percentages, capacity_hash, :total)}.to_not raise_error
     end
-    it 'should not raise an exception if a key has `nil` for a value' do
+    it 'does not raise an exception if a key has `nil` for a value' do
       capacity_hash[:foo] = nil
       expect {subject.send(:calculate_gauge_percentages, capacity_hash, :total)}.to_not raise_error
     end
-    it 'should not return a total percentage > 100% even if the total is less than the sum of all the keys' do
+    it 'does not return a total percentage > 100% even if the total is less than the sum of all the keys' do
       capacity_hash[:total] = 0
       call_method.each do |key, segment|
         expect(segment[:display_percentage]).to be <= 100
       end
     end
-    it 'should convert the capacties into gauge hashes' do
+    it 'converts the capacties into gauge hashes' do
       gauge_hash = call_method
       expect(gauge_hash[:foo]).to include(:amount, :percentage, :display_percentage)
       expect(gauge_hash[:bar]).to include(:amount, :percentage, :display_percentage)
       expect(gauge_hash[:total]).to include(:amount, :percentage, :display_percentage)
     end
-    it 'should not include the excluded keys values in calculating display_percentage' do
+    it 'does not include the excluded keys values in calculating display_percentage' do
       expect(call_method[:total][:display_percentage]).to eq(100)
+    end
+    it 'treats negative numbers as zero' do
+      negative_hash = capacity_hash.dup
+      negative_hash[:negative] = rand(-2000..-1000)
+      results = call_method
+      negative_results = subject.send(:calculate_gauge_percentages, negative_hash, :total)
+      expect(negative_results[:foo]).to eq(results[:foo])
+      expect(negative_results[:bar]).to eq(results[:bar])
+      expect(negative_results[:total]).to eq(results[:total])
     end
   end
 
