@@ -16,7 +16,7 @@ class DashboardController < ApplicationController
     advance_request_to_session
   end
 
-  around_action :skip_timeout_reset, only: [:current_overnight_vrc]
+  prepend_around_action :skip_timeout_reset, only: [:current_overnight_vrc]
 
   def index
     today = Time.zone.now.to_date
