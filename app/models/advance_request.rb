@@ -89,7 +89,11 @@ class AdvanceRequest
   end
 
   def rates
-    @rates ||= rate_service.quick_advance_rates(member_id)
+    unless @rates
+      @rates = rate_service.quick_advance_rates(member_id)
+      notify_if_rate_bands_exceeded(@rates)
+    end
+    @rates 
   end
 
   def term=(term)
@@ -235,6 +239,20 @@ class AdvanceRequest
     obj = new(nil, nil, request)
     obj.attributes = hash
     obj
+  end
+
+  def notify_if_rate_bands_exceeded(rates)
+    rates = rates.with_indifferent_access
+    ADVANCE_TYPES.each do |type|
+      ADVANCE_TERMS.each do |term|
+        rate_data = rates[type][term]
+        rate_data[:type] = type
+        rate_data[:term] = term
+        if rate_data[:disabled] && (rate_data[:rate_band_info][:min_threshold_exceeded] || rate_data[:rate_band_info][:max_threshold_exceeded])
+          InternalMailer.exceeds_rate_band(rate_data, @request.try(:uuid), signer).deliver_now
+        end
+      end
+    end
   end
 
   protected

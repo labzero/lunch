@@ -35,15 +35,35 @@ module MAPI
         end
       end
 
-      def self.disabled?(live, start_of_day, rate_band, loan_term, blackout_dates)
-        live_rate             = live[:rate].to_f
-        start_of_day_rate     = start_of_day[:rate].to_f
-        threshold_min         = start_of_day_rate - rate_band['LOW_BAND_OFF_BP'].to_f/100.0
-        threshold_max         = start_of_day_rate + rate_band['HIGH_BAND_OFF_BP'].to_f/100.0
+      def self.disabled?(live, loan_term, blackout_dates)
         blacked_out           = blackout_dates.include?( live['maturity_date'] )
         cant_trade            = !loan_term['trade_status']
         cant_display          = !loan_term['display_status']
-        blacked_out || cant_trade || cant_display || live_rate < threshold_min || live_rate > threshold_max
+        blacked_out || cant_trade || cant_display || live[:rate_band_info][:min_threshold_exceeded] || live[:rate_band_info][:max_threshold_exceeded]
+      end
+
+      def self.rate_band_info(live, rate_band)
+        live_rate              = live[:rate].to_f
+        low_band_off_delta     = rate_band['LOW_BAND_OFF_BP'].to_f/100.0
+        high_band_off_delta    = rate_band['HIGH_BAND_OFF_BP'].to_f/100.0
+        low_band_warn_delta    = rate_band['LOW_BAND_WARN_BP'].to_f/100.0
+        high_band_warn_delta   = rate_band['HIGH_BAND_WARN_BP'].to_f/100.0
+        low_band_off_rate      = live[:start_of_day_rate].to_f - low_band_off_delta
+        low_band_warn_rate     = live[:start_of_day_rate].to_f - low_band_warn_delta
+        high_band_off_rate     = live[:start_of_day_rate].to_f + high_band_off_delta
+        high_band_warn_rate    = live[:start_of_day_rate].to_f + high_band_warn_delta
+        {
+          low_band_warn_delta: low_band_warn_delta,
+          low_band_off_delta: low_band_off_delta,
+          high_band_warn_delta: high_band_warn_delta,
+          high_band_off_delta: high_band_off_delta,
+          low_band_off_rate: low_band_off_rate,
+          low_band_warn_rate: low_band_warn_rate,
+          high_band_warn_rate: high_band_warn_rate,
+          high_band_off_rate: high_band_off_rate,
+          min_threshold_exceeded: live_rate < low_band_off_rate,
+          max_threshold_exceeded: live_rate > high_band_off_rate
+        }.with_indifferent_access
       end
 
       def self.soap_client(endpoint, namespaces)
@@ -635,15 +655,16 @@ module MAPI
           end
           LOAN_TYPES.each do |type|
             LOAN_TERMS.each do |term|
-              live                 = live_data[type][term]
-              live[:maturity_date] = MAPI::Services::Rates.get_maturity_date(live[:maturity_date], TERM_MAPPING[term][:frequency_unit], holidays)
-              live[:disabled]      = MAPI::Services::Rates.disabled?(live, start_of_day[type][term], rate_bands[term], loan_terms[term][type], blackout_dates)
+              live                     = live_data[type][term]
+              live[:start_of_day_rate] = start_of_day[type][term][:rate].to_f              
+              live[:rate_band_info]    = MAPI::Services::Rates.rate_band_info(live, rate_bands[term])
+              live[:maturity_date]     = MAPI::Services::Rates.get_maturity_date(live[:maturity_date], TERM_MAPPING[term][:frequency_unit], holidays)
+              live[:disabled]          = MAPI::Services::Rates.disabled?(live, loan_terms[term][type], blackout_dates)
             end
           end
           live_data.merge( timestamp: Time.zone.now ).to_json
         end
-
-
+                               
         # Price Indication Historical rates for VRC, FRC, ARC
         relative_get "/price_indication/historical/:start_date/:end_date/:collateral_type/:credit_type" do
           MAPI::Services::Rates.init_cal_connection(settings.environment)

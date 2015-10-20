@@ -94,6 +94,21 @@ RSpec.describe InternalMailer, :type => :mailer do
     end
   end
 
+  describe '`exceeds_rate_band` email' do
+    let(:request_id) { double('A Request ID') }
+    let(:user) { double('A User', display_name: nil, username: nil) }
+    let(:rate_info) { double('Some rate info', :[] => nil) }
+    let(:build_mail) { mail :exceeds_rate_band, rate_info, request_id, user }
+    before { allow(rate_info).to receive(:[]).with(:rate_band_info).and_return({}) }
+
+    it_behaves_like 'an internal notification email', I18n.t('errors.emails.exceeds_rate_band.subject')
+    
+    it 'assigns @rate_info' do
+      build_mail
+      expect(assigns[:rate_info]).to be(rate_info)
+    end
+  end
+
   describe '`user_name_from_user` protected method' do
     subject { described_class.send :new }
     let(:user) { double('A User', display_name: nil, username: nil)}

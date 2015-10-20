@@ -1,0 +1,8 @@
+- rate_band_info = @rate_info[:rate_band_info]
+= simple_format(t('errors.emails.exceeds_rate_band.body_html', request_id: @request_id || t('global.missing_value'), user: @user || t('global.missing_value'), timestamp: Time.zone.now, type: @rate_info[:type].try(:upcase), term: @rate_info[:term].try(:upcase)))
+%p= t('errors.emails.exceeds_rate_band.start_of_day_rate', rate: fhlb_formatted_number(@rate_info[:start_of_day_rate].to_f, precision: 2, html: false))
+%p= t('errors.emails.exceeds_rate_band.low_band_off', delta: fhlb_formatted_number(rate_band_info[:low_band_off_delta].to_f, precision: 2, html: false), rate: fhlb_formatted_number(rate_band_info[:low_band_off_rate].to_f, precision: 2, html: false))
+%p= t('errors.emails.exceeds_rate_band.high_band_off', delta: fhlb_formatted_number(rate_band_info[:high_band_off_delta].to_f, precision: 2, html: false), rate: fhlb_formatted_number(rate_band_info[:high_band_off_rate].to_f, precision: 2, html: false))
+%p= t('errors.emails.exceeds_rate_band.low_band_warn', delta: fhlb_formatted_number(rate_band_info[:low_band_warn_delta].to_f, precision: 2, html: false), rate: fhlb_formatted_number(rate_band_info[:low_band_warn_rate].to_f, precision: 2, html: false))
+%p= t('errors.emails.exceeds_rate_band.high_band_warn', delta: fhlb_formatted_number(rate_band_info[:high_band_warn_delta].to_f, precision: 2, html: false), rate: fhlb_formatted_number(rate_band_info[:high_band_warn_rate].to_f, precision: 2, html: false))
+%p= t('errors.emails.exceeds_rate_band.current_rate', rate: fhlb_formatted_number(@rate_info[:rate].to_f, precision: 2, html: false))
