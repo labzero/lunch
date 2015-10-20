@@ -323,11 +323,15 @@ class DashboardController < ApplicationController
     largest_display_percentage = 0
     total_display_percentage = 0
     new_gauge_hash = gauge_hash.deep_dup
-    gauge_hash.each do |key, value|
-      total += value unless excluded_keys.include?(key) || value.nil?
+    new_gauge_hash.each do |key, value|
+      if value.nil? || value < 0
+        value = 0
+        new_gauge_hash[key] = value
+      end
+      total += value unless excluded_keys.include?(key)
     end
 
-    gauge_hash.each do |key, value|
+    new_gauge_hash.each do |key, value|
       percentage = total > 0 ? (value.to_f / total) * 100 : 0
 
       display_percentage = percentage.ceil
