@@ -1023,6 +1023,52 @@ td.dataTables_empty {
   }
 }
 
+.standard-credit-borrowing-capacity-tables {
+  th {
+    &:nth-child(4) {
+      width: 145px;
+    }
+    &:nth-child(5) {
+      width: 125px;
+    }
+    &:nth-child(6) {
+      width: 95px;
+    }
+  }
+}
+
+.sbc-borrowing-capacity-tables {
+  th {
+    &:nth-child(4) {
+      width: 125px;
+    }
+    &:nth-child(5) {
+      width: 125px;
+    }
+    &:nth-child(6) {
+      width: 115px;
+    }
+  }
+}
+
+.sbc-borrowing-capacity-tables, .standard-credit-borrowing-capacity-tables {
+  td, th {
+    @include table-cell-treatment;
+  }
+  th:last-child {
+    width: 165px;
+  }
+  .report-sub-table {
+    width: 531px;
+    td:first-child {
+      width: auto;
+    }
+    td:last-child {
+      width: 165px;
+    }
+  }
+}
+
 @media print {
   a, .report-main-body small a, .advances-main-body small a, .authorizations-report a, .reports a, .report a {
     color: $print-link-color;
@@ -1162,7 +1208,9 @@ td.dataTables_empty {
       border-bottom: 1px solid $light-gray;
     }
   }
-  .report-sub-table {
+  .report-sub-table, 
+  .sbc-borrowing-capacity-tables .report-sub-table, 
+  .standard-credit-borrowing-capacity-tables .report-sub-table {
     width: 50%;
     clear: both;
     td, th {
