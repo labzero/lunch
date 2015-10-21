@@ -294,7 +294,9 @@
 
       }
       tr {
-        background-color: inherit;
+        &:nth-child(even), &:nth-child(odd) { // Needed for increased precedence
+          background-color: inherit;
+        }
       }
       tr:last-child td {
         padding-bottom: 10px;
