@@ -159,6 +159,7 @@ describe EtransactAdvancesService do
     describe 'without service exceptions' do
       before do
         allow(subject).to receive(:get_days_to_maturity).with(advance_term).and_return(low_days)
+        allow(subject).to receive(:get_days_to_maturity).with(nil).and_return(nil)
         allow(subject).to receive(:todays_advances_amount).with(member_id, anything, anything).and_return(todays_advances_amount_response)
         allow(subject).to receive(:settings).and_return(settings_response)
         allow(subject).to receive(:todays_cumulative_advances_amount).with(member_id).and_return(todays_cumulative_advances_amount_response)
@@ -190,6 +191,12 @@ describe EtransactAdvancesService do
       it 'should return nil if todays_cumulative_advances_amount returns nil' do
         allow(subject).to receive(:todays_cumulative_advances_amount).with(member_id).and_return(nil)
         expect(check_limits).to eq(nil)
+      end
+      it 'returns nil if passed a nil term' do
+        expect(subject.check_limits(member_id, amount, nil)).to be_nil
+      end
+      it 'returns nil if passed a nil amount' do
+        expect(subject.check_limits(member_id, nil, advance_term)).to be_nil
       end
     end
   end
@@ -351,6 +358,9 @@ describe EtransactAdvancesService do
       it "should map #{i}y" do
         expect(subject.send(:get_days_to_maturity,"#{i}y")).to eq( ((today + i.year) - today).to_i )
       end
+    end
+    it 'returns nil if passed nil' do
+      expect(subject.send(:get_days_to_maturity, nil)).to be_nil
     end
   end
 

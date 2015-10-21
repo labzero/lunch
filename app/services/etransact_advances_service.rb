@@ -65,6 +65,7 @@ class EtransactAdvancesService < MAPIService
   end
 
   def check_limits(member_id, amount, advance_term)
+    return nil if amount.nil? || advance_term.nil?
     if limits = get_json(:check_limits, 'etransact_advances/limits')
       days_to_maturity = get_days_to_maturity(advance_term)
       min_amount = 0
