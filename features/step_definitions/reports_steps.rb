@@ -180,17 +180,17 @@ Then(/^I should see a "([^"]*)" for the (\d+)(?:st|rd|th) of the last month$/) d
   start_date = (Date.new(@today.year, @today.month, day.to_i) - 1.month)
   case report
   when 'Securities Services Monthly Statement'
-    heading = /^#{Regexp.quote(I18n.t('reports.pages.securities_services_statement.heading', date: fhlb_date_long_alpha(start_date)))}$/
+    heading = /^#{Regexp.quote(report_summary_with_date('reports.pages.securities_services_statement.heading', fhlb_date_long_alpha(start_date)))}$/
     sentinel = 'XXXXXXXXXX'
-    footer_base = I18n.t('reports.pages.securities_services_statement.footer', date: fhlb_date_long_alpha(start_date), account_number: sentinel)
+    footer_base = report_summary_with_date('reports.pages.securities_services_statement.footer', fhlb_date_long_alpha(start_date), {account_number: sentinel})
     footer = /^#{Regexp.quote(footer_base).gsub(sentinel, '\d+')}$/
   else
     raise 'unknown report'
   end
 
   expect(page.find(".datepicker-trigger input").value).to eq(I18n.t('datepicker.single.input', date: fhlb_date_standard_numeric(start_date)))
-  page.assert_selector('.report-summary-data h3', text: heading) if heading
-  page.assert_selector('.report-summary-data h3', text: footer) if footer
+  page.assert_selector('.report-summary-data h3', text: strip_tags(heading)) if heading
+  page.assert_selector('.report-summary-data h3', text: strip_tags(footer)) if footer
 end
 
 Then(/^I should see a "(.*?)" for the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of (this|last) month$/) do |report_type, start_day, end_day, month|
@@ -212,16 +212,16 @@ Then(/^I should see a "(.*?)" starting on "(.*?)" and ending on "(.*?)"$/) do |r
   end_date_obj = end_date.to_date
   case report_type
     when "Settlement Transaction Account Statement"
-      opening_balance = I18n.t('reports.pages.settlement_transaction_account.opening_balance_heading', date: start_date_obj.strftime('%B %-d, %Y'))
-      closing_balance = I18n.t('reports.pages.settlement_transaction_account.closing_balance_heading', date: end_date_obj.strftime('%B %-d, %Y'))
+      opening_balance = report_summary_with_date('reports.pages.settlement_transaction_account.opening_balance_heading', start_date_obj.strftime('%B %-d, %Y'))
+      closing_balance = report_summary_with_date('reports.pages.settlement_transaction_account.closing_balance_heading', end_date_obj.strftime('%B %-d, %Y'))
     when "Capital Stock Activity Statement"
-      opening_balance = I18n.t('reports.pages.capital_stock_activity.opening_balance_heading', date: start_date_obj.strftime('%B %-d, %Y'))
-      closing_balance = I18n.t('reports.pages.capital_stock_activity.closing_balance_heading', date: end_date_obj.strftime('%B %-d, %Y'))
+      opening_balance = report_summary_with_date('reports.pages.capital_stock_activity.opening_balance_heading', start_date_obj.strftime('%B %-d, %Y'))
+      closing_balance = report_summary_with_date('reports.pages.capital_stock_activity.closing_balance_heading', end_date_obj.strftime('%B %-d, %Y'))
     else raise "unknown report type"
   end
   expect(page.find(".datepicker-trigger input").value).to eq("#{start_date_obj.strftime('%m/%d/%Y')} - #{end_date_obj.strftime('%m/%d/%Y')}")
-  step %{I should see "#{opening_balance}"}
-  step %{I should see "#{closing_balance}"}
+  step %{I should see "#{strip_tags(opening_balance)}"}
+  step %{I should see "#{strip_tags(closing_balance)}"}
   report_dates_in_range?(start_date_obj, end_date_obj)
 end
 
@@ -259,15 +259,15 @@ Then(/^I should see a "(.*?)" report as of "(.*?)"$/) do |report_type, as_of_dat
   as_of_date = as_of_date.to_date
   summary_statement = case report_type
     when "Advances Detail"
-      I18n.t('reports.pages.advances_detail.total_current_par_heading', date: fhlb_date_long_alpha(as_of_date))
+      report_summary_with_date('reports.pages.advances_detail.total_current_par_heading', fhlb_date_long_alpha(as_of_date))
     when 'Securities Services Monthly Statement'
-      I18n.t('reports.pages.securities_services_statement.heading', date: fhlb_date_long_alpha(as_of_date))
+      report_summary_with_date('reports.pages.securities_services_statement.heading', fhlb_date_long_alpha(as_of_date))
     when 'Monthly Securities Position'
-      I18n.t("reports.pages.securities_position.all_securities.total_original_par_heading", date: fhlb_date_long_alpha(as_of_date))
+      report_summary_with_date("reports.pages.securities_position.all_securities.total_original_par_heading", fhlb_date_long_alpha(as_of_date))
     else raise "unknown report type"
   end
   expect(page.find(".datepicker-trigger input").value).to eq(I18n.t('datepicker.single.input', date: fhlb_date_standard_numeric(as_of_date)))
-  step %{I should see "#{summary_statement}"}
+  step %{I should see "#{strip_tags(summary_statement)}"}
 end
 
 Then(/^I should see a "(.*?)" report as of the end of the last valid month$/) do |report_type|
@@ -292,16 +292,16 @@ Then(/^I should see a "(.*?)" with dates between "(.*?)" and "(.*?)"$/) do |repo
   end_date_obj = end_date.to_date
   case report_type
     when "Settlement Transaction Account Statement"
-      opening_balance = I18n.t('reports.pages.settlement_transaction_account.opening_balance_heading', date: nil)
-      closing_balance = I18n.t('reports.pages.settlement_transaction_account.closing_balance_heading', date: nil)
+      opening_balance = report_summary_with_date('reports.pages.settlement_transaction_account.opening_balance_heading', nil)
+      closing_balance = report_summary_with_date('reports.pages.settlement_transaction_account.closing_balance_heading', nil)
     when "Capital Stock Activity Statement"
-      opening_balance = I18n.t('reports.pages.capital_stock_activity.opening_balance_heading', date: nil)
-      closing_balance = I18n.t('reports.pages.capital_stock_activity.closing_balance_heading', date: nil)
+      opening_balance = report_summary_with_date('reports.pages.capital_stock_activity.opening_balance_heading', nil)
+      closing_balance = report_summary_with_date('reports.pages.capital_stock_activity.closing_balance_heading', nil)
     else raise "unknown report type"
   end
   expect(page.find(".datepicker-trigger input").value).to eq("#{start_date_obj.strftime('%m/%d/%Y')} - #{end_date_obj.strftime('%m/%d/%Y')}")
-  returned_start_date = page.find('.report-summary-data:nth-child(1) h3').text.gsub(opening_balance, '').to_date
-  returned_end_date = page.find('.report-summary-data:nth-child(2) h3').text.gsub(closing_balance, '').to_date
+  returned_start_date = page.find('.report-summary-data:nth-child(1) h3').text.gsub(strip_tags(opening_balance), '').to_date
+  returned_end_date = page.find('.report-summary-data:nth-child(2) h3').text.gsub(strip_tags(closing_balance), '').to_date
   expect(start_date_obj).to be <= returned_start_date
   expect(end_date_obj).to be >= returned_end_date
   report_dates_in_range?(start_date_obj, end_date_obj)

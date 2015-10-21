@@ -14,6 +14,6 @@ Then(/^I should see advances details for the (\d+)(?:st|rd|th) of (this|last) mo
 end
 
 def check_advances_details_for_date(date)
-  page.assert_selector('.report-summary-data h3', text: I18n.t('reports.pages.advances_detail.total_current_par_heading', date: date.strftime('%B %-d, %Y')))
+  page.assert_selector('.report-summary-data h3', text: strip_tags(report_summary_with_date('reports.pages.advances_detail.total_current_par_heading', date.strftime('%B %-d, %Y'))))
   report_dates_in_range?((Time.zone.now.to_date - 100.years), date)
 end

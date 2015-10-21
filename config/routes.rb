@@ -43,7 +43,7 @@ Rails.application.routes.draw do
     get '/dividend-statement'            => 'error#not_found'
     get '/monthly-securities-position'   => 'error#not_found'
     get '/mortgage-collateral-update'    => 'error#not_found'
-    get '/securities-services-statement' => 'error#not_found'
+    get '/securities-services-statement' => 'reports#securities_services_statement'
     get '/trial-balance'                 => 'error#not_found'
     get '/securities-transactions'       => 'error#not_found'
   end

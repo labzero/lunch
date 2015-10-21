@@ -10,11 +10,11 @@
   .report-main-body
     .report-summary-data
       %h3
-        = t('reports.pages.capital_stock_activity.opening_balance_heading', date: fhlb_date_long_alpha(@capital_stock_activity[:start_date]))
+        = report_summary_with_date('reports.pages.capital_stock_activity.opening_balance_heading', fhlb_date_long_alpha(@capital_stock_activity[:start_date]))
       %p= t('reports.share_count', count: fhlb_formatted_number(@capital_stock_activity[:start_balance], html: false))
     .report-summary-data
       %h3
-        = t('reports.pages.capital_stock_activity.closing_balance_heading', date: fhlb_date_long_alpha(@capital_stock_activity[:end_date]))
+        = report_summary_with_date('reports.pages.capital_stock_activity.closing_balance_heading', fhlb_date_long_alpha(@capital_stock_activity[:end_date]))
       %p= t('reports.share_count', count: fhlb_formatted_number(@capital_stock_activity[:end_balance], html: false))
     %h2.report-table-title= t('reports.pages.capital_stock_activity.table_title')
     %table.report-table{data: {sortable: true, :'missing-data-message' => missing_data_message}}

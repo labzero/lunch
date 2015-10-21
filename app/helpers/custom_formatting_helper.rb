@@ -124,4 +124,9 @@ module CustomFormattingHelper
     end
   end
 
+  def report_summary_with_date(i18n, date, subs={})
+    subs[:date] = content_tag(:span, date, class: 'report-summary-date')
+    I18n.t(i18n, subs).html_safe
+  end
+
 end

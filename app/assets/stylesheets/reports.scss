@@ -215,6 +215,10 @@
   }
 }
 
+.report-summary-date {
+  white-space: nowrap;
+}
+
 .report-table-title {
    @extend %typography-section-title;
    margin: 0 0 15px;
