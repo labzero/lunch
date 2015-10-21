@@ -46,21 +46,6 @@ describe MAPI::Services::Rates::BlackoutDates do
           end
         end
       end
-
-      describe 'nearest_business_day' do
-        let (:fri){ double('friday',   saturday?: false, sunday?: false ) }
-        let (:sat){ double('saturday', saturday?: true,  sunday?: false) }
-        let (:sun){ double('sunday',   saturday?: false, sunday?: true) }
-        let (:mon){ double('monday',   saturday?: false, sunday?: false) }
-        it 'should return argument if it is a business day' do
-          expect(subject.nearest_business_day(fri)).to be == fri
-        end
-        it 'should return different day if argument is not a business day' do
-          allow(sat).to receive(:+).with(1.day).and_return(sun)
-          allow(sun).to receive(:+).with(1.day).and_return(mon)
-          expect(subject.nearest_business_day(sat)).to be == mon
-        end
-      end
     end
   end
 end
