@@ -29,6 +29,8 @@ describe MAPI::ServiceApp do
           expect(row['borrowing_capacity']).to be_kind_of(Integer)
         end
 
+        expect(borrowing_capacity_details['standard']['securities']).to be_a_kind_of(Integer)
+        
         result_standard_excluded = borrowing_capacity_details['standard']['excluded']
         expect(result_standard_excluded['blanket_lien']).to be_a_kind_of(Integer)
         expect(result_standard_excluded['bank']).to be_a_kind_of(Integer)
@@ -61,7 +63,7 @@ describe MAPI::ServiceApp do
       it_behaves_like 'a borrowing capacity detail endpoint'
     end
 
-    describe 'in the development environment' do
+    describe 'in the production environment' do
       let(:as_of_date) {'2015-01-14'}
       let(:bc_balances) {{"UPDATE_DATE"=> "12-JAN-2015 03:18 PM", "STD_EXCL_BL_BC"=> 20.5, "STD_EXCL_BANK_BC"=> 30.4, "STD_EXCL_REG_BC"=> 40, "STD_SECURITIES_BC"=> 0,
                           "STD_ADVANCES"=> 15000099, "STD_LETTERS_CDT_USED"=> 20, "STD_SWAP_COLL_REQ"=> 10, "STD_COVER_OTHER_PT_DEF"=> 99, "STD_PREPAY_FEES"=> 260,
@@ -205,6 +207,23 @@ describe MAPI::ServiceApp do
           else
             raise 'wrong collateral type'
           end
+        end
+      end
+
+      describe 'standard[:securities]' do
+        let(:security) { rand(1111111..9999999) + rand() }
+        let(:rounded_security) { security.round() }
+        let(:new_bc_balances) { bc_balances }
+
+        it 'should return `STD_SECURITIES_BC` as a rounded integer for standard[:securities]' do
+          new_bc_balances['STD_SECURITIES_BC'] = security
+          allow(result_set1).to receive(:fetch_hash).and_return(new_bc_balances, nil)
+          expect(borrowing_capacity_details['standard']['securities']).to eq(rounded_security)
+        end
+        it 'should return 0 if there is no value for `STD_SECURITIES_BC`' do
+          new_bc_balances['STD_SECURITIES_BC'] = nil
+          allow(result_set1).to receive(:fetch_hash).and_return(new_bc_balances, nil)
+          expect(borrowing_capacity_details['standard']['securities']).to eq(0)
         end
       end
 

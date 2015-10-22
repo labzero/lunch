@@ -6,18 +6,18 @@
     .resource-guide
       %h2= t('resources.guides.credit.title')
       %small= t('resources.guides.revised_at', date: fhlb_date_long_alpha(Date.new(2015, 4, 22)))
-      = link_to(t('global.view_pdf'), resources_download_path(file: :creditguide))
+      = link_to_download_resource(t('global.view_pdf'), resources_download_path(file: :creditguide))
       = link_to(t('resources.guides.view_updates'), '#credit-guide-updates')
 
     .resource-guide
       %h2= t('resources.guides.collateral.title')
       %small= t('resources.guides.revised_at', date: fhlb_date_long_alpha(Date.new(2015, 4, 22)))
-      = link_to(t('global.view_pdf'), resources_download_path(file: :collateralguide))
+      = link_to_download_resource(t('global.view_pdf'), resources_download_path(file: :collateralguide))
       = link_to(t('resources.guides.view_updates'), '#collateral-guide-updates')
 
     .resource-guide
       %h2= t('resources.guides.collateral_review.title')
-      = link_to(t('global.view_pdf'), resources_download_path(file: :collateralreviewguide))
+      = link_to_download_resource(t('global.view_pdf'), resources_download_path(file: :collateralreviewguide))
   .resource-guide-updates
     - [:credit, :collateral].each do |guide|
       .resource-guide-update

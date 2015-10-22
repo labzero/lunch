@@ -8,4 +8,9 @@ class MessageService
       CorporateCommunication.where(category: filter)
     end
   end
+  
+  def todays_quick_advance_message
+    AdvanceMessage.quick_advance_message_for(Time.zone.today)
+  end
+  
 end

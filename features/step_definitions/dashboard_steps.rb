@@ -148,12 +148,28 @@ Then(/^I should see a preview of the quick advance with a notification about the
   page.assert_selector('.quick-advance-updated-rate')
 end
 
+Then(/^I should see an initiate advance button with a notification about the new rate$/) do
+  page.assert_selector('.confirm-quick-advance', text: I18n.t('dashboard.quick_advance.buttons.new_rate'))
+end
+
 When(/^the quick advance rate has changed$/) do
   # implement code to ensure rate is displayed as having changed
 end
 
 When(/^the desk has closed$/) do
   # implement code to ensure desk has closed
+end
+
+When(/^there is limited pricing today$/) do
+  # implement code to ensure there is a limited pricing message for today
+end
+
+When (/^I click on the link to view limited pricing information$/) do
+  page.find('.quick-advance-limited-pricing-notice').click
+end
+
+Then (/^I should see the limited pricing information message$/) do
+  page.assert_selector('.quick-advance-limited-pricing-message', visible: true)
 end
 
 Then(/^I should not see a preview of the quick advance$/) do

@@ -45,6 +45,8 @@ describe RatesService do
 
   describe "`quick_advance_rates` method", :vcr do
     let(:quick_advance_rates) {subject.quick_advance_rates(member_id)}
+    let(:advance_request) { double('advance request instance') }
+    let(:rates) { double('rates hash') }
     it "should return a hash of hashes containing pledged collateral values" do
       expect(quick_advance_rates.length).to be >= 1
       expect(quick_advance_rates[:overnight][:whole_loan]).to be_kind_of(Float)

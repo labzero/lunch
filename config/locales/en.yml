@@ -44,7 +44,7 @@ en:
     borrowing_capacity: Borrowing Capacity
     advances: Advances
     total_market_value: Total Market Value
-    collateral_type: Collateral Type
+    loan_collateral_type: Loan Collateral Type
     count: Count
     original_amount: Original Amount
     unpaid_principal: Unpaid Principal
@@ -97,6 +97,8 @@ en:
     role: Role
     name: Name
     edit: Edit
+    phone: Phone
+    fax: Fax
     copyright_html: "&copy;"
     copyright_date: 2000-2015
     contact: Contact
@@ -104,6 +106,7 @@ en:
     privacy_policy: Privacy Policy
     truncated_web_address: "fhlbsf.com"
     view_pdf: View PDF
+    view_doc: View Doc
     view_report: View Report
     tbd: TBD
     report: Report
@@ -435,6 +438,8 @@ en:
       advances_desk_no_terms: There are no terms available right now.
       advance_last_updated: The following rates were last updated %{last_updated}
       hours_of_operation_html: "You may initiate an advance during the <a href=\"%{url}\">Advance Desk Hours of Operation</a>."
+      limited_pricing: View limited pricing information
+      deadline: The Member Portal observes the same deadlines for advance transactions as the Member Service Desk.
       frc_title: Fixed Rate Credit (FRC) Advance
       vrc_title: Variable Rate Credit (VRC) Advance
       tooltip:
@@ -474,6 +479,7 @@ en:
         back: Back
         preview: Preview the selected advance
         initiate: Initiate the selected advance
+        new_rate: Initiate Advance with New Rate
         credit: Review Credit Activity
         continue: Continue With Request
         rates: View Current Rates
@@ -684,9 +690,9 @@ en:
         lien_real_estate:
           title: 'Blanket Lien: Real Estate Loan Collateral'
           pledging: Pledging and Reporting Designation
-          lending_policy: Anti-Predatory Lending Policy Certification Blank Lien Summary
+          lending_policy: Anti-Predatory Lending Policy Certification Blanket Lien Summary
           questionnaire_html: 'Commercial Banks, Savings Institutions, and Industrial Loan Companies: <br>Blanket Lien Collateral Eligibility Questionnaire—Summary Reporting'
-          certification: 'Collateral: Blanket Lien Collateral Certification—Summary Reporting'
+          certification: 'Blanket Lien Collateral Certification—Summary Reporting'
           notification: 'MCU Notification: Blanket Lien—Detailed Reporting'
         lien_other:
           title: 'Blanket Lien: Small Business, Agribusiness, and Farm Loans'
@@ -919,32 +925,39 @@ en:
           basis_point_spread_to_benchmark: Basis Point Spread to Benchmark
           nominal_yield_of_benchmark: Nominal Yield of Benchmark* (%)
           advance_rate: Advance Rate (%)
-          interest_day_count: Interest Day Count
-          interest_rate_reset: Interest Rate Reset
+          interest_day_count: 'Interest Day Count:'
+          interest_rate_reset: 'Interest Rate Reset:'
           actual_actual: Actual/Actual
           actual_360: Actual/360
-          payment_frequency: Payment Frequency
+          payment_frequency: 'Interest Payment Frequency:'
+          overnight: 'Overnight:'
+          open: 'Open:'
           at_maturity: At maturity
           at_repayment: At repayment
           at_monthend_and_at_repayment: At monthend and at repayment
           monthly_and_at_repayment: Monthly and at repayment
           quarterly_and_at_repayment: Quarterly and at repayment
           semiannually_and_at_repayment: Semiannually and at repayment
-          advances_with_terms_of_180_days_or_less: Advances with terms of 180 days or less
-          advances_with_terms_of_more_than: Advances with terms of more than
-          vrc: VRC Advance
+          advances_with_terms_of_180_days_or_less: 'Advances with terms of 180 days or less:'
+          advances_with_terms_of_more_than: 'Advances with terms of more than 180 days:'
+          vrc: Variable Rate Credit (VRC) Advance
           vrc_standard_xlsx: "Standard - VRC"
           vrc_sbc_xlsx: "SBC - VRC"
-          frc: FRC Advance
+          frc: Fixed Rate Credit (FRC) Advance
           frc_standard_xlsx: "Standard - FRC"
           frc_sbc_xlsx: "SBC - FRC"
-          arc: ARC Advance (Basis Point Spread)
+          arc: Adjustable Rate Credit (ARC) Advance
+          basis_point_spread: (Basis Point Spread)
           arc_standard_xlsx: "Standard - ARC"
           arc_sbc_xlsx: "SBC - ARC"
-          1_month_libor: 1 Month LIBOR
-          3_month_libor: 3 Month LIBOR
-          6_month_libor: 6 Month LIBOR
-          prime: Daily Prime
+          1_month_libor: '1 Month LIBOR:'
+          3_month_libor: '3 Month LIBOR:'
+          6_month_libor: '6 Month LIBOR:'
+          prime: 'Daily Prime:'
+          1_month_libor_header: 1 Month LIBOR
+          3_month_libor_header: 3 Month LIBOR
+          6_month_libor_header: 6 Month LIBOR
+          prime_header: Daily Prime
           sta_info: Published STA rate is applied to previous business day's ending STA balance
           sta_rate: Effective Rate for Prior Business Day (%)
           freshness: This report reflects the price indications published at 6:00 am on the current business day.
@@ -1004,14 +1017,14 @@ en:
         remaining_borrowing_capacity_heading: "Remaining Borrowing Capacity:"
         standard_credit_program: Standard Credit Program
         sbc_program: Securities-Backed Credit (SBC) Program
-        market_value: Market Val
+        market_value: Market Value
         total_borrowing_capacity: Total Borrowing Capacity
         standard_credit: Covered by Standard Credit
         remaining_market_value: Market Value Remaining
         remaining_borrowing_capacity: Borrowing Capacity Remaining
         bc_upb: BC/UPB
         net_loan_collateral: Net Loan Collateral Borrowing Capacity
-        excess_capacity: Excess Borrowing Capacity
+        remaining_capacity: Remaining Borrowing Capacity
         freshness: Loan collateral data reflects intraday processing of Mortgage Collateral Updates, except for Market Value. Market Value and all other data is as of close of business on the prior business day.
         less_line_items:
           blanket_lien: Less Excluded Blanket Lien Borrowing Capacity
@@ -1021,9 +1034,11 @@ en:
           letters_of_credit: Less Letters of Credit
           swap_collateral: Less SWAP Collateral Required
           cover_sbc_type: Less Cover SBC Type Deficiencies
-          payment_fees: Less Potential Payment Fees
+          payment_fees: Less Potential Prepayment Fees
           other_collateral: Less Other Collateral Required
           mpf_ce_collateral: Less MPF CE Collateral Required
+        plus_line_items:
+          securities: Plus Securities Borrowing Capacity 
       settlement_transaction_account:
         title: Settlement/Transaction Account (STA) Statement
         opening_balance_heading: "Beginning balance of as of %{date}:"
@@ -1221,7 +1236,7 @@ en:
     general_information:
       title: General Information
       does_not_constitute_solicitation_html: This information does not constitute a solicitation or offer or advice (financial or otherwise) by the Bank, but is a description of generally available structures for certain products and price indications for those structures as of the time and date indicated above. This information is subject to the <a href="%{url}">Terms of Use</a> and may change without notice.
-      market_data_html: Market data is generally provided by Thomson Reuters. <img src="%{picture_url}" alt="Reuters Logo"> </br>Disclaimer Data provided by Thomson Reuters is for information purposes only and is not intended for trading purposes. Thomson Reuters shall not be liable for any errors or delay in the content, or for any action taken in reliance on any content.</br>The Bank may use another source of market data if necessary at its discretion.
+      market_data_html: Market data is generally provided by Thomson Reuters. <img src="%{picture_url}" alt="Reuters Logo"> </br>Data provided by Thomson Reuters is for information purposes only and is not intended for trading purposes. Thomson Reuters shall not be liable for any errors or delay in the content, or for any action taken in reliance on any content.</br>The Bank may use another source of market data if necessary at its discretion.
       same_day_pricing: Same-day pricing and/or funding for amounts up to $200 million for Variable Rate Credit advances and up to $100 million per posted maturity for all other advances with maturities up to 10 years are available according to your institution's Financing Availability, subject to market conditions. For advances with maturities greater than 10 years, same-day pricing and/or funding are subject to market execution.
       interest_rates_on_securities_backed_credit_advances: Interest rates on Securities-Backed Credit advances may be lower than rates on advances offered under the Bank's Standard Credit Program and competitive with rates in the securities repurchase market. The price indications shown here are based on Agency MBS collateral. For rates using AAA or AA collateral, call the Member Services Desk at %{phone_number}.
       please_call_the_member_services_desk: "Please call the Member Services Desk at %{phone_number} for current quotes, additional information about other maturities and customized offerings, and pricing information on the following products:"
@@ -1231,10 +1246,9 @@ en:
       lc: Standby Letters of Credit
       ace: Advances for Community Enterprise (ACE)
       cip: Community Investment Program (CIP) advances
-      hpa: Homeownership Preservation Advance (HPA)
       advances_with_embedded_options: Advances with embedded options, including interest rate caps
       advances_with_partial_prepayment_symmetry: Advances with partial prepayment symmetry
-      reduced_prices: Reduced prices are generally available for advances under the Bank's Community Investment Cash Advance (CICA) credit programs, which include ACE, CIP, and HPA.
+      reduced_prices: Reduced prices are generally available for advances under the Bank's Community Investment Cash Advance (CICA) credit programs, which include ACE, and CIP.
       standby_letters_of_credit: "Standby Letters of Credit (LCs) are available to assist members in facilitating residential housing finance and community lending that are eligible for the following two CICA credit programs: CIP and ACE. LCs may also be used to assist members with asset/liability management or to provide members with liquidity or other funding."
       for_advances_traded_on_or_after_january_1: "For advances traded on or after January 1, 2002, the maximum voluntary prepayment settlement amount per calendar month per member cannot exceed the greater of: (i) the amount of Bank stock owned by the member as of the last business day of the calendar month prior to the notice date or (ii) $250 million. In addition, the maximum voluntary prepayment amount for all advances is $250 million per member per business day."
       the_bank_will_provide_prepayment_fee_indications: The Bank will provide prepayment fee indications for up to 5 advances per member per business day.
@@ -1314,7 +1328,7 @@ en:
         call_dates: You specify the initial call date, with quarterly call dates thereafter.
         call_feature: The advance may be repaid on any call date without a prepayment fee, provided that the Bank receives proper call notice. The Bank will charge a prepayment fee if proper call notice is not received by the Bank or for prepayment on a date other than a designated call date.
         call_notice: At least 9 business days but no more than 60 calendar days before the specified call date.
-        prepayment_features_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=\"%{url}\">Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
+        prepayment_features_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=\"%{url}\" target='_blank'>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       arc_embedded:
         title: ARC Advance with Embedded Options
         description: Use ARC Advances with Embedded Options to match the interest rate and payment characteristics of your adjustable rate loan portfolio while managing your interest rate risk exposure.
@@ -1501,7 +1515,7 @@ en:
             title: Interest Payment Frequency
             description: At monthend and at repayment (semiannually and at repayment for Securities-Backed Credit Program; quarterly and at repayment for advances with partial prepayment symmetry)
           prepayment_features:
-            description_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the <a href=%{url}>Bank the Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
+            description_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=%{url}>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       frc_embedded:
         title: FRC Advance with Embedded Cap
         description: Available on an order-only basis, the FRC Advance with Embedded Cap is a fixed rate advance with an embedded interest rate cap that provides a benefit to the borrower when the cap index exceeds a specified strike rate on a cap observation date. When the cap index exceeds the strike rate, the borrower’s interest rate for the next accrual period is lowered by the difference between the index rate and the strike rate (subject to a minimum interest rate of 0.00%). Partial prepayment symmetry is available for this advance.
@@ -1841,6 +1855,60 @@ en:
     meta_title: FHLB - Messages
     receive_via_email: Receiving messages via email
     edit_email_settings_html: Edit your <a href=%{url}>Email Settings</a> to choose which messages you want to receive via email.
+  contact:
+    general_information:
+      title: General Information
+      address: "Federal Home Loan Bank of San Francisco\n\nP.O. Box 7948\nSan Francisco, CA 94120-7948\n\n600 California Street\nSan Francisco, CA 94108"
+    member_financial_services:
+      title: Member Financial Services
+      service_desk:
+        title: Member Services Desk
+      relationship_managers:
+        title: Relationship Managers
+      mortgage_purchases:
+        title: Mortgage Purchases
+    collateral_departments:
+      title: Collateral Departments
+      collateral_operations:
+        title: Collateral Operations
+        email: Email (MCUs)
+        blanket: Blanket lien pledges and certifications
+        pledge: Collateral pledge and release (mortgages and securities)
+        deficiency: Collateral deficiencies
+        vault: Collateral vault deposits and withdrawals
+        mcu: Mortgage Collateral Updates (MCUs)
+      collateral_services:
+        title: Collateral Services
+        eligibility: Collateral eligibility
+        reviews: Field reviews
+      securities_services:
+        title: Securities Services
+        safekeeping: Safekeeping services for pledged and unpledged securities
+        settlement: Settlement of securities transactions
+        principal: Securities principal and interest payments
+        cash: Securities cash projections, transaction confirmations and holdings reports
+    electronic_funds_management:
+      title: Electronic Funds Management
+      wire: "You can wire funds or send drawdown requests to your Settlement/Transaction Account at the Bank by indicating: FHLB SF, ABA Routing 1210-0070-1, Credit/Debit: Settlement/Transaction Account Number, and Member Name."
+    operations:
+      title: Operations
+      sta_rate: STA Rate
+    financial_accounting_reporting:
+      title: Financial Accounting and Reporting Department
+    community_investment:
+      title: Community Investment
+      ahp:
+        title: AHP Competitive Program
+      cip_ace:
+        title: CIP and ACE
+      programs:
+        title: AHEAD, IDEA, and WISH Programs
+    cofi:
+      title: 11th District Cost of Funds Indices
+      website: Website
+      cofi_html: <a href="%{url}">11th District Cost of Funds Indices</a>
+    web_support:
+      title: Web Support
   terms:
     title: Terms of Use
     intro:
@@ -1954,3 +2022,13 @@ en:
       stale_rate:
         subject: 'Notice: eTransact encountered stale rates'
         body_html: The eTransact system has encountered rates that are older than <strong>%{rate_timeout} seconds</strong> when getting rates from Market Data Services for request <strong>%{request_id}</strong>, issued by <strong>%{user}</strong>.
+      exceeds_rate_band:
+        subject: 'Notice: Rate Band Shut-Down Threshold Exceeded'
+        body_html: The product, %{type} VRC/FRC - %{term} - triggered an alert at %{timestamp}, when the rate band shutoff limits were exceeded. The alert was triggered when getting rates from Market Data Services for request <strong>%{request_id}</strong>, issued by <strong>%{user}</strong>.
+        start_of_day_rate: 'Rate at start of day: %{rate}'
+        current_rate: 'Current Rate: %{rate}'
+        low_band_off: 'Low Band Shutoff Rate (delta of %{delta}): %{rate}'
+        high_band_off: 'High Band Shutoff Rate (delta of %{delta}): %{rate}'
+        low_band_warn: 'Low Band Warning Rate (delta of %{delta}): %{rate}'
+        high_band_warn: 'High Band Warning Rate (delta of %{delta}): %{rate}'
+        

@@ -19,11 +19,12 @@ Scenario: Visit current price indications from header link
 Scenario: Visiting the Current Price Indications Report Page
   Given I am on the "Current Price Indications" report page
   Then I should see "Standard Credit Program"
-  And I should see "VRC Advance"
+  And I should see "Variable Rate Credit (VRC) Advance"
   And I should see VRC current price indications report
-  And I should see "FRC Advance"
+  And I should see "Fixed Rate Credit (FRC) Advance"
   And I should see FRC current price indications report
-  And I should see "ARC Advance (Basis Point Spread)"
+  And I should see "Adjustable Rate Credit (ARC) Advance"
+  And I should see "(Basis Point Spread)"
   And I should see ARC current price indications report
   And I should see "Securities-Backed Credit"
   And I should see "Settlement/Transaction Account"
@@ -35,3 +36,9 @@ Scenario: Member downloads an XLSX of the Current Price Indications report
   Given I am on the "Current Price Indications" report page
   When I request an XLSX
   Then I should begin downloading a file
+
+@data-unavailable @jira-mem-1065
+Scenario: A message is displayed when there is limited pricing
+  Given I am on the "Current Price Indications" report page
+  When there is limited pricing today
+  Then I should see the limited pricing information message  

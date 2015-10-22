@@ -64,6 +64,20 @@ primaryGroupID: 513
 userAccountControl: 512
 mail: local-password@example.com
 
+# local user with offsite access
+dn: sAMAccountName=local-offsite,dc=fhlbsf-i,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Local Offsite User
+sn: Local Offsite User
+givenname: Local
+sAMAccountName: local-offsite
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+userAccountControl: 512
+mail: local-offsite@example.com
+
 # FCN-MemberSite-AccessManagers-R group
 dn: CN=FCN-MemberSite-AccessManagers-R,DC=fhlbsf-i,DC=com
 cn: FCN-MemberSite-AccessManagers-R
@@ -77,6 +91,13 @@ dn: ou=FHLB-Accounts,dc=fhlbsf-i,dc=com
 objectClass: top
 objectClass: organizationalUnit
 ou: FHLB-Accounts
+
+# FCN-MemberSite-ExternalAccess
+dn: CN=FCN-MemberSite-ExternalAccess,DC=fhlbsf-i,DC=com
+cn: FCN-MemberSite-ExternalAccess
+objectClass: group
+objectClass: top
+member: sAMAccountName=local-offsite,dc=fhlbsf-i,dc=com
 
 #dn: ou=people,dc=fhlbsf-i,dc=com
 #objectClass: organizationalUnit

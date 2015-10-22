@@ -190,7 +190,7 @@ module MAPI
              sta_number = member['sta_number'] if member
           end
           
-          return nil if member_name.nil? || sta_number.nil? || fhfb_number.nil?
+          return nil if member_name.nil?
 
           {
             name: member_name,

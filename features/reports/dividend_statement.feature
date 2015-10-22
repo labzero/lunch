@@ -1,4 +1,4 @@
-@jira-mem-69
+@jira-mem-69 @wip
 Feature: Visiting the Dividend Transaction Statement Page
   As a user
   I want to use visit the Dividend Transaction Statement page for the FHLB Member Portal
@@ -7,7 +7,7 @@ Feature: Visiting the Dividend Transaction Statement Page
 Background:
   Given I am logged in
 
-@smoke @jira-mem-264
+@smoke @jira-mem-264 @wip
 Scenario: Member sees Dividend Transaction Statement
   Given I visit the dashboard
   When I select "Dividend Transaction Statement" from the reports dropdown
@@ -15,7 +15,7 @@ Scenario: Member sees Dividend Transaction Statement
   And I should see a report header
   And I should see 2 report tables with multiple data rows
 
-@smoke @jira-mem-264
+@smoke @jira-mem-264 @wip
 Scenario: Member sorts the Dividend Transaction Statement
   Given I am on the "Dividend Transaction Statement" report page
   And I should see the "Issue Date" column values in "ascending" order on the "Dividend Details" table
@@ -50,14 +50,14 @@ Scenario: Member sorts the Dividend Transaction Statement
   And I click the "Dividend" column heading
   Then I should see the "Dividend" column values in "descending" order on the "Dividend Details" table
 
-@smoke @jira-mem-787
+@smoke @jira-mem-787 @wip
 Scenario: Member selects a previous Dividend Transaction Statement
   Given I am on the "Dividend Transaction Statement" report page
   When I click on the dividend transaction dropdown selector
   And I click on the last option in the dividend transaction dropdown selector
   Then I should see a dividend summary for the last option in the dividend transaction dropdown selector
 
-@data-unavailable @jira-mem-264
+@data-unavailable @jira-mem-264 @wip
 Scenario: No data is available to show in the Dividend Transaction Statement Statement
   Given I am on the "Dividend Transaction Statement" report page
   When the "Dividend Summary" table has no data
@@ -65,7 +65,7 @@ Scenario: No data is available to show in the Dividend Transaction Statement Sta
   When the "Dividend Details" table has no data
   Then I should see the "Dividend Details" report table with Data Unavailable messaging
 
-@data-unavailable @jira-mem-264
+@data-unavailable @jira-mem-264 @wip
 Scenario: The Dividend Transaction Statement has been disabled
   Given I am on the "Dividend Transaction Statement" report page
   When the "Dividend Transaction Statement" report has been disabled

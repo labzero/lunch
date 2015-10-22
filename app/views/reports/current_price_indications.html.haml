@@ -1,66 +1,45 @@
 - @html_class = 'white-background'
 - @page_title = t('reports.meta_title')
-.report.price-indications-report.row
+.report.price-indications-report.report-current-price-indication.row
   .report-header
     %h1= @report_name
     = render 'reports_header_buttons', download_formats: [:xlsx]
     = render 'report_details', name: @member_name, freshness: t('reports.pages.price_indications.current.freshness')
     %p= t('reports.pages.price_indications.current.summary', phone_number: service_desk_phone_number)
+    - if @quick_advance_message
+      = render 'shared/quick_advance_message', message: @quick_advance_message
   .report-main-body
     %h2.report-table-title= t('reports.pages.price_indications.standard_credit_program')
     .report-table-title
       %h3= t('reports.pages.price_indications.current.vrc')
     = render 'reports/reports_table', table_class: 'current-price-vrc-table', table_data: @standard_vrc_table_data, sortable: false
-    %small
-      %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_actual')}
-      %p #{t('reports.pages.price_indications.current.payment_frequency')}:
-      .report-info-indent
-        %p #{t('global.overnight')}: #{t('reports.pages.price_indications.current.at_maturity')}
-        %p #{t('global.open')}: #{t('reports.pages.price_indications.current.at_monthend_and_at_repayment')}
+    = render 'reports_table_notes', notes: @standard_vrc_table_data[:notes]
     .report-table-title-with-margins
       %h3= t('reports.pages.price_indications.current.frc')
     = render 'reports/reports_table', table_class: 'current-price-frc-table', table_data: @standard_frc_table_data, sortable: false
-    %small
-      %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_actual')}
-      %p #{t('global.open')}: #{t('reports.pages.price_indications.current.at_monthend_and_at_repayment')}
+    = render 'reports_table_notes', notes: @standard_frc_table_data[:notes]
     .report-table-title-with-margins
       %h3= t('reports.pages.price_indications.current.arc')
+      .sub-title
+        =t('reports.pages.price_indications.current.basis_point_spread')
     = render 'reports/reports_table', table_class: 'current-price-arc-table', table_data: @standard_arc_table_data, sortable: false
-    %small
-      %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_360')}
-      %p #{t('reports.pages.price_indications.current.interest_rate_reset')}: #{t('global.monthly')}, #{t('global.quarterly')}, #{t('global.semiannually')}, #{t('global.daily')}
-      %p #{t('reports.pages.price_indications.current.payment_frequency')}: #{t('reports.pages.price_indications.current.monthly_and_at_repayment')}, #{t('reports.pages.price_indications.current.quarterly_and_at_repayment')}
-      .report-info-indent
-        %p #{t('reports.pages.price_indications.current.semiannually_and_at_repayment')}, #{t('reports.pages.price_indications.current.quarterly_and_at_repayment')}
+    = render 'reports_table_notes', notes: @standard_arc_table_data[:notes]
   .report-main-body
     %h2.report-table-title= t('reports.pages.price_indications.sbc_program')
     .report-table-title
       %h3= t('reports.pages.price_indications.current.vrc')
     = render 'reports/reports_table', table_class: 'current-price-vrc-table', table_data: @sbc_vrc_table_data, sortable: false
-    %small
-      %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_actual')}
-      %p #{t('reports.pages.price_indications.current.payment_frequency')}:
-      .report-info-indent
-        %p #{t('global.overnight')}: #{t('reports.pages.price_indications.current.at_maturity')}
-        %p #{t('global.open')}: #{t('reports.pages.price_indications.current.at_monthend_and_at_repayment')}
+    = render 'reports_table_notes', notes: @sbc_vrc_table_data[:notes]
     .report-table-title-with-margins
       %h3= t('reports.pages.price_indications.current.frc')
     = render 'reports/reports_table', table_class: 'current-price-frc-table', table_data: @sbc_frc_table_data, sortable: false
-    %small
-      %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_360')}
-      %p #{t('reports.pages.price_indications.current.payment_frequency')}:
-      .report-info-indent
-        %p #{t('reports.pages.price_indications.current.advances_with_terms_of_180_days_or_less')}: #{t('reports.pages.price_indications.current.at_repayment')}
-        %p #{t('reports.pages.price_indications.current.advances_with_terms_of_more_than')}: #{t('reports.pages.price_indications.current.semiannually_and_at_repayment')}
+    = render 'reports_table_notes', notes: @sbc_frc_table_data[:notes]
     .report-table-title-with-margins
       %h3= t('reports.pages.price_indications.current.arc')
+      .sub-title
+        =t('reports.pages.price_indications.current.basis_point_spread')
     = render 'reports/reports_table', table_class: 'current-price-arc-sbc-table', table_data: @sbc_arc_table_data, sortable: false
-    %small
-      %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_360')}
-      %p #{t('reports.pages.price_indications.current.interest_rate_reset')}: #{t('global.monthly')}, #{t('global.quarterly')}, #{t('global.semiannually')}
-      %p #{t('reports.pages.price_indications.current.payment_frequency')}: #{t('reports.pages.price_indications.current.monthly_and_at_repayment')}, #{t('reports.pages.price_indications.current.quarterly_and_at_repayment')}
-      .report-info-indent
-        %p= t('reports.pages.price_indications.current.semiannually_and_at_repayment')
+    = render 'reports_table_notes', notes: @sbc_arc_table_data[:notes]
   .report-main-body
     %h2.report-table-title= t('reports.pages.price_indications.settlement_transaction_account')
     %table.report-table.sta-rate-table.report-table-vertical-headers{data: {sortable: false}}
@@ -68,9 +47,10 @@
         %tr
           %td= @sta_table_data[:row_name]
           %td.report-cell-right.report-cell-expanding= fhlb_formatted_number(@sta_table_data[:row_value], precision: 5)
-    %small
-      %p #{t('reports.pages.price_indications.current.interest_day_count')}: #{t('reports.pages.price_indications.current.actual_360')}
-      %p= t('reports.pages.price_indications.current.sta_info')
+    %dl
+      %dt= t('reports.pages.price_indications.current.interest_day_count')
+      %dd= t('reports.pages.price_indications.current.actual_360')
+      %dd= t('reports.pages.price_indications.current.sta_info')
   .report-main-body
     %h2.report-table-title= t('reports.general_information.title')
     %small
@@ -87,7 +67,6 @@
           %li= t('reports.general_information.lc')
           %li= t('reports.general_information.ace')
           %li= t('reports.general_information.cip')
-          %li= t('reports.general_information.hpa')
           %li= t('reports.general_information.advances_with_embedded_options')
           %li= t('reports.general_information.advances_with_partial_prepayment_symmetry')
         %li= t('reports.general_information.reduced_prices')

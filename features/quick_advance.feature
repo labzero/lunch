@@ -71,6 +71,15 @@ Scenario: Certain rates should be missing due to rate bands
   Then I should see a blacked out value for the "2year" term with a type of "aa"
   And I should see a blacked out value for the "3year" term with a type of "aa"
 
+@jira-mem-1056
+Scenario: 2 year rates should be missing due to override_end_date/override_end_time
+  Given I visit the dashboard
+  And I open the quick advance flyout
+  Then I should see a blacked out value for the "2year" term with a type of "whole"
+  And I should see a blacked out value for the "2year" term with a type of "aa"
+  And I should see a blacked out value for the "2year" term with a type of "aaa"
+  And I should see a blacked out value for the "2year" term with a type of "agency"
+
 Scenario: Preview rate from Quick Advance flyout table
   Given I visit the dashboard
   And I open the quick advance flyout
@@ -167,7 +176,7 @@ Scenario: Users aren't required to enter a SecurID token a second time
   Then I should see confirmation number for the advance
 
 
-@data-unavailable @jira-mem-872
+@data-unavailable @jira-mem-872 @jira-mem-1028
 Scenario: The rate changes from the time the user sees the table to the time they see the preview
   Given I visit the dashboard
   And I open the quick advance flyout
@@ -175,6 +184,7 @@ Scenario: The rate changes from the time the user sees the table to the time the
   When I click on the initiate advance button
   And the quick advance rate has changed
   Then I should see a preview of the quick advance with a notification about the new rate
+  And I should see an initiate advance button with a notification about the new rate
 
 @data-unavailable @jira-mem-577
 Scenario: The View Recent Price Indications link is displayed when the desk is closed
@@ -182,6 +192,13 @@ Scenario: The View Recent Price Indications link is displayed when the desk is c
   And the desk has closed
   When I click on the View Recent Price Indications link
   Then I am on the "Current Price Indications" report page
+  
+@data-unavailable @jira-mem-569
+Scenario: A message is displayed when there is limited pricing
+  Given I visit the dashboard
+  And there is limited pricing today
+  When I click on the link to view limited pricing information
+  Then I should see the limited pricing information message
 
 @jira-mem-735
 Scenario: Users get an error if their requested advance would push FHLB over its total daily limit for web advances

@@ -66,6 +66,56 @@ class ReportsController < ApplicationController
     monthly_securities_position: 18.months,
     dividend_statement: 36.months
   }
+  
+  INTEREST_DAY_COUNT_MAPPINGS = {
+    standard: {
+      vrc: I18n.t('reports.pages.price_indications.current.actual_actual'),
+      frc: I18n.t('reports.pages.price_indications.current.actual_actual'),
+      arc: I18n.t('reports.pages.price_indications.current.actual_360'),
+      :'1m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'), 
+      :'3m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
+      :'6m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'), 
+      :'daily_prime' => I18n.t('reports.pages.price_indications.current.actual_360')
+    },
+    sbc: {
+      vrc: I18n.t('reports.pages.price_indications.current.actual_360'),
+      frc: I18n.t('reports.pages.price_indications.current.actual_actual'),
+      arc: I18n.t('reports.pages.price_indications.current.actual_360'),
+      :'1m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
+      :'3m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
+      :'6m_libor' => I18n.t('reports.pages.price_indications.current.actual_360')
+    }
+  }.freeze
+  
+  INTEREST_PAYMENT_FREQUENCY_MAPPINGS = {
+    standard: {
+      vrc: I18n.t('reports.pages.price_indications.current.at_maturity'),
+      vrc_open: I18n.t('reports.pages.price_indications.current.at_monthend_and_at_repayment'),
+      frc: I18n.t('reports.pages.price_indications.current.at_monthend_and_at_repayment'),
+      :'1m_libor' => I18n.t('reports.pages.price_indications.current.monthly_and_at_repayment'),
+      :'3m_libor' => I18n.t('reports.pages.price_indications.current.quarterly_and_at_repayment'),
+      :'6m_libor' => I18n.t('reports.pages.price_indications.current.semiannually_and_at_repayment'),
+      :'daily_prime' => I18n.t('reports.pages.price_indications.current.quarterly_and_at_repayment')
+    },
+    sbc: {
+      vrc: I18n.t('reports.pages.price_indications.current.at_maturity'),
+      vrc_open: I18n.t('reports.pages.price_indications.current.at_monthend_and_at_repayment'),
+      frc: [
+        [I18n.t('reports.pages.price_indications.current.advances_with_terms_of_180_days_or_less'), I18n.t('reports.pages.price_indications.current.at_repayment')],
+        [I18n.t('reports.pages.price_indications.current.advances_with_terms_of_more_than'), I18n.t('reports.pages.price_indications.current.semiannually_and_at_repayment')]
+      ],
+      :'1m_libor' => I18n.t('reports.pages.price_indications.current.monthly_and_at_repayment'),
+      :'3m_libor' => I18n.t('reports.pages.price_indications.current.quarterly_and_at_repayment'),
+      :'6m_libor' => I18n.t('reports.pages.price_indications.current.semiannually_and_at_repayment')
+    }  
+  }.freeze
+  
+  INTEREST_RATE_RESET_MAPPINGS = {
+    :'1m_libor' => I18n.t('global.monthly'),
+    :'3m_libor' => I18n.t('global.quarterly'),
+    :'6m_libor' => I18n.t('global.semiannually'),
+    :'daily_prime' => I18n.t('global.daily')
+  }.freeze
 
   before_action do
     @member_name = current_member_name
@@ -125,6 +175,7 @@ class ReportsController < ApplicationController
           route: reports_borrowing_capacity_path
         },
         mcu: {
+          disabled: true,
           updated: t('reports.collateral.mcu.updated'),
           available_history: t('reports.history.current_report'),
           route: reports_mortgage_collateral_update_path
@@ -137,16 +188,19 @@ class ReportsController < ApplicationController
           route: reports_capital_stock_activity_path
         },
         trial_balance: {
+          disabled: true,
           updated: t('reports.updated.daily'),
           available_history: t('reports.history.back_to', date: fhlb_date_long_alpha(Date.new(2002,1,1))),
           route: reports_trial_balance_path
         },
         capital_stock_and_leverage: {
+          disabled: true,
           updated: t('reports.updated.daily'),
           available_history: t('reports.history.current_report'),
           route: reports_capital_stock_and_leverage_path
         },
         dividend_statement: {
+          disabled: true,
           updated: t('reports.updated.quarterly'),
           available_history: t('reports.history.months', months: 36),
           route: reports_dividend_statement_path
@@ -154,26 +208,31 @@ class ReportsController < ApplicationController
       },
       securities: {
         transactions: {
+          disabled: true,
           updated: t('reports.securities.transactions.updated'),
           available_history: t('reports.securities.transactions.history'),
           route: reports_securities_transactions_path
         },
         cash_projections: {
+          disabled: true,
           updated: t('reports.updated.daily'),
           available_history: t('reports.history.current_report'),
           route: reports_cash_projections_path
         },
         current: {
+          disabled: true,
           updated: t('reports.updated.intraday'),
           available_history: t('reports.history.current_report'),
           route: reports_current_securities_position_path
         },
         monthly: {
+          disabled: true,
           updated: t('reports.securities.monthly.updated'),
           available_history: t('reports.history.months', months: 18),
           route: reports_monthly_securities_position_path
         },
         services_monthly: {
+          disabled: true,
           updated: t('reports.securities.services_monthly.updated'),
           available_history: t('reports.history.months', months: 18),
           route: reports_securities_services_statement_path
@@ -186,6 +245,7 @@ class ReportsController < ApplicationController
           route: reports_account_summary_path
         },
         authorizations: {
+          disabled: true,
           updated: t('reports.updated.intraday'),
           available_history: t('reports.history.current_report'),
           route: reports_authorizations_path
@@ -367,8 +427,15 @@ class ReportsController < ApplicationController
       end
       rows = [{columns: columns}]
       @standard_vrc_table_data = {
-        :column_headings => column_headings,
-        :rows => rows
+        column_headings: column_headings,
+        rows: rows,
+        notes: {
+          t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:standard][:vrc],
+          t('reports.pages.price_indications.current.payment_frequency') => [
+            [t('reports.pages.price_indications.current.overnight'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:vrc]],
+            [t('reports.pages.price_indications.current.open'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:vrc_open]]
+          ]  
+        }
       }
       #vrc data for sbc collateral
       @sbc_vrc_data = rate_service.current_price_indications('sbc', 'vrc')
@@ -385,8 +452,15 @@ class ReportsController < ApplicationController
       end
       rows = [{columns: columns}]
       @sbc_vrc_table_data = {
-        :column_headings => column_headings,
-        :rows => rows
+        column_headings: column_headings,
+        rows: rows,
+        notes: {
+          t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:sbc][:vrc],
+          t('reports.pages.price_indications.current.payment_frequency') => [
+            [t('reports.pages.price_indications.current.overnight'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:vrc]],
+            [t('reports.pages.price_indications.current.open'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:vrc_open]]
+          ]
+        }
       }
 
       #frc headers
@@ -407,8 +481,12 @@ class ReportsController < ApplicationController
         {columns: columns}
       end
       @standard_frc_table_data = {
-        :column_headings => column_headings,
-        :rows => rows
+        column_headings: column_headings,
+        rows: rows,
+        notes: {
+          t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:standard][:frc],
+          t('reports.pages.price_indications.current.payment_frequency') => INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:frc]
+        }  
       }
       #frc data for sbc collateral
       @sbc_frc_data = rate_service.current_price_indications('sbc', 'frc')
@@ -426,12 +504,16 @@ class ReportsController < ApplicationController
         {columns: columns}
       end
       @sbc_frc_table_data = {
-        :column_headings => column_headings,
-        :rows => rows
+        column_headings: column_headings,
+        rows: rows,
+        notes: {
+          t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:sbc][:frc],
+          t('reports.pages.price_indications.current.payment_frequency') => INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:frc]
+        }
       }
 
       #arc headers for standard collateral
-      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor'), t('reports.pages.price_indications.current.3_month_libor'), t('reports.pages.price_indications.current.6_month_libor'), t('reports.pages.price_indications.current.prime')]
+      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor_header'), t('reports.pages.price_indications.current.3_month_libor_header'), t('reports.pages.price_indications.current.6_month_libor_header'), t('reports.pages.price_indications.current.prime_header')]
       #arc data for standard collateral
       @standard_arc_data = rate_service.current_price_indications('standard', 'arc')
       rows = @standard_arc_data.collect do |row|
@@ -446,11 +528,26 @@ class ReportsController < ApplicationController
         {columns: columns}
       end
       @standard_arc_table_data = {
-        :column_headings => column_headings,
-        :rows => rows
+        column_headings: column_headings,
+        rows: rows,
+        notes: {
+          t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:standard][:arc],
+          t('reports.pages.price_indications.current.interest_rate_reset') => [
+            [t('reports.pages.price_indications.current.1_month_libor'), INTEREST_RATE_RESET_MAPPINGS[:'1m_libor']],
+            [t('reports.pages.price_indications.current.3_month_libor'), INTEREST_RATE_RESET_MAPPINGS[:'3m_libor']],
+            [t('reports.pages.price_indications.current.6_month_libor'), INTEREST_RATE_RESET_MAPPINGS[:'6m_libor']],
+            [t('reports.pages.price_indications.current.prime'), INTEREST_RATE_RESET_MAPPINGS[:'daily_prime']]
+          ],
+          t('reports.pages.price_indications.current.payment_frequency') => [
+            [t('reports.pages.price_indications.current.1_month_libor'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:'1m_libor']],
+            [t('reports.pages.price_indications.current.3_month_libor'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:'3m_libor']],
+            [t('reports.pages.price_indications.current.6_month_libor'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:'6m_libor']],
+            [t('reports.pages.price_indications.current.prime'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:'daily_prime']]
+          ]
+        }
       }
       #arc headers for sbc collateral
-      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor'), t('reports.pages.price_indications.current.3_month_libor'), t('reports.pages.price_indications.current.6_month_libor')]
+      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor_header'), t('reports.pages.price_indications.current.3_month_libor_header'), t('reports.pages.price_indications.current.6_month_libor_header')]
       #arc data for sbc collateral
       @sbc_arc_data = rate_service.current_price_indications('sbc', 'arc')
       rows = @sbc_arc_data.collect do |row|
@@ -465,9 +562,23 @@ class ReportsController < ApplicationController
         {columns: columns}
       end
       @sbc_arc_table_data = {
-        :column_headings => column_headings,
-        :rows => rows
+        column_headings: column_headings,
+        rows: rows,
+        notes: {
+          t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:sbc][:arc],
+          t('reports.pages.price_indications.current.interest_rate_reset') => [
+            [t('reports.pages.price_indications.current.1_month_libor'), INTEREST_RATE_RESET_MAPPINGS[:'1m_libor']],
+            [t('reports.pages.price_indications.current.3_month_libor'), INTEREST_RATE_RESET_MAPPINGS[:'3m_libor']],
+            [t('reports.pages.price_indications.current.6_month_libor'), INTEREST_RATE_RESET_MAPPINGS[:'6m_libor']]
+          ],
+          t('reports.pages.price_indications.current.payment_frequency') => [
+            [t('reports.pages.price_indications.current.1_month_libor'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:'1m_libor']],
+            [t('reports.pages.price_indications.current.3_month_libor'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:'3m_libor']],
+            [t('reports.pages.price_indications.current.6_month_libor'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:'6m_libor']]
+          ]          
+        }
       }
+      @quick_advance_message = MessageService.new.todays_quick_advance_message
     end
   end
 
@@ -500,10 +611,7 @@ class ReportsController < ApplicationController
         [t('reports.pages.price_indications.6m_libor.dropdown'), '6m_libor']
     ]
     if @collateral_type == 'standard'
-      @credit_type_options.push(
-        [t('reports.pages.price_indications.daily_prime.dropdown'), 'daily_prime'],
-        [t('reports.pages.price_indications.embedded_cap.dropdown'), 'embedded_cap']
-      )
+      @credit_type_options.push( [t('reports.pages.price_indications.daily_prime.dropdown'), 'daily_prime'] )
     end
     credit_type = params[:historical_price_credit_type]
     @credit_type_options.each do |option|
@@ -590,12 +698,20 @@ class ReportsController < ApplicationController
       else
         []
       end
+      
+      collateral_key = @collateral_type.to_sym
+      credit_key = @credit_type.to_sym
+      notes = {}
+      notes[t('reports.pages.price_indications.current.interest_day_count')] = INTEREST_DAY_COUNT_MAPPINGS[collateral_key][credit_key]
+      notes[t('reports.pages.price_indications.current.interest_rate_reset')] = INTEREST_RATE_RESET_MAPPINGS[credit_key] if RatesService::ARC_CREDIT_TYPES.include?(credit_key)
+      notes[t('reports.pages.price_indications.current.payment_frequency')] = INTEREST_PAYMENT_FREQUENCY_MAPPINGS[collateral_key][credit_key]
       @table_data = {
         :table_heading => table_heading,
         :column_headings => column_headings,
         :column_sub_headings => column_sub_headings,
         :column_sub_headings_first => column_sub_headings_first,
-        :rows => rows
+        :rows => rows,
+        :notes => notes
       }
     end
   end

@@ -605,10 +605,10 @@ RSpec.describe SettingsController, :type => :controller do
     end
 
     it_behaves_like 'a user required action', :put, :update_password
-
+    
     describe 'with a valid current password' do
       before do
-        allow(user).to receive(:valid_ldap_authentication?).with(current_password).and_return(true)
+        allow(user).to receive(:valid_ldap_authentication?).with(current_password, kind_of(Devise::Strategies::LdapAuthenticatable)).and_return(true)
       end
 
       it 'sets the password attribute on the user' do

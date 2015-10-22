@@ -429,6 +429,7 @@ describe MemberBalanceService do
         expect(borrowing_capacity_summary[:standard_credit_totals][:market_value]).to be_kind_of(Integer)
         expect(borrowing_capacity_summary[:standard_credit_totals][:borrowing_capacity]).to be_kind_of(Integer)
         expect(borrowing_capacity_summary[:net_loan_collateral]).to be_kind_of(Integer)
+        expect(borrowing_capacity_summary[:net_plus_securities_capacity]).to be_kind_of(Integer)
         expect(borrowing_capacity_summary[:standard_excess_capacity]).to be_kind_of(Integer)
       end
       it 'should return values for securities-backed field totals' do
@@ -459,7 +460,8 @@ describe MemberBalanceService do
             expect(borrowing_capacity_summary[:standard_credit_totals][:market_value]).to eq(2479090494)
             expect(borrowing_capacity_summary[:standard_credit_totals][:borrowing_capacity]).to eq(2216748960)
             expect(borrowing_capacity_summary[:net_loan_collateral]).to eq(2216568960)
-            expect(borrowing_capacity_summary[:standard_excess_capacity]).to eq(2207180460)
+            expect(borrowing_capacity_summary[:net_plus_securities_capacity]).to eq(2216573960)
+            expect(borrowing_capacity_summary[:standard_excess_capacity]).to eq(2207185460)
           end
           it 'should total all of the securities-backed collateral fields' do
             expect(borrowing_capacity_summary[:sbc_totals][:total_market_value]).to eq(4193763)
@@ -472,7 +474,7 @@ describe MemberBalanceService do
           end
           it 'should calculate total borrowing capacity and remaining borrowing capacity across all security types' do
             expect(borrowing_capacity_summary[:total_borrowing_capacity]).to eq(2217350292)
-            expect(borrowing_capacity_summary[:remaining_borrowing_capacity]).to eq(2207257094)
+            expect(borrowing_capacity_summary[:remaining_borrowing_capacity]).to eq(2207262094)
           end
           it 'should calculate `borrowing_capacity`/`unpaid_principal_balance` as a rounded, whole-number percentage' do
             expect(borrowing_capacity_summary[:standard][:collateral][0][:bc_upb]).to eq(95)

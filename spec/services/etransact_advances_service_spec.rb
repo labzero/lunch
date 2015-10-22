@@ -151,7 +151,7 @@ describe EtransactAdvancesService do
     let(:high_result) {{:status => 'high', :low => amount, :high => high_amount}}
     let(:limits_response) {[{"WHOLE_LOAN_ENABLED" => "N","SBC_AGENCY_ENABLED" => "Y", "SBC_AAA_ENABLED" => "Y", "SBC_AA_ENABLED" => "Y", "LOW_DAYS_TO_MATURITY" => low_days,
                              "HIGH_DAYS_TO_MATURITY" => high_days, "MIN_ONLINE_ADVANCE" => amount, "TERM_DAILY_LIMIT" => high_amount, "PRODUCT_TYPE" => "VRC",
-                             "END_TIME" => "1700", "OVERRIDE_END_DATE" => "01-JAN-2006 12:00 AM", "OVERRIDE_END_TIME" => "1700"}]}
+                             "END_TIME" => "1700", "OVERRIDE_END_DATE" => "2006-01-01", "OVERRIDE_END_TIME" => "1700"}]}
     let(:settings_response) {{"shareholder_total_daily_limit" => cumulative_amount}}
     let(:todays_advances_amount_response) {rand(1..9)}
     let(:todays_cumulative_advances_amount_response) {rand(1..9)}

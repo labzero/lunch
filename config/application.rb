@@ -28,8 +28,9 @@ module FhlbMember
     config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
     config.log_tags = [
       lambda { |request| "request_id=#{request.uuid}" },
-      lambda { |request| "session_id=#{request.session.id}"},
-      lambda { |request| request.session["warden.user.user.key"].nil? ? "user_id=NONE" : "user_id=#{request.session["warden.user.user.key"][0][0]}"}
+      lambda { |request| "session_id=#{request.session.id}" },
+      lambda { |request| request.session["warden.user.user.key"].nil? ? "user_id=NONE" : "user_id=#{request.session["warden.user.user.key"][0][0]}" },
+      lambda { |request| "remote_ip=#{request.remote_ip}" }
     ]
     config.logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new(Rails.root.join('log', "#{Rails.env}.log"), 'daily'))
     config.active_job.queue_adapter = :resque
@@ -44,6 +45,14 @@ module FhlbMember
 
     config.action_view.field_error_proc = Proc.new { |html_tag, instance|
       "#{html_tag}".html_safe
+    }
+
+    trusted_proxies = (ENV['TRUSTED_PROXIES'] || '').split.collect { |proxy| IPAddr.new(proxy) }
+    config.action_dispatch.trusted_proxies = trusted_proxies + ActionDispatch::RemoteIp::TRUSTED_PROXIES
+
+    config.action_dispatch.default_headers = {
+      'Pragma' => 'no-cache',
+      'Cache-Control' => 'no-store'
     }
   end
 end

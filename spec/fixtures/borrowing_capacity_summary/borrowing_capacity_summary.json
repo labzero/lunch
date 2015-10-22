@@ -1,6 +1,7 @@
 {
   "date" : "",
   "standard" : {
+    "securities" : 5000,
     "collateral" : [
       {
         "type" : "RESIDENTIAL - ARMs",

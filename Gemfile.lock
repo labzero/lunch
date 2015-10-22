@@ -7,10 +7,10 @@ GIT
 
 GIT
   remote: https://github.com/labzero/devise_ldap_authenticatable.git
-  revision: 2cd00dc59e6fad918216db4ea75f9b803986eb46
-  branch: 0.9.17
+  revision: 043aa116763c44e4d3cfd623c8445c4018b3b40b
+  branch: 0.9.19
   specs:
-    devise_ldap_authenticatable (0.9.17)
+    devise_ldap_authenticatable (0.9.19)
       devise (>= 3.4.1)
       net-ldap (>= 0.11)
 
@@ -24,6 +24,7 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
+    aasm (4.3.0)
     actionmailer (4.2.4)
       actionpack (= 4.2.4)
       actionview (= 4.2.4)
@@ -253,7 +254,7 @@ GEM
     mime-types (2.6.1)
     mini_magick (4.2.7)
     mini_portile (0.6.2)
-    minitest (5.8.0)
+    minitest (5.8.1)
     momentjs-rails (2.10.2)
       railties (>= 3.1)
     mono_logger (1.1.0)
@@ -380,7 +381,7 @@ GEM
       rspec-mocks (~> 3.2.0)
       rspec-support (~> 3.2.0)
     rspec-support (3.2.2)
-    ruby-oci8 (2.2.0)
+    ruby-oci8 (2.2.0.2)
     ruby-prof (0.15.8)
     ruby2ruby (2.1.4)
       ruby_parser (~> 3.1)
@@ -487,6 +488,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  aasm
   activerecord-oracle_enhanced-adapter (~> 1.6.0)
   autoprefixer-rails
   axlsx_rails (>= 0.3.0)

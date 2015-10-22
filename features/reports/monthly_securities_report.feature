@@ -1,4 +1,4 @@
-@jira-mem-69
+@jira-mem-69 @wip
 Feature: Visiting the Monthly Securities Position Report Page
   As a user
   I want to use visit the monthly securities position report page for the FHLB Member Portal
@@ -7,7 +7,7 @@ Feature: Visiting the Monthly Securities Position Report Page
   Background:
     Given I am logged in
 
-  @smoke @jira-mem-541
+  @smoke @jira-mem-541 @wip
   Scenario: Visit monthly securities position report page from header link
     Given I visit the dashboard
     When I select "Monthly Securities Position" from the reports dropdown
@@ -15,7 +15,7 @@ Feature: Visiting the Monthly Securities Position Report Page
     And I should see a report header
     And I should see a report table with multiple data rows
 
-  @jira-mem-541
+  @jira-mem-541 @wip
   Scenario: Viewing the details of a given security
     Given I am on the "Monthly Securities Position" report page
     When I click on the view cell for the first security
@@ -23,7 +23,7 @@ Feature: Visiting the Monthly Securities Position Report Page
     When I click on the hide link for the first security
     Then I should not see the detailed view for the first security
 
-  @smoke @jira-mem-541
+  @smoke @jira-mem-541 @wip
   Scenario: Member sorts the monthly securities position report by maturity date
     Given I am on the "Monthly Securities Position" report page
     When I click the "Maturity Date" column heading
@@ -31,7 +31,7 @@ Feature: Visiting the Monthly Securities Position Report Page
     And I click the "Maturity Date" column heading
     Then I should see the "Maturity Date" column values in "descending" order
 
-  @jira-mem-541
+  @jira-mem-541 @wip
   Scenario: Member filters the monthly securities position report
     Given I am on the "Monthly Securities Position" report page
     When I filter the report by "Pledged Securities"
@@ -39,7 +39,7 @@ Feature: Visiting the Monthly Securities Position Report Page
     When I filter the report by "Unpledged Securities"
     Then I should see a monthly securities position report for Unpledged Securities
 
-  @jira-mem-890
+  @jira-mem-890 @wip
   Scenario: Member enters a date occurring before the minimum allowed date
     Given I am on the "Monthly Securities Position" report page
     When I click the datepicker field
@@ -47,7 +47,7 @@ Feature: Visiting the Monthly Securities Position Report Page
     And I click the datepicker apply button
     Then I should see a "Monthly Securities Position" report as of 18 months ago
 
-  @jira-mem-890
+  @jira-mem-890 @wip
   Scenario: Member enters a date occurring after the maximum allowed date
     Given I am on the "Monthly Securities Position" report page
     When I click the datepicker field
@@ -55,13 +55,13 @@ Feature: Visiting the Monthly Securities Position Report Page
     And I click the datepicker apply button
     Then I should see a "Monthly Securities Position" report as of the end of the last valid month
 
-  @data-unavailable @jira-mem-283 @jira-mem-1053
+  @data-unavailable @jira-mem-283 @jira-mem-1053 @wip
   Scenario: No data is available to show in the monthly securities position report
     Given I am on the "Monthly Securities Position" report page
     When the "Monthly Securities Position" table has no data
     Then I should see an empty report table with No Records messaging
 
-  @data-unavailable @jira-mem-282 @jira-mem-1053
+  @data-unavailable @jira-mem-282 @jira-mem-1053 @wip
   Scenario: The monthly securities position report has been disabled
     Given I am on the "Monthly Securities Position" report page
     When the "Monthly Securities Position" report has been disabled

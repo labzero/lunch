@@ -28,23 +28,24 @@ Rails.application.routes.draw do
     get '/settlement-transaction-account' => 'reports#settlement_transaction_account'
     get '/advances' => 'reports#advances_detail'
     get '/historical-price-indications' => 'reports#historical_price_indications'
-    get '/cash-projections' => 'reports#cash_projections'
     get '/current-price-indications' => 'reports#current_price_indications'
     get '/interest-rate-resets' => 'reports#interest_rate_resets'
-    get '/dividend-statement' => 'reports#dividend_statement'
-    get '/securities-services-statement' => 'reports#securities_services_statement'
     get '/letters-of-credit' => 'reports#letters_of_credit'
-    get '/securities-transactions' => 'reports#securities_transactions'
-    get '/authorizations' => 'reports#authorizations'
     get '/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: :parallel_shift
-    get '/current-securities-position' => 'reports#current_securities_position'
-    get '/monthly-securities-position' => 'reports#monthly_securities_position'
     get '/forward-commitments' => 'reports#forward_commitments'
-    get '/capital-stock-and-leverage' => 'reports#capital_stock_and_leverage'
     get '/account-summary' => 'reports#account_summary'
     get '/todays-credit' => 'reports#todays_credit'
-    get '/trial-balance' => 'error#not_found'
-    get '/mortgage-collateral-update' => 'error#not_found'
+
+    get '/authorizations'                => 'error#not_found'
+    get '/capital-stock-and-leverage'    => 'error#not_found'
+    get '/cash-projections'              => 'error#not_found'
+    get '/current-securities-position'   => 'error#not_found'
+    get '/dividend-statement'            => 'error#not_found'
+    get '/monthly-securities-position'   => 'error#not_found'
+    get '/mortgage-collateral-update'    => 'error#not_found'
+    get '/securities-services-statement' => 'error#not_found'
+    get '/trial-balance'                 => 'error#not_found'
+    get '/securities-transactions'       => 'error#not_found'
   end
 
   get '/advances' => 'advances#index'
@@ -121,6 +122,7 @@ Rails.application.routes.draw do
     get 'member/password/reset' => 'users/passwords#edit', as: :edit_user_password
     put 'member/password' => 'users/passwords#update'
     get '/terms-of-use' => 'members#terms_of_use', as: :terms_of_use
+    get '/contact' => 'members#contact', as: :contact
   end
   devise_for :users, controllers: { sessions: 'users/sessions', passwords: 'users/passwords' }, :skip => [:sessions, :passwords]
 

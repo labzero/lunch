@@ -34,7 +34,7 @@
       color: $text-color;
     }
   }
-  a {
+  a, .disabled {
     display: block;
     color: $text-color;
     padding: 15px 20px;
@@ -59,6 +59,9 @@
         color: $actionable-blue;
         text-transform: uppercase;
       }
+    }
+    .disabled p {
+      color: $medium-gray;
     }
     .report-info {
       @extend %typography-table-total;
@@ -168,6 +171,20 @@
   }
 }
 
+.report-current-price-indication {
+  .report-main-body {
+    margin-bottom: 50px;
+  }
+  .quick-advance-limited-pricing-message {
+    display: block;
+    width: 490px;
+    margin: 45px 0 55px;
+    p {
+      width: 490px;
+    }
+  }
+}
+
 .advances-detail-report {
   .report-main-body {
     small {
@@ -176,10 +193,6 @@
       }
     }
   }
-}
-
-.report-info-indent {
-  margin-left: 40px;
 }
 
 .report-summary-data {
@@ -209,7 +222,10 @@
 
 .report-table-title-with-margins {
   @extend %typography-section-title;
-  margin: 50px 0 15px;
+  margin: 25px 0 10px;
+  .sub-title {
+    @extend %typography-table-cell;
+  }
 }
 
 .report-table {
@@ -504,6 +520,21 @@
       margin-left: 10px;
     }
   }
+  dl {
+    @extend %typography-table-cell;
+    margin: -5px 0 15px; // neg top margin so we can leave .report-table-title style as-is for other reports
+  }
+  dt {
+    float: left;
+    margin-right: 8px;
+  }
+  dd {
+    margin-left: 0;
+    dl {
+      clear: both;
+      margin: 0 0 0 40px;
+    }
+  }
 }
 
 .report-dividend-statement {
@@ -543,6 +574,7 @@
 
 .current-price-vrc-table {
   width: 480px;
+  margin-bottom: 15px;
   th {
     &:nth-child(2) {
       min-width: 150px;
@@ -555,6 +587,7 @@
 
 .current-price-frc-table {
   width: 480px;
+  margin-bottom: 15px;
   th {
     &:nth-child(2) {
       min-width: 90px;
@@ -570,14 +603,17 @@
 
 .current-price-arc-table {
   width: 380px;
+  margin-bottom: 15px;
 }
 
 .current-price-arc-sbc-table {
   width: 310px;
+  margin-bottom: 15px;
 }
 
 .sta-rate-table {
   width: 350px;
+  margin-bottom: 15px;
 }
 
 .report-securities-services-statement {
@@ -987,6 +1023,52 @@ td.dataTables_empty {
   }
 }
 
+.standard-credit-borrowing-capacity-tables {
+  th {
+    &:nth-child(4) {
+      width: 145px;
+    }
+    &:nth-child(5) {
+      width: 125px;
+    }
+    &:nth-child(6) {
+      width: 95px;
+    }
+  }
+}
+
+.sbc-borrowing-capacity-tables {
+  th {
+    &:nth-child(4) {
+      width: 125px;
+    }
+    &:nth-child(5) {
+      width: 125px;
+    }
+    &:nth-child(6) {
+      width: 115px;
+    }
+  }
+}
+
+.sbc-borrowing-capacity-tables, .standard-credit-borrowing-capacity-tables {
+  td, th {
+    @include table-cell-treatment;
+  }
+  th:last-child {
+    width: 165px;
+  }
+  .report-sub-table {
+    width: 531px;
+    td:first-child {
+      width: auto;
+    }
+    td:last-child {
+      width: 165px;
+    }
+  }
+}
+
 @media print {
   a, .report-main-body small a, .advances-main-body small a, .authorizations-report a, .reports a, .report a {
     color: $print-link-color;
@@ -1126,7 +1208,9 @@ td.dataTables_empty {
       border-bottom: 1px solid $light-gray;
     }
   }
-  .report-sub-table {
+  .report-sub-table, 
+  .sbc-borrowing-capacity-tables .report-sub-table, 
+  .standard-credit-borrowing-capacity-tables .report-sub-table {
     width: 50%;
     clear: both;
     td, th {
@@ -1188,5 +1272,8 @@ td.dataTables_empty {
   }
   .report-print-details {
     margin-bottom: 50px;
+  }
+  .sbc-borrowing-capacity-tables {
+    page-break-inside: avoid; 
   }
 }

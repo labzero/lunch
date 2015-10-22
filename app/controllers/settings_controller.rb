@@ -216,7 +216,8 @@ class SettingsController < ApplicationController
   end
 
   def update_password
-    if current_user.valid_ldap_authentication?(params[:user][:current_password])
+    strategy = Devise::Strategies::LdapAuthenticatable.new(request.env)
+    if current_user.valid_ldap_authentication?(params[:user][:current_password], strategy)
       current_user.password = params[:user][:password]
       current_user.password_confirmation = params[:user][:password_confirmation]
 

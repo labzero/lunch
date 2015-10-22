@@ -264,4 +264,28 @@ RSpec.describe ApplicationController, :type => :controller do
       call_method
     end
   end
+
+  describe '`skip_timeout_reset` private method' do
+    let(:call_method) { controller.send(:skip_timeout_reset, &block) }
+    let(:rack_env) { double('A Rack ENV', :[]= => nil) }
+    let(:request) { double('A Request') }
+    let(:dummy_obj) { double('A Dummy Obj') }
+    let(:block) { ->() { dummy_obj.dummy_call } }
+
+    before do
+      allow(controller).to receive(:request).and_return(request)
+      allow(request).to receive(:env).and_return(rack_env)
+    end
+
+    it 'should flag the request with `devise.skip_trackable` before yielding' do
+      expect(rack_env).to receive(:[]=).with('devise.skip_trackable', true).ordered
+      expect(dummy_obj).to receive(:dummy_call).ordered
+      call_method
+    end
+    it 'should clear the `devise.skip_trackable` flag on the request after yielding' do
+      expect(dummy_obj).to receive(:dummy_call).ordered
+      expect(rack_env).to receive(:[]=).with('devise.skip_trackable', false).ordered
+      call_method
+    end
+  end
 end

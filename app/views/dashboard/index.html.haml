@@ -65,6 +65,8 @@
           = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
         %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_status != :no_terms}"}
           = t('dashboard.quick_advance.advances_desk_no_terms')
+        - if @quick_advance_status == :open && @quick_advance_message
+          .quick-advance-limited-pricing-notice= t('dashboard.quick_advance.limited_pricing')
         - if [:open,:closed].include?(@quick_advance_status)
           %p.dashboard-vrc-overnight-message= t('global.vrc_overnight')
           .dashboard-advances-rate
@@ -74,6 +76,8 @@
           %p= t('dashboard.quick_advance.advance_last_updated', last_updated: @quick_advance_last_updated)
           %p= t('dashboard.quick_advance.hours_of_operation_html', url: '')
         - if @quick_advance_status == :open
+          - if @quick_advance_message
+            = render 'shared/quick_advance_message', message: @quick_advance_message
           %p.quick-advance-instruction= t('dashboard.quick_advance.advance_instruction')
           .quick-advance-rates
             .quick-advance-rates-body
@@ -83,14 +87,21 @@
                   %thead
                     %tr
                       %th{colspan: 2}
-                      %th= t('dashboard.quick_advance.table.axes_labels.standard')
-                      %th{colspan: 3}= t('dashboard.quick_advance.table.axes_labels.securities_backed')
+                      %th
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.axes_labels.standard')
+                      %th{colspan: 3}
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.axes_labels.securities_backed')
                     %tr.quick-advance-column-labels
-                      %th{colspan: 2}= t('dashboard.quick_advance.table.term')
-                      %th= t('dashboard.quick_advance.table.whole_loan')
-                      %th= t('dashboard.quick_advance.table.agency')
-                      %th= t('dashboard.quick_advance.table.aaa')
-                      %th= t('dashboard.quick_advance.table.aa')
+                      %th{colspan: 2}
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.term')
+                      %th
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.whole_loan')
+                      %th
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.agency')
+                      %th
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.aaa')
+                      %th
+                        .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.aa')
                   %tbody
           %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.preview')
           %small

@@ -227,6 +227,14 @@ $faded-opacity: 0.4 !default;
   }
 }
 
+.quick-advance-limited-pricing-notice {
+  @extend %typography-dashboard-gauge-label;
+  margin-top: 10px;
+  text-transform: uppercase;
+  color: $actionable-blue;
+  cursor: pointer;
+}
+
 .quick-advance-last-updated-message {
   display: none;
 }

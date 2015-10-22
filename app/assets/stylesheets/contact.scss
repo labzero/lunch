@@ -1,0 +1,48 @@
+.contact-page {
+  .column-2x10-right {
+    padding-right: 10px;
+  }
+  h1 {
+    @extend %typography-page-title;
+    margin: 30px 0 10px;
+  }
+  h2 {
+    @extend %typography-section-title;
+    margin: 25px 0 10px;
+  }
+  h3 {
+    @extend %typography-subtitle;
+    margin: 0 0 8px;
+    &:not(:first-of-type) {
+      margin-top: 25px;
+    }
+  }
+  h3 + p {
+    margin-top: 0;
+  }
+  a {
+    text-decoration: none;
+    color: $actionable-blue;
+  }
+  ul {
+    padding-left: 30px;
+    margin-top: 0;
+  }
+  table {
+    width: 440px;
+    margin-top: 15px;
+    &:last-child {
+      margin-bottom: 15px;
+    }
+    td {
+      vertical-align: top;
+      height: 30px;
+      text-align: left;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    .contact-cell-left {
+      width: 140px;
+    }
+  }
+}
