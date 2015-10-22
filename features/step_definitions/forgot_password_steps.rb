@@ -12,11 +12,13 @@ When(/^I enter my username$/) do
 end
 
 When(/^I submit the form$/) do
+  flag = flag_page
   page.find('form input[type=submit]').click
+  wait_for_unflagged_page(flag)
 end
 
 Then(/^I should see the forgot password confirmation page$/) do
-    page.assert_selector('form legend', exact: true, visible: true, text: I18n.t('forgot_password.confirmation.title'))
+  page.assert_selector('form legend', exact: true, visible: true, text: I18n.t('forgot_password.confirmation.title'))
 end
 
 When(/^I enter an invalid username$/) do

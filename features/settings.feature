@@ -123,3 +123,12 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
     When I log out
     And I login as the password change user with the new password
     Then I should be logged in
+
+  @jira-mem-1084
+  Scenario: User uses the wrong password to change their password
+    Given I am logged in
+    And I am on the change password page
+    When I enter a bad current password
+    And I enter a valid new password
+    And I submit the form
+    Then I should not see an error flash

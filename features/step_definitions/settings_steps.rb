@@ -178,6 +178,10 @@ When(/^I enter a current password of "([^"]*)"$/) do |password|
   page.find('body').click
 end
 
+When(/^I enter a bad current password$/) do
+  step %{I enter a current password of "#{SecureRandom.hex}"}
+end
+
 Then(/^I should see a current password required error$/) do
   page.assert_selector('label.label-error', exact: true, visible: true, text: I18n.t('activerecord.errors.models.user.attributes.current_password.blank'))
 end
