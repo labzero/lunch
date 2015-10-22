@@ -9,10 +9,7 @@
       = render 'reports_header_buttons', download_formats: :pdf
       = render 'report_details', name: @member_name, freshness: t('reports.account_summary.freshness', now: fhlb_datetime_standard_numeric(@now) )
   %section
-    %h2= t('reports.account_summary.institution_details.title')
     %dl
-      %dt= t('reports.account_summary.institution_details.your_institution')
-      %dd= @member_name
       %dt= t('reports.account_summary.institution_details.sta_number')
       %dd= @sta_number
       %dt= t('reports.account_summary.institution_details.fhfb_number')
@@ -21,9 +18,6 @@
     %section.account-summary-collateral-notice.icon-info-before
       = t('reports.account_summary.collateral_delivery_required')
   .report-main-body
-    %section
-      %p= t('reports.account_summary.intraday_activity_notice', date: fhlb_datetime_standard_numeric(@intraday_datetime))
-      %p= t('reports.account_summary.other_activity_notice', date: fhlb_datetime_standard_numeric(@credit_datetime))
     %section
       %h2= t('reports.account_summary.financing_availability.title')
       = render 'reports_table', sortable: false, table_data: @financing_availability

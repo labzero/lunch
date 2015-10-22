@@ -1354,7 +1354,7 @@ class ReportsController < ApplicationController
           },
           {
             columns: [
-              {value: t('reports.account_summary.capital_stock.excess_stock')},
+              {value: t('reports.account_summary.capital_stock.stock')},
               {value: member_profile[:capital_stock][:remaining_stock], type: :currency_whole}
             ]
           },
