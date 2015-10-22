@@ -44,6 +44,10 @@ Then(/^I should see a success flash$/) do
   page.assert_selector('.form-flash-message[data-type=success]')
 end
 
+Then(/^I should not see an error flash$/) do
+  page.assert_no_selector('.form-flash-message[data-type=error]', visible: true)
+end
+
 Then(/^I should not see any success or failure messages$/) do
   page.assert_no_selector('.form-flash-message[data-type=success]', visible: true)
   page.assert_no_selector('.form-flash-message[data-type=error]', visible: true)
