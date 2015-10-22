@@ -935,6 +935,7 @@ en:
           at_maturity: At maturity
           at_repayment: At repayment
           at_monthend_and_at_repayment: At monthend and at repayment
+          maturity_and_at_repayment: At maturity and at repayment
           monthly_and_at_repayment: Monthly and at repayment
           quarterly_and_at_repayment: Quarterly and at repayment
           semiannually_and_at_repayment: Semiannually and at repayment

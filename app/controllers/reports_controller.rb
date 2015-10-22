@@ -79,7 +79,7 @@ class ReportsController < ApplicationController
     },
     sbc: {
       vrc: I18n.t('reports.pages.price_indications.current.actual_360'),
-      frc: I18n.t('reports.pages.price_indications.current.actual_actual'),
+      frc: I18n.t('reports.pages.price_indications.current.actual_360'),
       arc: I18n.t('reports.pages.price_indications.current.actual_360'),
       :'1m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
       :'3m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
@@ -101,7 +101,7 @@ class ReportsController < ApplicationController
       vrc: I18n.t('reports.pages.price_indications.current.at_maturity'),
       vrc_open: I18n.t('reports.pages.price_indications.current.at_monthend_and_at_repayment'),
       frc: [
-        [I18n.t('reports.pages.price_indications.current.advances_with_terms_of_180_days_or_less'), I18n.t('reports.pages.price_indications.current.at_repayment')],
+        [I18n.t('reports.pages.price_indications.current.advances_with_terms_of_180_days_or_less'), I18n.t('reports.pages.price_indications.current.maturity_and_at_repayment')],
         [I18n.t('reports.pages.price_indications.current.advances_with_terms_of_more_than'), I18n.t('reports.pages.price_indications.current.semiannually_and_at_repayment')]
       ],
       :'1m_libor' => I18n.t('reports.pages.price_indications.current.monthly_and_at_repayment'),
