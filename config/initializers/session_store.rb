@@ -8,7 +8,7 @@ end
 session_store_args = {
   servers: ENV['SESSION_REDIS_URL'],
   key: '_fhlb-member_session',
-  expire_in: 20.minutes,
+  expire_after: 20.minutes,
   secure: Rails.env.production?,
   namespace: RedisHelper.namespace_from_url(ENV['SESSION_REDIS_URL'])
 }
