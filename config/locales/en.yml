@@ -1085,8 +1085,8 @@ en:
         new_rate: New Rate (%)
         next_reset: Next Reset
       dividend_statement:
-        outstanding_shares_heading: 'Total Average Shares Outstanding as of the end of the %{quarter}:'
-        dividend_amount_heading: 'Total Dividend Amount as of the end of the %{quarter}:'
+        outstanding_shares_heading: 'Total Average Shares Outstanding as of the end of the %{date}:'
+        dividend_amount_heading: 'Total Dividend Amount as of the end of the %{date}:'
         summary: Dividend Summary
         details: Dividend Details
         special_dividend: Special Dividend %{year}

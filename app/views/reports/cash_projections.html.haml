@@ -12,15 +12,15 @@
     %section
       .report-summary-data
         %h3
-          = t('reports.pages.cash_projections.total_net_header', date: fhlb_date_long_alpha(@as_of_date))
+          = report_summary_with_date('reports.pages.cash_projections.total_net_header', fhlb_date_long_alpha(@as_of_date))
         %p= fhlb_formatted_currency(@cash_projections[:total_net_amount], force_unit: true, precision: 2)
       .report-summary-data
         %h3
-          = t('reports.pages.cash_projections.total_principal', date: fhlb_date_long_alpha(@as_of_date))
+          = report_summary_with_date('reports.pages.cash_projections.total_principal', fhlb_date_long_alpha(@as_of_date))
         %p= fhlb_formatted_currency(@cash_projections[:total_principal], force_unit: true, precision: 2)
       .report-summary-data
         %h3
-          = t('reports.pages.cash_projections.total_interest', date: fhlb_date_long_alpha(@as_of_date))
+          = report_summary_with_date('reports.pages.cash_projections.total_interest', fhlb_date_long_alpha(@as_of_date))
         %p= fhlb_formatted_currency(@cash_projections[:total_interest], force_unit: true, precision: 2)
     %table.table-allow-wrapping.report-table.cash-projections-report-table{data: {sortable: true, :'disable-auto-width' => true, :'missing-data-message' => missing_data_message}}
       %thead

@@ -10,12 +10,12 @@
   .report-main-body
     -if @final
       .report-summary-data
-        %h3= t('reports.pages.securities_transactions.total_net_settled_final', date: fhlb_date_long_alpha(@start_date))
+        %h3= report_summary_with_date('reports.pages.securities_transactions.total_net_settled_final', fhlb_date_long_alpha(@start_date))
         %p= fhlb_formatted_currency(@total_net, force_unit: true)
       %h2.report-table-title= t('reports.pages.securities_transactions.final', date: fhlb_date_standard_numeric(@start_date))
     -else
       .report-summary-data
-        %h3= t('reports.pages.securities_transactions.total_net_settled_preliminary', date: fhlb_date_long_alpha(@start_date))
+        %h3= report_summary_with_date('reports.pages.securities_transactions.total_net_settled_preliminary', fhlb_date_long_alpha(@start_date))
         %p= fhlb_formatted_currency_whole(@total_net, force_unit: true)
       %h2.report-table-title= t('reports.pages.securities_transactions.preliminary', date: fhlb_date_standard_numeric(@start_date))
     %small
