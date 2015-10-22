@@ -197,8 +197,8 @@
 
 .report-summary-data {
   display: inline-block;
-  width: (3 * $grid-column-width) + (2 * $gutter-width);
-  margin-right: $grid-column-width + (2 * $gutter-width);
+  width: (4 * $grid-column-width) + (3 * $gutter-width) - (0.5 * $gutter-width); // 1/2 gutter width fudge factor is for an issue with the cooper grid and 3 summary headers
+  margin-right: $gutter-width;
   margin-bottom: 50px;
   &:nth-child(3) {
     margin-right: 0;
