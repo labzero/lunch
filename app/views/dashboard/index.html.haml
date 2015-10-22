@@ -15,7 +15,7 @@
               - if details[:display_percentage] > 0 && key != :total
                 .gauge-section{style: "width: #{number_to_percentage(details[:display_percentage], precision: 1)};", class: key == :uncollateralized ? 'financing-availability-gauge-uncollateralized' : 'financing-availability-gauge-collateralized'}
                   .inner-gauge-section
-                  = render 'shared/tooltip', tooltip_data: {t("dashboard.your_account.financing_availability.#{key}") => nil, number_to_percentage(details[:percentage], precision: 1) => nil, fhlb_formatted_currency(details[:amount]) => nil}
+                  = render 'shared/tooltip', tooltip_data: {t("dashboard.your_account.financing_availability.#{key}") => nil, number_to_percentage(details[:percentage], precision: 1) => nil, fhlb_formatted_currency_whole(details[:amount]) => nil}
       - if @borrowing_capacity_gauge
         .dashboard-borrowing-capacity
           %h2
@@ -26,7 +26,7 @@
               - if details[:display_percentage] > 0 && key != :total
                 .gauge-section{style: "width: #{number_to_percentage(details[:display_percentage], precision: 1)};", class: key == :mortgages ? 'borrowing-capacity-gauge-standard' : 'borrowing-capacity-gauge-sbc'}
                   .inner-gauge-section
-                  = render 'shared/tooltip', tooltip_data: {t("dashboard.your_account.borrowing_capacity.#{key}") => nil, number_to_percentage(details[:percentage], precision: 1) => nil, fhlb_formatted_currency(details[:amount]) => nil}
+                  = render 'shared/tooltip', tooltip_data: {t("dashboard.your_account.borrowing_capacity.#{key}") => nil, number_to_percentage(details[:percentage], precision: 1) => nil, fhlb_formatted_currency_whole(details[:amount]) => nil}
       .dashboard-account-summary
         %h2= t('dashboard.your_account.account_summary')
         %table
