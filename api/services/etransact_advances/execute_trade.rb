@@ -108,7 +108,7 @@ module MAPI
                   'v13:frequencyUnit' => 'M'
                 }
               end
-              payment_at = 'Maturity'
+              payment_at = 'End Of Month'
             else
               if (maturity_date - settlement_date).to_i <= 180
                 payment_at = 'Maturity'
@@ -277,9 +277,9 @@ module MAPI
           # True maturity date will be calculated later
           maturity_date = MAPI::Services::EtransactAdvances::ExecuteTrade::get_maturity_date(Time.zone.today, advance_term)
           settlement_date = Time.zone.today # currently both `trade_date` and `funding_date` are set to today, as we only allow same-day funding/trading at this time
-          day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/360' : 'ACT/ACT'
+          day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/ACT' : 'ACT/360'
 
-          message, payment_info = MAPI::Services::EtransactAdvances::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
+              message, payment_info = MAPI::Services::EtransactAdvances::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
 
           response_hash = {
             'advance_rate' => rate.to_f,
