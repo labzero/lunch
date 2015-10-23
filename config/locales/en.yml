@@ -861,13 +861,9 @@ en:
       title: Account Summary
       freshness: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{now}. Under Collateral Borrowing Capacity, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of close of business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today’s credit activity as of %{now}."
       institution_details:
-        title: Institution Details
-        your_institution: 'Your Institution:'
         sta_number: 'STA Number:'
         fhfb_number: 'FHFB Number:'
       collateral_delivery_required: 'Collateral Status: Delivery Required'
-      intraday_activity_notice: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{date}."
-      other_activity_notice: "Under Collateral Borrowing Capacity, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of Close of Business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today's credit activity as of %{date}."
       financing_availability:
         title: Financing Availability
         footnote: 'Represents a regulatory limit on long-term advances based on call report data. The actual amount available cannot exceed the Total Financing Availability.'
@@ -882,10 +878,10 @@ en:
         mpf_credit_available: MPF Available Credit Enhancement
       credit_outstanding:
         title: Credit Outstanding
-        standard_advances: Standard Advances
-        sbc_advances: SBC Advances
+        standard_advances: Standard Credit Program Advances
+        sbc_advances: Securities-Backed Credit Advances
         swaps_credit: Swaps (credit exposure)
-        swaps_notational: Swaps (notational)
+        swaps_notational: Swaps (notional)
         investments: Investments
         letters_of_credit: Letters of Credit
         mpf_credit: MPF Actual Credit Enhancement
@@ -893,8 +889,8 @@ en:
         title: Collateral Borrowing Capacity
         standard:
           title: Standard Credit Program*
-          total: Total Standard Program Borrowing Capacity
-          remaining: Remaining Standard Program Borrowing Capacity
+          total: Total Standard Credit Program Borrowing Capacity
+          remaining: Remaining Standard Credit Program Borrowing Capacity
         sbc:
           title: Securities-Backed Credit Program
           total_market: Total Securities-Backed Credit Market Value
@@ -910,7 +906,7 @@ en:
         title: Capital Stock Position and Leverage
         stock_owned: Stock Owned
         stock_requirement: Activity-Based Stock Requirement
-        excess_stock: Remaining Excess Stock
+        stock: Remaining Stock
         leverage: Remaining Leverage
     your_account:
       title: Your Account
