@@ -348,7 +348,7 @@ class AdvanceRequest
   end
 
   def perform_execute
-    response = etransact_service.quick_advance_execute(member_id, total_amount, type, term, rate, signer)
+    response = etransact_service.quick_advance_execute(member_id, total_amount, type, term, rate, signer, maturity_date)
     process_trade_errors(:execute, response)
     populate_attributes_from_response(response)
   end
