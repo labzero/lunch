@@ -323,6 +323,24 @@ describe AdvanceRequest do
     end
   end
 
+  describe '`total_amount` method' do
+    let(:call_method) { subject.send(:total_amount) }
+    let(:gross_amount) { double('A Gross Amount') }
+    let(:amount) { double('An Amount') }
+    before do
+      allow(subject).to receive(:amount).and_return(amount)
+      allow(subject).to receive(:gross_amount).and_return(gross_amount)
+    end
+    it 'returns the `gross_amount` if a stock purchase was requested' do
+      allow(subject).to receive(:purchase_stock?).and_return(true)
+      expect(call_method).to be(gross_amount)
+    end
+    it 'returns the `amount` if a stock purchase was not requested' do
+      allow(subject).to receive(:purchase_stock?).and_return(false)
+      expect(call_method).to be(amount)
+    end
+  end
+
   describe '`stock_choice=` method' do
     let(:sym_value) { double('Symbolic Value') }
     let(:value) { double("A Stock Choice", to_sym: sym_value) }

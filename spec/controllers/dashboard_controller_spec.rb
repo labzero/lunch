@@ -590,7 +590,8 @@ RSpec.describe DashboardController, :type => :controller do
       advance_program: :program_name,
       collateral_type: :collateral_type,
       old_rate: :old_rate,
-      rate_changed: :rate_changed?
+      rate_changed: :rate_changed?,
+      total_amount: :total_amount
     }.each do |param, method|
       it "should populate the view variable `@#{param}` with the value found on the advance request for attribute `#{method}`" do
         value = double("Advance Request Parameter: #{method}")
