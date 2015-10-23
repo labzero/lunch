@@ -133,10 +133,11 @@ module MAPI
         end
 
         def self.get_advance_rate_schedule(term, interest, day_count, settlement_date, maturity_date)
+          transformed_interest = transform_rate(interest)
           # Advance Rate Schedule
           if (term == 'overnight') || (term == 'open')
             advance_rate_schedule = {
-              'v13:initialRate' => interest,
+              'v13:initialRate' => transformed_interest,
               'v13:floatingRateSchedule' => {
                 'v13:floatingPeriod' => {
                   'v13:startDate' => Time.zone.today,
@@ -161,12 +162,12 @@ module MAPI
             }
           else
             advance_rate_schedule = {
-              'v13:initialRate' => interest,
+              'v13:initialRate' => transformed_interest,
               'v13:fixedRateSchedule' => {
                 'v13:step' => {
                   'v13:startDate' => settlement_date,
                   'v13:endDate' => maturity_date,
-                  'v13:rate' => interest,
+                  'v13:rate' => transformed_interest,
                   'v13:dayCountBasis' => day_count
                 }
               },
@@ -198,6 +199,10 @@ module MAPI
             }
           end
           advance_product_info
+        end
+
+        def self.transform_rate(rate)
+          rate.to_f / 100.0
         end
 
         def self.build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
