@@ -263,6 +263,7 @@ class ResourcesController < ApplicationController
       },
       {
         title: t('resources.forms.collateral.creditor_relationship.agreement'),
+        form_number: 2373,
         pdf_link: resources_download_path(file: :credit_union_agreement)
       }
     ]
