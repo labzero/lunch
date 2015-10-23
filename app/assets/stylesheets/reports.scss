@@ -503,7 +503,7 @@
   }
 }
 
-.price-indications-report {
+.report-price-indications {
   min-height: 470px; // Must be tall enough to allow datepicker without flowing into footer
   .report-filter:first-of-type {
     margin-left: 0;
@@ -532,7 +532,7 @@
   }
   dt {
     float: left;
-    margin-right: 8px;
+    margin-right: 3px;
   }
   dd {
     margin-left: 0;
