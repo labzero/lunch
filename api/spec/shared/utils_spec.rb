@@ -49,4 +49,50 @@ describe MAPI::Shared::Utils::ClassMethods do
       subject.fetch_objects(logger, sql)
     end
   end
+
+  describe '`decimal_to_percentage_rate` method' do
+    it 'converts a decimal rate to a percentage rate' do
+      rate = double('A Rate')
+      allow(rate).to receive(:to_f).and_return(rate)
+      expect(rate).to receive(:round).with(5).and_return(rate).ordered
+      expect(rate).to receive(:*).with(100.0).ordered
+      subject.decimal_to_percentage_rate(rate)
+    end
+
+    {
+      nil => nil,
+      0 => 0,
+      1.0 => 0.01,
+      20.0 => 0.2,
+      5 => 0.05,
+      4.36 => 0.0436,
+      4.37 => 0.043700001
+    }.each do |transformed_rate, rate|
+      it "converts `#{rate}` to `#{transformed_rate}`" do
+        expect(subject.decimal_to_percentage_rate(rate)).to eq(transformed_rate)
+      end
+    end
+  end
+
+  describe '`percentage_to_decimal_rate` method' do
+    it 'converts the rate to a decimal rate' do
+      rate = double('A Rate')
+      allow(rate).to receive(:to_f).and_return(rate)
+      expect(rate).to receive(:/).with(100.0)
+      subject.percentage_to_decimal_rate(rate)
+    end
+
+    {
+      nil => nil,
+      0 => 0,
+      1.0 => 0.01,
+      20.0 => 0.2,
+      5 => 0.05,
+      4.36 => 0.0436
+    }.each do |rate, transformed_rate|
+      it "converts `#{rate}` to `#{transformed_rate}`" do
+        expect(subject.percentage_to_decimal_rate(rate)).to eq(transformed_rate)
+      end
+    end
+  end
 end

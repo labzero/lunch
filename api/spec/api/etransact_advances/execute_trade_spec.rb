@@ -87,27 +87,6 @@ describe MAPI::ServiceApp do
     end
   end
 
-  describe '`transform_rate` class method' do
-    it 'converts the rate to a decimal rate' do
-      rate = double('A Rate')
-      allow(rate).to receive(:to_f).and_return(rate)
-      expect(rate).to receive(:/).with(100.0)
-      MAPI::Services::EtransactAdvances::ExecuteTrade.transform_rate(rate)
-    end
-
-    {
-      nil => 0,
-      1.0 => 0.01,
-      20.0 => 0.2,
-      5 => 0.05,
-      4.36 => 0.0436
-    }.each do |rate, transformed_rate|
-      it "converts `#{rate}` to `#{transformed_rate}`" do
-        expect(MAPI::Services::EtransactAdvances::ExecuteTrade.transform_rate(rate)).to eq(transformed_rate)
-      end
-    end
-  end
-
   describe 'get_advance_rate_schedule' do
     let(:rate) { double('rate') }
     let(:transformed_rate) { double('transformed rate') }
@@ -152,7 +131,7 @@ describe MAPI::ServiceApp do
     }
 
     before do
-      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:transform_rate).and_return(transformed_rate)
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:percentage_to_decimal_rate).and_return(transformed_rate)
     end
 
     it 'should return overnight advance rate schedule' do
@@ -162,7 +141,7 @@ describe MAPI::ServiceApp do
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_rate_schedule('1week', rate, day_count, Time.zone.today, Time.zone.today)).to eq(week_response)
     end
     it 'transforms the rate' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:transform_rate)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:percentage_to_decimal_rate)
       MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_rate_schedule('foo', rate, day_count, Time.zone.today, Time.zone.today)
     end
   end

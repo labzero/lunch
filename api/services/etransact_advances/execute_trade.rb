@@ -6,6 +6,8 @@ module MAPI
     module EtransactAdvances
       module ExecuteTrade
 
+        include MAPI::Shared::Utils
+
         LOAN_MAPPING = {
           whole: 'WHOLE LOAN',
           agency: 'SBC-AGENCY',
@@ -133,7 +135,7 @@ module MAPI
         end
 
         def self.get_advance_rate_schedule(term, interest, day_count, settlement_date, maturity_date)
-          transformed_interest = transform_rate(interest)
+          transformed_interest = percentage_to_decimal_rate(interest)
           # Advance Rate Schedule
           if (term == 'overnight') || (term == 'open')
             advance_rate_schedule = {
@@ -199,10 +201,6 @@ module MAPI
             }
           end
           advance_product_info
-        end
-
-        def self.transform_rate(rate)
-          rate.to_f / 100.0
         end
 
         def self.build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
