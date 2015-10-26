@@ -293,4 +293,7 @@ class ResourcesController < ApplicationController
     send_file Rails.root.join('private', filename), filename: filename
   end
 
+  def business_continuity
+  end
+
 end
