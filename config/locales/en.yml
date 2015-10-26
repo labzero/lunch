@@ -275,7 +275,7 @@ en:
         lock: Lock
         unlock: Unlock
         reset_password: Reset Password
-        add_user: Add New Web User
+        add_user: Add New User
       lock:
         title: Account Locked
         success_html: Account for <strong>%{name}</strong> is locked.
