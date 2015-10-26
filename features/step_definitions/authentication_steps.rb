@@ -44,6 +44,7 @@ end
 When (/^I accept the Terms of Use$/) do
   @login_flag = flag_page
   page.find(".primary-button[value=\'#{I18n.t('terms.agree')}\']").click
+  wait_for_unflagged_page(@login_flag)
 end
 
 When(/^I log in$/) do

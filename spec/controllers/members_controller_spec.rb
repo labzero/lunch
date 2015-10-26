@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe MembersController, type: :controller do
+  it { should_not use_before_action(:check_terms) }
+  
   login_user
 
   describe 'GET select_member' do
@@ -90,17 +92,24 @@ RSpec.describe MembersController, type: :controller do
   describe 'POST accept_terms' do
     let(:make_request) {post :accept_terms}
     let(:now) { DateTime.new(2015,1,1)}
-    let(:user) { double('user', member_id: nil, :'[]=' => nil, accepted_terms?: nil, password_expired?: false) }
-    before { allow(DateTime).to receive(:now).and_return(now) }
-    it_behaves_like 'a user required action', :post, :accept_terms
-    it 'updates the `terms_accepted_at` attribute of the current_user with the current DateTime', :vcr do
+    let(:user) { double('user', member_id: nil, :'[]=' => nil, accepted_terms?: nil, password_expired?: false, update_attribute: nil, reload: nil) }
+    before do
+      allow(DateTime).to receive(:now).and_return(now)
       allow(controller).to receive(:current_user).and_return(user)
+    end  
+    it_behaves_like 'a user required action', :post, :accept_terms
+    it 'updates the `terms_accepted_at` attribute of the current_user with the current DateTime' do
       expect(user).to receive(:update_attribute).with(:terms_accepted_at, now)
       make_request
     end
-    it 'redirects to the `after_sign_in_path_for` on success', :vcr do
+    it 'redirects to the `after_sign_in_path_for` on success' do
       allow(subject).to receive(:after_sign_in_path_for).and_return(dashboard_path).ordered
       expect(make_request).to redirect_to(dashboard_path)
+    end
+    it '`reload`s the current_user after updating' do
+      expect(user).to receive(:update_attribute).ordered
+      expect(user).to receive(:reload).ordered
+      make_request
     end
   end
 end

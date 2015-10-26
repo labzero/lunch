@@ -1,6 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe ErrorController, :type => :controller do
+  it { should_not use_before_action(:authenticate_user!) }
+  it { should_not use_before_action(:check_terms) }
+  
   describe 'GET standard_error' do
     it 'should raise an error' do
       expect{get :standard_error}.to raise_error(StandardError)

@@ -1,4 +1,5 @@
 class AdvancesController < ApplicationController
+  
   def manage_advances
     member_balances = MemberBalanceService.new(current_member_id, request)
     active_advances_response = member_balances.active_advances

@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe Users::PasswordsController, :type => :controller do
+  it { should_not use_before_action(:check_terms) }
+  
   let(:resource_class)  { subject.send(:resource_class) }
   before do
     @request.env["devise.mapping"] = Devise.mappings[:user]

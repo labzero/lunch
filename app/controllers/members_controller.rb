@@ -1,4 +1,6 @@
 class MembersController < ApplicationController
+  skip_before_action :check_terms
+  
   before_filter only: [:select_member, :set_member] do
     redirect_to after_sign_in_path_for(current_user) if current_member_id
     @members = MembersService.new(request).all_members
@@ -26,6 +28,7 @@ class MembersController < ApplicationController
   # POST
   def accept_terms
     current_user.update_attribute(:terms_accepted_at, DateTime.now)
+    current_user.reload
     redirect_to after_sign_in_path_for(current_user)
   end
 end

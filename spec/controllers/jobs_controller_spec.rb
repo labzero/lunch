@@ -11,7 +11,7 @@ RSpec.describe JobsController, :type => :controller do
 
   describe 'controller actions' do
     let(:job_status_id) { rand(1000) }
-    let(:current_user) { double('User', id: user_id)}
+    let(:current_user) { double('User', id: user_id, :accepted_terms? => true)}
     let(:user_id) { rand(1000) }
     let(:status) { 'some status'}
     let(:job_status) { double('job status instance', status: status) }

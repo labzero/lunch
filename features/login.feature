@@ -74,6 +74,14 @@ Scenario: User accepts the Terms of Service
   When I fill in and submit the login form with a first-time user
   Then I should see dashboard modules
 
+@jira-mem-1023 @wip
+Scenario: User cannot enter site without accepting the Terms of Use
+  Given I am logged out
+  And I visit the root path
+  And I fill in and submit the login form with a first-time user
+  When I visit the dashboard
+  Then I should see the Terms of Use page
+
 @jira-mem-859
 Scenario: User logs in with expired password
   Given I am logged out
