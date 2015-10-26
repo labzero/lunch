@@ -863,7 +863,7 @@ module MAPI
             logger.error error
             halt 503, 'Internal Service Error'
           end
-          result
+          result.to_json
         end
 
         # Member Profile

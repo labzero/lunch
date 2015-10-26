@@ -89,10 +89,11 @@ describe MAPI::ServiceApp do
 
   describe 'get_advance_rate_schedule' do
     let(:rate) { double('rate') }
+    let(:transformed_rate) { double('transformed rate') }
     let(:day_count) { double('day_count') }
     let(:overnight_response) {
       {
-        'v13:initialRate'=>rate,
+        'v13:initialRate'=>transformed_rate,
         'v13:floatingRateSchedule'=>{
           'v13:floatingPeriod'=>{
             'v13:startDate'=>Time.zone.today,
@@ -116,23 +117,32 @@ describe MAPI::ServiceApp do
     }
     let(:week_response) {
       {
-        'v13:initialRate'=>rate,
+        'v13:initialRate'=>transformed_rate,
         'v13:fixedRateSchedule'=>{
           'v13:step'=>{
             'v13:startDate'=>Time.zone.today,
             'v13:endDate'=>Time.zone.today,
-            'v13:rate'=>rate,
+            'v13:rate'=>transformed_rate,
             'v13:dayCountBasis'=>day_count
           }
         },
         'v13:roundingConvention'=>'NEAREST'
       }
     }
+
+    before do
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:percentage_to_decimal_rate).and_return(transformed_rate)
+    end
+
     it 'should return overnight advance rate schedule' do
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_rate_schedule('overnight', rate, day_count, Time.zone.today, Time.zone.today)).to eq(overnight_response)
     end
     it 'should return week advance rate schedule' do
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_rate_schedule('1week', rate, day_count, Time.zone.today, Time.zone.today)).to eq(week_response)
+    end
+    it 'transforms the rate' do
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:percentage_to_decimal_rate)
+      MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_rate_schedule('foo', rate, day_count, Time.zone.today, Time.zone.today)
     end
   end
 

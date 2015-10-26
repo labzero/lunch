@@ -43,6 +43,14 @@ module MAPI
             nil
           end
         end
+
+        def decimal_to_percentage_rate(rate)
+          rate.to_f.round(5) * 100.0 if rate
+        end
+
+        def percentage_to_decimal_rate(rate)
+          rate.to_f / 100.0 if rate
+        end
       end
     end
   end

@@ -6,7 +6,7 @@
     "advance_number": "469249",
     "advance_type": "FX CONSTANT",
     "status": "Processing",
-    "interest_rate": 0.21,
+    "interest_rate": 0.0021,
     "current_par": 8000000
 
   },
@@ -17,7 +17,7 @@
     "advance_number": "469250",
     "advance_type": "FX CONSTANT",
     "status": "Outstanding",
-    "interest_rate": 0.22,
+    "interest_rate": 0.0022,
     "current_par": 5000000
   },
   {
@@ -27,7 +27,7 @@
     "advance_number": "469251",
     "advance_type": "O/N VRC",
     "status": "Outstanding",
-    "interest_rate": 0.17,
+    "interest_rate": 0.0017,
     "current_par": 1000045
   },
   {
@@ -37,7 +37,7 @@
     "advance_number": "469252",
     "advance_type": "O/N VRC",
     "status": "Outstanding",
-    "interest_rate": 0.17,
+    "interest_rate": 0.0017,
     "current_par": 799000000
   }
 ]
