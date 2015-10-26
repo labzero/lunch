@@ -1076,7 +1076,7 @@ en:
       interest_rate_resets:
         title: Interest Rate Resets
         info: "The Bank processed the following interest rate resets effective %{date}"
-        questions: If you have any questions, contact %{phone_number}.
+        questions: Contact Operations at %{phone_number} if you have any questions.
         effective_date: Effective Date
         prior_rate: Prior Rate (%)
         new_rate: New Rate (%)
