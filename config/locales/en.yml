@@ -859,7 +859,7 @@ en:
         history: Current month to date. Prior statements are available for the previous 6 months.
     account_summary:
       title: Account Summary
-      freshness: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{now}. Under Collateral Borrowing Capacity, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of close of business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today’s credit activity as of %{now}."
+      freshness: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{now}. Collateral Borrowing Capacity data, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of close of business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today’s credit activity as of %{now}."
       institution_details:
         sta_number: 'STA Number:'
         fhfb_number: 'FHFB Number:'
