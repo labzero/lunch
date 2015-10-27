@@ -47,7 +47,7 @@ module MAPI
 
           std_breakdown.each do |row|
             reformat_hash = {'type' => row['COLLATERAL_TYPE'],
-                             'count' => row['STD_COUNT'],
+                             'count' => (row['STD_COUNT'] || 0).round,
                              'original_amount' => (row['STD_ORIGINAL_AMOUNT'] || 0).to_f.round,
                              'unpaid_principal' => (row['STD_UNPAID_BALANCE'] || 0).to_f.round,
                              'market_value' => (row['STD_MARKET_VALUE'] || 0).to_f.round,
