@@ -587,7 +587,6 @@ en:
   resources:
     business_continuity:
       name: Business Continuity
-      page_title: FHLB - Business Continuity
       title: "Notice of Business Continuity Preparedness"
       introduction: "The Federal Home Loan Bank of San Francisco (Bank) recognizes the importance of delivering quality services to its members in a timely manner. With this in mind, we have dedicated significant resources to our Business Continuity Management (BCM) and Technology Disaster Recovery (TDR) programs. Our BCM and TDR programs are staffed by full-time Bank employees who are focused on both the safety of our employees and the Bank’s ability to prepare for and respond to a variety of business disruption events quickly and effectively."
       responsibility:
