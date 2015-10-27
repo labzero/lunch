@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
   before_action :authenticate_user!
   before_action :check_password_change
+  before_action :check_terms
   before_action :save_render_time
   helper_method :current_member_name
 
@@ -49,6 +50,12 @@ class ApplicationController < ActionController::Base
 
   def check_password_change
     redirect_to user_expired_password_path if session['password_expired']
+  end
+  
+  def check_terms
+    if current_user
+      redirect_to terms_path unless current_user.accepted_terms?
+    end
   end
 
   def authenticate_user_with_authentication_flag!(*args, &block)

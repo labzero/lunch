@@ -432,12 +432,12 @@ RSpec.describe SettingsController, :type => :controller do
       let(:make_request) { post route, id: user_id }
       let(:roles) { double('Roles') }
       let(:actions) { double('Actions') }
-      let(:user) { double('User', class: User, id: user_id, method => true) }
+      let(:user) { double('User', class: User, id: user_id, method => true, :accepted_terms? => true) }
       before do
         allow(subject).to receive(:roles_for_user).and_return(roles)
         allow(subject).to receive(:actions_for_user).and_return(actions)
         allow(subject).to receive(:render_to_string)
-        allow(subject).to receive(:current_user).and_return(double('Current User', id: rand(1..9999)))
+        allow(subject).to receive(:current_user).and_return(double('Current User', id: rand(1..9999), :accepted_terms? => true))
         allow(User).to receive(:find).and_call_original
         allow(User).to receive(:find).with(user_id.to_s).and_return(user)
       end
@@ -482,9 +482,11 @@ RSpec.describe SettingsController, :type => :controller do
   describe 'GET expired_password' do
     let(:make_request) { get :expired_password }
     it_behaves_like 'a user required action', :get, :expired_password
-    it 'skips the `check_password_change` before action' do
-      expect(subject).to_not receive(:check_password_change)
-      make_request
+    %w(check_password_change check_terms).each do |action|
+      it "skips the `#{action}` before action" do
+        expect(subject).to_not receive(action.to_sym)
+        make_request
+      end
     end
     it 'redirects to the settings index page if the user does not have an expired password' do
       make_request
@@ -523,7 +525,7 @@ RSpec.describe SettingsController, :type => :controller do
   describe 'PUT update_expired_password' do
     let(:password) { SecureRandom.hex }
     let(:make_request) { put :update_expired_password, user: { password: password, password_confirmation: password } }
-    let(:user) { double('A User', save: false, :password= => nil, :password_confirmation= => nil) }
+    let(:user) { double('A User', save: false, :password= => nil, :password_confirmation= => nil, :accepted_terms? => true) }
 
     before do
       session['password_expired'] = true
@@ -531,10 +533,12 @@ RSpec.describe SettingsController, :type => :controller do
     end
 
     it_behaves_like 'a user required action', :put, :update_expired_password
-    
-    it 'skips the `check_password_change` before action' do
-      expect(subject).to_not receive(:check_password_change)
-      make_request
+
+    %w(check_password_change check_terms).each do |action|
+      it "skips the `#{action}` before action" do
+        expect(subject).to_not receive(action.to_sym)
+        make_request
+      end
     end
     it 'sets the password attribute on the user' do
       expect(user).to receive(:password=).with(password)
@@ -598,7 +602,7 @@ RSpec.describe SettingsController, :type => :controller do
     let(:password) { SecureRandom.hex }
     let(:current_password) { SecureRandom.hex }
     let(:make_request) { put :update_password, user: { password: password, password_confirmation: password, current_password: current_password } }
-    let(:user) { double('A User', save: false, :password= => nil, :password_confirmation= => nil, valid_ldap_authentication?: false, errors: double('Errors', add: nil)) }
+    let(:user) { double('A User', save: false, :password= => nil, :password_confirmation= => nil, valid_ldap_authentication?: false, errors: double('Errors', add: nil), :accepted_terms? => true) }
   
     before do
       allow(subject).to receive(:current_user).and_return(user)

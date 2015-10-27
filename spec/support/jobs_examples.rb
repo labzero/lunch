@@ -20,7 +20,7 @@ RSpec.shared_examples 'a report that can be downloaded' do |method, download_opt
       let(:job_status) { double('JobStatus', update_attributes!: nil)}
       let(:active_job) { double('Active Job Instance', job_status: job_status) }
       let(:user_id) { rand(1000) }
-      let(:current_user) { double('User', id: user_id)}
+      let(:current_user) { double('User', id: user_id, :accepted_terms? => true)}
 
       before do
         allow_any_instance_of(MembersService).to receive(:report_disabled?).and_return(false)
