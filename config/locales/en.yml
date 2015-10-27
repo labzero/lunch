@@ -585,6 +585,38 @@ en:
       title: Market Rates
       vrc: 30-Day VRC Rate (%)
   resources:
+    business_continuity:
+      name: Business Continuity
+      title: "Notice of Business Continuity Preparedness"
+      introduction: "The Federal Home Loan Bank of San Francisco (Bank) recognizes the importance of delivering quality services to its members in a timely manner. With this in mind, we have dedicated significant resources to our Business Continuity Management (BCM) and Technology Disaster Recovery (TDR) programs. Our BCM and TDR programs are staffed by full-time Bank employees who are focused on both the safety of our employees and the Bank’s ability to prepare for and respond to a variety of business disruption events quickly and effectively."
+      responsibility:
+        title: Our Responsibility to Members
+        description: "During a disaster or other business disruption, members can call (800) 283-0700 for real-time or recorded information regarding the Bank’s operational status. We are also prepared to communicate with members via email and through status updates posted on our public website (fhlbsf.com)."
+        communications:
+          title: Communications
+          description: "Our BCM program includes a plan for communicating with Bank members, selected third parties, officers of other FHLBanks, the media, and the general public during a business disruption event. Specifically, this communication plan will allow us to:"
+          relocation: Quickly notify our members and others of Bank relocation and service availability
+          status: Frequently update the Bank’s public website with relevant status and service information
+          cofi_availability: Make the 11th District Cost of Funds Indices (COFI) information available by phone and/or online
+        services:
+          title: Services
+          description: "The Bank’s business recovery strategies are designed to enable us to provide limited liquidity and offer certain basic services to our members, once we determine that our employees are safe and can safely carry out procedures to restore critical Bank operations. Depending on the nature and severity of the disruption, we expect to be able to provide, ideally within two hours, services that may include:"
+          rollover: Overnight and short-term advances, including rollover of maturing advances and Federal funds
+          drawdown: Drawdown of STA balances
+          settlement: Settlement of securities transactions
+          acceptance: Acceptance of requests to prepay advances
+      crisis_management:
+        title: Crisis Management Framework
+        crisis_management_team: In the event our San Francisco offices are wholly or partially inaccessible or unusable, the Bank’s Crisis Management Team is prepared to quickly direct implementation of our business recovery strategies. Key department managers are trained and equipped to support essential business operations by working either remotely or from a designated alternate location. The target for full business recovery is within 24 hours of the disruptive event.
+        recovery_operations: To facilitate recovery operations, the Bank participates in the National Communications System (NCS), which includes the Government Emergency Telecommunications Systems (GETS) and Wireless Priority Service (WPS) programs. This affords us increased communications capabilities in the event of telephone network congestion resulting from a local or regional disruptive event.
+      plan:
+        title: Business Continuity Plan
+        departmental_BCPs: To manage business disruption and systems failure, the Bank has comprehensive business continuity plans (BCPs) in place within each department. These BCPs are updated and exercised annually and have been invoked during real-world events in recent years. The Bank maintains an alternate business recovery center that is geographically separated from our primary office in downtown San Francisco. Our recovery center operates on a different power grid and is fully equipped for extended recovery operations. In addition, the Bank has in place and annually exercises reciprocal back-up agreements with FHLBank Atlanta and FHLBank New York. These agreements will provide short-term continuation of key services in the event the Bank is inoperable.
+        TDR_planning: The Bank’s TDR planning is focused on the restoration of technology systems and infrastructure that support critical business processes during a disruptive event. TDR planning incorporates fail-over strategies and delineates command responsibilities during technology incident management. These technology recovery programs are tested quarterly.
+      regulations:
+        title: Regulations and Governance
+        legal_obligations: The Bank is committed to both meeting our legal and regulatory obligations and maintaining high standards of resilience during our regular business practices. The BCM and TDR programs report to the Banks’ formal governance structure, which in turn reports to the Bank’s Board of Directors.
+        regulatory_authorities: Both programs are subject to examination by regulatory authorities, including the Federal Housing Finance Agency (FHFA), and are reviewed by the Bank’s Internal Audit department.
     guides:
       title: Guides
       intro: "The Bank's Credit and Collateral Guides contain comprehensive information about our products and services. For your convenience, recent changes to the guide are summarized below."
@@ -619,7 +651,7 @@ en:
         title: Collateral Guide
         updates:
           upcoming:
-            - "Please refere to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
+            - "Please refer to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
           revisions:
             -
               date: '2015-04-22'
@@ -729,8 +761,6 @@ en:
       title: Newsroom
     regulatory_updates:
       title: Regulatory Updates
-    business_continuity:
-      title: Business Continuity
     membership:
       title: Membership
       benefits:

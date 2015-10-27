@@ -78,6 +78,7 @@ Rails.application.routes.draw do
   end
 
   scope 'resources' do
+    get '/business-continuity' => 'resources#business_continuity'
     get '/forms' => 'resources#forms'
     get '/guides' => 'resources#guides'
     get '/download/:file' => 'resources#download', as: :resources_download
