@@ -1,29 +1,5 @@
 .product-page {
-  .column-2x10-right {
-    padding-right: 10px;
-  }
-  h2 {
-    @extend %typography-section-title;
-    margin: 25px 0 10px;
-  }
-  h3 {
-    @extend %typography-subtitle;
-    margin: 0 0 8px;
-    &:not(:first-of-type) {
-      margin-top: 25px;
-    }
-  }
-  h3 + p {
-    margin-top: 0;
-  }
-  a {
-    text-decoration: none;
-    color: $actionable-blue;
-  }
-  ul {
-    padding-left: 30px;
-    margin-top: 0;
-  }
+  @extend %info-page-style;
   .key_uses_list, .key_advantages_list {
     padding-left: 0;
   }
