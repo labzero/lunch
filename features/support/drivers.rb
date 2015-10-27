@@ -36,6 +36,7 @@ base_opts = {
   :'tunnel-identifier' => ENV['SAUCE_TUNNEL_IDENTIFIER'],
   :'selenium-version' => ENV['SAUCE_SELENIUM_VERSION'],
   :'iedriver-version' => ENV['SAUCE_IEDRIVER_VERSION'],
+  :chromedriverVersion => ENV['SAUCE_CHROMEDRIVER_VERSION'],
   :'screenResolution' =>  ENV['SAUCE_SCREEN_RESOLUTION'] || '1280x1024',
   :'maxDuration' => ENV['SAUCE_MAX_DURATION'] || 3600
 }
