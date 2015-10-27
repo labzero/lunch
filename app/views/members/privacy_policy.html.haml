@@ -4,130 +4,47 @@
     %h1= t('global.privacy_policy')
     %h2= t('privacy_policy.last_updated')
     %h2= t('privacy_policy.please_read')
-    This Privacy Policy (“Policy”) explains how the Federal Home Loan Bank of San Francisco (the “Bank” or “us” or “we”) may collect information from or about users (“you”) of the Bank’s website or member portal (collectively, “Website”) and/or the entity on whose behalf you are accessing this Website, including the entity you represent. This Policy binds that entity. This Policy does not apply to information we may receive through the mail, by email, by fax or telephone, in person, or in any other way.
-    %br/
-    %br/
-    IF APPLICABLE: We use other online services not covered by this Policy. If you visit one of these sites, please review the policies of those sites to understand how your information may be collected, used and shared.
-    %br/
-    %br/
-    From time to time, we may change this Policy. The effective date of this Policy, as stated above, indicates the last time this Policy was revised or updated. Checking the effective date above allows you to determine whether there have been changes since the last time you reviewed this Policy. We reserve the right to change this Policy at any time. Any changes to this Policy will become effective when we post the updated Policy to this Website. Your use of this Website following any changes to the Policy means that you accept the revised Policy. You are encouraged to review this Policy each time you use this Website
-    %br/
-    %br/
-    Additional information can be found in the #{link_to 'Terms of Use', terms_of_use_path} and the #{link_to 'Online Security guidlines', online_security_path}.
-    %br/
-    %br/
-    %strong Information Collected, Used and Stored
-    %br/
-    %br/
-    Throughout this Policy several specialized terms are used. “Personally Identifiable Information” means sensitive, non-public information regarding individuals. “User Information” could mean all Personally Identifiable Information and any other forms of information provided by you through the Website such as your email address, street address or the Internet Protocol (IP) address of your device. When you visit our Website, we may collect and store the service provider name from which you access the Internet (e.g., at&t internet services), IP address, device type, browser, browser language, operating system, screen resolution, pages accessed on the Website, time spent on a page, the date and time you access the Bank’s Website, and the address of the Internet site you visited prior to entering this Website (if you came from a referring site). We may use this information to measure the number of visitors to the Bank’s Website, to analyze where visitors linked to, within, and from the Bank’s Website, to help us optimize our Website. For example, we may organize and analyze IP addresses so that we can provide more efficient service, improve user experience, enhance security, monitor usage and produce traffic volume statistics. This type of information may be shared with third party vendors on an aggregated basis, such as if we choose to disclose site traffic information for marketing or customer service purposes. If you elect to utilize any links from this Website, or send the Bank an email, you may provide us with User Information that we may use to respond to your request for information, and to evaluate and process your request. The Bank may also use for other purposes and disclose to third party vendors User Information that does not constitute Personally Identifiable Information. We will not share any Personally Identifiable Information with third party vendors, unless done pursuant to applicable rules and regulations or pursuant to a court order or subpoena, except as provided herein, and only when such third party confirms that they have taken commercially reasonable measures to keep Personally Identifiable Information confidential. We require third party vendors to whom we disclose Personally Identifiable Information to take measures to keep that information confidential. We also maintain and require various security measures designed to protect this information.
-    %br/
-    %br/
-    The Bank may store any and all site usage information collected from you. The Bank does not store the data in an encrypted format. We retain your username and encrypt your password when you log in to this Website. We use reply email addresses to answer the email we receive. If applicable, we also use email address, name, title, organization and type, address, phone and fax numbers to communicate with you about your online event registrations or subscriptions. This information is not shared with any third party vendors except as stated below. These emails are not encrypted.
-    %br/
-    %br/
-    Usage logs and reports may be analyzed and reviewed by third party vendors who have submitted written confidentiality agreements to the Bank. These logs and reports are not sold to third party vendors.
-    %br/
-    %br/
-    For the purposes of maintaining accurate contact information, we collect information such as name, title, institution, or company name, institution or company address, phone and fax numbers, and email addresses. We retain that information until you provide new information or ask us to delete it.
-    %br/
-    %br/
-    For the purpose of registering for events, we may ask for all of the information above, plus credit card information. When you submit credit card information, you are directed to a third party vendor, and all of your credit card related information is provided directly to that third party vendor, and not to the Bank. This information is transmitted to the third party vendor via a secure connection. Any transfer of your information from this Website to a third party vendor’s website will subject your information to the privacy policies and terms of use of those websites.
-    %br/
-    %br/
-    From time to time, we may ask users of this Website to respond to surveys. We may ask for the user’s name, title, institution or company name, and/or institution or company type. Information from some surveys is aggregated and retained to reveal insights regarding the needs and customer satisfaction report on perceptions of users of this Website.
-    %br/
-    %br/
-    %strong Information That is Shared
-    %br/
-    %br/
-    We do not share Personally Identifiable Information with companies, organizations and individuals outside of the Bank unless one of the following circumstances apply:
-    %br/
-    %br/
+    %p= t('privacy_policy.introduction')
+    %p= t('privacy_policy.applicable')
+    %p= t('privacy_policy.additional_information_html', terms_url: terms_of_use_path)
+    %h3= t('privacy_policy.information_collected.title')
+    %p= t('privacy_policy.information_collected.introduction')
+    %p= t('privacy_policy.information_collected.store')
+    %p= t('privacy_policy.information_collected.usage')
+    %p= t('privacy_policy.information_collected.accurate')
+    %p= t('privacy_policy.information_collected.events')
+    %p= t('privacy_policy.information_collected.survey')
+    %h3= t('privacy_policy.information_shared.title')
+    %p= t('privacy_policy.information_shared.share')
     %ul
-      %li With your consent: We will share Personally Identifiable Information with third party vendors when we have your written consent to do so.
-      %li For external processing: We may engage third party vendors to collect Personally Identifiable Information and to process it for us, adhering to their respective privacy policies and not this Policy.
-      %li For legal reasons: We will share Personally Identifiable Information with third party vendors if we have a good-faith belief that access, use, preservation or disclosure of the information is reasonably necessary to:
+      %li= t('privacy_policy.information_shared.consent')
+      %li= t('privacy_policy.information_shared.third_party')
+      %li= t('privacy_policy.information_shared.identifiable')
       %br/
-      %div{:style => "MARGIN-LEFT: 2em", :type => "disc"}
-        %ul{:type => "circle"}
-          %li meet any applicable law, regulation, legal process or enforceable governmental request.
-          %li enforce the Bank’s applicable Terms of Use, including investigation of potential violations.
-          %li detect, prevent, or otherwise address fraud, security or technical issues.
-          %li protect against harm to the rights, property or safety of the Bank, our Website users, or the public as required or permitted by law.
-    We may share non-personally identifiable aggregated site visitation information with third party vendors.
-    %br/
-    %br/
-    %b
-      Use of Cookies
-    %br/
-    %br/
-    We collect and store information about your visit to this Website. To collect some of this information, our web server places a “cookie,” which is a small file, on the device you are using to access our Website. The use of cookies allows the Bank to collect information including browser type, the amount of time spent on the Website, and pages visited. We may use this information to enhance your online experience and to facilitate your use of this Website. We collect aggregated site-visitation statistics that we may use to measure the effectiveness of this Website and to improve our products and services. Accepting the cookies used by this Website does not give us access to your personal information.
-    %br/
-    %br/
-    You can refuse to accept these cookies and most devices and browsers offer their own privacy settings for cookies. You will need to manage your cookie settings for each device and browser you use. However, if you do not accept these cookies, you may experience some inconvenience in your use of this Website and you may not be able to access portions of this Website at all if you disable cookies on your browser. Some cookies remain on your device between visits, while others are transient and are erased after you complete your Internet session.
-    %br/
-    %br/
-    %b
-      Third Party Vendors
-    %br/
-    %br/
-    The Bank uses certain vendors that may include Google Analytics and Eventbrite as third party vendors to carry out certain aspects of the Website operations (“third party vendors”). Third party vendors may use cookies, collect, use and store information that the Bank might collect, all in accordance with their respective privacy policies and not this Policy. We recommend that you review the privacy policies of third party vendors who may collect your information.
-    %br/
-    %br/
-    %b
-      Information Security
-    %br/
-    %br/
-    The Bank uses Secure Sockets Layer (SSL) technology to protect your information from unauthorized access. However, this is not a guarantee that such information may not be accessed, disclosed, altered or destroyed by breach of such technology. It is not the Bank’s policy to share information we receive from you through this Website other than with regulators or third party vendors that assist the Bank in conducting its business. Certain non-personal information collected pursuant to surveys may be aggregated and shared with Bank employees or its agents. All Bank employees and its agents are subject to the terms of a confidentiality agreement. Any third party vendors who have access to personal information are required by contract to keep the information confidential.
-    %br/
-    %br/
-    %b
-      Disclosure of Collected Information
-    %br/
-    %br/
-    Except as otherwise described in this Policy, the Bank will not disclose Personally Identifiable Information to any third party vendor unless we believe that disclosure is necessary: (1) to conform to legal requirements or to respond to a subpoena, search warrant or other legal process received by the Bank, whether or not a response is required by applicable law; (2) to enforce the Bank’s Website Terms of Use or to protect the Bank’s rights; or (3) to protect the public and users of the Website.
-    %br/
-    %br/
-    %b
-      Third Party Websites
-    %br/
-    %br/
-    This Website contains links to other websites. The Bank is not responsible for the privacy practices or content of other websites. When you leave this Website, please read the privacy statements of each website that collects Personally Identifiable Information. This Policy applies solely to information collected by this Website.
-    %br/
-    %br/
-    %b
-      Social Media Sites
-    %br/
-    %br/
-    The Bank provides experiences on various social media platforms that enable sharing and collaboration among users who have registered to use them. Any content you post on official Bank-managed social media sites, such as pictures, information, opinions, or any personal information that you make available to other participants on these social platforms, is subject to the terms of the privacy policies of those respective platforms.
-    %br/
-    %br/
-    %b
-      Protecting children’s privacy online
-    %br/
-    %br/
-    This Website is not directed to individuals under the age of thirteen (13), and we request that these individuals do not provide Personally Identifiable Information through this Website. We do not knowingly collect information from children under 13 without parental consent. Visit the #{link_to 'Federal Trade Commission', 'https://www.ftc.gov/tips-advice/business-center/privacy-and-security/children%27s-privacy'} website for more information about the Children’s Online Privacy Protection Act (COPPA).
-    %br/
-    %br/
-    %b
-      Copyright
-    %br/
-    %br/
-    Except as otherwise provided by applicable law, the contents of this Website are copyrighted and the information herein may not be used without the prior written consent of the Bank.
-    %br/
-    %br/
-    %b
-      Governing Law and Jurisdiction in San Francisco
-    %br/
-    %br/
-    The use of this Website is governed by and shall be construed in accordance with the laws of the United States and, to the extent applicable, the State of California. Users of this Website and the Bank’s members agree that any action arising from any matter relating directly or indirectly to this Website shall be brought in a court of competent jurisdiction in the City and County of San Francisco, State of California, that those courts have personal jurisdiction over you and the member for that purpose, and you waive any right to bring or seek transfer of any such action to any court outside of San Francisco, California.
-    %br/
-    %br/
-    %b
-      Contact Information
-    %br/
-    %br/
-    If you have any questions about this Policy, please contact
-    %a{:href => "mailto:websupport@fhlbsf.com", :title => "Web Support"} Web Support
-    at (415) 616-2610.
-    %br/
+      %ul
+        %li= t('privacy_policy.information_shared.meet_law')
+        %li= t('privacy_policy.information_shared.enforce')
+        %li= t('privacy_policy.information_shared.issues')
+        %li= t('privacy_policy.information_shared.protect')
+    %p= t('privacy_policy.information_shared.information')
+    %h3= t('privacy_policy.cookies.title')
+    %p= t('privacy_policy.cookies.collect')
+    %p= t('privacy_policy.cookies.refuse')
+    %h3= t('privacy_policy.third_party.title')
+    %p= t('privacy_policy.third_party.vendors')
+    %h3= t('privacy_policy.information_security.title')
+    %p= t('privacy_policy.information_security.ssl')
+    %h3= t('privacy_policy.disclosure.title')
+    %p= t('privacy_policy.disclosure.disclose')
+    %h3= t('privacy_policy.websites.title')
+    %p= t('privacy_policy.websites.other_websites')
+    %h3= t('privacy_policy.social_media.title')
+    %p= t('privacy_policy.social_media.platforms')
+    %h3= t('privacy_policy.children.title')
+    %p= t('privacy_policy.children.minors_html', url: 'https://www.ftc.gov/tips-advice/business-center/privacy-and-security/children%27s-privacy')
+    %h3= t('privacy_policy.copyright.title')
+    %p= t('privacy_policy.copyright.content')
+    %h3= t('privacy_policy.governing.title')
+    %p= t('privacy_policy.governing.use')
+    %h3= t('privacy_policy.contact.title')
+    %p= t('privacy_policy.contact.details_html', url: web_support_email, phone_number: web_support_phone_number)
