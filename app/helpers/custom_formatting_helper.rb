@@ -71,7 +71,7 @@ module CustomFormattingHelper
 
   def fhlb_datetime_standard_numeric(datetime)
     return t('global.missing_value') if datetime.nil?
-    datetime.to_datetime.strftime('%l:%M%P %m/%d/%Y')
+    datetime.to_datetime.strftime('%l:%M %P %m/%d/%Y')
   end
 
   def fhlb_report_date_numeric(date)

@@ -96,7 +96,7 @@ describe CustomFormattingHelper do
   describe '`fhlb_datetime_standard_numeric` method' do
     let(:date) {DateTime.new(2015,1,2, 10, 12, 13)}
     it 'converts a datetime into a string following the `Time MM/DD/YYYY` format' do
-      expect(helper.fhlb_datetime_standard_numeric(date)).to eq('10:12am 01/02/2015')
+      expect(helper.fhlb_datetime_standard_numeric(date)).to eq('10:12 am 01/02/2015')
     end
     it 'returns the I18n value for `missing_value` if passed nil' do
       expect(helper.fhlb_datetime_standard_numeric(nil)).to eq(I18n.t('global.missing_value'))
