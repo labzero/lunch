@@ -4,15 +4,18 @@ module MAPI
       include Swagger::Blocks
       swagger_model :ActiveAdvances do
         property :trade_date do
-          key :type, :date
-          key :description, 'Advances Trade Date'
+          key :type, :string
+          key :format, :'date-time'
+          key :description, 'Advances Trade DateTime'
         end
         property :funding_date do
-          key :type, :date
+          key :type, :string
+          key :format, :date
           key :description, 'Advances Funding/Settlement Date'
         end
         property :maturity_date do
           key :type, :string
+          key :format, :date
           key :description, 'Advances Maturity Date or Open in cases for OPEN VRC advances'
         end
         property :advance_number do
@@ -34,6 +37,10 @@ module MAPI
         property :current_par do
           key :type, :Numeric
           key :description, 'Advances current par'
+        end
+        property :trade_time do
+          key :type, :string
+          key :description, 'The time an advance was traded.'
         end
       end
     end

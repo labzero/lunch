@@ -43,6 +43,17 @@ module MAPI
           end
         end
 
+        def self.sort_trades(trades)
+          trades.sort { |a, b| [b['trade_date'], b['advance_number']] <=> [a['trade_date'], a['advance_number']] }
+        end
+
+        def self.build_trade_datetime(trade)
+          date = trade.at_css('tradeHeader tradeDate').content
+          time = trade.at_css('tradeHeader tradeTime').content
+          return nil unless date && time
+          (date.to_date.iso8601 + 'T' + time)
+        end
+
         def self.is_large_member(environment, member_id)
 
           if environment == :production
@@ -76,7 +87,7 @@ module MAPI
             if ACTIVE_ADVANCES_ARRAY.include? trade.at_css('tradeHeader status').content
               rate = (trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate') : trade.at_css('advance coupon initialRate')).content
               hash = {
-                'trade_date' => trade.at_css('tradeHeader tradeDate').content,
+                'trade_date' => build_trade_datetime(trade),
                 'funding_date' => trade.at_css('tradeHeader settlementDate').content,
                 'maturity_date' => trade.at_css('advance maturityDate') ? trade.at_css('advance maturityDate').content : 'Open',
                 'advance_number' => trade.at_css('advance advanceNumber').content,
@@ -125,7 +136,7 @@ module MAPI
           data.each do |trade|
             trade['interest_rate'] = decimal_to_percentage_rate(trade['interest_rate'])
           end
-          data
+          sort_trades(data)
         end
 
         def self.current_daily_total(env, instrument)
@@ -183,7 +194,7 @@ module MAPI
               if TODAYS_ADVANCES_ARRAY.include? trade.at_css('tradeHeader status').content
                 rate = (trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate') : trade.at_css('advance coupon initialRate')).content
                 hash = {
-                  'trade_date' => trade.at_css('tradeHeader tradeDate').content,
+                  'trade_date' => build_trade_datetime(trade),
                   'funding_date' => trade.at_css('tradeHeader settlementDate').content,
                   'maturity_date' => trade.at_css('advance maturityDate') ? trade.at_css('advance maturityDate').content : 'Open',
                   'advance_number' => trade.at_css('advance advanceNumber').content,
@@ -203,7 +214,7 @@ module MAPI
           data.each do |trade|
             trade['interest_rate'] = decimal_to_percentage_rate(trade['interest_rate'])
           end
-          data
+          sort_trades(data)
         end
 
         def self.todays_credit_activity(env, member_id)
