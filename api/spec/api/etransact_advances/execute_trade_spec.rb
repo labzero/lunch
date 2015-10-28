@@ -18,23 +18,25 @@ describe MAPI::ServiceApp do
   let(:rate)  {0.17}
   let(:check_capstock)  {true}
   let(:signer)  {'local'}
+  let(:maturity_date) { "2016-03-11".to_date }
 
   before do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
   end
 
   describe 'get_maturity_date' do
+    let(:app){ double('app', logger: double('logger'), settings: double( 'settings', environment: nil ) ) }
     it 'should add one day if overnight' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_maturity_date(Time.zone.parse('2015-02-03').to_date, 'overnight')).to eq(Time.zone.parse('2015-02-04').to_date)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_maturity_date(app,Time.zone.parse('2015-02-03').to_date, 'overnight')).to eq(Time.zone.parse('2015-02-04').to_date)
     end
     it 'should add 7 days if 1week' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_maturity_date(Time.zone.parse('2015-02-03').to_date, '1week')).to eq(Time.zone.parse('2015-02-10').to_date)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_maturity_date(app,Time.zone.parse('2015-02-03').to_date, '1week')).to eq(Time.zone.parse('2015-02-10').to_date)
     end
     it 'should add 1 months if 1month' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_maturity_date(Time.zone.parse('2015-02-03').to_date, '1month')).to eq(Time.zone.parse('2015-03-03').to_date)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_maturity_date(app,Time.zone.parse('2015-02-03').to_date, '1month')).to eq(Time.zone.parse('2015-03-03').to_date)
     end
     it 'should add 1 year if 1year' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_maturity_date(Time.zone.parse('2015-02-03').to_date, '1year')).to eq(Time.zone.parse('2016-02-03').to_date)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_maturity_date(app,Time.zone.parse('2015-02-03').to_date, '1year')).to eq(Time.zone.parse('2016-02-03').to_date)
     end
   end
 
@@ -158,7 +160,7 @@ describe MAPI::ServiceApp do
   end
 
   describe 'Execute Trade' do
-    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
     it 'should return expected result of execute trade' do
       expect(execute_trade['status']).to be_kind_of(Array)
       expect(execute_trade['confirmation_number']).to be_kind_of(String)
@@ -173,6 +175,14 @@ describe MAPI::ServiceApp do
       expect(execute_trade['maturity_date']).to be_kind_of(String)
     end
   end
+
+  describe 'Execute Trade' do
+    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
+    it 'should return the maturity date passed as part of the URL' do
+      expect(execute_trade['maturity_date']).to eq(maturity_date.iso8601)
+    end
+  end
+
   describe 'Validate Trade' do
     let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
     it 'should return expected result of validate trade' do
@@ -187,6 +197,14 @@ describe MAPI::ServiceApp do
       expect(execute_trade['trade_date']).to be_kind_of(String)
       expect(execute_trade['funding_date']).to be_kind_of(String)
       expect(execute_trade['maturity_date']).to be_kind_of(String)
+    end
+  end
+
+  describe 'Validate Trade check' do
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    it 'should return a matching maturity date' do
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:get_maturity_date).and_return(maturity_date)
+      expect(execute_trade['maturity_date']).to eq(maturity_date.iso8601)
     end
   end
 
@@ -275,10 +293,11 @@ describe MAPI::ServiceApp do
   end
 
   describe 'in the production environment' do
-    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
     before do
       allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit) {|env, amount, hash| hash }
+      allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
     end
     describe 'agency for 1 week' do
       let(:advance_type)  {'agency'}
@@ -350,11 +369,11 @@ describe MAPI::ServiceApp do
       end
     end
     it 'should return Internal Service Error, if execute trade service is unavailable', vcr: {cassette_name: 'execute_trade_service_unavailable'} do
-      post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}"
+      post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"
       expect(last_response.status).to eq(503)
     end
     it 'should return Internal Service Error, if execute mds service is unavailable', vcr: {cassette_name: 'execute_trade_market_data_service_unavailable'} do
-      post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}"
+      post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"
       expect(last_response.status).to eq(503)
     end
   end
@@ -628,23 +647,62 @@ describe MAPI::ServiceApp do
       end
     end
   end
-  
+
   describe 'the `execute_trade` method' do
-    let(:app) { double('app', settings: double('settings', environment: nil)) }
+    let(:app) { double('app', settings: double('settings', environment: nil), logger: nil) }
     let(:today) { Time.zone.today }
     let(:built_message) { [double('message'), {}] }
-    let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(app, member_id, double('instrument'), 'EXECUTE', 234234, advance_term, advance_type, rate, false, double('signer'), double('markup'), double('blended_cost_of_funds'), double('cost_of_funds'), double('benchmark_rate')) }
+    let(:instrument) { double('instrument') }
+    let(:amount) { 234234 }
+    let(:signer) { double('signer') }
+    let(:markup) { double('markup') }
+    let(:day_count) { 'ACT/360' }
+    let(:blended_cost_of_funds) { double('blended_cost_of_funds') }
+    let(:cost_of_funds) { double('cost_of_funds') }
+    let(:benchmark_rate) { double('benchmark_rate') }
+    let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate) }
     before do
-      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:get_maturity_date)
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:get_maturity_date).and_return(maturity_date)
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:init_execute_trade_connection)
-      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:build_message).and_return(built_message)
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:build_message).with(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, today, day_count).and_return(built_message)
     end
-    
-    it 'returns today\'s date as a string for `trade_date`' do
-      expect(execute_trade['trade_date']).to eq(today)
+    shared_examples 'other_dates' do
+      it 'returns today\'s date as a string for `trade_date`' do
+        expect(execute_trade['trade_date']).to eq(today)
+      end
+      it 'returns today\'s date as a string for `funding_date`' do
+        expect(execute_trade['funding_date']).to eq(today)
+      end
     end
-    it 'returns today\'s date as a string for `funding_date`' do
-      expect(execute_trade['funding_date']).to eq(today)
+    shared_examples 'maturity_dates' do
+      it 'returns maturity_date as a string for `maturity_date`' do
+        expect(execute_trade['maturity_date'].to_date).to eq(maturity_date)
+      end
+      it 'passes the maturity_date to build_message' do
+        expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:build_message).with(anything, anything, anything, anything, anything, anything, anything, anything, anything, anything, anything, anything, maturity_date, anything, anything).and_return(built_message)
+        execute_trade
+      end
+    end
+    shared_examples 'maturity date is supplied' do
+      describe 'with supplied maturity_date' do
+        let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date) }
+        before do
+          allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:get_maturity_date).and_return(nil)
+        end
+        include_examples 'maturity_dates'
+      end
+    end
+    describe 'execute' do
+      let(:operation) { 'EXECUTE' }
+      include_examples 'other_dates'
+      include_examples 'maturity_dates'
+      include_examples 'maturity date is supplied'
+    end
+    describe 'validate' do
+      let(:operation) { 'VALIDATE' }
+      include_examples 'other_dates'
+      include_examples 'maturity_dates'
+      include_examples 'maturity date is supplied'
     end
   end
 end

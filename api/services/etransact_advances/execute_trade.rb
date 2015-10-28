@@ -5,6 +5,7 @@ module MAPI
   module Services
     module EtransactAdvances
       module ExecuteTrade
+        include MAPI::Shared::Constants
 
         include MAPI::Shared::Utils
 
@@ -67,18 +68,9 @@ module MAPI
           end
         end
 
-        def self.get_maturity_date (settlement_date, term)
-          maturity_date = settlement_date.to_date
-          if (term == 'overnight') || (term == 'open')
-            maturity_date = maturity_date + 1.day
-          elsif term[1].upcase == 'W'
-            maturity_date = maturity_date + (7*term[0].to_i).day
-          elsif term[1].upcase == 'M'
-            maturity_date = maturity_date + (term[0].to_i).month
-          elsif term[1].upcase == 'Y'
-            maturity_date = maturity_date + (term[0].to_i).year
-          end
-          maturity_date
+        def self.get_maturity_date (app, settlement_date, term)
+          holidays = MAPI::Services::Rates::Holidays.holidays(app.logger, app.settings.environment)
+          MAPI::Services::Rates.get_maturity_date(settlement_date+TERM_MAPPING[term][:time], TERM_MAPPING[term][:frequency_unit], holidays)
         end
 
         def self.get_payment_info(term, collateral, settlement_date, maturity_date)
@@ -274,12 +266,12 @@ module MAPI
           [message, payment_info]
         end
 
-        def self.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate)
+        def self.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date=nil)
           member_id = member_id.to_i
           # Calculated values
           # True maturity date will be calculated later
-          maturity_date = MAPI::Services::EtransactAdvances::ExecuteTrade::get_maturity_date(Time.zone.today, advance_term)
           settlement_date = Time.zone.today # currently both `trade_date` and `funding_date` are set to today, as we only allow same-day funding/trading at this time
+          maturity_date = MAPI::Services::EtransactAdvances::ExecuteTrade::get_maturity_date(app, settlement_date, advance_term) if maturity_date.nil?
           day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/ACT' : 'ACT/360'
 
           message, payment_info = MAPI::Services::EtransactAdvances::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
