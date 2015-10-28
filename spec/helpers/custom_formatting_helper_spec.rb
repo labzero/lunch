@@ -96,7 +96,7 @@ describe CustomFormattingHelper do
   describe '`fhlb_datetime_standard_numeric` method' do
     let(:date) {DateTime.new(2015,1,2, 10, 12, 13)}
     it 'converts a datetime into a string following the `Time MM/DD/YYYY` format' do
-      expect(helper.fhlb_datetime_standard_numeric(date)).to eq('10:12am 01/02/2015')
+      expect(helper.fhlb_datetime_standard_numeric(date)).to eq('10:12 am 01/02/2015')
     end
     it 'returns the I18n value for `missing_value` if passed nil' do
       expect(helper.fhlb_datetime_standard_numeric(nil)).to eq(I18n.t('global.missing_value'))
@@ -250,6 +250,30 @@ describe CustomFormattingHelper do
       }.each do |input, output|
         expect(helper.mask_email(input)).to eq(output)
       end
+    end
+  end
+  
+  describe '`report_summary_with_date`' do
+    let(:i18n_string) { double('an I18n key') }
+    let(:date) { double('a date string') }
+    let(:other_arg) { double('another I18n arg')}
+    let(:other_arg_hash) { {foo: other_arg} }
+    let(:response) { double('the interpolated string', html_safe: nil)}
+    let(:call_method) { helper.report_summary_with_date(i18n_string, date) } 
+    
+    before { allow(I18n).to receive(:t).and_return(response) }
+    
+    it 'sends the given string to I18n interpolation with a `date` argument in a span with class `report-summary-date`' do
+      expect(I18n).to receive(:t).with(i18n_string, {date: content_tag(:span, date, class: 'report-summary-date')}).and_return(response)
+      call_method
+    end
+    it 'sends the given string to I18n interpolation with any other args that were passed' do
+      expect(I18n).to receive(:t).with(i18n_string, hash_including(foo: other_arg)).and_return(response)
+      helper.report_summary_with_date(i18n_string, date, other_arg_hash)
+    end
+    it 'returns an `html_safe` interpolated string' do
+      expect(response).to receive(:html_safe)
+      call_method
     end
   end
 

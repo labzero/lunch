@@ -79,7 +79,7 @@ class ReportsController < ApplicationController
     },
     sbc: {
       vrc: I18n.t('reports.pages.price_indications.current.actual_360'),
-      frc: I18n.t('reports.pages.price_indications.current.actual_actual'),
+      frc: I18n.t('reports.pages.price_indications.current.actual_360'),
       arc: I18n.t('reports.pages.price_indications.current.actual_360'),
       :'1m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
       :'3m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
@@ -101,7 +101,7 @@ class ReportsController < ApplicationController
       vrc: I18n.t('reports.pages.price_indications.current.at_maturity'),
       vrc_open: I18n.t('reports.pages.price_indications.current.at_monthend_and_at_repayment'),
       frc: [
-        [I18n.t('reports.pages.price_indications.current.advances_with_terms_of_180_days_or_less'), I18n.t('reports.pages.price_indications.current.at_repayment')],
+        [I18n.t('reports.pages.price_indications.current.advances_with_terms_of_180_days_or_less'), I18n.t('reports.pages.price_indications.current.maturity_and_at_repayment')],
         [I18n.t('reports.pages.price_indications.current.advances_with_terms_of_more_than'), I18n.t('reports.pages.price_indications.current.semiannually_and_at_repayment')]
       ],
       :'1m_libor' => I18n.t('reports.pages.price_indications.current.monthly_and_at_repayment'),
@@ -1354,7 +1354,7 @@ class ReportsController < ApplicationController
           },
           {
             columns: [
-              {value: t('reports.account_summary.capital_stock.excess_stock')},
+              {value: t('reports.account_summary.capital_stock.stock')},
               {value: member_profile[:capital_stock][:remaining_stock], type: :currency_whole}
             ]
           },
@@ -1406,9 +1406,9 @@ class ReportsController < ApplicationController
   def securities_instance_variables(securities_position, filter)
     as_of_date = securities_position[:as_of_date]
     @headings = {
-      total_original_par: t("reports.pages.securities_position.#{filter}_securities.total_original_par_heading", date: fhlb_date_long_alpha(as_of_date)),
-      total_current_par: t("reports.pages.securities_position.#{filter}_securities.total_current_par_heading", date: fhlb_date_long_alpha(as_of_date)),
-      total_market_value: t("reports.pages.securities_position.#{filter}_securities.total_market_value_heading", date: fhlb_date_long_alpha(as_of_date)),
+      total_original_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_original_par_heading", fhlb_date_long_alpha(as_of_date)),
+      total_current_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_current_par_heading", fhlb_date_long_alpha(as_of_date)),
+      total_market_value: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_market_value_heading", fhlb_date_long_alpha(as_of_date)),
       table_heading: t("reports.pages.securities_position.#{filter}_securities.table_heading", n: securities_position[:securities].length, date: fhlb_date_long_alpha(as_of_date)),
       footer_total: t("reports.pages.securities_position.#{filter}_securities.total")
     }

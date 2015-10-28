@@ -6,6 +6,8 @@ module MAPI
     module EtransactAdvances
       module ExecuteTrade
 
+        include MAPI::Shared::Utils
+
         LOAN_MAPPING = {
           whole: 'WHOLE LOAN',
           agency: 'SBC-AGENCY',
@@ -108,7 +110,7 @@ module MAPI
                   'v13:frequencyUnit' => 'M'
                 }
               end
-              payment_at = 'Maturity'
+              payment_at = 'End Of Month'
             else
               if (maturity_date - settlement_date).to_i <= 180
                 payment_at = 'Maturity'
@@ -133,10 +135,11 @@ module MAPI
         end
 
         def self.get_advance_rate_schedule(term, interest, day_count, settlement_date, maturity_date)
+          transformed_interest = percentage_to_decimal_rate(interest)
           # Advance Rate Schedule
           if (term == 'overnight') || (term == 'open')
             advance_rate_schedule = {
-              'v13:initialRate' => interest,
+              'v13:initialRate' => transformed_interest,
               'v13:floatingRateSchedule' => {
                 'v13:floatingPeriod' => {
                   'v13:startDate' => Time.zone.today,
@@ -161,12 +164,12 @@ module MAPI
             }
           else
             advance_rate_schedule = {
-              'v13:initialRate' => interest,
+              'v13:initialRate' => transformed_interest,
               'v13:fixedRateSchedule' => {
                 'v13:step' => {
                   'v13:startDate' => settlement_date,
                   'v13:endDate' => maturity_date,
-                  'v13:rate' => interest,
+                  'v13:rate' => transformed_interest,
                   'v13:dayCountBasis' => day_count
                 }
               },
@@ -277,7 +280,7 @@ module MAPI
           # True maturity date will be calculated later
           maturity_date = MAPI::Services::EtransactAdvances::ExecuteTrade::get_maturity_date(Time.zone.today, advance_term)
           settlement_date = Time.zone.today # currently both `trade_date` and `funding_date` are set to today, as we only allow same-day funding/trading at this time
-          day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/360' : 'ACT/ACT'
+          day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/ACT' : 'ACT/360'
 
           message, payment_info = MAPI::Services::EtransactAdvances::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
 

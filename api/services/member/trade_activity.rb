@@ -6,6 +6,8 @@ module MAPI
     module Member
       module TradeActivity
 
+        include MAPI::Shared::Utils
+
         TODAYS_ADVANCES_ARRAY = %w(VERIFIED OPS_REVIEW OPS_VERIFIED SEC_REVIEWED SEC_REVIEW COLLATERAL_AUTH AUTH_TERM PEND_TERM)
         ACTIVE_ADVANCES_ARRAY = %w(VERIFIED OPS_REVIEW OPS_VERIFIED COLLATERAL_AUTH AUTH_TERM PEND_TERM)
         TODAYS_CREDIT_ARRAY = TODAYS_ADVANCES_ARRAY + %w(TERMINATED EXERCISED)
@@ -41,6 +43,17 @@ module MAPI
           end
         end
 
+        def self.sort_trades(trades)
+          trades.sort { |a, b| [b['trade_date'], b['advance_number']] <=> [a['trade_date'], a['advance_number']] }
+        end
+
+        def self.build_trade_datetime(trade)
+          date = trade.at_css('tradeHeader tradeDate').content
+          time = trade.at_css('tradeHeader tradeTime').content
+          return nil unless date && time
+          (date.to_date.iso8601 + 'T' + time)
+        end
+
         def self.is_large_member(environment, member_id)
 
           if environment == :production
@@ -72,14 +85,15 @@ module MAPI
           fhlbsfresponse = response.doc.xpath('//Envelope//Body//tradeResponse//trades//trade')
           fhlbsfresponse.each do |trade|
             if ACTIVE_ADVANCES_ARRAY.include? trade.at_css('tradeHeader status').content
+              rate = (trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate') : trade.at_css('advance coupon initialRate')).content
               hash = {
-                'trade_date' => trade.at_css('tradeHeader tradeDate').content,
+                'trade_date' => build_trade_datetime(trade),
                 'funding_date' => trade.at_css('tradeHeader settlementDate').content,
                 'maturity_date' => trade.at_css('advance maturityDate') ? trade.at_css('advance maturityDate').content : 'Open',
                 'advance_number' => trade.at_css('advance advanceNumber').content,
                 'advance_type' => trade.at_css('advance product').content,
                 'status' => Date.parse(trade.at_css('tradeHeader tradeDate').content) < Time.zone.today ? 'Outstanding' : 'Processing',
-                'interest_rate' => (trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate') : trade.at_css('advance coupon initialRate')).content.to_f.round(5),
+                'interest_rate' => rate,
                 'current_par' => trade.at_css('advance par amount').content.to_f
               }
               trade_activity.push(hash)
@@ -119,11 +133,14 @@ module MAPI
             trade_activity = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_active.json')))
             trade_activity
           end
-          data
+          data.each do |trade|
+            trade['interest_rate'] = decimal_to_percentage_rate(trade['interest_rate'])
+          end
+          sort_trades(data)
         end
 
         def self.current_daily_total(env, instrument)
-          data = if MAPI::Services::Member::TradeActivity.init_trade_connection(env)
+          data = if connection = MAPI::Services::Member::TradeActivity.init_trade_connection(env)
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [
@@ -134,7 +151,7 @@ module MAPI
               ]
             }
             begin
-              response = @@trade_connection.call(:get_trade, message_tag: 'tradeRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER)
+              response = connection.call(:get_trade, message_tag: 'tradeRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER)
             rescue Savon::Error => error
               raise error
             end
@@ -157,7 +174,7 @@ module MAPI
         def self.todays_trade_activity(app, member_id, instrument)
           member_id = member_id.to_i
           trade_activity = []
-          data = if MAPI::Services::Member::TradeActivity.init_trade_connection(app.settings.environment)
+          data = if connection = MAPI::Services::Member::TradeActivity.init_trade_connection(app.settings.environment)
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [{
@@ -167,7 +184,7 @@ module MAPI
               }]
             }
             begin
-              response = @@trade_connection.call(:get_trade, message_tag: 'tradeRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER)
+              response = connection.call(:get_trade, message_tag: 'tradeRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER)
             rescue Savon::Error => error
               raise error
             end
@@ -175,14 +192,15 @@ module MAPI
             fhlbsfresponse = response.doc.xpath('//Envelope//Body//tradeResponse//trades//trade')
             fhlbsfresponse.each do |trade|
               if TODAYS_ADVANCES_ARRAY.include? trade.at_css('tradeHeader status').content
+                rate = (trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate') : trade.at_css('advance coupon initialRate')).content
                 hash = {
-                  'trade_date' => trade.at_css('tradeHeader tradeDate').content,
+                  'trade_date' => build_trade_datetime(trade),
                   'funding_date' => trade.at_css('tradeHeader settlementDate').content,
                   'maturity_date' => trade.at_css('advance maturityDate') ? trade.at_css('advance maturityDate').content : 'Open',
                   'advance_number' => trade.at_css('advance advanceNumber').content,
                   'advance_type' => trade.at_css('advance product').content,
                   'status' => Date.parse(trade.at_css('tradeHeader tradeDate').content) < Time.zone.today ? 'Outstanding' : 'Processing',
-                  'interest_rate' => trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate').content.to_f.round(5) : trade.at_css('advance coupon initialRate').content.to_f.round(5),
+                  'interest_rate' => rate,
                   'current_par' => trade.at_css('advance par amount').content.to_f
                 }
                 trade_activity.push(hash)
@@ -193,14 +211,17 @@ module MAPI
             trade_activity = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_active.json')))
             trade_activity
           end
-          data.to_json
+          data.each do |trade|
+            trade['interest_rate'] = decimal_to_percentage_rate(trade['interest_rate'])
+          end
+          sort_trades(data)
         end
 
         def self.todays_credit_activity(env, member_id)
           member_id = member_id.to_i
           credit_activity = []
 
-          activities = if MAPI::Services::Member::TradeActivity.init_trade_activity_connection(env)
+          activities = if connection = MAPI::Services::Member::TradeActivity.init_trade_activity_connection(env)
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [{
@@ -209,7 +230,7 @@ module MAPI
               }]
             }
             begin
-              response = @@trade_activity_connection.call(:get_trade_activity, message_tag: 'tradeRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
+              response = connection.call(:get_trade_activity, message_tag: 'tradeRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
             rescue Savon::Error => error
               raise error
             end
@@ -253,7 +274,7 @@ module MAPI
               hash = {
                 transaction_number: transaction_number,
                 current_par: current_par,
-                interest_rate: interest_rate,
+                interest_rate: decimal_to_percentage_rate(interest_rate),
                 funding_date: funding_date,
                 maturity_date: maturity_date,
                 product_description: product_description,

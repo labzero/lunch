@@ -17,7 +17,7 @@
   {
     "tradeID": 387183,
     "amount": 1000000.0,
-    "rate": 0.22,
+    "rate": 0.0022,
     "fundingDate": "2015-08-04-07:00",
     "maturityDate": "2015-09-03-07:00",
     "productDescription": "ADVANCE FX CONSTANT FRC - Wholeloan",
@@ -32,7 +32,7 @@
   {
     "tradeID": 500638,
     "amount": 100.0,
-    "rate": 1.29,
+    "rate": 0.0129,
     "fundingDate": "2015-09-03-07:00",
     "maturityDate": null,
     "productDescription": "ADVANCE OPEN VRC VRC Open - WL",

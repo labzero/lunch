@@ -13,6 +13,7 @@ Scenario: Visit  Manage Advances Page from header link
   When I click on the advances link in the header
   Then I should see active advances data
   And I should see a advances table with multiple data rows
+  And I should see the "Trade Date" column values in "descending" order
 
 @data-unavailable @jira-mem-535 @jira-mem-1053
 Scenario: No data is available to show in the Manage Advances Page

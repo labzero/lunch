@@ -197,8 +197,8 @@
 
 .report-summary-data {
   display: inline-block;
-  width: (3 * $grid-column-width) + (2 * $gutter-width);
-  margin-right: $grid-column-width + (2 * $gutter-width);
+  width: (4 * $grid-column-width) + (3 * $gutter-width) - (0.5 * $gutter-width); // 1/2 gutter width fudge factor is for an issue with the cooper grid and 3 summary headers
+  margin-right: $gutter-width;
   margin-bottom: 50px;
   &:nth-child(3) {
     margin-right: 0;
@@ -213,6 +213,10 @@
     float: right;
     margin-right: 0;
   }
+}
+
+.report-summary-date {
+  white-space: nowrap;
 }
 
 .report-table-title {
@@ -294,7 +298,9 @@
 
       }
       tr {
-        background-color: inherit;
+        &:nth-child(even), &:nth-child(odd) { // Needed for increased precedence
+          background-color: inherit;
+        }
       }
       tr:last-child td {
         padding-bottom: 10px;
@@ -497,7 +503,7 @@
   }
 }
 
-.price-indications-report {
+.report-price-indications {
   min-height: 470px; // Must be tall enough to allow datepicker without flowing into footer
   .report-filter:first-of-type {
     margin-left: 0;
@@ -526,7 +532,7 @@
   }
   dt {
     float: left;
-    margin-right: 8px;
+    margin-right: 3px;
   }
   dd {
     margin-left: 0;

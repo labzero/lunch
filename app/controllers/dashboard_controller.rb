@@ -288,6 +288,7 @@ class DashboardController < ApplicationController
     @collateral_type = advance_request.collateral_type
     @old_rate = advance_request.old_rate
     @rate_changed = advance_request.rate_changed?
+    @total_amount = advance_request.total_amount
   end
 
   def advance_request_from_session

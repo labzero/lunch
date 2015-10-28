@@ -11,6 +11,14 @@ RSpec.describe ResourcesController, type: :controller do
     end
   end
 
+  describe 'GET business_continuity' do
+    it_behaves_like 'a user required action', :get, :guides
+    it 'should render the guides view' do
+      get :business_continuity
+      expect(response.body).to render_template('business_continuity')
+    end
+  end
+
   describe 'GET forms' do
     it_behaves_like 'a user required action', :get, :forms
     it 'should render the guides view' do

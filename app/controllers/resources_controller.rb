@@ -263,6 +263,7 @@ class ResourcesController < ApplicationController
       },
       {
         title: t('resources.forms.collateral.creditor_relationship.agreement'),
+        form_number: 2373,
         pdf_link: resources_download_path(file: :credit_union_agreement)
       }
     ]
@@ -290,6 +291,9 @@ class ResourcesController < ApplicationController
     end
 
     send_file Rails.root.join('private', filename), filename: filename
+  end
+
+  def business_continuity
   end
 
 end

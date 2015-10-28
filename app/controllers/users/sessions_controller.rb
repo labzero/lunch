@@ -1,7 +1,7 @@
 class Users::SessionsController < Devise::SessionsController
   layout 'external'
 
-  skip_before_action :check_password_change
+  skip_before_action :check_password_change, :check_terms
 
   def destroy
     super

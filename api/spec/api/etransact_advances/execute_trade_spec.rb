@@ -1,6 +1,14 @@
 require 'spec_helper'
 require 'date'
 
+def mk_payment_info(payment_at, freq_count, freq_unit, day_of_month=0)
+  {
+    payment_at: payment_at,
+    advance_payment_frequency: {'v13:frequency'=>freq_count, 'v13:frequencyUnit'=>freq_unit},
+    advance_payment_day_of_month: day_of_month
+  }
+end
+
 describe MAPI::ServiceApp do
 
   let(:member_id) {750}
@@ -50,10 +58,12 @@ describe MAPI::ServiceApp do
   end
 
   describe 'get_payment_info' do
-    let(:overnight_response) {{:payment_at=>'Overnight', :advance_payment_frequency=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'T'}, :advance_payment_day_of_month=>0}}
-    let(:open_response) {{:payment_at=>'End Of Month', :advance_payment_frequency=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'M'}, :advance_payment_day_of_month=>31}}
-    let(:whole_1_week_response) {{:payment_at=>'Maturity', :advance_payment_frequency=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'T'}, :advance_payment_day_of_month=>0}}
-    let(:next_month_response) {{:payment_at=>'Maturity', :advance_payment_frequency=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'M'}, :advance_payment_day_of_month=>0}}
+    let(:overnight_response)    { mk_payment_info('Overnight',    1, 'T') }
+    let(:open_response)         { mk_payment_info('End Of Month', 1, 'M', 31)}
+    let(:whole_1_week_response) { mk_payment_info('End Of Month', 1, 'T') }
+    let(:next_month_response)   { mk_payment_info('End Of Month', 1, 'M') }
+    let(:maturity_response)     { mk_payment_info('Maturity',     1, 'T') }
+    let(:semiannual_response)   { mk_payment_info('Semiannual',   6, 'M') }
     it 'should return overnight payment info' do
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('overnight', 'whole', Time.zone.today, Time.zone.today)).to eq(overnight_response)
     end
@@ -69,14 +79,21 @@ describe MAPI::ServiceApp do
     it 'should return next month payment info' do
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('1week', 'whole', Time.zone.today, Time.zone.today+32.days)).to eq(next_month_response)
     end
+    it 'should return maturity for SBC loans under six months' do
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('1week', 'aa', Time.zone.today, Time.zone.today+7.days)).to eq(maturity_response)
+    end
+    it 'should return semiannual for SBC loans longer than six months' do
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('1year', 'aaa', Time.zone.today, Time.zone.today+365.days)).to eq(semiannual_response)
+    end
   end
 
   describe 'get_advance_rate_schedule' do
     let(:rate) { double('rate') }
+    let(:transformed_rate) { double('transformed rate') }
     let(:day_count) { double('day_count') }
     let(:overnight_response) {
       {
-        'v13:initialRate'=>rate,
+        'v13:initialRate'=>transformed_rate,
         'v13:floatingRateSchedule'=>{
           'v13:floatingPeriod'=>{
             'v13:startDate'=>Time.zone.today,
@@ -100,23 +117,32 @@ describe MAPI::ServiceApp do
     }
     let(:week_response) {
       {
-        'v13:initialRate'=>rate,
+        'v13:initialRate'=>transformed_rate,
         'v13:fixedRateSchedule'=>{
           'v13:step'=>{
             'v13:startDate'=>Time.zone.today,
             'v13:endDate'=>Time.zone.today,
-            'v13:rate'=>rate,
+            'v13:rate'=>transformed_rate,
             'v13:dayCountBasis'=>day_count
           }
         },
         'v13:roundingConvention'=>'NEAREST'
       }
     }
+
+    before do
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:percentage_to_decimal_rate).and_return(transformed_rate)
+    end
+
     it 'should return overnight advance rate schedule' do
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_rate_schedule('overnight', rate, day_count, Time.zone.today, Time.zone.today)).to eq(overnight_response)
     end
     it 'should return week advance rate schedule' do
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_rate_schedule('1week', rate, day_count, Time.zone.today, Time.zone.today)).to eq(week_response)
+    end
+    it 'transforms the rate' do
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:percentage_to_decimal_rate)
+      MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_rate_schedule('foo', rate, day_count, Time.zone.today, Time.zone.today)
     end
   end
 

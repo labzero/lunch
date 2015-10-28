@@ -15,11 +15,11 @@
   .report-main-body
     .report-summary-data
       %h3
-        = t('reports.pages.settlement_transaction_account.opening_balance_heading', date: fhlb_date_long_alpha(@settlement_transaction_account[:start_date]))
+        = report_summary_with_date('reports.pages.settlement_transaction_account.opening_balance_heading', fhlb_date_long_alpha(@settlement_transaction_account[:start_date]))
       %p= fhlb_formatted_currency(@settlement_transaction_account[:start_balance], force_unit: true)
     .report-summary-data
       %h3
-        = t('reports.pages.settlement_transaction_account.closing_balance_heading', date: fhlb_date_long_alpha(@settlement_transaction_account[:end_date]))
+        = report_summary_with_date('reports.pages.settlement_transaction_account.closing_balance_heading', fhlb_date_long_alpha(@settlement_transaction_account[:end_date]))
       %p= fhlb_formatted_currency(@settlement_transaction_account[:end_balance], force_unit: true)
     %h2.report-table-title= t('reports.pages.settlement_transaction_account.table_title')
     %table.report-table{data: {sortable: false}}

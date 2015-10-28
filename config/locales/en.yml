@@ -275,7 +275,7 @@ en:
         lock: Lock
         unlock: Unlock
         reset_password: Reset Password
-        add_user: Add New Web User
+        add_user: Add New User
       lock:
         title: Account Locked
         success_html: Account for <strong>%{name}</strong> is locked.
@@ -585,6 +585,38 @@ en:
       title: Market Rates
       vrc: 30-Day VRC Rate (%)
   resources:
+    business_continuity:
+      name: Business Continuity
+      title: "Notice of Business Continuity Preparedness"
+      introduction: "The Federal Home Loan Bank of San Francisco (Bank) recognizes the importance of delivering quality services to its members in a timely manner. With this in mind, we have dedicated significant resources to our Business Continuity Management (BCM) and Technology Disaster Recovery (TDR) programs. Our BCM and TDR programs are staffed by full-time Bank employees who are focused on both the safety of our employees and the Bank’s ability to prepare for and respond to a variety of business disruption events quickly and effectively."
+      responsibility:
+        title: Our Responsibility to Members
+        description: "During a disaster or other business disruption, members can call (800) 283-0700 for real-time or recorded information regarding the Bank’s operational status. We are also prepared to communicate with members via email and through status updates posted on our public website (fhlbsf.com)."
+        communications:
+          title: Communications
+          description: "Our BCM program includes a plan for communicating with Bank members, selected third parties, officers of other FHLBanks, the media, and the general public during a business disruption event. Specifically, this communication plan will allow us to:"
+          relocation: Quickly notify our members and others of Bank relocation and service availability
+          status: Frequently update the Bank’s public website with relevant status and service information
+          cofi_availability: Make the 11th District Cost of Funds Indices (COFI) information available by phone and/or online
+        services:
+          title: Services
+          description: "The Bank’s business recovery strategies are designed to enable us to provide limited liquidity and offer certain basic services to our members, once we determine that our employees are safe and can safely carry out procedures to restore critical Bank operations. Depending on the nature and severity of the disruption, we expect to be able to provide, ideally within two hours, services that may include:"
+          rollover: Overnight and short-term advances, including rollover of maturing advances and Federal funds
+          drawdown: Drawdown of STA balances
+          settlement: Settlement of securities transactions
+          acceptance: Acceptance of requests to prepay advances
+      crisis_management:
+        title: Crisis Management Framework
+        crisis_management_team: In the event our San Francisco offices are wholly or partially inaccessible or unusable, the Bank’s Crisis Management Team is prepared to quickly direct implementation of our business recovery strategies. Key department managers are trained and equipped to support essential business operations by working either remotely or from a designated alternate location. The target for full business recovery is within 24 hours of the disruptive event.
+        recovery_operations: To facilitate recovery operations, the Bank participates in the National Communications System (NCS), which includes the Government Emergency Telecommunications Systems (GETS) and Wireless Priority Service (WPS) programs. This affords us increased communications capabilities in the event of telephone network congestion resulting from a local or regional disruptive event.
+      plan:
+        title: Business Continuity Plan
+        departmental_BCPs: To manage business disruption and systems failure, the Bank has comprehensive business continuity plans (BCPs) in place within each department. These BCPs are updated and exercised annually and have been invoked during real-world events in recent years. The Bank maintains an alternate business recovery center that is geographically separated from our primary office in downtown San Francisco. Our recovery center operates on a different power grid and is fully equipped for extended recovery operations. In addition, the Bank has in place and annually exercises reciprocal back-up agreements with FHLBank Atlanta and FHLBank New York. These agreements will provide short-term continuation of key services in the event the Bank is inoperable.
+        TDR_planning: The Bank’s TDR planning is focused on the restoration of technology systems and infrastructure that support critical business processes during a disruptive event. TDR planning incorporates fail-over strategies and delineates command responsibilities during technology incident management. These technology recovery programs are tested quarterly.
+      regulations:
+        title: Regulations and Governance
+        legal_obligations: The Bank is committed to both meeting our legal and regulatory obligations and maintaining high standards of resilience during our regular business practices. The BCM and TDR programs report to the Banks’ formal governance structure, which in turn reports to the Bank’s Board of Directors.
+        regulatory_authorities: Both programs are subject to examination by regulatory authorities, including the Federal Housing Finance Agency (FHFA), and are reviewed by the Bank’s Internal Audit department.
     guides:
       title: Guides
       intro: "The Bank's Credit and Collateral Guides contain comprehensive information about our products and services. For your convenience, recent changes to the guide are summarized below."
@@ -619,7 +651,7 @@ en:
         title: Collateral Guide
         updates:
           upcoming:
-            - "Please refere to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
+            - "Please refer to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
           revisions:
             -
               date: '2015-04-22'
@@ -729,8 +761,6 @@ en:
       title: Newsroom
     regulatory_updates:
       title: Regulatory Updates
-    business_continuity:
-      title: Business Continuity
     membership:
       title: Membership
       benefits:
@@ -859,15 +889,11 @@ en:
         history: Current month to date. Prior statements are available for the previous 6 months.
     account_summary:
       title: Account Summary
-      freshness: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{now}. Under Collateral Borrowing Capacity, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of close of business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today’s credit activity as of %{now}."
+      freshness: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{now}. Collateral Borrowing Capacity data, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of close of business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today’s credit activity as of %{now}."
       institution_details:
-        title: Institution Details
-        your_institution: 'Your Institution:'
         sta_number: 'STA Number:'
         fhfb_number: 'FHFB Number:'
       collateral_delivery_required: 'Collateral Status: Delivery Required'
-      intraday_activity_notice: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{date}."
-      other_activity_notice: "Under Collateral Borrowing Capacity, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of Close of Business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today's credit activity as of %{date}."
       financing_availability:
         title: Financing Availability
         footnote: 'Represents a regulatory limit on long-term advances based on call report data. The actual amount available cannot exceed the Total Financing Availability.'
@@ -882,10 +908,10 @@ en:
         mpf_credit_available: MPF Available Credit Enhancement
       credit_outstanding:
         title: Credit Outstanding
-        standard_advances: Standard Advances
-        sbc_advances: SBC Advances
+        standard_advances: Standard Credit Program Advances
+        sbc_advances: Securities-Backed Credit Advances
         swaps_credit: Swaps (credit exposure)
-        swaps_notational: Swaps (notational)
+        swaps_notational: Swaps (notional)
         investments: Investments
         letters_of_credit: Letters of Credit
         mpf_credit: MPF Actual Credit Enhancement
@@ -893,8 +919,8 @@ en:
         title: Collateral Borrowing Capacity
         standard:
           title: Standard Credit Program*
-          total: Total Standard Program Borrowing Capacity
-          remaining: Remaining Standard Program Borrowing Capacity
+          total: Total Standard Credit Program Borrowing Capacity
+          remaining: Remaining Standard Credit Program Borrowing Capacity
         sbc:
           title: Securities-Backed Credit Program
           total_market: Total Securities-Backed Credit Market Value
@@ -910,7 +936,7 @@ en:
         title: Capital Stock Position and Leverage
         stock_owned: Stock Owned
         stock_requirement: Activity-Based Stock Requirement
-        excess_stock: Remaining Excess Stock
+        stock: Remaining Stock
         leverage: Remaining Leverage
     your_account:
       title: Your Account
@@ -919,7 +945,7 @@ en:
         current:
           title: Current Price Indications
           summary: Price indications are subject to change. For current quotes, call the Member Services Desk at %{phone_number} between 7:00 am and 2:00 pm. California time. Variable Rate Credit advances are available until 2:00 pm., and all other advances are generally available until 12:00 pm.
-          advance_maturity: Advance maturity
+          advance_maturity: Advance Maturity
           overnight_fed_funds_benchmark: Overnight Fed Funds Benchmark* (%)
           treasury_benchmark_maturity: Treasury Benchmark Maturity
           basis_point_spread_to_benchmark: Basis Point Spread to Benchmark
@@ -935,6 +961,7 @@ en:
           at_maturity: At maturity
           at_repayment: At repayment
           at_monthend_and_at_repayment: At monthend and at repayment
+          maturity_and_at_repayment: At maturity and at repayment
           monthly_and_at_repayment: Monthly and at repayment
           quarterly_and_at_repayment: Quarterly and at repayment
           semiannually_and_at_repayment: Semiannually and at repayment
@@ -1079,14 +1106,14 @@ en:
       interest_rate_resets:
         title: Interest Rate Resets
         info: "The Bank processed the following interest rate resets effective %{date}"
-        questions: If you have any questions, contact %{phone_number}.
+        questions: Contact Operations at %{phone_number} if you have any questions.
         effective_date: Effective Date
         prior_rate: Prior Rate (%)
         new_rate: New Rate (%)
         next_reset: Next Reset
       dividend_statement:
-        outstanding_shares_heading: 'Total Average Shares Outstanding as of the end of the %{quarter}:'
-        dividend_amount_heading: 'Total Dividend Amount as of the end of the %{quarter}:'
+        outstanding_shares_heading: 'Total Average Shares Outstanding as of the end of the %{date}:'
+        dividend_amount_heading: 'Total Dividend Amount as of the end of the %{date}:'
         summary: Dividend Summary
         details: Dividend Details
         special_dividend: Special Dividend %{year}
@@ -1236,7 +1263,7 @@ en:
     general_information:
       title: General Information
       does_not_constitute_solicitation_html: This information does not constitute a solicitation or offer or advice (financial or otherwise) by the Bank, but is a description of generally available structures for certain products and price indications for those structures as of the time and date indicated above. This information is subject to the <a href="%{url}">Terms of Use</a> and may change without notice.
-      market_data_html: Market data is generally provided by Thomson Reuters. <img src="%{picture_url}" alt="Reuters Logo"> </br>Data provided by Thomson Reuters is for information purposes only and is not intended for trading purposes. Thomson Reuters shall not be liable for any errors or delay in the content, or for any action taken in reliance on any content.</br>The Bank may use another source of market data if necessary at its discretion.
+      market_data_html: Market data is generally provided by Thomson Reuters. <img src="%{picture_url}" alt="Reuters Logo"> </br>Data provided by Thomson Reuters is for information purposes only and is not intended for trading purposes. Thomson Reuters shall not be liable for any errors or delay in the content, or for any action taken in reliance on any content. The Bank may use another source of market data if necessary at its discretion.
       same_day_pricing: Same-day pricing and/or funding for amounts up to $200 million for Variable Rate Credit advances and up to $100 million per posted maturity for all other advances with maturities up to 10 years are available according to your institution's Financing Availability, subject to market conditions. For advances with maturities greater than 10 years, same-day pricing and/or funding are subject to market execution.
       interest_rates_on_securities_backed_credit_advances: Interest rates on Securities-Backed Credit advances may be lower than rates on advances offered under the Bank's Standard Credit Program and competitive with rates in the securities repurchase market. The price indications shown here are based on Agency MBS collateral. For rates using AAA or AA collateral, call the Member Services Desk at %{phone_number}.
       please_call_the_member_services_desk: "Please call the Member Services Desk at %{phone_number} for current quotes, additional information about other maturities and customized offerings, and pricing information on the following products:"
@@ -1328,7 +1355,7 @@ en:
         call_dates: You specify the initial call date, with quarterly call dates thereafter.
         call_feature: The advance may be repaid on any call date without a prepayment fee, provided that the Bank receives proper call notice. The Bank will charge a prepayment fee if proper call notice is not received by the Bank or for prepayment on a date other than a designated call date.
         call_notice: At least 9 business days but no more than 60 calendar days before the specified call date.
-        prepayment_features_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=\"%{url}\" target='_blank'>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
+        prepayment_features_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the %{download_link} (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       arc_embedded:
         title: ARC Advance with Embedded Options
         description: Use ARC Advances with Embedded Options to match the interest rate and payment characteristics of your adjustable rate loan portfolio while managing your interest rate risk exposure.
@@ -1360,7 +1387,7 @@ en:
         min_interest_rate:
           description: If the interest rate determined on any rate reset date or, if applicable, on the scheduled funding date, is less than the amount of the unamortized premium (the annuitized value of the option premium, if not paid upfront), the interest rate for the accrual period that begins on that rate reset date will be equal to the unamortized premium. The Bank will not be obligated to pay the borrower any amount relating to the application of a negative interest rate to the remaining principal amount of the advance.
         prepayment_features:
-          description: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the Statement of Authority: Advances with Partial Prepayment Symmetry (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
+          description_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the %{download_link} (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       cip: Community Investment Program (CIP)
       auction_indexed: DN Auction-Indexed Advance
       arc:
@@ -1515,7 +1542,7 @@ en:
             title: Interest Payment Frequency
             description: At monthend and at repayment (semiannually and at repayment for Securities-Backed Credit Program; quarterly and at repayment for advances with partial prepayment symmetry)
           prepayment_features:
-            description_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=%{url}>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
+            description_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the %{download_link} (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       frc_embedded:
         title: FRC Advance with Embedded Cap
         description: Available on an order-only basis, the FRC Advance with Embedded Cap is a fixed rate advance with an embedded interest rate cap that provides a benefit to the borrower when the cap index exceeds a specified strike rate on a cap observation date. When the cap index exceeds the strike rate, the borrower’s interest rate for the next accrual period is lowered by the difference between the index rate and the strike rate (subject to a minimum interest rate of 0.00%). Partial prepayment symmetry is available for this advance.
@@ -1551,7 +1578,7 @@ en:
             title: Interest Payment Dates
             description: Same as the rate reset dates
           prepayment_features:
-            description_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=%{pdf_url}>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
+            description_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the %{download_link} (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       knockout:
           title: Knockout Advance
           description: "The Knockout Advance is a specially priced term advance that is automatically terminated if the specified index rate reaches or exceeds a predetermined strike rate on a specified date. This structure allows the Bank to offer the member a rate that may be significantly lower than the rate for a comparable Fixed Rate Credit Advance, but with more certainty as to when the advance will be terminated than with a Putable Advance.\n\nThe Knockout Advance has a fixed rate that may be below the market rate for a comparable Fixed Rate Credit Advance, depending on the selected strike rate. The Bank is able to offer this lower rate because the Knockout Advance will be terminated automatically on any predetermined Knockout Date without a prepayment fee or prepayment credit, if the specified index rate is greater than or equal to the predetermined strike rate on a specified observation date.\n\nIf the advance is terminated before the original maturity date, the Bank will offer the borrower the opportunity to replace the funding with another advance at the market rate in effect on the date the advance is terminated, provided that the borrower meets all requirements for obtaining advances from the Bank at that time. The maturity date of the replacement funding will be either the originally scheduled maturity date of the Knockout Advance or a maturity date that is agreed upon by the Bank and the borrower. The borrower is not obligated to accept this replacement funding. A borrower that accepts the replacement funding may borrow under any of the regular credit products available to the borrower."
@@ -1562,7 +1589,7 @@ en:
             lower: Take advantage of a lower interest rate
             transparency: Greater transparency as to when the advance will be terminated early compared to the Putable Advance
           features: "Because of the special risk characteristics of the Knockout Advance, the Bank offers this product only to preapproved borrowers on an order-only basis. The actual terms and conditions of the advance are determined when the advance is made and are set forth in the Confirmation of Advance for each Knockout Advance. General features of the advance are as follows:"
-          eligibility_html: "Members that are well capitalized, have a consistent record of good earnings, and have minimal problem assets are generally eligible to use the Knockout Advance. A <a href=%{url}>Statement of Authority: Putable Advances</a> (PDF) signed by an authorized officer must be submitted to the Bank before any transactions may be executed."
+          eligibility_html: "Members that are well capitalized, have a consistent record of good earnings, and have minimal problem assets are generally eligible to use the Knockout Advance. A %{download_link} (PDF) signed by an authorized officer must be submitted to the Bank before any transactions may be executed."
           early_termination: "If the index rate is greater than or equal to the strike rate on an Observation Date, the entire advance will be terminated (no partial terminations) and the member must repay the entire advance on the Knockout Date. When terminating the advance, the Bank will provide at least 2 business days’ prior notice, by telephone and in writing by confirmed fax, using the modified following business day convention. The Bank will offer to make available replacement funding subject to the conditions described above."
           total_max_per_borrow: "The total maximum amount per borrower (including outstanding Putable Advance balances) that may be available is equal to three times the borrower’s current Tier 1 capital for FDIC-insured institutions, three times the borrower’s current net worth for NCUA-insured institutions, or a comparable amount for other borrowers, as determined by the Bank."
           maximum_term: 10 years
@@ -1571,16 +1598,16 @@ en:
           lockout_period: "Typically 3 months, 6 months, or 1 year (Other lockout periods may be available.)"
           knockout_dates_observe_period: Typically the Knockout Dates are the same as the interest payment dates, after the  lockout period. The Observation Dates are typically five business days before the Knockout Dates.
           interest_strike_rate: "The index rate and strike rate are established at the time the advance is made. The index rate is typically 3-month LIBOR."
-          prepayment_features_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=%{url}>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
+          prepayment_features_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the %{download_link} (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
           special_notice: "The Knockout Advance has a complex risk profile and may be an inappropriate product for some institutions. The expected maturity of the Knockout Advance may contract or extend adversely to market movements, and the Bank makes no representations as to the expected life of the advance. This information is not intended as investment advice. The decision to obtain a Knockout Advance and the analysis of how it may fit into a borrower’s financial or business strategy remain solely the borrower’s responsibility.\n\nNotwithstanding any lockout period for the knockout option, the Bank reserves all of its rights under the Advances and Security Agreement, including, without limitation, its right to terminate the Knockout Advance and accelerate repayment of the advance and its right to liquidate collateral pledged by the borrower as security for the Knockout Advance at any time upon the occurrence of an event of default described in the Advances and Security Agreement."
       mpf:
         title: "Mortgage Partnership Finance (MPF) Program"
         description_html: "The Mortgage Partnership Finance&#174; (MPF&#174;) Program offers members a competitive alternative to traditional investors when selling residential mortgage loans in the secondary market. The Bank offers the following MPF products:"
         description_list:
-          mpf_original_html: "<a href=%{url}>MPF Original</a>: The Bank purchases conventional, conforming fixed rate mortgage loans and holds them in the Bank’s portfolio."
-          mpf_government_html: "<a href=%{url}>MPF Government</a>: The Bank purchases FHA/VA-insured mortgage loans and holds them in the Bank’s portfolio."
-          mpf_xtra_html: "<a href=%{url}>MPF Xtra</a>&#174;: The Bank facilitates the purchase of conventional, conforming fixed rate mortgage loans for concurrent sale to Fannie Mae."
-          mpf_direct_html: "<a href=%{url}>MPF Direct</a>: The Bank facilitates the purchase of jumbo fixed rate mortgage loans for concurrent sale into the secondary market through an exclusive arrangement with Redwood Trust, Inc."
+          mpf_original_html: "%{download_link}: The Bank purchases conventional, conforming fixed rate mortgage loans and holds them in the Bank’s portfolio."
+          mpf_government_html: "%{download_link}: The Bank purchases FHA/VA-insured mortgage loans and holds them in the Bank’s portfolio."
+          mpf_xtra_html: "%{download_link}&#174;: The Bank facilitates the purchase of conventional, conforming fixed rate mortgage loans for concurrent sale to Fannie Mae."
+          mpf_direct_html: "%{download_link}: The Bank facilitates the purchase of jumbo fixed rate mortgage loans for concurrent sale into the secondary market through an exclusive arrangement with Redwood Trust, Inc."
         member_eligibility_html: "To participate in the MPF Program, a member must be approved as a Participating Financial Institution (PFI) by the Bank. The member must submit a <a href=%{url}>PFI Application</a> and meet the loan origination, servicing, reporting, credit, and collateral standards established for the MPF Program. Eligibility criteria include:"
         eligibility_list:
           creditworthiness: "Overall satisfactory creditworthiness according to the Bank’s credit quality standards, including an acceptable exam rating from the member's primary regulator, a \"Well Capitalized\" PCA status, satisfactory asset quality, and positive net income in four of the most recent six quarters"
@@ -1620,7 +1647,7 @@ en:
         use: Lower your cost of funds
         advantage: Take advantage of a lower interest rate
         features: "Because of the special risk characteristics of the Putable Advance, the Bank offers this product only to preapproved borrowers on an order-only basis. The actual terms and conditions of the advance are determined when the advance is made and are set forth in the Confirmation of Advance for each Putable Advance. General features of the advance are as follows:"
-        eligibility_html: "Members that are well capitalized, have a consistent record of good earnings, and have minimal problem assets are generally eligible to use the Putable Advance. A <a href=%{url}>Statement of Authority: Putable Advances</a> (PDF) signed by an authorized officer must be submitted to the Bank before any transactions may be executed."
+        eligibility_html: "Members that are well capitalized, have a consistent record of good earnings, and have minimal problem assets are generally eligible to use the Putable Advance. A %{download_link} (PDF) signed by an authorized officer must be submitted to the Bank before any transactions may be executed."
         bank_terminate: "The Bank will have the right to terminate only the entire Putable Advance (no partial terminations) on any Put Date and will provide at least 2 business days’ prior notice, by telephone and in writing by confirmed fax, using the modified following business day convention.* If the Bank exercises its right to terminate, the member must repay the entire advance on the Put Date selected by the Bank. The Bank will offer to make available replacement funding, subject to the conditions described above."
         total_max_amount_borrow: The total maximum amount per borrower that may be available is equal to three times the borrower's current Tier 1 capital for FDIC-insured institutions, three times the borrower's current net worth for NCUA-insured institutions, or a comparable amount for other borrowers, as determined by the Bank.
         maximum_term: 10 Years
@@ -1628,7 +1655,7 @@ en:
         interest_payment_frequency: Quarterly and at repayment
         put_lockout_period: "Typically 3 months, 6 months, or 1 year (Other lockout periods may be available.)"
         put_dates: Typically the Put Dates are the same as the interest payment dates, after the put lockout period.
-        prepayment_features_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the <a href=%{url}>Statement of Authority: Advances with Partial Prepayment Symmetry</a> (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
+        prepayment_features_html: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the %{download_link} (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
         special_notice: "The Putable Advance has a complex risk profile and may be an inappropriate product for some institutions. The expected maturity of the Putable Advance may contract or extend adversely to market movements, and the Bank makes no representations as to (i) the expected life of the advance or (ii) the criteria behind the exercise of the Bank’s right to terminate the Putable Advance. This information is not intended as investment advice. The decision to obtain a Putable Advance and the analysis of how it may fit into a borrower’s financial or business strategy remain solely the borrower’s responsibility.\n\nNotwithstanding any lockout period for exercising its right to terminate the Putable Advance, the Bank reserves all of its rights under the Advances and Security Agreement, including, without limitation, its right to terminate the Putable Advance and accelerate repayment of the advance and its right to liquidate collateral pledged by the borrower as security for the Putable Advance at any time upon the occurrence of an event of default described in the Advances and Security Agreement.\n\n* If the period end date falls on a non-business day, the period end date will be the first following business day, unless that day falls in the next calendar month, in which case the period end date will be the first preceding business day."
       vrc:
         title: Variable Rate Credit (VRC) Advance
@@ -2031,4 +2058,12 @@ en:
         high_band_off: 'High Band Shutoff Rate (delta of %{delta}): %{rate}'
         low_band_warn: 'Low Band Warning Rate (delta of %{delta}): %{rate}'
         high_band_warn: 'High Band Warning Rate (delta of %{delta}): %{rate}'
-        
+  downloads:
+    statement_of_authority:
+      partial_prepayment_symmetry: 'Statement of Authority: Advances with Partial Prepayment Symmetry'
+      putable_advances: 'Statement of Authority: Putable Advances'
+    mpf:
+      original: MPF Original
+      government: MPF Government
+      xtra: MPF Xtra
+      direct: MPF Direct

@@ -23,7 +23,7 @@ describe MAPI::ServiceApp do
     end
     describe 'in the production environment' do
       before do
-        allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+        allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
       end
       it 'should return active advances', vcr: {cassette_name: 'trade_activity_service'} do
         allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
@@ -70,10 +70,28 @@ describe MAPI::ServiceApp do
         expect{call_method}.to raise_error
       end
     end
+    %w(development test production).each do |env|
+      it "transforms the rate in #{env}", vcr: {cassette_name: 'trade_activity_service'} do
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
+        allow(MAPI::ServiceApp).to receive(:environment).and_return(env.to_sym)
+        transformed_rate = double('A Tranformed Rate')
+        allow(MAPI::Services::Member::TradeActivity).to receive(:decimal_to_percentage_rate).and_return(transformed_rate)
+        advances = call_method
+        expect(advances.count).to be > 0
+        advances.each do |advance|
+          expect(advance['interest_rate']).to be(transformed_rate)
+        end
+      end
+      it "sorts the results in #{env}" do
+        sorted_results = double('Sorted Results')
+        allow(MAPI::Services::Member::TradeActivity).to receive(:sort_trades).and_return(sorted_results)
+        expect(call_method).to be(sorted_results)
+      end
+    end
   end
 
   describe 'the `get_trade_activity_trades` method' do
-    describe 'in the production environment' do
+    describe 'in the production environment', vcr: {cassette_name: 'trade_activity_service'} do
       let(:message) {
         {
           'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
@@ -88,15 +106,23 @@ describe MAPI::ServiceApp do
       before do
         MAPI::Services::Member::TradeActivity.init_trade_connection(:production)
       end
-      it 'should return active advances', vcr: {cassette_name: 'trade_activity_service'} do
-        expect(advances[0]['trade_date']).to eq('2011-05-05-07:00')
+      it 'should return active advances' do
+        expect(advances[0]['trade_date']).to eq('2011-05-05T13:15:00.000-07:00')
         expect(advances[0]['funding_date']).to eq('2011-05-06-07:00')
         expect(advances[0]['maturity_date']).to eq('2016-05-06-07:00')
         expect(advances[0]['advance_number']).to eq('188367')
         expect(advances[0]['advance_type']).to eq('FX CONSTANT')
         expect(advances[0]['status']).to eq('Outstanding')
-        expect(advances[0]['interest_rate']).to eq(0.022)
+        expect(advances[0]['interest_rate']).to eq('0.022')
         expect(advances[0]['current_par']).to eq(2500000.0)
+      end
+      it 'calls `build_trade_datetime` to calculate the `trade_date`' do
+        trade_datetime = double('A Trade DateTime')
+        allow(MAPI::Services::Member::TradeActivity).to receive(:build_trade_datetime).and_return(trade_datetime)
+        expect(advances.count).to be > 0
+        advances.each do |advance|
+          expect(advance['trade_date']).to be(trade_datetime)
+        end
       end
     end
   end
@@ -125,6 +151,56 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe '`sort_trades` class method' do
+    let(:trades) do
+      trades = []
+      20.times do
+        trades << {'trade_date' => (Time.zone.now - rand(0..60).minutes).iso8601, 'advance_number' => rand(100000..999999) }
+        trades << {'trade_date' => (Time.zone.now - rand(0..3).days).iso8601, 'advance_number' => rand(100000..999999) }
+      end
+      trades
+    end
+    let(:call_method) { MAPI::Services::Member::TradeActivity.sort_trades(trades) }
+    it 'sorts the trades by `trade_date` DESC' do
+      last_trade = nil
+      call_method.each do |trade|
+        expect(trade['trade_date'] <= last_trade['trade_date']) if last_trade
+        last_trade = trade
+      end
+    end
+    it 'sorts trades on the same `trade_date` by `advance_number` DESC' do
+      5.times do
+        trades[10..20].sample['trade_date'] = trades[0..10].sample['trade_date']
+      end
+      last_trade = nil
+      call_method.each do |trade|
+        expect(trade['advance_number'] <= last_trade['advance_number']) if last_trade && trade['trade_date'] == last_trade['trade_date']
+        last_trade = trade
+      end
+    end
+  end
+
+  describe '`build_trade_datetime` class method' do
+    let(:trade) { double('Savon XML Trade Fragment', at_css: double('An XML Node', content: nil)) }
+    let(:trade_date) { double('Savon XML Trade Date', content: '2015-05-07-07:00') }
+    let(:trade_time) { double('Savon XML Trade Time', content: '09:55:00.100-07:00') }
+    let(:call_method) { MAPI::Services::Member::TradeActivity.build_trade_datetime(trade) }
+
+    it 'collects the `tradeDate`' do
+      expect(trade).to receive(:at_css).with('tradeHeader tradeDate').and_return(trade_date)
+      call_method
+    end
+    it 'collects the `tradeTime`' do
+      expect(trade).to receive(:at_css).with('tradeHeader tradeTime').and_return(trade_date)
+      call_method
+    end
+    it 'combines the date and time into an iso8601 string' do
+      allow(trade).to receive(:at_css).with('tradeHeader tradeDate').and_return(trade_date)
+      allow(trade).to receive(:at_css).with('tradeHeader tradeTime').and_return(trade_time)
+      expect(call_method).to eq(trade_date.content[0..-7] + 'T' + trade_time.content)
+    end
+  end
+
   describe 'the `current_daily_total` method' do
     describe 'in the production environment' do
       let(:included_trade_1) { double('included trade 1', at_css: nil) }
@@ -135,8 +211,7 @@ describe MAPI::ServiceApp do
       let(:trade_connection) { double('trade_connection', call: savon_response) }
       let(:current_daily_total) { MAPI::Services::Member::TradeActivity.current_daily_total(:production, 'ADVANCE') }
       before do
-        allow(MAPI::Services::Member::TradeActivity).to receive(:init_trade_connection).and_return(true)
-        MAPI::Services::Member::TradeActivity.class_variable_set(:@@trade_connection, trade_connection)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:init_trade_connection).and_return(trade_connection)
       end
       MAPI::Services::Member::TradeActivity::TODAYS_ADVANCES_ARRAY.each do |advance_type|
         it "adds the daily advance activity for all members if a trade has type `#{advance_type}`" do
@@ -168,7 +243,21 @@ describe MAPI::ServiceApp do
   end
 
   describe 'Todays Trade Activity' do
-    let(:todays_advances) { get "/member/#{member_id}/todays_advances"; JSON.parse(last_response.body) }
+    let(:todays_advances) { MAPI::Services::Member::TradeActivity.todays_trade_activity(subject, member_id, 'ADVANCE') }
+
+    describe 'endpoint' do
+      it 'is invoked via a member endpoint' do
+        expect(MAPI::Services::Member::TradeActivity).to receive(:todays_trade_activity).with(kind_of(described_class), member_id.to_s, 'ADVANCE')
+        get "/member/#{member_id}/todays_advances"
+      end
+      it 'has its results transformed into JSON' do
+        results = double('Some Trades')
+        allow(MAPI::Services::Member::TradeActivity).to receive(:todays_trade_activity).and_return(results)
+        expect(results).to receive(:to_json)
+        get "/member/#{member_id}/todays_advances"
+      end
+    end
+
     it 'should return expected today advances detail hash where value could not be nil' do
       todays_advances.each do |row|
         expect(row['trade_date']).to be_kind_of(String)
@@ -181,11 +270,11 @@ describe MAPI::ServiceApp do
         expect(row['current_par']).to be_kind_of(Numeric)
       end
     end
-    describe 'in the production environment' do
+    describe 'in the production environment', vcr: {cassette_name: 'trade_activity_service'} do
       before do
-        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+        allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
       end
-      it 'should return active advances', vcr: {cassette_name: 'trade_activity_service'} do
+      it 'should return active advances' do
         todays_advances.each do |row|
           expect(row['trade_date']).to be_kind_of(String)
           expect(row['funding_date']).to be_kind_of(String)
@@ -200,6 +289,30 @@ describe MAPI::ServiceApp do
       it 'should return Internal Service Error, if trade service is unavailable', vcr: {cassette_name: 'trade_activity_service_unavailable'} do
         get "/member/#{member_id}/todays_advances"
         expect(last_response.status).to eq(503)
+      end
+      it 'calls `build_trade_datetime` to calculate the `trade_date`' do
+        trade_datetime = double('A Trade DateTime')
+        allow(MAPI::Services::Member::TradeActivity).to receive(:build_trade_datetime).and_return(trade_datetime)
+        expect(todays_advances.count).to be > 0
+        todays_advances.each do |advance|
+          expect(advance['trade_date']).to be(trade_datetime)
+        end
+      end
+    end
+    %w(development test production).each do |env|
+      it "transforms the rate in #{env}", vcr: {cassette_name: 'trade_activity_service'} do
+        allow(MAPI::ServiceApp).to receive(:environment).and_return(env.to_sym)
+        transformed_rate = double('A Tranformed Rate')
+        allow(MAPI::Services::Member::TradeActivity).to receive(:decimal_to_percentage_rate).and_return(transformed_rate)
+        expect(todays_advances.count).to be > 0
+        todays_advances.each do |advance|
+          expect(advance['interest_rate']).to be(transformed_rate)
+        end
+      end
+      it "sorts the results in #{env}" do
+        sorted_results = double('Sorted Results')
+        allow(MAPI::Services::Member::TradeActivity).to receive(:sort_trades).and_return(sorted_results)
+        expect(todays_advances).to be(sorted_results)
       end
     end
   end
@@ -240,9 +353,21 @@ describe MAPI::ServiceApp do
       get "/member/#{member_id}/todays_credit_activity"
       expect(last_response.status).to eq(503)
     end
+
+    %w{development test production}.each do |env|
+      it "transforms the rate in #{env}", vcr: {cassette_name: 'todays_credit_activity'} do
+        transformed_rate = double('A Tranformed Rate')
+        allow(MAPI::Services::Member::TradeActivity).to receive(:decimal_to_percentage_rate).and_return(transformed_rate)
+        advances = MAPI::Services::Member::TradeActivity.todays_credit_activity(env.to_sym, member_id)
+        expect(advances.count).to be > 0
+        advances.each do |advance|
+          expect(advance[:interest_rate]).to be(transformed_rate)
+        end
+      end
+    end
     %w(development test).each do |env|
       describe "in the #{env} environment" do
-        let(:todays_credit_activity) { MAPI::Services::Member::TradeActivity.todays_credit_activity(env, member_id) }
+        let(:todays_credit_activity) { MAPI::Services::Member::TradeActivity.todays_credit_activity(env.to_sym, member_id) }
         before do
           allow(MAPI::ServiceApp).to receive(:environment).and_return(env.to_sym)
           allow(JSON).to receive(:parse).and_return(activity_hash)
@@ -300,17 +425,18 @@ describe MAPI::ServiceApp do
       end
     end
 
-    describe 'in the production environment' do
+    describe 'in the production environment', vcr: {cassette_name: 'todays_credit_activity'} do
       let(:savon_response) { double('savon response', doc: double('doc', remove_namespaces!: nil, xpath: activity_hash)) }
       let(:trade_activity_connection) { double('trade_connection', call: savon_response) }
       let(:todays_credit_activity) { MAPI::Services::Member::TradeActivity.todays_credit_activity(:production, member_id) }
       it 'initiates a Savon client connection' do
-        expect(Savon).to receive(:client).and_return(trade_activity_connection)
+        expect(Savon).to receive(:client)
         todays_credit_activity
       end
+
       describe 'with the trade_activity_connection stubbed' do
         before do
-          MAPI::Services::Member::TradeActivity.class_variable_set(:@@trade_activity_connection, trade_activity_connection)
+          allow(MAPI::Services::Member::TradeActivity).to receive(:init_trade_activity_connection).and_return(trade_activity_connection)
         end
         it 'calls `trade_activity_connection` with :get_trade_activity' do
           expect(trade_activity_connection).to receive(:call).with(:get_trade_activity, anything)

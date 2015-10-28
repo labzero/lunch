@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe ApplicationController, :type => :controller do
   it { should use_before_action(:check_password_change) }
   it { should use_before_action(:save_render_time) }
+  it { should use_before_action(:check_terms) }
 
   describe '`handle_exception` method' do
     let(:backtrace) {%w(some backtrace array returned by the error)}
@@ -242,6 +243,32 @@ RSpec.describe ApplicationController, :type => :controller do
     it 'does not redirect if the session is not flagged as having an expired password' do
       expect(subject).to_not receive(:redirect_to)
       call_method
+    end
+  end
+  
+  describe '`check_terms` method' do
+    let(:call_method) { subject.check_terms }
+    let(:user) { double('User', accepted_terms?: nil) }
+    before do
+      allow(controller).to receive(:current_user).and_return(user)
+    end
+    it 'redirects to the `terms_path` if the terms have not been accepted' do
+      allow(user).to receive(:accepted_terms?).and_return(false)
+      expect(subject).to receive(:redirect_to).with(terms_path)
+      call_method
+    end
+    it 'does not redirect to the `terms_path` if the terms have already been accepted' do
+      allow(user).to receive(:accepted_terms?).and_return(true)
+      expect(subject).to_not receive(:redirect_to)
+      call_method
+    end
+    it 'returns nil if there is no current_user' do
+      allow(controller).to receive(:current_user).and_return(nil)
+      expect(call_method).to be_nil
+    end
+    it 'returns nil if the terms have been accepted' do
+      allow(user).to receive(:accepted_terms?).and_return(true)
+      expect(call_method).to be_nil      
     end
   end
 

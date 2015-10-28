@@ -71,7 +71,7 @@ module CustomFormattingHelper
 
   def fhlb_datetime_standard_numeric(datetime)
     return t('global.missing_value') if datetime.nil?
-    datetime.to_datetime.strftime('%l:%M%P %m/%d/%Y')
+    datetime.to_datetime.strftime('%l:%M %P %m/%d/%Y')
   end
 
   def fhlb_report_date_numeric(date)
@@ -122,6 +122,11 @@ module CustomFormattingHelper
         parts[1] + ("*" * parts[2].length) + '@' + parts[3] + ("*" * parts[4].length) + parts[5]
       end
     end
+  end
+
+  def report_summary_with_date(i18n, date, subs={})
+    subs[:date] = content_tag(:span, date, class: 'report-summary-date')
+    I18n.t(i18n, subs).html_safe
   end
 
 end

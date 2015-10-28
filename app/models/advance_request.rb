@@ -130,6 +130,10 @@ class AdvanceRequest
     @stock_choice = choice
   end
 
+  def total_amount
+    purchase_stock? ? gross_amount : amount
+  end
+
   def sta_debit_amount
     stock_cost = (purchase_stock? ? gross_cumulative_stock_required : cumulative_stock_required)
     stock_cost.to_f if stock_cost
@@ -344,8 +348,7 @@ class AdvanceRequest
   end
 
   def perform_execute
-    requested_amount = (purchase_stock? ? gross_amount : amount)
-    response = etransact_service.quick_advance_execute(member_id, requested_amount, type, term, rate, signer)
+    response = etransact_service.quick_advance_execute(member_id, total_amount, type, term, rate, signer)
     process_trade_errors(:execute, response)
     populate_attributes_from_response(response)
   end

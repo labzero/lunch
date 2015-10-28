@@ -13,7 +13,7 @@
   .report-main-body
     .report-summary-data
       %h3
-        = t('reports.pages.advances_detail.total_current_par_heading', date: fhlb_date_long_alpha(@start_date))
+        = report_summary_with_date('reports.pages.advances_detail.total_current_par_heading', fhlb_date_long_alpha(@start_date))
       %p= fhlb_formatted_currency_whole(@advances_detail[:total_par], force_unit: true)
     %h2.report-table-title= t('reports.pages.advances_detail.title', date: fhlb_date_standard_numeric(@start_date))
     %table.table-allow-wrapping.report-table.advances-details-report-table{data: {sortable: true, :'disable-auto-width' => true, :'missing-data-message' => missing_data_message}}
@@ -139,4 +139,4 @@
       %p
         = t('reports.merger_notice')
       %p
-        = t('reports.advances_and_securities_agreement_notice', phone_number: fhlb_formatted_phone_number('4156162559'))
+        = t('reports.advances_and_securities_agreement_notice', phone_number: operations_phone_number)

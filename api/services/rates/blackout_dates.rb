@@ -20,12 +20,8 @@ module MAPI
         end
 
         def self.blackout_dates_development
-          fake_data_relative_to_today.map { |d| nearest_business_day(d) }
-        end
-
-        def self.nearest_business_day(d)
-          return d unless d.saturday? || d.sunday?
-          self.nearest_business_day(d + 1.day)
+          holidays = fake('calendar_holidays')
+          fake_data_relative_to_today.map { |d| MAPI::Services::Rates.get_maturity_date(d, 'D', holidays) }
         end
       end
     end

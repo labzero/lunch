@@ -72,9 +72,9 @@ describe MAPI::ServiceApp do
                           "SBC_COVER_OTHER_AAA"=> 10, "SBC_MV_COLL_EXCESS_DEF_AAA"=> 11.4, "SBC_COLL_EXCESS_DEF_AAA"=> 12.5, "SBC_MV_AG"=> 3584326, "SBC_BC_AG"=> 3405110,
                           "SBC_ADVANCES_AG"=> 19, "SBC_COVER_OTHER_AG"=> 1, "SBC_MV_COLL_EXCESS_DEF_AG"=> 3584326, "SBC_COLL_EXCESS_DEF_AG"=> 3584326.6, "SBC_OTHER_COLL_REQ"=>77,
                           "SBC_COLL_EXCESS_DEF"=> 3405110, "STD_TOTAL_BC"=> 97911718, "SBC_BC" => 3405110, "SBC_MV"=> 3584326, "SBC_ADVANCES"=> 0, "SBC_MV_COLL_EXCESS_DEF"=> 3584326}}
-      let(:bc_breakdown) {{"COLLATERAL_TYPE" =>"BL SUMMARY - RESIDENTIAL",  "STD_COUNT"=> 1,"STD_ORIGINAL_AMOUNT"=> 61335099,
+      let(:bc_breakdown) {{"COLLATERAL_TYPE" =>"BL SUMMARY - RESIDENTIAL",  "STD_COUNT"=> 1.0,"STD_ORIGINAL_AMOUNT"=> 61335099,
                            "STD_UNPAID_BALANCE" => 58403242, "STD_MARKET_VALUE" => 51394853.5, "STD_BORROWING_CAPACITY" =>40601935.4, "COLLATERAL_SORT_ID"=>"C10"}}
-      let(:bc_breakdown2) {{"COLLATERAL_TYPE" =>"BL SUMMARY - MULTIFAMILY",  "STD_COUNT"=> 2,"STD_ORIGINAL_AMOUNT"=> 61335099,
+      let(:bc_breakdown2) {{"COLLATERAL_TYPE" =>"BL SUMMARY - MULTIFAMILY",  "STD_COUNT"=> 2.0,"STD_ORIGINAL_AMOUNT"=> 61335099,
                             "STD_UNPAID_BALANCE" => 58403242, "STD_MARKET_VALUE" => 51394853, "STD_BORROWING_CAPACITY" =>40601935, "COLLATERAL_SORT_ID"=>"C12"}}
       let(:result_set1) {double('Oracle Result Set', fetch_hash: nil)}
       let(:result_set2) {double('Oracle Result Set', fetch_hash: nil)}
@@ -224,6 +224,23 @@ describe MAPI::ServiceApp do
           new_bc_balances['STD_SECURITIES_BC'] = nil
           allow(result_set1).to receive(:fetch_hash).and_return(new_bc_balances, nil)
           expect(borrowing_capacity_details['standard']['securities']).to eq(0)
+        end
+      end
+
+      describe 'standard[:collateral][:count]' do
+        let(:count) { rand(1..99) + rand() }
+        let(:rounded_count) { count.round() }
+        let(:new_bc_breakdown) { bc_breakdown }
+
+        it 'should return `STD_COUNT` as a rounded integer for standard[:collateral][:count]' do
+          new_bc_breakdown['STD_COUNT'] = count
+          allow(result_set2).to receive(:fetch_hash).and_return(new_bc_breakdown, nil)
+          expect(borrowing_capacity_details['standard']['collateral'][0]['count']).to eq(rounded_count)
+        end
+        it 'should return 0 if there is no value for `STD_COUNT`' do
+          new_bc_breakdown['STD_COUNT'] = nil
+          allow(result_set2).to receive(:fetch_hash).and_return(new_bc_breakdown, nil)
+          expect(borrowing_capacity_details['standard']['collateral'][0]['count']).to eq(0)
         end
       end
 

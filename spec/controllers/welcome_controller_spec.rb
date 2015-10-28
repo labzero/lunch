@@ -4,6 +4,8 @@ RSpec.describe WelcomeController, :type => :controller do
   let(:revision) { SecureRandom.hex }
 
   it { should use_around_filter(:skip_timeout_reset) }
+  it { should_not use_before_action(:authenticate_user!) }
+  it { should_not use_before_action(:check_terms) }
   
   describe "GET details" do
     let(:make_request) { get :details }

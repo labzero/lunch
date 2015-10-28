@@ -127,6 +127,7 @@ This is a summary of the options supported in our .env files:
 * `PROFILE_MODE`: Set to `true` to enable profiling of the site. A new log file (`performance.log`) will be created to capture all profiling details.
 * `TRUSTED_PROXIES`: A list of trusted proxies, expressed as a space separated list of CIDR rules. This will be added to the default proxy list.
 * `FHLB_INTERNAL_IPS`: A list of space separated CIDR rules representing IPs that are considered part of the bank's internal network.
+* `LOCAL_MAIL`: Set to `true` to enable local mail delivery via Letter Opener.
 
 
 ## Running the Tests

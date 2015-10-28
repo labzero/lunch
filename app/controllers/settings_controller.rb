@@ -2,10 +2,10 @@ class SettingsController < ApplicationController
 
   before_action do
     @sidebar_options = [
-        [t("settings.password.title"), settings_password_path],
-        [t("settings.two_factor.title"), settings_two_factor_path]
+        [t("settings.password.title"), settings_password_path]
     ]
-    @sidebar_options.unshift([t("settings.account.title"), settings_users_path]) if policy(:access_manager).show?
+    @sidebar_options << [t("settings.account.title"), settings_users_path] if policy(:access_manager).show?
+    @sidebar_options << [t("settings.two_factor.title"), settings_two_factor_path]
   end
 
   before_action only: [:users] do
@@ -28,6 +28,7 @@ class SettingsController < ApplicationController
   end
 
   skip_before_action :check_password_change, only: [:expired_password, :update_expired_password]
+  skip_before_action :check_terms, only: [:expired_password, :update_expired_password]
 
   def index
     @email_options = ['reports'] + CorporateCommunication::VALID_CATEGORIES
