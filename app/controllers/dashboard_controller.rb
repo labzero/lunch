@@ -276,7 +276,7 @@ class DashboardController < ApplicationController
     @advance_type_raw = advance_request.type
     @advance_program = advance_request.program_name
     @advance_type = advance_request.human_type
-    @interest_day_count = advance_request.interest_day_count
+    @human_interest_day_count = advance_request.human_interest_day_count
     @payment_on = advance_request.payment_on
     @advance_term = advance_request.term
     @trade_date = advance_request.trade_date

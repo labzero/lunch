@@ -1094,6 +1094,22 @@ describe AdvanceRequest do
     end
   end
 
+  describe '`human_interest_day_count`' do
+    shared_examples 'human_interest_day_count' do |input,output|
+      it "should return #{output} for #{input}" do
+        allow(subject).to receive(:interest_day_count).and_return(input)
+        expect(subject.human_interest_day_count).to eq(output)
+      end
+    end
+    include_examples 'human_interest_day_count', nil,       nil
+    include_examples 'human_interest_day_count', 'ACT/ACT',  I18n.t('dashboard.quick_advance.table.ACTACT')
+    include_examples 'human_interest_day_count', 'ACT/360', I18n.t('dashboard.quick_advance.table.ACT360')
+    it 'should raise an ArgumentError for other values' do
+      allow(subject).to receive(:interest_day_count).and_return('other values')
+      expect{subject.human_interest_day_count}.to raise_error(ArgumentError)
+    end
+  end
+
   describe '`transform_amount` protected method' do
     let(:floated_amount) { double('A Float Amount') }
     let(:duped_amount) { double('A Duplicated Amount', to_f: floated_amount) }
