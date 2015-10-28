@@ -177,6 +177,15 @@ class AdvanceRequest
     end
   end
 
+  def human_interest_day_count
+    case interest_day_count
+    when nil       then nil
+    when 'ACT/ACT' then I18n.t('dashboard.quick_advance.table.ACTACT')
+    when 'ACT/360' then I18n.t('dashboard.quick_advance.table.ACT360')
+    else raise ArgumentError.new('interest day count code should be either ACT/ACT or ACT/360')
+    end
+  end
+
   def human_type
     case type
     when :whole
