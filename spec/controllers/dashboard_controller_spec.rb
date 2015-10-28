@@ -468,28 +468,42 @@ RSpec.describe DashboardController, :type => :controller do
   describe "GET current_overnight_vrc", :vcr do
     let(:rate_service_instance) {double('RatesService')}
     let(:etransact_service_instance) {double('EtransactAdvancesService')}
-    let(:response_hash) { {} }
     let(:RatesService) {class_double(RatesService)}
+    let(:rate) { double('rate') }
+    let(:rate_service_response) { double('rate service response', :[] => nil, :[]= => nil) }
+    let(:response_hash) { get :current_overnight_vrc; JSON.parse(response.body) }
     it_behaves_like 'a user required action', :get, :current_overnight_vrc
     it 'calls `current_overnight_vrc` on the rate service and `etransact_active?` on the etransact service' do
       allow(RatesService).to receive(:new).and_return(rate_service_instance)
       allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
       expect(etransact_service_instance).to receive(:etransact_active?)
-      expect(rate_service_instance).to receive(:current_overnight_vrc).and_return(response_hash)
+      expect(rate_service_instance).to receive(:current_overnight_vrc).and_return({})
       get :current_overnight_vrc
     end
     it 'returns a rate' do
-      get :current_overnight_vrc
-      hash = JSON.parse(response.body)
-      expect(hash['rate']).to be_kind_of(Float)
-      expect(hash['rate']).to be >= 0
+      expect(response_hash['rate']).to be_kind_of(String)
+      expect(response_hash['rate'].to_f).to be >= 0
     end
     it 'returns a time stamp for when the rate was last updated' do
-      get :current_overnight_vrc
-      hash = JSON.parse(response.body)
-      date = DateTime.parse(hash['updated_at'])
+      date = DateTime.parse(response_hash['updated_at'])
       expect(date).to be_kind_of(DateTime)
       expect(date).to be <= DateTime.now
+    end
+    describe 'the rate value' do
+      before do
+        allow(RatesService).to receive(:new).and_return(rate_service_instance)
+        allow(rate_service_instance).to receive(:current_overnight_vrc).and_return(rate_service_response)
+        allow(rate_service_response).to receive(:[]).with(:rate).and_return(rate)
+      end
+      it 'is passed to the `fhlb_formatted_number` helper' do
+        expect(subject).to receive(:fhlb_formatted_number).with(rate, {precision: 2, html: false})
+        get :current_overnight_vrc
+      end
+      it 'is set to the returned `fhlb_formatted_number` string' do
+        allow(subject).to receive(:fhlb_formatted_number).and_return(rate)
+        expect(rate_service_response).to receive(:[]=).with(:rate, rate)
+        get :current_overnight_vrc
+      end
     end
   end
 

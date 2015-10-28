@@ -255,6 +255,7 @@ class DashboardController < ApplicationController
     etransact_service = EtransactAdvancesService.new(request)
     response = RatesService.new(request).current_overnight_vrc || {}
     response[:quick_advances_active] = etransact_service.etransact_active?
+    response[:rate] = fhlb_formatted_number(response[:rate], precision: 2, html: false)
     render json: response
   end
 
