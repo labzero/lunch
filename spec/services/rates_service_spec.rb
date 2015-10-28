@@ -13,8 +13,6 @@ describe RatesService do
   it { expect(subject).to respond_to(:overnight_vrc) }
   it { expect(subject).to respond_to(:current_overnight_vrc) }
   it { expect(subject).to respond_to(:quick_advance_rates) }
-  it { expect(subject).to respond_to(:quick_advance_preview) }
-  it { expect(subject).to respond_to(:quick_advance_confirmation) }
   it { expect(subject).to respond_to(:historical_price_indications) }
   it { expect(subject).to respond_to(:current_price_indications) }
 
@@ -53,37 +51,6 @@ describe RatesService do
       expect(quick_advance_rates[:open][:agency]).to be_kind_of(Float)
       expect(quick_advance_rates["1week"][:aaa]).to be_kind_of(Float)
       expect(quick_advance_rates["2week"][:aa]).to be_kind_of(Float)
-    end
-  end
-
-  describe "`quick_advance_preview` method" do
-    let(:quick_advance_preview) {subject.quick_advance_preview(member_id, amount, advance_type, advance_term, advance_rate)}
-    it "should return a hash of hashes containing info relevant to the requested preview" do
-      expect(quick_advance_preview.length).to be >= 1
-      expect(quick_advance_preview[:status]).to be_kind_of(String)
-      expect(quick_advance_preview[:advance_amount]).to eq(amount)
-      expect(quick_advance_preview["advance_term"]).to be_kind_of(String)
-      expect(quick_advance_preview["advance_type"]).to be_kind_of(String)
-      expect(quick_advance_preview["interest_day_count"]).to be_kind_of(String)
-      expect(quick_advance_preview["payment_on"]).to be_kind_of(String)
-      expect(quick_advance_preview["funding_date"]).to be_kind_of(Date)
-      expect(quick_advance_preview["maturity_date"]).to be_kind_of(Date)
-    end
-  end
-
-  describe "`quick_advance_confirmation` method" do
-    let(:quick_advance_confirmation) {subject.quick_advance_confirmation(member_id, amount, advance_type, advance_term, advance_rate)}
-    it "should return a hash of hashes containing info relevant to the requested advance" do
-      expect(quick_advance_confirmation.length).to be >= 1
-      expect(quick_advance_confirmation[:status]).to be_kind_of(String)
-      expect(quick_advance_confirmation[:confirmation_number]).to be_kind_of(Integer)
-      expect(quick_advance_confirmation[:advance_amount]).to eq(amount)
-      expect(quick_advance_confirmation["advance_term"]).to be_kind_of(String)
-      expect(quick_advance_confirmation["advance_type"]).to be_kind_of(String)
-      expect(quick_advance_confirmation["interest_day_count"]).to be_kind_of(String)
-      expect(quick_advance_confirmation["payment_on"]).to be_kind_of(String)
-      expect(quick_advance_confirmation["funding_date"]).to be_kind_of(Date)
-      expect(quick_advance_confirmation["maturity_date"]).to be_kind_of(Date)
     end
   end
 
@@ -178,30 +145,6 @@ describe RatesService do
     end
     it 'should return a data object from the MAPI endpoint' do
       expect(subject.current_price_indications(RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)).to be_kind_of(Array)
-    end
-  end
-
-  describe '`fake_quick_advance_response` method' do
-    let(:amount){ double('amount')}
-    let(:rate){ double('rate') }
-    let(:data) do
-      {
-        funding_date: (Date.today + 1.week).to_s,
-        maturity_date: (Date.today + 1.month).to_s,
-      }
-    end
-    %w(standard securities_backed variable_rate fixed_rate overnight open 1week 2week 3week 1month 2month 3month 6month 1year 2year 3year).each do |term|
-      %w(whole aa nonsense).each do |type|
-        it "should return a fake data structure for `#{term.inspect}` and `#{type.inspect}`" do
-          result = subject.send(:fake_quick_advance_response, data, amount, type, term, rate)
-          expect(result[:funding_date]).to be_a(Date)
-          expect(result[:maturity_date]).to be_a(Date)
-          expect(result[:advance_rate]).to eq(rate)
-          expect(result[:advance_amount]).to eq(amount)
-          expect(result[:advance_term]).to be_a(String)
-          expect(result[:advance_type]).to be_a(String)
-        end
-      end
     end
   end
 
