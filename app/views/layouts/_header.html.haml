@@ -37,27 +37,27 @@
             = link_to(t('reports.collateral.title'), reports_path(anchor: 'collateral'))
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.collateral.borrowing_capacity.title'), reports_borrowing_capacity_path)
-              %li.disabled= t('reports.collateral.mcu.title')
+              %li= link_to(t('reports.collateral.mcu.title'), reports_mortgage_collateral_update_path)
           %li<>
             = link_to(t('reports.capital_stock.title'), reports_path(anchor: 'capital_stock'))
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.capital_stock.activity.title'), reports_capital_stock_activity_path)
-              %li.disabled= t('reports.capital_stock.trial_balance.title')
-              %li.disabled= t('reports.capital_stock.capital_stock_and_leverage.title')
-              %li.disabled= t('reports.capital_stock.dividend_statement.title')
+              %li= link_to(t('reports.capital_stock.trial_balance.title'), reports_trial_balance_path)
+              %li= link_to(t('reports.capital_stock.capital_stock_and_leverage.title'), reports_capital_stock_and_leverage_path)
+              %li= link_to(t('reports.capital_stock.dividend_statement.title'), reports_dividend_statement_path)
           %li<>
             = link_to(t('reports.securities.title'), reports_path(anchor: 'securities'))
             %ul.nav-dropdown-nested
-              %li.disabled= t('reports.securities.transactions.title')
-              %li.disabled= t('reports.securities.cash_projections.title')
-              %li.disabled= t('reports.securities.current.title')
-              %li.disabled= t('reports.securities.monthly.title')
-              %li.disabled= t('reports.securities.services_monthly.title')
+              %li= link_to(t('reports.securities.transactions.title'), reports_securities_transactions_path)
+              %li= link_to(t('reports.securities.cash_projections.title'), reports_cash_projections_path)
+              %li= link_to(t('reports.securities.current.title'), reports_current_securities_position_path)
+              %li= link_to(t('reports.securities.monthly.title'), reports_monthly_securities_position_path)
+              %li= link_to(t('reports.securities.services_monthly.title'), reports_securities_services_statement_path)
           %li<>
             = link_to(t('reports.your_account.title'), reports_path(anchor: 'account'))
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.account.account_summary.title'), reports_account_summary_path)
-              %li.disabled= t('reports.account.authorizations.title')
+              %li= link_to(t('reports.account.authorizations.title'), reports_authorizations_path)
               %li= link_to(t('reports.account.settlement_transaction_account.title'), reports_settlement_transaction_account_path)
       %li<>
         = link_to(t('nav.secondary.resources'), '#', class: 'nav-menu')

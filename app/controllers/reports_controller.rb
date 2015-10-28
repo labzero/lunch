@@ -175,7 +175,6 @@ class ReportsController < ApplicationController
           route: reports_borrowing_capacity_path
         },
         mcu: {
-          disabled: true,
           updated: t('reports.collateral.mcu.updated'),
           available_history: t('reports.history.current_report'),
           route: reports_mortgage_collateral_update_path
@@ -188,19 +187,16 @@ class ReportsController < ApplicationController
           route: reports_capital_stock_activity_path
         },
         trial_balance: {
-          disabled: true,
           updated: t('reports.updated.daily'),
           available_history: t('reports.history.back_to', date: fhlb_date_long_alpha(Date.new(2002,1,1))),
           route: reports_trial_balance_path
         },
         capital_stock_and_leverage: {
-          disabled: true,
           updated: t('reports.updated.daily'),
           available_history: t('reports.history.current_report'),
           route: reports_capital_stock_and_leverage_path
         },
         dividend_statement: {
-          disabled: true,
           updated: t('reports.updated.quarterly'),
           available_history: t('reports.history.months', months: 36),
           route: reports_dividend_statement_path
@@ -208,31 +204,26 @@ class ReportsController < ApplicationController
       },
       securities: {
         transactions: {
-          disabled: true,
           updated: t('reports.securities.transactions.updated'),
           available_history: t('reports.securities.transactions.history'),
           route: reports_securities_transactions_path
         },
         cash_projections: {
-          disabled: true,
           updated: t('reports.updated.daily'),
           available_history: t('reports.history.current_report'),
           route: reports_cash_projections_path
         },
         current: {
-          disabled: true,
           updated: t('reports.updated.intraday'),
           available_history: t('reports.history.current_report'),
           route: reports_current_securities_position_path
         },
         monthly: {
-          disabled: true,
           updated: t('reports.securities.monthly.updated'),
           available_history: t('reports.history.months', months: 18),
           route: reports_monthly_securities_position_path
         },
         services_monthly: {
-          disabled: true,
           updated: t('reports.securities.services_monthly.updated'),
           available_history: t('reports.history.months', months: 18),
           route: reports_securities_services_statement_path
@@ -245,7 +236,6 @@ class ReportsController < ApplicationController
           route: reports_account_summary_path
         },
         authorizations: {
-          disabled: true,
           updated: t('reports.updated.intraday'),
           available_history: t('reports.history.current_report'),
           route: reports_authorizations_path
