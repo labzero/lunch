@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
+  let(:member_id) { 750 }
 
   before do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
@@ -10,20 +11,20 @@ describe MAPI::ServiceApp do
     describe 'the `interest_rate_resets` method' do
       let(:interest_rate_reset_data) { JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'interest_rate_resets.json')))
       }
-      let(:interest_rate_resets) { MAPI::Services::Member::InterestRateResets.interest_rate_resets(subject, MEMBER_ID) }
+      let(:interest_rate_resets) { MAPI::Services::Member::InterestRateResets.interest_rate_resets(subject, member_id) }
       let(:max_advances_update_date) { [Date.new(2015,1,31)] }
       let(:max_advances_business_date) { [Date.new(2015,1,30)] }
       let(:advances_prior_business_date) { [Date.new(2015,1,29)] }
 
       it 'calls the `interest_rate_resets` method when the endpoint is hit' do
         allow(MAPI::Services::Member::InterestRateResets).to receive(:interest_rate_resets).and_return('a response')
-        get "/member/#{MEMBER_ID}/interest_rate_resets"
+        get "/member/#{member_id}/interest_rate_resets"
         expect(last_response.status).to eq(200)
       end
 
       it 'returns a 503 if the `interest_rate_resets` method returns nil' do
         allow(MAPI::Services::Member::InterestRateResets).to receive(:interest_rate_resets).and_return(nil)
-        get "/member/#{MEMBER_ID}/interest_rate_resets"
+        get "/member/#{member_id}/interest_rate_resets"
         expect(last_response.status).to eq(503)
       end
 
@@ -51,9 +52,13 @@ describe MAPI::ServiceApp do
               allow(interest_rate_reset_result_set).to receive(:fetch).and_return(max_advances_update_date, max_advances_business_date, nil)
               expect(interest_rate_resets).to be_nil
             end
+          else
+            before do
+              allow(MAPI::Services::Member::CashProjections::Private).to receive(:fake_as_of_date).and_return(max_advances_business_date.first)
+            end
           end
-          it "returns an object with a `date_processed` attribute" do
-            expect(interest_rate_resets[:date_processed]).to be_kind_of(Date)
+          it 'returns an object with a `date_processed` attribute of `max_advances_business_date`' do
+            expect(interest_rate_resets[:date_processed]).to eq(max_advances_business_date.first)
           end
           it "returns an object with an `interest_rate_resets` attribute" do
             expect(interest_rate_resets[:interest_rate_resets]).to be_kind_of(Array)

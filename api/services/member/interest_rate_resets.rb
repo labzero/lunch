@@ -63,7 +63,7 @@ module MAPI
             while row = interest_rate_reset_cursor.fetch_hash()
               interest_rate_resets << row.with_indifferent_access
             end
-            date_processed = max_advances_update_date
+            date_processed = max_advances_business_date
           else
             date_processed = MAPI::Services::Member::CashProjections::Private.fake_as_of_date
             interest_rate_resets = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'interest_rate_resets.json')))
