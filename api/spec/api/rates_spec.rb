@@ -145,7 +145,7 @@ describe MAPI::ServiceApp do
 
   describe "rate summary" do
     before do
-      allow(MAPI::Services::Rates).to receive(:get_holidays).and_return([])
+      allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
       allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(blackout_dates)
       allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(loan_terms_hash)
       allow(MAPI::Services::Rates::RateBands).to receive(:rate_bands).and_return(rate_bands_hash)
@@ -274,7 +274,7 @@ describe MAPI::ServiceApp do
       before do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
         allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger)
-        allow(MAPI::Services::Rates).to receive(:get_holidays).and_return([])
+        allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
         allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return([])
         allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(loan_terms_hash)
         allow(MAPI::Services::Rates::RateBands).to receive(:rate_bands).and_return(rate_bands_hash)
@@ -287,7 +287,7 @@ describe MAPI::ServiceApp do
       end
 
       it "should return Internal Service Error, if calendar service is unavailable" do
-        allow(MAPI::Services::Rates).to receive(:get_holidays).and_return(nil)
+        allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return(nil)
         get '/rates/summary'
         expect(last_response.status).to eq(503)
       end

@@ -41,6 +41,7 @@ describe AdvanceRequest do
   let(:member_id) { double('A Member ID') }
   let(:signer) { double('A Signer', display_name: nil, username: nil) }
   let(:request) { double('A Request') }
+  let(:maturity_date) { double('A Maturity Date') }
   subject { described_class.new(member_id, signer, request) }
 
   describe 'initializer' do
@@ -1309,23 +1310,24 @@ describe AdvanceRequest do
       allow(subject).to receive(:rate).and_return(rate)
       allow(subject).to receive(:term).and_return(term)
       allow(subject).to receive(:amount).and_return(amount)
+      allow(subject).to receive(:maturity_date).and_return(maturity_date)
       allow(subject).to receive(:gross_amount).and_return(gross_amount)
       allow(subject).to receive(:etransact_service).and_return(service_object)
       allow(service_object).to receive(:quick_advance_execute).and_return(response)
     end
 
     it 'calls `quick_advance_execute`' do
-      expect(service_object).to receive(:quick_advance_execute).with(member_id, anything, type, term, rate, signer)
+      expect(service_object).to receive(:quick_advance_execute).with(member_id, anything, type, term, rate, signer, maturity_date)
       call_method
     end
     it 'calls `quick_advance_execute` with the `amount` if no stock purchase is requested' do
       allow(subject).to receive(:purchase_stock?).and_return(false)
-      expect(service_object).to receive(:quick_advance_execute).with(anything, amount, anything, anything, anything, anything)
+      expect(service_object).to receive(:quick_advance_execute).with(anything, amount, anything, anything, anything, anything, anything)
       call_method
     end
     it 'calls `quick_advance_execute` with the `gross_amount` if stock purchase is requested' do
       allow(subject).to receive(:purchase_stock?).and_return(true)
-      expect(service_object).to receive(:quick_advance_execute).with(anything, gross_amount, anything, anything, anything, anything)
+      expect(service_object).to receive(:quick_advance_execute).with(anything, gross_amount, anything, anything, anything, anything, anything)
       call_method
     end
     it 'calls `process_trade_errors` with the `quick_advance_execute` response' do

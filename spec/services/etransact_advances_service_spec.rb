@@ -95,7 +95,8 @@ describe EtransactAdvancesService do
     let(:advance_type) {'sometype'}
     let(:advance_rate) {'0.17'}
     let(:amount) { 100 }
-    let(:call_method) {subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer)}
+    let(:maturity_date) { "2016-03-11".to_date }
+    let(:call_method) {subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer, maturity_date)}
     
     before do
       allow(subject).to receive(:calypso_error_handler).and_return(nil)
@@ -108,7 +109,7 @@ describe EtransactAdvancesService do
       expect(call_method[:initiated_at]).to be_kind_of(DateTime)
     end
     it 'calls `post_hash`' do
-      expect(subject).to receive(:post_hash).with(:quick_advance_execute, "etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{signer}", '')
+      expect(subject).to receive(:post_hash).with(:quick_advance_execute, "etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{signer}/#{maturity_date.iso8601}", '')
       call_method
     end
     it 'returns the result of `post_hash`' do
