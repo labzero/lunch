@@ -188,7 +188,6 @@ class ReportsController < ApplicationController
           route: reports_capital_stock_activity_path
         },
         trial_balance: {
-          disabled: true,
           updated: t('reports.updated.daily'),
           available_history: t('reports.history.back_to', date: fhlb_date_long_alpha(Date.new(2002,1,1))),
           route: reports_trial_balance_path

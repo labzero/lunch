@@ -42,7 +42,7 @@
             = link_to(t('reports.capital_stock.title'), reports_path(anchor: 'capital_stock'))
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.capital_stock.activity.title'), reports_capital_stock_activity_path)
-              %li.disabled= t('reports.capital_stock.trial_balance.title')
+              %li= link_to(t('reports.capital_stock.trial_balance.title'), reports_trial_balance_path)
               %li.disabled= t('reports.capital_stock.capital_stock_and_leverage.title')
               %li.disabled= t('reports.capital_stock.dividend_statement.title')
           %li<>
