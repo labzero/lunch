@@ -1,7 +1,7 @@
 @jira-mem-69
 Feature: Visiting the Account Summary Page
   As a user
-  I want to use visit the account summary page for the FHLB Member Portal
+  I want to use visit the account summart page for the FHLB Member Portal
   In order to find out an overall picture of my banks position
 
   Background:
