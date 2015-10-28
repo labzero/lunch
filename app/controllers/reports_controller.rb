@@ -207,7 +207,6 @@ class ReportsController < ApplicationController
       },
       securities: {
         transactions: {
-          disabled: true,
           updated: t('reports.securities.transactions.updated'),
           available_history: t('reports.securities.transactions.history'),
           route: reports_securities_transactions_path

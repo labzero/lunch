@@ -31,6 +31,7 @@ Rails.application.routes.draw do
     get '/current-price-indications' => 'reports#current_price_indications'
     get '/interest-rate-resets' => 'reports#interest_rate_resets'
     get '/letters-of-credit' => 'reports#letters_of_credit'
+    get '/securities-transactions' => 'reports#securities_transactions'
     get '/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: :parallel_shift
     get '/forward-commitments' => 'reports#forward_commitments'
     get '/account-summary' => 'reports#account_summary'
@@ -45,7 +46,6 @@ Rails.application.routes.draw do
     get '/mortgage-collateral-update'    => 'error#not_found'
     get '/securities-services-statement' => 'reports#securities_services_statement'
     get '/trial-balance'                 => 'error#not_found'
-    get '/securities-transactions'       => 'error#not_found'
   end
 
   get '/advances' => 'advances#index'
