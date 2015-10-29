@@ -1,3 +1,4 @@
+- account_type_mapping = {'U' => t('reports.pages.securities_position.unpledged'), 'P' => t('reports.pages.securities_position.pledged')}
 .report-main-body
   %section
     .report-summary-data
@@ -52,7 +53,7 @@
                   %td= row[:custody_account_number] || t('global.missing_value')
                 %tr
                   %td= t('reports.pages.securities_position.custody_account_type')
-                  %td= row[:custody_account_type] || t('global.missing_value')
+                  %td= account_type_mapping[row[:custody_account_type]] || row[:custody_account_type] || t('global.missing_value')
                 %tr
                   %td= t('reports.pages.securities_position.security_pledge_type')
                   %td= row[:security_pledge_type] || t('global.missing_value')

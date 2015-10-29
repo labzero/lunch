@@ -1200,6 +1200,8 @@ en:
         current: Current Securities Position
         monthly: Monthly Securities Position
         freshness: This report reflects data as of the close of business on the last business day of the month and is generally available one business day after monthend.
+        pledged: Pledged
+        unpledged: Unpledged
         filter:
           all: All Securities
           pledged: Pledged Securities
