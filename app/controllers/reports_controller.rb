@@ -881,6 +881,8 @@ class ReportsController < ApplicationController
       @picker_presets = date_picker_presets(@start_date, nil, date_restriction)
       @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
     end
+    @picker_presets = date_picker_presets(@start_date, nil, date_restriction)
+    @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
   end
 
   def letters_of_credit
@@ -1443,7 +1445,7 @@ class ReportsController < ApplicationController
       rows: rows
     }
   end
-  
+
   def mortgage_collateral_update
     @mcu_data = report_disabled?(MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS) ? {} : MemberBalanceService.new(current_member_id, request).mortgage_collateral_update
     raise StandardError, "There has been an error and ReportsController#mortgage_collateral_update has encountered nil. Check error logs." if @mcu_data.nil?
@@ -1573,7 +1575,7 @@ class ReportsController < ApplicationController
         {type: nil, value: value}
     end
   end
-  
+
   def mcu_table_rows_for(data_hash, loan_types)
     rows = []
     loan_types.each do |loan_type|
@@ -1583,7 +1585,7 @@ class ReportsController < ApplicationController
     end
     rows
   end
-  
+
   def mcu_table_columns_for(data_hash, loan_type, title)
     [
       { value: title},

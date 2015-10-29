@@ -858,39 +858,38 @@ describe MemberBalanceService do
     end
   end
 
+  describe '`securities_services_statements_available` method' do
+    let(:statement){ double('statement') }
+    let(:statement2){ double('statement2') }
+    it 'should return nil when get_json returns nil' do
+      allow(subject).to receive(:get_json).and_return(nil)
+      expect(subject.securities_services_statements_available).to eq(nil)
+    end
+    it 'should return apply fix_date to list items returned by get_json' do
+      allow(subject).to receive(:get_json).and_return([statement])
+      allow(subject).to receive(:fix_date).with(statement, 'report_end_date').and_return(statement2)
+      expect(subject.securities_services_statements_available).to eq([statement2])
+    end
+  end
+
   describe '`securities_services_statement` method' do
-    let(:securities_services_statement) { subject.securities_services_statement(Time.zone.now) }
-    it 'returns a float for its `total`' do
-      expect(securities_services_statement[:total]).to be_kind_of(Float)
+    let(:date){ double('date') }
+    let(:isodate){ double('isodate') }
+    let(:statement){ double('statement') }
+    let(:statement_with_debit_date){ double('statement_with_debit_date') }
+    let(:statement_with_month_ending){ double('statement_with_month_ending') }
+    before do
+      allow(date).to receive_message_chain(:to_date,:iso8601).and_return(isodate)
     end
-    it 'returns a string for its `sta_account_number`' do
-      expect(securities_services_statement[:sta_account_number]).to be_kind_of(String)
+    it 'should return nil if get_hash returns nil' do
+      allow(subject).to receive(:get_json).and_return(nil)
+      expect(subject.securities_services_statement(date)).to eq(nil)
     end
-    it 'returns a float for its `account_maintenance.total`' do
-      expect(securities_services_statement[:account_maintenance][:total]).to be_kind_of(Float)
-    end
-    [:income_disbursement, :pledge_status_change, :certifications, :research, :handling].each do |attribute|
-      it "should return a price breakdown hash for `#{attribute}`" do
-        expect(securities_services_statement[attribute][:total]).to be_kind_of(Float)
-        expect(securities_services_statement[attribute][:cost]).to be_kind_of(Float)
-        expect(securities_services_statement[attribute][:count]).to be_kind_of(Fixnum)
-      end
-    end
-    [:secutities_fees, :transaction_fees].each do |section|
-      [:fed, :dtc, :funds, :euroclear].each do |attribute|
-        it "should return a price breakdown hash for `#{section}.#{attribute}`" do
-          expect(securities_services_statement[section][attribute][:total]).to be_kind_of(Float)
-          expect(securities_services_statement[section][attribute][:cost]).to be_kind_of(Float)
-          expect(securities_services_statement[section][attribute][:count]).to be_kind_of(Fixnum)
-        end
-      end
-    end
-    describe 'error states' do
-      it 'returns nil if there is a JSON parsing error' do
-        expect(File).to receive(:read).and_return('some malformed json!')
-        expect(Rails.logger).to receive(:warn)
-        expect(securities_services_statement).to be(nil)
-      end
+    it 'should fix_date on' do
+      allow(subject).to receive(:get_json).and_return([statement])
+      allow(subject).to receive(:fix_date).with(statement,'debit_date').and_return(statement_with_debit_date)
+      allow(subject).to receive(:fix_date).with(statement_with_debit_date,'month_ending').and_return(statement_with_month_ending)
+      expect(subject.securities_services_statement(date)).to eq(statement_with_month_ending)
     end
   end
 

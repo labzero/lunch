@@ -1,24 +1,25 @@
-require_relative 'member/balance'
-require_relative 'member/capital_stock'
-require_relative 'member/borrowing_capacity_details'
-require_relative 'member/settlement_transaction_account'
 require_relative 'member/advances_details'
-require_relative 'member/profile'
-require_relative 'member/disabled_reports'
-require_relative 'member/cash_projections'
-require_relative 'member/trade_activity'
-require_relative 'member/signer_roles'
-require_relative 'member/securities_position'
-require_relative 'member/forward_commitments'
+require_relative 'member/balance'
+require_relative 'member/borrowing_capacity_details'
+require_relative 'member/capital_stock'
 require_relative 'member/capital_stock_and_leverage'
 require_relative 'member/capital_stock_trial_balance'
-require_relative 'member/letters_of_credit'
-require_relative 'member/flags'
-require_relative 'member/interest_rate_resets'
-require_relative 'member/securities_transactions'
-require_relative 'member/parallel_shift_analysis'
+require_relative 'member/cash_projections'
+require_relative 'member/disabled_reports'
 require_relative 'member/dividend_statement'
+require_relative 'member/flags'
+require_relative 'member/forward_commitments'
+require_relative 'member/interest_rate_resets'
+require_relative 'member/letters_of_credit'
 require_relative 'member/mortgage_collateral_update'
+require_relative 'member/parallel_shift_analysis'
+require_relative 'member/profile'
+require_relative 'member/securities_position'
+require_relative 'member/securities_transactions'
+require_relative 'member/securities_services_statements'
+require_relative 'member/settlement_transaction_account'
+require_relative 'member/signer_roles'
+require_relative 'member/trade_activity'
 
 module MAPI
   module Services
@@ -769,6 +770,53 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/securities_services_statements_available'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the list of dates for which security services statements are available'
+              key :notes, 'Retrieve the list of dates for which security services statements are available'
+              key :nickname, :getSecurityServicesStatements
+              key :type, :array
+              items do
+                key :'$ref', :memberSecurityServicesStatementDate
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the list of available statement dates from'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/securities_services_statements/{date}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the list of security services for the given date'
+              key :notes, 'Retrieve the list of security services for the given date'
+              key :nickname, :getSecurityServicesStatementsForDate
+              key :type, :array
+              items do
+                key :'$ref', :memberSecurityServicesStatement
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the list of available statement dates from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :date
+                key :required, true
+                key :type, :string
+                key :description, 'The date of the requested statement'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -1064,6 +1112,19 @@ module MAPI
           member_id = params[:id]
           date      = params[:date]
           MAPI::Services::Member::CapitalStockTrialBalance.capital_stock_trial_balance(self, member_id, date).to_json
+        end
+
+        relative_get '/:id/securities_services_statements_available' do
+          env = self.settings.environment
+          id  = params[:id].to_i
+          MAPI::Services::Member::SecuritiesServicesStatements.available_statements(logger, env, id).to_json
+        end
+
+        relative_get '/:id/securities_services_statements/:date' do
+          env  = self.settings.environment
+          id   = params[:id].to_i
+          date = params[:date].to_date
+          MAPI::Services::Member::SecuritiesServicesStatements.statement(logger, env, id, date).to_json
         end
       end
 

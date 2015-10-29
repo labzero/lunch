@@ -572,8 +572,8 @@ RSpec.describe ReportsController, :type => :controller do
       let(:month_restricted_start_date) { Date.today - rand(10000) }
       let(:start_date_param) { Date.today - rand(10000) }
       before do
-        allow(member_balance_service_instance).to receive(:securities_services_statement).with(kind_of(Date)).and_return(response_hash)
-        allow(response_hash).to receive(:[]).with(:secutities_fees).and_return([{}])
+        allow(member_balance_service_instance).to receive(:securities_services_statement).with(kind_of(Date)).and_return([response_hash])
+        allow(response_hash).to receive(:[]).with(:securities_fees).and_return([{}])
         allow(response_hash).to receive(:[]).with(:transaction_fees).and_return([{}])
         allow(controller).to receive(:month_restricted_start_date).and_return(end_of_month)
       end
@@ -587,7 +587,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'should assign `@statement` to the result of calling MemberBalanceService.securities_services_statement' do
         make_request
-        expect(assigns[:statement]).to be(response_hash)
+        expect(assigns[:statement]).to eq([response_hash])
       end
       it 'should assign @date_picker_filter to the `end_of_month` filter' do
         make_request
