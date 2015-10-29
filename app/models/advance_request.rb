@@ -201,6 +201,15 @@ class AdvanceRequest
     end
   end
 
+  def human_term
+    case term
+    when *ADVANCE_TERMS
+      I18n.t("dashboard.quick_advance.table.axes_labels.#{term}")
+    else
+      term
+    end
+  end
+
   def collateral_type
     case type
     when :whole

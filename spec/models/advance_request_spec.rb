@@ -533,6 +533,22 @@ describe AdvanceRequest do
     end
   end
 
+  describe '`human_term` method' do
+    let(:call_method) { subject.human_term }
+    described_class::ADVANCE_TERMS.each do |term|
+      human_term = I18n.t("dashboard.quick_advance.table.axes_labels.#{term}")
+      it "returns `#{human_term}` when the `term` is `#{term}`" do
+        allow(subject).to receive(:term).and_return(term)
+        expect(call_method).to eq(human_term)
+      end
+    end
+    it 'returns the `term` when its anything else' do
+      term = double('A Term')
+      allow(subject).to receive(:term).and_return(term)
+      expect(call_method).to be(term)
+    end
+  end
+
   describe '`collateral_type` method' do
     let(:call_method) { subject.collateral_type }
     {
