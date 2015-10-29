@@ -50,6 +50,7 @@ require_relative 'models/member_parallel_shift'
 require_relative 'models/member_dividend_statement'
 require_relative 'models/member_contacts'
 require_relative 'models/member_todays_credit_activity'
+require_relative 'models/member_mortgage_collateral_update'
 
 Time.zone = ENV['TIMEZONE'] || 'Pacific Time (US & Canada)'
 Time.zone_default = Time.zone
