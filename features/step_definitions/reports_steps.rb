@@ -345,10 +345,10 @@ Then(/^I should see a (current|monthly) securities position report for (Pledged|
   table_header = page.find('.report-table-title').text
   expect(table_header).to include(filter_type)
   if !page.find(".report-table tbody tr:first-child td:first-child")['class'].split(' ').include?('dataTables_empty')
-    filter_type = filter_type == 'Pledged' ? 'P' : 'U'
-    security_types = jquery_evaluate("$('.report-detail-cell td:contains(Custody Account Type)').siblings().text()").split(//)
+    filter_type = filter_type == 'Pledged' ? I18n.t('reports.pages.securities_position.pledged') : I18n.t('reports.pages.securities_position.unpledged')
+    security_types = page.all(:xpath, "//*[@class='report-detail-cell']//td[text()='#{I18n.t('reports.pages.securities_position.custody_account_type')}']/following-sibling::td")
     security_types.each do |security_type|
-      expect(security_type).to eq(filter_type)
+      expect(security_type.text).to eq(filter_type)
     end
   end
 end
