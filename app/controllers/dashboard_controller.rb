@@ -18,6 +18,11 @@ class DashboardController < ApplicationController
 
   prepend_around_action :skip_timeout_reset, only: [:current_overnight_vrc]
 
+  rescue_from AASM::InvalidTransition, AASM::UnknownStateMachineError, AASM::UndefinedState, AASM::NoDirectAssignmentError do |exception|
+    logger.debug { 'Advance Request State: ' + advance_request.to_json }
+    raise exception
+  end
+
   def index
     today = Time.zone.now.to_date
     rate_service = RatesService.new(request)
@@ -147,6 +152,10 @@ class DashboardController < ApplicationController
     @rate_data = advance_request.rates
     @advance_terms = AdvanceRequest::ADVANCE_TERMS
     @advance_types = AdvanceRequest::ADVANCE_TYPES
+
+    logger.debug { '  Advance Request State: ' + advance_request.inspect }
+    logger.debug { '  Advance Request Errors: ' + advance_request.errors.inspect }
+
     render layout: false
   end
 
@@ -210,6 +219,10 @@ class DashboardController < ApplicationController
       response_html = render_to_string layout: false
     end
 
+    logger.debug { '  Advance Request State: ' + advance_request.inspect }
+    logger.debug { '  Advance Request Errors: ' + advance_request.errors.inspect }
+    logger.debug { '  Preview Results: ' + {preview_success: preview_success, preview_error: preview_error}.inspect }
+
     render json: {preview_success: preview_success, preview_error: preview_error, html: response_html}
   end
 
@@ -248,6 +261,11 @@ class DashboardController < ApplicationController
         end
       end
     end
+
+    logger.debug { '  Advance Request State: ' + advance_request.inspect }
+    logger.debug { '  Advance Request Errors: ' + advance_request.errors.inspect }
+    logger.debug { '  Execute Results: ' + {securid: securid_status, advance_success: advance_success}.inspect }
+
     render json: {securid: securid_status, advance_success: advance_success, html: response_html}
   end
 

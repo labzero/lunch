@@ -8,6 +8,10 @@ class AdvanceRequest
       @code = code
       @value = value
     end
+
+    def inspect
+      "<#{self.class}:#{object_id} type='#{type}' code='#{code}' value='#{value}'>"
+    end
   end
 
   include ActiveModel::Model
@@ -56,6 +60,10 @@ class AdvanceRequest
     @member_id = member_id
     @signer = signer
     @request = request
+  end
+
+  def id
+    @id ||= SecureRandom.uuid
   end
 
   def timestamp!
@@ -238,6 +246,8 @@ class AdvanceRequest
         instance_variable_set("@#{key}", value)
       when *(REQUEST_PARAMETERS + CORE_PARAMETERS)
         send("#{key}=", value)
+      when :id
+        @id = value
       else
         raise "unknown attribute: #{key}"
       end
@@ -246,7 +256,7 @@ class AdvanceRequest
 
   def attributes
     attrs = {}
-    (READONLY_ATTRS + REQUEST_PARAMETERS + CORE_PARAMETERS).each do |key|
+    (READONLY_ATTRS + REQUEST_PARAMETERS + CORE_PARAMETERS + [:id]).each do |key|
       attrs[key] = nil if send(key)
     end
     attrs[:current_state] = current_state
@@ -275,6 +285,10 @@ class AdvanceRequest
         end
       end
     end
+  end
+
+  def inspect
+    "<#{self.class}:#{id} state='#{current_state}' term='#{term}' type='#{type}' rate='#{rate}' amount='#{amount}' stock_choice='#{stock_choice}' errors=#{errors.inspect}>"
   end
 
   protected
