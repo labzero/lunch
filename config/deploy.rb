@@ -136,6 +136,21 @@ namespace :cluster do
         download!(File.join(shared_path, 'log'), "downloads/#{role}-#{host.hostname}", recursive: true)
       end
     end
+
+    desc 'Fetches the current logfiles from the cluster in question'
+    task :fetch_current do
+      FileUtils.mkdir_p('downloads')
+      role_set = Set.new([:web, :api])
+      on roles(*role_set.to_a) do |host|
+        role = (host.roles & role_set).to_a.join('-')
+        capture("cd #{shared_path} && ls -1 log/*.log log/**/*.log").split.each do |log|
+          dir = File.dirname(log)
+          download_dir = File.join('downloads' , "#{role}-#{host.hostname}", dir)
+          FileUtils.mkdir_p(download_dir)
+          download!(File.join(shared_path, log), download_dir, recursive: true)
+        end
+      end
+    end
   end
   namespace :maintenance do
     desc 'Enables maintenance mode.'
