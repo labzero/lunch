@@ -2,10 +2,13 @@ require 'rails_helper'
 
 describe AdvanceRequest do
   describe AdvanceRequest::Error do
+    let(:type) { double('A Type') }
+    let(:code) { double('A Code') }
+    let(:value) { double('A Value') }
+    
+    subject { described_class.new(type, code, value) }
+
     describe 'initializer' do
-      let(:type) { double('A Type') }
-      let(:code) { double('A Code') }
-      let(:value) { double('A Value') }
       let(:call_method) { described_class.new(type, code, value) }
       it 'assigns the `type` parameter to the `type` attribute' do
         expect(call_method.type).to be(type)
@@ -18,6 +21,19 @@ describe AdvanceRequest do
       end
       it 'sets `value` to nil if none is provided' do
         expect(described_class.new(type, code).value).to be_nil
+      end
+    end
+
+    describe 'inspect' do
+      let(:call_method) { subject.inspect }
+
+      it 'returns a String' do
+        expect(call_method).to be_kind_of(String)
+      end
+      [:type, :code, :value, :object_id, :class].each do |attr|
+        it "includes the `#{attr}`" do
+          expect(call_method).to include(subject.send(attr).to_s)
+        end
       end
     end
   end
@@ -40,6 +56,23 @@ describe AdvanceRequest do
     it 'sets `@request` to nil if none is provided' do
       obj = described_class.new(member_id, signer)
       expect(obj.instance_variable_get(:@request)).to be_nil
+    end
+  end
+
+  describe '`id` method' do
+    let(:call_method) { subject.id }
+    it 'returns a UUID' do
+      uuid = double('A UUID')
+      allow(SecureRandom).to receive(:uuid).and_return(uuid)
+      expect(call_method).to be(uuid)
+    end
+    it 'returns the same ID each time' do
+      id = call_method
+      expect(call_method).to be(id)
+    end
+    it 'returns a different ID per instance' do
+      other_instance = subject.dup
+      expect(call_method).to_not eq(other_instance.id)
     end
   end
 
@@ -578,7 +611,7 @@ describe AdvanceRequest do
 
   describe '`attributes` method' do
     let(:call_method) { subject.attributes }
-    persisted_attributes = described_class::READONLY_ATTRS + described_class::REQUEST_PARAMETERS + described_class::CORE_PARAMETERS
+    persisted_attributes = described_class::READONLY_ATTRS + described_class::REQUEST_PARAMETERS + described_class::CORE_PARAMETERS + [:id]
 
     before do
       persisted_attributes.each { |attr| allow(subject).to receive(attr) }
@@ -615,7 +648,7 @@ describe AdvanceRequest do
       call_method
       expect(subject.current_state).to be(hash[:current_state])
     end
-    (described_class::READONLY_ATTRS + described_class::REQUEST_PARAMETERS + described_class::CORE_PARAMETERS).each do |key|
+    (described_class::READONLY_ATTRS + described_class::REQUEST_PARAMETERS + described_class::CORE_PARAMETERS + [:id]).each do |key|
       it "assings the value found under `#{key}` to the attribute `#{key}`" do
         case key
         when :type
@@ -707,6 +740,23 @@ describe AdvanceRequest do
     it 'does not send an email if a rate is not disabled' do
       expect(InternalMailer).to_not receive(:exceeds_rate_band)
       call_method
+    end
+  end
+
+  describe 'inspect' do
+    let(:call_method) { subject.inspect }
+
+    it 'returns a String' do
+      expect(call_method).to be_kind_of(String)
+    end
+    [:type, :term, :amount, :id, :current_state, :rate, :stock_choice].each do |attr|
+      it "includes the `#{attr}`" do
+        expect(call_method).to include(subject.send(attr).to_s)
+      end
+    end
+
+    it 'includes the `errors`' do
+      expect(call_method).to include(subject.errors.inspect)
     end
   end
 

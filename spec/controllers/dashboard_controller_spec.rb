@@ -219,7 +219,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:rate_data) { {some: 'data'} }
     let(:RatesService) {class_double(RatesService)}
     let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
-    let(:advance_request) { double('An AdvanceRequest', rates: rate_data) }
+    let(:advance_request) { double('An AdvanceRequest', rates: rate_data, errors: []) }
     let(:make_request) { get :quick_advance_rates }
 
     before do
@@ -272,7 +272,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:check_capstock) { true }
     let(:check_result) {{:status => 'pass', :low => 100000, :high => 1000000000}}
     let(:make_request) { post :quick_advance_preview, interest_day_count: interest_day_count, payment_on: payment_on, maturity_date: maturity_date, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, check_capstock: check_capstock}
-    let(:advance_request) { double('An AdvanceRequest', :type= => nil, :term= => nil, :amount= => nil, :stock_choice= => nil, validate_advance: true, errors: nil, sta_debit_amount: 0, timestamp!: nil, amount: amount) }
+    let(:advance_request) { double('An AdvanceRequest', :type= => nil, :term= => nil, :amount= => nil, :stock_choice= => nil, validate_advance: true, errors: [], sta_debit_amount: 0, timestamp!: nil, amount: amount) }
     before do
       allow(subject).to receive(:advance_request).and_return(advance_request)
       allow(subject).to receive(:populate_advance_request_view_parameters)
@@ -365,7 +365,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:securid_token) { '222222' }
     let(:make_request) { post :quick_advance_perform, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, securid_pin: securid_pin, securid_token: securid_token }
     let(:securid_service) { SecurIDService.new('a user', test_mode: true) }
-    let(:advance_request) { double('An AdvanceRequest', expired?: false, executed?: true, execute: nil, sta_debit_amount: 0) }
+    let(:advance_request) { double('An AdvanceRequest', expired?: false, executed?: true, execute: nil, sta_debit_amount: 0, errors: []) }
 
     before do
       allow(subject).to receive(:session_elevated?).and_return(true)
