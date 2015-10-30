@@ -27,6 +27,7 @@ module FhlbMember
 
     config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
     config.log_tags = [
+      lambda { |request| "time=#{Time.zone.now.iso8601}" },
       lambda { |request| "request_id=#{request.uuid}" },
       lambda { |request| "session_id=#{request.session.id}" },
       lambda { |request| request.session["warden.user.user.key"].nil? ? "user_id=NONE" : "user_id=#{request.session["warden.user.user.key"][0][0]}" },
