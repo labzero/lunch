@@ -373,4 +373,8 @@ class MemberBalanceService < MAPIService
       processed_data
     end
   end
+  
+  def mortgage_collateral_update
+    fix_date(get_hash(:mortgage_collateral_update, "/member/#{@member_id}/mortgage_collateral_update"), :date_processed)
+  end
 end

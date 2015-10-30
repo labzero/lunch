@@ -22,6 +22,7 @@ class ReportsController < ApplicationController
   ACCOUNT_SUMMARY_WEB_FLAGS = [MembersService::FINANCING_AVAILABLE_DATA, MembersService::CREDIT_OUTSTANDING_DATA, MembersService::COLLATERAL_HIGHLIGHTS_DATA, MembersService::FHLB_STOCK_DATA]
   INTEREST_RATE_RESETS_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
   TODAYS_CREDIT_ACTIVITY_WEB_FLAGS = [MembersService::TODAYS_CREDIT_ACTIVITY]
+  MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS = [MembersService::COLLATERAL_REPORT_DATA]
 
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
@@ -1391,6 +1392,30 @@ class ReportsController < ApplicationController
       rows: rows
     }
   end
+  
+  def mortgage_collateral_update
+    @mcu_data = report_disabled?(MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS) ? {} : MemberBalanceService.new(current_member_id, request).mortgage_collateral_update
+    raise StandardError, "There has been an error and ReportsController#mortgage_collateral_update has encountered nil. Check error logs." if @mcu_data.nil?
+
+    column_headings = [t('common_table_headings.transaction'), t('common_table_headings.loan_count'), fhlb_add_unit_to_table_header(t('common_table_headings.unpaid_balance'), '$'), fhlb_add_unit_to_table_header(t('global.original_amount'), '$')]
+    # Loans Accepted Table
+    @accepted_loans_table_data = {
+      column_headings: column_headings,
+      rows: mcu_table_rows_for(@mcu_data, %w(updated pledged renumbered)),
+      footer: mcu_table_columns_for(@mcu_data, 'accepted', t('reports.pages.mortgage_collateral_update.total_accepted'))
+    }
+    # Loans Submitted Table
+    @submitted_loans_table_data = {
+      column_headings: column_headings,
+      rows: mcu_table_rows_for(@mcu_data, %w(accepted rejected)),
+      footer: mcu_table_columns_for(@mcu_data, 'total', t('reports.pages.mortgage_collateral_update.total_submitted'))
+    }
+    # Loans Depledged Table
+    @depledged_loans_table_data = {
+      column_headings: column_headings,
+      rows: [ {columns: mcu_table_columns_for(@mcu_data, 'depledged', t('reports.pages.mortgage_collateral_update.loans_depledged'))} ]
+    }
+  end
 
   private
   def securities_instance_variables(securities_position, filter)
@@ -1490,5 +1515,24 @@ class ReportsController < ApplicationController
       when 'cusip', 'transaction_code', 'security_description'
         {type: nil, value: value}
     end
+  end
+  
+  def mcu_table_rows_for(data_hash, loan_types)
+    rows = []
+    loan_types.each do |loan_type|
+      rows << {
+        columns: mcu_table_columns_for(data_hash, loan_type, t("reports.pages.mortgage_collateral_update.#{loan_type}"))
+      }
+    end
+    rows
+  end
+  
+  def mcu_table_columns_for(data_hash, loan_type, title)
+    [
+      { value: title},
+      { value: data_hash[:"#{loan_type}_count"], type: :number},
+      { value: data_hash[:"#{loan_type}_unpaid"], type: :number},
+      { value: data_hash[:"#{loan_type}_original"], type: :number}
+    ]
   end
 end

@@ -55,7 +55,7 @@ module MAPI
           key :type, :integer
           key :description, 'Dollar value of the unpaid portion of accepted, updated loans'
         end
-        property :renumber_unpaid do
+        property :renumbered_unpaid do
           key :type, :integer
           key :description, 'Dollar value of the unpaid portion of accepted, renumbered loans'
         end
@@ -83,7 +83,7 @@ module MAPI
           key :type, :integer
           key :description, 'Original dollar value of accepted, updated loans'
         end
-        property :renumber_original do
+        property :renumbered_original do
           key :type, :integer
           key :description, 'Original dollar value of accepted, renumbered loans'
         end

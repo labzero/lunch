@@ -122,6 +122,8 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/account-summary'
   when 'Today\'s Credit'
     visit '/reports/todays-credit'
+  when 'Mortgage Collateral Update'
+    visit '/reports/mortgage-collateral-update'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end

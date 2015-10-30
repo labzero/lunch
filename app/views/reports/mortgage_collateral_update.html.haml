@@ -1,0 +1,26 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.row.mcu-report
+  .report-header
+    %h1= t('reports.pages.mortgage_collateral_update.title')
+    = render 'reports_header_buttons'
+    = render 'report_details', name: @member_name, freshness: t('reports.pages.mortgage_collateral_update.report_details')
+  .report-main-body
+    %h2.report-table-title= t('reports.pages.mortgage_collateral_update.details')
+    %dl.mcu-details
+      %dt= t('reports.pages.mortgage_collateral_update.type')
+      %dd= @mcu_data[:mcu_type] || t('global.missing_value')
+      %dt= t('common_table_headings.transaction_number')
+      %dd= @mcu_data[:transaction_number] || t('global.missing_value')
+      %dt= t('reports.pages.mortgage_collateral_update.processed_date')
+      %dd= fhlb_date_standard_numeric(@mcu_data[:date_processed])
+      %dt= t('reports.pages.mortgage_collateral_update.pledge_type')
+      %dd= @mcu_data[:pledge_type] || t('global.missing_value')
+    %h2.report-table-title= t('reports.pages.mortgage_collateral_update.loans_accepted')
+    = render 'reports/reports_table', table_class: 'mcu-table', table_data: @accepted_loans_table_data, sortable: false
+    %h2.report-table-title= t('reports.pages.mortgage_collateral_update.loans_submitted')
+    = render 'reports/reports_table', table_class: 'mcu-table', table_data: @submitted_loans_table_data, sortable: false
+    %h2.report-table-title= t('reports.pages.mortgage_collateral_update.loans_depledged')
+    = render 'reports/reports_table', table_class: 'mcu-table', table_data: @depledged_loans_table_data, sortable: false        
+    %small
+      %p= t('reports.pages.mortgage_collateral_update.version_request', phone_number: mcu_phone_number)
