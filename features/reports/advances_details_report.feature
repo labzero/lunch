@@ -51,7 +51,7 @@ Scenario: Member sorts the advances details report by trade date
 Scenario: Member can't select a date in the future
   Given I am on the "Advances Detail" report page
   When I click the datepicker field
-  Then I should not see available dates after today
+  Then I should not see available dates after the most recent business day not including today
 
 @jira-mem-630
 Scenario: Entering text in the datepicker input field

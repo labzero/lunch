@@ -96,16 +96,22 @@ Then(/^I should see a report with dates for "(.*?)"$/) do |selector|
   report_dates_in_range?(start_date, end_date)
 end
 
-Then(/^I should not see available dates after today$/) do
-  step %{I choose the "custom date" preset in the datepicker}
-  calendar = page.find(".daterangepicker .calendar.single")
-  change_datepicker_to_month(@today, @today.strftime("%b %Y"), calendar)
-  day = @today.mday
-  calendar.assert_no_selector('.table-condensed .next.available')
-  days = Time.days_in_month(@today.month, @today.year)
-  (day + 1).upto(days) do |a_day|
-    calendar.assert_selector("td.disabled.off", text: /^#{a_day}$/)
-  end
+Then(/^I should not see available dates after the most recent business day not including today/) do
+  max_allowed_date = most_recent_business_day(@today - 1.day)
+  if max_allowed_date.month == @today.month
+    step %{I choose the "custom date" preset in the datepicker}
+    calendar = page.find(".daterangepicker .calendar.single")
+    change_datepicker_to_month(@today, @today.strftime("%b %Y"), calendar)
+    day = @today.mday
+    calendar.assert_no_selector('.table-condensed .next.available')
+    days = Time.days_in_month(@today.month, @today.year)
+    (day + 1).upto(days) do |a_day|
+      calendar.assert_selector("td.disabled.off", text: /^#{a_day}$/)
+    end
+  else
+    # handles the case where the max allowed date occurs in the last calendar month
+    page.assert_no_selector('.fa-arrow-right') 
+  end  
 end
 
 When(/^I write "(.*?)" in the datepicker (start|end) input field$/) do |date, input|
@@ -184,4 +190,10 @@ def change_datepicker_to_month(today, month, calendar)
     calendar.find(advance_class).click
     # we should add a 5 second check here to avoid infinte loops
   end
+end
+
+def most_recent_business_day(d)
+  return d - 1.day if d.saturday?
+  return d - 2.day if d.sunday?
+  d
 end
