@@ -99,7 +99,7 @@ class AdvanceRequest
   def rates
     unless @rates
       @rates = rate_service.quick_advance_rates(member_id)
-      notify_if_rate_bands_exceeded(@rates)
+      notify_if_rate_bands_exceeded
     end
     @rates 
   end
@@ -242,12 +242,14 @@ class AdvanceRequest
       case key.to_sym
       when :current_state
         aasm.current_state = value
+      when :rates
+        @rates = value.with_indifferent_access
+      when :id
+        @id = value
       when *READONLY_ATTRS
         instance_variable_set("@#{key}", value)
       when *(REQUEST_PARAMETERS + CORE_PARAMETERS)
         send("#{key}=", value)
-      when :id
-        @id = value
       else
         raise "unknown attribute: #{key}"
       end
@@ -273,11 +275,17 @@ class AdvanceRequest
     obj
   end
 
-  def notify_if_rate_bands_exceeded(rates)
-    rates = rates.with_indifferent_access
+  def inspect
+    "<#{self.class}:#{id} state='#{current_state}' term='#{term}' type='#{type}' rate='#{rate}' amount='#{amount}' stock_choice='#{stock_choice}' errors=#{errors.inspect}>"
+  end
+
+  protected
+
+  def notify_if_rate_bands_exceeded
+    return unless rates
     ADVANCE_TYPES.each do |type|
       ADVANCE_TERMS.each do |term|
-        rate_data = rates[type][term]
+        rate_data = rates[type][term].dup
         rate_data[:type] = type
         rate_data[:term] = term
         if rate_data[:disabled] && (rate_data[:rate_band_info][:min_threshold_exceeded] || rate_data[:rate_band_info][:max_threshold_exceeded])
@@ -286,12 +294,6 @@ class AdvanceRequest
       end
     end
   end
-
-  def inspect
-    "<#{self.class}:#{id} state='#{current_state}' term='#{term}' type='#{type}' rate='#{rate}' amount='#{amount}' stock_choice='#{stock_choice}' errors=#{errors.inspect}>"
-  end
-
-  protected
 
   def terms_present?
     term.present? && type.present? && rate!.present? && amount.present?

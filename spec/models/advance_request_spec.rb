@@ -271,7 +271,7 @@ describe AdvanceRequest do
         call_method
       end
       it 'passes the rates to `notify_if_rate_bands_exceeded`' do
-        expect(subject).to receive(:notify_if_rate_bands_exceeded).with(rate_table)
+        expect(subject).to receive(:notify_if_rate_bands_exceeded)
         call_method
       end
     end
@@ -672,6 +672,13 @@ describe AdvanceRequest do
       hash[double('An Unknown Key').as_null_object] = double('A Value')
       expect{call_method}.to raise_error
     end
+    it 'converts the rates to an indifferent access hash' do
+      rates = double('Rates')
+      hash[:rates] = rates
+      allow(subject).to receive(:rates).and_return(rates)
+      expect(rates).to receive(:with_indifferent_access)
+      call_method
+    end
   end
 
   {from_json: :from_json, from_hash: :attributes=}.each do |class_method, instance_method|
@@ -702,18 +709,37 @@ describe AdvanceRequest do
       end
     end
   end
-  
-  describe '`notify_if_rate_bands_exceeded` method' do
+
+  describe 'inspect' do
+    let(:call_method) { subject.inspect }
+
+    it 'returns a String' do
+      expect(call_method).to be_kind_of(String)
+    end
+    [:type, :term, :amount, :id, :current_state, :rate, :stock_choice].each do |attr|
+      it "includes the `#{attr}`" do
+        expect(call_method).to include(subject.send(attr).to_s)
+      end
+    end
+
+    it 'includes the `errors`' do
+      expect(call_method).to include(subject.errors.inspect)
+    end
+  end
+
+  describe '`notify_if_rate_bands_exceeded` protected method' do
     let(:request_uuid) { double('Some UUID') }
     let(:mail_message) { double('A Mail Message', deliver_now: nil) }
     let(:rate_band_info) { double('rate band info', :[] => nil) }
     let(:rate_data) { double('rate_data', :[]= => nil, :[] => nil) }
-    let(:rates) { double('hash double', with_indifferent_access: double('advance type', :[] => double('advance term', :[] => rate_data))) }
-    let(:call_method) { subject.notify_if_rate_bands_exceeded(rates) }
+    let(:rates) { double('rates', :[] => double('term rates', :[] => rate_data)) }
+    let(:call_method) { subject.send(:notify_if_rate_bands_exceeded) }
     
     before do
       allow(request).to receive(:uuid).and_return(request_uuid)
       allow(InternalMailer).to receive(:exceeds_rate_band).and_return(mail_message)
+      allow(subject).to receive(:rates).and_return(rates)
+      allow(rate_data).to receive(:dup).and_return(rate_data)
     end
     describe 'when a rate is disabled' do
       before do 
@@ -741,22 +767,9 @@ describe AdvanceRequest do
       expect(InternalMailer).to_not receive(:exceeds_rate_band)
       call_method
     end
-  end
-
-  describe 'inspect' do
-    let(:call_method) { subject.inspect }
-
-    it 'returns a String' do
-      expect(call_method).to be_kind_of(String)
-    end
-    [:type, :term, :amount, :id, :current_state, :rate, :stock_choice].each do |attr|
-      it "includes the `#{attr}`" do
-        expect(call_method).to include(subject.send(attr).to_s)
-      end
-    end
-
-    it 'includes the `errors`' do
-      expect(call_method).to include(subject.errors.inspect)
+    it 'does not raise an error if `rates` is nil' do
+      allow(subject).to receive(:rates).and_return(nil)
+      expect{call_method}.to_not raise_error
     end
   end
 
