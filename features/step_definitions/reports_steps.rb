@@ -87,7 +87,7 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
   when 'Capital Stock Activity Statement'
     visit '/reports/capital-stock-activity'
   when 'Settlement Transaction Account Statement'
-    visit '/reports/settlement-transaction-account?start_date=2015-04-01&end_date=2015-04-30'
+    visit '/reports/settlement-transaction-account'
   when 'Advances Detail'
     visit '/reports/advances'
   when 'Cash Projections'
