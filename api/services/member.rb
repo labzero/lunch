@@ -1028,7 +1028,7 @@ module MAPI
         relative_get '/:id/mortgage_collateral_update' do
           member_id = params[:id]
           begin
-            MAPI::Services::Member::MortgageCollateralUpdate.mortgage_collateral_update(self.settings.environment, member_id).to_json
+            MAPI::Services::Member::MortgageCollateralUpdate.mortgage_collateral_update(self.settings.environment, logger, member_id).to_json
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'

@@ -9,12 +9,32 @@ module MAPI
                             total_count total_unpaid total_original pledged_original updated_original depledged_original 
                             rejected_original renumbered_original accepted_original).freeze
         
-        def self.mortgage_collateral_update(env, member_id)
+        def self.mortgage_collateral_update(env, logger, member_id)
           mcu_data = if env == :production
-            mcu_query = <<-SQL
+            self.fetch_hash(logger, Private.mcu_sql(member_id))
+          else
+            self.fake_hash('mortgage_collateral_update')
+          end    
+          
+          if mcu_data
+            processed_data = {
+              date_processed: mcu_data['DATE_PROCESSED']
+            }
+            STRING_FIELDS.each do |field|
+              processed_data[field.to_sym] = (mcu_data[field.upcase].to_s if mcu_data[field.upcase])
+            end
+            INTEGER_FIELDS.each do |field|
+              processed_data[field.to_sym] = (mcu_data[field.upcase].round if mcu_data[field.upcase])
+            end
+            processed_data.with_indifferent_access
+          end          
+        end
+        
+        module Private
+          def self.mcu_sql(member_id)
+            <<-SQL
               SELECT 
                 FHLB_ID,
-                NVL(MCU_PROCESSING_TYPE, '-') MCU_PROCESSING_TYPE,
                 NVL(MCU_PROCESSING_TYPE_DESC, 'Undefined') mcu_type,
                 TRANS_NUM as transaction_number, 
                 NVL(PLEDGE_TYPE_ID, '-') pledge_type,
@@ -32,8 +52,6 @@ module MAPI
                 SYS_UPB_RENUMBER as renumbered_unpaid,
                 SYS_UPB_DEPOSIT + SYS_UPB_UPDATE + SYS_UPB_RENUMBER accepted_unpaid,
                 SYS_UPB as total_unpaid,
-                RECONCILE_UPB,
-                RECONCILE_TOTAL_LOANS,
                 ACTUAL_START_DATE as date_processed,
                 SYS_APPRAISED_DEPOSIT as total_original,
                 SYS_ORIG_AMOUNT_DEPOSIT as pledged_original,
@@ -45,23 +63,7 @@ module MAPI
               FROM FHLBOWN.MCU_PROCESSED_RPT_WEB@colaprod_link MCU
               WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id)}
             SQL
-            ActiveRecord::Base.connection.execute(mcu_query).try(:fetch_hash) || {}
-          else
-            self.fake_hash('mortgage_collateral_update')
-          end    
-          
-          if mcu_data
-            processed_data = {
-              date_processed: mcu_data['DATE_PROCESSED']
-            }
-            STRING_FIELDS.each do |field|
-              processed_data[field.to_sym] = (mcu_data[field.upcase].to_s if mcu_data[field.upcase])
-            end
-            INTEGER_FIELDS.each do |field|
-              processed_data[field.to_sym] = (mcu_data[field.upcase].round if mcu_data[field.upcase])
-            end
-            processed_data.with_indifferent_access
-          end          
+          end
         end
       end
     end

@@ -10,9 +10,13 @@ describe MAPI::ServiceApp do
   describe 'the mortgage_collateral_update endpoint' do
     let(:call_endpoint) { get "/member/#{member_id}/mortgage_collateral_update" }
     let(:response) { double('response') }
-    before { allow(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:mortgage_collateral_update).and_return(response) } 
+    before { allow(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:mortgage_collateral_update).and_return(response) }
+    it 'calls the `mortgage_collateral_update` method with the logger' do
+      expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:mortgage_collateral_update).with(anything, ActiveRecord::Base.logger, anything)
+      call_endpoint
+    end
     it 'calls the `mortgage_collateral_update` method with the member id' do
-      expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:mortgage_collateral_update).with(anything, member_id.to_s)
+      expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:mortgage_collateral_update).with(anything, anything, member_id.to_s)
       call_endpoint
     end
     it 'returns the results of the method call as JSON' do
@@ -44,34 +48,26 @@ describe MAPI::ServiceApp do
     let(:string_doubles) { Hash[( string_fields.map { |key| [key, double(key, to_s: nil)] } )].with_indifferent_access }
     let(:integer_doubles) { Hash[( integer_fields.map { |key| [key, double(key, round: nil)] } )].with_indifferent_access  }
     let(:mcu_data) { integer_doubles.merge(string_doubles).merge(date_doubles).with_indifferent_access }
-    let(:call_method) { MAPI::Services::Member::MortgageCollateralUpdate.mortgage_collateral_update(env, member_id) }
+    let(:logger) { double('logger') }
     
     before { allow(Date).to receive(:parse).with(mcu_data[:date_processed]) }
     
     [:development, :test, :production].each do |env|
       describe "in the #{env} environment" do
-        let(:call_method) { MAPI::Services::Member::MortgageCollateralUpdate.mortgage_collateral_update(env, member_id) }
+        let(:call_method) { MAPI::Services::Member::MortgageCollateralUpdate.mortgage_collateral_update(env, logger, member_id) }
         
         if env == :production
-          let(:sql_response) { double('result of sql query') }
-          before do
-            allow(ActiveRecord::Base.connection).to receive(:execute).and_return(sql_response)
-            allow(sql_response).to receive(:fetch_hash).and_return(mcu_data)
-          end
+          before { allow(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:fetch_hash).and_return(mcu_data) }
           
           # tests specific to production environment
-          it 'executes a SQL query on the ActiveRecord::Base.connection' do
-            expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String))
+          it 'calls the shared utility function `fetch_hash` with the logger as an argument' do
+            expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:fetch_hash).with(logger, anything)
             call_method
           end
-          it 'fetches a hash of the results of the SQL query' do
-            expect(sql_response).to receive(:fetch_hash)
+          it 'calls the shared utility function `fetch_hash` with the proper sql query' do
+            sql_query = MAPI::Services::Member::MortgageCollateralUpdate::Private.mcu_sql(member_id)
+            expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:fetch_hash).with(anything, sql_query)
             call_method
-          end
-          it 'returns a hash with all expected keys with values of nil if the SQL query yields no results' do
-            blank_hash = {"date_processed"=>nil, "mcu_type"=>nil, "transaction_number"=>nil, "pledge_type"=>nil, "pledged_count"=>nil, "updated_count"=>nil, "depledged_count"=>nil, "renumbered_count"=>nil, "rejected_count"=>nil, "accepted_count"=>nil, "pledged_unpaid"=>nil, "updated_unpaid"=>nil, "depledged_unpaid"=>nil, "rejected_unpaid"=>nil, "renumbered_unpaid"=>nil, "accepted_unpaid"=>nil, "total_count"=>nil, "total_unpaid"=>nil, "total_original"=>nil, "pledged_original"=>nil, "updated_original"=>nil, "depledged_original"=>nil, "rejected_original"=>nil, "renumbered_original"=>nil, "accepted_original"=>nil}
-            allow(sql_response).to receive(:fetch_hash).and_return(nil)
-            expect(call_method).to eq(blank_hash)
           end
         else
           before { allow(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:fake_hash).with('mortgage_collateral_update').and_return(mcu_data) }

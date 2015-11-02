@@ -15,6 +15,15 @@ module MAPI
         def fake_hash(filename)
           fake(filename).with_indifferent_access
         end
+        
+        def fetch_hash(logger, sql)
+          begin
+            ActiveRecord::Base.connection.execute(sql).try(:fetch_hash) || {}
+          rescue => e
+            logger.error(:fetch_hash, e.message)
+            nil
+          end
+        end
 
         def fetch_hashes(logger, sql)
           begin

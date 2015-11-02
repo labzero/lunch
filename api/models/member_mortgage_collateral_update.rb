@@ -3,6 +3,11 @@ module MAPI
     class MemberMortgageCollateralUpdate
       include Swagger::Blocks
       swagger_model :MemberMortgageCollateralUpdate do
+        key :required, [:date_processed, :mcu_type, :transaction_number, :pledge_type, :pledged_count, :updated_count,
+                        :renumbered_count, :accepted_count, :depledged_count, :rejected_count, :total_count, :pledged_unpaid,
+                        :updated_unpaid, :renumbered_unpaid, :accepted_unpaid, :depledged_unpaid, :rejected_unpaid, :total_unpaid,
+                        :pledged_original, :updated_original, :renumbered_original, :accepted_original, :depledged_original,
+                        :rejected_original, :total_original]
         property :date_processed do
           key :type, :date
           key :description, 'The date on which the Mortgage Collateral was updated'
