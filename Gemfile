@@ -40,6 +40,7 @@ gem 'haml-rails'
 gem 'dotenv-rails'
 gem 'redis-rails'
 gem 'aasm'
+gem 'redis-objects'
 
 # for parsing emails into CorporateCommunication objects
 gem 'mail'
