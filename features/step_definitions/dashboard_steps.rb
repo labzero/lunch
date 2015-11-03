@@ -112,6 +112,10 @@ Then(/^I should see the quick advance table tooltip for the cell with a term of 
   page.find(".dashboard-quick-advance-flyout td[data-advance-term='#{term}'][data-advance-type='#{type}'] .tooltip", visible: true)
 end
 
+Then(/^I should see the quick advance table tooltip for the cell with a term of "(.*?)", a type of "(.*?)" and a maturity date of "(.*?)"$/) do |term, type, text|
+  page.find(".dashboard-quick-advance-flyout td[data-advance-term='#{term}'][data-advance-type='#{type}'] .tooltip-pair span:last-child", visible: true, text: text)
+end
+
 When(/^I select the rate with a term of "(.*?)" and a type of "(.*?)"$/) do |term, type|
   @rate_term = term
   @rate_type = type

@@ -19,6 +19,6 @@
         .quick-advance-cell-wrapper
           - unless rate_data[:disabled]
             = fhlb_formatted_number(advance_rate, precision: 2)
-            = render 'shared/tooltip', tooltip_data: make_quick_advance_tooltip_data( rate_data )
+            = render 'shared/tooltip', tooltip_data: make_quick_advance_tooltip_data( rate_data, advance_term )
           - else
             = t('global.missing_value')
