@@ -150,6 +150,7 @@ RSpec.describe WelcomeController, :type => :controller do
   describe "GET session_status" do
     let(:response_body) { get :session_status; JSON.parse(response.body).with_indifferent_access }
     let(:request_env) { double('request environment', :[] => nil, :'[]=' => nil) }
+    let(:path) { double('logged out path') }
     before do
       allow(controller).to receive(:user_signed_in?)
     end
@@ -162,8 +163,9 @@ RSpec.describe WelcomeController, :type => :controller do
       expect(request.env).to receive(:'[]=').with('devise.skip_trackable', true)
       get :session_status
     end
-    it 'should return a JSON hash with `new_session_path` set to the new_session_path' do
-      expect(response_body[:new_session_path]).to eq(new_user_session_path)
+    it 'should return a JSON hash with `logged_out_path` set to the `after_sign_out_path_for(nil)` if there is a current user' do
+      allow(controller).to receive(:after_sign_out_path_for).with(nil).and_return(path)
+      expect(response_body[:logged_out_path]).to eq(JSON.parse(path.to_json))
     end
     it 'should return a JSON hash with `user_signed_in` set to true if the user is signed in' do
       allow(controller).to receive(:user_signed_in?).and_return(true)

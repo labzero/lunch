@@ -71,7 +71,7 @@ class WelcomeController < ApplicationController
   end
 
   def session_status
-    render json: {user_signed_in: user_signed_in?, new_session_path: new_user_session_path}
+    render json: {user_signed_in: user_signed_in?, logged_out_path: after_sign_out_path_for(nil)}
   end
 
   protected

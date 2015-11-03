@@ -30,7 +30,7 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
       width: 100%;
     }
   }
-  form {
+  form, .welcome-logged-out {
     width: $welcome-right-column-real-width;
     @extend %dashboard-module-base-styling;
     padding: 0 20px 20px 20px;
@@ -40,7 +40,7 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
       display: block;
     }
   }
-  legend {
+  legend, .welcome-logged-out h2 {
     @extend %dashboard-module-header;
     @extend %typography-section-title;
     display: block;
@@ -183,6 +183,19 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
       content: $icon-success;
     }
   }
+  .welcome-logged-out {
+    h2 {
+      margin: 0;
+    }
+    p {
+      width: auto;
+      margin: 15px 0;
+    }
+    a {
+      @extend %typography-table-button;
+      width: 100%;
+    }
+  }
 }
 
 .welcome, .error-page {
@@ -195,3 +208,4 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     background-size: contain;
   }
 }
+
