@@ -3,8 +3,10 @@
     var $table = this;
     var $initiateButton = $(".dashboard-quick-advance-flyout .initiate-quick-advance");
     var $amountField = $('.dashboard-quick-advance-flyout input[name=amount]');
-    var $flyout = $('.dashboard-quick-advance-flyout')
+    var $flyout = $('.dashboard-quick-advance-flyout');
     var selected_rate = {};
+    var $catchAllError = $flyout.find('.quick-advance-error').remove().show();
+    var $flyoutBottomSection = $('.flyout-bottom-section');
 
     var $flyoutTableCells = $('.dashboard-quick-advance-flyout td.selectable-cell');
     $flyoutTableCells.on('click', function(){
@@ -56,7 +58,6 @@
     }
 
     function initiateQuickAdvance(rate_data) {
-      var $flyoutBottomSection = $('.flyout-bottom-section');
       transitionToLoadingFromRates();
       $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function(json){
         var $oldNodes = $flyout.find('.flyout-top-section-body span, .quick-advance-limited-pricing-message, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer');
@@ -99,9 +100,7 @@
           }
         }
 
-      }).error(function() {
-        transitionToRatesFromLoading();
-      });
+      }).error(showCatchAllError);
     };
 
     function initiateQuickAdvanceWithoutCapstockCheck(params) {
@@ -128,10 +127,7 @@
         });
         setRsaEventListener();
         setConfirmQuickAdvanceListener();     
-      }).error(function() {
-        transitionToCapstockFromLoading();
-        $flyoutBottomSection.find('p[data-error-type=unknown]').show();
-      });
+      }).error(showCatchAllError);
     }
 
     function validateSecurID ($form) {
@@ -192,10 +188,7 @@
             $flyoutBottomSection.find('input[name=securid_pin], input[name=securid_token]').addClass('input-field-error');
           }
         }
-      }).error(function() {
-        transitionToPreviewFromLoading();
-        $flyoutBottomSection.find('p[data-error-type=unknown]').show();
-      });
+      }).error(showCatchAllError);
     };
 
     function transitionToLoadingFromPreview () {
@@ -302,6 +295,12 @@
           performQuickAdvance(authentication_details);
         }
       });
+    };
+
+    function showCatchAllError () {
+      $flyoutBottomSection.children().hide();
+      $flyoutBottomSection.append($catchAllError.clone());
+      $catchAllError.find('.quick-advance-error-button').removeAttr('disabled');
     };
 
   };
