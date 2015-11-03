@@ -7,7 +7,7 @@ class ReportsController < ApplicationController
   # Mapping of current reports onto flags defined in MembersService
   ADVANCES_DETAIL_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA, MembersService::ADVANCES_DETAIL_HISTORY]
   BORROWING_CAPACITY_WEB_FLAGS = [MembersService::COLLATERAL_REPORT_DATA]
-  CAPITAL_STOCK_ACTIVITY_WEB_FLAGS = [MembersService::CURRENT_SECURITIES_POSITION, MembersService::CAPSTOCK_REPORT_BALANCE]
+  CAPITAL_STOCK_ACTIVITY_WEB_FLAGS = [MembersService::CURRENT_SECURITIES_POSITION, MembersService::CAPSTOCK_REPORT_BALANCE, MembersService::CAPSTOCK_REPORT_TRIAL_BALANCE]
   HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::IRDB_RATES_DATA]
   SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
   CASH_PROJECTIONS_WEB_FLAGS = [MembersService::CASH_PROJECTIONS_DATA]
@@ -60,6 +60,8 @@ class ReportsController < ApplicationController
     User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
     User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title')
   }
+
+  CAPITAL_STOCK_TRIAL_BALANCE_START_DATE=Date.parse('2002-01-01')
 
   AUTHORIZATIONS_ORDER = [
     User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER,
@@ -279,6 +281,36 @@ class ReportsController < ApplicationController
       raise StandardError, "There has been an error and ReportsController#capital_stock_activity has encountered nil. Check error logs." if @capital_stock_activity.nil?
     end
     @picker_presets = date_picker_presets(@start_date, @end_date, date_restriction)
+  end
+
+  def capital_stock_trial_balance
+    @max_date = most_recent_business_day(Time.zone.now.to_date - 1.day)
+    @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
+      summary = { certificates: [], number_of_shares: 0, number_of_certificates: 0 }
+    else
+      summary = member_balances.capital_stock_trial_balance(@start_date)
+      raise StandardError, "There has been an error and ReportsController#capital_stock_trial_balance has returned nil. Check error logs." if summary.blank?
+    end
+    @picker_presets         = date_picker_presets(@start_date)
+    @number_of_shares       = summary[:number_of_shares]
+    @number_of_certificates = summary[:number_of_certificates]
+    column_headings = [t('reports.pages.capital_stock_trial_balance.certificate_sequence'),
+                       t("global.issue_date"),
+                       t('reports.pages.capital_stock_trial_balance.transaction_type'),
+                       t('reports.pages.capital_stock_trial_balance.shares_outstanding')]
+    certificates = summary[:certificates].map do |certificate|
+      { columns: [{value: certificate[:certificate_sequence], type: :number, classes: [:'report-cell-narrow']},
+                  {value: certificate[:issue_date],           type: :date,   classes: [:'report-cell-narrow']},
+                  {value: certificate[:transaction_type],     type: nil,     classes: [:'report-cell-narrow']},
+                  {value: certificate[:shares_outstanding],   type: :number, classes: [:'report-cell-narrow']}] }
+    end
+    footer = [
+        {value: t('reports.pages.capital_stock_trial_balance.total_shares_outstanding'), colspan: 3},
+        {value: summary[:number_of_shares], type: :number, classes: [:'report-cell-narrow']}
+    ]
+    @capital_stock_trial_balance_table_data = { column_headings: column_headings, rows: certificates, footer: footer }
   end
 
   def borrowing_capacity

@@ -19,10 +19,6 @@ module MAPI
             'cur_total_amount'       => 'total',
         }
 
-        def self.quote(value)
-          ActiveRecord::Base.connection.quote(value)
-        end
-
         def self.securities_count_sql(fhlb_id, rundate)
           <<-SQL
           SELECT COUNT(*) AS RECORDSCOUNT FROM SAFEKEEPING.ACCOUNT_DOCKET_XREF ADX, SAFEKEEPING.CURRENT_DAY, SAFEKEEPING.CUSTOMER_PROFILE CP

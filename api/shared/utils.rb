@@ -25,6 +25,10 @@ module MAPI
           end
         end
 
+        def quote(value)
+          ActiveRecord::Base.connection.quote(value)
+        end
+
         def fetch_hashes(logger, sql)
           begin
             results = []

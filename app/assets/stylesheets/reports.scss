@@ -243,6 +243,8 @@
     }
   }
 
+
+
   .report-cell-right {
     text-align: right;
   }
@@ -1121,6 +1123,12 @@ td.dataTables_empty {
 .report-mcu {
   .report-main-body {
     margin-top: 10px;
+  }
+}
+
+.report-capital-stock-trial {
+  .report-table {
+    width: auto;
   }
 }
 

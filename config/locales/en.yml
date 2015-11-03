@@ -822,6 +822,9 @@ en:
       current_report: Current report only
       months: '%{months} months'
       back_to: Back to %{date}
+    certificate_count: # supports all CLDR rules
+      one: "%{count} certificate"
+      other: "%{count} certificates"
     share_count: # supports all CLDR rules
       one: "%{count} share"
       other: "%{count} shares"
@@ -1066,9 +1069,20 @@ en:
         closing_balance_heading: "Closing balance of Class B Shares as of %{date}:"
         table_title: Class B stock at $100 per share
         certificate_sequence: Certificate Sequence
+        issue_date: Issue Date
+        transaction_type: Transaction Type
+        shares_outstanding: Shares Outstanding
+      capital_stock_trial_balance:
+        title: Capital Stock Trial Balance
+        no_of_shares_heading: "Total Class B Shares Outstanding at $100 per share as of %{date}:"
+        no_of_certificates_heading: "Number of Certificates as of %{date}:"
+        table_title: Class B stock at $100 per share
+        certificate_sequence: Certificate Sequence
         debit_shares: "Debits: Number of Shares"
         credit_shares: "Credits: Number of Shares"
         shares_outstanding: Shares Outstanding
+        transaction_type: Transaction Type
+        total_shares_outstanding: Total Shares Outstanding
       borrowing_capacity_summary:
         total_borrowing_capacity_heading: "Total Borrowing Capacity:"
         remaining_borrowing_capacity_heading: "Remaining Borrowing Capacity:"
