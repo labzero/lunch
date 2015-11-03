@@ -8,6 +8,28 @@ RSpec.describe DashboardController, :type => :controller do
 
   it { should use_around_filter(:skip_timeout_reset) }
 
+  {AASM::InvalidTransition => [AdvanceRequest.new(7, 'foo'), 'executed', :default], AASM::UnknownStateMachineError => ['message'], AASM::UndefinedState => ['foo'], AASM::NoDirectAssignmentError => ['message']}.each do |exception, args|
+    describe "`rescue_from` #{exception}" do
+      let(:make_request) { get :index }
+      before do
+        allow(subject).to receive(:index).and_raise(exception.new(*args))
+      end
+
+      it 'logs at the `debug` log level' do
+        expect(subject.logger).to receive(:debug).exactly(:twice)
+        make_request rescue exception
+      end
+      it 'puts the advance_request as JSON in the log' do
+        expect(subject.send(:advance_request)).to receive(:to_json).and_call_original
+        make_request rescue exception
+      end
+      it 'reraises the error' do
+        expect{make_request}.to raise_error(exception)
+      end
+
+    end
+  end
+
   describe "GET index", :vcr do
     let(:member_id) {750}
     let(:empty_financing_availability_gauge) {{total: {amount: 0, display_percentage: 100, percentage: 0}}}
@@ -640,21 +662,21 @@ RSpec.describe DashboardController, :type => :controller do
   describe '`advance_request_from_session` protected method' do
     let(:call_method) { subject.send(:advance_request_from_session) }
     describe 'with a serialized request in the session' do
-      let(:serialized_request) { double('A Serialized AdvanceRequest') }
+      let(:id) { double('An ID') }
       let(:advance_request) { double('An AdvanceRequest') }
       before do
-        session[:advance_request] = serialized_request
-        allow(AdvanceRequest).to receive(:from_hash).and_return(advance_request)
+        session[:advance_request] = id
+        allow(AdvanceRequest).to receive(:find).and_return(advance_request)
       end
-      it 'fetches the request hash from the session' do
+      it 'fetches the request ID from the session' do
         allow(session).to receive(:[]).and_call_original
         expect(session).to receive(:[]).with(:advance_request)
         call_method
       end
-      it 'builds an AdvanceRequest from the hash' do
+      it 'finds the AdvanceRequest by ID' do
         request = double('A Request')
         allow(subject).to receive(:request).and_return(request)
-        expect(AdvanceRequest).to receive(:from_hash).with(serialized_request, request)
+        expect(AdvanceRequest).to receive(:find).with(id, request)
         call_method
       end
       it 'assigns the AdvanceRequest to @advance_request' do
@@ -662,24 +684,32 @@ RSpec.describe DashboardController, :type => :controller do
         expect(assigns[:advance_request]).to be(advance_request)
       end
     end
-    it 'calls `advance_request` if the session has no serialized request' do
+    it 'calls `advance_request` if the session has no ID' do
       expect(subject).to receive(:advance_request)
       call_method
     end
   end
 
   describe '`advance_request_to_session` protected method' do
+    let(:advance_request) { double(AdvanceRequest, id: SecureRandom.uuid) }
     let(:call_method) { subject.send(:advance_request_to_session) }
     it 'does nothing if there is no @advance_request' do
       call_method
       expect(session[:advance_request]).to be_nil
     end
-    it 'converts the AdvanceRequest to a hash and stores in session' do
-      serialized_request = double('A Serialized AdvanceRequest')
-      advance_request = double('An AdvanceRequest', serializable_hash: serialized_request)
-      subject.instance_variable_set(:@advance_request, advance_request)
-      call_method
-      expect(session[:advance_request]).to be(serialized_request)
+    describe 'with an AdvanceRequest' do
+      before do
+        subject.instance_variable_set(:@advance_request, advance_request)
+      end
+      it 'saves the AdvanceRequest' do
+        expect(advance_request).to receive(:save)
+        call_method
+      end
+      it 'stores the AdvanceResquest ID in the session if the save succedes' do
+        allow(advance_request).to receive(:save).and_return(true)
+        call_method
+        expect(session[:advance_request]).to eq(advance_request.id)
+      end
     end
   end
 
