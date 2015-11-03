@@ -49,6 +49,13 @@ Scenario: Quick Advance flyout tooltip
   And I open the quick advance flyout
   When I hover on the cell with a term of "2week" and a type of "whole"
   Then I should see the quick advance table tooltip for the cell with a term of "2week" and a type of "whole"
+  
+@jira-mem-979
+Scenario: Quick Advance flyout tooltip for Open advances
+  Given I visit the dashboard
+  And I open the quick advance flyout
+  When I hover on the cell with a term of "open" and a type of "agency"
+  Then I should see the quick advance table tooltip for the cell with a term of "open", a type of "agency" and a maturity date of "Open"
 
 Scenario: Select rate from Quick Advance flyout table
   Given I visit the dashboard

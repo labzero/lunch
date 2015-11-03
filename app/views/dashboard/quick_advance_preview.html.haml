@@ -8,7 +8,7 @@
         %p= t('dashboard.quick_advance.preview.intro')
       %p= t('dashboard.quick_advance.preview.lock_rate')
       %p.quick-advance-loading-message= t('dashboard.quick_advance.preview.initiate')
-    = render 'quick_advance_summary', preview: @preview, advance_amount: @total_amount, advance_description: @advance_description, advance_program: @advance_program, advance_type: @advance_type, advance_rate: @advance_rate, rate_changed: @rate_changed, old_rate: @old_rate, human_interest_day_count: @human_interest_day_count, payment_on: @payment_on, advance_term: @advance_term, funding_date: @funding_date, maturity_date: @maturity_date, stock: @stock
+    = render 'quick_advance_summary', preview: @preview, advance_amount: @total_amount, advance_description: @advance_description, advance_program: @advance_program, advance_type: @advance_type, advance_rate: @advance_rate, rate_changed: @rate_changed, old_rate: @old_rate, human_interest_day_count: @human_interest_day_count, payment_on: @payment_on, advance_term: @advance_term, advance_raw_term: @advance_raw_term, funding_date: @funding_date, maturity_date: @maturity_date, stock: @stock
     - unless @session_elevated
       %fieldset.securid-form
         %p= t('dashboard.quick_advance.securid.intro')
