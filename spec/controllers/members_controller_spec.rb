@@ -112,4 +112,20 @@ RSpec.describe MembersController, type: :controller do
       make_request
     end
   end
+
+  describe 'GET logged_out' do
+    let(:make_request) { get :logged_out }
+    let(:current_user) { double('user') }
+    it_behaves_like 'a user not required action', :get, :logged_out
+    it 'renders the `logged_out` view if no current_user' do
+      allow(subject).to receive(:current_user).and_return(nil)
+      make_request
+      expect(response.body).to render_template('logged_out')
+    end
+    it 'redirects to the `after_sign_in_path_for(current_user)` if current_user exists' do
+      allow(subject).to receive(:after_sign_in_path_for).with(current_user).and_return(dashboard_path)
+      allow(subject).to receive(:current_user).and_return(current_user)
+      expect(make_request).to redirect_to(dashboard_path)
+    end
+  end
 end
