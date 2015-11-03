@@ -39,9 +39,13 @@ RSpec.describe ApplicationController, :type => :controller do
   end
 
   describe '`after_sign_out_path_for(resource)` method' do
-    it 'redirects to the root path' do
-      expect(controller).to receive(:root_path)
+    it 'redirects to the logged_out path' do
+      expect(controller).to receive(:logged_out_path)
       controller.send(:after_sign_out_path_for, 'some resource')
+    end
+    it 'redirects to the logged_out path when passed `nil`' do
+      expect(controller).to receive(:logged_out_path)
+      controller.send(:after_sign_out_path_for, nil)
     end
   end
 

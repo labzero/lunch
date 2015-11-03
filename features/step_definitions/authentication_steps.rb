@@ -22,6 +22,7 @@ end
 
 Given(/^I am logged in as "(.*?)" with password "(.*?)"$/) do |user, password|
   step %{I am logged out}
+  step %{I visit the root path}
   step %{I fill in and submit the login form with username "#{user}" and password "#{password}"}
 end
 
@@ -68,6 +69,7 @@ end
 
 When(/^I log in as "(.*?)" with password "(.*?)"$/) do |user, password|
   step %{I am logged out}
+  step %{I visit the root path}
   step %{I fill in and submit the login form with username "#{user}" and password "#{password}"}
 end
 
@@ -117,11 +119,15 @@ end
 
 When(/^I log out$/) do
   click_link(I18n.t('nav.primary.logout'))
-  page.assert_selector('form.welcome-login')
+  step %{I should see the logged out page}
 end
 
 Then(/^I should see the login form$/) do
   page.assert_selector("form.welcome-login input[type=submit][value='#{I18n.t('global.login')}']", visible: true)
+end
+
+Then(/^I should see the logged out page/) do
+  page.assert_selector('.welcome-logged-out')
 end
 
 Then(/^I should see a bad login error$/) do
@@ -145,7 +151,7 @@ Then(/^I should see the member bank selector submit button disabled$/) do
 end
 
 Then(/^I should be logged out$/) do
-  step %{I should see the login form}
+  step %{I should see the logged out page}
   step %{I visit the dashboard}
   step %{I should see the login form}
 end
@@ -203,6 +209,10 @@ end
 
 When(/^I fill in and submit the login form with an expired user and the new password$/) do
   step %{I fill in and submit the login form with username "#{expired_user['username']}" and password "#{valid_password}"}
+end
+
+When(/^I visit the logged out page$/) do
+  visit '/logged-out'
 end
 
 def user_for_type(user_type)

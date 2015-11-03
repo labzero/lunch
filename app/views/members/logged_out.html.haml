@@ -1,0 +1,5 @@
+= render layout: 'devise/sessions/welcome' do
+  .welcome-logged-out
+    %h2= t('welcome.logged_out')
+    %p= t('welcome.session_expired')
+    =link_to(t('welcome.log_in_again'), root_path, class: 'primary-button')

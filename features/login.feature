@@ -125,4 +125,15 @@ Scenario: User tries to navigate back after logout
   Given I am logged in
   When I log out
   And I use the browser back button
-  Then I should be logged out
+  Then I should see the login form
+  
+@jira-mem-1123 @smoke
+Scenario: User sees the logged out page when logging out
+  Given I am logged in
+  When I log out
+  Then I should see the logged out page
+  
+Scenario: User is redirected when visiting the logged out page directly
+  Given I am logged in
+  When I visit the logged out page
+  Then I should see dashboard modules
