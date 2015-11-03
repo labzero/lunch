@@ -460,6 +460,10 @@ $breakdown-table-currency-width: 10px;
   background: $medium-gray;
 }
 
+.dashboard-financing-availability {
+  display: none;
+}
+
 .collateral-gauge-label-mortgages {
   color: $light-green;
 }
