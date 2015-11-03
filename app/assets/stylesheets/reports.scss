@@ -1073,6 +1073,51 @@ td.dataTables_empty {
   }
 }
 
+.report-mcu-details {
+  @extend %typography-subtitle;
+  dt {
+    width: 140px;
+    float: left;
+    color: $medium-gray;
+    margin-right: 20px;
+  }
+  dd {
+    margin-bottom: 8px;
+    &:last-child {
+      margin-bottom: 30px;
+    }
+  }
+}
+
+.report-mcu-table {
+  margin-bottom: 35px;
+  width: 540px;
+  &:last-of-type {
+    margin-bottom: 10px;
+    tbody tr:first-child {
+      @extend %table-footer-cell;
+    }
+  }
+  td, th {
+    @include table-cell-treatment;
+  }
+  th:nth-child(1) {
+    width: 186px;
+  }
+  th:nth-child(2) {
+    width: 86px;
+  }
+  th:nth-child(3) {
+    width: 128px;
+  }
+}
+
+.report-mcu {
+  .report-main-body {
+    margin-top: 10px;
+  }
+}
+
 @media print {
   a, .report-main-body small a, .advances-main-body small a, .authorizations-report a, .reports a, .report a {
     color: $print-link-color;

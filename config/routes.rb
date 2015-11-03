@@ -44,7 +44,7 @@ Rails.application.routes.draw do
     get '/account-summary' => 'reports#account_summary'
     get '/todays-credit' => 'reports#todays_credit'
     get '/trial-balance' => 'error#not_found'
-    get '/mortgage-collateral-update' => 'error#not_found'
+    get '/mortgage-collateral-update' => 'reports#mortgage_collateral_update'
   end
 
   get '/advances' => 'advances#index'

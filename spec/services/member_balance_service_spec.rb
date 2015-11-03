@@ -1312,6 +1312,24 @@ describe MemberBalanceService do
       expect(todays_credit_activity.first[:product_description]).to eq(non_exercised_activity[:instrument_type])
     end
   end
+  
+  describe 'the `mortgage_collateral_update` method' do
+    let(:mortgage_collateral_update) { subject.mortgage_collateral_update }
+    let(:response) { double('response') }    
+    it_should_behave_like 'a MAPI backed service object method', :mortgage_collateral_update
+    it 'should call `get_hash` with the appropriate endpoint' do
+      expect(subject).to receive(:get_hash).with(:mortgage_collateral_update, "/member/#{member_id}/mortgage_collateral_update")
+      mortgage_collateral_update
+    end
+    it 'should call `fix_date` with the appropriate date field called out' do
+      expect(subject).to receive(:fix_date).with(anything, :date_processed)
+      mortgage_collateral_update
+    end
+    it 'should return the result of the `fix_date` call' do
+      allow(subject).to receive(:fix_date).with(anything, :date_processed).and_return(response)
+      expect(mortgage_collateral_update).to eq(response)
+    end
+  end
 
   # Helper Methods
   def expect_capital_stock_balance_to_receive(date)

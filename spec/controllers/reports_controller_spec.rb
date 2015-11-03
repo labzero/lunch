@@ -2,6 +2,7 @@ require 'rails_helper'
 include CustomFormattingHelper
 include ActionView::Helpers::NumberHelper
 include DatePickerHelper
+include ActiveSupport::Inflector
 
 RSpec.describe ReportsController, :type => :controller do
   shared_examples 'a date restricted report' do |action, default_start_selection=nil|
@@ -1153,6 +1154,95 @@ RSpec.describe ReportsController, :type => :controller do
         expect{todays_credit}.to raise_error
       end
     end
+    
+    describe 'GET mortgage_collateral_update' do
+      column_headings = [I18n.t('common_table_headings.transaction'), I18n.t('common_table_headings.loan_count'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.unpaid_balance'), '$'), fhlb_add_unit_to_table_header(I18n.t('global.original_amount'), '$')]
+      accepted_loans_hash = {
+        instance_variable: :accepted_loans_table_data,
+        table_row_arg: %w(updated pledged renumbered),
+        table_column_args: ['accepted', I18n.t('reports.pages.mortgage_collateral_update.total_accepted')]
+      }
+      submitted_loans_hash = {
+        instance_variable: :submitted_loans_table_data,
+        table_row_arg: %w(accepted rejected),
+        table_column_args: ['total', I18n.t('reports.pages.mortgage_collateral_update.total_submitted')]
+      }
+      let(:mortgage_collateral_update) { get :mortgage_collateral_update }
+      let(:mcu_data) { double('mcu data from service object') }
+      let(:table_rows) { double('table rows') }
+      let(:table_footer) { double('table footer') }
+      before do
+        allow(member_balance_service_instance).to receive(:mortgage_collateral_update).and_return(mcu_data)
+        allow(subject).to receive(:mcu_table_rows_for)
+        allow(subject).to receive(:mcu_table_columns_for)
+      end
+      
+      it_behaves_like 'a user required action', :get, :mortgage_collateral_update
+      
+      it 'renders the mortgage_collateral_update view' do
+        mortgage_collateral_update
+        expect(response.body).to render_template('mortgage_collateral_update')
+      end
+      it 'sets the @mcu_data instance variable to the result of the `mortgage_collateral_update` MemberBalanceService method' do
+        mortgage_collateral_update
+        expect(assigns[:mcu_data]).to eq(mcu_data)
+      end
+      
+      [accepted_loans_hash, submitted_loans_hash].each do |hash|
+        describe "the @#{hash[:instance_variable].to_s} instance variable" do
+          it "has a column_headings array equal to #{column_headings}" do
+            mortgage_collateral_update
+            expect(assigns[hash[:instance_variable]][:column_headings]).to eq(column_headings)
+          end
+          it "calls the `mcu_table_columns_for` private method with @mcu_data, #{hash[:table_column_args].first}, #{hash[:table_column_args].last}" do
+            expect(subject).to receive(:mcu_table_columns_for).with(mcu_data, hash[:table_column_args].first, hash[:table_column_args].last)
+            mortgage_collateral_update
+          end
+          it 'has a footer array equal to the result of the `mcu_table_columns_for` private method' do
+            allow(subject).to receive(:mcu_table_columns_for).with(mcu_data, hash[:table_column_args].first, hash[:table_column_args].last).and_return(table_footer)
+            mortgage_collateral_update
+            expect(assigns[hash[:instance_variable]][:footer]).to eq(table_footer)
+          end
+          it "calls the `mcu_table_rows_for` private method with @mcu_data, #{hash[:table_row_arg]}" do
+            expect(subject).to receive(:mcu_table_rows_for).with(mcu_data, hash[:table_row_arg])
+            mortgage_collateral_update
+          end
+          it "has a rows array equal to the result of the `mcu_table_rows_for` private method" do
+            allow(subject).to receive(:mcu_table_rows_for).with(mcu_data, hash[:table_row_arg]).and_return(table_rows)
+            mortgage_collateral_update
+            expect(assigns[hash[:instance_variable]][:rows]).to eq(table_rows)
+          end
+        end
+      end
+      describe 'the @depledged_loans_table_data instance variable' do
+        it "has a column_headings array equal to #{column_headings}" do
+          mortgage_collateral_update
+          expect(assigns[:depledged_loans_table_data][:column_headings]).to eq(column_headings)
+        end
+        it "calls the `mcu_table_columns_for` private method with @mcu_data, 'depledged', #{I18n.t('reports.pages.mortgage_collateral_update.loans_depledged')}" do
+          expect(subject).to receive(:mcu_table_columns_for).with(mcu_data, 'depledged', I18n.t('reports.pages.mortgage_collateral_update.loans_depledged'))
+          mortgage_collateral_update
+        end
+        it "has a rows array with a row object containing the result of the `mcu_table_columns_for` private method" do
+          expect(subject).to receive(:mcu_table_columns_for).with(mcu_data, 'depledged', I18n.t('reports.pages.mortgage_collateral_update.loans_depledged')).and_return(table_rows)
+          mortgage_collateral_update
+          expect(assigns[:depledged_loans_table_data][:rows]).to eq([{columns: table_rows}])
+        end
+      end
+      describe 'with the report disabled' do
+        before do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS).and_return(true)
+        end
+        it "sets @mcu_data to an hash" do
+          mortgage_collateral_update
+          expect(assigns[:mcu_data]).to eq({})
+        end
+      end
+      it 'raises an error if the MAPI endpoint returns nil' do
+        allow(member_balance_service_instance).to receive(:mortgage_collateral_update).and_return(nil)
+        expect{mortgage_collateral_update}.to raise_error
+      end
+    end
   end
 
   describe 'GET current_price_indications' do
@@ -2083,6 +2173,47 @@ RSpec.describe ReportsController, :type => :controller do
           start_date = Date.new(2013,4,17)
           expect(controller.send(:month_restricted_start_date, start_date)).to eq(start_date.end_of_month)
         end
+      end
+    end
+    
+    describe '`mcu_table_rows_for`' do
+      let(:data_hash) { double('a data hash') }
+      let(:loan_type_1) { double('a loan type') }
+      let(:loan_type_2) { double('another loan type') }
+      let(:translation_1) { double('a translation') }
+      let(:translation_2) { double('another translation') }
+      let(:column_data_1) { double('some column data') }
+      let(:column_data_2) { double('some more column data') }
+      let(:loan_types) { [loan_type_1, loan_type_2] }
+      let(:call_method) { subject.send(:mcu_table_rows_for, data_hash, loan_types) }
+      
+      it 'calls `mcu_table_columns_for` with the proper args for each supplied loan type in the correct order' do
+        allow(subject).to receive(:t).with("reports.pages.mortgage_collateral_update.#{loan_type_1}").and_return(translation_1)
+        allow(subject).to receive(:t).with("reports.pages.mortgage_collateral_update.#{loan_type_2}").and_return(translation_2)
+        expect(subject).to receive(:mcu_table_columns_for).with(data_hash, loan_type_1, translation_1).ordered
+        expect(subject).to receive(:mcu_table_columns_for).with(data_hash, loan_type_2, translation_2).ordered
+        call_method
+      end
+      it 'returns an array of row objects constructed from the `mcu_table_columns_for` method' do
+        expect(subject).to receive(:mcu_table_columns_for).and_return(column_data_1, column_data_2)
+        expect(call_method).to eq([{columns: column_data_1},{columns: column_data_2}])
+      end
+    end
+    
+    describe '`mcu_table_columns_for`' do
+      let(:data_hash) { double('a data hash', :[] => nil) }
+      let(:loan_type) { double('a loan type') }
+      let(:value) { double('some value') }
+      let(:title) { double('title') }
+      let(:call_method) { subject.send(:mcu_table_columns_for, data_hash, loan_type, title) }
+      it 'returns an array whose first member is an object with a value equal to the argument supplied' do
+        expect(call_method.first).to eq({value: title})
+      end
+      %w(count unpaid original).each_with_index do |type, i|
+        it "returns an array whose #{ordinalize(i)} member is an object with the correct loan_type #{type} value from the data hash and a type of `:number`" do
+          allow(data_hash).to receive(:[]).with(:"#{loan_type}_#{type}").and_return(value)
+          expect(call_method[i + 1]).to eq({value: value, type: :number})
+        end  
       end
     end
   end

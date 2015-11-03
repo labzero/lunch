@@ -181,6 +181,9 @@ en:
     funding_date: Funding Date
     advance_type: Advance Type
     product_type: Product Type
+    transaction: Transaction
+    loan_count: Loan Count
+    unpaid_balance: Unpaid Balance
   datepicker:
     range:
       date_to_current: "%{date} to date"
@@ -1247,6 +1250,24 @@ en:
         activity_based_requirement: Activity-Based Stock Requirement
         remaining_stock_html: "Remaining<br> Stock"
         remaining_leverage: Remaining Leverage
+      mortgage_collateral_update:
+        title: Mortgage Collateral Update (MCU) Status
+        details: MCU Details
+        type: MCU Type
+        processed_date: Processed Date
+        pledge_type: Pledge Type
+        loans_accepted: Loans Accepted
+        loans_submitted: Loans Submitted
+        loans_depledged: Loans Depledged/Not Reported
+        updated: Updated
+        pledged: Newly Pledged/Reported
+        renumbered: Renumbered
+        accepted: Accepted
+        rejected: Rejected
+        total_accepted: Total Loans Accepted 
+        total_submitted: Total Loans Submitted
+        version_request: To request an expanded version of this report or to obtain a prior version, contact Collateral Services at %{phone_number}
+        report_details: This report reflects the most recent data available after each MCU has been processed. Only the current report is available. An email with an expanded version of this report that includes detailed rejection and inconsistency information is sent to your institution each time an MCU is processed. 
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.

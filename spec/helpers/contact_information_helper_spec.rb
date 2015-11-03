@@ -55,4 +55,12 @@ describe ContactInformationHelper, type: :helper do
     end
     include_examples 'phone number contact method', 'OPERATIONS_PHONE_NUMBER'
   end
+
+  describe '`mcu_phone_number` method' do
+    let(:call_method) { helper.mcu_phone_number }
+    it 'responds to `mcu_phone_number`' do
+      expect(helper).to respond_to(:mcu_phone_number)
+    end
+    include_examples 'phone number contact method', 'MCU_PHONE_NUMBER'
+  end
 end
