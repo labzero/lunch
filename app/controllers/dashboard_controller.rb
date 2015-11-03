@@ -312,16 +312,18 @@ class DashboardController < ApplicationController
   end
 
   def advance_request_from_session
-    request_hash = session[:advance_request]
-    @advance_request = if request_hash 
-      AdvanceRequest.from_hash(request_hash, request)
+    id = session[:advance_request]
+    @advance_request ||= if id 
+      AdvanceRequest.find(id, request)
     else
       advance_request
     end
   end
 
   def advance_request_to_session
-    session[:advance_request] = @advance_request.serializable_hash if @advance_request
+    if @advance_request
+      session[:advance_request] = @advance_request.id if @advance_request.save
+    end
   end
 
   def advance_request

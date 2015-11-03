@@ -39,6 +39,7 @@ class AdvanceRequest
   PREVIEW_EXCLUDE_KEYS = [:advance_amount, :advance_rate, :advance_type, :advance_term, :status].freeze
 
   VALID_AMOUNT = /\A[0-9,]+(\.0?0?)?\z/i.freeze
+  LOG_PREFIX = "  \e[36m\033[1mREDIS\e[0m ".freeze
 
   attr_accessor *CORE_PARAMETERS
   attr_accessor *REQUEST_PARAMETERS
@@ -136,6 +137,10 @@ class AdvanceRequest
     choice = choice.to_sym
     raise "Unknown Stock Choice: #{choice}" if choice && !STOCK_CHOICES.include?(choice)
     @stock_choice = choice
+  end
+
+  def initiated_at=(datetime)
+    @initiated_at = datetime.try(:to_datetime)
   end
 
   def total_amount
@@ -238,14 +243,16 @@ class AdvanceRequest
   end
 
   def attributes=(hash)
-    hash.each do |key, value|
+    process_attribute = Proc.new do |key, value|
       case key.to_sym
       when :current_state
-        aasm.current_state = value
+        aasm.current_state = value.to_sym
       when :rates
-        @rates = value.with_indifferent_access
+        self.rates = value.with_indifferent_access
       when :id
         @id = value
+      when :timestamp
+        @timestamp = value.to_datetime
       when *READONLY_ATTRS
         instance_variable_set("@#{key}", value)
       when *(REQUEST_PARAMETERS + CORE_PARAMETERS)
@@ -253,6 +260,11 @@ class AdvanceRequest
       else
         raise "unknown attribute: #{key}"
       end
+    end
+    indifferent_hash = hash.with_indifferent_access
+    process_attribute.call(:rates, indifferent_hash[:rates]) if indifferent_hash.has_key?(:rates)
+    indifferent_hash.each do |key, value|
+      process_attribute.call(key, value) unless [:rates, 'rates'].include?(key)
     end
   end
 
@@ -265,6 +277,21 @@ class AdvanceRequest
     attrs
   end
 
+  def save
+    save_result = !!redis_value.set(to_json)
+    save_result = !!(redis_value.expire(Rails.configuration.x.advance_request.key_expiration)) if save_result
+    log{"AdvanceRequest:#{id} #{save_result ? 'saved' : 'save failed'}."}
+    save_result
+  end
+
+  def ttl
+    redis_value.ttl
+  end
+
+  def inspect
+    "<#{self.class}:#{id} state='#{current_state}' term='#{term}' type='#{type}' rate='#{rate}' amount='#{amount}' stock_choice='#{stock_choice}' errors=#{errors.inspect}>"
+  end
+
   def self.from_json(json, request=nil)
     new(nil, nil, request).from_json(json)
   end
@@ -275,17 +302,42 @@ class AdvanceRequest
     obj
   end
 
-  def inspect
-    "<#{self.class}:#{id} state='#{current_state}' term='#{term}' type='#{type}' rate='#{rate}' amount='#{amount}' stock_choice='#{stock_choice}' errors=#{errors.inspect}>"
+  def self.find(id, request=nil)
+    value = redis_value(id)
+    raise ActiveRecord::RecordNotFound if value.nil?
+    obj = from_json(value.value, request)
+    value.expire(Rails.configuration.x.advance_request.key_expiration)
+    log{"AdvanceRequest.find(#{id}) #{obj ? 'succeded' : 'failed'}."}
+    obj
+  end
+
+  def self.redis_key(id)
+    "#{self.name}:#{id}"
+  end
+
+  def self.redis_value(id)
+    Redis::Value.new(redis_key(id))
+  end
+
+  def self.log(level = :info, &message_block)
+    Rails.logger.send(level) { LOG_PREFIX + message_block.call.to_s }
   end
 
   protected
 
+  def log(level = :info, &message_block)
+    self.class.log(level, &message_block)
+  end
+
+  def redis_value
+    @redis_value ||= self.class.redis_value(id)
+  end
+
   def notify_if_rate_bands_exceeded
-    return unless rates
+    return unless @rates
     ADVANCE_TYPES.each do |type|
       ADVANCE_TERMS.each do |term|
-        rate_data = rates[type][term].dup
+        rate_data = @rates[type][term].dup
         rate_data[:type] = type
         rate_data[:term] = term
         if rate_data[:disabled] && (rate_data[:rate_band_info][:min_threshold_exceeded] || rate_data[:rate_band_info][:max_threshold_exceeded])

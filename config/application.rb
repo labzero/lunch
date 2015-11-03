@@ -55,5 +55,7 @@ module FhlbMember
       'Pragma' => 'no-cache',
       'Cache-Control' => 'no-store'
     }
+
+    config.x.advance_request.key_expiration = 1.hour
   end
 end
