@@ -74,29 +74,49 @@ module MAPI
           end
         end
 
-        def self.get_trade_activity_trades(message)
-          trade_activity = []
-          begin
-            response = @@trade_connection.call(:get_trade, message_tag: 'tradeRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER)
-          rescue Savon::Error => error
-            raise error
+        def self.get_ods_deal_structure_code(app, sub_product, collateral)
+          collateral = collateral.gsub(/[ -]/, '')
+          if app.settings.environment == :production
+            ods_deal_structure_code_query = <<-SQL
+              SELECT SYS_ADVANCE_TYPE
+              FROM ODS.ADV_TYPE_REFERENCE@ODS_LK
+              WHERE SUB_PRODUCT = #{ActiveRecord::Base.connection.quote(sub_product)} and COLLATERAL_TYPE = #{ActiveRecord::Base.connection.quote(collateral)}
+            SQL
+            ods_deal_structure = fetch_hash(app.logger, ods_deal_structure_code_query)
+            ods_deal_structure_code = nil
+            ods_deal_structure_code = ods_deal_structure['SYS_ADVANCE_TYPE'] if ods_deal_structure
+          else
+            ods_deal_structure_code = sub_product
           end
-          response.doc.remove_namespaces!
-          fhlbsfresponse = response.doc.xpath('//Envelope//Body//tradeResponse//trades//trade')
-          fhlbsfresponse.each do |trade|
-            if ACTIVE_ADVANCES_ARRAY.include? trade.at_css('tradeHeader status').content
-              rate = (trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate') : trade.at_css('advance coupon initialRate')).content
-              hash = {
-                'trade_date' => build_trade_datetime(trade),
-                'funding_date' => trade.at_css('tradeHeader settlementDate').content,
-                'maturity_date' => trade.at_css('advance maturityDate') ? trade.at_css('advance maturityDate').content : 'Open',
-                'advance_number' => trade.at_css('advance advanceNumber').content,
-                'advance_type' => trade.at_css('advance product').content,
-                'status' => Date.parse(trade.at_css('tradeHeader tradeDate').content) < Time.zone.today ? 'Outstanding' : 'Processing',
-                'interest_rate' => rate,
-                'current_par' => trade.at_css('advance par amount').content.to_f
-              }
-              trade_activity.push(hash)
+          ods_deal_structure_code
+        end
+
+        def self.get_trade_activity_trades(app, message)
+          trade_activity = []
+          connection = MAPI::Services::Member::TradeActivity.init_trade_connection(app.settings.environment)
+          if connection
+            begin
+              response = connection.call(:get_trade, message_tag: 'tradeRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER)
+            rescue Savon::Error => error
+              raise error
+            end
+            response.doc.remove_namespaces!
+            fhlbsfresponse = response.doc.xpath('//Envelope//Body//tradeResponse//trades//trade')
+            fhlbsfresponse.each do |trade|
+              if ACTIVE_ADVANCES_ARRAY.include? trade.at_css('tradeHeader status').content
+                rate = (trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate') : trade.at_css('advance coupon initialRate')).content
+                hash = {
+                  'trade_date' => build_trade_datetime(trade),
+                  'funding_date' => trade.at_css('tradeHeader settlementDate').content,
+                  'maturity_date' => trade.at_css('advance maturityDate') ? trade.at_css('advance maturityDate').content : 'Open',
+                  'advance_number' => trade.at_css('advance advanceNumber').content,
+                  'advance_type' => get_ods_deal_structure_code(app, trade.at_css('advance subProduct').content, trade.at_css('advance collateralType').content),
+                  'status' => Date.parse(trade.at_css('tradeHeader tradeDate').content) < Time.zone.today ? 'Outstanding' : 'Processing',
+                  'interest_rate' => rate,
+                  'current_par' => trade.at_css('advance par amount').content.to_f
+                }
+                trade_activity.push(hash)
+              end
             end
           end
           trade_activity
@@ -116,7 +136,7 @@ module MAPI
                     'v1:arrayOfAssetClasses' => [{'v1:assetClass' => instrument}]
                   }]
                 }
-                trade_activity.push(*MAPI::Services::Member::TradeActivity.get_trade_activity_trades(message))
+                trade_activity.push(*MAPI::Services::Member::TradeActivity.get_trade_activity_trades(app, message))
               end
             else
               message = {
@@ -126,7 +146,7 @@ module MAPI
                   'v1:arrayOfAssetClasses' => [{'v1:assetClass' => instrument}]
                 }]
               }
-              trade_activity.push(*MAPI::Services::Member::TradeActivity.get_trade_activity_trades(message))
+              trade_activity.push(*MAPI::Services::Member::TradeActivity.get_trade_activity_trades(app, message))
             end
             trade_activity
           else
