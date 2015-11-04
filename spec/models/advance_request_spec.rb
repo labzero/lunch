@@ -293,7 +293,7 @@ describe AdvanceRequest do
         stub_const("#{described_class.name}::#{allowed_values_const_name}", allowed_values)
         allow(allowed_values).to receive(:include?).with(sym_value).and_return(true)
       end
-
+      
       it "converts the supplied `#{attr}` to a symbol" do
         expect(value).to receive(:to_sym).and_return(sym_value)
         call_method
@@ -310,17 +310,36 @@ describe AdvanceRequest do
         call_method
         expect(subject.send(attr)).to be(sym_value)
       end
-      it 'updates the rate if both `term` and `type` are present' do
-        term = double('A Term')
-        type = double('A Type')
-        allow(subject).to receive(:term).and_return(term)
-        allow(subject).to receive(:type).and_return(type)
-        expect(subject).to receive(:rate_for!).with(term, type)
-        call_method
-      end
       it "does not update the rate if the `#{attr}` has not changed" do
         call_method
         expect(subject).to_not receive(:rate_for!)
+        call_method
+      end
+      describe 'when both `term` and `type` are present' do
+        let(:term) { double('A Term') }
+        let(:type) { double('A Tyoe') }
+        before do
+          allow(subject).to receive(:term).and_return(term)
+          allow(subject).to receive(:type).and_return(type)
+          allow(subject).to receive(:rate_for!)
+        end
+        it 'resets the `stock_choice` if the value has changed' do
+          expect(subject).to receive(:reset_stock_choice!)
+          call_method
+        end
+        it 'does not reset the `stock_choice` attr if the value has not changed' do
+          call_method
+          expect(subject).to_not receive(:reset_stock_choice!)
+          call_method
+        end
+        it 'updates the rate' do
+          expect(subject).to receive(:rate_for!).with(term, type)
+          call_method
+        end
+      end
+      it 'does not reset the `stock_choice` attr if type or term is not present' do
+        call_method
+        expect(subject).to_not receive(:reset_stock_choice!)
         call_method
       end
     end
@@ -335,6 +354,18 @@ describe AdvanceRequest do
       before do
         allow(subject).to receive(:transform_amount).with(amount, attr).and_return(transformed_amount)
         allow(subject).to receive(:transform_amount).with(nil, attr).and_return(nil)
+      end
+      
+      if attr == :amount
+        it 'resets the `stock_choice` attr via the `reset_stock_choice!` method if the new amount differs from the old amount' do
+          expect(subject).to receive(:reset_stock_choice!)
+          call_method
+        end
+        it 'does not reset the `stock_choice` attr if the new amount is the same as the old amount' do
+          call_method
+          expect(subject).to_not receive(:reset_stock_choice!)
+          call_method
+        end
       end
 
       it 'passes the amount through `transform_amount`' do
