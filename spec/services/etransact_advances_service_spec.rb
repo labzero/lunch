@@ -56,7 +56,8 @@ describe EtransactAdvancesService do
     let(:advance_rate) {'0.17'}
     let(:check_capstock) {true}
     let(:amount) { 100 }
-    let(:call_method) {subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer)}
+    let(:maturity_date) { "2016-03-11".to_date }
+    let(:call_method) {subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer, maturity_date)}
     
     before do
       allow(subject).to receive(:calypso_error_handler).and_return(nil)
@@ -66,7 +67,7 @@ describe EtransactAdvancesService do
       expect(call_method).to be_kind_of(Hash)
     end
     it 'calls `get_hash`' do
-      expect(subject).to receive(:get_hash).with(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{check_capstock}/#{signer}")
+      expect(subject).to receive(:get_hash).with(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}")
       call_method
     end
     it 'returns the results of `get_hash`' do
