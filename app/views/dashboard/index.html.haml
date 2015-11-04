@@ -103,6 +103,8 @@
                       %th
                         .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.aa')
                   %tbody
+          = render layout: 'quick_advance_error', locals: {no_display: true, close: true} do
+            %p= t('dashboard.quick_advance.error.advance_unavailable', phone_number: service_desk_phone_number)
           %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.preview')
           %small
             %p.rate-advances-footer= t('dashboard.quick_advance.table.footer')
