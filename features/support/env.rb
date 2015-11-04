@@ -90,9 +90,7 @@ if !custom_host
   puts "LDAP starting, ldap://localhost:#{ldap_port}"
   ldap_stdin, ldap_stdout, ldap_stderr, ldap_thr = Open3.popen3(ldap_server)
   at_exit do
-    Process.kill('INT', ldap_thr.pid) rescue Errno::ESRCH
-    ldap_stdin.close
-    ldap_thr.value # wait for the thread to finish
+    kill_background_process(ldap_thr, ldap_stdin)
     FileUtils.rm_rf(ldap_root)
   end
   check_service(ldap_port, ldap_thr, ldap_stdout, ldap_stderr, 'LDAP')
@@ -112,9 +110,7 @@ if !custom_host
   mapi_stdin, mapi_stdout, mapi_stderr, mapi_thr = Open3.popen3({'RACK_ENV' => 'test'}, mapi_server)
 
   at_exit do
-    Process.kill('INT', mapi_thr.pid) rescue Errno::ESRCH
-    mapi_stdin.close
-    mapi_thr.value # wait for the thread to finish
+    kill_background_process(mapi_thr, mapi_stdin)
   end
   check_service(mapi_port, mapi_thr, mapi_stdout, mapi_stderr, 'MAPI')
 
@@ -135,12 +131,10 @@ if !custom_host
   end
 
   at_exit do
-    Process.kill('TERM', resque_thr.pid) rescue Errno::ESRCH
-    resque_stdin.close
-    resque_thr.value # wait for the thread to finish
+    kill_background_process(resque_thr, resque_stdin, 'TERM')
   end
 
-  resque_time_out_at = Time.now + 15.seconds
+  resque_time_out_at = Time.now + 20.seconds
 
   while Time.now < resque_time_out_at && Resque.workers.count == 0
     Resque.workers.each do |worker|
@@ -150,6 +144,7 @@ if !custom_host
   end
 
   unless Resque.workers.count > 0
+    kill_background_process(resque_thr, resque_stdin, 'TERM')
     IO.copy_stream(resque_stdout, STDOUT)
     IO.copy_stream(resque_stderr, STDERR)
     raise 'resque-pool failed to start'
