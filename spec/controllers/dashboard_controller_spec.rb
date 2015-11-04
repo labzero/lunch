@@ -241,7 +241,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:rate_data) { {some: 'data'} }
     let(:RatesService) {class_double(RatesService)}
     let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
-    let(:advance_request) { double('An AdvanceRequest', rates: rate_data, errors: []) }
+    let(:advance_request) { double(AdvanceRequest, rates: rate_data, errors: [], id: SecureRandom.uuid) }
     let(:make_request) { get :quick_advance_rates }
 
     before do
@@ -255,19 +255,29 @@ RSpec.describe DashboardController, :type => :controller do
       expect(advance_request).to receive(:rates).and_return(rate_data)
       make_request
     end
-    it 'should render its view' do
+    it 'render its view' do
       make_request
       expect(response.body).to render_template('dashboard/quick_advance_rates')
     end
-    it 'should set @rate_data' do
+    it 'includes the html in its response' do
+      make_request
+      data = JSON.parse(response.body)
+      expect(data['html']).to be_kind_of(String)
+    end
+    it 'includes the advance request ID in its response' do
+      make_request
+      data = JSON.parse(response.body)
+      expect(data['id']).to eq(advance_request.id)
+    end
+    it 'sets @rate_data' do
       make_request
       expect(assigns[:rate_data]).to eq(rate_data)
     end
-    it 'should set @advance_terms' do
+    it 'sets @advance_terms' do
       make_request
       expect(assigns[:advance_terms]).to eq(AdvanceRequest::ADVANCE_TERMS)
     end
-    it 'should set @advance_types' do
+    it 'sets @advance_types' do
       make_request
       expect(assigns[:advance_types]).to eq(AdvanceRequest::ADVANCE_TYPES)
     end
@@ -294,7 +304,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:check_capstock) { true }
     let(:check_result) {{:status => 'pass', :low => 100000, :high => 1000000000}}
     let(:make_request) { post :quick_advance_preview, interest_day_count: interest_day_count, payment_on: payment_on, maturity_date: maturity_date, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, check_capstock: check_capstock}
-    let(:advance_request) { double('An AdvanceRequest', :type= => nil, :term= => nil, :amount= => nil, :stock_choice= => nil, validate_advance: true, errors: [], sta_debit_amount: 0, timestamp!: nil, amount: amount) }
+    let(:advance_request) { double(AdvanceRequest, :type= => nil, :term= => nil, :amount= => nil, :stock_choice= => nil, validate_advance: true, errors: [], sta_debit_amount: 0, timestamp!: nil, amount: amount, id: SecureRandom.uuid) }
     before do
       allow(subject).to receive(:advance_request).and_return(advance_request)
       allow(subject).to receive(:populate_advance_request_view_parameters)
@@ -387,7 +397,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:securid_token) { '222222' }
     let(:make_request) { post :quick_advance_perform, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, securid_pin: securid_pin, securid_token: securid_token }
     let(:securid_service) { SecurIDService.new('a user', test_mode: true) }
-    let(:advance_request) { double('An AdvanceRequest', expired?: false, executed?: true, execute: nil, sta_debit_amount: 0, errors: []) }
+    let(:advance_request) { double(AdvanceRequest, expired?: false, executed?: true, execute: nil, sta_debit_amount: 0, errors: [], id: SecureRandom.uuid) }
 
     before do
       allow(subject).to receive(:session_elevated?).and_return(true)
@@ -426,6 +436,17 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'executes the advance' do
       expect(advance_request).to receive(:execute)
+      make_request
+    end
+    it 'clears the request if the advance succedes' do
+      expect(subject).to receive(:render).and_call_original.ordered
+      expect(subject).to receive(:advance_request_clear!).ordered
+      make_request
+    end
+    it 'does not clear the request if the advance fails' do
+      allow(advance_request).to receive(:executed?).and_return(false)
+      expect(subject).to receive(:render).and_call_original.ordered
+      expect(subject).to_not receive(:advance_request_clear!).ordered
       make_request
     end
     describe 'with unelevated session' do
@@ -660,18 +681,22 @@ RSpec.describe DashboardController, :type => :controller do
   end
 
   describe '`advance_request_from_session` protected method' do
-    let(:call_method) { subject.send(:advance_request_from_session) }
-    describe 'with a serialized request in the session' do
-      let(:id) { double('An ID') }
+    let(:id) { double('An ID') }
+    let(:call_method) { subject.send(:advance_request_from_session, id) }
+    describe 'with a request ID in the session' do
       let(:advance_request) { double('An AdvanceRequest') }
       before do
-        session[:advance_request] = id
+        session[:advance_request] = [id]
         allow(AdvanceRequest).to receive(:find).and_return(advance_request)
       end
-      it 'fetches the request ID from the session' do
+      it 'fetches the request ID array from the session' do
         allow(session).to receive(:[]).and_call_original
         expect(session).to receive(:[]).with(:advance_request)
         call_method
+      end
+      it 'ignores IDs that arent in the request ID array' do
+        session[:advance_request] = [double('A Different ID')]
+        expect(AdvanceRequest).to_not receive(:find).with(id, request)
       end
       it 'finds the AdvanceRequest by ID' do
         request = double('A Request')
@@ -684,14 +709,22 @@ RSpec.describe DashboardController, :type => :controller do
         expect(assigns[:advance_request]).to be(advance_request)
       end
     end
-    it 'calls `advance_request` if the session has no ID' do
-      expect(subject).to receive(:advance_request)
-      call_method
+    describe 'without a request ID in the session' do
+      it 'calls `advance_request` if the session has no ID' do
+        expect(subject).to receive(:advance_request)
+        call_method
+      end
+      it 'initalizes the session' do
+        allow(session).to receive(:[]=).and_call_original
+        expect(session).to receive(:[]=).with(:advance_request, []).and_call_original
+        call_method
+      end
     end
   end
 
   describe '`advance_request_to_session` protected method' do
-    let(:advance_request) { double(AdvanceRequest, id: SecureRandom.uuid) }
+    let(:id) { double('An ID') }
+    let(:advance_request) { double(AdvanceRequest, id: id, save: false) }
     let(:call_method) { subject.send(:advance_request_to_session) }
     it 'does nothing if there is no @advance_request' do
       call_method
@@ -701,26 +734,54 @@ RSpec.describe DashboardController, :type => :controller do
       before do
         subject.instance_variable_set(:@advance_request, advance_request)
       end
+      it 'initalizes the session' do
+        allow(session).to receive(:[]=).and_call_original
+        expect(session).to receive(:[]=).with(:advance_request, []).and_call_original
+        call_method
+      end
       it 'saves the AdvanceRequest' do
         expect(advance_request).to receive(:save)
         call_method
       end
-      it 'stores the AdvanceResquest ID in the session if the save succedes' do
+      it 'stores the AdvanceRequest ID in the session if the save succedes' do
         allow(advance_request).to receive(:save).and_return(true)
         call_method
-        expect(session[:advance_request]).to eq(advance_request.id)
+        expect(session[:advance_request]).to include(id)
+      end
+      it 'does not add the ID if its already in the array' do
+        session[:advance_request] = [id]
+        call_method
+        expect(session[:advance_request]).to eq([id])
+      end
+      it 'raises an error if more than MAX_SIMULTANEOUS_ADVANCES advances are in the session after adding the current ID' do
+        allow(advance_request).to receive(:save).and_return(true)
+        session[:advance_request] = Array.new(described_class::MAX_SIMULTANEOUS_ADVANCES, double('Alternate ID'))
+        expect{call_method}.to raise_error(SecurityError)
       end
     end
   end
 
   describe '`advance_request_clear!` protected method' do
     let(:call_method) { subject.send(:advance_request_clear!) }
-    it 'deletes tha advance request from the session' do
-      expect(session).to receive(:delete).with(:advance_request)
+    let(:id) { double('An ID') }
+    let(:advance_request) { double(AdvanceRequest, id: id) }
+    before do
+      session[:advance_request] = []
+      subject.instance_variable_set(:@advance_request, advance_request)
+    end
+    it 'deletes tha advance request ID from the session' do
+      expect(session[:advance_request]).to receive(:delete).with(id)
       call_method
     end
+    it 'does not raise an error if the session is not initialized' do
+      session[:advance_request] = nil
+      expect{call_method}.to_not raise_error
+    end
+    it 'does not raise an error if there is no advance request' do
+      subject.instance_variable_set(:@advance_request, nil)
+      expect{call_method}.to_not raise_error
+    end
     it 'nils out the @advance_request' do
-      subject.instance_variable_set(:@advance_request, double('An AdvanceRequest'))
       call_method
       expect(assigns[:advance_request]).to be_nil
     end
