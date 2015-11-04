@@ -115,18 +115,22 @@
         $('.quick-advance-capstock-subheading').hide();
         $flyoutBottomSection.append($(json.html));
 
-        $('.flyout-top-section-body .quick-advance-preview-subheading').show();
+        if (json.preview_error == true) {
+          showQuickAdvancePreviewError();
+        } else {
+          $('.flyout-top-section-body .quick-advance-preview-subheading').show();
 
-        // event listener and handler for back button click
-        $('.quick-advance-back-button').on('click', function() {
-          $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
-          $('.quick-advance-preview-subheading').hide();
-          $oldNodes.show();
-          $('.flyout-top-section-body .quick-advance-capstock-subheading').show();
-          transitionToCapstockFromLoading();
-        });
-        setRsaEventListener();
-        setConfirmQuickAdvanceListener();     
+          // event listener and handler for back button click
+          $('.quick-advance-back-button').on('click', function() {
+            $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
+            $('.quick-advance-preview-subheading').hide();
+            $oldNodes.show();
+            $('.flyout-top-section-body .quick-advance-capstock-subheading').show();
+            transitionToCapstockFromLoading();
+          });
+          setRsaEventListener();
+          setConfirmQuickAdvanceListener();
+        };
       }).error(showCatchAllError);
     }
 
