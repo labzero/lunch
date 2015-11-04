@@ -1,0 +1,13 @@
+- @html_class = 'white-background'
+.row.resource-guide-page
+  %h1= t('resources.capital_plan.title')
+  %p= t('resources.capital_plan.effective_april_1')
+  %p= t('resources.capital_plan.effective_april_3')
+  .resource-guides
+    .resource-guide
+      %h2= t('resources.capital_plan.title')
+      = link_to_download_resource(t('global.view_pdf'), resources_download_path(file: :capitalplan))
+
+    .resource-guide
+      %h2= t('resources.capital_plan.summary_title')
+      = link_to_download_resource(t('global.view_pdf'), resources_download_path(file: :capitalplansummary))

@@ -284,6 +284,10 @@ class ResourcesController < ApplicationController
       filename = 'corporate-credit-union-amendment.docx'
     when 'credit_union_agreement'
       filename = 'subordination-agreement-credit-unions.pdf'
+    when 'capitalplan'
+      filename = 'capital-plan.pdf'
+    when 'capitalplansummary'
+      filename = 'capital-plan-summary.pdf'
     when /\Aform_(\d{3,4})\z/
       filename = "fc#{$1}.pdf"
     else
