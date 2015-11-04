@@ -8,6 +8,7 @@ describe MAPI::ServiceApp do
   end
 
   describe 'Trade Activity' do
+    let(:ods_deal_structure_code) { double('ods_deal_structure_code') }
     let(:call_method) { MAPI::Services::Member::TradeActivity.trade_activity(subject, member_id, 'ADVANCE') }
     it 'should return expected advances detail hash where value could not be nil' do
       call_method.each do |row|
@@ -27,12 +28,13 @@ describe MAPI::ServiceApp do
       end
       it 'should return active advances', vcr: {cassette_name: 'trade_activity_service'} do
         allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:get_ods_deal_structure_code).and_return(ods_deal_structure_code)
         call_method.each do |row|
           expect(row['trade_date']).to be_kind_of(String)
           expect(row['funding_date']).to be_kind_of(String)
           expect(row['maturity_date']).to be_kind_of(String)
           expect(row['advance_number']).to be_kind_of(String)
-          expect(row['advance_type']).to be_kind_of(String)
+          expect(row['advance_type']).to eq(ods_deal_structure_code)
           expect(row['status']).to be_kind_of(String)
           expect(row['interest_rate']).to be_kind_of(Numeric)
           expect(row['current_par']).to be_kind_of(Numeric)
@@ -40,12 +42,13 @@ describe MAPI::ServiceApp do
       end
       it 'should return active advances for large members', vcr: {cassette_name: 'trade_activity_service', :allow_playback_repeats => true} do
         allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(true)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:get_ods_deal_structure_code).and_return(ods_deal_structure_code)
         call_method.each do |row|
           expect(row['trade_date']).to be_kind_of(String)
           expect(row['funding_date']).to be_kind_of(String)
           expect(row['maturity_date']).to be_kind_of(String)
           expect(row['advance_number']).to be_kind_of(String)
-          expect(row['advance_type']).to be_kind_of(String)
+          expect(row['advance_type']).to eq(ods_deal_structure_code)
           expect(row['status']).to be_kind_of(String)
           expect(row['interest_rate']).to be_kind_of(Numeric)
           expect(row['current_par']).to be_kind_of(Numeric)
@@ -53,6 +56,7 @@ describe MAPI::ServiceApp do
       end
       it 'should call `get_trade_activity_trades` only 1 time for small members', vcr: {cassette_name: 'trade_activity_service'} do
         allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:get_ods_deal_structure_code).and_return(ods_deal_structure_code)
         expect(MAPI::Services::Member::TradeActivity).to receive(:get_trade_activity_trades).once
         MAPI::Services::Member::TradeActivity.trade_activity(subject, member_id, 'ADVANCE')
       end
@@ -73,6 +77,7 @@ describe MAPI::ServiceApp do
     %w(development test production).each do |env|
       it "transforms the rate in #{env}", vcr: {cassette_name: 'trade_activity_service'} do
         allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:get_ods_deal_structure_code).and_return(ods_deal_structure_code)
         allow(MAPI::ServiceApp).to receive(:environment).and_return(env.to_sym)
         transformed_rate = double('A Tranformed Rate')
         allow(MAPI::Services::Member::TradeActivity).to receive(:decimal_to_percentage_rate).and_return(transformed_rate)
@@ -102,16 +107,18 @@ describe MAPI::ServiceApp do
           }]
         }
       }
-      let(:advances) { MAPI::Services::Member::TradeActivity.get_trade_activity_trades(message) }
+      let(:app){ double('app', logger: double('logger'), settings: double( 'settings', environment: :production ) ) }
+      let(:advances) { MAPI::Services::Member::TradeActivity.get_trade_activity_trades(app, message) }
+      let(:ods_deal_structure_code) { double('ods_deal_structure_code') }
       before do
-        MAPI::Services::Member::TradeActivity.init_trade_connection(:production)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:get_ods_deal_structure_code).and_return(ods_deal_structure_code)
       end
       it 'should return active advances' do
         expect(advances[0]['trade_date']).to eq('2011-05-05T13:15:00.000-07:00')
         expect(advances[0]['funding_date']).to eq('2011-05-06-07:00')
         expect(advances[0]['maturity_date']).to eq('2016-05-06-07:00')
         expect(advances[0]['advance_number']).to eq('188367')
-        expect(advances[0]['advance_type']).to eq('FX CONSTANT')
+        expect(advances[0]['advance_type']).to eq(ods_deal_structure_code)
         expect(advances[0]['status']).to eq('Outstanding')
         expect(advances[0]['interest_rate']).to eq('0.022')
         expect(advances[0]['current_par']).to eq(2500000.0)
@@ -122,6 +129,77 @@ describe MAPI::ServiceApp do
         expect(advances.count).to be > 0
         advances.each do |advance|
           expect(advance['trade_date']).to be(trade_datetime)
+        end
+      end
+    end
+  end
+
+  describe 'the `get_ods_deal_structure_code` method' do
+    [:test, :development].each do |env|
+      describe 'in the development environment' do
+        let(:app) { double('app', logger: double('logger'), settings: double( 'settings', environment: env ) ) }
+        let(:sub_product) { double('sub_product')}
+        let(:collateral) { double('collateral', gsub: double('fixed_collateral'))}
+        let(:ods_deal_structure_code) { MAPI::Services::Member::TradeActivity.get_ods_deal_structure_code(app, sub_product, collateral) }
+        it 'return sub product' do
+          expect(ods_deal_structure_code).to eq(sub_product)
+        end
+      end
+    end
+    describe 'in the production environment' do
+      let(:app) { double('app', logger: double('logger', error: nil), settings: double( 'settings', environment: :production ) ) }
+      let(:sub_product) { double('sub_product')}
+      let(:collateral) { double('collateral', gsub: double('fixed_collateral'))}
+      let(:ods_deal_structure_code) { MAPI::Services::Member::TradeActivity.get_ods_deal_structure_code(app, sub_product, collateral) }
+      let(:empty_result_set) {double('Oracle Result Set', fetch: nil)}
+      let(:ods_code) {double('ods_code')}
+      it 'return nil if there are no records found' do
+        allow(ActiveRecord::Base.connection).to receive(:execute).and_return(double(empty_result_set))
+        expect(ods_deal_structure_code).to eq(nil)
+      end
+      it 'return ods deal structure code if sub product and collateral match a record' do
+        allow(MAPI::Services::Member::TradeActivity).to receive(:fetch_hash).with(app.logger, kind_of(String)).and_return({'SYS_ADVANCE_TYPE' => ods_code})
+        expect(ods_deal_structure_code).to be(ods_code)
+      end
+      it 'removes spaces and hyphens from collateral' do
+        expect(collateral).to receive(:gsub).with(/[ -]/, '')
+        ods_deal_structure_code
+      end
+      {
+        'FOO BAR' => 'FOOBAR',
+        'FOO-CAR' => 'FOOCAR',
+        'CATCAR' => 'CATCAR',
+        'FOO- WAR' => 'FOOWAR'
+      }.each do |original, result|
+        it "converts a collateral type of `#{original}` to `#{result}`" do
+          allow(ActiveRecord::Base.connection).to receive(:quote)
+          expect(ActiveRecord::Base.connection).to receive(:quote).with(result)
+          MAPI::Services::Member::TradeActivity.get_ods_deal_structure_code(app, sub_product, original)
+        end
+      end
+      describe 'query construction' do
+        before do
+          allow(ActiveRecord::Base.connection).to receive(:quote)
+        end
+
+        it 'queries for the subproduct' do
+          sub_product_string = SecureRandom.hex
+          allow(ActiveRecord::Base.connection).to receive(:quote).with(sub_product).and_return(sub_product_string)
+          expect(MAPI::Services::Member::TradeActivity).to receive(:fetch_hash).with(app.logger, kind_of(String)) do |*args, &block|
+            expect(args.last).to include(sub_product_string)
+            nil
+          end
+          ods_deal_structure_code
+        end
+
+        it 'queries for the collateral type' do
+          collateral_type_string = SecureRandom.hex
+          allow(ActiveRecord::Base.connection).to receive(:quote).with(collateral.gsub).and_return(collateral_type_string)
+          expect(MAPI::Services::Member::TradeActivity).to receive(:fetch_hash).with(app.logger, kind_of(String)) do |*args, &block|
+            expect(args.last).to include(collateral_type_string)
+            nil
+          end
+          ods_deal_structure_code
         end
       end
     end
