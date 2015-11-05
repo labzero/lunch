@@ -149,13 +149,17 @@ describe MAPI::ServiceApp do
   end
 
   describe 'get_advance_product_info' do
-    let(:overnight_response) {{'v14:product'=>'O/N VRC', 'v14:subProduct'=>'VRC', 'v14:term'=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'D'}}}
-    let(:week_response) {{'v14:product'=>'FX CONSTANT', 'v14:subProduct'=>'FRC', 'v14:term'=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'W'}}}
+    let(:overnight_response) {{'v14:product'=>'O/N VRC', 'v14:subProduct'=>'VRC', 'v14:term'=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'D'}, 'v14:maturityDate' => Time.zone.today}}
+    let(:open_response) {{'v14:product'=>'OPEN VRC', 'v14:subProduct'=>'VRC', 'v14:term'=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'D'}}}
+    let(:week_response) {{'v14:product'=>'FX CONSTANT', 'v14:subProduct'=>'FRC', 'v14:term'=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'W'}, 'v14:maturityDate' => Time.zone.today}}
     it 'should return overnight advance product info' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_product_info('overnight')).to eq(overnight_response)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_product_info('overnight', Time.zone.today)).to eq(overnight_response)
+    end
+    it 'should return open advance product info' do
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_product_info('open', Time.zone.today)).to eq(open_response)
     end
     it 'should return week advance product info' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_product_info('1week')).to eq(week_response)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_product_info('1week', Time.zone.today)).to eq(week_response)
     end
   end
 
