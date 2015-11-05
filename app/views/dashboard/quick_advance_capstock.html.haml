@@ -11,7 +11,7 @@
           %dt= t('dashboard.quick_advance.capitalstock.stock') +':'
           %dd= fhlb_formatted_currency(@net_stock_required, precision: 0)
           %dt= t('dashboard.quick_advance.capitalstock.net') +':'
-          %dd= fhlb_formatted_currency(@advance_amount, precision: 0)
+          %dd= fhlb_formatted_currency(@net_amount, precision: 0)
         %dl.large_dl
           %dt= t('dashboard.quick_advance.capitalstock.cumulative') +':'
           %dd= fhlb_formatted_currency(@cumulative_stock_required, precision: 0)
@@ -19,7 +19,7 @@
       = render 'shared/radio_button', id: 'increase_transaction', name: 'stock_choice', checked: false, text: t('dashboard.quick_advance.capitalstock.increase_transaction'), value: :purchase
       .quick-advance-summary
         %dl.large_dl
-          %dt= t('dashboard.quick_advance.capitalstock.original') +':'
+          %dt= t('dashboard.quick_advance.capitalstock.new') +':'
           %dd= fhlb_formatted_currency(@gross_amount, precision: 0)
           %dt= t('dashboard.quick_advance.capitalstock.stock') +':'
           %dd= fhlb_formatted_currency(@gross_net_stock_required, precision: 0)

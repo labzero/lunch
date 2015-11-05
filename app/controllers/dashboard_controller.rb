@@ -190,6 +190,7 @@ class DashboardController < ApplicationController
           preview_success = false
           preview_error = false
           @original_amount = advance_request.amount
+          @net_amount = @original_amount - @net_stock_required
           response_html = render_to_string :quick_advance_capstock, layout: false
         else
           preview_success = false
