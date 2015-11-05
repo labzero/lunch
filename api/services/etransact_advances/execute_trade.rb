@@ -110,6 +110,7 @@ module MAPI
                   'v13:frequencyUnit' => 'M'
                 }
               end
+              advance_payment_day_of_month = 31
               payment_at = 'End Of Month'
             else
               if (maturity_date - settlement_date).to_i <= 180
