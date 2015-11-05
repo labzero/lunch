@@ -88,6 +88,18 @@ class AdvanceRequest
     self.rate = rate_for(term, type)
   end
 
+  def maturity_date_for(term, type)
+    rates[type.to_sym][term.to_sym][:maturity_date].try(:to_date)
+  end
+
+  def maturity_date_for!(term, type)
+    self.maturity_date = maturity_date_for(term, type)
+  end
+
+  def maturity_date=(value)
+    @maturity_date = value.try(:to_date)
+  end
+
   def rate!
     rate_for!(term, type) unless rate
     rate
@@ -113,6 +125,7 @@ class AdvanceRequest
     if old_term != term && type
       reset_stock_choice!
       rate_for!(self.term, type)
+      maturity_date_for!(self.term, type)
     end
   end
 
@@ -124,6 +137,7 @@ class AdvanceRequest
     if old_type != type && term
       reset_stock_choice!
       rate_for!(term, self.type)
+      maturity_date_for!(term, self.type)
     end
   end
 
@@ -410,7 +424,7 @@ class AdvanceRequest
   end
 
   def perform_preview
-    response = etransact_service.quick_advance_validate(member_id, amount, type, term, rate, !stock_choice_present?, signer)
+    response = etransact_service.quick_advance_validate(member_id, amount, type, term, rate, !stock_choice_present?, signer, maturity_date)
     process_trade_errors(:preview, response)
     populate_attributes_from_response(response)
   end
