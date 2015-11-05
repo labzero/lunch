@@ -111,6 +111,7 @@ class AdvanceRequest
     old_term = @term
     @term = term
     if old_term != term && type
+      reset_stock_choice!
       rate_for!(self.term, type)
     end
   end
@@ -121,12 +122,15 @@ class AdvanceRequest
     old_type = @type
     @type = type
     if old_type != type && term
+      reset_stock_choice!
       rate_for!(term, self.type)
     end
   end
 
   def amount=(amount)
+    old_amount = @amount
     @amount = transform_amount(amount, :amount)
+    reset_stock_choice! if old_amount != @amount
   end
 
   def gross_amount=(amount)
@@ -137,6 +141,10 @@ class AdvanceRequest
     choice = choice.to_sym
     raise "Unknown Stock Choice: #{choice}" if choice && !STOCK_CHOICES.include?(choice)
     @stock_choice = choice
+  end
+  
+  def reset_stock_choice!
+    @stock_choice = nil
   end
 
   def initiated_at=(datetime)
