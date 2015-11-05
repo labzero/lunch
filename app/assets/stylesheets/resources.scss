@@ -32,7 +32,22 @@ $resource-page-padding: 140px !default;
   }
 }
 
-.resource-guide-page, .resource-forms-page {
+.resource-capital-plan-page {
+  p {
+    padding-right: $resource-page-padding + 15px;
+  }
+  a {
+    color: $actionable-blue;
+    text-decoration: none;
+    text-transform: uppercase;
+    display: block;
+  }
+  h2 {
+    margin-top: 30px;
+  }
+}
+
+.resource-guide-page, .resource-forms-page, .resource-capital-plan-page {
   h1 {
     @extend %typography-page-title;
   }
@@ -41,6 +56,15 @@ $resource-page-padding: 140px !default;
   }
   h3 {
     @extend %typography-subtitle;
+  }
+}
+
+.resource-capital-plan-redemption
+{
+  margin-top: 30px;
+  a {
+    text-transform: none;
+    display: inline;
   }
 }
 

@@ -300,4 +300,7 @@ class ResourcesController < ApplicationController
   def business_continuity
   end
 
+  def capital_plan
+  end
+
 end
