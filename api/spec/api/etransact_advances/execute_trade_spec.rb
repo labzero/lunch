@@ -184,7 +184,7 @@ describe MAPI::ServiceApp do
   end
 
   describe 'Validate Trade' do
-    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
     it 'should return expected result of validate trade' do
       expect(execute_trade['status']).to be_kind_of(Array)
       expect(execute_trade['confirmation_number']).to be_kind_of(String)
@@ -201,16 +201,15 @@ describe MAPI::ServiceApp do
   end
 
   describe 'Validate Trade check' do
-    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
     it 'should return a matching maturity date' do
-      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:get_maturity_date).and_return(maturity_date)
       expect(execute_trade['maturity_date']).to eq(maturity_date.iso8601)
     end
   end
 
   describe 'Validate Trade With Capital Stock Exception' do
     let(:amount)  {'1000000'}
-    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
     it 'should return expected result of validate trade' do
       expect(execute_trade['status']).to eq(['CapitalStockError'])
       expect(execute_trade['authorized_amount']).to be_kind_of(Numeric)
@@ -229,7 +228,7 @@ describe MAPI::ServiceApp do
 
   describe 'Validate Trade With Credit Error Exception' do
     let(:amount)  {'100001'}
-    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
     it 'should return a credit error response' do
       expect(execute_trade['status']).to eq(['CreditError'])
       expect(execute_trade['credit_max_amount']).to be_kind_of(Numeric)
@@ -238,7 +237,7 @@ describe MAPI::ServiceApp do
 
   describe 'Validate Trade With Collateral Error Exception' do
     let(:amount)  {'100002'}
-    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
     it 'should return a collateral exception response' do
       expect(execute_trade['status']).to eq(['CollateralError'])
       expect(execute_trade['collateral_max_amount']).to be_kind_of(Numeric)
@@ -248,7 +247,7 @@ describe MAPI::ServiceApp do
 
   describe 'Validate Trade With Total Daily Limit Error Exception' do
     let(:amount)  {'100003'}
-    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
     it 'should return expected result of validate trade' do
       expect(execute_trade['status']).to eq(['ExceedsTotalDailyLimitError'])
     end
@@ -256,7 +255,7 @@ describe MAPI::ServiceApp do
 
   describe 'Validate Trade With Capital Stock Gross Up Exception' do
     let(:amount)  {'2000000'}
-    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
     it 'should return expected result of validate trade' do
       expect(execute_trade['status']).to eq(['GrossUpError'])
       expect(execute_trade['authorized_amount']).to be_kind_of(Numeric)
@@ -275,7 +274,7 @@ describe MAPI::ServiceApp do
 
   describe 'Validate Trade With Capital Stock Missing Exception' do
     let(:amount)  {'3000000'}
-    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
     it 'should return expected result of validate trade' do
       expect(execute_trade['status']).to eq(['ExceptionError'])
       expect(execute_trade['authorized_amount']).to be_kind_of(Numeric)
@@ -354,7 +353,7 @@ describe MAPI::ServiceApp do
       let(:advance_type)  {'agency'}
       let(:advance_term)  {'1year'}
       let(:amount)  {'1000000'}
-      let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}"; JSON.parse(last_response.body) }
+      let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
       it 'should return result of execute trade', vcr: {cassette_name: 'execute_trade_service_capital_stock_purchase'} do
         expect(execute_trade['status']).to be_kind_of(Array)
         expect(execute_trade['authorized_amount']).to be_kind_of(Numeric)
@@ -660,21 +659,19 @@ describe MAPI::ServiceApp do
     let(:blended_cost_of_funds) { double('blended_cost_of_funds') }
     let(:cost_of_funds) { double('cost_of_funds') }
     let(:benchmark_rate) { double('benchmark_rate') }
-    let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate) }
+    let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date) }
+
     before do
-      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:get_maturity_date).and_return(maturity_date)
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:init_execute_trade_connection)
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:build_message).with(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, today, day_count).and_return(built_message)
     end
-    shared_examples 'other_dates' do
+    shared_examples 'dates' do
       it 'returns today\'s date as a string for `trade_date`' do
         expect(execute_trade['trade_date']).to eq(today)
       end
       it 'returns today\'s date as a string for `funding_date`' do
         expect(execute_trade['funding_date']).to eq(today)
       end
-    end
-    shared_examples 'maturity_dates' do
       it 'returns maturity_date as a string for `maturity_date`' do
         expect(execute_trade['maturity_date'].to_date).to eq(maturity_date)
       end
@@ -683,26 +680,13 @@ describe MAPI::ServiceApp do
         execute_trade
       end
     end
-    shared_examples 'maturity date is supplied' do
-      describe 'with supplied maturity_date' do
-        let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date) }
-        before do
-          allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:get_maturity_date).and_return(nil)
-        end
-        include_examples 'maturity_dates'
-      end
-    end
     describe 'execute' do
       let(:operation) { 'EXECUTE' }
-      include_examples 'other_dates'
-      include_examples 'maturity_dates'
-      include_examples 'maturity date is supplied'
+      include_examples 'dates'
     end
     describe 'validate' do
       let(:operation) { 'VALIDATE' }
-      include_examples 'other_dates'
-      include_examples 'maturity_dates'
-      include_examples 'maturity date is supplied'
+      include_examples 'dates'
     end
   end
 end
