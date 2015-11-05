@@ -62,8 +62,8 @@ describe MAPI::ServiceApp do
   describe 'get_payment_info' do
     let(:overnight_response)    { mk_payment_info('Overnight',    1, 'T') }
     let(:open_response)         { mk_payment_info('End Of Month', 1, 'M', 31)}
-    let(:whole_1_week_response) { mk_payment_info('End Of Month', 1, 'T') }
-    let(:next_month_response)   { mk_payment_info('End Of Month', 1, 'M') }
+    let(:whole_1_week_response) { mk_payment_info('End Of Month', 1, 'T', 31) }
+    let(:next_month_response)   { mk_payment_info('End Of Month', 1, 'M', 31) }
     let(:maturity_response)     { mk_payment_info('Maturity',     1, 'T') }
     let(:semiannual_response)   { mk_payment_info('Semiannual',   6, 'M') }
     it 'should return overnight payment info' do
