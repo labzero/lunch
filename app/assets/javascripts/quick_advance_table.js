@@ -264,7 +264,7 @@
     };
 
     function packageParameters(rate_data) {
-      return $.extend(rate_data, {amount: $amountField.val()})
+      return $.extend(rate_data, {amount: $amountField.val()});
     };
 
     function setRsaEventListener() {
