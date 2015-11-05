@@ -1,8 +1,10 @@
 require 'action_view'
 require_relative '../../app/helpers/custom_formatting_helper'
 require_relative '../../app/helpers/contact_information_helper'
+require_relative '../../app/helpers/reports_helper'
 include CustomFormattingHelper
 include ContactInformationHelper
+include ReportsHelper
 include ActionView::Helpers::SanitizeHelper
 
 When /^I visit the dashboard$/ do

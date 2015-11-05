@@ -39,7 +39,7 @@ Scenario: Member enters a date occurring after the maximum allowed date
 
 @data-unavailable @jira-mem-536
 Scenario: No data is available to show in the Securities Services Statement
-  Given I am on the "Securities Services Statement" report page
+  Given I am on the "Securities Services Monthly Statement" report page
   When the "Dividend Summary" table has no data
   Then I should see a "Dividend Summary" report table with all data missing
   When the "Dividend Details" table has no data
@@ -47,7 +47,13 @@ Scenario: No data is available to show in the Securities Services Statement
 
 @data-unavailable @jira-mem-536
 Scenario: The Securities Services Statement has been disabled
-  Given I am on the "Securities Services Statement" report page
+  Given I am on the "Securities Services Monthly Statement" report page
   When the "Dividend Transaction Statement" report has been disabled
   Then I should see a "Dividend Summary" report table with all data missing
   Then I should see the "Dividend Details" report table with Data Unavailable messaging
+
+@resque-backed @smoke @jira-mem-822
+Scenario: Member downloads a PDF of the Securities Services Statement report
+  Given I am on the "Securities Services Monthly Statement" report page
+  When I request a PDF
+  Then I should begin downloading a file  

@@ -519,6 +519,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :securities_services_statement
       it_behaves_like 'a date restricted report', :securities_services_statement, :last_month_end
       it_behaves_like 'a report with instance variables set in a before_filter', :securities_services_statement
+      it_behaves_like 'a report that can be downloaded', :securities_services_statement, [:pdf]
       it 'should set @start_date to the end of the month for the `start_date` attribute of the `min_and_start_dates` hash' do
         make_request
         expect(assigns[:start_date]).to eq(end_of_month)
