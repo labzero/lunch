@@ -362,13 +362,21 @@ RSpec.describe DashboardController, :type => :controller do
       end
     end
 
-    describe "POST quick_advance_capstock" do
+    describe 'capital stock purchase required' do
       before do
         allow(advance_request).to receive(:errors).and_return([double('An Error', type: :preview, code: :capital_stock, value: nil)])
+        allow(subject).to receive(:populate_advance_request_view_parameters) do
+          subject.instance_variable_set(:@original_amount, rand(10000..1000000))
+          subject.instance_variable_set(:@net_stock_required, rand(1000..9999))
+        end
       end
-      it 'should render its view' do
+      it 'render its view' do
         make_request
         expect(response.body).to render_template('dashboard/quick_advance_capstock')
+      end
+      it 'sets the @net_amount instance variable' do
+        make_request
+        expect(assigns[:net_amount]).to eq(assigns[:original_amount] - assigns[:net_stock_required])
       end
     end
   end

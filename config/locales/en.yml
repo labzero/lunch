@@ -530,6 +530,7 @@ en:
         original: Original Amount Requested
         stock: Stock Purchase Required
         net: Net Amount Available
+        new: New Amount Requested
         cumulative: Cumulative Stock Purchase Required
         increase_transaction: Increase Amount Requested to cover required stock purchase.
         debit_sta_html: If you select this option, the Bank will automatically debit your Settlement/Transaction Account (STA) for %{amount} today.
