@@ -172,15 +172,25 @@ module MAPI
           advance_rate_schedule
         end
 
-        def self.get_advance_product_info(term)
+        def self.get_advance_product_info(term, maturity_date)
           # Product information and term frequency, which depends on the term type
-          if (term == 'overnight') || (term == 'open')
+          if term == 'overnight'
             advance_product_info = {
-              'v14:product' => term.gsub('overnight', 'O/N').upcase + ' VRC',
+              'v14:product' => 'O/N VRC',
               'v14:subProduct' => 'VRC',
               'v14:term' => {
                 'v13:frequency' => 1,
                 'v13:frequencyUnit' => 'D'
+              },
+              'v14:maturityDate' => maturity_date
+            }
+          elsif term == 'open'
+            advance_product_info = {
+              'v14:product' => 'OPEN VRC',
+              'v14:subProduct' => 'VRC',
+              'v14:term' => {
+                  'v13:frequency' => 1,
+                  'v13:frequencyUnit' => 'D'
               }
             }
           else
@@ -190,7 +200,8 @@ module MAPI
               'v14:term' => {
                 'v13:frequency' => term[0].to_i,
                 'v13:frequencyUnit' => term[1].upcase
-              }
+              },
+              'v14:maturityDate' => maturity_date
             }
           end
           advance_product_info
@@ -211,7 +222,6 @@ module MAPI
           # Markup, Blended Cost Of Funds To Libor, Cost Of Funds and Benchmark Rate will be calculated later
           payment_info = MAPI::Services::EtransactAdvances::ExecuteTrade::get_payment_info(advance_term, advance_type, settlement_date, maturity_date)
           advance_payment_coupon_markup = {
-            'v14:maturityDate' => maturity_date,
             'v14:collateralType' => LOAN_MAPPING[advance_type],
             'v14:subsidyProgram' => 'N/A',
             'v14:prepaymentSymmetry' => false,
@@ -262,7 +272,7 @@ module MAPI
 
           # Put it all together
           message['v1:trade']['v12:advance'].deep_merge! advance_lender_amount
-          message['v1:trade']['v12:advance'].deep_merge! MAPI::Services::EtransactAdvances::ExecuteTrade::get_advance_product_info(advance_term)
+          message['v1:trade']['v12:advance'].deep_merge! MAPI::Services::EtransactAdvances::ExecuteTrade::get_advance_product_info(advance_term, maturity_date)
           message['v1:trade']['v12:advance'].deep_merge! advance_payment_coupon_markup
           [message, payment_info]
         end
