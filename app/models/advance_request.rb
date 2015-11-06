@@ -430,6 +430,7 @@ class AdvanceRequest
   end
 
   def perform_rate_check
+    return if aasm.current_event == :execute
     settings = etransact_service.settings
     rate_details = rate_service.rate(type, term)
 
