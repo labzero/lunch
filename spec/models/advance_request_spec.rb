@@ -1367,6 +1367,19 @@ describe AdvanceRequest do
         expect(subject).to receive(:add_error).with(:rate, :stale)
         call_method
       end
+      describe 'and the advance is being executed' do
+        before do
+          allow(subject).to receive_message_chain(:aasm, :current_event).and_return(:execute)
+        end
+        it 'does not add an error' do
+          expect(subject).to_not receive(:add_error).with(:rate, :stale)
+          call_method
+        end
+        it 'does not send a stale rate warning email' do
+          expect(InternalMailer).to_not receive(:stale_rate)
+          call_method
+        end
+      end
     end
 
     describe 'when the rate is not stale' do
@@ -1389,6 +1402,11 @@ describe AdvanceRequest do
       it 'sets the `rate` to be the new rate' do
         call_method
         expect(subject.rate).to be(new_rate)
+      end
+      it 'does not update the rate if the advance is being executed' do
+        allow(subject).to receive_message_chain(:aasm, :current_event).and_return(:execute)
+        call_method
+        expect(subject.rate).to be(rate)
       end
     end
   end
