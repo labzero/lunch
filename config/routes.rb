@@ -80,6 +80,7 @@ Rails.application.routes.draw do
     get '/business-continuity' => 'resources#business_continuity'
     get '/forms' => 'resources#forms'
     get '/guides' => 'resources#guides'
+    get '/capital-plan' => 'resources#capital_plan'
     get '/download/:file' => 'resources#download', as: :resources_download
   end
 

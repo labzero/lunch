@@ -637,7 +637,7 @@ en:
         title: Credit Guide
         updates:
           upcoming:
-            - "Please refere to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
+            - "Please refer to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
           revisions:
             -
               date: '2015-04-22'
@@ -762,6 +762,9 @@ en:
       title: FAQs
     capital_plan:
       title: Capital Plan
+      summary_title: Summary of Capital Plan
+      effective_april_html: "Effective April 1, 2015, the Bank amended and restated its capital plan to reduce member stock purchase requirements and make other clarifying and conforming changes.\n\nEffective August 3, 2015, the Bank reduced its activity-based stock purchase requirements, within the ranges authorized by the Bank’s Capital Plan. The activity-based stock requirement for outstanding advances was reduced from 3.0% to 2.7%, and the activity-based stock requirement for outstanding mortgage loans purchased from the member and held by the Bank was reduced from 3.0% to 0.0%."
+      members_may_request_html: "Members may request redemption of capital stock by submitting <a href='%{url}'> Notice of Redemption of Capital Stock</a> (PDF)"
     investor_relations:
       title: Investor Relations
     newsroom:
