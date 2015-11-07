@@ -1,15 +1,17 @@
 class MembersController < ApplicationController
   skip_before_action :check_terms
   skip_before_action :authenticate_user!, only: [:logged_out]
-  
+
   before_filter only: [:select_member, :set_member] do
     redirect_to after_sign_in_path_for(current_user) if current_member_id
     @members = MembersService.new(request).all_members
   end
-  
+
   before_filter only: [:logged_out] do
     redirect_to after_sign_in_path_for(current_user) if current_user
   end
+
+  skip_before_action :authenticate_user!, only: [:privacy_policy]
 
   def select_member
     raise 'No members found!' unless @members.present?
@@ -39,6 +41,10 @@ class MembersController < ApplicationController
 
   # GET
   def logged_out
+    render layout: 'external'
+  end
+
+  def privacy_policy
     render layout: 'external'
   end
 end
