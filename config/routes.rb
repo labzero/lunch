@@ -50,22 +50,28 @@ Rails.application.routes.draw do
   get '/advances' => 'advances#index'
   get '/advances/manage-advances' => 'advances#manage_advances'
 
-  get '/settings' => 'error#not_found'
-  post '/settings/save' => 'settings#save'
-  get '/settings/two-factor' => 'settings#two_factor'
-  post '/settings/two-factor/pin' => 'settings#reset_pin'
-  post '/settings/two-factor/resynchronize' => 'settings#resynchronize'
-  get '/settings/users' => 'settings#users'
-  post '/settings/users/:id/lock' => 'settings#lock', as: 'user_lock'
-  post '/settings/users/:id/unlock' => 'settings#unlock', as: 'user_unlock'
-  get '/settings/users/:id' => 'settings#edit_user', as: 'user'
-  patch '/settings/users/:id' => 'settings#update_user'
-  get '/settings/users/:id/confirm_delete' => 'settings#confirm_delete', as: 'user_confirm_delete'
-  delete '/settings/users/:id' => 'settings#delete_user'
-  get '/settings/expired-password' => 'settings#expired_password', as: :user_expired_password
-  put '/settings/expired-password' => 'settings#update_expired_password'
-  get '/settings/password' => 'settings#change_password', as: :settings_password
-  put '/settings/password' => 'settings#update_password'
+  scope 'settings', as: :settings do
+    get '/' => 'error#not_found'
+    post '/save' => 'settings#save'
+    get '/two-factor' => 'settings#two_factor'
+    put '/two-factor/pin' => 'settings#reset_pin'
+    post '/two-factor/pin' => 'settings#new_pin'
+    post '/two-factor/resynchronize' => 'settings#resynchronize'
+    get '/users' => 'settings#users'
+    patch '/users/:id' => 'settings#update_user'
+    delete '/users/:id' => 'settings#delete_user'
+    get '/password' => 'settings#change_password'
+    put '/password' => 'settings#update_password'
+  end
+
+  scope 'settings' do
+    post '/users/:id/lock' => 'settings#lock', as: 'user_lock'
+    post '/users/:id/unlock' => 'settings#unlock', as: 'user_unlock'
+    get '/users/:id' => 'settings#edit_user', as: 'user'
+    get '/users/:id/confirm_delete' => 'settings#confirm_delete', as: 'user_confirm_delete'
+    get '/expired-password' => 'settings#expired_password', as: :user_expired_password
+    put '/expired-password' => 'settings#update_expired_password'
+  end
 
   get '/jobs/:job_status_id' => 'jobs#status', as: 'job_status'
   get '/jobs/:job_status_id/download' => 'jobs#download', as: 'job_download'

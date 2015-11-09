@@ -146,6 +146,25 @@ class SettingsController < ApplicationController
   end
 
   # POST
+  def new_pin
+    securid = SecurIDService.new(current_user.username)
+    begin
+      securid.authenticate_without_pin(params[:securid_token])
+      status = securid.status
+    rescue SecurIDService::InvalidToken => e
+      status = 'invalid_token'
+    end
+    if securid.change_pin?
+      begin
+        status = 'success' if securid.change_pin(params[:securid_new_pin])
+      rescue SecurIDService::InvalidPin => e
+        status = 'invalid_new_pin'
+      end
+    end
+    render json: {status: status}
+  end
+
+  # POST
   def reset_pin
     securid = SecurIDService.new(current_user.username)
     begin

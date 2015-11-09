@@ -327,6 +327,18 @@ en:
       title: Manage Token
       description: Manage authentication with your SecurID token.
       help_html: 'To request a new SecurID token or get help with an existing one, <a href="%{url}">email Web Support</a> or call them at %{phone_number}.'
+      new_pin:
+        title: Set Token PIN for a New SecurID Token
+        description: If you just got a new SecurID token and need to set the PIN for it. Use Reset Token PIN if you forgot your PIN.
+        cta: Set New Token PIN
+        prompt_current: Enter your current token code.
+        prompt_new_pin: Enter your new PIN.
+        new_pin: New PIN
+        confirm_pin: Re-Enter PIN
+        save: Save PIN
+        success: Your token PIN has been set.
+        error: We failed to set your token PIN. Please contact Web Support for further assistance.
+        pin_mismatch: PINs don't match.
       reset_pin:
         title: Reset Token PIN
         description: "If you can't remember your token PIN, contact Web Support before resetting it."
