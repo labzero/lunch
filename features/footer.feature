@@ -4,7 +4,7 @@ Feature: Viewing the Footer
   In order to find information and navigate
 
 Background:
-  Given I am logged in
+  Given I am logged out
 
 Scenario: Viewing the footer
   When I visit the root path
@@ -13,8 +13,3 @@ Scenario: Viewing the footer
   And I should see "Terms of Use"
   And I should see "Privacy Policy"
   And I should see "fhlbsf.com"
-
-@jira-mem-674
-Scenario: Viewing the privacy policy page from the footer
-  When I click on the privacy policy link in the footer
-  Then I should see "Privacy Policy" in the selector "h1"
