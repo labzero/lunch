@@ -1,6 +1,7 @@
 class ReportsController < ApplicationController
   include DatePickerHelper
   include CustomFormattingHelper
+  include ReportsHelper
   include ActionView::Helpers::NumberHelper
 
   # Mapping of current reports onto flags defined in MembersService
@@ -817,15 +818,24 @@ class ReportsController < ApplicationController
     min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
     @min_date = min_and_start_dates_array.first
     @start_date = month_restricted_start_date(min_and_start_dates_array.last)
-    if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
-      @statement = {}
+    @report_name = t('reports.securities.services_monthly.title')
+    export_format = params[:export_format]
+
+    if export_format == 'pdf'
+      pdf_job_status = RenderReportPDFJob.perform_later(current_member_id, 'securities_services_statement', "securities_services_monthly_statement", {start_date: params[:start_date]}).job_status
+      pdf_job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(pdf_job_status), job_cancel_url: job_cancel_url(pdf_job_status)}
     else
-      member_balances = MemberBalanceService.new(current_member_id, request)
-      @statement = member_balances.securities_services_statement(@start_date)
-      raise StandardError, "There has been an error and ReportsController#securities_services_statement has encountered nil. Check error logs." if @statement.nil?
+      if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
+        @statement = {}
+      else
+        member_balances = MemberBalanceService.new(current_member_id, request)
+        @statement = member_balances.securities_services_statement(@start_date)
+        raise StandardError, "There has been an error and ReportsController#securities_services_statement has encountered nil. Check error logs." if @statement.nil?
+      end
+      @picker_presets = date_picker_presets(@start_date, nil, date_restriction)
+      @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
     end
-    @picker_presets = date_picker_presets(@start_date, nil, date_restriction)
-    @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
   end
 
   def letters_of_credit

@@ -5,4 +5,5 @@ module ReportTableHelper
   def missing_data_message
     @report_disabled ? DISABLED_MESSAGE : NO_RECORDS_MESSAGE
   end
+  
 end

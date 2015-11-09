@@ -637,6 +637,12 @@
   }
 }
 
+.securities-services-line-item-number {
+  min-width: 12px;
+  display: inline-block;
+  text-align: right;
+}
+
 .report-table-vertical-headers {
   td {
     &:nth-child(1) {
@@ -1322,7 +1328,27 @@ td.dataTables_empty {
   .report-print-details {
     margin-bottom: 50px;
   }
-  .sbc-borrowing-capacity-tables {
+  .sbc-borrowing-capacity-tables, .securities-services-table-wrapper {
     page-break-inside: avoid; 
+  }
+
+  .report-securities-services-statement {
+    .report-table-vertical-headers td:nth-child(1) {
+      background-color: transparent;
+    }
+    .report-table td {
+      border-left: none;
+      border-right: none;
+      border-top: 1px solid $light-gray;
+      &:last-child {
+        width: 140px;
+      }
+    }
+    .report-summary-right {
+      width: 355px;
+    }
+    .report-cell-expanding {
+      white-space: normal;
+    }
   }
 }
