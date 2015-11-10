@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 require 'securid_service' # because our name is weird
 
 describe SecurIDService do
@@ -65,6 +65,26 @@ describe SecurIDService do
       end
       it 'should call authenticate on the session and pass the prefixed username and concatenated pin and token' do
         expect(rsa_session).to receive(:authenticate).with(prefixed_username, pin + token)
+        make_call
+      end
+    end
+
+    describe '`authenticate_without_pin` method' do
+      let(:make_call) { subject.authenticate_without_pin(token) }
+      it 'should validates the token' do
+        expect(subject).to receive(:validate_token).with(token)
+        make_call
+      end
+      it 'does not validate the pin' do
+        expect(subject).to_not receive(:validate_pin)
+        make_call
+      end
+      it 'calls authenticate on the session and return the result' do
+        allow(rsa_session).to receive(:authenticate).and_return(session_status)
+        expect(make_call).to be(session_status)
+      end
+      it 'calls authenticate on the session and pass the prefixed username and token' do
+        expect(rsa_session).to receive(:authenticate).with(prefixed_username, token)
         make_call
       end
     end

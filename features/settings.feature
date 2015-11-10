@@ -77,6 +77,32 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
   And I submit the reset PIN form
   Then I should see the failed to reset PIN message
 
+  @jira-mem-1030
+  Scenario: Users can set their SecurID PIN
+    Given I am on the two factor authentication settings page
+    When I click on the new token PIN CTA
+    Then I should see the new PIN form
+    When I cancel setting the PIN
+    Then I should not see the new PIN form
+
+  @jira-mem-1030
+  Scenario: Users are informed if they have entered bad details on the new PIN form
+    Given I am on the new PIN page
+    And I enter a bad token
+    And I submit the new PIN form
+    Then I should see the invalid token message
+    When I enter a good token
+    And I enter a bad new PIN
+    And I submit the new PIN form
+    Then I should see the invalid PIN message
+    When I enter a good new PIN
+    And I enter a bad confirm PIN
+    And I submit the new PIN form
+    Then I should see the invalid PIN message
+    When I enter two different values for the new PIN
+    And I submit the new PIN form
+    Then I should see the failed to set PIN message
+
   @jira-mem-601
   Scenario: Users can resynchronize their SecurID token
     Given I am on the two factor authentication settings page

@@ -65,13 +65,62 @@ RSpec.describe SettingsController, :type => :controller do
     end
   end
 
-  describe 'POST reset_pin' do
+  describe 'POST new_pin' do
+    let(:securid_new_pin) { Random.rand(9999).to_s.rjust(4, '0') }
+    let(:securid_token) { Random.rand(999999).to_s.rjust(6, '0') }
+    let!(:securid_service) { SecurIDService.new('some_user', test_mode: :change_pin) }
+    let(:make_request) { post :new_pin, securid_token: securid_token, securid_new_pin: securid_new_pin }
+    it_behaves_like 'a user required action', :post, :new_pin
+    context do
+      before do
+        allow(SecurIDService).to receive(:new).and_return(securid_service)
+      end
+
+      it 'attempts to authenticate the users SecurID token without a pin' do
+        expect(securid_service).to receive(:authenticate_without_pin).with(securid_token)
+        make_request
+      end
+      it 'returns a status of `invalid_token` if the token is malformed' do
+        post :new_pin, securid_token: '123ab3', securid_new_pin: securid_new_pin
+        expect(JSON.parse(response.body)['status']).to eq('invalid_token')
+      end
+      it 'returns a status of `invalid_new_pin` if the new pin is malformed' do
+        post :new_pin, securid_token: securid_token, securid_new_pin: '123a'
+        expect(JSON.parse(response.body)['status']).to eq('invalid_new_pin')
+      end
+      it 'returns a status of `success` if the pin set was completed' do
+        make_request
+        expect(JSON.parse(response.body)['status']).to eq('success')
+      end
+      it 'attempts to change the users pin if the user needs a pin change' do
+        expect(securid_service).to receive(:change_pin).with(securid_new_pin).and_return(true)
+        make_request
+      end
+    end
+    it 'returns a status of `denied` if the user was not authenticated' do
+      allow(SecurIDService).to receive(:new).and_return(SecurIDService.new('some_user', test_mode: :denied))
+      make_request
+      expect(JSON.parse(response.body)['status']).to eq('denied')
+    end
+    it 'returns a status of `authenticated` if the user was authenticated but no pin change was needed' do
+      allow(SecurIDService).to receive(:new).and_return(SecurIDService.new('some_user', test_mode: true))
+      make_request
+      expect(JSON.parse(response.body)['status']).to eq('authenticated')
+    end
+    it 'returns a status of `must_resynchronize` if the user needs to resynchronize their token first' do
+      allow(SecurIDService).to receive(:new).and_return(SecurIDService.new('some_user', test_mode: :resynchronize))
+      make_request
+      expect(JSON.parse(response.body)['status']).to eq('must_resynchronize')
+    end
+  end
+
+  describe 'PUT reset_pin' do
     let(:securid_pin) { Random.rand(9999).to_s.rjust(4, '0') }
     let(:securid_new_pin) { Random.rand(9999).to_s.rjust(4, '0') }
     let(:securid_token) { Random.rand(999999).to_s.rjust(6, '0') }
     let!(:securid_service) { SecurIDService.new('some_user', test_mode: :change_pin) }
-    let(:make_request) { post :reset_pin, securid_token: securid_token, securid_pin: securid_pin, securid_new_pin: securid_new_pin }
-    it_behaves_like 'a user required action', :post, :reset_pin
+    let(:make_request) { put :reset_pin, securid_token: securid_token, securid_pin: securid_pin, securid_new_pin: securid_new_pin }
+    it_behaves_like 'a user required action', :put, :reset_pin
     context do
       before do
         allow(SecurIDService).to receive(:new).and_return(securid_service)
@@ -82,15 +131,15 @@ RSpec.describe SettingsController, :type => :controller do
         make_request
       end
       it 'should return a status of `invalid_pin` if the original pin is malformed' do
-        post :reset_pin, securid_token: securid_token, securid_pin: 'abcd', securid_new_pin: securid_new_pin
+        put :reset_pin, securid_token: securid_token, securid_pin: 'abcd', securid_new_pin: securid_new_pin
         expect(JSON.parse(response.body)['status']).to eq('invalid_pin')
       end
       it 'should return a status of `invalid_token` if the token is malformed' do
-        post :reset_pin, securid_token: '123ab3', securid_pin: securid_pin, securid_new_pin: securid_new_pin
+        put :reset_pin, securid_token: '123ab3', securid_pin: securid_pin, securid_new_pin: securid_new_pin
         expect(JSON.parse(response.body)['status']).to eq('invalid_token')
       end
       it 'should return a status of `invalid_new_pin` if the new pin is malformed' do
-        post :reset_pin, securid_token: securid_token, securid_pin: securid_pin, securid_new_pin: '123a'
+        put :reset_pin, securid_token: securid_token, securid_pin: securid_pin, securid_new_pin: '123a'
         expect(JSON.parse(response.body)['status']).to eq('invalid_new_pin')
       end
       it 'should return a status of `success` if the pin change was completed' do

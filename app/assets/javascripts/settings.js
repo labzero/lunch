@@ -1,6 +1,7 @@
 $(function () {
   var settingsSaveButton = $('.settings-email .save-button');
   var $resetPin = $('.settings-reset-pin');
+  var $newPin = $('.settings-new-pin');
   var $resetToken = $('.settings-resynchronize-token');
   $('.settings-email input[type="checkbox"]').on('click', function(event){
     var settings = getEmailSettings();
@@ -203,7 +204,7 @@ $(function () {
   function validatePin($root, field_name) {
     var valid = true;
     var $field = $root.find('input[name=' + field_name + ']');
-    if (!$field.val().match(/^\d{4}$/) ) {
+    if ($field.length && !$field.val().match(/^\d{4}$/) ) {
       valid = false;
       $field.parents('fieldset').find('.form-error[data-error-type=invalid_pin]').show();
       $field.addClass('input-field-error');
@@ -230,48 +231,50 @@ $(function () {
       $root.find('input').attr('disabled', true);
     };
   }
+  $.each([$resetPin, $newPin], function(index, $form) {
+    console.log($form)
+    $form.find('form').on('ajax:success', function(event, json, status, xhr) {
+      if (json.status == 'success') {
+        handleSuccess($form);
+      } else {
+        handleError($form, json.status, function($root, status) {
+          if (status == 'must_resynchronize') {
+            return [$root.find('input[name=securid_token]'), status];
+          }
+          if (status == 'invalid_new_pin') {
+            return [$root.find('input[name=securid_new_pin]'), 'invalid_pin'];
+          }
 
-  $resetPin.find('form').on('ajax:success', function(event, json, status, xhr) {
-    if (json.status == 'success') {
-      handleSuccess($resetPin);
-    } else {
-      handleError($resetPin, json.status, function($root, status) {
-        if (status == 'must_resynchronize') {
-          return [$root.find('input[name=securid_token]'), status];
-        }
-        if (status == 'invalid_new_pin') {
-          return [$root.find('input[name=securid_new_pin]'), 'invalid_pin'];
-        }
+          return false;
+        });
+      }
+    }).on('ajax:error', buildFormErrorHandler($form))
+    .on('ajax:complete', buildFormCompleteHandler($form))
+    .on('ajax:beforeSend', function(event) {
+      var valid = true;
+      beforeValidate($form);
 
-        return false;
+      $.each(['securid_pin', 'securid_new_pin', 'securid_confirm_pin'], function(index, name) {
+        if (!validatePin($form, name)) {
+          valid = false;
+        }
       });
-    }
-  }).on('ajax:error', buildFormErrorHandler($resetPin))
-  .on('ajax:complete', buildFormCompleteHandler($resetPin))
-  .on('ajax:beforeSend', function(event) {
-    var valid = true;
-    beforeValidate($resetPin);
 
-    $.each(['securid_pin', 'securid_new_pin', 'securid_confirm_pin'], function(index, name) {
-      if (!validatePin($resetPin, name)) {
+      if (!validateToken($form, 'securid_token')) {
         valid = false;
       }
+
+      var $field = $form.find('input[name=securid_confirm_pin]');
+      if ($field.val() != $form.find('input[name=securid_new_pin]').val()) {
+        valid = false;
+        $field.parents('li').find('.form-error[data-error-type=pin_mismatch]').show();
+        $field.addClass('input-field-error');
+      }
+
+      afterValidate($form, valid);
+
+      return valid;
     });
-
-    if (!validateToken($resetPin, 'securid_token')) {
-      valid = false;
-    }
-
-    var $field = $resetPin.find('input[name=securid_confirm_pin]');
-    if ($field.val() != $resetPin.find('input[name=securid_new_pin]').val()) {
-      valid = false;
-      $field.parents('li').find('.form-error[data-error-type=pin_mismatch]').show();
-      $field.addClass('input-field-error');
-    }
-
-    afterValidate($resetPin, valid);
-
-    return valid;
   });
 
   $resetToken.find('form').on('ajax:success', function(event, json, status, xhr) {
