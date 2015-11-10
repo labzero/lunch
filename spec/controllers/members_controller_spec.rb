@@ -128,4 +128,16 @@ RSpec.describe MembersController, type: :controller do
       expect(make_request).to redirect_to(dashboard_path)
     end
   end
+
+  describe 'GET privacy_policy' do
+    let (:make_request) { get :privacy_policy}
+    it_behaves_like 'a user not required action', :get, :privacy_policy
+    it 'uses the `external` layout' do
+      expect(make_request).to render_template('layouts/external')
+    end
+    it 'renders the view' do
+      make_request
+      expect(response.body).to render_template('privacy_policy')
+    end
+  end
 end
