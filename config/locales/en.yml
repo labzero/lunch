@@ -56,13 +56,9 @@ en:
     rates: Rates
     daily_balances: Daily Balances
     beginning_balance: Beginning Balance
-    messages: Messages
+    messages: Announcements
     categories: Categories
     login: Log In
-    prior: Prior
-    next: Next
-    forward: Forward
-    print: Print
     as_of: As of
     today: Today
     details: Details
@@ -378,7 +374,7 @@ en:
       selected_item_message: "(Be sure to include fhlbsf.com in your Safe Senders list)"
       required_item_message_html: "You are assigned to receive these emails. For more information, <a href=\"%{url}\">contact us</a>."
       all:
-        title: All Messages
+        title: All Announcements
         description_html: ""
       reports:
         title: Reports
@@ -1932,8 +1928,9 @@ en:
       bank_terminate: "Bank's Right to Terminate"
   messages:
     meta_title: FHLB - Messages
-    receive_via_email: Receiving messages via email
-    edit_email_settings_html: Edit your <a href=%{url}>Email Settings</a> to choose which messages you want to receive via email.
+    description: "Welcome to your Member Portal Inbox.\n\nHere you will find an archive of the Bank's recent announcements to members.\nYou may filter these announcements by topic using the sidebar menu."
+    prior: Newer
+    next: Older
   contact:
     general_information:
       title: General Information

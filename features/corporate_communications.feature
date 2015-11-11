@@ -12,7 +12,7 @@ Scenario: Visit the messages page from the header
   When I click on the messages icon in the header
   Then I should see "Categories" as the sidebar title
     And I should see a list of message categories in the sidebar
-    And I should see "Messages" as the page's title
+    And I should see "Announcements" as the page's title
 
 Scenario: Filtering by message type
   Given I am on the Messages Page
@@ -32,13 +32,13 @@ Scenario: View the details of a message
 
 Scenario: Navigate from one detail page to another
   Given I am on the Messages Page
+  And I remember all the message titles
   When I select the first message on the messages page
   Then I should be see the message detail view
-    And I should remember the date of that message and its title
-  When I click on the "Next" link at the top of the message detail view
-  Then the date of the current message should be earlier than the date of the message I remembered and the title should be different
-  When I click on the "Prior" link at the top of the message detail view
-  Then I should see the date and the title of the message I remembered
+  When I click on the "Older" link at the top of the message detail view
+  Then I see the title of the second message
+  When I click on the "Newer" link at the top of the message detail view
+  Then I see the title of the first message
 
 @data-unavailable @jira-mem-288
 Scenario: No messages in any category
