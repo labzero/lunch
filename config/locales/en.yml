@@ -251,7 +251,7 @@ en:
     wire_transfer:
       title: Wire Transfer Services
       description_title: Wire Transfer Services
-      description: The designated individuals listed are authorized to conduct offline funds transactions by telephone. The signer listed on this form must be listed as an authorized individual on the Resolution and Authorization.
+      description: The designated individuals listed are authorized to conduct offline funds transactions by telephone. Any signer listed on this form must be listed as an authorized individual on the Resolution and Authorization.
     advances:
       title: Advances
       description_title: Advances
