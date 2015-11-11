@@ -885,7 +885,7 @@ en:
     securities:
       title: Securities
       transactions:
-        title: Securities Transaction
+        title: Securities Transactions
         summary: Preliminary report reflects transactions settled as of 11:30 am. Final report reflects all transactions settled during the day.
         updated: 'Twice daily: preliminary report is available at approximately 1:00 pm, and the final report is available at the end of the business day'
         history: Current report only, either the preliminary report or the final report
@@ -1201,9 +1201,9 @@ en:
           credit_program: CICA Credit Program
         minimum_maintenance_charge: '*The minimum annual maintenance charge is $500.'
       securities_transactions:
-        title: Securities Transaction
-        info: The Securities Transaction Report is updated twice a day. The Preliminary Securities Transaction Report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm on the settlement day. The Final Securities Transaction Report reflects all transactions that have settled that day and is generally available at the end of the business day.
-        effective: Effective %{date}, a "units" column has been added to the Securities Transaction Report.
+        title: Securities Transactions
+        info: The Securities Transaction Report is updated twice a day. The Preliminary Securities Transactions Report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm on the settlement day. The Final Securities Transactions Report reflects all transactions that have settled that day and is generally available at the end of the business day.
+        effective: Effective %{date}, a "units" column has been added to the Securities Transactions Report.
         preliminary: Preliminary Securities Transactions settled as of 11:30 am on %{date}
         final: Final Securities Transactions settled as of close of business on %{date}
         indicates_a_new_transaction_html: "*Indicates a new transaction."
