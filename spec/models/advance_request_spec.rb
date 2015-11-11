@@ -41,6 +41,7 @@ describe AdvanceRequest do
   let(:member_id) { double('A Member ID') }
   let(:signer) { double('A Signer', display_name: nil, username: nil) }
   let(:request) { double('A Request') }
+  let(:maturity_date) { double('A Maturity Date') }
   subject { described_class.new(member_id, signer, request) }
 
   describe 'initializer' do
@@ -249,6 +250,80 @@ describe AdvanceRequest do
     end
   end
 
+  describe '`maturity_date_for` method' do
+    let(:term) { double('A Term') }
+    let(:type) { double('A Type') }
+    let(:maturity_date) { double('A Date') }
+    let(:details) { {maturity_date: maturity_date} }
+    let(:term_table) { {term => details} }
+    let(:rate_table) { {type => term_table} }
+    let(:call_method) { subject.maturity_date_for(term, type) }
+    before do
+      allow(term).to receive(:to_sym).and_return(term)
+      allow(type).to receive(:to_sym).and_return(type)
+      allow(maturity_date).to receive(:to_date).and_return(maturity_date)
+      allow(subject).to receive(:rates).and_return(rate_table)
+    end
+    it 'fetches the rate table from the `rates` attribute' do
+      expect(subject).to receive(:rates).and_return(rate_table)
+      call_method
+    end
+    it 'looks up the term/type pair in the rate table' do
+      allow(rate_table).to receive(:[]).with(type).and_return(term_table)
+      expect(term_table).to receive(:[]).with(term).and_return(details)
+      call_method
+    end
+    it 'converts the found date string to a date and returns it' do
+      maturity_date_to_date = double('A Maturity Date')
+      allow(maturity_date).to receive(:to_date).and_return(maturity_date_to_date)
+      expect(call_method).to be(maturity_date_to_date)
+    end
+    it 'raises an error if the rate is not found' do
+      expect{subject.maturity_date_for(double('A Bad Term'), double('A Bad Type'))}.to raise_error
+    end
+  end
+
+  describe '`maturity_date_for!` method' do
+    let(:term) { double('A Term') }
+    let(:type) { double('A Type') }
+    let(:maturity_date) { double('A Maturity date', to_date: nil) }
+    let(:call_method) { subject.maturity_date_for!(term, type) }
+    before do
+      allow(subject).to receive(:maturity_date_for).with(term, type).and_return(maturity_date)
+    end
+    it 'fetches the maturity_date via `maturity_date_for`' do
+      expect(subject).to receive(:maturity_date_for).with(term, type)
+      call_method
+    end
+    it 'assigns the maturity_date to the `maturity_date` attribute' do
+      expect(subject).to receive(:maturity_date=).with(maturity_date)
+      call_method
+    end
+    it 'returns the maturity_date' do
+      expect(call_method).to be(maturity_date)
+    end
+  end
+
+  describe '`maturity_date=` method' do
+    let(:maturity_date) { double('maturity_date') }
+    let(:maturity_date_to_date) { double('maturity_date_to_date') }
+    let(:call_method) { subject.maturity_date = maturity_date }
+    it 'calls `to_date` on the maturity_date' do
+      expect(maturity_date).to receive(:to_date)
+      call_method
+    end
+    it 'stores the transformed maturity_date in the `maturity_date` attribute' do
+      allow(maturity_date).to receive(:to_date).and_return(maturity_date_to_date)
+      call_method
+      expect(subject.maturity_date).to be(maturity_date_to_date)
+    end
+    it 'stores the transformed maturity_date in the `maturity_date` attribute even if nil' do
+      subject.maturity_date = nil
+      expect(subject.maturity_date).to be(nil)
+    end
+  end
+
+
   describe '`rates` method' do
     let(:rate_table) { double('A Rate Table') }
     let(:rate_service) { double('A RatesService', quick_advance_rates: rate_table) }
@@ -287,10 +362,15 @@ describe AdvanceRequest do
       let(:value) { double("A #{attr.to_s.titlecase}", to_sym: sym_value) }
       let(:call_method) { subject.send("#{attr}=", value)}
       let(:allowed_values) { double('Allowed Values') }
+      let(:maturity_date) { double('Maturity date') }
+      let(:term){double('A Term')}
+      let(:type){double('A Type')}
 
       before do
         stub_const("#{described_class.name}::#{allowed_values_const_name}", allowed_values)
         allow(allowed_values).to receive(:include?).with(sym_value).and_return(true)
+        allow(subject).to receive(:maturity_date_for!).with(term, type)
+        allow(subject).to receive(:rate_for!).with(term, type)
       end
 
       it "converts the supplied `#{attr}` to a symbol" do
@@ -310,16 +390,52 @@ describe AdvanceRequest do
         expect(subject.send(attr)).to be(sym_value)
       end
       it 'updates the rate if both `term` and `type` are present' do
-        term = double('A Term')
-        type = double('A Type')
         allow(subject).to receive(:term).and_return(term)
         allow(subject).to receive(:type).and_return(type)
         expect(subject).to receive(:rate_for!).with(term, type)
         call_method
       end
+      it 'updates the maturity_date if both `term` and `type` are present' do
+        allow(subject).to receive(:term).and_return(term)
+        allow(subject).to receive(:type).and_return(type)
+        expect(subject).to receive(:maturity_date_for!).with(term, type)
+        call_method
+      end
       it "does not update the rate if the `#{attr}` has not changed" do
         call_method
         expect(subject).to_not receive(:rate_for!)
+        call_method
+      end
+      describe 'when both `term` and `type` are present' do
+        let(:term) { double('A Term') }
+        let(:type) { double('A Tyoe') }
+        before do
+          allow(subject).to receive(:term).and_return(term)
+          allow(subject).to receive(:type).and_return(type)
+          allow(subject).to receive(:rate_for!)
+        end
+        it 'resets the `stock_choice` if the value has changed' do
+          expect(subject).to receive(:reset_stock_choice!)
+          call_method
+        end
+        it 'does not reset the `stock_choice` attr if the value has not changed' do
+          call_method
+          expect(subject).to_not receive(:reset_stock_choice!)
+          call_method
+        end
+        it 'updates the rate' do
+          expect(subject).to receive(:rate_for!).with(term, type)
+          call_method
+        end
+      end
+      it 'does not reset the `stock_choice` attr if type or term is not present' do
+        call_method
+        expect(subject).to_not receive(:reset_stock_choice!)
+        call_method
+      end
+      it "does not update the maturity_date if the `#{attr}` has not changed" do
+        call_method
+        expect(subject).to_not receive(:maturity_date_for!)
         call_method
       end
     end
@@ -334,6 +450,18 @@ describe AdvanceRequest do
       before do
         allow(subject).to receive(:transform_amount).with(amount, attr).and_return(transformed_amount)
         allow(subject).to receive(:transform_amount).with(nil, attr).and_return(nil)
+      end
+      
+      if attr == :amount
+        it 'resets the `stock_choice` attr via the `reset_stock_choice!` method if the new amount differs from the old amount' do
+          expect(subject).to receive(:reset_stock_choice!)
+          call_method
+        end
+        it 'does not reset the `stock_choice` attr if the new amount is the same as the old amount' do
+          call_method
+          expect(subject).to_not receive(:reset_stock_choice!)
+          call_method
+        end
       end
 
       it 'passes the amount through `transform_amount`' do
@@ -1143,6 +1271,7 @@ describe AdvanceRequest do
     let(:term) { double('A Term') }
     let(:type) { double('A Type') }
     let(:rate) { double('A Rate') }
+    let(:maturity_date) { double('maturity_date') }
     let(:call_method) { subject.send(:perform_preview) }
     let(:response) { double('A Quick Advance Validate Response', each: nil, :[] => []) }
 
@@ -1150,6 +1279,7 @@ describe AdvanceRequest do
       allow(subject).to receive(:type).and_return(type)
       allow(subject).to receive(:rate).and_return(rate)
       allow(subject).to receive(:term).and_return(term)
+      allow(subject).to receive(:maturity_date).and_return(maturity_date)
       allow(subject).to receive(:amount).and_return(amount)
       allow(subject).to receive(:etransact_service).and_return(service_object)
       allow(subject).to receive(:stock_choice_present?).and_return(false)
@@ -1157,16 +1287,16 @@ describe AdvanceRequest do
     end
 
     it 'calls `quick_advance_validate`' do
-      expect(service_object).to receive(:quick_advance_validate).with(member_id, amount, type, term, rate, anything, signer)
+      expect(service_object).to receive(:quick_advance_validate).with(member_id, amount, type, term, rate, anything, signer, maturity_date)
       call_method
     end
     it 'calls `quick_advance_validate` with a check stock value of `true` if `stock_choice_present?` returns false' do
-      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, true, anything)
+      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, true, anything, anything)
       call_method
     end
     it 'calls `quick_advance_validate` with a check stock value of `false` if `stock_choice_present?` returns true' do
       allow(subject).to receive(:stock_choice_present?).and_return(true)
-      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, false, anything)
+      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, false, anything, anything)
       call_method
     end
     it 'calls `process_trade_errors` with the `quick_advance_validate` response' do
@@ -1237,6 +1367,19 @@ describe AdvanceRequest do
         expect(subject).to receive(:add_error).with(:rate, :stale)
         call_method
       end
+      describe 'and the advance is being executed' do
+        before do
+          allow(subject).to receive_message_chain(:aasm, :current_event).and_return(:execute)
+        end
+        it 'does not add an error' do
+          expect(subject).to_not receive(:add_error).with(:rate, :stale)
+          call_method
+        end
+        it 'does not send a stale rate warning email' do
+          expect(InternalMailer).to_not receive(:stale_rate)
+          call_method
+        end
+      end
     end
 
     describe 'when the rate is not stale' do
@@ -1260,6 +1403,11 @@ describe AdvanceRequest do
         call_method
         expect(subject.rate).to be(new_rate)
       end
+      it 'does not update the rate if the advance is being executed' do
+        allow(subject).to receive_message_chain(:aasm, :current_event).and_return(:execute)
+        call_method
+        expect(subject.rate).to be(rate)
+      end
     end
   end
 
@@ -1278,23 +1426,24 @@ describe AdvanceRequest do
       allow(subject).to receive(:rate).and_return(rate)
       allow(subject).to receive(:term).and_return(term)
       allow(subject).to receive(:amount).and_return(amount)
+      allow(subject).to receive(:maturity_date).and_return(maturity_date)
       allow(subject).to receive(:gross_amount).and_return(gross_amount)
       allow(subject).to receive(:etransact_service).and_return(service_object)
       allow(service_object).to receive(:quick_advance_execute).and_return(response)
     end
 
     it 'calls `quick_advance_execute`' do
-      expect(service_object).to receive(:quick_advance_execute).with(member_id, anything, type, term, rate, signer)
+      expect(service_object).to receive(:quick_advance_execute).with(member_id, anything, type, term, rate, signer, maturity_date)
       call_method
     end
     it 'calls `quick_advance_execute` with the `amount` if no stock purchase is requested' do
       allow(subject).to receive(:purchase_stock?).and_return(false)
-      expect(service_object).to receive(:quick_advance_execute).with(anything, amount, anything, anything, anything, anything)
+      expect(service_object).to receive(:quick_advance_execute).with(anything, amount, anything, anything, anything, anything, anything)
       call_method
     end
     it 'calls `quick_advance_execute` with the `gross_amount` if stock purchase is requested' do
       allow(subject).to receive(:purchase_stock?).and_return(true)
-      expect(service_object).to receive(:quick_advance_execute).with(anything, gross_amount, anything, anything, anything, anything)
+      expect(service_object).to receive(:quick_advance_execute).with(anything, gross_amount, anything, anything, anything, anything, anything)
       call_method
     end
     it 'calls `process_trade_errors` with the `quick_advance_execute` response' do

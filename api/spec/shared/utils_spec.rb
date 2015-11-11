@@ -6,6 +6,32 @@ end
 
 describe MAPI::Shared::Utils::ClassMethods do
   subject { MAPISharedUtils }
+  describe 'fetch_hash' do
+    let(:logger)        { double('logger') }
+    let(:sql)           { double('sql') }
+    let(:sql_response)  { double('result of sql query') }
+    let(:response_hash) { double('a hash of results') }
+    let(:call_method)   { subject.fetch_hash(logger, sql) }
+    before { allow(ActiveRecord::Base.connection).to receive(:execute).and_return(sql_response) }
+
+    it 'executes a SQL query on the ActiveRecord::Base.connection' do
+      expect(ActiveRecord::Base.connection).to receive(:execute).with(sql)
+      call_method
+    end
+    it 'returns a fetched hash of the results of the SQL query' do
+      allow(sql_response).to receive(:fetch_hash).and_return(response_hash)
+      expect(call_method).to eq(response_hash)
+    end
+    it 'returns an empty hash if the SQL query yields no results' do
+      expect(call_method).to eq({})
+    end
+    it 'logs an error for exceptions' do
+      allow(sql_response).to receive(:fetch_hash).and_raise(:exception)
+      expect(logger).to receive(:error)
+      call_method
+    end
+  end
+  
   describe 'fetch_hashes' do
     let(:logger) { double('logger') }
     let(:sql)    { double('sql') }

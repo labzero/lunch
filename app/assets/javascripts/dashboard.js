@@ -79,9 +79,9 @@ $(function () {
     })
   };
 
-  function showQuickAdvanceRates(rates) {
+  function showQuickAdvanceRates(data) {
     var table = $('.dashboard-quick-advance-flyout table');
-    table.append($(rates)).quickAdvanceTable();
+    table.append($(data.html)).quickAdvanceTable(data.id);
   };
 
   function showQuickAdvanceClosedState() {

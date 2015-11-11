@@ -1,5 +1,5 @@
 (function( $ ) {
-  $.fn.quickAdvanceTable = function(){
+  $.fn.quickAdvanceTable = function(advance_request_id){
     var $table = this;
     var $initiateButton = $(".dashboard-quick-advance-flyout .initiate-quick-advance");
     var $amountField = $('.dashboard-quick-advance-flyout input[name=amount]');
@@ -59,7 +59,7 @@
 
     function initiateQuickAdvance(rate_data) {
       transitionToLoadingFromRates();
-      $.post('/dashboard/quick_advance_preview', packageParameters(rate_data), function(json){
+      $.post('/dashboard/quick_advance_preview', packageParameters(parametersWithAmount(rate_data)), function(json){
         var $oldNodes = $flyout.find('.flyout-top-section-body span, .quick-advance-limited-pricing-message, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer');
 
         // append the html response, hide old nodes and show the new ones
@@ -106,7 +106,7 @@
     function initiateQuickAdvanceWithoutCapstockCheck(params) {
       var $flyoutBottomSection = $('.flyout-bottom-section');
       transitionToLoadingFromCapstock();
-      $.post('/dashboard/quick_advance_preview', params, function(json){
+      $.post('/dashboard/quick_advance_preview', packageParameters(params), function(json){
         var $flyoutBottomSection = $('.flyout-bottom-section');
         var $oldNodes = $flyoutBottomSection.find('.quick-advance-capstock, .quick-advance-capstock-back-button, .confirm-quick-advance-capstock');
 
@@ -115,18 +115,22 @@
         $('.quick-advance-capstock-subheading').hide();
         $flyoutBottomSection.append($(json.html));
 
-        $('.flyout-top-section-body .quick-advance-preview-subheading').show();
+        if (json.preview_error == true) {
+          showQuickAdvancePreviewError();
+        } else {
+          $('.flyout-top-section-body .quick-advance-preview-subheading').show();
 
-        // event listener and handler for back button click
-        $('.quick-advance-back-button').on('click', function() {
-          $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
-          $('.quick-advance-preview-subheading').hide();
-          $oldNodes.show();
-          $('.flyout-top-section-body .quick-advance-capstock-subheading').show();
-          transitionToCapstockFromLoading();
-        });
-        setRsaEventListener();
-        setConfirmQuickAdvanceListener();     
+          // event listener and handler for back button click
+          $('.quick-advance-back-button').on('click', function() {
+            $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
+            $('.quick-advance-preview-subheading').hide();
+            $oldNodes.show();
+            $('.flyout-top-section-body .quick-advance-capstock-subheading').show();
+            transitionToCapstockFromLoading();
+          });
+          setRsaEventListener();
+          setConfirmQuickAdvanceListener();
+        };
       }).error(showCatchAllError);
     }
 
@@ -259,9 +263,13 @@
       selected_rate['advance_type'] = $element.data('advance-type');
     };
 
-    function packageParameters(rate_data) {
+    function packageParameters(params) {
+      return $.extend(params, {id: advance_request_id});
+    }
+
+    function parametersWithAmount(rate_data) {
       return $.extend(rate_data, {amount: $amountField.val()})
-    };
+    }
 
     function setRsaEventListener() {
       var $initiateButton = $('.confirm-quick-advance');

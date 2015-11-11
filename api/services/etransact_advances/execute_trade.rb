@@ -5,6 +5,7 @@ module MAPI
   module Services
     module EtransactAdvances
       module ExecuteTrade
+        include MAPI::Shared::Constants
 
         include MAPI::Shared::Utils
 
@@ -67,18 +68,9 @@ module MAPI
           end
         end
 
-        def self.get_maturity_date (settlement_date, term)
-          maturity_date = settlement_date.to_date
-          if (term == 'overnight') || (term == 'open')
-            maturity_date = maturity_date + 1.day
-          elsif term[1].upcase == 'W'
-            maturity_date = maturity_date + (7*term[0].to_i).day
-          elsif term[1].upcase == 'M'
-            maturity_date = maturity_date + (term[0].to_i).month
-          elsif term[1].upcase == 'Y'
-            maturity_date = maturity_date + (term[0].to_i).year
-          end
-          maturity_date
+        def self.get_maturity_date (app, settlement_date, term)
+          holidays = MAPI::Services::Rates::Holidays.holidays(app.logger, app.settings.environment)
+          MAPI::Services::Rates.get_maturity_date(settlement_date+TERM_MAPPING[term][:time], TERM_MAPPING[term][:frequency_unit], holidays)
         end
 
         def self.get_payment_info(term, collateral, settlement_date, maturity_date)
@@ -110,6 +102,7 @@ module MAPI
                   'v13:frequencyUnit' => 'M'
                 }
               end
+              advance_payment_day_of_month = 31
               payment_at = 'End Of Month'
             else
               if (maturity_date - settlement_date).to_i <= 180
@@ -179,15 +172,25 @@ module MAPI
           advance_rate_schedule
         end
 
-        def self.get_advance_product_info(term)
+        def self.get_advance_product_info(term, maturity_date)
           # Product information and term frequency, which depends on the term type
-          if (term == 'overnight') || (term == 'open')
+          if term == 'overnight'
             advance_product_info = {
-              'v14:product' => term.gsub('overnight', 'O/N').upcase + ' VRC',
+              'v14:product' => 'O/N VRC',
               'v14:subProduct' => 'VRC',
               'v14:term' => {
                 'v13:frequency' => 1,
                 'v13:frequencyUnit' => 'D'
+              },
+              'v14:maturityDate' => maturity_date
+            }
+          elsif term == 'open'
+            advance_product_info = {
+              'v14:product' => 'OPEN VRC',
+              'v14:subProduct' => 'VRC',
+              'v14:term' => {
+                  'v13:frequency' => 1,
+                  'v13:frequencyUnit' => 'D'
               }
             }
           else
@@ -197,7 +200,8 @@ module MAPI
               'v14:term' => {
                 'v13:frequency' => term[0].to_i,
                 'v13:frequencyUnit' => term[1].upcase
-              }
+              },
+              'v14:maturityDate' => maturity_date
             }
           end
           advance_product_info
@@ -218,7 +222,6 @@ module MAPI
           # Markup, Blended Cost Of Funds To Libor, Cost Of Funds and Benchmark Rate will be calculated later
           payment_info = MAPI::Services::EtransactAdvances::ExecuteTrade::get_payment_info(advance_term, advance_type, settlement_date, maturity_date)
           advance_payment_coupon_markup = {
-            'v14:maturityDate' => maturity_date,
             'v14:collateralType' => LOAN_MAPPING[advance_type],
             'v14:subsidyProgram' => 'N/A',
             'v14:prepaymentSymmetry' => false,
@@ -269,16 +272,15 @@ module MAPI
 
           # Put it all together
           message['v1:trade']['v12:advance'].deep_merge! advance_lender_amount
-          message['v1:trade']['v12:advance'].deep_merge! MAPI::Services::EtransactAdvances::ExecuteTrade::get_advance_product_info(advance_term)
+          message['v1:trade']['v12:advance'].deep_merge! MAPI::Services::EtransactAdvances::ExecuteTrade::get_advance_product_info(advance_term, maturity_date)
           message['v1:trade']['v12:advance'].deep_merge! advance_payment_coupon_markup
           [message, payment_info]
         end
 
-        def self.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate)
+        def self.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date=nil)
           member_id = member_id.to_i
           # Calculated values
           # True maturity date will be calculated later
-          maturity_date = MAPI::Services::EtransactAdvances::ExecuteTrade::get_maturity_date(Time.zone.today, advance_term)
           settlement_date = Time.zone.today # currently both `trade_date` and `funding_date` are set to today, as we only allow same-day funding/trading at this time
           day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/ACT' : 'ACT/360'
 

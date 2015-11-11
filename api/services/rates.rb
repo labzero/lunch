@@ -96,30 +96,6 @@ module MAPI
                                                                  'xmlns:v11' => 'http://fhlbsf.com/reports/contract/v1'} )
       end
 
-      def self.get_holidays_from_soap(logger, start, finish)
-        begin
-          @@cal_connection.call(:get_holiday,
-                                message_tag: 'holidayRequest',
-                                message: {'v1:endDate' => finish, 'v1:startDate' => start},
-                                soap_header: SOAP_HEADER )
-        rescue Savon::Error => error
-          logger.error error
-          nil
-        end
-      end
-
-      def self.get_holidays(logger, environment)
-        if MAPI::Services::Rates.init_cal_connection(environment)
-          return nil unless response = MAPI::Services::Rates.get_holidays_from_soap(logger, Time.zone.today, Time.zone.today + 3.years)
-          response.doc.remove_namespaces!
-          response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')[0].css('days day date').map do |holiday|
-            Time.zone.parse(holiday.content)
-          end
-        else
-          MAPI::Services::Rates.fake('calendar_holidays')
-        end
-      end
-
       def self.market_data_message_for_loan_type(loan_type, live_or_start_of_day)
         {
             'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
@@ -633,7 +609,7 @@ module MAPI
         end
 
         relative_get "/summary" do
-          halt 503, 'Internal Service Error' unless holidays       = MAPI::Services::Rates.get_holidays(logger, settings.environment)
+          halt 503, 'Internal Service Error' unless holidays       = MAPI::Services::Rates::Holidays.holidays(logger, settings.environment)
           halt 503, 'Internal Service Error' unless blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(logger,settings.environment)
           halt 503, 'Internal Service Error' unless loan_terms     = MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment)
           halt 503, 'Internal Service Error' unless rate_bands     = MAPI::Services::Rates::RateBands.rate_bands(logger,settings.environment)

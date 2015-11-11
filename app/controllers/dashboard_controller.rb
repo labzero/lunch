@@ -2,14 +2,14 @@ class DashboardController < ApplicationController
   include CustomFormattingHelper
   include DashboardHelper
 
-  THRESHOLD_CAPACITY = 35 #this will be set by each client, probably with a default value of 35, and be stored in some as-yet-unnamed db
+  MAX_SIMULTANEOUS_ADVANCES = 5.freeze # This number is to prevent a DoS by a user creating thousands of advance requests for a given session
 
   before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform] do
     authorize :advances, :show?
   end
 
   before_action only: [:quick_advance_perform, :quick_advance_preview] do
-    advance_request_from_session
+    advance_request_from_session(params[:id])
   end
 
   after_action only: [:quick_advance_rates, :quick_advance_perform, :quick_advance_preview] do
@@ -156,7 +156,7 @@ class DashboardController < ApplicationController
     logger.debug { '  Advance Request State: ' + advance_request.inspect }
     logger.debug { '  Advance Request Errors: ' + advance_request.errors.inspect }
 
-    render layout: false
+    render json: {html: render_to_string(layout: false), id: advance_request.id}
   end
 
   def quick_advance_preview
@@ -190,6 +190,7 @@ class DashboardController < ApplicationController
           preview_success = false
           preview_error = false
           @original_amount = advance_request.amount
+          @net_amount = @original_amount - @net_stock_required
           response_html = render_to_string :quick_advance_capstock, layout: false
         else
           preview_success = false
@@ -267,6 +268,7 @@ class DashboardController < ApplicationController
     logger.debug { '  Execute Results: ' + {securid: securid_status, advance_success: advance_success}.inspect }
 
     render json: {securid: securid_status, advance_success: advance_success, html: response_html}
+    advance_request_clear! if advance_success
   end
 
   def current_overnight_vrc
@@ -311,9 +313,9 @@ class DashboardController < ApplicationController
     @total_amount = advance_request.total_amount
   end
 
-  def advance_request_from_session
-    id = session[:advance_request]
-    @advance_request ||= if id 
+  def advance_request_from_session(id)
+    session[:advance_request] ||= []
+    @advance_request ||= if session[:advance_request].include?(id)
       AdvanceRequest.find(id, request)
     else
       advance_request
@@ -322,7 +324,10 @@ class DashboardController < ApplicationController
 
   def advance_request_to_session
     if @advance_request
-      session[:advance_request] = @advance_request.id if @advance_request.save
+      session[:advance_request] ||= []
+      id = @advance_request.id
+      session[:advance_request].push(id) if @advance_request.save && !session[:advance_request].include?(id)
+      raise SecurityError.new("Too many advances in session: #{session[:advance_request].count}") if session[:advance_request].count > MAX_SIMULTANEOUS_ADVANCES
     end
   end
 
@@ -335,7 +340,7 @@ class DashboardController < ApplicationController
   end
 
   def advance_request_clear!
-    session.delete(:advance_request)
+    session[:advance_request].delete(@advance_request.id) if @advance_request && session[:advance_request]
     @advance_request = nil
   end
 

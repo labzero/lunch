@@ -88,6 +88,18 @@ class AdvanceRequest
     self.rate = rate_for(term, type)
   end
 
+  def maturity_date_for(term, type)
+    rates[type.to_sym][term.to_sym][:maturity_date].try(:to_date)
+  end
+
+  def maturity_date_for!(term, type)
+    self.maturity_date = maturity_date_for(term, type)
+  end
+
+  def maturity_date=(value)
+    @maturity_date = value.try(:to_date)
+  end
+
   def rate!
     rate_for!(term, type) unless rate
     rate
@@ -111,7 +123,9 @@ class AdvanceRequest
     old_term = @term
     @term = term
     if old_term != term && type
+      reset_stock_choice!
       rate_for!(self.term, type)
+      maturity_date_for!(self.term, type)
     end
   end
 
@@ -121,12 +135,16 @@ class AdvanceRequest
     old_type = @type
     @type = type
     if old_type != type && term
+      reset_stock_choice!
       rate_for!(term, self.type)
+      maturity_date_for!(term, self.type)
     end
   end
 
   def amount=(amount)
+    old_amount = @amount
     @amount = transform_amount(amount, :amount)
+    reset_stock_choice! if old_amount != @amount
   end
 
   def gross_amount=(amount)
@@ -137,6 +155,10 @@ class AdvanceRequest
     choice = choice.to_sym
     raise "Unknown Stock Choice: #{choice}" if choice && !STOCK_CHOICES.include?(choice)
     @stock_choice = choice
+  end
+  
+  def reset_stock_choice!
+    @stock_choice = nil
   end
 
   def initiated_at=(datetime)
@@ -402,12 +424,13 @@ class AdvanceRequest
   end
 
   def perform_preview
-    response = etransact_service.quick_advance_validate(member_id, amount, type, term, rate, !stock_choice_present?, signer)
+    response = etransact_service.quick_advance_validate(member_id, amount, type, term, rate, !stock_choice_present?, signer, maturity_date)
     process_trade_errors(:preview, response)
     populate_attributes_from_response(response)
   end
 
   def perform_rate_check
+    return if aasm.current_event == :execute
     settings = etransact_service.settings
     rate_details = rate_service.rate(type, term)
 
@@ -434,7 +457,7 @@ class AdvanceRequest
   end
 
   def perform_execute
-    response = etransact_service.quick_advance_execute(member_id, total_amount, type, term, rate, signer)
+    response = etransact_service.quick_advance_execute(member_id, total_amount, type, term, rate, signer, maturity_date)
     process_trade_errors(:execute, response)
     populate_attributes_from_response(response)
   end
