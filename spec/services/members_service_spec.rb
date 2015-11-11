@@ -202,10 +202,10 @@ describe MembersService do
     describe '`signers_and_users` method' do
       let(:signer_mapped_roles) {[User::ROLE_MAPPING['signer-etransact']]}
       let(:signer_roles) {['signer-etransact']}
-      let(:signer) {{name: 'Some Signer', roles: signer_roles}}
+      let(:signer) {{name: 'Some Signer', roles: signer_roles, last_name: 'signer last name', first_name: 'signer first name'}}
       let(:duplicate_signer) {{name: 'A Duplicate User', username: 'username', roles: signer_roles}}
       let(:user_roles) {['user']}
-      let(:user) {double('Some User', :display_name => 'User Display Name', roles: user_roles, username: 'username')}
+      let(:user) {double('Some User', :display_name => 'User Display Name', roles: user_roles, username: 'username', surname: 'last name', given_name: 'first name')}
       let(:member) { subject.signers_and_users(member_id) }
 
       it 'should return nil if there was an API error' do
@@ -222,11 +222,18 @@ describe MembersService do
           allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: [signer].to_json))
           allow(subject).to receive(:fetch_ldap_users).and_return([user])
         end
-        it 'contains hashes with with a `display_name` and `roles` representing all users associated with a bank' do
-          expect(member).to include({:display_name => 'User Display Name', roles: user_roles})
+        [:display_name, :roles, :surname, :given_name].each do |attr|
+          it "contains hashes with a `#{attr}` representing all users associated with a bank" do
+            value = user.send(attr)
+            expect(member).to satisfy { |list| list.find {|e| e[attr] == value }}
+          end
         end
-        it 'contains hashes with with a `display_name` and `roles` representing all signers associated with a bank' do
-          expect(member).to include({:display_name => 'Some Signer', roles: signer_mapped_roles})
+        {display_name: :name, roles: :roles, surname: :last_name, given_name: :first_name}.each do |attr, signer_attr|
+          it "contains hashes with a `#{attr}` representing all signers associated with a bank" do
+            value = signer[signer_attr]
+            value = signer_mapped_roles if attr == :roles
+            expect(member).to satisfy { |list| list.find {|e| e[attr] == value }}
+          end
         end
         it 'does not add a signer to the result set if the signer is also a user' do
           allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: [signer, duplicate_signer].to_json))

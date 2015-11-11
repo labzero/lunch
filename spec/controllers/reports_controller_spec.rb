@@ -1711,9 +1711,12 @@ RSpec.describe ReportsController, :type => :controller do
     it_behaves_like 'a report with instance variables set in a before_filter', :authorizations
     describe 'view instance variables' do
       let(:member_service_instance) {double('MembersService')}
-      let(:user_no_roles) {{display_name: 'User With No Roles', roles: []}}
-      let(:user_etransact) {{display_name: 'Etransact User', roles: [User::Roles::ETRANSACT_SIGNER]}}
-      let(:signers_and_users) {[user_no_roles, user_etransact]}
+      let(:user_no_roles) {{display_name: 'User With No Roles', roles: [], surname: 'With No Roles', given_name: 'User'}}
+      let(:user_etransact) {{display_name: 'Etransact User', roles: [User::Roles::ETRANSACT_SIGNER], surname: 'User', given_name: 'Etransact'}}
+      let(:user_a) { {display_name: 'R&A User', roles: [User::Roles::SIGNER_MANAGER], given_name: 'R&A', surname: 'User'} }
+      let(:user_b) { {display_name: 'Collateral User', roles: [User::Roles::COLLATERAL_SIGNER], given_name: 'Collateral', surname: 'User'} }
+      let(:user_c) { {display_name: 'Wire Lady', roles: [User::Roles::WIRE_SIGNER], given_name: 'Wire', surname: 'Lady'} }
+      let(:signers_and_users) {[user_no_roles, user_etransact, user_a, user_b, user_c]}
       let(:roles) {['all', User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::AFFORDABILITY_SIGNER, User::Roles::COLLATERAL_SIGNER, User::Roles::MONEYMARKET_SIGNER, User::Roles::DERIVATIVES_SIGNER, User::Roles::SECURITIES_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER, User::Roles::ETRANSACT_SIGNER]}
       let(:role_translations) {[t('user_roles.all_authorizations'), t('user_roles.resolution.dropdown'), t('user_roles.entire_authority.dropdown'), t('user_roles.affordable_housing.title'), t('user_roles.collateral.title'), t('user_roles.money_market.title'), t('user_roles.interest_rate_derivatives.title'), t('user_roles.securities.title'), t('user_roles.wire_transfer.title'), t('user_roles.access_manager.title'), t('user_roles.etransact.title')]}
       let(:job_id) {rand(1000..10000)}
@@ -1853,25 +1856,22 @@ RSpec.describe ReportsController, :type => :controller do
                 expect(row[:columns].last[:value]).to be_kind_of(Array)
               end
             end
-            it 'contains all users sorted by display_name if the authorizations_filter is set to `all`' do
+            it 'contains all users sorted by last name then first name if the authorizations_filter is set to `all`' do
               make_request
-              expect(assigns[:authorizations_table_data][:rows].length).to eq(2)
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('Etransact User')
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.etransact.title')])
-              expect(assigns[:authorizations_table_data][:rows].last[:columns].first[:value]).to eq('User With No Roles')
-              expect(assigns[:authorizations_table_data][:rows].last[:columns].last[:value]).to eq([I18n.t('user_roles.user.title')])
-            end
-            it "only contains users with a user_role of #{I18n.t('user_roles.user.title')} if the authorizations_filter is set to `user`" do
-              get :authorizations, :authorizations_filter => 'user', job_id: job_id
-              expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('User With No Roles')
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.user.title')])
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(3)
+              expect(assigns[:authorizations_table_data][:rows][0][:columns].first[:value]).to eq(user_c[:display_name])
+              expect(assigns[:authorizations_table_data][:rows][1][:columns].first[:value]).to eq(user_b[:display_name])
+              expect(assigns[:authorizations_table_data][:rows][2][:columns].first[:value]).to eq(user_a[:display_name])
             end
             it 'only contains users with the proper role if an authorization_filter is set' do
-              get :authorizations, :authorizations_filter => User::Roles::ETRANSACT_SIGNER, job_id: job_id
+              get :authorizations, :authorizations_filter => User::Roles::SIGNER_MANAGER, job_id: job_id
               expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('Etransact User')
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.etransact.title')])
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_a[:display_name])
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.resolution.title')])
+            end
+            it 'ignores users with no role or the eTransact role' do
+              make_request
+              expect(assigns[:authorizations_table_data][:rows]).to satisfy { |rows| !rows.find {|row| [user_etransact[:display_name], user_no_roles[:display_name]].include?(row[:columns].first[:value]) } }
             end
           end
         end
@@ -2110,14 +2110,25 @@ RSpec.describe ReportsController, :type => :controller do
       it 'returns an array containing the I18n translation of the roles for a given user' do
         role_mappings.each_key do |role|
           user = {:roles => [role]}
-          expect(controller.send(:roles_for_signers, user)).to eq([role_mappings[role]])
+          expect(subject.send(:roles_for_signers, user)).to eq([role_mappings[role]])
         end
       end
-      it 'returns an array containing the I18n translation for `user` when a given user has no roles' do
+      it 'returns an empty array a given user has no roles' do
         role_mappings.each_key do |role|
           user = {:roles => []}
-          expect(controller.send(:roles_for_signers, user)).to eq([I18n.t('user_roles.user.title')])
+          expect(subject.send(:roles_for_signers, user)).to eq([])
         end
+      end
+      it 'sorts the roles based on the `AUTHORIZATIONS_ORDER`' do
+        roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER]
+        sorted_roles = roles.sort_by {|role| described_class::AUTHORIZATIONS_ORDER.index(role)}
+        user = {:roles => roles}
+        expect(subject.send(:roles_for_signers, user)).to eq(sorted_roles.collect {|role| role_mappings[role]})
+      end
+      it 'hides roles that are implied by a higher role' do
+        roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::SIGNER_MANAGER]
+        user = {:roles => roles}
+        expect(subject.send(:roles_for_signers, user)).to match_array([role_mappings[User::Roles::WIRE_SIGNER], role_mappings[User::Roles::SIGNER_MANAGER]])
       end
     end
     describe 'last_month_end' do

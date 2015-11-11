@@ -92,11 +92,11 @@ class MembersService < MAPIService
           usernames = users.blank? ? [] : users.collect(&:username)
           signers.each do |signer|
             roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact
-            signers_and_users << {display_name: signer['name'], roles: roles} unless usernames.include?(signer['username'])
+            signers_and_users << {display_name: signer['name'], roles: roles, given_name: signer['first_name'], surname: signer['last_name']} unless usernames.include?(signer['username'])
           end
 
           users.each do |user|
-            signers_and_users << {display_name: user.display_name || user.username, roles: user.roles}
+            signers_and_users << {display_name: user.display_name || user.username, roles: user.roles, surname: user.surname, given_name: user.given_name}
           end
         end
       end
