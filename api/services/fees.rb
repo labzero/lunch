@@ -47,7 +47,7 @@ module MAPI
 
         relative_get "/schedules" do
           begin
-            MAPI::Services::Fees.fee_schedules(self.settings.environment, logger).to_json
+            MAPI::Services::Fees.fee_schedules(self).to_json
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
@@ -55,9 +55,9 @@ module MAPI
         end
       end
       
-      def self.fee_schedules(env, logger)
-        if env == :production 
-          securities_services_fees = fetch_hashes(logger, SECURITIES_SERVICES_FEE_SQL)
+      def self.fee_schedules(app)
+        if app.settings.environment == :production 
+          securities_services_fees = fetch_hashes(app.logger, SECURITIES_SERVICES_FEE_SQL)
         else
           securities_services_fees = fake('securities_services_fees')
         end

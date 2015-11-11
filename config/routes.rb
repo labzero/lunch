@@ -89,6 +89,7 @@ Rails.application.routes.draw do
     get '/guides' => 'resources#guides'
     get '/capital-plan' => 'resources#capital_plan'
     get '/download/:file' => 'resources#download', as: :resources_download
+    get 'fee_schedules' => 'resources#fee_schedules'
   end
 
   scope 'products' do

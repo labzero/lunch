@@ -9,10 +9,6 @@ describe MAPI::ServiceApp do
     let(:call_endpoint) { get "/fees/schedules" }
     let(:response) { double('response') }
     before { allow(MAPI::Services::Fees).to receive(:fee_schedules).and_return(response) }
-    it 'calls the `fee_schedules` method with the logger' do
-      expect(MAPI::Services::Fees).to receive(:fee_schedules).with(anything, ActiveRecord::Base.logger)
-      call_endpoint
-    end
     it 'returns the results of the method call as JSON' do
       expect(response).to receive(:to_json)
       call_endpoint
@@ -52,7 +48,9 @@ describe MAPI::ServiceApp do
 
     [:development, :test, :production].each do |env|
       describe "in the #{env} environment" do
-        let(:call_method) { MAPI::Services::Fees.fee_schedules(env, logger) }
+        let(:logger) { double('logger') }
+        let(:app) { double('the ServiceApp', settings: double('app settings', environment: env), logger: logger) }
+        let(:call_method) { MAPI::Services::Fees.fee_schedules(app) }
 
         if env == :production
           before { allow(MAPI::Services::Fees).to receive(:fetch_hashes).and_return(securities_services_data) }

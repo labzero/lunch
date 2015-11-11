@@ -112,6 +112,7 @@ en:
     report: Report
     sta_number: Settlement/Transaction Account No. %{sta_number}
     all_transactions: All Transactions
+    footnote_indicator: '*'
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -699,6 +700,66 @@ en:
         title: Collateral Field Review Process
     fee_schedules:
       title: Fee Schedules
+      other_fee_info_html: The Bank charges fees for certain products and services. Other fees are included in the <a href=%{credit_guide_url}>Credit Guide</a> and the <a href=%{collateral_guide_url}>Collateral Guide</a>.
+      letter_of_credit: Standby Letter of Credit Prices and Fees
+      annual_maintenance_charge: Pricing/Annual Maintenance Charge
+      loc_pricing_info: 'Prices for standby letters of credit will be established and disclosed prior to issuance and will include, at a minimum, an ongoing annual maintenance charge, to be paid monthly in advance on a 30/360 day count basis. Current annual maintenance charges are listed below:'
+      minimum_annual_fee: Minimum annual fee
+      issuance_fee: Issuance Fee
+      cip_ace: CIP/ACE
+      agency_deposits: State and local agency deposits
+      other_purposes: Other purposes
+      price_range: '%{lower} - %{upper}'
+      commercial_paper: Commercial paper
+      tax_exempt_bond: Tax-exempt bond
+      draw_fee: Draw fee
+      amendment_fee: Amendment Fee
+      other_loc_info: For other letter of credit types, the Bank will determine an appropriate issuance fee based on the specific requirements of the transaction.
+      other_amendment_info: For other types of amendments, the Bank will determine an appropriate fee based on the specific requirements of the amendment.
+      increase_extension: Increases or extensions
+      basis_point_per_annum: '%{basis_point} basis points per annum'
+      securities_services: Securities Services Fees
+      monthly_maintenance_fee: Monthly Account Maintenance Fee
+      monthly_securities_fees: Monthly Securities Fees
+      security_transaction_fees: Security Transaction Fees
+      monthly_maintenance_info: The monthly account maintenance fee is based on the number of securities held at the end of the current month.
+      less_than_10: Less than 10 lots
+      between_10_and_24: 10-24 lots
+      more_than_24: 25 or more lots
+      amount_per_month: '%{amount} per month'
+      item_by_lot: '%{amount} per item, by lot'
+      par_by_lot: '%{amount} per %{par} par, by lot'
+      amount_per_item: '%{amount} per item'
+      fed: Fed eligible
+      dtc: DTC eligible
+      physical: Physical and mutual funds
+      euroclear: Euroclear
+      all_income_disbursement: All income disbursement
+      pledge_status_change: Pledge status change (account transfer)
+      certificate_registration: Registration of certificate
+      research_projects: Research projects (hourly)
+      special_handling: Special handling
+      specific_transaction_fee_info: '* Fees will be charged based on the specific transaction and time involved.'
+      wire_transfer_and_sta: Wire Transfer and STA Fees
+      domestic_outgoing_wires: Domestic Outgoing Wires
+      telephone_request: Telephone request
+      telephone_repetitive: Repetitive
+      telephone_non_repetitive: Non-repetitive
+      drawdown_request: Drawdown request
+      standing_request: Standing request
+      domestic_incoming_wires: Domestic incoming wires
+      overdraft_charges: Overdraft Charges
+      interest_rate: Interest rate charged daily on the amount of the overdraft
+      processing_fee: Processing fee
+      miscellaneous_securities_services: Miscellaneous Securities Services Fees
+      miscellaneous_wire_transfer: Miscellaneous Wire Transfer and STA Fees
+      photocopies: Photocopies
+      special_account_research: Special account research
+      interest_rate_overdraft: 'Fed funds + %{basis_points} basis points'
+      amount_per_overdraft: '%{amount} per overdraft'
+      amount_per_wire: '%{amount} per wire'
+      amount_per_statement: '%{amount} per item or statement'
+      amount_per_hour: '%{amount} per hour'  
     forms:
       title: Forms
       agreements:
