@@ -236,38 +236,46 @@ en:
       title: User
     access_manager:
       title: Access Manager
+      description_title: Access Manager
       description: Identifies your institution's Access Manager(s), who will add and delete users, reset passwords, and lock or unlock website access accounts for individuals
     resolution:
       dropdown: Resolution and Authorization
-      title: 'Resolution and Authorization: Member Transactions (All transactions except Wires)'
+      title: 'Resolution and Authorization: Member Transactions'
+      description_title: 'Resolution and Authorization: Member Transactions (All transactions except Wires)'
       description: The primary form on which you specify individuals who are authorized to execute all types of transactions with the Bank, except for wires. Must be adopted by your Board of Directors and signed by your Corporate Secretary.
     entire_authority:
       dropdown: Entire Authority
       title: Entire Authority (All transactions except Wires)
+      description_title: Entire Authority (All transactions except Wires)
       description: This form permits the individuals designated on the Resolution and Authorization to authorize additional officers, employees, or agents of your institution to engage in all transactions with the Bank, except for wires, and to provide instructions regarding all securities-related transactions.
     wire_transfer:
       title: Wire Transfer Services
+      description_title: Wire Transfer Services
       description: The designated individuals listed are authorized to conduct offline funds transactions by telephone. The signer listed on this form must be listed as an authorized individual on the Resolution and Authorization.
     advances:
       title: Advances
+      description_title: Advances
       description: The designated individuals listed are authorized to execute advances, letters of credit, lines of credit, and other similar extensions of credit with the Bank.
     affordable_housing:
       title: Affordable Housing Program
+      description_title: Affordable Housing Program
       description: The designated individuals listed are authorized to exercise authority under the Bank's Affordable Housing Program and any other community investment programs, excluding extensions of credit related to these programs.
     collateral:
       title: Collateral
+      description_title: Collateral
       description: The designated individuals listed are authorized to engage in collateral transactions with the Bank. Employees listed on this form are authorized to provide instructions regarding the pledging and de-pledging of securities but are not authorized to provide instructions regarding securities held in safekeeping (except to pledge those securities).
     interest_rate_derivatives:
       title: Interest Rate Derivatives
+      description_title: Interest Rate Derivatives
       description: The designated individuals listed are authorized to engage in interest rate derivative transactions with the Bank.
     money_market:
       title: Money Market Transactions
+      description_title: Money Market Transactions
       description: The designated individuals listed are authorized to request or purchase Bank funds in unsecured money market transactions.
     securities:
       title: Securities Services
+      description_title: Securities Services
       description: The designated individuals listed are authorized to move securities to and from their unpledged account (safekeeping account). Employees listed on this form are authorized to provide instructions regarding the purchase and sale of unpledged securities, but are not authorized to pledge or de-pledge securities.
-    etransact:
-      title: eTransact Holder
   settings:
     title: Settings
     save: Save
@@ -1202,6 +1210,8 @@ en:
         title: Authorizations
         intro_html: The following people are authorized to use the Bank's services on behalf of your institution. If you'd like to make changes to these authorizations, please fill out a <a href=%{url}>Signature Card Form</a>.
         contact_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about authorizations, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
+        sub_title: Users with %{filter}
+        sub_title_all_users: All Users with Authorizations
       parallel_shift:
         title: Putable Advance Parallel Shift Sensitivity Analysis
         info: The valuations below are calculated using data as of %{date}

@@ -92,7 +92,7 @@ module MAPI
         if record['SECURITYSIGNER'] == -1 || record['ALLRNA'] == -1 || record['ALLPRODUCT'] == -1
           roles << 'signer-securities'
         end
-        if record['WIRESIGNER'] == -1 || record['ALLRNA'] == -1 || record['ALLPRODUCT'] == -1
+        if record['WIRESIGNER'] == -1
           roles << 'signer-wiretransfers'
         end
         if record['REPOSIGNER'] == -1 || record['ALLRNA'] == -1 || record['ALLPRODUCT'] == -1

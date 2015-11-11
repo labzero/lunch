@@ -3,12 +3,23 @@
     {
       "name": "Chaste Access",
       "username": "extra-chaste-access",
-      "roles": ["signer", "signer-etransact"]
+      "roles": ["signer", "signer-etransact"],
+      "first_name": "Chaste",
+      "last_name": "Access"
     },
     {
       "name": "Della Duck",
       "username": null,
-      "roles": ["signer-collateral", "signer-moneymarket"]
+      "roles": ["signer-collateral", "signer-moneymarket"],
+      "first_name": "Della",
+      "last_name": "Duck"
+    },
+    {
+      "name": "Ronald Ruck",
+      "username": null,
+      "roles": ["signer", "signer-manager"],
+      "first_name": "Ronald",
+      "last_name": "Ruck"
     }
   ]
 }

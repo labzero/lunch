@@ -1179,6 +1179,11 @@ td.dataTables_empty {
   .report-header-buttons, .report-inputs {
     display: none;
   }
+  .report-header {
+    p {
+      @include typography-print-table-cell;
+    }
+  }
   .report-main-body {
     margin-bottom: 0px;
     h2 {

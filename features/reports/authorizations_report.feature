@@ -39,10 +39,6 @@ Scenario: Filtering the authorization report
   Then I should only see users with the "Wire Transfer Services" role
   When I select "Access Manager" from the authorizations filter
   Then I should only see users with the "Access Manager" role
-  When I select "eTransact Holder" from the authorizations filter
-  Then I should only see users with the "eTransact Holder" role
-  When I select "User" from the authorizations filter
-  Then I should only see users with the "User" role
 
 @resque-backed @smoke @jira-mem-824
 Scenario: Member downloads a PDF of the Authorizations report

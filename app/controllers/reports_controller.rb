@@ -35,9 +35,17 @@ class ReportsController < ApplicationController
     User::Roles::DERIVATIVES_SIGNER => I18n.t('user_roles.interest_rate_derivatives.title'),
     User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
     User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
-    User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title'),
-    User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact.title')
+    User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title')
   }
+
+  AUTHORIZATIONS_ROLE_UP = [
+    User::Roles::ADVANCE_SIGNER,
+    User::Roles::AFFORDABILITY_SIGNER,
+    User::Roles::COLLATERAL_SIGNER,
+    User::Roles::MONEYMARKET_SIGNER,
+    User::Roles::DERIVATIVES_SIGNER,
+    User::Roles::SECURITIES_SIGNER
+  ]
 
   AUTHORIZATIONS_DROPDOWN_MAPPING = {
     'all' => I18n.t('user_roles.all_authorizations'),
@@ -50,10 +58,15 @@ class ReportsController < ApplicationController
     User::Roles::DERIVATIVES_SIGNER => I18n.t('user_roles.interest_rate_derivatives.title'),
     User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
     User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
-    User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title'),
-    User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact.title'),
-    'user' => I18n.t('user_roles.user.title')
+    User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title')
   }
+
+  AUTHORIZATIONS_ORDER = [
+    User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER,
+    User::Roles::ADVANCE_SIGNER, User::Roles::AFFORDABILITY_SIGNER, User::Roles::COLLATERAL_SIGNER,
+    User::Roles::DERIVATIVES_SIGNER, User::Roles::MONEYMARKET_SIGNER, User::Roles::SECURITIES_SIGNER,
+    User::Roles::ACCESS_MANAGER
+  ]
 
   DATE_PICKER_FILTERS = {
     end_of_month: 'endOfMonth',
@@ -923,11 +936,11 @@ class ReportsController < ApplicationController
       render json: {job_status_url: job_status_url(pdf_job_status), job_cancel_url: job_cancel_url(pdf_job_status)}
     else
       @authorizations_dropdown_options = AUTHORIZATIONS_DROPDOWN_MAPPING.collect{|key, value| [value, key]}
-      @authorizations_dropdown_options.each do |option|
-        if option.last == @authorizations_filter
-          @authorizations_filter_text = option.first
-          break
-        end
+      @authorizations_filter_text = AUTHORIZATIONS_DROPDOWN_MAPPING[@authorizations_filter]
+      @authorizations_title = if @authorizations_filter == 'all'
+        t('reports.pages.authorizations.sub_title_all_users')
+      else
+        t('reports.pages.authorizations.sub_title', filter: AUTHORIZATIONS_MAPPING[@authorizations_filter])        
       end
 
       @authorizations_table_data = {
@@ -947,16 +960,12 @@ class ReportsController < ApplicationController
           job_status.destroy
         end
 
-        users = users.sort_by{|x| x[:display_name]}
+        users = users.sort { |a, b| [a[:surname], a[:given_name]] <=> [b[:surname], b[:given_name]] }
         rows = []
         users.each do |user|
           user_roles = roles_for_signers(user)
-          if @authorizations_filter == 'user' && user_roles.include?(t('user_roles.user.title'))
-            rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
-          else
-            next if user_roles.empty? || (@authorizations_filter != 'all' && !user[:roles].include?(@authorizations_filter))
-            rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
-          end
+          next if user_roles.empty? || (@authorizations_filter != 'all' && !user[:roles].include?(@authorizations_filter))
+          rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
         end
 
         @authorizations_table_data[:rows] = rows
@@ -1476,11 +1485,17 @@ class ReportsController < ApplicationController
   end
 
   def roles_for_signers(signer)
-    roles = signer[:roles].collect do |role|
+    roles = signer[:roles]
+    if roles.include?(User::Roles::SIGNER_ENTIRE_AUTHORITY) || roles.include?(User::Roles::SIGNER_MANAGER)
+      roles = roles - AUTHORIZATIONS_ROLE_UP
+    end
+    roles.delete(User::Roles::ETRANSACT_SIGNER)
+    roles.sort_by! { |role| AUTHORIZATIONS_ORDER.index(role) || 0 }
+    roles.collect! do |role|
       AUTHORIZATIONS_MAPPING[role]
     end
     roles.compact!
-    roles.present? ? roles : [t('user_roles.user.title')]
+    roles
   end
 
   def last_month_end

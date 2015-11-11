@@ -26,7 +26,7 @@ module MAPI
 
             signer_roles_cursor = ActiveRecord::Base.connection.execute(signer_roles_sql_query)
             while row = signer_roles_cursor.fetch_hash()
-              signers << {name: row['FULLNAME'], username: row['LOGIN_ID'], roles: MAPI::Services::Users.process_roles(row)}
+              signers << {name: row['FULLNAME'], username: row['LOGIN_ID'], roles: MAPI::Services::Users.process_roles(row), first_name: row['FNAME'], last_name: row['LNAME']}
             end
 
           else

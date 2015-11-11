@@ -27,7 +27,9 @@ describe MAPI::ServiceApp do
       describe "in the #{env} environment" do
         let(:signer_roles_result_set) {double('Oracle Result Set', fetch_hash: nil)} if env == :production
         let(:roles) {['signer', 'signer-etransact']}
-        let(:signer_roles_result) {[{'FULLNAME' => 'Chaste Access', 'LOGIN_ID' =>'extra-chaste-access'}, nil]} if env == :production
+        let(:last_name)  { 'Access' }
+        let(:first_name) { 'Chaste' }
+        let(:signer_roles_result) {[{'FULLNAME' => 'Chaste Access', 'LOGIN_ID' =>'extra-chaste-access', 'FNAME' => first_name, 'LNAME' => last_name}, nil]} if env == :production
         before do
           allow(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(MAPI.root, 'spec', 'fixtures', 'signer_roles.json')))) if env == :test
           allow(app.settings).to receive(:environment).and_return(env)
@@ -58,6 +60,16 @@ describe MAPI::ServiceApp do
               signer[:roles].each do |role|
                 expect(role).to be_kind_of(String)
               end
+            end
+          end
+          it 'has a last name attribute' do
+            signer_roles.each do |signer|
+              expect(signer[:last_name]).to be(last_name)
+            end
+          end
+          it 'has a first name attribute' do
+            signer_roles.each do |signer|
+              expect(signer[:first_name]).to be(first_name)
             end
           end
         end
