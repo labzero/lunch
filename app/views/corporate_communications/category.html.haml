@@ -5,8 +5,7 @@
     .column-2x10-right.column-2x10-extended
       %section
         %h1= t('global.messages')
-        %h2= t('messages.receive_via_email')
-        %p= t('messages.edit_email_settings_html', url: settings_path)
+        = simple_format t('messages.description')
         -if @sidebar_options.first[2]
           %table.corporate-communications-empty
             %tbody

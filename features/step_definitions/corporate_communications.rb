@@ -34,21 +34,6 @@ Then(/^I should be see the message detail view$/) do
   page.assert_selector('.corporate-communication-detail-reset')
 end
 
-Then(/^I should remember the date of that message and its title$/) do
-  @message_detail_date = page.find('.corporate-communication-detail-intro p').text
-  @message_detail_title = page.find('.corporate-communication-detail-intro h2').text
-end
-
-Then(/^the date of the current message should be earlier than the date of the message I remembered and the title should be different$/) do
-  expect(page.find('.corporate-communication-detail-intro p').text.to_date).to be < @message_detail_date.to_date
-  expect(page.find('.corporate-communication-detail-intro h2').text).to_not eq(@message_detail_title)
-end
-
-Then(/^I should see the date and the title of the message I remembered$/) do
-  expect(page.find('.corporate-communication-detail-intro p').text).to eq(@message_detail_date)
-  expect(page.find('.corporate-communication-detail-intro h2').text).to eq(@message_detail_title)
-end
-
 When(/^I click on the "(.*?)" link at the top of the message detail view$/) do |text|
   page.find('.corporate-communication-detail-navigation a', text: text.upcase).click
 end
@@ -62,7 +47,18 @@ Then(/^"(.*?)" category should be disabled$/) do |text|
 end
 
 When(/^the "(.*?)" category has no messages$/) do |text|
+  pending
   # placeholder step for now in case we implement removing messages during testing
 end
 
+Given(/^I remember all the message titles$/) do
+  @messages = page.all('.corporate-communications-index h3').collect(&:text)
+end
 
+Then(/^I see the title of the second message$/) do
+  expect(page.find('.corporate-communication-detail-intro h2').text).to eq(@messages.second)
+end
+
+Then(/^I see the title of the first message$/) do
+  expect(page.find('.corporate-communication-detail-intro h2').text).to eq(@messages.first)
+end

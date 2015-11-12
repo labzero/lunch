@@ -8,13 +8,9 @@
         %h1= t('global.messages')
         .corporate-communication-detail-actions
           .corporate-communication-detail-navigation
-            =link_to t('global.prior'), (@prior_message ? corporate_communication_path(@filter, @prior_message) : '#'), class: "primary-button icon-arrow-left-before #{'active' if @prior_message}"
-            =link_to t('global.next'), (@next_message ? corporate_communication_path(@filter, @next_message) : '#'), class: "primary-button icon-arrow-right-after #{'active' if @next_message}"
-          .corporate-communication-detail-share
-            %button.primary-button.icon-forward-before= t('global.forward')
-            %button.primary-button.icon-print-before= t('global.print')
+            =link_to t('messages.prior'), (@prior_message ? corporate_communication_path(@filter, @prior_message) : '#'), class: "primary-button icon-arrow-left-before #{'active' if @prior_message}"
+            =link_to t('messages.next'), (@next_message ? corporate_communication_path(@filter, @next_message) : '#'), class: "primary-button icon-arrow-right-after #{'active' if @next_message}"
         .corporate-communication-detail-wrapper
           .corporate-communication-detail-intro
             %h2= @message[:title]
-            %p= @message[:date_sent].strftime('%l:%M %p, %d %b %Y')
           .corporate-communication-detail-reset= @message[:body].html_safe
