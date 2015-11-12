@@ -770,6 +770,7 @@ en:
         settlement_transaction_account: Settlement/Transaction Account Agreement
       authorizations:
         title: Authorizations
+        instructions_link: View Authorizations Instructions
         signature_cards:
           title: Authorizations
           member_transactions: 'Resolution and Authorization: Member Transactions'
@@ -1291,7 +1292,7 @@ en:
         freshness: This report is updated twice a day. The preliminary report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm. The final report reflects all transactions settled during the day and is generally available at the end of the business day.
       authorizations:
         title: Authorizations
-        intro_html: The following people are authorized to use the Bank's services on behalf of your institution. If you'd like to make changes to these authorizations, please fill out a <a href=%{url}>Signature Card Form</a>.
+        intro_html: The following people are authorized to use the Bank's services on behalf of your institution. If you'd like to make changes to these authorizations, please fill out an <a href=%{url}>Authorization Form</a>.
         contact_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about authorizations, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
         sub_title: Users with %{filter}
         sub_title_all_users: All Users with Authorizations
@@ -1430,6 +1431,20 @@ en:
         product_list:
           intro: "Click the links below to find out more about the advantages, features, and requirements of each of our credit products:"
         stand_alone_html: At this time, the Bank is not offering stand-alone interest rate swaps, caps, and floors to members. For more information, see <a href=%{url}>Interest Rate Swaps, Caps & Floors</a>.
+    authorizations:
+      title: Authorization Forms Instructions
+      on_file: The Bank must have the original, signed authorization forms on file.
+      faxed_copies: Faxed copies of the authorization forms are valid for up to five (5) business days.
+      authorized_signers: "Authorization forms must be signed by an authorized signer listed on the Resolution and Authorization: Member Transactions (R&A)."
+      board_resolution_date: "The board resolution date must match the resolution date on the recent R&A on file. For example, if you are updating one or more authorization forms, but not updating the R&A, ensure the board resolution date on the authorization form matches the resolution date on the current R&A your institution has on file with the Bank."
+      new_form_supercedes: When the Bank receives a new authorization form, the new authorization form rescinds and supercedes the prior authorization form of the same type or designated activity.
+      include_all_individuals: New authorization forms should include all the individuals authorized for the designated activity, even if they were included on a prior authorization form.
+      use_second_form_if_necessary: "If all individuals authorized for a designated activity do not fit on a single authorization form, complete a second authorization form for that activity with the additional designated persons. Number each page as follows: page 1 of 2, page 2 of 2. The authorized signer must sign both authorization forms."
+      deleting_an_authorized_signer: "To delete an authorized signer from any authorization form, fax your request to Operations at %{operations_fax_number} or email a PDF of your request to <a href=\"mailto:%{email}\">Betty Norman</a>. The request must be on your institutions' letterhead and signed by an authorized signer listed on the R&A. You do not need to send a new authorization form to delete an authorized signer."
+      send_forms_to: "Send completed authorizations forms to:"
+      address: "Federal Home Loan Bank of San Francisco<br>Attn: Betty Norman, Operations<br>600 California Street, Suite 300<br>San Francisco, CA 94108"
+      contact: Contact Operations at %{operations_phone_number} with questions regarding authorization forms or these instructions.
+      return_link: return to authorizations forms
     advances:
       title: Advances
       ace: Advances for Community Enterprise (ACE)
