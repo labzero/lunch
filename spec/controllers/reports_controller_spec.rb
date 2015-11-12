@@ -119,6 +119,67 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
 
+    describe 'GET capital_stock_trial_balance' do
+      let(:start_date)                       { Date.new(2014, 12, 31) }
+      let(:member_balances_service_instance) { double('MemberBalanceService') }
+      let(:number_of_shares)                 { double('number_of_shares') }
+      let(:number_of_certificates)           { double('number_of_certificates') }
+      let(:certificate_sequence)             { double('certificate_sequence') }
+      let(:issue_date)                       { double('issue_date') }
+      let(:transaction_type)                 { double('transaction_type') }
+      let(:shares_outstanding)               { double('shares_outstanding') }
+      let(:summary) do
+        {
+            certificates: [certificate_hash],
+            number_of_shares: number_of_shares,
+            number_of_certificates: number_of_certificates
+        }
+      end
+      let(:certificate_hash) do
+        {
+            certificate_sequence: certificate_sequence,
+            issue_date:           issue_date,
+            transaction_type:     transaction_type,
+            shares_outstanding:   shares_outstanding,
+        }
+      end
+      let(:table_data) do
+        [{type: :number, value: certificate_sequence, classes: [:'report-cell-narrow']},
+         {type: :date,   value: issue_date,           classes: [:'report-cell-narrow']},
+         {type: nil,     value: transaction_type,     classes: [:'report-cell-narrow']},
+         {type: :number, value: shares_outstanding,   classes: [:'report-cell-narrow']}]
+      end
+      before do
+        allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
+        allow(member_balances_service_instance).to receive(:capital_stock_trial_balance).with(kind_of(Date)).and_return(summary)
+      end
+      it_behaves_like 'a user required action', :get, :capital_stock_trial_balance
+      it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_trial_balance
+      it 'can be disabled' do
+        allow(subject).to receive(:report_disabled?).and_return(true)
+        get :capital_stock_trial_balance
+        expect(assigns[:capital_stock_trial_balance_table_data][:rows]).to eq([])
+      end
+      it 'renders the capital_stock_trial_balance view' do
+        get :capital_stock_trial_balance
+        expect(response.body).to render_template('capital_stock_trial_balance')
+      end
+      it 'should pass @start_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+        allow(controller).to receive(:date_picker_presets).with(start_date).and_return(picker_preset_hash)
+        get :capital_stock_trial_balance, start_date: start_date
+        expect(assigns[:picker_presets]).to eq(picker_preset_hash)
+      end
+      it 'should assign @number_of_shares and @number_of_certificates' do
+        get :capital_stock_trial_balance
+        expect(assigns[:number_of_shares]).to eq(number_of_shares)
+        expect(assigns[:number_of_certificates]).to eq(number_of_certificates)
+      end
+      it 'should return capital_stock_trial_balance_table_data with with columns populated' do
+        get :capital_stock_trial_balance
+        expect(assigns[:capital_stock_trial_balance_table_data][:rows][0][:columns]).to eq(table_data)
+      end
+    end
+
     describe 'GET borrowing_capacity' do
       before do
         allow(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(response_hash)

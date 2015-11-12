@@ -334,6 +334,10 @@ class MemberBalanceService < MAPIService
     get_hash(:capital_stock_and_leverage, "member/#{@member_id}/capital_stock_and_leverage")
   end
 
+  def capital_stock_trial_balance(date)
+    get_hash(:capital_stock_trial_balance, "member/#{@member_id}/capital_stock_trial_balance/#{date.iso8601}")
+  end
+
   def interest_rate_resets
     fix_date(get_hash(:interest_rate_resets, "/member/#{@member_id}/interest_rate_resets"), :date_processed)
   end

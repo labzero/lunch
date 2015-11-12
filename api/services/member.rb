@@ -11,6 +11,7 @@ require_relative 'member/signer_roles'
 require_relative 'member/securities_position'
 require_relative 'member/forward_commitments'
 require_relative 'member/capital_stock_and_leverage'
+require_relative 'member/capital_stock_trial_balance'
 require_relative 'member/letters_of_credit'
 require_relative 'member/flags'
 require_relative 'member/interest_rate_resets'
@@ -744,6 +745,30 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/capital_stock_trial_balance/{date}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve capital stock trial balance for a given member and date'
+              key :notes, 'Retrieve capital stock trial balance for a given member and date'
+              key :nickname, :getTodaysCreditActivityForMember
+              key :type, :memberCapitalStockTrialBalance
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The member id'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :date
+                key :required, true
+                key :type, :date
+                key :description, 'The last business day'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -1033,6 +1058,12 @@ module MAPI
             logger.error error
             halt 503, 'Internal Service Error'
           end
+        end
+
+        relative_get '/:id/capital_stock_trial_balance/:date' do
+          member_id = params[:id]
+          date      = params[:date]
+          MAPI::Services::Member::CapitalStockTrialBalance.capital_stock_trial_balance(self, member_id, date).to_json
         end
       end
 
