@@ -97,6 +97,7 @@ module MAPI
 
       disable :logging # all logging does is add middleware. We will add similar middleware here
       logger = ActiveSupport::TaggedLogging.new(::Logger.new("#{settings.root}/../log/mapi-#{settings.environment}.log", 'daily'))
+      logger.level = ::Logger::Severity.const_get((ENV['LOG_LEVEL'] || :info).to_s.upcase)
       class << logger
         def <<(msg)
           info(msg.chomp)
