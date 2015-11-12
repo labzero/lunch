@@ -7,6 +7,7 @@ require_relative 'shared/constants'
 require_relative 'shared/utils'
 
 require_relative 'services/base'
+require_relative 'services/fees'
 require_relative 'services/mock_rates'
 require_relative 'services/mock_members'
 require_relative 'services/rates'
@@ -52,6 +53,7 @@ require_relative 'models/member_dividend_statement'
 require_relative 'models/member_contacts'
 require_relative 'models/member_todays_credit_activity'
 require_relative 'models/member_mortgage_collateral_update'
+require_relative 'models/fee_schedules'
 
 Time.zone = ENV['TIMEZONE'] || 'Pacific Time (US & Canada)'
 Time.zone_default = Time.zone
@@ -154,6 +156,7 @@ module MAPI
     register MAPI::Services::EtransactAdvances
     register MAPI::Services::Users
     register MAPI::Services::Health
+    register MAPI::Services::Fees
   end
 
   class DocApp < Sinatra::Base
@@ -197,6 +200,10 @@ module MAPI
       api do
         key :path, '/healthy'
         key :description, 'Health status'
+      end
+      api do 
+        key :path, '/fees'
+        key :description, 'Operations about fees associated with FHLB services and procedures'
       end
     end
 

@@ -1,0 +1,32 @@
+letters_of_credit:
+  annual_maintenance_charge:
+    minimum_annual_fee: 500
+    cip_ace: 6
+    agency_deposits: 10
+    other_purposes: 15
+  issuance_fee:
+    agency_deposits: 100
+    other_purposes: 500
+    commercial_paper:
+      lower_limit: 10000
+      upper_limit: 15000
+    tax_exempt_bond:
+      lower_limit: 2000
+      upper_limit: 7000
+  draw_fee: 100
+  amendment_fee:
+    agency_deposits: 100
+    other_purposes: 500
+wire_transfer_and_sta:
+  domestic_outgoing_wires:
+    telephone_repetitive: 12.0
+    telephone_non_repetitive: 12.0
+    drawdown_request: 7.0
+    standing_request: 10.0
+  domestic_incoming_wires: 4.5
+  overdraft_charges:
+    interest_rate: 200
+    processing_fee: 50.0
+  miscellaneous: 
+    photocopies: 6.5
+    special_account_research: 40.0
