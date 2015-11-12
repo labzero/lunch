@@ -35,13 +35,36 @@ class DashboardController < ApplicationController
     current_user_roles
 
     profile = member_balances.profile
+    
+    # Recent Activity
+    @job_status_url = false
+    @load_url = false
+    @recent_activity_data = {}
+    if params[:job_id] # Job has finished, get results
+      job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+      raise ActiveRecord::RecordNotFound unless job_status
+      
+      # grab recent activities
+      activities = JSON.parse(job_status.result_as_string).collect! {|o| o.with_indifferent_access}
+      job_status.destroy
 
-    @previous_activity = [
-      [t('dashboard.previous_activity.overnight_vrc'), 44503000, DateTime.new(2014,9,3)],
-      [t('dashboard.previous_activity.overnight_vrc'), 39097000, DateTime.new(2014,9,2)],
-      [t('dashboard.previous_activity.overnight_vrc'), 37990040, DateTime.new(2014,8,12)],
-      [t('dashboard.previous_activity.overnight_vrc'), 39282021, DateTime.new(2014,2,14)]
-    ]
+      @recent_activity_data = activities #process recent activities into whatever form we need
+    
+      render layout: false if request.xhr?
+    else
+      job_status = MemberBalanceTodaysCreditActivityJob.perform_later(current_member_id).job_status
+      job_status.update_attributes!(user_id: current_user.id)
+      @job_status_url = job_status_url(job_status)
+      @load_url = reports_authorizations_url(job_id: job_status.id, authorizations_filter: @authorizations_filter)
+      @recent_activity_data[:deferred] = true
+    end
+
+    # @previous_activity = [
+    #   [t('dashboard.previous_activity.overnight_vrc'), 44503000, DateTime.new(2014,9,3)],
+    #   [t('dashboard.previous_activity.overnight_vrc'), 39097000, DateTime.new(2014,9,2)],
+    #   [t('dashboard.previous_activity.overnight_vrc'), 37990040, DateTime.new(2014,8,12)],
+    #   [t('dashboard.previous_activity.overnight_vrc'), 39282021, DateTime.new(2014,2,14)]
+    # ]
 
     # @account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
     if !profile

@@ -113,14 +113,7 @@
           %small
             %p.rate-advances-footer= t('dashboard.quick_advance.table.footer')
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), link: {name: t('dashboard.actions.more'), path: ''}, data_available: !@previous_activity.blank?, classes: 'dashboard-module-previous-activity'} do
-      %table.table-dashboard-previous-activity
-        %tbody
-          - @previous_activity.each do |row|
-            %tr
-              %td
-                = row[0]
-                %div.dashboard-module-content-light= fhlb_date_standard_numeric(row[2])
-              %td= fhlb_formated_currency_unit(row[1])
+      -#=render 'dashboard/dashboard_recent_activity', table_data: @recent_activity_data
   .column-3
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
       %ul
