@@ -13,6 +13,11 @@ class MembersController < ApplicationController
 
   skip_before_action :authenticate_user!, only: [:privacy_policy]
 
+  def switch_member
+    session['member_id'] = nil
+    redirect_to members_select_member_path
+  end
+
   def select_member
     raise 'No members found!' unless @members.present?
     @members.collect! { |member| [member['name'], member['id']] }

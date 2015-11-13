@@ -38,6 +38,19 @@ RSpec.describe MembersController, type: :controller do
     end
   end
 
+  describe 'POST switch_member' do
+    let(:make_request) { post :switch_member }
+    let(:members_list) { double('A List of Members', collect!: []) }
+    it_behaves_like 'a user required action', :get, :select_member
+    it 'clears session[:member_id]' do
+      make_request
+      expect(session[:member_id]).to be_nil
+    end
+    it 'redirects to the `after_sign_in_path_for` if the session already has a selected member' do
+      expect(make_request).to redirect_to(members_select_member_path)
+    end
+  end
+
   describe 'POST set_member' do
     let(:member_id) { rand(1..1000) }
     let(:member_name) { double('A Member Name') }

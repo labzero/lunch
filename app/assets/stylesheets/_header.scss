@@ -41,7 +41,7 @@
     text-decoration: none;
     color: $white;
   }
-  .nav-logout a:before, .header-member-name:before {
+  .nav-logout a:before, .nav-member-switch a:before, .header-member-name:before {
     content: "|";
     display: inline-block;
     margin: 0 15px;

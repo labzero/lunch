@@ -149,6 +149,7 @@ en:
     primary:
       welcome: Hi %{name}
       logout: Logout
+      switch: Switch
       search: Search
     secondary:
       advances: Advances

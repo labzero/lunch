@@ -122,7 +122,8 @@ Rails.application.routes.draw do
     get '/' => 'users/sessions#new', :as => :new_user_session
     post '/' => 'users/sessions#create', :as => :user_session
     delete 'logout' => 'users/sessions#destroy', :as => :destroy_user_session
-    get 'logged-out' => 'members#logged_out' 
+    get 'logged-out' => 'members#logged_out'
+    post '/switch' => 'members#switch_member', :as => :members_switch_member
     get '/member' => 'members#select_member', :as => :members_select_member
     post '/member' => 'members#set_member', :as => :members_set_member
     get 'member/terms' => 'members#terms', :as => :terms
