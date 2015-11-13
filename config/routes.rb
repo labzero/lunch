@@ -41,7 +41,7 @@ Rails.application.routes.draw do
     get '/monthly-securities-position' => 'reports#monthly_securities_position'
     get '/mortgage-collateral-update' => 'reports#mortgage_collateral_update'
     get '/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: :parallel_shift
-    get '/securities-services-statement' => 'reports#securities_services_statement'
+    get '/securities-services-statement' => 'reports#securities_services_statement', as: :securities_services_statement
     get '/securities-transactions' => 'reports#securities_transactions'
     get '/settlement-transaction-account' => 'reports#settlement_transaction_account'
     get '/todays-credit' => 'reports#todays_credit'

@@ -97,7 +97,7 @@ describe MAPI::ServiceApp do
       describe "#{env}" do
         let(:securities_transactions) { get "/member/#{MEMBER_ID}/securities_transactions/#{DATE}"; JSON.parse(last_response.body) }
         it 'should return expected advances detail hash where value could not be nil' do
-          allow(MAPI::ServiceApp).to receive(:environment).and_return(:env)
+          allow(MAPI::ServiceApp).to receive(:environment).and_return(env)
           securities_transactions['transactions'].each do |row|
             expect(row['fhlb_id']).to              be_kind_of(Numeric)
             expect(row['custody_account_no']).to   be_kind_of(String)

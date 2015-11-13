@@ -20,7 +20,7 @@
       = render 'securities_services_table', rows: [[:account_maintenance, :maintenance, :maintenance]], data: @statement
     .securities-services-table-wrapper
       %h2.report-table-title= t('reports.pages.securities_services_statement.tables.securities')
-      = render 'securities_services_table', rows: [[:fed, :fed, :per_item_cusip], [:dtc, :dtc, :per_item_cusip], [:funds, :funds, :per_item_cusip], [:euroclear, :euroclear, :per_par_cusip]], data: @statement[:secutities_fees]
+      = render 'securities_services_table', rows: [[:fed, :fed, :per_item_cusip], [:dtc, :dtc, :per_item_cusip], [:funds, :funds, :per_item_cusip], [:euroclear, :euroclear, :per_par_cusip]], data: @statement[:securities_fees]
     .securities-services-table-wrapper
       %h2.report-table-title= t('reports.pages.securities_services_statement.tables.transaction')
       = render 'securities_services_table', rows: [[:fed, :fed, :per_item], [:dtc, :dtc, :per_item], [:funds, :funds, :per_item], [:euroclear, :euroclear, :per_item]], data: @statement[:transaction_fees]
