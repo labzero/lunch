@@ -88,7 +88,6 @@ Rails.application.routes.draw do
     get '/summary' => 'products#index', as: :product_summary
     get '/letters-of-credit' => 'error#not_found'
     get '/community_programs' => 'error#not_found'
-    get '/product-mpf-pfi' => 'error#not_found', as: :product_mpf_pfi
     scope 'advances' do
       get 'adjustable-rate-credit' => 'products#arc', as: :arc
       get 'advances-for-community-enterprise' => 'error#not_found', as: :ace
@@ -102,6 +101,7 @@ Rails.application.routes.draw do
       get 'frc-embedded' => 'products#frc_embedded', as: :frc_embedded
       get 'knockout' => 'products#knockout', as: :knockout
       get 'mortgage-partnership-finance' => 'products#mpf', as: :mpf
+      get 'pfi' => 'products#pfi', as: :pfi
       get 'other-cash-needs' => 'products#ocn', as: :ocn
       get 'putable' => 'products#putable', as: :putable
       get 'securities-backed-credit' => 'products#sbc', as: :sbc

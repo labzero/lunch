@@ -36,6 +36,23 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
   page.assert_selector('.product-page h1', text: text)
 end
 
+Then(/^I should see the pfi page$/) do
+  page.assert_selector('.product-mpf-page h1 span', text: I18n.t('products.advances.pfi.title'))
+end
+
 When(/^I click on the (arc embedded|frc|frc embedded|arc|amortizing|choice libor|auction indexed|knockout|putable|other cash needs|mortgage partnership finance) link in the products advances dropdown$/) do |link|
   page.find('.page-header .products-dropdown .nav-dropdown-nested a', text: dropdown_title_regex(link)).click
 end
+
+When(/^I click on the pfi link$/) do
+  click_link('PFI Application')
+end
+
+Then(/^I should see at least one pfi form to download$/) do
+  page.assert_selector('.product-mpf-table a', text: /\A#{Regexp.quote(I18n.t('global.view_pdf'))}\z/i, minimum: 1)
+end
+
+Given(/^I am on the pfi page$/) do
+  visit '/products/advances/pfi'
+end
+

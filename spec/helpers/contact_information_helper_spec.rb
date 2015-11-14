@@ -18,6 +18,23 @@ describe ContactInformationHelper, type: :helper do
     end
   end
 
+  describe '`mpf_support_email` method' do
+    let(:call_method) { helper.mpf_support_email }
+    it 'responds to `mpf_support_email`' do
+      expect(helper).to respond_to(:mpf_support_email)
+    end
+    it 'returns a mailto URL' do
+      uri = URI(call_method)
+      expect(uri.scheme).to eq('mailto')
+    end
+    it 'has the MPF_SUPPORT_EMAIL as the primary To: email' do
+      email = "#{SecureRandom.hex}@example.com"
+      stub_const("#{described_class}::MPF_SUPPORT_EMAIL", email)
+      uri = URI(call_method)
+      expect(uri.to).to eq(email)
+    end
+  end
+
   shared_examples 'phone number contact method' do |constant|
     it "calls `fhlb_formatted_phone_number` with the #{constant}" do
       phone_number = double('A Number')

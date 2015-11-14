@@ -1655,6 +1655,80 @@ en:
         training_html: "After a member is approved as a PFI, the Bank contacts the member to schedule training on MPF products, pricing, and master commitments; MPF loan delivery; use of eMPF and the MPF Guides; and MPF servicing and reporting. For MPF Direct, training on underwriting and exceptions is provided. In addition, a representative of the PFI is required to take and pass a one-hour online tutorial on MPF Pre-Closing Quality Control offered through AllRegs. For MPF Xtra, Fannie Mae Desktop Underwriter&#174; (DU&#174;) training is also required."
         ongoing: Outstanding loans sold to the Bank under the MPF Program and held by the Bank, including loans sold under the MPF Original and MPF Plus products between 2002 and 2006, remain subject to the credit enhancement requirements in effect when the loans were sold to the Bank and to the Bank’s current collateral and capital stock requirements.
         additional_information_html: "For more information on the MPF Program, including access to the MPF guides, visit the <a href=%{url}>MPF Program website</a>.\n\n\"Mortgage Partnership Finance,\" \"MPF,\" \"MPF Xtra,\" and \"eMPF\" are registered trademarks of the Federal Home Loan Bank of Chicago."
+      pfi:
+        title: Participating Financial Institution (PFI) Application
+        to_apply_html: "To apply for approval as a Participating Financial Institution (PFI) under the Mortgage Partnership Finance Program, complete the applicable forms and agreements. Before mailing the original documents to us, email a PDF of the documents to <a href=%{email}>mpf@fhlbsf.com</a> so we can review them for completeness. Once we inform you that the documents are complete, mail the original documents and all required exhibits to:"
+        address: "Federal Home Loan Bank of San Francisco\nAttn: Member Financial Services Department – MPF\n600 California Street, Suite 300\nSan Francisco, CA 94108"
+        contact: Contact your Relationship Manager with questions about the PFI application materials or the application process.
+        forms_and_agreements: Forms and Agreements
+        all_applicants:
+          title: All Applicants
+          mpf_participating: MPF Participating Financial Institution Resolution (board of directors approval required)
+          delegation_of_authority: Delegation of Authority
+          delegation_of_authority_requests: Delegation of Authority – Requests for Files from Custodian
+          delegation_of_authority_definitions: Delegation of Authority Definitions
+          participating_financial_institution_agreement: Participating Financial Institution Agreement
+          participating_financial_institution_application: Participating Financial Institution – Application
+          mortgage_operations_questionnaire: Mortgage Operations Questionnaire
+          mortgage_operations_questionnaire_addendum: Mortgage Operations Questionnaire – Addendum
+          mpf_fidelity: MPF Fidelity and Errors & Omissions Insurance Worksheet (Form OG2)
+          anti_predatory: Anti-Predatory Lending Questionnaire
+          in_house: In-House Quality Control Questionnaire
+        product_specific:
+          title: Product-Specific Application Forms and Agreements
+          mpf_original: MPF Original
+          collateral_file: Collateral File Release Information Form
+          post_closing: Post Closing Information Form
+          servicer: Servicer Information Form
+          servicing_retained_only: Servicing Retained Only
+          agreement_servicer_account_remittance: "Agreement for Servicer’s Custodial P & I Account: Scheduled/Scheduled or Actual/Actual Single Remittance"
+          agreement_servicer_account_actual: "Agreement for Servicer’s Custodial P & I Account: Actual/Actual"
+          agreement_servicer_account: "Agreement for Servicer’s Custodial T & I Account"
+          mfp_government: MPF Government FHA/VA
+          mpf_extra: MPF Xtra
+          mpf_extra_agreement: "MPF Xtra: Agreement for Access to Fannie Mae’s DU® Only"
+          mpf_xtra_addendum_mpf: MPF Xtra Addendum to MPF Program PFI Agreement (Servicing Retained)
+          mpf_xtra_addendum_servcer_account: "MPF Xtra: Agreement for Servicer’s Custodial P & I Account"
+          mpf_xtra_addendum_servcer: "MPF Xtra: Agreement for Servicer’s Custodial T & I"
+          servicing_released_only: Servicing Released Only
+          mpf_xtra_addendum_mpf_released: MPF Xtra Addendum to MPF Program PFI Agreement (Sale only/Servicing Released)
+          mpf_direct: MPF Direct
+          mpf_direct_agreement: MPF Direct Addendum to MPF Program PFI Agreement
+          mpf_direct_questionnaire: MPF Direct Mortgage Operations Questionnaire
+        exhibits:
+          title: Exhibits
+          organization_chart: Organization Chart of Major Mortgage Functional Areas
+          provide_copy: "Provide a copy of the organization chart for each of these areas:"
+          origination_preparation: "Origination: The preparation of the mortgage loan document package, including taking the borrower’s loan application"
+          underwriting: "Underwriting: The process by which the lender determines whether the loan is a good investment. The underwriter also determines whether the borrower is creditworthy and whether the property has sufficient value under existing market conditions."
+          secondary_marketing: "Secondary Marketing: The sale of mortgage loans to investors"
+          shipping_delivery: "Shipping/Delivery: The packaging and delivery of mortgage loans to investors"
+          quality_assurance: "Quality Assurance: The system of protection used to ensure that all loans are handled according to your standards and those of the investor"
+          resumes_summary: Resumes/Qualification Summary for Officers and Key Mortgage Staff
+          attach_resumes: Attach resumes/qualification summaries for the individual employees responsible for each of the organizational areas listed above (as required for your institution) and other key functional staff. Each resume should include the individual’s current title and a description of job responsibilities.
+          evidence_mortgage: Evidence of Mortgage Holders Errors & Omissions Insurance Coverage or Equivalent
+          protection_pfi: Protection to the PFI for losses caused by negligence, errors, or omissions committed by the persons required to be covered by the member’s fidelity insurance in the performance of duties related to mortgage origination, selling, or servicing. Attach a copy of each policy or certificate, including a copy of the insurance declaration page.
+          anti_predatory: Anti-Predatory Lending Policy, Procedures, and Testing Methodology
+          these_are_required_only: These are required only if you intend to deliver mortgages secured by properties located in a restricted loan jurisdiction. (See chapter 2.6 and Exhibit A of the MPF Origination Guide to determine which jurisdictions have categories of loans that may be ineligible for delivery under the MPF Program.)
+          in_house_policies: In-House Quality Control Policies and Procedures
+          your_institutions_quality_control_policies: "Your institution’s quality control policies and procedures for pre-closing and post-closing quality control"
+          in_house_reports: In-House Quality Control Reports
+          your_institutions_quality_control_review: "Your institution’s quality control review results and related summary reports for pre-closing and post-closing quality control"
+          quality_results: Quality Control Audit Results
+          quality_control_audits: Quality control audits conducted by applicable government agencies or other investors, and management’s response
+          third_party_originator: Third-Party Originator Policies and Procedures (if applicable)
+          for_institutions_that_deliver_mortgage: For institutions that plan to deliver mortgage loans originated by a third party, the policies and procedures of that third-party originator
+          origination: Origination and Servicing Audits
+          your_insitutions_origination: Your institution’s most recent origination and servicing audit(s), whether conducted internally or by an independent third party, and management’s response
+          all_servicing: All Servicing Retained Products
+          loan_servicing: "Loan Servicing: The ongoing management of mortgage loans from the time of loan closing until the time of liquidation (i.e., when the loan is paid in full or foreclosed) "
+          investor_reporting: "Investor Reporting: The recordkeeping and reporting duties associated with servicing mortgage loans on behalf of the investor"
+          default_servicing: "Default Servicing: The management of mortgage loans that are in various states of default (delinquent, seriously delinquent, in foreclosure, etc.)"
+          servicing_audit: Servicing Audit
+          your_institutions_most_recent_servicing: "Your institution’s most recent servicing audit conducted by applicable government agencies and other investors, and management’s response"
+          compliance: Compliance
+          information_on_your_institutions_compliance_html: "Information on your institution’s compliance with the Consumer Financial Protection Bureau’s <a href=%{url}>TILA-RESPA Integrated Disclosure rule</a>, which will become effective October 3, 2015"
+          evidence_of_authorization: Evidence of authorization to originate government loans (FHA/VA) from the applicable agency/agencies, including approval date and HUD/VA approval number
       ocn:
         title: Other Cash Needs (OCN) Advance
         description: The OCN Advance is a Variable Rate Credit (VRC) Advance option for members that, as a result of an unexpected development, need a short-term advance and either do not have a Financing Availability or have used it fully. In addition, the Bank, in its sole discretion, may fund an OCN Advance to cover the amount of any Settlement/Transaction Account (STA) overdraft.
