@@ -39,32 +39,24 @@ class DashboardController < ApplicationController
     # Recent Activity
     @job_status_url = false
     @load_url = false
-    @recent_activity_data = {}
-    if params[:job_id] # Job has finished, get results
-      job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+    @recent_activity_data = []
+    if params[:recent_activity_job_id] # Job has finished, get results
+      job_status = JobStatus.find_by(id: params[:recent_activity_job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
       raise ActiveRecord::RecordNotFound unless job_status
-      
+
       # grab recent activities
       activities = JSON.parse(job_status.result_as_string).collect! {|o| o.with_indifferent_access}
       job_status.destroy
 
-      @recent_activity_data = activities #process recent activities into whatever form we need
-    
-      render layout: false if request.xhr?
+      @recent_activity_data = process_recent_activities(activities)
+
+      render partial: 'dashboard/dashboard_recent_activity', locals: {table_data: @recent_activity_data}, layout: false if request.xhr?
     else
       job_status = MemberBalanceTodaysCreditActivityJob.perform_later(current_member_id).job_status
       job_status.update_attributes!(user_id: current_user.id)
       @job_status_url = job_status_url(job_status)
-      @load_url = reports_authorizations_url(job_id: job_status.id, authorizations_filter: @authorizations_filter)
-      @recent_activity_data[:deferred] = true
+      @load_url = dashboard_url(recent_activity_job_id: job_status.id)
     end
-
-    # @previous_activity = [
-    #   [t('dashboard.previous_activity.overnight_vrc'), 44503000, DateTime.new(2014,9,3)],
-    #   [t('dashboard.previous_activity.overnight_vrc'), 39097000, DateTime.new(2014,9,2)],
-    #   [t('dashboard.previous_activity.overnight_vrc'), 37990040, DateTime.new(2014,8,12)],
-    #   [t('dashboard.previous_activity.overnight_vrc'), 39282021, DateTime.new(2014,2,14)]
-    # ]
 
     # @account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
     if !profile
@@ -394,5 +386,24 @@ class DashboardController < ApplicationController
     end
     new_gauge_hash[largest_display_percentage_key][:display_percentage] = (100 - (total_display_percentage - largest_display_percentage))
     new_gauge_hash
+  end
+
+  def process_recent_activities(activities)
+    activity_data = []
+    if activities
+      activities.each_with_index do |activity, i|
+        break if i > 4
+        maturity_date = activity[:maturity_date].to_date if activity[:maturity_date]
+        maturity_date = if maturity_date == Time.zone.today
+                          t('global.today')
+                        elsif activity[:instrument_type] == 'ADVANCE' && !maturity_date
+                          t('global.open')
+                        else
+                          fhlb_date_standard_numeric(maturity_date)
+                        end
+        activity_data.push([activity[:product_description], activity[:current_par], maturity_date, activity[:transaction_number]])
+      end
+    end
+    activity_data
   end
 end

@@ -114,4 +114,37 @@ $(function () {
     }, 30000);
   };
 
+  var $deferredModules = $('.dashboard-module[data-deferred]');
+  $.each($deferredModules, function(){checkDeferredJobStatus($deferredModules, $deferredModules.data('deferred'), $deferredModules.data('deferred-load'));});
+
+
+  function deferredJobError($el) {
+    $el.find('.dashboard-module-loading').hide();
+    $el.find('.dashboard-module-temporarily-unavailable').show();
+  };
+
+  function loadDeferredJob($el, url) {
+    $.get(url).done(function(data) {
+      var $newReport = $(data);
+      $el.find('.dashboard-module-content').html($newReport);
+    }).fail(function() {
+      deferredJobError($el);
+    });
+  };
+
+  function checkDeferredJobStatus($el, status_url, load_url) {
+    $.get(status_url).done(function(data) {
+      var job_status = data.job_status;
+      if (job_status == 'completed') {
+        loadDeferredJob($el, load_url);
+      } else if(job_status == 'failed') {
+        deferredJobError($el);
+      } else {
+        jobStatusTimer = setTimeout(function(){checkDeferredJobStatus($el, status_url, load_url)}, 1000);
+      };
+    }).fail(function() {
+      deferredJobError($el);
+    });
+  };
+
 });

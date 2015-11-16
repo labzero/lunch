@@ -442,9 +442,11 @@ en:
       view: View
       download: Download
       xml: XML
-    previous_activity:
-      title: Previous Activity
-      overnight_vrc: Overnight/Open VRC
+    recent_activity:
+      title: Recent Credit Activity
+      loading: Please wait while we retrieve your recent credit activity.
+      view_report_html: View your institution's <a href=%{url}>Today's Credit Activity</a> report for detailed information.
+      no_activity: No recent credit activity.
     contacts:
       title: Contact
       icon_alt_text: Contact

@@ -3,7 +3,8 @@
 -classes ||= []
 -has_data = defined?(data_available) ? data_available : true
 -link ||= nil
-%section.dashboard-module{class: classes}
+-data ||= nil
+%section.dashboard-module{class: classes, data: data}
   %header
     %h1= title
     - if action && action[:type].include?('-button')

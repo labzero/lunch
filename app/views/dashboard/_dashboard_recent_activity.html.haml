@@ -1,13 +1,20 @@
 - table_data ||= {}
-- table_class ||= nil
-- deferred = table_data[:deferred] || false
-- if deferred
-  - table_class << 'table-loading'
-%table.table-dashboard-previous-activity{class: ('table-loading' if table_data[:deferred])}
-  %tbody
-    - @previous_activity.each do |row|
-      %tr
-        %td
-          = row[0]
-          %div.dashboard-module-content-light= fhlb_date_standard_numeric(row[2])
-        %td= fhlb_formated_currency_unit(row[1])
+- deferred ||= false
+
+-if deferred
+  .dashboard-module-loading= t('dashboard.recent_activity.loading')
+-elsif table_data.empty?
+  .dashboard-module-recent-activity-no-data= t('dashboard.recent_activity.no_activity')
+-else
+  %table.table-dashboard-recent-activity
+    %tbody
+      - table_data.each do |row|
+        %tr
+          %td
+            = row[0]
+            %div.dashboard-module-content-light= row[2]
+          %td
+            = fhlb_formated_currency_unit(row[1])
+            %div.dashboard-module-content-light=row[3]
+.dashboard-module-temporarily-unavailable= t('global.temporarily_unavailable')
+%p= t('dashboard.recent_activity.view_report_html', url: reports_todays_credit_path)

@@ -242,6 +242,80 @@ RSpec.describe DashboardController, :type => :controller do
         expect(assigns[:borrowing_capacity]).to eq(nil)
       end
     end
+    describe 'recent activity instance variables' do
+      let(:user_id) { rand(1..9999) }
+      let(:job_id) { rand(1..9999) }
+      let(:job_status_as_string) { double('job status as string') }
+      let(:job_status) { double('an instance of JobStatus', update_attributes!: nil, id: job_id, result_as_string: job_status_as_string, destroy: nil) }
+      let(:job) { double('an instance of the MemberBalanceTodaysCreditActivityJob', job_status: job_status) }
+      let(:job_status_url) { double('the job_status_url path') }
+      let(:current_user) { double('User', id: user_id, :accepted_terms? => true)}
+      let(:service_object) { double('service object', profile: {}, report_disabled?: true)}
+      before { allow(controller).to receive(:current_user).and_return(current_user) }
+      describe 'when the `recent_activity_job_id` param is not set' do
+        let(:get_index) {get :index}
+        before do
+          allow(MemberBalanceTodaysCreditActivityJob).to receive(:perform_later).and_return(job)
+          allow(controller).to receive(:job_status_url).and_return(job_status_url)
+        end
+        it 'sets @recent_activity_data to an empty array' do
+          get_index
+          expect(assigns[:recent_activity_data]).to eq([])
+        end
+        it 'calls `perform_later` on the `MemberBalanceTodaysCreditActivityJob`' do
+          expect(MemberBalanceTodaysCreditActivityJob).to receive(:perform_later).and_return(job)
+          get_index
+        end
+        it 'updates the the newly created JobStatus instance with the proper user_id' do
+          expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
+          get_index
+        end
+        it 'sets @job_status_url to the proper url' do
+          expect(controller).to receive(:job_status_url).with(job_status).and_return(job_status_url)
+          get_index
+          expect(assigns[:job_status_url]).to eq(job_status_url)
+        end
+        it 'sets @load_url to the dashboard_url with the `recent_activity_job_id` param set' do
+          get_index
+          expect(assigns[:load_url]).to eq(dashboard_url(recent_activity_job_id: job_id))
+        end
+      end
+      describe 'when the `recent_activity_job_id` param is set' do
+        let(:job_id) { double('Job ID') }
+        let(:get_index) { get :index, recent_activity_job_id: job_id }
+        let(:activities) { double('parsed recent credit activities', collect!: nil) }
+        let(:processed_activities) { double('result of `process_recent_activities`') }
+        before do
+          allow(JobStatus).to receive(:find_by).and_return(job_status)
+          allow(JSON).to receive(:parse).and_call_original
+          allow(JSON).to receive(:parse).with(job_status_as_string).and_return(activities)
+          allow(controller).to receive(:process_recent_activities)
+        end
+        it 'finds the JobStatus by id, user_id and status' do
+          expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: user_id, status: JobStatus.statuses[:completed]).and_return(job_status)
+          get_index
+        end
+        it 'raises an exception if no JobStatus is found' do
+          allow(JobStatus).to receive(:find_by)
+          expect{get_index}.to raise_error(ActiveRecord::RecordNotFound )
+        end
+        it 'destroys the job_status' do
+          expect(job_status).to receive(:destroy)
+          get_index
+        end
+        it 'sets @recent_activity_data to the result of passing the parsed activities hash to the `process_recent_activities` private method' do
+          allow(activities).to receive(:collect!).and_return(activities)
+          allow(controller).to receive(:process_recent_activities).with(activities).and_return(processed_activities)
+          get_index
+          expect(assigns[:recent_activity_data]).to eq(processed_activities)
+        end
+        it 'renders the `dashboard/dashboard_recent_activity` view when the request is XHR' do
+          allow(request).to receive(:xhr?).and_return(true)
+          get_index
+          expect(response).to render_template({partial: 'dashboard/_dashboard_recent_activity', layout: false})
+        end
+      end
+    end
   end
 
   describe "GET quick_advance_rates", :vcr do
@@ -804,6 +878,53 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'returns the signer name' do
         expect(call_method).to be(signer)
+      end
+    end
+  end
+
+  describe '`process_recent_activities` private method' do
+    let(:activity) { double('activity', :[] => nil) }
+    let(:activities) { [activity, activity, activity, activity, activity, activity] }
+    let(:product_description) { double('product description') }
+    let(:current_par) { double('current_par') }
+    let(:maturity_date) { double('maturity date') }
+    let(:transaction_number) { double('transaction_number') }
+    let(:call_method) { controller.send(:process_recent_activities, [activity]) }
+
+    it 'returns an empty array if passed nil' do
+      expect(controller.send(:process_recent_activities, nil)).to eq([])
+    end
+    it 'returns 5 processed activities' do
+      expect(controller.send(:process_recent_activities, activities).length).to eq(5)
+    end
+    describe 'a processed activity array' do
+      it 'has a product_description in the first position' do
+        allow(activity).to receive(:[]).with(:product_description).and_return(product_description)
+        expect(call_method.first[0]).to eq(product_description)
+      end
+      it 'has a current_par in the second position' do
+        allow(activity).to receive(:[]).with(:current_par).and_return(current_par)
+        expect(call_method.first[1]).to eq(current_par)
+      end
+      it 'has a transaction_number in the fourth position' do
+        allow(activity).to receive(:[]).with(:transaction_number).and_return(transaction_number)
+        expect(call_method.first[3]).to eq(transaction_number)
+      end
+      describe 'the maturity_date position' do
+        it 'returns the fhlb_date_standard_numeric maturity date in the third position' do
+          allow(maturity_date).to receive(:to_date).and_return(maturity_date)
+          allow(activity).to receive(:[]).with(:maturity_date).and_return(maturity_date)
+          allow(controller).to receive(:fhlb_date_standard_numeric).with(maturity_date).and_return(maturity_date)
+          expect(call_method.first[2]).to eq(maturity_date)
+        end
+        it "returns '#{I18n.t('global.today')}' if the maturity date is equal to today's date" do
+          allow(activity).to receive(:[]).with(:maturity_date).and_return(Time.zone.today)
+          expect(call_method.first[2]).to eq(I18n.t('global.today'))
+        end
+        it "returns #{I18n.t('global.open')} if the activity is an advance with no maturity date" do
+          allow(activity).to receive(:[]).with(:instrument_type).and_return('ADVANCE')
+          expect(call_method.first[2]).to eq(I18n.t('global.open'))
+        end
       end
     end
   end
