@@ -237,6 +237,8 @@ def user_for_type(user_type)
     extranet_no_role_user
   when 'offsite user'
     offsite_user
+  when 'user with disabled quick advances'
+    advances_disabled_user
   else
     raise 'unknown user type'
   end
@@ -288,6 +290,10 @@ end
 
 def offsite_user
   CustomConfig.env_config['offsite']
+end
+
+def advances_disabled_user
+  CustomConfig.env_config['advances_disabled']
 end
 
 def current_member_name

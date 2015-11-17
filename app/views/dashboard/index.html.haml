@@ -51,15 +51,18 @@
             %tr
               %td.borrowing-capacity-note= t('dashboard.your_account.table.borrowing_capacity_note_html', url: reports_borrowing_capacity_url)
   .column-3
-    - if policy(:advance).show? && @quick_advance_enabled
+    - if policy(:advance).show?
       - classes = ['dashboard-module-advances']
       - classes << 'dashboard-module-advances-closed' if @quick_advance_status == :closed
       =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: classes} do
-        - if @quick_advance_status == :open
+        - if @quick_advance_status == :open && @quick_advance_enabled
           = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}, field_name: :amount
           %h2.quick-advance-confirmation-subheading{style: 'display: none;'}= t('dashboard.quick_advance.confirmation.title')
           %h2.quick-advance-preview-subheading{style: 'display: none;'}= t('dashboard.quick_advance.preview.title')
           %h2.quick-advance-capstock-subheading{style: 'display: none;'}= t('dashboard.quick_advance.capitalstock.title')
+        %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_enabled}"}
+          = t('dashboard.quick_advance.advance_desk_unavailable_html', phone_number: service_desk_phone_number)
+          = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
         %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_status != :closed}"}
           = t('dashboard.quick_advance.advances_desk_closed')
           = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path

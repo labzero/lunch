@@ -35,5 +35,9 @@ describe MAPI::ServiceApp do
         end
       end
     end
+
+    it 'returns [\'N\'] for member_id 13 in the test environment' do
+      expect(MAPI::Services::Member::Flags.quick_advance_flag(subject, 13)).to eq(['N'])
+    end
   end
 end

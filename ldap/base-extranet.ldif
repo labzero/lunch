@@ -108,6 +108,19 @@ userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: chaste-norole@example.com
 
+# quick-advance-disabled
+dn: sAMAccountName=quick-advance-disabled,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: User With Disabled Quick Advance
+sn: User With Disabled Quick Advance
+givenname: Quick Advance Disabled
+sAMAccountName: quick-advance-disabled
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: quick-advance-disabled@example.com
+
 # Chaste Manhatten
 dn: CN=FHLB6,dc=extranet,dc=fhlbsf,dc=com
 cn: FHLB6
@@ -126,6 +139,13 @@ objectClass: group
 objectClass: top
 member: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra,dc=extranet,dc=fhlbsf,dc=com
+
+# The Bank With Disabled Signers
+dn: CN=FHLB13,dc=extranet,dc=fhlbsf,dc=com
+cn: FHLB13
+objectClass: group
+objectClass: top
+member: sAMAccountName=quick-advance-disabled,dc=extranet,dc=fhlbsf,dc=com
 
 # FCN-MemberSite-AccessManagers group
 dn: CN=FCN-MemberSite-AccessManagers,dc=extranet,dc=fhlbsf,dc=com
@@ -152,4 +172,4 @@ member: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-delete,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-reset,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
-
+member: sAMAccountName=quick-advance-disabled,dc=extranet,dc=fhlbsf,dc=com

@@ -245,9 +245,15 @@ Scenario: Users who wait too long to perform an advance are told that the rate h
   Then I should see a "rate expired" error
 
 @jira-mem-883
-  Scenario: Users gets an error if advance causes per-term cumulative amount to exceed limit
-    Given I visit the dashboard
-    And I open the quick advance flyout and enter 1000000000000
-    And I select the rate with a term of "2week" and a type of "whole"
-    When I click on the initiate advance button
-    Then I should see an "advance unavailable" error with amount 1000000000000 and type "whole"
+Scenario: Users gets an error if advance causes per-term cumulative amount to exceed limit
+  Given I visit the dashboard
+  And I open the quick advance flyout and enter 1000000000000
+  And I select the rate with a term of "2week" and a type of "whole"
+  When I click on the initiate advance button
+  Then I should see an "advance unavailable" error with amount 1000000000000 and type "whole"
+
+@jira-mem-926
+Scenario: User sees an unavailable message if quick advances are disabled for their bank
+  Given I am logged in as a "user with disabled quick advances"
+  When I visit the dashboard
+  Then I should see a quick advances disabled message

@@ -14,7 +14,7 @@ module MAPI
             quick_advance_flag_cursor = ActiveRecord::Base.connection.execute(quick_advance_flag_query)
             quick_advance_flag = quick_advance_flag_cursor.fetch || []
           else
-            quick_advance_flag = ['Y']
+            quick_advance_flag = member_id == 13 ? ['N'] : ['Y'] # disables "Bank With Disabled Signers" for integration testing
           end
           quick_advance_flag
         end

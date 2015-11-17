@@ -27,3 +27,7 @@ When(/^I click on the advances link in the header$/) do
   page.find('.secondary-nav li', text: I18n.t('global.advances')).click
 end
 
+Then(/^I should see a quick advances disabled message$/) do
+  page.assert_selector('.quick-advance-desk-closed-message', text(I18n.t('advance_desk_unavailable', phone_number: service_desk_phone_number)))
+end
+
