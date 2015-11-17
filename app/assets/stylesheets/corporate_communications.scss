@@ -11,17 +11,25 @@
   border-bottom: 1px solid $light-blue;
   a {
     display: block;
-    padding: 10px 20px 5px;
+    padding: 10px 20px 5px 45px;
+    position: relative;
+    &:before {
+      position: absolute;
+      left: 15px;
+      color: $medium-gray;
+      padding-top: (10px * $tight-line-height) - 10px;
+    }
   }
   h3 {
     @extend %typography-table-cell-heading;
     color: $darkest-gray;
-    margin: 0;
   }
   small {
     @extend %typography-table-annotation;
     color: $medium-gray;
     text-transform: uppercase;
+  }
+  h3, small {
     margin: 0;
   }
 }
@@ -29,6 +37,7 @@
 .corporate-communication-detail-reset {
   @import "base/normalize";
   margin-top: 25px;
+  margin-bottom: 20px;
 }
 
 .corporate-communication-detail-wrapper {
@@ -93,5 +102,34 @@
   margin-top: 60px;
   td.dataTables_empty {
     @extend %empty_table_cell;
+  }
+}
+
+.corporate-communication-attachments {
+  border-top: 1px solid $light-blue;
+  padding: 20px;
+
+  h3 {
+    @extend %typography-table-heading;
+    text-transform: uppercase;
+    color: $medium-gray;
+    margin-top: 0;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  a {
+    @extend %typography-table-heading;
+    text-transform: uppercase;
+    &:before {
+      @extend %small-icon-font;
+      color: $medium-gray;
+      vertical-align: middle;
+      padding-right: 10px;
+    }
   }
 }

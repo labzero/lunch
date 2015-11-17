@@ -109,6 +109,7 @@ en:
     sta_number: Settlement/Transaction Account No. %{sta_number}
     all_transactions: All Transactions
     footnote_indicator: '*'
+    attachments: Attachments
     dates:
       1_day: 1 day
       1_month: 1 mo

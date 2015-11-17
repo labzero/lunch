@@ -16,6 +16,6 @@
             - @messages.each do |message|
               %tr
                 %td
-                  %a{href: corporate_communication_path(@filter, message)}
+                  %a{href: corporate_communication_path(@filter, message), class: message.attachments.present? ? 'icon-paperclip-before' : nil}
                     %h3= message[:title]
                     %small= fhlb_date_standard_numeric(message[:date_sent])

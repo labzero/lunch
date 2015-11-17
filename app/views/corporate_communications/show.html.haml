@@ -14,3 +14,9 @@
           .corporate-communication-detail-intro
             %h2= @message[:title]
           .corporate-communication-detail-reset= @message[:body].html_safe
+          - if @message.attachments.present?
+            .corporate-communication-attachments
+              %h3= t('global.attachments')
+              %ul
+                - @message.attachments.each do |attachment|
+                  %li= link_to(attachment.data.original_filename, attachment_download_path(id: attachment, filename: attachment.data.original_filename), target: '_blank', class: 'icon-paperclip-before')

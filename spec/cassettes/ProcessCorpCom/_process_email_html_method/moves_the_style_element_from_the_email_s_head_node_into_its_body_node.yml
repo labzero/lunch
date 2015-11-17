@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: http://links.mkt1700.com/ctt?b=0&j=NjAyMjI5OTYyS0&kn=3&ms=NDc4MjE2NTYS1&mt=1&r=MTIzNTQ5ODcxMTA4S0&rt=0
+    uri: http://links.mkt1700.com/ctt?b=0&j=NDIwOTUwNzY5S0&kn=1&ms=NDU1NzMzNDIS1&mt=1&r=MTg2NDQ4MjQwNAS2&rt=3
     body:
       encoding: US-ASCII
       string: ''
@@ -13,17 +13,15 @@ http_interactions:
       - "*/*"
       User-Agent:
       - Ruby
-      Host:
-      - links.mkt1700.com
   response:
     status:
       code: 302
       message: Found
     headers:
       Date:
-      - Mon, 02 Mar 2015 18:34:15 GMT
+      - Mon, 16 Nov 2015 18:13:51 GMT
       Location:
-      - http://www.fhlbsf.com?utm_source=SilverpopMailing&utm_medium=email&utm_campaign=Test%20-%20122214_Home%20Builders%20Dinner%20Invite&utm_content=
+      - http://links.mkt1700.com/
       Content-Length:
       - '0'
       Connection:
@@ -34,10 +32,10 @@ http_interactions:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Mon, 02 Mar 2015 18:34:28 GMT
+  recorded_at: Mon, 16 Nov 2015 18:14:02 GMT
 - request:
     method: get
-    uri: http://links.mkt1700.com/ctt?b=0&j=NjAyMjI5OTYyS0&kn=1&ms=NDc4MjE2NTYS1&mt=1&r=MTIzNTQ5ODcxMTA4S0&rt=0
+    uri: http://links.mkt1700.com/ctt?b=0&j=Nzg0Mjc4MzkxS0&kn=5&ms=NDk5MDY3ODcS1&mt=1&r=ODkwNzA0NTc0OQS2&rt=3
     body:
       encoding: US-ASCII
       string: ''
@@ -48,17 +46,16 @@ http_interactions:
       - "*/*"
       User-Agent:
       - Ruby
-      Host:
-      - links.mkt1700.com
   response:
     status:
       code: 302
       message: Found
     headers:
       Date:
-      - Mon, 02 Mar 2015 18:34:15 GMT
+      - Mon, 16 Nov 2015 19:59:43 GMT
       Location:
-      - https://www.eventbrite.com/e/national-association-of-home-builders-annual-leadership-dinner-registration-15001723559
+      - http://fhlbsf.com/cofi/monthly/monthly.asp?utm_source=SilverpopMailing&utm_medium=email&utm_campaign=COFI
+        (5)&utm_content=
       Content-Length:
       - '0'
       Connection:
@@ -69,10 +66,10 @@ http_interactions:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Mon, 02 Mar 2015 18:34:29 GMT
+  recorded_at: Mon, 16 Nov 2015 19:59:43 GMT
 - request:
     method: get
-    uri: http://links.mkt1700.com/ctt?b=0&j=NjAyMjI5OTYyS0&kn=2&ms=NDc4MjE2NTYS1&mt=1&r=MTIzNTQ5ODcxMTA4S0&rt=0
+    uri: http://links.mkt1700.com/ctt?b=0&j=Nzg0Mjc4MzkxS0&kn=2&ms=NDk5MDY3ODcS1&mt=1&r=ODkwNzA0NTc0OQS2&rt=3
     body:
       encoding: US-ASCII
       string: ''
@@ -83,17 +80,16 @@ http_interactions:
       - "*/*"
       User-Agent:
       - Ruby
-      Host:
-      - links.mkt1700.com
   response:
     status:
       code: 302
       message: Found
     headers:
       Date:
-      - Mon, 02 Mar 2015 18:34:16 GMT
+      - Mon, 16 Nov 2015 19:59:43 GMT
       Location:
-      - http://slslasvegas.com/dining/bazaar-meat
+      - http://www.fhlbsf.com?utm_source=SilverpopMailing&utm_medium=email&utm_campaign=COFI
+        (5)&utm_content=
       Content-Length:
       - '0'
       Connection:
@@ -104,5 +100,5 @@ http_interactions:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Mon, 02 Mar 2015 18:34:29 GMT
+  recorded_at: Mon, 16 Nov 2015 19:59:43 GMT
 recorded_with: VCR 2.9.3

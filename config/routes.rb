@@ -21,6 +21,8 @@ Rails.application.routes.draw do
 
   get '/dashboard/current_overnight_vrc' => 'dashboard#current_overnight_vrc'
 
+  get '/attachments/download/:id/:filename' => 'attachments#download', as: :attachment_download, filename: /[^\/]+/
+
   scope 'reports', as: :reports do
     get '/' => 'reports#index'
     get '/account-summary' => 'reports#account_summary'

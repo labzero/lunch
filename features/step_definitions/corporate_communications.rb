@@ -1,4 +1,4 @@
-Given(/^I am on the Messages Page$/) do
+Given(/^I am on the Messages page$/) do
   visit '/corporate_communications/all'
 end
 
@@ -61,4 +61,12 @@ end
 
 Then(/^I see the title of the first message$/) do
   expect(page.find('.corporate-communication-detail-intro h2').text).to eq(@messages.first)
+end
+
+When(/^I click on a message with attachments$/) do
+  page.all('.corporate-communications-index a.icon-paperclip-before', visible: true).first.click
+end
+
+Then(/^I should see a list of attachments$/) do
+  page.assert_selector('.corporate-communication-attachments ul li', minimum: 1, visible: true)
 end
