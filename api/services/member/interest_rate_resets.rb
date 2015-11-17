@@ -77,14 +77,16 @@ module MAPI
         end
 
         module Private
+          include MAPI::Shared::Utils
+
           def self.format_interest_rate_resets(advances)
             advances.collect do |advance|
               next_reset = advance[:IS_OPEN_MATURITY].to_s == 'true' ? nil : advance[:NEXT_RESET_DATE].to_date
               {
                 effective_date: (advance[:ADX_UPDATE_DATE].to_date if advance[:ADX_UPDATE_DATE]),
                 advance_number: (advance[:TRANSACTION_NUMBER].to_s if advance[:TRANSACTION_NUMBER]),
-                prior_rate: (advance[:PRIOR_RATE].to_f if advance[:PRIOR_RATE]),
-                new_rate: (advance[:INTEREST_RATE].to_f if advance[:INTEREST_RATE]),
+                prior_rate: decimal_to_percentage_rate(advance[:PRIOR_RATE]),
+                new_rate: decimal_to_percentage_rate(advance[:INTEREST_RATE]),
                 next_reset: next_reset
               }
             end

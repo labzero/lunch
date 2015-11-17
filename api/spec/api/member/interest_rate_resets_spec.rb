@@ -89,6 +89,27 @@ describe MAPI::ServiceApp do
                 expect(reset[:next_reset]).to be_kind_of(Date) if reset[:next_reset]
               end
             end
+            describe 'converting values into a percentage' do
+              let(:interest_rate_reset_object) { double('interest rate reset object', :[] => nil) }
+              let(:interest_rate_attribute) { double('an attribute of the reset object', to_date: nil, to_s: nil) }
+              let(:interest_rate_reset_result) {[interest_rate_reset_object, nil]}
+              before do
+                allow(interest_rate_reset_object).to receive(:[]).with(:NEXT_RESET_DATE).and_return(interest_rate_attribute)
+                allow(interest_rate_reset_object).to receive(:with_indifferent_access).and_return(interest_rate_reset_object)
+                allow(MAPI::Services::Member::InterestRateResets::Private).to receive(:decimal_to_percentage_rate)
+              end
+              if env != :production
+                before { allow(JSON).to receive(:parse).and_return([interest_rate_reset_object]) }
+              end
+
+              [['prior_rate', :PRIOR_RATE],['new_rate', :INTEREST_RATE]].each do |attribute|
+                it "uses the `decimal_to_percentage_rate` util method to convert the `#{attribute.first}` to a percentage format" do
+                  allow(interest_rate_reset_object).to receive(:[]).with(attribute.last).and_return(interest_rate_attribute)
+                  expect(MAPI::Services::Member::InterestRateResets::Private).to receive(:decimal_to_percentage_rate).with(interest_rate_attribute)
+                  interest_rate_resets
+                end
+              end
+            end
           end
 
         end
