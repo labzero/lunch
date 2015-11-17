@@ -115,35 +115,35 @@ $(function () {
   };
 
   var $deferredModules = $('.dashboard-module[data-deferred]');
-  $.each($deferredModules, function(){checkDeferredJobStatus($deferredModules, $deferredModules.data('deferred'), $deferredModules.data('deferred-load'));});
+  $.each($deferredModules, function(){checkDeferredModuleStatus($deferredModules, $deferredModules.data('deferred'), $deferredModules.data('deferred-load'));});
 
 
-  function deferredJobError($el) {
+  function deferredModuleError($el) {
     $el.find('.dashboard-module-loading').hide();
     $el.find('.dashboard-module-temporarily-unavailable').show();
   };
 
-  function loadDeferredJob($el, url) {
+  function loadDeferredModule($el, url) {
     $.get(url).done(function(data) {
       var $newReport = $(data);
       $el.find('.dashboard-module-content').html($newReport);
     }).fail(function() {
-      deferredJobError($el);
+      deferredModuleError($el);
     });
   };
 
-  function checkDeferredJobStatus($el, status_url, load_url) {
+  function checkDeferredModuleStatus($el, status_url, load_url) {
     $.get(status_url).done(function(data) {
       var job_status = data.job_status;
       if (job_status == 'completed') {
-        loadDeferredJob($el, load_url);
+        loadDeferredModule($el, load_url);
       } else if(job_status == 'failed') {
-        deferredJobError($el);
+        deferredModuleError($el);
       } else {
-        jobStatusTimer = setTimeout(function(){checkDeferredJobStatus($el, status_url, load_url)}, 1000);
+        jobStatusTimer = setTimeout(function(){checkDeferredModuleStatus($el, status_url, load_url)}, 1000);
       };
     }).fail(function() {
-      deferredJobError($el);
+      deferredModuleError($el);
     });
   };
 

@@ -112,7 +112,7 @@
           %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.preview')
           %small
             %p.rate-advances-footer= t('dashboard.quick_advance.table.footer')
-    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.recent_activity.title'), data_available: true, classes: 'dashboard-module-recent-activity', data: {deferred: @job_status_url, 'deferred-load' => @load_url}} do
+    =render layout: 'dashboard/dashboard_module_deferred', locals: {dashboard_module_locals: {title: t('dashboard.recent_activity.title'), data_available: true, classes: 'dashboard-module-recent-activity', data: {deferred: @job_status_url, 'deferred-load' => @load_url}}} do
       =render 'dashboard/dashboard_recent_activity', table_data: @recent_activity_data, deferred: true
   .column-3
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do

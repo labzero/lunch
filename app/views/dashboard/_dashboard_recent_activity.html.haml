@@ -1,9 +1,7 @@
-- table_data ||= {}
 - deferred ||= false
+- table_data ||= {}
 
--if deferred
-  .dashboard-module-loading= t('dashboard.recent_activity.loading')
--elsif table_data.empty?
+-if table_data.empty? && !deferred
   .dashboard-module-recent-activity-no-data= t('dashboard.recent_activity.no_activity')
 -else
   %table.table-dashboard-recent-activity

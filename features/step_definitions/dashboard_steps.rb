@@ -39,8 +39,14 @@ Then(/^I should see a market overview graph$/) do
   mod.assert_selector('.dashboard-market-graph', :visible => true)
 end
 
-Then(/^I should see a recent activities module/) do
+Then(/^I should see the recent activities module in its loading state/) do
   mod = page.find('.dashboard-module', :text => I18n.t('dashboard.recent_activity.title'))
+  mod.assert_selector('.dashboard-module-loading', text: I18n.t('dashboard.recent_activity.loading'))
+end
+
+Then(/^I should see the recent activities module in its loaded state$/) do
+  mod = page.find('.dashboard-module', :text => I18n.t('dashboard.recent_activity.title'))
+  mod.assert_no_selector('.dashboard-module-loading', wait: 180)
 end
 
 Then(/^I should see the Your Account table breakdown$/) do
