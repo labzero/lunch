@@ -16,4 +16,4 @@
   -else
     %p= t('dashboard.quick_advance.error.advance_unavailable', phone_number: service_desk_phone_number)
   %p.quick-advance-loading-message= t('dashboard.quick_advance.preview.initiate')
-  = render 'quick_advance_summary', advance_amount: @advance_amount, advance_description: @advance_description, advance_program: @advance_program, advance_type: @advance_type, advance_rate: @advance_rate, human_interest_day_count: @human_interest_day_count, payment_on: @payment_on, advance_term: @advance_term, advance_raw_term: @advance_raw_term,funding_date: @funding_date, maturity_date: @maturity_date, stock: @stock
+  = render 'quick_advance_summary', advance_amount: @advance_amount, advance_description: @advance_description, advance_program: @advance_program, advance_type: @advance_type, advance_rate: @advance_rate, human_interest_day_count: @human_interest_day_count, human_payment_on: @human_payment_on, advance_term: @advance_term, advance_raw_term: @advance_raw_term,funding_date: @funding_date, maturity_date: @maturity_date, stock: @stock

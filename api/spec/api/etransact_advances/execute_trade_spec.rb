@@ -60,12 +60,12 @@ describe MAPI::ServiceApp do
   end
 
   describe 'get_payment_info' do
-    let(:overnight_response)    { mk_payment_info('Overnight',    1, 'T') }
-    let(:open_response)         { mk_payment_info('End Of Month', 1, 'M', 31)}
-    let(:whole_1_week_response) { mk_payment_info('End Of Month', 1, 'T', 31) }
-    let(:next_month_response)   { mk_payment_info('End Of Month', 1, 'M', 31) }
-    let(:maturity_response)     { mk_payment_info('Maturity',     1, 'T') }
-    let(:semiannual_response)   { mk_payment_info('Semiannual',   6, 'M') }
+    let(:overnight_response)    { mk_payment_info('Maturity',               1, 'T') }
+    let(:open_response)         { mk_payment_info('MonthEndOrRepayment',    1, 'M', 31)}
+    let(:whole_1_week_response) { mk_payment_info('MonthEndOrRepayment',    1, 'T', 31) }
+    let(:next_month_response)   { mk_payment_info('MonthEndOrRepayment',    1, 'M', 31) }
+    let(:maturity_response)     { mk_payment_info('Repayment',              1, 'T') }
+    let(:semiannual_response)   { mk_payment_info('SemiannualAndRepayment', 6, 'M') }
     it 'should return overnight payment info' do
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_payment_info('overnight', 'whole', Time.zone.today, Time.zone.today)).to eq(overnight_response)
     end

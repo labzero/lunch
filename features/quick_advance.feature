@@ -95,7 +95,27 @@ Scenario: Preview rate from Quick Advance flyout table
   Then I should not see the quick advance table
   And I should see a preview of the quick advance
 
-Scenario: Go back to rate table from preview in Quick Advance flyout
+@jira-mem-1179
+Scenario: Check the interest payment frequencies for various term/type
+  Given I visit the dashboard
+  And I open the quick advance flyout
+  And I select the rate with a term of "2week" and a type of "whole"
+  When I click on the initiate advance button
+  Then I should see an interest payment frequency of "monthendorrepayment"
+  When I click on the back button for the quick advance preview
+  And I select the rate with a term of "3year" and a type of "agency"
+  When I click on the initiate advance button
+  Then I should see an interest payment frequency of "semiannualandrepayment"
+  When I click on the back button for the quick advance preview
+  And I select the rate with a term of "3month" and a type of "aaa"
+  When I click on the initiate advance button
+  Then I should see an interest payment frequency of "repayment"
+  When I click on the back button for the quick advance preview
+  And I select the rate with a term of "overnight" and a type of "aa"
+  When I click on the initiate advance button
+  Then I should see an interest payment frequency of "maturity"
+
+  Scenario: Go back to rate table from preview in Quick Advance flyout
   Given I visit the dashboard
   And I open the quick advance flyout
   And I select the rate with a term of "2week" and a type of "aaa"

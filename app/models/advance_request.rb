@@ -221,6 +221,16 @@ class AdvanceRequest
     end
   end
 
+  def human_payment_on
+    case payment_on
+      when 'Maturity'               then I18n.t('dashboard.quick_advance.table.maturity')
+      when 'MonthEndOrRepayment'    then I18n.t('dashboard.quick_advance.table.monthendorrepayment')
+      when 'Repayment'              then I18n.t('dashboard.quick_advance.table.repayment')
+      when 'SemiannualAndRepayment' then I18n.t('dashboard.quick_advance.table.semiannualandrepayment')
+      else raise ArgumentError.new("Unrecognized value for payment_on: #{payment_on}")
+    end
+  end
+
   def human_type
     case type
     when :whole
