@@ -149,6 +149,10 @@ Then(/^I should see a preview of the quick advance$/) do
   #valdiate_passed_advance_params
 end
 
+Then(/^I should see an interest payment frequency of "(.*?)"$/) do |field|
+  page.assert_selector('.quick-advance-summary dd', text: I18n.t("dashboard.quick_advance.table.#{field}"), visible: true)
+end
+
 Then(/^I should see a preview of the quick advance with a notification about the new rate$/) do
   page.assert_selector('.quick-advance-preview', visible: true)
   page.assert_selector('.quick-advance-updated-rate')
@@ -194,7 +198,7 @@ end
 
 Then(/^I should see confirmation number for the advance$/) do
   page.assert_selector('.quick-advance-summary dt', text: "Advance Number:", visible: true)
-  valdiate_passed_advance_params
+  validate_passed_advance_params
 end
 
 Then(/^I should not see the quick advance preview message$/) do
@@ -296,7 +300,7 @@ Then(/^I should see SecurID errors$/) do
   page.assert_selector('.quick-advance-preview input.input-field-error', visible: true)
 end
 
-def valdiate_passed_advance_params
+def validate_passed_advance_params
   page.assert_selector('.quick-advance-summary span', visible: true, text: fhlb_formatted_currency(@amount, html: false, precision: 0))
   page.assert_selector('.quick-advance-summary dd', visible: true, text: I18n.t("dashboard.quick_advance.table.axes_labels.#{@rate_term}"))
   rate_type_text = case @rate_type
