@@ -60,7 +60,7 @@
           %h2.quick-advance-confirmation-subheading{style: 'display: none;'}= t('dashboard.quick_advance.confirmation.title')
           %h2.quick-advance-preview-subheading{style: 'display: none;'}= t('dashboard.quick_advance.preview.title')
           %h2.quick-advance-capstock-subheading{style: 'display: none;'}= t('dashboard.quick_advance.capitalstock.title')
-        %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_enabled}"}
+        %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_enabled || @quick_advance_status != :open}"}
           = t('dashboard.quick_advance.advance_desk_unavailable_html', phone_number: service_desk_phone_number)
           = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
         %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_status != :closed}"}

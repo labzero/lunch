@@ -83,30 +83,25 @@ describe MembersService do
   end
 
   describe '`quick_advance_enabled_for_member?` method' do
-    let(:method_call) { subject.quick_advance_enabled_for_member?(member_id) }
-    before do
-      allow(request_object).to receive(:get).and_return(response_object)
-      allow_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/quick_advance_flag").and_return(request_object)
+    let(:call_method) { subject.quick_advance_enabled_for_member?(member_id) }
+    let(:response) { double('MAPI response', :[] => nil) }
+    let(:advance_enabled_value) { double('advance enabled value') }
+    before { allow(subject).to receive(:get_hash).and_return(response) }
+    it 'calls the `get_hash` method with the proper method name' do
+      expect(subject).to receive(:get_hash).with(:quick_advance_enabled_for_member?, anything)
+      call_method
     end
-    it 'hits the MAPI endpoint' do
-      expect_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/quick_advance_flag").and_return(request_object)
-      method_call
+    it 'calls the `get_hash` method with the proper endpoint' do
+      expect(subject).to receive(:get_hash).with(anything, "member/#{member_id}/quick_advance_flag")
+      call_method
     end
-    it 'returns `true` if the MAPI endpoint returns `Y`' do
-      allow(JSON).to receive(:parse).and_return(['Y'])
-      expect(method_call).to be(true)
+    it 'returns the `quick_advance_enabled` value in the returned JSON object' do
+      allow(response).to receive(:[]).with(:quick_advance_enabled).and_return(advance_enabled_value)
+      expect(call_method).to eq(advance_enabled_value)
     end
-    it 'returns `false` if the MAPI endpoint does not return `Y`' do
-      allow(JSON).to receive(:parse).and_return(['N'])
-      expect(method_call).to be(false)
-    end
-    it 'should return nil if there was an API error' do
-      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
-      expect(method_call).to eq(nil)
-    end
-    it 'should return nil if there was a connection error' do
-      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
-      expect(method_call).to eq(nil)
+    it 'returns nil if `get_hash` returns nil' do
+      allow(subject).to receive(:get_hash).and_return(nil)
+      expect(call_method).to be_nil
     end
   end
 
