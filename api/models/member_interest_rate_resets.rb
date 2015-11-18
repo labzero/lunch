@@ -27,11 +27,13 @@ module MAPI
         end
         property :prior_rate do
           key :type, :float
-          key :description, 'The rate prior to the reset'
+          key :description, 'The rate prior to the reset, given in percentage format'
+          key :note, 'This value represents the rate as a percentage (i.e. a value of 0.19 == a rate of 0.19%)'
         end
         property :new_rate do
           key :type, :float
-          key :description, 'The rate after the reset'
+          key :description, 'The rate after the reset, given in percentage format'
+          key :note, 'This value represents the rate as a percentage (i.e. a value of 0.19 == a rate of 0.19%)'
         end
         property :next_reset do
           key :type, :date

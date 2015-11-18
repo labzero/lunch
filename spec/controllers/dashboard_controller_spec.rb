@@ -640,7 +640,7 @@ RSpec.describe DashboardController, :type => :controller do
       gross_pre_trade_stock_required: :gross_pre_trade_stock_required,
       gross_net_stock_required: :gross_net_stock_required,
       human_interest_day_count: :human_interest_day_count,
-      payment_on: :payment_on,
+      human_payment_on: :human_payment_on,
       trade_date: :trade_date,
       funding_date: :funding_date,
       maturity_date: :maturity_date,

@@ -1536,6 +1536,23 @@ describe AdvanceRequest do
     end
   end
 
+  describe '`human_payment_on`' do
+    shared_examples 'human_payment_on' do |input,output|
+      it "should return #{output} for #{input}" do
+        allow(subject).to receive(:payment_on).and_return(input)
+        expect(subject.human_payment_on).to eq(output)
+      end
+    end
+    include_examples 'human_payment_on', 'Maturity',               I18n.t('dashboard.quick_advance.table.maturity')
+    include_examples 'human_payment_on', 'MonthEndOrRepayment',    I18n.t('dashboard.quick_advance.table.monthendorrepayment')
+    include_examples 'human_payment_on', 'Repayment',              I18n.t('dashboard.quick_advance.table.repayment')
+    include_examples 'human_payment_on', 'SemiannualAndRepayment', I18n.t('dashboard.quick_advance.table.semiannualandrepayment')
+    it 'should raise an ArgumentError for other values' do
+      allow(subject).to receive(:payment_on).and_return('other values')
+      expect{subject.human_payment_on}.to raise_error(ArgumentError)
+    end
+  end
+
   describe '`transform_amount` protected method' do
     let(:floated_amount) { double('A Float Amount') }
     let(:duped_amount) { double('A Duplicated Amount', to_f: floated_amount) }

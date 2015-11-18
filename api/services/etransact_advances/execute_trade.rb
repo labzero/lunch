@@ -77,13 +77,13 @@ module MAPI
           # Advance payment frequency and payment day of the month
           advance_payment_day_of_month = 0
           if (term == 'overnight')
-            payment_at = 'Overnight'
+            payment_at = 'Maturity'
             advance_payment_frequency = {
               'v13:frequency' => 1,
               'v13:frequencyUnit' => 'T'
             }
           elsif (term == 'open')
-            payment_at = 'End Of Month'
+            payment_at = 'MonthEndOrRepayment'
             advance_payment_frequency = {
               'v13:frequency' => 1,
               'v13:frequencyUnit' => 'M'
@@ -103,16 +103,16 @@ module MAPI
                 }
               end
               advance_payment_day_of_month = 31
-              payment_at = 'End Of Month'
+              payment_at = 'MonthEndOrRepayment'
             else
               if (maturity_date - settlement_date).to_i <= 180
-                payment_at = 'Maturity'
+                payment_at = 'Repayment'
                 advance_payment_frequency = {
                   'v13:frequency' => 1,
                   'v13:frequencyUnit' => 'T'
                 }
               else
-                payment_at = 'Semiannual'
+                payment_at = 'SemiannualAndRepayment'
                 advance_payment_frequency = {
                   'v13:frequency' => 6,
                   'v13:frequencyUnit' => 'M'
