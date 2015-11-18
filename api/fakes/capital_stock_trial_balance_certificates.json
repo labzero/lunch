@@ -1,2 +1,2 @@
-[{"certificate_sequence": 50173, "class": "B", "issue_date": "02-NOV-2009", "shares_outstanding": 31906, "transaction_type": "Repurchase" },
- {"certificate_sequence": 51186, "class": "B", "issue_date": "26-APR-2013", "shares_outstanding": 8129, "transaction_type": "Repurchase" }]
+[{"certificate_sequence": "50173", "class": "B", "issue_date": "02-NOV-2009", "shares_outstanding": 31906, "transaction_type": "Repurchase" },
+ {"certificate_sequence": "51186", "class": "B", "issue_date": "26-APR-2013", "shares_outstanding": 8129, "transaction_type": "Repurchase" }]

@@ -34,7 +34,7 @@ module MAPI
                  tran_type as transaction_type
           from capstock.capstock_trial_balance_web_v
           where fhlb_id = #{quote(fhlb_id)}
-          and (sold_date is null or sold_date > #{quote(business_date)}
+          and (sold_date is null or sold_date > #{quote(business_date)})
           and issue_date <= #{quote(business_date)}
           and purchase_date <= #{quote(business_date)}
           SQL
@@ -42,14 +42,16 @@ module MAPI
 
         def self.capital_stock_trial_balance(app, fhlb_id, date)
           if app.settings.environment == :production
-            business_date   = fetch_hashes(app.logger, business_date_sql(date)).first['business_date']
-            closing_balance = fetch_hashes(app.logger, closing_balance_sql(fhlb_id, business_date))
-            certificates    = fetch_hashes(app.logger, certificates_sql(fhlb_id, business_date))
+            business_date   = dateify(fetch_hashes(app.logger, business_date_sql(date), true).first['business_date'])
+            closing_balance = fetch_hashes(app.logger, closing_balance_sql(fhlb_id, business_date), true)
+            certificates    = fetch_hashes(app.logger, certificates_sql(fhlb_id, business_date), true)
           else
             closing_balance = fake('capital_stock_trial_balance_closing_balance')
             certificates    = fake('capital_stock_trial_balance_certificates')
           end
-          closing_balance.first.merge("certificates" => certificates)
+          closing_balance.first.merge("certificates" => certificates).tap do |data|
+            %w(number_of_shares number_of_certificates).each{ |key| data[key] = data[key].to_i }
+          end
         end
       end
     end

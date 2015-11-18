@@ -29,11 +29,16 @@ module MAPI
           ActiveRecord::Base.connection.quote(value)
         end
 
-        def fetch_hashes(logger, sql)
+        def dateify(date_or_string)
+          Date.parse(date_or_string.to_s)
+        end
+
+        def fetch_hashes(logger, sql, downcase_keys=false)
           begin
             results = []
             cursor  = ActiveRecord::Base.connection.execute(sql)
             while row = cursor.fetch_hash()
+              row = Hash[row.map{ |k,v| [k.downcase,v] }] if downcase_keys
               results.push(row)
             end
             results
