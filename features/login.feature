@@ -137,3 +137,15 @@ Scenario: User is redirected when visiting the logged out page directly
   Given I am logged in
   When I visit the logged out page
   Then I should see dashboard modules
+
+@jira-mem-1018
+Scenario: User can change institutions via the link in nav header
+  Given I am logged out
+  And I visit the root path
+  When I fill in and submit the login form with a user not associated with a bank
+  Then I should see the member bank selector
+  And I should see the member bank selector submit button disabled
+  When I select the 1st member bank
+  Then I should see dashboard modules
+  When I click on the switch link in the nav
+  Then I should see the member bank selector

@@ -5,6 +5,7 @@
       %li= t('nav.primary.welcome', name: current_user.given_name || current_user.username)
       - if current_user.ldap_domain == 'intranet'
         %li.header-member-name= current_member_name
+        %li.nav-member-switch= link_to(t('nav.primary.switch'), members_switch_member_path, method: :post)
       %li.nav-logout= link_to(t('nav.primary.logout'), destroy_user_session_url, method: :delete)
       %li.nav-settings= link_to('', settings_password_path, class: 'icon-gear-after')
       %li.nav-mail= link_to('', corporate_communications_path('all'), class: 'icon-envelope-after')

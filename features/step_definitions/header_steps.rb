@@ -17,6 +17,10 @@ When(/^I click on the (reports|guides|capital plan|forms|agreements|authorizatio
   page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
 end
 
+When(/^I click on the switch link in the nav$/) do
+  page.find('.nav-member-switch a', text: I18n.t('nav.primary.switch')).click
+end
+
 Then(/^I should see the primary bank name in the header$/) do
   page.assert_selector('.header-member-name', text: CustomConfig.env_config['primary_bank'])
 end
