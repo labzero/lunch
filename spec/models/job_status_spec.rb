@@ -15,36 +15,12 @@ RSpec.describe JobStatus, :type => :model do
     expect(job_status.finished_at).to eq(now)
   end
 
-  describe '`result_as_string` method' do
-    let(:call_method) { subject.result_as_string }
-    let(:data) { double('Some Data') }
-    let(:tempfile) { double('A Tempfile', path: double('A Path'), read: data, unlink: nil) }
-    let(:result) { double('Paperclip::Attachment', copy_to_local_file: nil) }
-    before do
-      allow(subject).to receive(:result).and_return(result)
-      allow(Tempfile).to receive(:open).and_yield(tempfile)
-    end
-    it 'should open a Tempfile' do
-      expect(Tempfile).to receive(:open).with('job_result', Rails.root.join('tmp'))
-      call_method
-    end
-    it 'should delete the Tempfile after reading it' do
-      expect(tempfile).to receive(:read).ordered
-      expect(tempfile).to receive(:unlink).ordered
-      call_method
-    end
-    it 'should delete the Tempfile if an exception occurs' do
-      expect(tempfile).to receive(:unlink)
-      allow(tempfile).to receive(:read).and_raise('some error')
-      expect{call_method}.to raise_error
-    end
-    it 'should copy the stored file to the Tempfile' do
-      expect(result).to receive(:copy_to_local_file).with(:original, tempfile.path)
-      call_method
-    end
-    it 'should return the contents of the Tempfile' do
-      expect(call_method).to be(data)
-    end
+  it 'responds to `result_as_string`' do
+    expect(subject).to respond_to(:result_as_string)
+  end
+  
+  it 'includes PaperclipAttachmentAsString' do
+    expect(described_class.included_modules).to include(PaperclipAttachmentAsString)
   end
 
 end

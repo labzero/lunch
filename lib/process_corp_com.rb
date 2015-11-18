@@ -4,10 +4,8 @@ module ProcessCorpCom
   require 'net/http'
   require 'uri'
 
-  def self.process_email_html(file_location)
-    file_location = File.expand_path(file_location)
-    original_email = Mail.read(file_location)
-    html = original_email.html_part.body.decoded
+  def self.process_email_html(email)
+    html = email.html_part.body.decoded
 
     doc = Nokogiri::HTML(html)
     stylesheet = doc.at('style').content
@@ -51,6 +49,36 @@ module ProcessCorpCom
 
     body.inner_html
 
+  end
+
+  def self.process_email_attachments(email)
+    email.attachments.collect { |attachment| process_email_attachment(attachment) }
+  end
+
+  def self.process_email_attachment(attachment)
+    data = attachment.body.decoded
+    digest = Digest::SHA2.new
+    {
+      fingerprint: (digest << data).to_s,
+      data: Base64.encode64(data),
+      name: attachment.filename,
+      content_type: attachment.mime_type
+    }
+  end
+
+  def self.process_email(file_location, category=nil)
+    email = Mail.read(File.expand_path(file_location))
+
+    body = ProcessCorpCom.process_email_html(email)
+    attachments = ProcessCorpCom.process_email_attachments(email)
+    { 
+      body: body,
+      attachments: attachments,
+      email_id: email.message_id,
+      title: email.subject,
+      date: email.date,
+      category: category
+    }
   end
 
 end

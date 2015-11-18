@@ -11,7 +11,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150814212503) do
+ActiveRecord::Schema.define(version: 20151111213502) do
+
+  create_table "attachments", force: :cascade do |t|
+    t.string   "owner_type"
+    t.integer  "owner_id",          precision: 38
+    t.string   "category"
+    t.string   "data_file_name"
+    t.string   "data_content_type"
+    t.integer  "data_file_size",    precision: 38
+    t.datetime "data_updated_at"
+    t.string   "fingerprint"
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
+  end
+
+  add_index "attachments", ["owner_type", "owner_id"], name: "i_att_own_typ_own_id"
 
   create_table "corporate_communications", force: :cascade do |t|
     t.string   "email_id"
@@ -24,13 +39,13 @@ ActiveRecord::Schema.define(version: 20150814212503) do
   add_index "corporate_communications", ["category"], name: "i_cor_com_cat"
 
   create_table "job_statuses", force: :cascade do |t|
-    t.integer  "user_id",             limit: 16,  precision: 38
+    t.integer  "user_id",                         precision: 38
     t.string   "job_id"
-    t.integer  "status",              limit: 16,  precision: 38, default: 0
+    t.integer  "status",                          precision: 38, default: 0
     t.datetime "finished_at"
     t.string   "result_file_name"
     t.string   "result_content_type"
-    t.integer  "result_file_size",    limit: 16,  precision: 38
+    t.integer  "result_file_size",                precision: 38
     t.datetime "result_updated_at"
     t.boolean  "no_download",         limit: nil,                default: false
   end
@@ -40,10 +55,10 @@ ActiveRecord::Schema.define(version: 20150814212503) do
   add_index "job_statuses", ["status"], name: "index_job_statuses_on_status"
 
   create_table "users", force: :cascade do |t|
-    t.string   "username",                                         default: "", null: false
+    t.string   "username",                              default: "", null: false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
-    t.integer  "sign_in_count",          limit: 16, precision: 38, default: 0,  null: false
+    t.integer  "sign_in_count",          precision: 38, default: 0,  null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"

@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 describe CorporateCommunication do
+  it { should have_many(:attachments).conditions(category: :attachment) }
   [:email_id, :date_sent, :category, :title, :body].each do |attr|
     it "should validate the presence of `#{attr}`" do
       expect(subject).to validate_presence_of attr

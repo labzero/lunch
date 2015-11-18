@@ -60,6 +60,7 @@ $icon-forward: "\e60c";
 $icon-success: "\e60d";
 $icon-error: "\e60e";
 $icon-info: "\e60f";
+$icon-paperclip: "\e900";
 
 %icon-alert {
   @extend %icon-font;
@@ -155,6 +156,11 @@ $icon-info: "\e60f";
 .icon-info-before:before, .icon-info-after:after {
   @extend %icon-font;
   content: "#{$icon-info}";
+}
+
+.icon-paperclip-before:before, .icon-paperclip-after:after {
+  @extend %icon-font;
+  content: "#{$icon-paperclip}";
 }
 
 $spinner-size: 30px !default;
