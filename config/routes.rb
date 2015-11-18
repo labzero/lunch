@@ -95,6 +95,7 @@ Rails.application.routes.draw do
   end
 
   scope 'products' do
+    get '/authorizations' => 'products#authorizations', as: :products_authorizations
     get '/summary' => 'products#index', as: :product_summary
     get '/letters-of-credit' => 'error#not_found'
     get '/community_programs' => 'error#not_found'
@@ -117,7 +118,6 @@ Rails.application.routes.draw do
       get 'securities-backed-credit' => 'products#sbc', as: :sbc
       get 'variable-rate-credit' => 'products#vrc', as: :vrc
     end
-
   end
 
   devise_scope :user do

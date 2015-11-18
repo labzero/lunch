@@ -24,6 +24,11 @@ class ProductsController < ApplicationController
   end
 
   # GET
+  def authorizations
+    @last_modified = Date.new(2015, 10, 1)
+  end
+
+  # GET
   def choice_libor
     @last_modified = Date.new(2015, 4, 1)
   end

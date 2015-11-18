@@ -113,6 +113,19 @@ $resource-page-padding: 140px !default;
   }
 }
 
+.form-table-link-heading {
+  h3 {
+    float: left;
+  }
+  a {
+    text-transform: uppercase;
+    float: right;
+    display: inline-block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+  }
+}
+
 .resource-form-table {
   @extend %table-striped;
   @extend %table-nested-rows;
