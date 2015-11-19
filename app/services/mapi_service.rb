@@ -74,14 +74,6 @@ class MAPIService
     end
   end
   
-  def get_fake_hash(name, filename, &error_handler)
-    begin
-      JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', filename))).with_indifferent_access
-    rescue JSON::ParserError => e
-      warn(name, "JSON parsing error: #{e}", e, &error_handler)
-    end
-  end
-  
   def get_hash(name, endpoint, &error_handler)
     get_json(name, endpoint, &error_handler).try(:with_indifferent_access)
   end
