@@ -41,6 +41,10 @@ class CorporateCommunicationsController < ApplicationController
     elsif message_index != 0 && (message_index + 1) == messages_length
       @prior_message = messages_array[message_index - 1]
     end
+    @message_body = @message.body.dup
+    @message.images.each do |image|
+      @message_body.gsub!("cid:#{image.fingerprint}", attachment_download_path(id: image, filename: image.data.original_filename))
+    end
   end
 
 end

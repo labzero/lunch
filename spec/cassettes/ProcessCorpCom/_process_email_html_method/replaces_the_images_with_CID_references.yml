@@ -2,39 +2,6 @@
 http_interactions:
 - request:
     method: get
-    uri: http://links.mkt1700.com/ctt?b=0&j=NDIwOTUwNzY5S0&kn=1&ms=NDU1NzMzNDIS1&mt=1&r=MTg2NDQ4MjQwNAS2&rt=3
-    body:
-      encoding: US-ASCII
-      string: ''
-    headers:
-      Accept-Encoding:
-      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
-      Accept:
-      - "*/*"
-      User-Agent:
-      - Ruby
-  response:
-    status:
-      code: 302
-      message: Found
-    headers:
-      Date:
-      - Mon, 16 Nov 2015 18:13:52 GMT
-      Location:
-      - http://links.mkt1700.com/
-      Content-Length:
-      - '0'
-      Connection:
-      - close
-      Content-Type:
-      - text/plain; charset=UTF-8
-    body:
-      encoding: UTF-8
-      string: ''
-    http_version: 
-  recorded_at: Mon, 16 Nov 2015 18:14:03 GMT
-- request:
-    method: get
     uri: http://links.mkt1700.com/ctt?b=0&j=Nzg0Mjc4MzkxS0&kn=5&ms=NDk5MDY3ODcS1&mt=1&r=ODkwNzA0NTc0OQS2&rt=3
     body:
       encoding: US-ASCII
@@ -52,7 +19,7 @@ http_interactions:
       message: Found
     headers:
       Date:
-      - Mon, 16 Nov 2015 19:59:44 GMT
+      - Wed, 18 Nov 2015 22:04:56 GMT
       Location:
       - http://fhlbsf.com/cofi/monthly/monthly.asp?utm_source=SilverpopMailing&utm_medium=email&utm_campaign=COFI
         (5)&utm_content=
@@ -66,7 +33,7 @@ http_interactions:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Mon, 16 Nov 2015 19:59:44 GMT
+  recorded_at: Wed, 18 Nov 2015 22:04:56 GMT
 - request:
     method: get
     uri: http://links.mkt1700.com/ctt?b=0&j=Nzg0Mjc4MzkxS0&kn=2&ms=NDk5MDY3ODcS1&mt=1&r=ODkwNzA0NTc0OQS2&rt=3
@@ -86,7 +53,7 @@ http_interactions:
       message: Found
     headers:
       Date:
-      - Mon, 16 Nov 2015 19:59:44 GMT
+      - Wed, 18 Nov 2015 22:04:56 GMT
       Location:
       - http://www.fhlbsf.com?utm_source=SilverpopMailing&utm_medium=email&utm_campaign=COFI
         (5)&utm_content=
@@ -100,7 +67,7 @@ http_interactions:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Mon, 16 Nov 2015 19:59:44 GMT
+  recorded_at: Wed, 18 Nov 2015 22:04:56 GMT
 - request:
     method: get
     uri: http://contentz.mkt1700.com/ra/2015/26686/10/49906787/052909_COFI_Monthly_Corp_announce.gif
@@ -136,13 +103,13 @@ http_interactions:
       Accept-Ranges:
       - bytes
       Age:
-      - '6810'
+      - '7385'
       X-Cache:
       - Hit from cloudfront
       Via:
-      - 1.1 d2bd759914e30b1d5aee2929535c55f9.cloudfront.net (CloudFront)
+      - 1.1 8008015354a3ca72f56c382a1d1cfe9f.cloudfront.net (CloudFront)
       X-Amz-Cf-Id:
-      - f5B9M0-ic0rTZqeSbOFJGl7bEnXq7csDH8piIrHnqSfCfewNwdRlGw==
+      - sFOlKyHcsWtFTTr5f4yqzXymsd8Y8-lBcot8tRiLx5s-70y1P-xjiA==
     body:
       encoding: ASCII-8BIT
       string: !binary |-
@@ -204,5 +171,5 @@ http_interactions:
         ohzm55R5zXfOcyjeHOfl1HnPh0508QId20IvutJ7/vOjZzPpS4/6zJvu9GZC
         XepYLznVqx4bzKtn/esX3zrX/WljsJt952Ifuyy9fva2UzsIADs=
     http_version: 
-  recorded_at: Wed, 18 Nov 2015 21:55:22 GMT
+  recorded_at: Wed, 18 Nov 2015 22:04:57 GMT
 recorded_with: VCR 2.9.3
