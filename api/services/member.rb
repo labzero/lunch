@@ -423,11 +423,8 @@ module MAPI
             operation do
               key :method, 'GET'
               key :summary, 'Retrieve the Quick Advance Flag for the member'
-              key :notes, 'Returns `Y` if quick advances are enabled for this member'
-              key :type, :array
-              items do
-                key :type, :string
-              end
+              key :notes, 'Returns a hash whose `quick_advance_flag` property indicates whether quick advances are enabled for a given member'
+              key :type, :MemberQuickAdvanceFlag
               key :nickname, :getQuickAdvanceFlagForMember
               parameter do
                 key :paramType, :path

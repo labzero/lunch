@@ -58,5 +58,10 @@
     "name": "The Bank With The Really Really Long Name That Requires Truncation or Expansion",
     "fhfb_number": "15006",
     "sta_number": "21530012"
+  },
+  "13": {
+    "name": "The Bank With Disabled Signers",
+    "fhfb_number": "15006",
+    "sta_number": "21530013"
   }
 }

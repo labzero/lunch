@@ -461,6 +461,7 @@ en:
       advances_desk_closed: The Member Services Desk is closed.
       advances_desk_closed_link: View recent price indications
       advances_desk_no_terms: There are no terms available right now.
+      advance_desk_unavailable_html: Quick Advance is not available right now. Call the Member Services Desk at <span>%{phone_number}</span> for more information.
       advance_last_updated: The following rates were last updated %{last_updated}
       hours_of_operation_html: "You may initiate an advance during the <a href=\"%{url}\">Advance Desk Hours of Operation</a>."
       limited_pricing: View limited pricing information

@@ -59,9 +59,8 @@ class MembersService < MAPIService
   end
 
   def quick_advance_enabled_for_member?(member_id)
-    if data = get_json(:quick_advance_enabled_for_member?, "member/#{member_id}/quick_advance_flag")
-      flag = data.first
-      'Y' == flag.upcase unless flag.blank?
+    if data = get_hash(:quick_advance_enabled_for_member?, "member/#{member_id}/quick_advance_flag")
+      data[:quick_advance_enabled]
     end
   end
 
