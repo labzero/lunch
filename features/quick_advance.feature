@@ -257,3 +257,14 @@ Scenario: User sees an unavailable message if quick advances are disabled for th
   Given I am logged in as a "user with disabled quick advances"
   When I visit the dashboard
   Then I should see a quick advances disabled message
+
+@jira-mem-1197
+  Scenario: User who cancels an advance with a stock purchase doesn't see the stock purchase in the next advance
+    Given I visit the dashboard
+    And I am on the quick advance stock purchase screen
+    And I select the continue with advance option
+    When I click on the continue with request button
+    Then I should see the cumulative stock purchase on the preview screen
+    When I go back to the quick advance rate table
+    And I preview a loan that doesn't require a capital stock purchase
+    Then I should not see the cumulative stock purchase on the preview screen
