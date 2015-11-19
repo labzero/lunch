@@ -886,36 +886,44 @@ class ReportsController < ApplicationController
   end
 
   def letters_of_credit
-    if report_disabled?(LETTERS_OF_CREDIT_WEB_FLAGS)
-      letters_of_credit = {}
+    @report_name = t('reports.pages.letters_of_credit.title')
+    export_format = params[:export_format]
+    if export_format == 'xlsx'
+      excel_job_status = RenderReportExcelJob.perform_later(current_member_id, 'letters_of_credit', "letters-of-credit-#{Time.zone.today.to_s}").job_status
+      excel_job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(excel_job_status), job_cancel_url: job_cancel_url(excel_job_status)}
     else
-      member_balances = MemberBalanceService.new(current_member_id, request)
-      letters_of_credit = member_balances.letters_of_credit
-      raise StandardError, "There has been an error and ReportsController#letters_of_credit has encountered nil. Check error logs." if letters_of_credit.nil?
-    end
-    @as_of_date = letters_of_credit[:as_of_date]
-    @total_current_par = letters_of_credit[:total_current_par]
-    rows = if letters_of_credit[:credits]
-      letters_of_credit[:credits].collect do |credit|
-        {
-          columns: [
-            {value: credit[:lc_number], type: nil},
-            {value: credit[:current_par], type: :currency_whole},
-            {value: credit[:maintenance_charge], type: :basis_point},
-            {value: credit[:trade_date], type: :date, classes: [:'report-cell-right']},
-            {value: credit[:maturity_date], type: :date, classes: [:'report-cell-right']},
-            {value: credit[:description], type: nil}
-          ]
-        }
+      if report_disabled?(LETTERS_OF_CREDIT_WEB_FLAGS)
+        letters_of_credit = {}
+      else
+        member_balances = MemberBalanceService.new(current_member_id, request)
+        letters_of_credit = member_balances.letters_of_credit
+        raise StandardError, "There has been an error and ReportsController#letters_of_credit has encountered nil. Check error logs." if letters_of_credit.nil?
       end
-    else
-      []
+      @as_of_date = letters_of_credit[:as_of_date]
+      @total_current_par = letters_of_credit[:total_current_par]
+      rows = if letters_of_credit[:credits]
+        letters_of_credit[:credits].collect do |credit|
+          {
+            columns: [
+              {value: credit[:lc_number], type: nil},
+              {value: credit[:current_par], type: :currency_whole},
+              {value: credit[:maintenance_charge], type: :basis_point},
+              {value: credit[:trade_date], type: :date, classes: [:'report-cell-right']},
+              {value: credit[:maturity_date], type: :date, classes: [:'report-cell-right']},
+              {value: credit[:description], type: nil}
+            ]
+          }
+        end
+      else
+        []
+      end
+      @loc_table_data = {
+        column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), fhlb_add_unit_to_table_header(t('reports.pages.letters_of_credit.headers.current_amount'), '$'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('reports.pages.letters_of_credit.headers.issuance_date'), t('common_table_headings.maturity_date'), t('reports.pages.letters_of_credit.headers.credit_program')],
+        rows: rows,
+        footer: [{value: t('global.total')}, {value: @total_current_par, type: :currency_whole}, {value: nil, colspan: 4}]
+      }
     end
-    @loc_table_data = {
-      column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), fhlb_add_unit_to_table_header(t('reports.pages.letters_of_credit.headers.current_amount'), '$'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('reports.pages.letters_of_credit.headers.issuance_date'), t('common_table_headings.maturity_date'), t('reports.pages.letters_of_credit.headers.credit_program')],
-      rows: rows,
-      footer: [{value: t('global.total')}, {value: @total_current_par, type: :currency_whole}, {value: nil, colspan: 4}]
-    }
   end
 
   def most_recent_business_day(d)

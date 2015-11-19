@@ -1,0 +1,14 @@
+xlsx_package.use_shared_strings = true
+workbook = xlsx_package.workbook
+workbook.styles do |styles|
+  date_format = styles.add_style format_code: 'mm/dd/yyyy'
+  integer_format = styles.add_style num_fmt: 1
+
+  workbook.add_worksheet(name: t('reports.pages.letters_of_credit.title')) do |sheet|
+    sheet.add_row @loc_table_data[:column_headings]
+    @loc_table_data[:rows].each do |row|
+      values = row[:columns].collect { |column| column[:value]}
+      sheet.add_row values, style: [nil, integer_format, integer_format, date_format, date_format, nil]
+    end
+  end
+end

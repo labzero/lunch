@@ -650,6 +650,7 @@ RSpec.describe ReportsController, :type => :controller do
 
       it_behaves_like 'a user required action', :get, :letters_of_credit
       it_behaves_like 'a report with instance variables set in a before_filter', :letters_of_credit
+      it_behaves_like 'a report that can be downloaded', :letters_of_credit, [:xlsx]
 
       describe 'view instance variables' do
         it 'sets @as_of_date to the value returned by MemberBalanceService.letters_of_credit' do
