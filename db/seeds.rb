@@ -14,22 +14,27 @@ messages.each_with_index do |message, index|
     corp_com.body = message['body']
     corp_com.category = message['category']
     corp_com.email_id = message['email_id']
-    new_fingerprints = (message['attachments'] || []).collect { |attachment| attachment['fingerprint'] }
-    attachments = corp_com.attachments
-    old_fingerprints = corp_com.attachments.collect(&:fingerprint)
-    attachments.each do |attachment|
-      attachment.destroy unless new_fingerprints.include?(attachment.fingerprint)
-    end
+    
     corp_com.save! if corp_com.new_record? # work around rails ploymorphic save issue
-    (message['attachments'] || []).each do |attachment|
-      fingerprint = attachment['fingerprint']
-      unless old_fingerprints.include?(fingerprint)
-        file = StringIOWithFilename.new(Base64.decode64(attachment['data']))
-        file.original_filename = attachment['name']
-        file.content_type = attachment['content_type']
-        attachments.build(data: file, fingerprint: fingerprint)
+
+    ['attachments', 'images'].each do |association|
+      new_fingerprints = (message[association] || []).collect { |attachment| attachment['fingerprint'] }
+      attachments = corp_com.send(association)
+      old_fingerprints = attachments.collect(&:fingerprint)
+      attachments.each do |attachment|
+        attachment.destroy unless new_fingerprints.include?(attachment.fingerprint)
       end
+      (message[association] || []).each do |attachment|
+        fingerprint = attachment['fingerprint']
+        unless old_fingerprints.include?(fingerprint)
+          file = StringIOWithFilename.new(Base64.decode64(attachment['data']))
+          file.original_filename = attachment['name']
+          file.content_type = attachment['content_type']
+          attachments.build(data: file, fingerprint: fingerprint)
+        end
+      end      
     end
+
     corp_com.save!
   end
 end

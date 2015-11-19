@@ -69,17 +69,36 @@ RSpec.describe CorporateCommunicationsController, :type => :controller do
   end
 
   describe 'GET show' do
+    let(:make_request) { get :show, category: 'all', id: corporate_communication }
     it_behaves_like 'a user required action', :get, :category, category: 'all', id: ::FactoryGirl.build(:corporate_communication)
-    let(:corporate_communication) { ::FactoryGirl.create(:corporate_communication, category: 'accounting') }
+    let(:corporate_communication) { ::FactoryGirl.create(:corporate_communication, category: 'accounting', body: "<img src=\"cid:#{image_fingerprint}\">Foo") }
+    let(:image_url) { SecureRandom.hex }
+    let(:image_fingerprint) { SecureRandom.hex }
+    before do
+      allow(controller).to receive(:attachment_download_path).and_return(image_url)
+    end
     it 'sets @message to the appropriate CorporateCommunication record if `all` is given as the category argument' do
       expect(CorporateCommunication).to receive(:find).with(corporate_communication.id.to_s).and_call_original
-      get :show, category: 'all', id: corporate_communication
+      make_request
       expect(assigns[:message]).to eq(corporate_communication)
     end
     it 'sets @message to the appropriate CorporateCommunication record given the proper category' do
       expect(CorporateCommunication).to receive(:find_by!).with({:id => corporate_communication.id.to_s, :category => 'accounting'}).and_call_original
       get :show, category: 'accounting', id: corporate_communication
       expect(assigns[:message]).to eq(corporate_communication)
+    end
+    it 'sets the @message_body' do
+      allow(CorporateCommunication).to receive(:find).and_return(corporate_communication)
+      allow(corporate_communication).to receive(:body).and_return(SecureRandom.hex)
+      make_request
+      expect(assigns[:message_body]).to eq(corporate_communication.body)
+    end
+    it 'substitutes CID references in the @message_body' do
+      allow(CorporateCommunication).to receive(:find).and_return(corporate_communication)
+      allow(corporate_communication).to receive(:images).and_return([double(Attachment, fingerprint: image_fingerprint, data: double(Paperclip::Attachment, original_filename: nil))])
+      make_request
+      expect(assigns[:message_body]).to_not match('cid:')
+      expect(assigns[:message_body]).to match(image_url)
     end
     describe 'setting the @prior_message and @next_message instance variables' do
       before do

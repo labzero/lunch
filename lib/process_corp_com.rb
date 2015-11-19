@@ -44,11 +44,32 @@ module ProcessCorpCom
       end
     end
 
+    images = []
+    body.xpath('//img/@src').each do |image_url|
+      image_details = process_email_image(image_url)
+      image_url.content = "cid:#{image_details[:fingerprint]}"
+      images << image_details
+    end
+
 
     body.children.first.add_previous_sibling(style)
 
-    body.inner_html
+    {
+      html: body.inner_html,
+      images: images
+    }
+  end
 
+  def self.process_email_image(image_url)
+    uri = URI.parse(image_url)
+    image = Net::HTTP.get_response(uri)
+    digest = Digest::SHA2.new
+    {
+      fingerprint: (digest << image.body).to_s,
+      data: Base64.encode64(image.body),
+      content_type: image.content_type,
+      name: File.basename(image_url.to_s)
+    }
   end
 
   def self.process_email_attachments(email)
@@ -69,10 +90,11 @@ module ProcessCorpCom
   def self.process_email(file_location, category=nil)
     email = Mail.read(File.expand_path(file_location))
 
-    body = ProcessCorpCom.process_email_html(email)
+    body_parts = ProcessCorpCom.process_email_html(email)
     attachments = ProcessCorpCom.process_email_attachments(email)
     { 
-      body: body,
+      body: body_parts[:html],
+      images: body_parts[:images],
       attachments: attachments,
       email_id: email.message_id,
       title: email.subject,

@@ -101,4 +101,108 @@ http_interactions:
       string: ''
     http_version: 
   recorded_at: Mon, 16 Nov 2015 19:59:45 GMT
+- request:
+    method: get
+    uri: http://contentz.mkt1700.com/ra/2015/26686/10/49906787/052909_COFI_Monthly_Corp_announce.gif
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - image/gif
+      Content-Length:
+      - '2558'
+      Connection:
+      - keep-alive
+      Date:
+      - Wed, 18 Nov 2015 20:01:52 GMT
+      Server:
+      - Apache
+      Last-Modified:
+      - Fri, 30 Oct 2015 22:02:40 GMT
+      Etag:
+      - '"7a30254-9fe-52359960f3733"'
+      Accept-Ranges:
+      - bytes
+      Age:
+      - '6810'
+      X-Cache:
+      - Hit from cloudfront
+      Via:
+      - 1.1 73fa5a1ee49cf827e596b502b5927eab.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - mmJg260_e33krq-0ATfd8qFVhXNgNsxIlqMU1MpPlu2x5aakQw1tMA==
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        R0lGODlhvAJeANUAAMnKzICAhJe0tP///+Tl5sDAwsva2vHx8uTk5dbX2J+f
+        orHHx9/f4L+/wczNz8/Q0o+Pk/v7+93d3/j4+ODh4oeHi+rr69PT1ff39/T1
+        9efn6K+vsufn58/P0O7u75eXm8fHybe3ue/v79na29fX2Kenqtjj4wAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAC8Al4AAAb/
+        QIBwSCwaj8ikcslsOp/QqHRKrVqv2Kx2y+16v+CweEwum8/otHrNbrvf8Lh8
+        Tq/b7/i8fs/v+/+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6Ch
+        oqOkpaanqKmqq6ytrq9DCBoOsLW2t7i5SAkTAwMRErrCw8TFnA4evsoDBxfG
+        z9DR0oAUEb4ZCQ8HyrPT3t/g4WMJGb4RFEQjvb/B4u7v8PFHFsoWtEUOCMoH
+        9/L+/wDfbTtABIFBgw8AJECQUIgEBEIeMCxykIIzKfoCatzIkdBAIssGJACg
+        b6SQbUISiCwSUgPGAR1jypxJ5+MQZhRXnoSpUOdN/4gOyr2kSbSoUTI2heAs
+        6BNlT5M/hdATMsIas3sDLFgDJiRj0AEjjoodS5aIBKhGkgIYMOFgQn0WDvZK
+        6VPpAQT0XAKQcJbCAHRr//KK0HVA0AhoyypevJGcLw8Ni6j9daCyM30ZKh+w
+        Rjcx261hhVxIoBLiWguF3w7IEOEi49ew4TnQEDKCaSKTCTKF6lSlZ6DJEm5j
+        NsB0caor9Q3wELu5c28SrE4YUc3XBLS5c/Lm6Zul6ZKllRo33V2fhKzP06vP
+        dWG47XsO6Pmyt1O3Xe1DegsmTStrgugDPBCeX+N1RhJM9KC23oIMojKbMpAZ
+        4dgv6GS3W37chTTSMhME8//VLxPodtxTB0o1gF4NpqjiUfyt6OKLMMYo44w0
+        1mjjjamM1g+OPPaICAXrZECFBpod0E4W2yTm45JM8jHCNU5JMZwvt2HxUGRN
+        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
+    http_version: 
+  recorded_at: Wed, 18 Nov 2015 21:55:22 GMT
 recorded_with: VCR 2.9.3
