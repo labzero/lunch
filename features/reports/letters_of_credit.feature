@@ -26,3 +26,9 @@ Feature: Visiting the Letters of Credit Report Page
     Given I am on the "Letters of Credit" report page
     When the "Letters of Credit" report has been disabled
     Then I should see an empty report table with Data Unavailable messaging
+
+  @resque-backed @smoke @jira-mem-543 @jira-mem-797
+  Scenario: Member downloads an XLSX of the letters of credit report
+    Given I am on the "Letters of Credit" report page
+    When I request an XLSX
+    Then I should begin downloading a file
