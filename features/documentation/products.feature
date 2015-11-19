@@ -94,3 +94,16 @@ Feature: Products Page
     Given I hover on the products link in the header
     When I click on the mortgage partnership finance link in the products advances dropdown
     Then I should see the "mortgage partnership finance" product page
+
+  @smoke @jira-mem-1024
+  Scenario: Member navigates to the mortgage partnership finance product page
+    Given I hover on the products link in the header
+    When I click on the mortgage partnership finance link in the products advances dropdown
+    Then I should see the "mortgage partnership finance" product page
+    When I click on the pfi link
+    Then I should see the pfi page
+
+  @smoke @jira-mem-1024
+  Scenario: Member sees forms on the pfi page
+    Given I am on the pfi page
+    Then I should see at least one pfi form to download

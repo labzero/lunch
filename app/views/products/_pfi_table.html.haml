@@ -1,0 +1,16 @@
+- row_renderer = Proc.new do |row, nested|
+  %tr{class: nested ? 'nested-row' : nil}
+    %td
+      - if row[:title_only]
+        %h5= row[:title_only]
+      - if row[:title]
+        = row[:title]
+    %td
+      - if row[:pdf_link]
+        = link_to_download_resource(t('global.view_pdf'), row[:pdf_link])
+  - if row[:rows]
+    - row[:rows].each do |row|
+      - row_renderer.call(row, true)
+%table.product-mpf-table
+  - rows.each do |row|
+    - row_renderer.call(row, false)

@@ -17,4 +17,20 @@ RSpec.describe ProductsController, :type => :controller do
     end
   end
 
+  describe 'GET pfi' do
+    it_behaves_like 'a user required action', :get, :pfi
+    it 'should render the pfi view' do
+      get :pfi
+      expect(response.body).to render_template('pfi')
+    end
+    [
+      :all_applicants_rows, :mpf_original_rows, :mpf_government_rows, :mpf_xtra_rows, :mpf_direct_rows
+    ].each do |var|
+      it "should assign `@#{var}`" do
+        get :pfi
+        expect(assigns[var]).to be_present
+      end
+    end
+  end
+
 end

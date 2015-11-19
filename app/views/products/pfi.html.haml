@@ -1,0 +1,61 @@
+.row.product-mpf-page
+  .column-2x10-right
+    %h1
+      %span= t('products.advances.mpf.title')
+      %span= t('products.advances.pfi.title')
+    %p= t('products.advances.pfi.to_apply_html', email: mpf_support_email)
+    = simple_format(t('products.advances.pfi.address'))
+    %p= t('products.advances.pfi.contact')
+    %h2= t('products.advances.pfi.forms_and_agreements')
+    %h3= t('products.advances.pfi.all_applicants.title')
+    = render 'pfi_table', rows: @all_applicants_rows
+    %h3= t('products.advances.pfi.product_specific.title')
+    %h4= t('products.advances.pfi.product_specific.mpf_original')
+    = render 'pfi_table', rows: @mpf_original_rows
+    %h4= t('products.advances.pfi.product_specific.mfp_government')
+    = render 'pfi_table', rows: @mpf_government_rows
+    %h4= t('products.advances.pfi.product_specific.mpf_extra')
+    = render 'pfi_table', rows: @mpf_xtra_rows
+    %h4= t('products.advances.pfi.product_specific.mpf_direct')
+    = render 'pfi_table', rows: @mpf_direct_rows
+    .product-mpf-exhibits
+      %h2= t('products.advances.pfi.exhibits.title')
+      %h3= t('products.advances.pfi.all_applicants.title')
+      %h4= t('products.advances.pfi.exhibits.organization_chart')
+      %p= t('products.advances.pfi.exhibits.provide_copy')
+      %ul
+        %li= t('products.advances.pfi.exhibits.origination_preparation')
+        %li= t('products.advances.pfi.exhibits.underwriting')
+        %li= t('products.advances.pfi.exhibits.secondary_marketing')
+        %li= t('products.advances.pfi.exhibits.shipping_delivery')
+        %li= t('products.advances.pfi.exhibits.quality_assurance')
+      %h4= t('products.advances.pfi.exhibits.resumes_summary')
+      %p= t('products.advances.pfi.exhibits.attach_resumes')
+      %h4= t('products.advances.pfi.exhibits.evidence_mortgage')
+      %p= t('products.advances.pfi.exhibits.protection_pfi')
+      %h4= t('products.advances.pfi.exhibits.anti_predatory')
+      %p= t('products.advances.pfi.exhibits.these_are_required_only')
+      %h4= t('products.advances.pfi.exhibits.in_house_policies')
+      %p= t('products.advances.pfi.exhibits.your_institutions_quality_control_policies')
+      %h4= t('products.advances.pfi.exhibits.in_house_reports')
+      %p= t('products.advances.pfi.exhibits.your_institutions_quality_control_review')
+      %h4= t('products.advances.pfi.exhibits.quality_results')
+      %p= t('products.advances.pfi.exhibits.quality_control_audits')
+      %h4= t('products.advances.pfi.exhibits.third_party_originator')
+      %p= t('products.advances.pfi.exhibits.for_institutions_that_deliver_mortgage')
+      %h4= t('products.advances.pfi.exhibits.origination')
+      %p= t('products.advances.pfi.exhibits.your_insitutions_origination')
+      %h3= t('products.advances.pfi.exhibits.all_servicing')
+      %h4= t('products.advances.pfi.exhibits.organization_chart')
+      %p= t('products.advances.pfi.exhibits.provide_copy')
+      %ul
+        %li= t('products.advances.pfi.exhibits.loan_servicing')
+        %li= t('products.advances.pfi.exhibits.investor_reporting')
+        %li= t('products.advances.pfi.exhibits.default_servicing')
+      %h4= t('products.advances.pfi.exhibits.servicing_audit')
+      %p= t('products.advances.pfi.exhibits.your_institutions_most_recent_servicing')
+      %h4= t('products.advances.pfi.exhibits.compliance')
+      %p= t('products.advances.pfi.exhibits.information_on_your_institutions_compliance_html', url:'https://www.federalregister.gov/articles/2015/06/26/2015-15836/2013-integrated-mortgage-disclosures-rule-under-the-real-estate-settlement-procedures-act-regulation#h-11')
+      %h4= t('products.advances.pfi.product_specific.mfp_government')
+      %p= t('products.advances.pfi.exhibits.evidence_of_authorization')
+
