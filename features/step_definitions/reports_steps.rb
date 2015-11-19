@@ -84,48 +84,48 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
   sleep_if_close_to_midnight
   @today = Time.zone.now.to_date
   case report
-    when 'Account Summary'
-      visit '/reports/account-summary'
-    when 'Advances Detail'
-      visit '/reports/advances'
-    when 'Authorizations'
-      visit '/reports/authorizations'
-    when 'Borrowing Capacity Statement'
-      visit '/reports/borrowing-capacity'
-    when 'Capital Stock Activity Statement'
-      visit '/reports/capital-stock-activity'
-    when 'Capital Stock Trial Balance'
-      visit '/reports/capital-stock-trial-balance'
-    when 'Cash Projections'
-      visit '/reports/cash-projections'
-    when 'Current Price Indications'
-      visit '/reports/current-price-indications'
-    when 'Current Securities Position'
-      visit '/reports/current-securities-position'
-    when 'Capital Stock Position and Leverage Statement'
-      visit '/reports/capital-stock-and-leverage'
-    when 'Dividend Transaction Statement'
-      visit '/reports/dividend-statement'
-    when 'Forward Commitments'
-      visit '/reports/forward-commitments'
-    when 'Historical Price Indications'
-      visit '/reports/historical-price-indications'
-    when 'Interest Rate Resets'
-      visit '/reports/interest-rate-resets'
-    when 'Letters of Credit'
-      visit '/reports/letters-of-credit'
-    when 'Monthly Securities Position'
-      visit '/reports/monthly-securities-position'
-    when 'Mortgage Collateral Update'
-      visit '/reports/mortgage-collateral-update'
-    when 'Securities Services Monthly Statement'
-      visit '/reports/securities-services-statement'
-    when 'Securities Transactions'
-      visit '/reports/securities-transactions'
-    when 'Settlement Transaction Account Statement'
-      visit '/reports/settlement-transaction-account'
-    when 'Today\'s Credit'
-      visit '/reports/todays-credit'
+  when 'Account Summary'
+    visit '/reports/account-summary'
+  when 'Advances Detail'
+    visit '/reports/advances'
+  when 'Authorizations'
+    visit '/reports/authorizations'
+  when 'Borrowing Capacity Statement'
+    visit '/reports/borrowing-capacity'
+  when 'Capital Stock Activity Statement'
+    visit '/reports/capital-stock-activity'
+  when 'Capital Stock Trial Balance'
+    visit '/reports/capital-stock-trial-balance'
+  when 'Cash Projections'
+    visit '/reports/cash-projections'
+  when 'Current Price Indications'
+    visit '/reports/current-price-indications'
+  when 'Current Securities Position'
+    visit '/reports/current-securities-position'
+  when 'Capital Stock Position and Leverage Statement'
+    visit '/reports/capital-stock-and-leverage'
+  when 'Dividend Transaction Statement'
+    visit '/reports/dividend-statement'
+  when 'Forward Commitments'
+    visit '/reports/forward-commitments'
+  when 'Historical Price Indications'
+    visit '/reports/historical-price-indications'
+  when 'Interest Rate Resets'
+    visit '/reports/interest-rate-resets'
+  when 'Letters of Credit'
+    visit '/reports/letters-of-credit'
+  when 'Monthly Securities Position'
+    visit '/reports/monthly-securities-position'
+  when 'Mortgage Collateral Update'
+    visit '/reports/mortgage-collateral-update'
+  when 'Securities Services Monthly Statement'
+    visit '/reports/securities-services-statement'
+  when 'Securities Transactions'
+    visit '/reports/securities-transactions'
+  when 'Settlement Transaction Account Statement'
+    visit '/reports/settlement-transaction-account'
+  when 'Today\'s Credit'
+    visit '/reports/todays-credit'
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
@@ -133,37 +133,37 @@ end
 
 When(/^I click the "(.*?)" column heading$/) do |column_heading|
   heading = case column_heading
-              when 'Certificate Sequence'
-                I18n.t('reports.pages.capital_stock_activity.certificate_sequence')
-              when 'Trade Date'
-                I18n.t('common_table_headings.trade_date')
-              when 'Date'
-                I18n.t('global.date')
-              when 'Issue Date'
-                I18n.t('global.issue_date')
-              when 'Start Date'
-                I18n.t('global.start_date')
-              when 'End Date'
-                I18n.t('global.end_date')
-              when 'Dividend'
-                I18n.t('reports.pages.dividend_statement.headers.dividend')
-              when 'Shares Outstanding'
-                I18n.t('global.shares_outstanding')
-              when 'Average Shares Outstanding'
-                I18n.t('reports.pages.dividend_statement.headers.average_shares')
-              when 'Days Outstanding'
-                I18n.t('reports.pages.dividend_statement.headers.days_outstanding')
-              when 'Settlement Date'
-                I18n.t('common_table_headings.settlement_date')
-              when 'Outstanding Shares'
-                I18n.t('reports.pages.capital_stock_activity.shares_outstanding')
-              when 'Maturity Date'
-                I18n.t('common_table_headings.maturity_date')
-              when 'Funding Date'
-                I18n.t('common_table_headings.funding_date')
-              else
-                raise Capybara::ExpectationNotMet, 'unknown column heading passed as argument'
-            end
+    when 'Certificate Sequence'
+      I18n.t('reports.pages.capital_stock_activity.certificate_sequence')
+    when 'Trade Date'
+      I18n.t('common_table_headings.trade_date')
+    when 'Date'
+      I18n.t('global.date')
+    when 'Issue Date'
+      I18n.t('global.issue_date')
+    when 'Start Date'
+      I18n.t('global.start_date')
+    when 'End Date'
+      I18n.t('global.end_date')
+    when 'Dividend'
+      I18n.t('reports.pages.dividend_statement.headers.dividend')
+    when 'Shares Outstanding'
+      I18n.t('global.shares_outstanding')
+    when 'Average Shares Outstanding'
+      I18n.t('reports.pages.dividend_statement.headers.average_shares')
+    when 'Days Outstanding'
+      I18n.t('reports.pages.dividend_statement.headers.days_outstanding')
+    when 'Settlement Date'
+      I18n.t('common_table_headings.settlement_date')
+    when 'Outstanding Shares'
+      I18n.t('reports.pages.capital_stock_activity.shares_outstanding')
+    when 'Maturity Date'
+      I18n.t('common_table_headings.maturity_date')
+    when 'Funding Date'
+      I18n.t('common_table_headings.funding_date')
+    else
+      raise Capybara::ExpectationNotMet, 'unknown column heading passed as argument'
+  end
   page.find('.report-table th', text: /^#{Regexp.quote(heading)}$/).click
 end
 

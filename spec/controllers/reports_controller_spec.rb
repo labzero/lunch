@@ -163,6 +163,7 @@ RSpec.describe ReportsController, :type => :controller do
         allow(member_balances_service_instance).to receive(:capital_stock_trial_balance).with(kind_of(Date)).and_return(summary)
       end
       it_behaves_like 'a user required action', :get, :capital_stock_trial_balance
+      it_behaves_like 'a report that can be downloaded', :capital_stock_trial_balance, [:xlsx]
       it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_trial_balance
       it_behaves_like 'a report with a @max_date', :capital_stock_trial_balance
       it 'can be disabled' do
