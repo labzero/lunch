@@ -881,8 +881,6 @@ class ReportsController < ApplicationController
       @picker_presets = date_picker_presets(@start_date, nil, date_restriction)
       @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
     end
-    @picker_presets = date_picker_presets(@start_date, nil, date_restriction)
-    @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
   end
 
   def letters_of_credit

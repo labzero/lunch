@@ -882,11 +882,11 @@ describe MemberBalanceService do
       allow(date).to receive_message_chain(:to_date,:iso8601).and_return(isodate)
     end
     it 'should return nil if get_hash returns nil' do
-      allow(subject).to receive(:get_json).and_return(nil)
+      allow(subject).to receive(:get_hash).and_return(nil)
       expect(subject.securities_services_statement(date)).to eq(nil)
     end
     it 'should fix_date on' do
-      allow(subject).to receive(:get_json).and_return([statement])
+      allow(subject).to receive(:get_hash).and_return(statement)
       allow(subject).to receive(:fix_date).with(statement,'debit_date').and_return(statement_with_debit_date)
       allow(subject).to receive(:fix_date).with(statement_with_debit_date,'month_ending').and_return(statement_with_month_ending)
       expect(subject.securities_services_statement(date)).to eq(statement_with_month_ending)

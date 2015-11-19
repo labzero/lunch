@@ -269,10 +269,7 @@ class MemberBalanceService < MAPIService
   end
 
   def securities_services_statement(date)
-    statements = get_json(:securities_services_statements, "member/#{@member_id}/securities_services_statements/#{date.to_date.iso8601}")
-    return nil if statements.nil?
-    return {} if statements.empty?
-    fix_date( fix_date(statements.first, 'debit_date'), 'month_ending')
+    fix_date( fix_date(get_hash(:securities_services_statements, "member/#{@member_id}/securities_services_statements/#{date.to_date.iso8601}"), 'debit_date'), 'month_ending')
   end
 
   def letters_of_credit
