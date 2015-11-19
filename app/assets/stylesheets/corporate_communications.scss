@@ -48,8 +48,17 @@
 .corporate-communication-detail-intro {
   padding: 20px 25px;
   border-bottom: 1px solid $light-blue;
-  h2, p {
+  position: relative;
+  h2 {
     margin: 0;
+    padding-right: 30px;
+  }
+  &:before {
+    position: absolute;
+    right: 25px;
+    top: 20px * $tight-line-height;
+    color: $medium-gray;
+    vertical-align: middle;
   }
 }
 

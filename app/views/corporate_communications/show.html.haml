@@ -11,7 +11,7 @@
             =link_to t('messages.prior'), (@prior_message ? corporate_communication_path(@filter, @prior_message) : '#'), class: "primary-button icon-arrow-left-before #{'active' if @prior_message}"
             =link_to t('messages.next'), (@next_message ? corporate_communication_path(@filter, @next_message) : '#'), class: "primary-button icon-arrow-right-after #{'active' if @next_message}"
         .corporate-communication-detail-wrapper
-          .corporate-communication-detail-intro
+          .corporate-communication-detail-intro{class: @message.attachments.present? ? 'icon-paperclip-before' : nil }
             %h2= @message[:title]
           .corporate-communication-detail-reset= @message_body.html_safe
           - if @message.attachments.present?
