@@ -169,7 +169,12 @@
   }
 }
 
-.report-current-price-indication {
+.report-intro-details {
+  width: 540px;
+  margin: 0;
+}
+
+.report-current-price-indications {
   .report-main-body {
     margin-bottom: 50px;
   }
@@ -180,6 +185,20 @@
     p {
       width: 490px;
     }
+  }
+  h2, h3 {
+    @extend %typography-section-title;
+    margin: 25px 0 10px;
+    span {
+      display: block;
+      @extend %typography-table-cell;
+    }
+  }
+  h2 + h3 {
+    margin: 0 0 15px;
+  }
+  .report-details h2 {
+    margin: 0;
   }
 }
 
@@ -221,14 +240,6 @@
    @extend %typography-section-title;
    margin: 0 0 15px;
  }
-
-.report-table-title-with-margins {
-  @extend %typography-section-title;
-  margin: 25px 0 10px;
-  .sub-title {
-    @extend %typography-table-cell;
-  }
-}
 
 .report-table {
   @extend %table-report;
@@ -515,11 +526,23 @@
     th {
       box-sizing: border-box;
       &:first-child {
-        width: 82px;
+        width: 78px;
       }
     }
   }
-  small {
+  ol {
+    width: 520px;
+    padding-left: 20px;
+  }
+  ul {
+    margin-bottom: 10px;
+    list-style: disc;
+    li {
+      margin-bottom: 0;
+    }
+  }
+  li {
+    margin-bottom: 10px;
     img {
       position: relative;
       top: 3px;
