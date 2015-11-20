@@ -121,9 +121,6 @@
       background-color: $light-gray;
       .nav-menu {
         color: $actionable-blue;
-        &:after {
-          color: $text-color;
-        }
       }
       .nav-dropdown {
         display: block;
