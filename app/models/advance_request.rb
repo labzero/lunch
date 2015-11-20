@@ -37,6 +37,7 @@ class AdvanceRequest
   ].freeze
   CORE_PARAMETERS = [:type, :rates, :term, :amount, :rate, :stock_choice].freeze
   PREVIEW_EXCLUDE_KEYS = [:advance_amount, :advance_rate, :advance_type, :advance_term, :status].freeze
+  PARAMETER_ORDER = [:rates, :term, :type, :amount].freeze
 
   VALID_AMOUNT = /\A[0-9,]+(\.0?0?)?\z/i.freeze
   LOG_PREFIX = "  \e[36m\033[1mREDIS\e[0m ".freeze
@@ -158,7 +159,11 @@ class AdvanceRequest
   end
   
   def reset_stock_choice!
-    @stock_choice = nil
+    %w(@stock_choice @cumulative_stock_required @current_trade_stock_required @pre_trade_stock_required
+      @net_stock_required @gross_amount @gross_cumulative_stock_required @gross_current_trade_stock_required
+      @gross_pre_trade_stock_required @gross_net_stock_required).each do |ivar|
+        instance_variable_set(ivar, nil)
+      end
   end
 
   def initiated_at=(datetime)
@@ -294,9 +299,11 @@ class AdvanceRequest
       end
     end
     indifferent_hash = hash.with_indifferent_access
-    process_attribute.call(:rates, indifferent_hash[:rates]) if indifferent_hash.has_key?(:rates)
-    indifferent_hash.each do |key, value|
-      process_attribute.call(key, value) unless [:rates, 'rates'].include?(key)
+    keys = indifferent_hash.keys.collect(&:to_sym)
+    ordered_keys = PARAMETER_ORDER & keys
+    other_keys = indifferent_hash.keys.collect(&:to_sym) - ordered_keys
+    (ordered_keys + other_keys).each do |key|
+      process_attribute.call(key, indifferent_hash[key])
     end
   end
 

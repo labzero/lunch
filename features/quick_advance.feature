@@ -245,9 +245,20 @@ Scenario: Users who wait too long to perform an advance are told that the rate h
   Then I should see a "rate expired" error
 
 @jira-mem-883
-  Scenario: Users gets an error if advance causes per-term cumulative amount to exceed limit
+Scenario: Users gets an error if advance causes per-term cumulative amount to exceed limit
+  Given I visit the dashboard
+  And I open the quick advance flyout and enter 1000000000000
+  And I select the rate with a term of "2week" and a type of "whole"
+  When I click on the initiate advance button
+  Then I should see an "advance unavailable" error with amount 1000000000000 and type "whole"
+
+@jira-mem-1197
+  Scenario: User who cancels an advance with a stock purchase doesn't see the stock purchase in the next advance
     Given I visit the dashboard
-    And I open the quick advance flyout and enter 1000000000000
-    And I select the rate with a term of "2week" and a type of "whole"
-    When I click on the initiate advance button
-    Then I should see an "advance unavailable" error with amount 1000000000000 and type "whole"
+    And I am on the quick advance stock purchase screen
+    And I select the continue with advance option
+    When I click on the continue with request button
+    Then I should see the cumulative stock purchase on the preview screen
+    When I go back to the quick advance rate table
+    And I preview a loan that doesn't require a capital stock purchase
+    Then I should not see the cumulative stock purchase on the preview screen
