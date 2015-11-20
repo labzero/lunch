@@ -101,6 +101,8 @@ class ApplicationController < ActionController::Base
     begin
       if HTTP_404_ERRORS.include?(exception.class)
         render 'error/404', layout: 'error', status: 404
+      elsif exception.is_a?(Pundit::NotAuthorizedError)
+        render 'error/403', layout: 'error', status: 403
       else
         render 'error/500', layout: 'error', status: 500
       end

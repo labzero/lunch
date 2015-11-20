@@ -2311,6 +2311,10 @@ en:
     maintenance:
       headline: Scheduled Downtime
       summary: We’re currently performing maintenance on the Member Portal. We’ll have things up and running again soon.
+    restricted:
+      headline: The page you’re trying to access is restricted.
+      summary: The page you’re trying to access is restricted to specific individuals within your institution.
+      assistance_html: "If you believe you should have access to this page, please contact your institution’s Access Manager or <a href=%{email}>Web Support</a> at %{phone_number}."
     table_data_unavailable: This information is currently unavailable.
     table_data_no_records: There are no records to display.
     no_messages: No Messages
