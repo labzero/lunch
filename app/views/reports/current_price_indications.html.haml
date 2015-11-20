@@ -1,47 +1,41 @@
 - @html_class = 'white-background'
 - @page_title = t('reports.meta_title')
-.report.report-price-indications.report-current-price-indication.row
+.report.report-price-indications.report-current-price-indications.row
   .report-header
     %h1= @report_name
     = render 'reports_header_buttons', download_formats: [:xlsx]
     = render 'report_details', name: @member_name, freshness: t('reports.pages.price_indications.current.freshness')
-    %p= t('reports.pages.price_indications.current.summary', phone_number: service_desk_phone_number)
+    .report-intro-details= t('reports.pages.price_indications.current.summary', phone_number: service_desk_phone_number)
     - if @quick_advance_message
       = render 'shared/quick_advance_message', message: @quick_advance_message
   .report-main-body
-    %h2.report-table-title= t('reports.pages.price_indications.standard_credit_program')
-    .report-table-title
-      %h3= t('reports.pages.price_indications.current.vrc')
+    %h2= t('reports.pages.price_indications.standard_credit_program')
+    %h3= t('reports.pages.price_indications.current.vrc')
     = render 'reports/reports_table', table_class: 'current-price-vrc-table', table_data: @standard_vrc_table_data, sortable: false
     = render 'reports_table_notes', notes: @standard_vrc_table_data[:notes]
-    .report-table-title-with-margins
-      %h3= t('reports.pages.price_indications.current.frc')
+    %h3= t('reports.pages.price_indications.current.frc')
     = render 'reports/reports_table', table_class: 'current-price-frc-table', table_data: @standard_frc_table_data, sortable: false
     = render 'reports_table_notes', notes: @standard_frc_table_data[:notes]
-    .report-table-title-with-margins
-      %h3= t('reports.pages.price_indications.current.arc')
-      .sub-title
-        =t('reports.pages.price_indications.current.basis_point_spread')
+    %h3
+      = t('reports.pages.price_indications.current.arc')
+      %span= t('reports.pages.price_indications.current.basis_point_spread')
     = render 'reports/reports_table', table_class: 'current-price-arc-table', table_data: @standard_arc_table_data, sortable: false
     = render 'reports_table_notes', notes: @standard_arc_table_data[:notes]
   .report-main-body
-    %h2.report-table-title= t('reports.pages.price_indications.sbc_program')
-    .report-table-title
-      %h3= t('reports.pages.price_indications.current.vrc')
+    %h2= t('reports.pages.price_indications.sbc_program')
+    %h3= t('reports.pages.price_indications.current.vrc')
     = render 'reports/reports_table', table_class: 'current-price-vrc-table', table_data: @sbc_vrc_table_data, sortable: false
     = render 'reports_table_notes', notes: @sbc_vrc_table_data[:notes]
-    .report-table-title-with-margins
-      %h3= t('reports.pages.price_indications.current.frc')
+    %h3= t('reports.pages.price_indications.current.frc')
     = render 'reports/reports_table', table_class: 'current-price-frc-table', table_data: @sbc_frc_table_data, sortable: false
     = render 'reports_table_notes', notes: @sbc_frc_table_data[:notes]
-    .report-table-title-with-margins
-      %h3= t('reports.pages.price_indications.current.arc')
-      .sub-title
-        =t('reports.pages.price_indications.current.basis_point_spread')
+    %h3
+      = t('reports.pages.price_indications.current.arc')
+      %span= t('reports.pages.price_indications.current.basis_point_spread')
     = render 'reports/reports_table', table_class: 'current-price-arc-sbc-table', table_data: @sbc_arc_table_data, sortable: false
     = render 'reports_table_notes', notes: @sbc_arc_table_data[:notes]
   .report-main-body
-    %h2.report-table-title= t('reports.pages.price_indications.settlement_transaction_account')
+    %h2= t('reports.pages.price_indications.settlement_transaction_account')
     %table.report-table.sta-rate-table.report-table-vertical-headers{data: {sortable: false}}
       %tbody
         %tr
@@ -52,24 +46,23 @@
       %dd= t('reports.pages.price_indications.current.actual_360')
       %dd= t('reports.pages.price_indications.current.sta_info')
   .report-main-body
-    %h2.report-table-title= t('reports.general_information.title')
-    %small
-      %ol
-        %li= t('reports.general_information.does_not_constitute_solicitation_html', url: terms_of_use_path)
-        %li= t('reports.general_information.market_data_html', url: disclaimer_reuters_path, picture_url: image_url('thomson_reuters.gif'))
-        %li= t('reports.general_information.same_day_pricing')
-        %li= t('reports.general_information.interest_rates_on_securities_backed_credit_advances', phone_number: service_desk_phone_number)
-        %li= t('reports.general_information.please_call_the_member_services_desk', phone_number: service_desk_phone_number)
-        %ul
-          %li= t('reports.general_information.callable_advance')
-          %li= t('reports.general_information.putable_advance')
-          %li= t('reports.general_information.amortizing_advance')
-          %li= t('reports.general_information.lc')
-          %li= t('reports.general_information.ace')
-          %li= t('reports.general_information.cip')
-          %li= t('reports.general_information.advances_with_embedded_options')
-          %li= t('reports.general_information.advances_with_partial_prepayment_symmetry')
-        %li= t('reports.general_information.reduced_prices')
-        %li= t('reports.general_information.standby_letters_of_credit')
-        %li= t('reports.general_information.for_advances_traded_on_or_after_january_1')
-        %li= t('reports.general_information.the_bank_will_provide_prepayment_fee_indications')
+    %h2= t('reports.general_information.title')
+    %ol
+      %li= t('reports.general_information.does_not_constitute_solicitation_html', url: terms_of_use_path)
+      %li= t('reports.general_information.market_data_html', url: disclaimer_reuters_path, picture_url: image_url('thomson_reuters.gif'))
+      %li= t('reports.general_information.same_day_pricing')
+      %li= t('reports.general_information.interest_rates_on_securities_backed_credit_advances', phone_number: service_desk_phone_number)
+      %li= t('reports.general_information.please_call_the_member_services_desk', phone_number: service_desk_phone_number)
+      %ul
+        %li= t('reports.general_information.callable_advance')
+        %li= t('reports.general_information.putable_advance')
+        %li= t('reports.general_information.amortizing_advance')
+        %li= t('reports.general_information.lc')
+        %li= t('reports.general_information.ace')
+        %li= t('reports.general_information.cip')
+        %li= t('reports.general_information.advances_with_embedded_options')
+        %li= t('reports.general_information.advances_with_partial_prepayment_symmetry')
+      %li= t('reports.general_information.reduced_prices')
+      %li= t('reports.general_information.standby_letters_of_credit')
+      %li= t('reports.general_information.for_advances_traded_on_or_after_january_1')
+      %li= t('reports.general_information.the_bank_will_provide_prepayment_fee_indications')

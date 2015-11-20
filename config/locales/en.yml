@@ -1042,13 +1042,13 @@ en:
       price_indications:
         current:
           title: Current Price Indications
-          summary: Price indications are subject to change. For current quotes, call the Member Services Desk at %{phone_number} between 7:00 am and 2:00 pm. California time. Variable Rate Credit advances are available until 2:00 pm., and all other advances are generally available until 12:00 pm.
+          summary: Price indications are subject to change at any time. For current quotes, call the Member Services Desk at %{phone_number} between 7:00 am and 2:00 pm California time. Variable Rate Credit advances are available until 2:00 pm, and all other advances are generally available until 12 noon.
           advance_maturity: Advance Maturity
-          overnight_fed_funds_benchmark: Overnight Fed Funds Benchmark* (%)
+          overnight_fed_funds_benchmark: Overnight Fed Funds Benchmark
           treasury_benchmark_maturity: Treasury Benchmark Maturity
           basis_point_spread_to_benchmark: Basis Point Spread to Benchmark
-          nominal_yield_of_benchmark: Nominal Yield of Benchmark* (%)
-          advance_rate: Advance Rate (%)
+          nominal_yield_of_benchmark: Nominal Yield of Benchmark
+          advance_rate: Advance Rate
           interest_day_count: 'Interest Day Count:'
           interest_rate_reset: 'Interest Rate Reset:'
           actual_actual: Actual/Actual
@@ -1075,16 +1075,16 @@ en:
           basis_point_spread: (Basis Point Spread)
           arc_standard_xlsx: "Standard - ARC"
           arc_sbc_xlsx: "SBC - ARC"
-          1_month_libor: '1 Month LIBOR:'
-          3_month_libor: '3 Month LIBOR:'
-          6_month_libor: '6 Month LIBOR:'
+          1_month_libor: '1-Month LIBOR:'
+          3_month_libor: '3-Month LIBOR:'
+          6_month_libor: '6-Month LIBOR:'
           prime: 'Daily Prime:'
-          1_month_libor_header: 1 Month LIBOR
-          3_month_libor_header: 3 Month LIBOR
-          6_month_libor_header: 6 Month LIBOR
+          1_month_libor_header: 1-Month LIBOR
+          3_month_libor_header: 3-Month LIBOR
+          6_month_libor_header: 6-Month LIBOR
           prime_header: Daily Prime
-          sta_info: Published STA rate is applied to previous business day's ending STA balance
-          sta_rate: Effective Rate for Prior Business Day (%)
+          sta_info: Published STA rate is applied to the previous business day’s ending STA balance.
+          sta_rate: Effective Rate for Prior Business Day
           freshness: This report reflects the price indications published at 6:00 am on the current business day.
         historical:
           title: Historical Price Indications
@@ -1092,7 +1092,7 @@ en:
           availability: Historical data available varies by credit product.
         standard_credit_program: Standard Credit Program
         sbc_program: Securities-Backed Credit
-        settlement_transaction_account: Settlement/Transaction Account
+        settlement_transaction_account: Settlement/Transaction Account (STA)
         sta_xlsx: Settlement Transaction Account
         frc:
           dropdown: Fixed Rate Credit (FRC)
