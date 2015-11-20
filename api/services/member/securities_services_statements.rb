@@ -106,7 +106,8 @@ module MAPI
 
         def self.statement(logger, env, fhlb_id, report_date)
           from_db = env == :production ? fetch_hashes(logger,statement_sql(fhlb_id, report_date)) : fake('securities_services_statements')
-          from_db.map{ |record| multi_level_transform(record.with_indifferent_access, MAPPING) }
+          from_db = from_db.map{ |record| multi_level_transform(record.with_indifferent_access, MAPPING) }
+          from_db.empty? ? {} : from_db.first
         end
       end
     end

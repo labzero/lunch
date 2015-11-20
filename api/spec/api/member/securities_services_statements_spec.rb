@@ -59,55 +59,55 @@ describe MAPI::ServiceApp do
     describe 'production' do
       let(:env){ :production }
       let(:available_statements_sql){ double('available_statements_sql') }
-      let(:available_statements_records){ double('available_statements_records') }
+      let(:available_statements_hashes){ double('available_statements_hashes') }
       let(:statement_sql){ double('statement_sql') }
-      let(:statement_records){ double('statement_records', with_indifferent_access: indifferent_statement_records)}
-      let(:indifferent_statement_records){ double('indifferent_statement_records')}
-      let(:transformed_statement_records){ double('transformed_statement_records')}
+      let(:statement_hash){ double('statement_record', with_indifferent_access: indifferent_statement_hash)}
+      let(:indifferent_statement_hash){ double('indifferent_statement_hash')}
+      let(:transformed_statement_hash){ double('transformed_statement_hash')}
 
       before do
         allow(subject).to receive(:available_statements_sql).with(fhlb_id).and_return(available_statements_sql)
         allow(subject).to receive(:statement_sql).with(fhlb_id, date).and_return(statement_sql)
-        allow(subject).to receive(:fetch_hashes).with(logger, available_statements_sql).and_return(available_statements_records)
-        allow(subject).to receive(:fetch_hashes).with(logger, statement_sql).and_return([statement_records])
-        allow(subject).to receive(:multi_level_transform).with(indifferent_statement_records, subject::MAPPING).and_return(transformed_statement_records)
+        allow(subject).to receive(:fetch_hashes).with(logger, available_statements_sql).and_return(available_statements_hashes)
+        allow(subject).to receive(:fetch_hashes).with(logger, statement_sql).and_return([statement_hash])
+        allow(subject).to receive(:multi_level_transform).with(indifferent_statement_hash, subject::MAPPING).and_return(transformed_statement_hash)
       end
 
       describe 'available_statements' do
-        it 'should return available_statements_records' do
-          expect(subject.available_statements(logger, env, fhlb_id)).to eq(available_statements_records)
+        it 'should return available_statements_hashes' do
+          expect(subject.available_statements(logger, env, fhlb_id)).to eq(available_statements_hashes)
         end
       end
 
       describe 'statement' do
-        it 'should return statement_records' do
-          expect(subject.statement(logger, env, fhlb_id, date)).to eq([transformed_statement_records])
+        it 'should return transformed_statement_hash' do
+          expect(subject.statement(logger, env, fhlb_id, date)).to eq(transformed_statement_hash)
         end
 
         it 'should handle empty results' do
           allow(subject).to receive(:fetch_hashes).with(logger, statement_sql).and_return([])
-          expect(subject.statement(logger, env, fhlb_id, date)).to eq([])
+          expect(subject.statement(logger, env, fhlb_id, date)).to eq({})
         end
       end
     end
     [:test, :development].each do |env|
       describe env do
         describe 'available_statements' do
-          let(:available_statements_json){ double('available_statements_json') }
+          let(:available_statements){ double('available_statements') }
           it 'should return available_statements_records' do
-            allow(subject).to receive(:fake).with('securities_services_statements_available').and_return(available_statements_json)
-            expect(subject.available_statements(logger, env, fhlb_id)).to eq(available_statements_json)
+            allow(subject).to receive(:fake).with('securities_services_statements_available').and_return(available_statements)
+            expect(subject.available_statements(logger, env, fhlb_id)).to eq(available_statements)
           end
         end
 
         describe 'statement' do
-          let(:statement_json){ double('statement_json', with_indifferent_access: indifferent_json) }
-          let(:indifferent_json){ double('indifferent_json') }
-          let(:transformed_json){ double('transformed_json') }
+          let(:statement_hash){ double('statement_hash', with_indifferent_access: indifferent_hash) }
+          let(:indifferent_hash){ double('indifferent_hash') }
+          let(:transformed_hash){ double('transformed_hash') }
           it 'should return statement_records' do
-            allow(subject).to receive(:fake).with('securities_services_statements').and_return([statement_json])
-            allow(subject).to receive(:multi_level_transform).with(indifferent_json, subject::MAPPING).and_return(transformed_json)
-            expect(subject.statement(logger, env, fhlb_id, date)).to eq([transformed_json])
+            allow(subject).to receive(:fake).with('securities_services_statements').and_return([statement_hash])
+            allow(subject).to receive(:multi_level_transform).with(indifferent_hash, subject::MAPPING).and_return(transformed_hash)
+            expect(subject.statement(logger, env, fhlb_id, date)).to eq(transformed_hash)
           end
         end
       end
