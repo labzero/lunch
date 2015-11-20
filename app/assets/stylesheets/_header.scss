@@ -121,9 +121,6 @@
       background-color: $light-gray;
       .nav-menu {
         color: $actionable-blue;
-        &:after {
-          color: $text-color;
-        }
       }
       .nav-dropdown {
         display: block;
@@ -140,6 +137,12 @@
         content: " #{$icon-chevron}";
         font-size: 0.625rem;
       }
+    }
+    &:hover {
+      color: $actionable-blue;
+    }
+    &:active {
+      color: $brand-blue;
     }
   }
   .nav-dropdown {
