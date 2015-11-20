@@ -58,6 +58,10 @@ describe MAPI::ServiceApp do
         allow(roles_cursor).to receive(:fetch_hash).and_yield({'ADVSIGNER' => -1})
         expect(json).to match_array(['signer-advances', 'signer'])
       end
+      it 'downcases the username' do
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(match('foobar'))
+        get "/users/FooBar/roles"
+      end
       role_mapping = {
         'ADVSIGNER' => ['signer-advances'],
         'COLLATSIGNER' => ['signer-collateral'],
