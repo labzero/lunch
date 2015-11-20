@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe MembersController, type: :controller do
   it { should_not use_before_action(:check_terms) }
-  
+
   login_user
 
   describe 'GET select_member' do
@@ -109,7 +109,7 @@ RSpec.describe MembersController, type: :controller do
     before do
       allow(DateTime).to receive(:now).and_return(now)
       allow(controller).to receive(:current_user).and_return(user)
-    end  
+    end
     it_behaves_like 'a user required action', :post, :accept_terms
     it 'updates the `terms_accepted_at` attribute of the current_user with the current DateTime' do
       expect(user).to receive(:update_attribute).with(:terms_accepted_at, now)
@@ -151,6 +151,18 @@ RSpec.describe MembersController, type: :controller do
     it 'renders the view' do
       make_request
       expect(response.body).to render_template('privacy_policy')
+    end
+  end
+
+  describe 'GET terms_of_use' do
+    let (:make_request) { get :terms_of_use}
+    it_behaves_like 'a user not required action', :get, :terms_of_use
+    it 'uses the `external` layout' do
+      expect(make_request).to render_template('layouts/external')
+    end
+    it 'renders the view' do
+      make_request
+      expect(response.body).to render_template('terms_of_use')
     end
   end
 end
