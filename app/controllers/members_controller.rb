@@ -1,6 +1,6 @@
 class MembersController < ApplicationController
   skip_before_action :check_terms
-  skip_before_action :authenticate_user!, only: [:logged_out]
+  skip_before_action :authenticate_user!, only: [:logged_out, :privacy_policy, :terms_of_use]
 
   before_filter only: [:select_member, :set_member] do
     redirect_to after_sign_in_path_for(current_user) if current_member_id
@@ -50,6 +50,10 @@ class MembersController < ApplicationController
   end
 
   def privacy_policy
+    render layout: 'external'
+  end
+
+  def terms_of_use
     render layout: 'external'
   end
 end
