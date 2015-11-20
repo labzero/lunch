@@ -792,13 +792,18 @@ describe AdvanceRequest do
       call_method
       expect(subject.current_state).to be(symbol_state)
     end
-    it 'processes the `rates` key first if present' do
+    it 'processes the keys in the order: rates, term, type, amount, and then the remaining keys' do
+      other_key = described_class::REQUEST_PARAMETERS.sample
       hash[:type] = :aa
       hash[:rates] = double('Some Rates', with_indifferent_access: nil)
       hash[:term] = :open
+      hash[:amount] = rand(100000..999999)
+      hash[other_key] = 'some value'
       expect(subject).to receive(:rates=).ordered
-      expect(subject).to receive(:type=).ordered
       expect(subject).to receive(:term=).ordered
+      expect(subject).to receive(:type=).ordered
+      expect(subject).to receive(:amount=).ordered
+      expect(subject).to receive("#{other_key}=").ordered
       call_method
     end
     (described_class::READONLY_ATTRS + described_class::REQUEST_PARAMETERS + described_class::CORE_PARAMETERS + [:id]).each do |key|
