@@ -1054,7 +1054,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
-    describe 'GET interest_rate_resets' do
+    describe 'GET interest_rate_resets', :skip do
       let(:rates_service_instance) { double('RatesService') }
       let(:response_hash) { double('RatesServiceHash') }
       let(:effective_date) { double('effective_date') }

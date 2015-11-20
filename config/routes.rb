@@ -29,7 +29,7 @@ Rails.application.routes.draw do
     get '/advances' => 'reports#advances_detail'
     get '/historical-price-indications' => 'reports#historical_price_indications'
     get '/current-price-indications' => 'reports#current_price_indications'
-    get '/interest-rate-resets' => 'reports#interest_rate_resets'
+    get '/interest-rate-resets' => 'error#not_found'
     get '/letters-of-credit' => 'reports#letters_of_credit'
     get '/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: :parallel_shift
     get '/forward-commitments' => 'reports#forward_commitments'

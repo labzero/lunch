@@ -1,4 +1,4 @@
-@jira-mem-69
+@jira-mem-69 @wip
 Feature: Visiting the Interest Rate Resets Report Page
   As a user
   I want to use visit the interest rate resets report page for the FHLB Member Portal
