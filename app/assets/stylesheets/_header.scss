@@ -141,6 +141,12 @@
         font-size: 0.625rem;
       }
     }
+    &:hover {
+      color: $actionable-blue;
+    }
+    &:active {
+      color: $brand-blue;
+    }
   }
   .nav-dropdown {
     padding-bottom: 15px;
