@@ -28,6 +28,12 @@ Feature: Visiting the Forward Commitments Page
     When the "Forward Commitments" table has no data
     Then I should see an empty report table with No Records messaging
 
+  @resque-backed @smoke @jira-mem-799
+  Scenario: Member downloads an XLSX of the Forward Commitments report
+    Given I am on the "Forward Commitments" report page
+    When I request an XLSX
+    Then I should begin downloading a file
+
   @data-unavailable @jira-mem-282 @jira-mem-1053
   Scenario: The forward commitments has been disabled
     Given I am on the "Forward Commitments" report page

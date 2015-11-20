@@ -1086,45 +1086,56 @@ class ReportsController < ApplicationController
 
   def forward_commitments
     member_balances = MemberBalanceService.new(current_member_id, request)
-    if report_disabled?(FORWARD_COMMITMENTS_WEB_FLAG)
-      forward_commitments = {}
-    else
-      forward_commitments = member_balances.forward_commitments
-      raise StandardError, "There has been an error and ReportsController#monthly_securities_position has encountered nil. Check error logs." if forward_commitments.nil?
+    export_format = params[:export_format]
+    today = Time.zone.today
+    @report_name = t('reports.credit.forward_commitments.title')
+    if export_format == 'xlsx'
+      job_status = RenderReportExcelJob.perform_later(current_member_id, 'forward_commitments', "forward-commitments-#{today.to_s}").job_status
     end
-
-    rows = if forward_commitments[:advances]
-      forward_commitments[:advances].collect do |advance|
-        if advance[:interest_rate].nil? || advance[:interest_rate].to_f == 0
-          interest_rate = t('global.tbd')
-          interest_rate_type = nil
-        else
-          interest_rate = advance[:interest_rate]
-          interest_rate_type = :rate
-        end
-        {
-          columns: [
-            {value: advance[:trade_date], type: :date, classes: [:'report-cell-right']},
-            {value: advance[:funding_date], type: :date, classes: [:'report-cell-right']},
-            {value: advance[:maturity_date], type: :date, classes: [:'report-cell-right']},
-            {value: advance[:advance_number], type: nil},
-            {value: advance[:advance_type], type: nil},
-            {value: advance[:current_par], type: :currency_whole, classes: [:'report-cell-right']},
-            {value: interest_rate, type: interest_rate_type, classes: [:'report-cell-right']}
-          ]
-        }
+    unless job_status.nil?
+      job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
+    else
+      if report_disabled?(FORWARD_COMMITMENTS_WEB_FLAG)
+        forward_commitments = {}
+      else
+        forward_commitments = member_balances.forward_commitments
+        raise StandardError, "There has been an error and ReportsController#monthly_securities_position has encountered nil. Check error logs." if forward_commitments.nil?
       end
-    else
-      []
-    end
 
-    @as_of_date = forward_commitments[:as_of_date]
-    @total_current_par = forward_commitments[:total_current_par]
-    @table_data = {
-      column_headings: [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%')].collect{|x| {title: x, sortable: true}},
-      rows: rows,
-      footer: [{ value: t('global.total'), colspan: 5}, {value: @total_current_par, type: :currency_whole, classes: [:'report-cell-right']}, {value: ''}]
-    }
+      rows = if forward_commitments[:advances]
+               forward_commitments[:advances].collect do |advance|
+                 if advance[:interest_rate].nil? || advance[:interest_rate].to_f == 0
+                   interest_rate = t('global.tbd')
+                   interest_rate_type = nil
+                 else
+                   interest_rate = advance[:interest_rate]
+                   interest_rate_type = :rate
+                 end
+                 {
+                     columns: [
+                         {value: advance[:trade_date], type: :date, classes: [:'report-cell-right']},
+                         {value: advance[:funding_date], type: :date, classes: [:'report-cell-right']},
+                         {value: advance[:maturity_date], type: :date, classes: [:'report-cell-right']},
+                         {value: advance[:advance_number], type: nil},
+                         {value: advance[:advance_type], type: nil},
+                         {value: advance[:current_par], type: :currency_whole, classes: [:'report-cell-right']},
+                         {value: interest_rate, type: interest_rate_type, classes: [:'report-cell-right']}
+                     ]
+                 }
+               end
+             else
+               []
+             end
+
+      @as_of_date = forward_commitments[:as_of_date]
+      @total_current_par = forward_commitments[:total_current_par]
+      @table_data = {
+          column_headings: [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%')].collect { |x| {title: x, sortable: true} },
+          rows: rows,
+          footer: [{value: t('global.total'), colspan: 5}, {value: @total_current_par, type: :currency_whole, classes: [:'report-cell-right']}, {value: ''}]
+      }
+    end
   end
 
   def capital_stock_and_leverage
