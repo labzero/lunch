@@ -35,6 +35,9 @@ default: &default
   offsite:
     username: <%= ENV['CUCUMBER_OFFSITE_USERNAME'] || 'local-offsite' %>
     password: <%= ENV['CUCUMBER_OFFSITE_PASSWORD'] || 'development' %>
+  first_time:
+    username: <%= ENV['CUCUMBER_OFFSITE_USERNAME'] || 'extra-chaste-first-time' %>
+    password: <%= ENV['CUCUMBER_OFFSITE_PASSWORD'] || 'development' %>
   advances_disabled:
     username: <%= ENV['CUCUMBER_OFFSITE_USERNAME'] || 'quick-advance-disabled' %>
     password: <%= ENV['CUCUMBER_OFFSITE_PASSWORD'] || 'development' %>

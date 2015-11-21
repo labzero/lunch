@@ -10,6 +10,9 @@ changetype: delete
 dn: sAMAccountName=extra-chaste-reset,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
+dn: sAMAccountName=extra-chaste-first-time,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
+
 dn: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
