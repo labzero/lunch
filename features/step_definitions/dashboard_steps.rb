@@ -66,7 +66,11 @@ end
 
 
 When(/^I open the quick advance flyout and enter (\d+)$/) do |amount|
-  step "I enter \"#{amount}\" into the \".dashboard-module-advances input\" input field"
+  if page.first('.flyout', visible: true)
+    step "I enter \"#{amount}\" into the \".dashboard-quick-advance-flyout input\" input field"
+  else
+    step "I enter \"#{amount}\" into the \".dashboard-module-advances input\" input field"
+  end
   step "I should see a flyout"
   sleep 0.5 # we select a rate after the flyout opens, but in some cases selenium does its checks before that JS fires
 end
@@ -81,7 +85,7 @@ When(/^I click on the flyout close button$/) do
 end
 
 Given(/^I am on the quick advance stock purchase screen$/) do
-  step "I open the quick advance flyout and enter #{1000131}"
+  step "I open the quick advance flyout and enter 1000131"
   step "I select the rate with a term of \"2week\" and a type of \"whole\""
   step "I click on the initiate advance button"
   step "I should be on the quick advance stock purchase screen"
@@ -100,12 +104,7 @@ Then(/^I should see the cumulative stock purchase on the preview screen$/) do
 end
 
 When(/^I go back to the quick advance rate table$/) do
-  back_count = 0
-  while page.all('.dashboard-quick-advance-flyout .quick-advance-rates', visible: true, wait: 2).count == 0 && back_count < 3
-    page.find('.dashboard-quick-advance-flyout .secondary-button', visible: true, text: I18n.t('dashboard.quick_advance.buttons.back').upcase).click
-    back_count = back_count + 1
-  end
-  expect(back_count).to be < 3
+  quick_advance_go_back('.dashboard-quick-advance-flyout .quick-advance-rates', 2)
 end
 
 When(/^I preview a loan that doesn't require a capital stock purchase$/) do
@@ -113,6 +112,25 @@ When(/^I preview a loan that doesn't require a capital stock purchase$/) do
   step "I select the rate with a term of \"2week\" and a type of \"whole\""
   step "I click on the initiate advance button"
   step "I should see a preview of the quick advance"
+end
+
+Given(/^I am on the quick advance stock purchase screen for an advance with a collateral error$/) do
+  step "I open the quick advance flyout and enter 1000121"
+  step "I select the rate with a term of \"2week\" and a type of \"whole\""
+  step "I click on the initiate advance button"
+  step "I should be on the quick advance stock purchase screen"
+end
+
+Then(/^I see a collateral limit error$/) do
+  step %{I should see a "insufficient collateral" error with amount 1000121 and type "whole"}
+end
+
+When(/^I go back to the capital stock purchase screen$/) do
+  quick_advance_go_back('.dashboard-quick-advance-flyout .quick-advance-capstock', 1)
+end
+
+Then(/^I should see only one quick advance stock purchase screen$/) do
+  page.assert_selector('.dashboard-quick-advance-flyout .quick-advance-capstock', count: 1, visible: true)
 end
 
 Then(/^I should not see the cumulative stock purchase on the preview screen$/) do
@@ -353,4 +371,16 @@ def validate_passed_advance_params
     I18n.t('global.none')
   end
   page.assert_selector('.quick-advance-summary dd', visible: true, text: rate_type_text)
+end
+
+def quick_advance_go_back(selector, max_steps)
+  back_count = 0
+  while page.all(selector, visible: true, wait: 2).count == 0 && back_count <= max_steps
+    (
+      page.first('.dashboard-quick-advance-flyout .quick-advance-back-button', visible: true) ||
+      page.first('.dashboard-quick-advance-flyout .secondary-button', visible: true, text: I18n.t('dashboard.quick_advance.buttons.back').upcase)
+    ).click
+    back_count = back_count + 1
+  end
+  expect(back_count).to be <= max_steps
 end
