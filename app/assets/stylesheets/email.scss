@@ -1,6 +1,8 @@
 @import "base/normalize";
 @import "base/colors";
 @import "base/fonts";
+@import "base/typography";
+@import "base/nav";
 
 body {
   font-size: $default-font-size;
@@ -8,8 +10,7 @@ body {
 }
 
 a {
-  text-decoration: none;
-  color: $actionable-blue;
+  @extend %link-style;
 }
 
 header {

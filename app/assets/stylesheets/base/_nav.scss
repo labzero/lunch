@@ -10,3 +10,14 @@
 .nav-toc {
   @extend %nav-toc;
 }
+
+%link-style {
+  text-decoration: none;
+  color: $actionable-blue;
+  &:hover {
+    text-decoration: underline;
+  }
+  &:active {
+    color: $brand-blue;
+  }
+}

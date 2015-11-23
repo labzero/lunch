@@ -4,8 +4,7 @@
     margin: 32px 0 17px;
   }
   a {
-    text-decoration: none;
-    color: $actionable-blue;
+    @extend %link-style;
   }
 }
 
@@ -38,6 +37,24 @@
     display: block;
     color: $text-color;
     padding: 15px 20px;
+    p:last-child {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      @include typography-dropdown-selector;
+      color: $actionable-blue;
+      text-transform: uppercase;
+    }
+    &:hover p:last-child {
+      text-decoration: underline;
+    }
+    &:active p:last-child {
+      color: $brand-blue;
+    }
+    &:hover, &:active {
+      text-decoration: none;
+      color: $text-color;
+    }
   }
 
   td {
@@ -52,14 +69,6 @@
       font-size: 0.8667rem;
       font-weight: $normal-weight;
       margin: 5px 0 15px;
-      &:last-child {
-        position: absolute;
-        top: 15px;
-        right: 20px;
-        @include typography-dropdown-selector;
-        color: $actionable-blue;
-        text-transform: uppercase;
-      }
     }
     .report-info {
       @extend %typography-table-total;
@@ -326,13 +335,14 @@
       }
     }
     .hide-detail-view {
+      @extend %link-style;
       position: absolute;
       top: 10px;
       right: 10px;
       margin: 0;
       text-transform: uppercase;
-      color: $actionable-blue;
       cursor: pointer;
+
     }
   }
   tbody td {
@@ -360,8 +370,8 @@
 }
 
 .detail-view-trigger {
+  @extend %link-style;
   text-transform: uppercase;
-  color: $actionable-blue;
   cursor: pointer;
   vertical-align: top;
 }
@@ -785,7 +795,7 @@ td.dataTables_empty {
     }
   }
   a {
-    color: $actionable-blue;
+    @extend %link-style;
   }
   small {
     margin-bottom: 10px;
@@ -997,8 +1007,7 @@ td.dataTables_empty {
     }
     a {
       @extend %typography-table-heading;
-      text-decoration: none;
-      color: $actionable-blue;
+      @extend %link-style;
       text-transform: uppercase;
     }
   }

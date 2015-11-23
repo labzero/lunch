@@ -11,8 +11,7 @@ $resource-page-padding: 140px !default;
     @extend %typography-paragraph;
   }
   a {
-    color: $actionable-blue;
-    text-decoration: none;
+    @extend %link-style;
   }
   :not(li) > a {
     text-transform: uppercase;
@@ -37,8 +36,7 @@ $resource-page-padding: 140px !default;
     padding-right: $resource-page-padding + 15px;
   }
   a {
-    color: $actionable-blue;
-    text-decoration: none;
+    @extend %link-style;
     text-transform: uppercase;
     display: block;
   }

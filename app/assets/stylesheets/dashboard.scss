@@ -27,10 +27,9 @@ $faded-opacity: 0.4 !default;
 }
 
 %dashboard-module-link {
+  @extend %link-style;
   @extend %typography-header-nav;
   text-transform: uppercase;
-  text-decoration: none;
-  color: $actionable-blue;
   border: none;
   background-color: white;
   float: right;
@@ -202,8 +201,7 @@ $faded-opacity: 0.4 !default;
 
 .dashboard-module-advances {
   a {
-    color: $actionable-blue;
-    text-decoration: none;
+    @extend %link-style;
   }
   p {
     color: $text-color;
@@ -239,7 +237,7 @@ $faded-opacity: 0.4 !default;
   @extend %typography-dashboard-gauge-label;
   margin-top: 10px;
   text-transform: uppercase;
-  color: $actionable-blue;
+  @extend %link-style;
   cursor: pointer;
 }
 
@@ -340,8 +338,7 @@ $breakdown-table-currency-width: 10px;
   .borrowing-capacity-note {
     padding: 10px;
     a {
-      color: $actionable-blue;
-      text-decoration: none;
+      @extend %link-style;
     }
   }
 }
@@ -357,8 +354,7 @@ $breakdown-table-currency-width: 10px;
   @extend %typography-table-heading;
   text-align: right;
   a {
-    text-decoration: none;
-    color: $actionable-blue;
+    @extend %link-style;
     &.active {
       cursor: default;
       color: $text-color;

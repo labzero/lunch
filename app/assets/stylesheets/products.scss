@@ -79,8 +79,7 @@
     margin-bottom: 12px;
   }
   a {
-    text-decoration: none;
-    color: $actionable-blue;
+    @extend %link-style;
   }
 }
 

@@ -66,4 +66,7 @@
   section {
     padding-left: $gutter-width;
   }
+  a:not(.secondary-button):not(.primary-button) {
+    @extend %link-style;
+  }
 }

@@ -142,3 +142,8 @@
     }
   }
 }
+
+// needs this level of specificity to overrule on-hover underline
+.corporate-communications-index a:hover:not(.secondary-button):not(.primary-button):not(.total-button):not(.report-button-left):not(.split-button-left) {
+  text-decoration: none;
+}

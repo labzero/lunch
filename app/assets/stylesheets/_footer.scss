@@ -22,9 +22,11 @@
       padding-left: 0;
       border-left: none;
     }
-    color: $actionable-blue;
     display: inline;
     padding: 0 10px;
     border-left: 1px solid $secondary-gray;
+  }
+  a {
+    @extend %link-style;
   }
 }

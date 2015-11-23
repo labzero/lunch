@@ -21,8 +21,7 @@
     margin-top: 0;
   }
   a {
-    text-decoration: none;
-    color: $actionable-blue;
+    @extend %link-style;
   }
   ul {
     padding-left: 30px;

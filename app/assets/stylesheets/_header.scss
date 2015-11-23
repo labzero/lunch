@@ -128,7 +128,7 @@
     }
   }
   a {
-    text-decoration: none;
+    @extend %link-style;
     color: $text-color;
     white-space: nowrap;
     &.nav-menu {
@@ -139,6 +139,7 @@
       }
     }
     &:hover {
+      text-decoration: none;
       color: $actionable-blue;
     }
     &:active {

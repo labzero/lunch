@@ -91,8 +91,7 @@ $faded-opacity: 0.4 !default;
       }
     }
     a {
-      color: $actionable-blue;
-      text-decoration: none;
+      @extend %link-style;
     }
   }
   .icon-dollar-before:before {
@@ -336,11 +335,10 @@ $faded-opacity: 0.4 !default;
       margin: 0 0 10px 0;
     }
     a {
+      @extend %link-style;
       text-transform: uppercase;
-      text-decoration: none;
       display: block;
       clear: both;
-      color: $actionable-blue;
       &:visited {
         color: $actionable-blue;
       }

@@ -81,12 +81,13 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
   }
 
   a:not(.secondary-button):not(.primary-button) {
-    color: $actionable-blue;
+    @extend %link-style;
   }
 
   .welcome-login {
     a {
-        @extend %typography-table-link;
+      @extend %typography-table-link;
+      @extend %link-style;
     }
   }
 
