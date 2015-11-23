@@ -206,7 +206,7 @@ class ReportsController < ApplicationController
         trial_balance: {
           updated: t('reports.updated.daily'),
           available_history: t('reports.history.back_to', date: fhlb_date_long_alpha(Date.new(2002,1,1))),
-          route: reports_trial_balance_path
+          route: reports_capital_stock_trial_balance_path
         },
         capital_stock_and_leverage: {
           updated: t('reports.updated.daily'),
