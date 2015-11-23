@@ -1,4 +1,10 @@
 Given(/^I fill in and submit the login form with username "(.*?)" and password "(.*?)"$/) do |user, password|
+  step %{I fill in and submit the login form with username "#{user}" and password "#{password}" ignoring the terms of use}
+
+  accept_terms_if_needed
+end
+
+Given(/^I fill in and submit the login form with username "(.*?)" and password "(.*?)" ignoring the terms of use$/) do |user, password|
   fill_in('user[username]', with: user)
   fill_in('user[password]', with: password)
 
@@ -8,8 +14,6 @@ Given(/^I fill in and submit the login form with username "(.*?)" and password "
 
   session_id = get_session_id
   puts "Session ID: #{session_id}" if session_id
-
-  accept_terms_if_needed
 end
 
 Given(/^I fill in and submit the login form$/) do
@@ -53,7 +57,11 @@ When(/^I log in$/) do
 end
 
 When(/^I fill in and submit the login form with a first-time user$/) do
-  # implement way of simulating first-time user to test Terms of Service flow
+  step %{I fill in and submit the login form with username "#{first_time_user['username']}" and password "#{first_time_user['password']}" ignoring the terms of use}
+end
+
+When(/^I fill in and submit the login form with the capitalized last user$/) do
+  step %{I fill in and submit the login form with username "#{first_time_user['username'].upcase}" and password "#{first_time_user['password']}" ignoring the terms of use}
 end
 
 When(/^I fill in and submit the login form with an? (expired user|extranet no role user|primary user|offsite user)$/) do |user_type|
@@ -296,6 +304,10 @@ def advances_disabled_user
   CustomConfig.env_config['advances_disabled']
 end
 
+def first_time_user
+  CustomConfig.env_config['first_time']
+end
+
 def current_member_name
   @member_name ||= CustomConfig.env_config['primary_bank']
 end
@@ -370,4 +382,10 @@ Around('@offsite-ip') do |scenario, block|
     ENV['FHLB_INTERNAL_IPS'] = old_env
     silent_class_reload 'internal_user_policy.rb'
   end
+end
+
+Around('@first-time-user') do |scenario, block|
+  user = User.find_by(username: first_time_user['username'])
+  user.delete if user
+  block.call
 end
