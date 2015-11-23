@@ -50,7 +50,7 @@
 
       // event listener and handler for back button click
       $('.quick-advance-back-button').on('click', function () {
-        $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance').remove();
+        $('.quick-advance-preview, .quick-advance-back-button, .confirm-quick-advance, .quick-advance-capstock').remove();
         $('.quick-advance-preview-subheading').hide();
         $flyout.find('.flyout-top-section-body span, .quick-advance-limited-pricing-message, .quick-advance-instruction, .quick-advance-rates, .flyout-bottom-section .initiate-quick-advance, .flyout-bottom-section .rate-advances-footer').show();
         transitionToRatesFromLoading();

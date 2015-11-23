@@ -8,8 +8,6 @@
       %li.nav-logout= link_to(t('nav.primary.logout'), destroy_user_session_url, method: :delete)
       %li.nav-settings= link_to('', settings_password_path, class: 'icon-gear-after')
       %li.nav-mail= link_to('', corporate_communications_path('all'), class: 'icon-envelope-after')
-      %li
-        = render 'shared/input_field', icon: :magnify, placeholder: t('nav.primary.search'), field_class: :'nav-search'
 .secondary-nav
   %nav.row
     %time{datetime:@render_time.iso8601}= fhlb_datetime_standard_numeric(@render_time)
@@ -29,7 +27,7 @@
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.credit.todays_credit.title'), reports_todays_credit_path)
               %li= link_to(t('reports.credit.advances_detail.title'), reports_advances_path)
-              %li= link_to(t('reports.credit.interest_rate.title'), reports_interest_rate_resets_path)
+              %li.disabled= t('reports.credit.interest_rate.title')
               %li= link_to(t('reports.credit.letters_of_credit.title'), reports_letters_of_credit_path)
               %li= link_to(t('reports.credit.forward_commitments.title'), reports_forward_commitments_path)
               %li= link_to(t('reports.credit.parallel_shift.title'), reports_parallel_shift_path)

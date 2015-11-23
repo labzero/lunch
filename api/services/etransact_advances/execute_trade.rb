@@ -335,7 +335,7 @@ module MAPI
             else
               if (amount.to_i == 100001)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_credit_error.json')))
-              elsif (amount.to_i == 100002)
+              elsif (amount.to_i == 100002) || (amount.to_i == 1000121 && !check_capstock)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_collateral_error.json')))
               elsif (amount.to_i == 100003)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_exceeds_total_daily_limit_error.json')))
