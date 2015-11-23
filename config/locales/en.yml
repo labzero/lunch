@@ -1424,19 +1424,18 @@ en:
     products_summary:
       nav_title: Products Summary
       title: Products
-      intro: Our products and services are designed to help your institution expand the availability of mortgage credit, compete more effectively in your local markets, and foster strong and vibrant communities.
+      intro: Our products and services are designed to help your institution improve profitability, manage interest rate risk, access a price-competitive alternative when selling mortgage loans, and obtain lower-cost funding for affordable housing and economic development.
       advances:
         benefits:
           intro: "We offer a diverse array of flexible, low-cost funding options, with maturities ranging from 1 day to 30 years. Our credit products can help you:"
-          profitability: improve profitability
-          management: facilitate asset/liability management
-          liquidity: reduce on-balance sheet liquidity
-          lower_costs: lower funding costs
+          funding_costs: manage funding costs
+          reduce: reduce interest rate, basis, and prepayment risks
+          liquidity: meet liquidity needs
           broaden_products: broaden product lines
-          risk: control interest rate risk, basis risk, and prepayment risk
-        customize_html: We can customize our credit products to meet your funding or hedging requirements. We offer flexible cash flows and payment options, including partial prepayment symmetry (an optional feature of <a href=%{frc_url}>Fixed Rate Credit Advance</a> (PDF), <a href=%{callable_url}>Callable FRC</a> (PDF), <a href=%{putable_url}>Putable Advance</a> (PDF) , and <a href=%{arc_embedded_url}>Adjustable Rate Credit Advance with embedded options</a> (PDF).
+          promote: promote affordable housing, job creation and economic development
+        customize: We can customize our credit products to meet your funding or hedging requirements. We offer flexible cash flows and payment options, as well as different combinations of fixed and adjustable rate features and prepayment options, including partial prepayment symmetry.
         product_list:
-          intro: "Click the links below to find out more about the advantages, features, and requirements of each of our credit products:"
+          intro: "Find out more about the advantages, features, and requirements of each of our credit products:"
         stand_alone_html: At this time, the Bank is not offering stand-alone interest rate swaps, caps, and floors to members. For more information, see <a href=%{url}>Interest Rate Swaps, Caps & Floors</a>.
     authorizations:
       title: Authorization Forms Instructions
@@ -1503,6 +1502,7 @@ en:
         prepayment_features_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the %{download_link} (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       arc_embedded:
         title: ARC Advance with Embedded Options
+        product_page_title: Adjustable Rate Credit (ARC) Advance with Embedded Options
         description: Use ARC Advances with Embedded Options to match the interest rate and payment characteristics of your adjustable rate loan portfolio while managing your interest rate risk exposure.
         uses:
           finance: Finance adjustable rate mortgage loan portfolios
@@ -1690,6 +1690,7 @@ en:
             description_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the %{download_link} (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       frc_embedded:
         title: FRC Advance with Embedded Cap
+        product_page_title: Fixed Rate Credit (FRC) Advance with Embedded Cap
         description: Available on an order-only basis, the FRC Advance with Embedded Cap is a fixed rate advance with an embedded interest rate cap that provides a benefit to the borrower when the cap index exceeds a specified strike rate on a cap observation date. When the cap index exceeds the strike rate, the borrower’s interest rate for the next accrual period is lowered by the difference between the index rate and the strike rate (subject to a minimum interest rate of 0.00%). Partial prepayment symmetry is available for this advance.
         uses:
           management: Achieve asset/liability management goals
@@ -2017,13 +2018,13 @@ en:
         substitution: Borrowers may substitute like or better securities collateral, in the Bank's discretion, subject to the Bank's standard securities services fees.
     standby_loc:
       title: Standy Letters of Credit
-      description_html: A <a href=%{url}>standby letter of credit</a> is an obligation of the Bank to make payment to a third party if a member or housing associate does not perform its underlying obligation to that third party.
+      description_html: Use standby letters of credit to facilitate a variety of transactions with third parties. A <a href=%{url}>standby letter of credit</a> is an obligation of the Bank to make payment to a third party if a member or housing associate does not perform its underlying obligation to that third party.
     mpf_program:
       title: Mortgage Partnership Finance (MPF) Program
-      description_html: The Bank’s <a href=%{url}>Mortgage Partnership Finance&reg; (MPF) Program</a> provides members with access to an alternative secondary mortgage market channel for selling their residential fixed rate mortgage loans, including conventional conforming mortgage loans, eligible jumbo mortgage loans, and government insured or guaranteed mortgage loans.
+      description_html: Our <a href=%{url}>Mortgage Partnership Finance&reg; (MPF) Program</a> offers you access to an alternative secondary mortgage market channel for selling your residential fixed rate mortgage loans, including conventional conforming mortgage loans, eligible jumbo mortgage loans, and government insured or government-guaranteed mortgage loans.
     community_programs:
       title: Community Programs
-      description_html: The Bank's <a href=%{url}>community programs</a> provide funding for projects that create an affordable place to live for low- and moderate-income individuals and that foster strong, stable, and sustainable communities. Our members use our targeted grant programs and discounted credit programs to meet a wide range of affordable housing and economic development needs in Arizona, California, Nevada, and the other regions they serve.
+      description_html: The Bank's <a href=%{url}>community programs</a> can help you foster strong, stable, and sustainable communities by providing affordable housing and economic development needs in Arizona, California, Nevada, and the other regions you serve.
     section_headings:
       use: Use
       uses: Uses
