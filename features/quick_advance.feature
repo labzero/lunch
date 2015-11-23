@@ -283,3 +283,9 @@ Scenario: User who has a failed advance doesn't see a double render of the cap s
   When I go back to the capital stock purchase screen
   Then I should see only one quick advance stock purchase screen
 
+@jira-mem-1156
+Scenario: User navigates to Manage Advances page from quick advance confirmation screen
+  Given I visit the dashboard
+  And I successfully execute a quick advance
+  When I click the Manage Advances button
+  Then I should be on the Manage Advances page

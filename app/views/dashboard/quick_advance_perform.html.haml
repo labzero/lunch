@@ -3,4 +3,5 @@
     .quick-advance-icon-section.icon-success-before
       %p= t('dashboard.quick_advance.confirmation.intro', date_time: fhlb_datetime_standard_numeric(@initiated_at))
     = render 'quick_advance_summary', preview: @preview, advance_amount: @total_amount, advance_description: @advance_description, advance_program: @advance_program, advance_type: @advance_type, advance_rate: @advance_rate, human_interest_day_count: @human_interest_day_count, human_payment_on: @human_payment_on, advance_term: @advance_term, advance_raw_term: @advance_raw_term, trade_date: @trade_date, funding_date: @funding_date, maturity_date: @maturity_date, stock: @stock, advance_number: @advance_number
+  =link_to(t('advances.manage_advances.title'), advances_manage_advances_path, class: 'secondary-button')
   %button.primary-button{data: { :'flyout-action' => :close }}= t('global.close')
