@@ -33,8 +33,20 @@ $faded-opacity: 0.4 !default;
 .quick-advance-cell-wrapper {
   position: relative;
   z-index: 1;
-  &:hover {
+}
+
+.quick-advance-rates:not(.loading) {
+  .quick-advance-cell-wrapper:hover {
     z-index: 2;
+  }
+  td {
+    cursor: pointer;
+    &:hover {
+      z-index: 2;
+      .tooltip {
+        display: block;
+      }
+    }
   }
 }
 
@@ -171,16 +183,9 @@ $faded-opacity: 0.4 !default;
           font-size: 0.8667rem;
         }
       }
-      &:hover {
-        z-index: 2;
-        .tooltip {
-          display: block;
-        }
-      }
     }
     tr {
       td {
-        cursor: pointer;
         .quick-advance-cell-wrapper {
           @include pseudo-background-cover($lightest-blue);
         }
@@ -402,6 +407,14 @@ $faded-opacity: 0.4 !default;
   .loading & {
     p {
       display: none;
+    }
+    .quick-advance-summary p:first-child {
+      display: block;
+      color: $text-color;
+    }
+    .quick-advance-updated-rate {
+      @extend %typography-graph-data;
+      color: $medium-gray;
     }
     .quick-advance-icon-section {
       &:before {
