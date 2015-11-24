@@ -31,3 +31,10 @@ Then(/^I should see a quick advances disabled message$/) do
   page.assert_selector('.quick-advance-desk-closed-message', text(I18n.t('advance_desk_unavailable', phone_number: service_desk_phone_number)))
 end
 
+When(/^I click the Manage Advances button$/) do
+  page.find('.secondary-button', text: I18n.t('advances.manage_advances.title').upcase).click
+end
+
+Then(/^I should be on the Manage Advances page$/) do
+  page.assert_selector('h1', text: I18n.t('advances.manage_advances.title'), exact: true, visible: true)
+end
