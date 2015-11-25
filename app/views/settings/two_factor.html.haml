@@ -1,14 +1,13 @@
 = render layout: 'sidebar', locals: {selected: t("settings.two_factor.title")} do
   %section.settings-two-factor
     %h1= t('settings.two_factor.title')
-    %p= t('settings.two_factor.description')
     %p= t('settings.two_factor.help_html', phone_number: web_support_phone_number, url: web_support_email)
     .settings-group.settings-new-pin
       %h2= t('settings.two_factor.new_pin.title')
       .form-flash-message{data: {type: 'success'}}= t('settings.two_factor.new_pin.success')
-      .form-flash-message{data: {type: 'error'}}= t('settings.two_factor.new_pin.error')
+      .form-flash-message{data: {type: 'error'}}= t('settings.two_factor.new_pin.error_html', phone_number: web_support_phone_number, url: web_support_email)
+      %p= t('settings.two_factor.new_pin.description_html', phone_number: web_support_phone_number, url: web_support_email)
       .settings-inactive-view
-        %p= t('settings.two_factor.new_pin.description')
         = link_to(t('settings.two_factor.new_pin.cta'), '#', class: 'settings-group-cta')
       = form_tag settings_two_factor_pin_path, method: :post, remote: true, class: 'settings-active-view' do
         %ol
@@ -28,7 +27,7 @@
     .settings-group.settings-reset-pin
       %h2= t('settings.two_factor.reset_pin.title')
       .form-flash-message{data: {type: 'success'}}= t('settings.two_factor.reset_pin.success')
-      .form-flash-message{data: {type: 'error'}}= t('settings.two_factor.reset_pin.error')
+      .form-flash-message{data: {type: 'error'}}= t('settings.two_factor.reset_pin.error_html', phone_number: web_support_phone_number, url: web_support_email)
       .settings-inactive-view
         %p= t('settings.two_factor.reset_pin.description')
         = link_to(t('settings.two_factor.reset_pin.cta'), '#', class: 'settings-group-cta')
@@ -51,7 +50,7 @@
     .settings-group.settings-resynchronize-token
       %h2= t('settings.two_factor.resynchronize.title')
       .form-flash-message{data: {type: 'success'}}= t('settings.two_factor.resynchronize.success')
-      .form-flash-message{data: {type: 'error'}}= t('settings.two_factor.resynchronize.error')
+      .form-flash-message{data: {type: 'error'}}= t('settings.two_factor.resynchronize.error_html', phone_number: web_support_phone_number, url: web_support_email)
       .settings-inactive-view
         %p= t('settings.two_factor.resynchronize.description')
         = link_to(t('settings.two_factor.resynchronize.cta'), '#', class: 'settings-group-cta')
@@ -61,7 +60,7 @@
           %li= t('settings.two_factor.resynchronize.steps.wait_next')
           %li= t('settings.two_factor.resynchronize.steps.submit')
           %fieldset.securid-form
-            = render 'shared/securid_fields'
+            = render 'shared/securid_fields', token_label: t('settings.two_factor.resynchronize.first_token')
           %fieldset.securid-form
             = render 'shared/input_field', field_name: 'securid_next_token', field_type: :text, label: t('settings.two_factor.resynchronize.next_token'), html_attributes: {maxlength: 6}, field_class: 'securid-field-token'
             %p.form-error{data: {'error-type' => :invalid_token}}= t('dashboard.quick_advance.securid.errors.invalid_token')
