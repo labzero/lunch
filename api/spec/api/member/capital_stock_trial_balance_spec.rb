@@ -57,9 +57,9 @@ describe MAPI::ServiceApp do
           allow(subject).to receive(:business_date_sql).with(date).and_return(business_date_sql)
           allow(subject).to receive(:closing_balance_sql).and_return(closing_balance_sql)
           allow(subject).to receive(:certificates_sql).and_return(certificates_sql)
-          allow(subject).to receive(:fetch_hashes).with(logger, business_date_sql, true).and_return([{"business_date" => business_date_str}])
-          allow(subject).to receive(:fetch_hashes).with(logger, closing_balance_sql, true).and_return(closing_balance)
-          allow(subject).to receive(:fetch_hashes).with(logger, certificates_sql, true).and_return(certificates)
+          allow(subject).to receive(:fetch_hashes).with(logger, business_date_sql, {}, true).and_return([{"business_date" => business_date_str}])
+          allow(subject).to receive(:fetch_hashes).with(logger, closing_balance_sql, {}, true).and_return(closing_balance)
+          allow(subject).to receive(:fetch_hashes).with(logger, certificates_sql, {}, true).and_return(certificates)
         end
 
         it 'should return a valid result' do

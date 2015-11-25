@@ -42,9 +42,9 @@ module MAPI
 
         def self.capital_stock_trial_balance(app, fhlb_id, date)
           if app.settings.environment == :production
-            business_date   = dateify(fetch_hashes(app.logger, business_date_sql(date), true).first['business_date'])
-            closing_balance = fetch_hashes(app.logger, closing_balance_sql(fhlb_id, business_date), true)
-            certificates    = fetch_hashes(app.logger, certificates_sql(fhlb_id, business_date), true)
+            business_date   = dateify(fetch_hashes(app.logger, business_date_sql(date), {}, true).first['business_date'])
+            closing_balance = fetch_hashes(app.logger, closing_balance_sql(fhlb_id, business_date), {}, true)
+            certificates    = fetch_hashes(app.logger, certificates_sql(fhlb_id, business_date), {}, true)
           else
             closing_balance = fake('capital_stock_trial_balance_closing_balance')
             certificates    = fake('capital_stock_trial_balance_certificates')
