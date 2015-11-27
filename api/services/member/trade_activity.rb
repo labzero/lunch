@@ -74,6 +74,10 @@ module MAPI
           end
         end
 
+        def self.is_new_web_advance?(trade)
+          trade.at_css('tradeHeader party trader').content == ENV['MAPI_WEB_AO_ACCOUNT'] && TODAYS_ADVANCES_ARRAY.include?(trade.at_css('tradeHeader status').content)
+        end
+
         def self.get_ods_deal_structure_code(app, sub_product, collateral)
           collateral = collateral.gsub(/[ -]/, '')
           if app.settings.environment == :production
@@ -179,7 +183,7 @@ module MAPI
             fhlbsfresponse = response.doc.xpath('//Envelope//Body//tradeResponse//trades//trade')
             advance_daily_total = 0
             fhlbsfresponse.each do |trade|
-              if TODAYS_ADVANCES_ARRAY.include? trade.at_css('tradeHeader status').content
+              if is_new_web_advance?(trade)
                 advance_daily_total += trade.at_css('advance par amount').content.to_f
               end
             end
@@ -211,7 +215,7 @@ module MAPI
             response.doc.remove_namespaces!
             fhlbsfresponse = response.doc.xpath('//Envelope//Body//tradeResponse//trades//trade')
             fhlbsfresponse.each do |trade|
-              if TODAYS_ADVANCES_ARRAY.include? trade.at_css('tradeHeader status').content
+              if is_new_web_advance?(trade)
                 rate = (trade.at_css('advance coupon fixedRateSchedule') ? trade.at_css('advance coupon fixedRateSchedule step rate') : trade.at_css('advance coupon initialRate')).content
                 hash = {
                   'trade_date' => build_trade_datetime(trade),
