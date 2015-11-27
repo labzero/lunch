@@ -258,6 +258,32 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe '`is_new_web_advance?` class method' do
+    let(:trade) { double('A Trade XML Fragment') }
+    let(:trade_status) { double('Trade Status XML Fragment', content: MAPI::Services::Member::TradeActivity::TODAYS_ADVANCES_ARRAY.sample) }
+    let(:call_method) { MAPI::Services::Member::TradeActivity.is_new_web_advance?(trade) }
+    let(:web_trader) { double('Trader XML Fragment', content: double('A Web Trader')) }
+    before do
+      allow(trade).to receive(:at_css).with('tradeHeader status').and_return(trade_status)
+      allow(trade).to receive(:at_css).with('tradeHeader party trader').and_return(web_trader)
+      allow(ENV).to receive(:[]).with('MAPI_WEB_AO_ACCOUNT').and_return(web_trader.content)
+    end
+    it 'returns false if the advance status is not a new advance' do
+      allow(trade).to receive(:at_css).with('tradeHeader status').and_return(double('Trade Status XML Fragment', content: 'foo'))
+      expect(call_method).to be(false)
+    end
+    it 'returns false if the trade was not made on the web' do
+      allow(trade).to receive(:at_css).with('tradeHeader party trader').and_return(double('Trader XML Fragment', content: 'foo'))
+      expect(call_method).to be(false)
+    end
+    %w(VERIFIED OPS_REVIEW OPS_VERIFIED SEC_REVIEWED SEC_REVIEW COLLATERAL_AUTH AUTH_TERM PEND_TERM).each do |status|
+      it "returns true is the trade was made on the web and is of status `#{status}`" do
+        allow(trade_status).to receive(:content).and_return(status)
+        expect(call_method).to be(true)
+      end
+    end
+  end
+
   describe '`build_trade_datetime` class method' do
     let(:trade) { double('Savon XML Trade Fragment', at_css: double('An XML Node', content: nil)) }
     let(:trade_date) { double('Savon XML Trade Date', content: '2015-05-07-07:00') }
@@ -291,21 +317,29 @@ describe MAPI::ServiceApp do
       before do
         allow(MAPI::Services::Member::TradeActivity).to receive(:init_trade_connection).and_return(trade_connection)
       end
-      MAPI::Services::Member::TradeActivity::TODAYS_ADVANCES_ARRAY.each do |advance_type|
-        it "adds the daily advance activity for all members if a trade has type `#{advance_type}`" do
-          trade_1_amount = rand(1000..999999) + rand()
-          trade_2_amount = rand(1000..999999)  + rand()
-          allow(included_trade_1).to receive(:at_css).with('tradeHeader status').and_return(double('xml node', content: advance_type))
-          allow(included_trade_1).to receive(:at_css).with('advance par amount').and_return(double('xml node', content: trade_1_amount))
-          allow(included_trade_2).to receive(:at_css).with('tradeHeader status').and_return(double('xml node', content: advance_type))
-          allow(included_trade_2).to receive(:at_css).with('advance par amount').and_return(double('xml node', content: trade_2_amount))
-          allow(excluded_trade).to receive(:at_css).with('tradeHeader status').and_return(double('xml node', content: 'foo'))
-          expect(current_daily_total).to eq(trade_1_amount + trade_2_amount)
-        end
+      it 'adds the daily advance activity for all members if a trade is a new web trade' do
+        trade_1_amount = rand(1000..999999) + rand()
+        trade_2_amount = rand(1000..999999)  + rand()
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_new_web_advance?).with(included_trade_1).and_return(true)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_new_web_advance?).with(included_trade_2).and_return(true)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_new_web_advance?).with(excluded_trade).and_return(false)
+        allow(included_trade_1).to receive(:at_css).with('advance par amount').and_return(double('xml node', content: trade_1_amount))
+        allow(included_trade_2).to receive(:at_css).with('advance par amount').and_return(double('xml node', content: trade_2_amount))
+        expect(current_daily_total).to eq(trade_1_amount + trade_2_amount)
       end
       it 'raises an error if a Savon connection cannot be established' do
         allow(trade_connection).to receive(:call).and_raise(Savon::Error)
         expect{current_daily_total}.to raise_error(Savon::Error)
+      end
+      it 'calls the trade service with a message limiting the tradeDate to today' do
+        today = Time.zone.today
+        allow(Time.zone).to receive(:today).and_return(today)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_new_web_advance?)
+        expected_message = include('v1:tradeRequestParameters' => include(include(
+          {'v1:rangeOfTradeDates' => {'v1:startDate' => today.iso8601, 'v1:endDate' => today.iso8601}}
+        )))
+        expect(trade_connection).to receive(:call).with(anything, include(message: expected_message))
+        current_daily_total
       end
     end
     [:development, :test].each do |env|
@@ -322,6 +356,10 @@ describe MAPI::ServiceApp do
 
   describe 'Todays Trade Activity' do
     let(:todays_advances) { MAPI::Services::Member::TradeActivity.todays_trade_activity(subject, member_id, 'ADVANCE') }
+
+    before do
+      allow(MAPI::Services::Member::TradeActivity).to receive(:is_new_web_advance?).and_return(true)
+    end
 
     describe 'endpoint' do
       it 'is invoked via a member endpoint' do
@@ -349,9 +387,16 @@ describe MAPI::ServiceApp do
       end
     end
     describe 'in the production environment', vcr: {cassette_name: 'trade_activity_service'} do
+      let(:trade_connection) { MAPI::Services::Member::TradeActivity.init_trade_connection(:production) }
       before do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
       end
+      
+      it 'checks if the trades are new web trades' do
+        expect(MAPI::Services::Member::TradeActivity).to receive(:is_new_web_advance?).at_least(:once)
+        todays_advances
+      end
+
       it 'should return active advances' do
         todays_advances.each do |row|
           expect(row['trade_date']).to be_kind_of(String)
@@ -375,6 +420,17 @@ describe MAPI::ServiceApp do
         todays_advances.each do |advance|
           expect(advance['trade_date']).to be(trade_datetime)
         end
+      end
+
+      it 'calls the trade service with a message limiting the tradeDate to today' do
+        today = Time.zone.today
+        allow(Time.zone).to receive(:today).and_return(today)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_new_web_advance?)
+        expected_message = include('v1:tradeRequestParameters' => include(include(
+          {'v1:rangeOfTradeDates' => {'v1:startDate' => today.iso8601, 'v1:endDate' => today.iso8601}}
+        )))
+        expect(trade_connection).to receive(:call).with(anything, include(message: expected_message)).and_call_original
+        todays_advances
       end
     end
     %w(development test production).each do |env|
