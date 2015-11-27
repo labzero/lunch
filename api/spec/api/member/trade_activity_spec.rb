@@ -331,6 +331,16 @@ describe MAPI::ServiceApp do
         allow(trade_connection).to receive(:call).and_raise(Savon::Error)
         expect{current_daily_total}.to raise_error(Savon::Error)
       end
+      it 'calls the trade service with a message limiting the tradeDate to today' do
+        today = Time.zone.today
+        allow(Time.zone).to receive(:today).and_return(today)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_new_web_advance?)
+        expected_message = include('v1:tradeRequestParameters' => include(include(
+          {'v1:rangeOfTradeDates' => {'v1:startDate' => today.iso8601, 'v1:endDate' => today.iso8601}}
+        )))
+        expect(trade_connection).to receive(:call).with(anything, include(message: expected_message))
+        current_daily_total
+      end
     end
     [:development, :test].each do |env|
       describe "in the #{env} environment" do
@@ -377,6 +387,7 @@ describe MAPI::ServiceApp do
       end
     end
     describe 'in the production environment', vcr: {cassette_name: 'trade_activity_service'} do
+      let(:trade_connection) { MAPI::Services::Member::TradeActivity.init_trade_connection(:production) }
       before do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
       end
@@ -409,6 +420,17 @@ describe MAPI::ServiceApp do
         todays_advances.each do |advance|
           expect(advance['trade_date']).to be(trade_datetime)
         end
+      end
+
+      it 'calls the trade service with a message limiting the tradeDate to today' do
+        today = Time.zone.today
+        allow(Time.zone).to receive(:today).and_return(today)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:is_new_web_advance?)
+        expected_message = include('v1:tradeRequestParameters' => include(include(
+          {'v1:rangeOfTradeDates' => {'v1:startDate' => today.iso8601, 'v1:endDate' => today.iso8601}}
+        )))
+        expect(trade_connection).to receive(:call).with(anything, include(message: expected_message)).and_call_original
+        todays_advances
       end
     end
     %w(development test production).each do |env|
