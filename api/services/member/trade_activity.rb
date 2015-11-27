@@ -165,12 +165,14 @@ module MAPI
 
         def self.current_daily_total(env, instrument)
           data = if connection = MAPI::Services::Member::TradeActivity.init_trade_connection(env)
+            today = Time.zone.today
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [
                 {
-                  'v1:lastUpdatedDateTime' => Time.zone.today().strftime("%Y-%m-%dT%T"),
-                  'v1:arrayOfAssetClasses' => [{'v1:assetClass' => instrument}]
+                  'v1:lastUpdatedDateTime' => today.strftime("%Y-%m-%dT%T"),
+                  'v1:arrayOfAssetClasses' => [{'v1:assetClass' => instrument}],
+                  'v1:rangeOfTradeDates' => {'v1:startDate' => today.iso8601, 'v1:endDate' => today.iso8601}
                 }
               ]
             }
@@ -199,12 +201,14 @@ module MAPI
           member_id = member_id.to_i
           trade_activity = []
           data = if connection = MAPI::Services::Member::TradeActivity.init_trade_connection(app.settings.environment)
+            today = Time.zone.today
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [{
-                'v1:lastUpdatedDateTime' => Time.zone.today().strftime("%Y-%m-%dT%T"),
+                'v1:lastUpdatedDateTime' => today.strftime("%Y-%m-%dT%T"),
                 'v1:arrayOfCustomers' => [{'v1:fhlbId' => member_id}],
-                'v1:arrayOfAssetClasses' => [{'v1:assetClass' => instrument}]
+                'v1:arrayOfAssetClasses' => [{'v1:assetClass' => instrument}],
+                'v1:rangeOfTradeDates' => {'v1:startDate' => today.iso8601, 'v1:endDate' => today.iso8601}
               }]
             }
             begin
