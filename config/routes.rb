@@ -47,7 +47,6 @@ Rails.application.routes.draw do
     get '/securities-transactions' => 'reports#securities_transactions'
     get '/settlement-transaction-account' => 'reports#settlement_transaction_account'
     get '/todays-credit' => 'reports#todays_credit'
-    get '/trial-balance' => 'error#not_found'
   end
 
   get '/advances' => 'advances#index'
