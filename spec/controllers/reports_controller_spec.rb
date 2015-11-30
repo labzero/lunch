@@ -966,6 +966,7 @@ RSpec.describe ReportsController, :type => :controller do
       }
 
       it_behaves_like 'a user required action', :get, :forward_commitments
+      it_behaves_like 'a report that can be downloaded', :forward_commitments, [:xlsx]
       it_behaves_like 'a report with instance variables set in a before_filter', :forward_commitments
       describe 'view instance variables' do
         it 'sets @as_of_date to the value returned from the service endpoint' do
