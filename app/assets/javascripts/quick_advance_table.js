@@ -24,7 +24,8 @@
     $flyoutTableCells.hover( function(){
       var $this = $(this);
       var col = getColumnIndex($this);
-      if (!$this.hasClass('cell-selected') && $this.hasClass('selectable-cell')) {
+      var loading = $flyoutBottomSection.find('.quick-advance-rates').hasClass('loading');
+      if (!$this.hasClass('cell-selected') && $this.hasClass('selectable-cell') && !loading) {
         $this.toggleClass('cell-hovered').closest('tr').find('td.row-label').toggleClass('cell-hovered');
         $($table.find('tr.quick-advance-column-labels th')[col]).toggleClass('cell-hovered');
       }
@@ -245,6 +246,7 @@
     function transitionToLoadingFromRates () {
       var $flyoutBottomSection = $('.flyout-bottom-section');
       var $quickAdvanceRates= $flyoutBottomSection.find('.quick-advance-rates');
+      $amountField.attr('disabled', 'disabled');
       $quickAdvanceRates.addClass('loading');
       $flyoutBottomSection.find('button').removeClass('active');
       $flyoutBottomSection.find('button').attr('disabled', 'disabled');
@@ -256,6 +258,7 @@
       $quickAdvanceRates.removeClass('loading');
       $flyoutBottomSection.find('button').addClass('active');
       $flyoutBottomSection.find('button').removeAttr('disabled');
+      $amountField.removeAttr('disabled');
     };
 
     function setRateFromElementData($element) {
