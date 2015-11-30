@@ -257,7 +257,7 @@ $(function () {
       switch (options.filter) {
         // Snap to end of month
         case options.filterOptions['end_of_month']:
-          if (date !== endOfMonth && inputMonth >= thisMonth) {
+          if (!date.isSame(endOfMonth, 'day') && inputMonth >= thisMonth) {
             picker.setEndDate((date.subtract(1, 'month')).endOf('month'));
           } else {
             picker.setEndDate(date.endOf('month').format('MM/DD/YYYY'));
