@@ -488,6 +488,7 @@ en:
         repayment: At repayment
         semiannualandrepayment: Semiannually and at repayment
         footer: All advances are subject to the terms and conditions on the Bank's Credit Program, the Advances and Security Agreement with the Member, and the appropriate Advance Confirmation, as well as the Terms of Use.
+        loading: We are retrieving this data.
         axes_labels:
           standard: Standard
           securities_backed: Securities-Backed Credit

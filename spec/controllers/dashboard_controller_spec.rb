@@ -102,6 +102,14 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(assigns[:quick_advance_status]).to eq(:closed)
     end
+    it 'sets @advance_terms' do
+      get :index
+      expect(assigns[:advance_terms]).to eq(AdvanceRequest::ADVANCE_TERMS)
+    end
+    it 'sets @advance_types' do
+      get :index
+      expect(assigns[:advance_types]).to eq(AdvanceRequest::ADVANCE_TYPES)
+    end
     it 'should assign @financing_availability_gauge' do
       get :index
       expect(assigns[:financing_availability_gauge]).to be_kind_of(Hash)
