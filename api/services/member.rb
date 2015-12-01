@@ -1106,8 +1106,8 @@ module MAPI
         end
 
         relative_get '/:id/capital_stock_trial_balance/:date' do
-          member_id = params[:id]
-          date      = params[:date]
+          member_id = params[:id].to_i
+          date      = params[:date].to_date
           MAPI::Services::Member::CapitalStockTrialBalance.capital_stock_trial_balance(self, member_id, date).to_json
         end
 

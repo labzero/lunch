@@ -1221,6 +1221,24 @@ describe MemberBalanceService do
     end
   end
 
+  describe 'the `capital_stock_trial_balance` method' do
+    it_behaves_like 'a MAPI backed service object method', :capital_stock_trial_balance, Date.today
+    let(:date){ double('date') }
+    let(:isodate){ double('isodate') }
+    let(:statement){ double('statement') }
+    before do
+      allow(date).to receive(:iso8601).and_return(isodate)
+    end
+    it 'should return nil if get_hash returns nil' do
+      allow(subject).to receive(:get_hash).and_return(nil)
+      expect(subject.capital_stock_trial_balance(date)).to eq(nil)
+    end
+    it 'should fix_date on' do
+      allow(subject).to receive(:get_hash).and_return(statement)
+      expect(subject.capital_stock_trial_balance(date)).to eq(statement)
+    end
+  end
+
   describe 'the `interest_rate_resets` method', :vcr do
     let(:irr_rates) {subject.interest_rate_resets}
     describe 'error states' do

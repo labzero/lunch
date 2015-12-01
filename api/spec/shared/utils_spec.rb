@@ -46,11 +46,30 @@ describe MAPI::Shared::Utils::ClassMethods do
       expect(subject.fetch_hashes(logger, sql)).to be == [hash1, hash2, hash3]
     end
 
+    it 'should honour the downcase argument' do
+      allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
+      allow(cursor).to receive(:fetch_hash).and_return({ 'A' => hash1}, { 'B' => hash2}, {'C' => hash3}, nil)
+      expect(subject.fetch_hashes(logger, sql, true)).to be == [{'a' => hash1}, {'b' => hash2}, {'c' => hash3}]
+    end
+
     it 'logs an error for exceptions' do
       allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
       allow(cursor).to receive(:fetch_hash).and_raise(:exception)
       expect(logger).to receive(:error)
       subject.fetch_hashes(logger, sql)
+    end
+  end
+
+  describe 'dateify' do
+    let(:date){ Date.parse('2015-11-30') }
+    it 'should map an Oracle formatted date to this century' do
+      expect(subject.dateify('30-NOV-15')).to eq(date)
+    end
+    it 'should be idempotnent on a Date' do
+      expect(subject.dateify(date)).to eq(date)
+    end
+    it 'should handle an iso8661 string' do
+      expect(subject.dateify(date.iso8601)).to eq(date)
     end
   end
 

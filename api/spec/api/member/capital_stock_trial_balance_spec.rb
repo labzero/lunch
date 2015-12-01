@@ -12,9 +12,10 @@ describe MAPI::ServiceApp do
     [:test, :development, :production].each do |environment|
       describe '' do
         let(:app) { double('app', logger: logger, settings: settings) }
-        let(:business_date) { double('business_date') }
-        let(:business_date_sql) { double('business_date_sql') }
-        let(:call_method){ subject.capital_stock_trial_balance(app, fhlb_id, date) }
+        let(:business_date_sql)  { double('business_date_sql') }
+        let(:business_date_str)  { double('business_date_str') }
+        let(:business_date)      { double('business_date') }
+        let(:call_method)        { subject.capital_stock_trial_balance(app, fhlb_id, date) }
         let(:capital_stock_trial_balance) do
           {
               "fhlb_id" => 8976,
@@ -25,7 +26,7 @@ describe MAPI::ServiceApp do
         end
         let(:certificate1) do
           {
-              certificate_sequence: 50173,
+              certificate_sequence: "50173",
               class: "B",
               issue_date: "02-NOV-2009",
               shares_outstanding: 31906,
@@ -34,7 +35,7 @@ describe MAPI::ServiceApp do
         end
         let(:certificate2) do
           {
-              certificate_sequence: 51186,
+              certificate_sequence: "51186",
               class: "B",
               issue_date: "26-APR-2013",
               shares_outstanding: 8129,
@@ -51,12 +52,14 @@ describe MAPI::ServiceApp do
         let(:settings) { double('settings', environment: environment) }
 
         before do
+          allow(business_date_str).to receive(:to_s).and_return(business_date_str)
+          allow(Date).to    receive(:parse).with(business_date_str).and_return(business_date)
           allow(subject).to receive(:business_date_sql).with(date).and_return(business_date_sql)
           allow(subject).to receive(:closing_balance_sql).and_return(closing_balance_sql)
           allow(subject).to receive(:certificates_sql).and_return(certificates_sql)
-          allow(subject).to receive(:fetch_hashes).with(logger, business_date_sql).and_return([{"business_date" => business_date}])
-          allow(subject).to receive(:fetch_hashes).with(logger, closing_balance_sql).and_return(closing_balance)
-          allow(subject).to receive(:fetch_hashes).with(logger, certificates_sql).and_return(certificates)
+          allow(subject).to receive(:fetch_hashes).with(logger, business_date_sql, true).and_return([{"business_date" => business_date_str}])
+          allow(subject).to receive(:fetch_hashes).with(logger, closing_balance_sql, true).and_return(closing_balance)
+          allow(subject).to receive(:fetch_hashes).with(logger, certificates_sql, true).and_return(certificates)
         end
 
         it 'should return a valid result' do
@@ -65,7 +68,7 @@ describe MAPI::ServiceApp do
 
         it 'should return expected advances detail hash where value could not be nil' do
           call_method['certificates'].each do |row|
-            expect(row["certificate_sequence"]).to be_kind_of(Numeric)
+            expect(row["certificate_sequence"]).to be_kind_of(String)
             expect(row["class"]).to be_kind_of(String)
             expect(row["issue_date"]).to be_kind_of(String)
             expect(row["shares_outstanding"]).to be_kind_of(Numeric)

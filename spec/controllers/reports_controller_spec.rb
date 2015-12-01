@@ -144,7 +144,7 @@ RSpec.describe ReportsController, :type => :controller do
         }
       end
       let(:table_data) do
-        [{type: :number, value: certificate_sequence, classes: [:'report-cell-narrow']},
+        [{type: nil,     value: certificate_sequence, classes: [:'report-cell-narrow']},
          {type: :date,   value: issue_date,           classes: [:'report-cell-narrow']},
          {type: nil,     value: transaction_type,     classes: [:'report-cell-narrow']},
          {type: :number, value: shares_outstanding,   classes: [:'report-cell-narrow']}]
