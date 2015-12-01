@@ -49,12 +49,12 @@ module DatePickerHelper
     {start_date: start_date, end_date: end_date}
   end
 
-  def date_picker_presets(custom_start_date, custom_end_date = nil, date_history = nil)
+  def date_picker_presets(custom_start_date, custom_end_date = nil, date_history = nil, max_date = nil)
     min_date = Time.zone.today - date_history if date_history
     presets = if custom_end_date.nil?
-      date_picker_single(custom_start_date, min_date)
+      date_picker_single(custom_start_date, min_date, max_date)
     else
-      date_picker_range(custom_start_date, custom_end_date, min_date)
+      date_picker_range(custom_start_date, custom_end_date, min_date, max_date)
     end
     presets.each do |preset|
       if preset[:start_date] == custom_start_date && (preset[:end_date] == custom_end_date || custom_end_date.nil?)
@@ -65,7 +65,7 @@ module DatePickerHelper
     presets
   end
 
-  def date_picker_range(custom_start_date, custom_end_date, min_date)
+  def date_picker_range(custom_start_date, custom_end_date, min_date, max_date)
     [
       {
         label: t('datepicker.range.date_to_current', date: default_dates_hash[:this_month_start].to_date.strftime('%B')),
@@ -104,11 +104,12 @@ module DatePickerHelper
         is_custom: true
       }
     ].delete_if do |preset|
-      preset[:start_date] < min_date if min_date
+      (preset[:start_date] < min_date if min_date) ||
+      (preset[:start_date] > max_date if max_date)
     end
   end
 
-  def date_picker_single(custom_start_date, min_date)
+  def date_picker_single(custom_start_date, min_date, max_date)
     [
       {
         label: t('global.today'),
@@ -137,7 +138,8 @@ module DatePickerHelper
         is_custom: true
       }
     ].delete_if do |preset|
-      preset[:start_date] < min_date if min_date
+      (preset[:start_date] < min_date if min_date) ||
+      (preset[:start_date] > max_date if max_date)
     end
   end
 

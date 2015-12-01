@@ -42,9 +42,18 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
+  shared_examples 'a report with a @max_date' do |action|
+    it 'sets @max_date to the result of the most_recent_business_day method' do
+      allow(controller).to receive(:most_recent_business_day).with( Time.zone.today - 1.day ).and_return(max_date)
+      get action
+      expect(assigns[:max_date]).to eq(max_date)
+    end
+  end
+
   login_user
 
   let(:today) { Time.zone.today }
+  let(:max_date) { today - 1.day }
   let(:start_date) { today - 2.months }
   let(:restricted_start_date) { double('a restricted date')}
   let(:end_date) { today - 1.month }
@@ -155,6 +164,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it_behaves_like 'a user required action', :get, :capital_stock_trial_balance
       it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_trial_balance
+      it_behaves_like 'a report with a @max_date', :capital_stock_trial_balance
       it 'can be disabled' do
         allow(subject).to receive(:report_disabled?).and_return(true)
         get :capital_stock_trial_balance
@@ -164,8 +174,9 @@ RSpec.describe ReportsController, :type => :controller do
         get :capital_stock_trial_balance
         expect(response.body).to render_template('capital_stock_trial_balance')
       end
-      it 'should pass @start_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-        allow(controller).to receive(:date_picker_presets).with(start_date).and_return(picker_preset_hash)
+      it 'should pass @start_date and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+        allow(controller).to receive(:most_recent_business_day).and_return(max_date)
+        allow(controller).to receive(:date_picker_presets).with(start_date, nil, nil, max_date).and_return(picker_preset_hash)
         get :capital_stock_trial_balance, start_date: start_date
         expect(assigns[:picker_presets]).to eq(picker_preset_hash)
       end
@@ -346,6 +357,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a report that can be downloaded', :advances_detail, [:pdf, :xlsx]
       it_behaves_like 'a date restricted report', :advances_detail
       it_behaves_like 'a report with instance variables set in a before_filter', :advances_detail
+      it_behaves_like 'a report with a @max_date', :advances_detail
       it 'should render the advances_detail view' do
         get :advances_detail
         expect(response.body).to render_template('advances_detail')
@@ -356,8 +368,8 @@ RSpec.describe ReportsController, :type => :controller do
           get :advances_detail
           expect(assigns[:start_date]).to eq(restricted_start_date)
         end
-        it 'should pass @as_of_date and `date_restriction` to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-          expect(controller).to receive(:date_picker_presets).with(restricted_start_date, nil, ReportsController::DATE_RESTRICTION_MAPPING[:advances_detail]).and_return(picker_preset_hash)
+        it 'should pass @as_of_date, `date_restriction` and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+          expect(controller).to receive(:date_picker_presets).with(restricted_start_date, nil, ReportsController::DATE_RESTRICTION_MAPPING[:advances_detail], max_date).and_return(picker_preset_hash)
           get :advances_detail, start_date: start_date
           expect(assigns[:picker_presets]).to eq(picker_preset_hash)
         end
@@ -1505,6 +1517,7 @@ RSpec.describe ReportsController, :type => :controller do
     end
     it_behaves_like 'a user required action', :get, :securities_transactions
     it_behaves_like 'a report with instance variables set in a before_filter', :securities_transactions
+    it_behaves_like 'a report with a @max_date', :securities_transactions
     it 'can be disabled' do
       allow(subject).to receive(:report_disabled?).and_return(true)
       allow(transaction_hash).to receive(:collect)
@@ -1515,8 +1528,9 @@ RSpec.describe ReportsController, :type => :controller do
       get :securities_transactions
       expect(response.body).to render_template('securities_transactions')
     end
-    it 'should pass @start_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-      allow(controller).to receive(:date_picker_presets).with(start_date).and_return(picker_preset_hash)
+    it 'should pass @start_date and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+      allow(controller).to receive(:most_recent_business_day).and_return(max_date)
+      allow(controller).to receive(:date_picker_presets).with(start_date, nil, nil, max_date).and_return(picker_preset_hash)
       allow(response_hash).to receive(:[]).with(:transactions).and_return(securities_transactions_response_with_new_transaction)
       get :securities_transactions, start_date: start_date
       expect(assigns[:picker_presets]).to eq(picker_preset_hash)
