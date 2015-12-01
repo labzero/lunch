@@ -284,7 +284,7 @@ class ReportsController < ApplicationController
   end
 
   def capital_stock_trial_balance
-    @max_date = most_recent_business_day(Time.zone.now.to_date - 1.day)
+    @max_date = most_recent_business_day(Time.zone.today - 1.day)
     @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
     member_balances = MemberBalanceService.new(current_member_id, request)
     if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
@@ -293,7 +293,7 @@ class ReportsController < ApplicationController
       summary = member_balances.capital_stock_trial_balance(@start_date)
       raise StandardError, "There has been an error and ReportsController#capital_stock_trial_balance has returned nil. Check error logs." if summary.blank?
     end
-    @picker_presets         = date_picker_presets(@start_date)
+    @picker_presets         = date_picker_presets(@start_date, nil, nil, @max_date)
     @number_of_shares       = summary[:number_of_shares]
     @number_of_certificates = summary[:number_of_certificates]
     column_headings = [t('reports.pages.capital_stock_trial_balance.certificate_sequence'),
@@ -385,14 +385,14 @@ class ReportsController < ApplicationController
 
   def advances_detail
     date_restriction = DATE_RESTRICTION_MAPPING[:advances_detail]
-    @max_date = most_recent_business_day(Time.zone.now.to_date - 1.day)
+    @max_date = most_recent_business_day(Time.zone.today - 1.day)
     advance_start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
     @min_date, @start_date = min_and_start_dates(date_restriction, advance_start_date)
     member_balances = MemberBalanceService.new(current_member_id, request)
     @advances_detail = member_balances.advances_details(@start_date)
     @report_name = t('global.advances')
     raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
-    @picker_presets = date_picker_presets(@start_date, nil, date_restriction)
+    @picker_presets = date_picker_presets(@start_date, nil, date_restriction, @max_date)
     if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)
       @advances_detail = {}
     else
@@ -931,7 +931,7 @@ class ReportsController < ApplicationController
   end
   
   def securities_transactions
-    @max_date   = most_recent_business_day(Time.zone.now.to_date - 1.day)
+    @max_date   = most_recent_business_day(Time.zone.today - 1.day)
     @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
     member_balances = MemberBalanceService.new(current_member_id, request)
     if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
@@ -941,7 +941,7 @@ class ReportsController < ApplicationController
       securities_transactions = member_balances.securities_transactions(@start_date)
       raise StandardError, "There has been an error and ReportsController#securities_transactions has returned nil. Check error logs." if securities_transactions.blank?
     end
-    @picker_presets = date_picker_presets(@start_date)
+    @picker_presets = date_picker_presets(@start_date, nil, nil, @max_date)
     @total_net = securities_transactions[:total_net]
     @final = securities_transactions[:final]
     column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('common_table_headings.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('common_table_headings.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
