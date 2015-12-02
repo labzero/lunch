@@ -16,10 +16,10 @@ GIT
 
 GIT
   remote: https://github.com/labzero/securid.git
-  revision: d9deceecee80f5f63074d50c0c54b057314fc809
-  branch: 0.2.3
+  revision: 41d8a0c469b1afa7b4038ab9c07e4e562b3aaf8e
+  branch: 0.2.4
   specs:
-    securid (0.2.3)
+    securid (0.2.4)
 
 GEM
   remote: https://rubygems.org/
