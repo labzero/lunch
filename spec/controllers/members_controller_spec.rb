@@ -165,4 +165,16 @@ RSpec.describe MembersController, type: :controller do
       expect(response.body).to render_template('terms_of_use')
     end
   end
+
+  describe 'GET contact' do
+    let (:make_request) { get :contact}
+    it_behaves_like 'a user not required action', :get, :contact
+    it 'uses the `external` layout' do
+      expect(make_request).to render_template('layouts/external')
+    end
+    it 'renders the view' do
+      make_request
+      expect(response.body).to render_template('contact')
+    end
+  end
 end
