@@ -558,7 +558,7 @@ en:
         cumulative: Cumulative Stock Purchase Required
         increase_transaction: Increase Amount Requested to cover required stock purchase.
         debit_sta_html: If you select this option, the Bank will automatically debit your Settlement/Transaction Account (STA) for %{amount} today.
-        footer: Cumulative Stock Purchase Required reflects the total stock purchase for all advances transacted today, including the new advace request. To avoid an overdraft, please ensure your Settlement/Transaction Account (STA) has sufficient funds to cover this amount.
+        footer: Cumulative Stock Purchase Required reflects the total stock purchase for all advances transacted today, including the new advance request. To avoid an overdraft, please ensure your Settlement/Transaction Account (STA) has sufficient funds to cover this amount.
       error:
         insufficient_financing_availability_html: The original amount requested of %{amount} is not available based on your remaining financing availability.
         capital_stock_exception: No Net or Gross info returned
@@ -762,7 +762,7 @@ en:
       amount_per_overdraft: '%{amount} per overdraft'
       amount_per_wire: '%{amount} per wire'
       amount_per_statement: '%{amount} per item or statement'
-      amount_per_hour: '%{amount} per hour'  
+      amount_per_hour: '%{amount} per hour'
     forms:
       title: Forms
       agreements:
@@ -1372,10 +1372,10 @@ en:
         renumbered: Renumbered
         accepted: Accepted
         rejected: Rejected
-        total_accepted: Total Loans Accepted 
+        total_accepted: Total Loans Accepted
         total_submitted: Total Loans Submitted
         version_request: To request an expanded version of this report or to obtain a prior version, contact Collateral Services at %{phone_number}
-        report_details: This report reflects the most recent data available after each MCU has been processed. Only the current report is available. An email with an expanded version of this report that includes detailed rejection and inconsistency information is sent to your institution each time an MCU is processed. 
+        report_details: This report reflects the most recent data available after each MCU has been processed. Only the current report is available. An email with an expanded version of this report that includes detailed rejection and inconsistency information is sent to your institution each time an MCU is processed.
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
