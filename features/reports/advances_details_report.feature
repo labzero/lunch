@@ -77,6 +77,42 @@ Scenario: Member enters a date occurring after the maximum allowed date
   And I click the datepicker apply button
   Then I should see a "Advances Detail" report as of last business day
 
+@jira-mem-890 @jira-1232
+Scenario: Member enters a date occurring after the maximum allowed date on the last day of the month
+  Given that today's date is the last day of last month
+  Given I am on the "Advances Detail" report page
+  When I click the datepicker field
+  And I write tomorrow's date in the datepicker start input field
+  And I click the datepicker apply button
+  Then I should see a "Advances Detail" report as of last business day
+
+@jira-mem-890 @jira-1232
+Scenario: Member enters a date occurring after the maximum allowed date on the first day of the month
+  Given that today's date is the first day of this month
+  Given I am on the "Advances Detail" report page
+  When I click the datepicker field
+  And I write tomorrow's date in the datepicker start input field
+  And I click the datepicker apply button
+  Then I should see a "Advances Detail" report as of last business day
+
+@jira-mem-890 @jira-1232
+Scenario: Member enters a date occurring after the maximum allowed date on the last day of the quarter
+  Given that today's date is the last day of last quarter
+  Given I am on the "Advances Detail" report page
+  When I click the datepicker field
+  And I write tomorrow's date in the datepicker start input field
+  And I click the datepicker apply button
+  Then I should see a "Advances Detail" report as of last business day
+
+@jira-mem-890 @jira-1232
+Scenario: Member enters a date occurring after the maximum allowed date on the first day of this quarter
+  Given that today's date is the first day of this quarter
+  Given I am on the "Advances Detail" report page
+  When I click the datepicker field
+  And I write tomorrow's date in the datepicker start input field
+  And I click the datepicker apply button
+  Then I should see a "Advances Detail" report as of last business day
+
 @data-unavailable @jira-mem-283 @jira-mem-1053
 Scenario: No data is available to show in the Advances Detail Report
   Given I am on the "Advances Detail" report page

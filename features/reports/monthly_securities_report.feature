@@ -55,6 +55,24 @@ Feature: Visiting the Monthly Securities Position Report Page
     And I click the datepicker apply button
     Then I should see a "Monthly Securities Position" report as of the end of the last valid month
 
+  @jira-mem-890 @jira-mem-1220
+  Scenario: Member enters a date occurring after the maximum allowed date on the last day of the month
+    Given that today's date is the last day of last month
+    And I am on the "Monthly Securities Position" report page
+    When I click the datepicker field
+    And I write tomorrow's date in the datepicker start input field
+    And I click the datepicker apply button
+    Then I should see a "Monthly Securities Position" report as of the last day of last month
+
+  @jira-mem-890 @jira-mem-1220
+  Scenario: Member enters a date occurring after the maximum allowed date on the first day of the month
+    Given that today's date is the first day of this month
+    And I am on the "Monthly Securities Position" report page
+    When I click the datepicker field
+    And I write tomorrow's date in the datepicker start input field
+    And I click the datepicker apply button
+    Then I should see a "Monthly Securities Position" report as of the last day of last month
+
   @data-unavailable @jira-mem-283 @jira-mem-1053
   Scenario: No data is available to show in the monthly securities position report
     Given I am on the "Monthly Securities Position" report page

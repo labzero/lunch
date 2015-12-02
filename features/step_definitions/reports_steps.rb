@@ -259,6 +259,11 @@ def most_recent_business_day(d)
   d
 end
 
+Then(/^I should see a "(.*?)" report as of the last day of last month$/) do |report_type|
+  date = (@today - 1.month).end_of_month
+  step %{I should see a "#{report_type}" report as of "#{date}"}
+end
+
 Then(/^I should see a "(.*?)" report as of "(.*?)"$/) do |report_type, as_of_date|
   as_of_date = as_of_date.to_date
   summary_statement = case report_type
