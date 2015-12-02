@@ -35,28 +35,13 @@ class DashboardController < ApplicationController
     current_user_roles
 
     profile = member_balances.profile
-    
+
     # Recent Activity
-    @job_status_url = false
-    @load_url = false
     @recent_activity_data = []
-    if params[:recent_activity_job_id] # Job has finished, get results
-      job_status = JobStatus.find_by(id: params[:recent_activity_job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
-      raise ActiveRecord::RecordNotFound unless job_status
-
-      # grab recent activities
-      activities = JSON.parse(job_status.result_as_string).collect! {|o| o.with_indifferent_access}
-      job_status.destroy
-
-      @recent_activity_data = process_recent_activities(activities)
-
-      render partial: 'dashboard/dashboard_recent_activity', locals: {table_data: @recent_activity_data}, layout: false if request.xhr?
-    else
-      job_status = MemberBalanceTodaysCreditActivityJob.perform_later(current_member_id).job_status
-      job_status.update_attributes!(user_id: current_user.id)
-      @job_status_url = job_status_url(job_status)
-      @load_url = dashboard_url(recent_activity_job_id: job_status.id)
-    end
+    job_status = MemberBalanceTodaysCreditActivityJob.perform_later(current_member_id).job_status
+    job_status.update_attributes!(user_id: current_user.id)
+    @recent_activity_job_status_url = job_status_url(job_status)
+    @recent_activity_load_url = dashboard_recent_activity_url(recent_activity_job_id: job_status.id)
 
     # @account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
     if !profile
@@ -294,6 +279,24 @@ class DashboardController < ApplicationController
     response[:quick_advances_active] = etransact_service.etransact_active?
     response[:rate] = fhlb_formatted_number(response[:rate], precision: 2, html: false)
     render json: response
+  end
+
+  def recent_activity
+    @recent_activity_data = []
+    raise ArgumentError, "No job id given for recent_activity" unless params[:recent_activity_job_id]
+    job_status = JobStatus.find_by(id: params[:recent_activity_job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+    raise ActiveRecord::RecordNotFound unless job_status
+
+    # grab recent activities
+    activities = JSON.parse(job_status.result_as_string).collect! {|o| o.with_indifferent_access}
+    job_status.destroy
+
+    @recent_activity_data = process_recent_activities(activities)
+    if request.xhr?
+      render partial: 'dashboard/dashboard_recent_activity', locals: {table_data: @recent_activity_data}, layout: false
+    else
+      raise "Invalid request: must be XMLHttpRequest (xhr) in order to be valid"
+    end
   end
 
   private

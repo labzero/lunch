@@ -270,49 +270,14 @@ RSpec.describe DashboardController, :type => :controller do
           expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
           get_index
         end
-        it 'sets @job_status_url to the proper url' do
+        it 'sets @recent_activity_job_status_url to the proper url' do
           expect(controller).to receive(:job_status_url).with(job_status).and_return(job_status_url)
           get_index
-          expect(assigns[:job_status_url]).to eq(job_status_url)
+          expect(assigns[:recent_activity_job_status_url]).to eq(job_status_url)
         end
-        it 'sets @load_url to the dashboard_url with the `recent_activity_job_id` param set' do
+        it 'sets @recent_activity_load_url to the dashboard_recent_activity_url with the `recent_activity_job_id` param set' do
           get_index
-          expect(assigns[:load_url]).to eq(dashboard_url(recent_activity_job_id: job_id))
-        end
-      end
-      describe 'when the `recent_activity_job_id` param is set' do
-        let(:job_id) { double('Job ID') }
-        let(:get_index) { get :index, recent_activity_job_id: job_id }
-        let(:activities) { double('parsed recent credit activities', collect!: nil) }
-        let(:processed_activities) { double('result of `process_recent_activities`') }
-        before do
-          allow(JobStatus).to receive(:find_by).and_return(job_status)
-          allow(JSON).to receive(:parse).and_call_original
-          allow(JSON).to receive(:parse).with(job_status_as_string).and_return(activities)
-          allow(controller).to receive(:process_recent_activities)
-        end
-        it 'finds the JobStatus by id, user_id and status' do
-          expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: user_id, status: JobStatus.statuses[:completed]).and_return(job_status)
-          get_index
-        end
-        it 'raises an exception if no JobStatus is found' do
-          allow(JobStatus).to receive(:find_by)
-          expect{get_index}.to raise_error(ActiveRecord::RecordNotFound )
-        end
-        it 'destroys the job_status' do
-          expect(job_status).to receive(:destroy)
-          get_index
-        end
-        it 'sets @recent_activity_data to the result of passing the parsed activities hash to the `process_recent_activities` private method' do
-          allow(activities).to receive(:collect!).and_return(activities)
-          allow(controller).to receive(:process_recent_activities).with(activities).and_return(processed_activities)
-          get_index
-          expect(assigns[:recent_activity_data]).to eq(processed_activities)
-        end
-        it 'renders the `dashboard/dashboard_recent_activity` view when the request is XHR' do
-          allow(request).to receive(:xhr?).and_return(true)
-          get_index
-          expect(response).to render_template({partial: 'dashboard/_dashboard_recent_activity', layout: false})
+          expect(assigns[:recent_activity_load_url]).to eq(dashboard_recent_activity_url(recent_activity_job_id: job_id))
         end
       end
     end
@@ -657,6 +622,57 @@ RSpec.describe DashboardController, :type => :controller do
         expect(rate_service_response).to receive(:[]=).with(:rate, rate)
         get :current_overnight_vrc
       end
+    end
+  end
+
+  describe 'GET recent_activity' do
+    let(:user_id) { rand(1..9999) }
+    let(:job_status_as_string) { double('job status as string') }
+    let(:job_status) { double('an instance of JobStatus', update_attributes!: nil, id: job_id, result_as_string: job_status_as_string, destroy: nil) }
+    let(:job) { double('an instance of the MemberBalanceTodaysCreditActivityJob', job_status: job_status) }
+    let(:current_user) { double('User', id: user_id, :accepted_terms? => true)}
+    let(:job_id) { double('Job ID') }
+    let(:recent_activity) { get :recent_activity, recent_activity_job_id: job_id }
+    let(:activities) { double('parsed recent credit activities', collect!: nil) }
+    let(:processed_activities) { double('result of `process_recent_activities`') }
+    before do
+      allow(controller).to receive(:current_user_roles)
+      allow(controller).to receive(:current_user).and_return(current_user)
+      allow(controller).to receive(:process_recent_activities)
+      allow(JobStatus).to receive(:find_by).and_return(job_status)
+      allow(JSON).to receive(:parse).and_call_original
+      allow(JSON).to receive(:parse).with(job_status_as_string).and_return(activities)
+      allow(request).to receive(:xhr?).and_return(true)
+    end
+    it_behaves_like 'a user required action', :get, :recent_activity
+    it 'finds the JobStatus by id, user_id and status' do
+      expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: user_id, status: JobStatus.statuses[:completed]).and_return(job_status)
+      recent_activity
+    end
+    it 'raises an ArgumentError if no `recent_activity_job_id` param is passed' do
+      expect{get :recent_activity}.to raise_error(ArgumentError)
+    end
+    it 'raises an exception if no JobStatus is found' do
+      allow(JobStatus).to receive(:find_by)
+      expect{recent_activity}.to raise_error(ActiveRecord::RecordNotFound )
+    end
+    it 'destroys the job_status' do
+      expect(job_status).to receive(:destroy)
+      recent_activity
+    end
+    it 'sets @recent_activity_data to the result of passing the parsed activities hash to the `process_recent_activities` private method' do
+      allow(activities).to receive(:collect!).and_return(activities)
+      allow(controller).to receive(:process_recent_activities).with(activities).and_return(processed_activities)
+      recent_activity
+      expect(assigns[:recent_activity_data]).to eq(processed_activities)
+    end
+    it 'renders the `dashboard/dashboard_recent_activity` view' do
+      recent_activity
+      expect(response).to render_template({partial: 'dashboard/_dashboard_recent_activity', layout: false})
+    end
+    it 'raises an exception when the request is not XHR' do
+      allow(request).to receive(:xhr?).and_return(false)
+      expect{recent_activity}.to raise_exception
     end
   end
 

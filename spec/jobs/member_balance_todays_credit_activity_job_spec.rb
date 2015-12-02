@@ -10,9 +10,9 @@ RSpec.describe MemberBalanceTodaysCreditActivityJob, type: :job do
     run_job
   end
   [:development, :test].each do |env|
-    it "should sleep for 3s in the #{env} environment" do
+    it "should sleep for 5s in the #{env} environment" do
       allow(Rails.env).to receive(:production?).and_return(false)
-      expect(subject).to receive(:sleep).with(3)
+      expect(subject).to receive(:sleep).with(5)
       run_job
     end
   end

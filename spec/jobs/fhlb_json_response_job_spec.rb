@@ -7,7 +7,7 @@ RSpec.describe FhlbJsonResponseJob, type: :job do
     let(:job_status) { double('job status instance', canceled?: false, :result= => nil, :status= => nil, :no_download= => nil, save!: nil) }
     let(:args) { double('arguments') }
     let(:block) { double('a block of code') }
-    let(:run_job) { base_instance.perform_with_json_result(args, block) }
+    let(:run_job) { base_instance.perform(args, block) }
     let(:results) { double('result of the perform_without_json_result call') }
     let(:file) { double('instance of StringIOWithFilename', :content_type= => nil, :original_filename= => nil, ) }
     before do
