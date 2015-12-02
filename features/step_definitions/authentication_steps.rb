@@ -46,9 +46,13 @@ Then(/^I should see the Terms of Use page$/) do
   page.assert_selector('.terms-row h1', text: I18n.t('terms.title'))
 end
 
-When (/^I accept the Terms of Use$/) do
+When(/^I (accept|do not accept) the Terms of Use$/) do |button|
   @login_flag = flag_page
-  page.find(".primary-button[value=\'#{I18n.t('terms.agree')}\']").click
+  if button == 'accept'
+    page.find(".primary-button[value=\'#{I18n.t('terms.agree')}\']").click
+  else
+    page.find(".secondary-button", text: /#{Regexp.quote(I18n.t('terms.cancel'))}/i).click
+  end
   wait_for_unflagged_page(@login_flag)
 end
 
