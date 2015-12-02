@@ -280,7 +280,7 @@ en:
     save: Save
     save_message: Last auto-saved
     account:
-      title: Manage Access
+      title: Manage Users
       actions:
         lock: Lock
         unlock: Unlock
@@ -332,45 +332,46 @@ en:
       save_button: Save new password
     two_factor:
       title: Manage Token
-      description: Manage authentication with your SecurID token.
-      help_html: 'To request a new SecurID token or get help with an existing one, <a href="%{url}">email Web Support</a> or call them at %{phone_number}.'
+      help_html: To request a new SecurID token or get help with an existing one, contact <a href="%{url}">Web Support</a> at %{phone_number}.
       new_pin:
-        title: Set Token PIN for a New SecurID Token
+        title: Create Token PIN for a New SecurID Token
+        description_html: Contact <a href="%{url}">Web Support</a> at %{phone_number} to activate a new SecurID token. Once activated, you may set your PIN.
         description: If you just got a new SecurID token and need to set the PIN for it. Use Reset Token PIN if you forgot your PIN.
-        cta: Set New Token PIN
-        prompt_current: Enter your current token code.
-        prompt_new_pin: Enter your new PIN.
+        cta: Create New Token PIN
+        prompt_current: Enter the six-digit code shown on your token.
+        prompt_new_pin: Enter your new 4-digit PIN.
         new_pin: New PIN
-        confirm_pin: Re-Enter PIN
-        save: Save PIN
-        success: Your token PIN has been set.
-        error: We failed to set your token PIN. Please contact Web Support for further assistance.
+        confirm_pin: Re-enter PIN
+        save: Create PIN
+        success: Your token PIN has been created.
+        error_html: We were unable to create your token PIN. Please contact <a href="%{url}">Web Support</a> at %{phone_number} for further assistance.
         pin_mismatch: PINs don't match.
       reset_pin:
         title: Reset Token PIN
-        description: "If you can't remember your token PIN, contact Web Support before resetting it."
+        description: If you can’t remember your 4-digit token PIN, contact Web Support before resetting it.
         cta: Reset Token PIN
         hint: 'Note: You must save your new PIN before the token code you enter below expires.'
-        prompt_current_pin: Enter your current PIN and a token code.
-        prompt_new_pin: Enter your new PIN.
+        prompt_current_pin: Enter your current 4-digit PIN and the six-digit code shown on your token.
+        prompt_new_pin: Enter your new 4-digit PIN.
         new_pin: New PIN
-        confirm_pin: Re-Enter PIN
+        confirm_pin: Re-enter new PIN
         save: Save PIN
-        success: We reset your token PIN.
-        error: We failed to reset your token PIN. Please contact Web Support for further assistance.
+        success: Your token PIN has been reset.
+        error_html: We were unable to reset your token PIN. Please contact <a href="%{url}">Web Support</a> at %{phone_number} for further assistance.
         pin_mismatch: PINs don't match.
       resynchronize:
-        title: Reset Token
-        description: If your token codes are no longer accepted when you try to log in, you may need to reset your token. Contact Web Support before resetting it.
-        cta: Reset Token
-        save: Reset Token
+        title: Synchronize Token
+        description: If your token codes are no longer accepted, you may need to synchronize your token.
+        cta: Synchronize Token
+        save: Synchronize Token
+        first_token: First Token Code
         next_token: Second Token Code
-        success: We reset your token.
-        error: We failed to reset your token. Please contact Web Support for further assistance.
+        success: Your token has been synchronized.
+        error_html: We were unable to synchronize your token. Please contact <a href="%{url}">Web Support</a> at %{phone_number} for further assistance.
         steps:
-          enter_original: Enter a token code and your PIN.
+          enter_original: Enter your PIN and the 6-digit code shown on your token.
           wait_next: Wait for the next token code to appear, then enter it.
-          submit: Press 'Reset Token' before the second token code expires.
+          submit: Press ‘Synchronize Token’ before the second token code changes.
     email:
       title: Emails
       header: Choose which email messages to receive

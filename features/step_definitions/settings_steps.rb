@@ -128,11 +128,11 @@ When(/^I enter two different values for the new PIN$/) do
 end
 
 Then(/^I should see the failed to reset PIN message$/) do
-  page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(I18n.t('settings.two_factor.reset_pin.error'))}\z/, visible: true)
+  page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(strip_links(I18n.t('settings.two_factor.reset_pin.error_html', phone_number: web_support_phone_number, url: web_support_email)))}\z/, visible: true)
 end
 
 Then(/^I should see the failed to set PIN message$/) do
-  page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(I18n.t('settings.two_factor.new_pin.error'))}\z/, visible: true)
+  page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(strip_links(I18n.t('settings.two_factor.new_pin.error_html', phone_number: web_support_phone_number, url: web_support_email)))}\z/, visible: true)
 end
 
 When(/^I click on the resynchronize token CTA$/) do
@@ -169,7 +169,7 @@ When(/^I enter a good next token$/) do
 end
 
 Then(/^I should see the failed to resynchronize token message$/) do
-    page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(I18n.t('settings.two_factor.resynchronize.error'))}\z/, visible: true)
+    page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(strip_links(I18n.t('settings.two_factor.resynchronize.error_html', phone_number: web_support_phone_number, url: web_support_email)))}\z/, visible: true)
 end
 
 Then(/^I should see current password validations$/) do
