@@ -2300,6 +2300,7 @@ en:
       no_transfer: You may not assign this Terms of Use Agreement to any other party. The Bank may assign or delegate certain of its rights and responsibilities under this Terms of Use Agreement to independent contractors or other third parties.
     section_headings_disclaimer: The section headings in this Agreement are for convenience only and have no legal or contractual effect.
     agree: I agree to the terms of use
+    cancel: Cancel and log out
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

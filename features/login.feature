@@ -83,6 +83,15 @@ Scenario: User cannot enter site without accepting the Terms of Use
   When I visit the dashboard
   Then I should see the Terms of Use page
 
+@jira-mem-1041 @local-only @first-time-user
+Scenario: User can log out without accepting the Terms of Use
+  Given I am logged out
+  And I visit the root path
+  And I fill in and submit the login form with a first-time user
+  Then I should see the Terms of Use page
+  When I do not accept the Terms of Use
+  Then I should be logged out
+
 @jira-mem-1163 @local-only @first-time-user
 Scenario: User logins are case insensitive
   Given I am logged out
