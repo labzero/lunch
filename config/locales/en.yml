@@ -515,8 +515,8 @@ en:
         rates: View Current Rates
       preview:
         title: Initiate Advance
-        intro: Please review the details below. If everything looks correct, enter your SecurID credentials below and then click “Initiate Advance.” If not, click "Back."
-        elevated_intro: Please review the details below. If everything looks correct, click “Initiate Advance.” If not, click "Back."
+        intro: Please review the details below. If everything looks correct, enter your SecurID credentials below and then click “Initiate Advance.” If not, click “Back.”
+        elevated_intro: Please review the details below. If everything looks correct, click “Initiate Advance.” If not, click “Back.”
         lock_rate: This rate is locked for 60 seconds.
         initiate: Please wait while we initiate your advance. This may take about 30 seconds.
         footer: By executing this advance, you commit %{bank_name} to take down the requested advance in the principal amount and upon the terms shown here.
@@ -762,7 +762,7 @@ en:
       amount_per_overdraft: '%{amount} per overdraft'
       amount_per_wire: '%{amount} per wire'
       amount_per_statement: '%{amount} per item or statement'
-      amount_per_hour: '%{amount} per hour'  
+      amount_per_hour: '%{amount} per hour'
     forms:
       title: Forms
       agreements:
@@ -1372,10 +1372,10 @@ en:
         renumbered: Renumbered
         accepted: Accepted
         rejected: Rejected
-        total_accepted: Total Loans Accepted 
+        total_accepted: Total Loans Accepted
         total_submitted: Total Loans Submitted
         version_request: To request an expanded version of this report or to obtain a prior version, contact Collateral Services at %{phone_number}
-        report_details: This report reflects the most recent data available after each MCU has been processed. Only the current report is available. An email with an expanded version of this report that includes detailed rejection and inconsistency information is sent to your institution each time an MCU is processed. 
+        report_details: This report reflects the most recent data available after each MCU has been processed. Only the current report is available. An email with an expanded version of this report that includes detailed rejection and inconsistency information is sent to your institution each time an MCU is processed.
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
