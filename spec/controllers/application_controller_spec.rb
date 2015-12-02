@@ -178,6 +178,13 @@ RSpec.describe ApplicationController, :type => :controller do
     end
   end
 
+  describe '`session_elevate!` method' do
+    it 'sets `securid_authenticated` to true' do
+      controller.session_elevate!
+      expect(session['securid_authenticated']).to be(true)
+    end
+  end
+
   describe '`current_member_name` method' do
     let(:member_name) { double('A Member Name') }
     let(:member_id) { double('A Member ID') }
