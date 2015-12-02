@@ -286,31 +286,39 @@ class ReportsController < ApplicationController
   def capital_stock_trial_balance
     @max_date = most_recent_business_day(Time.zone.today - 1.day)
     @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
-      summary = { certificates: [], number_of_shares: 0, number_of_certificates: 0 }
+    export_format = params[:export_format]
+    @report_name = t('reports.pages.capital_stock_trial_balance.title')
+    if export_format == 'xlsx'
+      job_status = RenderReportExcelJob.perform_later(current_member_id, 'capital_stock_trial_balance', "capital_stock_trial_balance-#{@start_date.to_s}", {start_date: @start_date.to_s}).job_status
+      job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
     else
-      summary = member_balances.capital_stock_trial_balance(@start_date)
-      raise StandardError, "There has been an error and ReportsController#capital_stock_trial_balance has returned nil. Check error logs." if summary.blank?
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
+        summary = { certificates: [], number_of_shares: 0, number_of_certificates: 0 }
+      else
+        summary = member_balances.capital_stock_trial_balance(@start_date)
+        raise StandardError, "There has been an error and ReportsController#capital_stock_trial_balance has returned nil. Check error logs." if summary.blank?
+      end
+      @picker_presets         = date_picker_presets(@start_date, nil, nil, @max_date)
+      @number_of_shares       = summary[:number_of_shares]
+      @number_of_certificates = summary[:number_of_certificates]
+      column_headings = [t('reports.pages.capital_stock_trial_balance.certificate_sequence'),
+                         t("global.issue_date"),
+                         t('reports.pages.capital_stock_trial_balance.transaction_type'),
+                         t('reports.pages.capital_stock_trial_balance.shares_outstanding')]
+      certificates = summary[:certificates].map do |certificate|
+        { columns: [{value: certificate[:certificate_sequence], type: nil,     classes: [:'report-cell-narrow']},
+                    {value: certificate[:issue_date],           type: :date,   classes: [:'report-cell-narrow']},
+                    {value: certificate[:transaction_type],     type: nil,     classes: [:'report-cell-narrow']},
+                    {value: certificate[:shares_outstanding],   type: :number, classes: [:'report-cell-narrow']}] }
+      end
+      footer = [
+          {value: t('reports.pages.capital_stock_trial_balance.total_shares_outstanding'), colspan: 3},
+          {value: summary[:number_of_shares], type: :number, classes: [:'report-cell-narrow']}
+      ]
+      @capital_stock_trial_balance_table_data = { column_headings: column_headings, rows: certificates, footer: footer }
     end
-    @picker_presets         = date_picker_presets(@start_date, nil, nil, @max_date)
-    @number_of_shares       = summary[:number_of_shares]
-    @number_of_certificates = summary[:number_of_certificates]
-    column_headings = [t('reports.pages.capital_stock_trial_balance.certificate_sequence'),
-                       t("global.issue_date"),
-                       t('reports.pages.capital_stock_trial_balance.transaction_type'),
-                       t('reports.pages.capital_stock_trial_balance.shares_outstanding')]
-    certificates = summary[:certificates].map do |certificate|
-      { columns: [{value: certificate[:certificate_sequence], type: nil,     classes: [:'report-cell-narrow']},
-                  {value: certificate[:issue_date],           type: :date,   classes: [:'report-cell-narrow']},
-                  {value: certificate[:transaction_type],     type: nil,     classes: [:'report-cell-narrow']},
-                  {value: certificate[:shares_outstanding],   type: :number, classes: [:'report-cell-narrow']}] }
-    end
-    footer = [
-        {value: t('reports.pages.capital_stock_trial_balance.total_shares_outstanding'), colspan: 3},
-        {value: summary[:number_of_shares], type: :number, classes: [:'report-cell-narrow']}
-    ]
-    @capital_stock_trial_balance_table_data = { column_headings: column_headings, rows: certificates, footer: footer }
   end
 
   def borrowing_capacity

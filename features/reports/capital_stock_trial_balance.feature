@@ -1,7 +1,8 @@
 @jira-mem-1020
 Feature: Visiting the Capital Stock Trial Balance Report Page
   As a user
-  I want to use visit the Capital Stock Trial Balance report page for the FHLB Member Portal
+  I want to use visit the aCapital Stock Trial Balance page for the FHLB Member Portal
+  In order to view the details of my Capital Stock Trial Balance
 
   Background:
     Given I am logged in
@@ -28,3 +29,10 @@ Feature: Visiting the Capital Stock Trial Balance Report Page
     Given I am on the "Capital Stock Trial Balance" report page
     When the "Capital Stock Trial Balance" report has been disabled
     Then I should see an empty report table with Data Unavailable messaging
+
+  @resque-backed @smoke @jira-mem-1066
+  Scenario: Member downloads an XLSX of the Capital Stock Trial Balance report
+    Given I am on the "Capital Stock Trial Balance" report page
+    When I request an XLSX
+    Then I should begin downloading a file
+
