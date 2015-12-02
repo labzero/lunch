@@ -189,6 +189,7 @@ $faded-opacity: 0.4 !default;
         border-right: 1px solid $light-blue;
         vertical-align: top;
         padding-top: 30px;
+        cursor: default;
         span {
           position: relative;
           display: inline-block;
@@ -196,8 +197,7 @@ $faded-opacity: 0.4 !default;
           line-height: $spinner-size;
           padding-left: $spinner-size + 20px;
           &:before {
-            content: "";
-            position: absolute;
+            @extend %absolute-pseudoelement;
             @include icon-loading;
             left: 0;
           }
