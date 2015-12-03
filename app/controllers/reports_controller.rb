@@ -3,6 +3,7 @@ class ReportsController < ApplicationController
   include CustomFormattingHelper
   include ReportsHelper
   include ActionView::Helpers::NumberHelper
+  include FinancialInstrumentHelper
 
   # Mapping of current reports onto flags defined in MembersService
   ADVANCES_DETAIL_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA, MembersService::ADVANCES_DETAIL_HISTORY]
@@ -1460,7 +1461,7 @@ class ReportsController < ApplicationController
           {type: :index, value: activity[:interest_rate]},
           {type: :date, value: activity[:funding_date]},
           {type: (:date if maturity_date.is_a?(Date)), value: maturity_date},
-          {value: activity[:product_description]}
+          {value: financial_instrument_standardize(activity[:product_description])}
         ]
       }
     end
