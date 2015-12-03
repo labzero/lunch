@@ -868,6 +868,11 @@ en:
         title: Requirements
       applications:
         title: Applications
+  securities:
+    title: Securities
+    redirect:
+      title: You are being redirected to the Bank’s eTransact Securities site.
+      message: You will be prompted to log in again.
   reports:
     meta_title: FHLB - Reports
     title: Reports
