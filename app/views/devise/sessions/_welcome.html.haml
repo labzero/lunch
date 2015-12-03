@@ -10,5 +10,5 @@
     .column-4x8-left
       &nbsp;
     .column-4x8-right
-      %p= t('welcome.intro_html', url: web_support_email, phone_number: web_support_phone_number)
+      %p.welcome-intro= t('welcome.intro_html', url: web_support_email, phone_number: web_support_phone_number)
       = yield
