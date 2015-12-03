@@ -1,0 +1,6 @@
+.error-page
+  %h1= t('errors.restricted.headline')
+  %p= t('errors.restricted.summary')
+  %p= t('errors.restricted.assistance_html', email: web_support_email, phone_number: web_support_phone_number)
+  .logo-container
+    .logo= t('welcome.logo')

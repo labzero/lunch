@@ -36,6 +36,20 @@ RSpec.describe ApplicationController, :type => :controller do
         end
       end
     end
+
+    describe 'PageRestricted' do
+      let(:error) {Pundit::NotAuthorizedError.new}
+      before { allow(error).to receive(:backtrace).and_return(backtrace) }
+      it 'captures all PageRestricted and displays the page-restricted error view' do
+        expect(controller).to receive(:render).with('error/403', {:layout=>"error", :status=>403})
+        controller.send(:handle_exception, error)
+      end
+      it 'rescues any exceptions raised when rendering the `error/403` view' do
+        expect(controller).to receive(:render).with('error/403', {:layout=>"error", :status=>403}).and_raise(error)
+        expect(controller).to receive(:render).with({:text=>error, :status=>500})
+        controller.send(:handle_exception, error)
+      end
+    end
   end
 
   describe '`after_sign_out_path_for(resource)` method' do
