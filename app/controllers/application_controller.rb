@@ -12,10 +12,15 @@ class ApplicationController < ActionController::Base
   HTTP_404_ERRORS = [ActionController::RoutingError, ActionController::UnknownController, ::AbstractController::ActionNotFound, ActiveRecord::RecordNotFound]
 
   rescue_from Exception do |exception|
-    unless Rails.env.production?
-      raise exception
+    case exception
+    when ActionController::InvalidAuthenticityToken
+      handle_bad_csrf
     else
-      handle_exception(exception)
+      unless Rails.env.production?
+        raise exception
+      else
+        handle_exception(exception)
+      end
     end
   end
 
@@ -113,6 +118,11 @@ class ApplicationController < ActionController::Base
     request.env["devise.skip_trackable"] = true # tells Warden not to reset Timeoutable timer for this request
     yield
     request.env["devise.skip_trackable"] = false
+  end
+
+  def handle_bad_csrf
+    reset_session
+    redirect_to(logged_out_path)
   end
 
 end
