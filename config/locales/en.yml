@@ -2104,6 +2104,34 @@ en:
       renewal: Renewal
       repayment: Repayment
       bank_terminate: "Bank's Right to Terminate"
+    swaps:
+      title: Interest Rate Swaps, Caps & Floors
+      summary_html: "At this time, the Bank is not offering stand-alone interest rate swaps, caps, and floors, <a href=%{url}>pending publication</a> of final rules by the U.S. Commodity Futures Trading Commission (CFTC) that will affect the Bank's ability to offer these products. The rules are expected to be published later this year. The following information is provided for members that have already purchases interest rate swaps, caps, and floors from the Bank."
+      payment:
+        title: Payment
+        net_payment: The Bank will determine the net payment due on the scheduled payment dates of a swap. Only the net amount due will be credited to or debited from your Settlement/ Transaction Account with the Bank.
+        make_payment: The Bank will make payment on an interest rate cap or floor according to the terms of the Bank’s confirmation for that transaction.
+      specific_collateral_requirements:
+        title: Specific Collateral Requirements
+        minimum: The minimum collateral requirement on any interest rate swap, cap, or floor with the Bank can never fall below zero, and the Bank will not post collateral with the member.
+        no_requirements: There are no collateral requirements for interest rate caps and floors purchased by a member.
+        requirements: The collateral requirement for interest rate swaps and for interest rate caps and floors sold by a member to the Bank is the sum of the gross current exposure and the gross potential exposure.
+        gross: "Gross current exposure is calculated as the greater of:"
+        zero_or: zero, or
+        fair_value: the fair value of the derivative plus accrued interest receivable and minus accrued interest payable.
+        gross_potential: "Gross potential exposure is calculated based on the original term for new transactions (from the trade date to the maturity date) or the remaining term to maturity for existing transactions (from the reporting date to the maturity date), as follows:"
+      gross_exposure_table:
+        original: Original or Remaining Term
+        gross_exposure: Gross Potential Exposure
+        one_year: "≤ 1 year"
+        zero: zero
+        greater_one_year: "> 1 year and = 5 years"
+        five_times: 0.005 times the notional amount
+        five_years: "> 5 years"
+        fifteen_times: 0.015 times the notional amount
+      early_termination:
+        title: Early Termination
+        in_the_event: In the event of the early termination of an interest rate swap, cap, or floor, the Bank will calculate the required final payments in accordance with the terms of the Bank's International Swaps and Derivatives Association (ISDA) Master Agreement and related ISDA Schedule to the Master Agreement between the Bank and the member and with the terms of the Bank confirmation for that transaction.
   messages:
     meta_title: FHLB - Messages
     description: "Welcome to your Member Portal Inbox.\n\nHere you will find an archive of the Bank's recent announcements to members.\nYou may filter these announcements by topic using the sidebar menu."
