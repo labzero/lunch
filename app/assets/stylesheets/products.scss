@@ -48,27 +48,11 @@
   }
 }
 
-.product-mpf-page
+.product-page-mpf
 {
-  .column-2x10-right {
-    padding-right: 10px;
-  }
   h1 {
-    @extend %typography-page-title;
-    margin: 32px 0 17px;
     span {
       display: block;
-    }
-  }
-  h2 {
-    @extend %typography-section-title;
-    margin: 25px 0 10px;
-  }
-  h3 {
-    @extend %typography-subtitle;
-    margin: 0 0 8px;
-    &:not(:first-of-type) {
-      margin-top: 25px;
     }
   }
   h4 {
@@ -77,9 +61,6 @@
     color: $medium-gray;
     margin-top: 0;
     margin-bottom: 12px;
-  }
-  a {
-    @extend %link-style;
   }
 }
 

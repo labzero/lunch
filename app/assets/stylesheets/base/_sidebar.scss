@@ -1,3 +1,4 @@
+@import "base/links";
 .sidebar-row {
   .sidebar {
     ul {
@@ -6,16 +7,25 @@
       list-style: none;
     }
     li {
+      a {
+        @include undo-link-style;
+      }
       a, &.sidebar-label, span {
         padding: 10px;
         display: block;
         width: 100%;
         box-sizing: border-box;
         font-weight: $semibold-weight;
+        &:active {
+          color: $actionable-blue;
+        }
         &.active {
           background-color: $actionable-blue;
           color: $white;
           border-radius: $default-border-radius;
+          &:active {
+            color: $white;
+          }
         }
         &.disabled {
           color: $medium-gray;
@@ -42,11 +52,6 @@
       }
     }
   }
-
-  a {
-    color: $actionable-blue;
-    text-decoration: none;
-  }
 }
 
 .sidebar-row  .sidebar, .sidebar-row-main-content {
@@ -65,8 +70,5 @@
   }
   section {
     padding-left: $gutter-width;
-  }
-  a:not(.secondary-button):not(.primary-button) {
-    @extend %link-style;
   }
 }

@@ -20,9 +20,6 @@
   h2 + p, h3 + p {
     margin-top: 0;
   }
-  a {
-    @extend %link-style;
-  }
   ul {
     padding-left: 30px;
     margin-top: 0;

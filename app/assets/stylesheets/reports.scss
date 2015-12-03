@@ -3,9 +3,6 @@
     @extend %typography-page-title;
     margin: 32px 0 17px;
   }
-  a {
-    @extend %link-style;
-  }
 }
 
 .reports-table {
@@ -334,16 +331,6 @@
         }
       }
     }
-    .hide-detail-view {
-      @extend %link-style;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      margin: 0;
-      text-transform: uppercase;
-      cursor: pointer;
-
-    }
   }
   tbody td {
     table {
@@ -374,6 +361,16 @@
   text-transform: uppercase;
   cursor: pointer;
   vertical-align: top;
+}
+
+.hide-detail-view {
+  @extend %link-style;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  margin: 0;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
 .report-parent-table {
@@ -794,9 +791,6 @@ td.dataTables_empty {
       margin-top: 0;
     }
   }
-  a {
-    @extend %link-style;
-  }
   small {
     margin-bottom: 10px;
   }
@@ -1007,7 +1001,6 @@ td.dataTables_empty {
     }
     a {
       @extend %typography-table-heading;
-      @extend %link-style;
       text-transform: uppercase;
     }
   }
@@ -1165,9 +1158,6 @@ td.dataTables_empty {
 }
 
 @media print {
-  a, .report-main-body small a, .advances-main-body small a, .authorizations-report a, .reports a, .report a {
-    color: $print-link-color;
-  }
   .account-summary-report .report-table:not(.account-summary-collateral-totals) tbody td:first-child,
   .account-summary-report tfoot,
   .account-summary-collateral-totals tbody td {

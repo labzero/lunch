@@ -27,7 +27,6 @@ $faded-opacity: 0.4 !default;
 }
 
 %dashboard-module-link {
-  @extend %link-style;
   @extend %typography-header-nav;
   text-transform: uppercase;
   border: none;
@@ -163,7 +162,7 @@ $faded-opacity: 0.4 !default;
 }
 
 .dashboard-contact {
-  text-decoration: none;
+  @extend %undo-link-style;
   color: inherit;
   min-height: 54px;
   display: block;
@@ -200,9 +199,6 @@ $faded-opacity: 0.4 !default;
 }
 
 .dashboard-module-advances {
-  a {
-    @extend %link-style;
-  }
   p {
     color: $text-color;
   }
@@ -235,9 +231,9 @@ $faded-opacity: 0.4 !default;
 
 .quick-advance-limited-pricing-notice {
   @extend %typography-dashboard-gauge-label;
+  @extend %link-style;
   margin-top: 10px;
   text-transform: uppercase;
-  @extend %link-style;
   cursor: pointer;
 }
 
@@ -337,9 +333,6 @@ $breakdown-table-currency-width: 10px;
   }
   .borrowing-capacity-note {
     padding: 10px;
-    a {
-      @extend %link-style;
-    }
   }
 }
 
@@ -354,8 +347,8 @@ $breakdown-table-currency-width: 10px;
   @extend %typography-table-heading;
   text-align: right;
   a {
-    @extend %link-style;
     &.active {
+      @extend %undo-link-style;
       cursor: default;
       color: $text-color;
     }

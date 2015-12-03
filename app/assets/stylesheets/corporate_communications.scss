@@ -10,6 +10,7 @@
   border-top: 1px solid $light-blue;
   border-bottom: 1px solid $light-blue;
   a {
+    @extend %undo-link-style;
     display: block;
     padding: 10px 20px 5px 45px;
     position: relative;
@@ -141,9 +142,4 @@
       padding-right: 10px;
     }
   }
-}
-
-// needs this level of specificity to overrule on-hover underline
-.corporate-communications-index a:hover:not(.secondary-button):not(.primary-button):not(.total-button):not(.report-button-left):not(.split-button-left) {
-  text-decoration: none;
 }

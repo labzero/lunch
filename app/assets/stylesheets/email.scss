@@ -1,16 +1,10 @@
 @import "base/normalize";
 @import "base/colors";
 @import "base/fonts";
-@import "base/typography";
-@import "base/nav";
 
 body {
   font-size: $default-font-size;
   font-family: $default-font-family;
-}
-
-a {
-  @extend %link-style;
 }
 
 header {
