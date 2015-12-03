@@ -21,7 +21,7 @@
 en:
   global:
     na: N/A
-    vrc_overnight: VRC Overnight
+    standard_vrc_overnight: Standard VRC Overnight
     currency:
       thousand: T
       million: MM
@@ -615,7 +615,7 @@ en:
         borrowing_capacity_note_html: View your institution's <a href=%{url}>Borrowing Capacity</a> report for detailed information
     market_overview:
       title: Market Rates
-      vrc: 30-Day VRC Rate (%)
+      vrc: 30-Day Standard VRC Overnight Rate (%)
   resources:
     business_continuity:
       name: Business Continuity
