@@ -236,7 +236,7 @@ en:
     access_manager:
       title: Access Manager
       description_title: Access Manager
-      description: Identifies your institution's Access Manager(s), who will add and delete users, reset passwords, and lock or unlock website access accounts for individuals
+      description: The designated individuals identify your institution's Access Manager(s), who can add and delete users, reset passwords, and lock or unlock member portal access accounts for individuals.
     resolution:
       dropdown: Resolution and Authorization
       title: 'Resolution and Authorization: Member Transactions'
