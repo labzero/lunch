@@ -23,8 +23,8 @@
           %th.report-cell-narrow= t("global.issue_date")
           %th= t('reports.pages.capital_stock_activity.certificate_sequence')
           %th.report-cell-expanding= t('global.transaction_type')
-          %th= t('reports.pages.capital_stock_trial_balance.debit_shares')
-          %th= t('reports.pages.capital_stock_trial_balance.credit_shares')
+          %th= t('reports.pages.capital_stock_activity.debit_shares')
+          %th= t('reports.pages.capital_stock_activity.credit_shares')
           %th= t('reports.pages.capital_stock_activity.shares_outstanding')
       %tbody
         -@capital_stock_activity[:activities].to_a.each do |row|
