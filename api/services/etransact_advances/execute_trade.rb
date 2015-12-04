@@ -318,6 +318,7 @@ module MAPI
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_capital_stock(fhlbsfresponse, response, response_hash) if check_capstock
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_credit(fhlbsfresponse, response, response_hash)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_collateral(fhlbsfresponse, response, response_hash)
+                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_enabled_product(app.logger, app.settings.environment, advance_term, advance_type, response_hash)
 
                 # passed all checks
                 if response_hash['status'].blank?
@@ -330,8 +331,13 @@ module MAPI
           else
             if operation == 'EXECUTE'
               sleep(2) unless defined?(RSpec) # used to simulate performance of the actual trade service
-              response_hash['status'] = ['Success']
-              response_hash['confirmation_number'] = rand(100000..999999).to_s
+              if amount.to_i == 100005
+                response_hash['status'] ||= []
+                response_hash['status'] << 'DisabledProductError'
+              else
+                response_hash['status'] = ['Success']
+                response_hash['confirmation_number'] = rand(100000..999999).to_s
+              end
             else
               if (amount.to_i == 100001)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_credit_error.json')))
@@ -339,6 +345,9 @@ module MAPI
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_collateral_error.json')))
               elsif (amount.to_i == 100003)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_exceeds_total_daily_limit_error.json')))
+              elsif (amount.to_i == 100004)
+                response_hash['status'] ||= []
+                response_hash['status'] << 'DisabledProductError'
               elsif (amount.to_i < 1000000) || (!check_capstock)
                 response_hash['status'] = ['Success']
                 response_hash['confirmation_number'] = ''
@@ -446,6 +455,17 @@ module MAPI
           end
 
           hash.merge(new_hash){|key, old, new| old + new }
+        end
+
+        def self.check_enabled_product(logger, environment, type, term, response_hash)
+          new_hash = {}
+          loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(logger, environment)
+          unless loan_terms && loan_terms[type][term].with_indifferent_access['display_status']
+            new_hash = {
+              'status' => ['DisabledProductError']
+            }
+          end
+          response_hash.merge(new_hash){|key, old, new| old + new }
         end
       end
     end

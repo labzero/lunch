@@ -301,6 +301,7 @@ describe MAPI::ServiceApp do
       allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit) {|env, amount, hash| hash }
       allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_enabled_product) {|logger, env, type, term, hash| hash }
     end
     describe 'agency for 1 week' do
       let(:advance_type)  {'agency'}
@@ -647,6 +648,33 @@ describe MAPI::ServiceApp do
           allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(nil)
           expect{check_advance}.to raise_error
         end
+      end
+    end
+
+    describe '`check_enabled_product` method' do
+      let(:logger) { double(Logger) }
+      let(:environment) { double('An Environment') }
+      let(:type) { double('A Loan Type') }
+      let(:term) { double('A Loan Term') }
+      let(:response) { {'status' => [double('A Status')]} }
+      let!(:original_status) { response['status'] }
+      let(:call_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_enabled_product(logger, environment, type, term, response) }
+      let(:loan_term) { {display_status: false} }
+      let(:loan_terms) { { type => { term => loan_term } } }
+      before do
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(logger, environment).and_return(loan_terms)
+      end
+
+      it 'adds a status of `DisabledProductError` if the loan term is disabled' do
+        expect(call_method['status']).to eq(original_status + ['DisabledProductError'])
+      end
+      it 'adds a status of `DisabledProductError` if the loan term lookup fails' do
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(logger, environment).and_return(nil)
+        expect(call_method['status']).to eq(original_status + ['DisabledProductError'])
+      end
+      it 'leaves status unchanged if the loan term is enabled' do
+        loan_term[:display_status] = true
+        expect(call_method['status']).to eq(original_status)
       end
     end
   end
