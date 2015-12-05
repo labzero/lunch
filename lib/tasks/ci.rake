@@ -16,6 +16,17 @@ namespace :ci do
   task :sauce_connect do
     exec "sc -k #{ENV['SAUCE_ACCESS_KEY']} -u #{ENV['SAUCE_USERNAME']}"
   end
+
+  namespace :cucumber do
+    desc 'Runs the cukes in parallel'
+    task :parallel do
+      pid = fork do
+        runner_count = ENV['CUCUMBER_RUNNER_COUNT'] || 6
+        Bundler.clean_exec "RAILS_ENV=test parallel_test features --type cucumber --group-by runtime -n #{runner_count} --serialize-stdout"
+      end
+      Process.wait(pid)
+    end
+  end
 end
 
 namespace :spec do
