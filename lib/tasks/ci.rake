@@ -11,6 +11,11 @@ namespace :ci do
     end
     File.unlink('brakeman.txt')
   end
+
+  desc 'Launch SauceConnect'
+  task :sauce_connect do
+    exec "sc -k #{ENV['SAUCE_ACCESS_KEY']} -u #{ENV['SAUCE_USERNAME']}"
+  end
 end
 
 namespace :spec do
