@@ -57,5 +57,23 @@ module FhlbMember
     }
 
     config.x.advance_request.key_expiration = 1.hour
+
+    # Configure our cache
+
+    config.before_configuration do
+      require Rails.root.join('lib', 'redis_helper')
+      
+      ENV['CACHE_REDIS_URL'] ||= if ENV['REDIS_URL']
+        ::RedisHelper.add_url_namespace(ENV['REDIS_URL'], 'cache')
+      else
+        'redis://localhost:6379/cache'
+      end
+
+      cache_store_args = {
+        namespace: ::RedisHelper.namespace_from_url(ENV['CACHE_REDIS_URL']),
+        expires_in: 1.day
+      }
+      config.cache_store = :redis_store, ENV['CACHE_REDIS_URL'], cache_store_args
+    end
   end
 end
