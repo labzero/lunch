@@ -6,10 +6,9 @@ end
 
 
 session_store_args = {
-  servers: ENV['SESSION_REDIS_URL'],
+  servers: [{ url: ENV['SESSION_REDIS_URL'], namespace: RedisHelper.namespace_from_url(ENV['SESSION_REDIS_URL'])}],
   key: '_fhlb-member_session',
   expire_after: 20.minutes,
-  secure: Rails.env.production?,
-  namespace: RedisHelper.namespace_from_url(ENV['SESSION_REDIS_URL'])
+  secure: Rails.env.production?
 }
 Rails.application.config.session_store :redis_store, session_store_args
