@@ -153,7 +153,7 @@ class AdvanceRequest
   end
 
   def stock_choice=(choice)
-    choice = choice.to_sym
+    choice = choice.to_sym if choice
     raise "Unknown Stock Choice: #{choice}" if choice && !STOCK_CHOICES.include?(choice)
     @stock_choice = choice
   end

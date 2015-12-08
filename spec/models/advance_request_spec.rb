@@ -522,8 +522,9 @@ describe AdvanceRequest do
       allow(allowed_values).to receive(:include?).with(sym_value).and_return(false)
       expect{call_method}.to raise_error
     end
-    it 'raises an error if passed `nil`' do
-      expect{subject.stock_choice = nil}.to raise_error
+    it 'supports being set to `nil`' do
+      subject.stock_choice = nil
+      expect(subject.stock_choice).to be_nil
     end
     it 'stores the stock_choice' do
       call_method

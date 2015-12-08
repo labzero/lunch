@@ -289,3 +289,16 @@ Scenario: User navigates to Manage Advances page from quick advance confirmation
   And I successfully execute a quick advance
   When I click the Manage Advances button
   Then I should be on the Manage Advances page
+
+@jira-mem-1178
+Scenario: User backs out of an advance requiring a capital stock purchase and then takes the same advance out
+  Given I visit the dashboard
+  And I am on the quick advance stock purchase screen
+  And I select the continue with advance option
+  When I click on the continue with request button
+  Then I should see a preview of the quick advance
+  When I go back to the quick advance rate table
+  And I open the quick advance flyout and enter 1000131
+  And I select the rate with a term of "2week" and a type of "whole"
+  And I click on the initiate advance button
+  Then I should be on the quick advance stock purchase screen

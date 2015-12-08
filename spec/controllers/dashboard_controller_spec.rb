@@ -297,13 +297,13 @@ RSpec.describe DashboardController, :type => :controller do
     let(:username) {'Test User'}
     let(:advance_description) {double('some description')}
     let(:advance_program) {double('some program')}
-    let(:amount) { 100000 }
+    let(:amount) { rand(100010..999999) }
     let(:interest_day_count) { 'some interest_day_count' }
     let(:payment_on) { 'some payment_on' }
     let(:maturity_date) { 'some maturity_date' }
     let(:check_capstock) { true }
     let(:check_result) {{:status => 'pass', :low => 100000, :high => 1000000000}}
-    let(:make_request) { post :quick_advance_preview, interest_day_count: interest_day_count, payment_on: payment_on, maturity_date: maturity_date, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, check_capstock: check_capstock}
+    let(:make_request) { post :quick_advance_preview, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount }
     let(:advance_request) { double(AdvanceRequest, :type= => nil, :term= => nil, :amount= => nil, :stock_choice= => nil, validate_advance: true, errors: [], sta_debit_amount: 0, timestamp!: nil, amount: amount, id: SecureRandom.uuid) }
     before do
       allow(subject).to receive(:advance_request).and_return(advance_request)
@@ -328,6 +328,14 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'should validate the advance' do
       expect(advance_request).to receive(:validate_advance)
+      make_request
+    end
+    it 'sets the advance amount if passed an amount' do
+      expect(advance_request).to receive(:amount=).with(amount.to_s)
+      make_request
+    end
+    it 'clears the capital stock choice is passed an amount' do
+      expect(advance_request).to receive(:stock_choice=).with(nil)
       make_request
     end
     describe 'the rate is stale' do
