@@ -7,7 +7,7 @@ Feature: Visiting the Current Price Indications Report Page
 Background:
   Given I am logged in
 
-@smoke @jira-mem-315
+@jira-mem-315
 Scenario: Visit current price indications from header link
   Given I visit the dashboard
   When I select "Current" from the reports dropdown
@@ -15,7 +15,7 @@ Scenario: Visit current price indications from header link
   And I should see a report header with just freshness
   And I should see a report table with multiple data rows
 
-@smoke @jira-mem-315
+@jira-mem-315
 Scenario: Visiting the Current Price Indications Report Page
   Given I am on the "Current Price Indications" report page
   Then I should see "Standard Credit Program"
@@ -31,7 +31,7 @@ Scenario: Visiting the Current Price Indications Report Page
   And I should see STA rates report
   And I should see "General Information"
 
-@resque-backed @smoke @jira-mem-791
+@resque-backed @jira-mem-791
 Scenario: Member downloads an XLSX of the Current Price Indications report
   Given I am on the "Current Price Indications" report page
   When I request an XLSX
