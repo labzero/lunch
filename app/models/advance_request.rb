@@ -25,7 +25,7 @@ class AdvanceRequest
     :'2month', :'3month', :'6month', :'1year', :'2year', :'3year'
   ].freeze
 
-  READONLY_ATTRS = [:signer, :timestamp, :checked_stock, :member_id, :old_rate].freeze
+  READONLY_ATTRS = [:signer, :timestamp, :checked_stock, :member_id, :old_rate, :owners].freeze
   REQUEST_PARAMETERS = [
     :exception_message, :cumulative_stock_required,
     :current_trade_stock_required, :pre_trade_stock_required, :net_stock_required, :gross_amount,
@@ -56,6 +56,10 @@ class AdvanceRequest
       end
       transitions from: :preview, to: :executed
     end
+  end
+
+  def self.policy_class
+    AdvancePolicy
   end
 
   def initialize(member_id, signer, request=nil)
@@ -290,6 +294,8 @@ class AdvanceRequest
         @id = value
       when :timestamp
         @timestamp = value.to_datetime
+      when :owners
+        @owners = value.to_set
       when *READONLY_ATTRS
         instance_variable_set("@#{key}", value)
       when *(REQUEST_PARAMETERS + CORE_PARAMETERS)
@@ -329,6 +335,10 @@ class AdvanceRequest
 
   def inspect
     "<#{self.class}:#{id} state='#{current_state}' term='#{term}' type='#{type}' rate='#{rate}' amount='#{amount}' stock_choice='#{stock_choice}' errors=#{errors.inspect}>"
+  end
+
+  def owners
+    @owners ||= Set.new
   end
 
   def self.from_json(json, request=nil)
