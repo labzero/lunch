@@ -219,14 +219,16 @@ class User < ActiveRecord::Base
   def roles(request = ActionDispatch::TestRequest.new)
     @roles ||= (
       roles = []
-      # Hits ldap_groups and gets an array of the CN's of all the groups the user belongs to.
-      ldap_roles = self.ldap_groups
-      roles << ldap_roles.collect{|object| object.cn} unless ldap_roles.nil?
-      # Hit the MAPI endpoint to check if user is a signer. Need request object to connect to MAPI
-      user_service = UsersService.new(request)
-      user_service_roles = user_service.user_roles(username)
-      roles << user_service_roles unless user_service_roles.nil?
-      roles.flatten.collect{ |role| ROLE_MAPPING[role] }.compact
+      Devise::LDAP::Adapter.shared_connection do
+        # Hits ldap_groups and gets an array of the CN's of all the groups the user belongs to.
+        ldap_roles = self.ldap_groups
+        roles << ldap_roles.collect{|object| object.cn} unless ldap_roles.nil?
+        # Hit the MAPI endpoint to check if user is a signer. Need request object to connect to MAPI
+        user_service = UsersService.new(request)
+        user_service_roles = user_service.user_roles(username)
+        roles << user_service_roles unless user_service_roles.nil?
+        roles.flatten.collect{ |role| ROLE_MAPPING[role] }.compact
+      end
     )
   end
 

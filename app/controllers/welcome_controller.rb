@@ -46,14 +46,18 @@ class WelcomeController < ApplicationController
     end
 
     begin
-      ldap_intranet_status = Devise::LDAP::Connection.admin('intranet').search(filter: 'ou=FHLB-Accounts').present?
+      ldap_intranet_status = Devise::LDAP::Connection.admin('intranet').open do |ldap|
+        ldap.search(filter: 'ou=FHLB-Accounts').present?
+      end
     rescue Exception => e
       Rails.logger.error("LDAP Intranet check failed: #{e.message}")
       ldap_intranet_status = false
     end
 
     begin
-      ldap_extranet_status = Devise::LDAP::Connection.admin('extranet').search(filter: 'ou=eBiz').present?
+      ldap_extranet_status = Devise::LDAP::Connection.admin('extranet').open do |ldap|
+        ldap.search(filter: 'ou=eBiz').present?
+      end
     rescue Exception => e
       Rails.logger.error("LDAP Extranet check failed: #{e.message}")
       ldap_extranet_status = false

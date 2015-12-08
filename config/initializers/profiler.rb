@@ -4,6 +4,14 @@ if ENV['PROFILE_MODE'] == 'true'
   class Profiler
     include Singleton
 
+    def initialize
+      super
+      ActiveSupport::Notifications.subscribe('start_processing.action_controller') do |*args|
+        event = ActiveSupport::Notifications::Event.new *args
+        log_msg("REQUEST STARTED: #{event.payload.inspect}")
+      end
+    end
+
     def logger
       @logger ||= Logger.new(File.join(self.class.log_directory, 'performance.log'))
     end
@@ -14,11 +22,15 @@ if ENV['PROFILE_MODE'] == 'true'
       results = RubyProf.stop
     end
 
+    def log_msg(msg)
+      logger.debug(msg)
+    end
+
     def time(name)
       start = Time.now
       yield
       time = Time.now - start
-      logger.debug("%s - %f" % [name, time])
+      log_msg("%s - %f" % [name, time])
     end
 
     def self.profile(*args, &block)
