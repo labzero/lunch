@@ -1939,18 +1939,31 @@ RSpec.describe ReportsController, :type => :controller do
             end
             it 'contains all users sorted by last name then first name if the authorizations_filter is set to `all`' do
               make_request
-              expect(assigns[:authorizations_table_data][:rows].length).to eq(5)
-              expect(assigns[:authorizations_table_data][:rows][0][:columns].first[:value]).to eq(user_d[:display_name])
-              expect(assigns[:authorizations_table_data][:rows][1][:columns].first[:value]).to eq(user_e[:display_name])
-              expect(assigns[:authorizations_table_data][:rows][2][:columns].first[:value]).to eq(user_c[:display_name])
-              expect(assigns[:authorizations_table_data][:rows][3][:columns].first[:value]).to eq(user_b[:display_name])
-              expect(assigns[:authorizations_table_data][:rows][4][:columns].first[:value]).to eq(user_a[:display_name])
+              rows = assigns[:authorizations_table_data][:rows]
+              expect(rows.length).to eq(5)
+              rows.zip([user_d, user_e, user_c, user_b, user_a]).each do |row, user|
+                expect(row[:columns].first[:value]).to eq(user[:display_name])
+              end
             end
-            it 'only contains users with the proper role if an authorization_filter is set' do
+            it 'only contains signer managers if authorizations_filter is set to SIGNER_MANAGER' do
               get :authorizations, :authorizations_filter => User::Roles::SIGNER_MANAGER, job_id: job_id
               expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
               expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_a[:display_name])
               expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.resolution.title')])
+            end
+            it 'only contains collateral signers if authorizations_filter is set to COLLATERAL_SIGNER' do
+              get :authorizations, :authorizations_filter => User::Roles::COLLATERAL_SIGNER, job_id: job_id
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_b[:display_name])
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.collateral.title')])
+            end
+            it 'only contains wire signers if authorizations_filter is set to WIRE_SIGNER' do
+              get :authorizations, :authorizations_filter => User::Roles::WIRE_SIGNER, job_id: job_id
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(3)
+              expect(assigns[:authorizations_table_data][:rows][0][:columns].first[:value]).to eq(user_d[:display_name])
+              expect(assigns[:authorizations_table_data][:rows][1][:columns].first[:value]).to eq(user_e[:display_name])
+              expect(assigns[:authorizations_table_data][:rows][2][:columns].first[:value]).to eq(user_c[:display_name])
+              expect(assigns[:authorizations_table_data][:rows][0][:columns].last[:value]).to eq([I18n.t('user_roles.wire_transfer.title')])
             end
             it 'ignores users with no role or the eTransact role' do
               make_request
