@@ -53,7 +53,7 @@ RSpec.describe ReportsController, :type => :controller do
   login_user
 
   let(:today) { Time.zone.today }
-  let(:max_date) { today - 1.day }
+  let(:max_date) { controller.most_recent_business_day(today - 1.day)}
   let(:start_date) { today - 2.months }
   let(:restricted_start_date) { double('a restricted date')}
   let(:end_date) { today - 1.month }
