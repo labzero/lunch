@@ -39,21 +39,38 @@ describe MAPI::Shared::Utils::ClassMethods do
     let(:hash1)  { double('hash1') }
     let(:hash2)  { double('hash2') }
     let(:hash3)  { double('hash3') }
+    let(:hash4)  { { "A" =>  1,    "B" => "2",   "C" => "3.0" } }
+    let(:hash5)  { { "A" => "1",   "B" => "2.0", "C" =>  3    } }
+    let(:hash6)  { { "A" => "1.0", "B" =>  2,    "C" => "3"   } }
+    let(:hash7)  { { "A" =>  1,    "B" =>  2,    "C" =>  3    } }
+    let(:hash8)  { { "a" =>  1,    "b" =>  2,    "c" =>  3    } }
 
-    it 'executes a SQL query and performs fetch_hash on the resulting cursor' do
+    before do
       allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
-      allow(cursor).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
-      expect(subject.fetch_hashes(logger, sql)).to be == [hash1, hash2, hash3]
     end
 
-    it 'should honour the downcase argument' do
-      allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
+    it 'executes a SQL query and performs fetch_hash on the resulting cursor' do
+      allow(cursor).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
+      expect(subject.fetch_hashes(logger, sql)).to eq( [hash1, hash2, hash3] )
+    end
+
+    it 'handles the map_values parameter properly' do
+      allow(cursor).to receive(:fetch_hash).and_return(hash4, hash5, hash6, nil)
+      expect(subject.fetch_hashes(logger, sql, {to_i: %w(A B C)})).to eq( [hash7, hash7, hash7] )
+    end
+
+    it 'should honour the downcase_keys argument' do
       allow(cursor).to receive(:fetch_hash).and_return({ 'A' => hash1}, { 'B' => hash2}, {'C' => hash3}, nil)
-      expect(subject.fetch_hashes(logger, sql, true)).to be == [{'a' => hash1}, {'b' => hash2}, {'c' => hash3}]
+      expect(subject.fetch_hashes(logger, sql, {}, true)).to eq([{'a' => hash1}, {'b' => hash2}, {'c' => hash3}])
+    end
+
+    it 'should handle both the map_keys and downcase_keys arguments properly' do
+
+      allow(cursor).to receive(:fetch_hash).and_return(hash4, hash5, hash6, nil)
+      expect(subject.fetch_hashes(logger, sql, {to_i: %w(A B C)}, true)).to eq([hash8, hash8, hash8])
     end
 
     it 'logs an error for exceptions' do
-      allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
       allow(cursor).to receive(:fetch_hash).and_raise(:exception)
       expect(logger).to receive(:error)
       subject.fetch_hashes(logger, sql)
@@ -65,7 +82,7 @@ describe MAPI::Shared::Utils::ClassMethods do
     it 'should map an Oracle formatted date to this century' do
       expect(subject.dateify('30-NOV-15')).to eq(date)
     end
-    it 'should be idempotnent on a Date' do
+    it 'should be idempotent on a Date' do
       expect(subject.dateify(date)).to eq(date)
     end
     it 'should handle an iso8661 string' do

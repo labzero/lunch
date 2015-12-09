@@ -5,7 +5,7 @@ module MAPI
         include MAPI::Shared::Utils
         include MAPI::Shared::Constants
 
-        MAPPING={
+        MAP_KEYS={
             MAINT_FEE_CHARGE:             'account_maintenance/total',
 
             REG_OF_CERT_CHARGEPERTRANS:   'certifications/cost',
@@ -38,8 +38,8 @@ module MAPI
             RESEARCH_PROJECTS_HOURS:      'research/count',
             RESEARCH_PROJ_CHARGEPERHOURS: 'research/cost',
 
-            DEP_SEC_LOTS:                 'securities_fees/dtc/count',
             DEP_SEC_CHARGEPERLOTS:        'securities_fees/dtc/cost',
+            DEP_SEC_LOTS:                 'securities_fees/dtc/count',
             DEP_SEC_LOT_CHARGE:           'securities_fees/dtc/total',
             EURO_CD_CHARGEPERPAR1000:     'securities_fees/euroclear/cost',
             EURO_CD_PAR:                  'securities_fees/euroclear/count',
@@ -51,7 +51,7 @@ module MAPI
             PHYSICAL_SEC_LOTS:            'securities_fees/funds/count',
             PHYSICAL_SEC_LOT_CHARGE:      'securities_fees/funds/total',
 
-            STA_ACCOUNT_NUM:              'sta_account_number',
+            CP_STA_ACCOUNT_NUM:           'sta_account_number',
             TOTAL_STATEMENT_CHARGE:       'total',
 
             DEP_SEC_CHARGEPERTRANS:       'transaction_fees/dtc/cost',
@@ -66,11 +66,26 @@ module MAPI
             PHYSICAL_SEC_CHARGEPERTRANS:  'transaction_fees/funds/cost',
             PHYSICAL_SEC_TRANS:           'transaction_fees/funds/count',
             PHYSICAL_SEC_TRANS_CHARGE:    'transaction_fees/funds/total'
-        }.with_indifferent_access
+        }.freeze
+
+        MAP_VALUES={
+            to_date: %w(STA_CHARGE_DATE SSX_BTC_DATE),
+            to_i: %w(REG_OF_CERT_TRANS SPECIAL_HANDLING_HOURS PI_TRANS PLEDGE_CHANGE_TRANS RESEARCH_PROJECTS_HOURS
+                     DEP_SEC_LOTS EURO_CD_PAR FRB_SEC_LOTS PHYSICAL_SEC_LOTS
+                     DEP_SEC_TRANS EURO_CD_TRANS FRB_SEC_TRANS PHYSICAL_SEC_TRANS),
+            to_f: %w(MAINT_FEE_CHARGE
+                     REG_OF_CERT_CHARGEPERTRANS REG_OF_CERT_CHARGE SPECIAL_HAND_CHARGEPERHOURS SPECIAL_HANDLING_CHARGE
+                     PI_CHARGEPERTRANS PI_CHARGE PLEDGE_CHANGE_CHARGEPERTRANS PLEDGE_CHANGE_CHARGE
+                     RESEARCH_PROJECTS_CHARGE RESEARCH_PROJ_CHARGEPERHOURS DEP_SEC_CHARGEPERLOTS DEP_SEC_LOT_CHARGE
+                     EURO_CD_CHARGEPERPAR1000 EURO_CD_PAR_CHARGE FRB_SEC_CHARGEPERLOTS FRB_SEC_LOT_CHARGE
+                     PHYSICAL_SEC_CHARGEPERLOTS PHYSICAL_SEC_LOT_CHARGE TOTAL_STATEMENT_CHARGE
+                     DEP_SEC_CHARGEPERTRANS DEP_SEC_TRANS_CHARGE EURO_CD_CHARGEPERTRANS EURO_CD_TRANS_CHARGE
+                     FRB_SEC_CHARGEPERTRANS FRB_SEC_TRANS_CHARGE PHYSICAL_SEC_CHARGEPERTRANS PHYSICAL_SEC_TRANS_CHARGE)
+        }.freeze
 
         def self.statement_sql(fhlb_id, report_date)
           <<-SQL
-          SELECT #{MAPPING.keys.join(',')}
+          SELECT #{MAP_KEYS.keys.join(',')}
           FROM SAFEKEEPING.SECURITIES_FEES_STMT_WEB
           WHERE FHLB_ID = #{fhlb_id} AND (SSX_BTC_DATE = #{quote(report_date)})
           SQL
@@ -100,13 +115,13 @@ module MAPI
 
         def self.multi_level_transform(original, mapping)
           original.each_with_object({}) do |(key, value), result|
-            multi_level_merge(result, mapping[key].split('/'), value)
+            multi_level_merge(result, mapping[key.to_sym].split('/'), value)
           end
         end
 
         def self.statement(logger, env, fhlb_id, report_date)
-          from_db = env == :production ? fetch_hashes(logger,statement_sql(fhlb_id, report_date)) : fake('securities_services_statements')
-          from_db = from_db.map{ |record| multi_level_transform(record.with_indifferent_access, MAPPING) }
+          from_db = env == :production ? fetch_hashes(logger,statement_sql(fhlb_id, report_date), MAP_VALUES) : fake('securities_services_statements')
+          from_db = from_db.map{ |record| multi_level_transform(record, MAP_KEYS) }
           from_db.empty? ? {} : from_db.first
         end
       end
