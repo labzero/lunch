@@ -173,6 +173,7 @@ Then(/^I should see the name for the "(.*?)" in the header$/) do |user_type|
 end
 
 Then(/^I should be logged in$/) do
+  wait_for_unflagged_page(@login_flag)
   step %{I visit the dashboard}
   step %{I should see dashboard modules}
 end
