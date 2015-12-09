@@ -165,7 +165,10 @@ class DashboardController < ApplicationController
 
     advance_request.type = params[:advance_type] if params[:advance_type]
     advance_request.term = params[:advance_term] if params[:advance_term]
-    advance_request.amount = params[:amount] if params[:amount]
+    if params[:amount]
+      advance_request.amount = params[:amount]
+      advance_request.stock_choice = nil
+    end
     advance_request.stock_choice = params[:stock_choice] if params[:stock_choice]
 
     advance_request.validate_advance
