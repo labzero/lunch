@@ -1008,7 +1008,7 @@ class ReportsController < ApplicationController
           job_status.destroy
         end
 
-        users = users.sort { |a, b| [a[:surname], a[:given_name]] <=> [b[:surname], b[:given_name]] }
+        users = users.sort { |a, b| [a[:surname] || '', a[:given_name] || ''] <=> [b[:surname] || '', b[:given_name] || ''] }
         rows = []
         users.each do |user|
           user_roles = roles_for_signers(user)
