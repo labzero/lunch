@@ -53,8 +53,12 @@ RSpec.describe FhlbJob, type: :job do
       before do
         allow(job_status).to receive(:canceled?).and_raise('some error!')
       end
-      it 'logs the error' do
+      it 'logs the error at the `warn` level' do
         expect(Rails.logger).to receive(:warn)
+        base_instance.perform_with_rescue
+      end
+      it 'provides a backtrace of the error at the `debug` level' do
+        expect(Rails.logger).to receive(:debug)
         base_instance.perform_with_rescue
       end
       it 'sets the job_status equal to `failed`' do

@@ -66,6 +66,7 @@ RSpec.describe ReportsController, :type => :controller do
   before do
     allow(controller).to receive(:date_picker_presets).and_return(date_picker_presets)
     allow(controller).to receive(:most_recent_business_day).and_return(max_date)
+    allow(controller).to receive(:fhlb_report_date_numeric)
   end
 
   describe 'GET index' do
@@ -2313,7 +2314,70 @@ RSpec.describe ReportsController, :type => :controller do
         end  
       end
     end
-  end
 
+    describe '`downloadable_report`' do
+      let(:id) { rand(1..1000) }
+      let(:call_method) { subject.send(:downloadable_report) }
+      let(:job_status) { double('job status', :update_attributes! => nil) }
+      let(:job) { double('job instance', job_status: job_status) }
+      let(:action_name) { double('name of controller action', gsub: nil) }
+      let(:report_download_name) { double('report_download_name') }
+      let(:report_download_params) { double('report_download_params') }
+      let(:job_status_url) { double('job_status_url') }
+      let(:job_cancel_url) { double('job_cancel_url') }
+      describe 'when there is not an `export_format` parameter' do
+        it 'yields a code block' do
+          expect{|x| subject.send(:downloadable_report, &x) }.to yield_with_no_args
+        end
+      end
+      describe 'when there is an `export_format` parameter' do
+        before do
+          allow(subject).to receive(:params).and_return({export_format: ReportsController::DOWNLOAD_FORMATS.sample})
+          allow(subject).to receive(:render)
+          allow(subject).to receive(:action_name).and_return(action_name)
+        end
+        it 'raises an exception if the `export_format` parameter is not included in the allowed formats' do
+          allow(subject).to receive(:params).and_return({export_format: 'foo'})
+          expect{call_method}.to raise_error(ArgumentError, 'Format not allowed for this report')
+        end
+        it 'raises an exception if the `export_format` parameter is not `:pdf` or `:xlsx`, even if the format is allowed' do
+          allow(subject).to receive(:params).and_return({export_format: 'foo'})
+          expect{subject.send(:downloadable_report, [:foo])}.to raise_error(ArgumentError, 'Report format not recognized')
+        end
+        [['pdf', RenderReportPDFJob], ['xlsx', RenderReportExcelJob]].each do |format|
+          describe "when the export_format is #{format.first}" do
+            before do
+              allow(subject).to receive(:params).and_return({export_format: format.first})
+              allow(format.last).to receive(:perform_later).and_return(job)
+            end
+            it "calls `perform_later` on #{format.last} with the current_member_id and action_name" do
+              allow(subject).to receive(:current_member_id).and_return(id)
+              expect(format.last).to receive(:perform_later).with(id, action_name, anything, anything).and_return(job)
+              call_method
+            end
+            it "passes the `report_download_name` to the `perform_later` method" do
+              expect(format.last).to receive(:perform_later).with( anything, anything, report_download_name, anything).and_return(job)
+              subject.send(:downloadable_report, nil, nil, report_download_name)
+            end
+            it "passes the `report_download_params` to the `perform_later method`" do
+              expect(format.last).to receive(:perform_later).with( anything, anything, anything, report_download_params).and_return(job)
+              subject.send(:downloadable_report, nil, report_download_params)
+            end
+            it 'updates the job_status with the current_user_id' do
+              allow(subject).to receive(:current_user).and_return(double('User', id: id))
+              expect(job_status).to receive(:update_attributes!).with(user_id: id)
+              call_method
+            end
+            it 'renders a json object with the correct `job_status_url` and `job_cancel_url`' do
+              allow(subject).to receive(:job_status_url).with(job_status).and_return(job_status_url)
+              allow(subject).to receive(:job_cancel_url).with(job_status).and_return(job_cancel_url)
+              expect(subject).to receive(:render).with({json: {job_status_url: job_status_url, job_cancel_url: job_cancel_url}})
+              call_method
+            end
+          end
+        end
+      end
+    end
+  end
 end
 

@@ -135,6 +135,8 @@ class ReportsController < ApplicationController
     :'daily_prime' => I18n.t('global.daily')
   }.freeze
 
+  DOWNLOAD_FORMATS = [:pdf, :xlsx].freeze
+
   before_action do
     @member_name = current_member_name
   end
@@ -287,13 +289,9 @@ class ReportsController < ApplicationController
   def capital_stock_trial_balance
     @max_date = most_recent_business_day(Time.zone.today - 1.day)
     @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
-    export_format = params[:export_format]
     @report_name = t('reports.pages.capital_stock_trial_balance.title')
-    if export_format == 'xlsx'
-      job_status = RenderReportExcelJob.perform_later(current_member_id, 'capital_stock_trial_balance', "capital_stock_trial_balance-#{@start_date.to_s}", {start_date: @start_date.to_s}).job_status
-      job_status.update_attributes!(user_id: current_user.id)
-      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
-    else
+    report_download_name = "capital_stock_trial_balance-#{fhlb_report_date_numeric(@start_date)}"
+    downloadable_report(:xlsx, {start_date: @start_date.to_s}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
         summary = { certificates: [], number_of_shares: 0, number_of_certificates: 0 }
@@ -315,25 +313,18 @@ class ReportsController < ApplicationController
                     {value: certificate[:shares_outstanding],   type: :number, classes: [:'report-cell-narrow']}] }
       end
       footer = [
-          {value: t('reports.pages.capital_stock_trial_balance.total_shares_outstanding'), colspan: 3},
-          {value: summary[:number_of_shares], type: :number, classes: [:'report-cell-narrow']}
+        {value: t('reports.pages.capital_stock_trial_balance.total_shares_outstanding'), colspan: 3},
+        {value: summary[:number_of_shares], type: :number, classes: [:'report-cell-narrow']}
       ]
       @capital_stock_trial_balance_table_data = { column_headings: column_headings, rows: certificates, footer: footer }
     end
+
   end
 
   def borrowing_capacity
     @date = params[:end_date] || Time.zone.now.to_date
-    export_format = params[:export_format]
     @report_name = t('global.borrowing_capacity')
-
-    if export_format == 'pdf'
-      job_status = RenderReportPDFJob.perform_later(current_member_id, 'borrowing_capacity', 'borrowing-capacity', {end_date: @date.to_s}).job_status
-    end
-    unless job_status.nil?
-      job_status.update_attributes!(user_id: current_user.id)
-      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
-    else
+    downloadable_report(:pdf, {end_date: @date.to_s}) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
         @borrowing_capacity_summary = {}
@@ -350,7 +341,6 @@ class ReportsController < ApplicationController
     start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
     @min_date, @start_date = min_and_start_dates(date_restriction, start_date)
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
-    export_format = params[:export_format]
     @report_name = t('reports.pages.settlement_transaction_account.title')
     member_balances = MemberBalanceService.new(current_member_id, request)
     @daily_balance_key = MemberBalanceService::DAILY_BALANCE_KEY
@@ -372,13 +362,8 @@ class ReportsController < ApplicationController
     # default filter to 'all' if invalid filter param was passed
     @filter ||= @filter_options[0][1]
     @filter_text ||= @filter_options[0][0]
-    if export_format == 'pdf'
-      job_status = RenderReportPDFJob.perform_later(current_member_id, 'settlement_transaction_account', 'settlement-transaction-account', {start_date: @start_date.to_s, end_date: @end_date.to_s, sta_filter: @filter}).job_status
-    end
-    unless job_status.nil?
-      job_status.update_attributes!(user_id: current_user.id)
-      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
-    else
+    report_download_name = "settlement-transaction-account-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
+    downloadable_report(:pdf, {start_date: @start_date.to_s, end_date: @end_date.to_s, sta_filter: @filter}, report_download_name) do
       if report_disabled?(SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS)
         @settlement_transaction_account = {}
       else
@@ -397,55 +382,39 @@ class ReportsController < ApplicationController
     @max_date = most_recent_business_day(Time.zone.today - 1.day)
     advance_start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
     @min_date, @start_date = min_and_start_dates(date_restriction, advance_start_date)
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    @advances_detail = member_balances.advances_details(@start_date)
-    @report_name = t('global.advances')
-    raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
-    @picker_presets = date_picker_presets(@start_date, nil, date_restriction, @max_date)
-    if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)
-      @advances_detail = {}
-    else
+    report_download_name = "advances-#{fhlb_report_date_numeric(@start_date)}"
+    downloadable_report(nil, {start_date: @start_date.to_s}, report_download_name) do
+      member_balances = MemberBalanceService.new(current_member_id, request)
       @advances_detail = member_balances.advances_details(@start_date)
+      @report_name = t('global.advances')
       raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
-      # prepayment fee indication for detail view
-      @advances_detail[:advances_details].each_with_index do |advance, i|
-        case advance[:notes]
-          when 'unavailable_online'
-            @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.unavailable_online')
-          when 'not_applicable_to_vrc'
-            @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.not_applicable_to_vrc')
-          when 'prepayment_fee_restructure'
-            @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.prepayment_fee_restructure_html', date: fhlb_date_standard_numeric(advance[:structure_product_prepay_valuation_date].to_date))
-          else
-            @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.unavailable_for_past_dates') unless advance[:prepayment_fee_indication]
+      @picker_presets = date_picker_presets(@start_date, nil, date_restriction, @max_date)
+      if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)
+        @advances_detail = {}
+      else
+        @advances_detail = member_balances.advances_details(@start_date)
+        raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
+        # prepayment fee indication for detail view
+        @advances_detail[:advances_details].each_with_index do |advance, i|
+          case advance[:notes]
+            when 'unavailable_online'
+              @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.unavailable_online')
+            when 'not_applicable_to_vrc'
+              @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.not_applicable_to_vrc')
+            when 'prepayment_fee_restructure'
+              @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.prepayment_fee_restructure_html', date: fhlb_date_standard_numeric(advance[:structure_product_prepay_valuation_date].to_date))
+            else
+              @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.unavailable_for_past_dates') unless advance[:prepayment_fee_indication]
+          end
         end
       end
-    end
-    @advances_detail[:advances_details].sort! { |a, b| a[:trade_date] <=> b[:trade_date] } if @advances_detail[:advances_details]
-
-    export_format = params[:export_format]
-    if export_format == 'pdf'
-      job_status = RenderReportPDFJob.perform_later(current_member_id, 'advances_detail', 'advances', {start_date: @start_date.to_s}).job_status
-    elsif export_format == 'xlsx'
-      job_status = RenderReportExcelJob.perform_later(current_member_id, 'advances_detail', "advances-#{@start_date.to_s}", {start_date: @start_date.to_s}).job_status
-    end
-    unless job_status.nil?
-      job_status.update_attributes!(user_id: current_user.id)
-      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
+      @advances_detail[:advances_details].sort! { |a, b| a[:trade_date] <=> b[:trade_date] } if @advances_detail[:advances_details]
     end
   end
 
   def current_price_indications
-    today = Time.zone.today
     @report_name = t('reports.pages.price_indications.current.title')
-    export_format = params[:export_format]
-    if export_format == 'xlsx'
-      job_status = RenderReportExcelJob.perform_later(current_member_id, 'current_price_indications', "current-price-indications-#{today.to_s}").job_status
-    end
-    unless job_status.nil?
-      job_status.update_attributes!(user_id: current_user.id)
-      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
-    else
+    downloadable_report(:xlsx) do
       rate_service = RatesService.new(request)
       member_balances = MemberBalanceService.new(current_member_id, request)
 
@@ -669,24 +638,17 @@ class ReportsController < ApplicationController
     end
     @credit_type ||= @credit_type_options.first.last
     @credit_type_text ||= @credit_type_options.first.first
-
-    export_format = params[:export_format]
     @report_name = t('reports.pages.price_indications.historical.title')
     filename_credit_type = (@credit_type.include?('libor') || @credit_type.include?('daily_prime')) ? "arc-#{@credit_type.gsub('_','-')}" : @credit_type
-    filename = "historical-price-indications-#{@collateral_type}-#{filename_credit_type}-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
-    excel_params = {
+    report_download_name = "historical-price-indications-#{@collateral_type}-#{filename_credit_type}-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
+    report_download_params = {
       start_date: @start_date.to_s,
       end_date: @end_date.to_s,
       historical_price_collateral_type: @collateral_type,
       historical_price_credit_type: @credit_type
     }
-    if export_format == 'xlsx'
-      job_status = RenderReportExcelJob.perform_later(current_member_id, 'historical_price_indications', filename, excel_params).job_status
-    end
-    unless job_status.nil?
-      job_status.update_attributes!(user_id: current_user.id)
-      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
-    else
+
+    downloadable_report(:xlsx, report_download_params, report_download_name) do
       if report_disabled?(HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS)
         @historical_price_indications = {}
       else
@@ -873,13 +835,9 @@ class ReportsController < ApplicationController
     @min_date = min_and_start_dates_array.first
     @start_date = month_restricted_start_date(min_and_start_dates_array.last)
     @report_name = t('reports.securities.services_monthly.title')
-    export_format = params[:export_format]
 
-    if export_format == 'pdf'
-      pdf_job_status = RenderReportPDFJob.perform_later(current_member_id, 'securities_services_statement', "securities_services_monthly_statement", {start_date: params[:start_date]}).job_status
-      pdf_job_status.update_attributes!(user_id: current_user.id)
-      render json: {job_status_url: job_status_url(pdf_job_status), job_cancel_url: job_cancel_url(pdf_job_status)}
-    else
+    report_download_name = "securities-services-monthly-statement-#{fhlb_report_date_numeric(@start_date)}"
+    downloadable_report(:pdf, {start_date: params[:start_date]}, report_download_name) do
       if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
         @statement = {}
       else
@@ -893,13 +851,8 @@ class ReportsController < ApplicationController
   end
 
   def letters_of_credit
-    @report_name = t('reports.pages.letters_of_credit.title')
-    export_format = params[:export_format]
-    if export_format == 'xlsx'
-      excel_job_status = RenderReportExcelJob.perform_later(current_member_id, 'letters_of_credit', "letters-of-credit-#{Time.zone.today.to_s}").job_status
-      excel_job_status.update_attributes!(user_id: current_user.id)
-      render json: {job_status_url: job_status_url(excel_job_status), job_cancel_url: job_cancel_url(excel_job_status)}
-    else
+    downloadable_report(:xlsx) do
+      @report_name = t('reports.pages.letters_of_credit.title')
       if report_disabled?(LETTERS_OF_CREDIT_WEB_FLAGS)
         letters_of_credit = {}
       else
@@ -974,16 +927,9 @@ class ReportsController < ApplicationController
   def authorizations
     @authorizations_filter = params['authorizations_filter'] || 'all'
     @report_name = t('reports.account.authorizations.title')
-    export_format = params[:export_format]
     @today = Time.zone.today
 
-    if export_format == 'pdf'
-      pdf_job_status = RenderReportPDFJob.perform_later(current_member_id, 'authorizations', "authorizations", {authorizations_filter: @authorizations_filter.to_s}).job_status
-    end
-    unless pdf_job_status.nil?
-      pdf_job_status.update_attributes!(user_id: current_user.id)
-      render json: {job_status_url: job_status_url(pdf_job_status), job_cancel_url: job_cancel_url(pdf_job_status)}
-    else
+    downloadable_report(:pdf, {authorizations_filter: @authorizations_filter.to_s}) do
       @authorizations_dropdown_options = AUTHORIZATIONS_DROPDOWN_MAPPING.collect{|key, value| [value, key]}
       @authorizations_filter_text = AUTHORIZATIONS_DROPDOWN_MAPPING[@authorizations_filter]
       @authorizations_title = if @authorizations_filter == 'all'
@@ -1094,17 +1040,9 @@ class ReportsController < ApplicationController
   end
 
   def forward_commitments
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    export_format = params[:export_format]
-    today = Time.zone.today
-    @report_name = t('reports.credit.forward_commitments.title')
-    if export_format == 'xlsx'
-      job_status = RenderReportExcelJob.perform_later(current_member_id, 'forward_commitments', "forward-commitments-#{today.to_s}").job_status
-    end
-    unless job_status.nil?
-      job_status.update_attributes!(user_id: current_user.id)
-      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
-    else
+    downloadable_report(:xlsx) do
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      @report_name = t('reports.credit.forward_commitments.title')
       if report_disabled?(FORWARD_COMMITMENTS_WEB_FLAG)
         forward_commitments = {}
       else
@@ -1113,29 +1051,29 @@ class ReportsController < ApplicationController
       end
 
       rows = if forward_commitments[:advances]
-               forward_commitments[:advances].collect do |advance|
-                 if advance[:interest_rate].nil? || advance[:interest_rate].to_f == 0
-                   interest_rate = t('global.tbd')
-                   interest_rate_type = nil
-                 else
-                   interest_rate = advance[:interest_rate]
-                   interest_rate_type = :rate
-                 end
-                 {
-                     columns: [
-                         {value: advance[:trade_date], type: :date, classes: [:'report-cell-right']},
-                         {value: advance[:funding_date], type: :date, classes: [:'report-cell-right']},
-                         {value: advance[:maturity_date], type: :date, classes: [:'report-cell-right']},
-                         {value: advance[:advance_number], type: nil},
-                         {value: advance[:advance_type], type: nil},
-                         {value: advance[:current_par], type: :currency_whole, classes: [:'report-cell-right']},
-                         {value: interest_rate, type: interest_rate_type, classes: [:'report-cell-right']}
-                     ]
-                 }
-               end
-             else
-               []
-             end
+        forward_commitments[:advances].collect do |advance|
+          if advance[:interest_rate].nil? || advance[:interest_rate].to_f == 0
+            interest_rate = t('global.tbd')
+            interest_rate_type = nil
+          else
+            interest_rate = advance[:interest_rate]
+            interest_rate_type = :rate
+          end
+          {
+            columns: [
+              {value: advance[:trade_date], type: :date, classes: [:'report-cell-right']},
+              {value: advance[:funding_date], type: :date, classes: [:'report-cell-right']},
+              {value: advance[:maturity_date], type: :date, classes: [:'report-cell-right']},
+              {value: advance[:advance_number], type: nil},
+              {value: advance[:advance_type], type: nil},
+              {value: advance[:current_par], type: :currency_whole, classes: [:'report-cell-right']},
+              {value: interest_rate, type: interest_rate_type, classes: [:'report-cell-right']}
+            ]
+          }
+        end
+      else
+        []
+      end
 
       @as_of_date = forward_commitments[:as_of_date]
       @total_current_par = forward_commitments[:total_current_par]
@@ -1193,16 +1131,10 @@ class ReportsController < ApplicationController
 
     @now = Time.zone.now
     @date = @now.to_date
-    export_format = params[:export_format]
     @report_name = t('reports.account_summary.title')
 
-    if export_format == 'pdf'
-      job_status = RenderReportPDFJob.perform_later(current_member_id, 'account_summary', 'account-summary', {end_date: @date.to_s}).job_status
-    end
-    unless job_status.nil?
-      job_status.update_attributes!(user_id: current_user.id)
-      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
-    else
+    report_download_name = "account-summary-#{fhlb_report_date_numeric(@date)}"
+    downloadable_report(:pdf, nil, report_download_name) do
       if report_disabled?(ACCOUNT_SUMMARY_WEB_FLAGS)
         raise 'Report Disabled'
       end
@@ -1619,5 +1551,28 @@ class ReportsController < ApplicationController
       { value: data_hash[:"#{loan_type}_unpaid"], type: :number},
       { value: data_hash[:"#{loan_type}_original"], type: :number}
     ]
+  end
+
+  def downloadable_report(formats = nil, report_download_params = {}, report_download_name = nil)
+    export_format = params[:export_format]
+    if export_format
+      formats = Array.wrap(formats || DOWNLOAD_FORMATS)
+      export_format = export_format.to_sym
+      raise ArgumentError, 'Format not allowed for this report' unless formats.include?(export_format)
+      job_klass = case export_format
+                    when :pdf
+                      RenderReportPDFJob
+                    when :xlsx
+                      RenderReportExcelJob
+                    else
+                      raise ArgumentError, 'Report format not recognized'
+                  end
+      report_download_name ||= "#{action_name.gsub('_','-')}-#{fhlb_report_date_numeric(Time.zone.today)}" if action_name
+      job_status = job_klass.perform_later(current_member_id, action_name, report_download_name, report_download_params).job_status
+      job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
+    else
+      yield
+    end
   end
 end
