@@ -81,7 +81,10 @@ $(function () {
 
   function showQuickAdvanceRates(data) {
     var table = $('.dashboard-quick-advance-flyout table');
-    table.append($(data.html)).quickAdvanceTable(data.id);
+    var tbody = table.find('tbody');
+    tbody.children().remove();
+    tbody.append($(data.html));
+    table.quickAdvanceTable(data.id);
   };
 
   function showQuickAdvanceClosedState() {

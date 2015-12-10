@@ -14,6 +14,11 @@ class DashboardController < ApplicationController
     advance_request_to_session
   end
 
+  before_action only: [:quick_advance_rates, :index] do
+    @advance_terms = AdvanceRequest::ADVANCE_TERMS
+    @advance_types = AdvanceRequest::ADVANCE_TYPES
+  end
+
   prepend_around_action :skip_timeout_reset, only: [:current_overnight_vrc]
 
   rescue_from AASM::InvalidTransition, AASM::UnknownStateMachineError, AASM::UndefinedState, AASM::NoDirectAssignmentError do |exception|
@@ -147,8 +152,6 @@ class DashboardController < ApplicationController
     etransact_service = EtransactAdvancesService.new(request)
     @quick_advances_active = etransact_service.etransact_active?
     @rate_data = advance_request.rates
-    @advance_terms = AdvanceRequest::ADVANCE_TERMS
-    @advance_types = AdvanceRequest::ADVANCE_TYPES
 
     logger.debug { '  Advance Request State: ' + advance_request.inspect }
     logger.debug { '  Advance Request Errors: ' + advance_request.errors.inspect }
