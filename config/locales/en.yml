@@ -338,7 +338,7 @@ en:
         description_html: Contact <a href="%{url}">Web Support</a> at %{phone_number} to activate a new SecurID token. Once activated, you may set your PIN.
         description: If you just got a new SecurID token and need to set the PIN for it. Use Reset Token PIN if you forgot your PIN.
         cta: Create New Token PIN
-        prompt_current: Enter the six-digit code shown on your token.
+        prompt_current: Enter the 6-digit code shown on your token.
         prompt_new_pin: Enter your new 4-digit PIN.
         new_pin: New PIN
         confirm_pin: Re-enter PIN
@@ -350,8 +350,8 @@ en:
         title: Reset Token PIN
         description: If you can’t remember your 4-digit token PIN, contact Web Support before resetting it.
         cta: Reset Token PIN
-        hint: 'Note: You must save your new PIN before the token code you enter below expires.'
-        prompt_current_pin: Enter your current 4-digit PIN and the six-digit code shown on your token.
+        hint: 'Note: You must save your new 4-digit PIN before the token code you enter below expires.'
+        prompt_current_pin: Enter your current 4-digit PIN and the 6-digit code shown on your token.
         prompt_new_pin: Enter your new 4-digit PIN.
         new_pin: New PIN
         confirm_pin: Re-enter new PIN
