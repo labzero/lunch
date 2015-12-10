@@ -206,3 +206,9 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
   }
 }
 
+.welcome-intro {
+  a {
+    white-space: nowrap;
+  }
+}
+
