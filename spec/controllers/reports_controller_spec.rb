@@ -3,6 +3,7 @@ include CustomFormattingHelper
 include ActionView::Helpers::NumberHelper
 include DatePickerHelper
 include ActiveSupport::Inflector
+include FinancialInstrumentHelper
 
 RSpec.describe ReportsController, :type => :controller do
   shared_examples 'a date restricted report' do |action, default_start_selection=nil|
@@ -1202,7 +1203,7 @@ RSpec.describe ReportsController, :type => :controller do
       describe 'view instance variables' do
         it 'sets the @todays_credit row attribute' do
           todays_credit
-          expect(assigns[:todays_credit][:rows][0][:columns]).to eq([{value: credit_activity[:transaction_number]}, {type: :number, value: credit_activity[:current_par]}, {type: :index, value: credit_activity[:interest_rate]}, {type: :date, value: credit_activity[:funding_date]}, {type: :date, value: credit_activity[:maturity_date]}, {value: credit_activity[:product_description]}])
+          expect(assigns[:todays_credit][:rows][0][:columns]).to eq([{value: credit_activity[:transaction_number]}, {type: :number, value: credit_activity[:current_par]}, {type: :index, value: credit_activity[:interest_rate]}, {type: :date, value: credit_activity[:funding_date]}, {type: :date, value: credit_activity[:maturity_date]}, {value: financial_instrument_standardize(credit_activity[:product_description])}])
         end
         it 'sets the @todays_credit column_headings attribute' do
           todays_credit

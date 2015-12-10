@@ -1388,7 +1388,7 @@ en:
     prepayment_fee_notice: Prepayment fee indications are not based on rates as of today. Please call %{phone_number} by 10:30 a.m. to obtain a prepayment fee indication as of today.
     merger_notice: In the event of a merger, this report may not include all advances from the acquired institution.
     advances_and_securities_agreement_notice: Nothing in this report in any way amends, modifies, or waives the terms of your Advances and Security Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issued pursuant to that Agreement. The Bank expressly disclaims any and all liability that may arise from your institution's reliance on any information contained in, or errors or omissions made with respect to, this report. Please call Operations at %{phone_number} if you have any questions.
-    data_notice: Data reflects activty as on the date and time shown above.
+    data_notice: Data reflects activity as on the date and time shown above.
     refresh_notice: Refresh your browser for current information.
     pdf_footer: "%{report_name} as of %{date}"
     pdf_footer_range: "%{report_name} %{date}"
