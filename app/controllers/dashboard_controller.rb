@@ -2,8 +2,6 @@ class DashboardController < ApplicationController
   include CustomFormattingHelper
   include DashboardHelper
 
-  MAX_SIMULTANEOUS_ADVANCES = 5.freeze # This number is to prevent a DoS by a user creating thousands of advance requests for a given session
-
   before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform] do
     authorize :advances, :show?
   end
@@ -148,7 +146,6 @@ class DashboardController < ApplicationController
   def quick_advance_rates
     etransact_service = EtransactAdvancesService.new(request)
     @quick_advances_active = etransact_service.etransact_active?
-    advance_request_clear!
     @rate_data = advance_request.rates
     @advance_terms = AdvanceRequest::ADVANCE_TERMS
     @advance_types = AdvanceRequest::ADVANCE_TYPES
@@ -271,7 +268,6 @@ class DashboardController < ApplicationController
     logger.debug { '  Execute Results: ' + {securid: securid_status, advance_success: advance_success}.inspect }
 
     render json: {securid: securid_status, advance_success: advance_success, html: response_html}
-    advance_request_clear! if advance_success
   end
 
   def current_overnight_vrc
@@ -317,34 +313,23 @@ class DashboardController < ApplicationController
   end
 
   def advance_request_from_session(id)
-    session[:advance_request] ||= []
-    @advance_request ||= if session[:advance_request].include?(id)
-      AdvanceRequest.find(id, request)
-    else
-      advance_request
-    end
+    @advance_request = id ? AdvanceRequest.find(id, request) : advance_request
+    authorize @advance_request, :modify?
+    @advance_request
   end
 
   def advance_request_to_session
-    if @advance_request
-      session[:advance_request] ||= []
-      id = @advance_request.id
-      session[:advance_request].push(id) if @advance_request.save && !session[:advance_request].include?(id)
-      raise SecurityError.new("Too many advances in session: #{session[:advance_request].count}") if session[:advance_request].count > MAX_SIMULTANEOUS_ADVANCES
-    end
+    @advance_request.save if @advance_request
   end
 
   def advance_request
     @advance_request ||= AdvanceRequest.new(current_member_id, signer_full_name, request)
+    @advance_request.owners.add(current_user.id)
+    @advance_request
   end
 
   def signer_full_name
     session['signer_full_name'] ||= EtransactAdvancesService.new(request).signer_full_name(current_user.username)
-  end
-
-  def advance_request_clear!
-    session[:advance_request].delete(@advance_request.id) if @advance_request && session[:advance_request]
-    @advance_request = nil
   end
 
   def calculate_gauge_percentages(gauge_hash, excluded_keys=[])
