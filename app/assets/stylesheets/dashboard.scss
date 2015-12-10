@@ -230,6 +230,9 @@ $faded-opacity: 0.4 !default;
   @extend %link-style;
   margin-top: 10px;
   text-transform: uppercase;
+}
+
+.quick-advance-limited-pricing-notice, .dashboard-vrc-overnight-message[data-flyout-trigger], .dashboard-advances-rate[data-flyout-trigger] {
   cursor: pointer;
 }
 

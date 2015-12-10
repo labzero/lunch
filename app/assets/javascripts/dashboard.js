@@ -23,7 +23,7 @@ $(function () {
     openQuickAdvanceFlyout(event, $(this));
   });
   
-  $('.quick-advance-limited-pricing-notice').on('click', function(event){
+  $('.quick-advance-limited-pricing-notice, .dashboard-vrc-overnight-message[data-flyout-trigger], .dashboard-advances-rate[data-flyout-trigger]').on('click', function(event){
     openQuickAdvanceFlyout(event, $quickAdvancesInputField);
   });
 
