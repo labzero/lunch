@@ -10,10 +10,6 @@ $resource-page-padding: 140px !default;
   small {
     @extend %typography-paragraph;
   }
-  a {
-    color: $actionable-blue;
-    text-decoration: none;
-  }
   :not(li) > a {
     text-transform: uppercase;
     display: block;
@@ -37,8 +33,6 @@ $resource-page-padding: 140px !default;
     padding-right: $resource-page-padding + 15px;
   }
   a {
-    color: $actionable-blue;
-    text-decoration: none;
     text-transform: uppercase;
     display: block;
   }

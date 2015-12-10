@@ -1,5 +1,8 @@
 .contact-page {
   @extend %info-page-style;
+  h1 {
+    margin-bottom: 10px;
+  }
   table {
     width: 440px;
     margin-top: 15px;

@@ -29,8 +29,6 @@ $faded-opacity: 0.4 !default;
 %dashboard-module-link {
   @extend %typography-header-nav;
   text-transform: uppercase;
-  text-decoration: none;
-  color: $actionable-blue;
   border: none;
   background-color: white;
   float: right;
@@ -164,7 +162,7 @@ $faded-opacity: 0.4 !default;
 }
 
 .dashboard-contact {
-  text-decoration: none;
+  @extend %undo-link-style;
   color: inherit;
   min-height: 54px;
   display: block;
@@ -201,10 +199,6 @@ $faded-opacity: 0.4 !default;
 }
 
 .dashboard-module-advances {
-  a {
-    color: $actionable-blue;
-    text-decoration: none;
-  }
   p {
     color: $text-color;
   }
@@ -237,9 +231,9 @@ $faded-opacity: 0.4 !default;
 
 .quick-advance-limited-pricing-notice {
   @extend %typography-dashboard-gauge-label;
+  @extend %link-style;
   margin-top: 10px;
   text-transform: uppercase;
-  color: $actionable-blue;
   cursor: pointer;
 }
 
@@ -339,10 +333,6 @@ $breakdown-table-currency-width: 10px;
   }
   .borrowing-capacity-note {
     padding: 10px;
-    a {
-      color: $actionable-blue;
-      text-decoration: none;
-    }
   }
 }
 
@@ -357,9 +347,8 @@ $breakdown-table-currency-width: 10px;
   @extend %typography-table-heading;
   text-align: right;
   a {
-    text-decoration: none;
-    color: $actionable-blue;
     &.active {
+      @extend %undo-link-style;
       cursor: default;
       color: $text-color;
     }

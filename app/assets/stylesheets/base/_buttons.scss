@@ -21,6 +21,9 @@ $button-vertical-padding: 7px;
     cursor: default;
     pointer-events: none;
   }
+  &:hover {
+    text-decoration: none;
+  }
 }
 
 .primary-button {

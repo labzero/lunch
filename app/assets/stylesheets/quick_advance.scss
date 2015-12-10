@@ -90,10 +90,6 @@ $faded-opacity: 0.4 !default;
         margin-bottom: 30px;
       }
     }
-    a {
-      color: $actionable-blue;
-      text-decoration: none;
-    }
   }
   .icon-dollar-before:before {
     @extend %dashboard-module-advances-icon-dollar;
@@ -357,13 +353,8 @@ $faded-opacity: 0.4 !default;
     }
     a {
       text-transform: uppercase;
-      text-decoration: none;
       display: block;
       clear: both;
-      color: $actionable-blue;
-      &:visited {
-        color: $actionable-blue;
-      }
     }
     .input-field-container {
       display: block;

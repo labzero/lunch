@@ -73,20 +73,6 @@
   }
 }
 
-@media print {
-  .page-header {
-    box-shadow: none;
-  }
-
-  .main-nav {
-    background-color: transparent;
-    .logo {
-      height: 32px;
-      width: round($logo-aspect-ratio * 32px);
-    }
-  }
-}
-
 .secondary-nav {
   height: $header-secondary-nav-height;
   line-height: $header-secondary-nav-height;
@@ -128,7 +114,6 @@
     }
   }
   a {
-    text-decoration: none;
     color: $text-color;
     white-space: nowrap;
     &.nav-menu {
@@ -139,6 +124,7 @@
       }
     }
     &:hover {
+      text-decoration: none;
       color: $actionable-blue;
     }
     &:active {
@@ -182,5 +168,19 @@
     border-top-left-radius: 0;
     padding-top: 5px;
     box-shadow: 0px 0px 9px rgba(0,0,0, .18);
+  }
+}
+
+@media print {
+  .page-header {
+    box-shadow: none;
+  }
+
+  .main-nav {
+    background-color: transparent;
+    .logo {
+      height: 32px;
+      width: round($logo-aspect-ratio * 32px);
+    }
   }
 }
