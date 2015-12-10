@@ -47,7 +47,7 @@
     margin: 0 15px;
   }
   .header-member-name {
-    width: 250px;
+    max-width: 300px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
