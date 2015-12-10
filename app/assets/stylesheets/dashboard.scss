@@ -245,11 +245,6 @@ p.dashboard-vrc-overnight-message {
   font-weight: $semibold-weight;
   margin-bottom: 5px;
   color: $actionable-blue;
-  &:after {
-    @extend %icon-font;
-    content: " #{$icon-chevron}";
-    font-size: 0.8rem;
-  }
 }
 
 .dashboard-advances-rate {
