@@ -36,12 +36,12 @@ class DashboardController < ApplicationController
 
     profile = member_balances.profile
 
-    @previous_activity = [
-      [t('dashboard.previous_activity.overnight_vrc'), 44503000, DateTime.new(2014,9,3)],
-      [t('dashboard.previous_activity.overnight_vrc'), 39097000, DateTime.new(2014,9,2)],
-      [t('dashboard.previous_activity.overnight_vrc'), 37990040, DateTime.new(2014,8,12)],
-      [t('dashboard.previous_activity.overnight_vrc'), 39282021, DateTime.new(2014,2,14)]
-    ]
+    # Recent Activity
+    @recent_activity_data = []
+    job_status = MemberBalanceTodaysCreditActivityJob.perform_later(current_member_id).job_status
+    job_status.update_attributes!(user_id: current_user.id)
+    @recent_activity_job_status_url = job_status_url(job_status)
+    @recent_activity_load_url = dashboard_recent_activity_url(recent_activity_job_id: job_status.id)
 
     # @account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
     if !profile
@@ -281,6 +281,24 @@ class DashboardController < ApplicationController
     render json: response
   end
 
+  def recent_activity
+    @recent_activity_data = []
+    raise ArgumentError, "No job id given for recent_activity" unless params[:recent_activity_job_id]
+    job_status = JobStatus.find_by(id: params[:recent_activity_job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+    raise ActiveRecord::RecordNotFound unless job_status
+
+    # grab recent activities
+    activities = JSON.parse(job_status.result_as_string).collect! {|o| o.with_indifferent_access}
+    job_status.destroy
+
+    @recent_activity_data = process_recent_activities(activities)
+    if request.xhr?
+      render partial: 'dashboard/dashboard_recent_activity', locals: {table_data: @recent_activity_data}, layout: false
+    else
+      raise "Invalid request: must be XMLHttpRequest (xhr) in order to be valid"
+    end
+  end
+
   private
 
   def populate_advance_request_view_parameters
@@ -371,5 +389,24 @@ class DashboardController < ApplicationController
     end
     new_gauge_hash[largest_display_percentage_key][:display_percentage] = (100 - (total_display_percentage - largest_display_percentage))
     new_gauge_hash
+  end
+
+  def process_recent_activities(activities)
+    activity_data = []
+    if activities
+      activities.each_with_index do |activity, i|
+        break if i > 4
+        maturity_date = activity[:maturity_date].to_date if activity[:maturity_date]
+        maturity_date = if maturity_date == Time.zone.today
+                          t('global.today')
+                        elsif activity[:instrument_type] == 'ADVANCE' && !maturity_date
+                          t('global.open')
+                        else
+                          fhlb_date_standard_numeric(maturity_date)
+                        end
+        activity_data.push([activity[:product_description], activity[:current_par], maturity_date, activity[:transaction_number]])
+      end
+    end
+    activity_data
   end
 end

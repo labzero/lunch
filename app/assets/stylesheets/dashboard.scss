@@ -73,7 +73,7 @@ $faded-opacity: 0.4 !default;
   }
 }
 
-.table-dashboard-previous-activity, .table-dashboard-anticipated-activity {
+.table-dashboard-recent-activity, .table-dashboard-anticipated-activity {
   @extend %table-striped;
   td, th {
     height: 46px;
@@ -92,7 +92,7 @@ $faded-opacity: 0.4 !default;
   }
 }
 
-.table-dashboard-previous-activity {
+.table-dashboard-recent-activity {
   margin-bottom: 0;
 }
 
@@ -130,10 +130,6 @@ $faded-opacity: 0.4 !default;
 .dashboard-module-content-light {
   @extend %typography-table-annotation;
   clear: both;
-}
-
-.dashboard-module-previous-activity {
-  display: none;
 }
 
 .dashboard-module-contact {
@@ -520,4 +516,90 @@ $breakdown-table-currency-width: 10px;
   background: $white;
   text-align: center;
   padding: 13px 0;
+}
+
+.quick-advance-rates-body {
+  .quick-advance-icon-section {
+    @extend %clearfix;
+    overflow: visible;
+    position: relative;
+    &:before {
+      position: absolute;
+      top: 1rem;
+      left: 0;
+      font-size: 30px;
+      color: $alert-red;
+      .quick-advance-confirmation & {
+        color: $approval-green;
+      }
+    }
+  }
+  .quick-advance-loading-message {
+    display: none;
+  }
+  .loading & {
+    p {
+      display: none;
+    }
+    .quick-advance-icon-section {
+      &:before {
+        @include icon-loading;
+        content: '';
+      }
+    }
+    .quick-advance-loading-message {
+      padding-left: 60px;
+      display: block;
+    }
+    .quick-advance-summary {
+      opacity: $faded-opacity;
+    }
+    .label-radio {
+      opacity: $faded-opacity;
+    }
+    table {
+      opacity: $faded-opacity;
+    }
+  }
+}
+
+.dashboard-module-loading {
+  position: relative;
+  padding-left: 55px;
+  &:before {
+    @extend %absolute-pseudoelement;
+    @include icon-loading;
+    left: 0;
+  }
+}
+
+.dashboard-module-recent-activity {
+  p {
+    @extend %typography-dashboard-account-summary;
+    color: $medium-gray;
+    a {
+      text-decoration: none;
+      color: $actionable-blue;
+    }
+  }
+  .dashboard-module-temporarily-unavailable {
+    display: none;
+  }
+}
+
+.dashboard-module-recent-activity-no-data {
+  color: $medium-gray;
+  text-align: center;
+}
+
+.table-dashboard-recent-activity {
+  td {
+    @extend %typography-dashboard-account-summary;
+  }
+  .dashboard-module-content-light {
+    margin-top: 5px;
+  }
+  .alignright {
+    margin-bottom: 5px;
+  }
 }
