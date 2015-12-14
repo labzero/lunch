@@ -25,6 +25,15 @@ Scenario: Quick Advance flyout opens with commas in the amount field
   Then I should see a flyout
   And I should see "56,503,000" in the quick advance flyout input field
 
+@jira-mem-1175
+Scenario: Quick Advance flyout opens when user clicks the Overnight VRC label or rate
+  When I visit the dashboard
+  And I click on the VRC Overnight label
+  Then I should see a flyout
+  When I close the quick advance flyout
+  And I click on the VRC Overnight rate
+  Then I should see a flyout
+
 Scenario: Quick Advance flyout closes
   When I visit the dashboard
   And I open the quick advance flyout

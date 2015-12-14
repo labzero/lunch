@@ -71,8 +71,8 @@
         - if @quick_advance_status == :open && @quick_advance_message
           .quick-advance-limited-pricing-notice= t('dashboard.quick_advance.limited_pricing')
         - if [:open,:closed].include?(@quick_advance_status)
-          %p.dashboard-vrc-overnight-message= t('global.standard_vrc_overnight')
-          .dashboard-advances-rate
+          %p.dashboard-vrc-overnight-message{data: {'flyout-trigger' => (@quick_advance_status == :open)}}= t('global.standard_vrc_overnight')
+          .dashboard-advances-rate{data: {'flyout-trigger' => (@quick_advance_status == :open)}}
             = fhlb_formatted_number(@current_overnight_vrc, precision: 2, html: false)
             %span<> %
         .quick-advance-last-updated-message{class: "#{'show-message' unless @quick_advance_status == :open}"}

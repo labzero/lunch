@@ -17,6 +17,21 @@ When(/^I open the quick advance flyout$/) do
   step "I open the quick advance flyout and enter #{@amount}"
 end
 
+When(/^I close the quick advance flyout$/) do
+  step 'I click on the flyout close button'
+  step 'I should not see a flyout'
+end
+
+When(/^I click on the VRC Overnight (label|rate)$/) do |selector|
+  selector = case selector
+    when 'label'
+      '.dashboard-vrc-overnight-message'
+    when 'rate'
+      '.dashboard-advances-rate'
+  end
+  page.find(selector).click
+end
+
 Given(/^I am on the quick advance stock purchase screen$/) do
   step "I open the quick advance flyout and enter 1000131"
   step "I select the rate with a term of \"2week\" and a type of \"whole\""
