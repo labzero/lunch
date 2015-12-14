@@ -205,6 +205,12 @@ objectClass: group
 objectClass: top
 member: CN=FCN-MemberSite-Users,CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
 
+# eBiz Users
+dn: CN=Users,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
+cn: Users
+objectClass: group
+objectClass: top
+
 # FCN-MemberSite-Users group
 dn: CN=FCN-MemberSite-Users,CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
 cn: FCN-MemberSite-Users

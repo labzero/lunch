@@ -195,7 +195,7 @@ describe MembersService do
     end
 
     describe '`signers_and_users` method' do
-      let(:signer_mapped_roles) {[User::ROLE_MAPPING['signer-etransact']]}
+      let(:signer_mapped_roles) {[User::LDAP_GROUPS_TO_ROLES['signer-etransact']]}
       let(:signer_roles) {['signer-etransact']}
       let(:signer) {{name: 'Some Signer', roles: signer_roles, last_name: 'signer last name', first_name: 'signer first name'}}
       let(:duplicate_signer) {{name: 'A Duplicate User', username: 'username', roles: signer_roles}}

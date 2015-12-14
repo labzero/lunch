@@ -2,6 +2,10 @@ When(/^I edit a user$/) do
   first(:link, I18n.t('global.edit')).click
 end
 
+When(/^I create a new user$/) do
+  first(:link, I18n.t('settings.account.actions.add_user')).click
+end
+
 When(/^I visit the access manager page$/) do
   visit '/settings/users'
 end
@@ -49,7 +53,11 @@ Then(/^I should not see an edit user form overlay$/) do
   page.assert_no_selector('.settings-users-overlay h3', text: /\A#{Regexp.quote(I18n.t('settings.account.edit.title'))}\z/, visible: true)
 end
 
-When(/^I enter "([^"]*)" for the (email|email confirmation|first name|last name|)$/) do |value, field|
+Then(/^I should not see any validations errors$/) do
+  page.assert_no_selector('.form-error')
+end
+
+When(/^I enter "([^"]*)" for the (email|email confirmation|first name|last name|username)$/) do |value, field|
   attribute = attribute_for_user_field(field)
 
   step %{I enter "#{value}" into the "input[name=\"user[#{attribute}]\"]" input field}
@@ -59,8 +67,16 @@ When(/^I submit the edit user form$/) do
   page.find('.settings-users-overlay button', text: /\A#{Regexp.quote(I18n.t('settings.account.edit.save').upcase)}\z/).click
 end
 
-Then(/^I should a update user success overlay$/) do
+When(/^I submit the new user form$/) do
+  page.find('.settings-users-overlay button', text: /\A#{Regexp.quote(I18n.t('settings.account.create.save').upcase)}\z/).click
+end
+
+Then(/^I should see an update user success overlay$/) do
   page.assert_selector('.settings-users-overlay h3', text: /\A#{Regexp.quote(I18n.t('settings.account.update.title'))}\z/, visible: true)
+end
+
+Then(/^I should see a new user success overlay$/) do
+  page.assert_selector('.settings-users-overlay h3', text: /\A#{Regexp.quote(I18n.t('settings.account.confirm_create.title'))}\z/, visible: true)
 end
 
 Given(/^I edit the deletable user$/) do
@@ -116,18 +132,25 @@ Then(/^I should see the delete user button disabled$/) do
   page.assert_selector('.settings-user-delete[disabled]')
 end
 
-Then(/^I should see a (blank|confirmation mismatch) (first name|last name|email|email confirmation) error$/) do |type, field|
+Then(/^I should see a (too short\[\d+\]|too long\[\d+\]|blank|invalid|confirmation mismatch) (first name|last name|username|email|email confirmation) error$/) do |type, field|
   case type
-  when 'blank'
+  when 'blank', 'invalid'
     error_type = type.to_sym
   when 'confirmation mismatch'
     error_type = :confirmation
+  when /too short\[(\d+)\]/
+    error_type = :too_short
+    count = $1
+  when /too long\[(\d+)\]/
+    error_type = :too_long
+    count = $1
   else
     raise 'unknown field type'
   end
 
   attribute = attribute_for_user_field(field)
   message = User.new.errors.generate_message(attribute, error_type)
+  message = message[:other].sub( /\%\{count\}/, count ) if [:too_short, :too_long].include?(error_type)
   page.assert_selector('.label-error', text: /\A#{Regexp.quote(message)}\z/, visible: true)
 end
 
@@ -156,6 +179,8 @@ def attribute_for_user_field(field)
     attribute = 'given_name'
   when 'last name'
     attribute = 'surname'
+    when 'username'
+      attribute = 'username'
   else
     raise 'unknown field'
   end

@@ -57,26 +57,28 @@ Rails.application.routes.draw do
   get '/advances/manage-advances' => 'advances#manage_advances'
 
   scope 'settings', as: :settings do
-    get '/' => 'error#not_found'
-    post '/save' => 'settings#save'
-    get '/two-factor' => 'settings#two_factor'
-    put '/two-factor/pin' => 'settings#reset_pin'
-    post '/two-factor/pin' => 'settings#new_pin'
-    post '/two-factor/resynchronize' => 'settings#resynchronize'
-    get '/users' => 'settings#users'
-    patch '/users/:id' => 'settings#update_user'
-    delete '/users/:id' => 'settings#delete_user'
-    get '/password' => 'settings#change_password'
-    put '/password' => 'settings#update_password'
+    get    '/'                         => 'error#not_found'
+    get    '/password'                 => 'settings#change_password'
+    put    '/password'                 => 'settings#update_password'
+    post   '/save'                     => 'settings#save'
+    get    '/two-factor'               => 'settings#two_factor'
+    put    '/two-factor/pin'           => 'settings#reset_pin'
+    post   '/two-factor/pin'           => 'settings#new_pin'
+    post   '/two-factor/resynchronize' => 'settings#resynchronize'
+    get    '/users'                    => 'settings#users'
+    patch  '/users/:id'                => 'settings#update_user'
+    delete '/users/:id'                => 'settings#delete_user'
   end
 
   scope 'settings' do
-    post '/users/:id/lock' => 'settings#lock', as: 'user_lock'
-    post '/users/:id/unlock' => 'settings#unlock', as: 'user_unlock'
-    get '/users/:id' => 'settings#edit_user', as: 'user'
-    get '/users/:id/confirm_delete' => 'settings#confirm_delete', as: 'user_confirm_delete'
-    get '/expired-password' => 'settings#expired_password', as: :user_expired_password
-    put '/expired-password' => 'settings#update_expired_password'
+    get    '/users/new'                => 'settings#new_user', as: 'new_user'
+    post   '/users'                    => 'settings#create_user', as: 'users'
+    get    '/users/:id'                => 'settings#edit_user', as: 'user'
+    get    '/users/:id/confirm_delete' => 'settings#confirm_delete', as: 'user_confirm_delete'
+    post   '/users/:id/lock'           => 'settings#lock', as: 'user_lock'
+    post   '/users/:id/unlock'         => 'settings#unlock', as: 'user_unlock'
+    get    '/expired-password'         => 'settings#expired_password', as: :user_expired_password
+    put    '/expired-password'         => 'settings#update_expired_password'
   end
 
   get '/jobs/:job_status_id' => 'jobs#status', as: 'job_status'

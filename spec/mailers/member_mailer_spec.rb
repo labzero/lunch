@@ -47,4 +47,58 @@ RSpec.describe MemberMailer, :type => :mailer do
       end
     end
   end
+
+  describe 'new_user_instructions email' do
+    let(:display_name){ SecureRandom.hex }
+    let(:email){ "#{SecureRandom.hex}@#{SecureRandom.hex}.com" }
+    let(:firstname){ SecureRandom.hex }
+    let(:username){ SecureRandom.hex }
+    let(:given_name){ SecureRandom.hex }
+    let(:user){ double( 'user', display_name: display_name, email: email, firstname: firstname, username: username, given_name: given_name) }
+    let(:manager_display_name){ SecureRandom.hex }
+    let(:manager){ double('manager', display_name: manager_display_name) }
+    let(:institution){ SecureRandom.hex }
+    let(:token){ SecureRandom.hex }
+    let(:call_method){ mail :new_user_instructions, user, manager, institution, token }
+
+    it 'should call mail with the appropriate params' do
+      expect_any_instance_of(Devise::Mailer).to receive(:mail).with(to: "#{display_name} <#{email}>", subject: I18n.t('emails.new_user.subject'), from: I18n.t('emails.new_user.sender', email: ContactInformationHelper::WEB_SUPPORT_EMAIL) )
+      call_method
+    end
+
+    it 'calls mail with @resource set' do
+      call_method
+      expect(assigns[:resource]).to be(user)
+    end
+
+    it 'calls mail with @manager set' do
+      call_method
+      expect(assigns[:manager]).to be(manager)
+    end
+
+    it 'calls mail with @member_name set' do
+      call_method
+      expect(assigns[:member_name]).to be(institution)
+    end
+
+    it 'calls mail with @token set' do
+      call_method
+      expect(assigns[:token]).to be(token)
+    end
+
+    it 'produces an email containing given_name' do
+      call_method
+      expect(response.body).to match(given_name)
+    end
+
+    it 'produces an email containing manager_display_name' do
+      call_method
+      expect(response.body).to match(manager_display_name)
+    end
+
+    it 'produces an email containing token' do
+      call_method
+      expect(response.body).to match(token)
+    end
+  end
 end

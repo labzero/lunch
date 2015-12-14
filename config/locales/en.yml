@@ -295,6 +295,12 @@ en:
       error:
         title: An Error Occured
         summary: Your request could not be completed.
+      create:
+        title: Add New Web User
+        save: Add New Web User
+      confirm_create:
+        title: New Account Created
+        success_html: A new account has been created for <strong>%{name}</strong>.<br>An email with login instructions has been sent to this user.
       edit:
         title: Edit User Information
         save: Save Changes
@@ -416,6 +422,20 @@ en:
     logged_out: You Have Been Logged Out
     session_expired: For security reasons, your session expires after several minutes of inactivity.
     log_in_again: Log In Again
+  emails:
+    new_user:
+      sender: FHLBank San Francisco <%{email}>
+      subject: Access to FHLBank San Francisco Member Portal
+      greeting: 'Hi %{given_name},'
+      created_by: "An account has been created for you by your institution’s Access Manager, %{manager}."
+      username: 'Your username is: %{username}.'
+      set_password: To access the FHLB Member Portal, you'll need to set your password.
+      login_instructions: Once you have set a password, you will be redirected to the login page, where you will need to enter your username (above) and your new password.
+      expiration: For your security, this link will expire in one hour.
+      contact: Contact your Access Manager or Web Support at %{phone} if you have any questions.
+      sign_off_html: Thank you,<br>FHLBank San Francisco Web Support Team
+      disclaimer: 'The contents of this email are intended only for the use of the individual or entity to which they are addressed and may contain information that is legally privileged, confidential, and exempt from disclosure. If you are not the intended recipient, you are hereby notified that any dissemination, distribution, or copying of this email is strictly prohibited. If you have received this email in error, please: (i) reply immediately to this email indicating that you received this communication in error, and (ii) promptly delete this email from your computer. Thank you.'
+
   forgot_password:
     instructions: "Enter your username, and we'll email you instructions to reset your password."
     confirmation:
