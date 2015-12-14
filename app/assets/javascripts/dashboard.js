@@ -103,6 +103,7 @@ $(function () {
       if (!isCheckingRate) {
         isCheckingRate = true;
         $.get('/dashboard/current_overnight_vrc').done(function(data) {
+          $rate_element_children.remove();
           $rate_element.html(data.rate).append($rate_element_children);
           if (!data.quick_advances_active) {
             showQuickAdvanceClosedState();
