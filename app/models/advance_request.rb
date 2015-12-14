@@ -389,7 +389,7 @@ class AdvanceRequest
         rate_data = @rates[type][term].dup
         rate_data[:type] = type
         rate_data[:term] = term
-        if rate_data[:disabled] && (rate_data[:rate_band_info][:min_threshold_exceeded] || rate_data[:rate_band_info][:max_threshold_exceeded])
+        if rate_data[:disabled] && !rate_data[:end_of_day] && (rate_data[:rate_band_info][:min_threshold_exceeded] || rate_data[:rate_band_info][:max_threshold_exceeded])
           InternalMailer.exceeds_rate_band(rate_data, @request.try(:uuid), signer).deliver_now
         end
       end
