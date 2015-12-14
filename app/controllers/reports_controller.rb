@@ -1009,15 +1009,12 @@ class ReportsController < ApplicationController
           job_status.destroy
         end
 
-        users = users.sort { |a, b| [a[:surname] || '', a[:given_name] || ''] <=> [b[:surname] || '', b[:given_name] || ''] }
-        rows = []
-        users.each do |user|
-          user_roles = roles_for_signers(user)
-          next if user_roles.empty? || (@authorizations_filter != 'all' && !user[:roles].include?(@authorizations_filter))
-          rows << {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: user_roles}]}
-        end
+        users.sort_by! { |user| [user[:surname] || '', user[:given_name] || ''] }
 
-        @authorizations_table_data[:rows] = rows
+        user_roles = users.map{ |user| [user, roles_for_signers(user)] }.reject{ |_,roles| roles.empty? }
+        user_roles = user_roles.select{ |_,roles| roles.include?(AUTHORIZATIONS_MAPPING[@authorizations_filter]) } if @authorizations_filter != 'all'
+
+        @authorizations_table_data[:rows] = user_roles.map{ |user,roles| {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: roles}]}}
 
         render layout: false if request.xhr?
       else
@@ -1551,9 +1548,7 @@ class ReportsController < ApplicationController
     end
     roles.delete(User::Roles::ETRANSACT_SIGNER)
     roles.sort_by! { |role| AUTHORIZATIONS_ORDER.index(role) || 0 }
-    roles.collect! do |role|
-      AUTHORIZATIONS_MAPPING[role]
-    end
+    roles.collect! { |role| AUTHORIZATIONS_MAPPING[role] }
     roles.compact!
     roles
   end
