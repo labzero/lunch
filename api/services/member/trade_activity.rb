@@ -97,6 +97,7 @@ module MAPI
 
         def self.get_trade_activity_trades(app, message)
           trade_activity = []
+          today = Time.zone.today
           connection = MAPI::Services::Member::TradeActivity.init_trade_connection(app.settings.environment)
           if connection
             begin
@@ -115,7 +116,7 @@ module MAPI
                   'maturity_date' => trade.at_css('advance maturityDate') ? trade.at_css('advance maturityDate').content : 'Open',
                   'advance_number' => trade.at_css('advance advanceNumber').content,
                   'advance_type' => get_ods_deal_structure_code(app, trade.at_css('advance subProduct').content, trade.at_css('advance collateralType').content),
-                  'status' => Date.parse(trade.at_css('tradeHeader tradeDate').content) < Time.zone.today ? 'Outstanding' : 'Processing',
+                  'status' => Date.parse(trade.at_css('tradeHeader tradeDate').content) < today ? 'Outstanding' : 'Processing',
                   'interest_rate' => rate,
                   'current_par' => trade.at_css('advance par amount').content.to_f
                 }
@@ -248,12 +249,13 @@ module MAPI
         def self.todays_credit_activity(env, member_id)
           member_id = member_id.to_i
           credit_activity = []
+          today = Time.zone.today
 
           activities = if connection = MAPI::Services::Member::TradeActivity.init_trade_activity_connection(env)
             message = {
               'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
               'v1:tradeRequestParameters' => [{
-                'v1:lastUpdatedDateTime' => Time.zone.today().strftime("%Y-%m-%dT%T"),
+                'v1:lastUpdatedDateTime' => today.strftime("%Y-%m-%dT%T"),
                 'v1:arrayOfCustomers' => [{'v1:fhlbId' => member_id}]
               }]
             }
@@ -277,7 +279,7 @@ module MAPI
           else
             activities = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'credit_activity.json')))
             activities.each do |activity|
-              today_string = Time.zone.today.to_s
+              today_string = today.to_s
               activity['fundingDate'], activity['maturityDate'] = [today_string, today_string]
             end
           end
@@ -298,7 +300,7 @@ module MAPI
             sub_product = activity['subProduct'].to_s if activity['subProduct'].present?
 
             # skip the trade if it is an old Advance that is not prepaid, but rather Amended
-            if TODAYS_CREDIT_ARRAY.include?(status) && !(instrument_type == 'ADVANCE' && status != 'EXERCISED' && termination_par.blank? && !funding_date.blank? && funding_date < Time.zone.today)
+            if TODAYS_CREDIT_ARRAY.include?(status) && !(instrument_type == 'ADVANCE' && status != 'EXERCISED' && termination_par.blank? && !funding_date.blank? && funding_date < today)
               hash = {
                 transaction_number: transaction_number,
                 current_par: current_par,
