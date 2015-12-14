@@ -4,6 +4,7 @@
 -has_data = defined?(data_available) ? data_available : true
 -link ||= nil
 -data ||= nil
+-deferred ||= false
 %section.dashboard-module{class: classes, data: data}
   %header
     %h1= title
@@ -14,8 +15,11 @@
         .icon-alt-text= t("dashboard.actions.#{action[:type].gsub('-icon', '')}")
     - elsif link && link[:name] && link[:path]
       =link_to(link[:name], link[:path])
-  .dashboard-module-content
-    -if has_data
-      =yield
-    -else
-      .dashboard-module-temporarily-unavailable= t('global.temporarily_unavailable')
+  - if deferred && has_data
+    = yield
+  - else
+    .dashboard-module-content
+      -if has_data
+        = yield
+      -else
+        .dashboard-module-temporarily-unavailable= t('global.temporarily_unavailable')

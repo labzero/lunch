@@ -39,14 +39,15 @@ Then(/^I should see a market overview graph$/) do
   mod.assert_selector('.dashboard-market-graph', :visible => true)
 end
 
-Then(/^I should see the recent activities module in its loading state/) do
-  mod = page.find('.dashboard-module', :text => I18n.t('dashboard.recent_activity.title'))
-  mod.assert_selector('.dashboard-module-loading', text: I18n.t('dashboard.recent_activity.loading'))
-end
-
-Then(/^I should see the recent activities module in its loaded state$/) do
-  mod = page.find('.dashboard-module', :text => I18n.t('dashboard.recent_activity.title'))
+Then(/^I should see the "(.*?)" section in its loaded state$/) do |section|
+  mod = get_module_by_section(section)
   mod.assert_no_selector('.dashboard-module-loading', wait: 180)
+  case section
+    when 'recent activities'
+      mod.assert_selector('.table-dashboard-recent-activity') unless mod.has_css?('.dashboard-module-recent-activity-no-data')
+    when 'account overview'
+      mod.assert_selector('.table-dashboard-account-overview')
+  end
 end
 
 Then(/^I should see the Your Account table breakdown$/) do
@@ -74,4 +75,14 @@ end
 
 When(/^there is no data for "(.*?)"$/) do |data|
   # this step may be used in the future to conditionally shut off certain endpoints or otherwise mock the experience of no data returned
+end
+
+def get_module_by_section(section)
+  heading = case section
+    when 'recent activities'
+      I18n.t('dashboard.recent_activity.title')
+    when 'account overview'
+      I18n.t('dashboard.your_account.title')
+  end
+  page.find('.dashboard-module', text: heading, exact: true)
 end

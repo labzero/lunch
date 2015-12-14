@@ -26,6 +26,12 @@ class DashboardController < ApplicationController
     raise exception
   end
 
+  # {action_name: [job_klass, path_helper_as_string]}
+  DEFERRED_JOBS = {
+    recent_activity: [MemberBalanceTodaysCreditActivityJob, "dashboard_recent_activity_url"],
+    account_overview: [MemberBalanceProfileJob, "dashboard_account_overview_url"]
+  }.freeze
+
   def index
     today = Time.zone.now.to_date
     rate_service = RatesService.new(request)
@@ -33,76 +39,8 @@ class DashboardController < ApplicationController
     member_balances = MemberBalanceService.new(current_member_id, request)
     members_service = MembersService.new(request)
     current_user_roles
-
-    profile = member_balances.profile
-
-    # Recent Activity
-    @recent_activity_data = []
-    job_status = MemberBalanceTodaysCreditActivityJob.perform_later(current_member_id).job_status
-    job_status.update_attributes!(user_id: current_user.id)
-    @recent_activity_job_status_url = job_status_url(job_status)
-    @recent_activity_load_url = dashboard_recent_activity_url(recent_activity_job_id: job_status.id)
-
-    # @account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
-    if !profile
-      profile = {
-        credit_outstanding: {}
-      }
-    end
-
-    if members_service.report_disabled?(current_member_id, [MembersService::FINANCING_AVAILABLE_DATA])
-      profile[:total_financing_available] = nil
-    end
-
-    if members_service.report_disabled?(current_member_id, [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA])
-      profile[:sta_balance] = nil
-    end
-
-    if members_service.report_disabled?(current_member_id, [MembersService::CREDIT_OUTSTANDING_DATA])
-      profile[:credit_outstanding][:total] = nil
-    end
-
-    if members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA])
-      profile[:collateral_borrowing_capacity][:remaining] = nil
-      profile[:total_borrowing_capacity_standard] = nil
-      profile[:total_borrowing_capacity_sbc_agency] = nil
-      profile[:total_borrowing_capacity_sbc_aaa] = nil
-      profile[:total_borrowing_capacity_sbc_aa] = nil
-    end
-
-    if members_service.report_disabled?(current_member_id, [MembersService::FHLB_STOCK_DATA])
-      profile[:capital_stock] = nil
-    end
-
-    sta_balance = [
-      [t('dashboard.your_account.table.balance'), profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
-    ]
-
-    credit_outstanding = [
-      [t('dashboard.your_account.table.credit_outstanding'), profile[:credit_outstanding][:total]]
-    ]
-
-    if profile[:total_borrowing_capacity_sbc_agency] == 0 && profile[:total_borrowing_capacity_sbc_aaa] == 0 && profile[:total_borrowing_capacity_sbc_aa] == 0
-      remaining = [
-        {title: t('dashboard.your_account.table.remaining.title')},
-        [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
-        [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
-        [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
-      ]
-    else
-      remaining = [
-        {title: t('dashboard.your_account.table.remaining.title')},
-        [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
-        [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
-        [t('dashboard.your_account.table.remaining.standard'), profile[:total_borrowing_capacity_standard]],
-        [t('dashboard.your_account.table.remaining.agency'), profile[:total_borrowing_capacity_sbc_agency]],
-        [t('dashboard.your_account.table.remaining.aaa'), profile[:total_borrowing_capacity_sbc_aaa]],
-        [t('dashboard.your_account.table.remaining.aa'), profile[:total_borrowing_capacity_sbc_aa]],
-        [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
-      ]
-    end
-
-    @account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining}
+    populate_deferred_jobs_view_parameters(DEFERRED_JOBS)
+    profile = sanitize_profile_if_endpoints_disabled(member_balances.profile)
 
     @market_overview = [{
       name: 'Test',
@@ -299,21 +237,47 @@ class DashboardController < ApplicationController
   end
 
   def recent_activity
-    @recent_activity_data = []
-    raise ArgumentError, "No job id given for recent_activity" unless params[:recent_activity_job_id]
-    job_status = JobStatus.find_by(id: params[:recent_activity_job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
-    raise ActiveRecord::RecordNotFound unless job_status
+    activities = deferred_job_data || []
+    activities = activities.collect! {|o| o.with_indifferent_access}
+    recent_activity_data = process_recent_activities(activities)
+    render partial: 'dashboard/dashboard_recent_activity', locals: {table_data: recent_activity_data}, layout: false
+  end
 
-    # grab recent activities
-    activities = JSON.parse(job_status.result_as_string).collect! {|o| o.with_indifferent_access}
-    job_status.destroy
+  def account_overview
+    profile = deferred_job_data || {}
+    profile = sanitize_profile_if_endpoints_disabled(profile.with_indifferent_access)
 
-    @recent_activity_data = process_recent_activities(activities)
-    if request.xhr?
-      render partial: 'dashboard/dashboard_recent_activity', locals: {table_data: @recent_activity_data}, layout: false
+    # account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
+    sta_balance = [
+      [t('dashboard.your_account.table.balance'), profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
+    ]
+
+    credit_outstanding = [
+      [t('dashboard.your_account.table.credit_outstanding'), (profile[:credit_outstanding] || {})[:total]]
+    ]
+
+    remaining = if profile[:total_borrowing_capacity_sbc_agency] == 0 && profile[:total_borrowing_capacity_sbc_aaa] == 0 && profile[:total_borrowing_capacity_sbc_aa] == 0
+      [
+        {title: t('dashboard.your_account.table.remaining.title')},
+        [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
+        [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
+        [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
+      ]
     else
-      raise "Invalid request: must be XMLHttpRequest (xhr) in order to be valid"
+      [
+        {title: t('dashboard.your_account.table.remaining.title')},
+        [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
+        [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
+        [t('dashboard.your_account.table.remaining.standard'), profile[:total_borrowing_capacity_standard]],
+        [t('dashboard.your_account.table.remaining.agency'), profile[:total_borrowing_capacity_sbc_agency]],
+        [t('dashboard.your_account.table.remaining.aaa'), profile[:total_borrowing_capacity_sbc_aaa]],
+        [t('dashboard.your_account.table.remaining.aa'), profile[:total_borrowing_capacity_sbc_aa]],
+        [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
+      ]
     end
+
+    account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining}
+    render partial: 'dashboard/dashboard_account_overview', locals: {table_data: account_overview}, layout: false
   end
 
   private
@@ -426,4 +390,58 @@ class DashboardController < ApplicationController
     end
     activity_data
   end
+
+  def deferred_job_data
+    raise "Invalid request: must be XMLHttpRequest (xhr) in order to be valid" unless request.xhr?
+    param_name = "#{action_name}_job_id".to_sym
+    raise ArgumentError, "No job id given for #{action_name}" unless params[param_name]
+    job_status = JobStatus.find_by(id: params[param_name], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+    raise ActiveRecord::RecordNotFound unless job_status
+    deferred_job_data = JSON.parse(job_status.result_as_string).clone
+    job_status.destroy
+    deferred_job_data
+  end
+
+  def populate_deferred_jobs_view_parameters(jobs_hash)
+    jobs_hash.each do |name, args|
+      job_klass = args.first
+      path = args.last
+      job_status = job_klass.perform_later(current_member_id, (request.uuid if defined?(request))).job_status
+      job_status.update_attributes!(user_id: current_user.id)
+      instance_variable_set("@#{name}_job_status_url", job_status_url(job_status))
+      instance_variable_set("@#{name}_load_url", send(path, :"#{name}_job_id" => job_status.id))
+    end
+  end
+
+  def sanitize_profile_if_endpoints_disabled(profile)
+    members_service = MembersService.new(request)
+    profile = {credit_outstanding: {}, collateral_borrowing_capacity: {}} if profile.blank?
+
+    if members_service.report_disabled?(current_member_id, [MembersService::FINANCING_AVAILABLE_DATA])
+      profile[:total_financing_available] = nil
+    end
+
+    if members_service.report_disabled?(current_member_id, [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA])
+      profile[:sta_balance] = nil
+    end
+
+    if members_service.report_disabled?(current_member_id, [MembersService::CREDIT_OUTSTANDING_DATA])
+      profile[:credit_outstanding][:total] = nil
+    end
+
+    if members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA])
+      profile[:collateral_borrowing_capacity][:remaining] = nil
+      profile[:total_borrowing_capacity_standard] = nil
+      profile[:total_borrowing_capacity_sbc_agency] = nil
+      profile[:total_borrowing_capacity_sbc_aaa] = nil
+      profile[:total_borrowing_capacity_sbc_aa] = nil
+    end
+
+    if members_service.report_disabled?(current_member_id, [MembersService::FHLB_STOCK_DATA])
+      profile[:capital_stock] = nil
+    end
+
+    profile
+  end
+
 end

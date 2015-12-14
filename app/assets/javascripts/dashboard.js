@@ -101,51 +101,62 @@ $(function () {
     var $rate_element_children = $rate_element.children();
     setInterval(function() {
       if (!isCheckingRate) {
-        isCheckingRate = true;
-        $.get('/dashboard/current_overnight_vrc').done(function(data) {
-          $rate_element_children.remove();
-          $rate_element.html(data.rate).append($rate_element_children);
-          if (!data.quick_advances_active) {
-            showQuickAdvanceClosedState();
-          }
-        }).always(function() {
-          isCheckingRate = false;
-        });
+        getOvernightVrc();
       };
     }, 30000);
+    getOvernightVrc();
   };
 
-  var $deferredModules = $('.dashboard-module[data-deferred]');
-  $.each($deferredModules, function(){checkDeferredModuleStatus($deferredModules, $deferredModules.data('deferred'), $deferredModules.data('deferred-load'));});
-
-
-  function deferredModuleError($el) {
-    $el.find('.dashboard-module-loading').hide();
-    $el.find('.dashboard-module-temporarily-unavailable').show();
+  function getOvernightVrc() {
+    if (!isCheckingRate) {
+      isCheckingRate = true;
+      $.get('/dashboard/current_overnight_vrc').done(function(data) {
+        $rate_element_children.remove();
+        $rate_element.html(data.rate).append($rate_element_children);
+        if (!data.quick_advances_active) {
+          showQuickAdvanceClosedState();
+        }
+      }).always(function() {
+        isCheckingRate = false;
+        $rate_element.removeClass('dashboard-element-loading')
+      });
+    };
   };
 
-  function loadDeferredModule($el, url) {
-    $.get(url).done(function(data) {
-      var $newReport = $(data);
-      $el.find('.dashboard-module-content').html($newReport);
-    }).fail(function() {
-      deferredModuleError($el);
-    });
-  };
+  // Handle loading of deferred elements on dashboard
+  var $deferredElements = $('.dashboard-module-content-deferred');
+  $.each($deferredElements, function(i, el) {
+    var $el = $(el);
+    checkDeferredElementStatus($el, $el.data('deferred'), $el.data('deferred-load'));
+  });
 
-  function checkDeferredModuleStatus($el, status_url, load_url) {
+  function checkDeferredElementStatus($el, status_url, load_url) {
     $.get(status_url).done(function(data) {
       var job_status = data.job_status;
       if (job_status == 'completed') {
-        loadDeferredModule($el, load_url);
+        loadDeferredElement($el, load_url);
       } else if(job_status == 'failed') {
-        deferredModuleError($el);
+        deferredElementError($el);
       } else {
-        jobStatusTimer = setTimeout(function(){checkDeferredModuleStatus($el, status_url, load_url)}, 1000);
+        jobStatusTimer = setTimeout(function(){checkDeferredElementStatus($el, status_url, load_url)}, 1000);
       };
     }).fail(function() {
-      deferredModuleError($el);
+      deferredElementError($el);
     });
+  };
+
+  function loadDeferredElement($el, url) {
+    $.get(url).done(function(data) {
+      var $newContent = $(data);
+      $el.replaceWith($newContent);
+    }).fail(function() {
+      deferredElementError($el);
+    });
+  };
+
+  function deferredElementError($el) {
+    $el.find('.dashboard-module-loading').hide();
+    $el.find('.dashboard-module-temporarily-unavailable').show();
   };
 
 });
