@@ -25,6 +25,7 @@ class FhlbJob < ActiveJob::Base
     result # return the result of the job to handle the case where job is executed inline
   rescue => err
     Rails.logger.warn "#{self.class.name}##{job_id} raised an exception: #{err}"
+    Rails.logger.debug "BACKTRACE: #{err.backtrace.join("\n")}"
     job_status.failed!
   end
 end

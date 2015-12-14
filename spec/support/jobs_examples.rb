@@ -28,6 +28,7 @@ RSpec.shared_examples 'a report that can be downloaded' do |method, download_opt
         allow_any_instance_of(subject.class).to receive(:current_member_id).and_return(member_id)
         allow(format.last).to receive(:perform_later).and_return(active_job)
         allow(controller).to receive(:current_user).and_return(current_user)
+        allow(controller).to receive(:fhlb_report_date_numeric)
       end
 
       it "should enqueue a report #{format.first} job when the requested `export_format` is `#{format.first}`" do
