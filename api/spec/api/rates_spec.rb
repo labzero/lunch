@@ -219,6 +219,7 @@ describe MAPI::ServiceApp do
           expect(r[:rate]).to match(/\d+\.\d+/)
           expect(r[:disabled]).to be_boolean
           expect(r[:disabled]).to be == (blacked_out || cutoff || disabled || below_threshold || above_threshold)
+          expect(r[:end_of_day]).to be(cutoff)
           expect(r[:start_of_day_rate]).to eq(start_of_day_rate)
           expect(r[:rate_band_info]).to eq(MAPI::Services::Rates.rate_band_info(live_hash[loan_type][loan_term], rate_bands_hash[loan_term]))
         end

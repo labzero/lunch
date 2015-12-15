@@ -1076,6 +1076,7 @@ describe AdvanceRequest do
       before do 
         allow(rate_data).to receive(:[]).with(:disabled).and_return(true)
         allow(rate_data).to receive(:[]).with(:rate_band_info).and_return(rate_band_info)
+        allow(rate_data).to receive(:[]).with(:end_of_day).and_return(false)
       end
       it 'sends the `exceeds_rate_band` email if a rate is disabled and has exceeded its minimum threshold' do
         allow(rate_band_info).to receive(:[]).with(:min_threshold_exceeded).and_return(true)
@@ -1090,6 +1091,12 @@ describe AdvanceRequest do
         call_method
       end
       it 'does not send an email if a rate has not exceeded its thresholds' do
+        expect(InternalMailer).to_not receive(:exceeds_rate_band)
+        call_method
+      end
+      it 'does not send an email if a rate is disabled due to end of day' do
+        allow(rate_band_info).to receive(:[]).with(:min_threshold_exceeded).and_return(true)
+        allow(rate_data).to receive(:[]).with(:end_of_day).and_return(true)
         expect(InternalMailer).to_not receive(:exceeds_rate_band)
         call_method
       end

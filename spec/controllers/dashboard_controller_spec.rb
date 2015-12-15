@@ -15,8 +15,8 @@ RSpec.describe DashboardController, :type => :controller do
         allow(subject).to receive(:index).and_raise(exception.new(*args))
       end
 
-      it 'logs at the `debug` log level' do
-        expect(subject.logger).to receive(:debug).exactly(:twice)
+      it 'logs at the `info` log level' do
+        expect(subject.logger).to receive(:info).exactly(:twice)
         make_request rescue exception
       end
       it 'puts the advance_request as JSON in the log' do

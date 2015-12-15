@@ -37,6 +37,10 @@ module MAPI
           key :type, :string
           key :description, 'The rate of this loan_term and loan_type'
         end
+        property :end_of_day do
+          key :type, :boolean
+          key :description, 'Has this particular product reached end-of-day?'
+        end
       end
     end
   end

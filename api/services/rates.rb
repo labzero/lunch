@@ -636,6 +636,7 @@ module MAPI
               live[:rate_band_info]    = MAPI::Services::Rates.rate_band_info(live, rate_bands[term])
               live[:maturity_date]     = MAPI::Services::Rates.get_maturity_date(live[:maturity_date], TERM_MAPPING[term][:frequency_unit], holidays)
               live[:disabled]          = MAPI::Services::Rates.disabled?(live, loan_terms[term][type], blackout_dates)
+              live[:end_of_day]        = !loan_terms[term][type][:trade_status]
             end
           end
           live_data.merge( timestamp: Time.zone.now ).to_json
