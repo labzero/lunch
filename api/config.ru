@@ -7,6 +7,7 @@ require 'dotenv'
 Dotenv.load File.expand_path('../.env', __dir__)
 
 ENV['RACK_ENV'] = ENV['RAILS_ENV'] if !ENV['RACK_ENV'] && ENV['RAILS_ENV']
+ENV['MAPI'] = 'true'
 
 if ENV['PROFILE_MODE']
   require_relative '../config/initializers/profiler.rb'

@@ -129,6 +129,7 @@ This is a summary of the options supported in our .env files:
 * `FHLB_INTERNAL_IPS`: A list of space separated CIDR rules representing IPs that are considered part of the bank's internal network.
 * `LOCAL_MAIL`: Set to `true` to enable local mail delivery via Letter Opener.
 * `LOG_LEVEL`: Set to a valid log level to control what granularity of logging occurs. Defaults to `info`.
+* `NEW_RELIC_LICENSE_KEY`: The license key to use for New Relic.
 
 
 ## Running the Tests

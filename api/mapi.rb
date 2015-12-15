@@ -1,4 +1,5 @@
 require 'sinatra/base'
+require 'newrelic_rpm'
 require 'swagger/blocks'
 require 'active_support/concern'
 require 'active_support/time'
