@@ -29,7 +29,7 @@
       .form-flash-message{data: {type: 'success'}}= t('settings.two_factor.reset_pin.success')
       .form-flash-message{data: {type: 'error'}}= t('settings.two_factor.reset_pin.error_html', phone_number: web_support_phone_number, url: web_support_email)
       .settings-inactive-view
-        %p= t('settings.two_factor.reset_pin.description')
+        %p= t('settings.two_factor.reset_pin.description_html', url: web_support_email)
         = link_to(t('settings.two_factor.reset_pin.cta'), '#', class: 'settings-group-cta')
       = form_tag settings_two_factor_pin_path, method: :put, remote: true, class: 'settings-active-view' do
         %p= t('settings.two_factor.reset_pin.hint')
