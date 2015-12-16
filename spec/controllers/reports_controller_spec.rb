@@ -1522,6 +1522,7 @@ RSpec.describe ReportsController, :type => :controller do
     it_behaves_like 'a user required action', :get, :securities_transactions
     it_behaves_like 'a report with instance variables set in a before_filter', :securities_transactions
     it_behaves_like 'a report with a @max_date', :securities_transactions
+    it_behaves_like 'a report that can be downloaded', :securities_transactions, [:xlsx]
     it 'can be disabled' do
       allow(subject).to receive(:report_disabled?).and_return(true)
       allow(transaction_hash).to receive(:collect)

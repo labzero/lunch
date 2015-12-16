@@ -1,0 +1,18 @@
+xlsx_package.use_shared_strings = true
+workbook = xlsx_package.workbook
+workbook.styles do |styles|
+  currency_format = styles.add_style num_fmt: 2
+  date_format = styles.add_style format_code: 'mm/dd/yyyy'
+  integer_format = styles.add_style num_fmt: 1
+
+  styles = [nil, nil, nil, nil, integer_format, date_format, currency_format, currency_format, currency_format]
+
+  workbook_name = I18n.t('reports.pages.securities_transactions.title')
+  workbook.add_worksheet(name: workbook_name) do |sheet|
+    sheet.add_row @securities_transactions_table_data[:column_headings]
+    @securities_transactions_table_data[:rows].sort_by{ |row| row[:columns][1][:value] }.each do |row|
+      sheet.add_row row[:columns].collect { |column| column[:value]}, style: styles
+    end
+  end
+
+end
