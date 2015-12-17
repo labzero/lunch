@@ -1,11 +1,13 @@
 class FhlbJob < ActiveJob::Base
 
   def initialize(*args, &block)
-    super
-    @mutex = Mutex.new
+    # Run the alias method chain on the eigenclass to modify our subclasses perform. This should always be done first.
     class << self
       alias_method_chain :perform, :rescue
     end
+
+    super
+    @mutex = Mutex.new
   end
 
   def job_status
