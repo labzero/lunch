@@ -41,7 +41,6 @@ class RenderReportPDFJob < FhlbJob
     file.original_filename = "#{filename}.pdf"
     return if job_status.canceled?
     job_status.result = file
-    job_status.status = :completed
     job_status.save!
     file
   end

@@ -84,8 +84,9 @@ RSpec.describe RenderReportExcelJob, type: :job do
       expect(job_status).to receive(:result=).with(string_io_with_filename)
       run_job
     end
-    it 'sets the job_status as completed' do
-      expect(job_status).to receive(:status=).with(:completed)
+    it 'flags the JobStatus as completed on success' do
+      expect(job_status).to receive(:save!).once.ordered
+      expect(job_status).to receive(:completed!).ordered
       run_job
     end
     it 'saves the job_status' do

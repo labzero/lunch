@@ -20,7 +20,6 @@ class RenderReportExcelJob < FhlbJob
     file.original_filename = "#{filename}.xlsx"
     return if job_status.canceled?
     job_status.result = file
-    job_status.status = :completed
     job_status.save!
     file
   end
