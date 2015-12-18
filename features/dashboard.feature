@@ -6,30 +6,34 @@ Feature: Visiting the Dashboard
 Background:
   Given I am logged in
 
-  @smoke
-  Scenario: Visit dashboard
-    When I visit the dashboard
-    Then I should see dashboard modules
+@smoke
+Scenario: Visit dashboard
+  When I visit the dashboard
+  Then I should see dashboard modules
 
-  Scenario: See dashboard contacts
-    When I visit the dashboard
-    Then I should see 3 contacts
+Scenario: See dashboard contacts
+  When I visit the dashboard
+  Then I should see 3 contacts
 
-  @smoke
-  Scenario: See required dashboard modules
-    When I visit the dashboard
-    Then I should see the Your Account table breakdown
-    And I should see an "borrowing capacity gauge" in the Account module
-    And I should see a market overview graph
+@smoke
+Scenario: See required dashboard modules
+  When I visit the dashboard
+  Then I should see the Your Account table breakdown
+  And I should see an "borrowing capacity gauge" in the Account module
+  And I should see a market overview graph
 
-  @smoke @jira-mem-610
-  Scenario: See the recent activities module
-    When I visit the dashboard
-    Then I should see the recent activities module in its loading state
-    And I should see the recent activities module in its loaded state
+@smoke @jira-mem-610
+Scenario: See the recent activities module
+  When I visit the dashboard
+  Then I should see the recent activities module in its loaded state
 
-  @data-unavailable @jira-mem-408
-  Scenario: Data for Aggregate 30 Day Terms module is temporarily unavailable
-    Given I visit the dashboard
-    When there is no data for "Aggregate 30 Day Terms"
-    Then the Aggregate 30 Day Terms graph should show the Temporarily Unavailable state
+@timing-sensitive @jira-mem-610
+Scenario: See the recent activities module load asynchronously
+  When I visit the dashboard
+  Then I should see the recent activities module in its loading state
+
+@data-unavailable @jira-mem-408
+Scenario: Data for Aggregate 30 Day Terms module is temporarily unavailable
+  Given I visit the dashboard
+  When there is no data for "Aggregate 30 Day Terms"
+  Then the Aggregate 30 Day Terms graph should show the Temporarily Unavailable state

@@ -133,7 +133,7 @@ Scenario: Member interacts with the 'report loading' flyout when downloading a P
   When I cancel the report download from the flyout
   Then I should not see the report download flyout
 
-@jira-mem-415 @jira-mem-543
+@timing-sensitive @jira-mem-415 @jira-mem-543
 Scenario: Member interacts with the 'report loading' flyout when downloading an XLSX of the Advance Detail report
   Given I am on the "Advances Detail" report page
   When I request an XLSX
