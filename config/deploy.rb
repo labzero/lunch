@@ -81,6 +81,7 @@ namespace :deploy do
   before :publishing, :missing_dirs
   after :publishing, :restart
   after :migrate, :seed
+  after :updated, "newrelic:notice_deployment"
 
   after :restart, :clear_cache do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
