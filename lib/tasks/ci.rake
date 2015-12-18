@@ -22,9 +22,20 @@ namespace :ci do
     task :parallel do
       pid = fork do
         runner_count = ENV['CUCUMBER_RUNNER_COUNT'] || 6
-        Bundler.clean_exec "RAILS_ENV=test parallel_test features --type cucumber --group-by runtime -n #{runner_count} --serialize-stdout"
+        Bundler.clean_exec "RAILS_ENV=test parallel_test features --type cucumber --group-by runtime -n #{runner_count} --runtime-log 'tmp/parallel_runtime_cucumber.log' --serialize-stdout --test-options '#{ENV['CUCUMBER_TEST_OPTIONS']}'"
       end
       Process.wait(pid)
+    end
+
+    namespace :parallel do
+      desc 'Runs the smoke cukes in parallel'
+      task :smokes do
+        pid = fork do
+          runner_count = ENV['CUCUMBER_RUNNER_COUNT'] || 6
+          Bundler.clean_exec "RAILS_ENV=test parallel_test features --type cucumber --group-by runtime -n #{runner_count} --runtime-log 'tmp/parallel_runtime_cucumber_smokes.log' --serialize-stdout --test-options '--tags @smoke --tags ~@local-only #{ENV['CUCUMBER_TEST_OPTIONS']}'"
+        end
+        Process.wait(pid)
+      end
     end
   end
 end
