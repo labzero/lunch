@@ -184,3 +184,31 @@
     }
   }
 }
+
+.nav-securities-flyout-row {
+  &, .column-1 {
+    width: 535px;
+  }
+}
+
+.nav-securities-flyout {
+  display: none;
+  @extend %clearfix;
+  h2 {
+    @extend %typography-section-title;
+    margin-top: 0;
+  }
+  p {
+    margin-bottom: 20px;
+  }
+  .primary-button, .secondary-button {
+    width: calc(50% - 10px);
+    float: left;
+  }
+  .primary-button{
+    float: right;
+  }
+  .flyout & {
+    display: block;
+  }
+}
