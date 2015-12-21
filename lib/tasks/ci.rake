@@ -22,9 +22,14 @@ namespace :ci do
     task :parallel do
       pid = fork do
         runner_count = ENV['CUCUMBER_RUNNER_COUNT'] || 6
-        Bundler.clean_exec "RAILS_ENV=test parallel_test features --type cucumber --group-by runtime -n #{runner_count} --runtime-log 'tmp/parallel_runtime_cucumber.log' --serialize-stdout --test-options '#{ENV['CUCUMBER_TEST_OPTIONS']}'"
+        runtime_log_file = 'tmp/parallel_runtime_cucumber.log'
+        runtime_log = File.exist?(runtime_log_file) ? "--runtime-log '#{runtime_log_file}'" : nil
+        cmd = "RAILS_ENV=test parallel_test features --type cucumber --group-by runtime -n #{runner_count} #{runtime_log} --serialize-stdout --test-options '#{ENV['CUCUMBER_TEST_OPTIONS']}'"
+        puts cmd
+        Bundler.clean_exec cmd
       end
       Process.wait(pid)
+      exit $?.exitstatus
     end
 
     namespace :parallel do
@@ -32,9 +37,14 @@ namespace :ci do
       task :smokes do
         pid = fork do
           runner_count = ENV['CUCUMBER_RUNNER_COUNT'] || 6
-          Bundler.clean_exec "RAILS_ENV=test parallel_test features --type cucumber --group-by runtime -n #{runner_count} --runtime-log 'tmp/parallel_runtime_cucumber_smokes.log' --serialize-stdout --test-options '--tags @smoke --tags ~@local-only #{ENV['CUCUMBER_TEST_OPTIONS']}'"
+          runtime_log_file = 'tmp/parallel_runtime_cucumber_smokes.log'
+          runtime_log = File.exist?(runtime_log_file) ? "--runtime-log '#{runtime_log_file}'" : nil
+          cmd = "RAILS_ENV=test parallel_test features --type cucumber --group-by runtime -n #{runner_count} #{runtime_log} --runtime-log --serialize-stdout --test-options '--tags @smoke --tags ~@local-only #{ENV['CUCUMBER_TEST_OPTIONS']}'"
+          puts cmd
+          Bundler.clean_exec cmd
         end
         Process.wait(pid)
+        exit $?.exitstatus
       end
     end
   end
