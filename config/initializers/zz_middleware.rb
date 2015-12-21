@@ -12,3 +12,6 @@ Rails.application.config.middleware.insert_before(ActionDispatch::Session::Redis
 
 # swap the default logger with our slightly customized version
 Rails.application.config.middleware.swap(Rails::Rack::Logger, FhlbMember::Rack::Logger, Rails.application.config.log_tags)
+
+# Add shared LDAP connection middleware before Warden
+Rails.application.config.middleware.insert_before(Warden::Manager, FhlbMember::Rack::LDAPSharedConnection)

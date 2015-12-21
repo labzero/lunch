@@ -110,38 +110,42 @@ RSpec.describe WelcomeController, :type => :controller do
 
     describe 'LDAP Intranet status' do
       let(:service_key) {'madmax'}
-      let(:connection) { double('LDAP Connection', search: nil) }
+      let(:connection) { double(Devise::LDAP::Connection) }
+      let(:raw_connection) { double(Net::LDAP, search: nil) }
       before do
+        allow(connection).to receive(:open).and_yield(raw_connection)
         allow(Devise::LDAP::Connection).to receive(:admin).with('intranet').and_return(connection)
       end
       it 'returns `true` if the search returns something' do
-        allow(connection).to receive(:search).and_return([{}])
+        allow(raw_connection).to receive(:search).and_return([{}])
         expect(make_request[service_key]).to eq(true)
       end
       it 'returns `false` if the search returns nothing' do
         expect(make_request[service_key]).to eq(false)
       end
       it 'returns `false` if the search raises an error' do
-        allow(connection).to receive(:search).and_raise('some error')
+        allow(raw_connection).to receive(:search).and_raise('some error')
         expect(make_request[service_key]).to eq(false)
       end
     end
 
     describe 'LDAP Extranet status' do
       let(:service_key) {'roadwarrior'}
-      let(:connection) { double('LDAP Connection', search: nil) }
+      let(:connection) { double(Devise::LDAP::Connection) }
+      let(:raw_connection) { double(Net::LDAP, search: nil) }
       before do
+        allow(connection).to receive(:open).and_yield(raw_connection)
         allow(Devise::LDAP::Connection).to receive(:admin).with('extranet').and_return(connection)
       end
       it 'returns `true` if the search returns something' do
-        allow(connection).to receive(:search).and_return([{}])
+        allow(raw_connection).to receive(:search).and_return([{}])
         expect(make_request[service_key]).to eq(true)
       end
       it 'returns `false` if the search returns nothing' do
         expect(make_request[service_key]).to eq(false)
       end
       it 'returns `false` if the search raises an error' do
-        allow(connection).to receive(:search).and_raise('some error')
+        allow(raw_connection).to receive(:search).and_raise('some error')
         expect(make_request[service_key]).to eq(false)
       end
     end
