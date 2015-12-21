@@ -25,6 +25,7 @@ namespace :ci do
         Bundler.clean_exec "RAILS_ENV=test parallel_test features --type cucumber --group-by runtime -n #{runner_count} --runtime-log 'tmp/parallel_runtime_cucumber.log' --serialize-stdout --test-options '#{ENV['CUCUMBER_TEST_OPTIONS']}'"
       end
       Process.wait(pid)
+      exit $?.exitstatus
     end
 
     namespace :parallel do
@@ -35,6 +36,7 @@ namespace :ci do
           Bundler.clean_exec "RAILS_ENV=test parallel_test features --type cucumber --group-by runtime -n #{runner_count} --runtime-log 'tmp/parallel_runtime_cucumber_smokes.log' --serialize-stdout --test-options '--tags @smoke --tags ~@local-only #{ENV['CUCUMBER_TEST_OPTIONS']}'"
         end
         Process.wait(pid)
+        exit $?.exitstatus
       end
     end
   end
