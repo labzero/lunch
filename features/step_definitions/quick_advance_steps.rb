@@ -13,7 +13,7 @@ When(/^I open the quick advance flyout and enter (\d+)$/) do |amount|
 end
 
 When(/^I open the quick advance flyout$/) do
-  @amount = Random.rand(100000) + 100000
+  @amount = Random.rand(100010) + 100000
   step "I open the quick advance flyout and enter #{@amount}"
 end
 
@@ -319,4 +319,19 @@ end
 Given(/^I enter my SecurID pin and token$/) do
   step %{I enter my SecurID pin}
   step %{I enter my SecurID token}
+end
+
+When(/^I try and (preview|take out) an advance on a disabled product$/) do |mode|
+  amount = mode == 'preview' ? 100004 : 100005
+  step "I open the quick advance flyout and enter #{amount}"
+  step "I select the rate with a term of \"2week\" and a type of \"whole\""
+  step "I click on the initiate advance button"
+  if mode == 'take out'
+    step "I enter my SecurID pin and token"
+    step "I click on the quick advance confirm button"
+  end
+end
+
+Then(/^I should see a quick advance error$/) do
+  step %{I should see an "advance unavailable" error}
 end

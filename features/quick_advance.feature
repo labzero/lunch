@@ -311,3 +311,12 @@ Scenario: User backs out of an advance requiring a capital stock purchase and th
   And I select the rate with a term of "2week" and a type of "whole"
   And I click on the initiate advance button
   Then I should be on the quick advance stock purchase screen
+
+@jira-mem-983 @allow-rescue
+Scenario: Users should not be able to get an advance if the product has been disabled by the desk after selection on the rate table
+  Given I visit the dashboard
+  When I try and preview an advance on a disabled product
+  Then I should see a quick advance error
+  When I close the quick advance flyout
+  And I try and take out an advance on a disabled product
+  Then I should see a quick advance error
