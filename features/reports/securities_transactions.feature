@@ -27,6 +27,12 @@ Scenario: Visiting the Securities Transactions Report Page with new securities t
   Given I am on the "Securities Transactions" report page
   Then I should see a security that is indicated as a new transaction
 
+@resque-backed @smoke @jira-mem-815
+Scenario: Member downloads an XLSX of the Securities Transactions report
+  Given I am on the "Securities Transactions" report page
+  When I request an XLSX
+  Then I should begin downloading a file
+
 @data-unavailable @jira-mem-410
 Scenario: Visiting the Securities Transactions Report Page before the desk is closed
   Given I am on the "Securities Transactions" report page

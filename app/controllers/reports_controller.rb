@@ -895,33 +895,37 @@ class ReportsController < ApplicationController
   def securities_transactions
     @max_date   = most_recent_business_day(Time.zone.today - 1.day)
     @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
-      securities_transactions = {}
-      securities_transactions[:transactions] = []
-    else
-      securities_transactions = member_balances.securities_transactions(@start_date)
-      raise StandardError, "There has been an error and ReportsController#securities_transactions has returned nil. Check error logs." if securities_transactions.blank?
+    report_download_name = "securities-transactions-#{fhlb_report_date_numeric(@start_date)}"
+    downloadable_report(:xlsx, {start_date: params[:start_date]}, report_download_name) do
+      @report_name = t('reports.pages.securities_transactions.title')
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
+        securities_transactions = {}
+        securities_transactions[:transactions] = []
+      else
+        securities_transactions = member_balances.securities_transactions(@start_date)
+        raise StandardError, "There has been an error and ReportsController#securities_transactions has returned nil. Check error logs." if securities_transactions.blank?
+      end
+      @picker_presets = date_picker_presets(@start_date, nil, nil, @max_date)
+      @total_net = securities_transactions[:total_net]
+      @final = securities_transactions[:final]
+      column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('common_table_headings.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('common_table_headings.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
+      rows = securities_transactions[:transactions].collect do |row|
+        is_new = row['new_transaction']
+        { columns: row.map{ |field,value| map_securities_transactions_column(field, value, is_new) }.compact }
+      end
+      footer = [
+          { value: t('reports.pages.securities_transactions.total_net_amount'), colspan: 6},
+          { value: securities_transactions[:total_payment_or_principal],  type: :currency},
+          { value: securities_transactions[:total_interest], type: :currency},
+          { value: @total_net, type: :currency}
+      ]
+      @securities_transactions_table_data = {
+          :column_headings => column_headings,
+          :rows => rows,
+          :footer => footer
+      }
     end
-    @picker_presets = date_picker_presets(@start_date, nil, nil, @max_date)
-    @total_net = securities_transactions[:total_net]
-    @final = securities_transactions[:final]
-    column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('common_table_headings.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('common_table_headings.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
-    rows = securities_transactions[:transactions].collect do |row|
-      is_new = row['new_transaction']
-      { columns: row.map{ |field,value| map_securities_transactions_column(field, value, is_new) }.compact }
-    end
-    footer = [
-        { value: t('reports.pages.securities_transactions.total_net_amount'), colspan: 6},
-        { value: securities_transactions[:total_payment_or_principal],  type: :currency},
-        { value: securities_transactions[:total_interest], type: :currency},
-        { value: @total_net, type: :currency}
-    ]
-    @securities_transactions_table_data = {
-        :column_headings => column_headings,
-        :rows => rows,
-        :footer => footer
-    }
   end
 
   def authorizations
