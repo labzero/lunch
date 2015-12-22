@@ -75,7 +75,8 @@ describe MAPI::ServiceApp do
       before do
         allow(subject).to receive(:available_statements_sql).with(fhlb_id).and_return(available_statements_sql)
         allow(subject).to receive(:statement_sql).with(fhlb_id, date).and_return(statement_sql)
-        allow(subject).to receive(:fetch_hashes).with(logger, available_statements_sql).and_return(available_statements_hashes)
+        allow(subject).to receive(:fetch_hashes).with(logger, available_statements_sql, {}, true).and_return(available_statements_hashes)
+        allow(available_statements_hashes).to receive(:each)
         allow(subject).to receive(:fetch_hashes).with(logger, statement_sql, subject::MAP_VALUES).and_return([statement_hash])
         allow(subject).to receive(:multi_level_transform).with(statement_hash, subject::MAP_KEYS).and_return(transformed_statement_hash)
       end
@@ -103,6 +104,7 @@ describe MAPI::ServiceApp do
           let(:available_statements){ double('available_statements') }
           it 'should return available_statements_records' do
             allow(subject).to receive(:fake).with('securities_services_statements_available').and_return(available_statements)
+            allow(available_statements).to receive(:each)
             expect(subject.available_statements(logger, env, fhlb_id)).to eq(available_statements)
           end
         end

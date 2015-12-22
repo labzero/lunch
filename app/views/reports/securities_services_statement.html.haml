@@ -9,7 +9,10 @@
       = render 'reports_header_buttons', allowed_params: :start_date, download_formats: [:pdf]
       = render 'report_details', name: @member_name, freshness: t('reports.pages.securities_services_statement.freshness'), availability: t('reports.pages.securities_services_statement.availability')
     .report-inputs
-      = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_securities_services_statement_path, presets: @picker_presets, single_date_picker: true, open_direction: 'left', insert_filter_before: true, date_picker_filter: @date_picker_filter, min_date: @min_date
+      = form_tag(reports_securities_services_statement_path, method: 'GET') do
+        .report-filter
+          = render 'shared/dropdown', dropdown_name: 'start_date', default_value: @start_date, default_text: @dropdown_options_text, dropdown_options: @dropdown_options
+
   .report-main-body
     .report-summary-data
       %h3

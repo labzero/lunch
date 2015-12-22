@@ -829,24 +829,22 @@ class ReportsController < ApplicationController
   end
 
   def securities_services_statement
-    date_restriction = DATE_RESTRICTION_MAPPING[:securities_services_statement]
-    start_date = (params[:start_date] || last_month_end).to_date
-    min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
-    @min_date = min_and_start_dates_array.first
-    @start_date = month_restricted_start_date(min_and_start_dates_array.last)
+    member_balances = MemberBalanceService.new(current_member_id, request)
     @report_name = t('reports.securities.services_monthly.title')
 
+    available_reports      = member_balances.securities_services_statements_available
+    @dropdown_options      = available_reports.map{ |entry| [entry['month_year'], entry['report_end_date']] }
+    @start_date            = params[:start_date].try(:to_date) || @dropdown_options[0][1]
+    @dropdown_options_text = @dropdown_options.find{ |option| option[1] == @start_date }.try(:first)
+
     report_download_name = "securities-services-monthly-statement-#{fhlb_report_date_numeric(@start_date)}"
-    downloadable_report(:pdf, {start_date: params[:start_date]}, report_download_name) do
+    downloadable_report(:pdf, {start_date: params[@start_date]}, report_download_name) do
       if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
         @statement = {}
       else
-        member_balances = MemberBalanceService.new(current_member_id, request)
         @statement = member_balances.securities_services_statement(@start_date)
         raise StandardError, "There has been an error and ReportsController#securities_services_statement has encountered nil. Check error logs." if @statement.nil?
       end
-      @picker_presets = date_picker_presets(@start_date, nil, date_restriction)
-      @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
     end
   end
 

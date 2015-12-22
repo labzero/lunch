@@ -521,8 +521,21 @@ When(/^I click on the dividend transaction dropdown selector$/) do
   page.find('.dropdown-selection').click
 end
 
+When(/^I click on the securities services monthly statement dropdown selector$/) do
+  page.find('.report-filter .dropdown-selection').click
+end
+
+Then(/^I should see a report for "(.*?)"$/) do |date|
+  page.assert_selector('.report-summary-date', text: date)
+end
+
 When(/^I click on the last option in the dividend transaction dropdown selector$/) do
-  page.find('.dropdown li:last-child').click
+  page.find('.report-filter .dropdown li:last-child').click
+end
+
+When(/^I select "(.*?)" from the month year dropdown$/) do |monthyear|
+  page.find('.report-filter .icon-chevron-after').click
+  page.find('li', text: monthyear).click
 end
 
 Then(/^I should see a dividend summary for the last option in the dividend transaction dropdown selector$/) do

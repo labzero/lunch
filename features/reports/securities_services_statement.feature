@@ -16,26 +16,15 @@ Scenario: Member sees Securities Services Statement
   And I should see 4 report tables with multiple data rows
 
 @smoke @jira-mem-931
-Scenario: The datepicker on the Securities Services Monthly Statement defaults to end of the last full month
+Scenario: The Securities Services Monthly Statement defaults to May 2015
   Given I am on the "Securities Services Monthly Statement" report page
-  When I click the datepicker field
-  Then I should see the end of the last full month as the default datepicker option
+  When I click on the securities services monthly statement dropdown selector
+  Then I should see a report for "May 29, 2015"
 
-@jira-mem-890
-Scenario: Member enters a date occurring before the minimum allowed date
+Scenario: The Securities Services Monthly Statement report should be for Dec 31, 2104 when December 2014 is selected
   Given I am on the "Securities Services Monthly Statement" report page
-  When I click the datepicker field
-  And I write "1/10/2013" in the datepicker start input field
-  And I click the datepicker apply button
-  Then I should see a "Securities Services Monthly Statement" report as of 18 months ago
-
-@jira-mem-890
-Scenario: Member enters a date occurring after the maximum allowed date
-  Given I am on the "Securities Services Monthly Statement" report page
-  When I click the datepicker field
-  And I write tomorrow's date in the datepicker start input field
-  And I click the datepicker apply button
-  Then I should see a "Securities Services Monthly Statement" report as of the end of the last valid month
+  When I select "December 2014" from the month year dropdown
+  Then I should see a report for "December 31, 2014"
 
 @data-unavailable @jira-mem-536
 Scenario: No data is available to show in the Securities Services Statement
