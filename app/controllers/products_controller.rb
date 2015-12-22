@@ -243,4 +243,9 @@ class ProductsController < ApplicationController
     @last_modified = Date.new(2015, 8, 1)
   end
 
+  # GET
+  def swaps
+    @last_modified = Date.new(2011, 4, 1)
+  end
+
 end

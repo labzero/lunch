@@ -107,3 +107,12 @@ Feature: Products Page
   Scenario: Member sees forms on the pfi page
     Given I am on the pfi page
     Then I should see at least one pfi form to download
+
+  @smoke @jira-mem-1149
+  Scenario: Member navigates to the interest rate swaps caps and floors page
+    Given I hover on the products link in the header
+    When I click on the products summary link in the header
+    Then I should see the "products summary" product page
+    When I click on the swaps link
+    Then I should see the "swaps" product page
+

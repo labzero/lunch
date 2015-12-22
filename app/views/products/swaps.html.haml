@@ -1,0 +1,34 @@
+.row.product-page
+  .column-2x10-right
+    %h1= t('products.swaps.title')
+    %p= t('products.swaps.summary_html', url: 'http://www.cftc.gov/LawRegulation/DoddFrankAct/index.htm')
+    %h2= t('products.swaps.payment.title')
+    %p= t('products.swaps.payment.net_payment')
+    %p= t('products.swaps.payment.make_payment')
+    %h2= t('products.swaps.specific_collateral_requirements.title')
+    %p= t('products.swaps.specific_collateral_requirements.minimum')
+    %p= t('products.swaps.specific_collateral_requirements.no_requirements')
+    %p= t('products.swaps.specific_collateral_requirements.requirements')
+    %p= t('products.swaps.specific_collateral_requirements.gross')
+    %ul
+      %li= t('products.swaps.specific_collateral_requirements.zero_or')
+      %li= t('products.swaps.specific_collateral_requirements.fair_value')
+    %p= t('products.swaps.specific_collateral_requirements.gross_potential')
+    %table
+      %thead
+        %tr
+          %th= t('products.swaps.gross_exposure_table.original')
+          %th= t('products.swaps.gross_exposure_table.gross_exposure')
+      %tbody
+        %tr
+          %td= t('products.swaps.gross_exposure_table.one_year')
+          %td= t('products.swaps.gross_exposure_table.zero')
+        %tr
+          %td= t('products.swaps.gross_exposure_table.greater_one_year')
+          %td= t('products.swaps.gross_exposure_table.five_times')
+        %tr
+          %td= t('products.swaps.gross_exposure_table.five_years')
+          %td= t('products.swaps.gross_exposure_table.fifteen_times')
+    %h2= t('products.swaps.early_termination.title')
+    %p= t('products.swaps.early_termination.in_the_event')
+    .last-modified= t('products.section_headings.last_modified', date: fhlb_date_short_alpha(@last_modified))
