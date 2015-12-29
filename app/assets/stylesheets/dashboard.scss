@@ -295,11 +295,14 @@ $breakdown-table-currency-width: 10px;
       border-top: 1px solid $secondary-gray;
       text-align: left;
     }
-    th, .label, .currency, .value {
+    th, .label, .currency, .value, .title {
       padding: 5px 0;
       box-sizing: border-box;
     }
-    .label, .footnote {
+    .title {
+      padding-bottom: 1px;
+    }
+    .label, .footnote, .title {
       width: $breakdown-table-label-width;
       padding-left: 10px;
     }
@@ -323,6 +326,11 @@ $breakdown-table-currency-width: 10px;
       margin-top: 10px;
       border-top: 1px solid $secondary-gray;
       border-bottom: 1px solid $secondary-gray;
+    }
+    .detail {
+      .label {
+        padding-left: 20px;
+      }
     }
   }
   .borrowing-capacity-note {
