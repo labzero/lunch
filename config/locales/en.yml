@@ -348,7 +348,7 @@ en:
         pin_mismatch: PINs don't match.
       reset_pin:
         title: Reset Token PIN
-        description: If you can’t remember your 4-digit token PIN, contact Web Support before resetting it.
+        description_html: If you can’t remember your 4-digit token PIN, contact <a href="%{url}">Web Support</a> before resetting it.
         cta: Reset Token PIN
         hint: 'Note: You must save your new 4-digit PIN before the token code you enter below expires.'
         prompt_current_pin: Enter your current 4-digit PIN and the 6-digit code shown on your token.
