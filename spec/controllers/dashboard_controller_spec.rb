@@ -33,6 +33,32 @@ RSpec.describe DashboardController, :type => :controller do
   describe "GET index", :vcr do
     let(:member_id) {750}
     let(:empty_financing_availability_gauge) {{total: {amount: 0, display_percentage: 100, percentage: 0}}}
+    let(:remaining_financing_available) { double(Numeric).as_null_object }
+    let(:collateral_borrowing_capacity) { double(Numeric).as_null_object }
+    let(:total_borrowing_capacity_standard) { double(Numeric).as_null_object }
+    let(:total_borrowing_capacity_sbc_agency) { double(Numeric).as_null_object }
+    let(:total_borrowing_capacity_sbc_aaa) { double(Numeric).as_null_object }
+    let(:total_borrowing_capacity_sbc_aa) { double(Numeric).as_null_object }
+    let(:capital_stock) { double(Numeric).as_null_object }
+    let(:profile_bc) {{sta_balance: 90349.68, total_financing_available: 199771250, remaining_financing_available: remaining_financing_available, mpf_credit_available: 15000000,
+                          collateral_market_value_sbc_agency: 0, collateral_market_value_sbc_aaa: 0, collateral_market_value_sbc_aa: 0, total_borrowing_capacity_standard: total_borrowing_capacity_standard,
+                          total_borrowing_capacity_sbc_agency: total_borrowing_capacity_sbc_agency, total_borrowing_capacity_sbc_aaa: total_borrowing_capacity_sbc_aaa, total_borrowing_capacity_sbc_aa: total_borrowing_capacity_sbc_aa, collateral_delivery_status: "N",
+                          financing_percentage: 0.3, maximum_term: 120, total_assets: 1234567890, approved_long_term_credit: 234567890.0,
+                          collateral_borrowing_capacity: {total: 126850000, remaining: collateral_borrowing_capacity, standard: {total: 123500000, remaining: 15000000},
+                          sbc: {total_borrowing: 3350000, remaining_borrowing: 3405110, total_market: 3584326, remaining_market: 39000}},
+                          credit_outstanding: {total: 15000000, standard: 8555000, sbc: 4900000, swaps_credit: 0, swaps_notational: 345000, mpf_credit: 0, letters_of_credit: 1200000, investments: 2500000},
+                          capital_stock: {stock_owned: 853700, minimum_requirement: 853700, excess_stock: 0, surplus_stock: -128000, activity_based_requirement: 0,
+                          remaining_stock: 28456666, remaining_leverage: capital_stock}, used_financing_availability: 40533172, uncollateralized_financing_availability: 72921250}}
+    let(:profile_no_bc) {{sta_balance: 90349.68, total_financing_available: 199771250, remaining_financing_available: remaining_financing_available, mpf_credit_available: 15000000,
+                          collateral_market_value_sbc_agency: 0, collateral_market_value_sbc_aaa: 0, collateral_market_value_sbc_aa: 0, total_borrowing_capacity_standard: total_borrowing_capacity_standard,
+                          total_borrowing_capacity_sbc_agency: 0, total_borrowing_capacity_sbc_aaa: 0, total_borrowing_capacity_sbc_aa: 0, collateral_delivery_status: "N",
+                          financing_percentage: 0.3, maximum_term: 120, total_assets: 1234567890, approved_long_term_credit: 234567890.0,
+                          collateral_borrowing_capacity: {total: 126850000, remaining: collateral_borrowing_capacity, standard: {total: 123500000, remaining: 15000000},
+                          sbc: {total_borrowing: 3350000, remaining_borrowing: 3405110, total_market: 3584326, remaining_market: 39000}},
+                          credit_outstanding: {total: 15000000, standard: 8555000, sbc: 4900000, swaps_credit: 0, swaps_notational: 345000, mpf_credit: 0, letters_of_credit: 1200000, investments: 2500000},
+                          capital_stock: {stock_owned: 853700, minimum_requirement: 853700, excess_stock: 0, surplus_stock: -128000, activity_based_requirement: 0,
+                          remaining_stock: 28456666, remaining_leverage: capital_stock}, used_financing_availability: 40533172, uncollateralized_financing_availability: 72921250}}
+
     before do
       allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
       allow(subject).to receive(:current_user_roles)
@@ -54,6 +80,26 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(assigns[:account_overview]).to be_kind_of(Hash)
       expect(assigns[:account_overview].length).to eq(3)
+    end
+    it 'should assign @account_overview remaining borrowing capacity' do
+      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile_bc)
+      get :index
+      expect(assigns[:account_overview][:remaining].length).to eq(8)
+      expect(assigns[:account_overview][:remaining][1][1]).to eq(remaining_financing_available)
+      expect(assigns[:account_overview][:remaining][2][1]).to eq(collateral_borrowing_capacity)
+      expect(assigns[:account_overview][:remaining][3][1]).to eq(total_borrowing_capacity_standard)
+      expect(assigns[:account_overview][:remaining][4][1]).to eq(total_borrowing_capacity_sbc_agency)
+      expect(assigns[:account_overview][:remaining][5][1]).to eq(total_borrowing_capacity_sbc_aaa)
+      expect(assigns[:account_overview][:remaining][6][1]).to eq(total_borrowing_capacity_sbc_aa)
+      expect(assigns[:account_overview][:remaining][7][1]).to eq(capital_stock)
+    end
+    it 'should assign @account_overview without remaining borrowing capacity' do
+      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile_no_bc)
+      get :index
+      expect(assigns[:account_overview][:remaining].length).to eq(4)
+      expect(assigns[:account_overview][:remaining][1][1]).to eq(remaining_financing_available)
+      expect(assigns[:account_overview][:remaining][2][1]).to eq(collateral_borrowing_capacity)
+      expect(assigns[:account_overview][:remaining][3][1]).to eq(capital_stock)
     end
     it "should assign @market_overview" do
       get :index
@@ -229,12 +275,32 @@ RSpec.describe DashboardController, :type => :controller do
       it 'should set @account_overview to have zero capital stock remaining balance if the report is disabled' do
         allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::FHLB_STOCK_DATA]).and_return(true)
         get :index
-        expect(assigns[:account_overview][:remaining][3]).to eq(["Stock Leverage", nil])
+        expect(assigns[:account_overview][:remaining][7]).to eq(["Stock Leverage", nil])
       end
       it 'should set @account_overview to have zero collateral borrowing capacity if the report is disabled' do
         allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA]).and_return(true)
         get :index
         expect(assigns[:account_overview][:remaining][2]).to eq(["Collateral Borrowing Capacity", nil])
+      end
+      it 'should set @account_overview to have zero standard credit program if the report is disabled' do
+        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA]).and_return(true)
+        get :index
+        expect(assigns[:account_overview][:remaining][3]).to eq(["Standard Credit Program", nil])
+      end
+      it 'should set @account_overview to have zero sbc:agency if the report is disabled' do
+        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA]).and_return(true)
+        get :index
+        expect(assigns[:account_overview][:remaining][4]).to eq(["SBC:Agency", nil])
+      end
+      it 'should set @account_overview to have zero sbc:aaa if the report is disabled' do
+        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA]).and_return(true)
+        get :index
+        expect(assigns[:account_overview][:remaining][5]).to eq(["SBC:AAA", nil])
+      end
+      it 'should set @account_overview to have zero sbc:aa if the report is disabled' do
+        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA]).and_return(true)
+        get :index
+        expect(assigns[:account_overview][:remaining][6]).to eq(["SBC:AA", nil])
       end
       it 'should set @borrowing_capacity to be nil if the report is disabled' do
         allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_REPORT_DATA]).and_return(true)

@@ -1,4 +1,5 @@
 - @page_title = t('dashboard.meta_title')
+- @borrowing_capacity_types = [t('dashboard.your_account.table.remaining.standard'), t('dashboard.your_account.table.remaining.agency'), t('dashboard.your_account.table.remaining.aaa'), t('dashboard.your_account.table.remaining.aa')]
 .dashboard.row
   .column-3
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.market_overview.title'), classes: 'dashboard-module-market', data_available: !@market_overview.first[:data].blank?} do
@@ -38,13 +39,18 @@
                     - if sub_table.first.is_a?(Hash) &&  sub_table.first[:title]
                       %thead
                         %tr
-                          %th.label{colspan: '3'}= sub_table.first[:title]
+                          %th.title{colspan: '3'}= sub_table.first[:title]
                     %tbody
                       - sub_table.each do |row|
                         - next if row.is_a?(Hash)
-                        %tr{class: "#{'footnote-row' if row[2]}"}
-                          %td.label= row[0]
-                          %td.value= fhlb_formated_currency_unit(row[1], '$', row[3] || 0)
+                        - if @borrowing_capacity_types.include? row[0]
+                          %tr{class: "#{'detail'}"}
+                            %td.label= row[0]
+                            %td.value= fhlb_formated_currency_unit(row[1], '$', row[3] || 0)
+                        - else
+                          %tr{class: "#{'footnote-row' if row[2]}"}
+                            %td.label= row[0]
+                            %td.value= fhlb_formated_currency_unit(row[1], '$', row[3] || 0)
                         - if row[2]
                           %tr
                             %td.footnote{colspan: 2}= row[2]

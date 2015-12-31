@@ -64,6 +64,10 @@ class DashboardController < ApplicationController
 
     if members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA])
       profile[:collateral_borrowing_capacity][:remaining] = nil
+      profile[:total_borrowing_capacity_standard] = nil
+      profile[:total_borrowing_capacity_sbc_agency] = nil
+      profile[:total_borrowing_capacity_sbc_aaa] = nil
+      profile[:total_borrowing_capacity_sbc_aa] = nil
     end
 
     if members_service.report_disabled?(current_member_id, [MembersService::FHLB_STOCK_DATA])
@@ -78,12 +82,25 @@ class DashboardController < ApplicationController
       [t('dashboard.your_account.table.credit_outstanding'), profile[:credit_outstanding][:total]]
     ]
 
-    remaining = [
-      {title: t('dashboard.your_account.table.remaining.title')},
-      [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
-      [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
-      [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
-    ]
+    if profile[:total_borrowing_capacity_sbc_agency] == 0 && profile[:total_borrowing_capacity_sbc_aaa] == 0 && profile[:total_borrowing_capacity_sbc_aa] == 0
+      remaining = [
+        {title: t('dashboard.your_account.table.remaining.title')},
+        [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
+        [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
+        [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
+      ]
+    else
+      remaining = [
+        {title: t('dashboard.your_account.table.remaining.title')},
+        [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
+        [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
+        [t('dashboard.your_account.table.remaining.standard'), profile[:total_borrowing_capacity_standard]],
+        [t('dashboard.your_account.table.remaining.agency'), profile[:total_borrowing_capacity_sbc_agency]],
+        [t('dashboard.your_account.table.remaining.aaa'), profile[:total_borrowing_capacity_sbc_aaa]],
+        [t('dashboard.your_account.table.remaining.aa'), profile[:total_borrowing_capacity_sbc_aa]],
+        [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
+      ]
+    end
 
     @account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining}
 

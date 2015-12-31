@@ -609,6 +609,10 @@ en:
           available: Financing Availability
           capacity: Collateral Borrowing Capacity
           leverage: Stock Leverage
+          standard: Standard Credit Program
+          agency: SBC:Agency
+          aaa: SBC:AAA
+          aa: SBC:AA
         standard_program:
           title: 'Standard Program:'
         sbc_program:
