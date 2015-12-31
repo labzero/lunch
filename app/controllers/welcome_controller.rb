@@ -63,6 +63,17 @@ class WelcomeController < ApplicationController
       ldap_extranet_status = false
     end
 
+    begin
+      rsa_status = false
+      if Rails.env.production?
+        agent_status = RSA::SecurID.agent_status
+        rsa_status = true if agent_status && agent_status[:servers].select {|s| s[:active_address] }.present?
+      end
+    rescue Exception => e
+      Rails.logger.error("RSA check failed: #{e.message}")
+      rsa_status = false
+    end
+
     render json: {
       revision: get_revision,
       bartertown: mapi_status, # MAPI
@@ -70,7 +81,8 @@ class WelcomeController < ApplicationController
       masterblaster: resque_status, # Resque
       tomorrowmorrowland: redis_status, # Redis,
       madmax: ldap_intranet_status, # LDAP Intranet
-      roadwarrior: ldap_extranet_status # LDAP Extranet
+      roadwarrior: ldap_extranet_status, # LDAP Extranet
+      fury_road: rsa_status # RSA
     }
   end
 
