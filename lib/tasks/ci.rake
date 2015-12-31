@@ -28,7 +28,7 @@ namespace :ci do
         pid = fork do
           runner_count = ENV['CUCUMBER_RUNNER_COUNT'] || 6
           runtime_log_file = args.runtime_log_file || 'tmp/parallel_runtime_cucumber.log'
-          runtime_log = File.exist?(runtime_log_file) ? "--group-by runtime --runtime-log '#{runtime_log_file}'" : nil
+          runtime_log = File.size?(runtime_log_file) ? "--group-by runtime --runtime-log '#{runtime_log_file}'" : nil
           test_options = ["--out #{runtime_log_file}", args.test_options, ENV['CUCUMBER_TEST_OPTIONS']].reject { |s| s.nil? || s.length == 0 }.join(' ')
           cmd = "RAILS_ENV=test parallel_test features --type cucumber -n #{runner_count} #{runtime_log} --serialize-stdout --test-options '#{test_options}'"
           puts cmd
