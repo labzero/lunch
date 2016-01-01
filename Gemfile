@@ -80,7 +80,10 @@ gem 'premailer-rails'
 
 # for profiling
 gem 'ruby-prof', require: false
-gem 'newrelic_rpm'
+
+group :production, :development do
+  gem 'newrelic_rpm'
+end
 
 group :development, :test do
   gem 'rspec-rails'
