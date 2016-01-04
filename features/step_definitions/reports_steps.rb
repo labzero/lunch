@@ -198,16 +198,16 @@ Then(/^I should see a "([^"]*)" for the (\d+)(?:st|rd|th) of the last month$/) d
 end
 
 Then(/^I should see a "(.*?)" for the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of (this|last) month$/) do |report_type, start_day, end_day, month|
-  month = case month
+  month_date = case month
     when 'this'
-      @today.month
+      @today
     when 'last'
-      (@today - 1.month).month
+      (@today - 1.month)
     else
       raise 'Month not recognized'
   end
-  start_date = Date.new(@today.year, month, start_day.to_i).strftime('%B %-d, %Y')
-  end_date = Date.new(@today.year, month, end_day.to_i).strftime('%B %-d, %Y')
+  start_date = Date.new(month_date.year, month_date.month, start_day.to_i).strftime('%B %-d, %Y')
+  end_date = Date.new(month_date.year, month_date.month, end_day.to_i).strftime('%B %-d, %Y')
   step %{I should see a "#{report_type}" starting on "#{start_date}" and ending on "#{end_date}"}
 end
 
