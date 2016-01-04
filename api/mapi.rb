@@ -3,6 +3,9 @@ require 'newrelic_rpm'
 require 'swagger/blocks'
 require 'active_support/concern'
 require 'active_support/time'
+require 'savon'
+
+require_relative '../config/initializers/newrelic.rb'
 
 require_relative 'shared/constants'
 require_relative 'shared/utils'
