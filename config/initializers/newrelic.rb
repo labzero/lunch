@@ -89,7 +89,7 @@ if defined?(NewRelic::Agent)
 
       def bind_with_newrelic(*args, &block)
         callback = Proc.new do |result, metrics, elapsed|
-          query = args.first
+          query = args.first || @auth
           if query
             query_string = JSON.dump({
               method: query[:method].try(:to_s),
