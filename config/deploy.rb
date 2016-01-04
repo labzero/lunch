@@ -81,7 +81,23 @@ namespace :deploy do
   before :publishing, :missing_dirs
   after :publishing, :restart
   after :migrate, :seed
-  after :updated, "newrelic:notice_deployment"
+  after :updated, :newrelic_deployment do
+    begin
+      old_env = ENV['MAPI']
+      on roles(:api) do
+        ENV['MAPI'] = 'true'
+        invoke('newrelic:notice_deployment')
+      end
+
+      on roles(:app) do
+        ENV['MAPI'] = nil
+        invoke('newrelic:notice_deployment')
+      end
+    ensure
+      ENV['MAPI'] = old_env
+    end
+    
+  end
 
   after :restart, :clear_cache do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
