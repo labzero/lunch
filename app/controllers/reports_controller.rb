@@ -1027,23 +1027,27 @@ class ReportsController < ApplicationController
   end
 
   def monthly_securities_position
+    @report_name = t('reports.pages.securities_position.monthly')
     date_restriction = DATE_RESTRICTION_MAPPING[:monthly_securities_position]
     @securities_filter = params['securities_filter'] || 'all'
     start_date = (params[:start_date] || last_month_end).to_date
     min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
     @min_date = min_and_start_dates_array.first
     @month_end_date = month_restricted_start_date(min_and_start_dates_array.last)
-    @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
-    @picker_presets = date_picker_presets(@month_end_date, nil, date_restriction)
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    if report_disabled?(MONTHLY_SECURITIES_WEB_FLAGS)
-      @monthly_securities_position = {securities:[]}
-    else
-      @monthly_securities_position = member_balances.monthly_securities_position(@month_end_date, @securities_filter)
-      raise StandardError, "There has been an error and ReportsController#monthly_securities_position has encountered nil. Check error logs." if @monthly_securities_position.nil?
+    report_download_name = "monthly-securities-position-#{@securities_filter}-#{@month_end_date}"
+    downloadable_report(nil, {securities_filter: params['securities_filter'], start_date: params['start_date']}, report_download_name) do
+      @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
+      @picker_presets = date_picker_presets(@month_end_date, nil, date_restriction)
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      if report_disabled?(MONTHLY_SECURITIES_WEB_FLAGS)
+        @monthly_securities_position = {securities:[]}
+      else
+        @monthly_securities_position = member_balances.monthly_securities_position(@month_end_date, @securities_filter)
+        raise StandardError, "There has been an error and ReportsController#monthly_securities_position has encountered nil. Check error logs." if @monthly_securities_position.nil?
+      end
+      securities_instance_variables(@monthly_securities_position, @securities_filter)
+      @monthly_securities_position[:securities] = format_securities_detail(@monthly_securities_position[:securities])
     end
-    securities_instance_variables(@monthly_securities_position, @securities_filter)
-    @monthly_securities_position[:securities] = format_securities_detail(@monthly_securities_position[:securities])
   end
 
   def forward_commitments

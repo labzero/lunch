@@ -909,6 +909,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :monthly_securities_position
       it_behaves_like 'a date restricted report', :monthly_securities_position, :last_month_end
       it_behaves_like 'a report with instance variables set in a before_filter', :monthly_securities_position
+      it_behaves_like 'a report that can be downloaded', :monthly_securities_position, [:xlsx]
       describe 'view instance variables' do
         let(:unprocessed_securities) { double('unprocessed securities details', length: nil) }
         let(:processed_securities) { double('processed securities details') }
@@ -965,6 +966,18 @@ RSpec.describe ReportsController, :type => :controller do
         it 'sets @securities_filter_options to an array of arrays containing the appropriate values and labels for credit, debit, daily balance and all' do
           get :monthly_securities_position
           expect(assigns[:securities_filter_options]).to eq(dropdown_options)
+        end
+        it 'sets @report_download_column_headings to an array of column headings' do
+          column_headings = [
+            I18n.t('common_table_headings.custody_account_number'), I18n.t('reports.pages.securities_position.custody_account_type'), I18n.t('reports.pages.securities_position.security_pledge_type'),
+            I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.security_description'), I18n.t('reports.pages.securities_position.reg_id'),
+            I18n.t('common_table_headings.pool_number'), I18n.t('common_table_headings.coupon_rate'), I18n.t('common_table_headings.maturity_date'),
+            I18n.t('common_table_headings.original_par_value'), I18n.t('reports.pages.securities_position.factor'), I18n.t('reports.pages.securities_position.factor_date'),
+            I18n.t('common_table_headings.current_par'), I18n.t('common_table_headings.price'), I18n.t('common_table_headings.price_date'),
+            I18n.t('reports.pages.securities_position.market_value')
+          ]
+          get :monthly_securities_position
+          expect(assigns[:report_download_column_headings]).to eq(column_headings)
         end
         dropdown_options.each do |option|
           it "sets @securities_filter_text to the appropriate value when @securities_filter equals `#{option.last}`" do

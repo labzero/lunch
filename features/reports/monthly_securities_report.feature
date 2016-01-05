@@ -73,6 +73,12 @@ Feature: Visiting the Monthly Securities Position Report Page
     And I click the datepicker apply button
     Then I should see a "Monthly Securities Position" report as of the last day of last month
 
+  @resque-backed @smoke @jira-mem-821
+  Scenario: Member downloads an XLSX of the monthly securities position report
+    Given I am on the "Monthly Securities Position" report page
+    When I request an XLSX
+    Then I should begin downloading a file
+
   @data-unavailable @jira-mem-283 @jira-mem-1053
   Scenario: No data is available to show in the monthly securities position report
     Given I am on the "Monthly Securities Position" report page
