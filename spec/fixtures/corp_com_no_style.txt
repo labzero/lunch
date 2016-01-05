@@ -1,0 +1,31 @@
+Received: from SFDWEX03.fhlbsf-i.com ([fe80::7cd6:5a7e:3abe:8115]) by SFDWEX04.fhlbsf-i.com ([fe80::69b1:7419:b025:a9be%14]) with mapi id 14.03.0123.003; Thu, 07 Jan 2016 13:29:58 -0800
+Date: Thu, 07 Jan 2016 13:29:58 -0800
+From: "Holets, Ned" <holetsn@fhlbsf.com>
+To: mp-announcements <mp-announcements@fhlbsf.com>
+Message-ID: <A509541E-8798-4CA7-9763-DCDC3909B395@fhlbsf.com>
+Subject: Fooo!
+Mime-Version: 1.0
+Content-Type: text/html;
+ charset=utf-8
+Content-Transfer-Encoding: base64
+Thread-Topic: Fooo!
+Thread-Index: AQHRSZKOZ346Wyg/tUyNmi+HICjP4w==
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Exchange-Organization-AuthAs: Internal
+X-MS-Exchange-Organization-AuthMechanism: 04
+X-MS-Exchange-Organization-AuthSource: SFDWEX04.fhlbsf-i.com
+X-MS-Has-Attach: 
+X-MS-Exchange-Organization-SCL: -1
+X-MS-TNEF-Correlator: 
+Content-ID: <C3D941F00540E04594FF9BF0174E3C4F@fhlbsf.com>
+
+PGh0bWw+DQo8aGVhZD4NCjxtZXRhIGh0dHAtZXF1aXY9IkNvbnRlbnQtVHlw
+ZSIgY29udGVudD0idGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04Ij4NCjwvaGVh
+ZD4NCjxib2R5IHN0eWxlPSJ3b3JkLXdyYXA6IGJyZWFrLXdvcmQ7IC13ZWJr
+aXQtbmJzcC1tb2RlOiBzcGFjZTsgLXdlYmtpdC1saW5lLWJyZWFrOiBhZnRl
+ci13aGl0ZS1zcGFjZTsgY29sb3I6IHJnYigwLCAwLCAwKTsgZm9udC1zaXpl
+OiAxNHB4OyBmb250LWZhbWlseTogQ2FsaWJyaSwgc2Fucy1zZXJpZjsiPg0K
+PGRpdj4NCjxkaXY+DQo8ZGl2PlRlc3QhPC9kaXY+DQo8ZGl2Pg0KPGRpdiBp
+ZD0iTUFDX09VVExPT0tfU0lHTkFUVVJFIj48L2Rpdj4NCjwvZGl2Pg0KPC9k
+aXY+DQo8L2Rpdj4NCjwvYm9keT4NCjwvaHRtbD4NCg==

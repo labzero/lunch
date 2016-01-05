@@ -77,7 +77,6 @@ gem 'fog-aws'
 # for ActionMailer
 gem 'nokogiri'
 gem 'premailer-rails'
-gem 'em-imap'
 
 # for profiling
 gem 'ruby-prof', require: false
