@@ -902,7 +902,7 @@ class ReportsController < ApplicationController
   end
   
   def securities_transactions
-    @max_date   = most_recent_business_day(Time.zone.today - 1.day)
+    @max_date   = most_recent_business_day(Time.zone.today)
     @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
     report_download_name = "securities-transactions-#{fhlb_report_date_numeric(@start_date)}"
     downloadable_report(:xlsx, {start_date: params[:start_date]}, report_download_name) do
@@ -923,6 +923,7 @@ class ReportsController < ApplicationController
         is_new = row['new_transaction']
         { columns: row.map{ |field,value| map_securities_transactions_column(field, value, is_new) }.compact }
       end
+      @yesterdays_report = securities_transactions[:previous_business_day] ? reports_securities_transactions_path(start_date: securities_transactions[:previous_business_day]) : nil
       footer = [
           { value: t('reports.pages.securities_transactions.total_net_amount'), colspan: 6},
           { value: securities_transactions[:total_payment_or_principal],  type: :currency},
@@ -948,7 +949,7 @@ class ReportsController < ApplicationController
       @authorizations_title = if @authorizations_filter == 'all'
         t('reports.pages.authorizations.sub_title_all_users')
       else
-        t('reports.pages.authorizations.sub_title', filter: AUTHORIZATIONS_MAPPING[@authorizations_filter])        
+        t('reports.pages.authorizations.sub_title', filter: AUTHORIZATIONS_MAPPING[@authorizations_filter])
       end
 
       @authorizations_table_data = {

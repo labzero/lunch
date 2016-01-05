@@ -7,6 +7,8 @@
     = render 'report_details', name: @member_name, freshness: t('reports.pages.securities_transactions.freshness'), availability: t('reports.availability.current')
     .report-inputs
       = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_securities_transactions_url, presets: @picker_presets, single_date_picker: true, max_date: @max_date
+  - if @yesterdays_report
+    = link_to( t('reports.pages.securities_transactions.yesterdays_report'), @yesterdays_report )
   .report-main-body
     -if @final
       .report-summary-data

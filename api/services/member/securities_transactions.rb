@@ -6,7 +6,7 @@ module MAPI
         include MAPI::Shared::Constants
 
         SECURITIES_FIELD_MAPPINGS = {
-            'fhlb_id'                =>'fhlb_id',
+            'fhlb_id'                => 'fhlb_id',
             'cur_btc_account_number' => 'custody_account_no',
             'cur_new_trans'          => 'new_transaction',
             'cur_cusip'              => 'cusip',
@@ -19,7 +19,10 @@ module MAPI
             'cur_total_amount'       => 'total',
         }
 
-        def self.securities_count_sql(fhlb_id, rundate)
+        XMAS_2015  = Date.parse('2015-12-25')
+        DEC_1_2015 = Date.parse('2015-12-01')
+
+        def self.final_securities_count_sql(fhlb_id, rundate)
           <<-SQL
           SELECT COUNT(*) AS RECORDSCOUNT FROM SAFEKEEPING.ACCOUNT_DOCKET_XREF ADX, SAFEKEEPING.CURRENT_DAY, SAFEKEEPING.CUSTOMER_PROFILE CP
           WHERE CP.CP_ID = ADX.CP_ID AND CUR_BTC_ACCOUNT_NUMBER = RTRIM(ADX_BTC_ACCOUNT_NUMBER)
@@ -40,28 +43,39 @@ module MAPI
         end
 
         def self.translate_securities_transactions_fields(hash, mapping=SECURITIES_FIELD_MAPPINGS)
-          h = Hash[hash.map{ |k,v| [mapping[k.downcase],v]}].with_indifferent_access
+          h = Hash[hash.map{ |k,v| [mapping[k],v]}].with_indifferent_access
           h[:new_transaction] = h[:new_transaction]=='Y'
           h
         end
 
-        def self.securities_transactions(environment, logger, fhlb_id, rundate)
+        def self.fetch_final_securities_count(environment, logger, fhlb_id, rundate)
           if environment == :production
-            securities_transactions_production(logger, fhlb_id, rundate)
+            fetch_hashes(logger, final_securities_count_sql(fhlb_id, rundate))
           else
-            securities_transactions_development(fhlb_id, rundate)
+            rundate == XMAS_2015 || rundate == DEC_1_2015 ? [{ 'RECORDSCOUNT' => 0 }] : fake('securities_count')
           end
         end
 
-        def self.securities_transactions_production(logger, fhlb_id, rundate)
-          final      = fetch_hashes(logger, securities_count_sql(fhlb_id, rundate)).first['RECORDSCOUNT'] > 0
-          originals  = fetch_hashes(logger, securities_transactions_sql(fhlb_id, rundate, final))
-          translated = originals.map{ |h| translate_securities_transactions_fields(h) }
-          { final: final, transactions: translated }
+        def self.fetch_securities_transactions(environment, logger, fhlb_id, rundate, final)
+          if environment == :production
+            fetch_hashes(logger, securities_transactions_sql(fhlb_id, rundate, final), {to_i: ["CUR_UNITS"], to_f: %w(CUR_PRINCIPAL_AMOUNT CUR_INTEREST_AMOUNT CUR_TOTAL_AMOUNT)}, true)
+          else
+            rundate == XMAS_2015 ? [] : fake('securities_transactions')
+          end
         end
 
-        def self.securities_transactions_development(_fhlb_id, _rundate)
-          fake_hash('securities_transactions')
+        def self.securities_transactions(environment, logger, fhlb_id, rundate)
+          final      = fetch_final_securities_count(environment, logger, fhlb_id, rundate).first['RECORDSCOUNT'] > 0
+          originals  = fetch_securities_transactions(environment, logger, fhlb_id, rundate, final)
+          translated = originals.map{ |h| translate_securities_transactions_fields(h) }
+          result     = { final: final, transactions: translated }
+          result.merge!( previous_business_day: previous_business_day(environment, logger, rundate) ) if translated.empty?
+          result
+        end
+
+        def self.previous_business_day(environment, logger, date)
+          holidays = MAPI::Services::Rates::Holidays.holidays(logger, environment, date-1.week, date-1.day)
+          MAPI::Services::Rates.find_next_business_day(date-1.day, -1.day, holidays)
         end
       end
     end

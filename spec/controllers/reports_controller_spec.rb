@@ -1584,6 +1584,7 @@ RSpec.describe ReportsController, :type => :controller do
     let(:total)                            { double('total') }
     let(:total_net)                        { double('total_net') }
     let(:final)                            { double('final') }
+    let(:previous_business_day)            { double('previous_business_day') }
     let(:securities_transactions_hash) do
       {
           'custody_account_no'   => custody_account_no,
@@ -1627,6 +1628,7 @@ RSpec.describe ReportsController, :type => :controller do
       allow(response_hash).to receive(:[]).with(:final).and_return(final)
       allow(response_hash).to receive(:[]).with(:total_payment_or_principal)
       allow(response_hash).to receive(:[]).with(:total_interest)
+      allow(response_hash).to receive(:[]).with(:previous_business_day)
       allow(response_hash).to receive(:[]).with(:transactions).and_return(transaction_hash)
       allow(transaction_hash).to receive(:collect)
     end
