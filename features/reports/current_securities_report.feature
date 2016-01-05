@@ -39,6 +39,12 @@ Feature: Visiting the Current Securities Position Report Page
     When I filter the report by "Unpledged Securities"
     Then I should see a current securities position report for Unpledged Securities
 
+  @resque-backed @smoke @jira-mem-819
+  Scenario: Member downloads an XLSX of the current securities position report
+    Given I am on the "Current Securities Position" report page
+    When I request an XLSX
+    Then I should begin downloading a file
+
   @data-unavailable @jira-mem-283 @jira-mem-1053
   Scenario: No data is available to show in the current securities position report
     Given I am on the "Current Securities Position" report page

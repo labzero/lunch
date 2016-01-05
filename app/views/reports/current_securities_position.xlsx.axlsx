@@ -1,0 +1,19 @@
+xlsx_package.use_shared_strings = true
+workbook = xlsx_package.workbook
+workbook.styles do |styles|
+  currency_format = styles.add_style num_fmt: 2
+  coupon_format = styles.add_style format_code: "#,##0.0000"
+  factor_format = styles.add_style format_code: "#,##0.00000000"
+  date_format = styles.add_style format_code: 'mm/dd/yyyy'
+
+  styles = [nil, nil, nil, nil, nil, nil, nil, coupon_format, date_format, currency_format, factor_format, date_format, currency_format, currency_format, date_format, currency_format]
+
+  workbook.add_worksheet(name: @report_name) do |sheet|
+    sorted_securities = @current_securities_position[:securities].sort_by{|security| security[:security_pledge_type]}.reverse
+    sheet.add_row @report_download_column_headings
+    sorted_securities.each do |row|
+      values = row[:position_detail].flatten.collect { |column| column[:type] == :date ? (column[:raw_value].to_date if column[:raw_value]) : column[:raw_value]}
+      sheet.add_row values, style: styles
+    end
+  end
+end

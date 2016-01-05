@@ -820,13 +820,17 @@ RSpec.describe ReportsController, :type => :controller do
       let(:as_of_date) { Date.new(2014,1,1) }
       before {
         allow(securities_position_response).to receive(:[]).with(:securities).and_return([])
+        allow(securities_position_response).to receive(:[]=).with(:securities, anything)
         allow(member_balance_service_instance).to receive(:current_securities_position).and_return(securities_position_response)
       }
 
       it_behaves_like 'a user required action', :get, :current_securities_position
       it_behaves_like 'a report with instance variables set in a before_filter', :current_securities_position
+      it_behaves_like 'a report that can be downloaded', :current_securities_position, [:xlsx]
 
       describe 'view instance variables' do
+        let(:unprocessed_securities) { double('unprocessed securities details', length: nil) }
+        let(:processed_securities) { double('processed securities details') }
         it 'sets @current_securities_position to the hash returned from MemberBalanceService' do
           get :current_securities_position
           expect(assigns[:current_securities_position]).to eq(securities_position_response)
@@ -835,6 +839,12 @@ RSpec.describe ReportsController, :type => :controller do
           allow(controller).to receive(:report_disabled?).with(ReportsController::CURRENT_SECURITIES_POSITION_WEB_FLAG).and_return(true)
           get :current_securities_position
           expect(assigns[:current_securities_position]).to eq({securities:[]})
+        end
+        it 'sets @current_securities_position[:securities] to the result of the `format_securities_detail` method' do
+          allow(securities_position_response).to receive(:[]).with(:securities).and_return(unprocessed_securities)
+          allow(controller).to receive(:format_securities_detail).with(unprocessed_securities).and_return(processed_securities)
+          expect(securities_position_response).to receive(:[]=).with(:securities, processed_securities)
+          get :current_securities_position
         end
         it 'sets @securities_filter to `all` if no securities_filter param is provided' do
           get :current_securities_position
@@ -857,6 +867,18 @@ RSpec.describe ReportsController, :type => :controller do
           get :current_securities_position
           expect(assigns[:securities_filter_options]).to eq(dropdown_options)
         end
+        it 'sets @report_download_column_headings to an array of column headings' do
+          column_headings = [
+            I18n.t('common_table_headings.custody_account_number'), I18n.t('reports.pages.securities_position.custody_account_type'), I18n.t('reports.pages.securities_position.security_pledge_type'),
+            I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.security_description'), I18n.t('reports.pages.securities_position.reg_id'),
+            I18n.t('common_table_headings.pool_number'), I18n.t('common_table_headings.coupon_rate'), I18n.t('common_table_headings.maturity_date'),
+            I18n.t('common_table_headings.original_par_value'), I18n.t('reports.pages.securities_position.factor'), I18n.t('reports.pages.securities_position.factor_date'),
+            I18n.t('common_table_headings.current_par'), I18n.t('common_table_headings.price'), I18n.t('common_table_headings.price_date'),
+            I18n.t('reports.pages.securities_position.market_value')
+          ]
+          get :current_securities_position
+          expect(assigns[:report_download_column_headings]).to eq(column_headings)
+        end
         dropdown_options.each do |option|
           it "sets @securities_filter_text to the appropriate value when @securities_filter equals `#{option.last}`" do
             get :current_securities_position, securities_filter: option.last
@@ -878,6 +900,7 @@ RSpec.describe ReportsController, :type => :controller do
       let(:start_date_param) { Date.today - rand(10000) }
       before {
         allow(securities_position_response).to receive(:[]).with(:securities).and_return([])
+        allow(securities_position_response).to receive(:[]=).with(:securities, anything)
         allow(member_balance_service_instance).to receive(:monthly_securities_position).and_return(securities_position_response)
         allow(restricted_start_date).to receive(:end_of_month).and_return(end_of_month)
         allow(controller).to receive(:month_restricted_start_date).and_return(end_of_month)
@@ -887,6 +910,8 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a date restricted report', :monthly_securities_position, :last_month_end
       it_behaves_like 'a report with instance variables set in a before_filter', :monthly_securities_position
       describe 'view instance variables' do
+        let(:unprocessed_securities) { double('unprocessed securities details', length: nil) }
+        let(:processed_securities) { double('processed securities details') }
         it "should pass `#{ReportsController::DATE_RESTRICTION_MAPPING[:monthly_securities_position]}` to `min_and_start_dates`" do
           expect(controller).to receive(:min_and_start_dates).with(ReportsController::DATE_RESTRICTION_MAPPING[:monthly_securities_position], anything)
           get :monthly_securities_position
@@ -905,14 +930,20 @@ RSpec.describe ReportsController, :type => :controller do
           get :monthly_securities_position
           expect(assigns[:month_end_date]).to eq(month_restricted_start_date)
         end
-        it 'sets @current_securities_position to the hash returned from MemberBalanceService' do
+        it 'sets @monthly_securities_position to the hash returned from MemberBalanceService' do
           get :monthly_securities_position
           expect(assigns[:monthly_securities_position]).to eq(securities_position_response)
         end
-        it 'sets @current_securities_position to {securities:[]} if the report is disabled' do
+        it 'sets @monthly_securities_position to {securities:[]} if the report is disabled' do
           allow(controller).to receive(:report_disabled?).with(ReportsController::MONTHLY_SECURITIES_WEB_FLAGS).and_return(true)
           get :monthly_securities_position
           expect(assigns[:monthly_securities_position]).to eq({securities:[]})
+        end
+        it 'sets @monthly_securities_position[:securities] to the result of the `format_securities_detail` method' do
+          allow(securities_position_response).to receive(:[]).with(:securities).and_return(unprocessed_securities)
+          allow(controller).to receive(:format_securities_detail).with(unprocessed_securities).and_return(processed_securities)
+          expect(securities_position_response).to receive(:[]=).with(:securities, processed_securities)
+          get :monthly_securities_position
         end
         it 'sets @securities_filter to `all` if no securities_filter param is provided' do
           get :monthly_securities_position
@@ -2358,6 +2389,207 @@ RSpec.describe ReportsController, :type => :controller do
               allow(subject).to receive(:job_cancel_url).with(job_status).and_return(job_cancel_url)
               expect(subject).to receive(:render).with({json: {job_status_url: job_status_url, job_cancel_url: job_cancel_url}})
               call_method
+            end
+          end
+        end
+      end
+    end
+    describe '`format_securities_detail`' do
+      let(:security) { double('a security', :[] => nil) }
+      let(:call_method) { subject.send(:format_securities_detail, [security]) }
+      it 'assigns a `position_detail` array to each of the securities it is passed' do
+        expect(security).to receive(:[]=).with(:position_detail, anything)
+        call_method
+      end
+      describe 'the :position_detail array' do
+        %w(custody_account_number security_pledge_type cusip description reg_id pool_number coupon_rate maturity_date original_par
+        factor factor_date current_par price price_date market_value).each do |key|
+          let(key.to_sym) { double(key) }
+        end
+        let(:custody_account_type) { ['U', 'P'].sample }
+        let(:security) {
+          {
+            custody_account_type: custody_account_type,
+            custody_account_number: custody_account_number,
+            security_pledge_type: security_pledge_type,
+            cusip: cusip,
+            description: description,
+            reg_id: reg_id,
+            pool_number: pool_number,
+            coupon_rate: coupon_rate,
+            maturity_date: maturity_date,
+            original_par: original_par,
+            factor: factor,
+            factor_date: factor_date,
+            current_par: current_par,
+            price: price,
+            price_date: price_date,
+            market_value: market_value
+          }
+        }
+        let(:formatted_value) { double('a formatted value') }
+        before do
+          %i(fhlb_formatted_percentage fhlb_date_standard_numeric fhlb_formatted_currency).each do |method|
+            allow(subject).to receive(method)
+          end
+        end
+        describe 'the first sub-array' do
+          describe 'the first tertiary array' do
+            it 'contains a first member with appropriate details for `custody_account_number`' do
+              details = {
+                heading: I18n.t('common_table_headings.custody_account_number'),
+                value: custody_account_number,
+                raw_value: custody_account_number
+              }
+              expect(call_method.first[:position_detail][0][0][0]).to eq(details)
+            end
+            it 'contains a second member with appropriate details for `custody_account_type`' do
+              details = {
+                heading: I18n.t('reports.pages.securities_position.custody_account_type'),
+                value: ReportsController::ACCOUNT_TYPE_MAPPING[custody_account_type],
+                raw_value: ReportsController::ACCOUNT_TYPE_MAPPING[custody_account_type]
+              }
+              expect(call_method.first[:position_detail][0][0][1]).to eq(details)
+            end
+            it 'contains a third member with appropriate details for `security_pledge_type`' do
+              details = {
+                heading: I18n.t('reports.pages.securities_position.security_pledge_type'),
+                value: security_pledge_type,
+                raw_value: security_pledge_type
+              }
+              expect(call_method.first[:position_detail][0][0][2]).to eq(details)
+            end
+          end
+          describe 'the second tertiary array' do
+            it 'contains a first member with appropriate details for `cusip`' do
+              details = {
+                heading: I18n.t('common_table_headings.cusip'),
+                value: cusip,
+                raw_value: cusip
+              }
+              expect(call_method.first[:position_detail][0][1][0]).to eq(details)
+            end
+            it 'contains a second member with appropriate details for `description`' do
+              details = {
+                heading: I18n.t('common_table_headings.security_description'),
+                value: description,
+                raw_value: description
+              }
+              expect(call_method.first[:position_detail][0][1][1]).to eq(details)
+            end
+          end
+          describe 'the third tertiary array' do
+            it 'contains a first member with appropriate details for `reg_id`' do
+              details = {
+                heading: I18n.t('reports.pages.securities_position.reg_id'),
+                value: reg_id,
+                raw_value: reg_id
+              }
+              expect(call_method.first[:position_detail][0][2][0]).to eq(details)
+            end
+            it 'contains a second member with appropriate details for `pool_number`' do
+              details = {
+                heading: I18n.t('common_table_headings.pool_number'),
+                value: pool_number,
+                raw_value: pool_number
+              }
+              expect(call_method.first[:position_detail][0][2][1]).to eq(details)
+            end
+            it 'contains a third member with appropriate details for `coupon_rate`' do
+              allow(subject).to receive(:fhlb_formatted_percentage).with(coupon_rate, 3).and_return(formatted_value)
+              details = {
+                heading: I18n.t('common_table_headings.coupon_rate'),
+                value: formatted_value,
+                raw_value: coupon_rate
+              }
+              expect(call_method.first[:position_detail][0][2][2]).to eq(details)
+            end
+          end
+          describe 'the fourth tertiary array' do
+            it 'contains a first member with appropriate details for `maturity_date`' do
+              allow(subject).to receive(:fhlb_date_standard_numeric).with(maturity_date).and_return(formatted_value)
+              details = {
+                heading: I18n.t('common_table_headings.maturity_date'),
+                value: formatted_value,
+                raw_value: maturity_date,
+                type: :date
+              }
+              expect(call_method.first[:position_detail][0][3][0]).to eq(details)
+            end
+            it 'contains a second member with appropriate details for `original_par`' do
+              allow(subject).to receive(:fhlb_formatted_currency).with(original_par, force_unit: true, precision: 2).and_return(formatted_value)
+              details = {
+                heading: I18n.t('common_table_headings.original_par_value'),
+                value: formatted_value,
+                raw_value: original_par
+              }
+              expect(call_method.first[:position_detail][0][3][1]).to eq(details)
+            end
+          end
+        end
+        describe 'the second sub-array' do
+          describe 'the first tertiary array' do
+            it 'contains a first member with appropriate details for `coupon_rate`' do
+              allow(subject).to receive(:fhlb_formatted_percentage).with(factor, 8).and_return(formatted_value)
+              details = {
+                heading: I18n.t('reports.pages.securities_position.factor'),
+                value: formatted_value,
+                raw_value: factor
+              }
+              expect(call_method.first[:position_detail][1][0][0]).to eq(details)
+            end
+            it 'contains a second member with appropriate details for `factor_date`' do
+              allow(subject).to receive(:fhlb_date_standard_numeric).with(factor_date).and_return(formatted_value)
+              details = {
+                heading: I18n.t('reports.pages.securities_position.factor_date'),
+                value: formatted_value,
+                raw_value: factor_date,
+                type: :date
+              }
+              expect(call_method.first[:position_detail][1][0][1]).to eq(details)
+            end
+          end
+          describe 'the second tertiary array' do
+            it 'contains a member with appropriate details for `current_par`' do
+              allow(subject).to receive(:fhlb_formatted_currency).with(current_par, force_unit: true, precision: 2).and_return(formatted_value)
+              details = {
+                heading: I18n.t('common_table_headings.current_par'),
+                value: formatted_value,
+                raw_value: current_par
+              }
+              expect(call_method.first[:position_detail][1][1][0]).to eq(details)
+            end
+          end
+          describe 'the third tertiary array' do
+            it 'contains a first member with appropriate details for `price`' do
+              allow(subject).to receive(:fhlb_formatted_currency).with(price, force_unit: true, precision: 2).and_return(formatted_value)
+              details = {
+                heading: I18n.t('common_table_headings.price'),
+                value: formatted_value,
+                raw_value: price
+              }
+              expect(call_method.first[:position_detail][1][2][0]).to eq(details)
+            end
+            it 'contains a second member with appropriate details for `price_date`' do
+              allow(subject).to receive(:fhlb_date_standard_numeric).with(price_date).and_return(formatted_value)
+              details = {
+                heading: I18n.t('common_table_headings.price_date'),
+                value: formatted_value,
+                raw_value: price_date,
+                type: :date
+              }
+              expect(call_method.first[:position_detail][1][2][1]).to eq(details)
+            end
+          end
+          describe 'the fourth tertiary array' do
+            it 'contains a member with appropriate details for `market_value`' do
+              allow(subject).to receive(:fhlb_formatted_currency).with(market_value, force_unit: true, precision: 2).and_return(formatted_value)
+              details = {
+                heading: I18n.t('reports.pages.securities_position.market_value'),
+                value: formatted_value,
+                raw_value: market_value
+              }
+              expect(call_method.first[:position_detail][1][3][0]).to eq(details)
             end
           end
         end
