@@ -101,9 +101,11 @@ module MAPI
 
         def self.available_statements(logger, env, fhlb_id)
           if env == :production
-            fetch_hashes(logger, available_statements_sql(fhlb_id))
+            fetch_hashes(logger, available_statements_sql(fhlb_id), {}, true)
           else
             fake('securities_services_statements_available')
+          end.tap do |statements|
+            statements.each{ |statement| statement['report_end_date'] = dateify(statement['report_end_date']) }
           end
         end
 
