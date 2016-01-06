@@ -56,19 +56,18 @@ RSpec.describe User, :type => :model do
   describe 'validating passwords' do
     it { should validate_confirmation_of(:password) }
     it { should validate_length_of(:password).is_at_least(8) }
-    it 'requires at least one capital letter' do
-      should_not allow_value('abcder12!').for(:password)
+    it 'requires 3 of the 4 following criteria in any order: upper case letters, lower case letters, numbers, or special characters (!@#$%*)' do
+      # [(lower, number), (lower, symbol), (lower, upper), (upper, symbol), (upper, number), (number, symbol)]
+      ['abcder12', 'abcder!', 'abcderABC', 'ABCDE@#!', 'ABC83429', '9467@#!**'].each do |password|
+        password = password.split('').shuffle.join
+        should_not allow_value(password).for(:password)
+      end
+      # [(lower, number, upper), (lower, number, symbol), (upper, number, symbol), (number, symbol, lower), (upper, lower, number, symbol)]
+      ['abcder12ABC', 'abcder12!', 'ABC829*%$', '9*@#$@lwer', 'Abcder121!'].each do |password|
+        password = password.split('').shuffle.join
+        should allow_value(password).for(:password)
+      end
     end
-    it 'requires at least one lowercase letter' do
-      should_not allow_value('ABCDER12!').for(:password)
-    end
-    it 'requires at least one number' do
-      should_not allow_value('Abcderrr!').for(:password)
-    end
-    it 'requires at least one symbol' do
-      should_not allow_value('Abcder121').for(:password)
-    end
-    it { should allow_value('Abcder121!').for(:password) }
     it { should allow_value(nil).for(:password) }
   end
 

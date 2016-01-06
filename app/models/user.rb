@@ -4,11 +4,10 @@ class User < ActiveRecord::Base
   validates :surname, presence: {on: :update, unless: :password_changed?}
   validates :email, presence: {on: :update, unless: :password_changed?}, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, allow_blank: true }, confirmation: {if: :email_changed?, on: :update}
   validates :email_confirmation, presence: {if: :email_changed?, on: :update}
-  validates :password, confirmation: true, length: {minimum: 8, allow_nil: true}, format: { with: /\A(?=.*[A-Z]).*\z/, message: :capital_letter_needed, allow_nil: true }
-  validates :password, format: { with: /\A(?=.*[a-z]).*\z/, message: :lowercase_letter_needed, allow_nil: true }
-  validates :password, format: { with: /\A(?=.*\d).*\z/, message: :number_needed, allow_nil: true }
-  validates :password, format: { with: /\A(?=.*[!@#$%*]).*\z/, message: :symbol_needed, allow_nil: true }
   validates :current_password, {presence: true, if: :virtual_validators?}
+  validates :password, confirmation: true, length: {minimum: 8, allow_nil: true}
+  # (symbol, upper, number) OR (number, upper, lower) OR (symbol, upper, lower) OR (lower, number, symbol)
+  validates :password, format: { with: /\A(?=.*[!@#$%*])(?=.*[A-Z])(?=.*\d).*|(?=.*\d)(?=.*[A-Z])(?=.*[a-z]).*|(?=.*[!@#$%*])(?=.*[A-Z])(?=.*[a-z]).*|(?=.*[a-z])(?=.*\d)(?=.*[!@#$%*]).*\z/, message: :criteria_not_met, allow_nil: true }
 
   def self.policy_class
     AccessManagerPolicy

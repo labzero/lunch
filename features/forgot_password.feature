@@ -31,17 +31,21 @@ Scenario: Using an expired/invalid reset password link
   When I follow an invalid password link
   Then I should see the forgot password request expired page
 
-@local-only @jira-mem-717
+@local-only @jira-mem-717 @jira-mem-1021
 Scenario: Resetting a password
   Given I visit a valid reset password link
-  When I enter a password of "123abcd3!"
-  Then I should see a capital letter required password error
-  When I enter a password of "123ABCD3!"
-  Then I should see a lowercase required password error
-  When I enter a password of "ABCDefGH!"
-  Then I should see a number required password error
-  When I enter a password of "123Abcd3"
-  Then I should see a symbol required password error
+  When I enter a password of "abcder12"
+  Then I should see a criteria not met required password error
+  When I enter a password of "abcder!"
+  Then I should see a criteria not met required password error
+  When I enter a password of "abcderABC"
+  Then I should see a criteria not met required password error
+  When I enter a password of "ABCDE@#!"
+  Then I should see a criteria not met required password error
+  When I enter a password of "ABC83429"
+  Then I should see a criteria not met required password error
+  When I enter a password of "9467@#!**"
+  Then I should see a criteria not met required password error
   When I enter a password of "123Cd3!"
   Then I should see a minimum length required password error
   When I enter a password of "123Abcd3!"

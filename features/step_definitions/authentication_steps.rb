@@ -189,14 +189,18 @@ Then(/^I should see the change password success page$/) do
 end
 
 Then(/^I should see password change validations$/) do
-  step %{I enter a password of "123abcd3!"}
-  step %{I should see a capital letter required password error}
-  step %{I enter a password of "123ABCD3!"}
-  step %{I should see a lowercase required password error}
-  step %{I enter a password of "ABCDefGH!"}
-  step %{I should see a number required password error}
-  step %{I enter a password of "123Abcd3"}
-  step %{I should see a symbol required password error}
+  step %{I enter a password of "abcder12"}
+  step %{I should see a criteria not met required password error}
+  step %{I enter a password of "abcder!"}
+  step %{I should see a criteria not met required password error}
+  step %{I enter a password of "abcderABC"}
+  step %{I should see a criteria not met required password error}
+  step %{I enter a password of "ABCDE@#!"}
+  step %{I should see a criteria not met required password error}
+  step %{I enter a password of "ABC83429"}
+  step %{I should see a criteria not met required password error}
+  step %{I enter a password of "9467@#!**"}
+  step %{I should see a criteria not met required password error}
   step %{I enter a password of "123Cd3!"}
   step %{I should see a minimum length required password error}
   step %{I enter a password of "123Abcd3!"}

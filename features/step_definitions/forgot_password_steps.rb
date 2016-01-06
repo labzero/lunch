@@ -47,16 +47,10 @@ When(/^I enter a (password(?: confirmation)?) of "([^"]*)"$/) do |field, passwor
   page.find('body').click
 end
 
-Then(/^I should see a (capital letter|lowercase|number|symbol|confirmation|minimum length) required password error$/) do |error_type|
+Then(/^I should see a (criteria not met|confirmation|minimum length) required password error$/) do |error_type|
   error = case error_type
-  when 'capital letter'
-    I18n.t('activerecord.errors.models.user.attributes.password.capital_letter_needed')
-  when 'lowercase'
-    I18n.t('activerecord.errors.models.user.attributes.password.lowercase_letter_needed')
-  when 'number'
-    I18n.t('activerecord.errors.models.user.attributes.password.number_needed')
-  when 'symbol'
-    I18n.t('activerecord.errors.models.user.attributes.password.symbol_needed')
+  when 'criteria not met'
+    I18n.t('activerecord.errors.models.user.attributes.password.criteria_not_met')
   when 'confirmation'
     I18n.t('activerecord.errors.models.user.attributes.password.confirmation')
   when 'minimum length'

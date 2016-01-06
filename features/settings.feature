@@ -135,7 +135,7 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
     When I click on the gear icon in the header
     Then I should not see "Access Manager" in the sidebar nav
 
-  @jira-mem-920
+  @jira-mem-920 @jiram-mem-1021
   Scenario: User changes their password
     Given I am logged in as a "password change user"
     When I am on the change password page
