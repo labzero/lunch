@@ -6,8 +6,20 @@ class User < ActiveRecord::Base
   validates :email_confirmation, presence: {if: :email_changed?, on: :update}
   validates :current_password, {presence: true, if: :virtual_validators?}
   validates :password, confirmation: true, length: {minimum: 8, allow_nil: true}
-  # (symbol, upper, number) OR (number, upper, lower) OR (symbol, upper, lower) OR (lower, number, symbol)
-  validates :password, format: { with: /\A(?=.*[!@#$%*])(?=.*[A-Z])(?=.*\d).*|(?=.*\d)(?=.*[A-Z])(?=.*[a-z]).*|(?=.*[!@#$%*])(?=.*[A-Z])(?=.*[a-z]).*|(?=.*[a-z])(?=.*\d)(?=.*[!@#$%*]).*\z/, message: :criteria_not_met, allow_nil: true }
+
+  UPPER = '(?=.*[A-Z])'.freeze
+  LOWER = '(?=.*[a-z])'.freeze
+  NUMBER = '(?=.*\d)'.freeze
+  SYMBOL = '(?=.*[!@#$%*])'.freeze
+
+  SUN = SYMBOL + UPPER + NUMBER + '.*'.freeze
+  NUL = NUMBER + UPPER + LOWER + '.*'.freeze
+  SUL = SYMBOL + UPPER + LOWER + '.*'.freeze
+  LNS = LOWER + NUMBER + SYMBOL + '.*'.freeze
+
+  CRITERIA_REGEX = Regexp.new('\A' + [SUN, NUL, SUL, LNS].join('|') + '\z').freeze
+
+  validates :password, format: { with: CRITERIA_REGEX, message: :criteria_not_met, allow_nil: true }
 
   def self.policy_class
     AccessManagerPolicy
