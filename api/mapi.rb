@@ -59,7 +59,7 @@ require_relative 'models/fee_schedules'
 require_relative 'models/member_quick_advance_flag'
 
 require 'newrelic_rpm'
-require_relative '../config/initializers/newrelic.rb'
+NewRelic::Agent.add_instrumentation(File.join(__dir__, '..', 'lib', 'new_relic', 'instrumentation', '**', '*.rb')) if defined?(NewRelic::Agent)
 
 Time.zone = ENV['TIMEZONE'] || 'Pacific Time (US & Canada)'
 Time.zone_default = Time.zone
