@@ -217,10 +217,7 @@ en:
               too_short:
                 one: Passwords must be at least one character long.
                 other: Passwords must be at least %{count} characters long.
-              capital_letter_needed: Passwords must contain at least one capital letter.
-              lowercase_letter_needed: Passwords must contain at least one lowercase letter.
-              number_needed: Passwords must contain at least one number.
-              symbol_needed: "Passwords must contain at least symbol (!@#$%*)."
+              criteria_not_met: "Passwords must include at least three of the following: upper case letters, lower case letters, numbers, or special characters (!@#$%*)."
               confirmation: Passwords do not match.
               ldap_update_failed: We failed to update your password. Most likely you used a password that was used before.
             current_password:

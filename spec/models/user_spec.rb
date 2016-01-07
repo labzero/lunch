@@ -56,19 +56,62 @@ RSpec.describe User, :type => :model do
   describe 'validating passwords' do
     it { should validate_confirmation_of(:password) }
     it { should validate_length_of(:password).is_at_least(8) }
-    it 'requires at least one capital letter' do
-      should_not allow_value('abcder12!').for(:password)
+    describe 'acceptance criteria' do
+      lower ='asdfsa'
+      upper = 'KJSHDF'
+      number = '7423894'
+      symbol = '#$@!%*'
+
+      [
+        [['lowercase letter', 'symbol'], (lower + symbol)],
+        [['lowercase letter', 'number'], (lower + number)],
+        [['lowercase letter', 'uppercase letter'], (lower + upper)],
+        [['uppercase letter', 'lowercase letter'], (upper + lower)],
+        [['uppercase letter', 'number'], (upper + number)],
+        [['uppercase letter', 'symbol'], (upper + symbol)],
+        [['number', 'lowercase number'], (number + lower)],
+        [['number', 'uppercase number'], (number + upper)],
+        [['number', 'symbol'], (number + symbol)],
+        [['symbol', 'lowercase letter'], (symbol + lower)],
+        [['symbol', 'uppercase letter'], (symbol + upper)],
+        [['symbol', 'number'], (symbol + number)]
+      ].each do |criteria, password|
+        it "rejects passwords that only include a #{criteria.first} and a #{criteria.last}" do
+          should_not allow_value(password).for(:password)
+        end
+      end
+
+      [
+        [['lowercase letter', 'uppercase letter', 'number'], (lower + upper + number)],
+        [['lowercase letter', 'uppercase letter', 'symbol'], (lower + upper + symbol)],
+        [['lowercase letter', 'symbol', 'number'], (lower + symbol + number)],
+        [['lowercase letter', 'symbol', 'uppercase letter'], (lower + symbol + upper)],
+        [['lowercase letter', 'number', 'symbol'], (lower + number + symbol)],
+        [['lowercase letter', 'number', 'uppercase letter'], (lower + number + upper)],
+        [['uppercase letter', 'lowercase letter', 'number'], (upper + lower + number)],
+        [['uppercase letter', 'lowercase letter', 'symbol'], (upper + lower + symbol)],
+        [['uppercase letter', 'symbol', 'number'], (upper + symbol + number)],
+        [['uppercase letter', 'symbol', 'lowercase letter'], (upper + symbol + lower)],
+        [['uppercase letter', 'number', 'symbol'], (upper + number + symbol)],
+        [['uppercase letter', 'number', 'lowercase letter'], (upper + number + lower)],
+        [['number', 'lowercase letter', 'uppercase letter'], (number + lower + upper)],
+        [['number', 'lowercase letter', 'symbol'], (number + lower + symbol)],
+        [['number', 'symbol', 'uppercase letter'], (number + symbol + upper)],
+        [['number', 'symbol', 'lowercase letter'], (number + symbol + lower)],
+        [['number', 'uppercase letter', 'symbol'], (number + upper + symbol)],
+        [['number', 'uppercase letter', 'lowercase letter'], (number + upper + lower)],
+        [['symbol', 'lowercase letter', 'uppercase letter'], (symbol + lower + upper)],
+        [['symbol', 'lowercase letter', 'number'], (symbol + lower + number)],
+        [['symbol', 'number', 'uppercase letter'], (symbol + number + upper)],
+        [['symbol', 'number', 'lowercase letter'], (symbol + number + lower)],
+        [['symbol', 'uppercase letter', 'number'], (symbol + upper + number)],
+        [['symbol', 'uppercase letter', 'lowercase letter'], (symbol + upper + lower)]
+      ].each do |criteria, password|
+        it "accepts passwords that include a #{criteria.first}, a #{criteria[1]} and a #{criteria.last}" do
+          should allow_value(password).for(:password)
+        end
+      end
     end
-    it 'requires at least one lowercase letter' do
-      should_not allow_value('ABCDER12!').for(:password)
-    end
-    it 'requires at least one number' do
-      should_not allow_value('Abcderrr!').for(:password)
-    end
-    it 'requires at least one symbol' do
-      should_not allow_value('Abcder121').for(:password)
-    end
-    it { should allow_value('Abcder121!').for(:password) }
     it { should allow_value(nil).for(:password) }
   end
 
