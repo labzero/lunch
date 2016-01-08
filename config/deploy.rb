@@ -76,28 +76,34 @@ namespace :deploy do
     end
   end
 
+  desc 'Records the deployment'
+  task :record_deployment do
+    run_locally do
+      begin
+        old_env = ENV['MAPI']
+        if roles(:api).length > 0
+          debug 'Starting deployment logging to New Relic for the API application'
+          ENV['MAPI'] = 'true'
+          Rake::Task['newrelic:notice_deployment'].execute
+        end
+
+        if roles(:app).length > 0
+          debug 'Starting deployment logging to New Relic for the Web application'
+          ENV['MAPI'] = nil
+          Rake::Task['newrelic:notice_deployment'].execute
+        end
+      ensure
+        ENV['MAPI'] = old_env
+      end
+    end
+  end
+
   before :compile_assets, :clear_tmp
   after :compile_assets, :compile_maintenance
   before :publishing, :missing_dirs
   after :publishing, :restart
   after :migrate, :seed
-  after :updated, :newrelic_deployment do
-    begin
-      old_env = ENV['MAPI']
-      on roles(:api) do
-        ENV['MAPI'] = 'true'
-        invoke('newrelic:notice_deployment')
-      end
-
-      on roles(:app) do
-        ENV['MAPI'] = nil
-        invoke('newrelic:notice_deployment')
-      end
-    ensure
-      ENV['MAPI'] = old_env
-    end
-    
-  end
+  after :updated, :record_deployment
 
   after :restart, :clear_cache do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
