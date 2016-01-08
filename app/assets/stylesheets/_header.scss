@@ -202,6 +202,7 @@
     margin-bottom: 20px;
   }
   .primary-button, .secondary-button {
+    cursor: pointer;
     width: calc(50% - 10px);
     float: left;
   }
