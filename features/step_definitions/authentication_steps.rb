@@ -204,7 +204,6 @@ Then(/^I should see password change validations$/) do
   step %{I enter a password of "123Cd3!"}
   step %{I should see a minimum length required password error}
   step %{I enter a password of "123Abcd3!"}
-  step %{I should see a confirmation required password error}
   step %{I enter a password confirmation of "123Abcd3!"}
   step %{I should see no password errors}
 end
@@ -212,6 +211,34 @@ end
 When(/^I enter a valid new password$/) do
   step %{I enter a password of "#{valid_password}"}
   step %{I enter a password confirmation of "#{valid_password}"}
+end
+
+When(/^I enter a new valid password in the first field$/) do
+  step %{I enter a password of "#{valid_password}"}
+end
+
+When(/^I enter a new valid password in the password confirmation field$/) do
+  step %{I enter a password confirmation of "#{valid_password}"}
+end
+
+When(/^I focus on the password confirmation field$/) do
+  page.find('#user_password_confirmation').click
+end
+
+When(/^I focus on the new password field$/) do
+  page.find('#user_password').click
+end
+
+Then(/^I should not see a password match error$/) do
+  page.assert_no_selector('.label-error', text: I18n.t('activerecord.errors.models.user.attributes.password.confirmation'), exact: true)
+end
+
+Then(/^I should see a password match error$/) do
+  page.assert_selector('.label-error', text: I18n.t('activerecord.errors.models.user.attributes.password.confirmation'), exact: true)
+end
+
+When(/^I try to submit the form$/) do
+  page.find('form input[type=submit]').click
 end
 
 When(/^I dismiss the change password success page$/) do

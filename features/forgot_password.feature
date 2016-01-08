@@ -49,11 +49,26 @@ Scenario: Resetting a password
   When I enter a password of "123Cd3!"
   Then I should see a minimum length required password error
   When I enter a password of "123Abcd3!"
-  Then I should see a confirmation required password error
-  When I enter a password confirmation of "123Abcd3!"
+  And I enter a password confirmation of "123Abcd3!"
   Then I should see no password errors
   When I submit the form
   Then I should see the login form
   And I should see a password change success flash
   When I fill in and submit the login form with reset username and password "123Abcd3!"
   Then I should be logged in
+
+@local-only @jira-mem-1068
+Scenario: User password confirmation does not match in new password flow
+  Given I visit a valid reset password link
+  When I enter a password of "123Abcd3!"
+  And I focus on the password confirmation field
+  Then I should not see a password match error
+  When I focus on the new password field
+  Then I should not see a password match error
+  When I try to submit the form
+  Then I should see a password match error
+  When I enter a password confirmation of "123Abcd3!"
+  And I focus on the new password field
+  Then I should not see a password match error
+  When I submit the form
+  Then I should not see an error flash
