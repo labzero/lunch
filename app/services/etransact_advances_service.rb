@@ -36,7 +36,15 @@ class EtransactAdvancesService < MAPIService
 
   def quick_advance_execute(member_id, amount, advance_type, advance_term, rate, signer, maturity_date)
     error_handler = calypso_error_handler(member_id)
-    data = post_hash(:quick_advance_execute, "etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{URI.escape(signer)}/#{maturity_date.to_date.iso8601}", '', &error_handler)
+    body = {
+      amount: amount,
+      advance_type: advance_type,
+      advance_term: advance_term,
+      rate: rate,
+      signer: signer,
+      maturity_date: maturity_date.to_date.iso8601
+    }
+    data = post_hash(:quick_advance_execute, "etransact_advances/execute_advance/#{member_id}", body, &error_handler)
     data[:initiated_at] = Time.zone.now.to_datetime if data
     data
   end
