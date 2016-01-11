@@ -49,6 +49,7 @@ $(function () {
       var bottomContent = $('.quick-advance-rates, .quick-advance-last-updated-message, .quick-advance-limited-pricing-message, .quick-advance-instruction, .dashboard-module-advances .initiate-quick-advance, .rate-advances-footer, .quick-advance-error').clone();
       $('.dashboard-module-advances').flyout({topContent:topContent, bottomContent:bottomContent, useReferenceElement:true});
       var $amountField = $('.dashboard-quick-advance-flyout input[name=amount]');
+      $amountField.attr('id', 'quick-advance-amount'); // to conform to HTML5 standards and avoid duplicate ids
       $amountField.on('keypress', function(e){
         onlyAllowDigits(e);
       });
