@@ -158,3 +158,21 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
     And I enter a valid new password
     And I submit the form
     Then I should not see an error flash
+
+  @jira-mem-1068
+  Scenario: User password confirmation does not match in change password flow
+    Given I am logged in
+    And I am on the change password page
+    And I fill in the current password field with the password change user's password
+    And I enter a new valid password in the first field
+    When I focus on the password confirmation field
+    Then I should not see a password match error
+    When I focus on the new password field
+    Then I should not see a password match error
+    When I try to submit the form
+    Then I should see a password match error
+    When I enter a new valid password in the password confirmation field
+    And I focus on the new password field
+    Then I should not see a password match error
+    When I submit the form
+    Then I should not see an error flash

@@ -1,0 +1,46 @@
+$(function() {
+
+  var $changePasswordForms = $('.settings-password-change, .welcome-password-change');
+  $.each($changePasswordForms, function(){
+    $changePasswordForms.find('#user_password, #user_password_confirmation').on('focusout', function(e){
+      var confirmedPassword = $('#user_password_confirmation').val();
+      if (confirmedPassword && confirmedPassword.length > 0) {
+        checkPasswordMatch();
+      };
+    });
+    $changePasswordForms.find('input[type=submit]').on('click', function(e){
+      // Prevent form submission if passwords do not match
+      if (!checkPasswordMatch(e)) {
+        e.stopPropagation();
+        e.preventDefault();
+      };
+    });
+  });
+
+  function checkPasswordMatch() {
+    var confirmedPassword = $('#user_password_confirmation').val();
+    var newPassword = $('#user_password').val();
+    var $errorField = $('#user_password_confirmation + .label-error');
+    if (newPassword === confirmedPassword) {
+      passwordMatch($errorField);
+      return true;
+    } else {
+      passwordMatchError($errorField);
+      return false;
+    };
+  };
+
+  function passwordMatchError(errorField) {
+    errorField.text("<%= I18n.t('activerecord.errors.models.user.attributes.password.confirmation')%>");
+    $('label[for=user_password_confirmation]').addClass('label-error');
+    errorField.parent().addClass('input-field-container-error');
+    errorField.siblings().addClass('input-field-error');
+  };
+
+  function passwordMatch(errorField) {
+    errorField.text("");
+    $('label[for=user_password_confirmation]').removeClass('label-error');
+    errorField.parent().removeClass('input-field-container-error');
+    errorField.siblings().removeClass('input-field-error');
+  };
+});
