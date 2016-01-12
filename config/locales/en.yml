@@ -432,6 +432,7 @@ en:
       confirm_field: Re-enter new password
   dashboard:
     meta_title: FHLB - Dashboard
+    retrieving_data: We are retrieving this data.
     actions:
       more: More
       edit: Edit
@@ -441,7 +442,6 @@ en:
       xml: XML
     recent_activity:
       title: Recent Credit Activity
-      loading: Please wait while we retrieve your recent credit activity.
       view_report_html: View your institution's <a href=%{url}>Today's Credit Activity</a> report for detailed information.
       no_activity: No recent credit activity.
     contacts:
@@ -488,7 +488,6 @@ en:
         repayment: At repayment
         semiannualandrepayment: Semiannually and at repayment
         footer: All advances are subject to the terms and conditions on the Bank's Credit Program, the Advances and Security Agreement with the Member, and the appropriate Advance Confirmation, as well as the Terms of Use.
-        loading: We are retrieving this data.
         axes_labels:
           standard: Standard
           securities_backed: Securities-Backed Credit

@@ -171,3 +171,13 @@ $spinner-size: 30px !default;
   width: $spinner-size;
   height: $spinner-size;
 }
+
+$ellipsis-width: 34px !default;;
+$ellipsis-height: 6px !default;;
+@mixin icon-loading-ellipsis {
+  background-image: image-url('ellipsis-34x6-brandblue.gif');
+  background-position: center center;
+  background-repeat: no-repeat;
+  width: $ellipsis-width;
+  height: $ellipsis-height;
+}

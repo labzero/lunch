@@ -125,6 +125,9 @@ $faded-opacity: 0.4 !default;
 
 .dashboard-module-content {
   padding: 20px;
+  .dashboard-module-temporarily-unavailable {
+    display: none;
+  }
 }
 
 .dashboard-module-content-light {
@@ -251,11 +254,26 @@ p.dashboard-vrc-overnight-message {
   font-size: 5rem;
   line-height: 1;
   margin-bottom: -17px; // UGH. Design doesn't account for descender spacing
+  min-height: 75px;
   span {
     vertical-align: top;
     font-size: 3rem;
     display: inline-block;
     margin-top: 3px;
+  }
+}
+
+.dashboard-element-loading {
+  position: relative;
+  &:after {
+    @extend %absolute-pseudoelement;
+    @extend %vertical-center;
+    @include icon-loading-ellipsis;
+    width: $ellipsis-width;
+    height: $ellipsis-height;
+  }
+  span {
+    display: none;
   }
 }
 
@@ -334,7 +352,15 @@ $breakdown-table-currency-width: 10px;
     }
   }
   .borrowing-capacity-note {
+    @extend %typography-dashboard-account-summary;
     padding: 10px;
+  }
+  .dashboard-module-content {
+    margin-top: 10px;
+    padding: 20px;
+    background: $white;
+    height: 201px;
+    box-sizing: border-box;
   }
 }
 
@@ -577,6 +603,7 @@ $breakdown-table-currency-width: 10px;
 .dashboard-module-loading {
   position: relative;
   padding-left: 55px;
+  margin-bottom: 15px;
   &:before {
     @extend %absolute-pseudoelement;
     @include icon-loading;
@@ -593,8 +620,10 @@ $breakdown-table-currency-width: 10px;
       color: $actionable-blue;
     }
   }
-  .dashboard-module-temporarily-unavailable {
-    display: none;
+  .dashboard-module-content-deferred {
+    .dashboard-module-content {
+      padding: 0;
+    }
   }
 }
 

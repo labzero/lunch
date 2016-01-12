@@ -15,22 +15,13 @@ Scenario: See dashboard contacts
   When I visit the dashboard
   Then I should see 3 contacts
 
-@smoke
+@smoke @jira-mem-610 @jira-mem-1126
 Scenario: See required dashboard modules
   When I visit the dashboard
-  Then I should see the Your Account table breakdown
   And I should see an "borrowing capacity gauge" in the Account module
   And I should see a market overview graph
-
-@smoke @jira-mem-610
-Scenario: See the recent activities module
-  When I visit the dashboard
-  Then I should see the recent activities module in its loaded state
-
-@timing-sensitive @jira-mem-610
-Scenario: See the recent activities module load asynchronously
-  When I visit the dashboard
-  Then I should see the recent activities module in its loading state
+  And I should see the "recent activities" section in its loaded state
+  And I should see the "account overview" section in its loaded state
 
 @data-unavailable @jira-mem-408
 Scenario: Data for Aggregate 30 Day Terms module is temporarily unavailable

@@ -23,6 +23,8 @@ Rails.application.routes.draw do
 
   get '/dashboard/recent_activity' => 'dashboard#recent_activity'
 
+  get '/dashboard/account_overview' => 'dashboard#account_overview'
+
   get '/attachments/download/:id/:filename' => 'attachments#download', as: :attachment_download, filename: /[^\/]+/
 
   scope 'reports', as: :reports do
