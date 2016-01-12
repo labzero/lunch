@@ -862,10 +862,34 @@ en:
       title: Regulatory Updates
     membership:
       title: Membership
-      benefits:
-        title: Benefits
-      requirements:
-        title: Requirements
+      overview:
+        title: Membership
+        p1: The Federal Home Loan Bank of San Francisco is uniquely positioned to lend value to your enterprise and help you achieve your business objectives. We raise funds in the global capital markets and maintain a ready supply of liquidity to provide you with reliable access to low-cost funding and help you meet the diverse and ever-changing credit needs of your customers and communities.
+        p2_html: "Our <a href=%{product_url}>competitively priced products</a> are recognized as among the most cost-effective and versatile in the industry. Because the Federal Home Loan Banks' consolidated obligations are rated Aaa by Moody's Investors Service and AA+ by Standard & Poor's, the Federal Home Loan Banks are able to raise funds at rates that are close to Treasury security yields. As a member of the Bank, you'll be better positioned to:"
+        benefits:
+          reduce_risk: Reduce interest rate risk
+          control_cost: Control your cost of funds
+          manage_liquidity: Manage liquidity
+          strengthen_funding: Strengthen your contingent liquidity funding plans
+          meet_customer_needs: Offer credit products and other programs that meet the needs of your customers
+          support_affordable_housing: Support innovative affordable housing and economic development initiatives that revitalize communities
+        getting_started: Getting Started
+        resources_intro: "The following resources provide detailed information regarding Bank membership:"
+        membership_guidelines_html: "%{download_link}: These guidelines include our membership eligibility requirements, underwriting review standards, products and services, credit and collateral policies, and the membership application process."
+        capital_stock_html: "%{cap_plan_link}, %{cap_plan_summary_link}, and %{annual_reports_link}: All Bank members are required to invest in Bank capital stock. We encourage you, as a prospective shareholder, to review these financial disclosures, as well as the Bank’s %{sec_link}."
+        guides_html: "%{credit_link}, %{collateral_link}, and %{price_indications_link}: These resources provide detailed information about our products, credit and collateral policies, and advances pricing."
+        links:
+          membership_guidelines: Membership Guidelines
+          capital_plan: Capital Plan
+          summary_capital_plan: Summary of the Capital Plan
+          annual_reports: annual reports
+          sec_filings: SEC filings
+          federal_regulation: Code of Federal Regulations
+          credit_guide: Credit Guide
+          collateral_guide: Collateral Guide
+          current_price_indications: Current Price Indications
+        apply: Apply for Membership
+        apply_details_html: A complete list of application forms, agreements, and exhibits can be found on our <a href=%{url}>Applications</a> page.
       applications:
         title: Applications
   securities:

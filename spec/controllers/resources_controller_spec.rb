@@ -400,6 +400,14 @@ RSpec.describe ResourcesController, type: :controller do
       end
     end
   end
+
+  describe 'GET membership_overview' do
+    it_behaves_like 'a user required action', :get, :membership_overview
+    it 'should render the guides view' do
+      get :membership_overview
+      expect(response.body).to render_template('membership_overview')
+    end
+  end
   
   describe 'the `fee_schedule_table_hash` private method' do
     let(:translation) { double('I18n translation', to_s: 'foo') }

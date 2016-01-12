@@ -1,4 +1,7 @@
 $resource-page-padding: 140px !default;
+.resource {
+  @extend %info-page-style;
+}
 
 .resource-guide-page {
   p {
@@ -38,15 +41,6 @@ $resource-page-padding: 140px !default;
   }
   h2 {
     margin-top: 30px;
-  }
-}
-
-.resource {
-  h2 {
-    @extend %typography-section-title;
-  }
-  h3 {
-    @extend %typography-subtitle;
   }
 }
 

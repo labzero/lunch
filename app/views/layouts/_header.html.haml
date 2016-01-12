@@ -78,11 +78,9 @@
           %li= link_to(t('resources.regulatory_updates.title'), 'http://www.fhlbsf.com/resource-center/regulatory/default.aspx')
           %li<>= link_to(t('resources.business_continuity.name'), business_continuity_path)
           %li<>
-            = link_to(t('resources.membership.title'), '#')
+            = link_to(t('resources.membership.title'), membership_overview_path)
             %ul.nav-dropdown-nested
-              %li= link_to(t('resources.membership.benefits.title'), '#')
-              %li= link_to(t('resources.membership.requirements.title'), '#')
-              %li= link_to(t('resources.membership.applications.title'), '#')
+              %li= link_to(t('resources.membership.applications.title'), membership_application_path)
       %li.products-dropdown<>
         = link_to(t('nav.secondary.products'), '#', class: 'nav-menu')
         %ul.nav-dropdown<>

@@ -457,6 +457,10 @@ class ResourcesController < ApplicationController
     ]
     @sta_miscellaneous_table = fee_schedule_table_hash(sta_miscellaneous_rows)
   end
+
+  # GET
+  def membership_overview
+  end
   
   private
   

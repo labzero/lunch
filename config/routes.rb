@@ -95,6 +95,10 @@ Rails.application.routes.draw do
     get '/capital-plan' => 'resources#capital_plan'
     get '/download/:file' => 'resources#download', as: :resources_download
     get 'fee_schedules' => 'resources#fee_schedules'
+    scope 'membership' do
+      get 'overview' => 'resources#membership_overview', as: :membership_overview
+      get 'application' => 'error#not_found', as: :membership_application
+    end
   end
 
   scope 'products' do
