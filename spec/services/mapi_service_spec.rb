@@ -171,9 +171,17 @@ describe MAPIService do
       allow(subject).to receive(rest_action).and_return(nil)
     end
 
-    it "calls `#{rest_action}`" do
-      expect(subject).to receive(rest_action).with(name, endpoint, *args)
-      call_method
+    if rest_action == :post
+      it "calls `#{rest_action}` with a JSON body and a content_type of 'application/json'" do
+        new_args = args.collect{|x| x.to_json} + ['application/json']
+        expect(subject).to receive(rest_action).with(name, endpoint, *new_args)
+        call_method
+      end
+    else
+      it "calls `#{rest_action}`" do
+        expect(subject).to receive(rest_action).with(name, endpoint, *args)
+        call_method
+      end
     end
     it 'passes the response from `get` to `parse`' do
       response = double('A Response')
@@ -188,7 +196,7 @@ describe MAPIService do
     end
     it 'passes the error handler to `get`' do
       anythings = Array.new(args.length, anything)
-      allow(subject).to receive(rest_action).with(anything, anything, *anythings) do |*args, &block|
+      allow(subject).to receive(rest_action) do |*args, &block|
         expect(block).to be(error_handler)
         nil
       end
@@ -310,22 +318,37 @@ describe MAPIService do
 
   describe '`get_fake_hash` method'
 
-  describe '`post` method' do
+  describe '`post` method', :vcr do
     let(:endpoint) { double('An Endpoint', to_s: '/') }
     let(:name) { double('A Name') }
     let(:body) { double('Data To Post') }
+    let(:content_type) { double('content type') }
     let(:endpoint_client) { double('An Endpoint Client', post: nil) }
-    let(:call_method) { subject.post(name, endpoint, body) }
+    let(:call_method) { subject.post(name, endpoint, body, content_type) }
 
-    it_behaves_like 'a MAPI REST request', :post, 'Data to Post'
+    it_behaves_like 'a MAPI REST request', :post, 'Data to Post', 'application/json'
 
     it 'POSTs to the `endpoint`' do
       expect_any_instance_of(RestClient::Resource).to receive(:[]).with(endpoint).and_return(endpoint_client)
       call_method
     end
     it 'POSTs the `body`' do
-      expect_any_instance_of(RestClient::Resource).to receive(:post).with(body)
+      expect_any_instance_of(RestClient::Resource).to receive(:post).with(body, anything)
       call_method
+    end
+    it 'POSTs the `content_type` if one is given' do
+      expect_any_instance_of(RestClient::Resource).to receive(:post).with(anything, content_type: content_type)
+      call_method
+    end
+    it 'does not set the `content_type` if one is not given' do
+      expect_any_instance_of(RestClient::Resource).to receive(:post).with(anything)
+      subject.post(name, endpoint, body)
+    end
+    it 'succeeds if a `content_type` is given' do
+      expect{call_method}.to_not raise_exception
+    end
+    it 'succeeds if no `content_type` is given' do
+      expect{subject.post(name, endpoint, body)}.to_not raise_exception
     end
   end
 

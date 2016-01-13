@@ -19,6 +19,16 @@ describe MAPI::ServiceApp do
   let(:check_capstock)  {true}
   let(:signer)  {'local'}
   let(:maturity_date) { "2016-03-11".to_date }
+  let(:post_body) {
+    {
+      amount: amount,
+      advance_type: advance_type,
+      advance_term: advance_term,
+      rate: rate,
+      signer: signer,
+      maturity_date: maturity_date.iso8601
+    }.to_json
+  }
 
   before do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
@@ -164,7 +174,7 @@ describe MAPI::ServiceApp do
   end
 
   describe 'Execute Trade' do
-    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}", post_body; JSON.parse(last_response.body) }
     it 'should return expected result of execute trade' do
       expect(execute_trade['status']).to be_kind_of(Array)
       expect(execute_trade['confirmation_number']).to be_kind_of(String)
@@ -181,7 +191,7 @@ describe MAPI::ServiceApp do
   end
 
   describe 'Execute Trade' do
-    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}", post_body; JSON.parse(last_response.body) }
     it 'should return the maturity date passed as part of the URL' do
       expect(execute_trade['maturity_date']).to eq(maturity_date.iso8601)
     end
@@ -296,7 +306,7 @@ describe MAPI::ServiceApp do
   end
 
   describe 'in the production environment' do
-    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}", post_body; JSON.parse(last_response.body) }
     before do
       allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit) {|env, amount, hash| hash }
@@ -373,11 +383,11 @@ describe MAPI::ServiceApp do
       end
     end
     it 'should return Internal Service Error, if execute trade service is unavailable', vcr: {cassette_name: 'execute_trade_service_unavailable'} do
-      post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"
+      post "/etransact_advances/execute_advance/#{member_id}", post_body
       expect(last_response.status).to eq(503)
     end
     it 'should return Internal Service Error, if execute mds service is unavailable', vcr: {cassette_name: 'execute_trade_market_data_service_unavailable'} do
-      post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"
+      post "/etransact_advances/execute_advance/#{member_id}", post_body
       expect(last_response.status).to eq(503)
     end
   end
