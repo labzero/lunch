@@ -179,3 +179,9 @@ $resource-page-padding: 140px !default;
     } 
   } 
 }
+
+.resource-member-applications {
+  ol, ul {
+    padding-left: 30px;
+  }
+}

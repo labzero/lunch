@@ -97,7 +97,13 @@ Rails.application.routes.draw do
     get 'fee_schedules' => 'resources#fee_schedules'
     scope 'membership' do
       get 'overview' => 'resources#membership_overview', as: :membership_overview
-      get 'application' => 'error#not_found', as: :membership_application
+      get 'application' => 'resources#membership_application', as: :membership_application
+      scope 'application' do
+        get 'commercial-savings-and-industrial' => 'error#not_found', as: :commercial_application
+        get 'community-development' => 'error#not_found', as: :community_development_application
+        get 'credit-union' => 'error#not_found', as: :credit_union_application
+        get 'insurance-company' => 'error#not_found', as: :insurance_company_application
+      end
     end
   end
 

@@ -401,11 +401,15 @@ RSpec.describe ResourcesController, type: :controller do
     end
   end
 
-  describe 'GET membership_overview' do
-    it_behaves_like 'a user required action', :get, :membership_overview
-    it 'should render the guides view' do
-      get :membership_overview
-      expect(response.body).to render_template('membership_overview')
+  describe 'membership actions' do
+    [:membership_overview, :membership_application].each do |action|
+      describe "GET #{action.to_s}" do
+        it_behaves_like 'a user required action', :get, action
+        it 'should render the guides view' do
+          get action
+          expect(response.body).to render_template(action.to_s)
+        end
+      end
     end
   end
   

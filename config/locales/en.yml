@@ -891,7 +891,23 @@ en:
         apply: Apply for Membership
         apply_details_html: A complete list of application forms, agreements, and exhibits can be found on our <a href=%{url}>Applications</a> page.
       applications:
-        title: Applications
+        nav_title: Applications
+        title: Membership Application
+        intro_html: To apply for Bank membership, please complete all of the required application forms, agreements, and exhibits. Contact your <a href=%{url}>Relationship Manager</a> if you have any questions regarding the application process.
+        charter_types:
+          heading: "For a complete list of application forms, select your charter type from the list below:"
+          commercial: Commercial Bank, Savings Institution, or Industrial Loan Company
+          community_development: Community Development Financial Institution
+          credit_union: Credit Union
+          insurance_company: Insurance Company
+        process:
+          heading: Application Process Overview
+          submit_forms: Submit all required membership application forms, agreements, and exhibits to the Bank.
+          examination_report: We require a copy of your most recent regulatory examination report from your primary regulator (this does not apply to community development financial institutions). Examination reports must be provided directly to the Bank by the regulator and may not be submitted by the applicant.
+          application_review: Bank staff reviews the application for completeness and may request additional information as needed.
+          eligibility_requirements: Once we receive the regulatory examination report and the application is deemed complete, we determine whether your institution meets all of the statutory and regulatory eligibility requirements and underwriting review standards for membership.
+          notification: We notify your institution of approval or denial of your membership application within 60 days after the application is deemed complete.
+          approval: When your institution is approved for membership, your institution will wire your stock purchase requirement amount, as calculated on the Applicant’s Bank Stock Calculation worksheet, to your newly opened Settlement/Transaction Account.
   securities:
     title: Securities
     redirect:

@@ -461,6 +461,10 @@ class ResourcesController < ApplicationController
   # GET
   def membership_overview
   end
+
+  # GET
+  def membership_application
+  end
   
   private
   
