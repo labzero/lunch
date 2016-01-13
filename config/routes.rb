@@ -99,7 +99,7 @@ Rails.application.routes.draw do
       get 'overview' => 'resources#membership_overview', as: :membership_overview
       get 'application' => 'resources#membership_application', as: :membership_application
       scope 'application' do
-        get 'commercial-savings-and-industrial' => 'error#not_found', as: :commercial_application
+        get 'commercial-savings-and-industrial' => 'resources#commercial_application', as: :commercial_application
         get 'community-development' => 'error#not_found', as: :community_development_application
         get 'credit-union' => 'error#not_found', as: :credit_union_application
         get 'insurance-company' => 'error#not_found', as: :insurance_company_application

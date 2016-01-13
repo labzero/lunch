@@ -401,15 +401,27 @@ RSpec.describe ResourcesController, type: :controller do
     end
   end
 
-  describe 'membership actions' do
-    [:membership_overview, :membership_application].each do |action|
-      describe "GET #{action.to_s}" do
-        it_behaves_like 'a user required action', :get, action
-        it 'should render the guides view' do
-          get action
-          expect(response.body).to render_template(action.to_s)
-        end
-      end
+  RSpec.shared_examples 'a resource membership action' do |action|
+    it_behaves_like 'a user required action', :get, action
+    it "should render the #{action.to_s} view" do
+      get action
+      expect(response.body).to render_template(action.to_s)
+    end
+  end
+
+  describe 'GET :membership_overview' do
+    it_behaves_like 'a resource membership action', :membership_application
+  end
+
+  describe 'GET :membership_application' do
+    it_behaves_like 'a resource membership action', :membership_application
+  end
+
+  describe 'GET :commercial_application' do
+    it_behaves_like 'a resource membership action', :commercial_application
+    it 'sets @form_ids to the proper value' do
+      get :commercial_application
+      expect(assigns[:form_ids]).to eq(ResourcesController::APPLICATION_FORM_IDS[:commercial])
     end
   end
   

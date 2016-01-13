@@ -1,5 +1,14 @@
 class ResourcesController < ApplicationController
   include CustomFormattingHelper
+
+  APPLICATION_FORM_IDS = {
+    commercial: {
+      required: [2093, 2094, 2090, 2091, 2065, 2089, 2104, 2290],
+      requested: [2117, 2136, 2160],
+      optional: [1694, 1973, 1465, 2228],
+      access: [2066, 2067, 2153, 2068, 2070, 2109, 2108]
+    }
+  }.freeze
   
   # GET
   def guides
@@ -464,6 +473,11 @@ class ResourcesController < ApplicationController
 
   # GET
   def membership_application
+  end
+
+  # GET
+  def commercial_application
+    @form_ids = APPLICATION_FORM_IDS[:commercial]
   end
   
   private

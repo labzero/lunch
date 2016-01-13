@@ -2,6 +2,7 @@ module ContactInformationHelper
 
   WEB_SUPPORT_EMAIL = 'websupport@fhlbsf.com'
   MPF_SUPPORT_EMAIL = 'mpf@fhlbsf.com'
+  MEMBERSHIP_EMAIL = 'membership@fhlbsf.com'
   WEB_SUPPORT_PHONE_NUMBER = '4156162610'
   SERVICE_DESK_PHONE_NUMBER = '8004443452'
   OPERATIONS_PHONE_NUMBER = '4156162559'
@@ -13,6 +14,10 @@ module ContactInformationHelper
 
   def mpf_support_email
     "mailto:#{MPF_SUPPORT_EMAIL}"
+  end
+
+  def membership_email
+    "mailto:#{MEMBERSHIP_EMAIL}"
   end
 
   def web_support_phone_number

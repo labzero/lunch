@@ -1,0 +1,23 @@
+- required_form_ids ||= []
+- requested_form_ids ||= []
+- optional_form_ids ||= []
+- access_form_ids ||= []
+%h2= t('resources.membership.forms.required.heading')
+%p= t('resources.membership.forms.required.intro')
+%ul
+  - required_form_ids.each do |id|
+    = render 'application_form_list_item', form_id: id
+%h2= t('resources.membership.forms.requested.heading')
+%p= t('resources.membership.forms.requested.intro')
+%ul
+  - requested_form_ids.each do |id|
+    = render 'application_form_list_item', form_id: id
+%h2= t('resources.membership.forms.optional.heading')
+%p= t('resources.membership.forms.optional.intro')
+%ul
+  - optional_form_ids.each do |id|
+    = render 'application_form_list_item', form_id: id
+%p= t('resources.membership.forms.optional.access_html', url: 'https://member.fhlbsf.com/member/ps/forms/authorize/sig_card_instr.aspx')
+%ul
+  - access_form_ids.each do |id|
+    = render 'application_form_list_item', form_id: id

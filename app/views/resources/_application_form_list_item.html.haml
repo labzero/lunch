@@ -1,0 +1,13 @@
+%li
+  -if form_id == 1973
+    %strong= t("resources.membership.forms.id_1973.title")
+    %p= t("resources.membership.forms.id_1973.description_html", url: membership_email)
+  - else
+    = link_to_download_resource(t("resources.membership.forms.id_#{form_id.to_s}.title"), resources_download_path(file: :"form_#{form_id.to_s}"))
+    - case form_id
+    - when 2104
+      %p= t("resources.membership.forms.id_#{form_id.to_s}.description_html", url: membership_email)
+    - when 2136
+      %p= t("resources.membership.forms.id_#{form_id.to_s}.description_html", download_link: link_to_download_resource(t('resources.membership.forms.id_2135.title'), resources_download_path(file: :form_2135)))
+    - else
+      %p= t("resources.membership.forms.id_#{form_id.to_s}.description")
