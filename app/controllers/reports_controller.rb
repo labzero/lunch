@@ -137,6 +137,8 @@ class ReportsController < ApplicationController
 
   DOWNLOAD_FORMATS = [:pdf, :xlsx].freeze
 
+  ACCOUNT_TYPE_MAPPING = {'U' => I18n.t('reports.pages.securities_position.unpledged'), 'P' => I18n.t('reports.pages.securities_position.pledged')}.freeze
+
   before_action do
     @member_name = current_member_name
   end
@@ -1008,15 +1010,20 @@ class ReportsController < ApplicationController
   end
 
   def current_securities_position
+    @report_name = t('reports.pages.securities_position.current')
     @securities_filter = params['securities_filter'] || 'all'
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    if report_disabled?(CURRENT_SECURITIES_POSITION_WEB_FLAG)
-      @current_securities_position = {securities:[]}
-    else
-      @current_securities_position = member_balances.current_securities_position(@securities_filter)
-      raise StandardError, "There has been an error and ReportsController#current_securities_position has encountered nil. Check error logs." if @current_securities_position.nil?
+    report_download_name = "current-securities-position-#{@securities_filter}"
+    downloadable_report(nil, {securities_filter: params['securities_filter']}, report_download_name) do
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      if report_disabled?(CURRENT_SECURITIES_POSITION_WEB_FLAG)
+        @current_securities_position = {securities:[]}
+      else
+        @current_securities_position = member_balances.current_securities_position(@securities_filter)
+        raise StandardError, "There has been an error and ReportsController#current_securities_position has encountered nil. Check error logs." if @current_securities_position.nil?
+      end
+      securities_instance_variables(@current_securities_position, @securities_filter)
+      @current_securities_position[:securities] = format_securities_detail(@current_securities_position[:securities])
     end
-    securities_instance_variables(@current_securities_position, @securities_filter)
   end
 
   def monthly_securities_position
@@ -1036,6 +1043,7 @@ class ReportsController < ApplicationController
       raise StandardError, "There has been an error and ReportsController#monthly_securities_position has encountered nil. Check error logs." if @monthly_securities_position.nil?
     end
     securities_instance_variables(@monthly_securities_position, @securities_filter)
+    @monthly_securities_position[:securities] = format_securities_detail(@monthly_securities_position[:securities])
   end
 
   def forward_commitments
@@ -1448,6 +1456,14 @@ class ReportsController < ApplicationController
         break
       end
     end
+    @report_download_column_headings = [
+      t('common_table_headings.custody_account_number'), t('reports.pages.securities_position.custody_account_type'), t('reports.pages.securities_position.security_pledge_type'),
+      t('common_table_headings.cusip'), t('common_table_headings.security_description'), t('reports.pages.securities_position.reg_id'),
+      t('common_table_headings.pool_number'), t('common_table_headings.coupon_rate'), t('common_table_headings.maturity_date'),
+      t('common_table_headings.original_par_value'), t('reports.pages.securities_position.factor'), t('reports.pages.securities_position.factor_date'),
+      t('common_table_headings.current_par'), t('common_table_headings.price'), t('common_table_headings.price_date'),
+      t('reports.pages.securities_position.market_value')
+    ]
   end
 
   def report_disabled?(report_flags)
@@ -1571,5 +1587,116 @@ class ReportsController < ApplicationController
     else
       yield
     end
+  end
+
+  def format_securities_detail(securities)
+    securities.each do |security|
+      security[:position_detail] = [
+        [
+          [
+            {
+              heading: t('common_table_headings.custody_account_number'),
+              value: security[:custody_account_number] || t('global.missing_value'),
+              raw_value: security[:custody_account_number]
+            },
+            {
+              heading: t('reports.pages.securities_position.custody_account_type'),
+              value: ACCOUNT_TYPE_MAPPING[security[:custody_account_type]] || security[:custody_account_type] || t('global.missing_value'),
+              raw_value: ACCOUNT_TYPE_MAPPING[security[:custody_account_type]] || security[:custody_account_type]
+            },
+            {
+              heading: t('reports.pages.securities_position.security_pledge_type'),
+              value: security[:security_pledge_type] || t('global.missing_value'),
+              raw_value: security[:security_pledge_type]
+            }
+          ],
+          [
+            {
+              heading: t('common_table_headings.cusip'),
+              value: security[:cusip] || t('global.missing_value'),
+              raw_value: security[:cusip]
+            },
+            {
+              heading: t('common_table_headings.security_description'),
+              value: security[:description] || t('global.missing_value'),
+              raw_value: security[:description]
+            }
+          ],
+          [
+            {
+              heading: t('reports.pages.securities_position.reg_id'),
+              value: security[:reg_id] || t('global.missing_value'),
+              raw_value: security[:reg_id]
+            },
+            {
+              heading: t('common_table_headings.pool_number'),
+              value: security[:pool_number] || t('global.missing_value'),
+              raw_value: security[:pool_number]
+            },
+            {
+              heading: t('common_table_headings.coupon_rate'),
+              value: fhlb_formatted_percentage(security[:coupon_rate], 3),
+              raw_value: security[:coupon_rate]
+            }
+          ],
+          [
+            {
+              heading: t('common_table_headings.maturity_date'),
+              value: fhlb_date_standard_numeric(security[:maturity_date]),
+              raw_value: security[:maturity_date],
+              type: :date
+            },
+            {
+              heading: t('common_table_headings.original_par_value'),
+              value: fhlb_formatted_currency(security[:original_par], force_unit: true, precision: 2),
+              raw_value: security[:original_par]
+            }
+          ]
+        ],
+        [
+          [
+            {
+              heading: t('reports.pages.securities_position.factor'),
+              value: fhlb_formatted_percentage(security[:factor], 8),
+              raw_value: security[:factor]
+            },
+            {
+              heading: t('reports.pages.securities_position.factor_date'),
+              value: fhlb_date_standard_numeric(security[:factor_date]),
+              raw_value: security[:factor_date],
+              type: :date
+            }
+          ],
+          [
+            {
+              heading: t('common_table_headings.current_par'),
+              value: fhlb_formatted_currency(security[:current_par], force_unit: true, precision: 2),
+              raw_value: security[:current_par]
+            }
+          ],
+          [
+            {
+              heading: t('common_table_headings.price'),
+              value: fhlb_formatted_currency(security[:price], force_unit: true,  precision: 2),
+              raw_value: security[:price]
+            },
+            {
+              heading: t('common_table_headings.price_date'),
+              value: fhlb_date_standard_numeric(security[:price_date]),
+              raw_value: security[:price_date],
+              type: :date
+            }
+          ],
+          [
+            {
+              heading: t('reports.pages.securities_position.market_value'),
+              value: fhlb_formatted_currency(security[:market_value], force_unit: true, precision: 2),
+              raw_value: security[:market_value]
+            }
+          ]
+        ]
+      ]
+    end
+    securities
   end
 end
