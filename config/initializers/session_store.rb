@@ -1,3 +1,7 @@
+require_relative Rails.root.join('lib', 'redis-sessions', 'store')
+require_relative Rails.root.join('lib', 'redis-sessions', 'marshalling')
+require_relative Rails.root.join('lib', 'redis-sessions', 'namespace')
+
 ENV['SESSION_REDIS_URL'] ||= if ENV['REDIS_URL']
   RedisHelper.add_url_namespace(ENV['REDIS_URL'], 'session')
 else
