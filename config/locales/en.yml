@@ -908,6 +908,130 @@ en:
           eligibility_requirements: Once we receive the regulatory examination report and the application is deemed complete, we determine whether your institution meets all of the statutory and regulatory eligibility requirements and underwriting review standards for membership.
           notification: We notify your institution of approval or denial of your membership application within 60 days after the application is deemed complete.
           approval: When your institution is approved for membership, your institution will wire your stock purchase requirement amount, as calculated on the Applicant’s Bank Stock Calculation worksheet, to your newly opened Settlement/Transaction Account.
+      commercial:
+        title: Commercial Banks, Savings Institutions, and Industrial Loan Companies
+      forms:
+        required:
+          heading: Required Forms and Agreements
+          intro: The following forms and agreements are required to process your membership application.
+        requested:
+          heading: Requested Agreements and Forms
+          intro: The following agreements and forms are not required to apply for membership in the Bank, but are needed to conduct business with the Bank. We request that you submit these signed and dated agreements and forms with your application. These documents will become effective if and when your institution is approved for membership. Please date the documents as of the day they are executed.
+        optional:
+          heading: Optional Agreements and Forms
+          intro: The following agreements and forms are not required to apply for membership in the Bank, but may be needed to conduct certain transactions with the Bank. You may sign and date the forms and include them with your membership application. They will become effective if and when your institution is approved for membership.
+          access_html: "The following forms are used to provide access to individuals who are not already authorized to conduct business with the Bank on the Resolution and Authorization: Member Transactions. Please refer to the <a href=%{url}>Instructions</a> for completing the Certificate of Designated Persons forms."
+        id_1465:
+          title: "Letter of Credit Reimbursement Agreement (FC 1465)"
+          description: "This agreement is required if your institution chooses to enter into standby letter of credit transactions with the Bank."
+        id_1694:
+          title: "Safekeeping Agreement (FC 1694)"
+          description: "This agreement is required for institutions that pledge securities as collateral. It establishes a securities custody account with the Bank."
+        id_1973:
+          title: "ISDA Master Agreement (1992, second printing)/Schedule to the Master Agreement (FC 1973)"
+          description_html: "These documents are required for institutions that want to enter into derivatives transactions with the Bank and must be signed by one or more authorized officers of your institution (as indicated on the Resolution and Authorization: Member Transactions) at the level of vice president or higher. These documents are available in hard copy only. Please e-mail <a href=%{url}>membership@fhlbsf.com</a> for this agreement."
+        id_2065:
+          title: "Resolution and Authorization: Member Transactions (FC 2065)"
+          description: "This resolution must be adopted by your institution’s board of directors and signed by your Corporate Secretary. It is the primary form on which you specify individuals who are authorized to execute all types of transactions with the Bank, except for wires."
+        id_2066:
+          title: "Certificate of Designated Persons—Entire Authority (FC 2066)"
+          description: "This form permits the individuals designated on the Resolution and Authorization to authorize additional officers, employees, or agents of your institution to engage in all transactions with the Bank, except for wires, and to provide instructions regarding all securities-related transactions."
+        id_2067:
+          title: "Certificate of Designated Persons—Advances (FC 2067)"
+          description: "This form authorizes the designated individuals listed to execute advances, letters of credit, lines of credit, and other similar extensions of credit with the Bank."
+        id_2068:
+          title: "Certificate of Designated Persons—Collateral (FC 2068)"
+          description: "This form authorizes the designated individuals listed to engage in collateral transactions with the Bank. Employees listed on this form are authorized to provide instructions regarding the pledging and de-pledging of securities but are not authorized to provide instructions regarding securities held in safekeeping (except to pledge those securities)."
+        id_2070:
+          title: "Certificate of Designated Persons—Interest Rate Derivatives (FC 2070)"
+          description: "This form authorizes the designated individuals listed to engage in interest rate derivative transactions with the Bank."
+        id_2089:
+          title: "Calculation of 10% Requirement: Commercial Banks, Savings Institutions, and Industrial Loan Companies (FC 2089)"
+          description: "This worksheet is only required for institutions with average total assets for the preceding three-year period of $1,123 million or greater (as of January 1, 2015; subject to annual adjustment). This worksheet helps you determine whether your institution has at least 10% of total assets in residential mortgage loans, a statutory eligibility requirement for membership."
+        id_2090:
+          title: "Certificate of Applicant (FC 2090)"
+          description: "This document must be completed and signed by the person(s) authorized in the Resolution: Membership."
+        id_2091:
+          title: "Resolution: Membership/Counsel Certification (FC 2091)"
+          description: "This resolution must be adopted by your institution’s board of directors, and the Resolution: Membership must be completed and signed by your institution’s Corporate Secretary. The Counsel Certification is a requirement for membership and must be signed by your institution’s legal counsel."
+        id_2093:
+          title: "Membership Application: Forms and Exhibits Checklist: Commercial Banks, Savings Institutions, and Industrial Loan Companies (FC 2093)"
+          description: "This checklist identifies all of the forms, agreements, and exhibits that must be returned to the Bank with your application."
+        id_2094:
+          title: "Applicant Information: Commercial Banks, Savings Institutions, and Industrial Loan Companies (FC 2094)"
+          description: This form provides basic information about your institution.
+        id_2099:
+          title:
+          description:
+        id_2104:
+          title: "Applicant’s Bank Stock Calculation: Commercial Banks, Savings Institutions, and Industrial Loan Companies (FC 2104)"
+          description_html: "This worksheet helps you calculate the amount of Bank capital stock your institution must purchase to become a member. Please e-mail <a href=%{url}>membership@fhlbsf.com</a> if you want the Bank to prepare an estimate of the Initial Stock Purchase Requirement. The estimate will be based on the most recent financial information available to the Bank, which may lag current data by a quarter."
+        id_2108:
+          title: "Certificate of Designated Persons—Wire Transfer Services (FC 2108)"
+          description: "This form authorizes the designated individuals listed to conduct offline funds transactions by telephone. The signer listed on this form must be listed as an authorized individual on the Resolution and Authorization."
+        id_2109:
+          title: "Certificate of Designated Persons—Securities Services (FC 2109)"
+          description: "This form authorizes the designated individuals listed to move securities to and from their unpledged account (safekeeping account). Employees listed on this form are authorized to provide instructions regarding the purchase and sale of unpledged securities, but are not authorized to pledge or de-pledge securities."
+        id_2112:
+          title:
+          description:
+        id_2117:
+          title: "Advances and Security Agreement (FC 2117)"
+          description: "This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization."
+        id_2127:
+          title:
+          description:
+        id_2135:
+          title: "Settlement/Transaction Account Terms and Conditions (FC 2135)"
+          description:
+        id_2136:
+          title: "Settlement/Transaction Account Agreement (FC 2136)"
+          description_html: "This agreement defines the account relationship between your institution and the Bank. Review the %{download_link} before signing this agreement."
+        id_2138:
+          title:
+          description:
+        id_2139:
+          title:
+          description:
+        id_2153:
+          title: "Certificate of Designated Persons—Affordable Housing Program (FC 2153)"
+          description: "This form authorizes the designated individuals listed to exercise authority under the Bank’s Affordable Housing Program and any other community investment programs, excluding extensions of credit related to these programs."
+        id_2160:
+          title: "Website Access Manager Set-Up (FC 2160)"
+          description: "This form identifies your institution’s Access Manager(s), who will add and delete users, reset passwords, and lock or unlock website access accounts for individuals at your institution."
+        id_2170:
+          title:
+          description:
+        id_2171:
+          title:
+          description:
+        id_2177:
+          title:
+          description:
+        id_2178:
+          title:
+          description:
+        id_2228:
+          title: "eTransact: SecurID Token Application (FC 2228)"
+          description: "This form must be completed by each individual who needs access to eTransact, the Bank's secure online transaction service."
+        id_2290:
+          title: "Authorization to Release Records: Arizona (FC 2290)"
+          description: "This authorization is for Arizona institutions only. This form authorizes the Bank to obtain records and information, including examination reports, about your institution from the Arizona Department of Financial Institutions."
+        id_2345:
+          title:
+          description:
+        id_2346:
+          title:
+          description:
+        id_2347:
+          title:
+          description:
+        id_2348:
+          title:
+          description:
+        id_2349:
+          title:
+          description:
   securities:
     title: Securities
     redirect:
