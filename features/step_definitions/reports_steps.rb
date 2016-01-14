@@ -20,8 +20,12 @@ Then(/^I should see "([^"]*)" in the reports dropdown$/) do |report|
   page.find('.nav-dropdown li', text: /\A#{Regexp.quote(report)}\z/)
 end
 
-When(/^the "(.*?)" table has no data$/) do |report|
+When(/^the "(.*?)" report has no data$/) do |report|
   # placeholder step for now in case we implement turning off data for certain reports during testing
+end
+
+When(/^the "(.*?)" table has no data$/) do |report|
+  # placeholder step for now in case we implement turning off data for certain sections of reports during testing
 end
 
 When(/^the "(.*?)" report has been disabled$/) do |report|
@@ -542,4 +546,12 @@ Then(/^I should see a dividend summary for the last option in the dividend trans
   page.find('.dropdown-selection').click
   text = page.find('.dropdown li:last-child').text
   page.assert_selector('.table-dividend-summary tr:first-child td:last-child', text: text)
+end
+
+Then(/^I should see the has no data state for the Securities Services Monthly Statement$/) do
+  page.assert_selector('p', text: I18n.t('reports.pages.securities_services_statement.data_unavailable'), exact: true)
+  page.assert_no_selector('.report-header-buttons')
+  page.assert_no_selector('.report-inputs')
+  page.assert_no_selector('.securities-services-table-wrapper')
+  page.assert_no_selector('.report-summary-data')
 end

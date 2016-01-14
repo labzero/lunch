@@ -834,18 +834,23 @@ class ReportsController < ApplicationController
     member_balances = MemberBalanceService.new(current_member_id, request)
     @report_name = t('reports.securities.services_monthly.title')
 
-    available_reports      = member_balances.securities_services_statements_available
-    @dropdown_options      = available_reports.map{ |entry| [entry['month_year'], entry['report_end_date']] }
-    @start_date            = params[:start_date].try(:to_date) || @dropdown_options[0][1]
-    @dropdown_options_text = @dropdown_options.find{ |option| option[1] == @start_date }.try(:first)
+    available_reports = member_balances.securities_services_statements_available
+    if available_reports.empty?
+      @data_available = false
+    else
+      @data_available        = true
+      @dropdown_options      = available_reports.map{ |entry| [entry['month_year'], entry['report_end_date']] }
+      @start_date            = params[:start_date].try(:to_date) || @dropdown_options[0][1]
+      @dropdown_options_text = @dropdown_options.find{ |option| option[1] == @start_date }.try(:first)
 
-    report_download_name = "securities-services-monthly-statement-#{fhlb_report_date_numeric(@start_date)}"
-    downloadable_report(:pdf, {start_date: params[@start_date]}, report_download_name) do
-      if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
-        @statement = {}
-      else
-        @statement = member_balances.securities_services_statement(@start_date)
-        raise StandardError, "There has been an error and ReportsController#securities_services_statement has encountered nil. Check error logs." if @statement.nil?
+      report_download_name = "securities-services-monthly-statement-#{fhlb_report_date_numeric(@start_date)}"
+      downloadable_report(:pdf, {start_date: params[@start_date]}, report_download_name) do
+        if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
+          @statement = {}
+        else
+          @statement = member_balances.securities_services_statement(@start_date)
+          raise StandardError, "There has been an error and ReportsController#securities_services_statement has encountered nil. Check error logs." if @statement.nil?
+        end
       end
     end
   end

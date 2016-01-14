@@ -53,23 +53,22 @@ describe MAPI::Shared::Utils::ClassMethods do
       allow(cursor).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
       expect(subject.fetch_hashes(logger, sql)).to eq( [hash1, hash2, hash3] )
     end
-
     it 'handles the map_values parameter properly' do
       allow(cursor).to receive(:fetch_hash).and_return(hash4, hash5, hash6, nil)
       expect(subject.fetch_hashes(logger, sql, {to_i: %w(A B C)})).to eq( [hash7, hash7, hash7] )
     end
-
     it 'should honour the downcase_keys argument' do
       allow(cursor).to receive(:fetch_hash).and_return({ 'A' => hash1}, { 'B' => hash2}, {'C' => hash3}, nil)
       expect(subject.fetch_hashes(logger, sql, {}, true)).to eq([{'a' => hash1}, {'b' => hash2}, {'c' => hash3}])
     end
-
     it 'should handle both the map_keys and downcase_keys arguments properly' do
-
       allow(cursor).to receive(:fetch_hash).and_return(hash4, hash5, hash6, nil)
       expect(subject.fetch_hashes(logger, sql, {to_i: %w(A B C)}, true)).to eq([hash8, hash8, hash8])
     end
-
+    it 'returns an empty array if the SQL query yields no results' do
+      allow(cursor).to receive(:fetch_hash).and_return(nil)
+      expect(subject.fetch_hashes(logger, sql, {}, true)).to eq([])
+    end
     it 'logs an error for exceptions' do
       allow(cursor).to receive(:fetch_hash).and_raise(:exception)
       expect(logger).to receive(:error)
