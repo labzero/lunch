@@ -116,7 +116,7 @@ describe MAPI::Shared::Utils::ClassMethods do
     it 'converts a decimal rate to a percentage rate' do
       rate = double('A Rate')
       allow(rate).to receive(:to_f).and_return(rate)
-      expect(rate).to receive(:round).with(5).and_return(rate).ordered
+      expect(rate).to receive(:round).with(7).and_return(rate).ordered
       expect(rate).to receive(:*).with(100.0).ordered
       subject.decimal_to_percentage_rate(rate)
     end
