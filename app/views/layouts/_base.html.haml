@@ -1,4 +1,5 @@
 - header_template ||= 'layouts/header'
+- footer_template ||= 'layouts/footer'
 - inline_styles ||= false
 - skip_javascript ||= false
 - css_manifest ||= 'application'
@@ -29,5 +30,5 @@
             .flyout-close-button.icon-close-before
           .flyout-bottom-section
     .flyout-background
-    %footer.page-footer= render 'layouts/footer'
+    %footer.page-footer= render footer_template
     = render 'layouts/tracking'

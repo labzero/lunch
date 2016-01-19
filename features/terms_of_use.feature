@@ -5,6 +5,6 @@ Feature: Viewer visits the Terms of Use Page
 
 @jira-mem-674
 Scenario: View terms of use page
-  Given I am logged out
+  Given I am logged in
   When I visit the terms of use page
   Then I see the terms of use
