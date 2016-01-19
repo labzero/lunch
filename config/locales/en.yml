@@ -1422,6 +1422,7 @@ en:
         footer: 'Total amount to be debited from Settlement/Transaction Account No. %{account_number} as of %{date}:'
         freshness: This statement reflects fees for the prior month and is posted approximately 5 to 7 days before the debit date, which is the last business day of the month.
         availability: Statements are available for the previous 18 months.
+        data_unavailable: You have no Securities Services Monthly Statement for the last 18 months.
         tables:
           maintenance: Monthly Account Maintenance Fee
           securities: Monthly Securities Fees

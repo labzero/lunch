@@ -27,12 +27,18 @@ Scenario: The Securities Services Monthly Statement report should be for Dec 31,
   Then I should see a report for "December 31, 2014"
 
 @data-unavailable @jira-mem-536
-Scenario: No data is available to show in the Securities Services Statement
+Scenario: No data is available to show in spefic sections of the Securities Services Statement
   Given I am on the "Securities Services Monthly Statement" report page
   When the "Dividend Summary" table has no data
   Then I should see a "Dividend Summary" report table with all data missing
   When the "Dividend Details" table has no data
   Then I should see the "Dividend Details" report table with Data Unavailable messaging
+
+@data-unavailable @jira-mem-1309
+Scenario: No data at all is available for the Securities Services Statement
+  Given I am on the "Securities Services Monthly Statement" report page
+  When the "Securities Services Monthly Statement" report has no data
+  Then I should see the has no data state for the Securities Services Monthly Statement
 
 @data-unavailable @jira-mem-536
 Scenario: The Securities Services Statement has been disabled

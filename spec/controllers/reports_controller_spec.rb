@@ -587,38 +587,51 @@ RSpec.describe ReportsController, :type => :controller do
       let(:report_end_date) { double( 'report_end_date' ) }
       let(:month_year) { double( 'month_year' ) }
       let(:start_date_param) { Date.today - rand(10000) }
-      before do
-        allow(member_balance_service_instance).to receive(:securities_services_statements_available).and_return([{'month_year' => month_year, 'report_end_date' => report_end_date}])
-        allow(member_balance_service_instance).to receive(:securities_services_statement).with(report_end_date).and_return([response_hash])
-        allow(response_hash).to receive(:[]).with(:securities_fees).and_return([{}])
-        allow(response_hash).to receive(:[]).with(:transaction_fees).and_return([{}])
-      end
-      it_behaves_like 'a user required action', :get, :securities_services_statement
-      it_behaves_like 'a report with instance variables set in a before_filter', :securities_services_statement
-      it_behaves_like 'a report that can be downloaded', :securities_services_statement, [:pdf]
-      it 'should set @start_date to the `report_end_date` attribute of the first entry of hash returned by securities_services_statements_available' do
-        make_request
-        expect(assigns[:start_date]).to eq(report_end_date)
-      end
-      it 'should assign `@statement` to the result of calling MemberBalanceService.securities_services_statement' do
-        make_request
-        expect(assigns[:statement]).to eq([response_hash])
-      end
-      it 'should raise an error if @statement is nil' do
-        expect(member_balance_service_instance).to receive(:securities_services_statement).and_return(nil)
-        expect{make_request}.to raise_error(StandardError)
-      end
-      describe 'with the report disabled' do
+      describe 'when statements are available' do
         before do
-          allow(controller).to receive(:report_disabled?).with(ReportsController::SECURITIES_SERVICES_STATMENT_WEB_FLAGS).and_return(true)
+          allow(member_balance_service_instance).to receive(:securities_services_statements_available).and_return([{'month_year' => month_year, 'report_end_date' => report_end_date}])
+          allow(member_balance_service_instance).to receive(:securities_services_statement).with(report_end_date).and_return([response_hash])
+          allow(response_hash).to receive(:[]).with(:securities_fees).and_return([{}])
+          allow(response_hash).to receive(:[]).with(:transaction_fees).and_return([{}])
         end
-        it 'should set @statement to {} if the report is disabled' do
-          make_request
-          expect(assigns[:statement]).to eq({})
-        end
-        it 'should set @start_date if the report is disabled' do
+        it_behaves_like 'a user required action', :get, :securities_services_statement
+        it_behaves_like 'a report with instance variables set in a before_filter', :securities_services_statement
+        it_behaves_like 'a report that can be downloaded', :securities_services_statement, [:pdf]
+        it 'should set @start_date to the `report_end_date` attribute of the first entry of hash returned by securities_services_statements_available' do
           make_request
           expect(assigns[:start_date]).to eq(report_end_date)
+        end
+        it 'should assign `@statement` to the result of calling MemberBalanceService.securities_services_statement' do
+          make_request
+          expect(assigns[:statement]).to eq([response_hash])
+        end
+        it 'assigns @data_available a value of true' do
+          make_request
+          expect(assigns[:data_available]).to eq(true)
+        end
+        it 'should raise an error if @statement is nil' do
+          expect(member_balance_service_instance).to receive(:securities_services_statement).and_return(nil)
+          expect{make_request}.to raise_error(StandardError)
+        end
+        describe 'with the report disabled' do
+          before do
+            allow(controller).to receive(:report_disabled?).with(ReportsController::SECURITIES_SERVICES_STATMENT_WEB_FLAGS).and_return(true)
+          end
+          it 'should set @statement to {} if the report is disabled' do
+            make_request
+            expect(assigns[:statement]).to eq({})
+          end
+          it 'should set @start_date if the report is disabled' do
+            make_request
+            expect(assigns[:start_date]).to eq(report_end_date)
+          end
+        end
+      end
+      describe 'when no statements are available' do
+        before { allow(member_balance_service_instance).to receive(:securities_services_statements_available).and_return([]) }
+        it 'assigns @data_available a value of false' do
+          make_request
+          expect(assigns[:data_available]).to eq(false)
         end
       end
     end
