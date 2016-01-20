@@ -236,14 +236,15 @@ $(function () {
   };
 
   function snapToValidDate(e, picker, options){
-    //  if date is beyond maxDate, snap to maxDate
+    //  snap to maxDate or minDate if date is out of range
     var maxDate = moment(options.maxDate);
+    var minDate = moment(options.minDate);
     var today = moment(options.today);
     var thisMonth = moment().month();
     var $el = $(e.target);
     var date = moment($el.val());
-    if (date > maxDate) {
-      date = maxDate;
+    if (date > maxDate || date < minDate) {
+      date = date > maxDate ? maxDate : minDate;
       options.singleDatePicker ? picker.setEndDate(date.format('MM/DD/YYYY')) : null;
       $el.val(date.format('MM/DD/YYYY'));
     } else if (options.singleDatePicker) {

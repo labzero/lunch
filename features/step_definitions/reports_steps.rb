@@ -555,3 +555,7 @@ Then(/^I should see the has no data state for the Securities Services Monthly St
   page.assert_no_selector('.securities-services-table-wrapper')
   page.assert_no_selector('.report-summary-data')
 end
+
+Then(/^I should see a Capital Stock Trial Balance report for January 1, 2002$/) do
+  page.assert_selector('.report-summary-date', text: "January 1, 2002", exact: true, count: 2)
+end
