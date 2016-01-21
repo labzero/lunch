@@ -1,5 +1,8 @@
 .privacy-policy-page {
   @extend %info-page-style;
+  small {
+    text-transform: uppercase;
+  }
 }
 
 .terms-of-use-page {
