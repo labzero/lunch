@@ -194,3 +194,16 @@ namespace :cluster do
     end
   end
 end
+
+namespace :stats do
+  desc 'Runs the stats:extranet_logins rake task on the db primary'
+  task :extranet_logins do
+    on primary(:db) do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          execute :rake, "stats:extranet_logins"
+        end
+      end
+    end
+  end
+end
