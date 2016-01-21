@@ -1338,8 +1338,14 @@ td.dataTables_empty {
     }
   }
   .standard-credit-borrowing-capacity-tables .report-parent-table {
+    td, th {
+      white-space: normal;
+    }
+    th:first-child {
+      width: 180px;
+    }
     th:last-child {
-      width: 80px;
+      text-align: right;
     }
   }
   .report-print-footer {
