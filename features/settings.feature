@@ -174,5 +174,3 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
     When I enter a new valid password in the password confirmation field
     And I focus on the new password field
     Then I should not see a password match error
-    When I submit the form
-    Then I should not see an error flash
