@@ -110,6 +110,7 @@ en:
     all_transactions: All Transactions
     footnote_indicator: '*'
     attachments: Attachments
+    unknown: Unknown
     dates:
       1_day: 1 day
       1_month: 1 mo

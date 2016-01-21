@@ -742,6 +742,25 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`extranet_logins` class method' do
+    let!(:user_intranet_nosignin) { FactoryGirl.create(:user, username: 'user_intranet_nosignin', ldap_domain: 'intranet') }
+    let!(:user_intranet_signin) { FactoryGirl.create(:user, username: 'user_intranet_signin', ldap_domain: 'intranet', sign_in_count: rand(1..10)) }
+    let!(:user_extranet_nosignin) { FactoryGirl.create(:user, username: 'user_extranet_nosignin', ldap_domain: 'extranet') }
+    let!(:user_extranet_signin) { FactoryGirl.create(:user, username: 'user_extranet_signin', ldap_domain: 'extranet', sign_in_count: rand(1..10)) }
+    let(:call_method) { described_class.extranet_logins }
+
+    it 'returns extranet users who have at least one login' do
+      expect(call_method).to include(user_extranet_signin)
+    end
+    it 'does not return users who are not in the extranet domain' do
+      expect(call_method).to_not include(user_intranet_nosignin, user_intranet_signin)
+    end
+    it 'does not return users who are in the extranet domain but have never signed in' do
+      expect(call_method).to_not include(user_extranet_nosignin)
+    end
+
+  end
+
   describe '`member_id` method' do
     let(:call_method) { subject.member_id }
     let(:member_id_instance_variable) { double('@member_id') }

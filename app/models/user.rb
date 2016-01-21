@@ -223,6 +223,10 @@ class User < ActiveRecord::Base
     record
   end
 
+  def self.extranet_logins
+    where(ldap_domain: 'extranet').where(['sign_in_count > 0'])
+  end
+
   def after_ldap_authentication(new_ldap_domain)
     self.update_attribute(:ldap_domain, new_ldap_domain) if self.ldap_domain.nil?
   end
