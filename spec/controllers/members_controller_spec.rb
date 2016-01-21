@@ -144,10 +144,7 @@ RSpec.describe MembersController, type: :controller do
 
   describe 'GET privacy_policy' do
     let (:make_request) { get :privacy_policy}
-    it_behaves_like 'a user not required action', :get, :privacy_policy
-    it 'uses the `external` layout' do
-      expect(make_request).to render_template('layouts/external')
-    end
+    it_behaves_like 'a user required action', :get, :privacy_policy
     it 'renders the view' do
       make_request
       expect(response.body).to render_template('privacy_policy')
@@ -156,10 +153,7 @@ RSpec.describe MembersController, type: :controller do
 
   describe 'GET terms_of_use' do
     let (:make_request) { get :terms_of_use}
-    it_behaves_like 'a user not required action', :get, :terms_of_use
-    it 'uses the `external` layout' do
-      expect(make_request).to render_template('layouts/external')
-    end
+    it_behaves_like 'a user required action', :get, :terms_of_use
     it 'renders the view' do
       make_request
       expect(response.body).to render_template('terms_of_use')
@@ -168,10 +162,7 @@ RSpec.describe MembersController, type: :controller do
 
   describe 'GET contact' do
     let (:make_request) { get :contact}
-    it_behaves_like 'a user not required action', :get, :contact
-    it 'uses the `external` layout' do
-      expect(make_request).to render_template('layouts/external')
-    end
+    it_behaves_like 'a user required action', :get, :contact
     it 'renders the view' do
       make_request
       expect(response.body).to render_template('contact')

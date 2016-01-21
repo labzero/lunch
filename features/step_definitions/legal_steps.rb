@@ -13,3 +13,11 @@ end
 Then /^I see the terms of use$/ do
   page.assert_selector('.terms-of-use-page h1', visible: true, text: I18n.t('global.terms_of_use'), exact: true)
 end
+
+When(/^I visit the contact page$/) do
+  visit '/contact'
+end
+
+Then /^I see the contact information for FHLB$/ do
+  page.assert_selector('.contact-page h1', visible: true, text: I18n.t('global.contact'), exact: true)
+end

@@ -5,6 +5,6 @@ Feature: Viewer visits the Privacy Policy Page
 
 @jira-mem-674
 Scenario: View privacy policy page
-  Given I am logged out
+  Given I am logged in
   When I visit the privacy policy page
   Then I see the privacy policy
