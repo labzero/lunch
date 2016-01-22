@@ -32,7 +32,8 @@ module MAPI
         DATE_FIELDS = %i(maturity_date factor_date price_date).freeze
 
         def self.securities_position(app, member_id, report_type, options = {custody_account_type:nil})
-          report_type = report_type.to_sym
+          original_report_type = report_type.to_sym
+          report_type = original_report_type == :managed ? :current : original_report_type
           if app.settings.environment == :production
             selection_string = "#{SECURITIES_QUERY_MAPPINGS[:as_of_date][report_type]}, #{SECURITIES_FIELD_MAPPINGS.collect{|key, value| value[report_type].to_s}.join(',')}"
             securities_query = <<-SQL
@@ -53,29 +54,44 @@ module MAPI
                 end
               }
             SQL
-            securities_cursor = ActiveRecord::Base.connection.execute(securities_query)
+            securities_cursor = ActiveRecord::Base.connection.execute(securities_query.strip.gsub(/\s+/, " "))
             securities = []
             while row = securities_cursor.fetch_hash()
               securities << row.with_indifferent_access
             end
-            return {as_of_date: nil, total_original_par: nil, total_current_par: nil, total_market_value: nil, securities:[]} if securities.blank?
             as_of_date = securities.first[SECURITIES_QUERY_MAPPINGS[:as_of_date][report_type]]
           else
             as_of_date = options[:end_date] ? options[:end_date].to_date : (Time.zone.today - 1.month).end_of_month
             securities = Private.fake_securities(member_id, as_of_date, report_type, options[:custody_account_type])
           end
 
-          total_original_par = securities.inject(0) {|sum, security| sum + security[SECURITIES_FIELD_MAPPINGS[:original_par][report_type].to_sym].to_f}
-          total_current_par = securities.inject(0) {|sum, security| sum + security[SECURITIES_FIELD_MAPPINGS[:current_par][report_type].to_sym].to_f}
-          total_market_value = securities.inject(0) {|sum, security| sum + security[SECURITIES_FIELD_MAPPINGS[:market_value][report_type].to_sym].to_f}
+          if original_report_type == :managed
+            securities = Private.format_securities(securities, :current)
 
-          {
-            as_of_date: (as_of_date.to_date if as_of_date),
-            total_original_par: total_original_par,
-            total_current_par: total_current_par,
-            total_market_value: total_market_value,
-            securities: Private.format_securities(securities, report_type)
-          }
+            # Placeholder fields that will eventually be added to Managed Securities.  Unsure yet if they will require
+            # an additional lookup, or if the SAFEKEEPING.SSK_INTRADAY_SEC_POSITION view will be updated to include
+            # the necessary fields
+            securities.each do |security|
+              %i(eligibility authorized_by borrowing_capacity).each do |field|
+                security[field] = nil
+              end
+            end
+            securities
+          else
+            return {as_of_date: nil, total_original_par: nil, total_current_par: nil, total_market_value: nil, securities:[]} if securities.blank?
+
+            total_original_par = securities.inject(0) {|sum, security| sum + security[SECURITIES_FIELD_MAPPINGS[:original_par][report_type].to_sym].to_f}
+            total_current_par = securities.inject(0) {|sum, security| sum + security[SECURITIES_FIELD_MAPPINGS[:current_par][report_type].to_sym].to_f}
+            total_market_value = securities.inject(0) {|sum, security| sum + security[SECURITIES_FIELD_MAPPINGS[:market_value][report_type].to_sym].to_f}
+
+            {
+              as_of_date: (as_of_date.to_date if as_of_date),
+              total_original_par: total_original_par,
+              total_current_par: total_current_par,
+              total_market_value: total_market_value,
+              securities: Private.format_securities(securities, report_type)
+            }
+          end
         end
 
         # private

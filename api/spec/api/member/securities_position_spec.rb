@@ -155,4 +155,69 @@ describe MAPI::ServiceApp do
       end
     end
   end
+
+  describe 'the managed_securities endpoint' do
+    let(:call_endpoint) { get "/member/#{MEMBER_ID}/managed_securities" }
+    let(:managed_securities_response) { double('result of `managed_securities`', to_json: nil) }
+    it 'calls the `managed_securities` method' do
+      expect(MAPI::Services::Member::SecuritiesPosition).to receive(:securities_position).and_return(managed_securities_response)
+      call_endpoint
+    end
+    it 'returns json' do
+      allow(MAPI::Services::Member::SecuritiesPosition).to receive(:securities_position).and_return(managed_securities_response)
+      expect(managed_securities_response).to receive(:to_json)
+      call_endpoint
+    end
+  end
+  describe 'the `securities_position` method with a report type of :managed' do
+    [:test, :production].each do |env|
+      describe "`current_securities_method` method in the #{env} environment" do
+        managed_security_fields = %i(eligibility authorized_by borrowing_capacity)
+        let(:managed_securities) { MAPI::Services::Member::SecuritiesPosition.securities_position(subject, MEMBER_ID, :managed) }
+        let(:securities) { JSON.parse(File.read(File.join(MAPI.root, 'spec', 'fixtures', 'securities.json'))) }
+        let(:securities_result_set) {double('Oracle Result Set', fetch_hash: nil)}
+
+        before do
+          allow(MAPI::ServiceApp).to receive(:environment).and_return(env)
+          if env == :production
+            allow(ActiveRecord::Base.connection).to receive(:execute).and_return(securities_result_set)
+            allow(securities_result_set).to receive(:fetch_hash).and_return(*(securities + [nil]))
+          else
+            allow(MAPI::Services::Member::SecuritiesPosition::Private).to receive(:fake_securities).and_return(securities)
+          end
+        end
+        if env == :production
+          it 'executes the proper SQL query' do
+            securities_query = <<-SQL
+              SELECT SSX_BTC_DATE, #{MAPI::Services::Member::SecuritiesPosition::SECURITIES_FIELD_MAPPINGS.collect{|key, value| value[:current].to_s}.join(',')}
+              FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
+              WHERE fhlb_id = #{MEMBER_ID}
+            SQL
+            expect(ActiveRecord::Base.connection).to receive(:execute).with(securities_query.strip.gsub(/\s+/, " ")).and_return(securities_result_set)
+            managed_securities
+          end
+        end
+        it 'formats the securities' do
+          expect(MAPI::Services::Member::SecuritiesPosition::Private).to receive(:format_securities).with(securities, :current).and_return([])
+          managed_securities
+        end
+        it 'returns an array of the formatted securities' do
+          formatted_securities = MAPI::Services::Member::SecuritiesPosition::Private.format_securities(securities, :current).each do |security|
+            managed_security_fields.each do |field|
+              security[field] = nil
+            end
+          end
+          expect(managed_securities).to eq(formatted_securities)
+        end
+        # TODO: Replace these tests with something more appropriate once we really have eligibility, authorized_by, and borrowing_capacity
+        managed_security_fields.each do |key|
+          it "returns an array of securities that each include the #{key} key" do
+            managed_securities.each do |security|
+              expect(security.keys).to include(key)
+            end
+          end
+        end
+      end
+    end
+  end
 end

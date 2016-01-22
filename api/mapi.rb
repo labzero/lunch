@@ -58,6 +58,7 @@ require_relative 'models/member_mortgage_collateral_update'
 require_relative 'models/fee_schedules'
 require_relative 'models/member_quick_advance_flag'
 require_relative 'models/member_quick_advance_request'
+require_relative 'models/member_managed_securities'
 
 require 'newrelic_rpm'
 NewRelic::Agent.add_instrumentation(File.join(__dir__, '..', 'lib', 'new_relic', 'instrumentation', '**', '*.rb')) if defined?(NewRelic::Agent)
