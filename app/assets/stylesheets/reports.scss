@@ -1325,8 +1325,13 @@ td.dataTables_empty {
   }
   .advances-details-report-table {
     td, th {
+      &.report-cell-narrow {
+        padding: 6px 6px;
+      }
       &:last-child {
         display: table-cell;
+        text-align: left;
+
       }
       br:first-of-type {
         content: ' ';
