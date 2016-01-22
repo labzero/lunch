@@ -42,4 +42,4 @@ Feature: Visiting the Capital Stock Trial Balance Report Page
     When I click the datepicker field
     And I write "01/01/1999" in the datepicker start input field
     And I click the datepicker apply button
-    Then I should see a Capital Stock Trial Balance report for January 1, 2002
+    Then I should see a report for "January 1, 2002"

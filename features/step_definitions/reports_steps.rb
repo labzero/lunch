@@ -530,7 +530,7 @@ When(/^I click on the securities services monthly statement dropdown selector$/)
 end
 
 Then(/^I should see a report for "(.*?)"$/) do |date|
-  page.assert_selector('.report-summary-date', text: date)
+  page.assert_selector('.report-summary-date', text: fhlb_date_long_alpha(date.to_date), exact: true)
 end
 
 When(/^I click on the last option in the dividend transaction dropdown selector$/) do
@@ -554,8 +554,4 @@ Then(/^I should see the has no data state for the Securities Services Monthly St
   page.assert_no_selector('.report-inputs')
   page.assert_no_selector('.securities-services-table-wrapper')
   page.assert_no_selector('.report-summary-data')
-end
-
-Then(/^I should see a Capital Stock Trial Balance report for January 1, 2002$/) do
-  page.assert_selector('.report-summary-date', text: "January 1, 2002", exact: true, count: 2)
 end
