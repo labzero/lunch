@@ -170,6 +170,15 @@ GEM
       i18n (~> 0.5)
     fastercsv (1.5.5)
     ffi (1.9.8)
+    flipper (0.7.4)
+    flipper-redis (0.7.4)
+      flipper (~> 0.7.4)
+      redis (>= 2.2, < 4.0.0)
+    flipper-ui (0.7.4)
+      erubis (~> 2.7.0)
+      flipper (~> 0.7.4)
+      rack (~> 1.4, < 1.7)
+      rack-protection (~> 1.5.3)
     fog-aws (0.2.2)
       fog-core (~> 1.27)
       fog-json (~> 1.0)
@@ -518,6 +527,9 @@ DEPENDENCIES
   dotenv-rails
   factory_girl_rails
   faker
+  flipper
+  flipper-redis
+  flipper-ui
   fog-aws
   foreman
   growl

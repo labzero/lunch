@@ -160,6 +160,10 @@ Rails.application.routes.draw do
 
   root 'users/sessions#new'
 
+  constraints Constraints::WebAdmin.new do
+    mount Flipper::UI.app(Rails.application.flipper) => '/admin'
+  end
+
   get '/error' => 'error#standard_error' unless Rails.env.production?
   get '/maintenance' => 'error#maintenance' unless Rails.env.production?
   get '/not-found' => 'error#not_found' unless Rails.env.production?
