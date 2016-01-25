@@ -1417,10 +1417,10 @@ en:
           average_shares: Average Shares Outstanding
           dividend: Dividend
       securities_services_statement:
-        heading: 'Total amount due as of %{date}:'
+        heading: 'Total amount to be debited on %{date}:'
         footnote: '%{footnote}Fees will be charged based on the specific transaction and the amount of staff time required.'
         questions_html: 'If you have questions regarding this statement, please email <a href=%{mailto_url}>Securities Services</a> or call %{phone_number}.'
-        footer: 'Total amount to be debited from Settlement/Transaction Account No. %{account_number} as of %{date}:'
+        footer: 'Total amount to be debited from Settlement/Transaction Account No. %{account_number} on %{date}:'
         freshness: This statement reflects fees for the prior month and is posted approximately 5 to 7 days before the debit date, which is the last business day of the month.
         availability: Statements are available for the previous 18 months.
         data_unavailable: You have no Securities Services Monthly Statement for the last 18 months.
