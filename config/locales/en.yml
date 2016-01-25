@@ -1216,7 +1216,7 @@ en:
       price_indications:
         current:
           title: Current Price Indications
-          summary: Price indications are subject to change at any time. For current quotes, call the Member Services Desk at %{phone_number} between 7:00 am and 2:00 pm California time. Variable Rate Credit advances are available until 2:00 pm, and all other advances are generally available until 12 noon.
+          summary: "Variable Rate Credit advances are available from 7:00 am to 2:00 pm.\n\nAll other advances are generally available from 7:00 am to 12:00 pm."
           advance_maturity: Advance Maturity
           overnight_fed_funds_benchmark: Overnight Fed Funds Benchmark
           treasury_benchmark_maturity: Treasury Benchmark Maturity
@@ -1259,7 +1259,7 @@ en:
           prime_header: Daily Prime
           sta_info: Published STA rate is applied to the previous business day’s ending STA balance.
           sta_rate: Effective Rate for Prior Business Day
-          freshness: This report reflects the price indications published at 6:00 am on the current business day.
+          freshness: This report reflects the price indications published at 6:00 am PT on the current business day. For current quotes, call the Member Services Desk at %{phone_number}.
         historical:
           title: Historical Price Indications
           freshness: This report reflects historical price indications published at 6:00 am, not actual rates.
