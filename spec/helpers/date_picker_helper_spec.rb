@@ -41,7 +41,7 @@ describe DatePickerHelper do
         expect(helper.last_quarter[:quarter]).to eq(4)
       end
       it 'returns last year as the year' do
-        expect(helper.last_quarter[:year]).to eq(today.year - 1.year)
+        expect(helper.last_quarter[:year]).to eq(2012)
       end
     end
     [q2_date, q3_date, q4_date].each do |date|
@@ -245,6 +245,7 @@ describe DatePickerHelper do
         expect(preset[:start_date]).to be <= max_date
       end
     end
+
   end
 
 end
