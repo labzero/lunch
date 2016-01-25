@@ -6,16 +6,9 @@ Feature: Using the Securities tab
 Background:
   Given I am logged in
 
-@smoke
-Scenario: Visit Securities and cancel it
-  When I click on the securities link in the header
-  Then I should see the securities flyout
-  When I cancel the Securities flyout
-  Then I should not see the securities flyout
-
-@smoke
-Scenario: Visit Securities and continue to the external site
-  When I click on the securities link in the header
-  Then I should see the securities flyout
-  When I continue the Securities flyout
-  Then I should not see the securities flyout
+@smoke @jira-mem-1295
+Scenario: Visit Manage Securities from the header
+  Given I visit the dashboard
+  When I click on the Securities link in the header
+  Then I should be on the Manage Securities page
+  Then I should see a report table with multiple data rows

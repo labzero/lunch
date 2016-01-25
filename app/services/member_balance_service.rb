@@ -368,4 +368,10 @@ class MemberBalanceService < MAPIService
   def mortgage_collateral_update
     fix_date(get_hash(:mortgage_collateral_update, "/member/#{@member_id}/mortgage_collateral_update"), :date_processed)
   end
+
+  def managed_securities
+    if securities = get_json(:managed_securities, "/member/#{@member_id}/managed_securities")
+      securities.map { |x| x.with_indifferent_access}
+    end
+  end
 end

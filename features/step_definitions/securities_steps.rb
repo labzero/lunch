@@ -1,15 +1,8 @@
-Then(/^I should see the securities flyout$/) do
-  page.assert_selector('.nav-securities-flyout', visible: true)
+When(/^I click on the Securities link in the header$/) do
+  page.find('.secondary-nav a', text: I18n.t('securities.title'), exact: true).click
 end
 
-Then(/^I should not see the securities flyout$/) do
-  page.assert_no_selector('.flyout .nav-securities-flyout')
-end
-
-When(/^I cancel the Securities flyout$/) do
-  page.find('a.secondary-button', text: I18n.t('global.cancel').upcase, exact: true, visible: true).click
-end
-
-When(/^I continue the Securities flyout$/) do
-  page.find('a.primary-button', text: I18n.t('global.continue').upcase, exact: true, visible: true).click
+Then(/^I should be on the Manage Securities page$/) do
+  page.assert_selector('h1', text: I18n.t('securities.manage.title'), exact: true)
+  step 'I should see a report table with multiple data rows'
 end

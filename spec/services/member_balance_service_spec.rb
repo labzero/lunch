@@ -1348,6 +1348,21 @@ describe MemberBalanceService do
     end
   end
 
+  describe 'the `managed_securities` method' do
+    let(:managed_securities) { subject.managed_securities }
+    let(:security) { double('security') }
+    it_should_behave_like 'a MAPI backed service object method', :managed_securities
+    it 'should call `get_json` with the appropriate endpoint' do
+      expect(subject).to receive(:get_json).with(:managed_securities, "/member/#{member_id}/managed_securities")
+      managed_securities
+    end
+    it 'hands back an array of securities objects that have indifferent access' do
+      allow(subject).to receive(:get_json).and_return([security])
+      expect(security).to receive(:with_indifferent_access)
+      managed_securities
+    end
+  end
+
   # Helper Methods
   def expect_capital_stock_balance_to_receive(date)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with( "member/#{member_id}/capital_stock_balance/#{date}" )
