@@ -102,6 +102,11 @@ describe MAPI::ServiceApp do
                 expect(security[property]).to be_kind_of(Date)
               end
             end
+            it "uses `dateify` to parse `#{property}`" do
+              securities.each do |security|
+                expect(MAPI::Services::Member::SecuritiesPosition::Private).to receive(:dateify).with(security[property]) if security[property]
+              end
+            end
           end
           [:custody_account_number, :custody_account_type, :security_pledge_type, :cusip, :description, :reg_id, :pool_number].each do |property|
             it "returns an object with a `#{property}` formatted as a string" do

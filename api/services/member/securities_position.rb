@@ -80,6 +80,7 @@ module MAPI
 
         # private
         module Private
+          include MAPI::Shared::Utils
           def self.fake_securities(member_id, as_of_date, report_type, custody_account_type)
             fake_data = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'current_securities_position.json'))).with_indifferent_access
             rows = []
@@ -122,7 +123,7 @@ module MAPI
                 new_security[property] = (security[SECURITIES_FIELD_MAPPINGS[property][report_type]].to_f if security[SECURITIES_FIELD_MAPPINGS[property][report_type]])
               end
               DATE_FIELDS.each do |property|
-                new_security[property] = (security[SECURITIES_FIELD_MAPPINGS[property][report_type]].to_date if security[SECURITIES_FIELD_MAPPINGS[property][report_type]])
+                new_security[property] = (dateify(security[SECURITIES_FIELD_MAPPINGS[property][report_type]]) if security[SECURITIES_FIELD_MAPPINGS[property][report_type]])
               end
               new_security
             end
