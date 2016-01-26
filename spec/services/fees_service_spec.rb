@@ -3,7 +3,7 @@ require 'rails_helper'
 describe FeesService do
   subject { FeesService.new(double('request', uuid: '12345')) }
   
-  describe `fee_schedules` do
+  describe '`fee_schedules` method' do
     let(:fee_schedules) { subject.fee_schedules }
     let(:response) { double('response') }
     it_should_behave_like 'a MAPI backed service object method', :fee_schedules
