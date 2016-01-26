@@ -123,6 +123,15 @@
   }
 }
 
+.report-sta-number {
+  @extend %typography-subtitle;
+  margin-bottom: 30px;
+  span {
+    color: $medium-gray;
+    padding-right: 30px;
+  }
+}
+
 .report-datepicker, .report-filter {
   width: (3 * $grid-column-width) + (2 * $gutter-width);
   form {

@@ -347,6 +347,7 @@ class ReportsController < ApplicationController
     member_balances = MemberBalanceService.new(current_member_id, request)
     @daily_balance_key = MemberBalanceService::DAILY_BALANCE_KEY
     @picker_presets = date_picker_presets(@start_date, @end_date, date_restriction)
+    @sta_number = MembersService.new(request).member(current_member_id).try(:[], :sta_number) unless @sta_number
     @filter_options = [
       [t('global.all'), 'all'],
       [t('global.debits'), 'debit'],
