@@ -139,36 +139,36 @@ RSpec.describe DashboardController, :type => :controller do
         allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(contacts)
         allow(contacts).to receive(:[]).with(:cam).and_return({username: cam_username})
         allow(contacts).to receive(:[]).with(:rm).and_return({username: rm_username})
-        allow(Rails.application.assets).to receive(:find_asset)
+        allow(subject).to receive(:find_asset)
       end
       it 'is the result of the `members_service.member_contacts` method' do
         get :index
         expect(assigns[:contacts]).to eq(contacts)
       end
       it 'contains an `image_url` for the cam' do
-        allow(Rails.application.assets).to receive(:find_asset).with("#{cam_username}.jpg").and_return(true)
+        allow(subject).to receive(:find_asset).with("#{cam_username}.jpg").and_return(true)
         get :index
         expect(assigns[:contacts][:cam][:image_url]).to eq("#{cam_username}.jpg")
       end
       it 'contains an `image_url` for the rm' do
-        allow(Rails.application.assets).to receive(:find_asset).with("#{rm_username}.jpg").and_return(true)
+        allow(subject).to receive(:find_asset).with("#{rm_username}.jpg").and_return(true)
         get :index
         expect(assigns[:contacts][:rm][:image_url]).to eq("#{rm_username}.jpg")
       end
       it 'contains an `image_url` that is the downcased version of the username for the rm' do
         allow(contacts).to receive(:[]).with(:rm).and_return({username: uppercase_username})
-        allow(Rails.application.assets).to receive(:find_asset).with("#{uppercase_username.downcase}.jpg").and_return(true)
+        allow(subject).to receive(:find_asset).with("#{uppercase_username.downcase}.jpg").and_return(true)
         get :index
         expect(assigns[:contacts][:rm][:image_url]).to eq("#{uppercase_username.downcase}.jpg")
       end
       it 'contains an `image_url` that is the downcased version of the username for the cam' do
         allow(contacts).to receive(:[]).with(:cam).and_return({username: uppercase_username})
-        allow(Rails.application.assets).to receive(:find_asset).with("#{uppercase_username.downcase}.jpg").and_return(true)
+        allow(subject).to receive(:find_asset).with("#{uppercase_username.downcase}.jpg").and_return(true)
         get :index
         expect(assigns[:contacts][:cam][:image_url]).to eq("#{uppercase_username.downcase}.jpg")
       end
       it 'assigns the default image_url if the image asset does not exist for the contact' do
-        allow(Rails.application.assets).to receive(:find_asset).and_return(false)
+        allow(subject).to receive(:find_asset).and_return(false)
         get :index
         expect(assigns[:contacts][:rm][:image_url]).to eq('placeholder-usericon.svg')
         expect(assigns[:contacts][:cam][:image_url]).to eq('placeholder-usericon.svg')

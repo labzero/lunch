@@ -1,0 +1,24 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Cross Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "ecb9cfa49b0ab82676fbceeed42ee79caff88d4ae616dd8e12cc97ac541b353a",
+      "message": "Unescaped model attribute",
+      "file": "app/views/corporate_communications/show.html.haml",
+      "line": 16,
+      "link": "http://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "(CorporateCommunication.find(params[:id]) or CorporateCommunication.find_by!(:id => params[:id], :category => params[:category])).body.dup",
+      "render_path": [{"type":"controller","class":"CorporateCommunicationsController","method":"show","line":46,"file":"app/controllers/corporate_communications_controller.rb"}],
+      "location": {
+        "type": "template",
+        "template": "corporate_communications/show"
+      },
+      "user_input": "CorporateCommunication.find(params[:id])",
+      "confidence": "Weak",
+      "note": ""
+    }
+  ],
+  "updated": "2016-01-25 17:24:14 -0800",
+  "brakeman_version": "3.1.4"
+}

@@ -1,4 +1,5 @@
 class MemberMailer < Devise::Mailer
+  helper AssetHelper
   layout 'mailer'
 
   def reset_password_instructions(record, token, opts={})

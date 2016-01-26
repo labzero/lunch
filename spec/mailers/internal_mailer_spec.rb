@@ -43,9 +43,9 @@ RSpec.describe InternalMailer, :type => :mailer do
 
   describe '`calypso_error` email' do
     let(:error) { double('An Error', message: nil, backtrace: [], inspect: nil) }
-    let(:request_id) { double('A Request ID') }
+    let(:request_id) { double('A Request ID', to_s: SecureRandom.hex) }
     let(:user) { double('A User', display_name: nil, username: nil) }
-    let(:member) { double('A Member') }
+    let(:member) { double('A Member', to_s: SecureRandom.hex) }
     let(:build_mail) { mail :calypso_error, error, request_id, user, member }
 
     it_behaves_like 'an internal notification email', I18n.t('errors.emails.calypso_error.subject')
@@ -77,9 +77,9 @@ RSpec.describe InternalMailer, :type => :mailer do
   end
 
   describe '`stale_rate` email' do
-    let(:request_id) { double('A Request ID') }
+    let(:request_id) { double('A Request ID', to_s: SecureRandom.hex) }
     let(:user) { double('A User', display_name: nil, username: nil) }
-    let(:rate_timeout) { double('A Rate Timeout') }
+    let(:rate_timeout) { double('A Rate Timeout', to_s: SecureRandom.hex) }
     let(:build_mail) { mail :stale_rate, rate_timeout, request_id, user }
 
     it_behaves_like 'an internal notification email', I18n.t('errors.emails.stale_rate.subject')
@@ -95,7 +95,7 @@ RSpec.describe InternalMailer, :type => :mailer do
   end
 
   describe '`exceeds_rate_band` email' do
-    let(:request_id) { double('A Request ID') }
+    let(:request_id) { double('A Request ID', to_s: SecureRandom.hex) }
     let(:user) { double('A User', display_name: nil, username: nil) }
     let(:rate_info) { double('Some rate info', :[] => nil) }
     let(:build_mail) { mail :exceeds_rate_band, rate_info, request_id, user }

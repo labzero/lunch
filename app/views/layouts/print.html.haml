@@ -8,7 +8,7 @@
     %title= @page_title || 'FHLB Member Portal'
     %style
       - css_manifest_filename = (css_manifest.end_with?('.css') ? css_manifest : css_manifest + '.css' )
-      != FhlbMember::Application.assets.find_asset(css_manifest_filename).source
+      != asset_source(css_manifest_filename)
   %body
     %header.page-header= render 'layouts/header_print'
     = yield

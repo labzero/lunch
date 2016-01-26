@@ -1,5 +1,6 @@
 class InternalMailer < ActionMailer::Base
   helper CustomFormattingHelper
+  helper AssetHelper
   GENERAL_ALERT_ADDRESS = 'MemberPortalAlert@fhlbsf.com'
   layout 'mailer'
   default to: GENERAL_ALERT_ADDRESS, from: GENERAL_ALERT_ADDRESS
