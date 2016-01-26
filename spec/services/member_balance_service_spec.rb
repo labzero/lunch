@@ -1350,16 +1350,16 @@ describe MemberBalanceService do
 
   describe 'the `managed_securities` method' do
     let(:managed_securities) { subject.managed_securities }
-    let(:security) { double('security') }
+    let(:securities) { double('an array of securities') }
+    before { allow(subject).to receive(:get_hash).and_return({}) }
     it_should_behave_like 'a MAPI backed service object method', :managed_securities
-    it 'should call `get_json` with the appropriate endpoint' do
-      expect(subject).to receive(:get_json).with(:managed_securities, "/member/#{member_id}/managed_securities")
+    it 'should call `get_hash` with the appropriate endpoint' do
+      expect(subject).to receive(:get_hash).with(:managed_securities, "/member/#{member_id}/managed_securities").and_return({})
       managed_securities
     end
-    it 'hands back an array of securities objects that have indifferent access' do
-      allow(subject).to receive(:get_json).and_return([security])
-      expect(security).to receive(:with_indifferent_access)
-      managed_securities
+    it 'hands back only the array of securities objects' do
+      allow(subject).to receive(:get_hash).and_return({securities: securities})
+      expect(managed_securities).to eq(securities)
     end
   end
 

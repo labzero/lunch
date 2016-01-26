@@ -507,10 +507,7 @@ module MAPI
               key :method, 'GET'
               key :summary, 'Retrieve all securities currently being managed'
               key :nickname, :getManagedSecuritiesForMembers
-              key :type, :array
-              items do
-                key :type, :MemberManagedSecurities
-              end
+              key :type, :MemberSecuritiesPosition
               parameter do
                 key :paramType, :path
                 key :name, :id

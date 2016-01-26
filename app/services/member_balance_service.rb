@@ -370,8 +370,6 @@ class MemberBalanceService < MAPIService
   end
 
   def managed_securities
-    if securities = get_json(:managed_securities, "/member/#{@member_id}/managed_securities")
-      securities.map { |x| x.with_indifferent_access}
-    end
+    get_hash(:managed_securities, "/member/#{@member_id}/managed_securities")[:securities]
   end
 end

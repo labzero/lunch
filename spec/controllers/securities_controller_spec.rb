@@ -1,7 +1,7 @@
 require 'rails_helper'
 include CustomFormattingHelper
 
-RSpec.describe SecuritiesController, :type => :controller do
+RSpec.describe SecuritiesController, type: :controller do
   login_user
 
   describe 'requests hitting MemberBalanceService' do
