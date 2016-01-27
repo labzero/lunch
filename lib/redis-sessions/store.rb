@@ -4,6 +4,7 @@ class Rack::Session::Redis
   SEPARATOR_ESCAPE = "\e".freeze
   SEPARATOR_ESCAPED = "#{SEPARATOR_ESCAPE}#{SEPARATOR}".freeze
   SID_KEY = '__sid__'.freeze
+  ENV_ORIGINAL_SESSION_STORAGE_KEY = 'rack.session.redis.original_session'.freeze
 
   def generate_sid
     loop do
@@ -20,14 +21,23 @@ class Rack::Session::Redis
           raise "Session collision on '#{sid.inspect}'"
         end
       end
+      env[ENV_ORIGINAL_SESSION_STORAGE_KEY] = session.deep_dup
       [sid, session]
     end
   end
 
   def set_session(env, session_id, new_session, options)
     with_lock(env, false) do
-      persist_session(@pool, session_id, new_session, options)
+      persist_session(@pool, session_id, new_session, options, env[ENV_ORIGINAL_SESSION_STORAGE_KEY])
       session_id
+    end
+  end
+
+  def destroy_session(env, session_id, options)
+    with_lock(env) do
+      @pool.del(session_id)
+      env.delete(ENV_ORIGINAL_SESSION_STORAGE_KEY)
+      generate_sid unless options[:drop]
     end
   end
 
