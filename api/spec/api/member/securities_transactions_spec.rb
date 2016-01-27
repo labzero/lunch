@@ -1,14 +1,9 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  MEMBER_ID = 750
-  DATE = Time.zone.parse( '20 sept 2015').to_date.iso8601
+  let(:a_date) { Time.zone.parse( '20 sept 2015').to_date.iso8601 }
 
   subject { MAPI::Services::Member::SecuritiesTransactions }
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
 
   describe 'Securities Transactions' do
     let(:fhlb_id)              { double('fhlb_id')              }
@@ -95,7 +90,7 @@ describe MAPI::ServiceApp do
 
     [:test, :development].each do |env|
       describe "#{env}" do
-        let(:securities_transactions) { get "/member/#{MEMBER_ID}/securities_transactions/#{DATE}"; JSON.parse(last_response.body) }
+        let(:securities_transactions) { get "/member/#{member_id}/securities_transactions/#{a_date}"; JSON.parse(last_response.body) }
         it 'should return expected advances detail hash where value could not be nil' do
           allow(MAPI::ServiceApp).to receive(:environment).and_return(env)
           securities_transactions['transactions'].each do |row|

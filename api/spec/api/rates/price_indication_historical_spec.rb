@@ -2,9 +2,6 @@ require 'spec_helper'
 require 'date'
 
 describe MAPI::ServiceApp do
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
   describe 'price indication historical' do
     let(:collateral_type) {'standard'}
     let(:credit_type) {'frc'}

@@ -1,10 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'GET /users/:username/roles' do
     let(:username) { 'local' }
     let(:make_request) { get "/users/#{username}/roles" }

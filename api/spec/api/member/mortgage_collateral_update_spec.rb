@@ -1,12 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  let(:member_id) { rand(1111..9999) }
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'the mortgage_collateral_update endpoint' do
     let(:call_endpoint) { get "/member/#{member_id}/mortgage_collateral_update" }
     let(:response) { double('response') }

@@ -1,13 +1,8 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'member member_contacts' do
-    let(:member_contacts) { MAPI::Services::Member::Profile.member_contacts(subject, MEMBER_ID) }
+    let(:member_contacts) { MAPI::Services::Member::Profile.member_contacts(subject, member_id) }
     let(:processed_email) { double('the processed email address') }
     let(:downcased_username) { double('the downcased username') }
     let(:rm_email) { 'ExampleEmail@example.com' }
@@ -28,7 +23,7 @@ describe MAPI::ServiceApp do
 
     it 'calls the `member_contacts` method when the endpoint is hit' do
       allow(MAPI::Services::Member::Profile).to receive(:member_contacts).and_return('a response')
-      get "/member/#{MEMBER_ID}/member_contacts"
+      get "/member/#{member_id}/member_contacts"
       expect(last_response.status).to eq(200)
     end
 

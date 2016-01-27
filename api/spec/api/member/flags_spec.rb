@@ -1,18 +1,12 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe '`quick_advance_flag` method' do
-    let(:member_id) { 750 }
     let(:quick_advance_flag) { MAPI::Services::Member::Flags.quick_advance_flag(subject, member_id) }
 
     it 'calls the `quick_advance_flag` method when the endpoint is hit' do
       allow(MAPI::Services::Member::Flags).to receive(:quick_advance_flag).and_return('a response')
-      get "/member/#{MEMBER_ID}/quick_advance_flag"
+      get "/member/#{member_id}/quick_advance_flag"
       expect(last_response.status).to eq(200)
     end
 

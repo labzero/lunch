@@ -3,10 +3,6 @@ require 'spec_helper'
 describe MAPI::ServiceApp do
   subject { MAPI::Services::Member::SecuritiesServicesStatements }
 
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'SecuritiesServicesStatements' do
     let(:logger) { double('logger')  }
     let(:fhlb_id){ double('fhlb_id') }

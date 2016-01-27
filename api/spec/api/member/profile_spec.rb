@@ -1,16 +1,12 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
   describe 'member profile' do
-    let(:make_request) { get "/member/#{MEMBER_ID}/member_profile" }
+    let(:make_request) { get "/member/#{member_id}/member_profile" }
     let(:member_financial_position) { make_request; JSON.parse(last_response.body) }
     let(:capital_stock) { double('Capital Stock', as_json: SecureRandom.uuid) }
     before do
-      allow(MAPI::Services::Member::CapitalStockAndLeverage).to receive(:capital_stock_and_leverage).with(anything, MEMBER_ID).and_return(capital_stock)
+      allow(MAPI::Services::Member::CapitalStockAndLeverage).to receive(:capital_stock_and_leverage).with(anything, member_id).and_return(capital_stock)
     end
     it "should return json with expected elements type" do
       expect(member_financial_position.length).to be >= 1
@@ -38,12 +34,12 @@ describe MAPI::ServiceApp do
 
     it 'should call `MAPI::Services::Member::CapitalStockAndLeverage::capital_stock_and_leverage` method and return capital_stock' do
       capital_stock = double('Capital Stock', as_json: SecureRandom.uuid)
-      allow(MAPI::Services::Member::CapitalStockAndLeverage).to receive(:capital_stock_and_leverage).with(anything, MEMBER_ID).and_return(capital_stock)
+      allow(MAPI::Services::Member::CapitalStockAndLeverage).to receive(:capital_stock_and_leverage).with(anything, member_id).and_return(capital_stock)
       expect(member_financial_position['capital_stock']).to eq(capital_stock.as_json)
     end
 
     it 'should return a 404 if `MAPI::Services::Member::CapitalStockAndLeverage::capital_stock_and_leverage` returns nil'  do
-      allow(MAPI::Services::Member::CapitalStockAndLeverage).to receive(:capital_stock_and_leverage).with(anything, MEMBER_ID).and_return(nil)
+      allow(MAPI::Services::Member::CapitalStockAndLeverage).to receive(:capital_stock_and_leverage).with(anything, member_id).and_return(nil)
       make_request
       expect(last_response.status).to be(404)
     end
@@ -126,7 +122,7 @@ describe MAPI::ServiceApp do
   end
 
   describe 'member_details' do
-    let(:make_request) { get "/member/#{MEMBER_ID}/" }
+    let(:make_request) { get "/member/#{member_id}/" }
     let(:member_details) { make_request; JSON.parse(last_response.body) }
     let(:member_name) {SecureRandom.uuid}
     let(:member_name_cursor) { double('Member Query', fetch: [member_name])}
@@ -136,7 +132,7 @@ describe MAPI::ServiceApp do
     let(:fhfb_number_cursor) { double('FHFB Number Query', fetch: [fhfb_number])}
     let(:development_json) {
       {
-        MEMBER_ID => {
+        member_id => {
           'name' => member_name,
           'sta_number' => sta_number,
           'fhfb_number' => fhfb_number
@@ -154,19 +150,19 @@ describe MAPI::ServiceApp do
         end
         it 'returns a 404 if the member name isn\'t found' do
           allow(member_name_cursor).to receive(:fetch).and_return(nil)
-          development_json[MEMBER_ID]['name'] = nil
+          development_json[member_id]['name'] = nil
           make_request
           expect(last_response.status).to be(404)
         end
         it 'returns a 200 if the STA number isn\'t found' do
           allow(sta_number_cursor).to receive(:fetch).and_return(nil)
-          development_json[MEMBER_ID]['sta_number'] = nil
+          development_json[member_id]['sta_number'] = nil
           make_request
           expect(last_response.status).to be(200)
         end
         it 'returns a 200 if the FHFB number isn\'t found' do
           allow(fhfb_number_cursor).to receive(:fetch).and_return(nil)
-          development_json[MEMBER_ID]['fhfb_number'] = nil
+          development_json[member_id]['fhfb_number'] = nil
           make_request
           expect(last_response.status).to be(200)
         end

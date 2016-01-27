@@ -1,13 +1,8 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'member disabled reports' do
-    let(:disabled_reports) { get "/member/#{MEMBER_ID}/disabled_reports"; JSON.parse(last_response.body) }
+    let(:disabled_reports) { get "/member/#{member_id}/disabled_reports"; JSON.parse(last_response.body) }
 
     it 'returns an array of ids for disabled reports' do
       expect(disabled_reports).to be_kind_of(Array)

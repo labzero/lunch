@@ -1,11 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'member forward_commitments' do
     let(:advances) do
       new_array = []
@@ -17,12 +12,12 @@ describe MAPI::ServiceApp do
       new_array
     end
     let(:total_current_par) { advances.inject(0) {|sum, advance| sum + advance[:ADVDET_CURRENT_PAR]} }
-    let(:member_forward_commitments) { MAPI::Services::Member::ForwardCommitments.forward_commitments(subject, MEMBER_ID) }
+    let(:member_forward_commitments) { MAPI::Services::Member::ForwardCommitments.forward_commitments(subject, member_id) }
     let(:formatted_advances) { double('an array of advances') }
 
     it 'calls the `forward_commitments` method when the endpoint is hit' do
       allow(MAPI::Services::Member::ForwardCommitments).to receive(:forward_commitments).and_return('a response')
-      get "/member/#{MEMBER_ID}/forward_commitments"
+      get "/member/#{member_id}/forward_commitments"
       expect(last_response.status).to eq(200)
     end
 
@@ -106,7 +101,7 @@ describe MAPI::ServiceApp do
       end
       
       describe '`fake_advances` method' do
-        let(:fake_advances) { MAPI::Services::Member::ForwardCommitments::Private.fake_advances(MEMBER_ID, Time.zone.now.to_date) }
+        let(:fake_advances) { MAPI::Services::Member::ForwardCommitments::Private.fake_advances(member_id, Time.zone.now.to_date) }
       
         it 'returns an array of fake advance objects with the appropriate keys' do
           fake_advances.each do |advance|

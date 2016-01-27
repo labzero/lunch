@@ -1,14 +1,9 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  MEMBER_ID = 750
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
   describe 'member balance pledged collateral' do
     collateral_types = ['mortgages', 'agency', 'aaa', 'aa']
-    let(:pledged_collateral) { get "/member/#{MEMBER_ID}/balance/pledged_collateral"; JSON.parse(last_response.body) }
+    let(:pledged_collateral) { get "/member/#{member_id}/balance/pledged_collateral"; JSON.parse(last_response.body) }
     it "should return json with keys mortgages, agency, aaa, aa" do
       expect(pledged_collateral.length).to be >= 1
       collateral_types.each do |collateral_type|
@@ -52,7 +47,7 @@ describe MAPI::ServiceApp do
   end
 
   describe 'member balance total securities' do
-    let(:total_securities) { get "/member/#{MEMBER_ID}/balance/total_securities"; JSON.parse(last_response.body) }
+    let(:total_securities) { get "/member/#{member_id}/balance/total_securities"; JSON.parse(last_response.body) }
     it "should return json with keys pledge_securities, safekept_securities" do
       expect(total_securities.length).to be >= 1
       expect(total_securities['pledged_securities']).to be_kind_of(Numeric)
@@ -83,7 +78,7 @@ describe MAPI::ServiceApp do
   end
 
   describe 'member balance effective borrowing capacity' do
-    let(:effective_borrowing_capacity) { get "/member/#{MEMBER_ID}/balance/effective_borrowing_capacity"; JSON.parse(last_response.body) }
+    let(:effective_borrowing_capacity) { get "/member/#{member_id}/balance/effective_borrowing_capacity"; JSON.parse(last_response.body) }
     it "should return json with keys total_capacity, unused_capacity" do
       expect(effective_borrowing_capacity.length).to be >= 1
       effective_borrowing_capacity_type = ['total_capacity', 'unused_capacity']

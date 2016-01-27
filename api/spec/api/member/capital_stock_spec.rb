@@ -1,12 +1,8 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'capital stock balances' do
-    let(:capital_stock_balance) { get "/member/#{MEMBER_ID}/capital_stock_balance/2014-01-01"; JSON.parse(last_response.body) }
+    let(:capital_stock_balance) { get "/member/#{member_id}/capital_stock_balance/2014-01-01"; JSON.parse(last_response.body) }
 
     RSpec.shared_examples 'a capital stock balance endpoint' do
       it 'should return a number for the balance' do
@@ -57,14 +53,14 @@ describe MAPI::ServiceApp do
       it_behaves_like 'a capital stock balance endpoint'
     end
     it 'invalid param result in 400 error message' do
-      get "/member/#{MEMBER_ID}/capital_stock_balance/12-12-2014"
+      get "/member/#{member_id}/capital_stock_balance/12-12-2014"
       expect(last_response.status).to eq(400)
     end
   end
   describe 'capital stock Activities' do
     let(:from_date) {'2014-01-01'}
     let(:to_date) {'2014-12-31'}
-    let(:capital_stock_activities) { get "/member/#{MEMBER_ID}/capital_stock_activities/#{from_date}/#{to_date}"; JSON.parse(last_response.body) }
+    let(:capital_stock_activities) { get "/member/#{member_id}/capital_stock_activities/#{from_date}/#{to_date}"; JSON.parse(last_response.body) }
     it 'should return expected hash and data type in development' do
       capital_stock_activities['activities'].each do |activity|
         expect(activity['cert_id']).to be_kind_of(String)
@@ -75,9 +71,9 @@ describe MAPI::ServiceApp do
       end
     end
     it 'invalid param result in 400 error message' do
-      get "/member/#{MEMBER_ID}/capital_stock_activities/12-12-2014/#{to_date}"
+      get "/member/#{member_id}/capital_stock_activities/12-12-2014/#{to_date}"
       expect(last_response.status).to eq(400)
-      get "/member/#{MEMBER_ID}/capital_stock_activities/#{from_date}/12-12-2014"
+      get "/member/#{member_id}/capital_stock_activities/#{from_date}/12-12-2014"
       expect(last_response.status).to eq(400)
     end
     describe 'in the production environment' do

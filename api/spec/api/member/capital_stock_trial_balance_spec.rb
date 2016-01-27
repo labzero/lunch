@@ -1,12 +1,7 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
   subject { MAPI::Services::Member::CapitalStockTrialBalance }
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
 
   describe 'CapitalStockTrialBalance' do
     [:test, :development, :production].each do |environment|
