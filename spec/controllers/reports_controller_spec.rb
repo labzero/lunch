@@ -227,6 +227,8 @@ RSpec.describe ReportsController, :type => :controller do
 
     describe 'GET settlement_transaction_account' do
       let(:filter) {'some filter'}
+      let(:make_request) { get :settlement_transaction_account }
+      let(:make_request_with_dates) { get :settlement_transaction_account, start_date: start_date, end_date: end_date }
       before do
         allow(member_balance_service_instance).to receive(:settlement_transaction_account).and_return(response_hash)
         allow(response_hash).to receive(:[]).with(:activities)
@@ -237,7 +239,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a report with instance variables set in a before_filter', :settlement_transaction_account
       describe 'with activities array stubbed' do
         it 'should render the settlement_transaction_account view' do
-          get :settlement_transaction_account
+          make_request
           expect(response.body).to render_template('settlement_transaction_account')
         end
         describe "view instance variables" do
@@ -246,28 +248,28 @@ RSpec.describe ReportsController, :type => :controller do
           }
           it 'should set @settlement_transaction_account to the hash returned from MemberBalanceService' do
             expect(member_balance_service_instance).to receive(:settlement_transaction_account).and_return(response_hash)
-            get :settlement_transaction_account
+            make_request
             expect(assigns[:settlement_transaction_account]).to eq(response_hash)
           end
           it 'should raise an error if @settlement_transaction_account is nil' do
             expect(member_balance_service_instance).to receive(:settlement_transaction_account).and_return(nil)
-            expect{get :settlement_transaction_account}.to raise_error(StandardError)
+            expect{make_request}.to raise_error(StandardError)
           end
           it 'should set @settlement_transaction_account to {} if the report is disabled' do
             expect(controller).to receive(:report_disabled?).with(ReportsController::SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS).and_return(true)
-            get :settlement_transaction_account
+            make_request
             expect(assigns[:settlement_transaction_account]).to eq({})
           end
           it 'should set @start_date to the `start_date` attribute of the `min_and_start_dates` hash' do
-            get :settlement_transaction_account
+            make_request
             expect(assigns[:start_date]).to eq(restricted_start_date)
           end
           it 'should set @end_date to the end_date param' do
-            get :settlement_transaction_account, start_date: start_date, end_date: end_date
+            make_request_with_dates
             expect(assigns[:end_date]).to eq(end_date)
           end
           it 'should set @end_date to the end of last month if no end_date param is provided' do
-            get :settlement_transaction_account
+            make_request
             expect(assigns[:end_date]).to eq(default_dates_hash[:last_month_end])
           end
           it 'should pass @start_date, @end_date and `date_restriction` to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
@@ -278,7 +280,7 @@ RSpec.describe ReportsController, :type => :controller do
           it 'sets @daily_balance_key to the constant DAILY_BALANCE_KEY found in MemberBalanceService' do
             my_const = double('Some Constant')
             stub_const('MemberBalanceService::DAILY_BALANCE_KEY', my_const)
-            get :settlement_transaction_account
+            make_request
             expect(assigns[:daily_balance_key]).to eq(my_const)
           end
           it 'should set @filter to `debit` and @filter_text to the proper i18next translation for `debit` if debit is passed as the sta_filter param' do
@@ -292,7 +294,7 @@ RSpec.describe ReportsController, :type => :controller do
             expect(assigns[:filter_text]).to eq(I18n.t('global.credits'))
           end
           it 'should set @filter to `all` and @filter_text to the proper i18next translation for `all` if nothing is passed for the sta_filter param' do
-            get :settlement_transaction_account
+            make_request
             expect(assigns[:filter]).to eq('all')
             expect(assigns[:filter_text]).to eq(I18n.t('global.all'))
           end
@@ -308,7 +310,7 @@ RSpec.describe ReportsController, :type => :controller do
                 [I18n.t('global.credits'), 'credit'],
                 [I18n.t('global.daily_balances'), 'balance']
             ]
-            get :settlement_transaction_account
+            make_request
             expect(assigns[:filter_options]).to eq(options_array)
           end
         end
@@ -324,7 +326,7 @@ RSpec.describe ReportsController, :type => :controller do
               }
           ]
           allow(response_hash).to receive(:[]).with(:activities).at_least(:once).and_return(activities_array)
-          get :settlement_transaction_account, start_date: start_date, end_date: end_date
+          make_request_with_dates
           expect(assigns[:show_ending_balance]).to eq(false)
         end
         it 'should set @show_ending_balance to true if the date of the first transaction in the activity array is different than the @end_date' do
@@ -334,7 +336,7 @@ RSpec.describe ReportsController, :type => :controller do
             }
           ]
           allow(response_hash).to receive(:[]).with(:activities).at_least(:once).and_return(activities_array)
-          get :settlement_transaction_account, start_date: start_date, end_date: end_date
+          make_request_with_dates
           expect(assigns[:show_ending_balance]).to eq(true)
         end
         it 'should set @show_ending_balance to true if there is no balance given for the first transaction in the activity array, even if the date of the transaction is equal to @end_date' do
@@ -344,9 +346,32 @@ RSpec.describe ReportsController, :type => :controller do
               }
           ]
           allow(response_hash).to receive(:[]).with(:activities).at_least(:once).and_return(activities_array)
-          get :settlement_transaction_account, start_date: start_date, end_date: end_date
+          make_request_with_dates
           expect(assigns[:show_ending_balance]).to eq(true)
         end
+      end
+      describe 'fetching STA numbers' do
+        let(:sta_number) { double('An STA Number') }
+        let(:member_id) { double('A Member ID') }
+        let(:members_service) { double(MembersService, report_disabled?: false) }
+        before do
+          allow(MembersService).to receive(:new).and_return(members_service)
+          allow(members_service).to receive(:member).and_return({sta_number: sta_number}.with_indifferent_access)
+          allow(controller).to receive(:current_member_id).and_return(member_id)
+        end
+         it 'calls MembersService.member with the current_member_id' do
+           expect(members_service).to receive(:member).with(member_id)
+           make_request
+         end
+         it 'populates @sta_number with the STA number' do
+           make_request
+           expect(assigns[:sta_number]).to be(sta_number)
+         end
+         it 'does not populate @sta_number if its already set' do
+           controller.instance_variable_set(:@sta_number, sta_number)
+           expect(members_service).to receive(:member).exactly(:once)
+           make_request
+         end     
       end
     end
 

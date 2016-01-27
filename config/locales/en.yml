@@ -1358,6 +1358,7 @@ en:
         table_title: Settlement/Transaction Account (STA) Detail
         closing_balance: Balance as of close of business
         debit_credit_heading: Debits/Credits
+        sta_number_html: "<span>STA No.:</span> %{sta_number}"
       advances_detail:
         title: "Advances outstanding as of close of business %{date}"
         total_current_par_heading: "Total Current Par as of %{date}"
