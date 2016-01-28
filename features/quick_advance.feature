@@ -312,6 +312,14 @@ Scenario: User backs out of an advance requiring a capital stock purchase and th
   And I click on the initiate advance button
   Then I should be on the quick advance stock purchase screen
 
+@jira-mem-1168
+Scenario: User sees collateral limit error if advance causes both collateral and capital stock limits error
+  Given I visit the dashboard
+  And I open the quick advance flyout and enter 100006
+  And I select the rate with a term of "2week" and a type of "whole"
+  When I click on the initiate advance button
+  Then I should see an "insufficient collateral" error with amount 100006 and type "whole"
+
 @jira-mem-983 @allow-rescue
 Scenario: Users should not be able to get an advance if the product has been disabled by the desk after selection on the rate table
   Given I visit the dashboard

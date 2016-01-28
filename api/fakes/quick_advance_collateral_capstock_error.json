@@ -1,0 +1,16 @@
+{
+  "status" : ["CapitalStockError", "CollateralError"],
+  "authorized_amount" : 45098900,
+  "exception_message" : "INSUFFICIENT CAPITAL STOCK",
+  "cumulative_stock_required" : 47000,
+  "current_trade_stock_required" : 47000,
+  "pre_trade_stock_required" : -1000,
+  "net_stock_required" : 46000,
+  "gross_amount" : 47000000,
+  "gross_cumulative_stock_required" : 49000,
+  "gross_current_trade_stock_required" : 49000,
+  "gross_pre_trade_stock_required" : 0,
+  "gross_net_stock_required" : 49000,
+  "collateral_max_amount" : 45098900,
+  "collateral_authorized_amount" : 45098900
+}
