@@ -96,7 +96,7 @@ en:
     phone: Phone
     fax: Fax
     copyright_html: "&copy;"
-    copyright_date: 2000-2015
+    copyright_date: 2000-%{year}
     contact: Contact
     terms_of_use: Terms of Use
     privacy_policy: Privacy Policy
