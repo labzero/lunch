@@ -32,6 +32,14 @@ Given(/^I am on the change password page$/) do
   step %{I should see the change password page}
 end
 
+Then(/^I should see a message letting me know I cannot change my password$/) do
+  page.assert_selector('p', text: I18n.t('settings.password.intranet'), exact: true)
+end
+
+Then(/^I should not see the change password form/) do
+  page.assert_no_selector('.settings-password form')
+end
+
 Then(/^I should see the change password page$/) do
   page.assert_selector('.settings-password form', visible: true)
 end

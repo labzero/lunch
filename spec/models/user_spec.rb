@@ -843,10 +843,24 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`intranet_user?` method' do
+    let(:call_method) { subject.intranet_user? }
+    it 'returns true if the user has an ldap_domain of `intranet`' do
+      subject.ldap_domain = 'intranet'
+      expect(subject.intranet_user?).to eq(true)
+    end
+    it 'returns false if the user has any ldap_domain besides `intranet`' do
+      ['foo', 'extranet', nil].each do |domain|
+        subject.ldap_domain = domain
+        expect(subject.intranet_user?).to eq(false)
+      end
+    end
+  end
+
   describe '`check_password_change` protected method' do
     let(:call_method) { subject.send(:check_password_change) }
     it 'checks if the password has changed' do
-      expect(subject).to receive(:password_changed?)
+      expect(subject).to receive(:password_changed?).at_least(1)
       call_method
     end
     it 'checks if any LDAP backed attributes have changed' do
@@ -869,6 +883,19 @@ RSpec.describe User, :type => :model do
       end
       it 'adds an error to the password field if a rollback is raised' do
         expect(subject.errors).to receive(:add).with(:password, :non_atomic)
+        call_method rescue ActiveRecord::Rollback
+      end
+    end
+    describe 'when the password has changed and the user is an intranet user' do
+      before do
+        allow(subject).to receive(:password_changed?).and_return(true)
+        allow(subject).to receive(:intranet_user?).and_return(true)
+      end
+      it 'raises an ActiveRecord::Rollback' do
+        expect{call_method}.to raise_error(ActiveRecord::Rollback)
+      end
+      it 'adds an error to the password field if a rollback is raised' do
+        expect(subject.errors).to receive(:add).with(:password, :intranet)
         call_method rescue ActiveRecord::Rollback
       end
     end

@@ -22,6 +22,33 @@ primaryGroupID: 513
 mail: extra@example.com
 userAccountControl: 512
 
+# extra user with a password we can change
+dn: sAMAccountName=extra-password,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet Password User
+sn: Extranet Password
+sAMAccountName: extra-password
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: extra-password@example.com
+userAccountControl: 512
+
+# extra user with an expired password
+dn: sAMAccountName=extra-expired,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet Expired Password User
+sn: Extranet Expired Password
+sAMAccountName: extra-expired
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: extra-expired@example.com
+userAccountControl: 512
+passwordExpired: true
+
 # extra-chaste user
 dn: sAMAccountName=extra-chaste,dc=extranet,dc=fhlbsf,dc=com
 objectClass: user
@@ -154,6 +181,8 @@ objectClass: group
 objectClass: top
 member: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-password,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-expired,dc=extranet,dc=fhlbsf,dc=com
 
 # The Bank With Disabled Signers
 dn: CN=FHLB13,dc=extranet,dc=fhlbsf,dc=com
@@ -182,6 +211,8 @@ cn: FCN-MemberSite-Users
 objectClass: group
 objectClass: top
 member: sAMAccountName=extra,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-password,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-expired,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-delete,dc=extranet,dc=fhlbsf,dc=com
