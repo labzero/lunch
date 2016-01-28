@@ -8,6 +8,7 @@ RSpec.describe Rack::Session::Redis do
   let(:redis) { double(Redis::Store) }
   let(:sid) { SecureRandom.hex }
   let(:options) { subject.instance_variable_get(:@default_options) }
+  let(:session) { double('A Session') }
 
   before do
     allow(Redis::Store::Factory).to receive(:create).and_return(redis)
@@ -47,13 +48,14 @@ RSpec.describe Rack::Session::Redis do
     describe '`get_session`' do
       let(:env) { {} }
       let(:new_sid) { SecureRandom.hex }
-      let(:session) { double('A Session') }
       let(:new_session) { {} }
+      let(:duplicated_session) { double('A Duplicated Session') }
       let(:call_method) { subject.get_session(env, sid) }
       before do
         allow(subject).to receive(:generate_sid).and_return(new_sid)
         allow(subject).to receive(:persist_session).and_return('OK')
         allow(subject).to receive(:fetch_session).and_return(session)
+        allow(session).to receive(:deep_dup).and_return(duplicated_session)
       end
       it 'respects the session mutation mutex' do
         expect(subject).to receive(:with_lock).with(env, [nil, {}])
@@ -68,6 +70,10 @@ RSpec.describe Rack::Session::Redis do
       it 'fetches the session using the SID' do
         expect(subject).to receive(:fetch_session).with(redis, sid, options).and_return(session)
         call_method
+      end
+      it 'stores a duplicate of the found session in the env' do
+        call_method
+        expect(env[described_class::ENV_ORIGINAL_SESSION_STORAGE_KEY]).to be(duplicated_session)
       end
       it 'returns the SID and session' do
         expect(call_method).to eq([sid, session])
@@ -104,11 +110,12 @@ RSpec.describe Rack::Session::Redis do
     end
     describe '`set_session`' do
       let(:env) { {} }
-      let(:session) { double('A Session') }
+      let(:original_session) { double('Original Session') }
       let(:call_method) { subject.set_session(env, sid, session, options) }
 
       before do
         allow(subject).to receive(:persist_session)
+        env[described_class::ENV_ORIGINAL_SESSION_STORAGE_KEY] = original_session
       end
 
       it 'respects the session mutation mutex' do
@@ -120,18 +127,57 @@ RSpec.describe Rack::Session::Redis do
         expect(subject).to_not receive(:persist_session)
         call_method
       end
-      it 'persists the session' do
-        expect(subject).to receive(:persist_session).with(redis, sid, session, options)
+      it 'persists the session using the original_session stored in the env' do
+        expect(subject).to receive(:persist_session).with(redis, sid, session, options, original_session)
         call_method
       end
       it 'returns the SID' do
         expect(call_method).to eq(sid)
       end
     end
+    describe '`destroy_session`' do
+      let(:env) { {} }
+      let(:new_sid) { SecureRandom.hex }
+      let(:call_method) { subject.destroy_session(env, sid, options) }
+      before do
+        allow(redis).to receive(:del)
+        allow(subject).to receive(:generate_sid).and_return(new_sid)
+      end
+      it 'respects the session mutation mutex' do
+        expect(subject).to receive(:with_lock).with(env)
+        call_method
+      end
+      it 'wraps the work in the session mutex' do
+        allow(subject).to receive(:with_lock) # don't call the block to ensure our work is inside
+        expect(redis).to_not receive(:del)
+        expect(env).to_not receive(:delete)
+        expect(subject).to_not receive(:generate_sid)
+        call_method
+      end
+      it 'deletes the session from Redis' do
+        expect(redis).to receive(:del).with(sid)
+        call_method
+      end
+      it 'deletes the original session from the env' do
+        expect(env).to receive(:delete).with(described_class::ENV_ORIGINAL_SESSION_STORAGE_KEY)
+        call_method
+      end
+      it 'generates a new sid' do
+        expect(subject).to receive(:generate_sid)
+        call_method
+      end
+      it 'returns the new sid' do
+        expect(call_method).to eq(new_sid)
+      end
+      it 'does not generate a new sid if options includeds :drop' do
+        options[:drop] = true
+        expect(subject).to_not receive(:generate_sid)
+        call_method
+      end
+    end
   end
   describe 'protected methods' do
     describe '`persist_session`' do
-      let(:session) { double('A Session') }
       let(:old_session) { double('An Old Session')}
       let(:call_method) { subject.send(:persist_session, redis, sid, session, options) }
       let(:redis_transaction) { double('A Redis Transaction', hdel: nil, hmset: nil)}
