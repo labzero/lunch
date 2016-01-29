@@ -340,9 +340,9 @@ class ReportsController < ApplicationController
   def settlement_transaction_account
     date_restriction = DATE_RESTRICTION_MAPPING[:settlement_transaction_account]
     default_dates = default_dates_hash
-    start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
+    start_date = ((params[:start_date] || default_dates[:this_month_start])).to_date
     @min_date, @start_date = min_and_start_dates(date_restriction, start_date)
-    @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
+    @end_date = ((params[:end_date] || default_dates[:today])).to_date
     @report_name = t('reports.pages.settlement_transaction_account.title')
     member_balances = MemberBalanceService.new(current_member_id, request)
     @daily_balance_key = MemberBalanceService::DAILY_BALANCE_KEY

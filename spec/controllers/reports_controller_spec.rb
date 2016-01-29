@@ -10,6 +10,8 @@ RSpec.describe ReportsController, :type => :controller do
     let(:start_date) { rand(500).days.ago(Time.zone.today) }
     let(:default_start) do
       case default_start_selection
+        when :this_month_start
+          default_dates_hash[:this_month_start]
         when :last_month_start
           default_dates_hash[:last_month_start]
         when :last_month_end
@@ -265,7 +267,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it_behaves_like 'a user required action', :get, :settlement_transaction_account
       it_behaves_like 'a report that can be downloaded', :settlement_transaction_account, [:pdf]
-      it_behaves_like 'a date restricted report', :settlement_transaction_account, :last_month_start
+      it_behaves_like 'a date restricted report', :settlement_transaction_account, :this_month_start
       it_behaves_like 'a report with instance variables set in a before_filter', :settlement_transaction_account
       describe 'with activities array stubbed' do
         it 'should render the settlement_transaction_account view' do
@@ -300,7 +302,8 @@ RSpec.describe ReportsController, :type => :controller do
           end
           it 'should set @end_date to the end of last month if no end_date param is provided' do
             make_request
-            expect(assigns[:end_date]).to eq(default_dates_hash[:last_month_end])
+            get :settlement_transaction_account
+            expect(assigns[:end_date]).to eq(default_dates_hash[:today])
           end
           it 'should pass @start_date, @end_date and `date_restriction` to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
             expect(controller).to receive(:date_picker_presets).with(restricted_start_date, end_date, ReportsController::DATE_RESTRICTION_MAPPING[:settlement_transaction_account]).and_return(picker_preset_hash)
