@@ -530,7 +530,7 @@ When(/^I click on the securities services monthly statement dropdown selector$/)
 end
 
 Then(/^I should see a report for "(.*?)"$/) do |date|
-  page.assert_selector('.report-summary-date', text: date)
+  page.assert_selector('.report-summary-date', text: fhlb_date_long_alpha(date.to_date), exact: true)
 end
 
 When(/^I click on the last option in the dividend transaction dropdown selector$/) do

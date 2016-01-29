@@ -49,8 +49,12 @@ module MAPI
             closing_balance = fake('capital_stock_trial_balance_closing_balance')
             certificates    = fake('capital_stock_trial_balance_certificates')
           end
-          closing_balance.first.merge("certificates" => certificates).tap do |data|
-            %w(number_of_shares number_of_certificates).each{ |key| data[key] = data[key].to_i }
+          if closing_balance.empty? || certificates.empty?
+            {}
+          else
+            closing_balance.first.merge("certificates" => certificates).tap do |data|
+              %w(number_of_shares number_of_certificates).each{ |key| data[key] = data[key].to_i }
+            end
           end
         end
       end

@@ -163,6 +163,8 @@ RSpec.describe ReportsController, :type => :controller do
          {type: nil,     value: transaction_type,     classes: [:'report-cell-narrow']},
          {type: :number, value: shares_outstanding,   classes: [:'report-cell-narrow']}]
       end
+      let(:min_date) { Date.new(2002,1,1) }
+      let(:call_action) { get :capital_stock_trial_balance }
       before do
         allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
         allow(member_balances_service_instance).to receive(:capital_stock_trial_balance).with(kind_of(Date)).and_return(summary)
@@ -171,13 +173,8 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a report that can be downloaded', :capital_stock_trial_balance, [:xlsx]
       it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_trial_balance
       it_behaves_like 'a report with a @max_date', :capital_stock_trial_balance
-      it 'can be disabled' do
-        allow(subject).to receive(:report_disabled?).and_return(true)
-        get :capital_stock_trial_balance
-        expect(assigns[:capital_stock_trial_balance_table_data][:rows]).to eq([])
-      end
       it 'renders the capital_stock_trial_balance view' do
-        get :capital_stock_trial_balance
+        call_action
         expect(response.body).to render_template('capital_stock_trial_balance')
       end
       it 'should pass @start_date and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
@@ -187,12 +184,20 @@ RSpec.describe ReportsController, :type => :controller do
         expect(assigns[:picker_presets]).to eq(picker_preset_hash)
       end
       it 'should assign @number_of_shares and @number_of_certificates' do
-        get :capital_stock_trial_balance
+        call_action
         expect(assigns[:number_of_shares]).to eq(number_of_shares)
         expect(assigns[:number_of_certificates]).to eq(number_of_certificates)
       end
+      it 'should assign @min_date a date of January 1st, 2002' do
+        call_action
+        expect(assigns[:min_date]).to eq(min_date)
+      end
+      it 'should assign @start_date a date of January 1st, 2002 if the start_date param occurs before that date' do
+        get :capital_stock_trial_balance, start_date: min_date - 1.year
+        expect(assigns[:min_date]).to eq(min_date)
+      end
       it 'should return capital_stock_trial_balance_table_data with with columns populated' do
-        get :capital_stock_trial_balance
+        call_action
         expect(assigns[:capital_stock_trial_balance_table_data][:rows][0][:columns]).to eq(table_data)
       end
       it 'sorts certificates by sequence number' do
@@ -224,6 +229,26 @@ RSpec.describe ReportsController, :type => :controller do
         get :capital_stock_trial_balance
         assigned_certificates = assigns[:capital_stock_trial_balance_table_data][:rows].collect {|row| row[:columns].first[:value]}
         expect(assigned_certificates).to eq([certificate_3[:certificate_sequence], certificate_2[:certificate_sequence], certificate_1[:certificate_sequence]])
+      end
+      RSpec.shared_examples 'a capital stock trial balance report with no data' do
+        it 'returns an empty array for @capital_stock_trial_balance_table_data[:rows]' do
+          call_action
+          expect(assigns[:capital_stock_trial_balance_table_data][:rows]).to eq([])
+        end
+        [:number_of_shares, :number_of_certificates].each do |instance_var|
+          it "sets @#{instance_var.to_s} to nil" do
+            call_action
+            expect(assigns[instance_var]).to be_nil
+          end
+        end
+      end
+      describe 'when the report is disabled' do
+        before { allow(subject).to receive(:report_disabled?).and_return(true) }
+        it_behaves_like 'a capital stock trial balance report with no data'
+      end
+      describe 'when the `member_balances.capital_stock_trial_balance` method returns an empty dataset' do
+        before { allow(member_balances_service_instance).to receive(:capital_stock_trial_balance).and_return({}) }
+        it_behaves_like 'a capital stock trial balance report with no data'
       end
     end
 

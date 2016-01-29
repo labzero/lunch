@@ -60,7 +60,6 @@ describe MAPI::ServiceApp do
         it 'should return a valid result' do
           expect(call_method).to eq(capital_stock_trial_balance)
         end
-
         it 'should return expected advances detail hash where value could not be nil' do
           call_method['certificates'].each do |row|
             expect(row["certificate_sequence"]).to be_kind_of(String)
@@ -69,6 +68,18 @@ describe MAPI::ServiceApp do
             expect(row["shares_outstanding"]).to be_kind_of(Numeric)
             expect(row["transaction_type"]).to be_kind_of(String)
           end
+        end
+        it 'should return an empty hash if the `closing_balance` SQL query returns no results' do
+          allow(subject).to receive(:fetch_hashes).with(logger, closing_balance_sql, {}, true).and_return([])
+          allow(subject).to receive(:fake).with('capital_stock_trial_balance_certificates').and_call_original
+          allow(subject).to receive(:fake).with('capital_stock_trial_balance_closing_balance').and_return([])
+          expect(call_method).to eq({})
+        end
+        it 'should return an empty hash if the `certificates` SQL query returns no results' do
+          allow(subject).to receive(:fetch_hashes).with(logger, certificates_sql, {}, true).and_return([])
+          allow(subject).to receive(:fake).with('capital_stock_trial_balance_certificates').and_return([])
+          allow(subject).to receive(:fake).with('capital_stock_trial_balance_closing_balance').and_call_original
+          expect(call_method).to eq({})
         end
       end
     end

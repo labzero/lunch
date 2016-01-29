@@ -36,3 +36,10 @@ Feature: Visiting the Capital Stock Trial Balance Report Page
     When I request an XLSX
     Then I should begin downloading a file
 
+  @jira-mem-1237
+  Scenario: Member tries to pick a date occuring before January 1, 2002
+    Given I am on the "Capital Stock Trial Balance" report page
+    When I click the datepicker field
+    And I write "01/01/1999" in the datepicker start input field
+    And I click the datepicker apply button
+    Then I should see a report for "January 1, 2002"

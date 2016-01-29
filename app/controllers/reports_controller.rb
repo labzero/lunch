@@ -290,17 +290,20 @@ class ReportsController < ApplicationController
 
   def capital_stock_trial_balance
     @max_date = most_recent_business_day(Time.zone.today - 1.day)
+    @min_date = Date.new(2002,1,1)
     @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
+    @start_date = @min_date if @start_date < @min_date
     @report_name = t('reports.pages.capital_stock_trial_balance.title')
     report_download_name = "capital_stock_trial_balance-#{fhlb_report_date_numeric(@start_date)}"
     downloadable_report(:xlsx, {start_date: @start_date.to_s}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
-        summary = { certificates: [], number_of_shares: 0, number_of_certificates: 0 }
+        summary = { certificates: [] }
       else
         summary = member_balances.capital_stock_trial_balance(@start_date)
-        raise StandardError, "There has been an error and ReportsController#capital_stock_trial_balance has returned nil. Check error logs." if summary.blank?
+        raise StandardError, "There has been an error and ReportsController#capital_stock_trial_balance has returned nil. Check error logs." if summary.nil?
       end
+      summary = { certificates: [] } if summary.empty? # The member has no data to display
       @picker_presets         = date_picker_presets(@start_date, nil, nil, @max_date)
       @number_of_shares       = summary[:number_of_shares]
       @number_of_certificates = summary[:number_of_certificates]
