@@ -23,7 +23,7 @@ module DatePickerHelper
     quarter = (today.month / 3.0).ceil
     if quarter == 1
       quarter = 4
-      year = today.year - 1.year
+      year = today.year - 1
     else
       quarter = quarter - 1
       year = today.year
