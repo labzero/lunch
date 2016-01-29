@@ -24,4 +24,10 @@
     padding-left: 30px;
     margin-top: 0;
   }
+  small {
+    @extend %typography-paragraph;
+    text-transform: uppercase;
+    color: $medium-gray;
+    display: block;
+  }
 }

@@ -2364,7 +2364,7 @@ en:
     web_support:
       title: Web Support
   privacy_policy:
-    last_updated: "Last Updated: October 15, 2015"
+    last_updated: 'Last Updated: %{date}'
     please_read: PLEASE READ THIS PRIVACY POLICY BEFORE USING THIS WEBSITE OR OTHER ONLINE BANK SURVEY REQUEST
     introduction: "IF APPLICABLE: We use other online services not covered by this Policy. If you visit one of these sites, please review the policies of those sites to understand how your information may be collected, used and shared."
     applicable: From time to time, we may change this Policy. The effective date of this Policy, as stated above, indicates the last time this Policy was revised or updated. Checking the effective date above allows you to determine whether there have been changes since the last time you reviewed this Policy. We reserve the right to change this Policy at any time. Any changes to this Policy will become effective when we post the updated Policy to this Website. Your use of this Website following any changes to the Policy means that you accept the revised Policy. You are encouraged to review this Policy each time you use this Website
