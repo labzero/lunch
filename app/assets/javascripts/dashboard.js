@@ -45,7 +45,7 @@ $(function () {
       $element.data('flyout-trigger', 'inactive');
       $('.flyout').addClass('dashboard-quick-advance-flyout');
       $('.flyout-bottom-section').addClass('column-3-span-2');
-      var topContent = [$('.dashboard-module-advances header').clone(), $('<div class="flyout-top-section-body"></div>').append($('.dashboard-module-advances .input-field-container, .dashboard-module-advances h2, .quick-advance-desk-closed-message').clone())];
+      var topContent = [$('.dashboard-module-advances header').clone(), $('<div class="flyout-top-section-body"></div>').append($('.dashboard-module-advances .input-field-container, .dashboard-module-advances h2, .quick-advance-desk-closed-message-group').clone())];
       var bottomContent = $('.quick-advance-rates, .quick-advance-last-updated-message, .quick-advance-limited-pricing-message, .quick-advance-instruction, .dashboard-module-advances .initiate-quick-advance, .rate-advances-footer, .quick-advance-error').clone();
       $('.dashboard-module-advances').flyout({topContent:topContent, bottomContent:bottomContent, useReferenceElement:true});
       var $amountField = $('.dashboard-quick-advance-flyout input[name=amount]');
@@ -90,7 +90,7 @@ $(function () {
 
   function showQuickAdvanceClosedState() {
     $('.primary-button.initiate-quick-advance, .rate-advances-footer, .dashboard-module-advances .input-field-container, .flyout .input-field-container').remove();
-    $('.quick-advance-desk-closed-message').show();
+    $('.quick-advance-desk-closed-message-group').show();
     $('.quick-advance-last-updated-message').addClass('show-message');
     $('.dashboard-quick-advance-flyout td, .dashboard-quick-advance-flyout th').removeClass('cell-selected');
     $('.dashboard-quick-advance-flyout .selectable-cell').addClass('disabled-cell');
