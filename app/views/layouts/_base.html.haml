@@ -17,7 +17,7 @@
       - else
         %style
           - css_manifest_filename = (css_manifest.end_with?('.css') ? css_manifest : css_manifest + '.css' )
-          != FhlbMember::Application.assets.find_asset(css_manifest_filename).source
+          != asset_source(css_manifest_filename)
     = javascript_include_tag js_manifest unless skip_javascript
     = csrf_meta_tags
   %body

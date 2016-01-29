@@ -1,6 +1,7 @@
 class DashboardController < ApplicationController
   include CustomFormattingHelper
   include DashboardHelper
+  include AssetHelper
 
   before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform] do
     authorize :advances, :show?
@@ -95,11 +96,11 @@ class DashboardController < ApplicationController
     default_image_path = 'placeholder-usericon.svg'
     if @contacts[:rm] && @contacts[:rm][:username]
       rm_image_path = "#{@contacts[:rm][:username].downcase}.jpg"
-      @contacts[:rm][:image_url] = Rails.application.assets.find_asset(rm_image_path) ? rm_image_path : default_image_path
+      @contacts[:rm][:image_url] = find_asset(rm_image_path) ? rm_image_path : default_image_path
     end
     if @contacts[:cam] && @contacts[:cam][:username]
       cam_image_path = "#{@contacts[:cam][:username].downcase}.jpg" 
-      @contacts[:cam][:image_url] = Rails.application.assets.find_asset(cam_image_path) ? cam_image_path : default_image_path
+      @contacts[:cam][:image_url] = find_asset(cam_image_path) ? cam_image_path : default_image_path
     end
   end
 

@@ -3,7 +3,7 @@
   %head
     %meta{charset: "utf-8"}
     %style
-      = FhlbMember::Application.assets.find_asset('email.css').source
+      != asset_source('email.css')
   %body
     %header
       = image_tag 'logo-black-140x50.png', size: '140x50'
