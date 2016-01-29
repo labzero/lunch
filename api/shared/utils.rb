@@ -64,7 +64,7 @@ module MAPI
         end
 
         def decimal_to_percentage_rate(rate)
-          rate.to_f.round(5) * 100.0 if rate
+          rate.to_f.round(7) * 100.0 if rate
         end
 
         def percentage_to_decimal_rate(rate)
