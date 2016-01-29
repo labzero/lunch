@@ -1,12 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  let(:member_id) { 750 }
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'member interest_rate_resets' do
     describe 'the `interest_rate_resets` method' do
       let(:interest_rate_reset_data) { JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'interest_rate_resets.json')))

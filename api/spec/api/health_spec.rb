@@ -1,10 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'GET /healthy' do
     let(:make_request) { get "/healthy"; JSON.parse(last_response.body) }
     it 'should return a JSON hash' do

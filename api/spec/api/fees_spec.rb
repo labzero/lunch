@@ -1,10 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'the fee_schedules endpoint' do
     let(:call_endpoint) { get "/fees/schedules" }
     let(:response) { double('response') }

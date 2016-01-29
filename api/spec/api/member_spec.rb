@@ -3,7 +3,6 @@ require 'date'
 
 describe MAPI::ServiceApp do
   subject { MAPI::Services::Member }
-  before  { header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"" }
 
   describe 'capital_stock_trial_balance' do
     let(:result){ { "certificates" => [], "number_of_certificates" => 0, "number_of_shares" => 0 }}

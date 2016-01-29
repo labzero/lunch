@@ -1,15 +1,10 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'STA activities' do
     let(:from_date) {'2014-01-01'}
     let(:to_date) {'2014-12-31'}
-    let(:sta_activities) { get "/member/#{MEMBER_ID}/sta_activities/#{from_date}/#{to_date}"; JSON.parse(last_response.body) }
+    let(:sta_activities) { get "/member/#{member_id}/sta_activities/#{from_date}/#{to_date}"; JSON.parse(last_response.body) }
     RSpec.shared_examples 'a STA activities endpoint' do
       it 'should return a number for the balance' do
         expect(sta_activities['start_balance']).to be_kind_of(Numeric)
@@ -33,9 +28,9 @@ describe MAPI::ServiceApp do
       end
     end
     it 'invalid param result in 400 error message' do
-      get "/member/#{MEMBER_ID}/sta_activities/12-12-2014/#{to_date}"
+      get "/member/#{member_id}/sta_activities/12-12-2014/#{to_date}"
       expect(last_response.status).to eq(400)
-      get "/member/#{MEMBER_ID}/sta_activities/#{from_date}/12-12-2014"
+      get "/member/#{member_id}/sta_activities/#{from_date}/12-12-2014"
       expect(last_response.status).to eq(400)
     end
     describe 'in the development environment' do
@@ -183,7 +178,7 @@ describe MAPI::ServiceApp do
         allow(result_sta_count).to receive(:fetch_hash).and_return(sta_count_0, nil)
       end
       it 'invalid param result in 404 if row count is 0' do
-        get "/member/#{MEMBER_ID}/sta_activities/#{from_date}/#{to_date}"
+        get "/member/#{member_id}/sta_activities/#{from_date}/#{to_date}"
         expect(last_response.status).to eq(404)
       end
     end
@@ -192,11 +187,11 @@ describe MAPI::ServiceApp do
   describe 'current_sta_rate' do
     let(:sta_rate_data) { JSON.parse(File.read(File.join(MAPI.root, 'spec', 'fixtures', 'current_sta_rate.json')))
     }
-    let(:current_sta_rate) { MAPI::Services::Member::SettlementTransactionAccount.current_sta_rate(subject, MEMBER_ID) }
+    let(:current_sta_rate) { MAPI::Services::Member::SettlementTransactionAccount.current_sta_rate(subject, member_id) }
 
     it 'calls the `current_sta_rate` method when the endpoint is hit' do
       allow(MAPI::Services::Member::SettlementTransactionAccount).to receive(:current_sta_rate).and_return('a response')
-      get "/member/#{MEMBER_ID}/current_sta_rate"
+      get "/member/#{member_id}/current_sta_rate"
       expect(last_response.status).to eq(200)
     end
 

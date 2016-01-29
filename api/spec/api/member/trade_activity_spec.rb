@@ -2,11 +2,6 @@ require 'spec_helper'
 require 'date'
 
 describe MAPI::ServiceApp do
-  let(:member_id) { 750 }
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'Trade Activity' do
     let(:ods_deal_structure_code) { double('ods_deal_structure_code') }
     let(:call_method) { MAPI::Services::Member::TradeActivity.trade_activity(subject, member_id, 'ADVANCE') }

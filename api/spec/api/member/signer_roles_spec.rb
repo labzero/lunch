@@ -1,27 +1,22 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'GET /member/:member_id/signers' do
     it 'calls `MAPI::Services::Member::SignerRoles.signer_roles`' do
       expect(MAPI::Services::Member::SignerRoles).to receive(:signer_roles)
-      get "/member/#{MEMBER_ID}/signers"
+      get "/member/#{member_id}/signers"
     end
     it 'returns a JSON object' do
       response_obj = double('Response Object')
       allow(MAPI::Services::Member::SignerRoles).to receive(:signer_roles).and_return(response_obj)
       expect(response_obj).to receive(:to_json)
-      get "/member/#{MEMBER_ID}/signers"
+      get "/member/#{member_id}/signers"
     end
   end
 
   describe 'the `signer_roles` method' do
     let(:app) {double('App', :settings => double('settings', :environment => nil))}
-    let(:signer_roles) {MAPI::Services::Member::SignerRoles.signer_roles(app, MEMBER_ID)}
+    let(:signer_roles) {MAPI::Services::Member::SignerRoles.signer_roles(app, member_id)}
 
     [:test, :production].each do |env|
       describe "in the #{env} environment" do

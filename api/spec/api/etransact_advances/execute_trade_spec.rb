@@ -11,7 +11,6 @@ end
 
 describe MAPI::ServiceApp do
 
-  let(:member_id) {750}
   let(:amount)  {'100'}
   let(:advance_type)  {'agency'}
   let(:advance_term)  {'1week'}
@@ -29,10 +28,6 @@ describe MAPI::ServiceApp do
       maturity_date: maturity_date.iso8601
     }.to_json
   }
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
 
   describe 'get_maturity_date' do
     let(:app){ double('app', logger: double('logger'), settings: double( 'settings', environment: nil ) ) }

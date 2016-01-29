@@ -1,11 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'member letters_of_credit' do
     let(:credits) do
       new_array = []
@@ -17,12 +12,12 @@ describe MAPI::ServiceApp do
       new_array
     end
     let(:total_current_par) { credits.inject(0) {|sum, credit| sum + credit[:LCX_CURRENT_PAR]} }
-    let(:member_letters_of_credit) { MAPI::Services::Member::LettersOfCredit.letters_of_credit(subject, MEMBER_ID) }
+    let(:member_letters_of_credit) { MAPI::Services::Member::LettersOfCredit.letters_of_credit(subject, member_id) }
     let(:formatted_credits) { double('an array of credits') }
 
     it 'calls the `letters_of_credit` method when the endpoint is hit' do
       allow(MAPI::Services::Member::LettersOfCredit).to receive(:letters_of_credit).and_return('a response')
-      get "/member/#{MEMBER_ID}/letters_of_credit"
+      get "/member/#{member_id}/letters_of_credit"
       expect(last_response.status).to eq(200)
     end
 

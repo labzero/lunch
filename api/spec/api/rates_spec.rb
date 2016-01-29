@@ -34,9 +34,6 @@ end
 
 describe MAPI::ServiceApp do
   subject { MAPI::Services::Rates }
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
   describe "historic overnight rates" do
     describe "development" do
       let(:rates) { get '/rates/historic/overnight'; JSON.parse(last_response.body) }

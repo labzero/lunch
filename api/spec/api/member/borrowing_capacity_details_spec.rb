@@ -1,16 +1,12 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'borrowing capacity details' do
     let(:as_of_date) {'2015-01-14'}
-    let(:borrowing_capacity_details) { get "/member/#{MEMBER_ID}/borrowing_capacity_details/#{as_of_date}"; JSON.parse(last_response.body) }
+    let(:borrowing_capacity_details) { get "/member/#{member_id}/borrowing_capacity_details/#{as_of_date}"; JSON.parse(last_response.body) }
 
     it 'invalid param result in 400 error message' do
-      get "/member/#{MEMBER_ID}/borrowing_capacity_details/12-12-2014"
+      get "/member/#{member_id}/borrowing_capacity_details/12-12-2014"
       expect(last_response.status).to eq(400)
     end
 

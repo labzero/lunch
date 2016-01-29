@@ -1,10 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   [:test, :production].each do |env|
     describe "etransact advances limits in the #{env} environment" do
       let(:etransact_advances_limits) { get '/etransact_advances/limits'; JSON.parse(last_response.body) }
