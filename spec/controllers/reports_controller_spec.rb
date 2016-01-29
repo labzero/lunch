@@ -193,6 +193,36 @@ RSpec.describe ReportsController, :type => :controller do
         get :capital_stock_trial_balance
         expect(assigns[:capital_stock_trial_balance_table_data][:rows][0][:columns]).to eq(table_data)
       end
+      it 'sorts certificates by sequence number' do
+        sequence = rand(100000..999999)
+        certificate_1 = {
+          certificate_sequence: sequence + rand(100..1000),
+          issue_date:           issue_date,
+          transaction_type:     transaction_type,
+          shares_outstanding:   shares_outstanding,
+        }
+        certificate_2 = {
+          certificate_sequence: sequence,
+          issue_date:           issue_date,
+          transaction_type:     transaction_type,
+          shares_outstanding:   shares_outstanding,
+        }
+        certificate_3 = {
+          certificate_sequence: sequence - rand(100..1000),
+          issue_date:           issue_date,
+          transaction_type:     transaction_type,
+          shares_outstanding:   shares_outstanding,
+        }
+        summary = {
+          certificates: [certificate_2, certificate_1, certificate_3],
+          number_of_shares: number_of_shares,
+          number_of_certificates: number_of_certificates
+        }
+        allow(member_balances_service_instance).to receive(:capital_stock_trial_balance).and_return(summary)
+        get :capital_stock_trial_balance
+        assigned_certificates = assigns[:capital_stock_trial_balance_table_data][:rows].collect {|row| row[:columns].first[:value]}
+        expect(assigned_certificates).to eq([certificate_3[:certificate_sequence], certificate_2[:certificate_sequence], certificate_1[:certificate_sequence]])
+      end
     end
 
     describe 'GET borrowing_capacity' do

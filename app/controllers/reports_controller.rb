@@ -308,7 +308,7 @@ class ReportsController < ApplicationController
                          t("global.issue_date"),
                          t('reports.pages.capital_stock_trial_balance.transaction_type'),
                          t('reports.pages.capital_stock_trial_balance.shares_outstanding')]
-      certificates = summary[:certificates].map do |certificate|
+      certificates = summary[:certificates].sort{|a,b| a[:certificate_sequence] <=> b[:certificate_sequence]}.map do |certificate|
         { columns: [{value: certificate[:certificate_sequence], type: nil,     classes: [:'report-cell-narrow']},
                     {value: certificate[:issue_date],           type: :date,   classes: [:'report-cell-narrow']},
                     {value: certificate[:transaction_type],     type: nil,     classes: [:'report-cell-narrow']},
