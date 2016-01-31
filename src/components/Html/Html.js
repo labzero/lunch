@@ -13,7 +13,7 @@ import { analytics } from '../../config';
 // https://analytics.google.com/
 const trackingCode =
   'window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;' +
-  `ga('create','${analytics.google.trackingId}','auto');ga('send','pageview')`;
+  `ga('create','${analytics.google.trackingId}','auto');`;
 
 class Html extends Component {
 
@@ -43,10 +43,10 @@ class Html extends Component {
         <style id="css" dangerouslySetInnerHTML={{ __html: this.props.css }} />
       </head>
       <body>
-        <div id="app" dangerouslySetInnerHTML={{ __html: this.props.body }} />
+        <div id="app" dangerouslySetInnerHTML={{ __html: this.props.body }} ></div>
         <script src={this.props.entry}></script>
-        <script dangerouslySetInnerHTML={{ __html: trackingCode }} />
-        <script src="https://www.google-analytics.com/analytics.js" async defer />
+        <script dangerouslySetInnerHTML={{ __html: trackingCode }} ></script>
+        <script src="https://www.google-analytics.com/analytics.js" async defer ></script>
       </body>
       </html>
     );

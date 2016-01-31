@@ -12,10 +12,12 @@ import path from 'path';
 import express from 'express';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
-import Router from './routes';
-import Html from './components/Html';
+import { match, RouterContext } from 'react-router';
 import assets from './assets';
 import { port } from './config';
+import routes from './routes';
+import ContextHolder from './core/ContextHolder';
+import Html from './components/Html';
 
 const server = global.server = express();
 
@@ -41,23 +43,25 @@ server.use('/api/content', require('./api/content').default);
 // -----------------------------------------------------------------------------
 server.get('*', async (req, res, next) => {
   try {
-    let statusCode = 200;
-    const data = { title: '', description: '', css: '', body: '', entry: assets.main.js };
-    const css = [];
-    const context = {
-      insertCss: styles => css.push(styles._getCss()),
-      onSetTitle: value => (data.title = value),
-      onSetMeta: (key, value) => (data[key] = value),
-      onPageNotFound: () => (statusCode = 404),
-    };
-
-    await Router.dispatch({ path: req.path, query: req.query, context }, (state, component) => {
-      data.body = ReactDOM.renderToString(component);
+    match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
+      let statusCode = 200;
+      const data = { title: '', description: '', css: '', body: '', entry: assets.main.js };
+      const css = [];
+      const context = {
+        insertCss: styles => css.push(styles._getCss()),
+        onSetTitle: value => (data.title = value),
+        onSetMeta: (key, value) => (data[key] = value),
+        onPageNotFound: () => (statusCode = 404),
+      };
+      data.body = ReactDOM.renderToString(
+        <ContextHolder context={context}>
+          <RouterContext {...renderProps} />
+        </ContextHolder>
+      );
       data.css = css.join('');
+      const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
+      res.status(statusCode).send(`<!doctype html>\n${html}`);
     });
-
-    const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
-    res.status(statusCode).send(`<!doctype html>\n${html}`);
   } catch (err) {
     next(err);
   }
