@@ -263,6 +263,8 @@ def user_for_type(user_type)
   case user_type
   when 'primary user'
     primary_user
+  when 'intranet user'
+    intranet_user
   when 'quick-advance signer'
     quick_advance_signer
   when 'quick-advance non-signer'
@@ -298,6 +300,10 @@ end
 
 def quick_advance_non_signer
   CustomConfig.env_config['non_signer_advances_user']
+end
+
+def intranet_user
+  CustomConfig.env_config['intranet_user']
 end
 
 def extranet_user

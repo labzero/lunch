@@ -1,10 +1,9 @@
 class InternalUserPolicy < ApplicationPolicy
 
   INTERNAL_IPS = (ENV['FHLB_INTERNAL_IPS'] || '').split.freeze
-  INTERNAL_LDAP_DOMAIN = 'intranet'.freeze
 
   def access?
-    if user.ldap_domain_name == INTERNAL_LDAP_DOMAIN
+    if user.intranet_user?
       (self.class.cidrs.find { |cidr| cidr.include?(record.remote_ip) }).present? || user.roles.include?(User::Roles::USER_WITH_EXTERNAL_ACCESS)
     else
       true

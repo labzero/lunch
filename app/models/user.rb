@@ -74,6 +74,8 @@ class User < ActiveRecord::Base
     'signer-etransact' => Roles::ETRANSACT_SIGNER
   }.freeze
 
+  INTERNAL_LDAP_DOMAIN = 'intranet'.freeze
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :ldap_authenticatable, :recoverable, :trackable, :timeoutable, case_insensitive_keys: [:username]
@@ -277,6 +279,10 @@ class User < ActiveRecord::Base
     @virtual_validators || false
   end
 
+  def intranet_user?
+    self.ldap_domain == INTERNAL_LDAP_DOMAIN
+  end
+
   protected
 
   def reload_ldap_entry
@@ -325,9 +331,15 @@ class User < ActiveRecord::Base
   end
 
   def check_password_change
-    if password_changed? && (changed.select{|key| LDAP_ATTRIBUTES_MAPPING.include?(key)}).count > 0 # we don't allow password changes to be mixed with other LDAP changes
-      errors.add(:password, :non_atomic)
-      raise ActiveRecord::Rollback
+    user_policy = UserPolicy.new(self, nil)
+    if password_changed?
+      if (changed.select{|key| LDAP_ATTRIBUTES_MAPPING.include?(key)}).count > 0 # we don't allow password changes to be mixed with other LDAP changes
+        errors.add(:password, :non_atomic)
+        raise ActiveRecord::Rollback
+      elsif !user_policy.change_password?
+        errors.add(:password, :intranet)
+        raise ActiveRecord::Rollback
+      end
     end
   end
 

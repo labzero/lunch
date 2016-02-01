@@ -174,3 +174,10 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
     When I enter a new valid password in the password confirmation field
     And I focus on the new password field
     Then I should not see a password match error
+
+  @jira-mem-1033
+  Scenario: Intranet users cannot reset their passwords from the settings page
+    Given I am logged in as an "intranet user"
+    When I click on the gear icon in the header
+    Then I should see a message letting me know I cannot change my password
+    And I should not see the change password form

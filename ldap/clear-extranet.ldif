@@ -1,6 +1,12 @@
 dn: sAMAccountName=extra,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
+dn: sAMAccountName=extra-password,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
+
+dn: sAMAccountName=extra-expired,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
+
 dn: sAMAccountName=extra-chaste,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
