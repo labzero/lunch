@@ -8,7 +8,11 @@ Then(/^I should see the forgot password page$/) do
 end
 
 When(/^I enter my username$/) do
-  fill_in('user_username', with: primary_user['username'])
+  fill_in('user_username', with: extranet_user['username'])
+end
+
+When(/^I enter my intranet username$/) do
+  fill_in('user_username', with: intranet_user['username'])
 end
 
 When(/^I submit the form$/) do

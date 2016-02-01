@@ -72,3 +72,12 @@ Scenario: User password confirmation does not match in new password flow
   Then I should not see a password match error
   When I submit the form
   Then I should not see an error flash
+
+@jira-mem-1032
+Scenario: Intranet usernames are treated as not-found usernames in the forgot password flow
+  Given I visit the root path
+  And I follow the forgot password link
+  When I enter my intranet username
+  And I submit the form
+  Then I should see the forgot password page
+  And I should see an unknown user error flash
