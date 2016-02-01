@@ -134,6 +134,10 @@ Rails.application.routes.draw do
     end
   end
 
+  scope 'securities' do
+    get 'manage' => 'securities#manage', as: :manage_securities
+  end
+
   devise_scope :user do
     get '/' => 'users/sessions#new', :as => :new_user_session
     post '/' => 'users/sessions#create', :as => :user_session

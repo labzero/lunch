@@ -1,13 +1,15 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  %w(current monthly).each do |report_type|
-    describe "the #{report_type}_securities_position endpoint" do
+
+  RSpec.shared_examples 'a securities position with `total_original_par`, `total_current_par` and `total_market_value`' do |env, report_type, endpoint_arg|
+    describe 'object properties that sum other values' do
+      let(:call_method) { MAPI::Services::Member::SecuritiesPosition.securities_position(subject, member_id, endpoint_arg) }
       let(:securities) do
         new_array = []
         securities = JSON.parse(File.read(File.join(MAPI.root, 'spec', 'fixtures', 'securities.json')))
         securities.each do |security|
-          security[MAPI::Services::Member::SecuritiesPosition::SECURITIES_FIELD_MAPPINGS[:original_par][report_type].to_s] = (rand(0..1000000) + rand).round(2)
+          security[MAPI::Services::Member::SecuritiesPosition::SECURITIES_FIELD_MAPPINGS[:original_par][report_type]] = (rand(0..1000000) + rand).round(2)
           security[MAPI::Services::Member::SecuritiesPosition::SECURITIES_FIELD_MAPPINGS[:current_par][report_type]] = (rand(0..1000000) + rand).round(2)
           security[MAPI::Services::Member::SecuritiesPosition::SECURITIES_FIELD_MAPPINGS[:market_value][report_type]] = (rand(0..1000000) + rand).round(2)
           new_array << security.with_indifferent_access
@@ -17,7 +19,31 @@ describe MAPI::ServiceApp do
       let(:total_original_par) { securities.inject(0) {|sum, security| sum + security[MAPI::Services::Member::SecuritiesPosition::SECURITIES_FIELD_MAPPINGS[:original_par][report_type]]} }
       let(:total_current_par) { securities.inject(0) {|sum, security| sum + security[MAPI::Services::Member::SecuritiesPosition::SECURITIES_FIELD_MAPPINGS[:current_par][report_type]]} }
       let(:total_market_value) { securities.inject(0) {|sum, security| sum + security[MAPI::Services::Member::SecuritiesPosition::SECURITIES_FIELD_MAPPINGS[:market_value][report_type]]} }
-      let(:formatted_securities) { double('an array of securities') }
+
+      before do
+        if env == :production
+          allow(securities_result_set).to receive(:fetch_hash).and_return(*(securities + [nil]))
+        else
+          allow(MAPI::Services::Member::SecuritiesPosition::Private).to receive(:fake_securities).and_return(securities)
+        end
+      end
+
+      it "returns an object with a `total_original_par` that is the sum of the individual projection's original pars" do
+        expect(call_method[:total_original_par]).to eq(total_original_par)
+      end
+      it "returns an object with a `total_current_par` that is the sum of the individual projection's current pars" do
+        expect(call_method[:total_current_par]).to eq(total_current_par)
+      end
+      it "returns an object with a `total_market_value` that is the sum of the individual projection's market values" do
+        expect(call_method[:total_market_value]).to eq(total_market_value)
+      end
+    end
+  end
+
+  %w(current monthly).each do |report_type|
+    describe "the #{report_type}_securities_position endpoint" do
+      let(:securities) { JSON.parse(File.read(File.join(MAPI.root, 'spec', 'fixtures', 'securities.json'))) }
+      let(:formatted_securities) { double('an array of securities', sum: nil) }
       if report_type == 'current'
         let(:member_securities_position) { MAPI::Services::Member::SecuritiesPosition.securities_position(subject, member_id, report_type) }
       else
@@ -69,17 +95,9 @@ describe MAPI::ServiceApp do
             end
           end
 
+          it_behaves_like 'a securities position with `total_original_par`, `total_current_par` and `total_market_value`', env, report_type, report_type
           it 'returns an object with an `as_of_date`' do
             expect(member_securities_position[:as_of_date]).to be_kind_of(Date)
-          end
-          it "returns an object with a `total_original_par` that is the sum of the individual projection's original pars" do
-            expect(member_securities_position[:total_original_par]).to eq(total_original_par)
-          end
-          it "returns an object with a `total_current_par` that is the sum of the individual projection's current pars" do
-            expect(member_securities_position[:total_current_par]).to eq(total_current_par)
-          end
-          it "returns an object with a `total_market_value` that is the sum of the individual projection's market values" do
-            expect(member_securities_position[:total_market_value]).to eq(total_market_value)
           end
           it 'returns an object with an array of formatted `securities`' do
             allow(MAPI::Services::Member::SecuritiesPosition::Private).to receive(:format_securities).and_return(formatted_securities)
@@ -149,6 +167,83 @@ describe MAPI::ServiceApp do
             results = MAPI::Services::Member::SecuritiesPosition::Private.fake_securities(member_id, Time.zone.now.to_date, :current, nil)
             results.each do |result|
               expect(['U', 'P']).to include(result['ACCOUNT_TYPE'])
+            end
+          end
+        end
+      end
+    end
+  end
+
+  describe 'the managed_securities endpoint' do
+    let(:call_endpoint) { get "/member/#{member_id}/managed_securities" }
+    let(:managed_securities_response) { double('result of `managed_securities`', to_json: nil) }
+    it 'calls the `managed_securities` method' do
+      expect(MAPI::Services::Member::SecuritiesPosition).to receive(:securities_position).and_return(managed_securities_response)
+      call_endpoint
+    end
+    it 'returns json' do
+      allow(MAPI::Services::Member::SecuritiesPosition).to receive(:securities_position).and_return(managed_securities_response)
+      expect(managed_securities_response).to receive(:to_json)
+      call_endpoint
+    end
+  end
+  describe 'the `securities_position` method with a report type of :managed' do
+    [:test, :production].each do |env|
+      describe "`current_securities_method` method in the #{env} environment" do
+        managed_security_fields = %i(eligibility authorized_by borrowing_capacity)
+        let(:managed_securities) { MAPI::Services::Member::SecuritiesPosition.securities_position(subject, member_id, :managed) }
+        let(:securities) { JSON.parse(File.read(File.join(MAPI.root, 'spec', 'fixtures', 'securities.json'))) }
+        let(:securities_result_set) {double('Oracle Result Set', fetch_hash: nil)}
+
+        before do
+          allow(MAPI::ServiceApp).to receive(:environment).and_return(env)
+          if env == :production
+            allow(ActiveRecord::Base.connection).to receive(:execute).and_return(securities_result_set)
+            allow(securities_result_set).to receive(:fetch_hash).and_return(*(securities + [nil]))
+          else
+            allow(MAPI::Services::Member::SecuritiesPosition::Private).to receive(:fake_securities).and_return(securities)
+          end
+        end
+        it_behaves_like 'a securities position with `total_original_par`, `total_current_par` and `total_market_value`', env, :current, :managed
+        if env == :production
+          describe 'executing the SQL query' do
+            it 'selects the proper fields' do
+              select_statement = "SELECT SSX_BTC_DATE, #{MAPI::Services::Member::SecuritiesPosition::SECURITIES_FIELD_MAPPINGS.collect{|key, value| value[:current].to_s}.join(',')}"
+              expect(ActiveRecord::Base.connection).to receive(:execute).with(a_string_including(select_statement)).and_return(securities_result_set)
+              managed_securities
+            end
+            it 'pulls from the proper table' do
+              from_statement = 'FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION'
+              expect(ActiveRecord::Base.connection).to receive(:execute).with(a_string_including(from_statement)).and_return(securities_result_set)
+              managed_securities
+            end
+            it 'it includes the proper WHERE modifier' do
+              where_statement = "fhlb_id = #{member_id}"
+              expect(ActiveRecord::Base.connection).to receive(:execute).with(a_string_including(where_statement)).and_return(securities_result_set)
+              managed_securities
+            end
+          end
+        end
+        it 'returns an object with an `as_of_date`' do
+          expect(managed_securities[:as_of_date]).to be_kind_of(Date)
+        end
+        it 'formats the securities' do
+          expect(MAPI::Services::Member::SecuritiesPosition::Private).to receive(:format_securities).with(securities, :current).and_return([])
+          managed_securities
+        end
+        it 'returns an array of the formatted securities as the `securities` value' do
+          formatted_securities = MAPI::Services::Member::SecuritiesPosition::Private.format_securities(securities, :current).each do |security|
+            managed_security_fields.each do |field|
+              security[field] = nil
+            end
+          end
+          expect(managed_securities[:securities]).to eq(formatted_securities)
+        end
+        # TODO: Replace these tests with something more appropriate once we really have eligibility, authorized_by, and borrowing_capacity
+        managed_security_fields.each do |key|
+          it "returns an array of securities in the `securities` value that each include the #{key} key" do
+            managed_securities[:securities].each do |security|
+              expect(security.keys).to include(key)
             end
           end
         end

@@ -1348,6 +1348,21 @@ describe MemberBalanceService do
     end
   end
 
+  describe 'the `managed_securities` method' do
+    let(:managed_securities) { subject.managed_securities }
+    let(:securities) { double('an array of securities') }
+    before { allow(subject).to receive(:get_hash).and_return({}) }
+    it_should_behave_like 'a MAPI backed service object method', :managed_securities
+    it 'should call `get_hash` with the appropriate endpoint' do
+      expect(subject).to receive(:get_hash).with(:managed_securities, "/member/#{member_id}/managed_securities").and_return({})
+      managed_securities
+    end
+    it 'hands back only the array of securities objects' do
+      allow(subject).to receive(:get_hash).and_return({securities: securities})
+      expect(managed_securities).to eq(securities)
+    end
+  end
+
   # Helper Methods
   def expect_capital_stock_balance_to_receive(date)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with( "member/#{member_id}/capital_stock_balance/#{date}" )

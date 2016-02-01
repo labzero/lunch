@@ -502,6 +502,26 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/managed_securities'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve all securities currently being managed'
+              key :nickname, :getManagedSecuritiesForMembers
+              key :type, :MemberSecuritiesPosition
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
+          api do
             key :path, '/{id}/monthly_securities_position/{month_end_date}/{custody_account_type}'
             operation do
               key :method, 'GET'
@@ -1004,6 +1024,12 @@ module MAPI
           member_id = params[:id]
           custody_account_type = MAPI::Services::Member.custody_account_type(self, params[:custody_account_type])
           MAPI::Services::Member::SecuritiesPosition.securities_position(self, member_id, :current, {custody_account_type: custody_account_type}).to_json
+        end
+
+        # Member Managed Securities Position
+        relative_get '/:id/managed_securities' do
+          member_id = params[:id]
+          MAPI::Services::Member::SecuritiesPosition.securities_position(self, member_id, :managed).to_json
         end
 
         # Member Monthly Securities Position

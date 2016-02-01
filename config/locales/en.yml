@@ -184,6 +184,7 @@ en:
     transaction: Transaction
     loan_count: Loan Count
     unpaid_balance: Unpaid Balance
+    status: Status
   datepicker:
     range:
       date_to_current: "%{date} to date"
@@ -1038,6 +1039,12 @@ en:
     redirect:
       title: You are being redirected to the Bank’s eTransact Securities site.
       message: You will be prompted to log in again.
+    manage:
+      title: Manage Securities
+      eligibility: Eligibility
+      authorized_by: Authorized by
+      pledged: Pledged
+      safekept: Safekept
   reports:
     meta_title: FHLB - Reports
     title: Reports
