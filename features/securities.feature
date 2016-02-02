@@ -6,7 +6,7 @@ Feature: Using the Securities tab
 Background:
   Given I am logged in
 
-@smoke @jira-mem-1295
+@smoke @jira-mem-1295 @flip-on-securities
 Scenario: Visit Manage Securities from the header
   Given I visit the dashboard
   When I click on the Securities link in the header

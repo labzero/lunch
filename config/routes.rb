@@ -134,8 +134,10 @@ Rails.application.routes.draw do
     end
   end
 
-  scope 'securities' do
-    get 'manage' => 'securities#manage', as: :manage_securities
+  constraints Constraints::FeatureEnabled.new('securities') do
+    scope 'securities' do
+      get 'manage' => 'securities#manage', as: :manage_securities
+    end
   end
 
   devise_scope :user do
