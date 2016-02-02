@@ -950,4 +950,10 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`encrypted_password_changed?` protected method' do
+    it 'returns false' do
+      expect(subject.send(:encrypted_password_changed?)).to be(false)
+    end
+  end
+
 end
