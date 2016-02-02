@@ -58,7 +58,7 @@ Scenario: Quick Advance flyout tooltip
   And I open the quick advance flyout
   When I hover on the cell with a term of "2week" and a type of "whole"
   Then I should see the quick advance table tooltip for the cell with a term of "2week" and a type of "whole"
-  
+
 @jira-mem-979
 Scenario: Quick Advance flyout tooltip for Open advances
   Given I visit the dashboard
@@ -124,7 +124,7 @@ Scenario: Check the interest payment frequencies for various term/type
   When I click on the initiate advance button
   Then I should see an interest payment frequency of "maturity"
 
-  Scenario: Go back to rate table from preview in Quick Advance flyout
+Scenario: Go back to rate table from preview in Quick Advance flyout
   Given I visit the dashboard
   And I open the quick advance flyout
   And I select the rate with a term of "2week" and a type of "aaa"
@@ -228,7 +228,7 @@ Scenario: The View Recent Price Indications link is displayed when the desk is c
   And the desk has closed
   When I click on the View Recent Price Indications link
   Then I am on the "Current Price Indications" report page
-  
+
 @data-unavailable @jira-mem-569
 Scenario: A message is displayed when there is limited pricing
   Given I visit the dashboard
@@ -244,14 +244,21 @@ Scenario: Users get an error if their requested advance would push FHLB over its
   When I click on the initiate advance button
   Then I should see an "advance unavailable" error with amount 100003 and type "whole"
 
-@jira-mem-117
-Scenario: Users who wait too long to perform an advance are told that the rate has expired.
+@jira-mem-117 @jira-mem-1114
+Scenario: Users who wait too long to perform an advance are told that the rate has expired if the rate has changed
   Given I visit the dashboard
   And I am on the quick advance preview screen
   And I wait for 70 seconds
-  And I enter my SecurID pin and token
-  When I click on the quick advance confirm button
+  When I confirm an advance with a rate that changes
   Then I should see a "rate expired" error
+
+@jira-mem-117 @jira-mem-1114
+Scenario: Users who wait too long to perform an advance can still execute the advance if the rate has not changed
+  Given I visit the dashboard
+  And I am on the quick advance preview screen
+  And I wait for 70 seconds
+  When I confirm an advance with a rate that remains unchanged
+  Then I should see confirmation number for the advance
 
 @jira-mem-883
 Scenario: Users gets an error if advance causes per-term cumulative amount to exceed limit

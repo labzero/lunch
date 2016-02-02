@@ -165,6 +165,18 @@ Then(/^I should see an initiate advance button with a notification about the new
   page.assert_selector('.confirm-quick-advance', text: I18n.t('dashboard.quick_advance.buttons.new_rate'))
 end
 
+When(/^I confirm an advance with a rate that changes$/) do
+  step 'I enter my SecurID pin and token'
+  allow_any_instance_of(AdvanceRequest).to receive(:rate_changed?).and_return(true)
+  step 'I click on the quick advance confirm button'
+end
+
+When(/^I confirm an advance with a rate that remains unchanged$/) do
+  step 'I enter my SecurID pin and token'
+  allow_any_instance_of(AdvanceRequest).to receive(:rate_changed?).and_return(false)
+  step 'I click on the quick advance confirm button'
+end
+
 When(/^the quick advance rate has changed$/) do
   # implement code to ensure rate is displayed as having changed
 end

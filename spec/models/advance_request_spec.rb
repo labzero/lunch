@@ -91,17 +91,51 @@ describe AdvanceRequest do
     let(:now) { Time.zone.now }
     before do
       allow(Time).to receive_message_chain(:zone, :now).and_return(now)
+      allow(subject).to receive(:perform_rate_check)
+      allow(subject).to receive(:rate_changed?)
+    end
+
+    shared_examples 'a rate that has expired' do
+      before { allow(subject).to receive(:rate_changed?).and_return(true) }
+      it 'checks the rate' do
+        expect(subject).to receive(:perform_rate_check)
+        call_method
+      end
+      it 'returns true' do
+        expect(call_method).to be(true)
+      end
+    end
+
+    shared_examples 'a rate that has not expired' do
+      before { allow(subject).to receive(:rate_changed?).and_return(false) }
+      it 'resets the timestamp on the advance' do
+        expect(subject).to receive(:timestamp!)
+        call_method
+      end
+      it 'returns false' do
+        expect(call_method).to be(false)
+      end
     end
 
     shared_examples 'check the timestamp' do
       let(:timeout) { rand(1..20) }
-      it 'returns true if the timestamp + the timeout < now' do
-        subject.attributes = {'timestamp' => now - (timeout + 0.1).seconds}
-        expect(call_method).to be(true)
+      describe 'when the timestamp + the timeout < now' do
+        before { subject.attributes = {'timestamp' => now - (timeout + 0.1).seconds} }
+        describe 'when the rate has changed' do
+          include_examples 'a rate that has expired'
+        end
+        describe 'when the rate has not changed' do
+          include_examples 'a rate that has not expired'
+        end
       end
-      it 'returns true if the timestamp + the timeout == now' do
-        subject.attributes = {'timestamp' => now - timeout.seconds}
-        expect(call_method).to be(true)
+      describe 'returns true if the timestamp + the timeout == now' do
+        before { subject.attributes = {'timestamp' => now - timeout.seconds} }
+        describe 'when the rate has changed' do
+          include_examples 'a rate that has expired'
+        end
+        describe 'when the rate has not changed' do
+          include_examples 'a rate that has not expired'
+        end
       end
       it 'returns false if the timestamp + the timeout > now' do
         subject.attributes = {'timestamp' => now - (timeout - 0.1).seconds}
