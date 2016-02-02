@@ -207,3 +207,51 @@ namespace :stats do
     end
   end
 end
+
+namespace :feature do
+  desc 'Enables a feature for the supplied actor, or all actors if none is supplied'
+  task :enable, [:feature, :actor] do |t, args|
+    on primary(:db) do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          cli_args = [args.feature, args.actor].compact.join(',')
+          execute :rake, "flipper:feature:enable[#{cli_args}]"
+        end
+      end
+    end
+  end
+
+  desc 'Enable all *known* features for the supplied actor'
+  task :enable_all, [:actor] do |t, args|
+    on primary(:db) do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          execute :rake, "flipper:feature:enable_all[#{args.actor}]"
+        end
+      end
+    end
+  end
+
+  desc 'Disables a feature for the supplied actor, or all actors if none is supplied'
+  task :disable, [:feature, :actor] do |t, args|
+    on primary(:db) do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          cli_args = [args.feature, args.actor].compact.join(',')
+          execute :rake, "flipper:feature:disable[#{cli_args}]"
+        end
+      end
+    end
+  end
+
+  desc 'Disable all *known* features for the supplied actor'
+  task :disable_all, [:actor] do |t, args|
+    on primary(:db) do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          execute :rake, "flipper:feature:disable_all[#{args.actor}]"
+        end
+      end
+    end
+  end
+end

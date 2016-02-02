@@ -42,6 +42,11 @@ gem 'redis-rails'
 gem 'aasm'
 gem 'redis-objects'
 
+# feature flagging
+gem 'flipper'
+gem 'flipper-redis'
+gem 'flipper-ui'
+
 # for parsing emails into CorporateCommunication objects
 gem 'mail'
 gem 'css_parser'

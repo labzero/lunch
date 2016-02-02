@@ -10,5 +10,11 @@ changetype: delete
 dn: ou=FHLB-Accounts,dc=fhlbsf-i,dc=com
 changetype: delete
 
+dn: CN=FCN-MemberSite-Admins,DC=fhlbsf-i,DC=com
+changetype: delete
+
+dn: CN=FCN-MemberSite-ExternalAccess,DC=fhlbsf-i,DC=com
+changetype: delete
+
 dn: dc=fhlbsf-i,dc=com
 changetype: delete

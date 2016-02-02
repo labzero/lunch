@@ -134,8 +134,10 @@ Rails.application.routes.draw do
     end
   end
 
-  scope 'securities' do
-    get 'manage' => 'securities#manage', as: :manage_securities
+  constraints Constraints::FeatureEnabled.new('securities') do
+    scope 'securities' do
+      get 'manage' => 'securities#manage', as: :manage_securities
+    end
   end
 
   devise_scope :user do
@@ -159,6 +161,10 @@ Rails.application.routes.draw do
   devise_for :users, controllers: { sessions: 'users/sessions', passwords: 'users/passwords' }, :skip => [:sessions, :passwords]
 
   root 'users/sessions#new'
+
+  constraints Constraints::WebAdmin.new do
+    mount Flipper::UI.app(Rails.application.flipper) => '/admin'
+  end
 
   get '/error' => 'error#standard_error' unless Rails.env.production?
   get '/maintenance' => 'error#maintenance' unless Rails.env.production?

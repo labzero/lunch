@@ -530,6 +530,32 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`flipper_id` method' do
+    let(:call_method) { subject.flipper_id }
+    it 'returns the username' do
+      expect(call_method).to eq(subject.username)
+    end
+  end
+
+  describe '`member` method' do
+    let(:call_method) { subject.member }
+    let(:member_id) { double('A Member ID') }
+    before do
+      allow(subject).to receive(:member_id).and_return(member_id)
+    end
+    it 'returns a Member instance for the users affiliated member' do
+      expect(call_method.id).to eq(member_id)
+    end
+    it 'caches the member instance' do
+      member = call_method
+      expect(call_method).to be(member)
+    end
+    it 'returns nil if the user has no member affiliated with it' do
+      allow(subject).to receive(:member_id).and_return(nil)
+      expect(call_method).to be_nil
+    end
+  end
+
 
   describe '`reload_ldap_entry` protected method' do
     let(:call_method) { subject.send(:reload_ldap_entry) }
@@ -921,6 +947,12 @@ RSpec.describe User, :type => :model do
         callback.kind == :after && callback.filter == :clear_password_expiration
       end
       expect(callbacks.length).to eq(1)
+    end
+  end
+
+  describe '`encrypted_password_changed?` protected method' do
+    it 'returns false' do
+      expect(subject.send(:encrypted_password_changed?)).to be(false)
     end
   end
 

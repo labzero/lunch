@@ -15,3 +15,5 @@ Rails.application.config.middleware.swap(Rails::Rack::Logger, FhlbMember::Rack::
 
 # Add shared LDAP connection middleware before Warden
 Rails.application.config.middleware.insert_before(Warden::Manager, FhlbMember::Rack::LDAPSharedConnection)
+
+Rails.application.config.middleware.use Flipper::Middleware::Memoizer, -> { Rails.application.flipper }

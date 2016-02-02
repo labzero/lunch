@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   include Pundit
+  include FlipperHelper
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
@@ -7,7 +8,7 @@ class ApplicationController < ActionController::Base
   before_action :check_password_change
   before_action :check_terms
   before_action :save_render_time
-  helper_method :current_member_name
+  helper_method :current_member_name, :current_member_id
 
   HTTP_404_ERRORS = [ActionController::RoutingError, ActionController::UnknownController, ::AbstractController::ActionNotFound, ActiveRecord::RecordNotFound]
 

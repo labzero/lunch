@@ -70,6 +70,13 @@ objectClass: group
 objectClass: top
 member: sAMAccountName=local-offsite,dc=fhlbsf-i,dc=com
 
+# FCN-MemberSite-Admins
+dn: CN=FCN-MemberSite-Admins,DC=fhlbsf-i,DC=com
+cn: FCN-MemberSite-Admins
+objectClass: group
+objectClass: top
+member: sAMAccountName=local,dc=fhlbsf-i,dc=com
+
 #dn: ou=people,dc=fhlbsf-i,dc=com
 #objectClass: organizationalUnit
 #ou: people

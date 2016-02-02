@@ -259,7 +259,7 @@ class User < ActiveRecord::Base
           break
         end
       end
-      member_id
+      member_id.to_s if member_id
     )
   end
 
@@ -281,6 +281,14 @@ class User < ActiveRecord::Base
 
   def intranet_user?
     self.ldap_domain == INTERNAL_LDAP_DOMAIN
+  end
+
+  def flipper_id
+    username
+  end
+
+  def member
+    @member ||= (Member.new(member_id) if member_id)
   end
 
   protected
