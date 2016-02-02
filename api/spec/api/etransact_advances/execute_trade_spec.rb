@@ -693,4 +693,29 @@ describe MAPI::ServiceApp do
       include_examples 'dates'
     end
   end
+
+  describe '`build_message`' do
+    let(:today) { Time.zone.today }
+    let(:instrument) { double('instrument') }
+    let(:amount) { 234234 }
+    let(:signer) { double('signer') }
+    let(:markup) { double('markup') }
+    let(:day_count) { 'ACT/360' }
+    let(:blended_cost_of_funds) { double('blended_cost_of_funds') }
+    let(:cost_of_funds) { double('cost_of_funds') }
+    let(:benchmark_rate) { double('benchmark_rate') }
+    let(:operation) { double('An Operation') }
+    let(:call_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, today, day_count) }
+    let(:message) { call_method.first }
+
+    describe '`businessDayAdjustment` field' do
+      it 'sets the `businessDayAdjustment` to `FOLLOWING` if the term is not open' do
+        expect(message['v1:trade']['v12:advance']['v14:coupon']['v13:paymentDates']['v13:paymentConvention']['v13:businessDayAdjustment']).to eq('FOLLOWING')
+      end
+      it 'sets the `businessDayAdjustment` to `MODFOLLOWING` if the term open' do
+        message = MAPI::Services::EtransactAdvances::ExecuteTrade.build_message(member_id, instrument, operation, amount, 'open', advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, today, day_count).first
+        expect(message['v1:trade']['v12:advance']['v14:coupon']['v13:paymentDates']['v13:paymentConvention']['v13:businessDayAdjustment']).to eq('MODFOLLOWING')
+      end
+    end
+  end
 end

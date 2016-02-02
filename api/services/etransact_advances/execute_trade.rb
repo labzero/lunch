@@ -231,7 +231,7 @@ module MAPI
                 'v13:firstPaymentDate' => Time.zone.today,
                 'v13:paymentFrequency' => payment_info[:advance_payment_frequency],
                 'v13:paymentConvention' => {
-                  'v13:businessDayAdjustment' => 'FOLLOWING',
+                  'v13:businessDayAdjustment' => (advance_term.to_s == 'open' ? 'MODFOLLOWING' : 'FOLLOWING'),
                   'v13:businessDayCalendar' => 'USNY'
                 },
                 'v13:paymentDayOfMonth' =>  payment_info[:advance_payment_day_of_month]
