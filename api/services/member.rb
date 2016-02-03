@@ -1122,7 +1122,7 @@ module MAPI
         
         # Mortgage Collateral Update
         relative_get '/:id/mortgage_collateral_update' do
-          member_id = params[:id]
+          member_id = params[:id].to_i
           begin
             MAPI::Services::Member::MortgageCollateralUpdate.mortgage_collateral_update(self.settings.environment, logger, member_id).to_json
           rescue Savon::Error => error

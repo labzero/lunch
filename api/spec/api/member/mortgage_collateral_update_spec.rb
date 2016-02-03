@@ -10,7 +10,7 @@ describe MAPI::ServiceApp do
       call_endpoint
     end
     it 'calls the `mortgage_collateral_update` method with the member id' do
-      expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:mortgage_collateral_update).with(anything, anything, member_id.to_s)
+      expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:mortgage_collateral_update).with(anything, anything, member_id)
       call_endpoint
     end
     it 'returns the results of the method call as JSON' do
@@ -36,15 +36,19 @@ describe MAPI::ServiceApp do
   end
 
   describe 'the mortgage_collateral_update method' do
-    string_fields = MAPI::Services::Member::MortgageCollateralUpdate::STRING_FIELDS.collect{|x| x.upcase}
-    integer_fields = MAPI::Services::Member::MortgageCollateralUpdate::INTEGER_FIELDS.collect{|x| x.upcase}
-    let(:date_doubles) { {date_processed: double('date_processed', downcase: nil)} }
-    let(:string_doubles) { Hash[( string_fields.map { |key| [key, double(key, to_s: nil)] } )].with_indifferent_access }
-    let(:integer_doubles) { Hash[( integer_fields.map { |key| [key, double(key, round: nil)] } )].with_indifferent_access  }
-    let(:mcu_data) { integer_doubles.merge(string_doubles).merge(date_doubles).with_indifferent_access }
+    string_fields  = %w(mcu_type pledge_type transaction_number).map(&:upcase)
+    integer_fields = %w(accepted_count depledged_count pledged_count rejected_count renumbered_count total_count updated_count).map(&:upcase)
+    float_fields   = %w(accepted_unpaid depledged_unpaid pledged_unpaid rejected_unpaid renumbered_unpaid total_unpaid updated_unpaid
+                        accepted_original depledged_original pledged_original rejected_original renumbered_original total_original updated_original).map(&:upcase)
+    let(:date_processed_string) { double('date_processed_string')}
+    let(:date_doubles) {  { 'DATE_PROCESSED' => double('date_processed', to_s: date_processed_string)} }
+    let(:string_doubles)  { Hash[(  string_fields.map { |key| [key, double(key, to_s: nil)] } )].with_indifferent_access }
+    let(:integer_doubles) { Hash[( integer_fields.map { |key| [key, double(key, to_i: nil)] } )].with_indifferent_access }
+    let(:float_doubles)   { Hash[(   float_fields.map { |key| [key, double(key, to_f: nil)] } )].with_indifferent_access }
+    let(:mcu_data) { float_doubles.merge(integer_doubles).merge(string_doubles).merge(date_doubles).with_indifferent_access }
     let(:logger) { double('logger') }
 
-    before { allow(Date).to receive(:parse).with(mcu_data[:date_processed]) }
+    before { allow(Date).to receive(:parse).with(date_processed_string) }
 
     [:development, :test, :production].each do |env|
       describe "in the #{env} environment" do
@@ -52,7 +56,7 @@ describe MAPI::ServiceApp do
 
         if env == :production
           before { allow(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:fetch_hash).and_return(mcu_data) }
-
+          
           # tests specific to production environment
           it 'calls the shared utility function `fetch_hash` with the logger as an argument' do
             expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:fetch_hash).with(logger, anything)
@@ -75,7 +79,7 @@ describe MAPI::ServiceApp do
 
         # tests common to all environments
         it 'sets the `date_processed` field to the value of the returned data' do
-          expect(call_method[:date_processed]).to eq(mcu_data['DATE_PROCESSED'])
+          expect(call_method[:date_processed]).to eq(Date.parse(mcu_data['DATE_PROCESSED'].to_s))
         end
         string_fields.each do |field|
           it "sets the `#{field.downcase}` field with the proper string" do
@@ -84,8 +88,14 @@ describe MAPI::ServiceApp do
           end
         end
         integer_fields.each do |field|
-          it "sets the `#{field.downcase}` field with the proper rounded integer" do
-            allow(mcu_data[field]).to receive(:round).and_return(mcu_data[field])
+          it "sets the `#{field.downcase}` field with the proper integer" do
+            allow(mcu_data[field]).to receive(:to_i).and_return(mcu_data[field])
+            expect(call_method[field.downcase]).to eq(mcu_data[field])
+          end
+        end
+        float_fields.each do |field|
+          it "sets the `#{field.downcase}` field with the proper float" do
+            allow(mcu_data[field]).to receive(:to_f).and_return(mcu_data[field])
             expect(call_method[field.downcase]).to eq(mcu_data[field])
           end
         end
