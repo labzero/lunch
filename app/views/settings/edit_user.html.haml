@@ -1,4 +1,4 @@
-.settings-users-overlay.settings-user-form
+.settings-users-overlay.settings-user-edit-form
   %h3=t('settings.account.edit.title')
   = render 'user_form', user: @user
   = link_to(t('settings.account.edit.delete'), actions[:delete_disabled] ? '#' : user_confirm_delete_path(@user), class: 'secondary-button settings-user-delete', disabled: actions[:delete_disabled] ? 'disabled' : false, remote: true)

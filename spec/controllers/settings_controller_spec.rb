@@ -382,6 +382,120 @@ RSpec.describe SettingsController, :type => :controller do
     end
   end
 
+  describe 'GET new_user' do
+    allow_policy(:access_manager, :create?)
+    let(:make_request) { get :new_user }
+    let(:user) { double('User', new_record?: true) }
+    before do
+      allow(User).to receive(:new).and_return(user)
+    end
+    it 'assigns the User.new to @user' do
+      make_request
+      expect(assigns[:user]).to be(user)
+    end
+    it "renders the `edit_user` overlay" do
+      expect(subject).to receive(:render_to_string).with(layout: false)
+      make_request
+    end
+    it 'returns a JSON response' do
+      make_request
+      json = JSON.parse(response.body)
+      expect(json).to have_key('html')
+    end
+  end
+
+  describe 'POST create_user' do
+    allow_policy(:access_manager, :create?)
+    let(:user_id)    { rand(10000..99999) }
+    let(:user)       { double('User', class: User, id: user_id, errors: double('Errors', full_messages: [])) }
+    let(:username)   { SecureRandom.hex }
+    let(:email)      { SecureRandom.hex }
+    let(:given_name) { SecureRandom.hex }
+    let(:surname)    { SecureRandom.hex }
+    let(:params)    { {email: email, email_confirmation: email, given_name: given_name, surname: surname, username: username} }
+    let(:make_request) { post :create_user, { user: params } }
+    let(:new_user)  { double('new_user') }
+    let(:actions)   { double('actions') }
+    let(:mailer)    { double('mailer') }
+    let(:roles) { ['foo', 'bar'] }
+    let(:strong_params){ double('strong_params') }
+    let(:strong_params2){ double('strong_params2') }
+    let(:ldap_user){ double('ldap_user', roles: roles, id: user_id, locked?: false, set_reset_password_token: true)}
+    let(:current_member_id){ double('current_member_id') }
+    let(:current_member_name){ double('current_member_name') }
+    let(:result){ SecureRandom.hex }
+    before do
+      allow(subject).to receive(:current_member_id).and_return(current_member_id)
+      allow(subject).to receive(:current_member_name).and_return(current_member_name)
+      allow(User).to receive(:new).and_return(new_user)
+      allow(User).to receive(:add_extranet_user).with(current_member_id, subject.current_user.username, username, email, given_name, surname).and_return(ldap_user)
+      allow(new_user).to receive(:valid?).with(:update).and_return(true)
+      allow(MemberMailer).to receive(:new_user_instructions).and_return(mailer)
+      allow(mailer).to receive(:deliver_now)
+    end
+    it_behaves_like 'an authorization required method', :post, :create_user, :access_manager, :create?
+    it 'handles strong parameters' do
+      allow(subject).to receive(:params).and_return(strong_params)
+      allow(strong_params).to receive(:require).with(:user).and_return(strong_params2)
+      expect(strong_params2).to receive(:permit).with(:given_name, :surname, :email, :email_confirmation, :username).and_return(params)
+      make_request
+    end
+    it 'assigns the value returned by `add_extranet_user` to @user' do
+      make_request
+      expect(assigns[:user]).to be(ldap_user)
+    end
+    it 'returns a 500 if validation fails' do
+      allow(new_user).to receive(:valid?).and_return(false)
+      make_request
+      expect(response).to be_error
+    end
+    it 'renders the `create_user` overlay' do
+      allow(subject).to receive(:render_user_row).with(ldap_user)
+      expect(subject).to receive(:render_to_string).with(layout: false)
+      make_request
+    end
+    it 'renders the `user_row`' do
+      expect(subject).to receive(:render_user_row).with(ldap_user)
+      make_request
+    end
+    it 'returns a JSON response with an html entry' do
+      make_request
+      json = JSON.parse(response.body)
+      expect(json).to have_key('html')
+    end
+    it 'returns a JSON response with a row_html entry' do
+      make_request
+      json = JSON.parse(response.body)
+      expect(json).to have_key('row_html')
+    end
+
+    describe 'add_extranet_user fails' do
+      before do
+        allow(User).to receive(:add_extranet_user).and_return(nil)
+      end
+      it 'assigns a valid value to @user if add_extranet_user fails' do
+        make_request
+        expect(assigns[:user]).to eq(new_user)
+      end
+      it 'render_to_string to be called if add_extranet_user fails' do
+        expect(subject).to receive(:render_to_string).with('new_user', layout: false)
+        make_request
+      end
+
+      it 'return 500 status if add_extranet_user fails' do
+        make_request
+        expect(response).to have_http_status(:error)
+      end
+
+      it 'returns valid JSON response containing an error' do
+        allow(subject).to receive(:render_to_string).with('new_user', layout: false).and_return(result)
+        make_request
+        json = JSON.parse(response.body)
+        expect(json["html"]).to eq( result )
+      end
+    end
+  end
+
   describe 'GET confirm_delete' do
     allow_policy_resource(:user, :delete?)
     user_id = rand(10000..99999)
@@ -416,11 +530,13 @@ RSpec.describe SettingsController, :type => :controller do
     user_id = rand(10000..99999)
     let(:user_id) { user_id }
     let(:reason) { 'remove_access' }
+    let(:deletion_reason) { 'No longer a web user' }
     let(:make_request) { delete :delete_user, id: user_id, reason: reason }
     let(:user) { double('User', class: User, id: user_id, :'deletion_reason=' => nil, errors: double('Errors', full_messages: []), save!: true, destroy!: true) }
     before do
       allow(User).to receive(:find).and_call_original
       allow(User).to receive(:find).with(user_id.to_s).and_return(user)
+      allow(user).to receive(:update_attribute).with(:deletion_reason, deletion_reason).and_return(true)
     end
     it_behaves_like 'a resource-based authorization required method', :delete, :delete_user, :user, :delete?, id: user_id, reason: 'remove_access'
     it 'returns a 404 if the user was not found' do
@@ -438,17 +554,17 @@ RSpec.describe SettingsController, :type => :controller do
       'left_institution' => 'No longer with this institution'
     }.each do |code, message|
       it "converts reason code `#{code}` into reason string `#{message}`" do
-        expect(user).to receive(:deletion_reason=).with(message)
+        expect(user).to receive(:update_attribute).with(:deletion_reason, message)
         delete :delete_user, id: user_id, reason: code
       end
     end
     it 'saves the deletion reason' do
-      expect(user).to receive(:deletion_reason=).ordered
-      expect(user).to receive(:save!).ordered
+      expect(user).to receive(:update_attribute).with(:deletion_reason, deletion_reason).ordered
+      expect(user).to receive(:destroy!).ordered
       make_request
     end
-    it 'skips deleteing the user if the save fails' do
-      allow(user).to receive(:save!).and_return(false)
+    it 'skips deleting the user if the update_attribute fails' do
+      allow(user).to receive(:update_attribute).with(:deletion_reason, deletion_reason).and_return(false)
       expect(user).to_not receive(:destroy!)
       make_request
     end
@@ -456,12 +572,12 @@ RSpec.describe SettingsController, :type => :controller do
       expect(user).to receive(:destroy!).and_return(true)
       make_request
     end
-    it 'returns a 500 if the save fails' do
-      allow(user).to receive(:save!).and_return(false)
+    it 'returns a 500 if the update_attribute fails' do
+      allow(user).to receive(:update_attribute).with(:deletion_reason, deletion_reason).and_return(false)
       make_request
       expect(response).to have_http_status(:error)
     end
-    it 'returns a 500 if the delete fails' do
+    it 'returns a 500 if the destroy! fails' do
       allow(user).to receive(:destroy!).and_return(false)
       make_request
       expect(response).to have_http_status(:error)
@@ -760,6 +876,23 @@ RSpec.describe SettingsController, :type => :controller do
       it 'returns true for `reset_disabled`' do
         expect(call_method[:reset_disabled]).to be(true)
       end
+    end
+  end
+
+  describe 'render_user_row' do
+    let(:user){ double('user') }
+    let(:user_roles){ double('user_roles') }
+    let(:user_actions){ double('user_actions') }
+    let(:rendered_string){ double('rendered_string') }
+    let(:call_method){ subject.send(:render_user_row, user) }
+    before do
+      allow(subject).to receive(:roles_for_user).with(user).and_return(user_roles)
+      allow(subject).to receive(:actions_for_user).with(user).and_return(user_actions)
+      allow(subject).to receive(:render_to_string).with(partial: 'user_row', locals: {user: user, roles: user_roles, actions: user_actions}).and_return(rendered_string)
+    end
+
+    it 'returns the rendered string' do
+      expect(call_method).to eq(rendered_string)
     end
   end
 end

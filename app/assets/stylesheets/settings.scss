@@ -304,17 +304,8 @@
   }
 }
 
-.settings-user-form {
-  .settings-user-form-actions {
-    float: right;
-  }
-  button, .primary-button {
-    width: 130px;
-    margin-right: 20px;
-  }
-  .primary-button {
-    margin-right: 0;
-  }
+.settings-user-edit-form, .settings-user-create-form {
+
   form {
     margin-bottom: 30px;
   }
@@ -339,6 +330,29 @@
       padding-left: 1px;
       box-sizing: border-box;
     }
+  }
+}
+
+.settings-user-edit-form {
+  .settings-user-form-actions {
+    float: right;
+  }
+  button, .primary-button {
+    width: 130px;
+    margin-right: 20px;
+  }
+  .primary-button {
+    margin-right: 0;
+  }
+}
+
+.settings-user-create-form {
+  .primary-button, .secondary-button {
+    width: calc(50% - 10px);
+    float: left;
+  }
+  .primary-button{
+    float: right;
   }
 }
 

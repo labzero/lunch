@@ -90,7 +90,7 @@ class MembersService < MAPIService
           users = fetch_ldap_users(ldap, member_id) || []
           usernames = users.blank? ? [] : users.collect(&:username)
           signers.each do |signer|
-            roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact
+            roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::LDAP_GROUPS_TO_ROLES[role] }.compact
             signers_and_users << {display_name: signer['name'], roles: roles, given_name: signer['first_name'], surname: signer['last_name']} unless usernames.include?(signer['username'])
           end
 

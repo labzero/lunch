@@ -1,4 +1,7 @@
 class AccessManagerPolicy < ApplicationPolicy
+  def create?
+    user.roles.include?(User::Roles::ACCESS_MANAGER)
+  end
 
   def show?
     @user.roles.include?(User::Roles::ACCESS_MANAGER)

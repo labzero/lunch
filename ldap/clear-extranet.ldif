@@ -49,5 +49,8 @@ changetype: delete
 dn: CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
 changetype: delete
 
+dn: CN=Users,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
+changetype: delete
+
 dn: dc=extranet,dc=fhlbsf,dc=com
 changetype: delete

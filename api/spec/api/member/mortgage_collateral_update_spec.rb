@@ -34,7 +34,7 @@ describe MAPI::ServiceApp do
       end
     end
   end
-  
+
   describe 'the mortgage_collateral_update method' do
     string_fields = MAPI::Services::Member::MortgageCollateralUpdate::STRING_FIELDS.collect{|x| x.upcase}
     integer_fields = MAPI::Services::Member::MortgageCollateralUpdate::INTEGER_FIELDS.collect{|x| x.upcase}
@@ -43,16 +43,16 @@ describe MAPI::ServiceApp do
     let(:integer_doubles) { Hash[( integer_fields.map { |key| [key, double(key, round: nil)] } )].with_indifferent_access  }
     let(:mcu_data) { integer_doubles.merge(string_doubles).merge(date_doubles).with_indifferent_access }
     let(:logger) { double('logger') }
-    
+
     before { allow(Date).to receive(:parse).with(mcu_data[:date_processed]) }
-    
+
     [:development, :test, :production].each do |env|
       describe "in the #{env} environment" do
         let(:call_method) { MAPI::Services::Member::MortgageCollateralUpdate.mortgage_collateral_update(env, logger, member_id) }
-        
+
         if env == :production
           before { allow(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:fetch_hash).and_return(mcu_data) }
-          
+
           # tests specific to production environment
           it 'calls the shared utility function `fetch_hash` with the logger as an argument' do
             expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:fetch_hash).with(logger, anything)
@@ -91,5 +91,5 @@ describe MAPI::ServiceApp do
         end
       end
     end
-  end  
+  end
 end

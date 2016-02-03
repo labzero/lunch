@@ -2,7 +2,8 @@
   %section.settings-users
     .settings-users-header
       %h1= t('settings.account.title')
-      %button.table-button.secondary-button= t('settings.account.actions.add_user')
+      - if policy(current_user).create?
+        .table-button.secondary-button.settings-user-create= link_to( t('settings.account.actions.add_user'), new_user_path, remote: true)
     .settings-users-table
       %table
         %thead
@@ -22,4 +23,3 @@
       %p.settings-users-overlay-details.icon-alert-before=t('settings.account.error.summary')
       %button.primary-button{data: {'flyout-action' => 'close'}}= t('global.close')
     .settings-users-overlay.settings-users-loading
-      

@@ -38,7 +38,7 @@ Background:
     Then I should see a confirmation mismatch email error
     When I enter "test@example.com" for the email confirmation
     And I submit the edit user form
-    Then I should a update user success overlay
+    Then I should see an update user success overlay
     When I dismiss the overlay
     Then I should see a user with the an email of "test@example.com"
 
@@ -51,7 +51,7 @@ Background:
     Then I should see a blank first name error
     When I enter "John" for the first name
     And I submit the edit user form
-    Then I should a update user success overlay
+    Then I should see an update user success overlay
     When I dismiss the overlay
     Then I should see a user with the a first name of "John"
 
@@ -64,9 +64,57 @@ Background:
     Then I should see a blank last name error
     When I enter "Doe" for the last name
     And I submit the edit user form
-    Then I should a update user success overlay
+    Then I should see an update user success overlay
     When I dismiss the overlay
     Then I should see a user with the a last name of "Doe"
+
+  @jira-mem-565
+  Scenario: Access Managers can't create a user with validation errors
+    Given I visit the access manager page
+    When I create a new user
+    And I enter "" for the first name
+    And I submit the new user form
+    Then I should see a blank first name error
+    When I enter "John" for the first name
+    And I enter "" for the last name
+    And I submit the new user form
+    Then I should see a blank last name error
+    When I enter "Doe" for the last name
+    And I enter "fhlbsf1234" for the username
+    And I submit the new user form
+    Then I should see a invalid username error
+    And I enter "1234" for the username
+    And I submit the new user form
+    Then I should see a invalid username error
+    And I enter "ab" for the username
+    And I submit the new user form
+    Then I should see a too short[4] username error
+    And I enter "abcdefghijabcdefghijabcdefghij" for the username
+    And I submit the new user form
+    Then I should see a too long[20] username error
+    And I enter "u123" for the username
+    And I enter "" for the email
+    And I submit the new user form
+    Then I should see a blank email error
+    And I enter "jdoe@gmail.com" for the email
+    And I submit the new user form
+    Then I should see a confirmation mismatch email error
+    And I enter "jdoe@gmail.com" for the email confirmation
+    Then I should not see any validations errors
+
+  @jira-mem-565 @local-only
+  Scenario: Access Managers can create a new user
+    Given I visit the access manager page
+    When I create a new user
+    And I enter "New" for the first name
+    And I enter "User" for the last name
+    And I enter "newuser" for the username
+    And I enter "newuser@gmail.com" for the email
+    And I enter "newuser@gmail.com" for the email confirmation
+    And I submit the new user form
+    Then I should see a new user success overlay
+    When I dismiss the overlay
+    Then I should see a user with the a last name of "User"
 
   @jira-mem-564
   Scenario: Access Managers must select a reason why they are deleting a user
