@@ -2,4 +2,5 @@
 .row.terms-of-use-page
   .column-2x10-right
     %h1= t('terms.title')
+    %small= t('global.last_updated', date: fhlb_date_long_alpha(Date.new(2015, 10, 15)))
     = render 'terms'
