@@ -24,8 +24,9 @@ class AdvanceRequest
     :overnight, :open, :'1week', :'2week', :'3week', :'1month',
     :'2month', :'3month', :'6month', :'1year', :'2year', :'3year'
   ].freeze
+  LONG_ADVANCE_TERMS = ADVANCE_TERMS[8..-1].freeze
 
-  READONLY_ATTRS = [:signer, :timestamp, :checked_stock, :member_id, :old_rate, :owners].freeze
+  READONLY_ATTRS = [:signer, :timestamp, :checked_stock, :member_id, :old_rate, :owners, :request].freeze
   REQUEST_PARAMETERS = [
     :exception_message, :cumulative_stock_required,
     :current_trade_stock_required, :pre_trade_stock_required, :net_stock_required, :gross_amount,
@@ -38,6 +39,7 @@ class AdvanceRequest
   CORE_PARAMETERS = [:type, :rates, :term, :amount, :rate, :stock_choice].freeze
   PREVIEW_EXCLUDE_KEYS = [:advance_amount, :advance_rate, :advance_type, :advance_term, :status].freeze
   PARAMETER_ORDER = [:rates, :term, :type, :amount].freeze
+  SERIALIZATION_EXCLUDE_ATTRS = [:request].freeze
 
   VALID_AMOUNT = /\A[0-9,]+(\.0?0?)?\z/i.freeze
   LOG_PREFIX = "  \e[36m\033[1mREDIS\e[0m ".freeze
@@ -294,6 +296,8 @@ class AdvanceRequest
   def attributes=(hash)
     process_attribute = Proc.new do |key, value|
       case key.to_sym
+      when *SERIALIZATION_EXCLUDE_ATTRS
+        raise "illegal attribute: #{key}"
       when :current_state
         aasm.current_state = value.to_sym
       when :rates
@@ -323,7 +327,7 @@ class AdvanceRequest
 
   def attributes
     attrs = {}
-    (READONLY_ATTRS + REQUEST_PARAMETERS + CORE_PARAMETERS + [:id]).each do |key|
+    (READONLY_ATTRS + REQUEST_PARAMETERS + CORE_PARAMETERS + [:id] - SERIALIZATION_EXCLUDE_ATTRS).each do |key|
       attrs[key] = nil if send(key)
     end
     attrs[:current_state] = current_state
@@ -398,7 +402,7 @@ class AdvanceRequest
         rate_data[:type] = type
         rate_data[:term] = term
         if rate_data[:disabled] && !rate_data[:end_of_day] && (rate_data[:rate_band_info][:min_threshold_exceeded] || rate_data[:rate_band_info][:max_threshold_exceeded])
-          InternalMailer.exceeds_rate_band(rate_data, @request.try(:uuid), signer).deliver_now
+          InternalMailer.exceeds_rate_band(rate_data, request.try(:uuid), signer).deliver_now
         end
       end
     end
@@ -431,11 +435,11 @@ class AdvanceRequest
   end
 
   def etransact_service
-    @etransact_service ||= EtransactAdvancesService.new(@request)
+    @etransact_service ||= EtransactAdvancesService.new(request)
   end
 
   def rate_service
-    @rate_service ||= RatesService.new(@request)
+    @rate_service ||= RatesService.new(request)
   end
 
   def populate_attributes_from_response(response)
@@ -473,7 +477,7 @@ class AdvanceRequest
       if rate_details
         stale_rate = rate_details[:updated_at] + settings[:rate_stale_check].seconds < Time.zone.now
         if stale_rate
-          InternalMailer.stale_rate(settings[:rate_stale_check], @request.try(:request_uuid), signer).deliver_now
+          InternalMailer.stale_rate(settings[:rate_stale_check], request.try(:request_uuid), signer).deliver_now
           add_error(:rate, :stale)
         end
 
@@ -495,6 +499,9 @@ class AdvanceRequest
     response = etransact_service.quick_advance_execute(member_id, total_amount, type, term, rate, signer, maturity_date)
     process_trade_errors(:execute, response)
     populate_attributes_from_response(response)
+    if no_errors_present? && LONG_ADVANCE_TERMS.include?(term)
+      InternalMailer.long_term_advance(self).deliver_now
+    end
   end
 
   def process_trade_errors(method, response)

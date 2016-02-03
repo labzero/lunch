@@ -1,0 +1,26 @@
+= simple_format(t('emails.long_term_advance.body_html'))
+%dl
+  %dt Confirmation Number
+  %dd= @confirmation_number
+  %dt Member ID
+  %dd= @member_id
+  %dt Member Name
+  %dd= @member_name
+  %dt Signer
+  %dd= @signer
+
+%dl
+  %dt Amount
+  %dd= fhlb_formatted_currency(@amount)
+  %dt Type
+  %dd= @type
+  %dt Term
+  %dd= @term
+  %dt Rate
+  %dd= @rate
+  %dt Trade Date
+  %dd= fhlb_date_standard_numeric(@trade_date)
+  %dt Funding Date
+  %dd= fhlb_date_standard_numeric(@funding_date)
+  %dt Maturity Date
+  %dd= fhlb_date_standard_numeric(@maturity_date)

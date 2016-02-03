@@ -423,20 +423,6 @@ en:
     logged_out: You Have Been Logged Out
     session_expired: For security reasons, your session expires after several minutes of inactivity.
     log_in_again: Log In Again
-  emails:
-    new_user:
-      sender: FHLBank San Francisco <%{email}>
-      subject: Access to FHLBank San Francisco Member Portal
-      greeting: 'Hi %{given_name},'
-      created_by: "An account has been created for you by your institution’s Access Manager, %{manager}."
-      username: 'Your username is: %{username}.'
-      set_password: To access the FHLB Member Portal, you'll need to set your password.
-      login_instructions: Once you have set a password, you will be redirected to the login page, where you will need to enter your username (above) and your new password.
-      expiration: For your security, this link will expire in one hour.
-      contact: Contact your Access Manager or Web Support at %{phone} if you have any questions.
-      sign_off_html: Thank you,<br>FHLBank San Francisco Web Support Team
-      disclaimer: 'The contents of this email are intended only for the use of the individual or entity to which they are addressed and may contain information that is legally privileged, confidential, and exempt from disclosure. If you are not the intended recipient, you are hereby notified that any dissemination, distribution, or copying of this email is strictly prohibited. If you have received this email in error, please: (i) reply immediately to this email indicating that you received this communication in error, and (ii) promptly delete this email from your computer. Thank you.'
-
   forgot_password:
     instructions: "Enter your username, and we'll email you instructions to reset your password."
     confirmation:
@@ -2503,6 +2489,22 @@ en:
       agreements: "The terms and conditions related to the Bank’s advance products and services are governed by various agreements between the Bank and its members and housing associates, as well as Bank policies and applicable laws and regulations (“Bank Agreements”). In the event of express inconsistencies between these Terms of Use and Bank Agreements, the Bank Agreements shall be determinative."
     agree: I agree to the terms of use
     cancel: Cancel and log out
+  emails:
+    long_term_advance:
+      subject: Hedge Alert - %{amount} %{term} Advance Executed via Member Portal
+      body_html: A long term advance has been completed via eTransact.
+    new_user:
+      sender: FHLBank San Francisco <%{email}>
+      subject: Access to FHLBank San Francisco Member Portal
+      greeting: 'Hi %{given_name},'
+      created_by: "An account has been created for you by your institution’s Access Manager, %{manager}."
+      username: 'Your username is: %{username}.'
+      set_password: To access the FHLB Member Portal, you'll need to set your password.
+      login_instructions: Once you have set a password, you will be redirected to the login page, where you will need to enter your username (above) and your new password.
+      expiration: For your security, this link will expire in one hour.
+      contact: Contact your Access Manager or Web Support at %{phone} if you have any questions.
+      sign_off_html: Thank you,<br>FHLBank San Francisco Web Support Team
+      disclaimer: 'The contents of this email are intended only for the use of the individual or entity to which they are addressed and may contain information that is legally privileged, confidential, and exempt from disclosure. If you are not the intended recipient, you are hereby notified that any dissemination, distribution, or copying of this email is strictly prohibited. If you have received this email in error, please: (i) reply immediately to this email indicating that you received this communication in error, and (ii) promptly delete this email from your computer. Thank you.'
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."
