@@ -788,7 +788,7 @@ describe AdvanceRequest do
 
   describe '`attributes` method' do
     let(:call_method) { subject.attributes }
-    persisted_attributes = described_class::READONLY_ATTRS + described_class::REQUEST_PARAMETERS + described_class::CORE_PARAMETERS + [:id]
+    persisted_attributes = described_class::READONLY_ATTRS + described_class::REQUEST_PARAMETERS + described_class::CORE_PARAMETERS + [:id] - described_class::SERIALIZATION_EXCLUDE_ATTRS
 
     before do
       persisted_attributes.each { |attr| allow(subject).to receive(attr) }
@@ -814,6 +814,13 @@ describe AdvanceRequest do
       current_state = double('The Current State')
       allow(subject).to receive(:current_state).and_return(current_state)
       expect(call_method[:current_state]).to be(current_state)
+    end
+
+    described_class::SERIALIZATION_EXCLUDE_ATTRS.each do |attr|
+      it "does not include `#{attr}`" do
+        allow(subject).to receive(attr).and_return(double('A Value'))
+        expect(call_method).to_not have_key(attr)
+      end
     end
   end
 
@@ -841,7 +848,7 @@ describe AdvanceRequest do
       expect(subject).to receive("#{other_key}=").ordered
       call_method
     end
-    (described_class::READONLY_ATTRS + described_class::REQUEST_PARAMETERS + described_class::CORE_PARAMETERS + [:id]).each do |key|
+    (described_class::READONLY_ATTRS + described_class::REQUEST_PARAMETERS + described_class::CORE_PARAMETERS + [:id] - described_class::SERIALIZATION_EXCLUDE_ATTRS).each do |key|
       it "assings the value found under `#{key}` to the attribute `#{key}`" do
         case key
         when :type
@@ -874,6 +881,12 @@ describe AdvanceRequest do
     it 'raises an error if it encounters an unknown attribute' do
       hash[double('An Unknown Key').as_null_object] = double('A Value')
       expect{call_method}.to raise_error
+    end
+    described_class::SERIALIZATION_EXCLUDE_ATTRS.each do |attr|
+      it 'raises an error if it encounters an excluded attribute' do
+        hash[attr] = double('A Value')
+        expect{call_method}.to raise_error
+      end
     end
     it 'converts the rates to an indifferent access hash' do
       rates = double('Rates')
@@ -1487,6 +1500,7 @@ describe AdvanceRequest do
     let(:rate) { double('A Rate') }
     let(:call_method) { subject.send(:perform_execute) }
     let(:response) { double('A Quick Advance Execute Response', each: nil, :[] => []) }
+    let(:mail_message) { double(Mail::Message, deliver_now: nil) }
 
     before do
       allow(subject).to receive(:type).and_return(type)
@@ -1497,6 +1511,7 @@ describe AdvanceRequest do
       allow(subject).to receive(:gross_amount).and_return(gross_amount)
       allow(subject).to receive(:etransact_service).and_return(service_object)
       allow(service_object).to receive(:quick_advance_execute).and_return(response)
+      allow(InternalMailer).to receive(:long_term_advance).and_return(mail_message)
     end
 
     it 'calls `quick_advance_execute`' do
@@ -1520,6 +1535,31 @@ describe AdvanceRequest do
     it 'calls `populate_attributes_from_response` with the `quick_advance_execute` response' do
       expect(subject).to receive(:populate_attributes_from_response).with(response)
       call_method
+    end
+    describe 'when the advance is successfully executed' do
+      it 'sends a long term advance email if the term was > 3 months' do
+        term = described_class::LONG_ADVANCE_TERMS.sample
+        allow(subject).to receive(:term).and_return(term)
+        expect(InternalMailer).to receive(:long_term_advance).with(subject).and_return(mail_message)
+        call_method
+      end
+      it 'does not send a long term advance email if the term was <= 3 months' do
+        term = (described_class::ADVANCE_TERMS - described_class::LONG_ADVANCE_TERMS).sample
+        allow(subject).to receive(:term).and_return(term)
+        expect(InternalMailer).to_not receive(:long_term_advance).with(subject)
+        call_method
+      end
+    end
+    describe 'when the advance is not successfully executed' do
+      before do
+        subject.send(:add_error, 'foo', 'bar')
+      end
+      it 'does not send a long term advance email' do
+        term = described_class::LONG_ADVANCE_TERMS.sample
+        allow(subject).to receive(:term).and_return(term)
+        expect(InternalMailer).to_not receive(:long_term_advance).with(subject)
+        call_method
+      end
     end
   end
 
