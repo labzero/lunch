@@ -34,11 +34,22 @@ Given(/^I am logged in$/) do
   step %{I am logged in as an "extranet user"}
 end
 
+Given(/^I am logged in to a bank with data for the "([^"]*)" report$/) do |report|
+  user_type = case report
+  when 'Securities Services Monthly Statement'
+    'intranet user'
+  else
+    'extranet user'
+  end
+
+  step %{I am logged in as a "#{user_type}"}
+end
+
 Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
   user = user_for_type(user_type)
 
   step %{I am logged in as "#{user['username']}" with password "#{user['password']}"}
-  select_member_if_needed
+  select_member_if_needed(user['bank'])
   page.assert_selector('.main-nav .nav-logout')
 end
 
@@ -76,7 +87,7 @@ end
 When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|
   user = user_for_type(user_type)
   step %{I log in as "#{user['username']}" with password "#{user['password']}"}
-  select_member_if_needed
+  select_member_if_needed(user['bank'])
 end
 
 When(/^I log in as "(.*?)" with password "(.*?)"$/) do |user, password|
@@ -88,7 +99,7 @@ end
 When(/^I login as the (password change user|expired user) with the new password$/) do |user_type|
   user = user_for_type(user_type)
   step %{I log in as "#{user['username']}" with password "#{valid_password}"}
-  select_member_if_needed
+  select_member_if_needed(user['bank'])
 end
 
 When(/^I select the (\d+)(?:st|rd|th) member bank$/) do |num|
@@ -351,13 +362,14 @@ def first_time_user
 end
 
 def current_member_name
-  @member_name ||= CustomConfig.env_config['primary_bank']
+  @member_name ||= CustomConfig.env_config['primary_user']['bank']
 end
 
-def select_member_if_needed
+def select_member_if_needed(bank=nil)
+  bank ||= CustomConfig.env_config['primary_user']['bank']
   wait_for_unflagged_page(@login_flag)
   has_member = page.has_no_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 0)
-  step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} unless has_member
+  step %{I select the "#{bank}" member bank} unless has_member
 end
 
 def accept_terms_if_needed

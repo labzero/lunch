@@ -5,7 +5,7 @@ Feature: Visiting the Securities Services Monthly Statement Page
   In order to view my account charges.
 
 Background:
-  Given I am logged in
+  Given I am logged in to a bank with data for the "Securities Services Monthly Statement" report
 
 @smoke @jira-mem-536
 Scenario: Member sees Securities Services Statement
