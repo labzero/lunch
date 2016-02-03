@@ -82,7 +82,15 @@ class AdvanceRequest
       raise 'No RateTimeout setting found' unless settings && settings[:rate_timeout]
       timeout = settings[:rate_timeout]
     end
-    timestamp.present? && (Time.zone.now - timestamp >= timeout)
+
+    if timestamp.present? && (Time.zone.now - timestamp >= timeout)
+      perform_rate_check
+      rate_changed = rate_changed?
+      timestamp! unless rate_changed
+      rate_changed
+    else
+      false
+    end
   end
 
   def rate_for(term, type)
