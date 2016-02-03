@@ -44,6 +44,14 @@ server.use('/api/content', require('./api/content').default);
 server.get('*', async (req, res, next) => {
   try {
     match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
+      if (error) {
+        throw error;
+      }
+      if (redirectLocation) {
+        const redirectPath = `${redirectLocation.pathname}${redirectLocation.search}`;
+        res.redirect(302, redirectPath);
+        return;
+      }
       let statusCode = 200;
       const data = { title: '', description: '', css: '', body: '', entry: assets.main.js };
       const css = [];
