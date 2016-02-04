@@ -64,6 +64,12 @@
   font-weight: $light-weight;
 }
 
+@mixin typography-nav-dropdown-header {
+  font-size: 0.7333rem;
+  font-weight: $semibold-weight;
+  line-height: $loose-line-height;
+}
+
 @mixin typography-table-cell-heading {
   font-size: 1rem;
   font-weight: $light-weight;
@@ -249,6 +255,10 @@
 
 %typography-dashboard-account-summary {
   @include typography-dashboard-account-summary;
+}
+
+%typography-nav-dropdown-header {
+  @include typography-nav-dropdown-header;
 }
 
 %typography-table-annotation {

@@ -1228,6 +1228,7 @@ en:
         leverage: Remaining Leverage
     your_account:
       title: Your Account
+    learn_more_html: <a href=%{url}>Learn more</a> about all available reports.
     pages:
       price_indications:
         current:

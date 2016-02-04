@@ -79,7 +79,6 @@
   background-color: $white;
   nav {
     overflow: visible;
-    position: relative;
     z-index: 1;
     time {
       float: right;
@@ -98,7 +97,6 @@
     border-left: 1px solid $light-gray;
     display: inline-block;
     padding: 0 20px;
-    position: relative;
     box-sizing: border-box;
     &:last-child {
       border-right: 1px solid $light-gray;
@@ -132,15 +130,26 @@
     }
   }
   .nav-dropdown {
+    width: 100%;
     padding-bottom: 15px;
-    & > li {
+    display: none;
+    position: absolute;
+    background-color: $white;
+    z-index: -1;
+    left: 0;
+    border: 1px solid $light-gray;
+    border-radius: $default-border-radius;
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+    padding-top: 5px;
+    box-shadow: 0px 0px 9px rgba(0,0,0, .18);
+    > li {
       padding-top: 5px;
     }
     li {
       border: none;
-      line-height: 20px;
-      margin-bottom: 5px;
       display: block;
+      padding: 0;
       &:hover {
         background-color: $white;
       }
@@ -153,21 +162,45 @@
         margin-top: 5px;
       }
     }
+    h2 {
+      @extend %typography-nav-dropdown-header;
+      text-transform: uppercase;
+      color: $medium-gray;
+      margin: 10px 0 0;
+    }
+    p {
+      clear: both;
+      text-align: center;
+      margin-top: 0px;
+      padding-top: 30px;
+      a {
+        @extend %link-style;
+      }
+    }
   }
-
-  .nav-dropdown {
-    display: none;
-    position: absolute;
-    background-color: $white;
-    z-index: -1;
-    left: 0;
-    top: 30px;
-    border: 1px solid $light-gray;
-    border-radius: $default-border-radius;
-    border-top-right-radius: 0;
-    border-top-left-radius: 0;
-    padding-top: 5px;
-    box-shadow: 0px 0px 9px rgba(0,0,0, .18);
+}
+.nav-dropdown-row {
+  width: $row-width;
+  margin: 0 auto;
+  clear: both;
+  margin-top: 15px;
+  overflow: auto;
+  &:last-child {
+    margin-bottom: 30px;
+  }
+}
+.nav-dropdown-column {
+  width: 270px;
+  padding-left: 40px;
+  float: left;
+  &:first-child {
+    padding-left: 30px;
+  }
+  ul {
+    border-top: 1px solid $secondary-gray;
+    &:only-child {
+      margin-top: 26px; // space ordinarily occupied by the h2
+    }
   }
 }
 
