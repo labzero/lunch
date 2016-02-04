@@ -42,11 +42,6 @@ body {
   min-height: 100%;
 }
 
-// TODO: Remove this once new header nav is implemented
-.internal-page-header + main {
-  min-height: 680px;
-}
-
 @media screen and (max-width: $row-width) {
   html, body {
     overflow: visible;
