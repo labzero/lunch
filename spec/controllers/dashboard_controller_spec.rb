@@ -403,6 +403,25 @@ RSpec.describe DashboardController, :type => :controller do
         expect(assigns[:net_amount]).to eq(assigns[:original_amount] - assigns[:net_stock_required])
       end
     end
+
+    describe 'collateral and capital stock limit errors' do
+      let(:collateral_error) {'collateral error value'}
+      before do
+        allow(advance_request).to receive(:errors).and_return([double('CollateralError', type: :preview, code: :collateral, value: :collateral_error), double('CapStockError', type: :preview, code: :capital_stock, value: nil)])
+      end
+      it 'render its view' do
+        make_request
+        expect(response.body).to render_template('dashboard/quick_advance_error')
+      end
+      it 'sets the @error_message instance variable' do
+        make_request
+        expect(assigns[:error_message]).to eq(:collateral)
+      end
+      it 'sets the @error_value instance variable' do
+        make_request
+        expect(assigns[:error_value]).to eq(:collateral_error)
+      end
+    end
   end
 
   describe "POST quick_advance_perform", :vcr do
