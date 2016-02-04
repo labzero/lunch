@@ -44,7 +44,7 @@ end
 
 
 When(/^I click on the (arc embedded|frc|frc embedded|arc|amortizing|choice libor|auction indexed|knockout|putable|other cash needs|mortgage partnership finance) link in the products advances dropdown$/) do |link|
-  page.find('.page-header .products-dropdown .nav-dropdown-nested a', text: dropdown_title_regex(link)).click
+  page.find('.page-header .products-dropdown a', text: dropdown_title_regex(link), exact: true).click
 end
 
 When(/^I click on the pfi link$/) do
