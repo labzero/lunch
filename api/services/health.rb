@@ -48,7 +48,7 @@ module MAPI
                     'v12:name' => 'FRC_WL',
                     'v12:pricingGroup' => [{
                       'v12:id' => 'StartOfDay',
-                      'v12:groupDateTime' => '1900-01-01T00:00:00'
+                      'v12:groupDateTime' => Time.zone.now.iso8601
                     }],
                     'v12:data' => [{}]
                 }]
