@@ -22,7 +22,7 @@ When(/^I click on the switch link in the nav$/) do
 end
 
 Then(/^I should see the primary bank name in the header$/) do
-  page.assert_selector('.header-member-name', text: CustomConfig.env_config['primary_bank'])
+  page.assert_selector('.header-member-name', text: CustomConfig.env_config['primary_user']['bank'])
 end
 
 Then(/^I should see a datestamp in the navigation header$/) do
