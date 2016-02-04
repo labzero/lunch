@@ -1,19 +1,21 @@
 ---
 
 default: &default
-  primary_user:
+  primary_user: &primary_user
     username: <%= ENV['CUCUMBER_PRIMARY_USERNAME'] || 'local' %>
     password: <%= ENV['CUCUMBER_PRIMARY_PASSWORD'] || 'development' %>
     given_name: <%= ENV['CUCUMBER_PRIMARY_GIVEN_NAME'] || ENV['CUCUMBER_PRIMARY_USERNAME'] || 'local' %>
+    bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Meridian Bank, National Association' %>
   signer_advances_user:
     username: <%= ENV['CUCUMBER_SIGNER_ADVANCES_USERNAME'] || 'local' %>
     password: <%= ENV['CUCUMBER_SIGNER_ADVANCES_PASSWORD'] || 'development' %>
   non_signer_advances_user:
     username: <%= ENV['CUCUMBER_NON_SIGNER_ADVANCES_USERNAME'] || 'local-non-signer' %>
     password: <%= ENV['CUCUMBER_NON_SIGNER_ADVANCES_PASSWORD'] || 'development' %>
-  intranet_user:
+  intranet_user: &intranet_user
     username: <%= ENV['CUCUMBER_INTRANET_USERNAME'] || 'local' %>
     password: <%= ENV['CUCUMBER_INTRANET_PASSWORD'] || 'development' %>
+    bank: <%= ENV['CUCUMBER_INTRANET_BANK'] || 'Central Valley Community Bank' %>
   extranet_user:
     username: <%= ENV['CUCUMBER_EXTRANET_USERNAME'] || 'extra' %>
     password: <%= ENV['CUCUMBER_EXTRANET_PASSWORD'] || 'development' %>
@@ -44,12 +46,16 @@ default: &default
   advances_disabled:
     username: <%= ENV['CUCUMBER_OFFSITE_USERNAME'] || 'quick-advance-disabled' %>
     password: <%= ENV['CUCUMBER_OFFSITE_PASSWORD'] || 'development' %>
-  primary_bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Meridian Bank, National Association' %>
   valid_password: <%= ENV['CUCUMBER_VALID_PASSWORD'] || '123Abcd3!' %>
 
 local:
   <<: *default
-  primary_bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Wells Faygo' %>
+  primary_user:
+    <<: *primary_user
+    bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Wells Faygo' %>
+  intranet_user:
+    <<: *intranet_user
+    bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Chaste Manhattan' %>
 dev:
   <<: *default
 
