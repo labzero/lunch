@@ -2099,8 +2099,8 @@ RSpec.describe ReportsController, :type => :controller do
     let(:profile) {MemberBalanceService.new(member_id, ActionDispatch::TestRequest.new).profile}
     let(:member_name) { double('A Name') }
     let(:sta_number) { double('STA Number') }
-    let(:fhfb_number) { double('FHFB Number') }
-    let(:member_details) { {name: member_name, sta_number: sta_number, fhfb_number: fhfb_number} }
+    let(:fhfa_number) { double('FHFA Number') }
+    let(:member_details) { {name: member_name, sta_number: sta_number, fhfa_number: fhfa_number} }
 
     before do
       allow(subject).to receive(:current_member_id).and_return(member_id)
@@ -2147,9 +2147,9 @@ RSpec.describe ReportsController, :type => :controller do
       make_request
       expect(assigns[:sta_number]).to be(sta_number)
     end
-    it 'assigns @fhfb_number' do
+    it 'assigns @fhfa_number' do
       make_request
-      expect(assigns[:fhfb_number]).to be(fhfb_number)
+      expect(assigns[:fhfa_number]).to be(fhfa_number)
     end
     it 'assigns @member_name' do
       make_request
@@ -2239,7 +2239,7 @@ RSpec.describe ReportsController, :type => :controller do
           allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
           make_request
         end
-        %w(sta_number fhfb_number member_name).each do |instance_var|
+        %w(sta_number fhfa_number member_name).each do |instance_var|
           it "should not assign @#{instance_var}" do
             expect(assigns[instance_var.to_sym]).to be_nil
           end

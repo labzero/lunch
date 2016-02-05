@@ -1184,7 +1184,7 @@ en:
       freshness: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{now}. Collateral Borrowing Capacity data, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of close of business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today’s credit activity as of %{now}."
       institution_details:
         sta_number: 'STA Number:'
-        fhfb_number: 'FHFB No.:'
+        fhfa_number: 'FHFA No.:'
       collateral_delivery_required: 'Collateral Status: Delivery Required'
       financing_availability:
         title: Financing Availability

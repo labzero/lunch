@@ -153,7 +153,7 @@ module MAPI
 
         def self.member_details(app, member_id)
           quoted_member_id = ActiveRecord::Base.connection.quote(member_id)
-          fhfb_number = nil
+          fhfa_number = nil
           sta_number = nil
           member_name = nil
 
@@ -175,18 +175,18 @@ module MAPI
             AND TRUNC(st.stx_update_date) = (SELECT TRUNC(MAX(stx_update_date))  FROM  portfolios.sta_trans)
           SQL
 
-          fhfb_number_query = <<-SQL
+          fhfa_number_query = <<-SQL
             SELECT cu_fhfb_id FROM portfolios.customers WHERE fhlb_id = #{quoted_member_id}
           SQL
 
           if app.settings.environment == :production
             member_name = ActiveRecord::Base.connection.execute(member_name_query).fetch.try(&:first)
             sta_number = ActiveRecord::Base.connection.execute(sta_number_query).fetch.try(&:first)
-            fhfb_number = ActiveRecord::Base.connection.execute(fhfb_number_query).fetch.try(&:first)
+            fhfa_number = ActiveRecord::Base.connection.execute(fhfa_number_query).fetch.try(&:first)
           else
              member = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_details.json')))[member_id.to_s]
              member_name = member['name'] if member
-             fhfb_number = member['fhfb_number'] if member
+             fhfa_number = member['fhfa_number'] if member
              sta_number = member['sta_number'] if member
           end
           
@@ -194,7 +194,7 @@ module MAPI
 
           {
             name: member_name,
-            fhfb_number: fhfb_number,
+            fhfa_number: fhfa_number,
             sta_number: sta_number
           }
 
