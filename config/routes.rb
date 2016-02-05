@@ -77,6 +77,7 @@ Rails.application.routes.draw do
     get    '/users/:id/confirm_delete' => 'settings#confirm_delete', as: 'user_confirm_delete'
     post   '/users/:id/lock'           => 'settings#lock', as: 'user_lock'
     post   '/users/:id/unlock'         => 'settings#unlock', as: 'user_unlock'
+    post   '/users/:id/reset_password' => 'settings#reset_password', as: 'user_reset_password'
     get    '/expired-password'         => 'settings#expired_password', as: :user_expired_password
     put    '/expired-password'         => 'settings#update_expired_password'
   end

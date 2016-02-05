@@ -68,6 +68,12 @@ Background:
     When I dismiss the overlay
     Then I should see a user with the a last name of "Doe"
 
+  @jira-mem-563
+  Scenario: Access Manangers can reset a user's password
+    Given I visit the access manager page
+    When I reset the password for a user
+    Then I should see a reset password overlay
+
   @jira-mem-565
   Scenario: Access Managers can't create a user with validation errors
     Given I visit the access manager page

@@ -1,4 +1,8 @@
 class AccessManagerPolicy < ApplicationPolicy
+  def reset_password?
+    user.roles.include?(User::Roles::ACCESS_MANAGER)
+  end
+
   def create?
     user.roles.include?(User::Roles::ACCESS_MANAGER)
   end

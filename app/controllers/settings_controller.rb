@@ -21,6 +21,11 @@ class SettingsController < ApplicationController
     authorize @user, :edit?
   end
 
+  before_action only: [:reset_password] do
+    @user = User.find(params[:id])
+    authorize @user, :reset_password?
+  end
+
   before_action only: [:lock, :unlock] do
     @user = User.find(params[:id])
     authorize @user, :lock?
@@ -221,6 +226,15 @@ class SettingsController < ApplicationController
       end
     end
     render json: {status: status}
+  end
+
+  def reset_password
+    @user.send_reset_password_instructions
+    if @user.errors.empty?
+      render json: { html: render_to_string(layout: false) }
+    else
+      render json: {}, status: 500
+    end
   end
 
   def expired_password

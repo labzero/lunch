@@ -325,6 +325,10 @@ en:
       delete_user:
         title: User Access Deleted
         success_html: User access for <strong>%{name}</strong> has been deleted.
+      reset_password:
+        title: Password Reset
+        success_html: <strong>%{name}</strong>'s password has been reset.<br>An email with login instructions has been sent to this user.
+
     password:
       title: Manage Password
       instructions: "Change your Member Portal password.\n\nIf you have questions about account access, contact your institution’s Access Manager or <a href=\"%{url}\">Web Support</a> at %{phone_number}."
