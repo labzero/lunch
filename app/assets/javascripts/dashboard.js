@@ -86,6 +86,7 @@ $(function () {
     tbody.children().remove();
     tbody.append($(data.html));
     table.quickAdvanceTable(data.id);
+    Fhlb.Track.quick_advance_rate_table();
   };
 
   function showQuickAdvanceClosedState() {
