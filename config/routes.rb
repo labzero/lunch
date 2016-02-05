@@ -21,7 +21,9 @@ Rails.application.routes.draw do
 
   get '/dashboard/current_overnight_vrc' => 'dashboard#current_overnight_vrc'
 
-  get '/dashboard/recent_activity' => 'dashboard#recent_activity'
+  constraints Constraints::FeatureEnabled.new('recent-credit-activity') do
+    get '/dashboard/recent_activity' => 'dashboard#recent_activity'
+  end
 
   get '/dashboard/account_overview' => 'dashboard#account_overview'
 
