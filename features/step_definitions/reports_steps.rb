@@ -555,3 +555,13 @@ Then(/^I should see the has no data state for the Securities Services Monthly St
   page.assert_no_selector('.securities-services-table-wrapper')
   page.assert_no_selector('.report-summary-data')
 end
+
+When(/^I select the last entry from the month year dropdown$/) do
+  page.find('.report-filter .dropdown-selection').click
+  page.find('.report-filter .dropdown li:last-child').click
+end
+
+Then(/^I should see a report for the last entry from the month year dropdown$/) do
+  element = page.find('.report-filter .dropdown li:last-child', visible: false)
+  step %{I should see a report for "#{element['data-dropdown-value']}"}
+end

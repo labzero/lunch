@@ -15,16 +15,11 @@ Scenario: Member sees Securities Services Statement
   And I should see a report header
   And I should see 4 report tables with multiple data rows
 
-@smoke @jira-mem-931
-Scenario: The Securities Services Monthly Statement defaults to May 2015
+@smoke @jira-mem-1196
+Scenario: The Securities Services Monthly Statement report dropdown controls which report is shown
   Given I am on the "Securities Services Monthly Statement" report page
-  When I click on the securities services monthly statement dropdown selector
-  Then I should see a report for "May 29, 2015"
-
-Scenario: The Securities Services Monthly Statement report should be for Dec 31, 2104 when December 2014 is selected
-  Given I am on the "Securities Services Monthly Statement" report page
-  When I select "December 2014" from the month year dropdown
-  Then I should see a report for "December 31, 2014"
+  When I select the last entry from the month year dropdown
+  Then I should see a report for the last entry from the month year dropdown
 
 @data-unavailable @jira-mem-536
 Scenario: No data is available to show in spefic sections of the Securities Services Statement
