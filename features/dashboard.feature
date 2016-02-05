@@ -15,7 +15,7 @@ Scenario: See dashboard contacts
   When I visit the dashboard
   Then I should see 3 contacts
 
-@smoke @jira-mem-610 @jira-mem-1126
+@smoke @jira-mem-610 @jira-mem-1126 @flip-on-recent-credit-activity
 Scenario: See required dashboard modules
   When I visit the dashboard
   And I should see an "borrowing capacity gauge" in the Account module
