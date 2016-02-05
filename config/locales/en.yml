@@ -1487,6 +1487,8 @@ en:
         indicates_a_new_transaction_html: "*Indicates a new transaction."
         total_net_settled_preliminary: "Total Net Amount settled as of 11:30 am. on %{date}:"
         total_net_settled_final: "Total Net Amount settled as of close of business on %{date}:"
+        yesterdays_report: View the final securities transaction report for the previous business day
+        no_results_today: No records to display
         custody_account_no: Custody Account No.
         transaction_code: Transaction Code
         units: Units
