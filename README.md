@@ -130,6 +130,7 @@ This is a summary of the options supported in our .env files:
 * `LOCAL_MAIL`: Set to `true` to enable local mail delivery via Letter Opener.
 * `LOG_LEVEL`: Set to a valid log level to control what granularity of logging occurs. Defaults to `info`.
 * `NEW_RELIC_LICENSE_KEY`: The license key to use for New Relic.
+* `GA_TRACKING_ID`: The google analytics tracking id to use for event tracking.
 
 
 ## Running the Tests
