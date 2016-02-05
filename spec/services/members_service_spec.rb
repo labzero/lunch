@@ -146,8 +146,8 @@ describe MembersService do
       expect(member).to be_kind_of(Hash)
       expect(member[:sta_number]).to be_kind_of(String)
       expect(member[:sta_number]).to be_present
-      expect(member[:fhfb_number]).to be_kind_of(String)
-      expect(member[:fhfb_number]).to be_present
+      expect(member[:fhfa_number]).to be_kind_of(String)
+      expect(member[:fhfa_number]).to be_present
       expect(member[:name]).to be_kind_of(String)
       expect(member[:name]).to be_present
     end

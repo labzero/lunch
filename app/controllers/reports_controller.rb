@@ -1182,7 +1182,7 @@ class ReportsController < ApplicationController
       @credit_datetime = @now
       @collateral_notice = member_profile[:collateral_delivery_status] == 'Y'
       @sta_number = member_details[:sta_number]
-      @fhfb_number = member_details[:fhfb_number]
+      @fhfa_number = member_details[:fhfa_number]
       @member_name = member_details[:name]
       @financing_availability = {
         rows: [

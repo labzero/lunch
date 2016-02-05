@@ -128,14 +128,14 @@ describe MAPI::ServiceApp do
     let(:member_name_cursor) { double('Member Query', fetch: [member_name])}
     let(:sta_number) {SecureRandom.uuid}
     let(:sta_number_cursor) { double('STA Number Query', fetch: [sta_number])}
-    let(:fhfb_number) {SecureRandom.uuid}
-    let(:fhfb_number_cursor) { double('FHFB Number Query', fetch: [fhfb_number])}
+    let(:fhfa_number) {SecureRandom.uuid}
+    let(:fhfa_number_cursor) { double('FHFB Number Query', fetch: [fhfa_number])}
     let(:development_json) {
       {
         member_id => {
           'name' => member_name,
           'sta_number' => sta_number,
-          'fhfb_number' => fhfb_number
+          'fhfa_number' => fhfa_number
         }
       }
     }
@@ -146,7 +146,7 @@ describe MAPI::ServiceApp do
             development_json.to_json
           end
           allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(env)
-          allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_name_cursor, sta_number_cursor, fhfb_number_cursor)
+          allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_name_cursor, sta_number_cursor, fhfa_number_cursor)
         end
         it 'returns a 404 if the member name isn\'t found' do
           allow(member_name_cursor).to receive(:fetch).and_return(nil)
@@ -161,8 +161,8 @@ describe MAPI::ServiceApp do
           expect(last_response.status).to be(200)
         end
         it 'returns a 200 if the FHFB number isn\'t found' do
-          allow(fhfb_number_cursor).to receive(:fetch).and_return(nil)
-          development_json[member_id]['fhfb_number'] = nil
+          allow(fhfa_number_cursor).to receive(:fetch).and_return(nil)
+          development_json[member_id]['fhfa_number'] = nil
           make_request
           expect(last_response.status).to be(200)
         end
@@ -180,7 +180,7 @@ describe MAPI::ServiceApp do
           expect(member_details['sta_number']).to eq(sta_number)
         end
         it 'returns the member FHFB number' do
-          expect(member_details['fhfb_number']).to eq(fhfb_number)
+          expect(member_details['fhfa_number']).to eq(fhfa_number)
         end
       end
     end
