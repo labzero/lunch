@@ -35,6 +35,7 @@ namespace :deploy do
       execute :touch, release_path.join('api/tmp/restart.txt')
     end
     invoke 'resque_pool:restart'
+    invoke 'resque_scheduler:restart'
   end
 
   desc 'Creates API directories'
@@ -144,6 +145,38 @@ namespace :resque_pool do
   task :reload do
     on roles(:resque), in: :sequence, wait: 5 do
       sudo :reload, 'resque-pool'
+    end
+  end
+end
+
+namespace :resque_scheduler do
+  desc 'Starts the resque-scheduler daemon'
+  task :start do
+    on roles(:resque), in: :sequence, wait: 5 do
+      sudo :start, 'resque-scheduler'
+    end
+  end
+  desc 'Stops the resque-scheduler daemon'
+  task :stop do
+    on roles(:resque), in: :sequence, wait: 5 do
+      sudo :stop, 'resque-scheduler'
+    end
+  end
+  desc 'Restarts the resque-scheduler daemon'
+  task :restart do
+    on roles(:resque), in: :sequence, wait: 5 do
+      begin
+        sudo :start, 'resque-scheduler'
+      rescue SSHKit::Command::Failed
+        sudo :stop, 'resque-scheduler'
+        sudo :start, 'resque-scheduler'
+      end
+    end
+  end
+  desc 'Reloads the resque-scheduler daemon, which gives it all new children but leaves the partent process untouched'
+  task :reload do
+    on roles(:resque), in: :sequence, wait: 5 do
+      sudo :reload, 'resque-scheduler'
     end
   end
 end

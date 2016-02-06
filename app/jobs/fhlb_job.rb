@@ -30,4 +30,12 @@ class FhlbJob < ActiveJob::Base
     Rails.logger.debug "BACKTRACE: #{err.backtrace.join("\n")}"
     job_status.failed!
   end
+
+  def self.queue
+    queue_name
+  end
+
+  def self.scheduled(queue, klass, *args)
+    klass.constantize.set(queue: queue).perform_later(*args)
+  end
 end

@@ -20,3 +20,4 @@ ldap/openldap-data/*.ldif
 ldap/openldap-data/*dc=com
 ldap/openldap-data/run/slapd.pid
 ldap/openldap-data/run/slapd.args
+config/schedule-override.yml

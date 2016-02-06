@@ -67,4 +67,37 @@ RSpec.describe FhlbJob, type: :job do
       end
     end
   end
+
+  describe '`queue` class method' do
+    it 'returns the value provided by the `queue_name` method' do
+      name = double('A Queue Name')
+      allow(described_class).to receive(:queue_name).and_return(name)
+      expect(described_class.queue).to eq(name)
+    end
+  end
+
+  describe '`scheduled` class method' do
+    let(:klass) { double('A Class', constantize: described_class) }
+    let(:queue) { double('A Queue') }
+    let(:args) { [double('An Arg'), double('An Arg')] }
+    let(:call_method) { described_class.scheduled(queue, klass, *args) }
+
+    before do
+      allow(described_class).to receive(:perform_later)
+      allow(described_class).to receive(:set).and_return(described_class)
+    end
+
+    it 'constantizes the class' do
+      expect(klass).to receive(:constantize).and_return(described_class)
+      call_method
+    end
+    it 'sets the queue' do
+      expect(described_class).to receive(:set).with(include(queue: queue)).and_return(described_class)
+      call_method
+    end
+    it 'calls `perform_later`' do
+      expect(described_class).to receive(:perform_later).with(*args)
+      call_method
+    end
+  end
 end
