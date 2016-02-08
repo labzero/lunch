@@ -269,6 +269,7 @@ class ReportsController < ApplicationController
         }
       }
     }
+    @reports[:securities].delete(:transactions) unless feature_enabled?('report-securities-transaction')
   end
 
   def capital_stock_activity
