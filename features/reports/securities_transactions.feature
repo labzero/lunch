@@ -1,4 +1,4 @@
-@jira-mem-69
+@jira-mem-69 @flip-on-report-securities-transaction
 Feature: Visiting the Securities Transactions Report Page
   As a user
   I want to use visit the interest rate resets report page for the FHLB Member Portal
