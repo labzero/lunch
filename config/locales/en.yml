@@ -2320,7 +2320,7 @@ en:
         gross_exposure: Gross Potential Exposure
         one_year: "≤ 1 year"
         zero: zero
-        greater_one_year: "> 1 year and = 5 years"
+        greater_one_year: "> 1 year and ≤ 5 years"
         five_times: 0.005 times the notional amount
         five_years: "> 5 years"
         fifteen_times: 0.015 times the notional amount
