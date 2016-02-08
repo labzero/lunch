@@ -226,25 +226,34 @@ end
 Around do |scenario, block|
   features = {}
   feature_state = {}
+  scenario.source_tag_names.each do |tag|
+    matches = tag.match(/\A@flip-(on|off)-(.+)\z/)
+    if matches
+      features[matches[2]] = (matches[1] == 'on')
+    end
+  end
   unless custom_host
-    scenario.source_tag_names.each do |tag|
-      matches = tag.match(/\A@flip-(on|off)-(.+)\z/)
-      if matches
-        feature = Rails.application.flipper[matches[2]]
-        features[feature] = (matches[1] == 'on')
-        feature_state[feature] = {
+    features.each do |feature_name, enable|
+      feature = Rails.application.flipper[feature_name]
+      feature_state[feature] = {
           groups: feature.groups_value,
           boolean: feature.boolean_value,
           actors: feature.actors_value,
           percentage_of_actors: feature.percentage_of_actors_value,
           percentage_of_time: feature.percentage_of_time_value
         }
-      end
+    end
+    features.each do |feature_name, enable|
+      feature = Rails.application.flipper[feature_name]
+      enable ? feature.enable : feature.disable
     end
   end
-  features.each { |feature, enable| enable ? feature.enable : feature.disable }
   begin
-    block.call
+    if custom_host && features.present? # we can't mutate custom hosts, so skip the scenario
+      skip_this_scenario
+    else
+      block.call
+    end
   ensure
     feature_state.each do |feature, state|
       state[:boolean] ? feature.enable : feature.disable

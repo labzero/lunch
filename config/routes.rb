@@ -48,7 +48,9 @@ Rails.application.routes.draw do
     get '/mortgage-collateral-update' => 'reports#mortgage_collateral_update'
     get '/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: :parallel_shift
     get '/securities-services-statement' => 'reports#securities_services_statement', as: :securities_services_statement
-    get '/securities-transactions' => 'reports#securities_transactions'
+    constraints Constraints::FeatureEnabled.new('report-securities-transaction') do
+      get '/securities-transactions' => 'reports#securities_transactions'
+    end
     get '/settlement-transaction-account' => 'reports#settlement_transaction_account'
     get '/todays-credit' => 'reports#todays_credit'
   end
