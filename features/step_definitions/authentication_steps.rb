@@ -13,7 +13,7 @@ Given(/^I fill in and submit the login form with username "(.*?)" and password "
   wait_for_unflagged_page(@login_flag)
 
   session_id = get_session_id
-  puts "Session ID: #{session_id}" if session_id
+  Cucumber.logger.info("Session ID: #{session_id}\n") if session_id
 end
 
 Given(/^I fill in and submit the login form$/) do
