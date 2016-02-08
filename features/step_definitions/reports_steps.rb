@@ -16,6 +16,11 @@ When(/^I select "(.*?)" from the reports dropdown$/) do |report|
   page.find('.nav-dropdown').click_link(report)
 end
 
+Then(/^I should see a preliminary securities transaction report$/) do
+  target = I18n.t('reports.pages.securities_transactions.preliminary', date: '')
+  page.assert_selector('h2.report-table-title', text:/#{Regexp.quote(target)}/, visible: true)
+end
+
 Then(/^I should see "([^"]*)" in the reports dropdown$/) do |report|
   page.find('.nav-dropdown li', text: /\A#{Regexp.quote(report)}\z/)
 end
