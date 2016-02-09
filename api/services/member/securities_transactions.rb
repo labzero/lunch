@@ -11,7 +11,7 @@ module MAPI
             'cur_new_trans'          => 'new_transaction',
             'cur_cusip'              => 'cusip',
             'cur_trans_code'         => 'transaction_code',
-            'cur_desc_line1'         => 'security_description',
+            'cur_desc_line_1'        => 'security_description',
             'cur_units'              => 'units',
             'cur_maturity_date'      => 'maturity_date',
             'cur_principal_amount'   => 'payment_or_principal',
