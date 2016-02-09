@@ -255,3 +255,22 @@ namespace :feature do
     end
   end
 end
+
+namespace :service_fake do
+  [:enable, :disable].each do |switch|
+    desc "#{switch.to_s.capitalize} the fake service"
+    task switch, [:service] do |t, args|
+      on primary(:db) do
+        within release_path do
+          with rails_env: fetch(:rails_env) do
+            if args.service.to_sym == :all
+              execute :rake, "service_fakes:#{switch}"
+            else
+              execute :rake, "service_fakes:#{args.service}:#{switch}"
+            end
+          end
+        end
+      end
+    end
+  end
+end
