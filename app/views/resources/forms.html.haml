@@ -15,7 +15,7 @@
     %h2= t('resources.forms.authorizations.title')
     .form-table-link-heading
       %h3= t('resources.forms.authorizations.signature_cards.title')
-      =link_to(t('resources.forms.authorizations.instructions_link'), reports_authorizations_path)
+      =link_to(t('resources.forms.authorizations.instructions_link'), products_authorizations_path)
     = render 'form_table', rows: @signature_card_rows
     %h3= t('resources.forms.authorizations.wire_transfer.title')
     = render 'form_table', rows: @wire_transfer_rows
