@@ -6,8 +6,8 @@ include ActiveSupport::Inflector
 include FinancialInstrumentHelper
 
 RSpec.describe ReportsController, :type => :controller do
-  shared_examples 'a date restricted report' do |action, default_start_selection=nil|
-    let(:start_date) { rand(500).days.ago(Time.zone.today) }
+  shared_examples 'a date restricted report' do |action, default_start_selection=nil, start_date_offset=0|
+    let(:start_date) { rand(start_date_offset..500).days.ago(Time.zone.today) }
     let(:default_start) do
       case default_start_selection
         when :this_month_start
@@ -442,7 +442,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
 
       it_behaves_like 'a report that can be downloaded', :advances_detail, [:pdf, :xlsx]
-      it_behaves_like 'a date restricted report', :advances_detail
+      it_behaves_like 'a date restricted report', :advances_detail, nil, 1
       it_behaves_like 'a report with instance variables set in a before_filter', :advances_detail
       it_behaves_like 'a report with a @max_date', :advances_detail
       it 'should render the advances_detail view' do
