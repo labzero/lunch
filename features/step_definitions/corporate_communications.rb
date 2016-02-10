@@ -3,7 +3,7 @@ Given(/^I am on the Messages page$/) do
 end
 
 When(/^I click on the messages icon in the header$/) do
-  page.find('.main-nav a.icon-envelope-after').click
+  page.find('.main-nav a.icon-announcements-after').click
 end
 
 Then(/^I should see a list of message categories in the sidebar$/) do

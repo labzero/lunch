@@ -61,6 +61,7 @@ $icon-success: "\e60d";
 $icon-error: "\e60e";
 $icon-info: "\e60f";
 $icon-paperclip: "\e900";
+$icon-announcements: "\e901";
 
 %icon-alert {
   @extend %icon-font;
@@ -161,6 +162,11 @@ $icon-paperclip: "\e900";
 .icon-paperclip-before:before, .icon-paperclip-after:after {
   @extend %icon-font;
   content: "#{$icon-paperclip}";
+}
+
+.icon-announcements-before:before, .icon-announcements-after:after {
+  @extend %icon-font;
+  content: "#{$icon-announcements}";
 }
 
 $spinner-size: 30px !default;
