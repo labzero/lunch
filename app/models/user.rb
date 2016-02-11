@@ -326,6 +326,19 @@ class User < ActiveRecord::Base
     @member ||= (Member.new(member_id) if member_id)
   end
 
+  def new_announcements_count
+    last_viewed = self.last_viewed_announcements_at
+    if last_viewed
+      CorporateCommunication.where('date_sent >= ?', last_viewed).count
+    else
+      CorporateCommunication.count
+    end
+  end
+
+  def announcements_viewed!
+    self.update_attribute(:last_viewed_announcements_at, Time.zone.now)
+  end
+
   protected
 
   def reload_ldap_entry
