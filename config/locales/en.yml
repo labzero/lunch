@@ -928,6 +928,8 @@ en:
         title: Commercial Banks, Savings Institutions, and Industrial Loan Companies
       credit_union:
         title: Credit Union
+      insurance_company:
+        title: Insurance Companies
       forms:
         required:
           heading: Required Forms and Agreements
@@ -1018,17 +1020,17 @@ en:
           title: "Website Access Manager Set-Up (FC 2160)"
           description: "This form identifies your institution’s Access Manager(s), who will add and delete users, reset passwords, and lock or unlock website access accounts for individuals at your institution."
         id_2170:
-          title:
-          description:
+          title: "Membership Application: Forms and Exhibits Checklist: Insurance Companies (FC 2170)"
+          description: This checklist identifies all of the forms, agreements, and exhibits that must be returned to the Bank with your application.
         id_2171:
-          title:
-          description:
+          title: "Applicant Information: Insurance Companies (FC 2171)"
+          description: This form provides basic information about your institution.
         id_2177:
-          title:
-          description:
+          title: "Advances and Security Agreement: Insurance Companies (FC 2177)"
+          description: This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization.
         id_2178:
-          title:
-          description:
+          title: "Applicant’s Bank Stock Calculation: Insurance Companies (FC 2178)"
+          description_html: This worksheet helps you calculate the amount of Bank capital stock your institution must purchase to become a member. Please e-mail %{link} if you want the Bank to prepare an estimate of the Initial Stock Purchase Requirement. The estimate will be based on the most recent financial information available to the Bank, which may lag current data by a quarter.
         id_2228:
           title: "eTransact: SecurID Token Application (FC 2228)"
           description: "This form must be completed by each individual who needs access to eTransact, the Bank's secure online transaction service."

@@ -5,7 +5,7 @@
   - else
     = link_to_download_resource(t("resources.membership.forms.id_#{form_id.to_s}.title"), resources_download_path(file: :"form_#{form_id.to_s}"))
     - case form_id
-    - when 2104, 2112
+    - when 2104, 2112, 2178
       %p= t("resources.membership.forms.id_#{form_id.to_s}.description_html", link: link_to(ContactInformationHelper::MEMBERSHIP_EMAIL, membership_email))
     - when 2136
       %p= t("resources.membership.forms.id_#{form_id.to_s}.description_html", download_link: link_to_download_resource(t('resources.membership.forms.id_2135.title'), resources_download_path(file: :form_2135)))

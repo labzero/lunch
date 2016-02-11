@@ -109,7 +109,7 @@ Rails.application.routes.draw do
         get 'commercial-savings-and-industrial' => 'resources#commercial_application', as: :commercial_application
         get 'community-development' => 'error#not_found', as: :community_development_application
         get 'credit-union' => 'resources#credit_union_application', as: :credit_union_application
-        get 'insurance-company' => 'error#not_found', as: :insurance_company_application
+        get 'insurance-company' => 'resources#insurance_company_application', as: :insurance_company_application
       end
     end
   end
