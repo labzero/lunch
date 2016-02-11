@@ -909,6 +909,7 @@ en:
         nav_title: Applications
         title: Membership Application
         intro_html: To apply for Bank membership, please complete all of the required application forms, agreements, and exhibits. Contact your <a href=%{url}>Relationship Manager</a> if you have any questions regarding the application process.
+        pdf_message: The forms and agreements are in PDF format and should be viewed with Acrobat Reader 7.0 or later.
         charter_types:
           heading: "For a complete list of application forms, select your charter type from the list below:"
           commercial: Commercial Bank, Savings Institution, or Industrial Loan Company
@@ -925,6 +926,8 @@ en:
           approval: When your institution is approved for membership, your institution will wire your stock purchase requirement amount, as calculated on the Applicant’s Bank Stock Calculation worksheet, to your newly opened Settlement/Transaction Account.
       commercial:
         title: Commercial Banks, Savings Institutions, and Industrial Loan Companies
+      credit_union:
+        title: Credit Union
       forms:
         required:
           heading: Required Forms and Agreements
@@ -944,7 +947,7 @@ en:
           description: "This agreement is required for institutions that pledge securities as collateral. It establishes a securities custody account with the Bank."
         id_1973:
           title: "ISDA Master Agreement (1992, second printing)/Schedule to the Master Agreement (FC 1973)"
-          description_html: "These documents are required for institutions that want to enter into derivatives transactions with the Bank and must be signed by one or more authorized officers of your institution (as indicated on the Resolution and Authorization: Member Transactions) at the level of vice president or higher. These documents are available in hard copy only. Please e-mail <a href=%{url}>membership@fhlbsf.com</a> for this agreement."
+          description_html: "These documents are required for institutions that want to enter into derivatives transactions with the Bank and must be signed by one or more authorized officers of your institution (as indicated on the Resolution and Authorization: Member Transactions) at the level of vice president or higher. These documents are available in hard copy only. Please e-mail %{link} for this agreement."
         id_2065:
           title: "Resolution and Authorization: Member Transactions (FC 2065)"
           description: "This resolution must be adopted by your institution’s board of directors and signed by your Corporate Secretary. It is the primary form on which you specify individuals who are authorized to execute all types of transactions with the Bank, except for wires."
@@ -976,11 +979,11 @@ en:
           title: "Applicant Information: Commercial Banks, Savings Institutions, and Industrial Loan Companies (FC 2094)"
           description: This form provides basic information about your institution.
         id_2099:
-          title:
-          description:
+          title: "Calculation of 10% Requirement: Credit Unions (FC 2099)"
+          description: "This worksheet helps you determine whether your institution has at least 10% of total assets in residential mortgage loans, a statutory eligibility requirement for membership."
         id_2104:
           title: "Applicant’s Bank Stock Calculation: Commercial Banks, Savings Institutions, and Industrial Loan Companies (FC 2104)"
-          description_html: "This worksheet helps you calculate the amount of Bank capital stock your institution must purchase to become a member. Please e-mail <a href=%{url}>membership@fhlbsf.com</a> if you want the Bank to prepare an estimate of the Initial Stock Purchase Requirement. The estimate will be based on the most recent financial information available to the Bank, which may lag current data by a quarter."
+          description_html: "This worksheet helps you calculate the amount of Bank capital stock your institution must purchase to become a member. Please e-mail %{link} if you want the Bank to prepare an estimate of the Initial Stock Purchase Requirement. The estimate will be based on the most recent financial information available to the Bank, which may lag current data by a quarter."
         id_2108:
           title: "Certificate of Designated Persons—Wire Transfer Services (FC 2108)"
           description: "This form authorizes the designated individuals listed to conduct offline funds transactions by telephone. The signer listed on this form must be listed as an authorized individual on the Resolution and Authorization."
@@ -988,14 +991,14 @@ en:
           title: "Certificate of Designated Persons—Securities Services (FC 2109)"
           description: "This form authorizes the designated individuals listed to move securities to and from their unpledged account (safekeeping account). Employees listed on this form are authorized to provide instructions regarding the purchase and sale of unpledged securities, but are not authorized to pledge or de-pledge securities."
         id_2112:
-          title:
-          description:
+          title: "Applicant’s Bank Stock Calculation: Credit Unions (FC 2112)"
+          description_html: "This worksheet helps you calculate the amount of Bank capital stock your institution must purchase to become a member. Please e-mail %{link} if you want the Bank to prepare an estimate of the initial stock purchase. The estimate will be based on the most recent financial information available to the Bank, which may lag current data by a quarter."
         id_2117:
           title: "Advances and Security Agreement (FC 2117)"
           description: "This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization."
         id_2127:
-          title:
-          description:
+          title: Advances and Security Agreement (FC 2127)
+          description: This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization.
         id_2135:
           title: "Settlement/Transaction Account Terms and Conditions (FC 2135)"
           description:
@@ -1003,11 +1006,11 @@ en:
           title: "Settlement/Transaction Account Agreement (FC 2136)"
           description_html: "This agreement defines the account relationship between your institution and the Bank. Review the %{download_link} before signing this agreement."
         id_2138:
-          title:
-          description:
+          title: "Membership Application: Forms and Exhibits Checklist: Credit Unions (FC 2138)"
+          description: This checklist identifies all of the forms, agreements, and exhibits that must be returned to the Bank with your application.
         id_2139:
-          title:
-          description:
+          title: "Applicant Information: Credit Unions (FC 2139)"
+          description: This form provides basic information about your institution.
         id_2153:
           title: "Certificate of Designated Persons—Affordable Housing Program (FC 2153)"
           description: "This form authorizes the designated individuals listed to exercise authority under the Bank’s Affordable Housing Program and any other community investment programs, excluding extensions of credit related to these programs."

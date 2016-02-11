@@ -7,6 +7,12 @@ class ResourcesController < ApplicationController
       requested: [2117, 2136, 2160],
       optional: [1694, 1973, 1465, 2228],
       access: [2066, 2067, 2153, 2068, 2070, 2109, 2108]
+    },
+    credit_union: {
+      required: [2138, 2139, 2090, 2091, 2065, 2099, 2112, 2290],
+      requested: [2127, 2136, 2160],
+      optional: [1694, 1973, 1465, 2228],
+      access: [2066, 2067, 2153, 2068, 2070, 2109, 2108]
     }
   }.freeze
   
@@ -478,6 +484,11 @@ class ResourcesController < ApplicationController
   # GET
   def commercial_application
     @form_ids = APPLICATION_FORM_IDS[:commercial]
+  end
+
+  #GET
+  def credit_union_application
+    @form_ids = APPLICATION_FORM_IDS[:credit_union]
   end
   
   private
