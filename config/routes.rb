@@ -108,7 +108,7 @@ Rails.application.routes.draw do
       scope 'application' do
         get 'commercial-savings-and-industrial' => 'resources#commercial_application', as: :commercial_application
         get 'community-development' => 'error#not_found', as: :community_development_application
-        get 'credit-union' => 'error#not_found', as: :credit_union_application
+        get 'credit-union' => 'resources#credit_union_application', as: :credit_union_application
         get 'insurance-company' => 'error#not_found', as: :insurance_company_application
       end
     end

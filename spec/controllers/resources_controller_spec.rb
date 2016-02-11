@@ -424,6 +424,14 @@ RSpec.describe ResourcesController, type: :controller do
       expect(assigns[:form_ids]).to eq(ResourcesController::APPLICATION_FORM_IDS[:commercial])
     end
   end
+
+  describe 'GET :credit_union_application' do
+    it_behaves_like 'a resource membership action', :credit_union_application
+    it 'sets @form_ids to the proper value' do
+      get :credit_union_application
+      expect(assigns[:form_ids]).to eq(ResourcesController::APPLICATION_FORM_IDS[:credit_union])
+    end
+  end
   
   describe 'the `fee_schedule_table_hash` private method' do
     let(:translation) { double('I18n translation', to_s: 'foo') }

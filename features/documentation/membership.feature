@@ -17,3 +17,10 @@ Feature: Membership Pages
     Given I hover on the resources link in the header
     When I click on the applications link in the header
     Then I should be on the membership "applications" page
+
+  @jira-mem-1252
+  Scenario: Member navigates to the credit union membership application page
+    Given I hover on the resources link in the header
+    When I click on the applications link in the header
+    And I click on the "credit union" link on the applications page
+    Then I should be on the membership "credit union application" page
