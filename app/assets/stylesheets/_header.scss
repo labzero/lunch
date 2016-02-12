@@ -72,6 +72,22 @@
     color: $brand-blue;
   }
 }
+.nav-mail {
+  a {
+    position: relative;
+    p {
+      @extend %typography-badge;
+      text-align: center;
+      position: absolute;
+      left: 10px;
+      top: -8px;
+      width: 15px;
+      height: 12px;
+      background: $alert-red;
+      border-radius: $default-border-radius;
+    }
+  }
+}
 
 .secondary-nav {
   height: $header-secondary-nav-height;

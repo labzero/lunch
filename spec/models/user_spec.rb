@@ -683,6 +683,32 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`new_announcements_count`' do
+    let(:count) { double('number of CorporateCommunications') }
+    let(:now) { DateTime.new(2016,2,10) }
+    let(:last_viewed) { DateTime.new(2016,2,8) }
+    let(:call_method) { subject.new_announcements_count }
+    it 'returns the count of all CorporateCommunications if there is no `last_viewed_announcements_at` for the user' do
+      allow(CorporateCommunication).to receive(:count).and_return(count)
+      expect(call_method).to eq(count)
+    end
+    it 'returns the count of all CorporateCommuncations with a `date_sent` value greater than or equal to the user\'s `last_viewed_announcements_at` value' do
+      allow(Time.zone).to receive(:now).and_return(now)
+      subject.last_viewed_announcements_at = last_viewed
+      allow(CorporateCommunication).to receive(:where).with('date_sent >= ?', last_viewed).and_return(double('relational array', count: count))
+      expect(call_method).to eq(count)
+    end
+  end
+
+  describe 'announcements_viewed!' do
+    let(:now) { double('now') }
+    let(:call_method) { subject.announcements_viewed! }
+    it 'sets the user\'s `last_viewed_announcements_at` attribute to now' do
+      allow(Time.zone).to receive(:now).and_return(now)
+      expect(subject).to receive(:update_attribute).with(:last_viewed_announcements_at, now)
+      call_method
+    end
+  end
 
   describe '`reload_ldap_entry` protected method' do
     let(:call_method) { subject.send(:reload_ldap_entry) }

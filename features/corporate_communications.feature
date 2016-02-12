@@ -10,7 +10,7 @@ Feature: Visiting the Messages Page
 @smoke
 Scenario: Visit the messages page from the header
   Given I visit the dashboard
-  When I click on the messages icon in the header
+  When I click on the announcements icon in the header
   Then I should see "Categories" as the sidebar title
     And I should see a list of message categories in the sidebar
     And I should see "Announcements" as the page's title
@@ -54,7 +54,15 @@ Scenario: No messages in any category
   Then I should see a No Messages indicator
 
 @data-unavailable @jira-mem-288
-  Scenario: No messages in "Collateral" category
+Scenario: No messages in "Collateral" category
   Given I am on the Messages Page
   When the "Collateral Pledging" category has no messages
   Then "Collateral Pledging" category should be disabled
+
+@local-only @jira-mem-1240
+Scenario: User is alerted when there are new messages
+  When I have a new message
+  And I am logged in
+  Then I should see an announcements icon in the header with a badge indicating I have new messages
+  When I click on the announcements icon in the header
+  Then I should see an announcements icon in the header with no badge

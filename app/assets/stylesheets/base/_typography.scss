@@ -221,6 +221,12 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-badge {
+  font-size: 0.6rem;
+  font-weight: $bold-weight;
+  line-height: $tight-line-height;
+}
+
 %typography-page-title {
   @include typography-page-title;
 }
@@ -387,4 +393,8 @@
 
 %typography-footnote {
   @include typography-footnote;
+}
+
+%typography-badge {
+  @include typography-badge;
 }

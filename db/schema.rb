@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151111213502) do
+ActiveRecord::Schema.define(version: 20160210173455) do
 
   create_table "attachments", force: :cascade do |t|
     t.string   "owner_type"
@@ -37,6 +37,7 @@ ActiveRecord::Schema.define(version: 20151111213502) do
   end
 
   add_index "corporate_communications", ["category"], name: "i_cor_com_cat"
+  add_index "corporate_communications", ["date_sent"], name: "i_cor_com_dat_sen"
 
   create_table "job_statuses", force: :cascade do |t|
     t.integer  "user_id",                         precision: 38
@@ -55,10 +56,10 @@ ActiveRecord::Schema.define(version: 20151111213502) do
   add_index "job_statuses", ["status"], name: "index_job_statuses_on_status"
 
   create_table "users", force: :cascade do |t|
-    t.string   "username",                              default: "", null: false
+    t.string   "username",                                    default: "", null: false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
-    t.integer  "sign_in_count",          precision: 38, default: 0,  null: false
+    t.integer  "sign_in_count",                precision: 38, default: 0,  null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
@@ -67,6 +68,7 @@ ActiveRecord::Schema.define(version: 20151111213502) do
     t.datetime "updated_at"
     t.string   "ldap_domain"
     t.datetime "terms_accepted_at"
+    t.datetime "last_viewed_announcements_at"
   end
 
   add_index "users", ["reset_password_token"], name: "i_users_reset_password_token", unique: true
