@@ -1,3 +1,4 @@
+@flip-on-announcements
 Feature: Visiting the Messages Page
   As a user
   I want to use visit the messages page for the FHLB Member Portal

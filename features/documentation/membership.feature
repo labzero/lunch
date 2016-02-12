@@ -1,3 +1,4 @@
+@flip-on-unfinished-membership
 Feature: Membership Pages
   As a user
   I want to see the membership pages
