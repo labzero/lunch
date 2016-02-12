@@ -54,8 +54,8 @@
         - if @quick_advance_status == :open && @quick_advance_message
           .quick-advance-limited-pricing-notice= t('dashboard.quick_advance.limited_pricing')
         - if [:open,:closed].include?(@quick_advance_status)
-          %p.dashboard-vrc-overnight-message{data: {'flyout-trigger' => (@quick_advance_status == :open)}}= t('global.standard_vrc_overnight')
-          .dashboard-advances-rate{data: {'flyout-trigger' => (@quick_advance_status == :open)}}
+          %p.dashboard-vrc-overnight-message{style: 'display: none', data: {'flyout-trigger' => (@quick_advance_status == :open)}}= t('global.standard_vrc_overnight')
+          .dashboard-element-loading.dashboard-advances-rate{data: {'flyout-trigger' => (@quick_advance_status == :open)}}
             %span<> %
         .quick-advance-last-updated-message{class: "#{'show-message' unless @quick_advance_status == :open}"}
           %p= t('dashboard.quick_advance.advance_last_updated', last_updated: @quick_advance_last_updated)
