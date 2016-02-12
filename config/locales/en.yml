@@ -191,6 +191,7 @@ en:
       date_to_current: "%{date} to date"
       custom: Custom date range
       print: "%{start_date} - %{end_date}"
+      last_30_days: Last 30 Days
     single:
       input: "As of %{date}"
       custom: Custom date

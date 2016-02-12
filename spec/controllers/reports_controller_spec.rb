@@ -1710,9 +1710,9 @@ RSpec.describe ReportsController, :type => :controller do
         expect(rates_service_instance).to receive(:historical_price_indications).with(start_date, end_date, anything, anything).and_return(response_hash)
         get :historical_price_indications, start_date: start_date, end_date: end_date
       end
-      it 'should use the start of this year to date as the date range if no params are passed' do
-        start_of_year = today.beginning_of_year
-        expect(rates_service_instance).to receive(:historical_price_indications).with(start_of_year, today, anything, anything).and_return(response_hash)
+      it 'should use the last 30 days to date as the date range if no params are passed' do
+        last_30_days = today - 1.month
+        expect(rates_service_instance).to receive(:historical_price_indications).with(last_30_days, today, anything, anything).and_return(response_hash)
         get :historical_price_indications
       end
       it 'should raise an error if @historical_price_indications is nil' do
