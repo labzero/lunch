@@ -8,7 +8,8 @@
         %li.nav-member-switch= link_to(t('nav.primary.switch'), members_switch_member_path, method: :post)
       %li.nav-logout= link_to(t('nav.primary.logout'), destroy_user_session_url, method: :delete)
       %li.nav-settings= link_to('', settings_password_path, class: 'icon-gear-after')
-      %li.nav-mail= link_to('', corporate_communications_path('all'), class: 'icon-announcements-after')
+      - if feature_enabled?('announcements')
+        %li.nav-mail= link_to('', corporate_communications_path('all'), class: 'icon-announcements-after')
 .secondary-nav
   %nav.row
     %time{datetime:@render_time.iso8601}= fhlb_datetime_standard_numeric(@render_time)
@@ -26,7 +27,10 @@
               %h2= t('reports.your_account.title')
               %ul
                 %li= link_to(t('reports.account.account_summary.title'), reports_account_summary_path)
-                %li= link_to(t('reports.account.authorizations.title'), reports_authorizations_path)
+                - if feature_enabled?('authorizations-report')
+                  %li= link_to(t('reports.account.authorizations.title'), reports_authorizations_path)
+                - else
+                  %li.disabled= t('reports.account.authorizations.title')
                 %li= link_to(t('reports.account.settlement_transaction_account.title'), reports_settlement_transaction_account_path)
             .nav-dropdown-column
               %h2= t('reports.price_indications.title')
@@ -53,7 +57,10 @@
               %ul
                 %li= link_to(t('reports.capital_stock.activity.title'), reports_capital_stock_activity_path)
                 %li= link_to(t('reports.capital_stock.trial_balance.title'), reports_capital_stock_trial_balance_path)
-                %li= link_to(t('reports.capital_stock.capital_stock_and_leverage.title'), reports_capital_stock_and_leverage_path)
+                - if feature_enabled?('capital-stock-position-and-leverage-report')
+                  %li= link_to(t('reports.capital_stock.capital_stock_and_leverage.title'), reports_capital_stock_and_leverage_path)
+                - else
+                  %li.disabled= t('reports.capital_stock.capital_stock_and_leverage.title')
                 %li= link_to(t('reports.capital_stock.dividend_statement.title'), reports_dividend_statement_path)
             .nav-dropdown-column
               %h2= t('reports.securities.title')
