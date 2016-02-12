@@ -1,6 +1,7 @@
+@flip-on-capital-stock-position-and-leverage-report
 @jira-mem-69
 Feature: Visiting the Capital Stock Position and Leverage Report
-  As a user
+   As a user
   I want to use visit the Capital Stock Position and Leverage Report page for the FHLB Member Portal
   In order to view my current capital stock position and leverage
 
