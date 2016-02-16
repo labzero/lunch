@@ -607,7 +607,7 @@ class ReportsController < ApplicationController
   def historical_price_indications
     rate_service = RatesService.new(request)
     default_dates = default_dates_hash
-    @start_date = ((params[:start_date] || default_dates[:this_year_start])).to_date
+    @start_date = ((params[:start_date] || default_dates[:last_30_days])).to_date
     @end_date = ((params[:end_date] || default_dates[:today])).to_date
     @picker_presets = date_picker_presets(@start_date, @end_date)
     
