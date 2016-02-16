@@ -83,6 +83,7 @@
             });
             setRsaEventListener();
             setConfirmQuickAdvanceListener();
+            Fhlb.Track.quick_advance_preview();
           }
           else {
             $flyout.find('.flyout-top-section-body .quick-advance-capstock-subheading').show();
@@ -99,6 +100,7 @@
             $('.confirm-quick-advance-capstock').on('click', function () {
               initiateQuickAdvanceWithoutCapstockCheck({stock_choice: $flyout.find('input[name=stock_choice]:checked').val()});
             });
+            Fhlb.Track.quick_advance_stock_purchase();
           }
         }
 
@@ -116,7 +118,6 @@
         $oldNodes.hide();
         $('.quick-advance-capstock-subheading').hide();
         $flyoutBottomSection.append($(json.html));
-
         if (json.preview_error == true) {
           showQuickAdvancePreviewError();
         } else {
@@ -132,6 +133,7 @@
           });
           setRsaEventListener();
           setConfirmQuickAdvanceListener();
+          Fhlb.Track.quick_advance_preview();
         };
       }).error(showCatchAllError);
     }
