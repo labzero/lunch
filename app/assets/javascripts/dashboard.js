@@ -35,7 +35,7 @@ $(function () {
     }
   }).on('flyout-reset-initiated', function(){
     $quickAdvancesInputField.val('').data('flyout-trigger', 'active');
-    $('.quick-advance-desk-closed-message a').data('flyout-trigger', 'active');
+    $('.quick-advance-desk-closed-message-group a').data('flyout-trigger', 'active');
   });
 
   function openQuickAdvanceFlyout(event, $element) {
@@ -91,7 +91,9 @@ $(function () {
 
   function showQuickAdvanceClosedState() {
     $('.primary-button.initiate-quick-advance, .rate-advances-footer, .dashboard-module-advances .input-field-container, .flyout .input-field-container').remove();
-    $('.quick-advance-desk-closed-message-group').show();
+    $('.dashboard-module-advances').addClass('dashboard-module-advances-closed');
+    $('.quick-advance-desk-closed-message-group').children().hide();
+    $('.quick-advance-desk-closed-message').show();
     $('.quick-advance-last-updated-message').addClass('show-message');
     $('.dashboard-quick-advance-flyout td, .dashboard-quick-advance-flyout th').removeClass('cell-selected');
     $('.dashboard-quick-advance-flyout .selectable-cell').addClass('disabled-cell');
@@ -114,7 +116,7 @@ $(function () {
       isCheckingRate = true;
       $.get('/dashboard/current_overnight_vrc').done(function(data) {
         $rate_element_children.remove();
-        if (typeof data.rate == 'undefined' && $('.dashboard-vrc-overnight-message').is(':visible')) {
+        if (typeof data.rate == 'undefined' || data.rate == null) {
           $('.dashboard-vrc-overnight-message').hide();
           $('.dashboard-advances-rate').hide();
         }

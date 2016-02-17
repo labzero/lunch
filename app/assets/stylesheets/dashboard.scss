@@ -217,14 +217,16 @@ $faded-opacity: 0.4 !default;
   }
 }
 
-.quick-advance-desk-closed-message {
-  margin-bottom: 0;
-  a {
-    display: block;
-    text-transform: uppercase;
-  }
-  span {
-    white-space: nowrap;
+.quick-advance-desk-closed-message-group {
+  p {
+    margin-bottom: 0;
+    a {
+      display: block;
+      text-transform: uppercase;
+    }
+    span {
+      white-space: nowrap;
+    }
   }
 }
 
