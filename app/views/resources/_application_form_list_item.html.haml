@@ -9,5 +9,7 @@
       %p= t("resources.membership.forms.id_#{form_id.to_s}.description_html", link: link_to(ContactInformationHelper::MEMBERSHIP_EMAIL, membership_email))
     - when 2136
       %p= t("resources.membership.forms.id_#{form_id.to_s}.description_html", download_link: link_to_download_resource(t('resources.membership.forms.id_2135.title'), resources_download_path(file: :form_2135)))
+    - when 2349
+      %p= t("resources.membership.forms.id_#{form_id.to_s}.description_html", download_link: link_to_download_resource(t('resources.membership.forms.id_2127.title'), resources_download_path(file: :form_2127)))
     - else
       %p= t("resources.membership.forms.id_#{form_id.to_s}.description")
