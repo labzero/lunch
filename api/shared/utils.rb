@@ -25,11 +25,21 @@ module MAPI
           end
         end
 
-        def fetch_hashes(logger, sql)
+        def quote(value)
+          ActiveRecord::Base.connection.quote(value)
+        end
+
+        def dateify(date_or_string)
+          Date.parse(date_or_string.to_s)
+        end
+
+        def fetch_hashes(logger, sql, map_values={}, downcase_keys=false)
           begin
             results = []
             cursor  = ActiveRecord::Base.connection.execute(sql)
             while row = cursor.fetch_hash()
+              map_values.each{ |op, keys| keys.each{ |key| row[key] = row[key].try(op) } }
+              row = Hash[row.map{ |k,v| [k.downcase,v] }] if downcase_keys
               results.push(row)
             end
             results
@@ -54,7 +64,7 @@ module MAPI
         end
 
         def decimal_to_percentage_rate(rate)
-          rate.to_f.round(5) * 100.0 if rate
+          rate.to_f.round(7) * 100.0 if rate
         end
 
         def percentage_to_decimal_rate(rate)

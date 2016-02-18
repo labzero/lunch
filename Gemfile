@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.2.4'
+gem 'rails', '4.2.5.1'
 gem 'ruby-oci8'
 
 # IF THE DB IS ACTING STRANGE, CHECK THIS BRANCH.
@@ -23,10 +23,10 @@ gem 'jbuilder'
 # bundle exec rake doc:rails generates the API under doc/api.
 gem 'sdoc',          group: :doc
 gem 'rest-client'
-gem 'securid', git: 'https://github.com/labzero/securid.git', branch: '0.2.3'
+gem 'securid', git: 'https://github.com/labzero/securid.git', branch: '0.2.4'
 
 # For authentication/authorization
-gem 'devise_ldap_authenticatable', git: 'https://github.com/labzero/devise_ldap_authenticatable.git', branch: '0.9.19'
+gem 'devise_ldap_authenticatable', git: 'https://github.com/labzero/devise_ldap_authenticatable.git', branch: '0.9.21'
 gem 'pundit'
 
 # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
@@ -41,6 +41,11 @@ gem 'dotenv-rails'
 gem 'redis-rails'
 gem 'aasm'
 gem 'redis-objects'
+
+# feature flagging
+gem 'flipper'
+gem 'flipper-redis'
+gem 'flipper-ui'
 
 # for parsing emails into CorporateCommunication objects
 gem 'mail'
@@ -80,6 +85,10 @@ gem 'premailer-rails'
 
 # for profiling
 gem 'ruby-prof', require: false
+
+group :production, :development do
+  gem 'newrelic_rpm'
+end
 
 group :development, :test do
   gem 'rspec-rails'

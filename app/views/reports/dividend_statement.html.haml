@@ -16,10 +16,6 @@
     -if @show_summary_data
       .report-summary-data
         %h3
-          = report_summary_with_date('reports.pages.dividend_statement.outstanding_shares_heading', @dropdown_options_text)
-        %p= fhlb_formatted_number(@dividend_statement[:average_shares_outstanding], precision: 2)
-      .report-summary-data
-        %h3
           = report_summary_with_date('reports.pages.dividend_statement.dividend_amount_heading', @dropdown_options_text)
         %p= fhlb_formatted_currency(@dividend_statement[:total_dividend])
     %h2.report-table-title= t('reports.pages.dividend_statement.summary')

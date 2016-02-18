@@ -1,29 +1,24 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'member capital_stock_and_leverage' do
-    let(:capital_stock_and_leverage) {MAPI::Services::Member::CapitalStockAndLeverage.capital_stock_and_leverage(subject, MEMBER_ID)}
+    let(:capital_stock_and_leverage) {MAPI::Services::Member::CapitalStockAndLeverage.capital_stock_and_leverage(subject, member_id)}
 
     it 'calls the `capital_stock_and_leverage` method when the endpoint is hit' do
       allow(MAPI::Services::Member::CapitalStockAndLeverage).to receive(:capital_stock_and_leverage).and_return('a response')
-      get "/member/#{MEMBER_ID}/capital_stock_and_leverage"
+      get "/member/#{member_id}/capital_stock_and_leverage"
       expect(last_response.status).to eq(200)
     end
 
     describe 'when the `capital_stock_and_leverage` method returns nil' do
       before { allow(MAPI::Services::Member::CapitalStockAndLeverage).to receive(:capital_stock_and_leverage).and_return(nil) }
       it 'returns a 503' do
-        get "/member/#{MEMBER_ID}/capital_stock_and_leverage"
+        get "/member/#{member_id}/capital_stock_and_leverage"
         expect(last_response.status).to eq(503)
       end
       it 'logs an error' do
         expect_any_instance_of(Logger).to receive(:error)
-        get "/member/#{MEMBER_ID}/capital_stock_and_leverage"
+        get "/member/#{member_id}/capital_stock_and_leverage"
       end
     end
 

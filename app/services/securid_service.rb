@@ -18,6 +18,12 @@ class SecurIDService
     @session.authenticate(@username, pin.to_s + token.to_s)
   end
 
+  def authenticate_without_pin(token)
+    validate_token(token)
+
+    @session.authenticate(@username, token.to_s)
+  end  
+
   def change_pin(pin)
     validate_pin(pin)
 

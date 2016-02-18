@@ -2,8 +2,8 @@
 - @page_title = t('reports.meta_title')
 .report.securities-report.expanding-row-table.row
   .report-header
-    %h1= t('reports.pages.securities_position.monthly')
-    = render 'reports_header_buttons'
+    %h1= @report_name
+    = render 'reports_header_buttons', allowed_params: [:securities_filter, :start_date], download_formats: [:xlsx]
     = render 'report_details', name: @member_name, freshness: t('reports.pages.securities_position.freshness'), availability: t('reports.availability.months', months: 18)
     .report-inputs
       = render layout: 'reports_date_picker_form', locals: {start_date: @month_end_date, report_url: reports_monthly_securities_position_url, presets: @picker_presets, single_date_picker: true, date_picker_filter: @date_picker_filter, min_date: @min_date} do

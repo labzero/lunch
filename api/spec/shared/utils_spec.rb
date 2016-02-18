@@ -39,18 +39,53 @@ describe MAPI::Shared::Utils::ClassMethods do
     let(:hash1)  { double('hash1') }
     let(:hash2)  { double('hash2') }
     let(:hash3)  { double('hash3') }
+    let(:hash4)  { { "A" =>  1,    "B" => "2",   "C" => "3.0" } }
+    let(:hash5)  { { "A" => "1",   "B" => "2.0", "C" =>  3    } }
+    let(:hash6)  { { "A" => "1.0", "B" =>  2,    "C" => "3"   } }
+    let(:hash7)  { { "A" =>  1,    "B" =>  2,    "C" =>  3    } }
+    let(:hash8)  { { "a" =>  1,    "b" =>  2,    "c" =>  3    } }
 
-    it 'executes a SQL query and performs fetch_hash on the resulting cursor' do
+    before do
       allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
-      allow(cursor).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
-      expect(subject.fetch_hashes(logger, sql)).to be == [hash1, hash2, hash3]
     end
 
+    it 'executes a SQL query and performs fetch_hash on the resulting cursor' do
+      allow(cursor).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
+      expect(subject.fetch_hashes(logger, sql)).to eq( [hash1, hash2, hash3] )
+    end
+    it 'handles the map_values parameter properly' do
+      allow(cursor).to receive(:fetch_hash).and_return(hash4, hash5, hash6, nil)
+      expect(subject.fetch_hashes(logger, sql, {to_i: %w(A B C)})).to eq( [hash7, hash7, hash7] )
+    end
+    it 'should honour the downcase_keys argument' do
+      allow(cursor).to receive(:fetch_hash).and_return({ 'A' => hash1}, { 'B' => hash2}, {'C' => hash3}, nil)
+      expect(subject.fetch_hashes(logger, sql, {}, true)).to eq([{'a' => hash1}, {'b' => hash2}, {'c' => hash3}])
+    end
+    it 'should handle both the map_keys and downcase_keys arguments properly' do
+      allow(cursor).to receive(:fetch_hash).and_return(hash4, hash5, hash6, nil)
+      expect(subject.fetch_hashes(logger, sql, {to_i: %w(A B C)}, true)).to eq([hash8, hash8, hash8])
+    end
+    it 'returns an empty array if the SQL query yields no results' do
+      allow(cursor).to receive(:fetch_hash).and_return(nil)
+      expect(subject.fetch_hashes(logger, sql, {}, true)).to eq([])
+    end
     it 'logs an error for exceptions' do
-      allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
       allow(cursor).to receive(:fetch_hash).and_raise(:exception)
       expect(logger).to receive(:error)
       subject.fetch_hashes(logger, sql)
+    end
+  end
+
+  describe 'dateify' do
+    let(:date){ Date.parse('2015-11-30') }
+    it 'should map an Oracle formatted date to this century' do
+      expect(subject.dateify('30-NOV-15')).to eq(date)
+    end
+    it 'should be idempotent on a Date' do
+      expect(subject.dateify(date)).to eq(date)
+    end
+    it 'should handle an iso8661 string' do
+      expect(subject.dateify(date.iso8601)).to eq(date)
     end
   end
 
@@ -80,7 +115,7 @@ describe MAPI::Shared::Utils::ClassMethods do
     it 'converts a decimal rate to a percentage rate' do
       rate = double('A Rate')
       allow(rate).to receive(:to_f).and_return(rate)
-      expect(rate).to receive(:round).with(5).and_return(rate).ordered
+      expect(rate).to receive(:round).with(7).and_return(rate).ordered
       expect(rate).to receive(:*).with(100.0).ordered
       subject.decimal_to_percentage_rate(rate)
     end

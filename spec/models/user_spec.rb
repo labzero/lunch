@@ -15,11 +15,19 @@ RSpec.describe User, :type => :model do
   it { subject.email = 'foo' ; should validate_presence_of(:email_confirmation).on(:update) }
   it { should validate_presence_of(:given_name).on(:update) }
   it { should validate_presence_of(:surname).on(:update) }
+  it { should validate_presence_of(:username).on(:update) }
   ['foo', 'foo@example', 'foo@example.1'].each do |value|
     it { should_not allow_value(value).for(:email) }
   end
   ['foo@example.com', 'foo@example.co', 'bar@example.org'].each do |value|
     it { should allow_value(value).for(:email) }
+  end
+
+  ['foo', 'abcdefghijklmnopqrstuvwxyz', 'fhlbsf1', 'FHLBSF2', '1234', '12345678901234567890'].each do |value|
+    it { should_not allow_value(value).for(:username).on(:update) }
+  end
+  ['user', 'u123', 'u1234567890123456789'].each do |value|
+    it { should allow_value(value).for(:username).on(:update) }
   end
 
   describe 'password changes surpress some validations' do
@@ -56,19 +64,62 @@ RSpec.describe User, :type => :model do
   describe 'validating passwords' do
     it { should validate_confirmation_of(:password) }
     it { should validate_length_of(:password).is_at_least(8) }
-    it 'requires at least one capital letter' do
-      should_not allow_value('abcder12!').for(:password)
+    describe 'acceptance criteria' do
+      lower ='asdfsa'
+      upper = 'KJSHDF'
+      number = '7423894'
+      symbol = '#$@!%*'
+
+      [
+        [['lowercase letter', 'symbol'], (lower + symbol)],
+        [['lowercase letter', 'number'], (lower + number)],
+        [['lowercase letter', 'uppercase letter'], (lower + upper)],
+        [['uppercase letter', 'lowercase letter'], (upper + lower)],
+        [['uppercase letter', 'number'], (upper + number)],
+        [['uppercase letter', 'symbol'], (upper + symbol)],
+        [['number', 'lowercase number'], (number + lower)],
+        [['number', 'uppercase number'], (number + upper)],
+        [['number', 'symbol'], (number + symbol)],
+        [['symbol', 'lowercase letter'], (symbol + lower)],
+        [['symbol', 'uppercase letter'], (symbol + upper)],
+        [['symbol', 'number'], (symbol + number)]
+      ].each do |criteria, password|
+        it "rejects passwords that only include a #{criteria.first} and a #{criteria.last}" do
+          should_not allow_value(password).for(:password)
+        end
+      end
+
+      [
+        [['lowercase letter', 'uppercase letter', 'number'], (lower + upper + number)],
+        [['lowercase letter', 'uppercase letter', 'symbol'], (lower + upper + symbol)],
+        [['lowercase letter', 'symbol', 'number'], (lower + symbol + number)],
+        [['lowercase letter', 'symbol', 'uppercase letter'], (lower + symbol + upper)],
+        [['lowercase letter', 'number', 'symbol'], (lower + number + symbol)],
+        [['lowercase letter', 'number', 'uppercase letter'], (lower + number + upper)],
+        [['uppercase letter', 'lowercase letter', 'number'], (upper + lower + number)],
+        [['uppercase letter', 'lowercase letter', 'symbol'], (upper + lower + symbol)],
+        [['uppercase letter', 'symbol', 'number'], (upper + symbol + number)],
+        [['uppercase letter', 'symbol', 'lowercase letter'], (upper + symbol + lower)],
+        [['uppercase letter', 'number', 'symbol'], (upper + number + symbol)],
+        [['uppercase letter', 'number', 'lowercase letter'], (upper + number + lower)],
+        [['number', 'lowercase letter', 'uppercase letter'], (number + lower + upper)],
+        [['number', 'lowercase letter', 'symbol'], (number + lower + symbol)],
+        [['number', 'symbol', 'uppercase letter'], (number + symbol + upper)],
+        [['number', 'symbol', 'lowercase letter'], (number + symbol + lower)],
+        [['number', 'uppercase letter', 'symbol'], (number + upper + symbol)],
+        [['number', 'uppercase letter', 'lowercase letter'], (number + upper + lower)],
+        [['symbol', 'lowercase letter', 'uppercase letter'], (symbol + lower + upper)],
+        [['symbol', 'lowercase letter', 'number'], (symbol + lower + number)],
+        [['symbol', 'number', 'uppercase letter'], (symbol + number + upper)],
+        [['symbol', 'number', 'lowercase letter'], (symbol + number + lower)],
+        [['symbol', 'uppercase letter', 'number'], (symbol + upper + number)],
+        [['symbol', 'uppercase letter', 'lowercase letter'], (symbol + upper + lower)]
+      ].each do |criteria, password|
+        it "accepts passwords that include a #{criteria.first}, a #{criteria[1]} and a #{criteria.last}" do
+          should allow_value(password).for(:password)
+        end
+      end
     end
-    it 'requires at least one lowercase letter' do
-      should_not allow_value('ABCDER12!').for(:password)
-    end
-    it 'requires at least one number' do
-      should_not allow_value('Abcderrr!').for(:password)
-    end
-    it 'requires at least one symbol' do
-      should_not allow_value('Abcder121').for(:password)
-    end
-    it { should allow_value('Abcder121!').for(:password) }
     it { should allow_value(nil).for(:password) }
   end
 
@@ -108,10 +159,10 @@ RSpec.describe User, :type => :model do
       subject.roles
     end
     it 'returns an array containing roles based on the CNs it receives from LDAP' do
-      expect(subject.roles(request)).to include(User::ROLE_MAPPING[ldap_role_cn])
+      expect(subject.roles(request)).to include(User::LDAP_GROUPS_TO_ROLES[ldap_role_cn])
     end
     it 'returns an array containing roles based on the values it receives from the MAPI endpoint' do
-      expect(subject.roles(request)).to include(User::ROLE_MAPPING[signer_role])
+      expect(subject.roles(request)).to include(User::LDAP_GROUPS_TO_ROLES[signer_role])
     end
     it 'ignores any roles it receives if they do not correspond to ROLE_MAPPING' do
       allow(subject).to receive(:ldap_groups).and_return([ldap_role, double('another ldap role', cn: 'some role we do not care about')])
@@ -148,27 +199,27 @@ RSpec.describe User, :type => :model do
         allow(subject).to receive(:ldap_entry).and_return(ldap_entry)
         allow(ldap_entry).to receive(:[]).with(attribute).and_return([attribute_value])
       end
-      it 'should fetch the backing LDAP entry' do
+      it 'fetches the backing LDAP entry' do
         expect(subject).to receive(:ldap_entry).and_return(ldap_entry)
         call_method
       end
-      it "should return the `#{attribute}` of the backing LDAP entry" do
+      it "returns the `#{attribute}` of the backing LDAP entry" do
         expect(call_method).to eq(attribute_value)
       end
-      it 'should return nil if no entry was found' do
+      it 'returns nil if no entry was found' do
         allow(subject).to receive(:ldap_entry).and_return(nil)
         expect(call_method).to be_nil
       end
-      it 'should return the in-memory value if there is one' do
+      it 'returns the in-memory value if there is one' do
         subject.instance_variable_set(:"@#{method}", attribute_value)
         expect(call_method).to eq(attribute_value)
       end
-      it 'should return the in-memory value if there is no ldap_entry' do
+      it 'returns the in-memory value if there is no ldap_entry' do
         allow(subject).to receive(:ldap_entry).and_return(nil)
         subject.instance_variable_set(:"@#{method}", attribute_value)
         expect(call_method).to eq(attribute_value)
       end
-      it "should return nil if the entry had no value for `#{attribute}`" do
+      it "returns nil if the entry had no value for `#{attribute}`" do
         allow(ldap_entry).to receive(:[]).with(attribute)
         expect(call_method).to be_nil
       end
@@ -183,18 +234,18 @@ RSpec.describe User, :type => :model do
       allow(subject).to receive(:ldap_entry).and_return(ldap_entry)
       allow(ldap_entry).to receive(:[]).with(:userAccountControl).and_return([attribute_value])
     end
-    it 'should fetch the backing LDAP entry' do
+    it 'fetches the backing LDAP entry' do
       expect(subject).to receive(:ldap_entry).and_return(ldap_entry)
       call_method
     end
-    it 'should return true if the backing LDAP entry has the LDAP_LOCK_BIT set' do
+    it 'returns true if the backing LDAP entry has the LDAP_LOCK_BIT set' do
       expect(call_method).to eq(true)
     end
-    it 'should return false if no entry was found' do
+    it 'returns false if no entry was found' do
       allow(subject).to receive(:ldap_entry).and_return(nil)
       expect(call_method).to eq(false)
     end
-    it 'should return false if the LDAP_LOCK_BIT is not set' do
+    it 'returns false if the LDAP_LOCK_BIT is not set' do
       allow(ldap_entry).to receive(:[]).with(:userAccountControl).and_return(512)
       expect(call_method).to eq(false)
     end
@@ -291,15 +342,15 @@ RSpec.describe User, :type => :model do
   describe '`email=` method' do
     let(:value) { 'foo@example.com' }
     let(:call_method) { subject.email = value }
-    it 'should change the email attribute on the model' do
+    it 'changes the email attribute on the model' do
       call_method
       expect(subject.email).to eq(value)
     end
-    it 'should mark the email attribute as dirty if the value changed' do
+    it 'marks the email attribute as dirty if the value changed' do
       expect(subject).to receive(:attribute_will_change!).with('email')
       call_method
     end
-    it 'should not mark the email attribute as dirty if the value was the same' do
+    it 'does not mark the email attribute as dirty if the value was the same' do
       allow(subject).to receive(:email).and_return(value)
       expect(subject).to_not receive(:attribute_will_change!).with('email')
       call_method
@@ -312,15 +363,15 @@ RSpec.describe User, :type => :model do
     before do
       allow(subject).to receive(:attribute_will_change!)
     end
-    it 'should change the surname attribute on the model' do
+    it 'changes the surname attribute on the model' do
       call_method
       expect(subject.surname).to eq(value)
     end
-    it 'should mark the surname attribute as dirty if the value changed' do
+    it 'marks the surname attribute as dirty if the value changed' do
       expect(subject).to receive(:attribute_will_change!).with('surname')
       call_method
     end
-    it 'should not mark the surname attribute as dirty if the value was the same' do
+    it 'does not mark the surname attribute as dirty if the value was the same' do
       allow(subject).to receive(:surname).and_return(value)
       expect(subject).to_not receive(:attribute_will_change!).with('surname')
       call_method
@@ -337,15 +388,15 @@ RSpec.describe User, :type => :model do
     before do
       allow(subject).to receive(:attribute_will_change!)
     end
-    it 'should change the given_name attribute on the model' do
+    it 'changes the given_name attribute on the model' do
       call_method
       expect(subject.given_name).to eq(value)
     end
-    it 'should mark the given_name attribute as dirty if the value changed' do
+    it 'marks the given_name attribute as dirty if the value changed' do
       expect(subject).to receive(:attribute_will_change!).with('given_name')
       call_method
     end
-    it 'should not mark the given_name attribute as dirty if the value was the same' do
+    it 'does not mark the given_name attribute as dirty if the value was the same' do
       allow(subject).to receive(:given_name).and_return(value)
       expect(subject).to_not receive(:attribute_will_change!).with('given_name')
       call_method
@@ -359,15 +410,15 @@ RSpec.describe User, :type => :model do
   describe '`deletion_reason=` method' do
     let(:value) { 'stole my stapler' }
     let(:call_method) { subject.deletion_reason = value }
-    it 'should change the deletion_reason attribute on the model' do
+    it 'changes the deletion_reason attribute on the model' do
       call_method
       expect(subject.deletion_reason).to eq(value)
     end
-    it 'should mark the deletion_reason attribute as dirty if the value changed' do
+    it 'marks the deletion_reason attribute as dirty if the value changed' do
       expect(subject).to receive(:attribute_will_change!).with('deletion_reason')
       call_method
     end
-    it 'should not mark the deletion_reason attribute as dirty if the value was the same' do
+    it 'does not mark the deletion_reason attribute as dirty if the value was the same' do
       allow(subject).to receive(:deletion_reason).and_return(value)
       expect(subject).to_not receive(:attribute_will_change!).with('deletion_reason')
       call_method
@@ -487,10 +538,155 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe 'add_extranet_user' do
+    let(:member_id)    { double('member_id') }
+    let(:creator)      { double('creator') }
+    let(:username)     { double('username') }
+    let(:email)        { double('email') }
+    let(:given_name)   { double('given_name') }
+    let(:surname)      { double('surname') }
+    let(:call_method)  { User.add_extranet_user(member_id, creator, username, email, given_name, surname) }
+  describe '`flipper_id` method' do
+    let(:call_method) { subject.flipper_id }
+    it 'returns the username' do
+      expect(call_method).to eq(subject.username)
+    end
+  end
+
+    it 'calls find_or_create_by on success' do
+      allow(User).to receive(:create_ldap_user).with(member_id, creator, username, email, given_name, surname).and_return(true)
+      expect(User).to receive(:find_or_create_by).with(username: username, ldap_domain: User::LDAP_EXTRANET_DOMAIN)
+      call_method
+    end
+
+    it 'calls create_ldap_user on success' do
+      expect(User).to receive(:create_ldap_user).with(member_id, creator, username, email, given_name, surname)
+      call_method
+    end
+
+    it 'returns nil if add_groups fails' do
+      allow(User).to receive(:create_ldap_user).with(member_id, creator, username, email, given_name, surname).and_return(false)
+      expect(call_method).to be_nil
+    end
+  end
+
+  describe 'create_ldap_user' do
+    let(:member_id)    { rand(9999).to_s }
+    let(:creator)      { SecureRandom.hex }
+    let(:username)     { SecureRandom.hex }
+    let(:email)        { "#{SecureRandom.hex}@#{SecureRandom.hex}.com" }
+    let(:given_name)   { SecureRandom.hex }
+    let(:surname)      { SecureRandom.hex }
+    let(:dn) { "CN=#{username},#{User::LDAP_EXTRANET_EBIZ_USERS_DN}" }
+    let(:attributes) do
+      {
+        CreatedBy: creator,
+        description: "Created by #{creator}",
+        sAMAccountName: username,
+        mail: email,
+        User::LDAP_PASSWORD_EXPIRATION_ATTRIBUTE => 'true',
+        givenname: given_name,
+        sn: surname,
+        displayname: "#{given_name} #{surname}",
+        objectClass: %w(user top person)
+      }
+    end
+    let(:groups) { [User::AD_GROUP_NAME_PREFIX + member_id, User::ROLES_TO_LDAP_GROUPS[User::Roles::MEMBER_USER]] }
+    let(:group1_dn) { double('group1.dn') }
+    let(:group2_dn) { double('group2.dn') }
+    let(:group1_dn_results){ [double('group1_dn_result', dn: group1_dn)] }
+    let(:group2_dn_results){ [double('group2_dn_result', dn: group2_dn)] }
+    let(:call_method)  { User::create_ldap_user( member_id, creator, username, email, given_name, surname ) }
+    let(:ldap_admin)   { double('ldap_admin') }
+    let(:ldap)         { double('ldap') }
+    before do
+      allow(Devise::LDAP::Connection).to receive(:admin).with(User::LDAP_EXTRANET_DOMAIN).and_return(ldap_admin)
+      allow(ldap_admin).to receive(:open).and_yield(ldap)
+      allow(ldap).to receive(:search).with(filter: "(&(CN=#{groups[0]})(objectClass=group))").and_return(group1_dn_results)
+      allow(ldap).to receive(:search).with(filter: "(&(CN=#{groups[1]})(objectClass=group))").and_return(group2_dn_results)
+      allow(ldap).to receive(:add_attribute).with(group1_dn, 'member', dn).and_return(true)
+      allow(ldap).to receive(:add_attribute).with(group2_dn, 'member', dn).and_return(true)
+      allow(ldap).to receive(:add).with(dn: dn, attributes: attributes).and_return(true)
+    end
+
+    it 'searches with group1 filter' do
+      expect(ldap).to receive(:search).with(filter: "(&(CN=#{groups[0]})(objectClass=group))")
+      call_method
+    end
+
+    it 'searches with group2 filter' do
+      expect(ldap).to receive(:search).with(filter: "(&(CN=#{groups[1]})(objectClass=group))")
+      call_method
+    end
+
+    it 'calls add_attribute with group1_dn' do
+      expect(ldap).to receive(:add_attribute).with(group1_dn, 'member', dn)
+      call_method
+    end
+
+    it 'calls add_attribute with group2_dn' do
+      expect(ldap).to receive(:add_attribute).with(group2_dn, 'member', dn)
+      call_method
+    end
+
+    it 'calls add with dn and attributes' do
+      expect(ldap).to receive(:add).with(dn: dn, attributes: attributes)
+      call_method
+    end
+
+    it 'returns true on success' do
+      expect(call_method).to be_truthy
+    end
+
+    it 'returns false if add fails' do
+      allow(ldap).to receive(:add).with(dn: dn, attributes: attributes).and_return(false)
+      expect(call_method).to be_falsey
+    end
+
+    it 'returns false if search for #{groups[0]} fails' do
+      allow(ldap).to receive(:search).with(filter: "(&(CN=#{groups[0]})(objectClass=group))").and_return([])
+      expect(call_method).to be_falsey
+    end
+
+    it 'returns false if search for #{groups[1]} fails' do
+      allow(ldap).to receive(:search).with(filter: "(&(CN=#{groups[1]})(objectClass=group))").and_return([])
+      expect(call_method).to be_falsey
+    end
+
+    it 'returns false if add_attribute fails for first dn' do
+      allow(ldap).to receive(:add_attribute).with(group1_dn, 'member', dn).and_return(false)
+      expect(call_method).to be_falsey
+    end
+
+    it 'returns false if add_attribute fails for second dn' do
+      allow(ldap).to receive(:add_attribute).with(group2_dn, 'member', dn).and_return(false)
+      expect(call_method).to be_falsey
+    end
+  end
+
+  describe '`member` method' do
+    let(:call_method) { subject.member }
+    let(:member_id) { double('A Member ID') }
+    before do
+      allow(subject).to receive(:member_id).and_return(member_id)
+    end
+    it 'returns a Member instance for the users affiliated member' do
+      expect(call_method.id).to eq(member_id)
+    end
+    it 'caches the member instance' do
+      member = call_method
+      expect(call_method).to be(member)
+    end
+    it 'returns nil if the user has no member affiliated with it' do
+      allow(subject).to receive(:member_id).and_return(nil)
+      expect(call_method).to be_nil
+    end
+  end
+
 
   describe '`reload_ldap_entry` protected method' do
     let(:call_method) { subject.send(:reload_ldap_entry) }
-    it 'should nil out the `@ldap_entry` instance variable' do
+    it 'nils out the `@ldap_entry` instance variable' do
       subject.instance_variable_set(:@ldap_entry, double('LDAP Entry: User'))
       call_method
       expect(subject.instance_variable_get(:@ldap_entry)).to be_nil
@@ -502,7 +698,7 @@ RSpec.describe User, :type => :model do
     before do
       allow_any_instance_of(User).to receive(:save_ldap_attributes).and_call_original
     end
-    it 'should not save if there are no changes' do
+    it 'does not save if there are no changes' do
       expect(Devise::LDAP::Adapter).to_not receive(:set_ldap_params)
       call_method
     end
@@ -516,19 +712,19 @@ RSpec.describe User, :type => :model do
         allow(subject).to receive(:ldap_domain).and_return(ldap_domain)
         allow(Devise::LDAP::Adapter).to receive(:set_ldap_params).and_return(true)
       end
-      it 'should save the changes' do
+      it 'saves the changes' do
         expect(Devise::LDAP::Adapter).to receive(:set_ldap_params).with(username, {mail: email}, nil, ldap_domain)
         call_method
       end
-      it 'should call `reload_ldap_entry`' do
+      it 'calls `reload_ldap_entry`' do
         expect(subject).to receive(:reload_ldap_entry)
         call_method
       end
-      it 'should rollback if save fails' do
+      it 'rollbacks if save fails' do
         allow(Devise::LDAP::Adapter).to receive(:set_ldap_params).and_return(false)
         expect{call_method}.to raise_error(ActiveRecord::Rollback)
       end
-      it 'should call `reload_ldap_attributes` if the save succeeds' do
+      it 'calls `reload_ldap_attributes` if the save succeeds' do
         allow(Devise::LDAP::Adapter).to receive(:set_ldap_params).and_return(true)
         expect(subject).to receive(:reload_ldap_attributes)
         call_method
@@ -544,15 +740,15 @@ RSpec.describe User, :type => :model do
       allow(subject).to receive(:given_name).and_return(given_name)
       allow(subject).to receive(:surname).and_return(surname)
     end
-    it 'should rebuild the display_name' do
+    it 'rebuilds the display_name' do
       call_method
       expect(subject.display_name).to eq("#{given_name} #{surname}")
     end
-    it 'should mark the display_name as changed if it changed' do
+    it 'marks the display_name as changed if it changed' do
       expect(subject).to receive(:attribute_will_change!).with('display_name')
       call_method
     end
-    it 'should not mark the display_name as changed if it matches the current display_name' do
+    it 'does not mark the display_name as changed if it matches the current display_name' do
       allow(subject).to receive(:display_name).and_return("#{given_name} #{surname}")
       expect(subject).to_not receive(:attribute_will_change!).with('display_name')
       call_method
@@ -561,22 +757,22 @@ RSpec.describe User, :type => :model do
 
   describe '`reload_ldap_attributes` protected method' do
     let(:call_method) { subject.send(:reload_ldap_attributes) }
-    it 'should nil out `@email`' do
+    it 'nils out `@email`' do
       subject.instance_variable_set(:@email, 'foo')
       call_method
       expect(subject.instance_variable_get(:@email)).to be_nil
     end
-    it 'should nil out `@given_name`' do
+    it 'nils out `@given_name`' do
       subject.instance_variable_set(:@given_name, 'foo')
       call_method
       expect(subject.instance_variable_get(:@given_name)).to be_nil
     end
-    it 'should nil out `@surname`' do
+    it 'nils out `@surname`' do
       subject.instance_variable_set(:@surname, 'foo')
       call_method
       expect(subject.instance_variable_get(:@surname)).to be_nil
     end
-    it 'should nil out `@display_name`' do
+    it 'nils out `@display_name`' do
       subject.instance_variable_set(:@display_name, 'foo')
       call_method
       expect(subject.instance_variable_get(:@display_name)).to be_nil
@@ -600,23 +796,23 @@ RSpec.describe User, :type => :model do
         allow(ldap_entry).to receive(:[]).with(:samaccountname).and_return([samaccountname])
         allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
       end
-      it 'should raise an error if the Entry doesn\'t have an `objectclass` of `user`' do
+      it 'raises an error if the Entry doesn\'t have an `objectclass` of `user`' do
         allow(ldap_entry).to receive(:[]).with(:objectclass).and_return(['foo'])
         expect{call_method}.to raise_error
       end
-      it 'should call `super` with a `username` of the Entry\'s `samaccountname`' do
+      it 'calls `super` with a `username` of the Entry\'s `samaccountname`' do
         expect(described_class.superclass).to receive(:create).with(hash_including(username: samaccountname))
         call_method
       end
-      it 'should call `super` with an `ldap_domain` of where the Entry was found' do
+      it 'calls `super` with an `ldap_domain` of where the Entry was found' do
         expect(described_class.superclass).to receive(:create).with(hash_including(ldap_domain: ldap_domain))
         call_method
       end
-      it 'should call `Devise::LDAP::Adapter.get_ldap_domain_from_dn` to find the `ldap_domain`' do
+      it 'calls `Devise::LDAP::Adapter.get_ldap_domain_from_dn` to find the `ldap_domain`' do
         expect(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
         call_method
       end
-      it 'should set the `@ldap_entry` on the new User instance' do
+      it 'sets the `@ldap_entry` on the new User instance' do
         expect(call_method.instance_variable_get(:@ldap_entry)).to be(ldap_entry)
       end
     end
@@ -642,7 +838,7 @@ RSpec.describe User, :type => :model do
       expect(described_class).to receive(:find_or_create_by).with(hash_including(ldap_domain: ldap_domain))
       call_method
     end
-    it 'should call `Devise::LDAP::Adapter.get_ldap_domain_from_dn` to find the `ldap_domain`' do
+    it 'calls `Devise::LDAP::Adapter.get_ldap_domain_from_dn` to find the `ldap_domain`' do
       expect(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
       call_method
     end
@@ -660,7 +856,7 @@ RSpec.describe User, :type => :model do
       allow(described_class).to receive(:find_or_create_by).and_return(user)
     end
 
-    it 'should call `find_by` passing in the supplied attributes' do
+    it 'calls `find_by` passing in the supplied attributes' do
       expect(described_class).to receive(:find_by).with(attributes)
       call_method
     end
@@ -699,6 +895,25 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`extranet_logins` class method' do
+    let!(:user_intranet_nosignin) { FactoryGirl.create(:user, username: 'user_in_nosignin', ldap_domain: 'intranet') }
+    let!(:user_intranet_signin) { FactoryGirl.create(:user, username: 'user_in_signin', ldap_domain: 'intranet', sign_in_count: rand(1..10)) }
+    let!(:user_extranet_nosignin) { FactoryGirl.create(:user, username: 'user_ex_nosignin', ldap_domain: 'extranet') }
+    let!(:user_extranet_signin) { FactoryGirl.create(:user, username: 'user_ex_signin', ldap_domain: 'extranet', sign_in_count: rand(1..10)) }
+    let(:call_method) { described_class.extranet_logins }
+
+    it 'returns extranet users who have at least one login' do
+      expect(call_method).to include(user_extranet_signin)
+    end
+    it 'does not return users who are not in the extranet domain' do
+      expect(call_method).to_not include(user_intranet_nosignin, user_intranet_signin)
+    end
+    it 'does not return users who are in the extranet domain but have never signed in' do
+      expect(call_method).to_not include(user_extranet_nosignin)
+    end
+
+  end
+
   describe '`member_id` method' do
     let(:call_method) { subject.member_id }
     let(:member_id_instance_variable) { double('@member_id') }
@@ -734,7 +949,7 @@ RSpec.describe User, :type => :model do
 
   describe '`ldap_groups` method' do
     let(:ldap_groups_result){ double('ldap groups result') }
-    it 'should call `Devise::LDAP::Adapter.get_groups`' do
+    it 'calls `Devise::LDAP::Adapter.get_groups`' do
       allow(Devise::LDAP::Adapter).to receive(:get_groups).and_return(ldap_groups_result)
       expect(subject.ldap_groups).to eq(ldap_groups_result)
     end
@@ -748,11 +963,11 @@ RSpec.describe User, :type => :model do
       allow(subject).to receive(:username).and_return(username)
       allow(subject).to receive(:ldap_domain).and_return(ldap_domain)
     end
-    it 'should call `Devise::LDAP::Adapter.delete_ldap_entry`' do
+    it 'calls `Devise::LDAP::Adapter.delete_ldap_entry`' do
       expect(Devise::LDAP::Adapter).to receive(:delete_ldap_entry).with(username, nil, ldap_domain).and_return(true)
       call_method
     end
-    it 'should raise an `ActiveRecord::Rollback` if the delete fails' do
+    it 'raises an `ActiveRecord::Rollback` if the delete fails' do
       allow(Devise::LDAP::Adapter).to receive(:delete_ldap_entry).and_return(false)
       expect{call_method}.to raise_error(ActiveRecord::Rollback)
     end
@@ -781,10 +996,24 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`intranet_user?` method' do
+    let(:call_method) { subject.intranet_user? }
+    it 'returns true if the user has an ldap_domain of `intranet`' do
+      subject.ldap_domain = 'intranet'
+      expect(subject.intranet_user?).to eq(true)
+    end
+    it 'returns false if the user has any ldap_domain besides `intranet`' do
+      ['foo', 'extranet', nil].each do |domain|
+        subject.ldap_domain = domain
+        expect(subject.intranet_user?).to eq(false)
+      end
+    end
+  end
+
   describe '`check_password_change` protected method' do
     let(:call_method) { subject.send(:check_password_change) }
     it 'checks if the password has changed' do
-      expect(subject).to receive(:password_changed?)
+      expect(subject).to receive(:password_changed?).at_least(1)
       call_method
     end
     it 'checks if any LDAP backed attributes have changed' do
@@ -810,6 +1039,19 @@ RSpec.describe User, :type => :model do
         call_method rescue ActiveRecord::Rollback
       end
     end
+    describe 'when the password has changed and the user is an intranet user' do
+      before do
+        allow(subject).to receive(:password_changed?).and_return(true)
+        allow(subject).to receive(:intranet_user?).and_return(true)
+      end
+      it 'raises an ActiveRecord::Rollback' do
+        expect{call_method}.to raise_error(ActiveRecord::Rollback)
+      end
+      it 'adds an error to the password field if a rollback is raised' do
+        expect(subject.errors).to receive(:add).with(:password, :intranet)
+        call_method rescue ActiveRecord::Rollback
+      end
+    end
   end
 
   describe '`clear_password_expiration` protected method' do
@@ -832,6 +1074,12 @@ RSpec.describe User, :type => :model do
         callback.kind == :after && callback.filter == :clear_password_expiration
       end
       expect(callbacks.length).to eq(1)
+    end
+  end
+
+  describe '`encrypted_password_changed?` protected method' do
+    it 'returns false' do
+      expect(subject.send(:encrypted_password_changed?)).to be(false)
     end
   end
 

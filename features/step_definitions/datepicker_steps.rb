@@ -145,6 +145,31 @@ When(/^I write tomorrow's date in the datepicker start input field$/) do
   page.fill_in('daterangepicker_start', with: date.strftime('%_m/%-d/%Y'))
 end
 
+When(/^that today's date is the (last day of last month|first day of this month)$/) do |date|
+  today = Time.zone.today
+  date = if date == 'last day of last month'
+           (today - 1.month).end_of_month
+         else
+           today.beginning_of_month
+         end
+  step %{that today's date is "#{date}"}
+end
+
+When(/^that today's date is the (last day of last quarter|first day of this quarter)$/) do |date|
+  date = if date == 'last day of last quarter'
+           quarter_start_and_end_dates(last_quarter[:quarter], last_quarter[:year])[:end_date]
+         else
+           quarter_start_and_end_dates(current_quarter[:quarter], current_quarter[:year])[:start_date]
+         end
+  step %{that today's date is "#{date}"}
+end
+
+When(/^that today's date is "(.*?)"$/) do |date|
+  today = date.to_date
+  allow(Time.zone).to receive(:today).and_return(today)
+  allow(Time.zone.now).to receive(:to_date).and_return(today)
+end
+
 def get_datepicker_preset_label(preset)
   case preset
     when 'month to date'

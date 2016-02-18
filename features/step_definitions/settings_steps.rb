@@ -18,7 +18,7 @@ Then(/^I should be on the two factor settings page$/) do
   page.assert_selector('section.settings-two-factor',  visible: true)
   text = I18n.t('settings.two_factor.title')
   page.assert_selector('h1', visible: true, text: /\A#{Regexp.quote(text)}\z/)
-  page.assert_selector('.settings-group', visible: true, count: 2)
+  page.assert_selector('.settings-group', visible: true, count: 3)
 end
 
 When(/^I am on the email settings page$/) do
@@ -30,6 +30,14 @@ end
 Given(/^I am on the change password page$/) do
   page.find( '.page-header .nav-settings a' ).click
   step %{I should see the change password page}
+end
+
+Then(/^I should see a message letting me know I cannot change my password$/) do
+  page.assert_selector('p', text: I18n.t('settings.password.intranet'), exact: true)
+end
+
+Then(/^I should not see the change password form/) do
+  page.assert_no_selector('.settings-password form')
 end
 
 Then(/^I should see the change password page$/) do
@@ -60,33 +68,33 @@ Given(/^I am on the two factor authentication settings page$/) do
   visit '/settings/two-factor'
 end
 
-Then(/^I should see the reset PIN form$/) do
-  page.assert_selector('.settings-reset-pin form', visible: true)
+Then(/^I should see the (reset|new) PIN form$/) do |form_name|
+  page.assert_selector(".settings-#{form_name}-pin form", visible: true)
 end
 
-When(/^I click on the reset token PIN CTA$/) do
-  click_link I18n.t('settings.two_factor.reset_pin.cta')
+When(/^I click on the (reset|new) token PIN CTA$/) do |cta_name|
+  click_link I18n.t("settings.two_factor.#{cta_name}_pin.cta")
 end
 
-When(/^I cancel resetting the PIN$/) do
+When(/^I cancel (?:re)?setting the PIN$/) do
   click_button I18n.t('global.cancel')
 end
 
-Then(/^I should not see the reset PIN form$/) do
-  page.assert_selector('.settings-reset-pin form', visible: false)
+Then(/^I should not see the (reset|new) PIN form$/) do |form_name|
+  page.assert_selector(".settings-#{form_name}-pin form", visible: false)
 end
 
-Given(/^I am on the reset PIN page$/) do
+Given(/^I am on the (reset|new) PIN page$/) do |page_name|
   step %{I am on the two factor authentication settings page}
-  step %{I click on the reset token PIN CTA}
+  step %{I click on the #{page_name} token PIN CTA}
 end
 
 When(/^I enter a bad current PIN$/) do
   page.find('input[name=securid_pin').set('abc1')
 end
 
-When(/^I submit the reset PIN form$/) do
-  click_button I18n.t('settings.two_factor.reset_pin.save')
+When(/^I submit the (reset|new) PIN form$/) do |form_name|
+  click_button I18n.t("settings.two_factor.#{form_name}_pin.save")
 end
 
 Then(/^I should see the invalid PIN message$/) do
@@ -128,7 +136,11 @@ When(/^I enter two different values for the new PIN$/) do
 end
 
 Then(/^I should see the failed to reset PIN message$/) do
-  page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(I18n.t('settings.two_factor.reset_pin.error'))}\z/, visible: true)
+  page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(strip_links(I18n.t('settings.two_factor.reset_pin.error_html', phone_number: web_support_phone_number, url: web_support_email)))}\z/, visible: true)
+end
+
+Then(/^I should see the failed to set PIN message$/) do
+  page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(strip_links(I18n.t('settings.two_factor.new_pin.error_html', phone_number: web_support_phone_number, url: web_support_email)))}\z/, visible: true)
 end
 
 When(/^I click on the resynchronize token CTA$/) do
@@ -165,7 +177,7 @@ When(/^I enter a good next token$/) do
 end
 
 Then(/^I should see the failed to resynchronize token message$/) do
-    page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(I18n.t('settings.two_factor.resynchronize.error'))}\z/, visible: true)
+    page.assert_selector('.form-flash-message', text: /\A#{Regexp.quote(strip_links(I18n.t('settings.two_factor.resynchronize.error_html', phone_number: web_support_phone_number, url: web_support_email)))}\z/, visible: true)
 end
 
 Then(/^I should see current password validations$/) do

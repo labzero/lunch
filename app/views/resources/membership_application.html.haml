@@ -1,0 +1,24 @@
+- @html_class = 'white-background'
+.row.resource.resource-member-applications
+  .column-2x10-right
+    %h1= t('resources.membership.applications.title')
+    %p= t('resources.membership.applications.intro_html', url: contact_path)
+    %p= t('resources.membership.applications.charter_types.heading')
+    %ul
+      %li= link_to(t('resources.membership.applications.charter_types.commercial'), commercial_application_path)
+      - if feature_enabled?('unfinished-membership')
+        %li= link_to(t('resources.membership.applications.charter_types.community_development'), community_development_application_path)
+        %li= link_to(t('resources.membership.applications.charter_types.credit_union'), credit_union_application_path)
+        %li= link_to(t('resources.membership.applications.charter_types.insurance_company'), insurance_company_application_path)
+      - else
+        %li.disabled= t('resources.membership.applications.charter_types.community_development')
+        %li.disabled= t('resources.membership.applications.charter_types.credit_union')
+        %li.disabled= t('resources.membership.applications.charter_types.insurance_company')
+    %h2= t('resources.membership.applications.process.heading')
+    %ol
+      %li= t('resources.membership.applications.process.submit_forms')
+      %li= t('resources.membership.applications.process.examination_report')
+      %li= t('resources.membership.applications.process.application_review')
+      %li= t('resources.membership.applications.process.eligibility_requirements')
+      %li= t('resources.membership.applications.process.notification')
+      %li= t('resources.membership.applications.process.approval')

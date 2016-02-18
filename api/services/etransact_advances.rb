@@ -116,13 +116,14 @@ module MAPI
             end
           end
           api do
-            key :path, '/execute_advance/{id}/{amount}/{advance_type}/{advance_term}/{rate}/{signer}/{maturity_date}'
+            key :path, '/execute_advance/{id}'
             operation do
               key :method, 'POST'
               key :summary, 'Execute new Advance in Calypso.'
               key :notes, 'Returns the result of execute trade.'
               key :type, :ExecuteAdvance
               key :nickname, :ExecuteAdvance
+              key :consumes, ['application/json']
               parameter do
                 key :paramType, :path
                 key :name, :id
@@ -131,46 +132,10 @@ module MAPI
                 key :description, 'The id to find the members from.'
               end
               parameter do
-                key :paramType, :path
-                key :name, :amount
+                key :paramType, :body
+                key :name, :body
                 key :required, true
-                key :type, :Numeric
-                key :description, 'Amount to execute.'
-              end
-              parameter do
-                key :paramType, :path
-                key :name, :advance_type
-                key :required, true
-                key :type, :string
-                key :description, 'Collateral type.'
-              end
-              parameter do
-                key :paramType, :path
-                key :name, :advance_term
-                key :required, true
-                key :type, :string
-                key :description, 'Term of the advance.'
-              end
-              parameter do
-                key :paramType, :path
-                key :name, :rate
-                key :required, true
-                key :type, :Numeric
-                key :description, 'Advance rate.'
-              end
-              parameter do
-                key :paramType, :path
-                key :name, :signer
-                key :required, true
-                key :type, :string
-                key :description, 'Authorized signer.'
-              end
-              parameter do
-                key :paramType, :path
-                key :name, :maturity_date
-                key :required, true
-                key :type, :string
-                key :description, 'Maturity date.'
+                key :type, :MemberQuickAdvanceRequest
               end
               response_message do
                 key :code, 200
@@ -372,15 +337,16 @@ module MAPI
         end
 
         # Execute Advance
-        relative_post '/execute_advance/:id/:amount/:advance_type/:advance_term/:rate/:signer/:maturity_date' do
+        relative_post '/execute_advance/:id' do
           member_id = params[:id]
-          amount = params[:amount]
-          advance_type = params[:advance_type]
-          advance_term = params[:advance_term]
+          body = JSON.parse(request.body.read).with_indifferent_access
+          amount = body[:amount]
+          advance_type = body[:advance_type]
+          advance_term = body[:advance_term]
           check_capstock = false;
-          rate = params[:rate]
-          signer = params[:signer]
-          maturity_date = params[:maturity_date].to_date
+          rate = body[:rate]
+          signer = body[:signer]
+          maturity_date = body[:maturity_date].to_date
 
           begin
             cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term), advance_type)

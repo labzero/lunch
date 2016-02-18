@@ -2,31 +2,41 @@
 - @page_title = t('reports.meta_title')
 .report.report-securities-services-statement.row
   .report-header
-    %h1= t('reports.securities.services_monthly.title')
+    %h1= @report_name
     - if @print_layout
       = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@start_date))
     - else
+      = render 'reports_header_buttons', allowed_params: :start_date, download_formats: [:pdf] if @data_available
       = render 'report_details', name: @member_name, freshness: t('reports.pages.securities_services_statement.freshness'), availability: t('reports.pages.securities_services_statement.availability')
-      = render 'reports_header_buttons', allowed_params: :start_date
-    .report-inputs
-      = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_securities_services_statement_path, presets: @picker_presets, single_date_picker: true, open_direction: 'left', insert_filter_before: true, date_picker_filter: @date_picker_filter, min_date: @min_date
+    - if @data_available
+      .report-inputs
+        = form_tag(reports_securities_services_statement_path, method: 'GET') do
+          .report-filter
+            = render 'shared/dropdown', dropdown_name: 'start_date', default_value: @start_date, default_text: @dropdown_options_text, dropdown_options: @dropdown_options
+
   .report-main-body
-    .report-summary-data
-      %h3
-        = report_summary_with_date('reports.pages.securities_services_statement.heading', fhlb_date_long_alpha(@start_date))
-      %p= fhlb_formatted_currency(@statement[:total])
-    %h2.report-table-title= t('reports.pages.securities_services_statement.tables.maintenance')
-    = render 'securities_services_table', rows: [[:account_maintenance, :maintenance, :maintenance]], data: @statement
-    %h2.report-table-title= t('reports.pages.securities_services_statement.tables.securities')
-    = render 'securities_services_table', rows: [[:fed, :fed, :per_item_cusip], [:dtc, :dtc, :per_item_cusip], [:funds, :funds, :per_item_cusip], [:euroclear, :euroclear, :per_par_cusip]], data: @statement[:secutities_fees]
-    %h2.report-table-title= t('reports.pages.securities_services_statement.tables.transaction')
-    = render 'securities_services_table', rows: [[:fed, :fed, :per_item], [:dtc, :dtc, :per_item], [:funds, :funds, :per_item], [:euroclear, :euroclear, :per_item]], data: @statement[:transaction_fees]
-    %h2.report-table-title= t('reports.pages.securities_services_statement.tables.other')
-    = render 'securities_services_table', rows: [[:income_disbursement, :disbursement, :per_item_cusip], [:pledge_status_change, :pledge_status, :per_item], [:certifications, :certifications, :per_hour, '*'], [:research, :research, :per_hour, '*'], [:handling, :handling, :per_hour, '*']], data: @statement
-    .report-summary-data.report-summary-right
-      %h3= report_summary_with_date('reports.pages.securities_services_statement.footer', fhlb_date_long_alpha(@start_date), {account_number: @statement[:sta_account_number]})
-      %p= fhlb_formatted_currency(@statement[:total])
-    %small
-      %p= t('reports.pages.securities_services_statement.footnote', footnote: '*')
-      %p= t('reports.pages.securities_services_statement.questions_html', mailto_url: 'mailto:securities@fhlbsf.com', phone_number: fhlb_formatted_phone_number('4156162970'))
-    
+    - if @data_available
+      .report-summary-data
+        %h3
+          = report_summary_with_date('reports.pages.securities_services_statement.heading', fhlb_date_long_alpha(@start_date))
+        %p= fhlb_formatted_currency(@statement[:total])
+      .securities-services-table-wrapper
+        %h2.report-table-title= t('reports.pages.securities_services_statement.tables.maintenance')
+        = render 'securities_services_table', rows: [[:account_maintenance, :maintenance, :maintenance]], data: @statement
+      .securities-services-table-wrapper
+        %h2.report-table-title= t('reports.pages.securities_services_statement.tables.securities')
+        = render 'securities_services_table', rows: [[:fed, :fed, :per_item_cusip], [:dtc, :dtc, :per_item_cusip], [:funds, :funds, :per_item_cusip], [:euroclear, :euroclear, :per_par_cusip]], data: @statement[:securities_fees]
+      .securities-services-table-wrapper
+        %h2.report-table-title= t('reports.pages.securities_services_statement.tables.transaction')
+        = render 'securities_services_table', rows: [[:fed, :fed, :per_item], [:dtc, :dtc, :per_item], [:funds, :funds, :per_item], [:euroclear, :euroclear, :per_item]], data: @statement[:transaction_fees]
+      .securities-services-table-wrapper
+        %h2.report-table-title= t('reports.pages.securities_services_statement.tables.other')
+        = render 'securities_services_table', rows: [[:income_disbursement, :disbursement, :per_item_cusip], [:pledge_status_change, :pledge_status, :per_item], [:certifications, :certifications, :per_hour, '*'], [:research, :research, :per_hour, '*'], [:handling, :handling, :per_hour, '*']], data: @statement
+        .report-summary-data.report-summary-right
+          %h3= report_summary_with_date('reports.pages.securities_services_statement.footer', fhlb_date_long_alpha(@start_date), {account_number: @statement[:sta_account_number]})
+          %p= fhlb_formatted_currency(@statement[:total])
+      %small
+        %p= t('reports.pages.securities_services_statement.footnote', footnote: '*')
+        %p= t('reports.pages.securities_services_statement.questions_html', mailto_url: 'mailto:securities@fhlbsf.com', phone_number: fhlb_formatted_phone_number('4156162970'))
+    - else
+      %p= t('reports.pages.securities_services_statement.data_unavailable')

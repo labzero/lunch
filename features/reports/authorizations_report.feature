@@ -1,4 +1,5 @@
-@jira-mem-69 @wip
+@flip-on-authorizations-report
+@jira-mem-69
 Feature: Visiting the Authorizations Report Page
   As a user
   I want to use visit the authorizations report page for the FHLB Member Portal
@@ -7,7 +8,7 @@ Feature: Visiting the Authorizations Report Page
 Background:
   Given I am logged in
 
-@resque-backed @smoke @jira-mem-585 @jira-mem-836 @wip
+@resque-backed @smoke @jira-mem-585 @jira-mem-836
 Scenario: Visit authorizations page from header link
   Given I visit the dashboard
   When I select "Authorizations" from the reports dropdown
@@ -15,7 +16,7 @@ Scenario: Visit authorizations page from header link
   Then I should see a report table with multiple data rows
   And I should see a report header
 
-@resque-backed @jira-mem-585 @jira-mem-836 @wip
+@resque-backed @jira-mem-585 @jira-mem-836
 Scenario: Filtering the authorization report
   Given I am on the "Authorizations" report page
   And I wait for the report to load
@@ -39,12 +40,8 @@ Scenario: Filtering the authorization report
   Then I should only see users with the "Wire Transfer Services" role
   When I select "Access Manager" from the authorizations filter
   Then I should only see users with the "Access Manager" role
-  When I select "eTransact Holder" from the authorizations filter
-  Then I should only see users with the "eTransact Holder" role
-  When I select "User" from the authorizations filter
-  Then I should only see users with the "User" role
 
-@resque-backed @smoke @jira-mem-824 @wip
+@resque-backed @smoke @jira-mem-824
 Scenario: Member downloads a PDF of the Authorizations report
   Given I am on the "Authorizations" report page
   When I request a PDF

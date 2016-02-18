@@ -1,21 +1,35 @@
 require 'rails_helper'
 
 describe ContactInformationHelper, type: :helper do
+  RSpec.shared_examples 'an email helper method' do |method, constant|
+    describe "`#{method}` method" do
+      let(:call_method) { helper.send(method) }
+      it "responds to `#{method}`" do
+        expect(helper).to respond_to(method)
+      end
+      it 'returns a mailto URL' do
+        uri = URI(call_method)
+        expect(uri.scheme).to eq('mailto')
+      end
+      it "has the #{constant} as the primary To: email" do
+        email = "#{SecureRandom.hex}@example.com"
+        stub_const("#{described_class}::#{constant}", email)
+        uri = URI(call_method)
+        expect(uri.to).to eq(email)
+      end
+    end
+  end
+
   describe '`web_support_email` method' do
-    let(:call_method) { helper.web_support_email }
-    it 'responds to `web_support_email`' do
-      expect(helper).to respond_to(:web_support_email)
-    end
-    it 'returns a mailto URL' do
-      uri = URI(call_method)
-      expect(uri.scheme).to eq('mailto')
-    end
-    it 'has the WEB_SUPPORT_EMAIL as the primary To: email' do
-      email = "#{SecureRandom.hex}@example.com"
-      stub_const("#{described_class}::WEB_SUPPORT_EMAIL", email)
-      uri = URI(call_method)
-      expect(uri.to).to eq(email)
-    end
+    it_behaves_like 'an email helper method', :web_support_email, 'WEB_SUPPORT_EMAIL'
+  end
+
+  describe '`mpf_support_email` method' do
+    it_behaves_like 'an email helper method', :mpf_support_email, 'MPF_SUPPORT_EMAIL'
+  end
+
+  describe '`membership_email` method' do
+    it_behaves_like 'an email helper method', :membership_email, 'MEMBERSHIP_EMAIL'
   end
 
   shared_examples 'phone number contact method' do |constant|
@@ -54,5 +68,13 @@ describe ContactInformationHelper, type: :helper do
       expect(helper).to respond_to(:operations_phone_number)
     end
     include_examples 'phone number contact method', 'OPERATIONS_PHONE_NUMBER'
+  end
+
+  describe '`mcu_phone_number` method' do
+    let(:call_method) { helper.mcu_phone_number }
+    it 'responds to `mcu_phone_number`' do
+      expect(helper).to respond_to(:mcu_phone_number)
+    end
+    include_examples 'phone number contact method', 'MCU_PHONE_NUMBER'
   end
 end

@@ -1,0 +1,10 @@
+.privacy-policy-page {
+  @extend %info-page-style;
+}
+
+.terms-of-use-page {
+  @extend %info-page-style;
+  .legal {
+    font-weight: $semibold-weight;
+  }
+}

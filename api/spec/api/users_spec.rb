@@ -1,10 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'GET /users/:username/roles' do
     let(:username) { 'local' }
     let(:make_request) { get "/users/#{username}/roles" }
@@ -58,6 +54,10 @@ describe MAPI::ServiceApp do
         allow(roles_cursor).to receive(:fetch_hash).and_yield({'ADVSIGNER' => -1})
         expect(json).to match_array(['signer-advances', 'signer'])
       end
+      it 'downcases the username' do
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(match('foobar'))
+        get "/users/FooBar/roles"
+      end
       role_mapping = {
         'ADVSIGNER' => ['signer-advances'],
         'COLLATSIGNER' => ['signer-collateral'],
@@ -83,19 +83,19 @@ describe MAPI::ServiceApp do
           expect(json).not_to include(*(roles + ['signer-manager']))
         end
       end
-      it 'returns all the roles except `signer-manager` when the signer has the column `ALLPRODUCT` set to -1' do
+      it 'returns all the roles except `signer-manager` and `signer-wiretransfers` when the signer has the column `ALLPRODUCT` set to -1' do
         column_hash = Hash[role_mapping.keys.collect {|key| [key, 0]}]
         column_hash['ALLPRODUCT'] = -1
         column_hash['ACTIVE_TOKEN_EXISTS_FLAG'] = 'N'
         allow(roles_cursor).to receive(:fetch_hash).and_yield(column_hash)
-        expect(json).to match_array(role_mapping.values.flatten << 'signer' << 'signer-entire-authority')
+        expect(json).to match_array((role_mapping.values.flatten << 'signer' << 'signer-entire-authority') - role_mapping['WIRESIGNER'] )
       end
-      it 'returns all the roles when the signer has the column `ALLRNA` set to 0' do
+      it 'returns all the roles except `signer-wiretransfers` when the signer has the column `ALLRNA` set to 0' do
         column_hash = Hash[role_mapping.keys.collect {|key| [key, 0]}]
         column_hash['ALLRNA'] = -1
         column_hash['ACTIVE_TOKEN_EXISTS_FLAG'] = 'N'
         allow(roles_cursor).to receive(:fetch_hash).and_yield(column_hash)
-        expect(json).to match_array(role_mapping.values.flatten << 'signer-manager' << 'signer')
+        expect(json).to match_array((role_mapping.values.flatten << 'signer-manager' << 'signer') - role_mapping['WIRESIGNER'])
       end
       it 'returns the role `signer-etransact` if the column `ACTIVE_TOKEN_EXISTS_FLAG` is set to `Y`' do
         column_hash = Hash[role_mapping.keys.collect {|key| [key, 0]}]

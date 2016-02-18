@@ -20,8 +20,12 @@ Then(/^I should see "([^"]*)" in the reports dropdown$/) do |report|
   page.find('.nav-dropdown li', text: /\A#{Regexp.quote(report)}\z/)
 end
 
-When(/^the "(.*?)" table has no data$/) do |report|
+When(/^the "(.*?)" report has no data$/) do |report|
   # placeholder step for now in case we implement turning off data for certain reports during testing
+end
+
+When(/^the "(.*?)" table has no data$/) do |report|
+  # placeholder step for now in case we implement turning off data for certain sections of reports during testing
 end
 
 When(/^the "(.*?)" report has been disabled$/) do |report|
@@ -84,42 +88,46 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
   sleep_if_close_to_midnight
   @today = Time.zone.now.to_date
   case report
-  when 'Capital Stock Activity Statement'
-    visit '/reports/capital-stock-activity'
-  when 'Settlement Transaction Account Statement'
-    visit '/reports/settlement-transaction-account'
-  when 'Advances Detail'
-    visit '/reports/advances'
-  when 'Cash Projections'
-    visit '/reports/cash-projections'
-  when 'Borrowing Capacity Statement'
-    visit '/reports/borrowing-capacity'
-  when 'Historical Price Indications'
-    visit '/reports/historical-price-indications'
-  when 'Current Price Indications'
-    visit '/reports/current-price-indications'
-  when 'Interest Rate Resets'
-    visit '/reports/interest-rate-resets'
-  when 'Dividend Transaction Statement'
-    visit '/reports/dividend-statement'
-  when 'Securities Services Monthly Statement'
-    visit '/reports/securities-services-statement'
-  when 'Letters of Credit'
-    visit '/reports/letters-of-credit'
-  when 'Securities Transactions'
-    visit '/reports/securities-transactions'
-  when 'Authorizations'
-    visit '/reports/authorizations'
-  when 'Current Securities Position'
-    visit '/reports/current-securities-position'
-  when 'Forward Commitments'
-    visit '/reports/forward-commitments'
-  when 'Monthly Securities Position'
-    visit '/reports/monthly-securities-position'
-  when 'Capital Stock Position and Leverage Statement'
-    visit '/reports/capital-stock-and-leverage'
   when 'Account Summary'
     visit '/reports/account-summary'
+  when 'Advances Detail'
+    visit '/reports/advances'
+  when 'Authorizations'
+    visit '/reports/authorizations'
+  when 'Borrowing Capacity Statement'
+    visit '/reports/borrowing-capacity'
+  when 'Capital Stock Activity Statement'
+    visit '/reports/capital-stock-activity'
+  when 'Capital Stock Trial Balance'
+    visit '/reports/capital-stock-trial-balance'
+  when 'Cash Projections'
+    visit '/reports/cash-projections'
+  when 'Current Price Indications'
+    visit '/reports/current-price-indications'
+  when 'Current Securities Position'
+    visit '/reports/current-securities-position'
+  when 'Capital Stock Position and Leverage Statement'
+    visit '/reports/capital-stock-and-leverage'
+  when 'Dividend Transaction Statement'
+    visit '/reports/dividend-statement'
+  when 'Forward Commitments'
+    visit '/reports/forward-commitments'
+  when 'Historical Price Indications'
+    visit '/reports/historical-price-indications'
+  when 'Interest Rate Resets'
+    visit '/reports/interest-rate-resets'
+  when 'Letters of Credit'
+    visit '/reports/letters-of-credit'
+  when 'Monthly Securities Position'
+    visit '/reports/monthly-securities-position'
+  when 'Mortgage Collateral Update'
+    visit '/reports/mortgage-collateral-update'
+  when 'Securities Services Monthly Statement'
+    visit '/reports/securities-services-statement'
+  when 'Securities Transactions'
+    visit '/reports/securities-transactions'
+  when 'Settlement Transaction Account Statement'
+    visit '/reports/settlement-transaction-account'
   when 'Today\'s Credit'
     visit '/reports/todays-credit'
   else
@@ -129,37 +137,37 @@ end
 
 When(/^I click the "(.*?)" column heading$/) do |column_heading|
   heading = case column_heading
-              when 'Certificate Sequence'
-                I18n.t('reports.pages.capital_stock_activity.certificate_sequence')
-              when 'Trade Date'
-                I18n.t('common_table_headings.trade_date')
-              when 'Date'
-                I18n.t('global.date')
-              when 'Issue Date'
-                I18n.t('global.issue_date')
-              when 'Start Date'
-                I18n.t('global.start_date')
-              when 'End Date'
-                I18n.t('global.end_date')
-              when 'Dividend'
-                I18n.t('reports.pages.dividend_statement.headers.dividend')
-              when 'Shares Outstanding'
-                I18n.t('global.shares_outstanding')
-              when 'Average Shares Outstanding'
-                I18n.t('reports.pages.dividend_statement.headers.average_shares')
-              when 'Days Outstanding'
-                I18n.t('reports.pages.dividend_statement.headers.days_outstanding')
-              when 'Settlement Date'
-                I18n.t('common_table_headings.settlement_date')
-              when 'Outstanding Shares'
-                I18n.t('reports.pages.capital_stock_activity.shares_outstanding')
-              when 'Maturity Date'
-                I18n.t('common_table_headings.maturity_date')
-              when 'Funding Date'
-                I18n.t('common_table_headings.funding_date')
-              else
-                raise Capybara::ExpectationNotMet, 'unknown column heading passed as argument'
-            end
+    when 'Certificate Sequence'
+      I18n.t('reports.pages.capital_stock_activity.certificate_sequence')
+    when 'Trade Date'
+      I18n.t('common_table_headings.trade_date')
+    when 'Date'
+      I18n.t('global.date')
+    when 'Issue Date'
+      I18n.t('global.issue_date')
+    when 'Start Date'
+      I18n.t('global.start_date')
+    when 'End Date'
+      I18n.t('global.end_date')
+    when 'Dividend'
+      I18n.t('reports.pages.dividend_statement.headers.dividend')
+    when 'Shares Outstanding'
+      I18n.t('global.shares_outstanding')
+    when 'Average Shares Outstanding'
+      I18n.t('reports.pages.dividend_statement.headers.average_shares')
+    when 'Days Outstanding'
+      I18n.t('reports.pages.dividend_statement.headers.days_outstanding')
+    when 'Settlement Date'
+      I18n.t('common_table_headings.settlement_date')
+    when 'Outstanding Shares'
+      I18n.t('reports.pages.capital_stock_activity.shares_outstanding')
+    when 'Maturity Date'
+      I18n.t('common_table_headings.maturity_date')
+    when 'Funding Date'
+      I18n.t('common_table_headings.funding_date')
+    else
+      raise Capybara::ExpectationNotMet, 'unknown column heading passed as argument'
+  end
   page.find('.report-table th', text: /^#{Regexp.quote(heading)}$/).click
 end
 
@@ -194,16 +202,16 @@ Then(/^I should see a "([^"]*)" for the (\d+)(?:st|rd|th) of the last month$/) d
 end
 
 Then(/^I should see a "(.*?)" for the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of (this|last) month$/) do |report_type, start_day, end_day, month|
-  month = case month
+  month_date = case month
     when 'this'
-      @today.month
+      @today
     when 'last'
-      (@today - 1.month).month
+      (@today - 1.month)
     else
       raise 'Month not recognized'
   end
-  start_date = Date.new(@today.year, month, start_day.to_i).strftime('%B %-d, %Y')
-  end_date = Date.new(@today.year, month, end_day.to_i).strftime('%B %-d, %Y')
+  start_date = Date.new(month_date.year, month_date.month, start_day.to_i).strftime('%B %-d, %Y')
+  end_date = Date.new(month_date.year, month_date.month, end_day.to_i).strftime('%B %-d, %Y')
   step %{I should see a "#{report_type}" starting on "#{start_date}" and ending on "#{end_date}"}
 end
 
@@ -253,6 +261,11 @@ def most_recent_business_day(d)
   return d - 1.day if d.saturday?
   return d - 2.day if d.sunday?
   d
+end
+
+Then(/^I should see a "(.*?)" report as of the last day of last month$/) do |report_type|
+  date = (@today - 1.month).end_of_month
+  step %{I should see a "#{report_type}" report as of "#{date}"}
 end
 
 Then(/^I should see a "(.*?)" report as of "(.*?)"$/) do |report_type, as_of_date|
@@ -345,10 +358,10 @@ Then(/^I should see a (current|monthly) securities position report for (Pledged|
   table_header = page.find('.report-table-title').text
   expect(table_header).to include(filter_type)
   if !page.find(".report-table tbody tr:first-child td:first-child")['class'].split(' ').include?('dataTables_empty')
-    filter_type = filter_type == 'Pledged' ? 'P' : 'U'
-    security_types = jquery_evaluate("$('.report-detail-cell td:contains(Custody Account Type)').siblings().text()").split(//)
+    filter_type = filter_type == 'Pledged' ? I18n.t('reports.pages.securities_position.pledged') : I18n.t('reports.pages.securities_position.unpledged')
+    security_types = page.all(:xpath, "//*[@class='report-detail-cell']//td[text()='#{I18n.t('reports.pages.securities_position.custody_account_type')}']/following-sibling::td")
     security_types.each do |security_type|
-      expect(security_type).to eq(filter_type)
+      expect(security_type.text).to eq(filter_type)
     end
   end
 end
@@ -447,6 +460,10 @@ Then(/^I should see ARC current price indications report$/) do
   page.assert_selector('.current-price-arc-table tbody tr:first-child td')
 end
 
+Then(/^I should see Capital Stock Trial Balance report$/) do
+  page.assert_selector('.report-capital-stock-trial-balance table tbody tr:first-child td')
+end
+
 Then(/^I should see STA rates report$/) do
   page.assert_selector('.sta-rate-table tbody tr:last-child td')
 end
@@ -508,12 +525,43 @@ When(/^I click on the dividend transaction dropdown selector$/) do
   page.find('.dropdown-selection').click
 end
 
+When(/^I click on the securities services monthly statement dropdown selector$/) do
+  page.find('.report-filter .dropdown-selection').click
+end
+
+Then(/^I should see a report for "(.*?)"$/) do |date|
+  page.assert_selector('.report-summary-date', text: fhlb_date_long_alpha(date.to_date), exact: true)
+end
+
 When(/^I click on the last option in the dividend transaction dropdown selector$/) do
-  page.find('.dropdown li:last-child').click
+  page.find('.report-filter .dropdown li:last-child').click
+end
+
+When(/^I select "(.*?)" from the month year dropdown$/) do |monthyear|
+  page.find('.report-filter .icon-chevron-after').click
+  page.find('li', text: monthyear).click
 end
 
 Then(/^I should see a dividend summary for the last option in the dividend transaction dropdown selector$/) do
   page.find('.dropdown-selection').click
   text = page.find('.dropdown li:last-child').text
   page.assert_selector('.table-dividend-summary tr:first-child td:last-child', text: text)
+end
+
+Then(/^I should see the has no data state for the Securities Services Monthly Statement$/) do
+  page.assert_selector('p', text: I18n.t('reports.pages.securities_services_statement.data_unavailable'), exact: true)
+  page.assert_no_selector('.report-header-buttons')
+  page.assert_no_selector('.report-inputs')
+  page.assert_no_selector('.securities-services-table-wrapper')
+  page.assert_no_selector('.report-summary-data')
+end
+
+When(/^I select the last entry from the month year dropdown$/) do
+  page.find('.report-filter .dropdown-selection').click
+  page.find('.report-filter .dropdown li:last-child').click
+end
+
+Then(/^I should see a report for the last entry from the month year dropdown$/) do
+  element = page.find('.report-filter .dropdown li:last-child', visible: false)
+  step %{I should see a report for "#{element['data-dropdown-value']}"}
 end

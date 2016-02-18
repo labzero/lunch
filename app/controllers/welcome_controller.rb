@@ -46,17 +46,32 @@ class WelcomeController < ApplicationController
     end
 
     begin
-      ldap_intranet_status = Devise::LDAP::Connection.admin('intranet').search(filter: 'ou=FHLB-Accounts').present?
+      ldap_intranet_status = Devise::LDAP::Connection.admin('intranet').open do |ldap|
+        ldap.search(filter: 'ou=FHLB-Accounts').present?
+      end
     rescue Exception => e
       Rails.logger.error("LDAP Intranet check failed: #{e.message}")
       ldap_intranet_status = false
     end
 
     begin
-      ldap_extranet_status = Devise::LDAP::Connection.admin('extranet').search(filter: 'ou=eBiz').present?
+      ldap_extranet_status = Devise::LDAP::Connection.admin('extranet').open do |ldap|
+        ldap.search(filter: 'ou=eBiz').present?
+      end
     rescue Exception => e
       Rails.logger.error("LDAP Extranet check failed: #{e.message}")
       ldap_extranet_status = false
+    end
+
+    begin
+      rsa_status = false
+      if Rails.env.production?
+        agent_status = RSA::SecurID.agent_status
+        rsa_status = true if agent_status && agent_status[:servers].select {|s| s[:active_address] }.present?
+      end
+    rescue Exception => e
+      Rails.logger.error("RSA check failed: #{e.message}")
+      rsa_status = false
     end
 
     render json: {
@@ -66,7 +81,8 @@ class WelcomeController < ApplicationController
       masterblaster: resque_status, # Resque
       tomorrowmorrowland: redis_status, # Redis,
       madmax: ldap_intranet_status, # LDAP Intranet
-      roadwarrior: ldap_extranet_status # LDAP Extranet
+      roadwarrior: ldap_extranet_status, # LDAP Extranet
+      fury_road: rsa_status # RSA
     }
   end
 

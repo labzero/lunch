@@ -19,4 +19,5 @@
         %section
           = render 'terms'
         %section
+          = link_to(t('terms.cancel'), destroy_user_session_url, method: :delete, class: 'secondary-button')
           = submit_tag t('terms.agree'), class: 'primary-button'

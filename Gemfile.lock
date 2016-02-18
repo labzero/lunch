@@ -7,55 +7,55 @@ GIT
 
 GIT
   remote: https://github.com/labzero/devise_ldap_authenticatable.git
-  revision: 043aa116763c44e4d3cfd623c8445c4018b3b40b
-  branch: 0.9.19
+  revision: 021ba6014a06fe2b5740f33aa5c4d8e29458b563
+  branch: 0.9.21
   specs:
-    devise_ldap_authenticatable (0.9.19)
+    devise_ldap_authenticatable (0.9.21)
       devise (>= 3.4.1)
       net-ldap (>= 0.11)
 
 GIT
   remote: https://github.com/labzero/securid.git
-  revision: d9deceecee80f5f63074d50c0c54b057314fc809
-  branch: 0.2.3
+  revision: 41d8a0c469b1afa7b4038ab9c07e4e562b3aaf8e
+  branch: 0.2.4
   specs:
-    securid (0.2.3)
+    securid (0.2.4)
 
 GEM
   remote: https://rubygems.org/
   specs:
     aasm (4.3.0)
-    actionmailer (4.2.4)
-      actionpack (= 4.2.4)
-      actionview (= 4.2.4)
-      activejob (= 4.2.4)
+    actionmailer (4.2.5.1)
+      actionpack (= 4.2.5.1)
+      actionview (= 4.2.5.1)
+      activejob (= 4.2.5.1)
       mail (~> 2.5, >= 2.5.4)
       rails-dom-testing (~> 1.0, >= 1.0.5)
-    actionpack (4.2.4)
-      actionview (= 4.2.4)
-      activesupport (= 4.2.4)
+    actionpack (4.2.5.1)
+      actionview (= 4.2.5.1)
+      activesupport (= 4.2.5.1)
       rack (~> 1.6)
       rack-test (~> 0.6.2)
       rails-dom-testing (~> 1.0, >= 1.0.5)
       rails-html-sanitizer (~> 1.0, >= 1.0.2)
-    actionview (4.2.4)
-      activesupport (= 4.2.4)
+    actionview (4.2.5.1)
+      activesupport (= 4.2.5.1)
       builder (~> 3.1)
       erubis (~> 2.7.0)
       rails-dom-testing (~> 1.0, >= 1.0.5)
       rails-html-sanitizer (~> 1.0, >= 1.0.2)
-    activejob (4.2.4)
-      activesupport (= 4.2.4)
+    activejob (4.2.5.1)
+      activesupport (= 4.2.5.1)
       globalid (>= 0.3.0)
-    activemodel (4.2.4)
-      activesupport (= 4.2.4)
+    activemodel (4.2.5.1)
+      activesupport (= 4.2.5.1)
       builder (~> 3.1)
-    activerecord (4.2.4)
-      activemodel (= 4.2.4)
-      activesupport (= 4.2.4)
+    activerecord (4.2.5.1)
+      activemodel (= 4.2.5.1)
+      activesupport (= 4.2.5.1)
       arel (~> 6.0)
     activerecord-oracle_enhanced-adapter (1.6.3)
-    activesupport (4.2.4)
+    activesupport (4.2.5.1)
       i18n (~> 0.7)
       json (~> 1.7, >= 1.7.7)
       minitest (~> 5.1)
@@ -79,15 +79,17 @@ GEM
     bcrypt (3.1.10)
     bootstrap-daterangepicker-rails (0.1.1)
       railties (~> 4.0)
-    brakeman (3.0.3)
+    brakeman (3.1.4)
       erubis (~> 2.6)
       fastercsv (~> 1.5)
       haml (>= 3.0, < 5.0)
-      highline (~> 1.6.20)
+      highline (>= 1.6.20, < 2.0)
       multi_json (~> 1.2)
-      ruby2ruby (~> 2.1.1)
-      ruby_parser (~> 3.6.2)
+      ruby2ruby (>= 2.1.1, < 2.3.0)
+      ruby_parser (~> 3.7.0)
+      safe_yaml (>= 1.0)
       sass (~> 3.0)
+      slim (>= 1.3.6, < 4.0)
       terminal-table (~> 1.4)
     builder (3.2.2)
     byebug (6.0.2)
@@ -126,6 +128,7 @@ GEM
       execjs
     coffee-script-source (1.9.1.1)
     colorize (0.7.7)
+    concurrent-ruby (1.0.0)
     crack (0.4.2)
       safe_yaml (~> 1.0.0)
     css_parser (1.3.6)
@@ -140,7 +143,7 @@ GEM
     cucumber-core (1.1.3)
       gherkin (~> 2.12.0)
     database_cleaner (1.4.1)
-    devise (3.5.2)
+    devise (3.5.3)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
       railties (>= 3.2.6, < 5)
@@ -167,6 +170,15 @@ GEM
       i18n (~> 0.5)
     fastercsv (1.5.5)
     ffi (1.9.8)
+    flipper (0.7.4)
+    flipper-redis (0.7.4)
+      flipper (~> 0.7.4)
+      redis (>= 2.2, < 4.0.0)
+    flipper-ui (0.7.4)
+      erubis (~> 2.7.0)
+      flipper (~> 0.7.4)
+      rack (~> 1.4, < 1.7)
+      rack-protection (~> 1.5.3)
     fog-aws (0.2.2)
       fog-core (~> 1.27)
       fog-json (~> 1.0)
@@ -195,7 +207,7 @@ GEM
     growl (1.0.3)
     gyoku (1.3.1)
       builder (>= 2.1.2)
-    haml (4.0.6)
+    haml (4.0.7)
       tilt
     haml-rails (0.9.0)
       actionpack (>= 4.0.1)
@@ -205,7 +217,7 @@ GEM
       railties (>= 4.0.1)
     highcharts-rails (4.1.5)
       railties (>= 3.1)
-    highline (1.6.21)
+    highline (1.7.8)
     hitimes (1.2.2)
     html2haml (2.0.0)
       erubis (~> 2.7.0)
@@ -251,23 +263,24 @@ GEM
       systemu (~> 2.6.2)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
-    mime-types (2.6.1)
+    mime-types (2.99)
     mini_magick (4.2.7)
-    mini_portile (0.6.2)
-    minitest (5.8.1)
+    mini_portile2 (2.0.0)
+    minitest (5.8.4)
     momentjs-rails (2.10.2)
       railties (>= 3.1)
     mono_logger (1.1.0)
-    multi_json (1.11.0)
+    multi_json (1.11.2)
     multi_test (0.1.2)
-    net-ldap (0.11)
+    net-ldap (0.12.1)
     net-ping (1.7.7)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (2.9.2)
     netrc (0.10.3)
-    nokogiri (1.6.6.2)
-      mini_portile (~> 0.6.0)
+    newrelic_rpm (3.14.1.311)
+    nokogiri (1.6.7.2)
+      mini_portile2 (~> 2.0.0.rc2)
     nori (2.6.0)
     orm_adapter (0.5.0)
     paperclip (4.2.1)
@@ -275,8 +288,8 @@ GEM
       activesupport (>= 3.0.0)
       cocaine (~> 0.5.3)
       mime-types
-    parallel (1.4.1)
-    parallel_tests (1.3.9)
+    parallel (1.6.1)
+    parallel_tests (2.2.2)
       parallel
     premailer (1.8.4)
       css_parser (>= 1.3.6)
@@ -293,16 +306,16 @@ GEM
       rack (>= 1.0)
     rack-token_auth (0.1.0)
       rack
-    rails (4.2.4)
-      actionmailer (= 4.2.4)
-      actionpack (= 4.2.4)
-      actionview (= 4.2.4)
-      activejob (= 4.2.4)
-      activemodel (= 4.2.4)
-      activerecord (= 4.2.4)
-      activesupport (= 4.2.4)
+    rails (4.2.5.1)
+      actionmailer (= 4.2.5.1)
+      actionpack (= 4.2.5.1)
+      actionview (= 4.2.5.1)
+      activejob (= 4.2.5.1)
+      activemodel (= 4.2.5.1)
+      activerecord (= 4.2.5.1)
+      activesupport (= 4.2.5.1)
       bundler (>= 1.3.0, < 2.0)
-      railties (= 4.2.4)
+      railties (= 4.2.5.1)
       sprockets-rails
     rails-deprecated_sanitizer (1.0.3)
       activesupport (>= 4.2.0.alpha)
@@ -310,18 +323,18 @@ GEM
       activesupport (>= 4.2.0.beta, < 5.0)
       nokogiri (~> 1.6.0)
       rails-deprecated_sanitizer (>= 1.0.1)
-    rails-html-sanitizer (1.0.2)
+    rails-html-sanitizer (1.0.3)
       loofah (~> 2.0)
     rails-sass-images (0.5)
       dimensions (> 0)
       mime-types (> 0)
       sass (> 0)
-    railties (4.2.4)
-      actionpack (= 4.2.4)
-      activesupport (= 4.2.4)
+    railties (4.2.5.1)
+      actionpack (= 4.2.5.1)
+      activesupport (= 4.2.5.1)
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
-    rake (10.4.2)
+    rake (10.5.0)
     rb-fsevent (0.9.4)
     rb-inotify (0.9.5)
       ffi (>= 0.5.0)
@@ -350,8 +363,8 @@ GEM
       redis (>= 2.2)
     rerun (0.10.0)
       listen (~> 2.7, >= 2.7.3)
-    responders (2.1.0)
-      railties (>= 4.2.0, < 5)
+    responders (2.1.1)
+      railties (>= 4.2.0, < 5.1)
     resque (1.25.2)
       mono_logger (~> 1.0)
       multi_json (~> 1.0)
@@ -385,14 +398,14 @@ GEM
     rspec-support (3.2.2)
     ruby-oci8 (2.2.0.2)
     ruby-prof (0.15.8)
-    ruby2ruby (2.1.4)
+    ruby2ruby (2.2.0)
       ruby_parser (~> 3.1)
       sexp_processor (~> 4.0)
-    ruby_parser (3.6.6)
+    ruby_parser (3.7.3)
       sexp_processor (~> 4.1)
     rubyzip (1.0.0)
     safe_yaml (1.0.4)
-    sass (3.4.13)
+    sass (3.4.21)
     sass-rails (5.0.3)
       railties (>= 4.0.0, < 5.0)
       sass (~> 3.1)
@@ -416,7 +429,7 @@ GEM
       multi_json (~> 1.0)
       rubyzip (~> 1.0)
       websocket (~> 1.0)
-    sexp_processor (4.5.1)
+    sexp_processor (4.6.1)
     shoulda-callback-matchers (1.1.3)
       activesupport (>= 3)
     shoulda-matchers (2.8.0)
@@ -435,19 +448,24 @@ GEM
     sinatra-activerecord (2.0.6)
       activerecord (>= 3.2)
       sinatra (~> 1.0)
-    sprockets (3.3.4)
-      rack (~> 1.0)
-    sprockets-rails (2.3.2)
-      actionpack (>= 3.0)
-      activesupport (>= 3.0)
-      sprockets (>= 2.8, < 4.0)
+    slim (3.0.6)
+      temple (~> 0.7.3)
+      tilt (>= 1.3.3, < 2.1)
+    sprockets (3.5.2)
+      concurrent-ruby (~> 1.0)
+      rack (> 1, < 3)
+    sprockets-rails (3.0.0)
+      actionpack (>= 4.0)
+      activesupport (>= 4.0)
+      sprockets (>= 3.0.0)
     sshkit (1.7.1)
       colorize (>= 0.7.0)
       net-scp (>= 1.1.2)
       net-ssh (>= 2.8.0)
     swagger-blocks (1.1.2)
     systemu (2.6.5)
-    terminal-table (1.4.5)
+    temple (0.7.6)
+    terminal-table (1.5.2)
     thor (0.19.1)
     thread_safe (0.3.5)
     tilt (1.4.1)
@@ -472,7 +490,7 @@ GEM
     vcr (2.9.3)
     vegas (0.1.11)
       rack (>= 1.0.0)
-    warden (1.2.3)
+    warden (1.2.4)
       rack (>= 1.0)
     wasabi (3.5.0)
       httpi (~> 2.0)
@@ -509,6 +527,9 @@ DEPENDENCIES
   dotenv-rails
   factory_girl_rails
   faker
+  flipper
+  flipper-redis
+  flipper-ui
   fog-aws
   foreman
   growl
@@ -524,13 +545,14 @@ DEPENDENCIES
   mini_magick
   momentjs-rails
   net-ping
+  newrelic_rpm
   nokogiri
   paperclip
   parallel_tests
   premailer-rails
   pundit
   rack-token_auth
-  rails (= 4.2.4)
+  rails (= 4.2.5.1)
   rails-sass-images
   redis-objects
   redis-rails
@@ -561,4 +583,4 @@ DEPENDENCIES
   wicked_pdf
 
 BUNDLED WITH
-   1.10.6
+   1.11.2

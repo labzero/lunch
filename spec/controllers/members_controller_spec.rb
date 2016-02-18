@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe MembersController, type: :controller do
   it { should_not use_before_action(:check_terms) }
-  
+
   login_user
 
   describe 'GET select_member' do
@@ -35,6 +35,19 @@ RSpec.describe MembersController, type: :controller do
     end
     it 'should use the `external` layout', :vcr do
       expect(make_request).to render_template("layouts/external")
+    end
+  end
+
+  describe 'POST switch_member' do
+    let(:make_request) { post :switch_member }
+    let(:members_list) { double('A List of Members', collect!: []) }
+    it_behaves_like 'a user required action', :get, :select_member
+    it 'clears session[:member_id]' do
+      make_request
+      expect(session[:member_id]).to be_nil
+    end
+    it 'redirects to the `after_sign_in_path_for` if the session already has a selected member' do
+      expect(make_request).to redirect_to(members_select_member_path)
     end
   end
 
@@ -96,7 +109,7 @@ RSpec.describe MembersController, type: :controller do
     before do
       allow(DateTime).to receive(:now).and_return(now)
       allow(controller).to receive(:current_user).and_return(user)
-    end  
+    end
     it_behaves_like 'a user required action', :post, :accept_terms
     it 'updates the `terms_accepted_at` attribute of the current_user with the current DateTime' do
       expect(user).to receive(:update_attribute).with(:terms_accepted_at, now)
@@ -126,6 +139,33 @@ RSpec.describe MembersController, type: :controller do
       allow(subject).to receive(:after_sign_in_path_for).with(current_user).and_return(dashboard_path)
       allow(subject).to receive(:current_user).and_return(current_user)
       expect(make_request).to redirect_to(dashboard_path)
+    end
+  end
+
+  describe 'GET privacy_policy' do
+    let (:make_request) { get :privacy_policy}
+    it_behaves_like 'a user required action', :get, :privacy_policy
+    it 'renders the view' do
+      make_request
+      expect(response.body).to render_template('privacy_policy')
+    end
+  end
+
+  describe 'GET terms_of_use' do
+    let (:make_request) { get :terms_of_use}
+    it_behaves_like 'a user required action', :get, :terms_of_use
+    it 'renders the view' do
+      make_request
+      expect(response.body).to render_template('terms_of_use')
+    end
+  end
+
+  describe 'GET contact' do
+    let (:make_request) { get :contact}
+    it_behaves_like 'a user required action', :get, :contact
+    it 'renders the view' do
+      make_request
+      expect(response.body).to render_template('contact')
     end
   end
 end

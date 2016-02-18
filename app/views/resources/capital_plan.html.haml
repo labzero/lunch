@@ -1,0 +1,10 @@
+- @html_class = 'white-background'
+.row.resource.resource-capital-plan-page
+  %h1= t('resources.capital_plan.title')
+  = simple_format(t('resources.capital_plan.effective_april_html'))
+  %h2= t('resources.capital_plan.title')
+  = link_to_download_resource(t('global.view_pdf'), resources_download_path(file: :capitalplan))
+  %h2= t('resources.capital_plan.summary_title')
+  = link_to_download_resource(t('global.view_pdf'), resources_download_path(file: :capitalplansummary))
+  .resource-capital-plan-redemption
+    %p= t('resources.capital_plan.members_may_request_html', url: resources_download_path(file: :form_2238))

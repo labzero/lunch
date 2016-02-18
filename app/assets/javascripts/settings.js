@@ -1,6 +1,7 @@
 $(function () {
   var settingsSaveButton = $('.settings-email .save-button');
   var $resetPin = $('.settings-reset-pin');
+  var $newPin = $('.settings-new-pin');
   var $resetToken = $('.settings-resynchronize-token');
   $('.settings-email input[type="checkbox"]').on('click', function(event){
     var settings = getEmailSettings();
@@ -65,11 +66,45 @@ $(function () {
     showUsersLoading($ele);
   });
 
+  function insertRow(row_html)
+  {
+    var $newRow = $(row_html);
+    var newRowName = $newRow.find('td.settings-user-name').text();
+    var rows = $('.settings-users-table tr');
+    var needsInserted = true;
+    rows.each(function (i) {
+      var rowName = $(this).find('td.settings-user-name').text();
+      if (newRowName < rowName) {
+        $(this).before($newRow);
+        needsInserted = false;
+        return false;
+      }
+    });
+    if (needsInserted) {
+      $('.settings-users-table tbody').append($newRow);
+    }
+  }
+
+  var createSelector = '.settings-user-create a';
+  $('.settings-users').on('ajax:success', createSelector, function(event, json, status, xhr) {
+    var $ele = $(event.target);
+
+    showUsersFlyout($ele, json.html);
+    var $form = $('.settings-user-create-form form');
+    $form.enableClientSideValidations();
+  }).on('ajax:error', createSelector, function(event, xhr, status, error) {
+    var $ele = $(event.target);
+    showUsersError($ele);
+  }).on('ajax:beforeSend', createSelector, function(event) {
+    var $ele = $(event.target);
+    showUsersLoading($ele);
+  });
+
   var editSelector = '.settings-user-edit a';
   $('.settings-users').on('ajax:success', editSelector, function(event, json, status, xhr) {
     var $ele = $(event.target);
     showUsersFlyout($ele, json.html);
-    var $form = $('.settings-user-form form');
+    var $form = $('.settings-user-edit-form form');
     $form.data('row', $ele.parents('tr'));
     $form.enableClientSideValidations();
   }).on('ajax:error', editSelector, function(event, xhr, status, error) {
@@ -80,25 +115,44 @@ $(function () {
     showUsersLoading($ele);
   });
 
-  $('.flyout-row').on('click', '.settings-user-form .primary-button', function() {
-    $('.settings-user-form form').submit();
-  });
-
-  var formSelector = '.settings-user-form form';
-  $('.flyout-row').on('ajax:success', formSelector, function(event, json, status, xhr) {
+  var editFormSelector = '.settings-user-edit-form form';
+  $('.flyout-row').on('ajax:success', editFormSelector, function(event, json, status, xhr) {
     var $ele = $(event.target);
     var $row = $ele.data('row');
     showUsersFlyout($ele, json.html);
     $row.replaceWith(json.row_html);
-  }).on('ajax:error', formSelector, function(event, xhr, status, error) {
+  }).on('ajax:error', editFormSelector, function(event, xhr, status, error) {
     var $ele = $(event.target);
     showUsersError($ele);
-  }).on('ajax:beforeSend', formSelector, function(event) {
+  }).on('ajax:beforeSend', editFormSelector, function(event) {
     var $ele = $(event.target);
-    $('.settings-user-form').hide();
+    $('.settings-user-edit-form').hide();
     showUsersLoading($ele, true);
   });
 
+  $('.flyout-row').on('click', '.settings-user-edit-form .primary-button', function() {
+    $(editFormSelector).submit();
+  });
+
+  var createFormSelector = '.settings-user-create-form form';
+  $('.flyout-row').on('ajax:success', createFormSelector, function(event, json, status, xhr) {
+    var $ele = $(event.target);
+    insertRow(json.row_html)
+    showUsersFlyout($ele, json.html);
+  }).on('ajax:error', createFormSelector, function(event, xhr, status, error) {
+    var $ele = $(event.target);
+    showUsersError($ele);
+  }).on('ajax:beforeSend', createFormSelector, function(event) {
+    var $ele = $(event.target);
+    $('.settings-user-create-form').hide();
+    showUsersLoading($ele, true);
+  });
+
+  $('.flyout-row').on('click', '.settings-user-create-form .primary-button', function() {
+    $(createFormSelector).submit();
+  });
+
+  var formSelector = '.settings-user-edit-form form';
   var deleteSelector = '.settings-user-delete';
   $('.flyout-row').on('ajax:success', deleteSelector, function(event, json, status, xhr) {
     var $ele = $(event.target);
@@ -113,7 +167,7 @@ $(function () {
     if ($ele.attr('disabled')) {
       return false;
     };
-    $('.settings-user-form').hide();
+    $('settings-user-edit-form').hide();
     showUsersLoading($ele, true);
   });
 
@@ -203,7 +257,7 @@ $(function () {
   function validatePin($root, field_name) {
     var valid = true;
     var $field = $root.find('input[name=' + field_name + ']');
-    if (!$field.val().match(/^\d{4}$/) ) {
+    if ($field.length && !$field.val().match(/^\d{4}$/) ) {
       valid = false;
       $field.parents('fieldset').find('.form-error[data-error-type=invalid_pin]').show();
       $field.addClass('input-field-error');
@@ -230,48 +284,49 @@ $(function () {
       $root.find('input').attr('disabled', true);
     };
   }
+  $.each([$resetPin, $newPin], function(index, $form) {
+    $form.find('form').on('ajax:success', function(event, json, status, xhr) {
+      if (json.status == 'success') {
+        handleSuccess($form);
+      } else {
+        handleError($form, json.status, function($root, status) {
+          if (status == 'must_resynchronize') {
+            return [$root.find('input[name=securid_token]'), status];
+          }
+          if (status == 'invalid_new_pin') {
+            return [$root.find('input[name=securid_new_pin]'), 'invalid_pin'];
+          }
 
-  $resetPin.find('form').on('ajax:success', function(event, json, status, xhr) {
-    if (json.status == 'success') {
-      handleSuccess($resetPin);
-    } else {
-      handleError($resetPin, json.status, function($root, status) {
-        if (status == 'must_resynchronize') {
-          return [$root.find('input[name=securid_token]'), status];
-        }
-        if (status == 'invalid_new_pin') {
-          return [$root.find('input[name=securid_new_pin]'), 'invalid_pin'];
-        }
+          return false;
+        });
+      }
+    }).on('ajax:error', buildFormErrorHandler($form))
+    .on('ajax:complete', buildFormCompleteHandler($form))
+    .on('ajax:beforeSend', function(event) {
+      var valid = true;
+      beforeValidate($form);
 
-        return false;
+      $.each(['securid_pin', 'securid_new_pin', 'securid_confirm_pin'], function(index, name) {
+        if (!validatePin($form, name)) {
+          valid = false;
+        }
       });
-    }
-  }).on('ajax:error', buildFormErrorHandler($resetPin))
-  .on('ajax:complete', buildFormCompleteHandler($resetPin))
-  .on('ajax:beforeSend', function(event) {
-    var valid = true;
-    beforeValidate($resetPin);
 
-    $.each(['securid_pin', 'securid_new_pin', 'securid_confirm_pin'], function(index, name) {
-      if (!validatePin($resetPin, name)) {
+      if (!validateToken($form, 'securid_token')) {
         valid = false;
       }
+
+      var $field = $form.find('input[name=securid_confirm_pin]');
+      if ($field.val() != $form.find('input[name=securid_new_pin]').val()) {
+        valid = false;
+        $field.parents('li').find('.form-error[data-error-type=pin_mismatch]').show();
+        $field.addClass('input-field-error');
+      }
+
+      afterValidate($form, valid);
+
+      return valid;
     });
-
-    if (!validateToken($resetPin, 'securid_token')) {
-      valid = false;
-    }
-
-    var $field = $resetPin.find('input[name=securid_confirm_pin]');
-    if ($field.val() != $resetPin.find('input[name=securid_new_pin]').val()) {
-      valid = false;
-      $field.parents('li').find('.form-error[data-error-type=pin_mismatch]').show();
-      $field.addClass('input-field-error');
-    }
-
-    afterValidate($resetPin, valid);
-
-    return valid;
   });
 
   $resetToken.find('form').on('ajax:success', function(event, json, status, xhr) {

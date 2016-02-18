@@ -1,0 +1,27 @@
+- @html_class = 'white-background'
+.row.resource
+  .column-2x10-right
+    %h1= t('resources.membership.overview.title')
+    %p= t('resources.membership.overview.p1')
+    %p= t('resources.membership.overview.p2_html', product_url:product_summary_path)
+    %ul
+      %li= t('resources.membership.overview.benefits.reduce_risk')
+      %li= t('resources.membership.overview.benefits.control_cost')
+      %li= t('resources.membership.overview.benefits.manage_liquidity')
+      %li= t('resources.membership.overview.benefits.strengthen_funding')
+      %li= t('resources.membership.overview.benefits.meet_customer_needs')
+      %li= t('resources.membership.overview.benefits.support_affordable_housing')
+    %h2= t('resources.membership.overview.getting_started')
+    %p= t('resources.membership.overview.resources_intro')
+    %p= t('resources.membership.overview.membership_guidelines_html', download_link: link_to_download_resource(t('resources.membership.overview.links.membership_guidelines'), 'http://fhlbsf.com/member/docs/membership-guidelines.pdf'))
+    %p= t('resources.membership.overview.capital_stock_html',
+          cap_plan_link: link_to_download_resource(t('resources.membership.overview.links.capital_plan'), resources_download_path(file: :capitalplan)),
+          cap_plan_summary_link: link_to_download_resource(t('resources.membership.overview.links.summary_capital_plan'), resources_download_path(file: :capitalplansummary)),
+          annual_reports_link: link_to_download_resource(t('resources.membership.overview.links.annual_reports'), 'http://www.fhlbsf.com/resource-center/annual-reports.aspx'),
+          sec_link: link_to_download_resource(t('resources.membership.overview.links.sec_filings'), 'http://www.fhlbsf.com/about/investor/default.aspx#sec'))
+    %p= t('resources.membership.overview.guides_html',
+          credit_link: link_to_download_resource(t('resources.membership.overview.links.credit_guide'), resources_download_path(file: :creditguide)),
+          collateral_link: link_to_download_resource(t('resources.membership.overview.links.collateral_guide'), resources_download_path(file: :collateralguide)),
+          price_indications_link: link_to_download_resource(t('resources.membership.overview.links.current_price_indications'), reports_current_price_indications_path))
+    %h2= t('resources.membership.overview.apply')
+    %p= t('resources.membership.overview.apply_details_html', url: membership_application_path)

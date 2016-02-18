@@ -28,6 +28,7 @@ RSpec.shared_examples 'a report that can be downloaded' do |method, download_opt
         allow_any_instance_of(subject.class).to receive(:current_member_id).and_return(member_id)
         allow(format.last).to receive(:perform_later).and_return(active_job)
         allow(controller).to receive(:current_user).and_return(current_user)
+        allow(controller).to receive(:fhlb_report_date_numeric)
       end
 
       it "should enqueue a report #{format.first} job when the requested `export_format` is `#{format.first}`" do
@@ -47,5 +48,33 @@ RSpec.shared_examples 'a report that can be downloaded' do |method, download_opt
         expect(JSON.parse(response.body).with_indifferent_access[:job_cancel_url]).to eq(job_cancel_url(job_status))
       end
     end
+  end
+end
+
+RSpec.shared_examples 'a job that makes service calls' do |service, method|
+  let(:member_id) { double('A Member ID') }
+  let(:run_job) { subject.perform(member_id) }
+  let(:results) { double('results') }
+  let(:uuid) { double('uuid') }
+
+  it "calls `#{service.to_s}##{method.to_s}`" do
+    expect_any_instance_of(service).to receive(method).and_return(results)
+    run_job
+  end
+  it "creates a new instance of #{service} with the proper member_id" do
+    expect(service).to receive(:new).with(member_id, anything)
+    run_job
+  end
+  it "creates a new instance of #{service} with an instance of ActionDispatch::TestRequest" do
+    expect(service).to receive(:new).with(anything, instance_of(ActionDispatch::TestRequest))
+    run_job
+  end
+  it 'creates an instance of TestRequest using the uuid if one is provided' do
+    expect(ActionDispatch::TestRequest).to receive(:new).with({'action_dispatch.request_id' => uuid})
+    subject.perform(member_id, uuid)
+  end
+  it 'creates an instance of TestRequest with a nil uuid if one is not provided' do
+    expect(ActionDispatch::TestRequest).to receive(:new).with({'action_dispatch.request_id' => nil})
+    run_job
   end
 end

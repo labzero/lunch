@@ -22,6 +22,33 @@ primaryGroupID: 513
 mail: extra@example.com
 userAccountControl: 512
 
+# extra user with a password we can change
+dn: sAMAccountName=extra-password,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet Password User
+sn: Extranet Password
+sAMAccountName: extra-password
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: extra-password@example.com
+userAccountControl: 512
+
+# extra user with an expired password
+dn: sAMAccountName=extra-expired,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet Expired Password User
+sn: Extranet Expired Password
+sAMAccountName: extra-expired
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: extra-expired@example.com
+userAccountControl: 512
+passwordExpired: true
+
 # extra-chaste user
 dn: sAMAccountName=extra-chaste,dc=extranet,dc=fhlbsf,dc=com
 objectClass: user
@@ -64,6 +91,20 @@ sAMAccountName: extra-chaste-delete
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: chaste-delete@example.com
+
+# extra-chaste-first-time user
+dn: sAMAccountName=extra-chaste-first-time,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet User First Time - Chaste Manhatten
+displayName: Chaste First Time
+givenName: Chaste
+sn: First Time
+sAMAccountName: extra-chaste-first-time
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: chaste-first-time@example.com
 
 # extra-chaste-reset user
 dn: sAMAccountName=extra-chaste-reset,dc=extranet,dc=fhlbsf,dc=com
@@ -108,6 +149,19 @@ userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: chaste-norole@example.com
 
+# quick-advance-disabled
+dn: sAMAccountName=quick-advance-disabled,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: User With Disabled Quick Advance
+sn: User With Disabled Quick Advance
+givenname: Quick Advance Disabled
+sAMAccountName: quick-advance-disabled
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: quick-advance-disabled@example.com
+
 # Chaste Manhatten
 dn: CN=FHLB6,dc=extranet,dc=fhlbsf,dc=com
 cn: FHLB6
@@ -118,6 +172,7 @@ member: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-delete,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-reset,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-norole,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-chaste-first-time,dc=extranet,dc=fhlbsf,dc=com
 
 # Wells Faygo
 dn: CN=FHLB5,dc=extranet,dc=fhlbsf,dc=com
@@ -126,6 +181,15 @@ objectClass: group
 objectClass: top
 member: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-password,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-expired,dc=extranet,dc=fhlbsf,dc=com
+
+# The Bank With Disabled Signers
+dn: CN=FHLB13,dc=extranet,dc=fhlbsf,dc=com
+cn: FHLB13
+objectClass: group
+objectClass: top
+member: sAMAccountName=quick-advance-disabled,dc=extranet,dc=fhlbsf,dc=com
 
 # FCN-MemberSite-AccessManagers group
 dn: CN=FCN-MemberSite-AccessManagers,dc=extranet,dc=fhlbsf,dc=com
@@ -141,15 +205,24 @@ objectClass: group
 objectClass: top
 member: CN=FCN-MemberSite-Users,CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
 
+# eBiz Users
+dn: CN=Users,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
+cn: Users
+objectClass: group
+objectClass: top
+
 # FCN-MemberSite-Users group
 dn: CN=FCN-MemberSite-Users,CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com
 cn: FCN-MemberSite-Users
 objectClass: group
 objectClass: top
 member: sAMAccountName=extra,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-password,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-expired,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-delete,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-reset,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
-
+member: sAMAccountName=quick-advance-disabled,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-chaste-first-time,dc=extranet,dc=fhlbsf,dc=com

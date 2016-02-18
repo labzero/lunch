@@ -33,13 +33,15 @@ RSpec.describe DashboardController, :type => :controller do
   describe "GET index", :vcr do
     let(:member_id) {750}
     let(:empty_financing_availability_gauge) {{total: {amount: 0, display_percentage: 100, percentage: 0}}}
+    let(:profile) { double('profile') }
+    let(:service) { double('a service object', profile: profile, borrowing_capacity_summary: nil) }
     before do
       allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
       allow(subject).to receive(:current_user_roles)
       allow_any_instance_of(MembersService).to receive(:member_contacts)
       allow(MessageService).to receive(:new).and_return(double('service instance', todays_quick_advance_message: nil))
     end
-    
+
     it_behaves_like 'a user required action', :get, :index
     it_behaves_like 'a controller action with quick advance messaging', :index
     it "should render the index view" do
@@ -50,10 +52,14 @@ RSpec.describe DashboardController, :type => :controller do
       expect(subject).to receive(:current_user_roles)
       get :index
     end
-    it 'should assign @account_overview' do
+    it 'populates the deferred jobs view parameters' do
+      expect(subject).to receive(:populate_deferred_jobs_view_parameters).with(DashboardController::DEFERRED_JOBS)
       get :index
-      expect(assigns[:account_overview]).to be_kind_of(Hash)
-      expect(assigns[:account_overview].length).to eq(3)
+    end
+    it 'checks the profile for disabled endpoints' do
+      allow(MemberBalanceService).to receive(:new).and_return(service)
+      expect(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(profile).and_return({})
+      get :index
     end
     it "should assign @market_overview" do
       get :index
@@ -102,6 +108,14 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(assigns[:quick_advance_status]).to eq(:closed)
     end
+    it 'sets @advance_terms' do
+      get :index
+      expect(assigns[:advance_terms]).to eq(AdvanceRequest::ADVANCE_TERMS)
+    end
+    it 'sets @advance_types' do
+      get :index
+      expect(assigns[:advance_types]).to eq(AdvanceRequest::ADVANCE_TYPES)
+    end
     it 'should assign @financing_availability_gauge' do
       get :index
       expect(assigns[:financing_availability_gauge]).to be_kind_of(Hash)
@@ -125,36 +139,36 @@ RSpec.describe DashboardController, :type => :controller do
         allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(contacts)
         allow(contacts).to receive(:[]).with(:cam).and_return({username: cam_username})
         allow(contacts).to receive(:[]).with(:rm).and_return({username: rm_username})
-        allow(Rails.application.assets).to receive(:find_asset)
+        allow(subject).to receive(:find_asset)
       end
       it 'is the result of the `members_service.member_contacts` method' do
         get :index
         expect(assigns[:contacts]).to eq(contacts)
       end
       it 'contains an `image_url` for the cam' do
-        allow(Rails.application.assets).to receive(:find_asset).with("#{cam_username}.jpg").and_return(true)
+        allow(subject).to receive(:find_asset).with("#{cam_username}.jpg").and_return(true)
         get :index
         expect(assigns[:contacts][:cam][:image_url]).to eq("#{cam_username}.jpg")
       end
       it 'contains an `image_url` for the rm' do
-        allow(Rails.application.assets).to receive(:find_asset).with("#{rm_username}.jpg").and_return(true)
+        allow(subject).to receive(:find_asset).with("#{rm_username}.jpg").and_return(true)
         get :index
         expect(assigns[:contacts][:rm][:image_url]).to eq("#{rm_username}.jpg")
       end
       it 'contains an `image_url` that is the downcased version of the username for the rm' do
         allow(contacts).to receive(:[]).with(:rm).and_return({username: uppercase_username})
-        allow(Rails.application.assets).to receive(:find_asset).with("#{uppercase_username.downcase}.jpg").and_return(true)
+        allow(subject).to receive(:find_asset).with("#{uppercase_username.downcase}.jpg").and_return(true)
         get :index
         expect(assigns[:contacts][:rm][:image_url]).to eq("#{uppercase_username.downcase}.jpg")
       end
       it 'contains an `image_url` that is the downcased version of the username for the cam' do
         allow(contacts).to receive(:[]).with(:cam).and_return({username: uppercase_username})
-        allow(Rails.application.assets).to receive(:find_asset).with("#{uppercase_username.downcase}.jpg").and_return(true)
+        allow(subject).to receive(:find_asset).with("#{uppercase_username.downcase}.jpg").and_return(true)
         get :index
         expect(assigns[:contacts][:cam][:image_url]).to eq("#{uppercase_username.downcase}.jpg")
       end
       it 'assigns the default image_url if the image asset does not exist for the contact' do
-        allow(Rails.application.assets).to receive(:find_asset).and_return(false)
+        allow(subject).to receive(:find_asset).and_return(false)
         get :index
         expect(assigns[:contacts][:rm][:image_url]).to eq('placeholder-usericon.svg')
         expect(assigns[:contacts][:cam][:image_url]).to eq('placeholder-usericon.svg')
@@ -207,26 +221,6 @@ RSpec.describe DashboardController, :type => :controller do
         allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::FINANCING_AVAILABLE_DATA]).and_return(true)
         get :index
         expect(assigns[:financing_availability_gauge]).to eq(empty_financing_availability_gauge)
-      end
-      it 'should set @account_overview to have zero sta balance if the report is disabled' do
-        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]).and_return(true)
-        get :index
-        expect(assigns[:account_overview][:sta_balance][0]).to eq(["STA Balance:*", nil, "*as of close of business on prior business day"])
-      end
-      it 'should set @account_overview to have zero credit outstanding balance if the report is disabled' do
-        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::CREDIT_OUTSTANDING_DATA]).and_return(true)
-        get :index
-        expect(assigns[:account_overview][:credit_outstanding][0]).to eq(["Credit Outstanding:", nil])
-      end
-      it 'should set @account_overview to have zero capital stock remaining balance if the report is disabled' do
-        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::FHLB_STOCK_DATA]).and_return(true)
-        get :index
-        expect(assigns[:account_overview][:remaining][3]).to eq(["Stock Leverage", nil])
-      end
-      it 'should set @account_overview to have zero collateral borrowing capacity if the report is disabled' do
-        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA]).and_return(true)
-        get :index
-        expect(assigns[:account_overview][:remaining][2]).to eq(["Collateral Borrowing Capacity", nil])
       end
       it 'should set @borrowing_capacity to be nil if the report is disabled' do
         allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_REPORT_DATA]).and_return(true)
@@ -281,9 +275,9 @@ RSpec.describe DashboardController, :type => :controller do
       make_request
       expect(assigns[:advance_types]).to eq(AdvanceRequest::ADVANCE_TYPES)
     end
-    it 'clears the request before fetching rates' do
-      expect(subject).to receive(:advance_request_clear!).ordered
-      expect(advance_request).to receive(:rates).ordered
+    it 'calls `advance_request_to_session`' do
+      expect(subject).to receive(:render).at_least(:once).ordered
+      expect(subject).to receive(:advance_request_to_session).ordered
       make_request
     end
   end
@@ -297,21 +291,33 @@ RSpec.describe DashboardController, :type => :controller do
     let(:username) {'Test User'}
     let(:advance_description) {double('some description')}
     let(:advance_program) {double('some program')}
-    let(:amount) { 100000 }
+    let(:amount) { rand(100010..999999) }
     let(:interest_day_count) { 'some interest_day_count' }
     let(:payment_on) { 'some payment_on' }
     let(:maturity_date) { 'some maturity_date' }
     let(:check_capstock) { true }
     let(:check_result) {{:status => 'pass', :low => 100000, :high => 1000000000}}
-    let(:make_request) { post :quick_advance_preview, interest_day_count: interest_day_count, payment_on: payment_on, maturity_date: maturity_date, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, check_capstock: check_capstock}
+    let(:make_request) { post :quick_advance_preview, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount }
     let(:advance_request) { double(AdvanceRequest, :type= => nil, :term= => nil, :amount= => nil, :stock_choice= => nil, validate_advance: true, errors: [], sta_debit_amount: 0, timestamp!: nil, amount: amount, id: SecureRandom.uuid) }
     before do
       allow(subject).to receive(:advance_request).and_return(advance_request)
       allow(subject).to receive(:populate_advance_request_view_parameters)
       allow(subject).to receive(:advance_request_to_session)
+      allow(subject).to receive(:advance_request_from_session).and_return(advance_request)
     end
     it_behaves_like 'a user required action', :post, :quick_advance_preview
     it_behaves_like 'an authorization required method', :post, :quick_advance_preview, :advances, :show?
+
+    it 'calls `advance_request_from_session`' do
+      expect(subject).to receive(:advance_request_from_session).ordered
+      expect(advance_request).to receive(:validate_advance).ordered
+      make_request
+    end
+    it 'calls `advance_request_to_session`' do
+      expect(subject).to receive(:render).at_least(:once).ordered
+      expect(subject).to receive(:advance_request_to_session).ordered
+      make_request
+    end
     it 'should populate the normal advance view parameters' do
       expect(subject).to receive(:populate_advance_request_view_parameters)
       make_request
@@ -328,6 +334,14 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'should validate the advance' do
       expect(advance_request).to receive(:validate_advance)
+      make_request
+    end
+    it 'sets the advance amount if passed an amount' do
+      expect(advance_request).to receive(:amount=).with(amount.to_s)
+      make_request
+    end
+    it 'clears the capital stock choice is passed an amount' do
+      expect(advance_request).to receive(:stock_choice=).with(nil)
       make_request
     end
     describe 'the rate is stale' do
@@ -410,13 +424,24 @@ RSpec.describe DashboardController, :type => :controller do
     before do
       allow(subject).to receive(:session_elevated?).and_return(true)
       allow(SecurIDService).to receive(:new).and_return(securid_service)
-      allow(subject).to receive(:advance_request).and_return(advance_request)
       allow(subject).to receive(:populate_advance_request_view_parameters)
       allow(subject).to receive(:advance_request_to_session)
+      allow(subject).to receive(:advance_request).and_return(advance_request)
+      allow(subject).to receive(:advance_request_from_session).and_return(advance_request)
     end
 
     it_behaves_like 'a user required action', :post, :quick_advance_perform
     it_behaves_like 'an authorization required method', :post, :quick_advance_perform, :advances, :show?
+    it 'calls `advance_request_from_session`' do
+      expect(subject).to receive(:advance_request_from_session).ordered
+      expect(subject).to receive(:session_elevated?).ordered
+      make_request
+    end
+    it 'calls `advance_request_to_session`' do
+      expect(subject).to receive(:render).at_least(:once).ordered
+      expect(subject).to receive(:advance_request_to_session).ordered
+      make_request
+    end
     it 'should render the confirmation view on success' do
       make_request
       expect(response.body).to render_template('dashboard/quick_advance_perform')
@@ -444,17 +469,6 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'executes the advance' do
       expect(advance_request).to receive(:execute)
-      make_request
-    end
-    it 'clears the request if the advance succedes' do
-      expect(subject).to receive(:render).and_call_original.ordered
-      expect(subject).to receive(:advance_request_clear!).ordered
-      make_request
-    end
-    it 'does not clear the request if the advance fails' do
-      allow(advance_request).to receive(:executed?).and_return(false)
-      expect(subject).to receive(:render).and_call_original.ordered
-      expect(subject).to_not receive(:advance_request_clear!).ordered
       make_request
     end
     describe 'with unelevated session' do
@@ -554,6 +568,129 @@ RSpec.describe DashboardController, :type => :controller do
         allow(subject).to receive(:fhlb_formatted_number).and_return(rate)
         expect(rate_service_response).to receive(:[]=).with(:rate, rate)
         get :current_overnight_vrc
+      end
+    end
+  end
+
+  RSpec.shared_examples "a deferred job action" do |method|
+    it 'calls `deferred_job_data`' do
+      expect(subject).to receive(:deferred_job_data)
+      get method
+    end
+    it 'is successful even if `deferred_job_data` returns nil' do
+      allow(subject).to receive(:deferred_job_data).and_return(nil)
+      get method
+      expect(response.status).to eq(200)
+    end
+  end
+
+  describe 'GET recent_activity' do
+    let(:recent_activity) { get :recent_activity }
+    let(:activity_1) { double('activity') }
+    let(:activity_2) { double('another activity') }
+    let(:activities) { [activity_1, activity_2] }
+    let(:processed_activities) { double('processed_activities') }
+    before do
+      allow(subject).to receive(:process_recent_activities)
+      allow(subject).to receive(:deferred_job_data).and_return(activities)
+      [activity_1, activity_2].each do |activity|
+        allow(activity).to receive(:with_indifferent_access)
+      end
+      allow(subject).to receive(:render)
+    end
+    it_behaves_like 'a deferred job action', :recent_activity
+    it_behaves_like 'a user required action', :get, :recent_activity
+    it 'calls `with_indifferent_access` on the hashes contained in the activities array' do
+      [activity_1, activity_2].each do |activity|
+        expect(activity).to receive(:with_indifferent_access)
+      end
+      recent_activity
+    end
+    it 'processes the activities hash' do
+      expect(subject).to receive(:process_recent_activities).with(activities)
+      recent_activity
+    end
+    it 'renders the `dashboard_recent_activity` partial with the correct data' do
+      allow(subject).to receive(:process_recent_activities).and_return(processed_activities)
+      expect(subject).to receive(:render).with({partial: 'dashboard/dashboard_recent_activity', locals: {table_data: processed_activities}, layout: false})
+      recent_activity
+    end
+  end
+
+  describe 'GET account_overview' do
+    total_borrowing_capacity_keys = %i(total_borrowing_capacity_sbc_agency total_borrowing_capacity_sbc_aaa total_borrowing_capacity_sbc_aa)
+    ([:sta_balance, :remaining_financing_available, :total, :remaining, :remaining_leverage, :credit_outstanding, :collateral_borrowing_capacity, :capital_stock, :total_borrowing_capacity_standard] + total_borrowing_capacity_keys).each do |attr|
+      let(attr) { double(attr.to_s) }
+    end
+    let(:nested_hash) { double('hash') }
+    let(:account_overview) { get :account_overview }
+    let(:profile) {
+      {
+        sta_balance: sta_balance,
+        remaining_financing_available: remaining_financing_available,
+        credit_outstanding: credit_outstanding,
+        collateral_borrowing_capacity: collateral_borrowing_capacity,
+        capital_stock: capital_stock,
+        total_borrowing_capacity_standard: total_borrowing_capacity_standard,
+        total_borrowing_capacity_sbc_agency: total_borrowing_capacity_sbc_agency,
+        total_borrowing_capacity_sbc_aaa: total_borrowing_capacity_sbc_aaa,
+        total_borrowing_capacity_sbc_aa: total_borrowing_capacity_sbc_aa
+      }
+    }
+    before do
+      allow(subject).to receive(:deferred_job_data)
+      allow(subject).to receive(:render)
+    end
+
+    it_behaves_like 'a user required action', :get, :account_overview
+    it_behaves_like 'a deferred job action', :account_overview
+    it 'checks the profile for disabled endpoints' do
+      expect(subject).to receive(:sanitize_profile_if_endpoints_disabled).and_return({})
+      account_overview
+    end
+    describe 'rendering the `dashboard_account_overview` partial' do
+      before do
+        allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).and_return(profile)
+        allow(credit_outstanding).to receive(:[]).with(:total).and_return(total)
+        allow(collateral_borrowing_capacity).to receive(:[]).with(:remaining).and_return(remaining)
+        allow(capital_stock).to receive(:[]).with(:remaining_leverage).and_return(remaining_leverage)
+      end
+      it 'renders with the correct data when there is no total_borrowing_capacity_sbc_agency, total_borrowing_capacity_sbc_aaa and total_borrowing_capacity_sbc_aa' do
+        profile_no_bc = profile
+        total_borrowing_capacity_keys.each do |key|
+          profile_no_bc[key] = 0
+        end
+        allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).and_return(profile_no_bc)
+        table_data = {
+          sta_balance: [[I18n.t('dashboard.your_account.table.balance'), sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
+          credit_outstanding: [[I18n.t('dashboard.your_account.table.credit_outstanding'), total]],
+          remaining: [
+            {title: I18n.t('dashboard.your_account.table.remaining.title')},
+            [I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available],
+            [I18n.t('dashboard.your_account.table.remaining.capacity'), remaining],
+            [I18n.t('dashboard.your_account.table.remaining.leverage'), remaining_leverage]
+          ]
+        }
+        expect(subject).to receive(:render).with({partial: 'dashboard/dashboard_account_overview', locals: {table_data: table_data}, layout: false})
+        account_overview
+      end
+      it 'renders with the correct data when there is total_borrowing_capacity_sbc_agency, total_borrowing_capacity_sbc_aaa or total_borrowing_capacity_sbc_aa' do
+        table_data = {
+          sta_balance: [[I18n.t('dashboard.your_account.table.balance'), sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
+          credit_outstanding: [[I18n.t('dashboard.your_account.table.credit_outstanding'), total]],
+          remaining: [
+            {title: I18n.t('dashboard.your_account.table.remaining.title')},
+            [I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available],
+            [I18n.t('dashboard.your_account.table.remaining.capacity'), remaining],
+            [I18n.t('dashboard.your_account.table.remaining.standard'), total_borrowing_capacity_standard],
+            [I18n.t('dashboard.your_account.table.remaining.agency'), total_borrowing_capacity_sbc_agency],
+            [I18n.t('dashboard.your_account.table.remaining.aaa'), total_borrowing_capacity_sbc_aaa],
+            [I18n.t('dashboard.your_account.table.remaining.aa'), total_borrowing_capacity_sbc_aa],
+            [I18n.t('dashboard.your_account.table.remaining.leverage'), remaining_leverage]
+          ]
+        }
+        expect(subject).to receive(:render).with({partial: 'dashboard/dashboard_account_overview', locals: {table_data: table_data}, layout: false})
+        account_overview
       end
     end
   end
@@ -670,63 +807,67 @@ RSpec.describe DashboardController, :type => :controller do
 
   describe '`advance_request` protected method' do
     let(:call_method) { subject.send(:advance_request) }
+    let(:advance_request) { double(AdvanceRequest, owners: double(Set, add: nil)) }
     it 'returns a new AdvanceRequest if the controller is lacking one' do
       member_id = double('A Member ID')
       signer = double('A Signer')
-      request = double('A Request')
-      advance_request = double('An AdvanceRequest')
       allow(subject).to receive(:current_member_id).and_return(member_id)
       allow(subject).to receive(:signer_full_name).and_return(signer)
-      allow(subject).to receive(:request).and_return(request)
-      allow(AdvanceRequest).to receive(:new).with(member_id, signer, request).and_return(advance_request)
+      allow(AdvanceRequest).to receive(:new).with(member_id, signer, subject.request).and_return(advance_request)
       expect(call_method).to be(advance_request)
     end
     it 'returns the AdvanceRequest stored in `@advance_request` if present' do
-      advance_request = double('An AdvanceRequest')
       subject.instance_variable_set(:@advance_request, advance_request)
       expect(call_method).to be(advance_request)
+    end
+    it 'adds the current user to the owners list' do
+      allow(AdvanceRequest).to receive(:new).and_return(advance_request)
+      expect(advance_request.owners).to receive(:add).with(subject.current_user.id)
+      call_method
     end
   end
 
   describe '`advance_request_from_session` protected method' do
     let(:id) { double('An ID') }
     let(:call_method) { subject.send(:advance_request_from_session, id) }
-    describe 'with a request ID in the session' do
-      let(:advance_request) { double('An AdvanceRequest') }
-      before do
-        session[:advance_request] = [id]
-        allow(AdvanceRequest).to receive(:find).and_return(advance_request)
-      end
-      it 'fetches the request ID array from the session' do
-        allow(session).to receive(:[]).and_call_original
-        expect(session).to receive(:[]).with(:advance_request)
+    let(:advance_request) { double(AdvanceRequest, owners: double(Set, member?: true), class: AdvanceRequest) }
+
+    shared_examples 'modify authorization' do
+      it 'checks if the current user is allowed to modify the advance' do
+        expect(subject).to receive(:authorize).with(advance_request, :modify?)
         call_method
       end
-      it 'ignores IDs that arent in the request ID array' do
-        session[:advance_request] = [double('A Different ID')]
-        expect(AdvanceRequest).to_not receive(:find).with(id, request)
+      it 'raises a Pundit::NotAuthorizedError if the user cant modify the advance' do
+        allow(advance_request.owners).to receive(:member?).and_return(false)
+        expect{ call_method }.to raise_error(Pundit::NotAuthorizedError)
+      end
+    end
+
+    describe 'without a passed ID' do
+      let(:id) { nil }
+      before do
+        allow(subject).to receive(:advance_request).and_return(advance_request)
+      end
+      it 'calls `advance_request` if the session has no ID' do
+        expect(subject).to receive(:advance_request)
+        subject.send(:advance_request_from_session, nil)
+      end
+      include_examples 'modify authorization'
+    end
+    describe 'with a passed request ID' do
+      before do
+        allow(AdvanceRequest).to receive(:find).and_return(advance_request)
       end
       it 'finds the AdvanceRequest by ID' do
         request = double('A Request')
-        allow(subject).to receive(:request).and_return(request)
-        expect(AdvanceRequest).to receive(:find).with(id, request)
+        expect(AdvanceRequest).to receive(:find).with(id, subject.request)
         call_method
       end
       it 'assigns the AdvanceRequest to @advance_request' do
         call_method
         expect(assigns[:advance_request]).to be(advance_request)
       end
-    end
-    describe 'without a request ID in the session' do
-      it 'calls `advance_request` if the session has no ID' do
-        expect(subject).to receive(:advance_request)
-        call_method
-      end
-      it 'initalizes the session' do
-        allow(session).to receive(:[]=).and_call_original
-        expect(session).to receive(:[]=).with(:advance_request, []).and_call_original
-        call_method
-      end
+      include_examples 'modify authorization'
     end
   end
 
@@ -742,56 +883,10 @@ RSpec.describe DashboardController, :type => :controller do
       before do
         subject.instance_variable_set(:@advance_request, advance_request)
       end
-      it 'initalizes the session' do
-        allow(session).to receive(:[]=).and_call_original
-        expect(session).to receive(:[]=).with(:advance_request, []).and_call_original
-        call_method
-      end
       it 'saves the AdvanceRequest' do
         expect(advance_request).to receive(:save)
         call_method
       end
-      it 'stores the AdvanceRequest ID in the session if the save succedes' do
-        allow(advance_request).to receive(:save).and_return(true)
-        call_method
-        expect(session[:advance_request]).to include(id)
-      end
-      it 'does not add the ID if its already in the array' do
-        session[:advance_request] = [id]
-        call_method
-        expect(session[:advance_request]).to eq([id])
-      end
-      it 'raises an error if more than MAX_SIMULTANEOUS_ADVANCES advances are in the session after adding the current ID' do
-        allow(advance_request).to receive(:save).and_return(true)
-        session[:advance_request] = Array.new(described_class::MAX_SIMULTANEOUS_ADVANCES, double('Alternate ID'))
-        expect{call_method}.to raise_error(SecurityError)
-      end
-    end
-  end
-
-  describe '`advance_request_clear!` protected method' do
-    let(:call_method) { subject.send(:advance_request_clear!) }
-    let(:id) { double('An ID') }
-    let(:advance_request) { double(AdvanceRequest, id: id) }
-    before do
-      session[:advance_request] = []
-      subject.instance_variable_set(:@advance_request, advance_request)
-    end
-    it 'deletes tha advance request ID from the session' do
-      expect(session[:advance_request]).to receive(:delete).with(id)
-      call_method
-    end
-    it 'does not raise an error if the session is not initialized' do
-      session[:advance_request] = nil
-      expect{call_method}.to_not raise_error
-    end
-    it 'does not raise an error if there is no advance request' do
-      subject.instance_variable_set(:@advance_request, nil)
-      expect{call_method}.to_not raise_error
-    end
-    it 'nils out the @advance_request' do
-      call_method
-      expect(assigns[:advance_request]).to be_nil
     end
   end
 
@@ -818,6 +913,227 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'returns the signer name' do
         expect(call_method).to be(signer)
+      end
+    end
+  end
+
+  describe '`process_recent_activities` private method' do
+    let(:activity) { double('activity', :[] => nil) }
+    let(:activities) { [activity, activity, activity, activity, activity, activity] }
+    let(:product_description) { double('product description') }
+    let(:current_par) { double('current_par') }
+    let(:maturity_date) { double('maturity date') }
+    let(:transaction_number) { double('transaction_number') }
+    let(:call_method) { controller.send(:process_recent_activities, [activity]) }
+
+    it 'returns an empty array if passed nil' do
+      expect(controller.send(:process_recent_activities, nil)).to eq([])
+    end
+    it 'returns 5 processed activities' do
+      expect(controller.send(:process_recent_activities, activities).length).to eq(5)
+    end
+    describe 'a processed activity array' do
+      it 'has a product_description in the first position' do
+        allow(activity).to receive(:[]).with(:product_description).and_return(product_description)
+        expect(call_method.first[0]).to eq(product_description)
+      end
+      it 'has a current_par in the second position' do
+        allow(activity).to receive(:[]).with(:current_par).and_return(current_par)
+        expect(call_method.first[1]).to eq(current_par)
+      end
+      it 'has a transaction_number in the fourth position' do
+        allow(activity).to receive(:[]).with(:transaction_number).and_return(transaction_number)
+        expect(call_method.first[3]).to eq(transaction_number)
+      end
+      describe 'the maturity_date position' do
+        it 'returns the fhlb_date_standard_numeric maturity date in the third position' do
+          allow(maturity_date).to receive(:to_date).and_return(maturity_date)
+          allow(activity).to receive(:[]).with(:maturity_date).and_return(maturity_date)
+          allow(controller).to receive(:fhlb_date_standard_numeric).with(maturity_date).and_return(maturity_date)
+          expect(call_method.first[2]).to eq(maturity_date)
+        end
+        it "returns '#{I18n.t('global.today')}' if the maturity date is equal to today's date" do
+          allow(activity).to receive(:[]).with(:maturity_date).and_return(Time.zone.today)
+          expect(call_method.first[2]).to eq(I18n.t('global.today'))
+        end
+        it "returns #{I18n.t('global.open')} if the activity is an advance with no maturity date" do
+          allow(activity).to receive(:[]).with(:instrument_type).and_return('ADVANCE')
+          expect(call_method.first[2]).to eq(I18n.t('global.open'))
+        end
+      end
+    end
+  end
+
+  describe '`deferred_job_data` private method' do
+    let(:request) { double('request') }
+    let(:action_name) { %w(foo wizz bang bar).sample }
+    let(:params) { double('params hash') }
+    let(:param_name) { double('param_name') }
+    let(:user_id) { rand(1..9999) }
+    let(:job_status_as_string) { double('job status as string') }
+    let(:job_status) { double('an instance of JobStatus', result_as_string: job_status_as_string, destroy: nil) }
+    let(:job) { double('an instance of the MemberBalanceTodaysCreditActivityJob', job_status: job_status) }
+    let(:current_user) { double('User', id: user_id)}
+    let(:parsed_response) { double('parsed response') }
+    let(:call_method) { subject.send(:deferred_job_data) }
+    before do
+      allow(subject).to receive(:request).and_return(request)
+      allow(subject).to receive(:params).and_return(params)
+      allow(subject).to receive(:action_name).and_return(action_name)
+      allow(params).to receive(:[]).with("#{action_name}_job_id".to_sym).and_return(param_name)
+      allow(request).to receive(:xhr?).and_return(true)
+      allow(controller).to receive(:current_user).and_return(current_user)
+      allow(JobStatus).to receive(:find_by).and_return(job_status)
+      allow(JSON).to receive(:parse).and_return(parsed_response)
+    end
+    it 'raises an exception when the request is not XHR' do
+      allow(request).to receive(:xhr?).and_return(false)
+      expect{call_method}.to raise_exception
+    end
+    it 'raises an ArgumentError if no `recent_activity_job_id` param is passed' do
+      allow(params).to receive(:[])
+      expect{call_method}.to raise_error(ArgumentError)
+    end
+    it 'finds the JobStatus by id, user_id and status' do
+      expect(JobStatus).to receive(:find_by).with(id: param_name, user_id: user_id, status: JobStatus.statuses[:completed]).and_return(job_status)
+      call_method
+    end
+
+    it 'raises an exception if no JobStatus is found' do
+      allow(JobStatus).to receive(:find_by)
+      expect{call_method}.to raise_error(ActiveRecord::RecordNotFound )
+    end
+    it 'destroys the job_status' do
+      expect(job_status).to receive(:destroy)
+      call_method
+    end
+    it 'returns the JSON-parsed job status' do
+      allow(parsed_response).to receive(:clone).and_return(parsed_response)
+      allow(job_status_as_string).to receive(:dup).and_return(job_status_as_string)
+      allow(JSON).to receive(:parse).with(job_status_as_string).and_return(parsed_response)
+      expect(call_method).to eq(parsed_response)
+    end
+  end
+
+  describe '`populate_deferred_jobs_view_parameters` private method' do
+    let(:name) { %w(foo wizz bang bar).sample }
+    let(:job_status) { double('job status', update_attributes!: nil, id: job_id) }
+    let(:job_klass) { double('FhlbJob', perform_later: double('job instance', job_status: job_status)) }
+    let(:path) { %w(some path helpers as strings).sample }
+    let(:current_user) { double('User', id: user_id)}
+    let(:job_id) { double('job id') }
+    let(:user_id) { double('user id') }
+    let(:member_id) { double('memer id') }
+    let(:job_status_url) { double('job status url') }
+    let(:load_url) { double('load url') }
+    let(:uuid) { double('uuid of request') }
+    let(:call_method) { controller.send(:populate_deferred_jobs_view_parameters, {:"#{name}" => [job_klass, path]}) }
+
+    before do
+      allow(controller).to receive(:current_user).and_return(current_user)
+      allow(controller).to receive(:current_member_id).and_return(member_id)
+      allow(controller).to receive(:send).and_call_original
+      allow(controller).to receive(:send).with(path, anything)
+    end
+    describe 'calling `perform_later` on the passed job_klass' do
+      it 'passes member_id as an argument' do
+        expect(job_klass).to receive(:perform_later).with(member_id, anything).and_return(double('job instance', job_status: job_status))
+        call_method
+      end
+      it 'passes the uuid of the request object if one is available' do
+        allow(request).to receive(:uuid).and_return(uuid)
+        expect(job_klass).to receive(:perform_later).with(anything, uuid).and_return(double('job instance', job_status: job_status))
+        call_method
+      end
+      it 'passes nil as an argument if there is no request object' do
+        expect(job_klass).to receive(:perform_later).with(anything, nil).and_return(double('job instance', job_status: job_status))
+        call_method
+      end
+    end
+    it 'updates the job_status with the user id' do
+      expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
+      call_method
+    end
+    it 'sets a job status url instance variable' do
+      allow(controller).to receive(:job_status_url).with(job_status).and_return(job_status_url)
+      call_method
+      expect(assigns[:"#{name}_job_status_url"]).to eq(job_status_url)
+    end
+    it 'sets a load url instance variable' do
+      allow(controller).to receive(:send).with(path, {:"#{name}_job_id" => job_id}).and_return(load_url)
+      call_method
+      expect(assigns[:"#{name}_load_url"]).to eq(load_url)
+    end
+  end
+
+  describe '`sanitize_profile_if_endpoints_disabled` private method' do
+    [:total_financing_available, :sta_balance, :total, :remaining, :capital_stock].each do |attr|
+      let(attr) { double(attr.to_s) }
+    end
+    let(:profile) do
+      {
+        total_financing_available: total_financing_available,
+        sta_balance: sta_balance,
+        credit_outstanding: {total: total},
+        collateral_borrowing_capacity: {remaining: remaining},
+        capital_stock: capital_stock
+      }
+    end
+    let(:empty_profile) { {credit_outstanding: {}, collateral_borrowing_capacity: {}} }
+    let(:member_id) { double('member id') }
+    let(:call_method) { controller.send(:sanitize_profile_if_endpoints_disabled, profile) }
+
+    before do
+      allow(controller).to receive(:current_member_id).and_return(member_id)
+      allow_any_instance_of(MembersService).to receive(:report_disabled?)
+    end
+
+    it 'returns `{credit_outstanding: {}, collateral_borrowing_capacity: {}}` if nil is passed in' do
+      expect(controller.send(:sanitize_profile_if_endpoints_disabled, nil)).to eq(empty_profile)
+    end
+    it 'returns `{credit_outstanding: {}, collateral_borrowing_capacity: {}}` if an empty hash is passed in' do
+      expect(controller.send(:sanitize_profile_if_endpoints_disabled, {})).to eq(empty_profile)
+    end
+    [:total_financing_available, :sta_balance, :capital_stock, [:credit_outstanding, :total], [:collateral_borrowing_capacity, :remaining]].each do |attr|
+      if attr.is_a?(Symbol)
+        it "returns the original value of `#{attr}` if no flag is set" do
+          expect(call_method[attr]).to eq(send(attr))
+        end
+      else
+        it "returns the original value of `[#{attr.first}][#{attr.last}]` if no flag is set" do
+          expect(call_method[attr.first][attr.last]).to eq(send(attr.last))
+        end
+      end
+    end
+    it 'sets the `total_financing_available` to nil if the MembersService::FINANCING_AVAILABLE_DATA flag is set' do
+      allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::FINANCING_AVAILABLE_DATA]).and_return(true)
+      expect(call_method[:total_financing_available]).to be_nil
+    end
+    it 'sets the `sta_balance` to nil if the MembersService::STA_BALANCE_AND_RATE_DATA flag is set' do
+      allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, array_including(MembersService::STA_BALANCE_AND_RATE_DATA)).and_return(true)
+      expect(call_method[:sta_balance]).to be_nil
+    end
+    it 'sets the `sta_balance` to nil if the MembersService::STA_DETAIL_DATA flag is set' do
+      allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, array_including(MembersService::STA_DETAIL_DATA)).and_return(true)
+      expect(call_method[:sta_balance]).to be_nil
+    end
+    it 'sets the `credit_outstanding.total` to nil if the MembersService::CREDIT_OUTSTANDING_DATA flag is set' do
+      allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::CREDIT_OUTSTANDING_DATA]).and_return(true)
+      expect(call_method[:credit_outstanding][:total]).to be_nil
+    end
+    it 'sets the `capital_stock` to nil if the MembersService::FHLB_STOCK_DATA flag is set' do
+      allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::FHLB_STOCK_DATA]).and_return(true)
+      expect(call_method[:capital_stock]).to be_nil
+    end
+    describe 'the MembersService::COLLATERAL_HIGHLIGHTS_DATA flag is set' do
+      before { allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA]).and_return(true) }
+      it 'sets the `[:collateral_borrowing_capacity][:remaining]` to nil' do
+        expect(call_method[:collateral_borrowing_capacity][:remaining]).to be_nil
+      end
+      %i(total_borrowing_capacity_standard total_borrowing_capacity_sbc_agency total_borrowing_capacity_sbc_aaa total_borrowing_capacity_sbc_aa).each do |key|
+        it "sets the `[#{key}]` to nil" do
+          expect(call_method[key]).to be_nil
+        end
       end
     end
   end

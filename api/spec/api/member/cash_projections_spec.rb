@@ -1,11 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'member cash projections' do
     let(:as_of_date) { date = double('A Date'); allow(date).to receive(:to_date).and_return(date); date }
     let(:projections) do
@@ -22,12 +17,12 @@ describe MAPI::ServiceApp do
     let(:cpj_total_sum) { projections.inject(0) {|sum, projection| sum + projection[:CPJ_TOTAL_AMOUNT]} }
     let(:cpj_total_principal) { projections.inject(0) {|sum, projection| sum + projection[:CPJ_PRINCIPAL_AMOUNT]} }
     let(:cpj_total_interest) { projections.inject(0) {|sum, projection| sum + projection[:CPJ_INTEREST_AMOUNT]} }
-    let(:member_cash_projections) { MAPI::Services::Member::CashProjections.cash_projections(subject, MEMBER_ID) }
+    let(:member_cash_projections) { MAPI::Services::Member::CashProjections.cash_projections(subject, member_id) }
     let(:formatted_projections) { double('an array of projections') }
 
     it 'calls the proper method when the endpoint is hit' do
       expect(MAPI::Services::Member::CashProjections).to receive(:cash_projections)
-      get "/member/#{MEMBER_ID}/cash_projections"
+      get "/member/#{member_id}/cash_projections"
     end
 
     [:test, :production].each do |env|

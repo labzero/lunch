@@ -59,9 +59,8 @@ class MembersService < MAPIService
   end
 
   def quick_advance_enabled_for_member?(member_id)
-    if data = get_json(:quick_advance_enabled_for_member?, "member/#{member_id}/quick_advance_flag")
-      flag = data.first
-      'Y' == flag.upcase unless flag.blank?
+    if data = get_hash(:quick_advance_enabled_for_member?, "member/#{member_id}/quick_advance_flag")
+      data[:quick_advance_enabled]
     end
   end
 
@@ -91,12 +90,12 @@ class MembersService < MAPIService
           users = fetch_ldap_users(ldap, member_id) || []
           usernames = users.blank? ? [] : users.collect(&:username)
           signers.each do |signer|
-            roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::ROLE_MAPPING[role] }.compact
-            signers_and_users << {display_name: signer['name'], roles: roles} unless usernames.include?(signer['username'])
+            roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::LDAP_GROUPS_TO_ROLES[role] }.compact
+            signers_and_users << {display_name: signer['name'], roles: roles, given_name: signer['first_name'], surname: signer['last_name']} unless usernames.include?(signer['username'])
           end
 
           users.each do |user|
-            signers_and_users << {display_name: user.display_name || user.username, roles: user.roles}
+            signers_and_users << {display_name: user.display_name || user.username, roles: user.roles, surname: user.surname, given_name: user.given_name}
           end
         end
       end

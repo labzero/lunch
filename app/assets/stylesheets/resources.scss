@@ -1,4 +1,7 @@
 $resource-page-padding: 140px !default;
+.resource {
+  @extend %info-page-style;
+}
 
 .resource-guide-page {
   p {
@@ -9,10 +12,6 @@ $resource-page-padding: 140px !default;
   }
   small {
     @extend %typography-paragraph;
-  }
-  a {
-    color: $actionable-blue;
-    text-decoration: none;
   }
   :not(li) > a {
     text-transform: uppercase;
@@ -32,15 +31,25 @@ $resource-page-padding: 140px !default;
   }
 }
 
-.resource-guide-page, .resource-forms-page {
-  h1 {
-    @extend %typography-page-title;
+.resource-capital-plan-page {
+  p {
+    padding-right: $resource-page-padding + 15px;
+  }
+  a {
+    text-transform: uppercase;
+    display: block;
   }
   h2 {
-    @extend %typography-section-title;
+    margin-top: 30px;
   }
-  h3 {
-    @extend %typography-subtitle;
+}
+
+.resource-capital-plan-redemption
+{
+  margin-top: 30px;
+  a {
+    text-transform: none;
+    display: inline;
   }
 }
 
@@ -92,6 +101,19 @@ $resource-page-padding: 140px !default;
   }
 }
 
+.form-table-link-heading {
+  h3 {
+    float: left;
+  }
+  a {
+    text-transform: uppercase;
+    float: right;
+    display: inline-block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+  }
+}
+
 .resource-form-table {
   @extend %table-striped;
   @extend %table-nested-rows;
@@ -109,6 +131,65 @@ $resource-page-padding: 140px !default;
     &:last-child {
       width: 70px;
       text-align: right;
+    }
+  }
+}
+
+.resource-fee-schedules {
+  padding-right: 160px;
+  h2 {
+    margin-top: 30px;
+  }
+  h3 {
+    text-transform: capitalize;
+  }
+  p + h3, table + h3 {
+    margin-top: 30px;
+  }
+  td {
+    @include table-cell-treatment;
+    padding: 7px 10px;
+    &:first-child {
+      @extend %typography-table-heading;
+      background: $light-gray;
+      width: 350px;
+    }
+    &:last-child {
+      text-align: right;
+    }
+  }
+  table {
+    margin-bottom: 0;
+    width: 550px;
+  }
+}
+
+.resource-amendment-fee-table {
+  tr:not(:first-child) {
+    td:first-child {
+      padding-left: 30px;
+    }
+  }
+}
+
+.resource-domestic-outgoing-wire-table {
+  tr:nth-child(2), tr:nth-child(3) {
+    td:first-child {
+      padding-left: 30px;
+    } 
+  } 
+}
+
+.resource-member-applications {
+  ol, ul {
+    padding-left: 30px;
+  }
+}
+
+.resource-member-application {
+  ul {
+    p {
+      margin-top: 0;
     }
   }
 }

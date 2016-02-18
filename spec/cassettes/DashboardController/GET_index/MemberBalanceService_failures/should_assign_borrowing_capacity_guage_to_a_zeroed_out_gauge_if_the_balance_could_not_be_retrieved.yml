@@ -12,7 +12,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
       X-Request-Id:
       - ''
       User-Agent:
@@ -25,7 +25,7 @@ http_interactions:
       Content-Type:
       - text/html;charset=utf-8
       Content-Length:
-      - '1199'
+      - '1217'
       X-Xss-Protection:
       - 1; mode=block
       X-Content-Type-Options:
@@ -33,16 +33,59 @@ http_interactions:
       X-Frame-Options:
       - SAMEORIGIN
       Server:
-      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Mon, 20 Jul 2015 19:26:42 GMT
+      - Mon, 14 Dec 2015 20:13:06 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
-      string: '{"sta_balance":190349.49,"total_financing_available":199771250,"remaining_financing_available":169771250,"mpf_credit_available":15000000,"collateral_market_value_sbc_agency":3584326,"collateral_market_value_sbc_aaa":0,"collateral_market_value_sbc_aa":0,"total_borrowing_capacity_standard":82911718,"total_borrowing_capacity_sbc_agency":3405110,"total_borrowing_capacity_sbc_aaa":0,"total_borrowing_capacity_sbc_aa":0,"collateral_delivery_status":"N","financing_percentage":0.3,"maximum_term":120,"total_assets":1234567890,"approved_long_term_credit":234567890.0,"forward_commitments":0,"collateral_borrowing_capacity":{"total":126850000,"remaining":86316828,"standard":{"total":123500000,"remaining":82911718},"sbc":{"total_borrowing":3350000,"remaining_borrowing":3405110,"total_market":3584326,"remaining_market":39000}},"credit_outstanding":{"total":15000000,"standard":8555000,"sbc":4900000,"swaps_credit":0,"swaps_notational":345000,"mpf_credit":0,"letters_of_credit":1200000,"investments":2500000},"capital_stock":{"stock_owned":853700,"minimum_requirement":853700,"excess_stock":0,"surplus_stock":-128000,"activity_based_requirement":0,"remaining_stock":853700,"remaining_leverage":28456666}}'
+      string: '{"sta_balance":90349.68,"total_financing_available":199603250,"remaining_financing_available":149603250,"mpf_credit_available":13654400,"collateral_market_value_sbc_agency":0,"collateral_market_value_sbc_aaa":15758230,"collateral_market_value_sbc_aa":0,"total_borrowing_capacity_standard":91643604,"total_borrowing_capacity_sbc_agency":15166204,"total_borrowing_capacity_sbc_aaa":0,"total_borrowing_capacity_sbc_aa":0,"collateral_delivery_status":"Y","financing_percentage":0.3,"maximum_term":120,"total_assets":162850000,"approved_long_term_credit":48855000.0,"forward_commitments":1345600,"collateral_borrowing_capacity":{"total":140000000,"remaining":106809808,"standard":{"total":123500000,"remaining":91643604},"sbc":{"total_borrowing":16500000,"remaining_borrowing":15166204,"total_market":15758230,"remaining_market":145000}},"credit_outstanding":{"total":35000000,"standard":139728255,"sbc":0,"swaps_credit":1540000,"swaps_notational":2580000,"mpf_credit":112345,"letters_of_credit":18544400,"investments":345000},"capital_stock":{"stock_owned":853700,"minimum_requirement":853700,"excess_stock":0,"surplus_stock":-128000,"activity_based_requirement":0,"remaining_stock":853700,"remaining_leverage":28456666}}'
     http_version: 
-  recorded_at: Mon, 20 Jul 2015 19:26:42 GMT
+  recorded_at: Mon, 14 Dec 2015 20:13:06 GMT
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/disabled_reports
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
+      X-Request-Id:
+      - ''
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '2'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Mon, 14 Dec 2015 20:13:06 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: "[]"
+    http_version: 
+  recorded_at: Mon, 14 Dec 2015 20:13:06 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/rates/historic/overnight?limit=30
@@ -55,7 +98,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
       X-Request-Id:
       - ''
       User-Agent:
@@ -76,16 +119,59 @@ http_interactions:
       X-Frame-Options:
       - SAMEORIGIN
       Server:
-      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Mon, 20 Jul 2015 19:26:42 GMT
+      - Mon, 14 Dec 2015 20:13:06 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: '[["0014-02-12",0.11],["0014-02-13",0.12],["0014-02-14",0.11],["0014-02-15",0.12],["0014-02-16",0.11],["0014-02-20",0.11],["0014-02-21",0.11],["0014-02-22",0.11],["0014-02-23",0.11],["0014-02-26",0.12],["0014-02-27",0.12],["0014-02-28",0.12],["0014-03-01",0.12],["0014-03-02",0.12],["0014-03-05",0.12],["0014-03-06",0.12],["0014-03-07",0.12],["0014-03-08",0.12],["0014-03-09",0.13],["0014-03-12",0.13],["0014-03-13",0.12],["0014-03-14",0.12],["0014-03-15",0.12],["0014-03-16",0.12],["0014-03-19",0.13],["0014-03-20",0.13],["0014-03-21",0.13],["0014-03-22",0.13],["0014-03-23",0.13],["0014-04-19",0.08]]'
     http_version: 
-  recorded_at: Mon, 20 Jul 2015 19:26:42 GMT
+  recorded_at: Mon, 14 Dec 2015 20:13:06 GMT
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/disabled_reports
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
+      X-Request-Id:
+      - ''
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '2'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      Date:
+      - Mon, 14 Dec 2015 20:13:06 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: "[]"
+    http_version: 
+  recorded_at: Mon, 14 Dec 2015 20:13:06 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/rates/whole/overnight
@@ -98,7 +184,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
       X-Request-Id:
       - ''
       User-Agent:
@@ -119,16 +205,16 @@ http_interactions:
       X-Frame-Options:
       - SAMEORIGIN
       Server:
-      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Mon, 20 Jul 2015 19:26:42 GMT
+      - Mon, 14 Dec 2015 20:13:06 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
-      string: '{"rate":0.14,"updated_at":"2015-07-20 12:26:00 -0700"}'
+      string: '{"rate":0.14,"updated_at":"2015-12-14 17:13:00 -0300"}'
     http_version: 
-  recorded_at: Mon, 20 Jul 2015 19:26:42 GMT
+  recorded_at: Mon, 14 Dec 2015 20:13:06 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/quick_advance_flag
@@ -141,7 +227,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
       X-Request-Id:
       - ''
       User-Agent:
@@ -154,7 +240,7 @@ http_interactions:
       Content-Type:
       - text/html;charset=utf-8
       Content-Length:
-      - '5'
+      - '30'
       X-Xss-Protection:
       - 1; mode=block
       X-Content-Type-Options:
@@ -162,16 +248,16 @@ http_interactions:
       X-Frame-Options:
       - SAMEORIGIN
       Server:
-      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Mon, 20 Jul 2015 19:26:42 GMT
+      - Mon, 14 Dec 2015 20:13:06 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
-      string: '["Y"]'
+      string: '{"quick_advance_enabled":true}'
     http_version: 
-  recorded_at: Mon, 20 Jul 2015 19:26:42 GMT
+  recorded_at: Mon, 14 Dec 2015 20:13:06 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/etransact_advances/status
@@ -184,7 +270,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
       X-Request-Id:
       - ''
       User-Agent:
@@ -197,7 +283,7 @@ http_interactions:
       Content-Type:
       - text/html;charset=utf-8
       Content-Length:
-      - '3907'
+      - '3948'
       X-Xss-Protection:
       - 1; mode=block
       X-Content-Type-Options:
@@ -205,14 +291,14 @@ http_interactions:
       X-Frame-Options:
       - SAMEORIGIN
       Server:
-      - WEBrick/1.3.1 (Ruby/2.1.2/2014-05-08)
+      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Mon, 20 Jul 2015 19:26:42 GMT
+      - Mon, 14 Dec 2015 20:13:06 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
-      string: '{"etransact_advances_status":true,"wl_vrc_status":false,"all_loan_status":{"overnight":{"whole":{"trade_status":false,"display_status":false,"bucket_label":"Open
+      string: '{"eod_reached":false,"disabled":false,"etransact_advances_status":true,"wl_vrc_status":false,"all_loan_status":{"overnight":{"whole":{"trade_status":false,"display_status":false,"bucket_label":"Open
         and O/N"},"agency":{"trade_status":true,"display_status":true,"bucket_label":"Open
         and O/N"},"aaa":{"trade_status":true,"display_status":true,"bucket_label":"Open
         and O/N"},"aa":{"trade_status":true,"display_status":true,"bucket_label":"Open
@@ -250,20 +336,20 @@ http_interactions:
         Months"}},"1year":{"whole":{"trade_status":true,"display_status":true,"bucket_label":"1
         Year"},"agency":{"trade_status":true,"display_status":true,"bucket_label":"1
         Year"},"aaa":{"trade_status":true,"display_status":true,"bucket_label":"1
-        Year"},"aa":{"trade_status":true,"display_status":true,"bucket_label":"1 Year"}},"2year":{"whole":{"trade_status":true,"display_status":true,"bucket_label":"2
-        Years"},"agency":{"trade_status":true,"display_status":true,"bucket_label":"2
-        Years"},"aaa":{"trade_status":true,"display_status":true,"bucket_label":"2
-        Years"},"aa":{"trade_status":true,"display_status":true,"bucket_label":"2
+        Year"},"aa":{"trade_status":true,"display_status":true,"bucket_label":"1 Year"}},"2year":{"whole":{"trade_status":false,"display_status":true,"bucket_label":"2
+        Years"},"agency":{"trade_status":false,"display_status":true,"bucket_label":"2
+        Years"},"aaa":{"trade_status":false,"display_status":true,"bucket_label":"2
+        Years"},"aa":{"trade_status":false,"display_status":true,"bucket_label":"2
         Years"}},"3year":{"whole":{"trade_status":true,"display_status":true,"bucket_label":"3
         Years"},"agency":{"trade_status":true,"display_status":true,"bucket_label":"3
         Years"},"aaa":{"trade_status":true,"display_status":true,"bucket_label":"3
         Years"},"aa":{"trade_status":true,"display_status":true,"bucket_label":"3
         Years"}}}}'
     http_version: 
-  recorded_at: Mon, 20 Jul 2015 19:26:42 GMT
+  recorded_at: Mon, 14 Dec 2015 20:13:06 GMT
 - request:
     method: get
-    uri: http://localhost:3100/mapi/member/750/member_contacts
+    uri: http://localhost:3100/mapi/member/750/disabled_reports
     body:
       encoding: US-ASCII
       string: ''
@@ -286,7 +372,7 @@ http_interactions:
       Content-Type:
       - text/html;charset=utf-8
       Content-Length:
-      - '205'
+      - '2'
       X-Xss-Protection:
       - 1; mode=block
       X-Content-Type-Options:
@@ -296,15 +382,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Tue, 28 Jul 2015 23:49:53 GMT
+      - Mon, 14 Dec 2015 20:24:52 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
-      string: '{"cam":{"USERNAME":"hicksg","FULL_NAME":"Geoffrey Hicks","EMAIL":"hicksg@fhlbsf.com"},"rm":{"FULL_NAME":"John
-        McCormack","EMAIL":"mccormaj@fhlbsf.com","PHONE_NUMBER":"(415)616-2755","USERNAME":"mccormaj"}}'
+      string: "[]"
     http_version: 
-  recorded_at: Tue, 28 Jul 2015 23:49:53 GMT
+  recorded_at: Mon, 14 Dec 2015 20:24:52 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/disabled_reports
@@ -317,7 +402,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="4321dfghjklm"
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
       X-Request-Id:
       - ''
       User-Agent:
@@ -340,14 +425,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Tue, 15 Sep 2015 20:41:33 GMT
+      - Mon, 14 Dec 2015 20:24:52 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: "[]"
     http_version: 
-  recorded_at: Tue, 15 Sep 2015 20:41:33 GMT
+  recorded_at: Mon, 14 Dec 2015 20:24:52 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/disabled_reports
@@ -360,7 +445,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="4321dfghjklm"
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
       X-Request-Id:
       - ''
       User-Agent:
@@ -383,14 +468,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Tue, 15 Sep 2015 20:41:33 GMT
+      - Mon, 14 Dec 2015 20:24:52 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: "[]"
     http_version: 
-  recorded_at: Tue, 15 Sep 2015 20:41:33 GMT
+  recorded_at: Mon, 14 Dec 2015 20:24:52 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/disabled_reports
@@ -403,7 +488,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="4321dfghjklm"
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
       X-Request-Id:
       - ''
       User-Agent:
@@ -426,14 +511,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Tue, 15 Sep 2015 20:41:33 GMT
+      - Mon, 14 Dec 2015 20:24:52 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: "[]"
     http_version: 
-  recorded_at: Tue, 15 Sep 2015 20:41:33 GMT
+  recorded_at: Mon, 14 Dec 2015 20:24:52 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/disabled_reports
@@ -446,7 +531,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="4321dfghjklm"
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
       X-Request-Id:
       - ''
       User-Agent:
@@ -469,141 +554,12 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
       Date:
-      - Tue, 15 Sep 2015 20:41:33 GMT
+      - Mon, 14 Dec 2015 20:24:52 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: "[]"
     http_version: 
-  recorded_at: Tue, 15 Sep 2015 20:41:33 GMT
-- request:
-    method: get
-    uri: http://localhost:3100/mapi/member/750/disabled_reports
-    body:
-      encoding: US-ASCII
-      string: ''
-    headers:
-      Accept:
-      - "*/*; q=0.5, application/xml"
-      Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token token="4321dfghjklm"
-      X-Request-Id:
-      - ''
-      User-Agent:
-      - Ruby
-  response:
-    status:
-      code: 200
-      message: 'OK '
-    headers:
-      Content-Type:
-      - text/html;charset=utf-8
-      Content-Length:
-      - '2'
-      X-Xss-Protection:
-      - 1; mode=block
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - SAMEORIGIN
-      Server:
-      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
-      Date:
-      - Tue, 15 Sep 2015 20:41:33 GMT
-      Connection:
-      - Keep-Alive
-    body:
-      encoding: UTF-8
-      string: "[]"
-    http_version: 
-  recorded_at: Tue, 15 Sep 2015 20:41:33 GMT
-- request:
-    method: get
-    uri: http://localhost:3100/mapi/member/750/disabled_reports
-    body:
-      encoding: US-ASCII
-      string: ''
-    headers:
-      Accept:
-      - "*/*; q=0.5, application/xml"
-      Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token token="4321dfghjklm"
-      X-Request-Id:
-      - ''
-      User-Agent:
-      - Ruby
-  response:
-    status:
-      code: 200
-      message: 'OK '
-    headers:
-      Content-Type:
-      - text/html;charset=utf-8
-      Content-Length:
-      - '2'
-      X-Xss-Protection:
-      - 1; mode=block
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - SAMEORIGIN
-      Server:
-      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
-      Date:
-      - Tue, 15 Sep 2015 20:41:33 GMT
-      Connection:
-      - Keep-Alive
-    body:
-      encoding: UTF-8
-      string: "[]"
-    http_version: 
-  recorded_at: Tue, 15 Sep 2015 20:41:33 GMT
-- request:
-    method: get
-    uri: http://localhost:3100/mapi/member/750/disabled_reports
-    body:
-      encoding: US-ASCII
-      string: ''
-    headers:
-      Accept:
-      - "*/*; q=0.5, application/xml"
-      Accept-Encoding:
-      - gzip, deflate
-      Authorization:
-      - Token token="4321dfghjklm"
-      X-Request-Id:
-      - ''
-      User-Agent:
-      - Ruby
-  response:
-    status:
-      code: 200
-      message: 'OK '
-    headers:
-      Content-Type:
-      - text/html;charset=utf-8
-      Content-Length:
-      - '2'
-      X-Xss-Protection:
-      - 1; mode=block
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - SAMEORIGIN
-      Server:
-      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
-      Date:
-      - Tue, 15 Sep 2015 20:41:33 GMT
-      Connection:
-      - Keep-Alive
-    body:
-      encoding: UTF-8
-      string: "[]"
-    http_version: 
-  recorded_at: Tue, 15 Sep 2015 20:41:33 GMT
+  recorded_at: Mon, 14 Dec 2015 20:24:52 GMT
 recorded_with: VCR 2.9.3

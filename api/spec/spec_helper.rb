@@ -55,6 +55,7 @@ end
 
 RSpec.configure do |config|
   config.include RSpecMixin
+  config.include MAPI::RSpec::GlobalContext
 
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest

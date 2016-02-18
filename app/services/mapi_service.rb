@@ -56,9 +56,13 @@ class MAPIService
     end
   end
 
-  def post(name, endpoint, body, &error_handler)
+  def post(name, endpoint, body, content_type = nil, &error_handler)
     begin
-      @connection[endpoint].post body
+      if content_type
+        @connection[endpoint].post body, {:content_type => content_type}
+      else
+        @connection[endpoint].post body
+      end
     rescue RestClient::Exception => e
       warn(name, "RestClient error: #{e.class.name}:#{e.http_code}", e, &error_handler)
     rescue Errno::ECONNREFUSED => e
@@ -69,14 +73,6 @@ class MAPIService
   def parse(name, response, &error_handler)
     begin
       response.nil? ? nil : JSON.parse(response.body)
-    rescue JSON::ParserError => e
-      warn(name, "JSON parsing error: #{e}", e, &error_handler)
-    end
-  end
-  
-  def get_fake_hash(name, filename, &error_handler)
-    begin
-      JSON.parse(File.read(File.join(Rails.root, 'db', 'service_fakes', filename))).with_indifferent_access
     rescue JSON::ParserError => e
       warn(name, "JSON parsing error: #{e}", e, &error_handler)
     end
@@ -95,7 +91,7 @@ class MAPIService
   end
 
   def post_json(name, endpoint, body, &error_handler)
-    parse(name, post(name, endpoint, body, &error_handler), &error_handler)
+    parse(name, post(name, endpoint, body.to_json, 'application/json', &error_handler), &error_handler)
   end
 
 end

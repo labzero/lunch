@@ -22,6 +22,23 @@ RSpec.describe AccessManagerPolicy, :type => :policy do
     end
   end
 
+  describe '`create?` method' do
+
+    context 'for an access manager' do
+      before do
+        allow(user).to receive(:roles).and_return([User::Roles::ACCESS_MANAGER])
+      end
+      it { should permit_action(:create) }
+    end
+
+    context 'for a non-access manager' do
+      before do
+        allow(user).to receive(:roles).and_return([])
+      end
+      it { should_not permit_action(:create) }
+    end
+  end
+
   describe '`edit?` method' do
 
     context 'for an access manager' do

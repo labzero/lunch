@@ -1,0 +1,6 @@
+- @html_class = 'white-background'
+.row.resource.resource-member-application
+  .column-2x10-right
+    %h1= t('resources.membership.commercial.title')
+    %p= t('resources.membership.applications.intro_html', url: contact_path)
+    = render 'application_forms', required_form_ids: @form_ids[:required], requested_form_ids: @form_ids[:requested], optional_form_ids: @form_ids[:optional], access_form_ids: @form_ids[:access]

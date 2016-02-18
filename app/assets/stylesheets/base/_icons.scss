@@ -60,6 +60,7 @@ $icon-forward: "\e60c";
 $icon-success: "\e60d";
 $icon-error: "\e60e";
 $icon-info: "\e60f";
+$icon-paperclip: "\e900";
 
 %icon-alert {
   @extend %icon-font;
@@ -157,6 +158,11 @@ $icon-info: "\e60f";
   content: "#{$icon-info}";
 }
 
+.icon-paperclip-before:before, .icon-paperclip-after:after {
+  @extend %icon-font;
+  content: "#{$icon-paperclip}";
+}
+
 $spinner-size: 30px !default;
 @mixin icon-loading {
   background-image: image-url('spinner-27x27-brandblue.gif');
@@ -164,4 +170,14 @@ $spinner-size: 30px !default;
   background-repeat: no-repeat;
   width: $spinner-size;
   height: $spinner-size;
+}
+
+$ellipsis-width: 34px !default;;
+$ellipsis-height: 6px !default;;
+@mixin icon-loading-ellipsis {
+  background-image: image-url('ellipsis-34x6-brandblue.gif');
+  background-position: center center;
+  background-repeat: no-repeat;
+  width: $ellipsis-width;
+  height: $ellipsis-height;
 }

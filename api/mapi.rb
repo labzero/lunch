@@ -2,11 +2,14 @@ require 'sinatra/base'
 require 'swagger/blocks'
 require 'active_support/concern'
 require 'active_support/time'
+require 'savon'
+HTTPI::Adapter.use # force Savon to load its adapters
 
 require_relative 'shared/constants'
 require_relative 'shared/utils'
 
 require_relative 'services/base'
+require_relative 'services/fees'
 require_relative 'services/mock_rates'
 require_relative 'services/mock_members'
 require_relative 'services/rates'
@@ -30,6 +33,7 @@ require_relative 'models/member_balance_effective_borrowing_capacity'
 require_relative 'models/realtime_rate'
 require_relative 'models/summary_rates'
 require_relative 'models/member_capital_stock'
+require_relative 'models/member_capital_stock_trial_balance'
 require_relative 'models/member_borrowing_capacity_details'
 require_relative 'models/member_sta_activities'
 require_relative 'models/member_current_sta_rate'
@@ -50,6 +54,13 @@ require_relative 'models/member_parallel_shift'
 require_relative 'models/member_dividend_statement'
 require_relative 'models/member_contacts'
 require_relative 'models/member_todays_credit_activity'
+require_relative 'models/member_mortgage_collateral_update'
+require_relative 'models/fee_schedules'
+require_relative 'models/member_quick_advance_flag'
+require_relative 'models/member_quick_advance_request'
+
+require 'newrelic_rpm'
+NewRelic::Agent.add_instrumentation(File.join(__dir__, '..', 'lib', 'new_relic', 'instrumentation', '**', '*.rb')) if defined?(NewRelic::Agent)
 
 Time.zone = ENV['TIMEZONE'] || 'Pacific Time (US & Canada)'
 Time.zone_default = Time.zone
@@ -96,6 +107,7 @@ module MAPI
 
       disable :logging # all logging does is add middleware. We will add similar middleware here
       logger = ActiveSupport::TaggedLogging.new(::Logger.new("#{settings.root}/../log/mapi-#{settings.environment}.log", 'daily'))
+      logger.level = ::Logger::Severity.const_get((ENV['LOG_LEVEL'] || :info).to_s.upcase)
       class << logger
         def <<(msg)
           info(msg.chomp)
@@ -151,6 +163,7 @@ module MAPI
     register MAPI::Services::EtransactAdvances
     register MAPI::Services::Users
     register MAPI::Services::Health
+    register MAPI::Services::Fees
   end
 
   class DocApp < Sinatra::Base
@@ -194,6 +207,10 @@ module MAPI
       api do
         key :path, '/healthy'
         key :description, 'Health status'
+      end
+      api do 
+        key :path, '/fees'
+        key :description, 'Operations about fees associated with FHLB services and procedures'
       end
     end
 

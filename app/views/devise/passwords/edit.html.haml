@@ -11,7 +11,7 @@
           = error
       %p= t('forgot_password.update.instructions')
       = f.hidden_field :reset_password_token
-      = render 'shared/input_field', form_builder: f, field_name: :password, label: t('forgot_password.update.password_field'), field_type: :password_field, html_attributes: field_attributes.merge(autofocus: true)
+      = render 'shared/input_field', form_builder: f, field_name: :password, label: t('forgot_password.update.password_field'), field_type: :password_field, html_attributes: field_attributes.merge(autofocus: true, validate: {confirmation: false})
       = render 'shared/input_field', form_builder: f, field_name: :password_confirmation, label: t('forgot_password.update.confirm_field'), field_type: :password_field, html_attributes: field_attributes
 
       .form-actions

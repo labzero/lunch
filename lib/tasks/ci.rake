@@ -11,6 +11,39 @@ namespace :ci do
     end
     File.unlink('brakeman.txt')
   end
+
+  desc 'Launch SauceConnect'
+  task :sauce_connect do
+    exec "sc -k #{ENV['SAUCE_ACCESS_KEY']} -u #{ENV['SAUCE_USERNAME']}"
+  end
+
+  namespace :cucumber do
+    desc 'Runs the cukes in parallel'
+    task :parallel do
+      ::Rake::Task['ci:cucumber:parallel:base'].invoke
+    end
+
+    namespace :parallel do
+      task :base, [:test_options, :runtime_log_file] do |task, args|
+        pid = fork do
+          runner_count = ENV['CUCUMBER_RUNNER_COUNT'] || 6
+          runtime_log_file = args.runtime_log_file || 'tmp/parallel_runtime_cucumber.log'
+          runtime_log = File.size?(runtime_log_file) ? "--group-by runtime --runtime-log '#{runtime_log_file}'" : nil
+          test_options = ["--out #{runtime_log_file}", args.test_options, ENV['CUCUMBER_TEST_OPTIONS']].reject { |s| s.nil? || s.length == 0 }.join(' ')
+          cmd = "RAILS_ENV=test parallel_test features --type cucumber -n #{runner_count} #{runtime_log} --serialize-stdout --allowed-missing 100 --test-options '#{test_options}'"
+          puts cmd
+          Bundler.clean_exec cmd
+        end
+        Process.wait(pid)
+        exit $?.exitstatus
+      end
+
+      desc 'Runs the smoke cukes in parallel'
+      task :smokes do
+        ::Rake::Task['ci:cucumber:parallel:base'].invoke('--tags @smoke --tags ~@local-only', 'tmp/parallel_runtime_cucumber_smokes.log')
+      end
+    end
+  end
 end
 
 namespace :spec do

@@ -35,35 +35,6 @@ primaryGroupID: 513
 userAccountControl: 512
 mail: local-non-signer@example.com
 
-# local user with an expired password
-dn: sAMAccountName=local-expired,dc=fhlbsf-i,dc=com
-objectClass: user
-objectClass: top
-objectClass: person
-cn: Local User Expired Password
-sn: User Expired Password
-givenname: Local
-sAMAccountName: local-expired
-userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
-primaryGroupID: 513
-userAccountControl: 512
-mail: local-expired@example.com
-passwordExpired: true
-
-# local user with a password we can change
-dn: sAMAccountName=local-password,dc=fhlbsf-i,dc=com
-objectClass: user
-objectClass: top
-objectClass: person
-cn: Local User Changeable Password
-sn: User Changeable Password
-givenname: Local
-sAMAccountName: local-password
-userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
-primaryGroupID: 513
-userAccountControl: 512
-mail: local-password@example.com
-
 # local user with offsite access
 dn: sAMAccountName=local-offsite,dc=fhlbsf-i,dc=com
 objectClass: user
@@ -98,6 +69,13 @@ cn: FCN-MemberSite-ExternalAccess
 objectClass: group
 objectClass: top
 member: sAMAccountName=local-offsite,dc=fhlbsf-i,dc=com
+
+# FCN-MemberSite-Admins
+dn: CN=FCN-MemberSite-Admins,DC=fhlbsf-i,DC=com
+cn: FCN-MemberSite-Admins
+objectClass: group
+objectClass: top
+member: sAMAccountName=local,dc=fhlbsf-i,dc=com
 
 #dn: ou=people,dc=fhlbsf-i,dc=com
 #objectClass: organizationalUnit

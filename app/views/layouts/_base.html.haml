@@ -1,8 +1,10 @@
 - header_template ||= 'layouts/header'
+- footer_template ||= 'layouts/footer'
 - inline_styles ||= false
 - skip_javascript ||= false
 - css_manifest ||= 'application'
 - js_manifest ||= 'application'
+- internal_page ||= false
 !!!
 %html{class: @html_class, data: {authenticated_action: @authenticated_action, session_status_path: session_status_path}}
   %head
@@ -15,11 +17,11 @@
       - else
         %style
           - css_manifest_filename = (css_manifest.end_with?('.css') ? css_manifest : css_manifest + '.css' )
-          != FhlbMember::Application.assets.find_asset(css_manifest_filename).source
+          != asset_source(css_manifest_filename)
     = javascript_include_tag js_manifest unless skip_javascript
     = csrf_meta_tags
   %body
-    %header.page-header= render header_template
+    %header.page-header{class: "#{'internal-page-header' if internal_page}"}= render header_template
     %main
       = yield
     .flyout-row
@@ -29,5 +31,5 @@
             .flyout-close-button.icon-close-before
           .flyout-bottom-section
     .flyout-background
-    %footer.page-footer= render 'layouts/footer'
+    %footer.page-footer= render footer_template
     = render 'layouts/tracking'

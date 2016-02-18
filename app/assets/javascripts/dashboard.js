@@ -23,7 +23,7 @@ $(function () {
     openQuickAdvanceFlyout(event, $(this));
   });
   
-  $('.quick-advance-limited-pricing-notice').on('click', function(event){
+  $('.quick-advance-limited-pricing-notice, .dashboard-vrc-overnight-message[data-flyout-trigger], .dashboard-advances-rate[data-flyout-trigger]').on('click', function(event){
     openQuickAdvanceFlyout(event, $quickAdvancesInputField);
   });
 
@@ -45,10 +45,11 @@ $(function () {
       $element.data('flyout-trigger', 'inactive');
       $('.flyout').addClass('dashboard-quick-advance-flyout');
       $('.flyout-bottom-section').addClass('column-3-span-2');
-      var topContent = [$('.dashboard-module-advances header').clone(), $('<div class="flyout-top-section-body"></div>').append($('.dashboard-module-advances .input-field-container, .dashboard-module-advances h2, .quick-advance-desk-closed-message').clone())];
+      var topContent = [$('.dashboard-module-advances header').clone(), $('<div class="flyout-top-section-body"></div>').append($('.dashboard-module-advances .input-field-container, .dashboard-module-advances h2, .quick-advance-desk-closed-message-group').clone())];
       var bottomContent = $('.quick-advance-rates, .quick-advance-last-updated-message, .quick-advance-limited-pricing-message, .quick-advance-instruction, .dashboard-module-advances .initiate-quick-advance, .rate-advances-footer, .quick-advance-error').clone();
       $('.dashboard-module-advances').flyout({topContent:topContent, bottomContent:bottomContent, useReferenceElement:true});
       var $amountField = $('.dashboard-quick-advance-flyout input[name=amount]');
+      $amountField.attr('id', 'quick-advance-amount'); // to conform to HTML5 standards and avoid duplicate ids
       $amountField.on('keypress', function(e){
         onlyAllowDigits(e);
       });
@@ -81,12 +82,15 @@ $(function () {
 
   function showQuickAdvanceRates(data) {
     var table = $('.dashboard-quick-advance-flyout table');
-    table.append($(data.html)).quickAdvanceTable(data.id);
+    var tbody = table.find('tbody');
+    tbody.children().remove();
+    tbody.append($(data.html));
+    table.quickAdvanceTable(data.id);
   };
 
   function showQuickAdvanceClosedState() {
     $('.primary-button.initiate-quick-advance, .rate-advances-footer, .dashboard-module-advances .input-field-container, .flyout .input-field-container').remove();
-    $('.quick-advance-desk-closed-message').show();
+    $('.quick-advance-desk-closed-message-group').show();
     $('.quick-advance-last-updated-message').addClass('show-message');
     $('.dashboard-quick-advance-flyout td, .dashboard-quick-advance-flyout th').removeClass('cell-selected');
     $('.dashboard-quick-advance-flyout .selectable-cell').addClass('disabled-cell');
@@ -98,17 +102,62 @@ $(function () {
     var $rate_element_children = $rate_element.children();
     setInterval(function() {
       if (!isCheckingRate) {
-        isCheckingRate = true;
-        $.get('/dashboard/current_overnight_vrc').done(function(data) {
-          $rate_element.html(data.rate).append($rate_element_children);
-          if (!data.quick_advances_active) {
-            showQuickAdvanceClosedState();
-          }
-        }).always(function() {
-          isCheckingRate = false;
-        });
+        getOvernightVrc();
       };
     }, 30000);
+    getOvernightVrc();
+  };
+
+  function getOvernightVrc() {
+    if (!isCheckingRate) {
+      isCheckingRate = true;
+      $.get('/dashboard/current_overnight_vrc').done(function(data) {
+        $rate_element_children.remove();
+        $rate_element.html(data.rate).append($rate_element_children);
+        if (!data.quick_advances_active) {
+          showQuickAdvanceClosedState();
+        }
+      }).always(function() {
+        isCheckingRate = false;
+        $rate_element.removeClass('dashboard-element-loading')
+      });
+    };
+  };
+
+  // Handle loading of deferred elements on dashboard
+  var $deferredElements = $('.dashboard-module-content-deferred');
+  $.each($deferredElements, function(i, el) {
+    var $el = $(el);
+    checkDeferredElementStatus($el, $el.data('deferred'), $el.data('deferred-load'));
+  });
+
+  function checkDeferredElementStatus($el, status_url, load_url) {
+    $.get(status_url).done(function(data) {
+      var job_status = data.job_status;
+      if (job_status == 'completed') {
+        loadDeferredElement($el, load_url);
+      } else if(job_status == 'failed') {
+        deferredElementError($el);
+      } else {
+        jobStatusTimer = setTimeout(function(){checkDeferredElementStatus($el, status_url, load_url)}, 1000);
+      };
+    }).fail(function() {
+      deferredElementError($el);
+    });
+  };
+
+  function loadDeferredElement($el, url) {
+    $.get(url).done(function(data) {
+      var $newContent = $(data);
+      $el.replaceWith($newContent);
+    }).fail(function() {
+      deferredElementError($el);
+    });
+  };
+
+  function deferredElementError($el) {
+    $el.find('.dashboard-module-loading').hide();
+    $el.find('.dashboard-module-temporarily-unavailable').show();
   };
 
 });

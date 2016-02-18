@@ -1,7 +1,7 @@
 set :rails_env, 'production'
 set :branch, ENV['CAP_BRANCH'] || "master"
 
-nodes = JSON.parse(ENV['MEMBER_PRODUCTION_NODES'])
+nodes = JSON.parse(ENV['MEMBER_PRODUCTION_NODES'] || '{}')
 
 nodes.each do |ip, details|
   server ip, user: 'ubuntu', roles: details['roles'], primary: !!details['primary']

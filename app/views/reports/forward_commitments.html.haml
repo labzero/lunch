@@ -1,9 +1,10 @@
 - @html_class = 'white-background'
 - @page_title = t('reports.meta_title')
+
 .report.row
   .report-header
     %h1= t('reports.pages.forward_commitments.title')
-    = render 'reports_header_buttons'
+    = render 'reports_header_buttons', download_formats: [:xlsx]
     = render 'report_details', name: @member_name, freshness: t('reports.freshness.prior_day'), availability: t('reports.availability.current')
   .report-main-body
     .report-summary-data

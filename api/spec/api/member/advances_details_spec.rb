@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
   let(:as_of_date)  {Time.zone.now.to_date - 1.day}
 
   let(:advances_historical){{"ADVDET_ADVANCE_NUMBER"=> "330006", "ADVDET_CURRENT_PAR"=> 3000000, "ADV_DAY_COUNT"=> "ACT/365",
@@ -15,7 +14,7 @@ describe MAPI::ServiceApp do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
   end
   describe 'Advances Details' do
-    let(:advances) { get "/member/#{MEMBER_ID}/advances_details/#{as_of_date}"; JSON.parse(last_response.body) }
+    let(:advances) { get "/member/#{member_id}/advances_details/#{as_of_date}"; JSON.parse(last_response.body) }
     valid_payment_frequencies = ['Monthly','Annually','Every 13 weeks', 'Every 9 weeks','Every 4 weeks','Semiannually','Every 26 weeks','Daily']
     valid_day_count_basis = ['Actual/Actual','Actual/365','30/360','Actual/360']
     RSpec.shared_examples 'Advances Details endpoint' do
@@ -67,7 +66,7 @@ describe MAPI::ServiceApp do
     end
 
     describe 'in development environment, if date is before yesterday, it should get historical data' do
-      let(:advances) { get "/member/#{MEMBER_ID}/advances_details/2013-01-02"; JSON.parse(last_response.body) }
+      let(:advances) { get "/member/#{member_id}/advances_details/2013-01-02"; JSON.parse(last_response.body) }
       it 'should show nil for prepayment related ' do
         advances['advances_details'].each do |row|
           expect(row['prepayment_fee_indication']).to be_nil()
@@ -80,9 +79,9 @@ describe MAPI::ServiceApp do
 
     it 'invalid param or future date result in 400 error message' do
       future_date = Time.zone.now.to_date + 1.day
-      get "/member/#{MEMBER_ID}/advances_details/12-12-2014"
+      get "/member/#{member_id}/advances_details/12-12-2014"
       expect(last_response.status).to eq(400)
-      get "/member/#{MEMBER_ID}/advances_details/#{future_date}"
+      get "/member/#{member_id}/advances_details/#{future_date}"
       expect(last_response.status).to eq(400)
     end
 

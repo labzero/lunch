@@ -110,40 +110,82 @@ RSpec.describe WelcomeController, :type => :controller do
 
     describe 'LDAP Intranet status' do
       let(:service_key) {'madmax'}
-      let(:connection) { double('LDAP Connection', search: nil) }
+      let(:connection) { double(Devise::LDAP::Connection) }
+      let(:raw_connection) { double(Net::LDAP, search: nil) }
       before do
+        allow(connection).to receive(:open).and_yield(raw_connection)
         allow(Devise::LDAP::Connection).to receive(:admin).with('intranet').and_return(connection)
       end
       it 'returns `true` if the search returns something' do
-        allow(connection).to receive(:search).and_return([{}])
+        allow(raw_connection).to receive(:search).and_return([{}])
         expect(make_request[service_key]).to eq(true)
       end
       it 'returns `false` if the search returns nothing' do
         expect(make_request[service_key]).to eq(false)
       end
       it 'returns `false` if the search raises an error' do
-        allow(connection).to receive(:search).and_raise('some error')
+        allow(raw_connection).to receive(:search).and_raise('some error')
         expect(make_request[service_key]).to eq(false)
       end
     end
 
     describe 'LDAP Extranet status' do
       let(:service_key) {'roadwarrior'}
-      let(:connection) { double('LDAP Connection', search: nil) }
+      let(:connection) { double(Devise::LDAP::Connection) }
+      let(:raw_connection) { double(Net::LDAP, search: nil) }
       before do
+        allow(connection).to receive(:open).and_yield(raw_connection)
         allow(Devise::LDAP::Connection).to receive(:admin).with('extranet').and_return(connection)
       end
       it 'returns `true` if the search returns something' do
-        allow(connection).to receive(:search).and_return([{}])
+        allow(raw_connection).to receive(:search).and_return([{}])
         expect(make_request[service_key]).to eq(true)
       end
       it 'returns `false` if the search returns nothing' do
         expect(make_request[service_key]).to eq(false)
       end
       it 'returns `false` if the search raises an error' do
-        allow(connection).to receive(:search).and_raise('some error')
+        allow(raw_connection).to receive(:search).and_raise('some error')
         expect(make_request[service_key]).to eq(false)
       end
+    end
+
+    describe 'RSA status' do
+      let(:service_key) { 'fury_road' }
+      let(:agent_status) { {servers: [{active_address: nil}, {active_address: '10.0.0.1'}]} }
+
+      describe 'in the production environment' do
+        before do
+          allow(Rails.env).to receive(:production?).and_return(true)
+          allow(RSA::SecurID).to receive(:agent_status).and_return(agent_status)
+        end
+
+        it 'returns `true` if the agent check has at least one server with an active addresses' do
+          expect(make_request[service_key]).to be(true)
+        end
+        it 'returns `false` if the agent check has no servers with active addresses' do
+          agent_status[:servers] = Array.new(3, {active_address: nil})
+          expect(make_request[service_key]).to be(false)
+        end
+        it 'returns `false` if the agent check returns false' do
+          allow(RSA::SecurID).to receive(:agent_status).and_return(false)
+          expect(make_request[service_key]).to be(false)
+        end
+        it 'returns `false` if the agent check raises an error' do
+          allow(RSA::SecurID).to receive(:agent_status).and_raise('some error')
+          expect(make_request[service_key]).to be(false)
+        end
+      end
+
+      describe 'if the environment is not production' do
+        it 'returns `false`' do
+          expect(make_request[service_key]).to be(false)
+        end
+        it 'does not call `RSA::SecurID.agent_status`' do
+          expect(RSA::SecurID).to_not receive(:agent_status)
+          make_request
+        end
+      end 
     end
   end
 

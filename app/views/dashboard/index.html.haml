@@ -1,4 +1,5 @@
 - @page_title = t('dashboard.meta_title')
+- @borrowing_capacity_types = [t('dashboard.your_account.table.remaining.standard'), t('dashboard.your_account.table.remaining.agency'), t('dashboard.your_account.table.remaining.aaa'), t('dashboard.your_account.table.remaining.aa')]
 .dashboard.row
   .column-3
     =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.market_overview.title'), classes: 'dashboard-module-market', data_available: !@market_overview.first[:data].blank?} do
@@ -29,48 +30,32 @@
                   = render 'shared/tooltip', tooltip_data: {t("dashboard.your_account.borrowing_capacity.#{key}") => nil, number_to_percentage(details[:percentage], precision: 1) => nil, fhlb_formatted_currency_whole(details[:amount]) => nil}
       .dashboard-account-summary
         %h2= t('dashboard.your_account.account_summary')
-        %table
-          %tbody
-            - @account_overview.each do |sub_table_name, sub_table|
-              %tr
-                %td{colspan: '3'}
-                  %table.sub-table
-                    - if sub_table.first.is_a?(Hash) &&  sub_table.first[:title]
-                      %thead
-                        %tr
-                          %th.label{colspan: '3'}= sub_table.first[:title]
-                    %tbody
-                      - sub_table.each do |row|
-                        - next if row.is_a?(Hash)
-                        %tr{class: "#{'footnote-row' if row[2]}"}
-                          %td.label= row[0]
-                          %td.value= fhlb_formated_currency_unit(row[1], '$', row[3] || 0)
-                        - if row[2]
-                          %tr
-                            %td.footnote{colspan: 2}= row[2]
-            %tr
-              %td.borrowing-capacity-note= t('dashboard.your_account.table.borrowing_capacity_note_html', url: reports_borrowing_capacity_url)
+        =render 'dashboard/dashboard_module_content_deferred', job_status_url: @account_overview_job_status_url, load_url: @account_overview_load_url
+        .borrowing-capacity-note= t('dashboard.your_account.table.borrowing_capacity_note_html', url: reports_borrowing_capacity_url)
   .column-3
-    - if policy(:advance).show? && @quick_advance_enabled
+    - if policy(:advance).show?
       - classes = ['dashboard-module-advances']
       - classes << 'dashboard-module-advances-closed' if @quick_advance_status == :closed
       =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: classes} do
-        - if @quick_advance_status == :open
+        - if @quick_advance_status == :open && @quick_advance_enabled
           = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}, field_name: :amount
           %h2.quick-advance-confirmation-subheading{style: 'display: none;'}= t('dashboard.quick_advance.confirmation.title')
           %h2.quick-advance-preview-subheading{style: 'display: none;'}= t('dashboard.quick_advance.preview.title')
           %h2.quick-advance-capstock-subheading{style: 'display: none;'}= t('dashboard.quick_advance.capitalstock.title')
-        %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_status != :closed}"}
-          = t('dashboard.quick_advance.advances_desk_closed')
-          = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
-        %p.quick-advance-desk-closed-message{style: "#{'display: none' if @quick_advance_status != :no_terms}"}
-          = t('dashboard.quick_advance.advances_desk_no_terms')
+        .quick-advance-desk-closed-message-group
+          %p.quick-advance-desk-closed-message{style: "#{'display: none;' if @quick_advance_enabled || @quick_advance_status != :open}"}
+            = t('dashboard.quick_advance.advance_desk_unavailable_html', phone_number: service_desk_phone_number)
+            = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
+          %p.quick-advance-desk-closed-message{style: "#{'display: none;' if @quick_advance_status != :closed}"}
+            = t('dashboard.quick_advance.advances_desk_closed')
+            = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
+          %p.quick-advance-desk-closed-message{style: "#{'display: none;' if @quick_advance_status != :no_terms}"}
+            = t('dashboard.quick_advance.advances_desk_no_terms')
         - if @quick_advance_status == :open && @quick_advance_message
           .quick-advance-limited-pricing-notice= t('dashboard.quick_advance.limited_pricing')
         - if [:open,:closed].include?(@quick_advance_status)
-          %p.dashboard-vrc-overnight-message= t('global.vrc_overnight')
-          .dashboard-advances-rate
-            = fhlb_formatted_number(@current_overnight_vrc, precision: 2, html: false)
+          %p.dashboard-vrc-overnight-message{data: {'flyout-trigger' => (@quick_advance_status == :open)}}= t('global.standard_vrc_overnight')
+          .dashboard-advances-rate{data: {'flyout-trigger' => (@quick_advance_status == :open)}}
             %span<> %
         .quick-advance-last-updated-message{class: "#{'show-message' unless @quick_advance_status == :open}"}
           %p= t('dashboard.quick_advance.advance_last_updated', last_updated: @quick_advance_last_updated)
@@ -103,20 +88,14 @@
                       %th
                         .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.aa')
                   %tbody
+                    = render 'rates_table', advance_terms: @advance_terms, advance_types: @advance_types, loading: true
           = render layout: 'quick_advance_error', locals: {no_display: true, close: true} do
             %p= t('dashboard.quick_advance.error.advance_unavailable', phone_number: service_desk_phone_number)
           %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.preview')
           %small
             %p.rate-advances-footer= t('dashboard.quick_advance.table.footer')
-    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.previous_activity.title'), link: {name: t('dashboard.actions.more'), path: ''}, data_available: !@previous_activity.blank?, classes: 'dashboard-module-previous-activity'} do
-      %table.table-dashboard-previous-activity
-        %tbody
-          - @previous_activity.each do |row|
-            %tr
-              %td
-                = row[0]
-                %div.dashboard-module-content-light= fhlb_date_standard_numeric(row[2])
-              %td= fhlb_formated_currency_unit(row[1])
+    =render layout: 'dashboard/dashboard_module_deferred', locals: {job_status_url: @recent_activity_job_status_url, load_url: @recent_activity_load_url, dashboard_module_locals: {title: t('dashboard.recent_activity.title'), data_available: true, classes: 'dashboard-module-recent-activity'}} do
+      =render 'dashboard/dashboard_recent_activity', table_data: @recent_activity_data, deferred: true
   .column-3
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
       %ul

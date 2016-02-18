@@ -1,0 +1,33 @@
+%link-style {
+  text-decoration: none;
+  color: $actionable-blue;
+  &:hover {
+    text-decoration: underline;
+  }
+  &:active {
+    color: $brand-blue;
+  }
+}
+
+@mixin undo-link-style {
+  &:active {
+    color: inherit;
+  }
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+%undo-link-style {
+  @include undo-link-style;
+}
+
+a {
+  @extend %link-style;
+}
+
+@media print {
+  a {
+    color: $print-link-color;
+  }
+}

@@ -2,5 +2,6 @@
   "local": ["signer", "signer-advances"],
   "extra": [],
   "local-non-signer": [],
-  "extra-chaste-access": ["signer", "signer-etransact"]
+  "extra-chaste-access": ["signer", "signer-etransact"],
+  "quick-advance-disabled": ["signer", "signer-advances"]
 }

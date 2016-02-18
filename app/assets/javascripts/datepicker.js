@@ -236,13 +236,15 @@ $(function () {
   };
 
   function snapToValidDate(e, picker, options){
-    //  if date is in the future, snap to today
+    //  snap to maxDate or minDate if date is out of range
+    var maxDate = moment(options.maxDate);
+    var minDate = moment(options.minDate);
     var today = moment(options.today);
     var thisMonth = moment().month();
     var $el = $(e.target);
     var date = moment($el.val());
-    if (date > today) {
-      date = today;
+    if (date > maxDate || date < minDate) {
+      date = date > maxDate ? maxDate : minDate;
       options.singleDatePicker ? picker.setEndDate(date.format('MM/DD/YYYY')) : null;
       $el.val(date.format('MM/DD/YYYY'));
     } else if (options.singleDatePicker) {
@@ -257,7 +259,7 @@ $(function () {
       switch (options.filter) {
         // Snap to end of month
         case options.filterOptions['end_of_month']:
-          if (date !== endOfMonth && inputMonth >= thisMonth) {
+          if (!date.isSame(endOfMonth, 'day') && inputMonth >= thisMonth) {
             picker.setEndDate((date.subtract(1, 'month')).endOf('month'));
           } else {
             picker.setEndDate(date.endOf('month').format('MM/DD/YYYY'));

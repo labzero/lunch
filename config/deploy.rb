@@ -76,11 +76,34 @@ namespace :deploy do
     end
   end
 
+  desc 'Records the deployment'
+  task :record_deployment do
+    run_locally do
+      begin
+        old_env = ENV['MAPI']
+        if roles(:api).length > 0
+          debug 'Starting deployment logging to New Relic for the API application'
+          ENV['MAPI'] = 'true'
+          Rake::Task['newrelic:notice_deployment'].execute
+        end
+
+        if roles(:app).length > 0
+          debug 'Starting deployment logging to New Relic for the Web application'
+          ENV['MAPI'] = nil
+          Rake::Task['newrelic:notice_deployment'].execute
+        end
+      ensure
+        ENV['MAPI'] = old_env
+      end
+    end
+  end
+
   before :compile_assets, :clear_tmp
   after :compile_assets, :compile_maintenance
   before :publishing, :missing_dirs
   after :publishing, :restart
   after :migrate, :seed
+  after :updated, :record_deployment
 
   after :restart, :clear_cache do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
@@ -166,6 +189,67 @@ namespace :cluster do
       on release_roles(fetch(:assets_roles)) do
         within shared_path do
           execute :rm, 'MAINTENANCE'
+        end
+      end
+    end
+  end
+end
+
+namespace :stats do
+  desc 'Runs the stats:extranet_logins rake task on the db primary'
+  task :extranet_logins do
+    on primary(:db) do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          execute :rake, "stats:extranet_logins"
+        end
+      end
+    end
+  end
+end
+
+namespace :feature do
+  desc 'Enables a feature for the supplied actor, or all actors if none is supplied'
+  task :enable, [:feature, :actor] do |t, args|
+    on primary(:db) do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          cli_args = [args.feature, args.actor].compact.join(',')
+          execute :rake, "flipper:feature:enable[#{cli_args}]"
+        end
+      end
+    end
+  end
+
+  desc 'Enable all *known* features for the supplied actor'
+  task :enable_all, [:actor] do |t, args|
+    on primary(:db) do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          execute :rake, "flipper:feature:enable_all[#{args.actor}]"
+        end
+      end
+    end
+  end
+
+  desc 'Disables a feature for the supplied actor, or all actors if none is supplied'
+  task :disable, [:feature, :actor] do |t, args|
+    on primary(:db) do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          cli_args = [args.feature, args.actor].compact.join(',')
+          execute :rake, "flipper:feature:disable[#{cli_args}]"
+        end
+      end
+    end
+  end
+
+  desc 'Disable all *known* features for the supplied actor'
+  task :disable_all, [:actor] do |t, args|
+    on primary(:db) do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          execute :rake, "flipper:feature:disable_all[#{args.actor}]"
         end
       end
     end

@@ -1,4 +1,10 @@
 Given(/^I fill in and submit the login form with username "(.*?)" and password "(.*?)"$/) do |user, password|
+  step %{I fill in and submit the login form with username "#{user}" and password "#{password}" ignoring the terms of use}
+
+  accept_terms_if_needed
+end
+
+Given(/^I fill in and submit the login form with username "(.*?)" and password "(.*?)" ignoring the terms of use$/) do |user, password|
   fill_in('user[username]', with: user)
   fill_in('user[password]', with: password)
 
@@ -8,8 +14,6 @@ Given(/^I fill in and submit the login form with username "(.*?)" and password "
 
   session_id = get_session_id
   puts "Session ID: #{session_id}" if session_id
-
-  accept_terms_if_needed
 end
 
 Given(/^I fill in and submit the login form$/) do
@@ -30,11 +34,22 @@ Given(/^I am logged in$/) do
   step %{I am logged in as an "extranet user"}
 end
 
+Given(/^I am logged in to a bank with data for the "([^"]*)" report$/) do |report|
+  user_type = case report
+  when 'Securities Services Monthly Statement'
+    'intranet user'
+  else
+    'extranet user'
+  end
+
+  step %{I am logged in as a "#{user_type}"}
+end
+
 Given(/^I am logged in as an? "(.*?)"$/) do |user_type|
   user = user_for_type(user_type)
 
   step %{I am logged in as "#{user['username']}" with password "#{user['password']}"}
-  select_member_if_needed
+  select_member_if_needed(user['bank'])
   page.assert_selector('.main-nav .nav-logout')
 end
 
@@ -42,9 +57,13 @@ Then(/^I should see the Terms of Use page$/) do
   page.assert_selector('.terms-row h1', text: I18n.t('terms.title'))
 end
 
-When (/^I accept the Terms of Use$/) do
+When(/^I (accept|do not accept) the Terms of Use$/) do |button|
   @login_flag = flag_page
-  page.find(".primary-button[value=\'#{I18n.t('terms.agree')}\']").click
+  if button == 'accept'
+    page.find(".primary-button[value=\'#{I18n.t('terms.agree')}\']").click
+  else
+    page.find(".secondary-button", text: /#{Regexp.quote(I18n.t('terms.cancel'))}/i).click
+  end
   wait_for_unflagged_page(@login_flag)
 end
 
@@ -53,7 +72,11 @@ When(/^I log in$/) do
 end
 
 When(/^I fill in and submit the login form with a first-time user$/) do
-  # implement way of simulating first-time user to test Terms of Service flow
+  step %{I fill in and submit the login form with username "#{first_time_user['username']}" and password "#{first_time_user['password']}" ignoring the terms of use}
+end
+
+When(/^I fill in and submit the login form with the capitalized last user$/) do
+  step %{I fill in and submit the login form with username "#{first_time_user['username'].upcase}" and password "#{first_time_user['password']}" ignoring the terms of use}
 end
 
 When(/^I fill in and submit the login form with an? (expired user|extranet no role user|primary user|offsite user)$/) do |user_type|
@@ -64,7 +87,7 @@ end
 When(/^I log in as (?:a|an) "(.*?)"$/) do |user_type|
   user = user_for_type(user_type)
   step %{I log in as "#{user['username']}" with password "#{user['password']}"}
-  select_member_if_needed
+  select_member_if_needed(user['bank'])
 end
 
 When(/^I log in as "(.*?)" with password "(.*?)"$/) do |user, password|
@@ -76,7 +99,7 @@ end
 When(/^I login as the (password change user|expired user) with the new password$/) do |user_type|
   user = user_for_type(user_type)
   step %{I log in as "#{user['username']}" with password "#{valid_password}"}
-  select_member_if_needed
+  select_member_if_needed(user['bank'])
 end
 
 When(/^I select the (\d+)(?:st|rd|th) member bank$/) do |num|
@@ -161,6 +184,7 @@ Then(/^I should see the name for the "(.*?)" in the header$/) do |user_type|
 end
 
 Then(/^I should be logged in$/) do
+  wait_for_unflagged_page(@login_flag)
   step %{I visit the dashboard}
   step %{I should see dashboard modules}
 end
@@ -176,18 +200,21 @@ Then(/^I should see the change password success page$/) do
 end
 
 Then(/^I should see password change validations$/) do
-  step %{I enter a password of "123abcd3!"}
-  step %{I should see a capital letter required password error}
-  step %{I enter a password of "123ABCD3!"}
-  step %{I should see a lowercase required password error}
-  step %{I enter a password of "ABCDefGH!"}
-  step %{I should see a number required password error}
-  step %{I enter a password of "123Abcd3"}
-  step %{I should see a symbol required password error}
+  step %{I enter a password of "abcder12"}
+  step %{I should see a criteria not met required password error}
+  step %{I enter a password of "abcder!"}
+  step %{I should see a criteria not met required password error}
+  step %{I enter a password of "abcderABC"}
+  step %{I should see a criteria not met required password error}
+  step %{I enter a password of "ABCDE@#!"}
+  step %{I should see a criteria not met required password error}
+  step %{I enter a password of "ABC83429"}
+  step %{I should see a criteria not met required password error}
+  step %{I enter a password of "9467@#!**"}
+  step %{I should see a criteria not met required password error}
   step %{I enter a password of "123Cd3!"}
   step %{I should see a minimum length required password error}
   step %{I enter a password of "123Abcd3!"}
-  step %{I should see a confirmation required password error}
   step %{I enter a password confirmation of "123Abcd3!"}
   step %{I should see no password errors}
 end
@@ -195,6 +222,34 @@ end
 When(/^I enter a valid new password$/) do
   step %{I enter a password of "#{valid_password}"}
   step %{I enter a password confirmation of "#{valid_password}"}
+end
+
+When(/^I enter a new valid password in the first field$/) do
+  step %{I enter a password of "#{valid_password}"}
+end
+
+When(/^I enter a new valid password in the password confirmation field$/) do
+  step %{I enter a password confirmation of "#{valid_password}"}
+end
+
+When(/^I focus on the password confirmation field$/) do
+  page.find('#user_password_confirmation').click
+end
+
+When(/^I focus on the new password field$/) do
+  page.find('#user_password').click
+end
+
+Then(/^I should not see a password match error$/) do
+  page.assert_no_selector('.label-error', text: I18n.t('activerecord.errors.models.user.attributes.password.confirmation'), exact: true)
+end
+
+Then(/^I should see a password match error$/) do
+  page.assert_selector('.label-error', text: I18n.t('activerecord.errors.models.user.attributes.password.confirmation'), exact: true)
+end
+
+When(/^I try to submit the form$/) do
+  page.find('form input[type=submit]').click
 end
 
 When(/^I dismiss the change password success page$/) do
@@ -219,6 +274,8 @@ def user_for_type(user_type)
   case user_type
   when 'primary user'
     primary_user
+  when 'intranet user'
+    intranet_user
   when 'quick-advance signer'
     quick_advance_signer
   when 'quick-advance non-signer'
@@ -237,6 +294,8 @@ def user_for_type(user_type)
     extranet_no_role_user
   when 'offsite user'
     offsite_user
+  when 'user with disabled quick advances'
+    advances_disabled_user
   else
     raise 'unknown user type'
   end
@@ -252,6 +311,10 @@ end
 
 def quick_advance_non_signer
   CustomConfig.env_config['non_signer_advances_user']
+end
+
+def intranet_user
+  CustomConfig.env_config['intranet_user']
 end
 
 def extranet_user
@@ -290,14 +353,23 @@ def offsite_user
   CustomConfig.env_config['offsite']
 end
 
-def current_member_name
-  @member_name ||= CustomConfig.env_config['primary_bank']
+def advances_disabled_user
+  CustomConfig.env_config['advances_disabled']
 end
 
-def select_member_if_needed
+def first_time_user
+  CustomConfig.env_config['first_time']
+end
+
+def current_member_name
+  @member_name ||= CustomConfig.env_config['primary_user']['bank']
+end
+
+def select_member_if_needed(bank=nil)
+  bank ||= CustomConfig.env_config['primary_user']['bank']
   wait_for_unflagged_page(@login_flag)
   has_member = page.has_no_css?('.welcome legend', text: I18n.t('welcome.choose_member'), wait: 0)
-  step %{I select the "#{CustomConfig.env_config['primary_bank']}" member bank} unless has_member
+  step %{I select the "#{bank}" member bank} unless has_member
 end
 
 def accept_terms_if_needed
@@ -364,4 +436,10 @@ Around('@offsite-ip') do |scenario, block|
     ENV['FHLB_INTERNAL_IPS'] = old_env
     silent_class_reload 'internal_user_policy.rb'
   end
+end
+
+Around('@first-time-user') do |scenario, block|
+  user = User.find_by(username: first_time_user['username'])
+  user.delete if user
+  block.call
 end

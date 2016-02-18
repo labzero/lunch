@@ -12,6 +12,10 @@ class SettingsController < ApplicationController
     authorize :access_manager, :show?
   end
 
+  before_action only: [:new_user, :create_user] do
+    authorize :access_manager, :create?
+  end
+
   before_action only: [:edit_user, :update_user] do
     @user = User.find(params[:id])
     authorize @user, :edit?
@@ -91,6 +95,25 @@ class SettingsController < ApplicationController
   end
 
   # GET
+  def new_user
+    @user = User.new
+    render json: {html: render_to_string(layout: false)}
+  end
+
+  # POST
+  def create_user
+    permitted_params = params.require(:user).permit(:given_name, :surname, :email, :email_confirmation, :username)
+    if (@user = User.new(permitted_params)).valid?(:update) && # to avoid duplication of validation rules
+       extranet_user = User.add_extranet_user( current_member_id, current_user.username, permitted_params[:username], permitted_params[:email], permitted_params[:given_name], permitted_params[:surname] )
+      @user = extranet_user
+      MemberMailer.new_user_instructions(@user, current_user, current_member_name, @user.send(:set_reset_password_token)).deliver_now
+      render json: {html: render_to_string(layout: false), row_html: render_user_row(@user)}
+    else
+      render json: {html: render_to_string('new_user', layout: false)}, status: 500
+    end
+  end
+
+  # GET
   def edit_user
     @user.email_confirmation = @user.email
     render json: {html: render_to_string(layout: false, locals: { actions: actions_for_user(@user) })}
@@ -100,14 +123,7 @@ class SettingsController < ApplicationController
   def update_user
     @user = User.find(params[:id])
     if @user.update_attributes!(params.require(:user).permit(:given_name, :surname, :email, :email_confirmation))
-      render json: {
-        html: render_to_string(layout: false),
-        row_html: render_to_string(partial: 'user_row', locals: {
-          user: @user,
-          roles: roles_for_user(@user),
-          actions: actions_for_user(@user)
-        })
-      }
+      render json: {html: render_to_string(layout: false), row_html: render_user_row(@user)}
     else
       render json: {}, status: 500
     end
@@ -131,9 +147,8 @@ class SettingsController < ApplicationController
     else
       raise ActiveRecord::RecordInvalid.new(@user)
     end
-    @user.deletion_reason = reason
-    success = @user.save! && @user.destroy!
-    if success
+
+    if @user.update_attribute(:deletion_reason, reason) && @user.destroy!
       render json: { html: render_to_string(layout: false) }
     else
       render json: {}, status: 500
@@ -143,6 +158,25 @@ class SettingsController < ApplicationController
   # GET
   def two_factor
     
+  end
+
+  # POST
+  def new_pin
+    securid = SecurIDService.new(current_user.username)
+    begin
+      securid.authenticate_without_pin(params[:securid_token])
+      status = securid.status
+    rescue SecurIDService::InvalidToken => e
+      status = 'invalid_token'
+    end
+    if securid.change_pin?
+      begin
+        status = 'success' if securid.change_pin(params[:securid_new_pin])
+      rescue SecurIDService::InvalidPin => e
+        status = 'invalid_new_pin'
+      end
+    end
+    render json: {status: status}
   end
 
   # POST
@@ -235,7 +269,6 @@ class SettingsController < ApplicationController
   end
 
   private
-
   def roles_for_user(user)
     roles = user.roles.collect do |role|
       if role == User::Roles::ACCESS_MANAGER
@@ -256,6 +289,15 @@ class SettingsController < ApplicationController
       reset_disabled: is_current_user,
       delete_disabled: is_current_user
     }
+  end
+
+  def render_user_row(user)
+    render_to_string(partial: 'user_row',
+                     locals: {
+                         user: user,
+                         roles: roles_for_user(user),
+                         actions: actions_for_user(user)
+                     })
   end
 
 end

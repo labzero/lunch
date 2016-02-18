@@ -57,6 +57,18 @@ When(/^I use the browser back button$/) do
   page.driver.go_back
 end
 
+Then(/^I should see a flyout$/) do
+  page.assert_selector('.flyout', visible: true)
+end
+
+When(/^I click on the flyout close button$/) do
+  page.find('.flyout-close-button').click
+end
+
+Then(/^I should not see a flyout$/) do
+  page.assert_selector('.flyout', :visible => :hidden)
+end
+
 def jquery_guard(timeout=10)
   times_out_at = Time.now + timeout
   while page.evaluate_script('typeof $') == 'undefined'

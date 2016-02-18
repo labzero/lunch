@@ -8,17 +8,6 @@ class JobStatus < ActiveRecord::Base
   has_attached_file :result, preserve_files: false, keep_old_files: false
   do_not_validate_attachment_file_type :result
 
-  def result_as_string
-    string = nil
-    Tempfile.open('job_result', Rails.root.join('tmp')) do |f|
-      begin
-        self.result.copy_to_local_file(:original, f.path)
-        string = f.read
-      ensure
-        f.unlink
-      end
-    end
-    string
-  end
+  include PaperclipAttachmentAsString
 
 end

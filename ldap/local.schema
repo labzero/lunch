@@ -16,6 +16,11 @@ attributetype ( 1.2.840.113556.1.5.9.1.3 NAME 'deleteReason'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   SINGLE-VALUE )
 
+attributetype ( 1.2.840.113556.1.5.9.1.2 NAME 'CreatedBy'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  EQUALITY caseIgnoreMatch )
+
 attributetype ( 1.2.840.113556.1.5.9.1.4 NAME 'passwordExpired'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   SINGLE-VALUE
@@ -23,7 +28,7 @@ attributetype ( 1.2.840.113556.1.5.9.1.4 NAME 'passwordExpired'
 
 objectclass ( 1.2.840.113556.1.5.9 NAME 'user'
   AUXILIARY
-  MAY (sAMAccountName $ primaryGroupID $ displayName $ givenName $ mail $ userAccountControl $ deleteReason $ passwordExpired) )
+  MAY (sAMAccountName $ primaryGroupID $ displayName $ givenName $ mail $ userAccountControl $ deleteReason $ passwordExpired $ CreatedBy) )
 
 objectclass ( 1.2.840.113556.1.5.8
 	NAME 'group'

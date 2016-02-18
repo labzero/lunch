@@ -1,22 +1,25 @@
-require_relative 'member/balance'
-require_relative 'member/capital_stock'
-require_relative 'member/borrowing_capacity_details'
-require_relative 'member/settlement_transaction_account'
 require_relative 'member/advances_details'
-require_relative 'member/profile'
-require_relative 'member/disabled_reports'
-require_relative 'member/cash_projections'
-require_relative 'member/trade_activity'
-require_relative 'member/signer_roles'
-require_relative 'member/securities_position'
-require_relative 'member/forward_commitments'
+require_relative 'member/balance'
+require_relative 'member/borrowing_capacity_details'
+require_relative 'member/capital_stock'
 require_relative 'member/capital_stock_and_leverage'
-require_relative 'member/letters_of_credit'
-require_relative 'member/flags'
-require_relative 'member/interest_rate_resets'
-require_relative 'member/securities_transactions'
-require_relative 'member/parallel_shift_analysis'
+require_relative 'member/capital_stock_trial_balance'
+require_relative 'member/cash_projections'
+require_relative 'member/disabled_reports'
 require_relative 'member/dividend_statement'
+require_relative 'member/flags'
+require_relative 'member/forward_commitments'
+require_relative 'member/interest_rate_resets'
+require_relative 'member/letters_of_credit'
+require_relative 'member/mortgage_collateral_update'
+require_relative 'member/parallel_shift_analysis'
+require_relative 'member/profile'
+require_relative 'member/securities_position'
+require_relative 'member/securities_transactions'
+require_relative 'member/securities_services_statements'
+require_relative 'member/settlement_transaction_account'
+require_relative 'member/signer_roles'
+require_relative 'member/trade_activity'
 
 module MAPI
   module Services
@@ -420,11 +423,8 @@ module MAPI
             operation do
               key :method, 'GET'
               key :summary, 'Retrieve the Quick Advance Flag for the member'
-              key :notes, 'Returns `Y` if quick advances are enabled for this member'
-              key :type, :array
-              items do
-                key :type, :string
-              end
+              key :notes, 'Returns a hash whose `quick_advance_flag` property indicates whether quick advances are enabled for a given member'
+              key :type, :MemberQuickAdvanceFlag
               key :nickname, :getQuickAdvanceFlagForMember
               parameter do
                 key :paramType, :path
@@ -498,6 +498,26 @@ module MAPI
               response_message do
                 key :code, 400
                 key :message, 'Invalid param for custody account type'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/managed_securities'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve all securities currently being managed'
+              key :nickname, :getManagedSecuritiesForMembers
+              key :type, :MemberSecuritiesPosition
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
               end
             end
           end
@@ -716,13 +736,101 @@ module MAPI
               key :summary, 'Retrieve today\'s credit activty for a given member'
               key :notes, 'Retrieve today\'s credit activty for a given member'
               key :nickname, :getTodaysCreditActivityForMember
-              key :type, :memberTodaysCreditActivity
+              key :type, :MemberTodaysCreditActivity
               parameter do
                 key :paramType, :path
                 key :name, :id
                 key :required, true
                 key :type, :string
                 key :description, 'The id to find the members from'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/mortgage_collateral_update'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the status of the member\'s last mortgage collateral update'
+              key :notes, 'Retrieve the status of the member\'s last mortgage collateral update'
+              key :nickname, :getMortgageCollateralUpdateForMember
+              key :type, :MemberMortgageCollateralUpdate
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/capital_stock_trial_balance/{date}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve capital stock trial balance for a given member and date'
+              key :notes, 'Retrieve capital stock trial balance for a given member and date'
+              key :nickname, :getTodaysCreditActivityForMember
+              key :type, :memberCapitalStockTrialBalance
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The member id'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :date
+                key :required, true
+                key :type, :date
+                key :description, 'The last business day'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/securities_services_statements_available'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the list of dates for which security services statements are available'
+              key :notes, 'Retrieve the list of dates for which security services statements are available'
+              key :nickname, :getSecurityServicesStatements
+              key :type, :array
+              items do
+                key :'$ref', :memberSecurityServicesStatementDate
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the list of available statement dates from'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/securities_services_statements/{date}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the list of security services for the given date'
+              key :notes, 'Retrieve the list of security services for the given date'
+              key :nickname, :getSecurityServicesStatementsForDate
+              key :type, :array
+              items do
+                key :'$ref', :memberSecurityServicesStatement
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the list of available statement dates from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :date
+                key :required, true
+                key :type, :string
+                key :description, 'The date of the requested statement'
               end
             end
           end
@@ -918,6 +1026,12 @@ module MAPI
           MAPI::Services::Member::SecuritiesPosition.securities_position(self, member_id, :current, {custody_account_type: custody_account_type}).to_json
         end
 
+        # Member Managed Securities Position
+        relative_get '/:id/managed_securities' do
+          member_id = params[:id]
+          MAPI::Services::Member::SecuritiesPosition.securities_position(self, member_id, :managed).to_json
+        end
+
         # Member Monthly Securities Position
         relative_get '/:id/monthly_securities_position/:month_end_date/:custody_account_type' do
           member_id = params[:id]
@@ -1004,6 +1118,36 @@ module MAPI
             logger.error error
             halt 503, 'Internal Service Error'
           end
+        end
+        
+        # Mortgage Collateral Update
+        relative_get '/:id/mortgage_collateral_update' do
+          member_id = params[:id]
+          begin
+            MAPI::Services::Member::MortgageCollateralUpdate.mortgage_collateral_update(self.settings.environment, logger, member_id).to_json
+          rescue Savon::Error => error
+            logger.error error
+            halt 503, 'Internal Service Error'
+          end
+        end
+
+        relative_get '/:id/capital_stock_trial_balance/:date' do
+          member_id = params[:id].to_i
+          date      = params[:date].to_date
+          MAPI::Services::Member::CapitalStockTrialBalance.capital_stock_trial_balance(self, member_id, date).to_json
+        end
+
+        relative_get '/:id/securities_services_statements_available' do
+          env = self.settings.environment
+          id  = params[:id].to_i
+          MAPI::Services::Member::SecuritiesServicesStatements.available_statements(logger, env, id).to_json
+        end
+
+        relative_get '/:id/securities_services_statements/:date' do
+          env  = self.settings.environment
+          id   = params[:id].to_i
+          date = params[:date].to_date
+          MAPI::Services::Member::SecuritiesServicesStatements.statement(logger, env, id, date).to_json
         end
       end
 

@@ -91,17 +91,51 @@ describe AdvanceRequest do
     let(:now) { Time.zone.now }
     before do
       allow(Time).to receive_message_chain(:zone, :now).and_return(now)
+      allow(subject).to receive(:perform_rate_check)
+      allow(subject).to receive(:rate_changed?)
+    end
+
+    shared_examples 'a rate that has expired' do
+      before { allow(subject).to receive(:rate_changed?).and_return(true) }
+      it 'checks the rate' do
+        expect(subject).to receive(:perform_rate_check)
+        call_method
+      end
+      it 'returns true' do
+        expect(call_method).to be(true)
+      end
+    end
+
+    shared_examples 'a rate that has not expired' do
+      before { allow(subject).to receive(:rate_changed?).and_return(false) }
+      it 'resets the timestamp on the advance' do
+        expect(subject).to receive(:timestamp!)
+        call_method
+      end
+      it 'returns false' do
+        expect(call_method).to be(false)
+      end
     end
 
     shared_examples 'check the timestamp' do
       let(:timeout) { rand(1..20) }
-      it 'returns true if the timestamp + the timeout < now' do
-        subject.attributes = {'timestamp' => now - (timeout + 0.1).seconds}
-        expect(call_method).to be(true)
+      describe 'when the timestamp + the timeout < now' do
+        before { subject.attributes = {'timestamp' => now - (timeout + 0.1).seconds} }
+        describe 'when the rate has changed' do
+          include_examples 'a rate that has expired'
+        end
+        describe 'when the rate has not changed' do
+          include_examples 'a rate that has not expired'
+        end
       end
-      it 'returns true if the timestamp + the timeout == now' do
-        subject.attributes = {'timestamp' => now - timeout.seconds}
-        expect(call_method).to be(true)
+      describe 'returns true if the timestamp + the timeout == now' do
+        before { subject.attributes = {'timestamp' => now - timeout.seconds} }
+        describe 'when the rate has changed' do
+          include_examples 'a rate that has expired'
+        end
+        describe 'when the rate has not changed' do
+          include_examples 'a rate that has not expired'
+        end
       end
       it 'returns false if the timestamp + the timeout > now' do
         subject.attributes = {'timestamp' => now - (timeout - 0.1).seconds}
@@ -522,8 +556,9 @@ describe AdvanceRequest do
       allow(allowed_values).to receive(:include?).with(sym_value).and_return(false)
       expect{call_method}.to raise_error
     end
-    it 'raises an error if passed `nil`' do
-      expect{subject.stock_choice = nil}.to raise_error
+    it 'supports being set to `nil`' do
+      subject.stock_choice = nil
+      expect(subject.stock_choice).to be_nil
     end
     it 'stores the stock_choice' do
       call_method
@@ -824,6 +859,9 @@ describe AdvanceRequest do
         when :rates
           expected_value = double('A Converted Value')
           value = double('A Value', with_indifferent_access: expected_value)
+        when :owners
+          expected_value = double('Set of Owners')
+          value = double('A Value', to_set: expected_value)
         else
           value = double('A Value').as_null_object
         end
@@ -908,6 +946,17 @@ describe AdvanceRequest do
 
     it 'includes the `errors`' do
       expect(call_method).to include(subject.errors.inspect)
+    end
+  end
+
+  describe '`owners` method' do
+    let(:call_method) { subject.owners }
+    it 'returns a Set' do
+      expect(call_method).to be_kind_of(Set)
+    end
+    it 'returns the same object on each call' do
+      set = call_method
+      expect(call_method).to be(set)
     end
   end
 
@@ -1025,6 +1074,12 @@ describe AdvanceRequest do
         expect(block.call).to eq(described_class::LOG_PREFIX + message.to_s)
       end
       call_method
+    end
+  end
+
+  describe '`policy_class` class method' do
+    it 'returns the AdvancePolicy class' do
+      expect(described_class.policy_class).to eq(AdvancePolicy)
     end
   end
 

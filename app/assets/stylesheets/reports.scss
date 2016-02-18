@@ -1,11 +1,7 @@
-.reports, .report, .resource-guide-page, .resource-forms-page, .product-page {
+.reports, .report, .resource, .product-page {
   h1 {
     @extend %typography-page-title;
     margin: 32px 0 17px;
-  }
-  a {
-    text-decoration: none;
-    color: $actionable-blue;
   }
 }
 
@@ -34,11 +30,30 @@
       color: $text-color;
     }
   }
-  a, .disabled {
+  a {
     display: block;
     color: $text-color;
     padding: 15px 20px;
+    p:last-child {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      @include typography-dropdown-selector;
+      color: $actionable-blue;
+      text-transform: uppercase;
+    }
+    &:hover p:last-child {
+      text-decoration: underline;
+    }
+    &:active p:last-child {
+      color: $brand-blue;
+    }
+    &:hover, &:active {
+      text-decoration: none;
+      color: $text-color;
+    }
   }
+
   td {
     @extend %typography-subtitle;
     height: 100px;
@@ -51,17 +66,6 @@
       font-size: 0.8667rem;
       font-weight: $normal-weight;
       margin: 5px 0 15px;
-      &:last-child {
-        position: absolute;
-        top: 15px;
-        right: 20px;
-        @include typography-dropdown-selector;
-        color: $actionable-blue;
-        text-transform: uppercase;
-      }
-    }
-    .disabled p {
-      color: $medium-gray;
     }
     .report-info {
       @extend %typography-table-total;
@@ -119,6 +123,15 @@
   }
 }
 
+.report-sta-number {
+  @extend %typography-subtitle;
+  margin-bottom: 30px;
+  span {
+    color: $medium-gray;
+    padding-right: 30px;
+  }
+}
+
 .report-datepicker, .report-filter {
   width: (3 * $grid-column-width) + (2 * $gutter-width);
   form {
@@ -171,7 +184,12 @@
   }
 }
 
-.report-current-price-indication {
+.report-intro-details {
+  width: 540px;
+  margin: 0;
+}
+
+.report-current-price-indications {
   .report-main-body {
     margin-bottom: 50px;
   }
@@ -182,6 +200,20 @@
     p {
       width: 490px;
     }
+  }
+  h2, h3 {
+    @extend %typography-section-title;
+    margin: 25px 0 10px;
+    span {
+      display: block;
+      @extend %typography-table-cell;
+    }
+  }
+  h2 + h3 {
+    margin: 0 0 15px;
+  }
+  .report-details h2 {
+    margin: 0;
   }
 }
 
@@ -224,14 +256,6 @@
    margin: 0 0 15px;
  }
 
-.report-table-title-with-margins {
-  @extend %typography-section-title;
-  margin: 25px 0 10px;
-  .sub-title {
-    @extend %typography-table-cell;
-  }
-}
-
 .report-table {
   @extend %table-report;
 
@@ -244,6 +268,8 @@
       background-color: $lightest-blue;
     }
   }
+
+
 
   .report-cell-right {
     text-align: right;
@@ -314,15 +340,6 @@
         }
       }
     }
-    .hide-detail-view {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      margin: 0;
-      text-transform: uppercase;
-      color: $actionable-blue;
-      cursor: pointer;
-    }
   }
   tbody td {
     table {
@@ -349,10 +366,20 @@
 }
 
 .detail-view-trigger {
+  @extend %link-style;
   text-transform: uppercase;
-  color: $actionable-blue;
   cursor: pointer;
   vertical-align: top;
+}
+
+.hide-detail-view {
+  @extend %link-style;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  margin: 0;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
 .report-parent-table {
@@ -515,11 +542,23 @@
     th {
       box-sizing: border-box;
       &:first-child {
-        width: 82px;
+        width: 78px;
       }
     }
   }
-  small {
+  ol {
+    width: 520px;
+    padding-left: 20px;
+  }
+  ul {
+    margin-bottom: 10px;
+    list-style: disc;
+    li {
+      margin-bottom: 0;
+    }
+  }
+  li {
+    margin-bottom: 10px;
     img {
       position: relative;
       top: 3px;
@@ -639,6 +678,12 @@
   }
 }
 
+.securities-services-line-item-number {
+  min-width: 12px;
+  display: inline-block;
+  text-align: right;
+}
+
 .report-table-vertical-headers {
   td {
     &:nth-child(1) {
@@ -754,9 +799,6 @@ td.dataTables_empty {
     &:first-child {
       margin-top: 0;
     }
-  }
-  a {
-    color: $actionable-blue;
   }
   small {
     margin-bottom: 10px;
@@ -968,8 +1010,6 @@ td.dataTables_empty {
     }
     a {
       @extend %typography-table-heading;
-      text-decoration: none;
-      color: $actionable-blue;
       text-transform: uppercase;
     }
   }
@@ -1075,10 +1115,58 @@ td.dataTables_empty {
   }
 }
 
-@media print {
-  a, .report-main-body small a, .advances-main-body small a, .authorizations-report a, .reports a, .report a {
-    color: $print-link-color;
+.report-mcu-details {
+  @extend %typography-subtitle;
+  dt {
+    width: 140px;
+    float: left;
+    color: $medium-gray;
+    margin-right: 20px;
   }
+  dd {
+    margin-bottom: 8px;
+    &:last-child {
+      margin-bottom: 30px;
+    }
+  }
+}
+
+.report-mcu-table {
+  margin-bottom: 35px;
+  width: 540px;
+  &:last-of-type {
+    margin-bottom: 10px;
+    tbody tr:first-child {
+      @extend %table-footer-cell;
+    }
+  }
+  td, th {
+    @include table-cell-treatment;
+  }
+  th:nth-child(1) {
+    width: 186px;
+  }
+  th:nth-child(2) {
+    width: 86px;
+  }
+  th:nth-child(3) {
+    width: 128px;
+  }
+}
+
+.report-mcu {
+  .report-main-body {
+    margin-top: 10px;
+  }
+}
+
+.report-capital-stock-trial-balance {
+  .report-table {
+    width: auto;
+  }
+}
+
+@media print {
   .account-summary-report .report-table:not(.account-summary-collateral-totals) tbody td:first-child,
   .account-summary-report tfoot,
   .account-summary-collateral-totals tbody td {
@@ -1129,6 +1217,11 @@ td.dataTables_empty {
   }
   .report-header-buttons, .report-inputs {
     display: none;
+  }
+  .report-header {
+    p {
+      @include typography-print-table-cell;
+    }
   }
   .report-main-body {
     margin-bottom: 0px;
@@ -1241,8 +1334,13 @@ td.dataTables_empty {
   }
   .advances-details-report-table {
     td, th {
+      &.report-cell-narrow {
+        padding: 6px 6px;
+      }
       &:last-child {
         display: table-cell;
+        text-align: left;
+
       }
       br:first-of-type {
         content: ' ';
@@ -1254,8 +1352,14 @@ td.dataTables_empty {
     }
   }
   .standard-credit-borrowing-capacity-tables .report-parent-table {
+    td, th {
+      white-space: normal;
+    }
+    th:first-child {
+      width: 180px;
+    }
     th:last-child {
-      width: 80px;
+      text-align: right;
     }
   }
   .report-print-footer {
@@ -1279,7 +1383,27 @@ td.dataTables_empty {
   .report-print-details {
     margin-bottom: 50px;
   }
-  .sbc-borrowing-capacity-tables {
+  .sbc-borrowing-capacity-tables, .securities-services-table-wrapper {
     page-break-inside: avoid; 
+  }
+
+  .report-securities-services-statement {
+    .report-table-vertical-headers td:nth-child(1) {
+      background-color: transparent;
+    }
+    .report-table td {
+      border-left: none;
+      border-right: none;
+      border-top: 1px solid $light-gray;
+      &:last-child {
+        width: 140px;
+      }
+    }
+    .report-summary-right {
+      width: 355px;
+    }
+    .report-cell-expanding {
+      white-space: normal;
+    }
   }
 }

@@ -39,7 +39,7 @@ module MAPI
           signer_id = nil
           if settings.environment == :production
             signer_id_query = <<-SQL
-              SELECT SIGNER_ID FROM WEB_ADM.ETRANSACT_SIGNER WHERE LOGIN_ID = #{ActiveRecord::Base.connection.quote(username)}
+              SELECT SIGNER_ID FROM WEB_ADM.ETRANSACT_SIGNER WHERE LOWER(LOGIN_ID) = #{ActiveRecord::Base.connection.quote(username.downcase)}
             SQL
             ActiveRecord::Base.connection.execute(signer_id_query).fetch do |row|
               signer_id = row[0].to_i
@@ -92,7 +92,7 @@ module MAPI
         if record['SECURITYSIGNER'] == -1 || record['ALLRNA'] == -1 || record['ALLPRODUCT'] == -1
           roles << 'signer-securities'
         end
-        if record['WIRESIGNER'] == -1 || record['ALLRNA'] == -1 || record['ALLPRODUCT'] == -1
+        if record['WIRESIGNER'] == -1
           roles << 'signer-wiretransfers'
         end
         if record['REPOSIGNER'] == -1 || record['ALLRNA'] == -1 || record['ALLPRODUCT'] == -1

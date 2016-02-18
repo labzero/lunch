@@ -80,13 +80,9 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     float: right;
   }
 
-  a:not(.secondary-button):not(.primary-button) {
-    color: $actionable-blue;
-  }
-
   .welcome-login {
     a {
-        @extend %typography-table-link;
+      @extend %typography-table-link;
     }
   }
 
@@ -103,11 +99,9 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
   }
 
   form a:not(.secondary-button):not(.primary-button) {
-    color: $actionable-blue;
     display: block;
     margin-bottom: 20px;
     line-height: 1;
-    text-decoration: none;
     &:last-child {
       margin-bottom: 0;
     }
@@ -166,13 +160,16 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
       width: $column-8-width;
       margin: 0 auto 35px;
       padding: 0;
-      a {
+      a:not(.secondary-button):not(.primary-button) {
         display: inline;
         margin-bottom: auto;
         line-height: normal;
-        text-transform: none;
-        text-decoration: none;
       }
+    }
+    .secondary-button {
+      text-transform: uppercase;
+      display: inline-block;
+      line-height: 1;
     }
   }
   .password-change-success {
@@ -206,6 +203,12 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     display: inline-block;
     background: $logo-black no-repeat;
     background-size: contain;
+  }
+}
+
+.welcome-intro {
+  a {
+    white-space: nowrap;
   }
 }
 

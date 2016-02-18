@@ -1,0 +1,18 @@
+xlsx_package.use_shared_strings = true
+workbook = xlsx_package.workbook
+workbook.styles do |styles|
+  currency_format = styles.add_style num_fmt: 2
+  date_format = styles.add_style format_code: 'mm/dd/yyyy'
+  interest_format = styles.add_style
+
+  styles = [date_format, date_format, date_format, nil, nil, currency_format, interest_format]
+
+  workbook_name = I18n.t('reports.pages.forward_commitments.title')
+  workbook.add_worksheet(name: workbook_name) do |sheet|
+    sheet.add_row @table_data[:column_headings].map{ |ch| ch[:title] }
+    @table_data[:rows].sort_by{ |row| row[:columns][1][:value] }.each do |row|
+      sheet.add_row row[:columns].collect { |column| column[:value]}, style: styles
+    end
+  end
+
+end

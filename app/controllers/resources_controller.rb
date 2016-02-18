@@ -1,5 +1,15 @@
 class ResourcesController < ApplicationController
+  include CustomFormattingHelper
 
+  APPLICATION_FORM_IDS = {
+    commercial: {
+      required: [2093, 2094, 2090, 2091, 2065, 2089, 2104, 2290],
+      requested: [2117, 2136, 2160],
+      optional: [1694, 1973, 1465, 2228],
+      access: [2066, 2067, 2153, 2068, 2070, 2109, 2108]
+    }
+  }.freeze
+  
   # GET
   def guides
   end
@@ -284,6 +294,58 @@ class ResourcesController < ApplicationController
       filename = 'corporate-credit-union-amendment.docx'
     when 'credit_union_agreement'
       filename = 'subordination-agreement-credit-unions.pdf'
+    when 'capitalplan'
+      filename = 'capital-plan.pdf'
+    when 'capitalplansummary'
+      filename = 'capital-plan-summary.pdf'
+    when 'pfi_agreement_resolution'
+      filename = 'mpf-pfi-agreement-resolution.pdf'
+    when 'delegation_of_authority'
+      filename = 'mpf-delegation-of-authority.pdf'
+    when 'delegation_of_authority_requests'
+      filename = 'mpf-delegation-of-authority-requests-for-files-from-custodian.pdf'
+    when 'delegation_of_authority_definitions'
+      filename = 'mpf-delegation-of-authority-definitions.pdf'
+    when 'pfi_agreement'
+      filename = 'mpf-pfi-agreement.pdf'
+    when 'pfi_application'
+      filename = 'mpf-pfi-application.pdf'
+    when 'mortgage_operations_questionnaire'
+      filename = 'mpf-mortgage-operations-questionnaire.pdf'
+    when 'mortgage_operations_questionnaire_addendum'
+      filename = 'mpf-mortgage-operations-questionnaire-addendum.pdf'
+    when 'mpf_fidelity'
+      filename = 'mpf-fidelity-errors-omissions-insurance-worksheet-OG2.pdf'
+    when 'anti_predatory'
+      filename = 'mpf-anti-predatory-lending-questionnaire.pdf'
+    when 'in_house'
+      filename = 'mpf-in-house-QC-questionnaire.pdf'
+    when 'collateral_file'
+      filename = 'mpf-collateral-file-release-information.pdf'
+    when 'post_closing'
+      filename = 'mpf-post-closing-information.pdf'
+    when 'servicer'
+      filename = 'mpf-servicer-information.pdf'
+    when 'servicer_account_remittance'
+      filename = 'mpf-PI-custodial-account-agreement-SS-or-AA-single-remittance.pdf'
+    when 'servicer_account_actual'
+      filename = 'mpf-PI-custodial-account-agreement-AA.pdf'
+    when 'servicer_account'
+      filename = 'mpf-TI-custodial-account-agreement.pdf'
+    when 'xtra_agreement'
+      filename = 'mpf-xtra-agreement-for-access-to-fannie-mae-du-only.pdf'
+    when 'xtra_addendum_mpf'
+      filename = 'mpf-xtra-addendum-servicing-retained.pdf'
+    when 'xtra_addendum_servcer_account'
+      filename = 'mpf-xtra-PI-custodial-account-agreement-mpf-bank.pdf'
+    when 'xtra'
+      filename = 'mpf-xtra-TI-custodial-account-agreement.pdf'
+    when 'xtra_addendum_mpf_released'
+      filename = 'mpf-xtra-addendum-servicing-released.pdf'
+    when 'direct_agreement'
+      filename = 'mpf-direct-addendum-to-pfi-agreement.pdf'
+    when 'direct_questionnaire'
+      filename = 'mpf-direct-operations-questionnaire.pdf'
     when /\Aform_(\d{3,4})\z/
       filename = "fc#{$1}.pdf"
     else
@@ -294,6 +356,147 @@ class ResourcesController < ApplicationController
   end
 
   def business_continuity
+  end
+
+  def capital_plan
+  end
+  
+  def fee_schedules
+    fees = FeesService.new(request).fee_schedules
+    raise StandardError, "There has been an error and ResourcesController#fee_schedules has encountered nil. Check error logs." if fees.nil?
+    # LOC - annual maintenace charge
+    annual_maintenance_charge_root = fees[:letters_of_credit][:annual_maintenance_charge]
+    annual_maintenance_charge_rows = [
+      [:minimum_annual_fee, annual_maintenance_charge_root[:minimum_annual_fee], :currency_whole],
+      [:cip_ace, t('resources.fee_schedules.basis_point_per_annum', basis_point: annual_maintenance_charge_root[:cip_ace])],
+      [:agency_deposits, t('resources.fee_schedules.basis_point_per_annum', basis_point: annual_maintenance_charge_root[:agency_deposits])],
+      [:other_purposes, t('resources.fee_schedules.basis_point_per_annum', basis_point: annual_maintenance_charge_root[:other_purposes])]
+    ]
+    @annual_maintenance_charge_table = fee_schedule_table_hash(annual_maintenance_charge_rows)
+    
+    # LOC - issuance fee
+    issuance_fee_root = fees[:letters_of_credit][:issuance_fee]
+    issuance_fee_rows = [
+      [:agency_deposits, issuance_fee_root[:agency_deposits], :currency_whole],
+      [:other_purposes, issuance_fee_root[:other_purposes], :currency_whole],
+      [:commercial_paper, t('resources.fee_schedules.price_range', lower: fhlb_formatted_currency_whole(issuance_fee_root[:commercial_paper][:lower_limit], html: false), upper: fhlb_formatted_currency_whole(issuance_fee_root[:commercial_paper][:upper_limit], html: false))],
+      [:tax_exempt_bond, t('resources.fee_schedules.price_range', lower: fhlb_formatted_currency_whole(issuance_fee_root[:tax_exempt_bond][:lower_limit], html: false), upper: fhlb_formatted_currency_whole(issuance_fee_root[:tax_exempt_bond][:upper_limit], html: false))]
+    ]    
+    @issuance_fee_table = fee_schedule_table_hash(issuance_fee_rows)
+    
+    # LOC - draw fee
+    @draw_fee_table = fee_schedule_table_hash([[:draw_fee, fees[:letters_of_credit][:draw_fee], :currency_whole]])
+    
+    # LOC - amendment fee
+    amendment_fee_root = fees[:letters_of_credit][:amendment_fee]
+    amendment_fee_rows = [
+      [:increase_extension],
+      [:agency_deposits, amendment_fee_root[:agency_deposits], :currency_whole],
+      [:other_purposes, amendment_fee_root[:other_purposes], :currency_whole]
+    ]
+    @amendment_fee_table = fee_schedule_table_hash(amendment_fee_rows)
+    
+    # Securities Services - monthly maintenance
+    monthly_maintenance_root = fees[:securities_services][:monthly_maintenance]
+    monthly_maintenance_rows = [
+      [:less_than_10, t('resources.fee_schedules.amount_per_month', amount: fhlb_formatted_currency(monthly_maintenance_root[:less_than_10], html: false))],
+      [:between_10_and_24, t('resources.fee_schedules.amount_per_month', amount: fhlb_formatted_currency(monthly_maintenance_root[:between_10_and_24], html: false))],
+      [:more_than_24, t('resources.fee_schedules.amount_per_month', amount: fhlb_formatted_currency(monthly_maintenance_root[:more_than_24], html: false))]
+    ]
+    @monthly_maintenance_table = fee_schedule_table_hash(monthly_maintenance_rows)
+
+    # Securities Services - monthly securities
+    monthly_securities_root = fees[:securities_services][:monthly_securities]
+    monthly_securities_rows = [
+      [:fed, t('resources.fee_schedules.item_by_lot', amount: fhlb_formatted_currency(monthly_securities_root[:fed], html: false))],
+      [:dtc, t('resources.fee_schedules.item_by_lot', amount: fhlb_formatted_currency(monthly_securities_root[:dtc], html: false))],
+      [:physical, t('resources.fee_schedules.item_by_lot', amount: fhlb_formatted_currency(monthly_securities_root[:physical], html: false))],
+      [:euroclear, t('resources.fee_schedules.par_by_lot', amount: fhlb_formatted_currency(monthly_securities_root[:euroclear][:fee_per_par], html: false), par: monthly_securities_root[:euroclear][:per_par_amount])],
+    ]
+    @monthly_securities_table = fee_schedule_table_hash(monthly_securities_rows)
+
+    # Securities Services - security transaction
+    security_transaction_root = fees[:securities_services][:security_transaction]
+    security_transaction_rows = [
+      [:fed, t('resources.fee_schedules.amount_per_item', amount: fhlb_formatted_currency(security_transaction_root[:fed], html: false))],
+      [:dtc, t('resources.fee_schedules.amount_per_item', amount: fhlb_formatted_currency(security_transaction_root[:dtc], html: false))],
+      [:physical, t('resources.fee_schedules.amount_per_item', amount: fhlb_formatted_currency(security_transaction_root[:physical], html: false))],
+      [:euroclear, t('resources.fee_schedules.amount_per_item', amount: fhlb_formatted_currency(security_transaction_root[:euroclear], html: false))]
+    ]
+    @security_transaction_table = fee_schedule_table_hash(security_transaction_rows)
+
+    # Securities Services - miscellaneous
+    securities_services_miscellaneous_root = fees[:securities_services][:miscellaneous]
+    securities_services_miscellaneous_rows = [
+      [:all_income_disbursement, t('resources.fee_schedules.amount_per_item', amount: fhlb_formatted_currency(securities_services_miscellaneous_root[:all_income_disbursement], html: false))],
+      [:pledge_status_change, t('resources.fee_schedules.amount_per_item', amount: fhlb_formatted_currency(securities_services_miscellaneous_root[:pledge_status_change], html: false))],
+      [:certificate_registration, t('global.footnote_indicator')],
+      [:research_projects, t('global.footnote_indicator')],
+      [:special_handling, t('global.footnote_indicator')]
+    ]
+    @securities_services_miscellaneous_table = fee_schedule_table_hash(securities_services_miscellaneous_rows)
+    
+    # Wire Transfer and STA - domestic outgoing wires
+    domestic_outgoing_wires_root = fees[:wire_transfer_and_sta][:domestic_outgoing_wires]
+    domestic_outgoing_wires_rows = [
+      [:telephone_request],
+      [:telephone_repetitive, t('resources.fee_schedules.amount_per_wire', amount: fhlb_formatted_currency(domestic_outgoing_wires_root[:telephone_repetitive], html: false))],
+      [:telephone_non_repetitive, t('resources.fee_schedules.amount_per_wire', amount: fhlb_formatted_currency(domestic_outgoing_wires_root[:telephone_non_repetitive], html: false))],
+      [:drawdown_request, t('resources.fee_schedules.amount_per_wire', amount: fhlb_formatted_currency(domestic_outgoing_wires_root[:drawdown_request], html: false))],
+      [:standing_request, t('resources.fee_schedules.amount_per_wire', amount: fhlb_formatted_currency(domestic_outgoing_wires_root[:standing_request], html: false))]
+    ]
+    @domestic_outgoing_wires_table = fee_schedule_table_hash(domestic_outgoing_wires_rows)
+
+    # Wire Transfer and STA - domestic incoming wires
+    @domestic_incoming_wires_table = fee_schedule_table_hash([[:domestic_incoming_wires, t('resources.fee_schedules.amount_per_wire', amount: fhlb_formatted_currency(fees[:wire_transfer_and_sta][:domestic_incoming_wires], html: false))]])
+
+    # Wire Transfer and STA - overdraft charges
+    overdraft_charges_root = fees[:wire_transfer_and_sta][:overdraft_charges]
+    overdraft_charges_rows = [
+      [:interest_rate, t('resources.fee_schedules.interest_rate_overdraft', basis_points: overdraft_charges_root[:interest_rate])],
+      [:processing_fee, t('resources.fee_schedules.amount_per_overdraft', amount: fhlb_formatted_currency(overdraft_charges_root[:processing_fee], html: false))]
+    ]
+    @overdraft_charges_table = fee_schedule_table_hash(overdraft_charges_rows)
+
+    # Wire Transfer and STA - miscellaneous
+    sta_miscellaneous_root = fees[:wire_transfer_and_sta][:miscellaneous]
+    sta_miscellaneous_rows = [
+      [:photocopies, t('resources.fee_schedules.amount_per_statement', amount: fhlb_formatted_currency(sta_miscellaneous_root[:photocopies], html: false))],
+      [:special_account_research, t('resources.fee_schedules.amount_per_hour', amount: fhlb_formatted_currency(sta_miscellaneous_root[:special_account_research], html: false))]
+    ]
+    @sta_miscellaneous_table = fee_schedule_table_hash(sta_miscellaneous_rows)
+  end
+
+  # GET
+  def membership_overview
+  end
+
+  # GET
+  def membership_application
+  end
+
+  # GET
+  def commercial_application
+    @form_ids = APPLICATION_FORM_IDS[:commercial]
+  end
+  
+  private
+  
+  def fee_schedule_table_hash(rows)
+    table_data = {
+      rows: []
+    }
+    rows.each do |row|
+      table_data[:rows].push(
+        {
+          columns: [
+            {value: t("resources.fee_schedules.#{row.first.to_s}")},
+            {value: row[1], type: row[2]}  
+          ]
+        }
+      )
+    end
+    table_data
   end
 
 end

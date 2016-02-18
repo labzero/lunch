@@ -1,0 +1,17 @@
+- deferred ||= false
+- table_data ||= {}
+
+-if table_data.empty? && !deferred
+  .dashboard-module-recent-activity-no-data= t('dashboard.recent_activity.no_activity')
+-else
+  %table.table-dashboard-recent-activity
+    %tbody
+      - table_data.each do |row|
+        %tr
+          %td
+            = row[0]
+            %div.dashboard-module-content-light= row[2]
+          %td
+            = fhlb_formated_currency_unit(row[1])
+            %div.dashboard-module-content-light=row[3]
+%p= t('dashboard.recent_activity.view_report_html', url: reports_todays_credit_path)

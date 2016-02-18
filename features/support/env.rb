@@ -3,6 +3,7 @@ Dotenv.load
 
 require 'capybara/rspec'
 require 'capybara/cucumber'
+require 'cucumber/rspec/doubles'
 
 require_relative 'custom_config'
 include CustomConfig
@@ -40,6 +41,10 @@ if !custom_host
   require_relative '../../lib/redis_helper'
   resque_namespace = ['resque', ENV['RAILS_ENV'], 'cucumber', parallel_test_number, Process.pid].compact.join('-')
   ENV['RESQUE_REDIS_URL'] ||= RedisHelper.add_url_namespace(ENV['REDIS_URL'], resque_namespace)
+  flipper_namespace = ['flipper', ENV['RAILS_ENV'], 'cucumber', parallel_test_number, Process.pid].compact.join('-')
+  ENV['FLIPPER_REDIS_URL'] ||= RedisHelper.add_url_namespace(ENV['REDIS_URL'], flipper_namespace)
+
+  puts "Flipper initialized (#{ENV['FLIPPER_REDIS_URL']})"
 
   require 'open3'
   require ::File.expand_path('../../../config/environment',  __FILE__)
@@ -215,5 +220,51 @@ if ENV['CUCUMBER_INCLUDE_SAUCE_SESSION']
     JenkinsSauce.output_jenkins_log(scenario)
     block.call
     ::Capybara.current_session.driver.quit if ENV['CUCUMBER_INCLUDE_SAUCE_SESSION'] == 'scenario'
+  end
+end
+
+Around do |scenario, block|
+  features = {}
+  feature_state = {}
+  scenario.source_tag_names.each do |tag|
+    matches = tag.match(/\A@flip-(on|off)-(.+)\z/)
+    if matches
+      features[matches[2]] = (matches[1] == 'on')
+    end
+  end
+  unless custom_host
+    features.each do |feature_name, enable|
+      feature = Rails.application.flipper[feature_name]
+      feature_state[feature] = {
+          groups: feature.groups_value,
+          boolean: feature.boolean_value,
+          actors: feature.actors_value,
+          percentage_of_actors: feature.percentage_of_actors_value,
+          percentage_of_time: feature.percentage_of_time_value
+        }
+    end
+    features.each do |feature_name, enable|
+      feature = Rails.application.flipper[feature_name]
+      enable ? feature.enable : feature.disable
+    end
+  end
+  begin
+    if custom_host && features.present? # we can't mutate custom hosts, so skip the scenario
+      skip_this_scenario
+    else
+      block.call
+    end
+  ensure
+    feature_state.each do |feature, state|
+      state[:boolean] ? feature.enable : feature.disable
+      feature.enable_percentage_of_time(state[:percentage_of_time])
+      feature.enable_percentage_of_actors(state[:percentage_of_actors])
+      state[:groups].each do |group|
+        feature.enable_group(group)
+      end
+      state[:actors].each do |actor|
+        feature.enable_group(actor)
+      end
+    end
   end
 end

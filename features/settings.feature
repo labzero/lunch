@@ -16,15 +16,15 @@ Scenario: Navigate to settings page
 Scenario: Email Settings
   Given I visit the dashboard
     And I click on the gear icon in the header
-  When I click on "Emails" in the sidebar nav
-  Then I should be on the email settings page
+   When I click on "Emails" in the sidebar nav
+   Then I should be on the email settings page
 
 @wip
 Scenario: Changing Email Settings
   Given I am on the email settings page
     And I see the unselected state for the "reports" option
-  When I check the box for the "reports" option
-    Then I should see the selected state for the "reports" option
+   When I check the box for the "reports" option
+   Then I should see the selected state for the "reports" option
     And I should see the auto-save message for the email settings page
 
 @wip
@@ -77,6 +77,32 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
   And I submit the reset PIN form
   Then I should see the failed to reset PIN message
 
+  @jira-mem-1030
+  Scenario: Users can set their SecurID PIN
+    Given I am on the two factor authentication settings page
+    When I click on the new token PIN CTA
+    Then I should see the new PIN form
+    When I cancel setting the PIN
+    Then I should not see the new PIN form
+
+  @jira-mem-1030
+  Scenario: Users are informed if they have entered bad details on the new PIN form
+    Given I am on the new PIN page
+    And I enter a bad token
+    And I submit the new PIN form
+    Then I should see the invalid token message
+    When I enter a good token
+    And I enter a bad new PIN
+    And I submit the new PIN form
+    Then I should see the invalid PIN message
+    When I enter a good new PIN
+    And I enter a bad confirm PIN
+    And I submit the new PIN form
+    Then I should see the invalid PIN message
+    When I enter two different values for the new PIN
+    And I submit the new PIN form
+    Then I should see the failed to set PIN message
+
   @jira-mem-601
   Scenario: Users can resynchronize their SecurID token
     Given I am on the two factor authentication settings page
@@ -109,7 +135,7 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
     When I click on the gear icon in the header
     Then I should not see "Access Manager" in the sidebar nav
 
-  @jira-mem-920
+  @jira-mem-920 @jiram-mem-1021
   Scenario: User changes their password
     Given I am logged in as a "password change user"
     When I am on the change password page
@@ -132,3 +158,26 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
     And I enter a valid new password
     And I submit the form
     Then I should not see an error flash
+
+  @jira-mem-1068
+  Scenario: User password confirmation does not match in change password flow
+    Given I am logged in
+    And I am on the change password page
+    And I fill in the current password field with the password change user's password
+    And I enter a new valid password in the first field
+    When I focus on the password confirmation field
+    Then I should not see a password match error
+    When I focus on the new password field
+    Then I should not see a password match error
+    When I try to submit the form
+    Then I should see a password match error
+    When I enter a new valid password in the password confirmation field
+    And I focus on the new password field
+    Then I should not see a password match error
+
+  @jira-mem-1033
+  Scenario: Intranet users cannot reset their passwords from the settings page
+    Given I am logged in as an "intranet user"
+    When I click on the gear icon in the header
+    Then I should see a message letting me know I cannot change my password
+    And I should not see the change password form

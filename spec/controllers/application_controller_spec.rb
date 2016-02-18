@@ -36,6 +36,20 @@ RSpec.describe ApplicationController, :type => :controller do
         end
       end
     end
+
+    describe 'PageRestricted' do
+      let(:error) {Pundit::NotAuthorizedError.new}
+      before { allow(error).to receive(:backtrace).and_return(backtrace) }
+      it 'captures all PageRestricted and displays the page-restricted error view' do
+        expect(controller).to receive(:render).with('error/403', {:layout=>"error", :status=>403})
+        controller.send(:handle_exception, error)
+      end
+      it 'rescues any exceptions raised when rendering the `error/403` view' do
+        expect(controller).to receive(:render).with('error/403', {:layout=>"error", :status=>403}).and_raise(error)
+        expect(controller).to receive(:render).with({:text=>error, :status=>500})
+        controller.send(:handle_exception, error)
+      end
+    end
   end
 
   describe '`after_sign_out_path_for(resource)` method' do
@@ -178,6 +192,13 @@ RSpec.describe ApplicationController, :type => :controller do
     end
   end
 
+  describe '`session_elevate!` method' do
+    it 'sets `securid_authenticated` to true' do
+      controller.session_elevate!
+      expect(session['securid_authenticated']).to be(true)
+    end
+  end
+
   describe '`current_member_name` method' do
     let(:member_name) { double('A Member Name') }
     let(:member_id) { double('A Member ID') }
@@ -317,6 +338,62 @@ RSpec.describe ApplicationController, :type => :controller do
       expect(dummy_obj).to receive(:dummy_call).ordered
       expect(rack_env).to receive(:[]=).with('devise.skip_trackable', false).ordered
       call_method
+    end
+  end
+
+  describe '`handle_bad_csrf` private method' do
+    let(:call_method) { controller.send(:handle_bad_csrf) }
+
+    before do
+      allow(controller).to receive(:redirect_to)
+    end
+
+    it 'resets the session' do
+      expect(controller).to receive(:reset_session)
+      call_method
+    end
+
+    it 'redirects to the logged out page' do
+      expect(controller).to receive(:redirect_to).with(controller.logged_out_path)
+      call_method
+    end
+  end
+
+  describe 'exception handling' do
+    login_user
+    controller do
+      def index; end
+    end
+
+    let(:make_request) { get :index }
+
+    describe '`ActionController::InvalidAuthenticityToken` exception' do
+      before do
+        allow(controller).to receive(:index).and_raise(ActionController::InvalidAuthenticityToken)
+      end
+
+      it 'calls `handle_bad_csrf`' do
+        expect(controller).to receive(:handle_bad_csrf)
+        make_request
+      end
+    end
+
+    describe 'other exceptions' do
+      let(:exception) { Exception.new }
+      before do
+        allow(controller).to receive(:index).and_raise(exception)
+      end
+
+      it 'calls `handle_exception` if the app is running in production' do
+        allow(Rails.env).to receive(:production?).and_return(true)
+        expect(controller).to receive(:handle_exception).with(exception)
+        make_request
+      end
+
+      it 'reraises the exception if the app is not in production' do
+        allow(Rails.env).to receive(:production?).and_return(false)
+        expect{make_request}.to raise_error(exception)
+      end
     end
   end
 end

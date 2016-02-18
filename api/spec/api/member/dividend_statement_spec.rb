@@ -1,11 +1,6 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'member dividend_statement' do
     describe 'the `dividend_statement` method' do
       let(:date) {  Date.new(2015,1,11) }
@@ -16,13 +11,13 @@ describe MAPI::ServiceApp do
 
       it 'calls the `dividend_statement` method when the endpoint is hit' do
         allow(MAPI::Services::Member::DividendStatement).to receive(:dividend_statement).and_return('a response')
-        get "/member/#{MEMBER_ID}/dividend_statement/#{date}/2015Q1"
+        get "/member/#{member_id}/dividend_statement/#{date}/2015Q1"
         expect(last_response.status).to eq(200)
       end
 
       [:development, :test, :production].each do |env|
         describe "in the #{env} environment" do
-          let(:dividend_statement) { MAPI::Services::Member::DividendStatement.dividend_statement(env, MEMBER_ID, date, div_id) }
+          let(:dividend_statement) { MAPI::Services::Member::DividendStatement.dividend_statement(env, member_id, date, div_id) }
           if env == :production
             let(:div_id_result_set) {double('Oracle Result Set', fetch_hash: nil)}
             let(:sta_account_number_result_set) {double('Oracle Result Set', fetch: nil)}

@@ -29,8 +29,6 @@ $faded-opacity: 0.4 !default;
 %dashboard-module-link {
   @extend %typography-header-nav;
   text-transform: uppercase;
-  text-decoration: none;
-  color: $actionable-blue;
   border: none;
   background-color: white;
   float: right;
@@ -75,7 +73,7 @@ $faded-opacity: 0.4 !default;
   }
 }
 
-.table-dashboard-previous-activity, .table-dashboard-anticipated-activity {
+.table-dashboard-recent-activity, .table-dashboard-anticipated-activity {
   @extend %table-striped;
   td, th {
     height: 46px;
@@ -94,7 +92,7 @@ $faded-opacity: 0.4 !default;
   }
 }
 
-.table-dashboard-previous-activity {
+.table-dashboard-recent-activity {
   margin-bottom: 0;
 }
 
@@ -127,15 +125,14 @@ $faded-opacity: 0.4 !default;
 
 .dashboard-module-content {
   padding: 20px;
+  .dashboard-module-temporarily-unavailable {
+    display: none;
+  }
 }
 
 .dashboard-module-content-light {
   @extend %typography-table-annotation;
   clear: both;
-}
-
-.dashboard-module-previous-activity {
-  display: none;
 }
 
 .dashboard-module-contact {
@@ -164,7 +161,7 @@ $faded-opacity: 0.4 !default;
 }
 
 .dashboard-contact {
-  text-decoration: none;
+  @extend %undo-link-style;
   color: inherit;
   min-height: 54px;
   display: block;
@@ -201,10 +198,6 @@ $faded-opacity: 0.4 !default;
 }
 
 .dashboard-module-advances {
-  a {
-    color: $actionable-blue;
-    text-decoration: none;
-  }
   p {
     color: $text-color;
   }
@@ -227,15 +220,22 @@ $faded-opacity: 0.4 !default;
 .quick-advance-desk-closed-message {
   margin-bottom: 0;
   a {
+    display: block;
     text-transform: uppercase;
+  }
+  span {
+    white-space: nowrap;
   }
 }
 
 .quick-advance-limited-pricing-notice {
   @extend %typography-dashboard-gauge-label;
+  @extend %link-style;
   margin-top: 10px;
   text-transform: uppercase;
-  color: $actionable-blue;
+}
+
+.quick-advance-limited-pricing-notice, .dashboard-vrc-overnight-message[data-flyout-trigger], .dashboard-advances-rate[data-flyout-trigger] {
   cursor: pointer;
 }
 
@@ -247,11 +247,6 @@ p.dashboard-vrc-overnight-message {
   font-weight: $semibold-weight;
   margin-bottom: 5px;
   color: $actionable-blue;
-  &:after {
-    @extend %icon-font;
-    content: " #{$icon-chevron}";
-    font-size: 0.8rem;
-  }
 }
 
 .dashboard-advances-rate {
@@ -259,11 +254,26 @@ p.dashboard-vrc-overnight-message {
   font-size: 5rem;
   line-height: 1;
   margin-bottom: -17px; // UGH. Design doesn't account for descender spacing
+  min-height: 75px;
   span {
     vertical-align: top;
     font-size: 3rem;
     display: inline-block;
     margin-top: 3px;
+  }
+}
+
+.dashboard-element-loading {
+  position: relative;
+  &:after {
+    @extend %absolute-pseudoelement;
+    @extend %vertical-center;
+    @include icon-loading-ellipsis;
+    width: $ellipsis-width;
+    height: $ellipsis-height;
+  }
+  span {
+    display: none;
   }
 }
 
@@ -303,11 +313,14 @@ $breakdown-table-currency-width: 10px;
       border-top: 1px solid $secondary-gray;
       text-align: left;
     }
-    th, .label, .currency, .value {
+    th, .label, .currency, .value, .title {
       padding: 5px 0;
       box-sizing: border-box;
     }
-    .label, .footnote {
+    .title {
+      padding-bottom: 1px;
+    }
+    .label, .footnote, .title {
       width: $breakdown-table-label-width;
       padding-left: 10px;
     }
@@ -332,13 +345,22 @@ $breakdown-table-currency-width: 10px;
       border-top: 1px solid $secondary-gray;
       border-bottom: 1px solid $secondary-gray;
     }
+    .detail {
+      .label {
+        padding-left: 20px;
+      }
+    }
   }
   .borrowing-capacity-note {
+    @extend %typography-dashboard-account-summary;
     padding: 10px;
-    a {
-      color: $actionable-blue;
-      text-decoration: none;
-    }
+  }
+  .dashboard-module-content {
+    margin-top: 10px;
+    padding: 20px;
+    background: $white;
+    height: 201px;
+    box-sizing: border-box;
   }
 }
 
@@ -353,9 +375,8 @@ $breakdown-table-currency-width: 10px;
   @extend %typography-table-heading;
   text-align: right;
   a {
-    text-decoration: none;
-    color: $actionable-blue;
     &.active {
+      @extend %undo-link-style;
       cursor: default;
       color: $text-color;
     }
@@ -576,5 +597,49 @@ $breakdown-table-currency-width: 10px;
     table {
       opacity: $faded-opacity;
     }
+  }
+}
+
+.dashboard-module-loading {
+  position: relative;
+  padding-left: 55px;
+  margin-bottom: 15px;
+  &:before {
+    @extend %absolute-pseudoelement;
+    @include icon-loading;
+    left: 0;
+  }
+}
+
+.dashboard-module-recent-activity {
+  p {
+    @extend %typography-dashboard-account-summary;
+    color: $medium-gray;
+    a {
+      text-decoration: none;
+      color: $actionable-blue;
+    }
+  }
+  .dashboard-module-content-deferred {
+    .dashboard-module-content {
+      padding: 0;
+    }
+  }
+}
+
+.dashboard-module-recent-activity-no-data {
+  color: $medium-gray;
+  text-align: center;
+}
+
+.table-dashboard-recent-activity {
+  td {
+    @extend %typography-dashboard-account-summary;
+  }
+  .dashboard-module-content-light {
+    margin-top: 5px;
+  }
+  .alignright {
+    margin-bottom: 5px;
   }
 }

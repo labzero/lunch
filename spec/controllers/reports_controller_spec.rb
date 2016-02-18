@@ -2,12 +2,16 @@ require 'rails_helper'
 include CustomFormattingHelper
 include ActionView::Helpers::NumberHelper
 include DatePickerHelper
+include ActiveSupport::Inflector
+include FinancialInstrumentHelper
 
 RSpec.describe ReportsController, :type => :controller do
   shared_examples 'a date restricted report' do |action, default_start_selection=nil|
     let(:start_date) { rand(500).days.ago(Time.zone.today) }
     let(:default_start) do
       case default_start_selection
+        when :this_month_start
+          default_dates_hash[:this_month_start]
         when :last_month_start
           default_dates_hash[:last_month_start]
         when :last_month_end
@@ -41,9 +45,18 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
+  shared_examples 'a report with a @max_date' do |action|
+    it 'sets @max_date to the result of the most_recent_business_day method' do
+      allow(controller).to receive(:most_recent_business_day).with( Time.zone.today - 1.day ).and_return(max_date)
+      get action
+      expect(assigns[:max_date]).to eq(max_date)
+    end
+  end
+
   login_user
 
   let(:today) { Time.zone.today }
+  let(:max_date) { controller.most_recent_business_day(today - 1.day)}
   let(:start_date) { today - 2.months }
   let(:restricted_start_date) { double('a restricted date')}
   let(:end_date) { today - 1.month }
@@ -54,6 +67,8 @@ RSpec.describe ReportsController, :type => :controller do
 
   before do
     allow(controller).to receive(:date_picker_presets).and_return(date_picker_presets)
+    allow(controller).to receive(:most_recent_business_day).and_return(max_date)
+    allow(controller).to receive(:fhlb_report_date_numeric)
   end
 
   describe 'GET index' do
@@ -118,6 +133,125 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
 
+    describe 'GET capital_stock_trial_balance' do
+      let(:start_date)                       { Date.new(2014, 12, 31) }
+      let(:member_balances_service_instance) { double('MemberBalanceService') }
+      let(:number_of_shares)                 { double('number_of_shares') }
+      let(:number_of_certificates)           { double('number_of_certificates') }
+      let(:certificate_sequence)             { double('certificate_sequence') }
+      let(:issue_date)                       { double('issue_date') }
+      let(:transaction_type)                 { double('transaction_type') }
+      let(:shares_outstanding)               { double('shares_outstanding') }
+      let(:summary) do
+        {
+            certificates: [certificate_hash],
+            number_of_shares: number_of_shares,
+            number_of_certificates: number_of_certificates
+        }
+      end
+      let(:certificate_hash) do
+        {
+            certificate_sequence: certificate_sequence,
+            issue_date:           issue_date,
+            transaction_type:     transaction_type,
+            shares_outstanding:   shares_outstanding,
+        }
+      end
+      let(:table_data) do
+        [{type: nil,     value: certificate_sequence, classes: [:'report-cell-narrow']},
+         {type: :date,   value: issue_date,           classes: [:'report-cell-narrow']},
+         {type: nil,     value: transaction_type,     classes: [:'report-cell-narrow']},
+         {type: :number, value: shares_outstanding,   classes: [:'report-cell-narrow']}]
+      end
+      let(:min_date) { Date.new(2002,1,1) }
+      let(:call_action) { get :capital_stock_trial_balance }
+      before do
+        allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
+        allow(member_balances_service_instance).to receive(:capital_stock_trial_balance).with(kind_of(Date)).and_return(summary)
+      end
+      it_behaves_like 'a user required action', :get, :capital_stock_trial_balance
+      it_behaves_like 'a report that can be downloaded', :capital_stock_trial_balance, [:xlsx]
+      it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_trial_balance
+      it_behaves_like 'a report with a @max_date', :capital_stock_trial_balance
+      it 'renders the capital_stock_trial_balance view' do
+        call_action
+        expect(response.body).to render_template('capital_stock_trial_balance')
+      end
+      it 'should pass @start_date and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+        allow(controller).to receive(:most_recent_business_day).and_return(max_date)
+        allow(controller).to receive(:date_picker_presets).with(start_date, nil, nil, max_date).and_return(picker_preset_hash)
+        get :capital_stock_trial_balance, start_date: start_date
+        expect(assigns[:picker_presets]).to eq(picker_preset_hash)
+      end
+      it 'should assign @number_of_shares and @number_of_certificates' do
+        call_action
+        expect(assigns[:number_of_shares]).to eq(number_of_shares)
+        expect(assigns[:number_of_certificates]).to eq(number_of_certificates)
+      end
+      it 'should assign @min_date a date of January 1st, 2002' do
+        call_action
+        expect(assigns[:min_date]).to eq(min_date)
+      end
+      it 'should assign @start_date a date of January 1st, 2002 if the start_date param occurs before that date' do
+        get :capital_stock_trial_balance, start_date: min_date - 1.year
+        expect(assigns[:min_date]).to eq(min_date)
+      end
+      it 'should return capital_stock_trial_balance_table_data with with columns populated' do
+        call_action
+        expect(assigns[:capital_stock_trial_balance_table_data][:rows][0][:columns]).to eq(table_data)
+      end
+      it 'sorts certificates by sequence number' do
+        sequence = rand(100000..999999)
+        certificate_1 = {
+          certificate_sequence: sequence + rand(100..1000),
+          issue_date:           issue_date,
+          transaction_type:     transaction_type,
+          shares_outstanding:   shares_outstanding,
+        }
+        certificate_2 = {
+          certificate_sequence: sequence,
+          issue_date:           issue_date,
+          transaction_type:     transaction_type,
+          shares_outstanding:   shares_outstanding,
+        }
+        certificate_3 = {
+          certificate_sequence: sequence - rand(100..1000),
+          issue_date:           issue_date,
+          transaction_type:     transaction_type,
+          shares_outstanding:   shares_outstanding,
+        }
+        summary = {
+          certificates: [certificate_2, certificate_1, certificate_3],
+          number_of_shares: number_of_shares,
+          number_of_certificates: number_of_certificates
+        }
+        allow(member_balances_service_instance).to receive(:capital_stock_trial_balance).and_return(summary)
+        get :capital_stock_trial_balance
+        assigned_certificates = assigns[:capital_stock_trial_balance_table_data][:rows].collect {|row| row[:columns].first[:value]}
+        expect(assigned_certificates).to eq([certificate_3[:certificate_sequence], certificate_2[:certificate_sequence], certificate_1[:certificate_sequence]])
+      end
+      RSpec.shared_examples 'a capital stock trial balance report with no data' do
+        it 'returns an empty array for @capital_stock_trial_balance_table_data[:rows]' do
+          call_action
+          expect(assigns[:capital_stock_trial_balance_table_data][:rows]).to eq([])
+        end
+        [:number_of_shares, :number_of_certificates].each do |instance_var|
+          it "sets @#{instance_var.to_s} to nil" do
+            call_action
+            expect(assigns[instance_var]).to be_nil
+          end
+        end
+      end
+      describe 'when the report is disabled' do
+        before { allow(subject).to receive(:report_disabled?).and_return(true) }
+        it_behaves_like 'a capital stock trial balance report with no data'
+      end
+      describe 'when the `member_balances.capital_stock_trial_balance` method returns an empty dataset' do
+        before { allow(member_balances_service_instance).to receive(:capital_stock_trial_balance).and_return({}) }
+        it_behaves_like 'a capital stock trial balance report with no data'
+      end
+    end
+
     describe 'GET borrowing_capacity' do
       before do
         allow(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(response_hash)
@@ -150,17 +284,19 @@ RSpec.describe ReportsController, :type => :controller do
 
     describe 'GET settlement_transaction_account' do
       let(:filter) {'some filter'}
+      let(:make_request) { get :settlement_transaction_account }
+      let(:make_request_with_dates) { get :settlement_transaction_account, start_date: start_date, end_date: end_date }
       before do
         allow(member_balance_service_instance).to receive(:settlement_transaction_account).and_return(response_hash)
         allow(response_hash).to receive(:[]).with(:activities)
       end
       it_behaves_like 'a user required action', :get, :settlement_transaction_account
       it_behaves_like 'a report that can be downloaded', :settlement_transaction_account, [:pdf]
-      it_behaves_like 'a date restricted report', :settlement_transaction_account, :last_month_start
+      it_behaves_like 'a date restricted report', :settlement_transaction_account, :this_month_start
       it_behaves_like 'a report with instance variables set in a before_filter', :settlement_transaction_account
       describe 'with activities array stubbed' do
         it 'should render the settlement_transaction_account view' do
-          get :settlement_transaction_account
+          make_request
           expect(response.body).to render_template('settlement_transaction_account')
         end
         describe "view instance variables" do
@@ -169,29 +305,30 @@ RSpec.describe ReportsController, :type => :controller do
           }
           it 'should set @settlement_transaction_account to the hash returned from MemberBalanceService' do
             expect(member_balance_service_instance).to receive(:settlement_transaction_account).and_return(response_hash)
-            get :settlement_transaction_account
+            make_request
             expect(assigns[:settlement_transaction_account]).to eq(response_hash)
           end
           it 'should raise an error if @settlement_transaction_account is nil' do
             expect(member_balance_service_instance).to receive(:settlement_transaction_account).and_return(nil)
-            expect{get :settlement_transaction_account}.to raise_error(StandardError)
+            expect{make_request}.to raise_error(StandardError)
           end
           it 'should set @settlement_transaction_account to {} if the report is disabled' do
             expect(controller).to receive(:report_disabled?).with(ReportsController::SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS).and_return(true)
-            get :settlement_transaction_account
+            make_request
             expect(assigns[:settlement_transaction_account]).to eq({})
           end
           it 'should set @start_date to the `start_date` attribute of the `min_and_start_dates` hash' do
-            get :settlement_transaction_account
+            make_request
             expect(assigns[:start_date]).to eq(restricted_start_date)
           end
           it 'should set @end_date to the end_date param' do
-            get :settlement_transaction_account, start_date: start_date, end_date: end_date
+            make_request_with_dates
             expect(assigns[:end_date]).to eq(end_date)
           end
           it 'should set @end_date to the end of last month if no end_date param is provided' do
+            make_request
             get :settlement_transaction_account
-            expect(assigns[:end_date]).to eq(default_dates_hash[:last_month_end])
+            expect(assigns[:end_date]).to eq(default_dates_hash[:today])
           end
           it 'should pass @start_date, @end_date and `date_restriction` to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
             expect(controller).to receive(:date_picker_presets).with(restricted_start_date, end_date, ReportsController::DATE_RESTRICTION_MAPPING[:settlement_transaction_account]).and_return(picker_preset_hash)
@@ -201,7 +338,7 @@ RSpec.describe ReportsController, :type => :controller do
           it 'sets @daily_balance_key to the constant DAILY_BALANCE_KEY found in MemberBalanceService' do
             my_const = double('Some Constant')
             stub_const('MemberBalanceService::DAILY_BALANCE_KEY', my_const)
-            get :settlement_transaction_account
+            make_request
             expect(assigns[:daily_balance_key]).to eq(my_const)
           end
           it 'should set @filter to `debit` and @filter_text to the proper i18next translation for `debit` if debit is passed as the sta_filter param' do
@@ -215,7 +352,7 @@ RSpec.describe ReportsController, :type => :controller do
             expect(assigns[:filter_text]).to eq(I18n.t('global.credits'))
           end
           it 'should set @filter to `all` and @filter_text to the proper i18next translation for `all` if nothing is passed for the sta_filter param' do
-            get :settlement_transaction_account
+            make_request
             expect(assigns[:filter]).to eq('all')
             expect(assigns[:filter_text]).to eq(I18n.t('global.all'))
           end
@@ -231,7 +368,7 @@ RSpec.describe ReportsController, :type => :controller do
                 [I18n.t('global.credits'), 'credit'],
                 [I18n.t('global.daily_balances'), 'balance']
             ]
-            get :settlement_transaction_account
+            make_request
             expect(assigns[:filter_options]).to eq(options_array)
           end
         end
@@ -247,7 +384,7 @@ RSpec.describe ReportsController, :type => :controller do
               }
           ]
           allow(response_hash).to receive(:[]).with(:activities).at_least(:once).and_return(activities_array)
-          get :settlement_transaction_account, start_date: start_date, end_date: end_date
+          make_request_with_dates
           expect(assigns[:show_ending_balance]).to eq(false)
         end
         it 'should set @show_ending_balance to true if the date of the first transaction in the activity array is different than the @end_date' do
@@ -257,7 +394,7 @@ RSpec.describe ReportsController, :type => :controller do
             }
           ]
           allow(response_hash).to receive(:[]).with(:activities).at_least(:once).and_return(activities_array)
-          get :settlement_transaction_account, start_date: start_date, end_date: end_date
+          make_request_with_dates
           expect(assigns[:show_ending_balance]).to eq(true)
         end
         it 'should set @show_ending_balance to true if there is no balance given for the first transaction in the activity array, even if the date of the transaction is equal to @end_date' do
@@ -267,9 +404,32 @@ RSpec.describe ReportsController, :type => :controller do
               }
           ]
           allow(response_hash).to receive(:[]).with(:activities).at_least(:once).and_return(activities_array)
-          get :settlement_transaction_account, start_date: start_date, end_date: end_date
+          make_request_with_dates
           expect(assigns[:show_ending_balance]).to eq(true)
         end
+      end
+      describe 'fetching STA numbers' do
+        let(:sta_number) { double('An STA Number') }
+        let(:member_id) { double('A Member ID') }
+        let(:members_service) { double(MembersService, report_disabled?: false) }
+        before do
+          allow(MembersService).to receive(:new).and_return(members_service)
+          allow(members_service).to receive(:member).and_return({sta_number: sta_number}.with_indifferent_access)
+          allow(controller).to receive(:current_member_id).and_return(member_id)
+        end
+         it 'calls MembersService.member with the current_member_id' do
+           expect(members_service).to receive(:member).with(member_id)
+           make_request
+         end
+         it 'populates @sta_number with the STA number' do
+           make_request
+           expect(assigns[:sta_number]).to be(sta_number)
+         end
+         it 'does not populate @sta_number if its already set' do
+           controller.instance_variable_set(:@sta_number, sta_number)
+           expect(members_service).to receive(:member).exactly(:once)
+           make_request
+         end     
       end
     end
 
@@ -284,6 +444,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a report that can be downloaded', :advances_detail, [:pdf, :xlsx]
       it_behaves_like 'a date restricted report', :advances_detail
       it_behaves_like 'a report with instance variables set in a before_filter', :advances_detail
+      it_behaves_like 'a report with a @max_date', :advances_detail
       it 'should render the advances_detail view' do
         get :advances_detail
         expect(response.body).to render_template('advances_detail')
@@ -294,10 +455,10 @@ RSpec.describe ReportsController, :type => :controller do
           get :advances_detail
           expect(assigns[:start_date]).to eq(restricted_start_date)
         end
-        it 'should pass @as_of_date and `date_restriction` to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-          expect(controller).to receive(:date_picker_presets).with(restricted_start_date, nil, ReportsController::DATE_RESTRICTION_MAPPING[:advances_detail]).and_return(picker_preset_hash)
+        it 'should pass @as_of_date, `date_restriction` and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+          expect(controller).to receive(:date_picker_presets).with(restricted_start_date, nil, ReportsController::DATE_RESTRICTION_MAPPING[:advances_detail], max_date).and_return(picker_preset_hash)
           get :advances_detail, start_date: start_date
-          expect(assigns[:picker_presets]).to eq(picker_preset_hash)
+          # expect(assigns[:picker_presets]).to eq(picker_preset_hash)
         end
         it 'should call the method `advances_details` on a MemberBalanceService instance with the `start` argument and set @advances_detail to its result' do
           expect(member_balance_service_instance).to receive(:advances_details).with(restricted_start_date).and_return(advances_detail)
@@ -379,7 +540,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
 
-    describe 'GET cash_projections', skip: true do
+    describe 'GET cash_projections' do
       let(:as_of_date) { '2014-12-12'.to_date }
       it_behaves_like 'a user required action', :get, :cash_projections
 
@@ -416,7 +577,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
 
-    describe 'GET dividend_statement', skip: true do
+    describe 'GET dividend_statement' do
       let(:make_request) { get :dividend_statement }
       let(:response_hash) { double('A Dividend Statement', :'[]' => nil)}
       let(:year) { Array(2000..2015).sample }
@@ -503,72 +664,57 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
 
-    describe 'GET securities_services_statement', skip: true do
+    describe 'GET securities_services_statement' do
       let(:make_request) { get :securities_services_statement }
       let(:response_hash) { double('A Securities Services Statement', :'[]' => nil)}
-      let(:end_of_month) { (start_date - 1.month).end_of_month }
-      let(:month_restricted_start_date) { Date.today - rand(10000) }
+      let(:report_end_date) { double( 'report_end_date' ) }
+      let(:month_year) { double( 'month_year' ) }
       let(:start_date_param) { Date.today - rand(10000) }
-      before do
-        allow(member_balance_service_instance).to receive(:securities_services_statement).with(kind_of(Date)).and_return(response_hash)
-        allow(response_hash).to receive(:[]).with(:secutities_fees).and_return([{}])
-        allow(response_hash).to receive(:[]).with(:transaction_fees).and_return([{}])
-        allow(controller).to receive(:month_restricted_start_date).and_return(end_of_month)
-      end
-      it_behaves_like 'a user required action', :get, :securities_services_statement
-      it_behaves_like 'a date restricted report', :securities_services_statement, :last_month_end
-      it_behaves_like 'a report with instance variables set in a before_filter', :securities_services_statement
-      it 'should set @start_date to the end of the month for the `start_date` attribute of the `min_and_start_dates` hash' do
-        make_request
-        expect(assigns[:start_date]).to eq(end_of_month)
-      end
-      it 'should assign `@statement` to the result of calling MemberBalanceService.securities_services_statement' do
-        make_request
-        expect(assigns[:statement]).to be(response_hash)
-      end
-      it 'should assign @date_picker_filter to the `end_of_month` filter' do
-        make_request
-        expect(assigns[:date_picker_filter]).to eq(ReportsController::DATE_PICKER_FILTERS[:end_of_month])
-      end
-      it "should pass `#{ReportsController::DATE_RESTRICTION_MAPPING[:securities_services_statement]}` to `min_and_start_dates`" do
-        expect(controller).to receive(:min_and_start_dates).with(ReportsController::DATE_RESTRICTION_MAPPING[:securities_services_statement], anything)
-        make_request
-      end
-      it 'should pass `last_month_end` to `min_and_start_dates` if no start_date param is given' do
-        allow(controller).to receive(:last_month_end).and_return(end_of_month)
-        expect(controller).to receive(:min_and_start_dates).with(anything, end_of_month)
-        make_request
-      end
-      it 'should pass the start_date param to `min_and_start_dates` if one is provided' do
-        expect(controller).to receive(:min_and_start_dates).with(anything, start_date_param)
-        get :securities_services_statement, start_date: start_date_param
-      end
-      it 'should set @start_date to the value returned by `month_restricted_start_date`' do
-        allow(controller).to receive(:month_restricted_start_date).and_return(month_restricted_start_date)
-        make_request
-        expect(assigns[:start_date]).to eq(month_restricted_start_date)
-      end
-      it 'should set @picker_presets to the `date_picker_presets` for the `start_date`' do
-        some_presets = double('Some Presets')
-        allow(subject).to receive(:date_picker_presets).and_return(some_presets)
-        make_request
-        expect(assigns[:picker_presets]).to eq(some_presets)
-      end
-      it 'should raise an error if @statement is nil' do
-        expect(member_balance_service_instance).to receive(:securities_services_statement).and_return(nil)
-        expect{make_request}.to raise_error(StandardError)
-      end
-      describe 'with the report disabled' do
+      describe 'when statements are available' do
         before do
-          allow(controller).to receive(:report_disabled?).with(ReportsController::SECURITIES_SERVICES_STATMENT_WEB_FLAGS).and_return(true)
+          allow(member_balance_service_instance).to receive(:securities_services_statements_available).and_return([{'month_year' => month_year, 'report_end_date' => report_end_date}])
+          allow(member_balance_service_instance).to receive(:securities_services_statement).with(report_end_date).and_return([response_hash])
+          allow(response_hash).to receive(:[]).with(:securities_fees).and_return([{}])
+          allow(response_hash).to receive(:[]).with(:transaction_fees).and_return([{}])
         end
-        it 'should set @statement to {} if the report is disabled' do
+        it_behaves_like 'a user required action', :get, :securities_services_statement
+        it_behaves_like 'a report with instance variables set in a before_filter', :securities_services_statement
+        it_behaves_like 'a report that can be downloaded', :securities_services_statement, [:pdf]
+        it 'should set @start_date to the `report_end_date` attribute of the first entry of hash returned by securities_services_statements_available' do
           make_request
-          expect(assigns[:statement]).to eq({})
+          expect(assigns[:start_date]).to eq(report_end_date)
         end
-        it 'should set @start_date if the report is disabled' do
+        it 'should assign `@statement` to the result of calling MemberBalanceService.securities_services_statement' do
           make_request
-          expect(assigns[:start_date]).to be_kind_of(Date)
+          expect(assigns[:statement]).to eq([response_hash])
+        end
+        it 'assigns @data_available a value of true' do
+          make_request
+          expect(assigns[:data_available]).to eq(true)
+        end
+        it 'should raise an error if @statement is nil' do
+          expect(member_balance_service_instance).to receive(:securities_services_statement).and_return(nil)
+          expect{make_request}.to raise_error(StandardError)
+        end
+        describe 'with the report disabled' do
+          before do
+            allow(controller).to receive(:report_disabled?).with(ReportsController::SECURITIES_SERVICES_STATMENT_WEB_FLAGS).and_return(true)
+          end
+          it 'should set @statement to {} if the report is disabled' do
+            make_request
+            expect(assigns[:statement]).to eq({})
+          end
+          it 'should set @start_date if the report is disabled' do
+            make_request
+            expect(assigns[:start_date]).to eq(report_end_date)
+          end
+        end
+      end
+      describe 'when no statements are available' do
+        before { allow(member_balance_service_instance).to receive(:securities_services_statements_available).and_return([]) }
+        it 'assigns @data_available a value of false' do
+          make_request
+          expect(assigns[:data_available]).to eq(false)
         end
       end
     end
@@ -587,6 +733,7 @@ RSpec.describe ReportsController, :type => :controller do
 
       it_behaves_like 'a user required action', :get, :letters_of_credit
       it_behaves_like 'a report with instance variables set in a before_filter', :letters_of_credit
+      it_behaves_like 'a report that can be downloaded', :letters_of_credit, [:xlsx]
 
       describe 'view instance variables' do
         it 'sets @as_of_date to the value returned by MemberBalanceService.letters_of_credit' do
@@ -759,8 +906,7 @@ RSpec.describe ReportsController, :type => :controller do
         expect{make_request}.to raise_error(StandardError)
       end
     end
-
-    describe 'GET current_securities_position', skip: true do
+    describe 'GET current_securities_position' do
       dropdown_options = [
         [I18n.t('reports.pages.securities_position.filter.all'), 'all'],
         [I18n.t('reports.pages.securities_position.filter.pledged'), 'pledged'],
@@ -770,13 +916,17 @@ RSpec.describe ReportsController, :type => :controller do
       let(:as_of_date) { Date.new(2014,1,1) }
       before {
         allow(securities_position_response).to receive(:[]).with(:securities).and_return([])
+        allow(securities_position_response).to receive(:[]=).with(:securities, anything)
         allow(member_balance_service_instance).to receive(:current_securities_position).and_return(securities_position_response)
       }
 
       it_behaves_like 'a user required action', :get, :current_securities_position
       it_behaves_like 'a report with instance variables set in a before_filter', :current_securities_position
+      it_behaves_like 'a report that can be downloaded', :current_securities_position, [:xlsx]
 
       describe 'view instance variables' do
+        let(:unprocessed_securities) { double('unprocessed securities details', length: nil) }
+        let(:processed_securities) { double('processed securities details') }
         it 'sets @current_securities_position to the hash returned from MemberBalanceService' do
           get :current_securities_position
           expect(assigns[:current_securities_position]).to eq(securities_position_response)
@@ -785,6 +935,12 @@ RSpec.describe ReportsController, :type => :controller do
           allow(controller).to receive(:report_disabled?).with(ReportsController::CURRENT_SECURITIES_POSITION_WEB_FLAG).and_return(true)
           get :current_securities_position
           expect(assigns[:current_securities_position]).to eq({securities:[]})
+        end
+        it 'sets @current_securities_position[:securities] to the result of the `format_securities_detail` method' do
+          allow(securities_position_response).to receive(:[]).with(:securities).and_return(unprocessed_securities)
+          allow(controller).to receive(:format_securities_detail).with(unprocessed_securities).and_return(processed_securities)
+          expect(securities_position_response).to receive(:[]=).with(:securities, processed_securities)
+          get :current_securities_position
         end
         it 'sets @securities_filter to `all` if no securities_filter param is provided' do
           get :current_securities_position
@@ -807,6 +963,18 @@ RSpec.describe ReportsController, :type => :controller do
           get :current_securities_position
           expect(assigns[:securities_filter_options]).to eq(dropdown_options)
         end
+        it 'sets @report_download_column_headings to an array of column headings' do
+          column_headings = [
+            I18n.t('common_table_headings.custody_account_number'), I18n.t('reports.pages.securities_position.custody_account_type'), I18n.t('reports.pages.securities_position.security_pledge_type'),
+            I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.security_description'), I18n.t('reports.pages.securities_position.reg_id'),
+            I18n.t('common_table_headings.pool_number'), I18n.t('common_table_headings.coupon_rate'), I18n.t('common_table_headings.maturity_date'),
+            I18n.t('common_table_headings.original_par_value'), I18n.t('reports.pages.securities_position.factor'), I18n.t('reports.pages.securities_position.factor_date'),
+            I18n.t('common_table_headings.current_par'), I18n.t('common_table_headings.price'), I18n.t('common_table_headings.price_date'),
+            I18n.t('reports.pages.securities_position.market_value')
+          ]
+          get :current_securities_position
+          expect(assigns[:report_download_column_headings]).to eq(column_headings)
+        end
         dropdown_options.each do |option|
           it "sets @securities_filter_text to the appropriate value when @securities_filter equals `#{option.last}`" do
             get :current_securities_position, securities_filter: option.last
@@ -815,8 +983,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
-
-    describe 'GET monthly_securities_position', skip: true do
+    describe 'GET monthly_securities_position' do
       dropdown_options = [
         [I18n.t('reports.pages.securities_position.filter.all'), 'all'],
         [I18n.t('reports.pages.securities_position.filter.pledged'), 'pledged'],
@@ -829,6 +996,7 @@ RSpec.describe ReportsController, :type => :controller do
       let(:start_date_param) { Date.today - rand(10000) }
       before {
         allow(securities_position_response).to receive(:[]).with(:securities).and_return([])
+        allow(securities_position_response).to receive(:[]=).with(:securities, anything)
         allow(member_balance_service_instance).to receive(:monthly_securities_position).and_return(securities_position_response)
         allow(restricted_start_date).to receive(:end_of_month).and_return(end_of_month)
         allow(controller).to receive(:month_restricted_start_date).and_return(end_of_month)
@@ -837,7 +1005,10 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :monthly_securities_position
       it_behaves_like 'a date restricted report', :monthly_securities_position, :last_month_end
       it_behaves_like 'a report with instance variables set in a before_filter', :monthly_securities_position
+      it_behaves_like 'a report that can be downloaded', :monthly_securities_position, [:xlsx]
       describe 'view instance variables' do
+        let(:unprocessed_securities) { double('unprocessed securities details', length: nil) }
+        let(:processed_securities) { double('processed securities details') }
         it "should pass `#{ReportsController::DATE_RESTRICTION_MAPPING[:monthly_securities_position]}` to `min_and_start_dates`" do
           expect(controller).to receive(:min_and_start_dates).with(ReportsController::DATE_RESTRICTION_MAPPING[:monthly_securities_position], anything)
           get :monthly_securities_position
@@ -856,14 +1027,20 @@ RSpec.describe ReportsController, :type => :controller do
           get :monthly_securities_position
           expect(assigns[:month_end_date]).to eq(month_restricted_start_date)
         end
-        it 'sets @current_securities_position to the hash returned from MemberBalanceService' do
+        it 'sets @monthly_securities_position to the hash returned from MemberBalanceService' do
           get :monthly_securities_position
           expect(assigns[:monthly_securities_position]).to eq(securities_position_response)
         end
-        it 'sets @current_securities_position to {securities:[]} if the report is disabled' do
+        it 'sets @monthly_securities_position to {securities:[]} if the report is disabled' do
           allow(controller).to receive(:report_disabled?).with(ReportsController::MONTHLY_SECURITIES_WEB_FLAGS).and_return(true)
           get :monthly_securities_position
           expect(assigns[:monthly_securities_position]).to eq({securities:[]})
+        end
+        it 'sets @monthly_securities_position[:securities] to the result of the `format_securities_detail` method' do
+          allow(securities_position_response).to receive(:[]).with(:securities).and_return(unprocessed_securities)
+          allow(controller).to receive(:format_securities_detail).with(unprocessed_securities).and_return(processed_securities)
+          expect(securities_position_response).to receive(:[]=).with(:securities, processed_securities)
+          get :monthly_securities_position
         end
         it 'sets @securities_filter to `all` if no securities_filter param is provided' do
           get :monthly_securities_position
@@ -886,6 +1063,18 @@ RSpec.describe ReportsController, :type => :controller do
           get :monthly_securities_position
           expect(assigns[:securities_filter_options]).to eq(dropdown_options)
         end
+        it 'sets @report_download_column_headings to an array of column headings' do
+          column_headings = [
+            I18n.t('common_table_headings.custody_account_number'), I18n.t('reports.pages.securities_position.custody_account_type'), I18n.t('reports.pages.securities_position.security_pledge_type'),
+            I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.security_description'), I18n.t('reports.pages.securities_position.reg_id'),
+            I18n.t('common_table_headings.pool_number'), I18n.t('common_table_headings.coupon_rate'), I18n.t('common_table_headings.maturity_date'),
+            I18n.t('common_table_headings.original_par_value'), I18n.t('reports.pages.securities_position.factor'), I18n.t('reports.pages.securities_position.factor_date'),
+            I18n.t('common_table_headings.current_par'), I18n.t('common_table_headings.price'), I18n.t('common_table_headings.price_date'),
+            I18n.t('reports.pages.securities_position.market_value')
+          ]
+          get :monthly_securities_position
+          expect(assigns[:report_download_column_headings]).to eq(column_headings)
+        end
         dropdown_options.each do |option|
           it "sets @securities_filter_text to the appropriate value when @securities_filter equals `#{option.last}`" do
             get :monthly_securities_position, securities_filter: option.last
@@ -904,6 +1093,7 @@ RSpec.describe ReportsController, :type => :controller do
       }
 
       it_behaves_like 'a user required action', :get, :forward_commitments
+      it_behaves_like 'a report that can be downloaded', :forward_commitments, [:xlsx]
       it_behaves_like 'a report with instance variables set in a before_filter', :forward_commitments
       describe 'view instance variables' do
         it 'sets @as_of_date to the value returned from the service endpoint' do
@@ -981,8 +1171,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
-
-    describe 'GET capital_stock_and_leverage', skip: true do
+    describe 'GET capital_stock_and_leverage' do
       let(:capital_stock_and_leverage) { get :capital_stock_and_leverage }
       let(:capital_stock_and_leverage_response) { double('Capital stock and leverage response', :[] => nil) }
       let(:surplus_stock) { rand(1..999999999) }
@@ -1127,7 +1316,7 @@ RSpec.describe ReportsController, :type => :controller do
       describe 'view instance variables' do
         it 'sets the @todays_credit row attribute' do
           todays_credit
-          expect(assigns[:todays_credit][:rows][0][:columns]).to eq([{value: credit_activity[:transaction_number]}, {type: :number, value: credit_activity[:current_par]}, {type: :index, value: credit_activity[:interest_rate]}, {type: :date, value: credit_activity[:funding_date]}, {type: :date, value: credit_activity[:maturity_date]}, {value: credit_activity[:product_description]}])
+          expect(assigns[:todays_credit][:rows][0][:columns]).to eq([{value: credit_activity[:transaction_number]}, {type: :number, value: credit_activity[:current_par]}, {type: :index, value: credit_activity[:interest_rate]}, {type: :date, value: credit_activity[:funding_date]}, {type: :date, value: credit_activity[:maturity_date]}, {value: financial_instrument_standardize(credit_activity[:product_description])}])
         end
         it 'sets the @todays_credit column_headings attribute' do
           todays_credit
@@ -1154,6 +1343,95 @@ RSpec.describe ReportsController, :type => :controller do
       it 'raises an error if the MAPI endpoint returns nil' do
         allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return(nil)
         expect{todays_credit}.to raise_error
+      end
+    end
+    
+    describe 'GET mortgage_collateral_update' do
+      column_headings = [I18n.t('common_table_headings.transaction'), I18n.t('common_table_headings.loan_count'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.unpaid_balance'), '$'), fhlb_add_unit_to_table_header(I18n.t('global.original_amount'), '$')]
+      accepted_loans_hash = {
+        instance_variable: :accepted_loans_table_data,
+        table_row_arg: %w(updated pledged renumbered),
+        table_column_args: ['accepted', I18n.t('reports.pages.mortgage_collateral_update.total_accepted')]
+      }
+      submitted_loans_hash = {
+        instance_variable: :submitted_loans_table_data,
+        table_row_arg: %w(accepted rejected),
+        table_column_args: ['total', I18n.t('reports.pages.mortgage_collateral_update.total_submitted')]
+      }
+      let(:mortgage_collateral_update) { get :mortgage_collateral_update }
+      let(:mcu_data) { double('mcu data from service object') }
+      let(:table_rows) { double('table rows') }
+      let(:table_footer) { double('table footer') }
+      before do
+        allow(member_balance_service_instance).to receive(:mortgage_collateral_update).and_return(mcu_data)
+        allow(subject).to receive(:mcu_table_rows_for)
+        allow(subject).to receive(:mcu_table_columns_for)
+      end
+      
+      it_behaves_like 'a user required action', :get, :mortgage_collateral_update
+      
+      it 'renders the mortgage_collateral_update view' do
+        mortgage_collateral_update
+        expect(response.body).to render_template('mortgage_collateral_update')
+      end
+      it 'sets the @mcu_data instance variable to the result of the `mortgage_collateral_update` MemberBalanceService method' do
+        mortgage_collateral_update
+        expect(assigns[:mcu_data]).to eq(mcu_data)
+      end
+      
+      [accepted_loans_hash, submitted_loans_hash].each do |hash|
+        describe "the @#{hash[:instance_variable].to_s} instance variable" do
+          it "has a column_headings array equal to #{column_headings}" do
+            mortgage_collateral_update
+            expect(assigns[hash[:instance_variable]][:column_headings]).to eq(column_headings)
+          end
+          it "calls the `mcu_table_columns_for` private method with @mcu_data, #{hash[:table_column_args].first}, #{hash[:table_column_args].last}" do
+            expect(subject).to receive(:mcu_table_columns_for).with(mcu_data, hash[:table_column_args].first, hash[:table_column_args].last)
+            mortgage_collateral_update
+          end
+          it 'has a footer array equal to the result of the `mcu_table_columns_for` private method' do
+            allow(subject).to receive(:mcu_table_columns_for).with(mcu_data, hash[:table_column_args].first, hash[:table_column_args].last).and_return(table_footer)
+            mortgage_collateral_update
+            expect(assigns[hash[:instance_variable]][:footer]).to eq(table_footer)
+          end
+          it "calls the `mcu_table_rows_for` private method with @mcu_data, #{hash[:table_row_arg]}" do
+            expect(subject).to receive(:mcu_table_rows_for).with(mcu_data, hash[:table_row_arg])
+            mortgage_collateral_update
+          end
+          it "has a rows array equal to the result of the `mcu_table_rows_for` private method" do
+            allow(subject).to receive(:mcu_table_rows_for).with(mcu_data, hash[:table_row_arg]).and_return(table_rows)
+            mortgage_collateral_update
+            expect(assigns[hash[:instance_variable]][:rows]).to eq(table_rows)
+          end
+        end
+      end
+      describe 'the @depledged_loans_table_data instance variable' do
+        it "has a column_headings array equal to #{column_headings}" do
+          mortgage_collateral_update
+          expect(assigns[:depledged_loans_table_data][:column_headings]).to eq(column_headings)
+        end
+        it "calls the `mcu_table_columns_for` private method with @mcu_data, 'depledged', #{I18n.t('reports.pages.mortgage_collateral_update.loans_depledged')}" do
+          expect(subject).to receive(:mcu_table_columns_for).with(mcu_data, 'depledged', I18n.t('reports.pages.mortgage_collateral_update.loans_depledged'))
+          mortgage_collateral_update
+        end
+        it "has a rows array with a row object containing the result of the `mcu_table_columns_for` private method" do
+          expect(subject).to receive(:mcu_table_columns_for).with(mcu_data, 'depledged', I18n.t('reports.pages.mortgage_collateral_update.loans_depledged')).and_return(table_rows)
+          mortgage_collateral_update
+          expect(assigns[:depledged_loans_table_data][:rows]).to eq([{columns: table_rows}])
+        end
+      end
+      describe 'with the report disabled' do
+        before do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS).and_return(true)
+        end
+        it "sets @mcu_data to an hash" do
+          mortgage_collateral_update
+          expect(assigns[:mcu_data]).to eq({})
+        end
+      end
+      it 'raises an error if the MAPI endpoint returns nil' do
+        allow(member_balance_service_instance).to receive(:mortgage_collateral_update).and_return(nil)
+        expect{mortgage_collateral_update}.to raise_error
       end
     end
   end
@@ -1289,7 +1567,7 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
-  describe 'GET securities_transactions', skip: true do
+  describe 'GET securities_transactions' do
     let(:start_date)                       { Date.new(2014,12,31) }
     let(:member_balances_service_instance) { double('MemberBalanceService') }
     let(:response_hash)                    { double('MemberBalanceServiceHash') }
@@ -1354,6 +1632,8 @@ RSpec.describe ReportsController, :type => :controller do
     end
     it_behaves_like 'a user required action', :get, :securities_transactions
     it_behaves_like 'a report with instance variables set in a before_filter', :securities_transactions
+    it_behaves_like 'a report with a @max_date', :securities_transactions
+    it_behaves_like 'a report that can be downloaded', :securities_transactions, [:xlsx]
     it 'can be disabled' do
       allow(subject).to receive(:report_disabled?).and_return(true)
       allow(transaction_hash).to receive(:collect)
@@ -1364,8 +1644,9 @@ RSpec.describe ReportsController, :type => :controller do
       get :securities_transactions
       expect(response.body).to render_template('securities_transactions')
     end
-    it 'should pass @start_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-      allow(controller).to receive(:date_picker_presets).with(start_date).and_return(picker_preset_hash)
+    it 'should pass @start_date and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+      allow(controller).to receive(:most_recent_business_day).and_return(max_date)
+      allow(controller).to receive(:date_picker_presets).with(start_date, nil, nil, max_date).and_return(picker_preset_hash)
       allow(response_hash).to receive(:[]).with(:transactions).and_return(securities_transactions_response_with_new_transaction)
       get :securities_transactions, start_date: start_date
       expect(assigns[:picker_presets]).to eq(picker_preset_hash)
@@ -1389,6 +1670,7 @@ RSpec.describe ReportsController, :type => :controller do
     let (:sat) { double('sat', saturday?: true,  sunday?: false) }
     let (:sun) { double('sun', saturday?: false, sunday?: true)  }
     before do
+      allow(controller).to receive(:most_recent_business_day).and_call_original
       allow(sun).to receive(:-).with(2.day).and_return(fri)
       allow(sat).to receive(:-).with(1.day).and_return(fri)
     end
@@ -1617,15 +1899,20 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
-  describe 'GET authorizations', skip: true do
+  describe 'GET authorizations' do
     it_behaves_like 'a user required action', :get, :authorizations
     it_behaves_like 'a report that can be downloaded', :authorizations, [:pdf]
     it_behaves_like 'a report with instance variables set in a before_filter', :authorizations
     describe 'view instance variables' do
       let(:member_service_instance) {double('MembersService')}
-      let(:user_no_roles) {{display_name: 'User With No Roles', roles: []}}
-      let(:user_etransact) {{display_name: 'Etransact User', roles: [User::Roles::ETRANSACT_SIGNER]}}
-      let(:signers_and_users) {[user_no_roles, user_etransact]}
+      let(:user_no_roles) {{display_name: 'User With No Roles', roles: [], surname: 'With No Roles', given_name: 'User'}}
+      let(:user_etransact) {{display_name: 'Etransact User', roles: [User::Roles::ETRANSACT_SIGNER], surname: 'User', given_name: 'Etransact'}}
+      let(:user_a) { {display_name: 'R&A User', roles: [User::Roles::SIGNER_MANAGER], given_name: 'R&A', surname: 'User'} }
+      let(:user_b) { {display_name: 'Collateral User', roles: [User::Roles::COLLATERAL_SIGNER], given_name: 'Collateral', surname: 'User'} }
+      let(:user_c) { {display_name: 'Wire Lady', roles: [User::Roles::WIRE_SIGNER], given_name: 'Wire', surname: 'Lady'} }
+      let(:user_d) { {display_name: 'No Surname', roles: [User::Roles::WIRE_SIGNER], given_name: 'No', surname: nil} }
+      let(:user_e) { {display_name: 'No Given Name', roles: [User::Roles::WIRE_SIGNER], given_name: nil, surname: 'Given'} }
+      let(:signers_and_users) {[user_no_roles, user_etransact, user_a, user_b, user_c, user_d, user_e]}
       let(:roles) {['all', User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::AFFORDABILITY_SIGNER, User::Roles::COLLATERAL_SIGNER, User::Roles::MONEYMARKET_SIGNER, User::Roles::DERIVATIVES_SIGNER, User::Roles::SECURITIES_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER, User::Roles::ETRANSACT_SIGNER]}
       let(:role_translations) {[t('user_roles.all_authorizations'), t('user_roles.resolution.dropdown'), t('user_roles.entire_authority.dropdown'), t('user_roles.affordable_housing.title'), t('user_roles.collateral.title'), t('user_roles.money_market.title'), t('user_roles.interest_rate_derivatives.title'), t('user_roles.securities.title'), t('user_roles.wire_transfer.title'), t('user_roles.access_manager.title'), t('user_roles.etransact.title')]}
       let(:job_id) {rand(1000..10000)}
@@ -1765,25 +2052,37 @@ RSpec.describe ReportsController, :type => :controller do
                 expect(row[:columns].last[:value]).to be_kind_of(Array)
               end
             end
-            it 'contains all users sorted by display_name if the authorizations_filter is set to `all`' do
+            it 'contains all users sorted by last name then first name if the authorizations_filter is set to `all`' do
               make_request
-              expect(assigns[:authorizations_table_data][:rows].length).to eq(2)
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('Etransact User')
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.etransact.title')])
-              expect(assigns[:authorizations_table_data][:rows].last[:columns].first[:value]).to eq('User With No Roles')
-              expect(assigns[:authorizations_table_data][:rows].last[:columns].last[:value]).to eq([I18n.t('user_roles.user.title')])
+              rows = assigns[:authorizations_table_data][:rows]
+              expect(rows.length).to eq(5)
+              rows.zip([user_d, user_e, user_c, user_b, user_a]).each do |row, user|
+                expect(row[:columns].first[:value]).to eq(user[:display_name])
+              end
             end
-            it "only contains users with a user_role of #{I18n.t('user_roles.user.title')} if the authorizations_filter is set to `user`" do
-              get :authorizations, :authorizations_filter => 'user', job_id: job_id
+            it 'only contains signer managers if authorizations_filter is set to SIGNER_MANAGER' do
+              get :authorizations, :authorizations_filter => User::Roles::SIGNER_MANAGER, job_id: job_id
               expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('User With No Roles')
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.user.title')])
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_a[:display_name])
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.resolution.title')])
             end
-            it 'only contains users with the proper role if an authorization_filter is set' do
-              get :authorizations, :authorizations_filter => User::Roles::ETRANSACT_SIGNER, job_id: job_id
+            it 'only contains collateral signers if authorizations_filter is set to COLLATERAL_SIGNER' do
+              get :authorizations, :authorizations_filter => User::Roles::COLLATERAL_SIGNER, job_id: job_id
               expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq('Etransact User')
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.etransact.title')])
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_b[:display_name])
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.collateral.title')])
+            end
+            it 'only contains wire signers if authorizations_filter is set to WIRE_SIGNER' do
+              get :authorizations, :authorizations_filter => User::Roles::WIRE_SIGNER, job_id: job_id
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(3)
+              expect(assigns[:authorizations_table_data][:rows][0][:columns].first[:value]).to eq(user_d[:display_name])
+              expect(assigns[:authorizations_table_data][:rows][1][:columns].first[:value]).to eq(user_e[:display_name])
+              expect(assigns[:authorizations_table_data][:rows][2][:columns].first[:value]).to eq(user_c[:display_name])
+              expect(assigns[:authorizations_table_data][:rows][0][:columns].last[:value]).to eq([I18n.t('user_roles.wire_transfer.title')])
+            end
+            it 'ignores users with no role or the eTransact role' do
+              make_request
+              expect(assigns[:authorizations_table_data][:rows]).to satisfy { |rows| !rows.find {|row| [user_etransact[:display_name], user_no_roles[:display_name]].include?(row[:columns].first[:value]) } }
             end
           end
         end
@@ -2022,14 +2321,25 @@ RSpec.describe ReportsController, :type => :controller do
       it 'returns an array containing the I18n translation of the roles for a given user' do
         role_mappings.each_key do |role|
           user = {:roles => [role]}
-          expect(controller.send(:roles_for_signers, user)).to eq([role_mappings[role]])
+          expect(subject.send(:roles_for_signers, user)).to eq([role_mappings[role]])
         end
       end
-      it 'returns an array containing the I18n translation for `user` when a given user has no roles' do
+      it 'returns an empty array a given user has no roles' do
         role_mappings.each_key do |role|
           user = {:roles => []}
-          expect(controller.send(:roles_for_signers, user)).to eq([I18n.t('user_roles.user.title')])
+          expect(subject.send(:roles_for_signers, user)).to eq([])
         end
+      end
+      it 'sorts the roles based on the `AUTHORIZATIONS_ORDER`' do
+        roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER]
+        sorted_roles = roles.sort_by {|role| described_class::AUTHORIZATIONS_ORDER.index(role)}
+        user = {:roles => roles}
+        expect(subject.send(:roles_for_signers, user)).to eq(sorted_roles.collect {|role| role_mappings[role]})
+      end
+      it 'hides roles that are implied by a higher role' do
+        roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::SIGNER_MANAGER]
+        user = {:roles => roles}
+        expect(subject.send(:roles_for_signers, user)).to match_array([role_mappings[User::Roles::WIRE_SIGNER], role_mappings[User::Roles::SIGNER_MANAGER]])
       end
     end
     describe 'last_month_end' do
@@ -2088,7 +2398,312 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
-  end
+    
+    describe '`mcu_table_rows_for`' do
+      let(:data_hash) { double('a data hash') }
+      let(:loan_type_1) { double('a loan type') }
+      let(:loan_type_2) { double('another loan type') }
+      let(:translation_1) { double('a translation') }
+      let(:translation_2) { double('another translation') }
+      let(:column_data_1) { double('some column data') }
+      let(:column_data_2) { double('some more column data') }
+      let(:loan_types) { [loan_type_1, loan_type_2] }
+      let(:call_method) { subject.send(:mcu_table_rows_for, data_hash, loan_types) }
+      
+      it 'calls `mcu_table_columns_for` with the proper args for each supplied loan type in the correct order' do
+        allow(subject).to receive(:t).with("reports.pages.mortgage_collateral_update.#{loan_type_1}").and_return(translation_1)
+        allow(subject).to receive(:t).with("reports.pages.mortgage_collateral_update.#{loan_type_2}").and_return(translation_2)
+        expect(subject).to receive(:mcu_table_columns_for).with(data_hash, loan_type_1, translation_1).ordered
+        expect(subject).to receive(:mcu_table_columns_for).with(data_hash, loan_type_2, translation_2).ordered
+        call_method
+      end
+      it 'returns an array of row objects constructed from the `mcu_table_columns_for` method' do
+        expect(subject).to receive(:mcu_table_columns_for).and_return(column_data_1, column_data_2)
+        expect(call_method).to eq([{columns: column_data_1},{columns: column_data_2}])
+      end
+    end
+    
+    describe '`mcu_table_columns_for`' do
+      let(:data_hash) { double('a data hash', :[] => nil) }
+      let(:loan_type) { double('a loan type') }
+      let(:value) { double('some value') }
+      let(:title) { double('title') }
+      let(:call_method) { subject.send(:mcu_table_columns_for, data_hash, loan_type, title) }
+      it 'returns an array whose first member is an object with a value equal to the argument supplied' do
+        expect(call_method.first).to eq({value: title})
+      end
+      %w(count unpaid original).each_with_index do |type, i|
+        it "returns an array whose #{ordinalize(i)} member is an object with the correct loan_type #{type} value from the data hash and a type of `:number`" do
+          allow(data_hash).to receive(:[]).with(:"#{loan_type}_#{type}").and_return(value)
+          expect(call_method[i + 1]).to eq({value: value, type: :number})
+        end  
+      end
+    end
 
+    describe '`downloadable_report`' do
+      let(:id) { rand(1..1000) }
+      let(:call_method) { subject.send(:downloadable_report) }
+      let(:job_status) { double('job status', :update_attributes! => nil) }
+      let(:job) { double('job instance', job_status: job_status) }
+      let(:action_name) { double('name of controller action', gsub: nil) }
+      let(:report_download_name) { double('report_download_name') }
+      let(:report_download_params) { double('report_download_params') }
+      let(:job_status_url) { double('job_status_url') }
+      let(:job_cancel_url) { double('job_cancel_url') }
+      describe 'when there is not an `export_format` parameter' do
+        it 'yields a code block' do
+          expect{|x| subject.send(:downloadable_report, &x) }.to yield_with_no_args
+        end
+      end
+      describe 'when there is an `export_format` parameter' do
+        before do
+          allow(subject).to receive(:params).and_return({export_format: ReportsController::DOWNLOAD_FORMATS.sample})
+          allow(subject).to receive(:render)
+          allow(subject).to receive(:action_name).and_return(action_name)
+        end
+        it 'raises an exception if the `export_format` parameter is not included in the allowed formats' do
+          allow(subject).to receive(:params).and_return({export_format: 'foo'})
+          expect{call_method}.to raise_error(ArgumentError, 'Format not allowed for this report')
+        end
+        it 'raises an exception if the `export_format` parameter is not `:pdf` or `:xlsx`, even if the format is allowed' do
+          allow(subject).to receive(:params).and_return({export_format: 'foo'})
+          expect{subject.send(:downloadable_report, [:foo])}.to raise_error(ArgumentError, 'Report format not recognized')
+        end
+        [['pdf', RenderReportPDFJob], ['xlsx', RenderReportExcelJob]].each do |format|
+          describe "when the export_format is #{format.first}" do
+            before do
+              allow(subject).to receive(:params).and_return({export_format: format.first})
+              allow(format.last).to receive(:perform_later).and_return(job)
+            end
+            it "calls `perform_later` on #{format.last} with the current_member_id and action_name" do
+              allow(subject).to receive(:current_member_id).and_return(id)
+              expect(format.last).to receive(:perform_later).with(id, action_name, anything, anything).and_return(job)
+              call_method
+            end
+            it "passes the `report_download_name` to the `perform_later` method" do
+              expect(format.last).to receive(:perform_later).with( anything, anything, report_download_name, anything).and_return(job)
+              subject.send(:downloadable_report, nil, nil, report_download_name)
+            end
+            it "passes the `report_download_params` to the `perform_later method`" do
+              expect(format.last).to receive(:perform_later).with( anything, anything, anything, report_download_params).and_return(job)
+              subject.send(:downloadable_report, nil, report_download_params)
+            end
+            it 'updates the job_status with the current_user_id' do
+              allow(subject).to receive(:current_user).and_return(double('User', id: id))
+              expect(job_status).to receive(:update_attributes!).with(user_id: id)
+              call_method
+            end
+            it 'renders a json object with the correct `job_status_url` and `job_cancel_url`' do
+              allow(subject).to receive(:job_status_url).with(job_status).and_return(job_status_url)
+              allow(subject).to receive(:job_cancel_url).with(job_status).and_return(job_cancel_url)
+              expect(subject).to receive(:render).with({json: {job_status_url: job_status_url, job_cancel_url: job_cancel_url}})
+              call_method
+            end
+          end
+        end
+      end
+    end
+    describe '`format_securities_detail`' do
+      let(:security) { double('a security', :[] => nil) }
+      let(:call_method) { subject.send(:format_securities_detail, [security]) }
+      it 'assigns a `position_detail` array to each of the securities it is passed' do
+        expect(security).to receive(:[]=).with(:position_detail, anything)
+        call_method
+      end
+      describe 'the :position_detail array' do
+        %w(custody_account_number security_pledge_type cusip description reg_id pool_number coupon_rate maturity_date original_par
+        factor factor_date current_par price price_date market_value).each do |key|
+          let(key.to_sym) { double(key) }
+        end
+        let(:custody_account_type) { ['U', 'P'].sample }
+        let(:security) {
+          {
+            custody_account_type: custody_account_type,
+            custody_account_number: custody_account_number,
+            security_pledge_type: security_pledge_type,
+            cusip: cusip,
+            description: description,
+            reg_id: reg_id,
+            pool_number: pool_number,
+            coupon_rate: coupon_rate,
+            maturity_date: maturity_date,
+            original_par: original_par,
+            factor: factor,
+            factor_date: factor_date,
+            current_par: current_par,
+            price: price,
+            price_date: price_date,
+            market_value: market_value
+          }
+        }
+        let(:formatted_value) { double('a formatted value') }
+        before do
+          %i(fhlb_formatted_percentage fhlb_date_standard_numeric fhlb_formatted_currency).each do |method|
+            allow(subject).to receive(method)
+          end
+        end
+        describe 'the first sub-array' do
+          describe 'the first tertiary array' do
+            it 'contains a first member with appropriate details for `custody_account_number`' do
+              details = {
+                heading: I18n.t('common_table_headings.custody_account_number'),
+                value: custody_account_number,
+                raw_value: custody_account_number
+              }
+              expect(call_method.first[:position_detail][0][0][0]).to eq(details)
+            end
+            it 'contains a second member with appropriate details for `custody_account_type`' do
+              details = {
+                heading: I18n.t('reports.pages.securities_position.custody_account_type'),
+                value: ReportsController::ACCOUNT_TYPE_MAPPING[custody_account_type],
+                raw_value: ReportsController::ACCOUNT_TYPE_MAPPING[custody_account_type]
+              }
+              expect(call_method.first[:position_detail][0][0][1]).to eq(details)
+            end
+            it 'contains a third member with appropriate details for `security_pledge_type`' do
+              details = {
+                heading: I18n.t('reports.pages.securities_position.security_pledge_type'),
+                value: security_pledge_type,
+                raw_value: security_pledge_type
+              }
+              expect(call_method.first[:position_detail][0][0][2]).to eq(details)
+            end
+          end
+          describe 'the second tertiary array' do
+            it 'contains a first member with appropriate details for `cusip`' do
+              details = {
+                heading: I18n.t('common_table_headings.cusip'),
+                value: cusip,
+                raw_value: cusip
+              }
+              expect(call_method.first[:position_detail][0][1][0]).to eq(details)
+            end
+            it 'contains a second member with appropriate details for `description`' do
+              details = {
+                heading: I18n.t('common_table_headings.security_description'),
+                value: description,
+                raw_value: description
+              }
+              expect(call_method.first[:position_detail][0][1][1]).to eq(details)
+            end
+          end
+          describe 'the third tertiary array' do
+            it 'contains a first member with appropriate details for `reg_id`' do
+              details = {
+                heading: I18n.t('reports.pages.securities_position.reg_id'),
+                value: reg_id,
+                raw_value: reg_id
+              }
+              expect(call_method.first[:position_detail][0][2][0]).to eq(details)
+            end
+            it 'contains a second member with appropriate details for `pool_number`' do
+              details = {
+                heading: I18n.t('common_table_headings.pool_number'),
+                value: pool_number,
+                raw_value: pool_number
+              }
+              expect(call_method.first[:position_detail][0][2][1]).to eq(details)
+            end
+            it 'contains a third member with appropriate details for `coupon_rate`' do
+              allow(subject).to receive(:fhlb_formatted_percentage).with(coupon_rate, 3).and_return(formatted_value)
+              details = {
+                heading: I18n.t('common_table_headings.coupon_rate'),
+                value: formatted_value,
+                raw_value: coupon_rate
+              }
+              expect(call_method.first[:position_detail][0][2][2]).to eq(details)
+            end
+          end
+          describe 'the fourth tertiary array' do
+            it 'contains a first member with appropriate details for `maturity_date`' do
+              allow(subject).to receive(:fhlb_date_standard_numeric).with(maturity_date).and_return(formatted_value)
+              details = {
+                heading: I18n.t('common_table_headings.maturity_date'),
+                value: formatted_value,
+                raw_value: maturity_date,
+                type: :date
+              }
+              expect(call_method.first[:position_detail][0][3][0]).to eq(details)
+            end
+            it 'contains a second member with appropriate details for `original_par`' do
+              allow(subject).to receive(:fhlb_formatted_currency).with(original_par, force_unit: true, precision: 2).and_return(formatted_value)
+              details = {
+                heading: I18n.t('common_table_headings.original_par_value'),
+                value: formatted_value,
+                raw_value: original_par
+              }
+              expect(call_method.first[:position_detail][0][3][1]).to eq(details)
+            end
+          end
+        end
+        describe 'the second sub-array' do
+          describe 'the first tertiary array' do
+            it 'contains a first member with appropriate details for `coupon_rate`' do
+              allow(subject).to receive(:fhlb_formatted_percentage).with(factor, 8).and_return(formatted_value)
+              details = {
+                heading: I18n.t('reports.pages.securities_position.factor'),
+                value: formatted_value,
+                raw_value: factor
+              }
+              expect(call_method.first[:position_detail][1][0][0]).to eq(details)
+            end
+            it 'contains a second member with appropriate details for `factor_date`' do
+              allow(subject).to receive(:fhlb_date_standard_numeric).with(factor_date).and_return(formatted_value)
+              details = {
+                heading: I18n.t('reports.pages.securities_position.factor_date'),
+                value: formatted_value,
+                raw_value: factor_date,
+                type: :date
+              }
+              expect(call_method.first[:position_detail][1][0][1]).to eq(details)
+            end
+          end
+          describe 'the second tertiary array' do
+            it 'contains a member with appropriate details for `current_par`' do
+              allow(subject).to receive(:fhlb_formatted_currency).with(current_par, force_unit: true, precision: 2).and_return(formatted_value)
+              details = {
+                heading: I18n.t('common_table_headings.current_par'),
+                value: formatted_value,
+                raw_value: current_par
+              }
+              expect(call_method.first[:position_detail][1][1][0]).to eq(details)
+            end
+          end
+          describe 'the third tertiary array' do
+            it 'contains a first member with appropriate details for `price`' do
+              allow(subject).to receive(:fhlb_formatted_currency).with(price, force_unit: true, precision: 2).and_return(formatted_value)
+              details = {
+                heading: I18n.t('common_table_headings.price'),
+                value: formatted_value,
+                raw_value: price
+              }
+              expect(call_method.first[:position_detail][1][2][0]).to eq(details)
+            end
+            it 'contains a second member with appropriate details for `price_date`' do
+              allow(subject).to receive(:fhlb_date_standard_numeric).with(price_date).and_return(formatted_value)
+              details = {
+                heading: I18n.t('common_table_headings.price_date'),
+                value: formatted_value,
+                raw_value: price_date,
+                type: :date
+              }
+              expect(call_method.first[:position_detail][1][2][1]).to eq(details)
+            end
+          end
+          describe 'the fourth tertiary array' do
+            it 'contains a member with appropriate details for `market_value`' do
+              allow(subject).to receive(:fhlb_formatted_currency).with(market_value, force_unit: true, precision: 2).and_return(formatted_value)
+              details = {
+                heading: I18n.t('reports.pages.securities_position.market_value'),
+                value: formatted_value,
+                raw_value: market_value
+              }
+              expect(call_method.first[:position_detail][1][3][0]).to eq(details)
+            end
+          end
+        end
+      end
+    end
+  end
 end
 

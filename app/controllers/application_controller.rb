@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   include Pundit
+  include FlipperHelper
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
@@ -7,15 +8,20 @@ class ApplicationController < ActionController::Base
   before_action :check_password_change
   before_action :check_terms
   before_action :save_render_time
-  helper_method :current_member_name
+  helper_method :current_member_name, :current_member_id
 
   HTTP_404_ERRORS = [ActionController::RoutingError, ActionController::UnknownController, ::AbstractController::ActionNotFound, ActiveRecord::RecordNotFound]
 
   rescue_from Exception do |exception|
-    unless Rails.env.production?
-      raise exception
+    case exception
+    when ActionController::InvalidAuthenticityToken
+      handle_bad_csrf
     else
-      handle_exception(exception)
+      unless Rails.env.production?
+        raise exception
+      else
+        handle_exception(exception)
+      end
     end
   end
 
@@ -101,6 +107,8 @@ class ApplicationController < ActionController::Base
     begin
       if HTTP_404_ERRORS.include?(exception.class)
         render 'error/404', layout: 'error', status: 404
+      elsif exception.is_a?(Pundit::NotAuthorizedError)
+        render 'error/403', layout: 'error', status: 403
       else
         render 'error/500', layout: 'error', status: 500
       end
@@ -113,6 +121,11 @@ class ApplicationController < ActionController::Base
     request.env["devise.skip_trackable"] = true # tells Warden not to reset Timeoutable timer for this request
     yield
     request.env["devise.skip_trackable"] = false
+  end
+
+  def handle_bad_csrf
+    reset_session
+    redirect_to(logged_out_path)
   end
 
 end

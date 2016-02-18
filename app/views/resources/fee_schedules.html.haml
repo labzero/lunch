@@ -1,0 +1,49 @@
+
+- @html_class = 'white-background'
+.resource.resource-fee-schedules.row
+  %section
+    %h1= t('resources.fee_schedules.title')
+    %p= t('resources.fee_schedules.other_fee_info_html', credit_guide_url: resources_download_path(file: :creditguide), collateral_guide_url: resources_download_path(file: :collateralguide))
+    %nav.nav-toc
+      = link_to(t('resources.fee_schedules.letter_of_credit'), '#letter_of_credit')
+      = link_to(t('resources.fee_schedules.securities_services'), '#securities_services')
+      = link_to(t('resources.fee_schedules.wire_transfer_and_sta'), '#wire_transfer_and_sta')
+  %section
+    %a{name: 'letter_of_credit'}
+    %h2= t('resources.fee_schedules.letter_of_credit')
+    %h3= t('resources.fee_schedules.annual_maintenance_charge') 
+    %p= t('resources.fee_schedules.loc_pricing_info')
+    = render 'reports/reports_table', sortable: false, table_data: @annual_maintenance_charge_table
+    %h3= t('resources.fee_schedules.issuance_fee')
+    = render 'reports/reports_table', sortable: false, table_data: @issuance_fee_table  
+    %p= t('resources.fee_schedules.other_loc_info')
+    %h3= t('resources.fee_schedules.draw_fee')
+    = render 'reports/reports_table', sortable: false, table_data: @draw_fee_table
+    %h3= t('resources.fee_schedules.amendment_fee')
+    = render 'reports/reports_table', sortable: false, table_data: @amendment_fee_table, table_class: 'resource-amendment-fee-table'
+    %p= t('resources.fee_schedules.other_amendment_info')
+  %section
+    %a{name: 'securities_services'}
+    %h2= t('resources.fee_schedules.securities_services')
+    %h3= t('resources.fee_schedules.monthly_maintenance_fee')
+    %p= t('resources.fee_schedules.monthly_maintenance_info')
+    = render 'reports/reports_table', sortable: false, table_data: @monthly_maintenance_table
+    %h3= t('resources.fee_schedules.monthly_securities_fees')
+    = render 'reports/reports_table', sortable: false, table_data: @monthly_securities_table
+    %h3= t('resources.fee_schedules.security_transaction_fees')
+    = render 'reports/reports_table', sortable: false, table_data: @security_transaction_table
+    %h3= t('.miscellaneous_securities_services')
+    = render 'reports/reports_table', sortable: false, table_data: @securities_services_miscellaneous_table
+    %small= t('resources.fee_schedules.specific_transaction_fee_info')
+  %section
+    %a{name: 'wire_transfer_and_sta'}
+    %h2= t('resources.fee_schedules.wire_transfer_and_sta')
+    %h3= t('resources.fee_schedules.domestic_outgoing_wires')
+    = render 'reports/reports_table', sortable: false, table_data: @domestic_outgoing_wires_table, table_class: 'resource-domestic-outgoing-wire-table'
+    %h3= t('resources.fee_schedules.domestic_incoming_wires')
+    = render 'reports/reports_table', sortable: false, table_data: @domestic_incoming_wires_table
+    %h3= t('resources.fee_schedules.overdraft_charges')
+    = render 'reports/reports_table', sortable: false, table_data: @overdraft_charges_table
+    %h3= t('resources.fee_schedules.miscellaneous_wire_transfer')  
+    = render 'reports/reports_table', sortable: false, table_data: @sta_miscellaneous_table
+  

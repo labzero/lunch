@@ -1,0 +1,8 @@
+- job_status_url ||= nil
+- load_url ||= nil
+- dashboard_module_locals ||= {}
+- dashboard_module_locals[:deferred] = true
+=render layout: 'dashboard/dashboard_module', locals: dashboard_module_locals do
+  .dashboard-module-content
+    = render layout: 'dashboard/dashboard_module_content_deferred', locals: {job_status_url: job_status_url, load_url: load_url} do
+      = yield

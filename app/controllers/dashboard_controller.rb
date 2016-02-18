@@ -1,8 +1,7 @@
 class DashboardController < ApplicationController
   include CustomFormattingHelper
   include DashboardHelper
-
-  MAX_SIMULTANEOUS_ADVANCES = 5.freeze # This number is to prevent a DoS by a user creating thousands of advance requests for a given session
+  include AssetHelper
 
   before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform] do
     authorize :advances, :show?
@@ -16,12 +15,23 @@ class DashboardController < ApplicationController
     advance_request_to_session
   end
 
+  before_action only: [:quick_advance_rates, :index] do
+    @advance_terms = AdvanceRequest::ADVANCE_TERMS
+    @advance_types = AdvanceRequest::ADVANCE_TYPES
+  end
+
   prepend_around_action :skip_timeout_reset, only: [:current_overnight_vrc]
 
   rescue_from AASM::InvalidTransition, AASM::UnknownStateMachineError, AASM::UndefinedState, AASM::NoDirectAssignmentError do |exception|
     logger.info { 'Advance Request State at Exception: ' + advance_request.to_json }
     raise exception
   end
+
+  # {action_name: [job_klass, path_helper_as_string]}
+  DEFERRED_JOBS = {
+    recent_activity: [MemberBalanceTodaysCreditActivityJob, "dashboard_recent_activity_url"],
+    account_overview: [MemberBalanceProfileJob, "dashboard_account_overview_url"]
+  }.freeze
 
   def index
     today = Time.zone.now.to_date
@@ -30,59 +40,8 @@ class DashboardController < ApplicationController
     member_balances = MemberBalanceService.new(current_member_id, request)
     members_service = MembersService.new(request)
     current_user_roles
-
-    profile = member_balances.profile
-
-    @previous_activity = [
-      [t('dashboard.previous_activity.overnight_vrc'), 44503000, DateTime.new(2014,9,3)],
-      [t('dashboard.previous_activity.overnight_vrc'), 39097000, DateTime.new(2014,9,2)],
-      [t('dashboard.previous_activity.overnight_vrc'), 37990040, DateTime.new(2014,8,12)],
-      [t('dashboard.previous_activity.overnight_vrc'), 39282021, DateTime.new(2014,2,14)]
-    ]
-
-    # @account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
-    if !profile
-      profile = {
-        credit_outstanding: {}
-      }
-    end
-
-    if members_service.report_disabled?(current_member_id, [MembersService::FINANCING_AVAILABLE_DATA])
-      profile[:total_financing_available] = nil
-    end
-
-    if members_service.report_disabled?(current_member_id, [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA])
-      profile[:sta_balance] = nil
-    end
-
-    if members_service.report_disabled?(current_member_id, [MembersService::CREDIT_OUTSTANDING_DATA])
-      profile[:credit_outstanding][:total] = nil
-    end
-
-    if members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA])
-      profile[:collateral_borrowing_capacity][:remaining] = nil
-    end
-
-    if members_service.report_disabled?(current_member_id, [MembersService::FHLB_STOCK_DATA])
-      profile[:capital_stock] = nil
-    end
-
-    sta_balance = [
-      [t('dashboard.your_account.table.balance'), profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
-    ]
-
-    credit_outstanding = [
-      [t('dashboard.your_account.table.credit_outstanding'), profile[:credit_outstanding][:total]]
-    ]
-
-    remaining = [
-      {title: t('dashboard.your_account.table.remaining.title')},
-      [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
-      [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
-      [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
-    ]
-
-    @account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining}
+    populate_deferred_jobs_view_parameters(DEFERRED_JOBS)
+    profile = sanitize_profile_if_endpoints_disabled(member_balances.profile)
 
     @market_overview = [{
       name: 'Test',
@@ -137,21 +96,18 @@ class DashboardController < ApplicationController
     default_image_path = 'placeholder-usericon.svg'
     if @contacts[:rm] && @contacts[:rm][:username]
       rm_image_path = "#{@contacts[:rm][:username].downcase}.jpg"
-      @contacts[:rm][:image_url] = Rails.application.assets.find_asset(rm_image_path) ? rm_image_path : default_image_path
+      @contacts[:rm][:image_url] = find_asset(rm_image_path) ? rm_image_path : default_image_path
     end
     if @contacts[:cam] && @contacts[:cam][:username]
       cam_image_path = "#{@contacts[:cam][:username].downcase}.jpg" 
-      @contacts[:cam][:image_url] = Rails.application.assets.find_asset(cam_image_path) ? cam_image_path : default_image_path
+      @contacts[:cam][:image_url] = find_asset(cam_image_path) ? cam_image_path : default_image_path
     end
   end
 
   def quick_advance_rates
     etransact_service = EtransactAdvancesService.new(request)
     @quick_advances_active = etransact_service.etransact_active?
-    advance_request_clear!
     @rate_data = advance_request.rates
-    @advance_terms = AdvanceRequest::ADVANCE_TERMS
-    @advance_types = AdvanceRequest::ADVANCE_TYPES
 
     logger.info { '  Advance Request State: ' + advance_request.inspect }
     logger.info { '  Advance Request Errors: ' + advance_request.errors.inspect }
@@ -165,7 +121,10 @@ class DashboardController < ApplicationController
 
     advance_request.type = params[:advance_type] if params[:advance_type]
     advance_request.term = params[:advance_term] if params[:advance_term]
-    advance_request.amount = params[:amount] if params[:amount]
+    if params[:amount]
+      advance_request.amount = params[:amount]
+      advance_request.stock_choice = nil
+    end
     advance_request.stock_choice = params[:stock_choice] if params[:stock_choice]
 
     advance_request.validate_advance
@@ -268,7 +227,6 @@ class DashboardController < ApplicationController
     logger.info { '  Execute Results: ' + {securid: securid_status, advance_success: advance_success}.inspect }
 
     render json: {securid: securid_status, advance_success: advance_success, html: response_html}
-    advance_request_clear! if advance_success
   end
 
   def current_overnight_vrc
@@ -277,6 +235,50 @@ class DashboardController < ApplicationController
     response[:quick_advances_active] = etransact_service.etransact_active?
     response[:rate] = fhlb_formatted_number(response[:rate], precision: 2, html: false)
     render json: response
+  end
+
+  def recent_activity
+    activities = deferred_job_data || []
+    activities = activities.collect! {|o| o.with_indifferent_access}
+    recent_activity_data = process_recent_activities(activities)
+    render partial: 'dashboard/dashboard_recent_activity', locals: {table_data: recent_activity_data}, layout: false
+  end
+
+  def account_overview
+    profile = deferred_job_data || {}
+    profile = sanitize_profile_if_endpoints_disabled(profile.with_indifferent_access)
+
+    # account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
+    sta_balance = [
+      [t('dashboard.your_account.table.balance'), profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
+    ]
+
+    credit_outstanding = [
+      [t('dashboard.your_account.table.credit_outstanding'), (profile[:credit_outstanding] || {})[:total]]
+    ]
+
+    remaining = if profile[:total_borrowing_capacity_sbc_agency] == 0 && profile[:total_borrowing_capacity_sbc_aaa] == 0 && profile[:total_borrowing_capacity_sbc_aa] == 0
+      [
+        {title: t('dashboard.your_account.table.remaining.title')},
+        [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
+        [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
+        [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
+      ]
+    else
+      [
+        {title: t('dashboard.your_account.table.remaining.title')},
+        [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
+        [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
+        [t('dashboard.your_account.table.remaining.standard'), profile[:total_borrowing_capacity_standard]],
+        [t('dashboard.your_account.table.remaining.agency'), profile[:total_borrowing_capacity_sbc_agency]],
+        [t('dashboard.your_account.table.remaining.aaa'), profile[:total_borrowing_capacity_sbc_aaa]],
+        [t('dashboard.your_account.table.remaining.aa'), profile[:total_borrowing_capacity_sbc_aa]],
+        [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
+      ]
+    end
+
+    account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining}
+    render partial: 'dashboard/dashboard_account_overview', locals: {table_data: account_overview}, layout: false
   end
 
   private
@@ -314,34 +316,23 @@ class DashboardController < ApplicationController
   end
 
   def advance_request_from_session(id)
-    session[:advance_request] ||= []
-    @advance_request ||= if session[:advance_request].include?(id)
-      AdvanceRequest.find(id, request)
-    else
-      advance_request
-    end
+    @advance_request = id ? AdvanceRequest.find(id, request) : advance_request
+    authorize @advance_request, :modify?
+    @advance_request
   end
 
   def advance_request_to_session
-    if @advance_request
-      session[:advance_request] ||= []
-      id = @advance_request.id
-      session[:advance_request].push(id) if @advance_request.save && !session[:advance_request].include?(id)
-      raise SecurityError.new("Too many advances in session: #{session[:advance_request].count}") if session[:advance_request].count > MAX_SIMULTANEOUS_ADVANCES
-    end
+    @advance_request.save if @advance_request
   end
 
   def advance_request
     @advance_request ||= AdvanceRequest.new(current_member_id, signer_full_name, request)
+    @advance_request.owners.add(current_user.id)
+    @advance_request
   end
 
   def signer_full_name
     session['signer_full_name'] ||= EtransactAdvancesService.new(request).signer_full_name(current_user.username)
-  end
-
-  def advance_request_clear!
-    session[:advance_request].delete(@advance_request.id) if @advance_request && session[:advance_request]
-    @advance_request = nil
   end
 
   def calculate_gauge_percentages(gauge_hash, excluded_keys=[])
@@ -381,4 +372,77 @@ class DashboardController < ApplicationController
     new_gauge_hash[largest_display_percentage_key][:display_percentage] = (100 - (total_display_percentage - largest_display_percentage))
     new_gauge_hash
   end
+
+  def process_recent_activities(activities)
+    activity_data = []
+    if activities
+      activities.each_with_index do |activity, i|
+        break if i > 4
+        maturity_date = activity[:maturity_date].to_date if activity[:maturity_date]
+        maturity_date = if maturity_date == Time.zone.today
+                          t('global.today')
+                        elsif activity[:instrument_type] == 'ADVANCE' && !maturity_date
+                          t('global.open')
+                        else
+                          fhlb_date_standard_numeric(maturity_date)
+                        end
+        activity_data.push([activity[:product_description], activity[:current_par], maturity_date, activity[:transaction_number]])
+      end
+    end
+    activity_data
+  end
+
+  def deferred_job_data
+    raise "Invalid request: must be XMLHttpRequest (xhr) in order to be valid" unless request.xhr?
+    param_name = "#{action_name}_job_id".to_sym
+    raise ArgumentError, "No job id given for #{action_name}" unless params[param_name]
+    job_status = JobStatus.find_by(id: params[param_name], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+    raise ActiveRecord::RecordNotFound unless job_status
+    deferred_job_data = JSON.parse(job_status.result_as_string).clone
+    job_status.destroy
+    deferred_job_data
+  end
+
+  def populate_deferred_jobs_view_parameters(jobs_hash)
+    jobs_hash.each do |name, args|
+      job_klass = args.first
+      path = args.last
+      job_status = job_klass.perform_later(current_member_id, (request.uuid if defined?(request))).job_status
+      job_status.update_attributes!(user_id: current_user.id)
+      instance_variable_set("@#{name}_job_status_url", job_status_url(job_status))
+      instance_variable_set("@#{name}_load_url", send(path, :"#{name}_job_id" => job_status.id))
+    end
+  end
+
+  def sanitize_profile_if_endpoints_disabled(profile)
+    members_service = MembersService.new(request)
+    profile = {credit_outstanding: {}, collateral_borrowing_capacity: {}} if profile.blank?
+
+    if members_service.report_disabled?(current_member_id, [MembersService::FINANCING_AVAILABLE_DATA])
+      profile[:total_financing_available] = nil
+    end
+
+    if members_service.report_disabled?(current_member_id, [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA])
+      profile[:sta_balance] = nil
+    end
+
+    if members_service.report_disabled?(current_member_id, [MembersService::CREDIT_OUTSTANDING_DATA])
+      profile[:credit_outstanding][:total] = nil
+    end
+
+    if members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA])
+      profile[:collateral_borrowing_capacity][:remaining] = nil
+      profile[:total_borrowing_capacity_standard] = nil
+      profile[:total_borrowing_capacity_sbc_agency] = nil
+      profile[:total_borrowing_capacity_sbc_aaa] = nil
+      profile[:total_borrowing_capacity_sbc_aa] = nil
+    end
+
+    if members_service.report_disabled?(current_member_id, [MembersService::FHLB_STOCK_DATA])
+      profile[:capital_stock] = nil
+    end
+
+    profile
+  end
+
 end

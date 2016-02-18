@@ -1,8 +1,8 @@
 %span= t('global.copyright_html')
-%span= t('global.copyright_date')
+%span= t('global.copyright_date', year: Time.zone.now.year)
 %span= t('global.fhlb_full')
 %ul.footer-nav
   %li= link_to(t('global.contact'), contact_path)
   %li= link_to(t('global.terms_of_use'), terms_of_use_path)
-  %li= link_to(t('global.privacy_policy'), '#')
+  %li= link_to(t('global.privacy_policy'), privacy_policy_path)
   %li= link_to(t('global.truncated_web_address'), 'http://www.fhlbsf.com/')

@@ -1,0 +1,17 @@
+.row.product-page.authorizations
+  .column-2x10-right
+    %h1= t('products.authorizations.title')
+    %ul
+      %li= t('products.authorizations.on_file')
+      %li= t('products.authorizations.faxed_copies')
+      %li= t('products.authorizations.authorized_signers')
+      %li= t('products.authorizations.board_resolution_date')
+      %li= t('products.authorizations.new_form_supercedes')
+      %li= t('products.authorizations.include_all_individuals')
+      %li= t('products.authorizations.use_second_form_if_necessary')
+      %li= t('products.authorizations.deleting_an_authorized_signer', email: 'normanb@fhlb.com', operations_fax_number: fhlb_formatted_phone_number('4153953993')).html_safe
+      %li= t('products.authorizations.send_forms_to')
+      %p= t('products.authorizations.address').html_safe
+    %p= t('products.authorizations.contact', operations_phone_number: fhlb_formatted_phone_number('4156162616') )
+    = link_to(t('products.authorizations.return_link'), reports_authorizations_path)
+    .last-modified= t('products.section_headings.last_modified', date: fhlb_date_short_alpha(@last_modified))

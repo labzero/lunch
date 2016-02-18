@@ -1,0 +1,7 @@
+- job_status_url ||= nil
+- load_url ||= nil
+.dashboard-module-content-deferred{data: {deferred: job_status_url, 'deferred-load' => load_url}}
+  .dashboard-module-content
+    .dashboard-module-loading= t('dashboard.retrieving_data')
+    .dashboard-module-temporarily-unavailable= t('global.temporarily_unavailable')
+    = yield

@@ -1,20 +1,15 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
-
   describe 'member parallel_shift_analysis' do
     describe 'the `parallel_shift_analysis` endpoint' do
       let(:parallel_shift_data) { JSON.parse(File.read(File.join(MAPI.root, 'spec', 'fixtures', 'parallel_shift_data.json'))) }
-      let(:parallel_shift) { MAPI::Services::Member::ParallelShiftAnalysis.parallel_shift(subject, MEMBER_ID) }
+      let(:parallel_shift) { MAPI::Services::Member::ParallelShiftAnalysis.parallel_shift(subject, member_id) }
       let(:max_date) { [Date.new(2015,1,31)] }
 
       it 'calls the `parallel_shift` method when the endpoint is hit' do
         allow(MAPI::Services::Member::ParallelShiftAnalysis).to receive(:parallel_shift).and_return('a response')
-        get "/member/#{MEMBER_ID}/parallel_shift_analysis"
+        get "/member/#{member_id}/parallel_shift_analysis"
         expect(last_response.status).to eq(200)
       end
 

@@ -858,39 +858,38 @@ describe MemberBalanceService do
     end
   end
 
+  describe '`securities_services_statements_available` method' do
+    let(:statement){ double('statement') }
+    let(:statement2){ double('statement2') }
+    it 'should return nil when get_json returns nil' do
+      allow(subject).to receive(:get_json).and_return(nil)
+      expect(subject.securities_services_statements_available).to eq(nil)
+    end
+    it 'should return apply fix_date to list items returned by get_json' do
+      allow(subject).to receive(:get_json).and_return([statement])
+      allow(subject).to receive(:fix_date).with(statement, 'report_end_date').and_return(statement2)
+      expect(subject.securities_services_statements_available).to eq([statement2])
+    end
+  end
+
   describe '`securities_services_statement` method' do
-    let(:securities_services_statement) { subject.securities_services_statement(Time.zone.now) }
-    it 'returns a float for its `total`' do
-      expect(securities_services_statement[:total]).to be_kind_of(Float)
+    let(:date){ double('date') }
+    let(:isodate){ double('isodate') }
+    let(:statement){ double('statement') }
+    let(:statement_with_debit_date){ double('statement_with_debit_date') }
+    let(:statement_with_month_ending){ double('statement_with_month_ending') }
+    before do
+      allow(date).to receive_message_chain(:to_date,:iso8601).and_return(isodate)
     end
-    it 'returns a string for its `sta_account_number`' do
-      expect(securities_services_statement[:sta_account_number]).to be_kind_of(String)
+    it 'should return nil if get_hash returns nil' do
+      allow(subject).to receive(:get_hash).and_return(nil)
+      expect(subject.securities_services_statement(date)).to eq(nil)
     end
-    it 'returns a float for its `account_maintenance.total`' do
-      expect(securities_services_statement[:account_maintenance][:total]).to be_kind_of(Float)
-    end
-    [:income_disbursement, :pledge_status_change, :certifications, :research, :handling].each do |attribute|
-      it "should return a price breakdown hash for `#{attribute}`" do
-        expect(securities_services_statement[attribute][:total]).to be_kind_of(Float)
-        expect(securities_services_statement[attribute][:cost]).to be_kind_of(Float)
-        expect(securities_services_statement[attribute][:count]).to be_kind_of(Fixnum)
-      end
-    end
-    [:secutities_fees, :transaction_fees].each do |section|
-      [:fed, :dtc, :funds, :euroclear].each do |attribute|
-        it "should return a price breakdown hash for `#{section}.#{attribute}`" do
-          expect(securities_services_statement[section][attribute][:total]).to be_kind_of(Float)
-          expect(securities_services_statement[section][attribute][:cost]).to be_kind_of(Float)
-          expect(securities_services_statement[section][attribute][:count]).to be_kind_of(Fixnum)
-        end
-      end
-    end
-    describe 'error states' do
-      it 'returns nil if there is a JSON parsing error' do
-        expect(File).to receive(:read).and_return('some malformed json!')
-        expect(Rails.logger).to receive(:warn)
-        expect(securities_services_statement).to be(nil)
-      end
+    it 'should fix_date on' do
+      allow(subject).to receive(:get_hash).and_return(statement)
+      allow(subject).to receive(:fix_date).with(statement,'debit_date').and_return(statement_with_debit_date)
+      allow(subject).to receive(:fix_date).with(statement_with_debit_date,'month_ending').and_return(statement_with_month_ending)
+      expect(subject.securities_services_statement(date)).to eq(statement_with_month_ending)
     end
   end
 
@@ -1222,6 +1221,24 @@ describe MemberBalanceService do
     end
   end
 
+  describe 'the `capital_stock_trial_balance` method' do
+    it_behaves_like 'a MAPI backed service object method', :capital_stock_trial_balance, Date.today
+    let(:date){ double('date') }
+    let(:isodate){ double('isodate') }
+    let(:statement){ double('statement') }
+    before do
+      allow(date).to receive(:iso8601).and_return(isodate)
+    end
+    it 'should return nil if get_hash returns nil' do
+      allow(subject).to receive(:get_hash).and_return(nil)
+      expect(subject.capital_stock_trial_balance(date)).to eq(nil)
+    end
+    it 'should fix_date on' do
+      allow(subject).to receive(:get_hash).and_return(statement)
+      expect(subject.capital_stock_trial_balance(date)).to eq(statement)
+    end
+  end
+
   describe 'the `interest_rate_resets` method', :vcr do
     let(:irr_rates) {subject.interest_rate_resets}
     describe 'error states' do
@@ -1310,6 +1327,39 @@ describe MemberBalanceService do
     it 'sets the `product_description` of an non-EXERCISED, non-TERMINATED, activity to its `instrument_type` if the activity is not an ADVANCE' do
       allow(subject).to receive(:get_json).and_return([non_exercised_activity])
       expect(todays_credit_activity.first[:product_description]).to eq(non_exercised_activity[:instrument_type])
+    end
+  end
+  
+  describe 'the `mortgage_collateral_update` method' do
+    let(:mortgage_collateral_update) { subject.mortgage_collateral_update }
+    let(:response) { double('response') }    
+    it_should_behave_like 'a MAPI backed service object method', :mortgage_collateral_update
+    it 'should call `get_hash` with the appropriate endpoint' do
+      expect(subject).to receive(:get_hash).with(:mortgage_collateral_update, "/member/#{member_id}/mortgage_collateral_update")
+      mortgage_collateral_update
+    end
+    it 'should call `fix_date` with the appropriate date field called out' do
+      expect(subject).to receive(:fix_date).with(anything, :date_processed)
+      mortgage_collateral_update
+    end
+    it 'should return the result of the `fix_date` call' do
+      allow(subject).to receive(:fix_date).with(anything, :date_processed).and_return(response)
+      expect(mortgage_collateral_update).to eq(response)
+    end
+  end
+
+  describe 'the `managed_securities` method' do
+    let(:managed_securities) { subject.managed_securities }
+    let(:securities) { double('an array of securities') }
+    before { allow(subject).to receive(:get_hash).and_return({}) }
+    it_should_behave_like 'a MAPI backed service object method', :managed_securities
+    it 'should call `get_hash` with the appropriate endpoint' do
+      expect(subject).to receive(:get_hash).with(:managed_securities, "/member/#{member_id}/managed_securities").and_return({})
+      managed_securities
+    end
+    it 'hands back only the array of securities objects' do
+      allow(subject).to receive(:get_hash).and_return({securities: securities})
+      expect(managed_securities).to eq(securities)
     end
   end
 

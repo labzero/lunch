@@ -21,74 +21,110 @@ Rails.application.routes.draw do
 
   get '/dashboard/current_overnight_vrc' => 'dashboard#current_overnight_vrc'
 
+  get '/dashboard/recent_activity' => 'dashboard#recent_activity'
+
+  get '/dashboard/account_overview' => 'dashboard#account_overview'
+
+  get '/attachments/download/:id/:filename' => 'attachments#download', as: :attachment_download, filename: /[^\/]+/
+
   scope 'reports', as: :reports do
     get '/' => 'reports#index'
-    get '/capital-stock-activity' => 'reports#capital_stock_activity'
-    get '/borrowing-capacity' => 'reports#borrowing_capacity'
-    get '/settlement-transaction-account' => 'reports#settlement_transaction_account'
-    get '/advances' => 'reports#advances_detail'
-    get '/historical-price-indications' => 'reports#historical_price_indications'
-    get '/current-price-indications' => 'reports#current_price_indications'
-    get '/interest-rate-resets' => 'error#not_found'
-    get '/letters-of-credit' => 'reports#letters_of_credit'
-    get '/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: :parallel_shift
-    get '/forward-commitments' => 'reports#forward_commitments'
     get '/account-summary' => 'reports#account_summary'
+    get '/advances' => 'reports#advances_detail'
+    constraints Constraints::FeatureEnabled.new('authorizations-report') do
+      get '/authorizations' => 'reports#authorizations'
+    end
+    get '/borrowing-capacity' => 'reports#borrowing_capacity'
+    get '/capital-stock-activity' => 'reports#capital_stock_activity'
+    constraints Constraints::FeatureEnabled.new('capital-stock-position-and-leverage-report') do
+      get '/capital-stock-and-leverage' => 'reports#capital_stock_and_leverage'
+    end
+    get '/capital-stock-trial-balance' => 'reports#capital_stock_trial_balance'
+    get '/cash-projections' => 'reports#cash_projections'
+    get '/current-price-indications' => 'reports#current_price_indications'
+    get '/current-securities-position' => 'reports#current_securities_position'
+    get '/dividend-statement' => 'reports#dividend_statement'
+    get '/forward-commitments' => 'reports#forward_commitments'
+    get '/historical-price-indications' => 'reports#historical_price_indications'
+    get '/interest-rate-resets' => 'reports#interest_rate_resets'
+    get '/letters-of-credit' => 'reports#letters_of_credit'
+    get '/monthly-securities-position' => 'reports#monthly_securities_position'
+    get '/mortgage-collateral-update' => 'reports#mortgage_collateral_update'
+    get '/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: :parallel_shift
+    get '/securities-services-statement' => 'reports#securities_services_statement', as: :securities_services_statement
+    constraints Constraints::FeatureEnabled.new('report-securities-transaction') do
+      get '/securities-transactions' => 'reports#securities_transactions'
+    end
+    get '/settlement-transaction-account' => 'reports#settlement_transaction_account'
     get '/todays-credit' => 'reports#todays_credit'
-
-    get '/authorizations'                => 'error#not_found'
-    get '/capital-stock-and-leverage'    => 'error#not_found'
-    get '/cash-projections'              => 'error#not_found'
-    get '/current-securities-position'   => 'error#not_found'
-    get '/dividend-statement'            => 'error#not_found'
-    get '/monthly-securities-position'   => 'error#not_found'
-    get '/mortgage-collateral-update'    => 'error#not_found'
-    get '/securities-services-statement' => 'reports#securities_services_statement'
-    get '/trial-balance'                 => 'error#not_found'
-    get '/securities-transactions'       => 'error#not_found'
   end
 
   get '/advances' => 'advances#index'
   get '/advances/manage-advances' => 'advances#manage_advances'
 
-  get '/settings' => 'error#not_found'
-  post '/settings/save' => 'settings#save'
-  get '/settings/two-factor' => 'settings#two_factor'
-  post '/settings/two-factor/pin' => 'settings#reset_pin'
-  post '/settings/two-factor/resynchronize' => 'settings#resynchronize'
-  get '/settings/users' => 'settings#users'
-  post '/settings/users/:id/lock' => 'settings#lock', as: 'user_lock'
-  post '/settings/users/:id/unlock' => 'settings#unlock', as: 'user_unlock'
-  get '/settings/users/:id' => 'settings#edit_user', as: 'user'
-  patch '/settings/users/:id' => 'settings#update_user'
-  get '/settings/users/:id/confirm_delete' => 'settings#confirm_delete', as: 'user_confirm_delete'
-  delete '/settings/users/:id' => 'settings#delete_user'
-  get '/settings/expired-password' => 'settings#expired_password', as: :user_expired_password
-  put '/settings/expired-password' => 'settings#update_expired_password'
-  get '/settings/password' => 'settings#change_password', as: :settings_password
-  put '/settings/password' => 'settings#update_password'
+  scope 'settings', as: :settings do
+    get    '/'                         => 'error#not_found'
+    get    '/password'                 => 'settings#change_password'
+    put    '/password'                 => 'settings#update_password'
+    post   '/save'                     => 'settings#save'
+    get    '/two-factor'               => 'settings#two_factor'
+    put    '/two-factor/pin'           => 'settings#reset_pin'
+    post   '/two-factor/pin'           => 'settings#new_pin'
+    post   '/two-factor/resynchronize' => 'settings#resynchronize'
+    get    '/users'                    => 'settings#users'
+    patch  '/users/:id'                => 'settings#update_user'
+    delete '/users/:id'                => 'settings#delete_user'
+  end
+
+  scope 'settings' do
+    get    '/users/new'                => 'settings#new_user', as: 'new_user'
+    post   '/users'                    => 'settings#create_user', as: 'users'
+    get    '/users/:id'                => 'settings#edit_user', as: 'user'
+    get    '/users/:id/confirm_delete' => 'settings#confirm_delete', as: 'user_confirm_delete'
+    post   '/users/:id/lock'           => 'settings#lock', as: 'user_lock'
+    post   '/users/:id/unlock'         => 'settings#unlock', as: 'user_unlock'
+    get    '/expired-password'         => 'settings#expired_password', as: :user_expired_password
+    put    '/expired-password'         => 'settings#update_expired_password'
+  end
 
   get '/jobs/:job_status_id' => 'jobs#status', as: 'job_status'
   get '/jobs/:job_status_id/download' => 'jobs#download', as: 'job_download'
   get '/jobs/:job_status_id/cancel' => 'jobs#cancel', as: 'job_cancel'
 
-  scope 'corporate_communications/:category' do
-    resources :corporate_communications, only: :show, as: :corporate_communication
-    get '/' => 'corporate_communications#category', as: :corporate_communications
+  constraints Constraints::FeatureEnabled.new('announcements') do
+    scope 'corporate_communications/:category' do
+      resources :corporate_communications, only: :show, as: :corporate_communication
+      get '/' => 'corporate_communications#category', as: :corporate_communications
+    end
   end
 
   scope 'resources' do
     get '/business-continuity' => 'resources#business_continuity'
     get '/forms' => 'resources#forms'
     get '/guides' => 'resources#guides'
+    get '/capital-plan' => 'resources#capital_plan'
     get '/download/:file' => 'resources#download', as: :resources_download
+    get 'fee_schedules' => 'resources#fee_schedules'
+    scope 'membership' do
+      get 'overview' => 'resources#membership_overview', as: :membership_overview
+      get 'application' => 'resources#membership_application', as: :membership_application
+      scope 'application' do
+        get 'commercial-savings-and-industrial' => 'resources#commercial_application', as: :commercial_application
+        constraints Constraints::FeatureEnabled.new('unfinished-membership') do
+          get 'community-development' => 'error#not_found', as: :community_development_application
+          get 'credit-union' => 'resources#credit_union_application', as: :credit_union_application
+          get 'insurance-company' => 'resources#insurance_company_application', as: :insurance_company_application
+        end
+      end
+    end
   end
 
   scope 'products' do
+    get '/authorizations' => 'products#authorizations', as: :products_authorizations
     get '/summary' => 'products#index', as: :product_summary
     get '/letters-of-credit' => 'error#not_found'
     get '/community_programs' => 'error#not_found'
-    get '/product-mpf-pfi' => 'error#not_found', as: :product_mpf_pfi
+    get '/interest-rate-swaps-caps-floors' => 'products#swaps', as: :product_swaps
     scope 'advances' do
       get 'adjustable-rate-credit' => 'products#arc', as: :arc
       get 'advances-for-community-enterprise' => 'error#not_found', as: :ace
@@ -102,19 +138,26 @@ Rails.application.routes.draw do
       get 'frc-embedded' => 'products#frc_embedded', as: :frc_embedded
       get 'knockout' => 'products#knockout', as: :knockout
       get 'mortgage-partnership-finance' => 'products#mpf', as: :mpf
+      get 'pfi' => 'products#pfi', as: :pfi
       get 'other-cash-needs' => 'products#ocn', as: :ocn
       get 'putable' => 'products#putable', as: :putable
       get 'securities-backed-credit' => 'products#sbc', as: :sbc
       get 'variable-rate-credit' => 'products#vrc', as: :vrc
     end
+  end
 
+  constraints Constraints::FeatureEnabled.new('securities') do
+    scope 'securities' do
+      get 'manage' => 'securities#manage', as: :manage_securities
+    end
   end
 
   devise_scope :user do
     get '/' => 'users/sessions#new', :as => :new_user_session
     post '/' => 'users/sessions#create', :as => :user_session
     delete 'logout' => 'users/sessions#destroy', :as => :destroy_user_session
-    get 'logged-out' => 'members#logged_out' 
+    get 'logged-out' => 'members#logged_out'
+    post '/switch' => 'members#switch_member', :as => :members_switch_member
     get '/member' => 'members#select_member', :as => :members_select_member
     post '/member' => 'members#set_member', :as => :members_set_member
     get 'member/terms' => 'members#terms', :as => :terms
@@ -125,10 +168,15 @@ Rails.application.routes.draw do
     put 'member/password' => 'users/passwords#update'
     get '/terms-of-use' => 'members#terms_of_use', as: :terms_of_use
     get '/contact' => 'members#contact', as: :contact
+    get '/privacy-policy' => 'members#privacy_policy', as: :privacy_policy
   end
   devise_for :users, controllers: { sessions: 'users/sessions', passwords: 'users/passwords' }, :skip => [:sessions, :passwords]
 
   root 'users/sessions#new'
+
+  constraints Constraints::WebAdmin.new do
+    mount Flipper::UI.app(Rails.application.flipper) => '/admin'
+  end
 
   get '/error' => 'error#standard_error' unless Rails.env.production?
   get '/maintenance' => 'error#maintenance' unless Rails.env.production?

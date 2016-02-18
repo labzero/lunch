@@ -4,15 +4,35 @@ class User < ActiveRecord::Base
   validates :surname, presence: {on: :update, unless: :password_changed?}
   validates :email, presence: {on: :update, unless: :password_changed?}, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, allow_blank: true }, confirmation: {if: :email_changed?, on: :update}
   validates :email_confirmation, presence: {if: :email_changed?, on: :update}
-  validates :password, confirmation: true, length: {minimum: 8, allow_nil: true}, format: { with: /\A(?=.*[A-Z]).*\z/, message: :capital_letter_needed, allow_nil: true }
-  validates :password, format: { with: /\A(?=.*[a-z]).*\z/, message: :lowercase_letter_needed, allow_nil: true }
-  validates :password, format: { with: /\A(?=.*\d).*\z/, message: :number_needed, allow_nil: true }
-  validates :password, format: { with: /\A(?=.*[!@#$%*]).*\z/, message: :symbol_needed, allow_nil: true }
   validates :current_password, {presence: true, if: :virtual_validators?}
+  validates :password, confirmation: true, length: {minimum: 8, allow_nil: true}
+  validates :username, presence: {on: :update, unless: :password_changed?}, length: {on: :update, minimum: 4, maximum: 20, unless: :password_changed? }, format: {on: :update, with: /\A(?!fhlbsf)[a-zA-Z]\w+\Z/i, unless: :password_change_or_update? }
+
+  UPPER = '(?=.*[A-Z])'.freeze
+  LOWER = '(?=.*[a-z])'.freeze
+  NUMBER = '(?=.*\d)'.freeze
+  SYMBOL = '(?=.*[!@#$%*])'.freeze
+
+  SUN = SYMBOL + UPPER + NUMBER + '.*'.freeze
+  NUL = NUMBER + UPPER + LOWER + '.*'.freeze
+  SUL = SYMBOL + UPPER + LOWER + '.*'.freeze
+  LNS = LOWER + NUMBER + SYMBOL + '.*'.freeze
+
+  CRITERIA_REGEX = Regexp.new('\A' + [SUN, NUL, SUL, LNS].join('|') + '\z').freeze
+
+  validates :password, format: { with: CRITERIA_REGEX, message: :criteria_not_met, allow_nil: true }
 
   def self.policy_class
     AccessManagerPolicy
   end
+
+  LDAP_EXTRANET_DOMAIN = 'extranet'.freeze
+
+  LDAP_INTERNAL_DOMAIN = 'intranet'.freeze
+
+  LDAP_EXTRANET_EBIZ_USERS_DN ='CN=Users,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com'
+
+  AD_GROUP_NAME_PREFIX = "FHLB"
 
   LDAP_ATTRIBUTES_MAPPING = {
     email: :mail,
@@ -44,7 +64,7 @@ class User < ActiveRecord::Base
     ETRANSACT_SIGNER = 'etransact_signer'
   end
 
-  ROLE_MAPPING = {
+  LDAP_GROUPS_TO_ROLES = {
     'FCN-MemberSite-Users' => Roles::MEMBER_USER,
     'FCN-MemberSite-ExternalAccess' => Roles::USER_WITH_EXTERNAL_ACCESS,
     'FCN-MemberSite-AccessManagers-R' => Roles::ACCESS_MANAGER_READ_ONLY,
@@ -63,9 +83,11 @@ class User < ActiveRecord::Base
     'signer-etransact' => Roles::ETRANSACT_SIGNER
   }.freeze
 
+  ROLES_TO_LDAP_GROUPS = LDAP_GROUPS_TO_ROLES.invert.freeze
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :ldap_authenticatable, :recoverable, :trackable, :timeoutable
+  devise :ldap_authenticatable, :recoverable, :trackable, :timeoutable, case_insensitive_keys: [:username]
 
   attr_accessor :roles, :email, :surname, :given_name, :member_id, :deletion_reason
 
@@ -177,6 +199,32 @@ class User < ActiveRecord::Base
     result && InternalUserPolicy.new(self, strategy.request).access?
   end
 
+  def self.create_ldap_user(member_id, creator, username, email, given_name, surname)
+    dn = "CN=#{username},#{LDAP_EXTRANET_EBIZ_USERS_DN}"
+    attributes = {
+        CreatedBy: creator,
+        description: "Created by #{creator}",
+        sAMAccountName: username,
+        mail: email,
+        LDAP_PASSWORD_EXPIRATION_ATTRIBUTE => 'true',
+        givenname: given_name,
+        sn: surname,
+        displayname: "#{given_name} #{surname}",
+        objectClass: %w(user top person)
+      }
+    groups = [AD_GROUP_NAME_PREFIX + member_id, ROLES_TO_LDAP_GROUPS[Roles::MEMBER_USER]]
+    Devise::LDAP::Adapter.shared_connection do
+      Devise::LDAP::Connection.admin(LDAP_EXTRANET_DOMAIN).open do |ldap|
+        group_dns = groups.map{ |group| ldap.search(filter: "(&(CN=#{group})(objectClass=group))").first.try(:dn) }
+        group_dns.all? && ldap.add(dn: dn, attributes: attributes) && group_dns.all?{ |group_dn| ldap.add_attribute(group_dn, 'member', dn) }
+      end
+    end
+  end
+
+  def self.add_extranet_user(member_id, creator, username, email, given_name=nil, surname=nil)
+    find_or_create_by(username: username, ldap_domain: LDAP_EXTRANET_DOMAIN) if create_ldap_user(member_id, creator, username, email, given_name, surname)
+  end
+
   def self.create(*args, &block)
     ldap_entry = args.try(:first)
     if ldap_entry.is_a?(Net::LDAP::Entry)
@@ -212,6 +260,10 @@ class User < ActiveRecord::Base
     record
   end
 
+  def self.extranet_logins
+    where(ldap_domain: 'extranet').where(['sign_in_count > 0'])
+  end
+
   def after_ldap_authentication(new_ldap_domain)
     self.update_attribute(:ldap_domain, new_ldap_domain) if self.ldap_domain.nil?
   end
@@ -219,14 +271,16 @@ class User < ActiveRecord::Base
   def roles(request = ActionDispatch::TestRequest.new)
     @roles ||= (
       roles = []
-      # Hits ldap_groups and gets an array of the CN's of all the groups the user belongs to.
-      ldap_roles = self.ldap_groups
-      roles << ldap_roles.collect{|object| object.cn} unless ldap_roles.nil?
-      # Hit the MAPI endpoint to check if user is a signer. Need request object to connect to MAPI
-      user_service = UsersService.new(request)
-      user_service_roles = user_service.user_roles(username)
-      roles << user_service_roles unless user_service_roles.nil?
-      roles.flatten.collect{ |role| ROLE_MAPPING[role] }.compact
+      Devise::LDAP::Adapter.shared_connection do
+        # Hits ldap_groups and gets an array of the CN's of all the groups the user belongs to.
+        ldap_roles = self.ldap_groups
+        roles << ldap_roles.collect{|object| object.cn} unless ldap_roles.nil?
+        # Hit the MAPI endpoint to check if user is a signer. Need request object to connect to MAPI
+        user_service = UsersService.new(request)
+        user_service_roles = user_service.user_roles(username)
+        roles << user_service_roles unless user_service_roles.nil?
+        roles.flatten.collect{ |role| LDAP_GROUPS_TO_ROLES[role] }.compact
+      end
     )
   end
 
@@ -240,7 +294,7 @@ class User < ActiveRecord::Base
           break
         end
       end
-      member_id
+      member_id.to_s if member_id
     )
   end
 
@@ -258,6 +312,18 @@ class User < ActiveRecord::Base
 
   def virtual_validators?
     @virtual_validators || false
+  end
+
+  def intranet_user?
+    self.ldap_domain == LDAP_INTERNAL_DOMAIN
+  end
+
+  def flipper_id
+    username
+  end
+
+  def member
+    @member ||= (Member.new(member_id) if member_id)
   end
 
   protected
@@ -307,10 +373,20 @@ class User < ActiveRecord::Base
     false
   end
 
+  def password_change_or_update?
+    password_changed? || !new_record?
+  end
+
   def check_password_change
-    if password_changed? && (changed.select{|key| LDAP_ATTRIBUTES_MAPPING.include?(key)}).count > 0 # we don't allow password changes to be mixed with other LDAP changes
-      errors.add(:password, :non_atomic)
-      raise ActiveRecord::Rollback
+    user_policy = UserPolicy.new(self, nil)
+    if password_changed?
+      if (changed.select{|key| LDAP_ATTRIBUTES_MAPPING.include?(key)}).count > 0 # we don't allow password changes to be mixed with other LDAP changes
+        errors.add(:password, :non_atomic)
+        raise ActiveRecord::Rollback
+      elsif !user_policy.change_password?
+        errors.add(:password, :intranet)
+        raise ActiveRecord::Rollback
+      end
     end
   end
 

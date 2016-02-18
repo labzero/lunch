@@ -89,38 +89,56 @@ describe EtransactAdvancesService do
     end
   end
 
-  describe '`quick_advance_execute` method', :vcr do
-    let(:signer) {'signer'}
-    let(:member_id) {750}
-    let(:advance_term) {'someterm'}
-    let(:advance_type) {'sometype'}
-    let(:advance_rate) {'0.17'}
-    let(:amount) { 100 }
-    let(:maturity_date) { "2016-03-11".to_date }
+  describe '`quick_advance_execute` method' do
+    let(:signer) { double('signer') }
+    let(:member_id) { double('member id') }
+    let(:advance_term) { double('term') }
+    let(:advance_type) { double('type') }
+    let(:advance_rate) { double('rate') }
+    let(:amount) { double('amount') }
+    let(:iso_date) { double('iso8601 date') }
+    let(:maturity_date) { double('date string', to_date: double('date', iso8601: iso_date)) }
+    let(:error_handler) { double('error handler') }
+    let(:post_body) {
+      {
+        amount: amount,
+        advance_type: advance_type,
+        advance_term: advance_term,
+        rate: advance_rate,
+        signer: signer,
+        maturity_date: iso_date
+      }
+    }
+    let(:post_response) { double('response from post_hash', :[]= => nil) }
+    let(:now) { double('now') }
     let(:call_method) {subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer, maturity_date)}
     
     before do
-      allow(subject).to receive(:calypso_error_handler).and_return(nil)
+      allow(subject).to receive(:calypso_error_handler)
     end
 
-    it 'should return a hash back' do
-      expect(call_method).to be_kind_of(Hash)
+    describe 'calling the `post_hash` method' do
+      it 'passes :quick_advance_execute as the method name' do
+        expect(subject).to receive(:post_hash).with(:quick_advance_execute, anything, anything)
+        call_method
+      end
+      it 'passes the correct MAPI endpoint' do
+        expect(subject).to receive(:post_hash).with(anything, "etransact_advances/execute_advance/#{member_id}", anything)
+        call_method
+      end
+      it 'passes the body of the post request' do
+        expect(subject).to receive(:post_hash).with(anything, anything, post_body)
+        call_method
+      end
+    end
+    it 'returns the result of the `post_hash` call' do
+      allow(subject).to receive(:post_hash).and_return(post_response)
+      expect(call_method).to eq(post_response)
     end
     it 'should set initiated_at' do
-      expect(call_method[:initiated_at]).to be_kind_of(DateTime)
-    end
-    it 'calls `post_hash`' do
-      expect(subject).to receive(:post_hash).with(:quick_advance_execute, "etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{signer}/#{maturity_date.iso8601}", '')
-      call_method
-    end
-    it 'returns the result of `post_hash`' do
-      result = double('A Result', :[]= => nil)
-      allow(subject).to receive(:post_hash).and_return(result)
-      expect(call_method).to be(result)
-    end
-    it 'should URL encode the signer' do
-      expect(URI).to receive(:escape).with(signer)
-      call_method
+      allow(subject).to receive(:post_hash).and_return({})
+      allow(Time.zone).to receive(:now).and_return(double('now', to_datetime: now))
+      expect(call_method[:initiated_at]).to eq(now)
     end
     it 'passes a `calypso_error_handler` to the `post_hash` method' do
       error_handler = -> (n, m, e) {}

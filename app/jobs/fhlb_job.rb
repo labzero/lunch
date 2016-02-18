@@ -1,11 +1,13 @@
 class FhlbJob < ActiveJob::Base
 
   def initialize(*args, &block)
-    super
-    @mutex = Mutex.new
+    # Run the alias method chain on the eigenclass to modify our subclasses perform. This should always be done first.
     class << self
       alias_method_chain :perform, :rescue
     end
+
+    super
+    @mutex = Mutex.new
   end
 
   def job_status
@@ -25,6 +27,7 @@ class FhlbJob < ActiveJob::Base
     result # return the result of the job to handle the case where job is executed inline
   rescue => err
     Rails.logger.warn "#{self.class.name}##{job_id} raised an exception: #{err}"
+    Rails.logger.debug "BACKTRACE: #{err.backtrace.join("\n")}"
     job_status.failed!
   end
 end

@@ -9,16 +9,22 @@ $(function () {
     $deferredReport = $('.report[data-deferred]');
 
     $reportForm.on('submit', function(event){
+      event.stopPropagation();
+      event.preventDefault();
       openLoadingFlyout();
-    });
-
-    $reportForm.on('ajax:success', function(event, data, status, xhr) {
-      jobCancelUrl = data.jobCancelUrl;
-      checkDownloadJobStatus(data.job_status_url);
-    });
-
-    $reportForm.on('ajax:failure', function(event, data, status, xhr) {
-      downloadError();
+      $.ajax({
+        url     : $(this).attr('action'),
+        method  : $(this).attr('method'),
+        dataType: 'json',
+        data    : $(this).serialize(),
+        success : function( data, status, xhr ) {
+          jobCancelUrl = data.jobCancelUrl;
+          checkDownloadJobStatus(data.job_status_url);
+        },
+        error   : function( xhr, status, err ) {
+          downloadError();
+        }
+      });
     });
 
     if ($deferredReport.length == 1) {

@@ -264,25 +264,12 @@ class MemberBalanceService < MAPIService
     end
   end
 
-  def securities_services_statement(month)
-    # TODO: hit MAPI endpoint
+  def securities_services_statements_available
+    get_json(:securities_services_statements_available, "member/#{@member_id}/securities_services_statements_available").try(:map){ |statement| fix_date(statement, 'report_end_date') }
+  end
 
-    recursive_to_f = Proc.new do |obj|
-      obj.each do |key, value|
-        if value.is_a?(Hash)
-          recursive_to_f.call(value)
-        elsif key == 'count'
-          obj[key] = value.to_i
-        elsif key != 'sta_account_number'
-          obj[key] = value.to_f
-        end
-      end
-    end
-
-    if data = get_fake_hash(:securities_services_statement, 'securities_services_statement.json')
-      recursive_to_f.call(data)
-    end
-    data
+  def securities_services_statement(date)
+    fix_date( fix_date(get_hash(:securities_services_statements, "member/#{@member_id}/securities_services_statements/#{date.to_date.iso8601}"), 'debit_date'), 'month_ending')
   end
 
   def letters_of_credit
@@ -334,6 +321,10 @@ class MemberBalanceService < MAPIService
     get_hash(:capital_stock_and_leverage, "member/#{@member_id}/capital_stock_and_leverage")
   end
 
+  def capital_stock_trial_balance(date)
+    get_hash(:capital_stock_trial_balance, "member/#{@member_id}/capital_stock_trial_balance/#{date.iso8601}")
+  end
+
   def interest_rate_resets
     fix_date(get_hash(:interest_rate_resets, "/member/#{@member_id}/interest_rate_resets"), :date_processed)
   end
@@ -372,5 +363,13 @@ class MemberBalanceService < MAPIService
       end
       processed_data
     end
+  end
+  
+  def mortgage_collateral_update
+    fix_date(get_hash(:mortgage_collateral_update, "/member/#{@member_id}/mortgage_collateral_update"), :date_processed)
+  end
+
+  def managed_securities
+    get_hash(:managed_securities, "/member/#{@member_id}/managed_securities")[:securities]
   end
 end

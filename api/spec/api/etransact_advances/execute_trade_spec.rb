@@ -11,7 +11,6 @@ end
 
 describe MAPI::ServiceApp do
 
-  let(:member_id) {750}
   let(:amount)  {'100'}
   let(:advance_type)  {'agency'}
   let(:advance_term)  {'1week'}
@@ -19,10 +18,16 @@ describe MAPI::ServiceApp do
   let(:check_capstock)  {true}
   let(:signer)  {'local'}
   let(:maturity_date) { "2016-03-11".to_date }
-
-  before do
-    header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
-  end
+  let(:post_body) {
+    {
+      amount: amount,
+      advance_type: advance_type,
+      advance_term: advance_term,
+      rate: rate,
+      signer: signer,
+      maturity_date: maturity_date.iso8601
+    }.to_json
+  }
 
   describe 'get_maturity_date' do
     let(:app){ double('app', logger: double('logger'), settings: double( 'settings', environment: nil ) ) }
@@ -164,7 +169,7 @@ describe MAPI::ServiceApp do
   end
 
   describe 'Execute Trade' do
-    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}", post_body; JSON.parse(last_response.body) }
     it 'should return expected result of execute trade' do
       expect(execute_trade['status']).to be_kind_of(Array)
       expect(execute_trade['confirmation_number']).to be_kind_of(String)
@@ -181,7 +186,7 @@ describe MAPI::ServiceApp do
   end
 
   describe 'Execute Trade' do
-    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}", post_body; JSON.parse(last_response.body) }
     it 'should return the maturity date passed as part of the URL' do
       expect(execute_trade['maturity_date']).to eq(maturity_date.iso8601)
     end
@@ -296,11 +301,12 @@ describe MAPI::ServiceApp do
   end
 
   describe 'in the production environment' do
-    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
+    let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}", post_body; JSON.parse(last_response.body) }
     before do
       allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit) {|env, amount, hash| hash }
       allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_enabled_product) {|logger, env, type, term, hash| hash }
     end
     describe 'agency for 1 week' do
       let(:advance_type)  {'agency'}
@@ -372,11 +378,11 @@ describe MAPI::ServiceApp do
       end
     end
     it 'should return Internal Service Error, if execute trade service is unavailable', vcr: {cassette_name: 'execute_trade_service_unavailable'} do
-      post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"
+      post "/etransact_advances/execute_advance/#{member_id}", post_body
       expect(last_response.status).to eq(503)
     end
     it 'should return Internal Service Error, if execute mds service is unavailable', vcr: {cassette_name: 'execute_trade_market_data_service_unavailable'} do
-      post "/etransact_advances/execute_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{signer}/#{maturity_date.iso8601}"
+      post "/etransact_advances/execute_advance/#{member_id}", post_body
       expect(last_response.status).to eq(503)
     end
   end
@@ -647,6 +653,33 @@ describe MAPI::ServiceApp do
           allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(nil)
           expect{check_advance}.to raise_error
         end
+      end
+    end
+
+    describe '`check_enabled_product` method' do
+      let(:logger) { double(Logger) }
+      let(:environment) { double('An Environment') }
+      let(:type) { double('A Loan Type') }
+      let(:term) { double('A Loan Term') }
+      let(:response) { {'status' => [double('A Status')]} }
+      let!(:original_status) { response['status'] }
+      let(:call_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_enabled_product(logger, environment, type, term, response) }
+      let(:loan_term) { {display_status: false} }
+      let(:loan_terms) { { type => { term => loan_term } } }
+      before do
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(logger, environment).and_return(loan_terms)
+      end
+
+      it 'adds a status of `DisabledProductError` if the loan term is disabled' do
+        expect(call_method['status']).to eq(original_status + ['DisabledProductError'])
+      end
+      it 'adds a status of `DisabledProductError` if the loan term lookup fails' do
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(logger, environment).and_return(nil)
+        expect(call_method['status']).to eq(original_status + ['DisabledProductError'])
+      end
+      it 'leaves status unchanged if the loan term is enabled' do
+        loan_term[:display_status] = true
+        expect(call_method['status']).to eq(original_status)
       end
     end
   end

@@ -62,7 +62,7 @@ Scenario: User logs out without selecting a member bank
   When I log out
   Then I should be logged out
 
-@jira-mem-671 @wip
+@jira-mem-671 @local-only @first-time-user
 Scenario: User accepts the Terms of Service
   Given I am logged out
   And I visit the root path
@@ -71,16 +71,39 @@ Scenario: User accepts the Terms of Service
   When I accept the Terms of Use
   Then I should see dashboard modules
   When I log out
-  When I fill in and submit the login form with a first-time user
+  And I visit the root path
+  And I fill in and submit the login form with a first-time user
   Then I should see dashboard modules
 
-@jira-mem-1023 @wip
+@jira-mem-1023 @local-only @first-time-user
 Scenario: User cannot enter site without accepting the Terms of Use
   Given I am logged out
   And I visit the root path
   And I fill in and submit the login form with a first-time user
   When I visit the dashboard
   Then I should see the Terms of Use page
+
+@jira-mem-1041 @local-only @first-time-user
+Scenario: User can log out without accepting the Terms of Use
+  Given I am logged out
+  And I visit the root path
+  And I fill in and submit the login form with a first-time user
+  Then I should see the Terms of Use page
+  When I do not accept the Terms of Use
+  Then I should be logged out
+
+@jira-mem-1163 @local-only @first-time-user
+Scenario: User logins are case insensitive
+  Given I am logged out
+  And I visit the root path
+  When I fill in and submit the login form with a first-time user
+  Then I should see the Terms of Use page
+  When I accept the Terms of Use
+  Then I should see dashboard modules
+  When I log out
+  And I visit the root path
+  And I fill in and submit the login form with the capitalized last user
+  Then I should see dashboard modules
 
 @jira-mem-859
 Scenario: User logs in with expired password
@@ -137,3 +160,15 @@ Scenario: User is redirected when visiting the logged out page directly
   Given I am logged in
   When I visit the logged out page
   Then I should see dashboard modules
+
+@jira-mem-1018
+Scenario: User can change institutions via the link in nav header
+  Given I am logged out
+  And I visit the root path
+  When I fill in and submit the login form with a user not associated with a bank
+  Then I should see the member bank selector
+  And I should see the member bank selector submit button disabled
+  When I select the 1st member bank
+  Then I should see dashboard modules
+  When I click on the switch link in the nav
+  Then I should see the member bank selector

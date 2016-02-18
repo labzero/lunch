@@ -5,15 +5,20 @@
       %li= t('nav.primary.welcome', name: current_user.given_name || current_user.username)
       - if current_user.ldap_domain == 'intranet'
         %li.header-member-name= current_member_name
+        %li.nav-member-switch= link_to(t('nav.primary.switch'), members_switch_member_path, method: :post)
       %li.nav-logout= link_to(t('nav.primary.logout'), destroy_user_session_url, method: :delete)
       %li.nav-settings= link_to('', settings_password_path, class: 'icon-gear-after')
-      %li.nav-mail= link_to('', corporate_communications_path('all'), class: 'icon-envelope-after')
+      - if feature_enabled?('announcements')
+        %li.nav-mail= link_to('', corporate_communications_path('all'), class: 'icon-envelope-after')
 .secondary-nav
   %nav.row
     %time{datetime:@render_time.iso8601}= fhlb_datetime_standard_numeric(@render_time)
     %ul<>
       %li<>
         = link_to(t('nav.secondary.advances'), advances_manage_advances_path)
+      - if feature_enabled?('securities')
+        %li<>
+          = link_to(t('securities.title'), manage_securities_path)
       %li<>
         = link_to(t('reports.title'), reports_path, class: 'nav-menu')
         %ul.nav-dropdown<>
@@ -27,7 +32,7 @@
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.credit.todays_credit.title'), reports_todays_credit_path)
               %li= link_to(t('reports.credit.advances_detail.title'), reports_advances_path)
-              %li.disabled= t('reports.credit.interest_rate.title')
+              %li= link_to(t('reports.credit.interest_rate.title'), reports_interest_rate_resets_path)
               %li= link_to(t('reports.credit.letters_of_credit.title'), reports_letters_of_credit_path)
               %li= link_to(t('reports.credit.forward_commitments.title'), reports_forward_commitments_path)
               %li= link_to(t('reports.credit.parallel_shift.title'), reports_parallel_shift_path)
@@ -35,33 +40,40 @@
             = link_to(t('reports.collateral.title'), reports_path(anchor: 'collateral'))
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.collateral.borrowing_capacity.title'), reports_borrowing_capacity_path)
-              %li.disabled= t('reports.collateral.mcu.title')
+              %li= link_to(t('reports.collateral.mcu.title'), reports_mortgage_collateral_update_path)
           %li<>
             = link_to(t('reports.capital_stock.title'), reports_path(anchor: 'capital_stock'))
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.capital_stock.activity.title'), reports_capital_stock_activity_path)
-              %li.disabled= t('reports.capital_stock.trial_balance.title')
-              %li.disabled= t('reports.capital_stock.capital_stock_and_leverage.title')
-              %li.disabled= t('reports.capital_stock.dividend_statement.title')
+              %li= link_to(t('reports.capital_stock.trial_balance.title'), reports_capital_stock_trial_balance_path)
+              - if feature_enabled?('capital-stock-position-and-leverage-report')
+                %li= link_to(t('reports.capital_stock.capital_stock_and_leverage.title'), reports_capital_stock_and_leverage_path)
+              - else
+                %li.disabled= t('reports.capital_stock.capital_stock_and_leverage.title')
+              %li= link_to(t('reports.capital_stock.dividend_statement.title'), reports_dividend_statement_path)
           %li<>
             = link_to(t('reports.securities.title'), reports_path(anchor: 'securities'))
             %ul.nav-dropdown-nested
-              %li.disabled= t('reports.securities.transactions.title')
-              %li.disabled= t('reports.securities.cash_projections.title')
-              %li.disabled= t('reports.securities.current.title')
-              %li.disabled= t('reports.securities.monthly.title')
-              %li.disabled= t('reports.securities.services_monthly.title')
+              - if feature_enabled?('report-securities-transaction')
+                %li= link_to(t('reports.securities.transactions.title'), reports_securities_transactions_path)
+              %li= link_to(t('reports.securities.cash_projections.title'), reports_cash_projections_path)
+              %li= link_to(t('reports.securities.current.title'), reports_current_securities_position_path)
+              %li= link_to(t('reports.securities.monthly.title'), reports_monthly_securities_position_path)
+              %li= link_to(t('reports.securities.services_monthly.title'), reports_securities_services_statement_path)
           %li<>
             = link_to(t('reports.your_account.title'), reports_path(anchor: 'account'))
             %ul.nav-dropdown-nested
               %li= link_to(t('reports.account.account_summary.title'), reports_account_summary_path)
-              %li.disabled= t('reports.account.authorizations.title')
+              - if feature_enabled?('authorizations-report')
+                %li= link_to(t('reports.account.authorizations.title'), reports_authorizations_path)
+              - else
+                %li.disabled= t('reports.account.authorizations.title')
               %li= link_to(t('reports.account.settlement_transaction_account.title'), reports_settlement_transaction_account_path)
       %li<>
         = link_to(t('nav.secondary.resources'), '#', class: 'nav-menu')
         %ul.nav-dropdown<>
           %li<>= link_to(t('resources.guides.title'), guides_path)
-          %li.disabled<>= t('resources.fee_schedules.title')
+          %li<>= link_to(t('resources.fee_schedules.title'), fee_schedules_path)
           %li<>
             = link_to(t('resources.forms.title'), forms_path)
             %ul.nav-dropdown-nested
@@ -69,18 +81,15 @@
               %li= link_to(t('resources.forms.authorizations.title'), forms_path(anchor: :authorizations))
               %li= link_to(t('resources.forms.credit.title'), forms_path(anchor: :credit))
               %li= link_to(t('resources.forms.collateral.title'), forms_path(anchor: :collateral))
-          %li.disabled<>= t('resources.faq.title')
-          %li.disabled<>= t('resources.capital_plan.title')
+          %li<>= link_to(t('resources.capital_plan.title'), capital_plan_path)
           %li= link_to(t('resources.investor_relations.title'), 'http://www.fhlbsf.com/about/investor/default.aspx')
           %li= link_to(t('resources.newsroom.title'), 'http://www.fhlbsf.com/about/news/releases/default.aspx')
           %li= link_to(t('resources.regulatory_updates.title'), 'http://www.fhlbsf.com/resource-center/regulatory/default.aspx')
-          %li<>= link_to(t('resources.business_continuity.name'),business_continuity_path)
-          %li.disabled<>
-            = t('resources.membership.title')
+          %li<>= link_to(t('resources.business_continuity.name'), business_continuity_path)
+          %li<>
+            = link_to(t('resources.membership.title'), membership_overview_path)
             %ul.nav-dropdown-nested
-              %li.disabled= t('resources.membership.benefits.title')
-              %li.disabled= t('resources.membership.requirements.title')
-              %li.disabled= t('resources.membership.applications.title')
+              %li= link_to(t('resources.membership.applications.nav_title'), membership_application_path)
       %li.products-dropdown<>
         = link_to(t('nav.secondary.products'), '#', class: 'nav-menu')
         %ul.nav-dropdown<>

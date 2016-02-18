@@ -25,6 +25,15 @@ Scenario: Quick Advance flyout opens with commas in the amount field
   Then I should see a flyout
   And I should see "56,503,000" in the quick advance flyout input field
 
+@jira-mem-1175
+Scenario: Quick Advance flyout opens when user clicks the Overnight VRC label or rate
+  When I visit the dashboard
+  And I click on the VRC Overnight label
+  Then I should see a flyout
+  When I close the quick advance flyout
+  And I click on the VRC Overnight rate
+  Then I should see a flyout
+
 Scenario: Quick Advance flyout closes
   When I visit the dashboard
   And I open the quick advance flyout
@@ -49,7 +58,7 @@ Scenario: Quick Advance flyout tooltip
   And I open the quick advance flyout
   When I hover on the cell with a term of "2week" and a type of "whole"
   Then I should see the quick advance table tooltip for the cell with a term of "2week" and a type of "whole"
-  
+
 @jira-mem-979
 Scenario: Quick Advance flyout tooltip for Open advances
   Given I visit the dashboard
@@ -115,7 +124,7 @@ Scenario: Check the interest payment frequencies for various term/type
   When I click on the initiate advance button
   Then I should see an interest payment frequency of "maturity"
 
-  Scenario: Go back to rate table from preview in Quick Advance flyout
+Scenario: Go back to rate table from preview in Quick Advance flyout
   Given I visit the dashboard
   And I open the quick advance flyout
   And I select the rate with a term of "2week" and a type of "aaa"
@@ -219,7 +228,7 @@ Scenario: The View Recent Price Indications link is displayed when the desk is c
   And the desk has closed
   When I click on the View Recent Price Indications link
   Then I am on the "Current Price Indications" report page
-  
+
 @data-unavailable @jira-mem-569
 Scenario: A message is displayed when there is limited pricing
   Given I visit the dashboard
@@ -235,14 +244,21 @@ Scenario: Users get an error if their requested advance would push FHLB over its
   When I click on the initiate advance button
   Then I should see an "advance unavailable" error with amount 100003 and type "whole"
 
-@jira-mem-117
-Scenario: Users who wait too long to perform an advance are told that the rate has expired.
+@jira-mem-117 @jira-mem-1114
+Scenario: Users who wait too long to perform an advance are told that the rate has expired if the rate has changed
   Given I visit the dashboard
   And I am on the quick advance preview screen
   And I wait for 70 seconds
-  And I enter my SecurID pin and token
-  When I click on the quick advance confirm button
+  When I confirm an advance with a rate that changes
   Then I should see a "rate expired" error
+
+@jira-mem-117 @jira-mem-1114
+Scenario: Users who wait too long to perform an advance can still execute the advance if the rate has not changed
+  Given I visit the dashboard
+  And I am on the quick advance preview screen
+  And I wait for 70 seconds
+  When I confirm an advance with a rate that remains unchanged
+  Then I should see confirmation number for the advance
 
 @jira-mem-883
 Scenario: Users gets an error if advance causes per-term cumulative amount to exceed limit
@@ -251,6 +267,12 @@ Scenario: Users gets an error if advance causes per-term cumulative amount to ex
   And I select the rate with a term of "2week" and a type of "whole"
   When I click on the initiate advance button
   Then I should see an "advance unavailable" error with amount 1000000000000 and type "whole"
+
+@jira-mem-926
+Scenario: User sees an unavailable message if quick advances are disabled for their bank
+  Given I am logged in as a "user with disabled quick advances"
+  When I visit the dashboard
+  Then I should see a quick advances disabled message
 
 @jira-mem-1197
 Scenario: User who cancels an advance with a stock purchase doesn't see the stock purchase in the next advance
@@ -277,3 +299,31 @@ Scenario: User who has a failed advance doesn't see a double render of the cap s
   When I go back to the capital stock purchase screen
   Then I should see only one quick advance stock purchase screen
 
+@jira-mem-1156
+Scenario: User navigates to Manage Advances page from quick advance confirmation screen
+  Given I visit the dashboard
+  And I successfully execute a quick advance
+  When I click the Manage Advances button
+  Then I should be on the Manage Advances page
+
+@jira-mem-1178
+Scenario: User backs out of an advance requiring a capital stock purchase and then takes the same advance out
+  Given I visit the dashboard
+  And I am on the quick advance stock purchase screen
+  And I select the continue with advance option
+  When I click on the continue with request button
+  Then I should see a preview of the quick advance
+  When I go back to the quick advance rate table
+  And I open the quick advance flyout and enter 1000131
+  And I select the rate with a term of "2week" and a type of "whole"
+  And I click on the initiate advance button
+  Then I should be on the quick advance stock purchase screen
+
+@jira-mem-983 @allow-rescue
+Scenario: Users should not be able to get an advance if the product has been disabled by the desk after selection on the rate table
+  Given I visit the dashboard
+  When I try and preview an advance on a disabled product
+  Then I should see a quick advance error
+  When I close the quick advance flyout
+  And I try and take out an advance on a disabled product
+  Then I should see a quick advance error

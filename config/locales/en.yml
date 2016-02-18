@@ -21,7 +21,7 @@
 en:
   global:
     na: N/A
-    vrc_overnight: VRC Overnight
+    standard_vrc_overnight: Standard VRC Overnight
     currency:
       thousand: T
       million: MM
@@ -56,13 +56,9 @@ en:
     rates: Rates
     daily_balances: Daily Balances
     beginning_balance: Beginning Balance
-    messages: Messages
+    messages: Announcements
     categories: Categories
     login: Log In
-    prior: Prior
-    next: Next
-    forward: Forward
-    print: Print
     as_of: As of
     today: Today
     details: Details
@@ -100,7 +96,7 @@ en:
     phone: Phone
     fax: Fax
     copyright_html: "&copy;"
-    copyright_date: 2000-2015
+    copyright_date: 2000-%{year}
     contact: Contact
     terms_of_use: Terms of Use
     privacy_policy: Privacy Policy
@@ -112,6 +108,9 @@ en:
     report: Report
     sta_number: Settlement/Transaction Account No. %{sta_number}
     all_transactions: All Transactions
+    footnote_indicator: '*'
+    attachments: Attachments
+    unknown: Unknown
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -152,6 +151,7 @@ en:
     primary:
       welcome: Hi %{name}
       logout: Logout
+      switch: Switch
       search: Search
     secondary:
       advances: Advances
@@ -181,6 +181,10 @@ en:
     funding_date: Funding Date
     advance_type: Advance Type
     product_type: Product Type
+    transaction: Transaction
+    loan_count: Loan Count
+    unpaid_balance: Unpaid Balance
+    status: Status
   datepicker:
     range:
       date_to_current: "%{date} to date"
@@ -212,13 +216,11 @@ en:
               confirmation: Confirmation email address does not match.
             password:
               non_atomic: You can't change a password and other attributes at the same time.
+              intranet: Intranet users cannot change their password through the Member Portal.
               too_short:
                 one: Passwords must be at least one character long.
                 other: Passwords must be at least %{count} characters long.
-              capital_letter_needed: Passwords must contain at least one capital letter.
-              lowercase_letter_needed: Passwords must contain at least one lowercase letter.
-              number_needed: Passwords must contain at least one number.
-              symbol_needed: "Passwords must contain at least symbol (!@#$%*)."
+              criteria_not_met: "Passwords must include at least three of the following: upper case letters, lower case letters, numbers, or special characters (!@#$%*)."
               confirmation: Passwords do not match.
               ldap_update_failed: We failed to update your password. Most likely you used a password that was used before.
             current_password:
@@ -233,44 +235,52 @@ en:
       title: User
     access_manager:
       title: Access Manager
-      description: Identifies your institution's Access Manager(s), who will add and delete users, reset passwords, and lock or unlock website access accounts for individuals
+      description_title: Access Manager
+      description: The designated individuals identify your institution's Access Manager(s), who can add and delete users, reset passwords, and lock or unlock member portal access accounts for individuals.
     resolution:
       dropdown: Resolution and Authorization
-      title: 'Resolution and Authorization: Member Transactions (All transactions except Wires)'
+      title: 'Resolution and Authorization: Member Transactions'
+      description_title: 'Resolution and Authorization: Member Transactions (All transactions except Wires)'
       description: The primary form on which you specify individuals who are authorized to execute all types of transactions with the Bank, except for wires. Must be adopted by your Board of Directors and signed by your Corporate Secretary.
     entire_authority:
       dropdown: Entire Authority
-      title: Entire Authority (All transactions except Wires)
+      title: Entire Authority
+      description_title: Entire Authority (All transactions except Wires)
       description: This form permits the individuals designated on the Resolution and Authorization to authorize additional officers, employees, or agents of your institution to engage in all transactions with the Bank, except for wires, and to provide instructions regarding all securities-related transactions.
     wire_transfer:
       title: Wire Transfer Services
-      description: The designated individuals listed are authorized to conduct offline funds transactions by telephone. The signer listed on this form must be listed as an authorized individual on the Resolution and Authorization.
+      description_title: Wire Transfer Services
+      description: The designated individuals listed are authorized to conduct offline funds transactions by telephone. Any signer listed on this form must be listed as an authorized individual on the Resolution and Authorization.
     advances:
       title: Advances
+      description_title: Advances
       description: The designated individuals listed are authorized to execute advances, letters of credit, lines of credit, and other similar extensions of credit with the Bank.
     affordable_housing:
       title: Affordable Housing Program
+      description_title: Affordable Housing Program
       description: The designated individuals listed are authorized to exercise authority under the Bank's Affordable Housing Program and any other community investment programs, excluding extensions of credit related to these programs.
     collateral:
       title: Collateral
+      description_title: Collateral
       description: The designated individuals listed are authorized to engage in collateral transactions with the Bank. Employees listed on this form are authorized to provide instructions regarding the pledging and de-pledging of securities but are not authorized to provide instructions regarding securities held in safekeeping (except to pledge those securities).
     interest_rate_derivatives:
       title: Interest Rate Derivatives
+      description_title: Interest Rate Derivatives
       description: The designated individuals listed are authorized to engage in interest rate derivative transactions with the Bank.
     money_market:
       title: Money Market Transactions
+      description_title: Money Market Transactions
       description: The designated individuals listed are authorized to request or purchase Bank funds in unsecured money market transactions.
     securities:
       title: Securities Services
+      description_title: Securities Services
       description: The designated individuals listed are authorized to move securities to and from their unpledged account (safekeeping account). Employees listed on this form are authorized to provide instructions regarding the purchase and sale of unpledged securities, but are not authorized to pledge or de-pledge securities.
-    etransact:
-      title: eTransact Holder
   settings:
     title: Settings
     save: Save
     save_message: Last auto-saved
     account:
-      title: Manage Access
+      title: Manage Users
       actions:
         lock: Lock
         unlock: Unlock
@@ -285,6 +295,12 @@ en:
       error:
         title: An Error Occured
         summary: Your request could not be completed.
+      create:
+        title: Add New Web User
+        save: Add New Web User
+      confirm_create:
+        title: New Account Created
+        success_html: A new account has been created for <strong>%{name}</strong>.<br>An email with login instructions has been sent to this user.
       edit:
         title: Edit User Information
         save: Save Changes
@@ -311,6 +327,7 @@ en:
     password:
       title: Manage Password
       instructions: "Change your Member Portal password.\n\nIf you have questions about account access, contact your institution’s Access Manager or <a href=\"%{url}\">Web Support</a> at %{phone_number}."
+      intranet: Internal users do not change passwords through the Member Portal.
     change_password:
       title: Change Your Password
       instructions: "Passwords should contain at least 8 characters, including one capital letter, one number and one special character (!@#$%*). Passwords expire every 60 days. You may not reuse a password that you have used within the last eight 60-day periods."
@@ -322,40 +339,53 @@ en:
       save_button: Save new password
     two_factor:
       title: Manage Token
-      description: Manage authentication with your SecurID token.
-      help_html: 'To request a new SecurID token or get help with an existing one, <a href="%{url}">email Web Support</a> or call them at %{phone_number}.'
+      help_html: To request a new SecurID token or get help with an existing one, contact <a href="%{url}">Web Support</a> at %{phone_number}.
+      new_pin:
+        title: Create Token PIN for a New SecurID Token
+        description_html: Contact <a href="%{url}">Web Support</a> at %{phone_number} to activate a new SecurID token. Once activated, you may set your PIN.
+        description: If you just got a new SecurID token and need to set the PIN for it. Use Reset Token PIN if you forgot your PIN.
+        cta: Create New Token PIN
+        prompt_current: Enter the 6-digit code shown on your token.
+        prompt_new_pin: Enter your new 4-digit PIN.
+        new_pin: New PIN
+        confirm_pin: Re-enter PIN
+        save: Create PIN
+        success: Your token PIN has been created.
+        error_html: We were unable to create your token PIN. Please contact <a href="%{url}">Web Support</a> at %{phone_number} for further assistance.
+        pin_mismatch: PINs don't match.
       reset_pin:
         title: Reset Token PIN
-        description: "If you can't remember your token PIN, contact Web Support before resetting it."
+        description_html: If you can’t remember your 4-digit token PIN, contact <a href="%{url}">Web Support</a> before resetting it.
         cta: Reset Token PIN
-        hint: 'Note: You must save your new PIN before the token code you enter below expires.'
-        prompt_current_pin: Enter your current PIN and a token code.
-        prompt_new_pin: Enter your new PIN.
+        hint: 'Note: You must save your new 4-digit PIN before the token code you enter below expires.'
+        prompt_current_pin: Enter your current 4-digit PIN and the 6-digit code shown on your token.
+        prompt_new_pin: Enter your new 4-digit PIN.
         new_pin: New PIN
-        confirm_pin: Re-Enter PIN
+        confirm_pin: Re-enter new PIN
         save: Save PIN
-        success: We reset your token PIN.
-        error: We failed to reset your token PIN. Please contact Web Support for further assistance.
+        success: Your token PIN has been reset.
+        error_html: We were unable to reset your token PIN. Please contact <a href="%{url}">Web Support</a> at %{phone_number} for further assistance.
         pin_mismatch: PINs don't match.
       resynchronize:
-        title: Reset Token
-        description: If your token codes are no longer accepted when you try to log in, you may need to reset your token. Contact Web Support before resetting it.
-        cta: Reset Token
-        save: Reset Token
+        title: Synchronize Token
+        description: If your token codes are no longer accepted, you may need to synchronize your token.
+        cta: Synchronize Token
+        save: Synchronize Token
+        first_token: First Token Code
         next_token: Second Token Code
-        success: We reset your token.
-        error: We failed to reset your token. Please contact Web Support for further assistance.
+        success: Your token has been synchronized.
+        error_html: We were unable to synchronize your token. Please contact <a href="%{url}">Web Support</a> at %{phone_number} for further assistance.
         steps:
-          enter_original: Enter a token code and your PIN.
+          enter_original: Enter your PIN and the 6-digit code shown on your token.
           wait_next: Wait for the next token code to appear, then enter it.
-          submit: Press 'Reset Token' before the second token code expires.
+          submit: Press ‘Synchronize Token’ before the second token code changes.
     email:
       title: Emails
       header: Choose which email messages to receive
       selected_item_message: "(Be sure to include fhlbsf.com in your Safe Senders list)"
       required_item_message_html: "You are assigned to receive these emails. For more information, <a href=\"%{url}\">contact us</a>."
       all:
-        title: All Messages
+        title: All Announcements
         description_html: ""
       reports:
         title: Reports
@@ -392,6 +422,20 @@ en:
     logged_out: You Have Been Logged Out
     session_expired: For security reasons, your session expires after several minutes of inactivity.
     log_in_again: Log In Again
+  emails:
+    new_user:
+      sender: FHLBank San Francisco <%{email}>
+      subject: Access to FHLBank San Francisco Member Portal
+      greeting: 'Hi %{given_name},'
+      created_by: "An account has been created for you by your institution’s Access Manager, %{manager}."
+      username: 'Your username is: %{username}.'
+      set_password: To access the FHLB Member Portal, you'll need to set your password.
+      login_instructions: Once you have set a password, you will be redirected to the login page, where you will need to enter your username (above) and your new password.
+      expiration: For your security, this link will expire in one hour.
+      contact: Contact your Access Manager or Web Support at %{phone} if you have any questions.
+      sign_off_html: Thank you,<br>FHLBank San Francisco Web Support Team
+      disclaimer: 'The contents of this email are intended only for the use of the individual or entity to which they are addressed and may contain information that is legally privileged, confidential, and exempt from disclosure. If you are not the intended recipient, you are hereby notified that any dissemination, distribution, or copying of this email is strictly prohibited. If you have received this email in error, please: (i) reply immediately to this email indicating that you received this communication in error, and (ii) promptly delete this email from your computer. Thank you.'
+
   forgot_password:
     instructions: "Enter your username, and we'll email you instructions to reset your password."
     confirmation:
@@ -412,6 +456,7 @@ en:
       confirm_field: Re-enter new password
   dashboard:
     meta_title: FHLB - Dashboard
+    retrieving_data: We are retrieving this data.
     actions:
       more: More
       edit: Edit
@@ -419,9 +464,10 @@ en:
       view: View
       download: Download
       xml: XML
-    previous_activity:
-      title: Previous Activity
-      overnight_vrc: Overnight/Open VRC
+    recent_activity:
+      title: Recent Credit Activity
+      view_report_html: View your institution's <a href=%{url}>Today's Credit Activity</a> report for detailed information.
+      no_activity: No recent credit activity.
     contacts:
       title: Contact
       icon_alt_text: Contact
@@ -439,6 +485,7 @@ en:
       advances_desk_closed: The Member Services Desk is closed.
       advances_desk_closed_link: View recent price indications
       advances_desk_no_terms: There are no terms available right now.
+      advance_desk_unavailable_html: Quick Advance is not available right now. Call the Member Services Desk at <span>%{phone_number}</span> for more information.
       advance_last_updated: The following rates were last updated %{last_updated}
       hours_of_operation_html: "You may initiate an advance during the <a href=\"%{url}\">Advance Desk Hours of Operation</a>."
       limited_pricing: View limited pricing information
@@ -492,8 +539,8 @@ en:
         rates: View Current Rates
       preview:
         title: Initiate Advance
-        intro: Please review the details below. If everything looks correct, enter your SecurID credentials below and then click “Initiate Advance.” If not, click "Back."
-        elevated_intro: Please review the details below. If everything looks correct, click “Initiate Advance.” If not, click "Back."
+        intro: Please review the details below. If everything looks correct, enter your SecurID credentials below and then click “Initiate Advance.” If not, click “Back.”
+        elevated_intro: Please review the details below. If everything looks correct, click “Initiate Advance.” If not, click “Back.”
         lock_rate: This rate is locked for 60 seconds.
         initiate: Please wait while we initiate your advance. This may take about 30 seconds.
         footer: By executing this advance, you commit %{bank_name} to take down the requested advance in the principal amount and upon the terms shown here.
@@ -535,7 +582,7 @@ en:
         cumulative: Cumulative Stock Purchase Required
         increase_transaction: Increase Amount Requested to cover required stock purchase.
         debit_sta_html: If you select this option, the Bank will automatically debit your Settlement/Transaction Account (STA) for %{amount} today.
-        footer: Cumulative Stock Purchase Required reflects the total stock purchase for all advances transacted today, including the new advace request. To avoid an overdraft, please ensure your Settlement/Transaction Account (STA) has sufficient funds to cover this amount.
+        footer: Cumulative Stock Purchase Required reflects the total stock purchase for all advances transacted today, including the new advance request. To avoid an overdraft, please ensure your Settlement/Transaction Account (STA) has sufficient funds to cover this amount.
       error:
         insufficient_financing_availability_html: The original amount requested of %{amount} is not available based on your remaining financing availability.
         capital_stock_exception: No Net or Gross info returned
@@ -582,6 +629,10 @@ en:
           available: Financing Availability
           capacity: Collateral Borrowing Capacity
           leverage: Stock Leverage
+          standard: Standard Credit Program
+          agency: SBC:Agency
+          aaa: SBC:AAA
+          aa: SBC:AA
         standard_program:
           title: 'Standard Program:'
         sbc_program:
@@ -591,7 +642,7 @@ en:
         borrowing_capacity_note_html: View your institution's <a href=%{url}>Borrowing Capacity</a> report for detailed information
     market_overview:
       title: Market Rates
-      vrc: 30-Day VRC Rate (%)
+      vrc: 30-Day Standard VRC Overnight Rate (%)
   resources:
     business_continuity:
       name: Business Continuity
@@ -638,7 +689,7 @@ en:
         title: Credit Guide
         updates:
           upcoming:
-            - "Please refere to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
+            - "Please refer to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
           revisions:
             -
               date: '2015-04-22'
@@ -680,6 +731,66 @@ en:
         title: Collateral Field Review Process
     fee_schedules:
       title: Fee Schedules
+      other_fee_info_html: The Bank charges fees for certain products and services. Other fees are included in the <a href=%{credit_guide_url}>Credit Guide</a> and the <a href=%{collateral_guide_url}>Collateral Guide</a>.
+      letter_of_credit: Standby Letter of Credit Prices and Fees
+      annual_maintenance_charge: Pricing/Annual Maintenance Charge
+      loc_pricing_info: 'Prices for standby letters of credit will be established and disclosed prior to issuance and will include, at a minimum, an ongoing annual maintenance charge, to be paid monthly in advance on a 30/360 day count basis. Current annual maintenance charges are listed below:'
+      minimum_annual_fee: Minimum annual fee
+      issuance_fee: Issuance Fee
+      cip_ace: CIP/ACE
+      agency_deposits: State and local agency deposits
+      other_purposes: Other purposes
+      price_range: '%{lower} - %{upper}'
+      commercial_paper: Commercial paper
+      tax_exempt_bond: Tax-exempt bond
+      draw_fee: Draw fee
+      amendment_fee: Amendment Fee
+      other_loc_info: For other letter of credit types, the Bank will determine an appropriate issuance fee based on the specific requirements of the transaction.
+      other_amendment_info: For other types of amendments, the Bank will determine an appropriate fee based on the specific requirements of the amendment.
+      increase_extension: Increases or extensions
+      basis_point_per_annum: '%{basis_point} basis points per annum'
+      securities_services: Securities Services Fees
+      monthly_maintenance_fee: Monthly Account Maintenance Fee
+      monthly_securities_fees: Monthly Securities Fees
+      security_transaction_fees: Security Transaction Fees
+      monthly_maintenance_info: The monthly account maintenance fee is based on the number of securities held at the end of the current month.
+      less_than_10: Less than 10 lots
+      between_10_and_24: 10-24 lots
+      more_than_24: 25 or more lots
+      amount_per_month: '%{amount} per month'
+      item_by_lot: '%{amount} per item, by lot'
+      par_by_lot: '%{amount} per %{par} par, by lot'
+      amount_per_item: '%{amount} per item'
+      fed: Fed eligible
+      dtc: DTC eligible
+      physical: Physical and mutual funds
+      euroclear: Euroclear
+      all_income_disbursement: All income disbursement
+      pledge_status_change: Pledge status change (account transfer)
+      certificate_registration: Registration of certificate
+      research_projects: Research projects (hourly)
+      special_handling: Special handling
+      specific_transaction_fee_info: '* Fees will be charged based on the specific transaction and time involved.'
+      wire_transfer_and_sta: Wire Transfer and STA Fees
+      domestic_outgoing_wires: Domestic Outgoing Wires
+      telephone_request: Telephone request
+      telephone_repetitive: Repetitive
+      telephone_non_repetitive: Non-repetitive
+      drawdown_request: Drawdown request
+      standing_request: Standing request
+      domestic_incoming_wires: Domestic incoming wires
+      overdraft_charges: Overdraft Charges
+      interest_rate: Interest rate charged daily on the amount of the overdraft
+      processing_fee: Processing fee
+      miscellaneous_securities_services: Miscellaneous Securities Services Fees
+      miscellaneous_wire_transfer: Miscellaneous Wire Transfer and STA Fees
+      photocopies: Photocopies
+      special_account_research: Special account research
+      interest_rate_overdraft: 'Fed funds + %{basis_points} basis points'
+      amount_per_overdraft: '%{amount} per overdraft'
+      amount_per_wire: '%{amount} per wire'
+      amount_per_statement: '%{amount} per item or statement'
+      amount_per_hour: '%{amount} per hour'
     forms:
       title: Forms
       agreements:
@@ -694,6 +805,7 @@ en:
         settlement_transaction_account: Settlement/Transaction Account Agreement
       authorizations:
         title: Authorizations
+        instructions_link: View Authorizations Instructions
         signature_cards:
           title: Authorizations
           member_transactions: 'Resolution and Authorization: Member Transactions'
@@ -763,6 +875,9 @@ en:
       title: FAQs
     capital_plan:
       title: Capital Plan
+      summary_title: Summary of Capital Plan
+      effective_april_html: "Effective April 1, 2015, the Bank amended and restated its capital plan to reduce member stock purchase requirements and make other clarifying and conforming changes.\n\nEffective August 3, 2015, the Bank reduced its activity-based stock purchase requirements, within the ranges authorized by the Bank’s Capital Plan. The activity-based stock requirement for outstanding advances was reduced from 3.0% to 2.7%, and the activity-based stock requirement for outstanding mortgage loans purchased from the member and held by the Bank was reduced from 3.0% to 0.0%."
+      members_may_request_html: "Members may request redemption of capital stock by submitting <a href='%{url}'> Notice of Redemption of Capital Stock</a> (PDF)"
     investor_relations:
       title: Investor Relations
     newsroom:
@@ -771,12 +886,187 @@ en:
       title: Regulatory Updates
     membership:
       title: Membership
-      benefits:
-        title: Benefits
-      requirements:
-        title: Requirements
+      overview:
+        title: Membership
+        p1: The Federal Home Loan Bank of San Francisco is uniquely positioned to lend value to your enterprise and help you achieve your business objectives. We raise funds in the global capital markets and maintain a ready supply of liquidity to provide you with reliable access to low-cost funding and help you meet the diverse and ever-changing credit needs of your customers and communities.
+        p2_html: "Our <a href=%{product_url}>competitively priced products</a> are recognized as among the most cost-effective and versatile in the industry. Because the Federal Home Loan Banks' consolidated obligations are rated Aaa by Moody's Investors Service and AA+ by Standard & Poor's, the Federal Home Loan Banks are able to raise funds at rates that are close to Treasury security yields. As a member of the Bank, you'll be better positioned to:"
+        benefits:
+          reduce_risk: Reduce interest rate risk
+          control_cost: Control your cost of funds
+          manage_liquidity: Manage liquidity
+          strengthen_funding: Strengthen your contingent liquidity funding plans
+          meet_customer_needs: Offer credit products and other programs that meet the needs of your customers
+          support_affordable_housing: Support innovative affordable housing and economic development initiatives that revitalize communities
+        getting_started: Getting Started
+        resources_intro: "The following resources provide detailed information regarding Bank membership:"
+        membership_guidelines_html: "%{download_link}: These guidelines include our membership eligibility requirements, underwriting review standards, products and services, credit and collateral policies, and the membership application process."
+        capital_stock_html: "%{cap_plan_link}, %{cap_plan_summary_link}, and %{annual_reports_link}: All Bank members are required to invest in Bank capital stock. We encourage you, as a prospective shareholder, to review these financial disclosures, as well as the Bank’s %{sec_link}."
+        guides_html: "%{credit_link}, %{collateral_link}, and %{price_indications_link}: These resources provide detailed information about our products, credit and collateral policies, and advances pricing."
+        links:
+          membership_guidelines: Membership Guidelines
+          capital_plan: Capital Plan
+          summary_capital_plan: Summary of the Capital Plan
+          annual_reports: annual reports
+          sec_filings: SEC filings
+          federal_regulation: Code of Federal Regulations
+          credit_guide: Credit Guide
+          collateral_guide: Collateral Guide
+          current_price_indications: Current Price Indications
+        apply: Apply for Membership
+        apply_details_html: A complete list of application forms, agreements, and exhibits can be found on our <a href=%{url}>Applications</a> page.
       applications:
-        title: Applications
+        nav_title: Applications
+        title: Membership Application
+        intro_html: To apply for Bank membership, please complete all of the required application forms, agreements, and exhibits. Contact your <a href=%{url}>Relationship Manager</a> if you have any questions regarding the application process.
+        charter_types:
+          heading: "For a complete list of application forms, select your charter type from the list below:"
+          commercial: Commercial Bank, Savings Institution, or Industrial Loan Company
+          community_development: Community Development Financial Institution
+          credit_union: Credit Union
+          insurance_company: Insurance Company
+        process:
+          heading: Application Process Overview
+          submit_forms: Submit all required membership application forms, agreements, and exhibits to the Bank.
+          examination_report: We require a copy of your most recent regulatory examination report from your primary regulator (this does not apply to community development financial institutions). Examination reports must be provided directly to the Bank by the regulator and may not be submitted by the applicant.
+          application_review: Bank staff reviews the application for completeness and may request additional information as needed.
+          eligibility_requirements: Once we receive the regulatory examination report and the application is deemed complete, we determine whether your institution meets all of the statutory and regulatory eligibility requirements and underwriting review standards for membership.
+          notification: We notify your institution of approval or denial of your membership application within 60 days after the application is deemed complete.
+          approval: When your institution is approved for membership, your institution will wire your stock purchase requirement amount, as calculated on the Applicant’s Bank Stock Calculation worksheet, to your newly opened Settlement/Transaction Account.
+      commercial:
+        title: Commercial Banks, Savings Institutions, and Industrial Loan Companies
+      forms:
+        required:
+          heading: Required Forms and Agreements
+          intro: The following forms and agreements are required to process your membership application.
+        requested:
+          heading: Requested Agreements and Forms
+          intro: The following agreements and forms are not required to apply for membership in the Bank, but are needed to conduct business with the Bank. We request that you submit these signed and dated agreements and forms with your application. These documents will become effective if and when your institution is approved for membership. Please date the documents as of the day they are executed.
+        optional:
+          heading: Optional Agreements and Forms
+          intro: The following agreements and forms are not required to apply for membership in the Bank, but may be needed to conduct certain transactions with the Bank. You may sign and date the forms and include them with your membership application. They will become effective if and when your institution is approved for membership.
+          access_html: "The following forms are used to provide access to individuals who are not already authorized to conduct business with the Bank on the Resolution and Authorization: Member Transactions. Please refer to the <a href=%{url}>Instructions</a> for completing the Certificate of Designated Persons forms."
+        id_1465:
+          title: "Letter of Credit Reimbursement Agreement (FC 1465)"
+          description: "This agreement is required if your institution chooses to enter into standby letter of credit transactions with the Bank."
+        id_1694:
+          title: "Safekeeping Agreement (FC 1694)"
+          description: "This agreement is required for institutions that pledge securities as collateral. It establishes a securities custody account with the Bank."
+        id_1973:
+          title: "ISDA Master Agreement (1992, second printing)/Schedule to the Master Agreement (FC 1973)"
+          description_html: "These documents are required for institutions that want to enter into derivatives transactions with the Bank and must be signed by one or more authorized officers of your institution (as indicated on the Resolution and Authorization: Member Transactions) at the level of vice president or higher. These documents are available in hard copy only. Please e-mail <a href=%{url}>membership@fhlbsf.com</a> for this agreement."
+        id_2065:
+          title: "Resolution and Authorization: Member Transactions (FC 2065)"
+          description: "This resolution must be adopted by your institution’s board of directors and signed by your Corporate Secretary. It is the primary form on which you specify individuals who are authorized to execute all types of transactions with the Bank, except for wires."
+        id_2066:
+          title: "Certificate of Designated Persons—Entire Authority (FC 2066)"
+          description: "This form permits the individuals designated on the Resolution and Authorization to authorize additional officers, employees, or agents of your institution to engage in all transactions with the Bank, except for wires, and to provide instructions regarding all securities-related transactions."
+        id_2067:
+          title: "Certificate of Designated Persons—Advances (FC 2067)"
+          description: "This form authorizes the designated individuals listed to execute advances, letters of credit, lines of credit, and other similar extensions of credit with the Bank."
+        id_2068:
+          title: "Certificate of Designated Persons—Collateral (FC 2068)"
+          description: "This form authorizes the designated individuals listed to engage in collateral transactions with the Bank. Employees listed on this form are authorized to provide instructions regarding the pledging and de-pledging of securities but are not authorized to provide instructions regarding securities held in safekeeping (except to pledge those securities)."
+        id_2070:
+          title: "Certificate of Designated Persons—Interest Rate Derivatives (FC 2070)"
+          description: "This form authorizes the designated individuals listed to engage in interest rate derivative transactions with the Bank."
+        id_2089:
+          title: "Calculation of 10% Requirement: Commercial Banks, Savings Institutions, and Industrial Loan Companies (FC 2089)"
+          description: "This worksheet is only required for institutions with average total assets for the preceding three-year period of $1,123 million or greater (as of January 1, 2015; subject to annual adjustment). This worksheet helps you determine whether your institution has at least 10% of total assets in residential mortgage loans, a statutory eligibility requirement for membership."
+        id_2090:
+          title: "Certificate of Applicant (FC 2090)"
+          description: "This document must be completed and signed by the person(s) authorized in the Resolution: Membership."
+        id_2091:
+          title: "Resolution: Membership/Counsel Certification (FC 2091)"
+          description: "This resolution must be adopted by your institution’s board of directors, and the Resolution: Membership must be completed and signed by your institution’s Corporate Secretary. The Counsel Certification is a requirement for membership and must be signed by your institution’s legal counsel."
+        id_2093:
+          title: "Membership Application: Forms and Exhibits Checklist: Commercial Banks, Savings Institutions, and Industrial Loan Companies (FC 2093)"
+          description: "This checklist identifies all of the forms, agreements, and exhibits that must be returned to the Bank with your application."
+        id_2094:
+          title: "Applicant Information: Commercial Banks, Savings Institutions, and Industrial Loan Companies (FC 2094)"
+          description: This form provides basic information about your institution.
+        id_2099:
+          title:
+          description:
+        id_2104:
+          title: "Applicant’s Bank Stock Calculation: Commercial Banks, Savings Institutions, and Industrial Loan Companies (FC 2104)"
+          description_html: "This worksheet helps you calculate the amount of Bank capital stock your institution must purchase to become a member. Please e-mail <a href=%{url}>membership@fhlbsf.com</a> if you want the Bank to prepare an estimate of the Initial Stock Purchase Requirement. The estimate will be based on the most recent financial information available to the Bank, which may lag current data by a quarter."
+        id_2108:
+          title: "Certificate of Designated Persons—Wire Transfer Services (FC 2108)"
+          description: "This form authorizes the designated individuals listed to conduct offline funds transactions by telephone. The signer listed on this form must be listed as an authorized individual on the Resolution and Authorization."
+        id_2109:
+          title: "Certificate of Designated Persons—Securities Services (FC 2109)"
+          description: "This form authorizes the designated individuals listed to move securities to and from their unpledged account (safekeeping account). Employees listed on this form are authorized to provide instructions regarding the purchase and sale of unpledged securities, but are not authorized to pledge or de-pledge securities."
+        id_2112:
+          title:
+          description:
+        id_2117:
+          title: "Advances and Security Agreement (FC 2117)"
+          description: "This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization."
+        id_2127:
+          title:
+          description:
+        id_2135:
+          title: "Settlement/Transaction Account Terms and Conditions (FC 2135)"
+          description:
+        id_2136:
+          title: "Settlement/Transaction Account Agreement (FC 2136)"
+          description_html: "This agreement defines the account relationship between your institution and the Bank. Review the %{download_link} before signing this agreement."
+        id_2138:
+          title:
+          description:
+        id_2139:
+          title:
+          description:
+        id_2153:
+          title: "Certificate of Designated Persons—Affordable Housing Program (FC 2153)"
+          description: "This form authorizes the designated individuals listed to exercise authority under the Bank’s Affordable Housing Program and any other community investment programs, excluding extensions of credit related to these programs."
+        id_2160:
+          title: "Website Access Manager Set-Up (FC 2160)"
+          description: "This form identifies your institution’s Access Manager(s), who will add and delete users, reset passwords, and lock or unlock website access accounts for individuals at your institution."
+        id_2170:
+          title:
+          description:
+        id_2171:
+          title:
+          description:
+        id_2177:
+          title:
+          description:
+        id_2178:
+          title:
+          description:
+        id_2228:
+          title: "eTransact: SecurID Token Application (FC 2228)"
+          description: "This form must be completed by each individual who needs access to eTransact, the Bank's secure online transaction service."
+        id_2290:
+          title: "Authorization to Release Records: Arizona (FC 2290)"
+          description: "This authorization is for Arizona institutions only. This form authorizes the Bank to obtain records and information, including examination reports, about your institution from the Arizona Department of Financial Institutions."
+        id_2345:
+          title:
+          description:
+        id_2346:
+          title:
+          description:
+        id_2347:
+          title:
+          description:
+        id_2348:
+          title:
+          description:
+        id_2349:
+          title:
+          description:
+  securities:
+    title: Securities
+    redirect:
+      title: You are being redirected to the Bank’s eTransact Securities site.
+      message: You will be prompted to log in again.
+    manage:
+      title: Manage Securities
+      eligibility: Eligibility
+      authorized_by: Authorized by
+      pledged: Pledged
+      safekept: Safekept
   reports:
     meta_title: FHLB - Reports
     title: Reports
@@ -800,6 +1090,9 @@ en:
       current_report: Current report only
       months: '%{months} months'
       back_to: Back to %{date}
+    certificate_count: # supports all CLDR rules
+      one: "%{count} certificate"
+      other: "%{count} certificates"
     share_count: # supports all CLDR rules
       one: "%{count} share"
       other: "%{count} shares"
@@ -863,7 +1156,7 @@ en:
     securities:
       title: Securities
       transactions:
-        title: Securities Transaction
+        title: Securities Transactions
         summary: Preliminary report reflects transactions settled as of 11:30 am. Final report reflects all transactions settled during the day.
         updated: 'Twice daily: preliminary report is available at approximately 1:00 pm, and the final report is available at the end of the business day'
         history: Current report only, either the preliminary report or the final report
@@ -900,7 +1193,7 @@ en:
       freshness: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{now}. Collateral Borrowing Capacity data, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of close of business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today’s credit activity as of %{now}."
       institution_details:
         sta_number: 'STA Number:'
-        fhfb_number: 'FHFB Number:'
+        fhfb_number: 'FHFB No.:'
       collateral_delivery_required: 'Collateral Status: Delivery Required'
       financing_availability:
         title: Financing Availability
@@ -952,13 +1245,13 @@ en:
       price_indications:
         current:
           title: Current Price Indications
-          summary: Price indications are subject to change. For current quotes, call the Member Services Desk at %{phone_number} between 7:00 am and 2:00 pm. California time. Variable Rate Credit advances are available until 2:00 pm., and all other advances are generally available until 12:00 pm.
+          summary: "Variable Rate Credit advances are available from 7:00 am to 2:00 pm.\n\nAll other advances are generally available from 7:00 am to 12:00 pm."
           advance_maturity: Advance Maturity
-          overnight_fed_funds_benchmark: Overnight Fed Funds Benchmark* (%)
+          overnight_fed_funds_benchmark: Overnight Fed Funds Benchmark
           treasury_benchmark_maturity: Treasury Benchmark Maturity
           basis_point_spread_to_benchmark: Basis Point Spread to Benchmark
-          nominal_yield_of_benchmark: Nominal Yield of Benchmark* (%)
-          advance_rate: Advance Rate (%)
+          nominal_yield_of_benchmark: Nominal Yield of Benchmark
+          advance_rate: Advance Rate
           interest_day_count: 'Interest Day Count:'
           interest_rate_reset: 'Interest Rate Reset:'
           actual_actual: Actual/Actual
@@ -985,24 +1278,24 @@ en:
           basis_point_spread: (Basis Point Spread)
           arc_standard_xlsx: "Standard - ARC"
           arc_sbc_xlsx: "SBC - ARC"
-          1_month_libor: '1 Month LIBOR:'
-          3_month_libor: '3 Month LIBOR:'
-          6_month_libor: '6 Month LIBOR:'
+          1_month_libor: '1-Month LIBOR:'
+          3_month_libor: '3-Month LIBOR:'
+          6_month_libor: '6-Month LIBOR:'
           prime: 'Daily Prime:'
-          1_month_libor_header: 1 Month LIBOR
-          3_month_libor_header: 3 Month LIBOR
-          6_month_libor_header: 6 Month LIBOR
+          1_month_libor_header: 1-Month LIBOR
+          3_month_libor_header: 3-Month LIBOR
+          6_month_libor_header: 6-Month LIBOR
           prime_header: Daily Prime
-          sta_info: Published STA rate is applied to previous business day's ending STA balance
-          sta_rate: Effective Rate for Prior Business Day (%)
-          freshness: This report reflects the price indications published at 6:00 am on the current business day.
+          sta_info: Published STA rate is applied to the previous business day’s ending STA balance.
+          sta_rate: Effective Rate for Prior Business Day
+          freshness: This report reflects the price indications published at 6:00 am PT on the current business day. For current quotes, call the Member Services Desk at %{phone_number}.
         historical:
           title: Historical Price Indications
-          freshness: This report reflects historical price indications published at 6:00 am, not actual rates. 
+          freshness: This report reflects historical price indications published at 6:00 am, not actual rates.
           availability: Historical data available varies by credit product.
         standard_credit_program: Standard Credit Program
         sbc_program: Securities-Backed Credit
-        settlement_transaction_account: Settlement/Transaction Account
+        settlement_transaction_account: Settlement/Transaction Account (STA)
         sta_xlsx: Settlement Transaction Account
         frc:
           dropdown: Fixed Rate Credit (FRC)
@@ -1044,9 +1337,22 @@ en:
         closing_balance_heading: "Closing balance of Class B Shares as of %{date}:"
         table_title: Class B stock at $100 per share
         certificate_sequence: Certificate Sequence
+        issue_date: Issue Date
+        transaction_type: Transaction Type
+        shares_outstanding: Shares Outstanding
+        debit_shares: "Debits: Number of Shares"
+        credit_shares: "Credits: Number of Shares"
+      capital_stock_trial_balance:
+        title: Capital Stock Trial Balance
+        no_of_shares_heading: "Total Class B Shares Outstanding at $100 per share as of %{date}:"
+        no_of_certificates_heading: "Number of Certificates as of %{date}:"
+        table_title: Class B stock at $100 per share
+        certificate_sequence: Certificate Sequence
         debit_shares: "Debits: Number of Shares"
         credit_shares: "Credits: Number of Shares"
         shares_outstanding: Shares Outstanding
+        transaction_type: Transaction Type
+        total_shares_outstanding: Total Shares Outstanding
       borrowing_capacity_summary:
         total_borrowing_capacity_heading: "Total Borrowing Capacity:"
         remaining_borrowing_capacity_heading: "Remaining Borrowing Capacity:"
@@ -1073,7 +1379,7 @@ en:
           other_collateral: Less Other Collateral Required
           mpf_ce_collateral: Less MPF CE Collateral Required
         plus_line_items:
-          securities: Plus Securities Borrowing Capacity 
+          securities: Plus Securities Borrowing Capacity
       settlement_transaction_account:
         title: Settlement/Transaction Account (STA) Statement
         opening_balance_heading: "Beginning balance of as of %{date}:"
@@ -1081,6 +1387,7 @@ en:
         table_title: Settlement/Transaction Account (STA) Detail
         closing_balance: Balance as of close of business
         debit_credit_heading: Debits/Credits
+        sta_number_html: "<span>STA No.:</span> %{sta_number}"
       advances_detail:
         title: "Advances outstanding as of close of business %{date}"
         total_current_par_heading: "Total Current Par as of %{date}"
@@ -1140,12 +1447,13 @@ en:
           average_shares: Average Shares Outstanding
           dividend: Dividend
       securities_services_statement:
-        heading: 'Total amount due as of %{date}:'
+        heading: 'Total amount to be debited on %{date}:'
         footnote: '%{footnote}Fees will be charged based on the specific transaction and the amount of staff time required.'
         questions_html: 'If you have questions regarding this statement, please email <a href=%{mailto_url}>Securities Services</a> or call %{phone_number}.'
-        footer: 'Total amount to be debited from Settlement/Transaction Account No. %{account_number} as of %{date}:'
+        footer: 'Total amount to be debited from Settlement/Transaction Account No. %{account_number} on %{date}:'
         freshness: This statement reflects fees for the prior month and is posted approximately 5 to 7 days before the debit date, which is the last business day of the month.
         availability: Statements are available for the previous 18 months.
+        data_unavailable: You have no Securities Services Monthly Statement for the last 18 months.
         tables:
           maintenance: Monthly Account Maintenance Fee
           securities: Monthly Securities Fees
@@ -1179,9 +1487,9 @@ en:
           credit_program: CICA Credit Program
         minimum_maintenance_charge: '*The minimum annual maintenance charge is $500.'
       securities_transactions:
-        title: Securities Transaction
-        info: The Securities Transaction Report is updated twice a day. The Preliminary Securities Transaction Report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm on the settlement day. The Final Securities Transaction Report reflects all transactions that have settled that day and is generally available at the end of the business day.
-        effective: Effective %{date}, a "units" column has been added to the Securities Transaction Report.
+        title: Securities Transactions
+        info: The Securities Transaction Report is updated twice a day. The Preliminary Securities Transactions Report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm on the settlement day. The Final Securities Transactions Report reflects all transactions that have settled that day and is generally available at the end of the business day.
+        effective: Effective %{date}, a "units" column has been added to the Securities Transactions Report.
         preliminary: Preliminary Securities Transactions settled as of 11:30 am on %{date}
         final: Final Securities Transactions settled as of close of business on %{date}
         indicates_a_new_transaction_html: "*Indicates a new transaction."
@@ -1198,8 +1506,10 @@ en:
         freshness: This report is updated twice a day. The preliminary report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm. The final report reflects all transactions settled during the day and is generally available at the end of the business day.
       authorizations:
         title: Authorizations
-        intro_html: The following people are authorized to use the Bank's services on behalf of your institution. If you'd like to make changes to these authorizations, please fill out a <a href=%{url}>Signature Card Form</a>.
+        intro_html: The following people are authorized to use the Bank's services on behalf of your institution. If you'd like to make changes to these authorizations, please fill out an <a href=%{url}>Authorization Form</a>.
         contact_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about authorizations, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
+        sub_title: Users with %{filter}
+        sub_title_all_users: All Users with Authorizations
       parallel_shift:
         title: Putable Advance Parallel Shift Sensitivity Analysis
         info: The valuations below are calculated using data as of %{date}
@@ -1208,6 +1518,8 @@ en:
         current: Current Securities Position
         monthly: Monthly Securities Position
         freshness: This report reflects data as of the close of business on the last business day of the month and is generally available one business day after monthend.
+        pledged: Pledged
+        unpledged: Unpledged
         filter:
           all: All Securities
           pledged: Pledged Securities
@@ -1253,6 +1565,24 @@ en:
         activity_based_requirement: Activity-Based Stock Requirement
         remaining_stock_html: "Remaining<br> Stock"
         remaining_leverage: Remaining Leverage
+      mortgage_collateral_update:
+        title: Mortgage Collateral Update (MCU) Status
+        details: MCU Details
+        type: MCU Type
+        processed_date: Processed Date
+        pledge_type: Pledge Type
+        loans_accepted: Loans Accepted
+        loans_submitted: Loans Submitted
+        loans_depledged: Loans Depledged/Not Reported
+        updated: Updated
+        pledged: Newly Pledged/Reported
+        renumbered: Renumbered
+        accepted: Accepted
+        rejected: Rejected
+        total_accepted: Total Loans Accepted
+        total_submitted: Total Loans Submitted
+        version_request: To request an expanded version of this report or to obtain a prior version, contact Collateral Services at %{phone_number}
+        report_details: This report reflects the most recent data available after each MCU has been processed. Only the current report is available. An email with an expanded version of this report that includes detailed rejection and inconsistency information is sent to your institution each time an MCU is processed.
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
@@ -1263,7 +1593,7 @@ en:
     prepayment_fee_notice: Prepayment fee indications are not based on rates as of today. Please call %{phone_number} by 10:30 a.m. to obtain a prepayment fee indication as of today.
     merger_notice: In the event of a merger, this report may not include all advances from the acquired institution.
     advances_and_securities_agreement_notice: Nothing in this report in any way amends, modifies, or waives the terms of your Advances and Security Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issued pursuant to that Agreement. The Bank expressly disclaims any and all liability that may arise from your institution's reliance on any information contained in, or errors or omissions made with respect to, this report. Please call Operations at %{phone_number} if you have any questions.
-    data_notice: Data reflects activty as on the date and time shown above.
+    data_notice: Data reflects activity as on the date and time shown above.
     refresh_notice: Refresh your browser for current information.
     pdf_footer: "%{report_name} as of %{date}"
     pdf_footer_range: "%{report_name} %{date}"
@@ -1301,20 +1631,33 @@ en:
     products_summary:
       nav_title: Products Summary
       title: Products
-      intro: Our products and services are designed to help your institution expand the availability of mortgage credit, compete more effectively in your local markets, and foster strong and vibrant communities.
+      intro: Our products and services are designed to help your institution improve profitability, manage interest rate risk, access a price-competitive alternative when selling mortgage loans, and obtain lower-cost funding for affordable housing and economic development.
       advances:
         benefits:
           intro: "We offer a diverse array of flexible, low-cost funding options, with maturities ranging from 1 day to 30 years. Our credit products can help you:"
-          profitability: improve profitability
-          management: facilitate asset/liability management
-          liquidity: reduce on-balance sheet liquidity
-          lower_costs: lower funding costs
+          funding_costs: manage funding costs
+          reduce: reduce interest rate, basis, and prepayment risks
+          liquidity: meet liquidity needs
           broaden_products: broaden product lines
-          risk: control interest rate risk, basis risk, and prepayment risk
-        customize_html: We can customize our credit products to meet your funding or hedging requirements. We offer flexible cash flows and payment options, including partial prepayment symmetry (an optional feature of <a href=%{frc_url}>Fixed Rate Credit Advance</a> (PDF), <a href=%{callable_url}>Callable FRC</a> (PDF), <a href=%{putable_url}>Putable Advance</a> (PDF) , and <a href=%{arc_embedded_url}>Adjustable Rate Credit Advance with embedded options</a> (PDF).
+          promote: promote affordable housing, job creation and economic development
+        customize: We can customize our credit products to meet your funding or hedging requirements. We offer flexible cash flows and payment options, as well as different combinations of fixed and adjustable rate features and prepayment options, including partial prepayment symmetry.
         product_list:
-          intro: "Click the links below to find out more about the advantages, features, and requirements of each of our credit products:"
+          intro: "Find out more about the advantages, features, and requirements of each of our credit products:"
         stand_alone_html: At this time, the Bank is not offering stand-alone interest rate swaps, caps, and floors to members. For more information, see <a href=%{url}>Interest Rate Swaps, Caps & Floors</a>.
+    authorizations:
+      title: Authorization Forms Instructions
+      on_file: The Bank must have the original, signed authorization forms on file.
+      faxed_copies: Faxed copies of the authorization forms are valid for up to five (5) business days.
+      authorized_signers: "Authorization forms must be signed by an authorized signer listed on the Resolution and Authorization: Member Transactions (R&A)."
+      board_resolution_date: "The board resolution date must match the resolution date on the recent R&A on file. For example, if you are updating one or more authorization forms, but not updating the R&A, ensure the board resolution date on the authorization form matches the resolution date on the current R&A your institution has on file with the Bank."
+      new_form_supercedes: When the Bank receives a new authorization form, the new authorization form rescinds and supercedes the prior authorization form of the same type or designated activity.
+      include_all_individuals: New authorization forms should include all the individuals authorized for the designated activity, even if they were included on a prior authorization form.
+      use_second_form_if_necessary: "If all individuals authorized for a designated activity do not fit on a single authorization form, complete a second authorization form for that activity with the additional designated persons. Number each page as follows: page 1 of 2, page 2 of 2. The authorized signer must sign both authorization forms."
+      deleting_an_authorized_signer: "To delete an authorized signer from any authorization form, fax your request to Operations at %{operations_fax_number} or email a PDF of your request to <a href=\"mailto:%{email}\">Betty Norman</a>. The request must be on your institutions' letterhead and signed by an authorized signer listed on the R&A. You do not need to send a new authorization form to delete an authorized signer."
+      send_forms_to: "Send completed authorizations forms to:"
+      address: "Federal Home Loan Bank of San Francisco<br>Attn: Betty Norman, Operations<br>600 California Street, Suite 300<br>San Francisco, CA 94108"
+      contact: Contact Operations at %{operations_phone_number} with questions regarding authorization forms or these instructions.
+      return_link: return to authorizations forms
     advances:
       title: Advances
       ace: Advances for Community Enterprise (ACE)
@@ -1366,6 +1709,7 @@ en:
         prepayment_features_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the %{download_link} (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       arc_embedded:
         title: ARC Advance with Embedded Options
+        product_page_title: Adjustable Rate Credit (ARC) Advance with Embedded Options
         description: Use ARC Advances with Embedded Options to match the interest rate and payment characteristics of your adjustable rate loan portfolio while managing your interest rate risk exposure.
         uses:
           finance: Finance adjustable rate mortgage loan portfolios
@@ -1553,6 +1897,7 @@ en:
             description_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the %{download_link} (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       frc_embedded:
         title: FRC Advance with Embedded Cap
+        product_page_title: Fixed Rate Credit (FRC) Advance with Embedded Cap
         description: Available on an order-only basis, the FRC Advance with Embedded Cap is a fixed rate advance with an embedded interest rate cap that provides a benefit to the borrower when the cap index exceeds a specified strike rate on a cap observation date. When the cap index exceeds the strike rate, the borrower’s interest rate for the next accrual period is lowered by the difference between the index rate and the strike rate (subject to a minimum interest rate of 0.00%). Partial prepayment symmetry is available for this advance.
         uses:
           management: Achieve asset/liability management goals
@@ -1633,6 +1978,80 @@ en:
         training_html: "After a member is approved as a PFI, the Bank contacts the member to schedule training on MPF products, pricing, and master commitments; MPF loan delivery; use of eMPF and the MPF Guides; and MPF servicing and reporting. For MPF Direct, training on underwriting and exceptions is provided. In addition, a representative of the PFI is required to take and pass a one-hour online tutorial on MPF Pre-Closing Quality Control offered through AllRegs. For MPF Xtra, Fannie Mae Desktop Underwriter&#174; (DU&#174;) training is also required."
         ongoing: Outstanding loans sold to the Bank under the MPF Program and held by the Bank, including loans sold under the MPF Original and MPF Plus products between 2002 and 2006, remain subject to the credit enhancement requirements in effect when the loans were sold to the Bank and to the Bank’s current collateral and capital stock requirements.
         additional_information_html: "For more information on the MPF Program, including access to the MPF guides, visit the <a href=%{url}>MPF Program website</a>.\n\n\"Mortgage Partnership Finance,\" \"MPF,\" \"MPF Xtra,\" and \"eMPF\" are registered trademarks of the Federal Home Loan Bank of Chicago."
+      pfi:
+        title: Participating Financial Institution (PFI) Application
+        to_apply_html: "To apply for approval as a Participating Financial Institution (PFI) under the Mortgage Partnership Finance Program, complete the applicable forms and agreements. Before mailing the original documents to us, email a PDF of the documents to <a href=%{email}>mpf@fhlbsf.com</a> so we can review them for completeness. Once we inform you that the documents are complete, mail the original documents and all required exhibits to:"
+        address: "Federal Home Loan Bank of San Francisco\nAttn: Member Financial Services Department – MPF\n600 California Street, Suite 300\nSan Francisco, CA 94108"
+        contact: Contact your Relationship Manager with questions about the PFI application materials or the application process.
+        forms_and_agreements: Forms and Agreements
+        all_applicants:
+          title: All Applicants
+          mpf_participating: MPF Participating Financial Institution Resolution (board of directors approval required)
+          delegation_of_authority: Delegation of Authority
+          delegation_of_authority_requests: Delegation of Authority – Requests for Files from Custodian
+          delegation_of_authority_definitions: Delegation of Authority Definitions
+          participating_financial_institution_agreement: Participating Financial Institution Agreement
+          participating_financial_institution_application: Participating Financial Institution – Application
+          mortgage_operations_questionnaire: Mortgage Operations Questionnaire
+          mortgage_operations_questionnaire_addendum: Mortgage Operations Questionnaire – Addendum
+          mpf_fidelity: MPF Fidelity and Errors & Omissions Insurance Worksheet (Form OG2)
+          anti_predatory: Anti-Predatory Lending Questionnaire
+          in_house: In-House Quality Control Questionnaire
+        product_specific:
+          title: Product-Specific Application Forms and Agreements
+          mpf_original: MPF Original
+          collateral_file: Collateral File Release Information Form
+          post_closing: Post Closing Information Form
+          servicer: Servicer Information Form
+          servicing_retained_only: Servicing Retained Only
+          agreement_servicer_account_remittance: "Agreement for Servicer’s Custodial P & I Account: Scheduled/Scheduled or Actual/Actual Single Remittance"
+          agreement_servicer_account_actual: "Agreement for Servicer’s Custodial P & I Account: Actual/Actual"
+          agreement_servicer_account: "Agreement for Servicer’s Custodial T & I Account"
+          mfp_government: MPF Government FHA/VA
+          mpf_extra: MPF Xtra
+          mpf_extra_agreement: "MPF Xtra: Agreement for Access to Fannie Mae’s DU® Only"
+          mpf_xtra_addendum_mpf: MPF Xtra Addendum to MPF Program PFI Agreement (Servicing Retained)
+          mpf_xtra_addendum_servcer_account: "MPF Xtra: Agreement for Servicer’s Custodial P & I Account"
+          mpf_xtra_addendum_servcer: "MPF Xtra: Agreement for Servicer’s Custodial T & I"
+          servicing_released_only: Servicing Released Only
+          mpf_xtra_addendum_mpf_released: MPF Xtra Addendum to MPF Program PFI Agreement (Sale only/Servicing Released)
+          mpf_direct: MPF Direct
+          mpf_direct_agreement: MPF Direct Addendum to MPF Program PFI Agreement
+          mpf_direct_questionnaire: MPF Direct Mortgage Operations Questionnaire
+        exhibits:
+          title: Exhibits
+          organization_chart: Organization Chart of Major Mortgage Functional Areas
+          provide_copy: "Provide a copy of the organization chart for each of these areas:"
+          origination_preparation: "Origination: The preparation of the mortgage loan document package, including taking the borrower’s loan application"
+          underwriting: "Underwriting: The process by which the lender determines whether the loan is a good investment. The underwriter also determines whether the borrower is creditworthy and whether the property has sufficient value under existing market conditions."
+          secondary_marketing: "Secondary Marketing: The sale of mortgage loans to investors"
+          shipping_delivery: "Shipping/Delivery: The packaging and delivery of mortgage loans to investors"
+          quality_assurance: "Quality Assurance: The system of protection used to ensure that all loans are handled according to your standards and those of the investor"
+          resumes_summary: Resumes/Qualification Summary for Officers and Key Mortgage Staff
+          attach_resumes: Attach resumes/qualification summaries for the individual employees responsible for each of the organizational areas listed above (as required for your institution) and other key functional staff. Each resume should include the individual’s current title and a description of job responsibilities.
+          evidence_mortgage: Evidence of Mortgage Holders Errors & Omissions Insurance Coverage or Equivalent
+          protection_pfi: Protection to the PFI for losses caused by negligence, errors, or omissions committed by the persons required to be covered by the member’s fidelity insurance in the performance of duties related to mortgage origination, selling, or servicing. Attach a copy of each policy or certificate, including a copy of the insurance declaration page.
+          anti_predatory: Anti-Predatory Lending Policy, Procedures, and Testing Methodology
+          these_are_required_only: These are required only if you intend to deliver mortgages secured by properties located in a restricted loan jurisdiction. (See chapter 2.6 and Exhibit A of the MPF Origination Guide to determine which jurisdictions have categories of loans that may be ineligible for delivery under the MPF Program.)
+          in_house_policies: In-House Quality Control Policies and Procedures
+          your_institutions_quality_control_policies: "Your institution’s quality control policies and procedures for pre-closing and post-closing quality control"
+          in_house_reports: In-House Quality Control Reports
+          your_institutions_quality_control_review: "Your institution’s quality control review results and related summary reports for pre-closing and post-closing quality control"
+          quality_results: Quality Control Audit Results
+          quality_control_audits: Quality control audits conducted by applicable government agencies or other investors, and management’s response
+          third_party_originator: Third-Party Originator Policies and Procedures (if applicable)
+          for_institutions_that_deliver_mortgage: For institutions that plan to deliver mortgage loans originated by a third party, the policies and procedures of that third-party originator
+          origination: Origination and Servicing Audits
+          your_insitutions_origination: Your institution’s most recent origination and servicing audit(s), whether conducted internally or by an independent third party, and management’s response
+          all_servicing: All Servicing Retained Products
+          loan_servicing: "Loan Servicing: The ongoing management of mortgage loans from the time of loan closing until the time of liquidation (i.e., when the loan is paid in full or foreclosed) "
+          investor_reporting: "Investor Reporting: The recordkeeping and reporting duties associated with servicing mortgage loans on behalf of the investor"
+          default_servicing: "Default Servicing: The management of mortgage loans that are in various states of default (delinquent, seriously delinquent, in foreclosure, etc.)"
+          servicing_audit: Servicing Audit
+          your_institutions_most_recent_servicing: "Your institution’s most recent servicing audit conducted by applicable government agencies and other investors, and management’s response"
+          compliance: Compliance
+          information_on_your_institutions_compliance_html: "Information on your institution’s compliance with the Consumer Financial Protection Bureau’s <a href=%{url}>TILA-RESPA Integrated Disclosure rule</a>, which will become effective October 3, 2015"
+          evidence_of_authorization: Evidence of authorization to originate government loans (FHA/VA) from the applicable agency/agencies, including approval date and HUD/VA approval number
       ocn:
         title: Other Cash Needs (OCN) Advance
         description: The OCN Advance is a Variable Rate Credit (VRC) Advance option for members that, as a result of an unexpected development, need a short-term advance and either do not have a Financing Availability or have used it fully. In addition, the Bank, in its sole discretion, may fund an OCN Advance to cover the amount of any Settlement/Transaction Account (STA) overdraft.
@@ -1805,14 +2224,14 @@ en:
         delivery: All securities pledged to the Bank must be delivered to the Bank's securities custodian, Citibank, N.A. (Citibank).
         substitution: Borrowers may substitute like or better securities collateral, in the Bank's discretion, subject to the Bank's standard securities services fees.
     standby_loc:
-      title: Standy Letters of Credit
-      description_html: A <a href=%{url}>standby letter of credit</a> is an obligation of the Bank to make payment to a third party if a member or housing associate does not perform its underlying obligation to that third party.
+      title: Standby Letters of Credit
+      description_html: Use standby letters of credit to facilitate a variety of transactions with third parties. A <a href=%{url}>standby letter of credit</a> is an obligation of the Bank to make payment to a third party if a member or housing associate does not perform its underlying obligation to that third party.
     mpf_program:
       title: Mortgage Partnership Finance (MPF) Program
-      description_html: The Bank’s <a href=%{url}>Mortgage Partnership Finance&reg; (MPF) Program</a> provides members with access to an alternative secondary mortgage market channel for selling their residential fixed rate mortgage loans, including conventional conforming mortgage loans, eligible jumbo mortgage loans, and government insured or guaranteed mortgage loans.
+      description_html: Our <a href=%{url}>Mortgage Partnership Finance&reg; (MPF) Program</a> offers you access to an alternative secondary mortgage market channel for selling your residential fixed rate mortgage loans, including conventional conforming mortgage loans, eligible jumbo mortgage loans, and government-insured or government-guaranteed mortgage loans.
     community_programs:
       title: Community Programs
-      description_html: The Bank's <a href=%{url}>community programs</a> provide funding for projects that create an affordable place to live for low- and moderate-income individuals and that foster strong, stable, and sustainable communities. Our members use our targeted grant programs and discounted credit programs to meet a wide range of affordable housing and economic development needs in Arizona, California, Nevada, and the other regions they serve.
+      description_html: The Bank's <a href=%{url}>community programs</a> can help you foster strong, stable, and sustainable communities by providing affordable housing and economic development needs in Arizona, California, Nevada, and the other regions you serve.
     section_headings:
       use: Use
       uses: Uses
@@ -1886,10 +2305,39 @@ en:
       renewal: Renewal
       repayment: Repayment
       bank_terminate: "Bank's Right to Terminate"
+    swaps:
+      title: Interest Rate Swaps, Caps & Floors
+      summary_html: "At this time, the Bank is not offering stand-alone interest rate swaps, caps, and floors, <a href=%{url}>pending publication</a> of final rules by the U.S. Commodity Futures Trading Commission (CFTC) that will affect the Bank's ability to offer these products. The rules are expected to be published later this year. The following information is provided for members that have already purchases interest rate swaps, caps, and floors from the Bank."
+      payment:
+        title: Payment
+        net_payment: The Bank will determine the net payment due on the scheduled payment dates of a swap. Only the net amount due will be credited to or debited from your Settlement/ Transaction Account with the Bank.
+        make_payment: The Bank will make payment on an interest rate cap or floor according to the terms of the Bank’s confirmation for that transaction.
+      specific_collateral_requirements:
+        title: Specific Collateral Requirements
+        minimum: The minimum collateral requirement on any interest rate swap, cap, or floor with the Bank can never fall below zero, and the Bank will not post collateral with the member.
+        no_requirements: There are no collateral requirements for interest rate caps and floors purchased by a member.
+        requirements: The collateral requirement for interest rate swaps and for interest rate caps and floors sold by a member to the Bank is the sum of the gross current exposure and the gross potential exposure.
+        gross: "Gross current exposure is calculated as the greater of:"
+        zero_or: zero, or
+        fair_value: the fair value of the derivative plus accrued interest receivable and minus accrued interest payable.
+        gross_potential: "Gross potential exposure is calculated based on the original term for new transactions (from the trade date to the maturity date) or the remaining term to maturity for existing transactions (from the reporting date to the maturity date), as follows:"
+      gross_exposure_table:
+        original: Original or Remaining Term
+        gross_exposure: Gross Potential Exposure
+        one_year: "≤ 1 year"
+        zero: zero
+        greater_one_year: "> 1 year and = 5 years"
+        five_times: 0.005 times the notional amount
+        five_years: "> 5 years"
+        fifteen_times: 0.015 times the notional amount
+      early_termination:
+        title: Early Termination
+        in_the_event: In the event of the early termination of an interest rate swap, cap, or floor, the Bank will calculate the required final payments in accordance with the terms of the Bank's International Swaps and Derivatives Association (ISDA) Master Agreement and related ISDA Schedule to the Master Agreement between the Bank and the member and with the terms of the Bank confirmation for that transaction.
   messages:
     meta_title: FHLB - Messages
-    receive_via_email: Receiving messages via email
-    edit_email_settings_html: Edit your <a href=%{url}>Email Settings</a> to choose which messages you want to receive via email.
+    description: "Welcome to your Member Portal Inbox.\n\nHere you will find an archive of the Bank's recent announcements to members.\nYou may filter these announcements by topic using the sidebar menu."
+    prior: Newer
+    next: Older
   contact:
     general_information:
       title: General Information
@@ -1944,6 +2392,62 @@ en:
       cofi_html: <a href="%{url}">11th District Cost of Funds Indices</a>
     web_support:
       title: Web Support
+  privacy_policy:
+    last_updated: 'Last Updated: %{date}'
+    please_read: PLEASE READ THIS PRIVACY POLICY BEFORE USING THIS WEBSITE OR OTHER ONLINE BANK SURVEY REQUEST
+    introduction: "IF APPLICABLE: We use other online services not covered by this Policy. If you visit one of these sites, please review the policies of those sites to understand how your information may be collected, used and shared."
+    applicable: From time to time, we may change this Policy. The effective date of this Policy, as stated above, indicates the last time this Policy was revised or updated. Checking the effective date above allows you to determine whether there have been changes since the last time you reviewed this Policy. We reserve the right to change this Policy at any time. Any changes to this Policy will become effective when we post the updated Policy to this Website. Your use of this Website following any changes to the Policy means that you accept the revised Policy. You are encouraged to review this Policy each time you use this Website
+    additional_information_html: Additional information can be found in the <a href=%{terms_url}>Terms of Use</a> and the <a href=%{online_security_url}>Online Security guidelines</a>.
+    information_collected:
+      title: Information Collected, Used and Stored
+      introduction: Throughout this Policy several specialized terms are used. “Personally Identifiable Information” means sensitive, non-public information regarding individuals. “User Information” could mean all Personally Identifiable Information and any other forms of information provided by you through the Website such as your email address, street address or the Internet Protocol (IP) address of your device. When you visit our Website, we may collect and store the service provider name from which you access the Internet (e.g., at&t internet services), IP address, device type, browser, browser language, operating system, screen resolution, pages accessed on the Website, time spent on a page, the date and time you access the Bank’s Website, and the address of the Internet site you visited prior to entering this Website (if you came from a referring site). We may use this information to measure the number of visitors to the Bank’s Website, to analyze where visitors linked to, within, and from the Bank’s Website, to help us optimize our Website. For example, we may organize and analyze IP addresses so that we can provide more efficient service, improve user experience, enhance security, monitor usage and produce traffic volume statistics. This type of information may be shared with third party vendors on an aggregated basis, such as if we choose to disclose site traffic information for marketing or customer service purposes. If you elect to utilize any links from this Website, or send the Bank an email, you may provide us with User Information that we may use to respond to your request for information, and to evaluate and process your request. The Bank may also use for other purposes and disclose to third party vendors User Information that does not constitute Personally Identifiable Information. We will not share any Personally Identifiable Information with third party vendors, unless done pursuant to applicable rules and regulations or pursuant to a court order or subpoena, except as provided herein, and only when such third party confirms that they have taken commercially reasonable measures to keep Personally Identifiable Information confidential. We require third party vendors to whom we disclose Personally Identifiable Information to take measures to keep that information confidential. We also maintain and require various security measures designed to protect this information.
+      store: The Bank may store any and all site usage information collected from you. The Bank does not store the data in an encrypted format. We retain your username and encrypt your password when you log in to this Website. We use reply email addresses to answer the email we receive. If applicable, we also use email address, name, title, organization and type, address, phone and fax numbers to communicate with you about your online event registrations or subscriptions. This information is not shared with any third party vendors except as stated below. These emails are not encrypted.
+      usage: Usage logs and reports may be analyzed and reviewed by third party vendors who have submitted written confidentiality agreements to the Bank. These logs and reports are not sold to third party vendors.
+      accurate: For the purposes of maintaining accurate contact information, we collect information such as name, title, institution, or company name, institution or company address, phone and fax numbers, and email addresses. We retain that information until you provide new information or ask us to delete it.
+      events: For the purpose of registering for events, we may ask for all of the information above, plus credit card information. When you submit credit card information, you are directed to a third party vendor, and all of your credit card related information is provided directly to that third party vendor, and not to the Bank. This information is transmitted to the third party vendor via a secure connection. Any transfer of your information from this Website to a third party vendor’s website will subject your information to the privacy policies and terms of use of those websites.
+      survey: From time to time, we may ask users of this Website to respond to surveys. We may ask for the user’s name, title, institution or company name, and/or institution or company type. Information from some surveys is aggregated and retained to reveal insights regarding the needs and customer satisfaction report on perceptions of users of this Website.
+    information_shared:
+      title: Information That is Shared
+      share: "We do not share Personally Identifiable Information with companies, organizations and individuals outside of the Bank unless one of the following circumstances apply:"
+      consent: "With your consent: We will share Personally Identifiable Information with third party vendors when we have your written consent to do so."
+      third_party: "For external processing: We may engage third party vendors to collect Personally Identifiable Information and to process it for us, adhering to their respective privacy policies and not this Policy."
+      identifiable: "For legal reasons: We will share Personally Identifiable Information with third party vendors if we have a good-faith belief that access, use, preservation or disclosure of the information is reasonably necessary to:"
+      meet_law: meet any applicable law, regulation, legal process or enforceable governmental request.
+      enforce: enforce the Bank’s applicable Terms of Use, including investigation of potential violations.
+      issues: detect, prevent, or otherwise address fraud, security or technical issues.
+      protect: protect against harm to the rights, property or safety of the Bank, our Website users, or the public as required or permitted by law.
+      information: We may share non-personally identifiable aggregated site visitation information with third party vendors.
+    cookies:
+      title: Use of Cookies
+      collect: We collect and store information about your visit to this Website. To collect some of this information, our web server places a “cookie,” which is a small file, on the device you are using to access our Website. The use of cookies allows the Bank to collect information including browser type, the amount of time spent on the Website, and pages visited. We may use this information to enhance your online experience and to facilitate your use of this Website. We collect aggregated site-visitation statistics that we may use to measure the effectiveness of this Website and to improve our products and services. Accepting the cookies used by this Website does not give us access to your personal information.
+      refuse: You can refuse to accept these cookies and most devices and browsers offer their own privacy settings for cookies. You will need to manage your cookie settings for each device and browser you use. However, if you do not accept these cookies, you may experience some inconvenience in your use of this Website and you may not be able to access portions of this Website at all if you disable cookies on your browser. Some cookies remain on your device between visits, while others are transient and are erased after you complete your Internet session.
+    third_party:
+      title: Third Party Vendors
+      vendors: The Bank uses certain vendors that may include Google Analytics and Eventbrite as third party vendors to carry out certain aspects of the Website operations (“third party vendors”). Third party vendors may use cookies, collect, use and store information that the Bank might collect, all in accordance with their respective privacy policies and not this Policy. We recommend that you review the privacy policies of third party vendors who may collect your information.
+    information_security:
+      title: Information Security
+      ssl: The Bank uses Secure Sockets Layer (SSL) technology to protect your information from unauthorized access. However, this is not a guarantee that such information may not be accessed, disclosed, altered or destroyed by breach of such technology. It is not the Bank’s policy to share information we receive from you through this Website other than with regulators or third party vendors that assist the Bank in conducting its business. Certain non-personal information collected pursuant to surveys may be aggregated and shared with Bank employees or its agents. All Bank employees and its agents are subject to the terms of a confidentiality agreement. Any third party vendors who have access to personal information are required by contract to keep the information confidential.
+    disclosure:
+      title: Disclosure of Collected Information
+      disclose: "Except as otherwise described in this Policy, the Bank will not disclose Personally Identifiable Information to any third party vendor unless we believe that disclosure is necessary: (1) to conform to legal requirements or to respond to a subpoena, search warrant or other legal process received by the Bank, whether or not a response is required by applicable law; (2) to enforce the Bank’s Website Terms of Use or to protect the Bank’s rights; or (3) to protect the public and users of the Website."
+    websites:
+      title: Third Party Websites
+      other_websites: This Website contains links to other websites. The Bank is not responsible for the privacy practices or content of other websites. When you leave this Website, please read the privacy statements of each website that collects Personally Identifiable Information. This Policy applies solely to information collected by this Website.
+    social_media:
+      title: Social Media Sites
+      platforms: The Bank provides experiences on various social media platforms that enable sharing and collaboration among users who have registered to use them. Any content you post on official Bank-managed social media sites, such as pictures, information, opinions, or any personal information that you make available to other participants on these social platforms, is subject to the terms of the privacy policies of those respective platforms.
+    children:
+      title: Protecting children’s privacy online
+      minors_html: This Website is not directed to individuals under the age of thirteen (13), and we request that these individuals do not provide Personally Identifiable Information through this Website. We do not knowingly collect information from children under 13 without parental consent. Visit the <a href=%{url}>Federal Trade Commission</a> website for more information about the Children’s Online Privacy Protection Act (COPPA).
+    copyright:
+      title: Copyright
+      content: Except as otherwise provided by applicable law, the contents of this Website are copyrighted and the information herein may not be used without the prior written consent of the Bank.
+    governing:
+      title: Governing Law and Jurisdiction in San Francisco
+      use: The use of this Website is governed by and shall be construed in accordance with the laws of the United States and, to the extent applicable, the State of California. Users of this Website and the Bank’s members agree that any action arising from any matter relating directly or indirectly to this Website shall be brought in a court of competent jurisdiction in the City and County of San Francisco, State of California, that those courts have personal jurisdiction over you and the member for that purpose, and you waive any right to bring or seek transfer of any such action to any court outside of San Francisco, California.
+    contact:
+      title: Contact Information
+      details_html: If you have any questions about this Policy, please contact <a href="%{url}">Web Support</a> at %{phone_number}.
   terms:
     title: Terms of Use
     intro:
@@ -2030,6 +2534,7 @@ en:
       no_transfer: You may not assign this Terms of Use Agreement to any other party. The Bank may assign or delegate certain of its rights and responsibilities under this Terms of Use Agreement to independent contractors or other third parties.
     section_headings_disclaimer: The section headings in this Agreement are for convenience only and have no legal or contractual effect.
     agree: I agree to the terms of use
+    cancel: Cancel and log out
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."
@@ -2042,6 +2547,10 @@ en:
     maintenance:
       headline: Scheduled Downtime
       summary: We’re currently performing maintenance on the Member Portal. We’ll have things up and running again soon.
+    restricted:
+      headline: The page you’re trying to access is restricted.
+      summary: The page you’re trying to access is restricted to specific individuals within your institution.
+      assistance_html: "If you believe you should have access to this page, please contact your institution’s Access Manager or <a href=%{email}>Web Support</a> at %{phone_number}."
     table_data_unavailable: This information is currently unavailable.
     table_data_no_records: There are no records to display.
     no_messages: No Messages
