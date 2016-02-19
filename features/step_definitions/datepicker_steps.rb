@@ -114,8 +114,8 @@ Then(/^I should not see available dates after the most recent business day not i
     end
   else
     # handles the case where the max allowed date occurs in the last calendar month
-    page.assert_no_selector('.fa-arrow-right') 
-  end  
+    page.assert_no_selector('.fa-arrow-right')
+  end
 end
 
 When(/^I write "(.*?)" in the datepicker (start|end) input field$/) do |date, input|
@@ -219,4 +219,12 @@ def change_datepicker_to_month(today, month, calendar)
     calendar.find(advance_class).click
     # we should add a 5 second check here to avoid infinte loops
   end
+end
+
+When(/^I click on the datepicker (start|end) input field$/) do |input|
+  page.find("input[name=daterangepicker_#{input}]").click
+end
+
+Then(/^I should see the date "(.*?)" in the datepicker (start|end) input field/) do |date, input|
+  page.find("input[name=daterangepicker_#{input}]").value.should eq date
 end
