@@ -914,8 +914,7 @@ en:
         charter_types:
           heading: "For a complete list of application forms, select your charter type from the list below:"
           commercial: Commercial Bank, Savings Institution, or Industrial Loan Company
-          community_development:
-            title: Community Development Financial Institution
+          community_development: Community Development Financial Institution
           credit_union: Credit Union
           insurance_company: Insurance Company
         process:
