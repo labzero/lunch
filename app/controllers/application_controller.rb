@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
   before_action :authenticate_user!, :check_password_change, :check_terms, :save_render_time
-  helper_method :current_member_name, :current_member_id, :new_announcements_count
+  helper_method :current_member_name, :current_member_id, :new_announcements_count, :set_active_nav, :get_active_nav
 
   HTTP_404_ERRORS = [ActionController::RoutingError, ActionController::UnknownController, ::AbstractController::ActionNotFound, ActiveRecord::RecordNotFound]
 
@@ -73,6 +73,14 @@ class ApplicationController < ActionController::Base
 
   def reset_new_announcements_count
     session.delete('new_announcements_count')
+  end
+
+  def set_active_nav(name)
+    @active_nav = name
+  end
+
+  def get_active_nav
+    @active_nav
   end
 
   alias_method_chain :authenticate_user!, :authentication_flag

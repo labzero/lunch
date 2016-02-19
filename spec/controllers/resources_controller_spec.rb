@@ -4,7 +4,15 @@ include CustomFormattingHelper
 RSpec.describe ResourcesController, type: :controller do
   login_user
 
+  shared_examples 'a report with instance variables set in a before_filter' do |action|
+    it 'sets the active nav to :resources' do
+      expect(controller).to receive(:set_active_nav).with(:resources)
+      get action
+    end
+  end
+
   describe 'GET guides' do
+    it_behaves_like 'a report with instance variables set in a before_filter', :guides
     it_behaves_like 'a user required action', :get, :guides
     it 'should render the guides view' do
       get :guides
@@ -13,7 +21,8 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'GET business_continuity' do
-    it_behaves_like 'a user required action', :get, :guides
+    it_behaves_like 'a report with instance variables set in a before_filter', :business_continuity
+    it_behaves_like 'a user required action', :get, :business_continuity
     it 'should render the guides view' do
       get :business_continuity
       expect(response.body).to render_template('business_continuity')
@@ -21,6 +30,7 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'GET capital_plan' do
+    it_behaves_like 'a report with instance variables set in a before_filter', :capital_plan
     it_behaves_like 'a user required action', :get, :capital_plan
     it 'should render the capital plan view' do
       get :capital_plan
@@ -29,6 +39,7 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'GET forms' do
+    it_behaves_like 'a report with instance variables set in a before_filter', :forms
     it_behaves_like 'a user required action', :get, :forms
     it 'should render the guides view' do
       get :forms
@@ -121,6 +132,7 @@ RSpec.describe ResourcesController, type: :controller do
       allow(controller).to receive(:fee_schedule_table_hash)
     end
 
+    it_behaves_like 'a report with instance variables set in a before_filter', :fee_schedules
     it_behaves_like 'a user required action', :get, :fee_schedules
     it 'fetches fee schedule info from the FeeService' do
       expect(fee_service).to receive(:fee_schedules)
@@ -402,6 +414,7 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   RSpec.shared_examples 'a resource membership action' do |action|
+    it_behaves_like 'a report with instance variables set in a before_filter', action
     it_behaves_like 'a user required action', :get, action
     it "should render the #{action.to_s} view" do
       get action
@@ -410,7 +423,7 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'GET :membership_overview' do
-    it_behaves_like 'a resource membership action', :membership_application
+    it_behaves_like 'a resource membership action', :membership_overview
   end
 
   describe 'GET :membership_application' do

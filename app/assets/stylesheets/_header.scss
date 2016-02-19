@@ -117,11 +117,13 @@
     &:last-child {
       border-right: 1px solid $light-gray;
     }
-    &:hover {
+    &:hover, &.active-nav-item {
       background-color: $light-gray;
       .nav-menu {
         color: $actionable-blue;
       }
+    }
+    &:hover {
       .nav-dropdown {
         display: block;
       }
