@@ -2081,7 +2081,8 @@ RSpec.describe ReportsController, :type => :controller do
       let(:user_c) { {display_name: 'Wire Lady', roles: [User::Roles::WIRE_SIGNER], given_name: 'Wire', surname: 'Lady'} }
       let(:user_d) { {display_name: 'No Surname', roles: [User::Roles::WIRE_SIGNER], given_name: 'No', surname: nil} }
       let(:user_e) { {display_name: 'No Given Name', roles: [User::Roles::WIRE_SIGNER], given_name: nil, surname: 'Given'} }
-      let(:signers_and_users) {[user_no_roles, user_etransact, user_a, user_b, user_c, user_d, user_e]}
+      let(:user_f) { {display_name: 'Entire Authority User', roles: [User::Roles::SIGNER_ENTIRE_AUTHORITY], given_name: 'Entire Authority', surname: 'User'} }
+      let(:signers_and_users) {[user_no_roles, user_etransact, user_a, user_b, user_c, user_d, user_e, user_f]}
       let(:roles) {['all', User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::AFFORDABILITY_SIGNER, User::Roles::COLLATERAL_SIGNER, User::Roles::MONEYMARKET_SIGNER, User::Roles::DERIVATIVES_SIGNER, User::Roles::SECURITIES_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER, User::Roles::ETRANSACT_SIGNER]}
       let(:role_translations) {[t('user_roles.all_authorizations'), t('user_roles.resolution.dropdown'), t('user_roles.entire_authority.dropdown'), t('user_roles.affordable_housing.title'), t('user_roles.collateral.title'), t('user_roles.money_market.title'), t('user_roles.interest_rate_derivatives.title'), t('user_roles.securities.title'), t('user_roles.wire_transfer.title'), t('user_roles.access_manager.title'), t('user_roles.etransact.title')]}
       let(:job_id) {rand(1000..10000)}
@@ -2224,8 +2225,8 @@ RSpec.describe ReportsController, :type => :controller do
             it 'contains all users sorted by last name then first name if the authorizations_filter is set to `all`' do
               make_request
               rows = assigns[:authorizations_table_data][:rows]
-              expect(rows.length).to eq(5)
-              rows.zip([user_d, user_e, user_c, user_b, user_a]).each do |row, user|
+              expect(rows.length).to eq(6)
+              rows.zip([user_d, user_e, user_c, user_b, user_f, user_a]).each do |row, user|
                 expect(row[:columns].first[:value]).to eq(user[:display_name])
               end
             end
@@ -2235,18 +2236,41 @@ RSpec.describe ReportsController, :type => :controller do
               expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_a[:display_name])
               expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.resolution.title')])
             end
-            it 'only contains collateral signers if authorizations_filter is set to COLLATERAL_SIGNER' do
-              get :authorizations, :authorizations_filter => User::Roles::COLLATERAL_SIGNER, job_id: job_id
+            it 'only contains signer entire authority if authorizations_filter is set to SIGNER_ENTIRE_AUTHORITY' do
+              get :authorizations, :authorizations_filter => User::Roles::SIGNER_ENTIRE_AUTHORITY, job_id: job_id
               expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_f[:display_name])
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.entire_authority.title')])
+            end
+            describe 'when the filtered users include a signer manager or a signer with entire authority' do
+              before { get :authorizations, :authorizations_filter => User::Roles::COLLATERAL_SIGNER, job_id: job_id }
+              it 'sets the @footnote_role to a downcased, then capitalized, version of the authorizations_filter' do
+                human_role = ReportsController::AUTHORIZATIONS_MAPPING[User::Roles::COLLATERAL_SIGNER].downcase.capitalize
+                expect(assigns[:footnote_role]).to eq(human_role)
+              end
+              it 'marks the signer manager and signer with entire authority roles as footnoted' do
+                entire_authority = ReportsController::AUTHORIZATIONS_MAPPING[User::Roles::SIGNER_ENTIRE_AUTHORITY]
+                signer_manager = ReportsController::AUTHORIZATIONS_MAPPING[User::Roles::SIGNER_MANAGER]
+                expect(assigns[:authorizations_table_data][:rows][1][:columns].last[:value]).to include([entire_authority, :footnoted])
+                expect(assigns[:authorizations_table_data][:rows][2][:columns].last[:value]).to include([signer_manager, :footnoted])
+              end
+            end
+            it 'only contains collateral signers, signer managers and signer entire authority if authorizations_filter is set to COLLATERAL_SIGNER' do
+              get :authorizations, :authorizations_filter => User::Roles::COLLATERAL_SIGNER, job_id: job_id
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(3)
               expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_b[:display_name])
+              expect(assigns[:authorizations_table_data][:rows][1][:columns].first[:value]).to eq(user_f[:display_name])
+              expect(assigns[:authorizations_table_data][:rows][2][:columns].first[:value]).to eq(user_a[:display_name])
               expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.collateral.title')])
             end
-            it 'only contains wire signers if authorizations_filter is set to WIRE_SIGNER' do
+            it 'only contains wire signers, signer managers and signer entire authority  if authorizations_filter is set to WIRE_SIGNER' do
               get :authorizations, :authorizations_filter => User::Roles::WIRE_SIGNER, job_id: job_id
-              expect(assigns[:authorizations_table_data][:rows].length).to eq(3)
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(5)
               expect(assigns[:authorizations_table_data][:rows][0][:columns].first[:value]).to eq(user_d[:display_name])
               expect(assigns[:authorizations_table_data][:rows][1][:columns].first[:value]).to eq(user_e[:display_name])
               expect(assigns[:authorizations_table_data][:rows][2][:columns].first[:value]).to eq(user_c[:display_name])
+              expect(assigns[:authorizations_table_data][:rows][3][:columns].first[:value]).to eq(user_f[:display_name])
+              expect(assigns[:authorizations_table_data][:rows][4][:columns].first[:value]).to eq(user_a[:display_name])
               expect(assigns[:authorizations_table_data][:rows][0][:columns].last[:value]).to eq([I18n.t('user_roles.wire_transfer.title')])
             end
             it 'ignores users with no role or the eTransact role' do

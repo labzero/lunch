@@ -21,7 +21,10 @@
   - value = capture_haml do
     %ul
       - cell[:value].each do |list_item|
-        %li{data:{'list-value' => list_item}}= list_item
+        - if list_item.is_a?(Array) && list_item.last == :footnoted
+          %li{data:{'list-value' => list_item}}= t('global.footnoted_string', string: list_item.first)
+        -else
+          %li{data:{'list-value' => list_item}}= list_item
 - else
   - value = cell[:value]
   - classes = [:'report-cell-narrow']

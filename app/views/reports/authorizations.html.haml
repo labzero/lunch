@@ -15,6 +15,8 @@
           = render 'shared/dropdown', dropdown_name: 'authorizations_filter', default_value: @authorizations_filter, default_text: @authorizations_filter_text, dropdown_options: @authorizations_dropdown_options
   .report-main-body
     %h2.report-table-title= @authorizations_title
+    - if @footnote_role
+      %small= t('reports.pages.authorizations.table_footnote', role: @footnote_role)
     =render 'reports/reports_table', table_class: 'authorizations-table', table_data: @authorizations_table_data, sortable: false
     %small= t('reports.pages.authorizations.contact_html', operations_url: '#', web_support_url: '#', operations_phone_number: fhlb_formatted_phone_number('4156162616'), web_support_phone_number: web_support_phone_number)
     - %w(resolution entire_authority wire_transfer advances affordable_housing collateral interest_rate_derivatives money_market securities access_manager).each do |role|

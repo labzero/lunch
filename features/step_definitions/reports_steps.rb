@@ -504,7 +504,7 @@ When(/^I select "(.*?)" from the authorizations filter$/) do |text|
   step %{I wait for the report to load}
 end
 
-When(/^I should only see users with the "(.*?)" role$/) do |role|
+When(/^I should only see users with the "(.*?)" role( or with inclusive roles)?$/) do |role, inclusive|
   role_mapping = {
     'Resolution and Authorization' => I18n.t('user_roles.resolution.title'),
     'Entire Authority' => I18n.t('user_roles.entire_authority.title'),
@@ -522,7 +522,12 @@ When(/^I should only see users with the "(.*?)" role$/) do |role|
   role_name = role_mapping[role]
   page.all('.report-table tbody td:last-child').each do |cell|
     next if cell.text == I18n.t('errors.table_data_no_records')
-    cell.assert_selector('li', text: role_name)
+    if inclusive && cell.has_no_selector?('li', text: role_name)
+      cell.assert_selector('li', text: /\A#{Regexp.quote(I18n.t('global.footnoted_string', string: role_mapping['Resolution and Authorization']))}|#{Regexp.quote(I18n.t('global.footnoted_string', string: role_mapping['Entire Authority']))}\z/)
+      page.assert_selector('small', text: I18n.t('reports.pages.authorizations.table_footnote', role: role_name.downcase.capitalize), exact: true)
+    else
+      cell.assert_selector('li', text: role_name, exact: true)
+    end
   end
 end
 
