@@ -92,11 +92,13 @@ $(function () {
   function showQuickAdvanceClosedState() {
     $('.primary-button.initiate-quick-advance, .rate-advances-footer, .dashboard-module-advances .input-field-container, .flyout .input-field-container').remove();
     $('.dashboard-module-advances').addClass('dashboard-module-advances-closed');
-    $('.quick-advance-desk-closed-message-group').children().hide();
-    $('.quick-advance-desk-closed-message').show();
-    $('.quick-advance-last-updated-message').addClass('show-message');
+    $('.dashboard-module-advances .quick-advance-desk-closed-message-group').children().hide();
+    $('.dashboard-module-advances .quick-advance-desk-closed-message').show();
     $('.dashboard-quick-advance-flyout td, .dashboard-quick-advance-flyout th').removeClass('cell-selected');
     $('.dashboard-quick-advance-flyout .selectable-cell').addClass('disabled-cell');
+    if (!$('.quick-advance-confirmation-subheading').is(':visible')) {
+      $('.quick-advance-last-updated-message').addClass('show-message');
+    };
   };
 
   if ($('.dashboard-module-advances').length > 0) {
