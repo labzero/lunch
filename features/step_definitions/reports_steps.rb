@@ -570,3 +570,15 @@ Then(/^I should see a report for the last entry from the month year dropdown$/) 
   element = page.find('.report-filter .dropdown li:last-child', visible: false)
   step %{I should see a report for "#{element['data-dropdown-value']}"}
 end
+
+Then(/^I should be on the "(.*?)" report page$/) do |report|
+  text = case report
+    when 'Settlement Transaction'
+      I18n.t('reports.pages.settlement_transaction_account.title')
+    when 'Borrowing Capacity'
+      I18n.t('global.borrowing_capacity')
+    when 'Capital Stock Position and Leverage'
+      I18n.t('reports.pages.capital_stock_and_leverage.title')
+  end
+  page.assert_selector('.report h1', text: text, exact: true)
+end

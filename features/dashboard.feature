@@ -28,3 +28,15 @@ Scenario: Data for Aggregate 30 Day Terms module is temporarily unavailable
   Given I visit the dashboard
   When there is no data for "Aggregate 30 Day Terms"
   Then the Aggregate 30 Day Terms graph should show the Temporarily Unavailable state
+
+@jira-mem-1330 @flip-on-capital-stock-position-and-leverage-report
+Scenario: User visits report pages from the Account Overview module
+  Given I am on the dashboard with the account overview in its loaded state
+  When I click on the STA Balance link in the account overview
+  Then I should be on the "Settlement Transaction" report page
+  When I am on the dashboard with the account overview in its loaded state
+  And I click on the Collateral Borrowing Capacity link in the account overview
+  Then I should be on the "Borrowing Capacity" report page
+  When I am on the dashboard with the account overview in its loaded state
+  And I click on the Stock Leverage link in the account overview
+  Then I should be on the "Capital Stock Position and Leverage" report page

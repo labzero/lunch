@@ -2,7 +2,6 @@ class DashboardController < ApplicationController
   include CustomFormattingHelper
   include DashboardHelper
   include AssetHelper
-  include ActionView::Helpers::UrlHelper
 
   before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform] do
     authorize :advances, :show?
@@ -257,7 +256,7 @@ class DashboardController < ApplicationController
 
     # account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
     sta_balance = [
-      [link_to(t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path), profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
+      [[t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
     ]
 
     credit_outstanding = [
@@ -265,7 +264,7 @@ class DashboardController < ApplicationController
     ]
 
     leverage_title = if feature_enabled?('capital-stock-position-and-leverage-report')
-      link_to(t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path)
+      [t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path]
     else
       t('dashboard.your_account.table.remaining.leverage')
     end
@@ -274,14 +273,14 @@ class DashboardController < ApplicationController
       [
         {title: t('dashboard.your_account.table.remaining.title')},
         [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
-        [link_to(t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
+        [[t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], (profile[:collateral_borrowing_capacity] || {})[:remaining]],
         [leverage_title, (profile[:capital_stock] || {})[:remaining_leverage]]
       ]
     else
       [
         {title: t('dashboard.your_account.table.remaining.title')},
         [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
-        [link_to(t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
+        [[t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], (profile[:collateral_borrowing_capacity] || {})[:remaining]],
         [t('dashboard.your_account.table.remaining.standard'), profile[:total_borrowing_capacity_standard]],
         [t('dashboard.your_account.table.remaining.agency'), profile[:total_borrowing_capacity_sbc_agency]],
         [t('dashboard.your_account.table.remaining.aaa'), profile[:total_borrowing_capacity_sbc_aaa]],

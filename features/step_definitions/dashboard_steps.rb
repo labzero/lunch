@@ -77,6 +77,23 @@ When(/^there is no data for "(.*?)"$/) do |data|
   # this step may be used in the future to conditionally shut off certain endpoints or otherwise mock the experience of no data returned
 end
 
+When(/^I am on the dashboard with the account overview in its loaded state$/) do
+  step 'I visit the dashboard'
+  step %{I should see the "account overview" section in its loaded state}
+end
+
+When(/^I click on the (STA Balance|Collateral Borrowing Capacity|Stock Leverage) link in the account overview$/) do |link|
+  text = case link
+    when 'STA Balance'
+      I18n.t('dashboard.your_account.table.balance')
+    when 'Collateral Borrowing Capacity'
+      I18n.t('dashboard.your_account.table.remaining.capacity')
+    when 'Stock Leverage'
+      I18n.t('dashboard.your_account.table.remaining.leverage')
+  end
+  page.find('.table-dashboard-account-overview a', text: text, exact: true).click
+end
+
 def get_module_by_section(section)
   heading = case section
     when 'recent activities'
