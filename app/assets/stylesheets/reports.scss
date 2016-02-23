@@ -149,6 +149,12 @@
       width: 320px;
     }
   }
+  &.report-filter-medium {
+    width: 250px;
+    .dropdown-selection {
+      width: 250px;
+    }
+  }
 }
 
 .report-datepicker {
@@ -607,6 +613,13 @@
     tfoot td:first-child {
       border-right: none;
     }
+  }
+}
+
+.sta-sta-table {
+  width: auto;
+  th {
+    width: 85px;
   }
 }
 

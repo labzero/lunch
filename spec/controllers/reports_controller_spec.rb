@@ -1962,7 +1962,8 @@ RSpec.describe ReportsController, :type => :controller do
         it 'should set @collateral_type_options to an array of arrays containing the appropriate values and labels for standard and sbc' do
           options_array = [
               [I18n.t('reports.pages.price_indications.standard_credit_program'), 'standard'],
-              [I18n.t('reports.pages.price_indications.sbc_program'), 'sbc']
+              [I18n.t('reports.pages.price_indications.sbc_program'), 'sbc'],
+              [I18n.t('reports.pages.price_indications.sta.dropdown'), 'sta']
           ]
           get :historical_price_indications
           expect(assigns[:collateral_type_options]).to eq(options_array)
@@ -1976,6 +1977,10 @@ RSpec.describe ReportsController, :type => :controller do
           get :historical_price_indications, historical_price_credit_type: 'vrc'
           expect(assigns[:credit_type]).to eq('vrc')
           expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.vrc.dropdown'))
+        end
+        it 'should set @credit_type to `sta` if sta is passed as the historical_price_collateral_type param' do
+          get :historical_price_indications, historical_price_collateral_type: 'sta'
+          expect(assigns[:credit_type]).to eq('sta')
         end
         ['1m_libor', '3m_libor', '6m_libor', 'daily_prime'].each do |credit_type|
           it "should set @credit_type to `#{credit_type}` and @credit_type_text to the proper i18next translation for `#{credit_type}` if #{credit_type} is passed as the historical_price_credit_type param" do
@@ -2018,6 +2023,7 @@ RSpec.describe ReportsController, :type => :controller do
             let(:vrc_column_headings)  {[I18n.t('global.date'), I18n.t('global.dates.1_day')]}
             let(:arc_column_headings) {[I18n.t('global.date'), I18n.t('global.dates.1_year'), I18n.t('global.dates.2_years'), I18n.t('global.dates.3_years'), I18n.t('global.dates.5_years')]}
             let(:arc_daily_prime_column_headings) {[I18n.t('global.full_dates.1_year'), I18n.t('global.full_dates.2_years'), I18n.t('global.full_dates.3_years'), I18n.t('global.full_dates.5_years')]}
+            let(:sta_column_headings)  {[I18n.t('global.date'), I18n.t('advances.rate')]}
             it 'sets column_headings for the `frc` credit type' do
               get :historical_price_indications, historical_price_credit_type: 'frc'
               expect((assigns[:table_data])[:column_headings]).to eq(frc_column_headings)
@@ -2036,12 +2042,18 @@ RSpec.describe ReportsController, :type => :controller do
               get :historical_price_indications, historical_price_credit_type: 'daily_prime'
               expect((assigns[:table_data])[:column_headings]).to eq(arc_daily_prime_column_headings)
             end
+            it 'sets column_headings for the sta collateral type' do
+              get :historical_price_indications, historical_price_collateral_type: 'sta'
+              expect((assigns[:table_data])[:column_headings]).to eq(sta_column_headings)
+            end
           end
           describe 'rows' do
             let(:row_1) {{date: 'some_date', rates_by_term: [{type: :index, value: 'rate_1'}, {type: :index, value: 'rate_2'}]}}
             let(:row_2) {{date: 'some_other_date', rates_by_term: [{type: :index, value: 'rate_3'}, {type: :index, value: 'rate_4'}]}}
             let(:rows) {[row_1, row_2]}
             let(:formatted_rows) {[{date: 'some_date', columns: [{type: :index, value: 'rate_1'}, {type: :index, value: 'rate_2'}]}, {date: 'some_other_date', columns: [{type: :index, value: 'rate_3'}, {type: :index, value: 'rate_4'}]}]}
+            let(:sta_rows) {[{date: 'some_date', rate: 'rate_1'}]}
+            let(:sta_formatted_rows) {[{date: 'some_date', columns: [{type: :index, value: 'rate_1'}]}]}
             before do
               allow(response_hash).to receive(:[]).with(:rates_by_date).and_return(rows)
               allow(response_hash).to receive(:[]=)
@@ -2054,8 +2066,18 @@ RSpec.describe ReportsController, :type => :controller do
               expect(controller).to receive(:sort_report_data).with(formatted_rows, :date)
               get :historical_price_indications, historical_price_credit_type: 'frc'
             end
+            it 'should be an array of rows of sta data, each containing a row object with a date and a column array containing objects with a type and a rate value' do
+              allow(response_hash).to receive(:[]).with(:rates_by_date).and_return(sta_rows)
+              get :historical_price_indications, historical_price_collateral_type: 'sta'
+              expect((assigns[:table_data])[:rows]).to eq(sta_formatted_rows)
+            end
           end
           describe 'the notes hash' do
+            let(:sta_notes) {
+              {I18n.t('reports.pages.price_indications.current.interest_day_count') => I18n.t('reports.pages.price_indications.current.actual_360'),
+               '' => I18n.t('reports.pages.price_indications.sta.notes')
+              }
+            }
             collateral_types = [:standard, :sbc]
             credit_types = [:frc, :vrc, :'1m_libor', :'3m_libor', :'6m_libor']
             collateral_types.each do |collateral_type|
@@ -2076,6 +2098,12 @@ RSpec.describe ReportsController, :type => :controller do
                     end
                   end
                 end
+              end
+            end
+            describe 'when the collateral type is sta' do
+              it 'has an interest_day_count key value of Actual/360' do
+                get :historical_price_indications, historical_price_collateral_type: 'sta'
+                expect((assigns[:table_data])[:notes]).to eq(sta_notes)
               end
             end
           end

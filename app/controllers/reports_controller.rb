@@ -651,7 +651,8 @@ class ReportsController < ApplicationController
     
     @collateral_type_options = [
         [t('reports.pages.price_indications.standard_credit_program'), 'standard'],
-        [t('reports.pages.price_indications.sbc_program'), 'sbc']
+        [t('reports.pages.price_indications.sbc_program'), 'sbc'],
+        [t('reports.pages.price_indications.sta.dropdown'), 'sta']
     ]
     collateral_type = params[:historical_price_collateral_type]
     @collateral_type_options.each do |option|
@@ -663,26 +664,33 @@ class ReportsController < ApplicationController
     end
     @collateral_type ||= @collateral_type_options.first.last
     @collateral_type_text ||= @collateral_type_options.first.first
-    @credit_type_options = [
+    if @collateral_type == 'sta'
+      @credit_type = 'sta'
+      @open_direction = 'right'
+    else
+      @open_direction = 'left'
+      @credit_type_options = [
         [t('reports.pages.price_indications.frc.dropdown'), 'frc'],
         [t('reports.pages.price_indications.vrc.dropdown'), 'vrc'],
         [t('reports.pages.price_indications.1m_libor.dropdown'), '1m_libor'],
         [t('reports.pages.price_indications.3m_libor.dropdown'), '3m_libor'],
         [t('reports.pages.price_indications.6m_libor.dropdown'), '6m_libor']
-    ]
-    if @collateral_type == 'standard'
-      @credit_type_options.push( [t('reports.pages.price_indications.daily_prime.dropdown'), 'daily_prime'] )
-    end
-    credit_type = params[:historical_price_credit_type]
-    @credit_type_options.each do |option|
-      if option[1] == credit_type
-        @credit_type = credit_type
-        @credit_type_text = option[0]
-        break
+      ]
+      if @collateral_type == 'standard'
+        @credit_type_options.push( [t('reports.pages.price_indications.daily_prime.dropdown'), 'daily_prime'] )
       end
+      credit_type = params[:historical_price_credit_type]
+      @credit_type_options.each do |option|
+        if option[1] == credit_type
+          @credit_type = credit_type
+          @credit_type_text = option[0]
+          break
+        end
+      end
+      @credit_type ||= @credit_type_options.first.last
+      @credit_type_text ||= @credit_type_options.first.first
     end
-    @credit_type ||= @credit_type_options.first.last
-    @credit_type_text ||= @credit_type_options.first.first
+
     @report_name = t('reports.pages.price_indications.historical.title')
     filename_credit_type = (@credit_type.include?('libor') || @credit_type.include?('daily_prime')) ? "arc-#{@credit_type.gsub('_','-')}" : @credit_type
     report_download_name = "historical-price-indications-#{@collateral_type}-#{filename_credit_type}-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
@@ -701,63 +709,81 @@ class ReportsController < ApplicationController
         raise StandardError, "There has been an error and ReportsController#historical_price_indications has encountered nil. Check error logs." if @historical_price_indications.nil?
       end
 
-      case @credit_type.to_sym
-        when :frc
-          column_heading_keys = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.values
-          terms = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.keys
-        when :vrc
-          column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
-          terms = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.keys
-        when *RatesService::ARC_CREDIT_TYPES
-          table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading") unless @credit_type == :daily_prime
-          column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
-          terms = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.keys
-        # TODO add statement for 'embedded_cap' when it is rigged up
-      end
+      collateral_key = @collateral_type.to_sym
+      notes = {}
 
-      column_headings = []
-      column_sub_headings = []
-      if (@credit_type.to_sym == :daily_prime)
-        column_heading_keys.each do |key|
-          column_headings << I18n.t("global.full_dates.#{key}")
-          column_sub_headings = [fhlb_add_unit_to_table_header(I18n.t("reports.pages.price_indications.daily_prime.benchmark_index"), '%'), I18n.t("reports.pages.price_indications.daily_prime.basis_point_spread")]
-        end
-        column_sub_headings_first =  I18n.t('global.date')
-      else
-        column_heading_keys.each do |key|
-          column_headings << I18n.t("global.dates.#{key}")
-        end
+      if @collateral_type == 'sta'
+        column_headings = []
+        column_sub_headings = []
         column_headings.insert(0, I18n.t('global.date'))
-      end
-
-      rows = if @historical_price_indications[:rates_by_date]
-        @historical_price_indications[:rates_by_date] = add_rate_objects_for_all_terms(@historical_price_indications[:rates_by_date], terms, @credit_type.to_sym)
-        if (@credit_type.to_sym == :daily_prime)
+        column_headings.insert(1, I18n.t('advances.rate'))
+        rows = if @historical_price_indications[:rates_by_date]
           @historical_price_indications[:rates_by_date].collect do |row|
-            columns = []
-            # need to replicate rate data for display purposes
-            row[:rates_by_term].each_with_index do |column, i|
-              next if i == 0
-              columns <<  {type: row[:rates_by_term][0][:type].to_sym, value: row[:rates_by_term][0][:value]}
-              columns <<  {type: column[:type].to_sym, value: column[:value] }
-            end
-            {date: row[:date], columns: columns }
+            {date: row[:date], columns: [{type: :index, value: row[:rate] }] }
           end
         else
-          @historical_price_indications[:rates_by_date].collect do |row|
-            {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: column[:type].to_sym, value: column[:value] } } }
-          end
+          []
         end
+        notes = {
+          t('reports.pages.price_indications.current.interest_day_count') => t('reports.pages.price_indications.current.actual_360'),
+          '' => t('reports.pages.price_indications.sta.notes')
+        }
       else
-        []
-      end
+        case @credit_type.to_sym
+          when :frc
+            column_heading_keys = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.values
+            terms = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.keys
+          when :vrc
+            column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
+            terms = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.keys
+          when *RatesService::ARC_CREDIT_TYPES
+            table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading") unless @credit_type == :daily_prime
+            column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
+            terms = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.keys
+          # TODO add statement for 'embedded_cap' when it is rigged up
+        end
 
-      collateral_key = @collateral_type.to_sym
-      credit_key = @credit_type.to_sym
-      notes = {}
-      notes[t('reports.pages.price_indications.current.interest_day_count')] = INTEREST_DAY_COUNT_MAPPINGS[collateral_key][credit_key]
-      notes[t('reports.pages.price_indications.current.interest_rate_reset')] = INTEREST_RATE_RESET_MAPPINGS[credit_key] if RatesService::ARC_CREDIT_TYPES.include?(credit_key)
-      notes[t('reports.pages.price_indications.current.payment_frequency')] = INTEREST_PAYMENT_FREQUENCY_MAPPINGS[collateral_key][credit_key]
+        column_headings = []
+        column_sub_headings = []
+        if (@credit_type.to_sym == :daily_prime)
+          column_heading_keys.each do |key|
+            column_headings << I18n.t("global.full_dates.#{key}")
+            column_sub_headings = [fhlb_add_unit_to_table_header(I18n.t("reports.pages.price_indications.daily_prime.benchmark_index"), '%'), I18n.t("reports.pages.price_indications.daily_prime.basis_point_spread")]
+          end
+          column_sub_headings_first =  I18n.t('global.date')
+        else
+          column_heading_keys.each do |key|
+            column_headings << I18n.t("global.dates.#{key}")
+          end
+          column_headings.insert(0, I18n.t('global.date'))
+        end
+
+        rows = if @historical_price_indications[:rates_by_date]
+          @historical_price_indications[:rates_by_date] = add_rate_objects_for_all_terms(@historical_price_indications[:rates_by_date], terms, @credit_type.to_sym)
+          if (@credit_type.to_sym == :daily_prime)
+            @historical_price_indications[:rates_by_date].collect do |row|
+              columns = []
+              # need to replicate rate data for display purposes
+              row[:rates_by_term].each_with_index do |column, i|
+                next if i == 0
+                columns <<  {type: row[:rates_by_term][0][:type].to_sym, value: row[:rates_by_term][0][:value]}
+                columns <<  {type: column[:type].to_sym, value: column[:value] }
+              end
+              {date: row[:date], columns: columns }
+            end
+          else
+            @historical_price_indications[:rates_by_date].collect do |row|
+              {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: column[:type].to_sym, value: column[:value] } } }
+            end
+          end
+        else
+          []
+        end
+        credit_key = @credit_type.to_sym
+        notes[t('reports.pages.price_indications.current.interest_day_count')] = INTEREST_DAY_COUNT_MAPPINGS[collateral_key][credit_key]
+        notes[t('reports.pages.price_indications.current.interest_rate_reset')] = INTEREST_RATE_RESET_MAPPINGS[credit_key] if RatesService::ARC_CREDIT_TYPES.include?(credit_key)
+        notes[t('reports.pages.price_indications.current.payment_frequency')] = INTEREST_PAYMENT_FREQUENCY_MAPPINGS[collateral_key][credit_key]
+      end
       @table_data = {
         :table_heading => table_heading,
         :column_headings => column_headings,

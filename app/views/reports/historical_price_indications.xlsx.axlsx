@@ -14,7 +14,7 @@ workbook.styles do |styles|
     when 'frc'
       styles = frc_styles
       column_headings = @table_data[:column_headings]
-    when 'vrc'
+    when 'vrc', 'sta'
       styles = vrc_styles
       column_headings = @table_data[:column_headings]
     when /libor/
