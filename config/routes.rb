@@ -112,11 +112,9 @@ Rails.application.routes.draw do
       get 'application' => 'resources#membership_application', as: :membership_application
       scope 'application' do
         get 'commercial-savings-and-industrial' => 'resources#commercial_application', as: :commercial_application
-        constraints Constraints::FeatureEnabled.new('unfinished-membership') do
-          get 'community-development' => 'error#not_found', as: :community_development_application
-          get 'credit-union' => 'resources#credit_union_application', as: :credit_union_application
-          get 'insurance-company' => 'resources#insurance_company_application', as: :insurance_company_application
-        end
+        get 'community-development' => 'resources#community_development_application', as: :community_development_application
+        get 'credit-union' => 'resources#credit_union_application', as: :credit_union_application
+        get 'insurance-company' => 'resources#insurance_company_application', as: :insurance_company_application
       end
     end
   end

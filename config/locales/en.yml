@@ -1000,8 +1000,8 @@ en:
           title: "Advances and Security Agreement (FC 2117)"
           description: "This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization."
         id_2127:
-          title: Advances and Security Agreement (FC 2127)
-          description: This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization.
+          title: "Advances and Security Agreement (FC 2127)"
+          description: "This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization."
         id_2135:
           title: "Settlement/Transaction Account Terms and Conditions (FC 2135)"
           description:
@@ -1039,20 +1039,20 @@ en:
           title: "Authorization to Release Records: Arizona (FC 2290)"
           description: "This authorization is for Arizona institutions only. This form authorizes the Bank to obtain records and information, including examination reports, about your institution from the Arizona Department of Financial Institutions."
         id_2345:
-          title:
-          description:
+          title: "Membership Application: Forms and Exhibits Checklist: Community Development Financial Institutions (FC 2345)"
+          description: This checklist identifies all of the forms, agreements, and exhibits that must be returned to the Bank with your application.
         id_2346:
-          title:
-          description:
+          title: "Applicant Information: Community Development Financial Institutions (FC 2346)"
+          description: This form provides basic information about your organization.
         id_2347:
-          title:
-          description:
+          title: "Certificate of Applicant: Community Development Financial Institutions (FC 2347)"
+          description: "This document must be completed and signed by the person(s) authorized in the Resolution: Membership."
         id_2348:
-          title:
-          description:
+          title: "Applicant’s Bank Stock Calculation: Community Development Financial Institutions (FC 2348)"
+          description: This worksheet helps you calculate the amount of Bank capital stock your organization must purchase to become a member.
         id_2349:
-          title:
-          description:
+          title: "Advances and Security Agreement: Community Development Financial Institutions (FC 2349)"
+          description_html: "This agreement defines the credit relationship between your organization and the Bank. Signatures on this document require notarization. This agreement should be used by community development loan funds and venture capital funds that are certified by the Community Development Financial Institutions Fund of the U.S. Department of the Treasury (CDFI Fund). Privately insured credit unions that are certified by the CDFI Fund should use the %{download_link}."
   securities:
     title: Securities
     redirect:
