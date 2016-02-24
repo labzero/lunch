@@ -7,7 +7,7 @@ RSpec.describe InternalMailer, :type => :mailer do
     end
   end
 
-  shared_examples 'an internal notification email' do |message_subject|
+  shared_examples 'an internal error notification email' do |message_subject|
     it 'assigns @user to the return of `user_name_from_user`' do
       a_name = double('Some Name')
       allow_any_instance_of(described_class).to receive(:user_name_from_user).and_return(a_name)
@@ -27,6 +27,10 @@ RSpec.describe InternalMailer, :type => :mailer do
       build_mail
       expect(response.body).to match(request_id.to_s)
     end
+    it_behaves_like 'an internal notification email', message_subject
+  end
+
+  shared_examples 'an internal notification email' do |message_subject|
     it 'sets the `to` of the email' do
       build_mail
       expect(response.to.first).to eq InternalMailer::GENERAL_ALERT_ADDRESS
@@ -48,7 +52,7 @@ RSpec.describe InternalMailer, :type => :mailer do
     let(:member) { double('A Member', to_s: SecureRandom.hex) }
     let(:build_mail) { mail :calypso_error, error, request_id, user, member }
 
-    it_behaves_like 'an internal notification email', I18n.t('errors.emails.calypso_error.subject')
+    it_behaves_like 'an internal error notification email', I18n.t('errors.emails.calypso_error.subject')
 
     it 'assigns @error' do
       build_mail
@@ -82,7 +86,7 @@ RSpec.describe InternalMailer, :type => :mailer do
     let(:rate_timeout) { double('A Rate Timeout', to_s: SecureRandom.hex) }
     let(:build_mail) { mail :stale_rate, rate_timeout, request_id, user }
 
-    it_behaves_like 'an internal notification email', I18n.t('errors.emails.stale_rate.subject')
+    it_behaves_like 'an internal error notification email', I18n.t('errors.emails.stale_rate.subject')
 
     it 'assigns @rate_timeout' do
       build_mail
@@ -101,12 +105,88 @@ RSpec.describe InternalMailer, :type => :mailer do
     let(:build_mail) { mail :exceeds_rate_band, rate_info, request_id, user }
     before { allow(rate_info).to receive(:[]).with(:rate_band_info).and_return({}) }
 
-    it_behaves_like 'an internal notification email', I18n.t('errors.emails.exceeds_rate_band.subject')
+    it_behaves_like 'an internal error notification email', I18n.t('errors.emails.exceeds_rate_band.subject')
     
     it 'assigns @rate_info' do
       build_mail
       expect(assigns[:rate_info]).to be(rate_info)
     end
+  end
+
+  describe '`long_term_advance` email' do
+    include CustomFormattingHelper
+    formatted_amount = SecureRandom.hex
+    term = SecureRandom.hex
+    let(:advance) { double(AdvanceRequest) }
+    let(:build_mail) { mail :long_term_advance, advance }
+    let(:confirmation_number) { double('A Confirmation Number') }
+    let(:trade_date) { Date.new(2012, 10, 11) }
+    let(:funding_date) { Date.new(2012, 10, 12) }
+    let(:maturity_date) { Date.new(2012, 10, 13) }
+    let(:signer) { SecureRandom.hex }
+    let(:type) { double('A Type') }
+    let(:term) { term }
+    let(:rate) { double('A Rate') }
+    let(:amount) { rand(1000000..2000000) }
+    let(:formatted_amount) { formatted_amount }
+    let(:member_id) { double('A Member ID') }
+    let(:member_name) { double('A Member Name') }
+    let(:request) { double('A Request') }
+    let(:members_service) { double(MembersService) }
+    let(:formatted_amount_html) { fhlb_formatted_currency(amount) }
+    let(:formatted_trade_date) { fhlb_date_standard_numeric(trade_date) }
+    let(:formatted_maturity_date) { fhlb_date_standard_numeric(maturity_date) }
+    let(:formatted_funding_date) { fhlb_date_standard_numeric(funding_date) }
+
+    before do
+      allow(advance).to receive(:confirmation_number).and_return(confirmation_number)
+      allow(advance).to receive(:trade_date).and_return(trade_date)
+      allow(advance).to receive(:funding_date).and_return(funding_date)
+      allow(advance).to receive(:maturity_date).and_return(maturity_date)
+      allow(advance).to receive(:signer).and_return(signer)
+      allow(advance).to receive(:human_type).and_return(type)
+      allow(advance).to receive(:human_term).and_return(term)
+      allow(advance).to receive(:rate).and_return(rate)
+      allow(advance).to receive(:total_amount).and_return(amount)
+      allow(advance).to receive(:member_id).and_return(member_id)
+      allow(advance).to receive(:request).and_return(request)
+      allow(MembersService).to receive(:new).and_return(members_service)
+      allow(members_service).to receive(:member).with(member_id).and_return({name: member_name})
+      allow_any_instance_of(described_class).to receive(:fhlb_formatted_currency).with(amount, anything).and_return(formatted_amount)
+    end
+
+    it_behaves_like 'an internal notification email', I18n.t('emails.long_term_advance.subject', amount: formatted_amount, term: term)
+    [:advance, :confirmation_number, :trade_date, :funding_date, :maturity_date, :signer, :type, :term, :rate, :member_id, :member_name, :amount].each do |param|
+      it "assigns @#{param}" do
+        build_mail
+        expect(assigns[param]).to eq(send(param))
+      end
+    end
+
+    {
+      confirmation_number: :confirmation_number,
+      trade_date: :formatted_trade_date,
+      funding_date: :formatted_funding_date,
+      maturity_date: :formatted_maturity_date,
+      signer: :signer,
+      type: :type,
+      term: :term,
+      rate: :rate,
+      member_id: :member_id,
+      member_name: :member_name,
+      amount: :formatted_amount_html
+      }.each do |param, value|
+        it "includes @#{param} in the message" do
+          target_value = send(value)
+          unless target_value.is_a?(String)
+            string_value = SecureRandom.hex
+            allow(target_value).to receive(:to_s).and_return(string_value)
+            target_value = string_value
+          end
+          build_mail
+          expect(response.body).to include(target_value)
+        end
+      end
   end
 
   describe '`user_name_from_user` protected method' do

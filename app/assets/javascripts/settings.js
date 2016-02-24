@@ -66,6 +66,18 @@ $(function () {
     showUsersLoading($ele);
   });
 
+  var resetPasswordSelector = '.settings-user-reset-password a';
+  $('.settings-users').on('ajax:success', resetPasswordSelector, function(event, json, status, xhr) {
+    var $ele = $(event.target);
+    showUsersFlyout($ele, json.html);
+  }).on('ajax:error', resetPasswordSelector, function(event, xhr, status, error) {
+    var $ele = $(event.target);
+    showUsersError($ele);
+  }).on('ajax:beforeSend', resetPasswordSelector, function(event) {
+    var $ele = $(event.target);
+    showUsersLoading($ele);
+  });
+
   function insertRow(row_html)
   {
     var $newRow = $(row_html);

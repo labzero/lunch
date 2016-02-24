@@ -607,7 +607,7 @@ class ReportsController < ApplicationController
   def historical_price_indications
     rate_service = RatesService.new(request)
     default_dates = default_dates_hash
-    @start_date = ((params[:start_date] || default_dates[:this_year_start])).to_date
+    @start_date = ((params[:start_date] || default_dates[:last_30_days])).to_date
     @end_date = ((params[:end_date] || default_dates[:today])).to_date
     @picker_presets = date_picker_presets(@start_date, @end_date)
     
@@ -903,7 +903,7 @@ class ReportsController < ApplicationController
   end
   
   def securities_transactions
-    @max_date   = most_recent_business_day(Time.zone.today - 1.day)
+    @max_date   = most_recent_business_day(Time.zone.today)
     @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
     report_download_name = "securities-transactions-#{fhlb_report_date_numeric(@start_date)}"
     downloadable_report(:xlsx, {start_date: params[:start_date]}, report_download_name) do
@@ -924,6 +924,7 @@ class ReportsController < ApplicationController
         is_new = row['new_transaction']
         { columns: row.map{ |field,value| map_securities_transactions_column(field, value, is_new) }.compact }
       end
+      @yesterdays_report = securities_transactions[:previous_business_day] ? reports_securities_transactions_path(start_date: securities_transactions[:previous_business_day]) : nil
       footer = [
           { value: t('reports.pages.securities_transactions.total_net_amount'), colspan: 6},
           { value: securities_transactions[:total_payment_or_principal],  type: :currency},
@@ -949,7 +950,7 @@ class ReportsController < ApplicationController
       @authorizations_title = if @authorizations_filter == 'all'
         t('reports.pages.authorizations.sub_title_all_users')
       else
-        t('reports.pages.authorizations.sub_title', filter: AUTHORIZATIONS_MAPPING[@authorizations_filter])        
+        t('reports.pages.authorizations.sub_title', filter: AUTHORIZATIONS_MAPPING[@authorizations_filter])
       end
 
       @authorizations_table_data = {
@@ -1182,7 +1183,7 @@ class ReportsController < ApplicationController
       @credit_datetime = @now
       @collateral_notice = member_profile[:collateral_delivery_status] == 'Y'
       @sta_number = member_details[:sta_number]
-      @fhfb_number = member_details[:fhfb_number]
+      @fhfa_number = member_details[:fhfa_number]
       @member_name = member_details[:name]
       @financing_availability = {
         rows: [

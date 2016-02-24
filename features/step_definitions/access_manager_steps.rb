@@ -23,6 +23,10 @@ When(/^I lock a user$/) do
   first(:link, I18n.t('settings.account.actions.lock')).click
 end
 
+When(/^I reset the password for a user$/) do
+  first(:link, I18n.t('settings.account.actions.reset_password')).click
+end
+
 Then(/^I should see a locked user success overlay$/) do
   page.assert_selector('.settings-users-overlay h3', text: /\A#{Regexp.quote(I18n.t('settings.account.lock.title'))}\z/, visible: true)
 end
@@ -77,6 +81,10 @@ end
 
 Then(/^I should see a new user success overlay$/) do
   page.assert_selector('.settings-users-overlay h3', text: /\A#{Regexp.quote(I18n.t('settings.account.confirm_create.title'))}\z/, visible: true)
+end
+
+Then(/^I should see a reset password overlay$/) do
+  page.assert_selector('.settings-users-overlay h3', text: /\A#{Regexp.quote(I18n.t('settings.account.reset_password.title'))}\z/, visible: true)
 end
 
 Given(/^I edit the deletable user$/) do

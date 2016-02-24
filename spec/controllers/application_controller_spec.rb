@@ -317,6 +317,58 @@ RSpec.describe ApplicationController, :type => :controller do
     end
   end
 
+  describe '`new_announcements_count`' do
+    let(:current_user) { double('User', new_announcements_count: nil) }
+    let(:count) { double('count', :> => true) }
+    let(:call_method) { subject.new_announcements_count }
+    describe 'when there is no `current_user`' do
+      before { allow(subject).to receive(:current_user).and_return(nil) }
+      it 'returns 0' do
+        expect(call_method).to eq(0)
+      end
+      it 'does not set the session value for `new_announcements_count`' do
+        call_method
+        expect(session).not_to have_key(:new_announcements_count)
+      end
+    end
+    describe 'when there is a `current_user`' do
+      before { allow(subject).to receive(:current_user).and_return(current_user) }
+      describe 'when there is a value for the session key `new_announcements_count`' do
+        before { session['new_announcements_count'] = count }
+        it 'returns the value' do
+          expect(call_method).to eq(count)
+        end
+        it 'does not call `new_announcements_count` on the user' do
+          expect(current_user).not_to receive(:new_announcements_count)
+          call_method
+        end
+      end
+      describe 'when there is not a value for the session key `new_announcements_count`' do
+        before { allow(current_user).to receive(:new_announcements_count).and_return(count) }
+        it 'calls `new_announcements_count` on the user' do
+          expect(current_user).to receive(:new_announcements_count)
+          call_method
+        end
+        it 'returns the result of calling `new_announcements_count` on the current user' do
+          expect(call_method).to eq(count)
+        end
+        it 'sets the session value for `new_announcements_count` to the one `new_announcements_count` of the current user' do
+          call_method
+          expect(session['new_announcements_count']).to eq(count)
+        end
+      end
+    end
+  end
+
+  describe '`reset_new_announcements_count`' do
+    let(:call_method) { subject.reset_new_announcements_count }
+    it 'removes `new_announcements_count` from the session hash' do
+      session['new_announcements_count'] = double('count')
+      call_method
+      expect(session).not_to have_key('new_announcements_count')
+    end
+  end
+
   describe '`skip_timeout_reset` private method' do
     let(:call_method) { controller.send(:skip_timeout_reset, &block) }
     let(:rack_env) { double('A Rack ENV', :[]= => nil) }

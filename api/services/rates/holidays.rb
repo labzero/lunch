@@ -19,12 +19,15 @@ module MAPI
           end
         end
 
-        def self.holidays(logger, environment)
+        def self.holidays(logger, environment, start=Time.zone.today, finish=Time.zone.today + 3.years)
           if connection = MAPI::Services::Rates.init_cal_connection(environment)
-            return nil unless response = get_holidays_from_soap(logger, connection, Time.zone.today, Time.zone.today + 3.years)
-            response.doc.remove_namespaces!
-            response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')[0].css('days day date').map do |holiday|
-              Time.zone.parse(holiday.content)
+            if response = get_holidays_from_soap(logger, connection, start, finish)
+              response.doc.remove_namespaces!
+              r1 = response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')
+              return [] if r1.blank?
+              r1[0].css('days day date').map { |holiday| Time.zone.parse(holiday.content) }
+            else
+              []
             end
           else
             MAPI::Services::Rates.fake('calendar_holidays')

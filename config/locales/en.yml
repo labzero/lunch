@@ -111,6 +111,7 @@ en:
     footnote_indicator: '*'
     attachments: Attachments
     unknown: Unknown
+    last_updated: 'Last Updated: %{date}'
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -190,6 +191,7 @@ en:
       date_to_current: "%{date} to date"
       custom: Custom date range
       print: "%{start_date} - %{end_date}"
+      last_30_days: Last 30 Days
     single:
       input: "As of %{date}"
       custom: Custom date
@@ -324,6 +326,10 @@ en:
       delete_user:
         title: User Access Deleted
         success_html: User access for <strong>%{name}</strong> has been deleted.
+      reset_password:
+        title: Password Reset
+        success_html: <strong>%{name}</strong>'s password has been reset.<br>An email with login instructions has been sent to this user.
+
     password:
       title: Manage Password
       instructions: "Change your Member Portal password.\n\nIf you have questions about account access, contact your institution’s Access Manager or <a href=\"%{url}\">Web Support</a> at %{phone_number}."
@@ -422,20 +428,6 @@ en:
     logged_out: You Have Been Logged Out
     session_expired: For security reasons, your session expires after several minutes of inactivity.
     log_in_again: Log In Again
-  emails:
-    new_user:
-      sender: FHLBank San Francisco <%{email}>
-      subject: Access to FHLBank San Francisco Member Portal
-      greeting: 'Hi %{given_name},'
-      created_by: "An account has been created for you by your institution’s Access Manager, %{manager}."
-      username: 'Your username is: %{username}.'
-      set_password: To access the FHLB Member Portal, you'll need to set your password.
-      login_instructions: Once you have set a password, you will be redirected to the login page, where you will need to enter your username (above) and your new password.
-      expiration: For your security, this link will expire in one hour.
-      contact: Contact your Access Manager or Web Support at %{phone} if you have any questions.
-      sign_off_html: Thank you,<br>FHLBank San Francisco Web Support Team
-      disclaimer: 'The contents of this email are intended only for the use of the individual or entity to which they are addressed and may contain information that is legally privileged, confidential, and exempt from disclosure. If you are not the intended recipient, you are hereby notified that any dissemination, distribution, or copying of this email is strictly prohibited. If you have received this email in error, please: (i) reply immediately to this email indicating that you received this communication in error, and (ii) promptly delete this email from your computer. Thank you.'
-
   forgot_password:
     instructions: "Enter your username, and we'll email you instructions to reset your password."
     confirmation:
@@ -630,9 +622,9 @@ en:
           capacity: Collateral Borrowing Capacity
           leverage: Stock Leverage
           standard: Standard Credit Program
-          agency: SBC:Agency
-          aaa: SBC:AAA
-          aa: SBC:AA
+          agency: 'SBC: Agency'
+          aaa: 'SBC: AAA'
+          aa: 'SBC: AA'
         standard_program:
           title: 'Standard Program:'
         sbc_program:
@@ -918,6 +910,7 @@ en:
         nav_title: Applications
         title: Membership Application
         intro_html: To apply for Bank membership, please complete all of the required application forms, agreements, and exhibits. Contact your <a href=%{url}>Relationship Manager</a> if you have any questions regarding the application process.
+        pdf_message: The forms and agreements are in PDF format and should be viewed with Acrobat Reader 7.0 or later.
         charter_types:
           heading: "For a complete list of application forms, select your charter type from the list below:"
           commercial: Commercial Bank, Savings Institution, or Industrial Loan Company
@@ -934,6 +927,10 @@ en:
           approval: When your institution is approved for membership, your institution will wire your stock purchase requirement amount, as calculated on the Applicant’s Bank Stock Calculation worksheet, to your newly opened Settlement/Transaction Account.
       commercial:
         title: Commercial Banks, Savings Institutions, and Industrial Loan Companies
+      credit_union:
+        title: Credit Union
+      insurance_company:
+        title: Insurance Companies
       forms:
         required:
           heading: Required Forms and Agreements
@@ -953,7 +950,7 @@ en:
           description: "This agreement is required for institutions that pledge securities as collateral. It establishes a securities custody account with the Bank."
         id_1973:
           title: "ISDA Master Agreement (1992, second printing)/Schedule to the Master Agreement (FC 1973)"
-          description_html: "These documents are required for institutions that want to enter into derivatives transactions with the Bank and must be signed by one or more authorized officers of your institution (as indicated on the Resolution and Authorization: Member Transactions) at the level of vice president or higher. These documents are available in hard copy only. Please e-mail <a href=%{url}>membership@fhlbsf.com</a> for this agreement."
+          description_html: "These documents are required for institutions that want to enter into derivatives transactions with the Bank and must be signed by one or more authorized officers of your institution (as indicated on the Resolution and Authorization: Member Transactions) at the level of vice president or higher. These documents are available in hard copy only. Please e-mail %{link} for this agreement."
         id_2065:
           title: "Resolution and Authorization: Member Transactions (FC 2065)"
           description: "This resolution must be adopted by your institution’s board of directors and signed by your Corporate Secretary. It is the primary form on which you specify individuals who are authorized to execute all types of transactions with the Bank, except for wires."
@@ -985,11 +982,11 @@ en:
           title: "Applicant Information: Commercial Banks, Savings Institutions, and Industrial Loan Companies (FC 2094)"
           description: This form provides basic information about your institution.
         id_2099:
-          title:
-          description:
+          title: "Calculation of 10% Requirement: Credit Unions (FC 2099)"
+          description: "This worksheet helps you determine whether your institution has at least 10% of total assets in residential mortgage loans, a statutory eligibility requirement for membership."
         id_2104:
           title: "Applicant’s Bank Stock Calculation: Commercial Banks, Savings Institutions, and Industrial Loan Companies (FC 2104)"
-          description_html: "This worksheet helps you calculate the amount of Bank capital stock your institution must purchase to become a member. Please e-mail <a href=%{url}>membership@fhlbsf.com</a> if you want the Bank to prepare an estimate of the Initial Stock Purchase Requirement. The estimate will be based on the most recent financial information available to the Bank, which may lag current data by a quarter."
+          description_html: "This worksheet helps you calculate the amount of Bank capital stock your institution must purchase to become a member. Please e-mail %{link} if you want the Bank to prepare an estimate of the Initial Stock Purchase Requirement. The estimate will be based on the most recent financial information available to the Bank, which may lag current data by a quarter."
         id_2108:
           title: "Certificate of Designated Persons—Wire Transfer Services (FC 2108)"
           description: "This form authorizes the designated individuals listed to conduct offline funds transactions by telephone. The signer listed on this form must be listed as an authorized individual on the Resolution and Authorization."
@@ -997,14 +994,14 @@ en:
           title: "Certificate of Designated Persons—Securities Services (FC 2109)"
           description: "This form authorizes the designated individuals listed to move securities to and from their unpledged account (safekeeping account). Employees listed on this form are authorized to provide instructions regarding the purchase and sale of unpledged securities, but are not authorized to pledge or de-pledge securities."
         id_2112:
-          title:
-          description:
+          title: "Applicant’s Bank Stock Calculation: Credit Unions (FC 2112)"
+          description_html: "This worksheet helps you calculate the amount of Bank capital stock your institution must purchase to become a member. Please e-mail %{link} if you want the Bank to prepare an estimate of the initial stock purchase. The estimate will be based on the most recent financial information available to the Bank, which may lag current data by a quarter."
         id_2117:
           title: "Advances and Security Agreement (FC 2117)"
           description: "This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization."
         id_2127:
-          title:
-          description:
+          title: Advances and Security Agreement (FC 2127)
+          description: This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization.
         id_2135:
           title: "Settlement/Transaction Account Terms and Conditions (FC 2135)"
           description:
@@ -1012,11 +1009,11 @@ en:
           title: "Settlement/Transaction Account Agreement (FC 2136)"
           description_html: "This agreement defines the account relationship between your institution and the Bank. Review the %{download_link} before signing this agreement."
         id_2138:
-          title:
-          description:
+          title: "Membership Application: Forms and Exhibits Checklist: Credit Unions (FC 2138)"
+          description: This checklist identifies all of the forms, agreements, and exhibits that must be returned to the Bank with your application.
         id_2139:
-          title:
-          description:
+          title: "Applicant Information: Credit Unions (FC 2139)"
+          description: This form provides basic information about your institution.
         id_2153:
           title: "Certificate of Designated Persons—Affordable Housing Program (FC 2153)"
           description: "This form authorizes the designated individuals listed to exercise authority under the Bank’s Affordable Housing Program and any other community investment programs, excluding extensions of credit related to these programs."
@@ -1024,17 +1021,17 @@ en:
           title: "Website Access Manager Set-Up (FC 2160)"
           description: "This form identifies your institution’s Access Manager(s), who will add and delete users, reset passwords, and lock or unlock website access accounts for individuals at your institution."
         id_2170:
-          title:
-          description:
+          title: "Membership Application: Forms and Exhibits Checklist: Insurance Companies (FC 2170)"
+          description: This checklist identifies all of the forms, agreements, and exhibits that must be returned to the Bank with your application.
         id_2171:
-          title:
-          description:
+          title: "Applicant Information: Insurance Companies (FC 2171)"
+          description: This form provides basic information about your institution.
         id_2177:
-          title:
-          description:
+          title: "Advances and Security Agreement: Insurance Companies (FC 2177)"
+          description: This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization.
         id_2178:
-          title:
-          description:
+          title: "Applicant’s Bank Stock Calculation: Insurance Companies (FC 2178)"
+          description_html: This worksheet helps you calculate the amount of Bank capital stock your institution must purchase to become a member. Please e-mail %{link} if you want the Bank to prepare an estimate of the Initial Stock Purchase Requirement. The estimate will be based on the most recent financial information available to the Bank, which may lag current data by a quarter.
         id_2228:
           title: "eTransact: SecurID Token Application (FC 2228)"
           description: "This form must be completed by each individual who needs access to eTransact, the Bank's secure online transaction service."
@@ -1192,8 +1189,8 @@ en:
       title: Account Summary
       freshness: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{now}. Collateral Borrowing Capacity data, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of close of business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today’s credit activity as of %{now}."
       institution_details:
-        sta_number: 'STA Number:'
-        fhfb_number: 'FHFB No.:'
+        sta_number: 'STA No.:'
+        fhfa_number: 'FHFA No.:'
       collateral_delivery_required: 'Collateral Status: Delivery Required'
       financing_availability:
         title: Financing Availability
@@ -1241,6 +1238,7 @@ en:
         leverage: Remaining Leverage
     your_account:
       title: Your Account
+    learn_more_html: <a href=%{url}>Learn more</a> about all available reports.
     pages:
       price_indications:
         current:
@@ -1490,11 +1488,13 @@ en:
         title: Securities Transactions
         info: The Securities Transaction Report is updated twice a day. The Preliminary Securities Transactions Report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm on the settlement day. The Final Securities Transactions Report reflects all transactions that have settled that day and is generally available at the end of the business day.
         effective: Effective %{date}, a "units" column has been added to the Securities Transactions Report.
-        preliminary: Preliminary Securities Transactions settled as of 11:30 am on %{date}
-        final: Final Securities Transactions settled as of close of business on %{date}
+        preliminary: "Preliminary Report: Securities Transactions settled as of 11:30 am on %{date}"
+        final: "Final Report: Securities Transactions settled as of close of business on %{date}"
         indicates_a_new_transaction_html: "*Indicates a new transaction."
         total_net_settled_preliminary: "Total Net Amount settled as of 11:30 am. on %{date}:"
         total_net_settled_final: "Total Net Amount settled as of close of business on %{date}:"
+        yesterdays_report: View the final securities transaction report for the previous business day.
+        no_results_today: No records to display
         custody_account_no: Custody Account No.
         transaction_code: Transaction Code
         units: Units
@@ -2326,7 +2326,7 @@ en:
         gross_exposure: Gross Potential Exposure
         one_year: "≤ 1 year"
         zero: zero
-        greater_one_year: "> 1 year and = 5 years"
+        greater_one_year: "> 1 year and ≤ 5 years"
         five_times: 0.005 times the notional amount
         five_years: "> 5 years"
         fifteen_times: 0.015 times the notional amount
@@ -2393,7 +2393,6 @@ en:
     web_support:
       title: Web Support
   privacy_policy:
-    last_updated: 'Last Updated: %{date}'
     please_read: PLEASE READ THIS PRIVACY POLICY BEFORE USING THIS WEBSITE OR OTHER ONLINE BANK SURVEY REQUEST
     introduction: "IF APPLICABLE: We use other online services not covered by this Policy. If you visit one of these sites, please review the policies of those sites to understand how your information may be collected, used and shared."
     applicable: From time to time, we may change this Policy. The effective date of this Policy, as stated above, indicates the last time this Policy was revised or updated. Checking the effective date above allows you to determine whether there have been changes since the last time you reviewed this Policy. We reserve the right to change this Policy at any time. Any changes to this Policy will become effective when we post the updated Policy to this Website. Your use of this Website following any changes to the Policy means that you accept the revised Policy. You are encouraged to review this Policy each time you use this Website
@@ -2451,90 +2450,74 @@ en:
   terms:
     title: Terms of Use
     intro:
-      definition: This Terms of Use is an agreement ("Agreement" or "Terms of Use") between the Federal Home Loan Bank of San Francisco (the "Bank" or "us" or "we") and the user ("you") of the Bank's website ("Website") and the member of the Bank or other entity with permission to access this Website ("Member") you represent. "You" also refers to the member on whose behalf you access this Website, "Member" also means you, and this Agreement also binds that Member.
-      agree: "By clicking on \"I agree to the Terms of Use,\" you agree to the Terms of Use Agreement."
-      right: We reserve the right to change this Agreement at any time. We may inform you of changes to this Agreement; however, regardless of whether such notice is provided, you must review this Agreement each time you use this Website, and you agree to be bound to any changes to this Agreement when you use this Website after any such modification or change is posted.
-      alert: An important function of this Agreement is to alert you that the data presented on this Website is not warranted or otherwise guaranteed. Please read this carefully.
-    access:
-      title: Authorized Access
-      website: The Bank has two websites, one for the public and one for members.
-      agreement: This Website is subject to this Agreement, and the public website is subject to a separate terms of use agreement referenced therein. No one may enter any area of this Website without first agreeing to this Agreement.
-      login: This Website can only be properly accessed through the Member Login at fhlbsf.com or member.fhlbsf.com, where the Member's authorized users enter their username and password.
-      data: Some areas of this Website contain data specific to a Member, and these pages may only be accessed by such Member and its authorized users, subject to the terms of this Agreement. No other person may access those areas or the information displayed there.
-      authorized: Persons duly authorized by the Bank may access any page or data on this Website, including those specific to a Member, and such persons are bound by written confidentiality agreements to keep non-public information confidential.
-      violation: Access to any portion of this Website in excess of the authority provided here is a violation of federal criminal law and may also give rise to civil liability.
-      member: If you are a Member, your username, password, and your SecurID token(s) may be disabled in accordance with the Bank's policies and procedures.
+      definition: Except as otherwise set forth herein, these Terms of Use govern your use of the Federal Home Loan Bank of San Francisco (“the Bank” or “we”) website or member portal (collectively, this “Website”) (any reference to “you” or “your” in these Terms of Use includes both you individually and the institution on whose behalf you use or access this Website). By accessing and using the Bank’s Website, you acknowledge that you have read these Terms of Use and agree to be bound by these Terms of Use, and further acknowledge that these Terms of Use may be amended from time to time, and you agree to be bound by any such amendments. If you do not agree to be bound by these Terms of Use, now or as amended, please leave this Website immediately.
+      security: Be advised that the security of the Internet cannot be guaranteed and therefore your privacy thereon cannot be guaranteed. The Bank will not be responsible for any unauthorized access to communications that you submit through the Internet or this Website.
     false_information:
       title: No False Information
-      description: You shall not provide any false information in connection with the use of this Website. Also, you agree to update or correct any information that you have provided if the information becomes outdated or misleading. You must use this Website consistent with all applicable laws and regulations.
+      description: You shall not provide any false information in connection with the use of this Website. You must use this Website consistent with all applicable laws and regulations.
     privacy:
       title: Privacy
-      description_html: "For information about our data protection practices, please see our <a href=%{url}>Privacy Policy</a>. By using this Website, you acknowledge and agree that we may access, preserve, and disclose your account information and any content associated with that account if required to do so by law or in a good faith belief that such access, preservation, or disclosure is reasonably necessary to: (a) satisfy any applicable law, regulation, legal process or governmental request, (b) enforce this Terms of Use, including investigation of potential violations hereof, (c) detect, prevent, or otherwise address fraud, security or technical issues (including, without limitation, the filtering of spam), (d) respond to user support requests, or (e) protect the rights, property or safety of the Bank, its users or the public. The Bank will not be responsible or liable for the exercise or non-exercise of its rights under the Terms of Use."
+      description_html: "For information about our data protection practices, please see our <a href=%{url}>Privacy Policy</a>. By using this Website, you acknowledge and agree that the Bank may access, preserve, and disclose any information we receive from you if required to do so by law or in a good faith belief that such access, preservation, or disclosure is reasonably necessary to: (a) satisfy any applicable law, regulation, legal process, or governmental request, (b) enforce these Terms of Use, including investigation of potential violations hereof, (c) detect, prevent, or otherwise address fraud, security or technical issues (including, without limitation, the filtering of spam), (d) respond to user support requests, or (e) protect the rights, property, or safety of the Bank, its users, or the public. The Bank will not be responsible or liable for the exercise or non-exercise of its rights under these Terms of Use."
     disclaimers:
       title: Disclaimers
-      sources: The information on this Website comes from a variety of sources and includes information that is subject to change without notice. The Bank seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Some of the information displayed on these pages changes rapidly, sometimes every day, and sometimes from minute to minute. The accuracy and timeliness of the data is subject to delays in connectivity across the internet, your systems, and other facilities outside the control of the Bank. Therefore, you must independently verify the accuracy of any information presented here.
-      warranty: ALL MATERIALS RELATED TO THIS WEBSITE, INCLUDING ALL CONTENT, SOFTWARE, AND INFORMATION ON THIS WEBSITE ARE PROVIDED "AS IS" AND WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. To the fullest extent permitted by law, we disclaim all warranties, express or implied, including, but not limited to, implied warranties of merchantability and fitness for a particular purpose, security and title. We do not warrant that the functions contained in the materials on this Website will be uninterrupted or error-free, that defects will be corrected, or that this Website or the servers that make such materials available are free of viruses or other harmful components. You assume the entire cost of all necessary servicing, repair, or correction. Applicable law may not allow the exclusion of implied warranties, so the above exclusion may not apply to you. 
-      download: Any material downloaded or otherwise obtained through the use of this Website is done at your own discretion and risk and you will be solely responsible for any damage to your computer system or loss of data that results from the download or use of such material. 
-      responsibility: We have no responsibility for any error, omission, interruption, deletion, defect, delay in operation or transmission, communications line failure, theft or destruction or unauthorized access to, or alteration of, a user's communications or data. We are not responsible for any loss or damage resulting from anyone's use of this Website, or any content posted on this Website, or any interactions between users of this Website, whether online or offline. 
-      risk: Use of the internet is solely at your own risk and is subject to all applicable local, state, national and international laws and regulations. We are not responsible for the security of any information transmitted via the internet. You assume all risk involved in transmitting information or files to or from this Website and must make your own determinations as to these matters.  
+      sources: The information on this Website is subject to change without notice and the Bank neither guarantees nor represents or warrants that the information is accurate, complete, or current. It is your responsibility to confirm the accuracy of any information contained on this Website, and the Bank is not responsible for any inaccuracies therein.
+      warranty: ALL MATERIALS RELATED TO THIS WEBSITE, INCLUDING ALL CONTENT, SOFTWARE, AND INFORMATION ON THIS WEBSITE (collectively, “Materials”) ARE PROVIDED “AS IS” AND WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. The Bank does not warrant that the functions contained in the Materials on this Website will be uninterrupted, risk-free, or error-free, that defects, with respect to both content and functionality, will be corrected, or that this Website or the servers that make such materials available are free of viruses or other harmful components. You assume ALL RISK ASSOCIATED WITH ACCESSING THIS WEBSITE INCLUDING, WITHOUT LIMITATION, COST OF REPAIR, SERVICING, DAMAGE, OR LOSS OF DATA.
+      responsibility: All users of this Website acknowledge that the material on this Website (i) does not represent investment advice; (ii) does not constitute an offer to extend credit, a grant or subsidy and (iii) does not constitute investment solicitation or an offer to buy securities. You must not rely on this Website or the information contained on this Website in making an investment decision, a credit decision or a calculation of the timing or amount of payment on debt securities or any other related information.
     ownership:
       title: Ownership and Other Intellectual Property Rights
-      description: This Website and all its pages are copyrighted by us, ©2000- 2015 Federal Home Loan Bank of San Francisco, all rights reserved. The distinctive house rooftop logo appearing throughout this Website, including on documents that can be downloaded from this Website, and the words "FHLBank San Francisco" are trademarks and trade names of the Bank. Except for data that (1) you create, (2) is in the public domain or (3) for which you have been given written permission, you may not copy, modify, publish, transmit, distribute, perform, display, or sell any data located on this Website. However, you may make copies of our data and information on this Website solely for use in connection with the Member's business. Some data on this Website is updated on a real time basis and is proprietary or is licensed to us by third parties. You will not copy, reproduce, alter, modify, create derivative works, or publicly display any content (except for data you provide) from this Website without the Bank's prior express written permission, or that of the appropriate third party.
+      description: This Website and all its pages are copyrighted by the Federal Home Loan Bank of San Francisco, © 2000 - 2015, all rights reserved. The Bank’s distinctive house rooftop logo appearing throughout this Website, including documents that can be downloaded from this Website, and the words “FHLBank San Francisco” are trademarks, whether registered or at common law, and trade names of the Bank. The Bank’s trademark, trade name, or logo cannot be used for any commercial purpose without the written consent of an authorized agent of the Bank. Except for data that (1) you create, (2) is in the public domain or (3) for which you have been given written permission by an authorized agent of the Bank, you may not copy, modify, publish, transmit, distribute, perform, display, or sell any data located on this Website.
     liability:
       title: Limitation on Liability
-      liability: In no event will the Bank or any other party involved in creating, producing, or distributing this Website be liable to you or any third person for any direct, indirect, consequential, exemplary, incidental, special or punitive damages, including also lost profits arising from your use of (or inability to use) this Website even if we have been advised of the possibility of such damages. Notwithstanding anything to the contrary contained herein, the Bank's liability to you or any member for any cause whatsoever, and regardless of the form of the action, will at all times be limited in the aggregate to $100.00.
-      damages: This limitation on damages includes but is not limited to damages that result from reliance by you on any information obtained from this Website, or from mistakes, omissions, interruptions, deletion of files or email, errors, defects, viruses, delays in operation or transmission, or any failure of performance (whether or not resulting from acts of God), communications failure, theft, destruction, or unauthorized access to the Bank's records, programs, or services. This paragraph applies to all content and services and software available through this Website. Because some states do not allow the exclusion or limitation of liability for consequential or incidental damages, in such states (if their law is deemed to apply) liability is limited to the fullest extent permitted by law.
+      liability: The Bank is not liable for any errors contained in this Website, or for any direct, indirect, consequential, exemplary, incidental, special or punitive damages, including also lost profits arising from your use of (or inability to use) this Website. The Bank’s liability for damage or claims arising from your use of this Website is limited to the lesser of $100 (U.S.), or to the fullest extent permitted by law.
     indemnity:
       title: Indemnity
-      description: You agree to defend, hold harmless and indemnify the Bank, and its subsidiaries, affiliates, officers, agents, and employees, advertisers or partners, from and against any third party claim arising from or in any way related to your use of this Website or violation of this Agreement including any liability or expense arising from all claims, losses, damages (actual and consequential), suits, judgments, litigation costs and attorneys' fees, of every kind and nature. In such a case, the Bank will provide you with written notice of such claim, suit or action.
+      description: You agree to defend, hold harmless and indemnify the Bank, and its officers, directors, agents, and employees, or partners, from and against any third party claim arising from or in any way related to your use of this Website or violation of these Terms of Use including any liability or expense arising from all claims, losses, damages (actual and consequential), suits, judgments, litigation costs, and attorneys’ fees, of every kind and nature. In such a case, the Bank will provide you with written notice of such claim, suit, or action.
     links:
       title: Links
-      description: This Website may provide, or third parties may provide, links to other World Wide Web sites or resources. Because we have no control over such sites and resources, you acknowledge and agree that the Bank is not responsible for the availability of such external sites or resources, and does not endorse and is not responsible or liable for any content, advertising, products, or other materials on or available from such sites or resources. You further acknowledge and agree that we shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with use of or reliance on any such content, goods or services available on or through any such site or resource.
-    modifications:
-      title: Modifications to this Website
-      description: The Bank reserves the right at any time, and from time to time to modify or discontinue, temporarily or permanently, this Website (or any part thereof) with or without notice. You agree that the Bank shall not be liable to you or to any third party for any modification, suspension or discontinuance of this Website.
+      description: This Website may provide, or third parties may provide, links to other Internet sites or resources. Because the Bank has no control over such websites and resources, you acknowledge and agree that the Bank is not responsible for the availability of such external websites or resources, and does not endorse and is not responsible or liable for any content, advertising, products, or other materials on or available from such websites or resources. You further acknowledge and agree that the Bank shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with use of or reliance on any such content, goods, or services available on or through any such website or resource.
     governing_law:
       title: Governing Law and Jurisdiction in San Francisco
-      description: All agreements on this Website are governed by and shall be construed in accordance with the laws of the United States and, to the extent applicable, the State of California. You agree that any action arising from any matter relating directly or indirectly to this Website shall be brought in the courts of the State of California or the federal courts sitting in the City and County of San Francisco, State of California, that those courts have personal jurisdiction over you and the Member for that purpose, and you waive any right to bring or seek transfer of any such action to any court outside of San Francisco.
+      description: The use of this Website is governed by and shall be construed in accordance with the laws of the United States and, to the extent applicable, the State of California. You agree that any action arising from any matter relating directly or indirectly to this Website shall be brought in a court of competent jurisdiction in the City and County of San Francisco, State of California, that those courts have personal jurisdiction over you for that purpose, and you waive any right to bring or seek transfer of any such action to any court outside of San Francisco, California.
     termination_of_access:
       title: Termination of Your Access to the Member Website
-      take_effect_html: This Agreement will take effect at the time of your first use of this Website (thereby indicating your acceptance of this Agreement). You may cancel your use of this Website and/or terminate this Agreement with or without cause at any time by providing notice to the Bank by contacting <a href=%{email}>Web Support</a> at %{phone}. The Bank or the Member on whose behalf you access this Website may at any time and for any reason, including a period of account inactivity, terminate your access to this Website, or suspend or terminate your account. In the event of termination, your user account will be disabled and you may not be granted access to your user account or any files or other content contained in your user account although residual copies of information for your institution may remain in our system. Sections pertaining to disclaimers, ownership and other intellectual property rights, limitation of liability, indemnity, governing law and jurisdiction, termination, waiver and severability, and statute of limitations shall survive expiration or termination of this Agreement.
-      member_agreements: Termination of your access to this Website will not affect the Member Agreements (defined below). If a Member ceases being a member of the Bank, all access by or on behalf of the Member will terminate unless otherwise agreed by the Bank in its sole discretion.
+      take_effect: These Terms of Use will take effect at the time of your first use of this Website (thereby indicating your acceptance of these Terms of Use. The Bank may at any time and for any reason, including a period of account inactivity, terminate your access to this Website, or suspend or terminate your account. In the event of termination, your user account will be disabled, and you may not be granted access to your user account or any files or other content contained in your user account although residual copies of information for your institution may remain in our system. Sections of these Terms of Use pertaining to disclaimers, ownership and other intellectual property rights, limitation of liability, indemnity, governing law and jurisdiction, termination, waiver and severability, and statute of limitations shall survive expiration or termination of your access to the Website.
+      member_agreements: Termination of your access to this Website will not affect the Member Agreements (defined below). If your institution ceases being a borrower of the Bank, all access by or on behalf of your institution will terminate unless otherwise agreed by the Bank in its sole discretion.
     infringement:
       title: Notification of Claimed Infringement
-      description_html: "If you believe that your work has been copied in a way that constitutes copyright infringement, or your intellectual property rights have been otherwise violated, contact <a href=%{email}>Web Support</a> at %{phone} and provide us with the following information: (1) an electronic or physical signature of the person authorized to act on behalf of the owner of the copyright or other intellectual property interest; (2) a description of the copyrighted work or other intellectual property that you claim has been infringed; (3) a description of where the material that you claim is infringing is located on this Website; (4) your name, address, telephone number, and email address; (5) a statement by you that you have a good faith belief that the disputed use is not authorized by the copyright owner, its agent, or the law; and 6) a statement by you, made under penalty of perjury, that the above information in your notice is accurate and that you are the copyright or intellectual property owner or authorized to act on the copyright or intellectual property owner's behalf."
+      description_html: "If you believe that your work has been copied in a way that constitutes copyright infringement, or your intellectual property rights have been otherwise violated, contact <a href=%{email}>Web Support</a> at %{phone} and please provide us with the following information: (1) an electronic or physical signature of the person authorized to act on behalf of the owner of the copyright or other intellectual property interest; (2) a description of the copyrighted work or other intellectual property that you claim has been infringed; (3) a description of where the material that you claim is infringing is located on this Website; (4) your name, address, telephone number, and email address; (5) a statement by you that you have a good faith belief that the disputed use is not authorized by the copyright owner, its agent, or the law; and (6) a statement by you, made under penalty of perjury, that the above information in your notice is accurate and that you are the copyright or intellectual property owner or authorized to act on the copyright or intellectual property owner’s behalf."
     securities_transactions:
       title: No Securities Transactions
-      sale: No information presented on this Website has any connection or relevance whatsoever to the sale or exchange of any security, other than the deposit or release of securities to the Bank for safekeeping or the pledge or release of securities as collateral for member advances.
-      obligations: None of the information at this Website is part of any offering notice or offering circular for consolidated obligations of the Bank or other credit products of the Bank. Only member institutions and certain eligible financial institutions may transact business with the Bank.
-      information: The material on this Website is set forth for informational purposes only. You acknowledge that this material (i) does not represent financial, accounting or investment advice; (ii) does not constitute an offer to extend credit, a grant, or a subsidy; and (iii) does not constitute investment solicitation or an offer to buy or sell securities. It is the sole responsibility of the users and members to check the accuracy of assumptions or other information contained on this Website. You must not rely on this Website or the information contained in it when making an investment decision, a credit decision, or when calculating the timing or amount of payments on debt securities, or any other related information.
+      sale: No information presented on this Website has any connection or relevance whatsoever to the sale or exchange of any security, other than the deposit or release of securities to the Bank for safekeeping or the pledge or release of securities as collateral for advances.
+      obligations: None of the information on this Website is part of any offering notice or offering circular for consolidated obligations of the Bank or other credit products of the Bank. Only certain eligible institutions may transact business with the Bank.
+      information: The material on this Website is set forth for informational purposes only. You acknowledge that this material (i) does not represent financial, accounting, or investment advice; (ii) does not constitute an offer to extend credit, a grant, or a subsidy; and (iii) does not constitute investment solicitation or an offer to buy or sell securities. It is the sole responsibility of the users and members to check the accuracy of assumptions or other information contained on this Website. You must not rely on this Website or the information contained in it when making an investment decision, a credit decision, or when calculating the timing or amount of payments on debt securities, or any other related information.
     advance_transactions:
       title: Advance Transactions
-      members_only: Through access to the members only area of this Website, the Bank provides an alternate method for its members to request certain types of advances from the Bank. The Bank establishes a "Financing Availability" for each member, setting the total dollar amount, maximum maturity, and other terms for all credit products and other member obligations available without additional credit underwriting or review by the Bank. A member's Financing Availability is based on the Bank's assessment of the member's creditworthiness and financial condition as reported to the member's regulator and the results of periodic regulatory examinations, financial reports, and other relevant information. A member's Financing Availability is subject to review and change by the Bank at any time. If your institution requires credit in excess of its approved Financing Availability, contact your relationship manager and your request will be reviewed by the Bank.
-      extend_credit: The Bank's ability to extend credit under a member's established Financing Availability is conditioned on the member's compliance with the Bank's Advances and Security Agreement (and other applicable agreements, including the Bank's Credit Program), specific eligibility or documentation requirements and policies applicable to specific Bank products), credit considerations, the borrowing capacity of collateral pledged by the member, other eligibility requirements established by the Bank, and regulatory limits on extensions of credit to the member.
-      act_upon_html: The Bank is entitled to act upon instructions received with respect to any transaction you make under your username and password and without inquiring into the identity of the person using your password. You agree that you will not under any circumstances disclose your password to anyone, including anyone claiming to represent the Bank. You acknowledge that no one from the Bank will ever ask you for your password, and that Bank employees do not need your password for any reason.  View the Bank’s <a href=%{url}>Online Security</a> guidelines.
-      liability: You are liable for all transactions made or authorized with the use of your password. The Bank has no responsibility for establishing the identity of any person who uses your password. You agree that if you give your password to anyone or fail to safeguard its secrecy, you do so at your own risk because anyone with your password will have access to your account. The password can be changed within this Website. The Bank recommends that you change your password regularly. You agree that if you believe the secrecy of your password has been compromised, you will immediately notify the Bank of that fact and will immediately change your password.
-      indemnity: You agree to indemnify and release the Bank from any and all liability, and agree not to make any claim against the Bank or bring any action against the Bank, relating to its honoring or allowing any actions or transactions that were conducted under your password.
-      authorization: By directing the Bank, through the use of services offered on the Website initiated with your username and password, you authorize the Bank to complete the transaction.
-      questions_html: In case you have questions about your electronic transactions, you can contact <a href=%{email}>Web Support</a> at %{phone}.  
-      obligations: The Bank is under no obligation to execute a requested advance for any reason, including without limit, market conditions, changes in posted interest rates, aggregate daily funding limits, and other factors that may affect the Bank's ability to execute the requested advance, as determined by the Bank in its sole discretion.
-      consultations: A member should discuss with its accountants, attorneys, investment advisors and other financial representatives and consultants whether and to what extent any of the Bank's credit products are appropriate and useful to it and its business.
-    other_agreements:
-      title: Other Agreements
-      description: The terms and conditions related to the Bank's products and services are governed by various agreements between the Bank and its members, as well as Bank policies and applicable laws and regulations ("Member Agreements"). In the event of express inconsistencies between this Agreement and the Member Agreements, the Member Agreements shall be determinative.
-    waiver:
-      title: Waiver and Severability of Terms
-      description: The failure of the Bank to exercise or enforce any right or provision of this Agreement shall not constitute a waiver of such right or provision. If any provision of this Agreement is found by a court of competent jurisdiction to be invalid, the parties nevertheless agree that the court should endeavor to give effect to the parties' intentions as reflected in the provision, and the other provisions of this Agreement remain in full force and effect.
-    limitations:
-      title: Statute of Limitations
-      description: You agree that regardless of any statute or law to the contrary, you may only file a claim or cause of action arising out of or related to use of this Website or this Agreement within one (1) year after such claim or cause of action arose or be forever barred.
-    beneficiaries:
-      title: No Third Party Beneficiaries; Assignment
-      no_third_party: You agree that, except as otherwise expressly provided in this Agreement, there shall be no third party beneficiaries to this Agreement.
-      no_transfer: You may not assign this Terms of Use Agreement to any other party. The Bank may assign or delegate certain of its rights and responsibilities under this Terms of Use Agreement to independent contractors or other third parties.
-    section_headings_disclaimer: The section headings in this Agreement are for convenience only and have no legal or contractual effect.
+      members_only: Through access to this Website, the Bank provides an alternate method for eligible institutions to request certain types of advances from the Bank. The Bank is entitled to act upon instructions received with respect to any advance transaction you make under your username and password and without inquiring into the identity of the person using your password. You agree that you will not under any circumstances disclose your password to anyone, including anyone claiming to represent the Bank. You acknowledge that no one from the Bank will ever ask you for your password, and that Bank employees do not need your password for any reason.
+      liability: You are liable for all transactions made or authorized with the use of your password. The Bank has no responsibility for establishing the identity of any person who uses your password. You agree that if you give your password to anyone or fail to safeguard its secrecy, you do so at your own risk because anyone with your password will have access to your account. The password can be changed within this Website. You will need to change your password pursuant to Bank requirements. You agree that if you believe the secrecy of your password has been compromised, you will immediately notify the Bank of that fact and will immediately change your password.
+      indemnity: " You agree to indemnify and release the Bank from any and all liability, and agree not to make any claim against the Bank or bring any action against the Bank, relating to its honoring or allowing any actions or transactions that were conducted under your password."
+      authorization: "By directing the Bank, through the use of advance services offered on the Website initiated with your username and password, you authorize the Bank to complete the transaction."
+      questions_html: "If you have questions about your online advance transactions, you can contact <a href=%{email}>Web Support</a> at %{phone}."
+      obligations: "The Bank is under no obligation to execute a requested advance for any reason, including without limit, market conditions, changes in posted interest rates, aggregate daily funding limits, and other factors that may affect the Bank’s ability to execute the requested advance, as determined by the Bank in its sole discretion."
+      consultations: "You should discuss with your accountants, attorneys, investment advisors and other financial representatives and consultants whether and to what extent any of the Bank’s credit products are appropriate and useful to your business. "
+      agreements: "The terms and conditions related to the Bank’s advance products and services are governed by various agreements between the Bank and its members and housing associates, as well as Bank policies and applicable laws and regulations (“Bank Agreements”). In the event of express inconsistencies between these Terms of Use and Bank Agreements, the Bank Agreements shall be determinative."
     agree: I agree to the terms of use
     cancel: Cancel and log out
+  emails:
+    long_term_advance:
+      subject: Hedge Alert - %{amount} %{term} Advance Executed via Member Portal
+      body_html: A long term advance has been completed via eTransact.
+    new_user:
+      sender: FHLBank San Francisco <%{email}>
+      subject: Access to FHLBank San Francisco Member Portal
+      greeting: 'Hi %{given_name},'
+      created_by: "An account has been created for you by your institution’s Access Manager, %{manager}."
+      username: 'Your username is: %{username}.'
+      set_password: To access the FHLB Member Portal, you'll need to set your password.
+      login_instructions: Once you have set a password, you will be redirected to the login page, where you will need to enter your username (above) and your new password.
+      expiration: For your security, this link will expire in one hour.
+      contact: Contact your Access Manager or Web Support at %{phone} if you have any questions.
+      sign_off_html: Thank you,<br>FHLBank San Francisco Web Support Team
+      disclaimer: 'The contents of this email are intended only for the use of the individual or entity to which they are addressed and may contain information that is legally privileged, confidential, and exempt from disclosure. If you are not the intended recipient, you are hereby notified that any dissemination, distribution, or copying of this email is strictly prohibited. If you have received this email in error, please: (i) reply immediately to this email indicating that you received this communication in error, and (ii) promptly delete this email from your computer. Thank you.'
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

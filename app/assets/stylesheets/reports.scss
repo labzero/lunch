@@ -964,6 +964,17 @@ td.dataTables_empty {
   }
 }
 
+.securities-transactions-report {
+  .report-inputs{
+    margin-bottom: 20px;
+  }
+  .next-day-link{
+    @extend %typography-table-cell;
+    margin-bottom: 46px;
+    display: block;
+  }
+}
+
 .account-summary-report {
   .report-table {
     margin-bottom: 10px;
@@ -1033,7 +1044,7 @@ td.dataTables_empty {
     line-height: 1.5;
   }
   dt {
-    width: 150px;
+    width: 85px;
     color: $medium-gray;
     clear: left;
   }

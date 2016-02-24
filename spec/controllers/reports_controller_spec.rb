@@ -6,8 +6,8 @@ include ActiveSupport::Inflector
 include FinancialInstrumentHelper
 
 RSpec.describe ReportsController, :type => :controller do
-  shared_examples 'a date restricted report' do |action, default_start_selection=nil|
-    let(:start_date) { rand(500).days.ago(Time.zone.today) }
+  shared_examples 'a date restricted report' do |action, default_start_selection=nil, start_date_offset=0|
+    let(:start_date) { rand(start_date_offset..500).days.ago(Time.zone.today) }
     let(:default_start) do
       case default_start_selection
         when :this_month_start
@@ -442,7 +442,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
 
       it_behaves_like 'a report that can be downloaded', :advances_detail, [:pdf, :xlsx]
-      it_behaves_like 'a date restricted report', :advances_detail
+      it_behaves_like 'a date restricted report', :advances_detail, nil, 1
       it_behaves_like 'a report with instance variables set in a before_filter', :advances_detail
       it_behaves_like 'a report with a @max_date', :advances_detail
       it 'should render the advances_detail view' do
@@ -1584,6 +1584,7 @@ RSpec.describe ReportsController, :type => :controller do
     let(:total)                            { double('total') }
     let(:total_net)                        { double('total_net') }
     let(:final)                            { double('final') }
+    let(:previous_business_day)            { double('previous_business_day') }
     let(:securities_transactions_hash) do
       {
           'custody_account_no'   => custody_account_no,
@@ -1627,6 +1628,7 @@ RSpec.describe ReportsController, :type => :controller do
       allow(response_hash).to receive(:[]).with(:final).and_return(final)
       allow(response_hash).to receive(:[]).with(:total_payment_or_principal)
       allow(response_hash).to receive(:[]).with(:total_interest)
+      allow(response_hash).to receive(:[]).with(:previous_business_day)
       allow(response_hash).to receive(:[]).with(:transactions).and_return(transaction_hash)
       allow(transaction_hash).to receive(:collect)
     end
@@ -1708,9 +1710,9 @@ RSpec.describe ReportsController, :type => :controller do
         expect(rates_service_instance).to receive(:historical_price_indications).with(start_date, end_date, anything, anything).and_return(response_hash)
         get :historical_price_indications, start_date: start_date, end_date: end_date
       end
-      it 'should use the start of this year to date as the date range if no params are passed' do
-        start_of_year = today.beginning_of_year
-        expect(rates_service_instance).to receive(:historical_price_indications).with(start_of_year, today, anything, anything).and_return(response_hash)
+      it 'should use the last 30 days to date as the date range if no params are passed' do
+        last_30_days = today - 1.month
+        expect(rates_service_instance).to receive(:historical_price_indications).with(last_30_days, today, anything, anything).and_return(response_hash)
         get :historical_price_indications
       end
       it 'should raise an error if @historical_price_indications is nil' do
@@ -2097,8 +2099,8 @@ RSpec.describe ReportsController, :type => :controller do
     let(:profile) {MemberBalanceService.new(member_id, ActionDispatch::TestRequest.new).profile}
     let(:member_name) { double('A Name') }
     let(:sta_number) { double('STA Number') }
-    let(:fhfb_number) { double('FHFB Number') }
-    let(:member_details) { {name: member_name, sta_number: sta_number, fhfb_number: fhfb_number} }
+    let(:fhfa_number) { double('FHFA Number') }
+    let(:member_details) { {name: member_name, sta_number: sta_number, fhfa_number: fhfa_number} }
 
     before do
       allow(subject).to receive(:current_member_id).and_return(member_id)
@@ -2145,9 +2147,9 @@ RSpec.describe ReportsController, :type => :controller do
       make_request
       expect(assigns[:sta_number]).to be(sta_number)
     end
-    it 'assigns @fhfb_number' do
+    it 'assigns @fhfa_number' do
       make_request
-      expect(assigns[:fhfb_number]).to be(fhfb_number)
+      expect(assigns[:fhfa_number]).to be(fhfa_number)
     end
     it 'assigns @member_name' do
       make_request
@@ -2237,7 +2239,7 @@ RSpec.describe ReportsController, :type => :controller do
           allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
           make_request
         end
-        %w(sta_number fhfb_number member_name).each do |instance_var|
+        %w(sta_number fhfa_number member_name).each do |instance_var|
           it "should not assign @#{instance_var}" do
             expect(assigns[instance_var.to_sym]).to be_nil
           end

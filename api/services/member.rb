@@ -1104,9 +1104,14 @@ module MAPI
         end
 
         relative_get '/:id/securities_transactions/:date' do
-          member_id = params[:id]
+          member_id = params[:id].to_i
           date = params[:date].to_date
-          MAPI::Services::Member::SecuritiesTransactions.securities_transactions(self.settings.environment, logger, member_id, date).to_json
+          begin
+            MAPI::Services::Member::SecuritiesTransactions.securities_transactions(self.settings.environment, logger, member_id, date).to_json
+          rescue => e
+            logger.error e
+            halt 503, 'Internal Service Error'
+          end
         end
 
         # Today's Credit Activity
@@ -1122,7 +1127,7 @@ module MAPI
         
         # Mortgage Collateral Update
         relative_get '/:id/mortgage_collateral_update' do
-          member_id = params[:id]
+          member_id = params[:id].to_i
           begin
             MAPI::Services::Member::MortgageCollateralUpdate.mortgage_collateral_update(self.settings.environment, logger, member_id).to_json
           rescue Savon::Error => error

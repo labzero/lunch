@@ -145,7 +145,13 @@ class DashboardController < ApplicationController
         preview_error = true
         @error_message = rate_error.code
       else
-        if preview_errors.find {|e| e.code == :capital_stock}
+        collateral_error = preview_errors.find {|e| e.code == :collateral}
+        if collateral_error
+          preview_success = false
+          preview_error = true
+          @error_message = :collateral
+          @error_value = collateral_error.value
+        elsif preview_errors.find {|e| e.code == :capital_stock}
           preview_success = false
           preview_error = false
           @original_amount = advance_request.amount
@@ -154,7 +160,7 @@ class DashboardController < ApplicationController
         else
           preview_success = false
           preview_error = true
-          [:capital_stock_offline, :credit, :collateral, :total_daily_limit].each do |code|
+          [:capital_stock_offline, :credit, :total_daily_limit].each do |code|
             error = preview_errors.find {|e| e.code == code}
             if error
               @error_message = code
@@ -233,7 +239,7 @@ class DashboardController < ApplicationController
     etransact_service = EtransactAdvancesService.new(request)
     response = RatesService.new(request).current_overnight_vrc || {}
     response[:quick_advances_active] = etransact_service.etransact_active?
-    response[:rate] = fhlb_formatted_number(response[:rate], precision: 2, html: false)
+    response[:rate] = fhlb_formatted_number(response[:rate], precision: 2, html: false) if response[:rate]
     render json: response
   end
 

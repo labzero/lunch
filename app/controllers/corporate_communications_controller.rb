@@ -18,6 +18,8 @@ class CorporateCommunicationsController < ApplicationController
   end
 
   def category
+    current_user.announcements_viewed!
+    reset_new_announcements_count
     message_service = MessageService.new
     @messages = message_service.corporate_communications(@filter)
   end

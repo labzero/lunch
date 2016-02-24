@@ -35,6 +35,7 @@ namespace :deploy do
       execute :touch, release_path.join('api/tmp/restart.txt')
     end
     invoke 'resque_pool:restart'
+    invoke 'resque_scheduler:restart'
   end
 
   desc 'Creates API directories'
@@ -148,6 +149,38 @@ namespace :resque_pool do
   end
 end
 
+namespace :resque_scheduler do
+  desc 'Starts the resque-scheduler daemon'
+  task :start do
+    on roles(:resque), in: :sequence, wait: 5 do
+      sudo :start, 'resque-scheduler'
+    end
+  end
+  desc 'Stops the resque-scheduler daemon'
+  task :stop do
+    on roles(:resque), in: :sequence, wait: 5 do
+      sudo :stop, 'resque-scheduler'
+    end
+  end
+  desc 'Restarts the resque-scheduler daemon'
+  task :restart do
+    on roles(:resque), in: :sequence, wait: 5 do
+      begin
+        sudo :start, 'resque-scheduler'
+      rescue SSHKit::Command::Failed
+        sudo :stop, 'resque-scheduler'
+        sudo :start, 'resque-scheduler'
+      end
+    end
+  end
+  desc 'Reloads the resque-scheduler daemon, which gives it all new children but leaves the partent process untouched'
+  task :reload do
+    on roles(:resque), in: :sequence, wait: 5 do
+      sudo :reload, 'resque-scheduler'
+    end
+  end
+end
+
 namespace :cluster do
   namespace :logs do
     desc 'Fetches the logfiles from the cluster in question'
@@ -250,6 +283,25 @@ namespace :feature do
       within release_path do
         with rails_env: fetch(:rails_env) do
           execute :rake, "flipper:feature:disable_all[#{args.actor}]"
+        end
+      end
+    end
+  end
+end
+
+namespace :service_fake do
+  [:enable, :disable].each do |switch|
+    desc "#{switch.to_s.capitalize} the fake service"
+    task switch, [:service] do |t, args|
+      on primary(:db) do
+        within release_path do
+          with rails_env: fetch(:rails_env) do
+            if args.service.to_sym == :all
+              execute :rake, "service_fakes:#{switch}"
+            else
+              execute :rake, "service_fakes:#{args.service}:#{switch}"
+            end
+          end
         end
       end
     end

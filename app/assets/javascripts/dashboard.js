@@ -86,6 +86,7 @@ $(function () {
     tbody.children().remove();
     tbody.append($(data.html));
     table.quickAdvanceTable(data.id);
+    Fhlb.Track.quick_advance_rate_table();
   };
 
   function showQuickAdvanceClosedState() {
@@ -113,7 +114,16 @@ $(function () {
       isCheckingRate = true;
       $.get('/dashboard/current_overnight_vrc').done(function(data) {
         $rate_element_children.remove();
-        $rate_element.html(data.rate).append($rate_element_children);
+        if (typeof data.rate == 'undefined' && $('.dashboard-vrc-overnight-message').is(':visible')) {
+          $('.dashboard-vrc-overnight-message').hide();
+          $('.dashboard-advances-rate').hide();
+        }
+        else
+        {
+          $('.dashboard-vrc-overnight-message').show();
+          $('.dashboard-advances-rate').show();
+          $rate_element.html(data.rate).append($rate_element_children);
+        }
         if (!data.quick_advances_active) {
           showQuickAdvanceClosedState();
         }

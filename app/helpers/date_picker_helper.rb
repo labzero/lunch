@@ -5,6 +5,7 @@ module DatePickerHelper
     {
       this_month_start: today.beginning_of_month,
       today: today,
+      last_30_days: today - 1.month,
       last_month_start: today.beginning_of_month - 1.month,
       last_month_end: (today.beginning_of_month - 1.month).end_of_month,
       this_year_start: today.beginning_of_year,
@@ -76,6 +77,11 @@ module DatePickerHelper
         label: default_dates_hash[:last_month_start].to_date.strftime('%B'),
         start_date: default_dates_hash[:last_month_start],
         end_date: default_dates_hash[:last_month_end]
+      },
+      {
+        label: t('datepicker.range.last_30_days'),
+        start_date: default_dates_hash[:last_30_days],
+        end_date: default_dates_hash[:today]
       },
       {
         label: t('datepicker.range.date_to_current', date: t("dates.quarters.#{current_quarter[:quarter]}", year: current_quarter[:year])),

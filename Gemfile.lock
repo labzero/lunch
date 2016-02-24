@@ -375,6 +375,11 @@ GEM
       rake
       resque (~> 1.22)
       trollop (~> 2.0)
+    resque-scheduler (4.0.0)
+      mono_logger (~> 1.0)
+      redis (~> 3.0)
+      resque (~> 1.25)
+      rufus-scheduler (~> 3.0)
     rest-client (1.8.0)
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 3.0)
@@ -404,6 +409,7 @@ GEM
     ruby_parser (3.7.3)
       sexp_processor (~> 4.1)
     rubyzip (1.0.0)
+    rufus-scheduler (3.2.0)
     safe_yaml (1.0.4)
     sass (3.4.21)
     sass-rails (5.0.3)
@@ -559,6 +565,7 @@ DEPENDENCIES
   rerun
   resque
   resque-pool
+  resque-scheduler
   rest-client
   rspec-rails
   ruby-oci8

@@ -1,163 +1,194 @@
 {
 	"metadata": {
 		"name": "FHLBSF",
-		"lastOpened": 1436478485662,
-		"created": 1436478483419
+		"lastOpened": 1455112450712,
+		"created": 1455112448106
 	},
 	"iconSets": [
 		{
 			"selection": [
 				{
-					"order": 20,
-					"id": 328,
-					"name": "paperclip",
-					"prevSize": 32
+					"order": 19,
+					"id": 329,
+					"prevSize": 32,
+					"code": 59649,
+					"name": "announcements",
+					"tempChar": ""
 				},
 				{
-					"order": 22,
+					"order": 1,
+					"id": 328,
+					"name": "paperclip",
+					"prevSize": 32,
+					"code": 59648,
+					"tempChar": ""
+				},
+				{
+					"order": 2,
 					"id": 327,
 					"prevSize": 32,
 					"code": 58895,
 					"name": "info",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 23,
+					"order": 3,
 					"id": 326,
 					"prevSize": 32,
 					"code": 58894,
 					"name": "error",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 24,
+					"order": 4,
 					"id": 325,
 					"name": "success",
 					"prevSize": 32,
 					"code": 58893,
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 25,
+					"order": 5,
 					"id": 324,
 					"prevSize": 32,
 					"code": 58891,
 					"name": "print",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 26,
+					"order": 6,
 					"id": 323,
 					"prevSize": 32,
 					"code": 58892,
 					"name": "forward",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 27,
+					"order": 7,
 					"id": 322,
 					"name": "caret",
 					"prevSize": 32,
 					"code": 58890,
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 28,
+					"order": 8,
 					"id": 320,
 					"prevSize": 32,
 					"code": 58889,
 					"name": "alert",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 29,
+					"order": 9,
 					"id": 319,
 					"prevSize": 32,
 					"code": 58885,
 					"name": "calendar",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 30,
+					"order": 10,
 					"id": 318,
 					"prevSize": 32,
 					"code": 58881,
 					"name": "chevron",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 31,
+					"order": 11,
 					"id": 317,
 					"prevSize": 32,
 					"code": 58888,
 					"name": "close",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 32,
+					"order": 12,
 					"id": 316,
 					"prevSize": 32,
 					"code": 58887,
 					"name": "edit",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 33,
+					"order": 13,
 					"id": 315,
 					"prevSize": 32,
 					"code": 58880,
 					"name": "gear",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 34,
+					"order": 14,
 					"id": 314,
 					"prevSize": 32,
 					"code": 58883,
 					"name": "magnify",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 35,
+					"order": 15,
 					"id": 313,
 					"prevSize": 32,
 					"code": 58886,
 					"name": "phone",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 36,
+					"order": 16,
 					"id": 312,
 					"prevSize": 32,
 					"code": 58882,
 					"name": "envelope",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 37,
+					"order": 17,
 					"id": 321,
 					"prevSize": 32,
 					"code": 58896,
 					"name": "arrow-left",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
-					"order": 38,
+					"order": 18,
 					"id": 308,
 					"prevSize": 32,
 					"code": 58884,
 					"name": "arrow-right",
-					"tempChar": ""
+					"tempChar": ""
 				}
 			],
 			"id": 0,
 			"metadata": {
 				"name": "Icons",
-				"importSize": 40
+				"importSize": {
+					"width": 512,
+					"height": 512
+				}
 			},
 			"height": 1024,
 			"prevSize": 32,
 			"icons": [
+				{
+					"id": 29,
+					"paths": [
+						"M436.7 334.119h356v50h-356v-50z",
+						"M436.7 486.119h356v50h-356v-50z",
+						"M436.7 640.119h356v50h-356v-50z",
+						"M947.7 128.119h-664.4l-1.2 284h-205.4v329c-0.6 58.6 16.4 109 57.6 135.6 13.2 8.4 23 15 47.4 16.8l610 2.4c50.6 0 90-15 117.2-44.6 39-42.6 37.4-100.4 36.8-110.2l2-613zM280.5 743.319c1.2 58.6-27.6 83.2-44.6 92.8-23.6 13.2-49.4 12.6-72 0-23-12.8-37.8-50-37.4-92v-282h155.2l-1.2 281.2zM895.7 744.119c0 0.4 1.8 40-24 73.8-15.4 20.2-44.2 28.2-80 28.2h-492.4c20.6-26.8 31.6-62.6 30.8-103.4l2.8-564.6h564.6l-1.8 566z"
+					],
+					"attrs": [],
+					"isMulticolor": false,
+					"grid": 20,
+					"tags": [
+						"announcements"
+					],
+					"colorPermutations": {
+						"6868681": []
+					}
+				},
 				{
 					"id": 28,
 					"paths": [
@@ -168,7 +199,10 @@
 					"grid": 20,
 					"tags": [
 						"paperclip"
-					]
+					],
+					"colorPermutations": {
+						"6868681": []
+					}
 				},
 				{
 					"id": 27,
@@ -498,7 +532,10 @@
 						"arrow-left"
 					],
 					"defaultCode": 57493,
-					"grid": 24
+					"grid": 24,
+					"colorPermutations": {
+						"6868681": []
+					}
 				},
 				{
 					"id": 8,
@@ -510,7 +547,10 @@
 						"arrow-right"
 					],
 					"defaultCode": 57493,
-					"grid": 24
+					"grid": 24,
+					"colorPermutations": {
+						"6868681": []
+					}
 				}
 			],
 			"invisible": false,
@@ -545,7 +585,8 @@
 				"baseline": 6.25,
 				"whitespace": 50
 			},
-			"resetPoint": 58880
+			"resetPoint": 58880,
+			"embed": false
 		},
 		"imagePref": {
 			"prefix": "icon-",

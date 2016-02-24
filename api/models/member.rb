@@ -19,14 +19,14 @@ module MAPI
         end
       end
       swagger_model :MemberDetails do
-        key :required, [:name, :fhfb_number, :sta_number]
+        key :required, [:name, :fhfa_number, :sta_number]
         property :name do
           key :type, :string
           key :description, 'The name of the member.'
         end
-        property :fhfb_number do
+        property :fhfa_number do
           key :type, :string
-          key :description, 'The Federal Housing Finance Board number of the member.'
+          key :description, 'The Federal Housing Finance Agency number of the member.'
         end
         property :sta_number do
           key :type, :string

@@ -74,6 +74,7 @@ gem 'resque'
 gem 'wicked_pdf'
 gem 'axlsx_rails', '>= 0.3.0'
 gem 'resque-pool'
+gem 'resque-scheduler'
 
 # for AWS assets
 gem 'paperclip'

@@ -644,6 +644,44 @@ RSpec.describe SettingsController, :type => :controller do
     end
   end
 
+  describe "POST reset_password" do
+    allow_policy_resource(:user, :reset_password?)
+    user_id = rand(10000..99999)
+    let(:user_id) { user_id }
+    let(:make_request) { post :reset_password, id: user_id }
+    let(:user) { double('User', class: User, id: user_id, send_reset_password_instructions: nil, errors: []) }
+    before do
+      allow(User).to receive(:find).with(user_id.to_s).and_return(user)
+    end
+    it_behaves_like 'a resource-based authorization required method', :post, :reset_password, :user, :reset_password?, id: user_id
+    it 'assigns the user identified by `params[:id]` to @user' do
+      make_request
+      expect(assigns[:user]).to be(user)
+    end
+    it "calls reset_password on the user" do
+      expect(user).to receive(:send_reset_password_instructions)
+      make_request
+    end
+    it "returns 500 if the user was not reset_passworded successfully" do
+      allow(user).to receive(:errors).and_return([:error])
+      make_request
+      expect(response).to have_http_status(:error)
+    end
+    it 'returns a 404 if the user was not found' do
+      allow(User).to receive(:find).and_call_original
+      expect{post :reset_password, id: 'foo'}.to raise_error(ActiveRecord::RecordNotFound)
+    end
+    it "renders the reset_password overlay" do
+      expect(subject).to receive(:render_to_string).with(layout: false)
+      make_request
+    end
+    it 'returns a JSON response' do
+      make_request
+      json = JSON.parse(response.body)
+      expect(json).to have_key('html')
+    end
+  end
+
   describe 'GET expired_password' do
     let(:make_request) { get :expired_password }
     it_behaves_like 'a user required action', :get, :expired_password

@@ -4,11 +4,8 @@ class ApplicationController < ActionController::Base
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
-  before_action :authenticate_user!
-  before_action :check_password_change
-  before_action :check_terms
-  before_action :save_render_time
-  helper_method :current_member_name, :current_member_id
+  before_action :authenticate_user!, :check_password_change, :check_terms, :save_render_time
+  helper_method :current_member_name, :current_member_id, :new_announcements_count
 
   HTTP_404_ERRORS = [ActionController::RoutingError, ActionController::UnknownController, ::AbstractController::ActionNotFound, ActiveRecord::RecordNotFound]
 
@@ -67,6 +64,15 @@ class ApplicationController < ActionController::Base
   def authenticate_user_with_authentication_flag!(*args, &block)
     @authenticated_action = true unless instance_variable_defined?(:@authenticated_action)
     authenticate_user_without_authentication_flag!(*args, &block)
+  end
+
+  def new_announcements_count
+    session['new_announcements_count'] ||= current_user.new_announcements_count if current_user
+    session['new_announcements_count'] || 0
+  end
+
+  def reset_new_announcements_count
+    session.delete('new_announcements_count')
   end
 
   alias_method_chain :authenticate_user!, :authentication_flag

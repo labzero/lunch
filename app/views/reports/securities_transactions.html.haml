@@ -1,12 +1,14 @@
 - @html_class = 'white-background'
 - @page_title = t('reports.meta_title')
-.report.row
+.report.row.securities-transactions-report
   .report-header
     %h1= @report_name
     = render 'reports_header_buttons', download_formats: [:xlsx]
     = render 'report_details', name: @member_name, freshness: t('reports.pages.securities_transactions.freshness'), availability: t('reports.availability.current')
     .report-inputs
       = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_securities_transactions_url, presets: @picker_presets, single_date_picker: true, max_date: @max_date
+  - if @yesterdays_report
+    = link_to( t('reports.pages.securities_transactions.yesterdays_report'), @yesterdays_report, class: 'next-day-link' )
   .report-main-body
     -if @final
       .report-summary-data

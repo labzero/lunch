@@ -2,8 +2,8 @@ Given(/^I am on the Messages page$/) do
   visit '/corporate_communications/all'
 end
 
-When(/^I click on the messages icon in the header$/) do
-  page.find('.main-nav a.icon-envelope-after').click
+When(/^I click on the announcements icon in the header$/) do
+  page.find('.main-nav a.icon-announcements-after').click
 end
 
 Then(/^I should see a list of message categories in the sidebar$/) do
@@ -69,4 +69,17 @@ end
 
 Then(/^I should see a list of attachments$/) do
   page.assert_selector('.corporate-communication-attachments ul li', minimum: 1, visible: true)
+end
+
+Then(/^I should see an announcements icon in the header with a badge indicating I have new messages$/) do
+  page.assert_selector('.icon-announcements-after p')
+end
+
+Then(/^I should see an announcements icon in the header with no badge$/) do
+  page.assert_selector('.icon-announcements-after')
+  page.assert_no_selector('.icon-announcements-after p')
+end
+
+When(/^I have a new message$/) do
+  FactoryGirl.create(:corporate_communication, date_sent: Time.zone.now)
 end

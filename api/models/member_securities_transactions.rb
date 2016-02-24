@@ -14,6 +14,10 @@ module MAPI
             key :'$ref', :SecurityTransactionObject
           end
         end
+        property :previous_business_day do
+          key :type, :string
+          key :description, 'What was the previous business day (in the event that no transactions are returned)'
+        end
       end
       swagger_model :SecurityTransactionObject do
         property :fhlb_id do

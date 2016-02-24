@@ -8,8 +8,9 @@ describe DatePickerHelper do
   end
 
   describe '`default_dates_hash` method' do
-    it 'returns a hash with keys for `today`, `this_month_start`, `last_month_start`, `last_month_end`, `this_year_start`, `last_year_start`, and `last_year_end`' do
+    it 'returns a hash with keys for `today`, `this_month_start`, `last_30_days`, `last_month_start`, `last_month_end`, `this_year_start`, `last_year_start`, and `last_year_end`' do
       expect(helper.default_dates_hash[:today]).to eq(today)
+      expect(helper.default_dates_hash[:last_30_days]).to eq(today - 1.month)
       expect(helper.default_dates_hash[:this_month_start]).to eq(today.beginning_of_month)
       expect(helper.default_dates_hash[:last_month_start]).to eq(today.beginning_of_month - 1.month)
       expect(helper.default_dates_hash[:last_month_end]).to eq((today.beginning_of_month - 1.month).end_of_month)
@@ -151,11 +152,6 @@ describe DatePickerHelper do
       expect(helper.date_picker_range(start_date, end_date, nil, nil)).to be_kind_of(Array)
     end
     describe 'a preset object' do
-      it 'has a label' do
-        helper.date_picker_range(start_date, end_date, nil, nil).each do |preset|
-          expect(preset[:label]).to be_kind_of(String)
-        end
-      end
       it 'has a label' do
         helper.date_picker_range(start_date, end_date, nil, nil).each do |preset|
           expect(preset[:label]).to be_kind_of(String)

@@ -48,6 +48,7 @@
 
     function showQuickAdvancePreviewError() {
       $('.flyout-top-section-body .quick-advance-preview-subheading').show();
+      Fhlb.Track.quick_advance_preview_error();
 
       // event listener and handler for back button click
       $('.quick-advance-back-button').on('click', function () {
@@ -82,6 +83,7 @@
             });
             setRsaEventListener();
             setConfirmQuickAdvanceListener();
+            Fhlb.Track.quick_advance_preview();
           }
           else {
             $flyout.find('.flyout-top-section-body .quick-advance-capstock-subheading').show();
@@ -98,6 +100,7 @@
             $('.confirm-quick-advance-capstock').on('click', function () {
               initiateQuickAdvanceWithoutCapstockCheck({stock_choice: $flyout.find('input[name=stock_choice]:checked').val()});
             });
+            Fhlb.Track.quick_advance_stock_purchase();
           }
         }
 
@@ -115,7 +118,6 @@
         $oldNodes.hide();
         $('.quick-advance-capstock-subheading').hide();
         $flyoutBottomSection.append($(json.html));
-
         if (json.preview_error == true) {
           showQuickAdvancePreviewError();
         } else {
@@ -131,6 +133,7 @@
           });
           setRsaEventListener();
           setConfirmQuickAdvanceListener();
+          Fhlb.Track.quick_advance_preview();
         };
       }).error(showCatchAllError);
     }
@@ -168,6 +171,7 @@
             $quickAdvancePreview.hide();
             $flyoutTopSection.find('.quick-advance-preview-subheading').hide();
             $flyoutTopSection.find('.quick-advance-confirmation-subheading').show();
+            Fhlb.Track.quick_advance_confirmation();
           } else {
             $('.quick-advance-preview.loading').remove();
             $('.quick-advance-confirmation-subheading').hide();
@@ -217,6 +221,7 @@
       $flyoutBottomSection.find('button').removeAttr('disabled');
       $flyoutTopSection.find('.quick-advance-preview-subheading').show();
       $flyoutTopSection.find('.quick-advance-confirmation-subheading').hide();
+      Fhlb.Track.quick_advance_preview();
     };
 
     function transitionToLoadingFromCapstock () {
@@ -241,6 +246,7 @@
       $flyoutBottomSection.find('input[type=radio]').removeAttr('disabled');
       $flyoutTopSection.find('.quick-advance-capstock-subheading').show();
       $flyoutTopSection.find('.quick-advance-preview-subheading').hide();
+      Fhlb.Track.quick_advance_stock_purchase();
     };
 
     function transitionToLoadingFromRates () {
@@ -259,6 +265,7 @@
       $flyoutBottomSection.find('button').addClass('active');
       $flyoutBottomSection.find('button').removeAttr('disabled');
       $amountField.removeAttr('disabled');
+      Fhlb.Track.quick_advance_rate_table();
     };
 
     function setRateFromElementData($element) {
@@ -312,6 +319,7 @@
       $flyoutBottomSection.children().hide();
       $flyoutBottomSection.append($catchAllError.clone());
       $catchAllError.find('.quick-advance-error-button').removeAttr('disabled');
+      Fhlb.Track.quick_advance_catchall_error();
     };
 
   };

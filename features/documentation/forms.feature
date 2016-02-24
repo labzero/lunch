@@ -7,11 +7,6 @@ Background:
   Given I am logged in
 
 @smoke
-Scenario: Member navigates to the forms page via the resources dropdown
-  Given I hover on the resources link in the header
-  When I click on the forms link in the header
-  Then I should see the forms page
-
 Scenario: Member navigates to the agreements topic on the forms page via the resources dropdown
   Given I hover on the resources link in the header
   When I click on the agreements link in the header

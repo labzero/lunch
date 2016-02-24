@@ -1,67 +1,67 @@
 {
   "1": {
     "name": "Old McDonald's Leanding Window",
-    "fhfb_number": "15017",
+    "fhfa_number": "15017",
     "sta_number": "21530001"
   },
   "2": {
     "name": "Bobby's Payday Loans",
-    "fhfb_number": "15016",
+    "fhfa_number": "15016",
     "sta_number": "21530002"
   },
   "3": {
     "name": "Irish Bank",
-    "fhfb_number": "15015",
+    "fhfa_number": "15015",
     "sta_number": "21530003"
   },
   "4": {
     "name": "S'more Bank",
-    "fhfb_number": "15014",
+    "fhfa_number": "15014",
     "sta_number": "21530004"
   },
   "5": {
     "name": "Wells Faygo",
-    "fhfb_number": "15013",
+    "fhfa_number": "15013",
     "sta_number": "21530005"
   },
   "6": {
     "name": "Chaste Manhattan",
-    "fhfb_number": "15012",
+    "fhfa_number": "15012",
     "sta_number": "21530006"
   },
   "7": {
     "name": "Subprime Backalley Lenders",
-    "fhfb_number": "15011",
+    "fhfa_number": "15011",
     "sta_number": "21530007"
   },
   "8": {
     "name": "Loan Sharks Incorporated",
-    "fhfb_number": "15010",
+    "fhfa_number": "15010",
     "sta_number": "21530008"
   },
   "9": {
     "name": "Marina Bank",
-    "fhfb_number": "15009",
+    "fhfa_number": "15009",
     "sta_number": "21530009"
   },
   "10": {
     "name": "Overseas Bank",
-    "fhfb_number": "15008",
+    "fhfa_number": "15008",
     "sta_number": "21530010"
   },
   "11": {
     "name": "Cayman Islands Holding Company",
-    "fhfb_number": "15007",
+    "fhfa_number": "15007",
     "sta_number": "21530011"
   },
   "12": {
     "name": "The Bank With The Really Really Long Name That Requires Truncation or Expansion",
-    "fhfb_number": "15006",
+    "fhfa_number": "15006",
     "sta_number": "21530012"
   },
   "13": {
     "name": "The Bank With Disabled Signers",
-    "fhfb_number": "15006",
+    "fhfa_number": "15006",
     "sta_number": "21530013"
   }
 }

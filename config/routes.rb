@@ -21,7 +21,9 @@ Rails.application.routes.draw do
 
   get '/dashboard/current_overnight_vrc' => 'dashboard#current_overnight_vrc'
 
-  get '/dashboard/recent_activity' => 'dashboard#recent_activity'
+  constraints Constraints::FeatureEnabled.new('recent-credit-activity') do
+    get '/dashboard/recent_activity' => 'dashboard#recent_activity'
+  end
 
   get '/dashboard/account_overview' => 'dashboard#account_overview'
 
@@ -83,6 +85,7 @@ Rails.application.routes.draw do
     get    '/users/:id/confirm_delete' => 'settings#confirm_delete', as: 'user_confirm_delete'
     post   '/users/:id/lock'           => 'settings#lock', as: 'user_lock'
     post   '/users/:id/unlock'         => 'settings#unlock', as: 'user_unlock'
+    post   '/users/:id/reset_password' => 'settings#reset_password', as: 'user_reset_password'
     get    '/expired-password'         => 'settings#expired_password', as: :user_expired_password
     put    '/expired-password'         => 'settings#update_expired_password'
   end

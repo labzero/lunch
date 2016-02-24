@@ -4,9 +4,15 @@ RSpec.describe CorporateCommunicationsController, :type => :controller do
   login_user
 
   describe 'before_filter methods' do
+    let(:current_user) { FactoryGirl.build(User) }
     let(:message_service_instance) { double('MessageServiceInstance') }
     let(:corporate_communications_zero) { double('Array of Messages', count: 0) }
     let(:corporate_communications_non_zero) { double('Array of Messages', count: 7) }
+    before do
+      allow(controller).to receive(:reset_new_announcements_count)
+      allow(controller).to receive(:current_user).and_return(current_user)
+      allow(current_user).to receive(:announcements_viewed!)
+    end
     it 'should set @sidebar_options as an array of options with a label and a value' do
       get :category, category: 'all'
       expect(assigns(:sidebar_options)).to be_kind_of(Array)
@@ -48,22 +54,37 @@ RSpec.describe CorporateCommunicationsController, :type => :controller do
 
   describe 'GET category' do
     it_behaves_like 'a user required action', :get, :category, category: 'all'
+    let(:current_user) { FactoryGirl.build(User) }
+    let(:perform_action) { get :category, category: 'all' }
     let(:message_service_instance) { double('MessageServiceInstance') }
     let(:corporate_communications) { double('Array of Messages', count: 7 ) }
+    before do
+      allow(controller).to receive(:reset_new_announcements_count)
+      allow(controller).to receive(:current_user).and_return(current_user)
+      allow(current_user).to receive(:announcements_viewed!)
+    end
     it 'should render the category view' do
-      get :category, category: 'all'
+      perform_action
       expect(response.body).to render_template('category')
+    end
+    it 'should call `announcements_viewed!` on the current user' do
+      expect(current_user).to receive(:announcements_viewed!)
+      perform_action
+    end
+    it 'should call `reset_new_announcements_count`' do
+      expect(controller).to receive(:reset_new_announcements_count)
+      perform_action
     end
     it 'should pass @filter to MessageService#corporate_communications as an argument' do
       allow(message_service_instance).to receive(:corporate_communications).with(kind_of(String)).and_return(corporate_communications)
       allow(MessageService).to receive(:new).and_return(message_service_instance)
       expect(message_service_instance).to receive(:corporate_communications).with('all').at_least(2).and_return(corporate_communications)
-      get :category, category: 'all'
+      perform_action
     end
     it 'should set @messages to the value returned by MessageService#corporate_communications' do
       allow(MessageService).to receive(:new).and_return(message_service_instance)
       allow(message_service_instance).to receive(:corporate_communications).and_return(corporate_communications)
-      get :category, category: 'all'
+      perform_action
       expect(assigns[:messages]).to eq(corporate_communications)
     end
   end

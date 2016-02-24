@@ -1,5 +1,7 @@
 .dropdown {
   @extend %typography-dropdown-selector;
+  -webkit-touch-callout: none; /* iOS Safari */
+  user-select: none;
   position: relative;
   overflow: visible;
   select {
@@ -60,4 +62,3 @@
   width: (3 * $grid-column-width) + (2 * $gutter-width);
   padding-right: 35px;
 }
-

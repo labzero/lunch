@@ -36,10 +36,26 @@ Scenario: Member downloads an XLSX of the Securities Transactions report
 @data-unavailable @jira-mem-410
 Scenario: Visiting the Securities Transactions Report Page before the desk is closed
   Given I am on the "Securities Transactions" report page
-  Then I should see "Preliminary Securities Transactions settled as of 11:30 a.m. on"
+  Then I should see a preliminary securities transaction report
 
 @data-unavailable @smoke @jira-mem-410 @jira-mem-1053
 Scenario: Securities Transactions Report has been disabled
   Given I am on the "Securities Transactions" report page
   When the "Securities Transactions" report has been disabled
   Then I should see an empty report table with Data Unavailable messaging
+
+@jira-1086
+Scenario: Securities Transactions Report has no records
+  Given I am on the "Securities Transactions" report page
+  When I click the datepicker field
+  And I write "12/25/2015" in the datepicker start input field
+  And I click the datepicker apply button
+  Then I should see an empty report table with No Records messaging
+
+@jira-1086
+Scenario: Securities Transactions Report is preliminary
+  Given I am on the "Securities Transactions" report page
+  When I click the datepicker field
+  And I write "12/1/2015" in the datepicker start input field
+  And I click the datepicker apply button
+  Then I should see a preliminary securities transaction report
