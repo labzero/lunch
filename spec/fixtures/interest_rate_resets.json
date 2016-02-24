@@ -1,0 +1,11 @@
+{
+  "date_processed": null,
+  "interest_rate_resets": [
+    {
+      "effective_date": null,
+      "advance_number": "12345",
+      "prior_rate": 0.19849999999999998,
+      "new_rate": 0.1928,
+      "next_reset": null}
+  ]
+}

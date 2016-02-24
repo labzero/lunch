@@ -979,11 +979,12 @@ describe MemberBalanceService do
 
   describe 'the `parallel_shift` method', :vcr do
     let(:parallel_shift) {subject.parallel_shift}
+    let(:response_no_dates) { JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'parallel_shift_no_dates.json'))).with_indifferent_access }
     it 'returns a hash with an `as_of_date` that is a date' do
       expect(parallel_shift[:as_of_date]).to be_kind_of(Date)
     end
     it 'returns a hash with nil for an `as_of_date` if there is no as_of_date in the response' do
-      allow(JSON).to receive(:parse).and_return(JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'parallel_shift_no_dates.json'))))
+      allow(JSON).to receive(:parse).and_return(response_no_dates)
       expect(parallel_shift[:as_of_date]).to be_nil
     end
     it 'returns a hash with a `putable_advances` array' do
@@ -993,7 +994,7 @@ describe MemberBalanceService do
       it 'contains objects representing putable advance data' do
         parallel_shift[:putable_advances].each do |advance|
           expect(advance[:advance_number]).to be_kind_of(String)
-          expect(advance[:issue_date]).to be_kind_of(String)
+          expect(advance[:issue_date]).to be_kind_of(Date)
           expect(advance[:interest_rate]).to be_kind_of(Float)
           advance[:shift_neg_300].blank? ? (expect(advance[:shift_neg_300]).to be_nil) : (expect(advance[:shift_neg_300]).to be_kind_of(Float))
           advance[:shift_neg_200].blank? ? (expect(advance[:shift_neg_200]).to be_nil) : (expect(advance[:shift_neg_200]).to be_kind_of(Float))
@@ -1005,7 +1006,6 @@ describe MemberBalanceService do
         end
       end
     end
-
     describe 'error states' do
       it 'should return nil if there is a JSON parsing error' do
         allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
@@ -1020,6 +1020,15 @@ describe MemberBalanceService do
         expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
         expect(parallel_shift).to eq(nil)
       end
+    end
+    it 'fixes the date for the response' do
+      expect(subject).to receive(:fix_date)
+      parallel_shift
+    end
+    it 'fixes the :issue_date for each advance' do
+      allow(subject).to receive(:fix_date).and_return(response_no_dates)
+      expect(subject).to receive(:fix_date).with(anything, :issue_date).at_least(:once)
+      parallel_shift
     end
   end
 
@@ -1226,21 +1235,31 @@ describe MemberBalanceService do
     let(:date){ double('date') }
     let(:isodate){ double('isodate') }
     let(:statement){ double('statement') }
+    let(:certificate) { double('certificate') }
+    let(:call_method) { subject.capital_stock_trial_balance(date) }
     before do
       allow(date).to receive(:iso8601).and_return(isodate)
+      allow(statement).to receive(:[]).with(:certificates).and_return([])
     end
-    it 'should return nil if get_hash returns nil' do
+    it 'returns nil if get_hash returns nil' do
       allow(subject).to receive(:get_hash).and_return(nil)
-      expect(subject.capital_stock_trial_balance(date)).to eq(nil)
+      expect(call_method).to eq(nil)
     end
-    it 'should fix_date on' do
+    it 'returns the result of `get_hash`' do
       allow(subject).to receive(:get_hash).and_return(statement)
-      expect(subject.capital_stock_trial_balance(date)).to eq(statement)
+      expect(call_method).to eq(statement)
+    end
+    it 'fixes the :issue_date for each certificate' do
+      allow(subject).to receive(:get_hash).and_return(statement)
+      allow(statement).to receive(:[]).with(:certificates).and_return([certificate])
+      expect(subject).to receive(:fix_date).with(certificate, :issue_date)
+      call_method
     end
   end
 
   describe 'the `interest_rate_resets` method', :vcr do
     let(:irr_rates) {subject.interest_rate_resets}
+    let(:advances) { JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'interest_rate_resets.json'))).with_indifferent_access }
     describe 'error states' do
       it 'should return nil if there is a JSON parsing error' do
         allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
@@ -1263,12 +1282,21 @@ describe MemberBalanceService do
     it 'should return an array of hashes containing interest rate resets' do
       expect(irr_rates.length).to be >= 1
       irr_rates[:interest_rate_resets].each do |rate|
-        expect(rate[:effective_date]).to be_kind_of(String)
+        expect(rate[:effective_date]).to be_kind_of(Date)
         expect(rate[:advance_number]).to be_kind_of(String)
         expect(rate[:prior_rate]).to be_kind_of(Float)
         expect(rate[:new_rate]).to be_kind_of(Float)
-        expect(rate[:next_reset]).to be_kind_of(String)
+        expect(rate[:next_reset]).to be_kind_of(Date)
       end
+    end
+    it 'fixes the :date_processed for the response' do
+      expect(subject).to receive(:fix_date).with(anything, :date_processed).exactly(:once)
+      irr_rates
+    end
+    it 'fixes the :effective_date and :next_reset for each advance' do
+      allow(subject).to receive(:fix_date).with(anything, :date_processed).and_return(advances)
+      expect(subject).to receive(:fix_date).with(anything, [:effective_date, :next_reset]).at_least(:once)
+      irr_rates
     end
   end
 
@@ -1327,6 +1355,11 @@ describe MemberBalanceService do
     it 'sets the `product_description` of an non-EXERCISED, non-TERMINATED, activity to its `instrument_type` if the activity is not an ADVANCE' do
       allow(subject).to receive(:get_json).and_return([non_exercised_activity])
       expect(todays_credit_activity.first[:product_description]).to eq(non_exercised_activity[:instrument_type])
+    end
+    it 'fixes the :funding_date and :maturity_date for each activity' do
+      allow(subject).to receive(:get_json).and_return([non_exercised_activity, terminated_activity_without_status, terminated_lc])
+      expect(subject).to receive(:fix_date).with(anything, [:funding_date, :maturity_date]).exactly(3)
+      todays_credit_activity
     end
   end
   
