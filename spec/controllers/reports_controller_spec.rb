@@ -724,17 +724,25 @@ RSpec.describe ReportsController, :type => :controller do
       let(:as_of_date) { double('some date') }
       let(:total_current_par) { double('total current par') }
       let(:maturity_date) {double('maturity date')}
+      let(:letters_of_credit) { double('letters of credit array') }
       before do
+        allow(response_hash).to receive(:[]=)
         allow(response_hash).to receive(:[]).with(:as_of_date)
         allow(response_hash).to receive(:[]).with(:total_current_par)
         allow(response_hash).to receive(:[]).with(:credits)
         allow(member_balance_service_instance).to receive(:letters_of_credit).and_return(response_hash)
+        allow(controller).to receive(:sort_report_data).and_return([])
       end
 
       it_behaves_like 'a user required action', :get, :letters_of_credit
       it_behaves_like 'a report with instance variables set in a before_filter', :letters_of_credit
       it_behaves_like 'a report that can be downloaded', :letters_of_credit, [:xlsx]
 
+      it 'sorts the letters of credit by lc_number' do
+        allow(member_balance_service_instance).to receive(:letters_of_credit).and_return({credits: letters_of_credit})
+        expect(controller).to receive(:sort_report_data).with(letters_of_credit, :lc_number)
+        make_request
+      end
       describe 'view instance variables' do
         it 'sets @as_of_date to the value returned by MemberBalanceService.letters_of_credit' do
           expect(response_hash).to receive(:[]).with(:as_of_date).and_return(as_of_date)
@@ -825,6 +833,10 @@ RSpec.describe ReportsController, :type => :controller do
       let(:parallel_shift_nil_data) { {as_of_date: as_of_date, putable_advances: [putable_advance_nil_data]} }
       before do
         allow(member_balance_service_instance).to receive(:parallel_shift).and_return(parallel_shift_data)
+      end
+      it 'sorts putable advances by advance number' do
+        expect(controller).to receive(:sort_report_data).with([putable_advance_data], :advance_number).and_return([])
+        make_request
       end
       describe 'view instance variables' do
         it 'sets @as_of_date to the date returned from MemberBalanceService.parallel_shift' do
@@ -1252,7 +1264,8 @@ RSpec.describe ReportsController, :type => :controller do
       let(:new_rate) { double('new_rate') }
       let(:next_reset) { double('next_reset') }
       let(:date_processed) { double('date processed') }
-      let(:irr_response) {{date_processed: date_processed, interest_rate_resets: [{'effective_date' => effective_date, 'advance_number' => advance_number, 'prior_rate' => prior_rate, 'new_rate' => new_rate, 'next_reset' => next_reset}]}}
+      let(:advances) { [{'effective_date' => effective_date, 'advance_number' => advance_number, 'prior_rate' => prior_rate, 'new_rate' => new_rate, 'next_reset' => next_reset}] }
+      let(:irr_response) {{date_processed: date_processed, interest_rate_resets: advances}}
       let(:interest_rate_resets) { get :interest_rate_resets }
 
       before do
@@ -1263,6 +1276,10 @@ RSpec.describe ReportsController, :type => :controller do
       it 'renders the interest_rate_resets view' do
         interest_rate_resets
         expect(response.body).to render_template('interest_rate_resets')
+      end
+      it 'sorts the interest rate resets by effective date' do
+        expect(controller).to receive(:sort_report_data).with(advances, :effective_date).and_return(advances)
+        interest_rate_resets
       end
       describe 'view instance variables' do
         it 'sets the @irr_table_data row attribute' do
@@ -1313,6 +1330,10 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it_behaves_like 'a user required action', :get, :todays_credit
       it_behaves_like 'a report with instance variables set in a before_filter', :todays_credit
+      it 'sorts activities by funding date' do
+        expect(controller).to receive(:sort_report_data).with([credit_activity], :funding_date).and_return([])
+        todays_credit
+      end
       describe 'view instance variables' do
         it 'sets the @todays_credit row attribute' do
           todays_credit
@@ -1571,7 +1592,7 @@ RSpec.describe ReportsController, :type => :controller do
     let(:start_date)                       { Date.new(2014,12,31) }
     let(:member_balances_service_instance) { double('MemberBalanceService') }
     let(:response_hash)                    { double('MemberBalanceServiceHash') }
-    let(:transaction_hash)                 { double('transaction_hash') }
+    let(:transaction_hash)                 { double('transaction_hash', collect: nil, sort: []) }
     let(:custody_account_no)               { double('custody_account_no') }
     let(:new_transaction)                  { double('new_transaction') }
     let(:cusip)                            { double('cusip') }
@@ -1630,7 +1651,6 @@ RSpec.describe ReportsController, :type => :controller do
       allow(response_hash).to receive(:[]).with(:total_interest)
       allow(response_hash).to receive(:[]).with(:previous_business_day)
       allow(response_hash).to receive(:[]).with(:transactions).and_return(transaction_hash)
-      allow(transaction_hash).to receive(:collect)
     end
     it_behaves_like 'a user required action', :get, :securities_transactions
     it_behaves_like 'a report with instance variables set in a before_filter', :securities_transactions
@@ -1645,6 +1665,35 @@ RSpec.describe ReportsController, :type => :controller do
     it 'renders the securities_transactions view' do
       get :securities_transactions
       expect(response.body).to render_template('securities_transactions')
+    end
+    it 'sorts the transactions first by custody account number and then by cusip' do
+      # uses 'transaction_code' as an id for these mock transactions for ease of testing
+      transaction_1 = {
+        'custody_account_no' => 5,
+        'cusip' => 5,
+        'transaction_code' => rand
+      }
+      transaction_2= {
+        'custody_account_no' => 1,
+        'cusip' => 55,
+        'transaction_code' => rand
+      }
+      transaction_3= {
+        'custody_account_no' => 10,
+        'cusip' => 23,
+        'transaction_code' => rand
+      }
+      transaction_4= {
+        'custody_account_no' => 5,
+        'cusip' => 2,
+        'transaction_code' => rand
+      }
+      sorted_transactions = [transaction_2, transaction_4, transaction_1, transaction_3]
+      expect(response_hash).to receive(:[]).with(:transactions).and_return([transaction_1, transaction_2, transaction_3, transaction_4])
+      get :securities_transactions
+      sorted_transactions.each_with_index do |transaction, i|
+        expect(assigns[:securities_transactions_table_data][:rows][i][:columns].last[:value]).to eq(transaction['transaction_code'])
+      end
     end
     it 'should pass @start_date and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
       allow(controller).to receive(:most_recent_business_day).and_return(max_date)
@@ -1865,11 +1914,17 @@ RSpec.describe ReportsController, :type => :controller do
             let(:row_2) {{date: 'some_other_date', rates_by_term: [{type: :index, value: 'rate_3'}, {type: :index, value: 'rate_4'}]}}
             let(:rows) {[row_1, row_2]}
             let(:formatted_rows) {[{date: 'some_date', columns: [{type: :index, value: 'rate_1'}, {type: :index, value: 'rate_2'}]}, {date: 'some_other_date', columns: [{type: :index, value: 'rate_3'}, {type: :index, value: 'rate_4'}]}]}
-            it 'should be an array of rows, each containing a row object with a date and a column array containing objects with a type and a rate value' do
+            before do
               allow(response_hash).to receive(:[]).with(:rates_by_date).and_return(rows)
               allow(response_hash).to receive(:[]=)
+            end
+            it 'should be an array of rows, each containing a row object with a date and a column array containing objects with a type and a rate value' do
               get :historical_price_indications, historical_price_credit_type: 'frc'
               expect((assigns[:table_data])[:rows]).to eq(formatted_rows)
+            end
+            it 'sorts by date' do
+              expect(controller).to receive(:sort_report_data).with(formatted_rows, :date)
+              get :historical_price_indications, historical_price_credit_type: 'frc'
             end
           end
           describe 'the notes hash' do
@@ -2703,6 +2758,25 @@ RSpec.describe ReportsController, :type => :controller do
               expect(call_method.first[:position_detail][1][3][0]).to eq(details)
             end
           end
+        end
+      end
+    end
+    describe '`sort_report_data`' do
+      let(:item_1) { {foo: 5} }
+      let(:item_2) { {foo: 1} }
+      let(:item_3) { {foo: 15} }
+      let(:data) { [item_1, item_2, item_3] }
+      it 'returns an empty array if it is passed an empty array as the first argument' do
+        expect(controller.send(:sort_report_data, [], :foo)).to eq([])
+      end
+      describe 'default behavior' do
+        it 'sorts the given data by the given field in ascending order' do
+          expect(controller.send(:sort_report_data, data, :foo)).to eq([item_2, item_1, item_3])
+        end
+      end
+      describe 'when passed a third argument that is not `asc`' do
+        it 'sorts the given data by the given field in descending order' do
+          expect(controller.send(:sort_report_data, data, :foo, 'desc')).to eq([item_3, item_1, item_2])
         end
       end
     end
