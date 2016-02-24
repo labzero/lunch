@@ -5,7 +5,7 @@
     "__DEV__": true
   },
   "rules": {
-    "comma-dangle": [2, "never"],
+    "comma-dangle": 0,
     "key-spacing": 0,
     "no-confusing-arrow": 0,
     "react/jsx-quotes": 0,

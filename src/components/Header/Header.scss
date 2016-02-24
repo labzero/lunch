@@ -47,4 +47,9 @@ $brand-color: #61dafb;
   font-weight: normal;
   font-size: 4em;
   line-height: 1em;
+
+  a {
+    color: inherit;
+    text-decoration: inherit;
+  }
 }

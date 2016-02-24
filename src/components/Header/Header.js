@@ -11,7 +11,6 @@ import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Header.scss';
 import Link from '../Link';
-import Navigation from '../Navigation';
 
 class Header extends Component {
 
@@ -20,9 +19,9 @@ class Header extends Component {
       <div className={s.root}>
         <div className={s.container}>
           <div className={s.banner}>
-            <Link to="/">
-              <h1 className={s.bannerTitle}>Lunch</h1>
-            </Link>
+            <h1 className={s.bannerTitle}>
+              <Link to="/">Lunch</Link>
+            </h1>
           </div>
         </div>
       </div>
