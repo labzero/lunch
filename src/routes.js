@@ -12,6 +12,7 @@ import Router from 'react-routing/src/Router';
 import fetch from './core/fetch';
 import App from './components/App';
 import ContentPage from './components/ContentPage';
+import HomePage from './components/HomePage';
 import ContactPage from './components/ContactPage';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
@@ -23,6 +24,8 @@ const router = new Router(on => {
     const component = await next();
     return component && <App context={state.context}>{component}</App>;
   });
+
+  on('/', async () => <HomePage />);
 
   on('/contact', async () => <ContactPage />);
 

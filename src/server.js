@@ -35,6 +35,7 @@ server.use(express.static(path.join(__dirname, 'public')));
 // Register API middleware
 // -----------------------------------------------------------------------------
 server.use('/api/content', require('./api/content').default);
+server.use('/api/restaurants', require('./api/restaurants').default);
 
 //
 // Register server-side rendering middleware

@@ -12,6 +12,7 @@ function format(time) {
 }
 
 function run(fn, options) {
+  require('dotenv').config();
   const task = typeof fn.default === 'undefined' ? fn : fn.default;
   const start = new Date();
   console.log(`[${format(start)}] Starting '${task.name}'...`);
