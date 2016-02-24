@@ -106,7 +106,9 @@ When(/^I select the (\d+)(?:st|rd|th) member bank$/) do |num|
   @login_flag = flag_page
   dropdown = page.find('select[name=member_id]')
   dropdown.click
-  dropdown.find("option:nth-child(#{num.to_i})").click
+  option = dropdown.find("option:nth-child(#{num.to_i})")
+  @member_id = option.value
+  option.click
   click_button(I18n.t('global.continue'))
 end
 
@@ -126,9 +128,16 @@ When(/^I select the "(.*?)" member bank$/) do |bank_name|
   else
     dropdown = page.find('select[name=member_id]')
     dropdown.click
-    dropdown.find('option', text: /\A#{Regexp.quote(bank_name)}\z/).click
+    option = dropdown.find('option', text: /\A#{Regexp.quote(bank_name)}\z/)
+    @member_id = option.value
+    option.click
     click_button(I18n.t('global.continue'))
   end
+end
+
+Given(/^I am logged in to a bank with Quick Reports$/) do
+  step %{I am logged in as a "intranet user"}
+  MemberProcessQuickReportsJob.perform_now(current_member_id, QuickReportSet.current_period)
 end
 
 Given(/^I am logged out$/) do
@@ -363,6 +372,10 @@ end
 
 def current_member_name
   @member_name ||= CustomConfig.env_config['primary_user']['bank']
+end
+
+def current_member_id
+  @member_id
 end
 
 def select_member_if_needed(bank=nil)

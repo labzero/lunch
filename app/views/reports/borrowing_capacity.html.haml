@@ -7,19 +7,19 @@
       = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@date))
     - else
       = render 'reports_header_buttons', download_formats: :pdf
-      = render 'report_details', name: @member_name, freshness: t('reports.pages.borrowing_capacity_summary.freshness'), availability: t('reports.availability.current')
+      = render 'report_details', name: @member_name, freshness: t('reports.pages.borrowing_capacity.freshness'), availability: t('reports.availability.current')
   .report-main-body
     %section
       .report-summary-data
         %h3
-          = t('reports.pages.borrowing_capacity_summary.total_borrowing_capacity_heading')
+          = t('reports.pages.borrowing_capacity.total_borrowing_capacity_heading')
         %p= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:total_borrowing_capacity], force_unit: true)
       .report-summary-data
         %h3
-          = t('reports.pages.borrowing_capacity_summary.remaining_borrowing_capacity_heading')
+          = t('reports.pages.borrowing_capacity.remaining_borrowing_capacity_heading')
         %p= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:remaining_borrowing_capacity], force_unit: true)
     %section.standard-credit-borrowing-capacity-tables.report-tables-section
-      %h2.report-table-title= t('reports.pages.borrowing_capacity_summary.standard_credit_program')
+      %h2.report-table-title= t('reports.pages.borrowing_capacity.standard_credit_program')
       %table.report-table.report-parent-table{data: {sortable: true, :'default-sort' => [[1, 'desc']], :'missing-data-message' => missing_data_message, 'disable-auto-width' => true}}
         %thead
           %tr
@@ -27,8 +27,8 @@
             %th.report-cell-narrow.report-cell-right= t('global.count')
             %th.report-cell-narrow.report-cell-right= fhlb_add_unit_to_table_header(t('global.original_amount'), '$')
             %th.report-cell-narrow.report-cell-right= fhlb_add_unit_to_table_header(t('global.unpaid_principal'), '$')
-            %th.report-cell-narrow.report-cell-right= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity_summary.market_value'), '$')
-            %th.report-cell-narrow.report-cell-right= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity_summary.bc_upb'), '%')
+            %th.report-cell-narrow.report-cell-right= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity.market_value'), '$')
+            %th.report-cell-narrow.report-cell-right= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity.bc_upb'), '%')
             %th.report-cell-narrow.report-cell-expanding= fhlb_add_unit_to_table_header(t('global.borrowing_capacity'), '$')
         - if @borrowing_capacity_summary[:standard].to_h.length > 0
           %tbody
@@ -54,66 +54,66 @@
         %table.report-table.report-sub-table{data: {sortable: false, 'disable-auto-width' => true}}
           %tbody
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.blanket_lien')
+              %td= t('reports.pages.borrowing_capacity.less_line_items.blanket_lien')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:excluded][:blanket_lien])
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.bank_borrowing_capacity')
+              %td= t('reports.pages.borrowing_capacity.less_line_items.bank_borrowing_capacity')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:excluded][:bank])
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.excluded_regulatory')
+              %td= t('reports.pages.borrowing_capacity.less_line_items.excluded_regulatory')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:excluded][:regulatory])
           %tfoot
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.net_loan_collateral')
+              %td= t('reports.pages.borrowing_capacity.net_loan_collateral')
               %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:net_loan_collateral])
         %table.report-table.report-sub-table{data: {sortable: false, 'disable-auto-width' => true}}
           %tbody
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.plus_line_items.securities')
+              %td= t('reports.pages.borrowing_capacity.plus_line_items.securities')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:securities])
           %tfoot
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.total_borrowing_capacity')          
+              %td= t('reports.pages.borrowing_capacity.total_borrowing_capacity')          
               %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:net_plus_securities_capacity]) 
         %table.report-table.report-sub-table{data: {sortable: false, 'disable-auto-width' => true}}
           %tbody
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.advances')
+              %td= t('reports.pages.borrowing_capacity.less_line_items.advances')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:utilized][:advances])
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.letters_of_credit')
+              %td= t('reports.pages.borrowing_capacity.less_line_items.letters_of_credit')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:utilized][:letters_of_credit])
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.swap_collateral')
+              %td= t('reports.pages.borrowing_capacity.less_line_items.swap_collateral')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:utilized][:swap_collateral])
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.cover_sbc_type')
+              %td= t('reports.pages.borrowing_capacity.less_line_items.cover_sbc_type')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:utilized][:sbc_type_deficiencies])
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.payment_fees')
+              %td= t('reports.pages.borrowing_capacity.less_line_items.payment_fees')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:utilized][:payment_fees])
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.other_collateral')
+              %td= t('reports.pages.borrowing_capacity.less_line_items.other_collateral')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:utilized][:other_collateral])
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.mpf_ce_collateral')
+              %td= t('reports.pages.borrowing_capacity.less_line_items.mpf_ce_collateral')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:utilized][:mpf_ce_collateral])
           %tfoot
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.remaining_capacity')
+              %td= t('reports.pages.borrowing_capacity.remaining_capacity')
               %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:standard_excess_capacity])
     %section.sbc-borrowing-capacity-tables.report-tables-section
-      %h2.report-table-title= t('reports.pages.borrowing_capacity_summary.sbc_program')
+      %h2.report-table-title= t('reports.pages.borrowing_capacity.sbc_program')
       %table.report-table.report-parent-table.table-allow-wrapping{data: {sortable: false, 'disable-auto-width' => true}}
         %thead
           %tr
             %th.report-cell-narrow= t('global.loan_collateral_type')
             %th= fhlb_add_unit_to_table_header(t('global.total_market_value'), '$')
-            %th= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity_summary.total_borrowing_capacity'), '$')
+            %th= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity.total_borrowing_capacity'), '$')
             %th= fhlb_add_unit_to_table_header(t('global.advances'), '$')
-            %th= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity_summary.standard_credit'), '$')
-            %th= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity_summary.remaining_market_value'), '$')
-            %th= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity_summary.remaining_borrowing_capacity'), '$')
+            %th= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity.standard_credit'), '$')
+            %th= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity.remaining_market_value'), '$')
+            %th= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity.remaining_borrowing_capacity'), '$')
         - if @borrowing_capacity_summary[:sbc].to_h.length > 0
           %tbody
             -@borrowing_capacity_summary[:sbc][:collateral].each do |type, value|
@@ -141,17 +141,17 @@
         %table.report-table.report-sub-table{data: {sortable: false, 'disable-auto-width' => true}}
           %tbody
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.other_collateral')
+              %td= t('reports.pages.borrowing_capacity.less_line_items.other_collateral')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:sbc][:utilized][:other_collateral])
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.less_line_items.excluded_regulatory')
+              %td= t('reports.pages.borrowing_capacity.less_line_items.excluded_regulatory')
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:sbc][:utilized][:excluded_regulatory])
           %tfoot
             %tr
-              %td= t('reports.pages.borrowing_capacity_summary.remaining_capacity')
+              %td= t('reports.pages.borrowing_capacity.remaining_capacity')
               %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:sbc_excess_capacity])
     %section
       .report-summary-data.report-table-summary-data
         %h3
-          = t('reports.pages.borrowing_capacity_summary.remaining_borrowing_capacity_heading')
+          = t('reports.pages.borrowing_capacity.remaining_borrowing_capacity_heading')
         %p= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:remaining_borrowing_capacity], force_unit: true)

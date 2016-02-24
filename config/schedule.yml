@@ -1,0 +1,2 @@
+ProcessQuickReportsJob:
+  cron: "15 0 * * *"

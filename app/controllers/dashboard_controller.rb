@@ -33,6 +33,13 @@ class DashboardController < ApplicationController
     account_overview: [MemberBalanceProfileJob, "dashboard_account_overview_url"]
   }.freeze
 
+  QUICK_REPORT_MAPPING = {
+    account_summary: I18n.t('reports.account.account_summary.title'),
+    advances_detail: I18n.t('reports.credit.advances_detail.title'),
+    borrowing_capacity: I18n.t('reports.collateral.borrowing_capacity.title'),
+    settlement_transaction_account: I18n.t('reports.account.settlement_transaction_account.title')
+  }.with_indifferent_access.freeze
+
   def index
     today = Time.zone.now.to_date
     rate_service = RatesService.new(request)
@@ -101,6 +108,20 @@ class DashboardController < ApplicationController
     if @contacts[:cam] && @contacts[:cam][:username]
       cam_image_path = "#{@contacts[:cam][:username].downcase}.jpg" 
       @contacts[:cam][:image_url] = find_asset(cam_image_path) ? cam_image_path : default_image_path
+    end
+
+    current_report_set = QuickReportSet.for_member(current_member_id).latest_with_reports
+    @quick_reports = {}.with_indifferent_access
+    if current_report_set.present?
+      @quick_reports_period = (current_report_set.period + '-01').to_date # covert period to date
+      current_report_set.member.quick_report_list.each do |report_name|
+        @quick_reports[report_name] = {
+          title: QUICK_REPORT_MAPPING[report_name]
+        }
+      end
+      current_report_set.reports_named(@quick_reports.keys).completed.each do |quick_report|
+        @quick_reports[quick_report.report_name][:url] = reports_quick_download_path(quick_report)
+      end
     end
   end
 

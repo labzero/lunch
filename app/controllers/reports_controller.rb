@@ -1,4 +1,5 @@
 class ReportsController < ApplicationController
+  attr_accessor :report_download_name
   include DatePickerHelper
   include CustomFormattingHelper
   include ReportsHelper
@@ -1153,7 +1154,7 @@ class ReportsController < ApplicationController
 
     @now = Time.zone.now
     @date = @now.to_date
-    @report_name = t('reports.account_summary.title')
+    @report_name = t('reports.pages.account_summary.title')
 
     report_download_name = "account-summary-#{fhlb_report_date_numeric(@date)}"
     downloadable_report(:pdf, nil, report_download_name) do
@@ -1189,49 +1190,49 @@ class ReportsController < ApplicationController
         rows: [
           {
             columns: [
-              {value: t('reports.account_summary.financing_availability.asset_percentage')},
+              {value: t('reports.pages.account_summary.financing_availability.asset_percentage')},
               {value: (member_profile[:financing_percentage] * 100 if member_profile[:financing_percentage]), type: :percentage}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.financing_availability.maximum_term')},
+              {value: t('reports.pages.account_summary.financing_availability.maximum_term')},
               {value: member_profile[:maximum_term], type: :months}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.financing_availability.total_assets')},
+              {value: t('reports.pages.account_summary.financing_availability.total_assets')},
               {value: member_profile[:total_assets], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.financing_availability.total_financing_availability')},
+              {value: t('reports.pages.account_summary.financing_availability.total_financing_availability')},
               {value: member_profile[:total_financing_available], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.financing_availability.approved_credit')},
+              {value: t('reports.pages.account_summary.financing_availability.approved_credit')},
               {value: member_profile[:approved_long_term_credit], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.financing_availability.credit_outstanding')},
+              {value: t('reports.pages.account_summary.financing_availability.credit_outstanding')},
               {value: member_profile[:credit_outstanding][:total], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.financing_availability.forward_commitments')},
+              {value: t('reports.pages.account_summary.financing_availability.forward_commitments')},
               {value: member_profile[:forward_commitments], type: :currency_whole}
             ]
           }
         ],
         footer: [
-          {value: t('reports.account_summary.financing_availability.remaining_financing_availability')},
+          {value: t('reports.pages.account_summary.financing_availability.remaining_financing_availability')},
           {value: member_profile[:remaining_financing_available], type: :currency_whole}
         ]
       }
@@ -1239,7 +1240,7 @@ class ReportsController < ApplicationController
       if member_profile[:mpf_credit_available].present? && member_profile[:mpf_credit_available] > 0
         @financing_availability[:rows].insert(-2, {
                                                   columns: [
-                                                    {value: t('reports.account_summary.financing_availability.mpf_credit_available')},
+                                                    {value: t('reports.pages.account_summary.financing_availability.mpf_credit_available')},
                                                     {value: member_profile[:mpf_credit_available], type: :currency_whole}
                                                   ]
                                                 })
@@ -1249,43 +1250,43 @@ class ReportsController < ApplicationController
         rows: [
           {
             columns: [
-              {value: t('reports.account_summary.credit_outstanding.standard_advances')},
+              {value: t('reports.pages.account_summary.credit_outstanding.standard_advances')},
               {value: member_profile[:credit_outstanding][:standard], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.credit_outstanding.sbc_advances')},
+              {value: t('reports.pages.account_summary.credit_outstanding.sbc_advances')},
               {value: member_profile[:credit_outstanding][:sbc], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.credit_outstanding.swaps_credit')},
+              {value: t('reports.pages.account_summary.credit_outstanding.swaps_credit')},
               {value: member_profile[:credit_outstanding][:swaps_credit], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.credit_outstanding.swaps_notational')},
+              {value: t('reports.pages.account_summary.credit_outstanding.swaps_notational')},
               {value: member_profile[:credit_outstanding][:swaps_notational], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.credit_outstanding.investments')},
+              {value: t('reports.pages.account_summary.credit_outstanding.investments')},
               {value: member_profile[:credit_outstanding][:investments], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.credit_outstanding.letters_of_credit')},
+              {value: t('reports.pages.account_summary.credit_outstanding.letters_of_credit')},
               {value: member_profile[:credit_outstanding][:letters_of_credit], type: :currency_whole}
             ]
           }
         ],
         footer: [
-          {value: t('reports.account_summary.credit_outstanding.title')},
+          {value: t('reports.pages.account_summary.credit_outstanding.title')},
           {value: member_profile[:credit_outstanding][:total], type: :currency_whole}
         ]
       }
@@ -1293,7 +1294,7 @@ class ReportsController < ApplicationController
       if member_profile[:credit_outstanding][:mpf_credit].present? && member_profile[:credit_outstanding][:mpf_credit] > 0
         @credit_outstanding[:rows] << {
           columns: [
-            {value: t('reports.account_summary.credit_outstanding.mpf_credit')},
+            {value: t('reports.pages.account_summary.credit_outstanding.mpf_credit')},
             {value: member_profile[:credit_outstanding][:mpf_credit], type: :currency_whole}
           ]
         }
@@ -1303,13 +1304,13 @@ class ReportsController < ApplicationController
         rows: [
           {
             columns: [
-              {value: t('reports.account_summary.collateral_borrowing_capacity.standard.total')},
+              {value: t('reports.pages.account_summary.collateral_borrowing_capacity.standard.total')},
               {value: member_profile[:collateral_borrowing_capacity][:standard][:total], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.collateral_borrowing_capacity.standard.remaining')},
+              {value: t('reports.pages.account_summary.collateral_borrowing_capacity.standard.remaining')},
               {value: member_profile[:collateral_borrowing_capacity][:standard][:remaining], type: :currency_whole}
             ]
           }
@@ -1320,25 +1321,25 @@ class ReportsController < ApplicationController
         rows: [
           {
             columns: [
-              {value: t('reports.account_summary.collateral_borrowing_capacity.sbc.total_market')},
+              {value: t('reports.pages.account_summary.collateral_borrowing_capacity.sbc.total_market')},
               {value: member_profile[:collateral_borrowing_capacity][:sbc][:total_market], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.collateral_borrowing_capacity.sbc.remaining_market')},
+              {value: t('reports.pages.account_summary.collateral_borrowing_capacity.sbc.remaining_market')},
               {value: member_profile[:collateral_borrowing_capacity][:sbc][:remaining_market], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.collateral_borrowing_capacity.sbc.total')},
+              {value: t('reports.pages.account_summary.collateral_borrowing_capacity.sbc.total')},
               {value: member_profile[:collateral_borrowing_capacity][:sbc][:total_borrowing], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.collateral_borrowing_capacity.sbc.remaining')},
+              {value: t('reports.pages.account_summary.collateral_borrowing_capacity.sbc.remaining')},
               {value: member_profile[:collateral_borrowing_capacity][:sbc][:remaining_borrowing], type: :currency_whole}
             ]
           }
@@ -1349,13 +1350,13 @@ class ReportsController < ApplicationController
         rows: [
           {
             columns: [
-              {value: t('reports.account_summary.collateral_borrowing_capacity.totals.total')},
+              {value: t('reports.pages.account_summary.collateral_borrowing_capacity.totals.total')},
               {value: member_profile[:collateral_borrowing_capacity][:total], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.collateral_borrowing_capacity.totals.remaining')},
+              {value: t('reports.pages.account_summary.collateral_borrowing_capacity.totals.remaining')},
               {value: member_profile[:collateral_borrowing_capacity][:remaining], type: :currency_whole}
             ]
           }
@@ -1366,25 +1367,25 @@ class ReportsController < ApplicationController
         rows: [
           {
             columns: [
-              {value: t('reports.account_summary.capital_stock.stock_owned')},
+              {value: t('reports.pages.account_summary.capital_stock.stock_owned')},
               {value: member_profile[:capital_stock][:stock_owned], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.capital_stock.stock_requirement')},
+              {value: t('reports.pages.account_summary.capital_stock.stock_requirement')},
               {value: member_profile[:capital_stock][:activity_based_requirement], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.capital_stock.stock')},
+              {value: t('reports.pages.account_summary.capital_stock.stock')},
               {value: member_profile[:capital_stock][:remaining_stock], type: :currency_whole}
             ]
           },
           {
             columns: [
-              {value: t('reports.account_summary.capital_stock.leverage')},
+              {value: t('reports.pages.account_summary.capital_stock.leverage')},
               {value: member_profile[:capital_stock][:remaining_leverage], type: :currency_whole}
             ]
           }
@@ -1583,6 +1584,8 @@ class ReportsController < ApplicationController
 
   def downloadable_report(formats = nil, report_download_params = {}, report_download_name = nil)
     export_format = params[:export_format]
+    self.report_download_name ||= report_download_name
+    self.report_download_name ||= "#{action_name.to_s.gsub('_','-')}-#{fhlb_report_date_numeric(Time.zone.today)}" if action_name
     if export_format
       formats = Array.wrap(formats || DOWNLOAD_FORMATS)
       export_format = export_format.to_sym
@@ -1595,8 +1598,7 @@ class ReportsController < ApplicationController
                     else
                       raise ArgumentError, 'Report format not recognized'
                   end
-      report_download_name ||= "#{action_name.gsub('_','-')}-#{fhlb_report_date_numeric(Time.zone.today)}" if action_name
-      job_status = job_klass.perform_later(current_member_id, action_name, report_download_name, report_download_params).job_status
+      job_status = job_klass.perform_later(current_member_id, action_name, self.report_download_name, report_download_params).job_status
       job_status.update_attributes!(user_id: current_user.id)
       render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
     else

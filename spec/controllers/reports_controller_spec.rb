@@ -2121,7 +2121,7 @@ RSpec.describe ReportsController, :type => :controller do
     end
     it 'assigns @report_name' do
       make_request
-      expect(assigns[:report_name]).to eq(I18n.t('reports.account_summary.title'))
+      expect(assigns[:report_name]).to eq(I18n.t('reports.pages.account_summary.title'))
     end
     it 'assigns @intraday_datetime' do
       make_request

@@ -98,6 +98,18 @@
       =render layout: 'dashboard/dashboard_module_deferred', locals: {job_status_url: @recent_activity_job_status_url, load_url: @recent_activity_load_url, dashboard_module_locals: {title: t('dashboard.recent_activity.title'), data_available: true, classes: 'dashboard-module-recent-activity'}} do
         =render 'dashboard/dashboard_recent_activity', table_data: @recent_activity_data, deferred: true
   .column-3
+    - if @quick_reports.present?
+      = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_reports.title'), classes: 'dashboard-module-quick-reports'} do
+        %p= t('dashboard.quick_reports.description')
+        %h3= fhlb_date_short_alpha(@quick_reports_period)
+        %ul
+          - @quick_reports.each do |report_name, details|
+            %li
+              - if details[:url]
+                = link_to(details[:title], details[:url])
+              - else
+                = details[:title]
+        %small= t('dashboard.quick_reports.all_reports_html', url: reports_path)
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
       %ul
         - if @contacts[:rm] && @contacts[:rm][:full_name]
