@@ -11,6 +11,7 @@ import React from 'react';
 import { IndexRoute, Route } from 'react-router';
 import fetch from './core/fetch';
 import App from './components/App';
+import HomePage from './components/HomePage';
 import ContentPage from './components/ContentPage';
 import ContactPage from './components/ContactPage';
 import LoginPage from './components/LoginPage';
@@ -27,7 +28,7 @@ async function getContextComponent(location, callback) {
 export default (
   <Route>
     <Route path="/" component={App}>
-      <IndexRoute getComponent={getContextComponent} />
+      <IndexRoute component={HomePage} />
       <Route path="contact" component={ContactPage} />
       <Route path="login" component={LoginPage} />
       <Route path="register" component={RegisterPage} />
