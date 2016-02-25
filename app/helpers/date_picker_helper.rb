@@ -1,9 +1,9 @@
 module DatePickerHelper
 
-  def default_dates_hash
-    today = Time.zone.today
+  def default_dates_hash(today=Time.zone.today)
     {
       this_month_start: today.beginning_of_month,
+      this_month_end: today.end_of_month,
       today: today,
       last_30_days: today - 1.month,
       last_month_start: today.beginning_of_month - 1.month,

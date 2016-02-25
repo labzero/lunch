@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe FhlbJob, type: :job do
-  let(:base_instance) { FhlbJob.new}
+  let(:base_instance) { FhlbJob.new }
   describe '`job_status` method' do
     it 'find or creates an instance of JobStatus using its job_id' do
       expect(JobStatus).to receive(:find_or_create_by!).with(job_id: base_instance.job_id)

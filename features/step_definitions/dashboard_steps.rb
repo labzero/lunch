@@ -94,12 +94,18 @@ When(/^I click on the (STA Balance|Collateral Borrowing Capacity|Stock Leverage)
   page.find('.table-dashboard-account-overview a', text: text, exact: true).click
 end
 
+Then(/^I should see a list of downloadedable quick reports$/) do
+  page.assert_selector('.dashboard-module-quick-reports ul a[href]', minimum: 1)
+end
+
 def get_module_by_section(section)
   heading = case section
     when 'recent activities'
       I18n.t('dashboard.recent_activity.title')
     when 'account overview'
       I18n.t('dashboard.your_account.title')
+    when 'quick reports'
+      I18n.t('dashboard.quick_reports.title')
   end
   page.find('.dashboard-module', text: heading, exact: true)
 end

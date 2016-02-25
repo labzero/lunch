@@ -58,6 +58,7 @@ Rails.application.routes.draw do
     end
     get '/settlement-transaction-account' => 'reports#settlement_transaction_account'
     get '/todays-credit' => 'reports#todays_credit'
+    get '/quick/download/:id' => 'quick_reports#download', as: :quick_download
   end
 
   get '/advances' => 'advances#index'
