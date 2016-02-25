@@ -1,4 +1,4 @@
-@flip-on-authorizations-report
+@flip-on-report-authorizations
 @jira-mem-69
 Feature: Visiting the Authorizations Report Page
   As a user

@@ -1,4 +1,4 @@
-@jira-mem-69
+@jira-mem-69 @flip-on-report-capital-stock-activity-statement
 Feature: Visiting the Capital Stock Activity Statement Page
   As a user
   I want to use visit the captial stock activity statement page for the FHLB Member Portal

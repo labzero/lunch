@@ -712,7 +712,7 @@ RSpec.describe DashboardController, :type => :controller do
         account_overview
       end
       it 'renders with the correct data when the capital stock position and leverage report feature is disabled' do
-        allow(controller).to receive(:feature_enabled?).with('capital-stock-position-and-leverage-report').and_return(false)
+        allow(controller).to receive(:feature_enabled?).with('report-capital-stock-position-and-leverage').and_return(false)
         table_data = {
           sta_balance: [[[I18n.t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
           credit_outstanding: [[I18n.t('dashboard.your_account.table.credit_outstanding'), total]],

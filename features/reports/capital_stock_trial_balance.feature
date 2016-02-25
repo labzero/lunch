@@ -1,4 +1,4 @@
-@jira-mem-1020
+@jira-mem-1020 @flip-on-report-capital-stock-trial-balance
 Feature: Visiting the Capital Stock Trial Balance Report Page
   As a user
   I want to use visit the aCapital Stock Trial Balance page for the FHLB Member Portal
