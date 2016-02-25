@@ -681,13 +681,13 @@ RSpec.describe DashboardController, :type => :controller do
         end
         allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).and_return(profile_no_bc)
         table_data = {
-          sta_balance: [[I18n.t('dashboard.your_account.table.balance'), sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
+          sta_balance: [[[I18n.t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
           credit_outstanding: [[I18n.t('dashboard.your_account.table.credit_outstanding'), total]],
           remaining: [
             {title: I18n.t('dashboard.your_account.table.remaining.title')},
             [I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available],
-            [I18n.t('dashboard.your_account.table.remaining.capacity'), remaining],
-            [I18n.t('dashboard.your_account.table.remaining.leverage'), remaining_leverage]
+            [[I18n.t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], remaining],
+            [[I18n.t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path], remaining_leverage]
           ]
         }
         expect(subject).to receive(:render).with({partial: 'dashboard/dashboard_account_overview', locals: {table_data: table_data}, layout: false})
@@ -695,12 +695,31 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'renders with the correct data when there is total_borrowing_capacity_sbc_agency, total_borrowing_capacity_sbc_aaa or total_borrowing_capacity_sbc_aa' do
         table_data = {
-          sta_balance: [[I18n.t('dashboard.your_account.table.balance'), sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
+          sta_balance: [[[I18n.t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
           credit_outstanding: [[I18n.t('dashboard.your_account.table.credit_outstanding'), total]],
           remaining: [
             {title: I18n.t('dashboard.your_account.table.remaining.title')},
             [I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available],
-            [I18n.t('dashboard.your_account.table.remaining.capacity'), remaining],
+            [[I18n.t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], remaining],
+            [I18n.t('dashboard.your_account.table.remaining.standard'), total_borrowing_capacity_standard],
+            [I18n.t('dashboard.your_account.table.remaining.agency'), total_borrowing_capacity_sbc_agency],
+            [I18n.t('dashboard.your_account.table.remaining.aaa'), total_borrowing_capacity_sbc_aaa],
+            [I18n.t('dashboard.your_account.table.remaining.aa'), total_borrowing_capacity_sbc_aa],
+            [[I18n.t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path], remaining_leverage]
+          ]
+        }
+        expect(subject).to receive(:render).with({partial: 'dashboard/dashboard_account_overview', locals: {table_data: table_data}, layout: false})
+        account_overview
+      end
+      it 'renders with the correct data when the capital stock position and leverage report feature is disabled' do
+        allow(controller).to receive(:feature_enabled?).with('capital-stock-position-and-leverage-report').and_return(false)
+        table_data = {
+          sta_balance: [[[I18n.t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
+          credit_outstanding: [[I18n.t('dashboard.your_account.table.credit_outstanding'), total]],
+          remaining: [
+            {title: I18n.t('dashboard.your_account.table.remaining.title')},
+            [I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available],
+            [[I18n.t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], remaining],
             [I18n.t('dashboard.your_account.table.remaining.standard'), total_borrowing_capacity_standard],
             [I18n.t('dashboard.your_account.table.remaining.agency'), total_borrowing_capacity_sbc_agency],
             [I18n.t('dashboard.your_account.table.remaining.aaa'), total_borrowing_capacity_sbc_aaa],
