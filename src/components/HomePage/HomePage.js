@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './HomePage.scss';
+import RestaurantList from '../RestaurantList';
 
 const title = 'Lunch';
 
@@ -18,7 +19,7 @@ class HomePage extends Component {
     return (
       <div>
         <h1>{title}</h1>
-        <p>Sorry, but the page you were trying to view does not exist.</p>
+        <RestaurantList />
       </div>
     );
   }
