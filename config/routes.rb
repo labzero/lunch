@@ -33,27 +33,41 @@ Rails.application.routes.draw do
     get '/' => 'reports#index'
     get '/account-summary' => 'reports#account_summary'
     get '/advances' => 'reports#advances_detail'
-    constraints Constraints::FeatureEnabled.new('authorizations-report') do
+    constraints Constraints::FeatureEnabled.new('report-authorizations') do
       get '/authorizations' => 'reports#authorizations'
     end
     get '/borrowing-capacity' => 'reports#borrowing_capacity'
-    get '/capital-stock-activity' => 'reports#capital_stock_activity'
-    constraints Constraints::FeatureEnabled.new('capital-stock-position-and-leverage-report') do
+    constraints Constraints::FeatureEnabled.new('report-capital-stock-activity-statement') do
+      get '/capital-stock-activity' => 'reports#capital_stock_activity'
+    end
+    constraints Constraints::FeatureEnabled.new('report-capital-stock-position-and-leverage') do
       get '/capital-stock-and-leverage' => 'reports#capital_stock_and_leverage'
     end
-    get '/capital-stock-trial-balance' => 'reports#capital_stock_trial_balance'
-    get '/cash-projections' => 'reports#cash_projections'
+    constraints Constraints::FeatureEnabled.new('report-capital-stock-trial-balance') do
+      get '/capital-stock-trial-balance' => 'reports#capital_stock_trial_balance'
+    end
+    constraints Constraints::FeatureEnabled.new('report-cash-projections') do
+      get '/cash-projections' => 'reports#cash_projections'
+    end
+    constraints Constraints::FeatureEnabled.new('report-current-securities-positions') do
+      get '/current-securities-position' => 'reports#current_securities_position'
+    end
     get '/current-price-indications' => 'reports#current_price_indications'
-    get '/current-securities-position' => 'reports#current_securities_position'
-    get '/dividend-statement' => 'reports#dividend_statement'
+    constraints Constraints::FeatureEnabled.new('report-dividened-transaction-statement') do
+      get '/dividend-statement' => 'reports#dividend_statement'
+    end
     get '/forward-commitments' => 'reports#forward_commitments'
     get '/historical-price-indications' => 'reports#historical_price_indications'
     get '/interest-rate-resets' => 'reports#interest_rate_resets'
     get '/letters-of-credit' => 'reports#letters_of_credit'
-    get '/monthly-securities-position' => 'reports#monthly_securities_position'
+    constraints Constraints::FeatureEnabled.new('report-monthly-securities-positions') do
+      get '/monthly-securities-position' => 'reports#monthly_securities_position'
+    end
     get '/mortgage-collateral-update' => 'reports#mortgage_collateral_update'
     get '/putable-advance-parallel-shift-sensitivity' => 'reports#parallel_shift', as: :parallel_shift
-    get '/securities-services-statement' => 'reports#securities_services_statement', as: :securities_services_statement
+    constraints Constraints::FeatureEnabled.new('report-securities-services-monthly-statement') do
+      get '/securities-services-statement' => 'reports#securities_services_statement', as: :securities_services_statement
+    end
     constraints Constraints::FeatureEnabled.new('report-securities-transaction') do
       get '/securities-transactions' => 'reports#securities_transactions'
     end

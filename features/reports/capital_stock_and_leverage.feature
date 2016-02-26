@@ -1,4 +1,4 @@
-@flip-on-capital-stock-position-and-leverage-report
+@flip-on-report-capital-stock-position-and-leverage
 @jira-mem-69
 Feature: Visiting the Capital Stock Position and Leverage Report
    As a user
