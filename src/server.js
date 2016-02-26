@@ -11,13 +11,16 @@ import 'babel-polyfill';
 import path from 'path';
 import express from 'express';
 import React from 'react';
+import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom/server';
 import { match, RouterContext } from 'react-router';
+import configureStore from './configureStore';
 import assets from './assets';
 import { port } from './config';
 import makeRoutes from './routes';
 import ContextHolder from './core/ContextHolder';
 import Html from './components/Html';
+import Restaurant from './models/Restaurant';
 
 const server = global.server = express();
 
@@ -47,31 +50,44 @@ server.use('/api/restaurants', require('./api/restaurants').default);
 server.get('*', async (req, res, next) => {
   try {
     match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
-      if (error) {
-        throw error;
-      }
-      if (redirectLocation) {
-        const redirectPath = `${redirectLocation.pathname}${redirectLocation.search}`;
-        res.redirect(302, redirectPath);
-        return;
-      }
-      let statusCode = 200;
-      const data = { title: '', description: '', css: '', body: '', entry: assets.main.js };
-      const css = [];
-      const context = {
-        insertCss: styles => css.push(styles._getCss()),
-        onSetTitle: value => (data.title = value),
-        onSetMeta: (key, value) => (data[key] = value),
-        onPageNotFound: () => (statusCode = 404),
-      };
-      data.body = ReactDOM.renderToString(
-        <ContextHolder context={context}>
-          <RouterContext {...renderProps} />
-        </ContextHolder>
-      );
-      data.css = css.join('');
-      const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
-      res.status(statusCode).send(`<!doctype html>\n${html}`);
+      Restaurant.fetchAll().then(all => {
+        if (error) {
+          throw error;
+        }
+        if (redirectLocation) {
+          const redirectPath = `${redirectLocation.pathname}${redirectLocation.search}`;
+          res.redirect(302, redirectPath);
+          return;
+        }
+        let statusCode = 200;
+        const initialState = { restaurants: { items: all.serialize() } };
+        const store = configureStore(initialState);
+        const data = {
+          title: '',
+          description: '',
+          css: '',
+          body: '',
+          entry: assets.main.js,
+          initialState
+        };
+        const css = [];
+        const context = {
+          insertCss: styles => css.push(styles._getCss()),
+          onSetTitle: value => (data.title = value),
+          onSetMeta: (key, value) => (data[key] = value),
+          onPageNotFound: () => (statusCode = 404),
+        };
+        data.body = ReactDOM.renderToString(
+          <ContextHolder context={context}>
+            <Provider store={store}>
+              <RouterContext {...renderProps} />
+            </Provider>
+          </ContextHolder>
+        );
+        data.css = css.join('');
+        const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
+        res.status(statusCode).send(`<!doctype html>\n${html}`);
+      });
     });
   } catch (err) {
     next(err);

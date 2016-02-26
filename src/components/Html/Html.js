@@ -15,6 +15,9 @@ const trackingCode =
   'window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;' +
   `ga('create','${analytics.google.trackingId}','auto');`;
 
+const generateInitialState = (initialState) =>
+  `window.__INITIAL_STATE__ = ${JSON.stringify(initialState)}`;
+
 class Html extends Component {
 
   static propTypes = {
@@ -23,11 +26,13 @@ class Html extends Component {
     css: PropTypes.string,
     body: PropTypes.string.isRequired,
     entry: PropTypes.string.isRequired,
+    initialState: PropTypes.object.isRequired
   };
 
   static defaultProps = {
     title: '',
     description: '',
+    initialState: {}
   };
 
   render() {
@@ -44,8 +49,9 @@ class Html extends Component {
       </head>
       <body>
         <div id="app" dangerouslySetInnerHTML={{ __html: this.props.body }} ></div>
-        <script src={this.props.entry}></script>
+        <script dangerouslySetInnerHTML={{ __html: generateInitialState(this.props.initialState) }}></script>
         <script dangerouslySetInnerHTML={{ __html: trackingCode }} ></script>
+        <script src={this.props.entry}></script>
         <script src="https://www.google-analytics.com/analytics.js" async defer ></script>
       </body>
       </html>

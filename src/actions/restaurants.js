@@ -14,7 +14,7 @@ export const RECEIVE_RESTAURANTS = 'RECEIVE_RESTAURANTS';
 export function receiveRestaurants(json) {
   return {
     type: RECEIVE_RESTAURANTS,
-    items: json.data
+    items: json
   };
 }
 
@@ -28,7 +28,7 @@ function fetchRestaurants() {
 }
 
 function shouldFetchRestaurants(state) {
-  const items = state.items;
+  const items = state.restaurants.items;
   if (!items) {
     return true;
   }
@@ -38,7 +38,7 @@ function shouldFetchRestaurants(state) {
   return items.didInvalidate;
 }
 
-export function fetchRestaurantsIfNeeded() {
+export default function fetchRestaurantsIfNeeded() {
   // Note that the function also receives getState()
   // which lets you choose what to dispatch next.
 

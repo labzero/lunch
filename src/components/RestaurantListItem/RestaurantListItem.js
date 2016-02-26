@@ -4,17 +4,13 @@ import s from './RestaurantListItem.scss';
 
 class RestaurantListItem extends Component {
 
-  static contextTypes = {
-    // onSetTitle: PropTypes.func.isRequired
+  static propTypes = {
+    name: PropTypes.string.isRequired
   };
-
-  componentWillMount() {
-    // this.context.onSetTitle(title);
-  }
 
   render() {
     return (
-      <div>Hello</div>
+      <li>{this.props.name}</li>
     );
   }
 

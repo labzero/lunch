@@ -14,20 +14,21 @@ class HomePage extends Component {
   };
 
   static propTypes = {
-    dispatch: PropTypes.func.isRequired
+    dispatch: PropTypes.func.isRequired,
+    items: PropTypes.array.isRequired
   };
 
   componentWillMount() {
+    this.context.onSetTitle(title);
     const { dispatch } = this.props;
     dispatch(fetchRestaurantsIfNeeded());
-    this.context.onSetTitle(title);
   }
 
   render() {
     return (
       <div>
         <h1>{title}</h1>
-        <RestaurantList />
+        <RestaurantList items={this.props.items} />
       </div>
     );
   }

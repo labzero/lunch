@@ -9,11 +9,10 @@
 
 import 'babel-polyfill';
 import React from 'react';
-import { createStore, combineReducers, applyMiddleware } from 'redux';
-import thunkMiddleware from 'redux-thunk';
 import { Provider } from 'react-redux';
 import { match, Router } from 'react-router';
-import { syncHistoryWithStore, routerReducer } from 'react-router-redux';
+import { syncHistoryWithStore } from 'react-router-redux';
+import configureStore from './configureStore';
 import { render } from 'react-dom';
 import FastClick from 'fastclick';
 import makeRoutes from './routes';
@@ -21,16 +20,9 @@ import Location from './core/Location';
 import ContextHolder from './core/ContextHolder';
 import { addEventListener, removeEventListener } from './core/DOMUtils';
 
-import reducers from './reducers';
+const initialState = window.__INITIAL_STATE__;
 
-// Add the reducer to your store on the `routing` key
-const store = createStore(
-  combineReducers({
-    ...reducers,
-    routing: routerReducer
-  }),
-  applyMiddleware(thunkMiddleware)
-);
+const store = configureStore(initialState);
 
 // Create an enhanced history that syncs navigation events with the store
 const history = syncHistoryWithStore(Location, store);
