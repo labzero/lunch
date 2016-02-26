@@ -2,6 +2,7 @@ class ProductsController < ApplicationController
 
   before_action do
     @html_class ||= 'white-background'
+    set_active_nav(:products)
   end
 
   # GET

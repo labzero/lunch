@@ -43,6 +43,10 @@ RSpec.describe ReportsController, :type => :controller do
       get action
       expect(assigns[:member_name]).to eq(member_name)
     end
+    it 'sets the active nav to :reports' do
+      expect(controller).to receive(:set_active_nav).with(:reports)
+      get action
+    end
   end
 
   shared_examples 'a report with a @max_date' do |action|

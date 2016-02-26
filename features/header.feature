@@ -32,3 +32,14 @@ Scenario: Intranet user sees bank name in header
 Scenario: Member sees render time in navigation header
   Given I visit the dashboard
   Then I should see a datestamp in the navigation header
+
+@jira-mem-262
+Scenario: Member sees active nav state when a subpage is viewed
+  When I click on the reports link in the header
+  Then I should see the active state of the reports nav item
+  When I hover on the resources link in the header
+  And I click on the agreements link in the header
+  Then I should see the active state of the resources nav item
+  When I hover on the products link in the header
+  And I click on the products summary link in the header
+  Then I should see the active state of the products nav item

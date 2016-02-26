@@ -9,6 +9,10 @@ RSpec.describe ProductsController, :type => :controller do
       get :index
       expect(response.body).to render_template('index')
     end
+    it 'sets the active nav to :products' do
+      expect(controller).to receive(:set_active_nav).with(:products)
+      get :index
+    end
   end
 
   [:arc, :arc_embedded, :auction_indexed, :frc_embedded, :frc, :amortizing, :choice_libor, :knockout, :ocn, :putable, :mpf, :callable, :vrc, :sbc, :swaps, :authorizations].each do |action|
@@ -19,6 +23,7 @@ RSpec.describe ProductsController, :type => :controller do
 
   describe 'GET pfi' do
     it_behaves_like 'a user required action', :get, :pfi
+    it_behaves_like 'a product page', :pfi
     it 'should render the pfi view' do
       get :pfi
       expect(response.body).to render_template('pfi')

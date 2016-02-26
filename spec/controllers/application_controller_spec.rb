@@ -369,6 +369,27 @@ RSpec.describe ApplicationController, :type => :controller do
     end
   end
 
+  describe '`set_active_nav`' do
+    it 'sets the @active_nav instance variable to whatever it is passed' do
+      [:foo, :bar, :biz].each do |name|
+        subject.set_active_nav(name)
+        expect(controller.instance_variable_get(:@active_nav)).to eq(name)
+      end
+    end
+  end
+
+  describe '`get_active_nav`' do
+    let(:call_method) { controller.get_active_nav }
+    let(:active_nav) { double('active nav value') }
+    it 'returns the value of the instance variable @active_nav' do
+      controller.instance_variable_set(:@active_nav, active_nav)
+      expect(call_method).to eq(active_nav)
+    end
+    it 'returns nil if there is no instance variable @active_nav' do
+      expect(call_method).to be_nil
+    end
+  end
+
   describe '`skip_timeout_reset` private method' do
     let(:call_method) { controller.send(:skip_timeout_reset, &block) }
     let(:rack_env) { double('A Rack ENV', :[]= => nil) }

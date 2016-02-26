@@ -1,3 +1,4 @@
+- active_nav = get_active_nav
 .main-nav
   .row
     = link_to(t('welcome.logo'), dashboard_url, class: 'logo')
@@ -22,7 +23,7 @@
       - if feature_enabled?('securities')
         %li<>
           = link_to(t('securities.title'), manage_securities_path)
-      %li<>
+      %li{class: ('active-nav-item' if active_nav == :reports)}<>
         = link_to(t('reports.title'), reports_path, class: 'nav-menu')
         .nav-dropdown
           .nav-dropdown-row
@@ -68,7 +69,7 @@
                 = header_report_nav_item(t('reports.securities.monthly.title'), reports_monthly_securities_position_path, feature_enabled?('report-monthly-securities-positions'))
                 = header_report_nav_item(t('reports.securities.services_monthly.title'), reports_securities_services_statement_path, feature_enabled?('report-securities-services-monthly-statement'))
           %p= t('reports.learn_more_html', url: reports_path)
-      %li<>
+      %li{class: ('active-nav-item' if active_nav == :resources)}<>
         = link_to(t('nav.secondary.resources'), '#', class: 'nav-menu')
         .nav-dropdown
           .nav-dropdown-row
@@ -94,7 +95,7 @@
               %ul
                 %li= link_to(t('resources.membership.title'), membership_overview_path)
                 %li= link_to(t('resources.membership.applications.nav_title'), membership_application_path)
-      %li.products-dropdown<>
+      %li.products-dropdown{class: ('active-nav-item' if active_nav == :products)}<>
         = link_to(t('nav.secondary.products'), '#', class: 'nav-menu')
         .nav-dropdown
           .nav-dropdown-row

@@ -28,6 +28,10 @@ class ResourcesController < ApplicationController
     }
   }.freeze
 
+  before_action do
+    set_active_nav(:resources)
+  end
+
   # GET
   def guides
   end

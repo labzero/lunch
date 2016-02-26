@@ -142,6 +142,7 @@ class ReportsController < ApplicationController
 
   before_action do
     @member_name = current_member_name
+    set_active_nav(:reports)
   end
 
   def index
