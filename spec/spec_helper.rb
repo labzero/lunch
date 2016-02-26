@@ -82,6 +82,10 @@ RSpec.configure do |config|
     ActiveJob::Base.queue_adapter = :test
   end
 
+  config.before(:each) do
+    allow_any_instance_of(Flipper::Feature).to receive(:enabled?).and_return(true)
+  end
+
 # The settings below are suggested to provide a good initial experience
 # with RSpec, but feel free to customize to your heart's content.
 =begin

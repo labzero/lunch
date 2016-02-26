@@ -269,7 +269,19 @@ class ReportsController < ApplicationController
         }
       }
     }
-    @reports[:securities].delete(:transactions) unless feature_enabled?('report-securities-transaction')
+
+    @reports[:securities][:transactions][:disabled] = true unless feature_enabled?('report-securities-transaction')
+    @reports[:securities][:cash_projections][:disabled] = true unless feature_enabled?('report-cash-projections')
+    @reports[:securities][:current][:disabled] = true unless feature_enabled?('report-current-securities-positions')
+    @reports[:securities][:monthly][:disabled] = true unless feature_enabled?('report-monthly-securities-positions')
+    @reports[:securities][:services_monthly][:disabled] = true unless feature_enabled?('report-securities-services-monthly-statement')
+
+    @reports[:capital_stock][:activity][:disabled] = true unless feature_enabled?('report-capital-stock-activity-statement')
+    @reports[:capital_stock][:trial_balance][:disabled] = true unless feature_enabled?('report-capital-stock-trial-balance')
+    @reports[:capital_stock][:capital_stock_and_leverage][:disabled] = true unless feature_enabled?('report-capital-stock-position-and-leverage')
+    @reports[:capital_stock][:dividend_statement][:disabled] = true unless feature_enabled?('report-dividened-transaction-statement')
+
+    @reports[:account][:authorizations][:disabled] = true unless feature_enabled?('report-authorizations')
   end
 
   def capital_stock_activity

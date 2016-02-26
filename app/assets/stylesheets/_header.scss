@@ -177,6 +177,9 @@
         border: none;
         margin-top: 5px;
       }
+      &.disabled {
+        color: $medium-gray;
+      }
     }
     h2 {
       @extend %typography-nav-dropdown-header;

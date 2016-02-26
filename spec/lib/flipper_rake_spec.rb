@@ -10,6 +10,7 @@ describe Rake do
     load 'lib/tasks/flipper.rake'
     Rake::Task.define_task(:environment)
     Rails.application.flipper = Flipper.new(Flipper::Adapters::Memory.new)
+    allow_any_instance_of(Flipper::Feature).to receive(:enabled?).and_call_original
   end
 
   describe 'the flipper:seed task' do
