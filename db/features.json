@@ -3,6 +3,13 @@
   "securities",
   "report-securities-transaction",
   "announcements",
-  "capital-stock-position-and-leverage-report",
-  "authorizations-report"
+  "report-capital-stock-position-and-leverage",
+  "report-authorizations",
+  "report-capital-stock-activity-statement",
+  "report-capital-stock-trial-balance",
+  "report-dividened-transaction-statement",
+  "report-cash-projections",
+  "report-current-securities-positions",
+  "report-monthly-securities-positions",
+  "report-securities-services-monthly-statement"
 ]

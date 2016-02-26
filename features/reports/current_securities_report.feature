@@ -1,4 +1,4 @@
-@jira-mem-69
+@jira-mem-69 @flip-on-report-current-securities-positions
 Feature: Visiting the Current Securities Position Report Page
   As a user
   I want to use visit the current securities position report page for the FHLB Member Portal

@@ -284,7 +284,7 @@ class DashboardController < ApplicationController
       [t('dashboard.your_account.table.credit_outstanding'), (profile[:credit_outstanding] || {})[:total]]
     ]
 
-    leverage_title = if feature_enabled?('capital-stock-position-and-leverage-report')
+    leverage_title = if feature_enabled?('report-capital-stock-position-and-leverage')
       [t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path]
     else
       t('dashboard.your_account.table.remaining.leverage')

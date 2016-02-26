@@ -1,4 +1,4 @@
-@jira-mem-69
+@jira-mem-69 @flip-on-report-monthly-securities-positions
 Feature: Visiting the Monthly Securities Position Report Page
   As a user
   I want to use visit the monthly securities position report page for the FHLB Member Portal

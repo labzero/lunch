@@ -1,4 +1,4 @@
-@jira-mem-69
+@jira-mem-69 @flip-on-report-securities-services-monthly-statement
 Feature: Visiting the Securities Services Monthly Statement Page
   As a user
   I want to use visit the Securities Services Monthly Statement page for the FHLB Member Portal

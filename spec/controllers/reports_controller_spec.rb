@@ -78,6 +78,39 @@ RSpec.describe ReportsController, :type => :controller do
       get :index
       expect(response.body).to render_template('index')
     end
+    describe 'flipped reports' do
+      {
+        securities: {
+          transactions: 'report-securities-transaction',
+          cash_projections: 'report-cash-projections',
+          current: 'report-current-securities-positions',
+          monthly: 'report-monthly-securities-positions',
+          services_monthly: 'report-securities-services-monthly-statement'
+        },
+        capital_stock: {
+          activity: 'report-capital-stock-activity-statement',
+          trial_balance: 'report-capital-stock-trial-balance',
+          capital_stock_and_leverage: 'report-capital-stock-position-and-leverage',
+          dividend_statement: 'report-dividened-transaction-statement'
+        },
+        account: {
+          authorizations: 'report-authorizations'
+        }
+      }.each do |section, reports|
+        reports.each do |report, feature|
+          it "marks the report `#{section}.#{report}` as disabled if the feature `#{feature}` is disabled" do
+            allow(controller).to receive(:feature_enabled?).and_call_original
+            allow(controller).to receive(:feature_enabled?).with(feature).and_return(false)
+            get :index
+            expect(assigns[:reports][section][report][:disabled]).to be(true)
+          end
+          it "does not mark the report `#{section}.#{report}` as disabled if its feature `#{feature}` is enabled" do
+            get :index
+            expect(assigns[:reports][section][report]).to_not have_key(:disabled)
+          end
+        end
+      end
+    end
   end
 
   describe 'requests hitting MemberBalanceService' do

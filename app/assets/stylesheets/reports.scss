@@ -30,27 +30,33 @@
       color: $text-color;
     }
   }
-  a {
-    display: block;
-    color: $text-color;
-    padding: 15px 20px;
-    p:last-child {
-      position: absolute;
-      top: 15px;
-      right: 20px;
-      @include typography-dropdown-selector;
-      color: $actionable-blue;
-      text-transform: uppercase;
-    }
-    &:hover p:last-child {
-      text-decoration: underline;
-    }
-    &:active p:last-child {
-      color: $brand-blue;
-    }
-    &:hover, &:active {
-      text-decoration: none;
+  .description-cell {
+    a, .disabled {
+      display: block;
       color: $text-color;
+      padding: 15px 20px;
+      p:last-child {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        @include typography-dropdown-selector;
+        text-transform: uppercase;
+      }
+    }
+    a {
+      p:last-child {
+        color: $actionable-blue;
+      }
+      &:hover p:last-child {
+        text-decoration: underline;
+      }
+      &:active p:last-child {
+        color: $brand-blue;
+      }
+      &:hover, &:active {
+        text-decoration: none;
+        color: $text-color;
+      }
     }
   }
 

@@ -1,4 +1,4 @@
-@jira-mem-69
+@jira-mem-69 @flip-on-report-cash-projections
 Feature: Visiting the Cash Projections Report Page
   As a user
   I want to use visit the cash projections report page for the FHLB Member Portal

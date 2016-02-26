@@ -29,51 +29,44 @@
             .nav-dropdown-column
               %h2= t('reports.your_account.title')
               %ul
-                %li= link_to(t('reports.account.account_summary.title'), reports_account_summary_path)
-                - if feature_enabled?('authorizations-report')
-                  %li= link_to(t('reports.account.authorizations.title'), reports_authorizations_path)
-                - else
-                  %li.disabled= t('reports.account.authorizations.title')
-                %li= link_to(t('reports.account.settlement_transaction_account.title'), reports_settlement_transaction_account_path)
+                = header_report_nav_item(t('reports.account.account_summary.title'), reports_account_summary_path)
+                = header_report_nav_item(t('reports.account.authorizations.title'), reports_authorizations_path, feature_enabled?('report-authorizations'))
+                = header_report_nav_item(t('reports.account.settlement_transaction_account.title'), reports_settlement_transaction_account_path)
             .nav-dropdown-column
               %h2= t('reports.price_indications.title')
               %ul
-                %li= link_to(t('reports.price_indications.current.title'), reports_current_price_indications_path)
-                %li= link_to(t('reports.price_indications.historical.title'), reports_historical_price_indications_path)
+                = header_report_nav_item(t('reports.price_indications.current.title'), reports_current_price_indications_path)
+                = header_report_nav_item(t('reports.price_indications.historical.title'), reports_historical_price_indications_path)
             .nav-dropdown-column
               %h2= t('reports.collateral.title')
               %ul
-                %li= link_to(t('reports.collateral.borrowing_capacity.title'), reports_borrowing_capacity_path)
-                %li= link_to(t('reports.collateral.mcu.title'), reports_mortgage_collateral_update_path)
+                = header_report_nav_item(t('reports.collateral.borrowing_capacity.title'), reports_borrowing_capacity_path)
+                = header_report_nav_item(t('reports.collateral.mcu.title'), reports_mortgage_collateral_update_path)
           .nav-dropdown-row
             .nav-dropdown-column
               %h2= t('reports.credit.title')
               %ul
-                %li= link_to(t('reports.credit.todays_credit.title'), reports_todays_credit_path)
-                %li= link_to(t('reports.credit.advances_detail.title'), reports_advances_path)
-                %li= link_to(t('reports.credit.interest_rate.title'), reports_interest_rate_resets_path)
-                %li= link_to(t('reports.credit.letters_of_credit.title'), reports_letters_of_credit_path)
-                %li= link_to(t('reports.credit.forward_commitments.title'), reports_forward_commitments_path)
-                %li= link_to(t('reports.credit.parallel_shift.title'), reports_parallel_shift_path)
+                = header_report_nav_item(t('reports.credit.todays_credit.title'), reports_todays_credit_path)
+                = header_report_nav_item(t('reports.credit.advances_detail.title'), reports_advances_path)
+                = header_report_nav_item(t('reports.credit.interest_rate.title'), reports_interest_rate_resets_path)
+                = header_report_nav_item(t('reports.credit.letters_of_credit.title'), reports_letters_of_credit_path)
+                = header_report_nav_item(t('reports.credit.forward_commitments.title'), reports_forward_commitments_path)
+                = header_report_nav_item(t('reports.credit.parallel_shift.title'), reports_parallel_shift_path)
             .nav-dropdown-column
               %h2= t('reports.capital_stock.title')
               %ul
-                %li= link_to(t('reports.capital_stock.activity.title'), reports_capital_stock_activity_path)
-                %li= link_to(t('reports.capital_stock.trial_balance.title'), reports_capital_stock_trial_balance_path)
-                - if feature_enabled?('capital-stock-position-and-leverage-report')
-                  %li= link_to(t('reports.capital_stock.capital_stock_and_leverage.title'), reports_capital_stock_and_leverage_path)
-                - else
-                  %li.disabled= t('reports.capital_stock.capital_stock_and_leverage.title')
-                %li= link_to(t('reports.capital_stock.dividend_statement.title'), reports_dividend_statement_path)
+                = header_report_nav_item(t('reports.capital_stock.activity.title'), reports_capital_stock_activity_path, feature_enabled?('report-capital-stock-activity-statement'))
+                = header_report_nav_item(t('reports.capital_stock.trial_balance.title'), reports_capital_stock_trial_balance_path, feature_enabled?('report-capital-stock-trial-balance'))
+                = header_report_nav_item(t('reports.capital_stock.capital_stock_and_leverage.title'), reports_capital_stock_and_leverage_path, feature_enabled?('report-capital-stock-position-and-leverage'))
+                = header_report_nav_item(t('reports.capital_stock.dividend_statement.title'), reports_dividend_statement_path, feature_enabled?('report-dividened-transaction-statement'))
             .nav-dropdown-column
               %h2= t('reports.securities.title')
               %ul.nav-dropdown-nested
-                - if feature_enabled?('report-securities-transaction')
-                  %li= link_to(t('reports.securities.transactions.title'), reports_securities_transactions_path)
-                %li= link_to(t('reports.securities.cash_projections.title'), reports_cash_projections_path)
-                %li= link_to(t('reports.securities.current.title'), reports_current_securities_position_path)
-                %li= link_to(t('reports.securities.monthly.title'), reports_monthly_securities_position_path)
-                %li= link_to(t('reports.securities.services_monthly.title'), reports_securities_services_statement_path)
+                = header_report_nav_item(t('reports.securities.transactions.title'), reports_securities_transactions_path, feature_enabled?('report-securities-transaction'))
+                = header_report_nav_item(t('reports.securities.cash_projections.title'), reports_cash_projections_path, feature_enabled?('report-cash-projections'))
+                = header_report_nav_item(t('reports.securities.current.title'), reports_current_securities_position_path, feature_enabled?('report-current-securities-positions'))
+                = header_report_nav_item(t('reports.securities.monthly.title'), reports_monthly_securities_position_path, feature_enabled?('report-monthly-securities-positions'))
+                = header_report_nav_item(t('reports.securities.services_monthly.title'), reports_securities_services_statement_path, feature_enabled?('report-securities-services-monthly-statement'))
           %p= t('reports.learn_more_html', url: reports_path)
       %li<>
         = link_to(t('nav.secondary.resources'), '#', class: 'nav-menu')

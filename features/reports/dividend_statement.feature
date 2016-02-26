@@ -1,4 +1,4 @@
-@jira-mem-69
+@jira-mem-69 @flip-on-report-dividened-transaction-statement
 Feature: Visiting the Dividend Transaction Statement Page
   As a user
   I want to use visit the Dividend Transaction Statement page for the FHLB Member Portal
