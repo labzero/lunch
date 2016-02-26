@@ -27,7 +27,7 @@ class HomePage extends Component {
   render() {
     return (
       <div>
-        <h1>{title}</h1>
+        <RestaurantAddForm />
         <RestaurantList items={this.props.items} />
       </div>
     );

@@ -1,0 +1,6 @@
+{
+  "name": "RestaurantAddForm",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./RestaurantAddForm.js"
+}
