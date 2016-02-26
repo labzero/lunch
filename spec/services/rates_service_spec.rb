@@ -122,14 +122,18 @@ describe RatesService do
     end
     it 'should return nil if there was an API error' do
       allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
-      expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)).to eq(nil)
+      expect(historical_prices).to eq(nil)
     end
     it 'should return nil if there was a connection error' do
       allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
-      expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)).to eq(nil)
+      expect(historical_prices).to eq(nil)
     end
     it 'should return a data object from the MAPI endpoint' do
-      expect(subject.historical_price_indications(start_date, end_date, RatesService::COLLATERAL_TYPES.first, RatesService::CREDIT_TYPES.first)).to be_kind_of(Hash)
+      expect(historical_prices).to be_kind_of(Hash)
+    end
+    it 'fixes the :date field' do
+      expect(subject).to receive(:fix_date).with(anything, :date)
+      historical_prices
     end
   end
 

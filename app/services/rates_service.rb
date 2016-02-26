@@ -86,8 +86,8 @@ class RatesService < MAPIService
     return warn(:historical_price_indications, "invalid colateral type #{collateral_type}. Collateral type must be one of these values: #{COLLATERAL_TYPES}", nil) unless COLLATERAL_TYPES.include?(collateral_type)
     return warn(:historical_price_indications, "unsupported credit type: #{credit_type}. Currently, RatesService.historical_price_indications only accepts 'frc', 'vrc', '1m_libor', '3m_libor', '6m_libor' and daily_prime' as the credit_type arg.", nil) if credit_type == :embedded_cap
     # TODO remove the previous line once you support 'embedded_cap'
-    
-    get_hash(:historical_price_indications, "rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/#{credit_type}")
+
+    fix_date(get_hash(:historical_price_indications, "rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/#{credit_type}"), :date)
   end
 
 end

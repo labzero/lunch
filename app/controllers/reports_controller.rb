@@ -326,7 +326,8 @@ class ReportsController < ApplicationController
                          t("global.issue_date"),
                          t('reports.pages.capital_stock_trial_balance.transaction_type'),
                          t('reports.pages.capital_stock_trial_balance.shares_outstanding')]
-      certificates = summary[:certificates].sort{|a,b| a[:certificate_sequence] <=> b[:certificate_sequence]}.map do |certificate|
+      summary[:certificates] = sort_report_data(summary[:certificates], :certificate_sequence)
+      certificates = summary[:certificates].map do |certificate|
         { columns: [{value: certificate[:certificate_sequence], type: nil,     classes: [:'report-cell-narrow']},
                     {value: certificate[:issue_date],           type: :date,   classes: [:'report-cell-narrow']},
                     {value: certificate[:transaction_type],     type: nil,     classes: [:'report-cell-narrow']},
@@ -727,7 +728,7 @@ class ReportsController < ApplicationController
       else
         []
       end
-      
+
       collateral_key = @collateral_type.to_sym
       credit_key = @credit_type.to_sym
       notes = {}
@@ -739,7 +740,7 @@ class ReportsController < ApplicationController
         :column_headings => column_headings,
         :column_sub_headings => column_sub_headings,
         :column_sub_headings_first => column_sub_headings_first,
-        :rows => rows,
+        :rows => sort_report_data(rows, :date),
         :notes => notes
       }
     end
@@ -765,6 +766,7 @@ class ReportsController < ApplicationController
     else
       raise StandardError, 'There has been an error and ReportsController#interest_rate_resets has encountered nil. Check error logs.' if irr_data.nil?
       @date_processed = irr_data[:date_processed]
+      irr_data[:interest_rate_resets] = sort_report_data(irr_data[:interest_rate_resets], :effective_date)
       rows = irr_data[:interest_rate_resets].collect do |row|
         columns = []
         row.each do |value|
@@ -886,6 +888,7 @@ class ReportsController < ApplicationController
       end
       @as_of_date = letters_of_credit[:as_of_date]
       @total_current_par = letters_of_credit[:total_current_par]
+      letters_of_credit[:credits] = sort_report_data(letters_of_credit[:credits], :lc_number)
       rows = if letters_of_credit[:credits]
         letters_of_credit[:credits].collect do |credit|
           {
@@ -934,7 +937,7 @@ class ReportsController < ApplicationController
       @total_net = securities_transactions[:total_net]
       @final = securities_transactions[:final]
       column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('common_table_headings.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('common_table_headings.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
-      rows = securities_transactions[:transactions].collect do |row|
+      rows = securities_transactions[:transactions].sort { |a, b| [a['custody_account_no'], a['cusip']] <=> [b['custody_account_no'], b['cusip']] }.collect do |row|
         is_new = row['new_transaction']
         { columns: row.map{ |field,value| map_securities_transactions_column(field, value, is_new) }.compact }
       end
@@ -1012,6 +1015,7 @@ class ReportsController < ApplicationController
     end
     @as_of_date = parallel_shift[:as_of_date]
     rows = []
+    parallel_shift[:putable_advances] = sort_report_data(parallel_shift[:putable_advances], :advance_number)
     parallel_shift[:putable_advances].each do |advance|
       rows << {
         columns:[
@@ -1416,6 +1420,7 @@ class ReportsController < ApplicationController
       raise StandardError, "There has been an error and ReportsController#todays_credit has encountered nil. Check error logs." if activities.nil?
     end
     rows = []
+    activities = sort_report_data(activities, :funding_date)
     activities.each do |activity|
       maturity_date = if activity[:instrument_type] == 'ADVANCE'
         activity[:maturity_date] || t('global.open')
@@ -1728,5 +1733,10 @@ class ReportsController < ApplicationController
       ]
     end
     securities
+  end
+
+  def sort_report_data(data, sort_field, sort_order='asc')
+    data = data.sort{|a,b| a[sort_field] <=> b[sort_field]}
+    sort_order == 'asc' ? data : data.reverse
   end
 end

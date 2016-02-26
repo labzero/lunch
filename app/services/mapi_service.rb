@@ -94,4 +94,12 @@ class MAPIService
     parse(name, post(name, endpoint, body.to_json, 'application/json', &error_handler), &error_handler)
   end
 
+  def fix_date(data, field=:as_of_date)
+    fields = [field].flatten
+    fields.each do |field|
+      data[field] = data[field].to_date if data && data[field]
+    end
+    data
+  end
+
 end

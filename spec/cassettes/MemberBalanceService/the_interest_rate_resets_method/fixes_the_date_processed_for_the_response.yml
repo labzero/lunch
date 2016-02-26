@@ -1,0 +1,46 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/member/750/interest_rate_resets
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="FQEozsDJBUmgYtykUMn0SPpwtCmSYa"
+      X-Request-Id:
+      - '12345'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '317'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.4/2015-12-16)
+      Date:
+      - Tue, 23 Feb 2016 22:33:43 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '{"date_processed":"2016-02-22","interest_rate_resets":[{"effective_date":"0015-01-12","advance_number":"12345","prior_rate":0.19849999999999998,"new_rate":0.1928,"next_reset":null},{"effective_date":"0015-01-12","advance_number":"76543","prior_rate":0.19135,"new_rate":0.19999000000000003,"next_reset":"0015-03-12"}]}'
+    http_version: 
+  recorded_at: Tue, 23 Feb 2016 22:33:43 GMT
+recorded_with: VCR 2.9.3
