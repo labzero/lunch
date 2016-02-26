@@ -26,9 +26,9 @@ import { port } from './config';
 import makeRoutes from './routes';
 import ContextHolder from './core/ContextHolder';
 import Html from './components/Html';
-import Restaurant from './models/Restaurant';
 // import passport from './core/passport';
 import schema from './data/schema';
+import fetch from './core/fetch';
 
 const server = global.server = express();
 
@@ -92,7 +92,7 @@ server.use('/graphql', expressGraphQL(req => ({
 server.get('*', async (req, res, next) => {
   try {
     match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
-      Restaurant.fetchAll().then(all => {
+      fetch('/api/restaurants').then(all => all.json()).then(all => {
         if (error) {
           throw error;
         }
@@ -102,7 +102,7 @@ server.get('*', async (req, res, next) => {
           return;
         }
         let statusCode = 200;
-        const initialState = { restaurants: { items: all.serialize() } };
+        const initialState = { restaurants: { items: all } };
         const store = configureStore(initialState);
         const data = {
           title: '',

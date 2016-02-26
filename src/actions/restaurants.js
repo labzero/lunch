@@ -1,4 +1,4 @@
-import fetch from 'isomorphic-fetch';
+import fetch from '../core/fetch';
 
 export const INVALIDATE_RESTAURANTS = 'INVALIDATE_RESTAURANTS';
 export function invalidateRestaurants() {
