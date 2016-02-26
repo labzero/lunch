@@ -1,0 +1,17 @@
+xlsx_package.use_shared_strings = true
+workbook = xlsx_package.workbook
+workbook.styles do |styles|
+  date_format = styles.add_style format_code: 'mm/dd/yyyy'
+  integer_format = styles.add_style num_fmt: 1
+
+  styles = [date_format, nil, nil, integer_format, integer_format, integer_format]
+
+  workbook.add_worksheet(name: I18n.t('reports.pages.capital_stock_activity.xlsx_worksheet_name')) do |sheet|
+    sheet.add_row @capital_stock_activity_table_data[:column_headings]
+    @capital_stock_activity_table_data[:rows].each do |row|
+      values = row[:columns].collect { |column| column[:type] == :date ? column[:value].to_date : column[:value]}
+      sheet.add_row values, style: styles
+    end
+  end
+
+end

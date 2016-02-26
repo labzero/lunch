@@ -1344,6 +1344,7 @@ en:
         shares_outstanding: Shares Outstanding
         debit_shares: "Debits: Number of Shares"
         credit_shares: "Credits: Number of Shares"
+        xlsx_worksheet_name: Capital Stock Activity
       capital_stock_trial_balance:
         title: Capital Stock Trial Balance
         no_of_shares_heading: "Total Class B Shares Outstanding at $100 per share as of %{date}:"

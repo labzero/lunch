@@ -2,8 +2,8 @@
 - @page_title = t('reports.meta_title')
 .report.row
   .report-header
-    %h1= t('reports.pages.capital_stock_activity.title')
-    = render 'reports_header_buttons'
+    %h1= @report_name
+    = render 'reports_header_buttons', download_formats: [:xlsx]
     = render 'report_details', name: @member_name, freshness: t('reports.freshness.prior_day'), availability: t('reports.availability.months', months: 12)
     .report-inputs
       = render 'reports_date_picker_form', start_date: @start_date, end_date: @end_date, report_url: reports_capital_stock_activity_url, presets: @picker_presets, min_date: @min_date
@@ -17,29 +17,5 @@
         = report_summary_with_date('reports.pages.capital_stock_activity.closing_balance_heading', fhlb_date_long_alpha(@capital_stock_activity[:end_date]))
       %p= t('reports.share_count', count: fhlb_formatted_number(@capital_stock_activity[:end_balance], html: false))
     %h2.report-table-title= t('reports.pages.capital_stock_activity.table_title')
-    %table.report-table{data: {sortable: true, :'missing-data-message' => missing_data_message}}
-      %thead
-        %tr
-          %th.report-cell-narrow= t("global.issue_date")
-          %th= t('reports.pages.capital_stock_activity.certificate_sequence')
-          %th.report-cell-expanding= t('global.transaction_type')
-          %th= t('reports.pages.capital_stock_activity.debit_shares')
-          %th= t('reports.pages.capital_stock_activity.credit_shares')
-          %th= t('reports.pages.capital_stock_activity.shares_outstanding')
-      %tbody
-        -@capital_stock_activity[:activities].to_a.each do |row|
-          %tr
-            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:trans_date])
-            %td= row['cert_id']
-            %td.report-cell-expanding= row[:trans_type]
-            %td.report-cell-right= fhlb_formatted_number row[:debit_shares]
-            %td.report-cell-right= fhlb_formatted_number row[:credit_shares]
-            %td.report-cell-right= fhlb_formatted_number row[:outstanding_shares]
-      %tfoot
-        %tr
-          %td.report-cell-total.report-cell-narrow{colspan: 2}= t('global.totals')
-          %td.report-cell-expanding
-          %td.report-cell-right= fhlb_formatted_number @capital_stock_activity[:total_debits]
-          %td.report-cell-right= fhlb_formatted_number @capital_stock_activity[:total_credits]
-          %td
+    =render 'reports/reports_table', table_data: @capital_stock_activity_table_data, sortable: true, disable_auto_width: false, no_wrapping: true
     %small= t('reports.accuracy_notice_html', url: '#', phone_number: fhlb_formatted_phone_number('4156162634'), phone_number_alt: fhlb_formatted_phone_number('4156162913'))

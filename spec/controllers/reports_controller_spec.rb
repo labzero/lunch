@@ -127,31 +127,106 @@ RSpec.describe ReportsController, :type => :controller do
     end
 
     describe 'GET capital_stock_activity' do
-      before { allow(member_balance_service_instance).to receive(:capital_stock_activity).and_return(response_hash) }
+      let(:capital_stock_activity) { get :capital_stock_activity }
+      let(:total_debits) { double('total debits') }
+      let(:total_credits) { double('total credits') }
+      let(:activity) do
+        {
+          trans_date: double('trans date'),
+          cert_id: double('cert id'),
+          trans_type: double('trans type'),
+          debit_shares: double('debit shares'),
+          credit_shares: double('credit shares'),
+          outstanding_shares: double('outstanding shares')
+        }
+      end
+      let(:capital_stock_hash) { {activities: [activity], total_debits: total_debits, total_credits: total_credits} }
+      before do
+        allow(member_balance_service_instance).to receive(:capital_stock_activity).and_return(response_hash)
+        allow(response_hash).to receive(:[]).and_return({})
+      end
       it_behaves_like 'a user required action', :get, :capital_stock_activity
       it_behaves_like 'a date restricted report', :capital_stock_activity, :last_month_start
       it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_activity
+      it_behaves_like 'a report that can be downloaded', :capital_stock_activity, [:xlsx]
 
       it 'should render the capital_stock_activity view' do
-        get :capital_stock_activity
+        capital_stock_activity
         expect(response.body).to render_template('capital_stock_activity')
       end
-      it 'should set @capital_stock_activity' do
-        get :capital_stock_activity
-        expect(assigns[:capital_stock_activity]).to eq(response_hash)
-      end
-      it 'should set @capital_stock_activity to {} if the report is disabled' do
-        allow(controller).to receive(:report_disabled?).with(ReportsController::CAPITAL_STOCK_ACTIVITY_WEB_FLAGS).and_return(true)
-        get :capital_stock_activity
-        expect(assigns[:capital_stock_activity]).to eq({})
-      end
-      it 'should raise an error if @capital_stock_activity is nil' do
+      it 'should raise an error if the service returns nil' do
         allow(member_balance_service_instance).to receive(:capital_stock_activity).and_return(nil)
-        expect{get :capital_stock_activity}.to raise_error(StandardError)
+        expect{capital_stock_activity}.to raise_error(StandardError)
       end
       describe "view instance variables" do
+        describe '@capital_stock_activity_table_data' do
+          before do
+            allow(member_balance_service_instance).to receive(:capital_stock_activity).and_return(capital_stock_hash)
+          end
+          it 'contains an array of appropriate column headings' do
+            capital_stock_activity
+            expect(assigns[:capital_stock_activity_table_data][:column_headings]).to eq([I18n.t("global.issue_date"), I18n.t('reports.pages.capital_stock_activity.certificate_sequence'), I18n.t('global.transaction_type'), I18n.t('reports.pages.capital_stock_activity.debit_shares'), I18n.t('reports.pages.capital_stock_activity.credit_shares'), I18n.t('reports.pages.capital_stock_activity.shares_outstanding')])
+          end
+          describe 'the `rows` array' do
+            it 'returns an empty array if the report has been disabled' do
+              allow(controller).to receive(:report_disabled?).with(ReportsController::CAPITAL_STOCK_ACTIVITY_WEB_FLAGS).and_return(true)
+              capital_stock_activity
+              expect(assigns[:capital_stock_activity_table_data][:rows]).to eq([])
+            end
+            it 'returns an empty array if there are no activities' do
+              capital_stock_hash = {activities: [], total_debits: total_debits, total_credits: total_credits}
+              allow(member_balance_service_instance).to receive(:capital_stock_activity).and_return(capital_stock_hash)
+              capital_stock_activity
+              expect(assigns[:capital_stock_activity_table_data][:rows]).to eq([])
+            end
+            describe 'the `columns` value for each row' do
+              before { capital_stock_activity }
+              it 'has a first member whose value is the trans_date of the activity' do
+                expect(assigns[:capital_stock_activity_table_data][:rows][0][:columns][0][:value]).to eq(activity[:trans_date])
+              end
+              it 'has a first member whose type is set to :date' do
+                expect(assigns[:capital_stock_activity_table_data][:rows][0][:columns][0][:type]).to eq(:date)
+              end
+              it 'has a second member whose value is the cert_id of the activity' do
+                expect(assigns[:capital_stock_activity_table_data][:rows][0][:columns][1][:value]).to eq(activity[:cert_id])
+              end
+              it 'has a third member whose value is the trans_type of the activity' do
+                expect(assigns[:capital_stock_activity_table_data][:rows][0][:columns][2][:value]).to eq(activity[:trans_type])
+              end
+              ['debit_shares', 'credit_shares', 'outstanding_shares'].each_with_index do |attr, i|
+                it "has a #{(i+4).ordinalize} member whose value is the #{attr} of the activity" do
+                  expect(assigns[:capital_stock_activity_table_data][:rows][0][:columns][i+3][:value]).to eq(activity[attr.to_sym])
+                end
+                it "has a #{(i+4).ordinalize} member whose type is set to :number" do
+                  expect(assigns[:capital_stock_activity_table_data][:rows][0][:columns][i+3][:type]).to eq(:number)
+                end
+              end
+            end
+          end
+          describe 'the `footer` array' do
+            before { capital_stock_activity }
+            it "has a first item with a value of `#{I18n.t('global.totals')}`" do
+              expect(assigns[:capital_stock_activity_table_data][:footer][0][:value]).to eq(I18n.t('global.totals'))
+            end
+            it 'has a first item with a colspan of 3' do
+              expect(assigns[:capital_stock_activity_table_data][:footer][0][:colspan]).to eq(3)
+            end
+            it 'has a second item with a value corresponding the to total debits' do
+              expect(assigns[:capital_stock_activity_table_data][:footer][1][:value]).to eq(total_debits)
+            end
+            it 'has a second item with a type set to :number' do
+              expect(assigns[:capital_stock_activity_table_data][:footer][1][:type]).to eq(:number)
+            end
+            it 'has a third item with a value corresponding the to total credits' do
+              expect(assigns[:capital_stock_activity_table_data][:footer][2][:value]).to eq(total_credits)
+            end
+            it 'has a third item with a type set to :number' do
+              expect(assigns[:capital_stock_activity_table_data][:footer][2][:type]).to eq(:number)
+            end
+          end
+        end
         it 'should set @start_date to the `start_date` attribute of the `min_and_start_dates` hash' do
-          get :capital_stock_activity
+          capital_stock_activity
           expect(assigns[:start_date]).to eq(restricted_start_date)
         end
         it 'should set @end_date to the end_date param' do
@@ -159,7 +234,7 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[:end_date]).to eq(end_date)
         end
         it 'should set @end_date to the end of last month if no end_date param is provided' do
-          get :capital_stock_activity
+          capital_stock_activity
           expect(assigns[:end_date]).to eq(default_dates_hash[:last_month_end])
         end
         it 'should pass @start_date, @end_date and the `date_restriction` to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do

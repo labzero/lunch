@@ -287,20 +287,41 @@ class ReportsController < ApplicationController
   end
 
   def capital_stock_activity
+    @report_name = t('reports.pages.capital_stock_activity.title')
     date_restriction = DATE_RESTRICTION_MAPPING[:capital_stock_activity]
     default_dates = default_dates_hash
     member_balances = MemberBalanceService.new(current_member_id, request)
     start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
     @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
     @min_date, @start_date = min_and_start_dates(date_restriction, start_date)
-
-    if report_disabled?(CAPITAL_STOCK_ACTIVITY_WEB_FLAGS)
-      @capital_stock_activity = {}
-    else
-      @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
-      raise StandardError, "There has been an error and ReportsController#capital_stock_activity has encountered nil. Check error logs." if @capital_stock_activity.nil?
-    end
     @picker_presets = date_picker_presets(@start_date, @end_date, date_restriction)
+    report_download_name = "capital-stock-activity-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
+
+    downloadable_report(:xlsx, {start_date: params[:start_date], end_date: params[:end_date]}, report_download_name) do
+      if report_disabled?(CAPITAL_STOCK_ACTIVITY_WEB_FLAGS)
+        @capital_stock_activity = {activities:[]}
+      else
+        @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
+        raise StandardError, "There has been an error and ReportsController#capital_stock_activity has encountered nil. Check error logs." if @capital_stock_activity.nil?
+      end
+      column_headings = [t("global.issue_date"), t('reports.pages.capital_stock_activity.certificate_sequence'), t('global.transaction_type'), t('reports.pages.capital_stock_activity.debit_shares'), t('reports.pages.capital_stock_activity.credit_shares'), t('reports.pages.capital_stock_activity.shares_outstanding')]
+      rows = @capital_stock_activity[:activities].map do |activity|
+        {columns: [
+          {value: activity[:trans_date], type: :date},
+          {value: activity[:cert_id]},
+          {value: activity[:trans_type]},
+          {value: activity[:debit_shares], type: :number},
+          {value: activity[:credit_shares], type: :number},
+          {value: activity[:outstanding_shares], type: :number}
+        ]}
+      end
+      footer = [
+        {value: t('global.totals'), colspan: 3},
+        {value: @capital_stock_activity[:total_debits], type: :number},
+        {value: @capital_stock_activity[:total_credits], type: :number}
+      ]
+      @capital_stock_activity_table_data = {column_headings: column_headings, rows: rows, footer: footer, footer_cells: 4}
+    end
   end
 
   def capital_stock_trial_balance
