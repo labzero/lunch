@@ -2054,7 +2054,7 @@ en:
           servicing_audit: Servicing Audit
           your_institutions_most_recent_servicing: "Your institution’s most recent servicing audit conducted by applicable government agencies and other investors, and management’s response"
           compliance: Compliance
-          information_on_your_institutions_compliance_html: "Information on your institution’s compliance with the Consumer Financial Protection Bureau’s <a href=%{url}>TILA-RESPA Integrated Disclosure rule</a>, which will become effective October 3, 2015"
+          information_on_your_institutions_compliance_html: "Information on your institution’s compliance with the Consumer Financial Protection Bureau’s <a href=%{url}>TILA-RESPA Integrated Disclosure rule</a>, which became effective October 3, 2015"
           evidence_of_authorization: Evidence of authorization to originate government loans (FHA/VA) from the applicable agency/agencies, including approval date and HUD/VA approval number
       ocn:
         title: Other Cash Needs (OCN) Advance
