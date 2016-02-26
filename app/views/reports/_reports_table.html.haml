@@ -6,6 +6,7 @@
 - default_sort ||= [0, 'asc']
 - deferred = table_data[:deferred] || false
 - disable_auto_width = defined?(disable_auto_width) ? disable_auto_width : true
+- remaining_cells = table_data[:footer_cells]
 - unless no_wrapping
   - table_class << 'table-allow-wrapping'
 - if deferred
@@ -55,4 +56,8 @@
   - if table_data[:footer]
     %tfoot
       - table_data[:footer].each do |cell|
+        - remaining_cells = remaining_cells - 1 if remaining_cells
         = render 'reports/report_cell', cell: cell
+      - if remaining_cells
+        - remaining_cells.times do
+          = render 'reports/report_cell', cell: {}

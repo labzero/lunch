@@ -111,3 +111,9 @@ Scenario: The Capital Stock Activity Statement has been disabled
   Given I am on the "Capital Stock Activity Statement" report page
   When the "Capital Stock Activity" report has been disabled
   Then I should see an empty report table with Data Unavailable messaging
+
+@resque-backed @smoke @jira-mem-809
+Scenario: Member downloads an XLSX of the Capital Stock Activity report
+  Given I am on the "Capital Stock Activity Statement" report page
+  When I request an XLSX
+  Then I should begin downloading a file
