@@ -25,8 +25,10 @@
     "react": "0.14.7",
     "react-dom": "0.14.7",
     "react-redux": "^4.4.0",
-    "redux": "^3.3.1",
     "react-router": "2.0.0-rc5",
+    "react-router-redux": "^4.0.0",
+    "redux": "^3.3.1",
+    "redux-thunk": "^1.0.3",
     "source-map-support": "0.4.0",
     "whatwg-fetch": "0.11.0"
   },

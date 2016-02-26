@@ -1,24 +1,19 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantList.scss';
 import RestaurantListItem from '../RestaurantListItem';
 
-class RestaurantList extends Component {
+const RestaurantList = ({ items }) => (
+  <ul>
+    {items.map(item => <RestaurantListItem key={item.id} {...item} />)}
+  </ul>
+);
 
-  static contextTypes = {
-    // onSetTitle: PropTypes.func.isRequired
-  };
-
-  componentWillMount() {
-    // this.context.onSetTitle(title);
-  }
-
-  render() {
-    return (
-      <RestaurantListItem />
-    );
-  }
-
-}
+RestaurantList.propTypes = {
+  items: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired
+  }))
+};
 
 export default withStyles(RestaurantList, s);

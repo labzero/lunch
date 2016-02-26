@@ -1,4 +1,6 @@
 import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
+import fetchRestaurantsIfNeeded from '../../actions/restaurants';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './HomePage.scss';
 import RestaurantList from '../RestaurantList';
@@ -11,7 +13,13 @@ class HomePage extends Component {
     onSetTitle: PropTypes.func.isRequired
   };
 
+  static propTypes = {
+    dispatch: PropTypes.func.isRequired
+  };
+
   componentWillMount() {
+    const { dispatch } = this.props;
+    dispatch(fetchRestaurantsIfNeeded());
     this.context.onSetTitle(title);
   }
 
@@ -26,4 +34,22 @@ class HomePage extends Component {
 
 }
 
-export default withStyles(HomePage, s);
+function mapStateToProps(state) {
+  const { restaurants } = state;
+  const {
+    isFetching,
+    lastUpdated,
+    items
+  } = restaurants || {
+    isFetching: true,
+    items: []
+  };
+
+  return {
+    items,
+    isFetching,
+    lastUpdated
+  };
+}
+
+export default connect(mapStateToProps)(withStyles(HomePage, s));

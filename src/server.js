@@ -15,11 +15,13 @@ import ReactDOM from 'react-dom/server';
 import { match, RouterContext } from 'react-router';
 import assets from './assets';
 import { port } from './config';
-import routes from './routes';
+import makeRoutes from './routes';
 import ContextHolder from './core/ContextHolder';
 import Html from './components/Html';
 
 const server = global.server = express();
+
+const routes = makeRoutes();
 
 //
 // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the

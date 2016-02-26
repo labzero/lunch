@@ -25,7 +25,7 @@ async function getContextComponent(location, callback) {
   callback(null, () => <ContentPage {...content} />);
 }
 
-export default (
+export default (store) => (
   <Route>
     <Route path="/" component={App}>
       <IndexRoute component={HomePage} />
