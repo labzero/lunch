@@ -216,9 +216,3 @@ def change_datepicker_to_month(today, month, calendar)
     # we should add a 5 second check here to avoid infinte loops
   end
 end
-
-def most_recent_business_day(d)
-  return d - 1.day if d.saturday?
-  return d - 2.day if d.sunday?
-  d
-end

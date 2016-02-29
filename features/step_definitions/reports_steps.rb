@@ -1,3 +1,5 @@
+include DatePickerHelper
+
 Then(/^I should see "(.*?)" as the report page's main title$/) do |title|
   page.assert_selector('h1', text: title)
 end
@@ -260,12 +262,6 @@ end
 
 Then(/^I should see a "(.*?)" report as of last business day$/) do |report_type|
   step %{I should see a "#{report_type}" report as of "#{most_recent_business_day(Time.zone.today - 1)}"}
-end
-
-def most_recent_business_day(d)
-  return d - 1.day if d.saturday?
-  return d - 2.day if d.sunday?
-  d
 end
 
 Then(/^I should see a "(.*?)" report as of the last day of last month$/) do |report_type|

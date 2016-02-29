@@ -87,15 +87,15 @@ class ReportsController < ApplicationController
     monthly_securities_position: 18.months,
     dividend_statement: 36.months
   }
-  
+
   INTEREST_DAY_COUNT_MAPPINGS = {
     standard: {
       vrc: I18n.t('reports.pages.price_indications.current.actual_actual'),
       frc: I18n.t('reports.pages.price_indications.current.actual_actual'),
       arc: I18n.t('reports.pages.price_indications.current.actual_360'),
-      :'1m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'), 
+      :'1m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
       :'3m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
-      :'6m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'), 
+      :'6m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
       :'daily_prime' => I18n.t('reports.pages.price_indications.current.actual_360')
     },
     sbc: {
@@ -107,7 +107,7 @@ class ReportsController < ApplicationController
       :'6m_libor' => I18n.t('reports.pages.price_indications.current.actual_360')
     }
   }.freeze
-  
+
   INTEREST_PAYMENT_FREQUENCY_MAPPINGS = {
     standard: {
       vrc: I18n.t('reports.pages.price_indications.current.at_maturity'),
@@ -128,9 +128,9 @@ class ReportsController < ApplicationController
       :'1m_libor' => I18n.t('reports.pages.price_indications.current.at_monthend_and_at_repayment'),
       :'3m_libor' => I18n.t('reports.pages.price_indications.current.quarterly_and_at_repayment'),
       :'6m_libor' => I18n.t('reports.pages.price_indications.current.semiannually_and_at_repayment')
-    }  
+    }
   }.freeze
-  
+
   INTEREST_RATE_RESET_MAPPINGS = {
     :'1m_libor' => I18n.t('global.monthly'),
     :'3m_libor' => I18n.t('global.quarterly'),
@@ -145,6 +145,7 @@ class ReportsController < ApplicationController
   before_action do
     @member_name = current_member_name
     set_active_nav(:reports)
+    @min_date, @start_date, @end_date, @max_date = nil
   end
 
   def index
@@ -290,15 +291,11 @@ class ReportsController < ApplicationController
 
   def capital_stock_activity
     @report_name = t('reports.pages.capital_stock_activity.title')
-    date_restriction = DATE_RESTRICTION_MAPPING[:capital_stock_activity]
-    default_dates = default_dates_hash
     member_balances = MemberBalanceService.new(current_member_id, request)
-    start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
-    @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
-    @min_date, @start_date = min_and_start_dates(date_restriction, start_date)
-    @picker_presets = date_picker_presets(@start_date, @end_date, date_restriction)
-    report_download_name = "capital-stock-activity-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
+    initialize_dates(:capital_stock_activity, params[:start_date], params[:end_date])
 
+    @picker_presets = date_picker_presets(@start_date, @end_date, ReportConfiguration.date_restrictions(:capital_stock_activity))
+    report_download_name = "capital-stock-activity-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
     downloadable_report(:xlsx, {start_date: params[:start_date], end_date: params[:end_date]}, report_download_name) do
       if report_disabled?(CAPITAL_STOCK_ACTIVITY_WEB_FLAGS)
         @capital_stock_activity = {activities:[]}
@@ -327,12 +324,9 @@ class ReportsController < ApplicationController
   end
 
   def capital_stock_trial_balance
-    @max_date = most_recent_business_day(Time.zone.today - 1.day)
-    @min_date = Date.new(2002,1,1)
-    @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
-    @start_date = @min_date if @start_date < @min_date
-    @report_name = t('reports.pages.capital_stock_trial_balance.title')
+    @report_name = ReportConfiguration.report_title(:capital_stock_trial_balance)
     report_download_name = "capital_stock_trial_balance-#{fhlb_report_date_numeric(@start_date)}"
+    initialize_dates(:capital_stock_trial_balance, params[:start_date])
     downloadable_report(:xlsx, {start_date: @start_date.to_s}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
@@ -366,29 +360,25 @@ class ReportsController < ApplicationController
   end
 
   def borrowing_capacity
-    @date = params[:end_date] || Time.zone.now.to_date
-    @report_name = t('global.borrowing_capacity')
-    downloadable_report(:pdf, {end_date: @date.to_s}) do
+    @report_name = ReportConfiguration.report_title(:borrowing_capacity)
+    initialize_dates(:borrowing_capacity, nil, params[:end_date])
+    downloadable_report(:pdf, {end_date: @end_date.to_s}) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
         @borrowing_capacity_summary = {}
       else
-        @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(@date.to_date)
+        @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(@end_date.to_date)
         raise StandardError, "There has been an error and ReportsController#borrowing_capacity has encountered nil. Check error logs." if @borrowing_capacity_summary.nil?
       end
     end
   end
 
   def settlement_transaction_account
-    date_restriction = DATE_RESTRICTION_MAPPING[:settlement_transaction_account]
-    default_dates = default_dates_hash
-    start_date = ((params[:start_date] || default_dates[:this_month_start])).to_date
-    @min_date, @start_date = min_and_start_dates(date_restriction, start_date)
-    @end_date = ((params[:end_date] || default_dates[:today])).to_date
-    @report_name = t('reports.pages.settlement_transaction_account.title')
+    @report_name = ReportConfiguration.report_title(:settlement_transaction_account)
+    initialize_dates(:settlement_transaction_account, params[:start_date], params[:end_date])
     member_balances = MemberBalanceService.new(current_member_id, request)
     @daily_balance_key = MemberBalanceService::DAILY_BALANCE_KEY
-    @picker_presets = date_picker_presets(@start_date, @end_date, date_restriction)
+    @picker_presets = date_picker_presets(@start_date, @end_date, ReportConfiguration.date_restrictions(:settlement_transaction_account))
     @sta_number = MembersService.new(request).member(current_member_id).try(:[], :sta_number) unless @sta_number
     @filter_options = [
       [t('global.all'), 'all'],
@@ -423,17 +413,14 @@ class ReportsController < ApplicationController
   end
 
   def advances_detail
-    date_restriction = DATE_RESTRICTION_MAPPING[:advances_detail]
-    @max_date = most_recent_business_day(Time.zone.today - 1.day)
-    advance_start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
-    @min_date, @start_date = min_and_start_dates(date_restriction, advance_start_date)
+    initialize_dates(:advances_detail, params[:start_date])
     report_download_name = "advances-#{fhlb_report_date_numeric(@start_date)}"
     downloadable_report(nil, {start_date: @start_date.to_s}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       @advances_detail = member_balances.advances_details(@start_date)
       @report_name = t('global.advances')
       raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
-      @picker_presets = date_picker_presets(@start_date, nil, date_restriction, @max_date)
+      @picker_presets = date_picker_presets(@start_date, nil, ReportConfiguration.date_restrictions(:advances_detail), @max_date)
       if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)
         @advances_detail = {}
       else
@@ -458,7 +445,7 @@ class ReportsController < ApplicationController
   end
 
   def current_price_indications
-    @report_name = t('reports.pages.price_indications.current.title')
+    @report_name = ReportConfiguration.report_title(:current_price_indications)
     downloadable_report(:xlsx) do
       rate_service = RatesService.new(request)
       member_balances = MemberBalanceService.new(current_member_id, request)
@@ -494,7 +481,7 @@ class ReportsController < ApplicationController
           t('reports.pages.price_indications.current.payment_frequency') => [
             [t('reports.pages.price_indications.current.overnight'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:vrc]],
             [t('reports.pages.price_indications.current.open'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:vrc_open]]
-          ]  
+          ]
         }
       }
       #vrc data for sbc collateral
@@ -546,7 +533,7 @@ class ReportsController < ApplicationController
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:standard][:frc],
           t('reports.pages.price_indications.current.payment_frequency') => INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:frc]
-        }  
+        }
       }
       #frc data for sbc collateral
       @sbc_frc_data = rate_service.current_price_indications('sbc', 'frc')
@@ -635,7 +622,7 @@ class ReportsController < ApplicationController
             [t('reports.pages.price_indications.current.1_month_libor'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:'1m_libor']],
             [t('reports.pages.price_indications.current.3_month_libor'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:'3m_libor']],
             [t('reports.pages.price_indications.current.6_month_libor'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:'6m_libor']]
-          ]          
+          ]
         }
       }
       @quick_advance_message = MessageService.new.todays_quick_advance_message
@@ -644,11 +631,9 @@ class ReportsController < ApplicationController
 
   def historical_price_indications
     rate_service = RatesService.new(request)
-    default_dates = default_dates_hash
-    @start_date = ((params[:start_date] || default_dates[:last_30_days])).to_date
-    @end_date = ((params[:end_date] || default_dates[:today])).to_date
+    initialize_dates(:historical_price_indications, params[:start_date], params[:end_date])
     @picker_presets = date_picker_presets(@start_date, @end_date)
-    
+
     @collateral_type_options = [
         [t('reports.pages.price_indications.standard_credit_program'), 'standard'],
         [t('reports.pages.price_indications.sbc_program'), 'sbc'],
@@ -902,7 +887,7 @@ class ReportsController < ApplicationController
 
   def securities_services_statement
     member_balances = MemberBalanceService.new(current_member_id, request)
-    @report_name = t('reports.securities.services_monthly.title')
+    @report_name = ReportConfiguration.report_title(:securities_services_statement)
 
     available_reports = member_balances.securities_services_statements_available
     if available_reports.empty?
@@ -927,7 +912,7 @@ class ReportsController < ApplicationController
 
   def letters_of_credit
     downloadable_report(:xlsx) do
-      @report_name = t('reports.pages.letters_of_credit.title')
+      @report_name = ReportConfiguration.report_title(:letters_of_credit)
       if report_disabled?(LETTERS_OF_CREDIT_WEB_FLAGS)
         letters_of_credit = {}
       else
@@ -962,18 +947,11 @@ class ReportsController < ApplicationController
     end
   end
 
-  def most_recent_business_day(d)
-    return d - 1.day if d.saturday?
-    return d - 2.day if d.sunday?
-    d
-  end
-  
   def securities_transactions
-    @max_date   = most_recent_business_day(Time.zone.today)
-    @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
+    initialize_dates(:securities_transactions, params[:start_date])
     report_download_name = "securities-transactions-#{fhlb_report_date_numeric(@start_date)}"
     downloadable_report(:xlsx, {start_date: params[:start_date]}, report_download_name) do
-      @report_name = t('reports.pages.securities_transactions.title')
+      @report_name = ReportConfiguration.report_title(:securities_transactions)
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
         securities_transactions = {}
@@ -1007,7 +985,7 @@ class ReportsController < ApplicationController
 
   def authorizations
     @authorizations_filter = params['authorizations_filter'] || 'all'
-    @report_name = t('reports.account.authorizations.title')
+    @report_name = ReportConfiguration.report_title(:authorizations)
     @today = Time.zone.today
 
     downloadable_report(:pdf, {authorizations_filter: @authorizations_filter.to_s}) do
@@ -1111,7 +1089,8 @@ class ReportsController < ApplicationController
   end
 
   def current_securities_position
-    @report_name = t('reports.pages.securities_position.current')
+    @report_name = ReportConfiguration.report_title(:current_securities_position)
+
     @securities_filter = params['securities_filter'] || 'all'
     report_download_name = "current-securities-position-#{@securities_filter}"
     downloadable_report(nil, {securities_filter: params['securities_filter']}, report_download_name) do
@@ -1128,17 +1107,14 @@ class ReportsController < ApplicationController
   end
 
   def monthly_securities_position
-    @report_name = t('reports.pages.securities_position.monthly')
-    date_restriction = DATE_RESTRICTION_MAPPING[:monthly_securities_position]
     @securities_filter = params['securities_filter'] || 'all'
-    start_date = (params[:start_date] || default_dates_hash[:last_month_end]).to_date
-    min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
-    @min_date = min_and_start_dates_array.first
-    @month_end_date = month_restricted_start_date(min_and_start_dates_array.last)
+    initialize_dates(:monthly_securities_position, params[:start_date])
+    @report_name = ReportConfiguration.report_title(:monthly_securities_position)
+    @month_end_date = month_restricted_start_date(@start_date)
     report_download_name = "monthly-securities-position-#{@securities_filter}-#{@month_end_date}"
     downloadable_report(nil, {securities_filter: params['securities_filter'], start_date: params['start_date']}, report_download_name) do
       @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
-      @picker_presets = date_picker_presets(@month_end_date, nil, date_restriction)
+      @picker_presets = date_picker_presets(@month_end_date, nil, ReportConfiguration.date_restrictions(:monthly_securities_position))
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(MONTHLY_SECURITIES_WEB_FLAGS)
         @monthly_securities_position = {securities:[]}
@@ -1154,7 +1130,7 @@ class ReportsController < ApplicationController
   def forward_commitments
     downloadable_report(:xlsx) do
       member_balances = MemberBalanceService.new(current_member_id, request)
-      @report_name = t('reports.credit.forward_commitments.title')
+      @report_name = ReportConfiguration.report_title(:forward_commitments)
       if report_disabled?(FORWARD_COMMITMENTS_WEB_FLAG)
         forward_commitments = {}
       else
@@ -1243,8 +1219,7 @@ class ReportsController < ApplicationController
 
     @now = Time.zone.now
     @date = @now.to_date
-    @report_name = t('reports.pages.account_summary.title')
-
+    @report_name = ReportConfiguration.report_title(:account_summary)
     report_download_name = "account-summary-#{fhlb_report_date_numeric(@date)}"
     downloadable_report(:pdf, nil, report_download_name) do
       if report_disabled?(ACCOUNT_SUMMARY_WEB_FLAGS)
@@ -1615,30 +1590,6 @@ class ReportsController < ApplicationController
     roles
   end
 
-  def min_and_start_dates(min_date_range, start_date_param=nil)
-    now = Time.zone.today
-    start_date = (start_date_param || now).to_date
-    min_date = now - min_date_range
-
-    start_date = if min_date < start_date && start_date <= now
-      start_date
-    elsif start_date > now
-      now
-    else
-      min_date
-    end
-    [min_date, start_date]
-  end
-
-  def month_restricted_start_date(start_date)
-    today = Time.zone.today
-    if start_date > today.beginning_of_month && start_date != today.end_of_month
-      (start_date - 1.month).end_of_month
-    else
-      start_date.end_of_month
-    end
-  end
-
   def map_securities_transactions_column(field,value,is_new)
     case field
       when 'units'
@@ -1811,5 +1762,13 @@ class ReportsController < ApplicationController
   def sort_report_data(data, sort_field, sort_order='asc')
     data = data.sort{|a,b| a[sort_field] <=> b[sort_field]}
     sort_order == 'asc' ? data : data.reverse
+  end
+
+  def initialize_dates(report, start_date = nil, end_date = nil)
+    date_bounds = ReportConfiguration.date_bounds(report, start_date, end_date)
+    @min_date = date_bounds[:min]
+    @start_date = date_bounds[:start]
+    @end_date = date_bounds[:end]
+    @max_date = date_bounds[:max]
   end
 end
