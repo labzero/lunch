@@ -43,10 +43,6 @@ RSpec.describe ReportsController, :type => :controller do
       get action
       expect(assigns[:member_name]).to eq(member_name)
     end
-    it 'sets the active nav to :reports' do
-      expect(controller).to receive(:set_active_nav).with(:reports)
-      get action
-    end
   end
 
   shared_examples 'a report with a @max_date' do |action|
@@ -78,6 +74,7 @@ RSpec.describe ReportsController, :type => :controller do
   describe 'GET index' do
     it_behaves_like 'a user required action', :get, :index
     it_behaves_like 'a report with instance variables set in a before_filter', :index
+    it_behaves_like 'a controller action with an active nav setting', :index, :reports
     it 'should render the index view' do
       get :index
       expect(response.body).to render_template('index')
@@ -148,6 +145,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :capital_stock_activity
       it_behaves_like 'a date restricted report', :capital_stock_activity, :last_month_start
       it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_activity
+      it_behaves_like 'a controller action with an active nav setting', :capital_stock_activity, :reports
       it_behaves_like 'a report that can be downloaded', :capital_stock_activity, [:xlsx]
 
       it 'should render the capital_stock_activity view' do
@@ -284,6 +282,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :capital_stock_trial_balance
       it_behaves_like 'a report that can be downloaded', :capital_stock_trial_balance, [:xlsx]
       it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_trial_balance
+      it_behaves_like 'a controller action with an active nav setting', :capital_stock_trial_balance, :reports
       it_behaves_like 'a report with a @max_date', :capital_stock_trial_balance
       it 'renders the capital_stock_trial_balance view' do
         call_action
@@ -371,6 +370,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :borrowing_capacity
       it_behaves_like 'a report that can be downloaded', :borrowing_capacity, [:pdf]
       it_behaves_like 'a report with instance variables set in a before_filter', :borrowing_capacity
+      it_behaves_like 'a controller action with an active nav setting', :borrowing_capacity, :reports
       it 'should render the borrowing_capacity view' do
         get :borrowing_capacity
         expect(response.body).to render_template('borrowing_capacity')
@@ -406,6 +406,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a report that can be downloaded', :settlement_transaction_account, [:pdf]
       it_behaves_like 'a date restricted report', :settlement_transaction_account, :this_month_start
       it_behaves_like 'a report with instance variables set in a before_filter', :settlement_transaction_account
+      it_behaves_like 'a controller action with an active nav setting', :settlement_transaction_account, :reports
       describe 'with activities array stubbed' do
         it 'should render the settlement_transaction_account view' do
           make_request
@@ -541,7 +542,7 @@ RSpec.describe ReportsController, :type => :controller do
            controller.instance_variable_set(:@sta_number, sta_number)
            expect(members_service).to receive(:member).exactly(:once)
            make_request
-         end     
+         end
       end
     end
 
@@ -556,6 +557,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a report that can be downloaded', :advances_detail, [:pdf, :xlsx]
       it_behaves_like 'a date restricted report', :advances_detail, nil, 1
       it_behaves_like 'a report with instance variables set in a before_filter', :advances_detail
+      it_behaves_like 'a controller action with an active nav setting', :advances_detail, :reports
       it_behaves_like 'a report with a @max_date', :advances_detail
       it 'should render the advances_detail view' do
         get :advances_detail
@@ -661,6 +663,7 @@ RSpec.describe ReportsController, :type => :controller do
         allow(member_balance_service_instance).to receive(:cash_projections).and_return({})
       end
       it_behaves_like 'a report with instance variables set in a before_filter', :cash_projections
+      it_behaves_like 'a controller action with an active nav setting', :cash_projections, :reports
       describe 'view instance variables' do
         before {
           allow(response_hash).to receive(:[]).with(:as_of_date).and_return(as_of_date)
@@ -704,6 +707,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it_behaves_like 'a user required action', :get, :dividend_statement
       it_behaves_like 'a report with instance variables set in a before_filter', :dividend_statement
+      it_behaves_like 'a controller action with an active nav setting', :dividend_statement, :reports
       it 'calls MemberBalanceService.dividend_statement with the proper date restriction' do
         expect(member_balance_service_instance).to receive(:dividend_statement).with(ReportsController::DATE_RESTRICTION_MAPPING[:dividend_statement].ago.to_date, anything)
         make_request
@@ -791,6 +795,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it_behaves_like 'a user required action', :get, :securities_services_statement
         it_behaves_like 'a report with instance variables set in a before_filter', :securities_services_statement
+        it_behaves_like 'a controller action with an active nav setting', :securities_services_statement, :reports
         it_behaves_like 'a report that can be downloaded', :securities_services_statement, [:pdf]
         it 'should set @start_date to the `report_end_date` attribute of the first entry of hash returned by securities_services_statements_available' do
           make_request
@@ -848,6 +853,7 @@ RSpec.describe ReportsController, :type => :controller do
 
       it_behaves_like 'a user required action', :get, :letters_of_credit
       it_behaves_like 'a report with instance variables set in a before_filter', :letters_of_credit
+      it_behaves_like 'a controller action with an active nav setting', :letters_of_credit, :reports
       it_behaves_like 'a report that can be downloaded', :letters_of_credit, [:xlsx]
 
       it 'sorts the letters of credit by lc_number' do
@@ -912,6 +918,7 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET parallel_shift' do
       it_behaves_like 'a user required action', :get, :parallel_shift
       it_behaves_like 'a report with instance variables set in a before_filter', :parallel_shift
+      it_behaves_like 'a controller action with an active nav setting', :parallel_shift, :reports
       projections = %i(shift_neg_300 shift_neg_200 shift_neg_100 shift_0 shift_100 shift_200 shift_300)
       let(:make_request) { get :parallel_shift }
       let(:as_of_date) { double('some date') }
@@ -1046,6 +1053,7 @@ RSpec.describe ReportsController, :type => :controller do
 
       it_behaves_like 'a user required action', :get, :current_securities_position
       it_behaves_like 'a report with instance variables set in a before_filter', :current_securities_position
+      it_behaves_like 'a controller action with an active nav setting', :current_securities_position, :reports
       it_behaves_like 'a report that can be downloaded', :current_securities_position, [:xlsx]
 
       describe 'view instance variables' do
@@ -1129,6 +1137,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :monthly_securities_position
       it_behaves_like 'a date restricted report', :monthly_securities_position, :last_month_end
       it_behaves_like 'a report with instance variables set in a before_filter', :monthly_securities_position
+      it_behaves_like 'a controller action with an active nav setting', :monthly_securities_position, :reports
       it_behaves_like 'a report that can be downloaded', :monthly_securities_position, [:xlsx]
       describe 'view instance variables' do
         let(:unprocessed_securities) { double('unprocessed securities details', length: nil) }
@@ -1219,6 +1228,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :forward_commitments
       it_behaves_like 'a report that can be downloaded', :forward_commitments, [:xlsx]
       it_behaves_like 'a report with instance variables set in a before_filter', :forward_commitments
+      it_behaves_like 'a controller action with an active nav setting', :forward_commitments, :reports
       describe 'view instance variables' do
         it 'sets @as_of_date to the value returned from the service endpoint' do
           allow(forward_commitments_response).to receive(:[]).with(:as_of_date).and_return(as_of_date)
@@ -1305,6 +1315,7 @@ RSpec.describe ReportsController, :type => :controller do
 
       it_behaves_like 'a user required action', :get, :capital_stock_and_leverage
       it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_and_leverage
+      it_behaves_like 'a controller action with an active nav setting', :capital_stock_and_leverage, :reports
       %w(position_table_data leverage_table_data).each do |table|
         describe "the @#{table} view instance variable" do
           it 'contains a `column_headings` array containing strings' do
@@ -1385,6 +1396,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it_behaves_like 'a user required action', :get, :interest_rate_resets
       it_behaves_like 'a report with instance variables set in a before_filter', :interest_rate_resets
+      it_behaves_like 'a controller action with an active nav setting', :interest_rate_resets, :reports
       it 'renders the interest_rate_resets view' do
         interest_rate_resets
         expect(response.body).to render_template('interest_rate_resets')
@@ -1442,6 +1454,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it_behaves_like 'a user required action', :get, :todays_credit
       it_behaves_like 'a report with instance variables set in a before_filter', :todays_credit
+      it_behaves_like 'a controller action with an active nav setting', :todays_credit, :reports
       it 'sorts activities by funding date' do
         expect(controller).to receive(:sort_report_data).with([credit_activity], :funding_date).and_return([])
         todays_credit
@@ -1478,7 +1491,7 @@ RSpec.describe ReportsController, :type => :controller do
         expect{todays_credit}.to raise_error
       end
     end
-    
+
     describe 'GET mortgage_collateral_update' do
       column_headings = [I18n.t('common_table_headings.transaction'), I18n.t('common_table_headings.loan_count'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.unpaid_balance'), '$'), fhlb_add_unit_to_table_header(I18n.t('global.original_amount'), '$')]
       accepted_loans_hash = {
@@ -1500,9 +1513,9 @@ RSpec.describe ReportsController, :type => :controller do
         allow(subject).to receive(:mcu_table_rows_for)
         allow(subject).to receive(:mcu_table_columns_for)
       end
-      
+
       it_behaves_like 'a user required action', :get, :mortgage_collateral_update
-      
+
       it 'renders the mortgage_collateral_update view' do
         mortgage_collateral_update
         expect(response.body).to render_template('mortgage_collateral_update')
@@ -1511,7 +1524,7 @@ RSpec.describe ReportsController, :type => :controller do
         mortgage_collateral_update
         expect(assigns[:mcu_data]).to eq(mcu_data)
       end
-      
+
       [accepted_loans_hash, submitted_loans_hash].each do |hash|
         describe "the @#{hash[:instance_variable].to_s} instance variable" do
           it "has a column_headings array equal to #{column_headings}" do
@@ -1591,6 +1604,7 @@ RSpec.describe ReportsController, :type => :controller do
     it_behaves_like 'a user required action', :get, :current_price_indications
     it_behaves_like 'a report that can be downloaded', :current_price_indications, [:xlsx]
     it_behaves_like 'a report with instance variables set in a before_filter', :current_price_indications
+    it_behaves_like 'a controller action with an active nav setting', :current_price_indications, :reports
     it_behaves_like 'a controller action with quick advance messaging', :current_price_indications
     it 'renders the current_price_indications view' do
       allow(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
@@ -1615,9 +1629,9 @@ RSpec.describe ReportsController, :type => :controller do
       expect(assigns[:sbc_arc_data]).to eq(arc_response)
     end
     describe 'table data' do
-      interest_day_count_key = I18n.t('reports.pages.price_indications.current.interest_day_count') 
-      payment_frequency_key = I18n.t('reports.pages.price_indications.current.payment_frequency') 
-      interest_rate_reset_key = I18n.t('reports.pages.price_indications.current.interest_rate_reset') 
+      interest_day_count_key = I18n.t('reports.pages.price_indications.current.interest_day_count')
+      payment_frequency_key = I18n.t('reports.pages.price_indications.current.payment_frequency')
+      interest_rate_reset_key = I18n.t('reports.pages.price_indications.current.interest_rate_reset')
       before { current_price_indications }
       describe '@standard_vrc_table_data' do
         it "should contain a notes hash with a #{interest_day_count_key} key and a value of '#{ReportsController::INTEREST_DAY_COUNT_MAPPINGS[:standard][:vrc]}'" do
@@ -1766,6 +1780,7 @@ RSpec.describe ReportsController, :type => :controller do
     end
     it_behaves_like 'a user required action', :get, :securities_transactions
     it_behaves_like 'a report with instance variables set in a before_filter', :securities_transactions
+    it_behaves_like 'a controller action with an active nav setting', :securities_transactions, :reports
     it_behaves_like 'a report with a @max_date', :securities_transactions
     it_behaves_like 'a report that can be downloaded', :securities_transactions, [:xlsx]
     it 'can be disabled' do
@@ -1862,6 +1877,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :historical_price_indications
       it_behaves_like 'a report that can be downloaded', :historical_price_indications, [:xlsx]
       it_behaves_like 'a report with instance variables set in a before_filter', :historical_price_indications
+      it_behaves_like 'a controller action with an active nav setting', :historical_price_indications, :reports
       it 'renders the historical_price_indications view' do
         expect(rates_service_instance).to receive(:historical_price_indications).and_return(response_hash)
         get :historical_price_indications
@@ -2072,6 +2088,7 @@ RSpec.describe ReportsController, :type => :controller do
     it_behaves_like 'a user required action', :get, :authorizations
     it_behaves_like 'a report that can be downloaded', :authorizations, [:pdf]
     it_behaves_like 'a report with instance variables set in a before_filter', :authorizations
+    it_behaves_like 'a controller action with an active nav setting', :authorizations, :reports
     describe 'view instance variables' do
       let(:member_service_instance) {double('MembersService')}
       let(:user_no_roles) {{display_name: 'User With No Roles', roles: [], surname: 'With No Roles', given_name: 'User'}}
@@ -2179,7 +2196,7 @@ RSpec.describe ReportsController, :type => :controller do
           make_request
         end
       end
-      
+
       describe '@authorizations_filter_text' do
         ReportsController::AUTHORIZATIONS_DROPDOWN_MAPPING.each do |role, role_name|
           it "equals #{role_name} when the authorizations_filter is set to #{role}" do
@@ -2277,6 +2294,7 @@ RSpec.describe ReportsController, :type => :controller do
 
     it_behaves_like 'a report that can be downloaded', :account_summary, [:pdf]
     it_behaves_like 'a report with instance variables set in a before_filter', :account_summary
+    it_behaves_like 'a controller action with an active nav setting', :account_summary, :reports
     it 'should render the account_summary view' do
       make_request
       expect(response.body).to render_template('account_summary')
