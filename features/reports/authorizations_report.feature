@@ -46,3 +46,15 @@ Scenario: Member downloads a PDF of the Authorizations report
   Given I am on the "Authorizations" report page
   When I request a PDF
   Then I should begin downloading a file
+
+@resque-backed @local-only @jira-mem-1297
+Scenario: Member sees Resolution and Authorization users when filtering by a role, even though those users do not explicitly have the filtered role
+  Given I am signed in as a Chaste Manhattan user
+  And I am on the "Authorizations" report page
+  When I select "Collateral" from the authorizations filter
+  Then I should see 2 authorized users
+  And I should see user "Della Duck" with the "Collateral" authorization and no "Resolution and Authorization" authorization
+  And I should see user "Ronald Ruck" with the "Resolution and Authorization" footnoted authorization and no "Collateral" authorization
+  When I select "Securities Services" from the authorizations filter
+  Then I should see 1 authorized user
+  And I should see user "Ronald Ruck" with the "Resolution and Authorization" footnoted authorization and no "Securities Services" authorization

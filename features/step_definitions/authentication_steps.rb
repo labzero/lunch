@@ -279,6 +279,12 @@ When(/^I visit the logged out page$/) do
   visit '/logged-out'
 end
 
+When(/^I am signed in as a Chaste Manhattan user$/) do
+  step 'I am logged out'
+  step 'I visit the dashboard'
+  step 'I fill in and submit the login form with username "extra-chaste" and password "development"'
+end
+
 def user_for_type(user_type)
   case user_type
   when 'primary user'
