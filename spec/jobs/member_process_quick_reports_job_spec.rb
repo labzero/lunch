@@ -14,6 +14,9 @@ RSpec.describe MemberProcessQuickReportsJob, type: :job do
     allow(report_set).to receive(:missing_reports).and_return([])
   end
 
+  it 'queues its self as `low_priority`' do
+    expect(described_class.queue).to eq('low_priority')
+  end
   it 'raises an error if `member_id` is nil' do
     subject.perform(nil, period)
     expect(subject.job_status.failed?).to be(true)

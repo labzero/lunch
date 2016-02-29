@@ -1,4 +1,5 @@
 class ProcessQuickReportsJob < FhlbJob
+  queue_as :low_priority
 
   def perform(period=nil)
     period ||= QuickReportSet.current_period

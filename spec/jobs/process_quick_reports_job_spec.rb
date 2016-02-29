@@ -11,6 +11,9 @@ RSpec.describe ProcessQuickReportsJob, type: :job do
     expect(QuickReportSet).to receive(:current_period)
     subject.perform
   end
+  it 'queues its self as `low_priority`' do
+    expect(described_class.queue).to eq('low_priority')
+  end
   it 'fetches a list of all members from the MembersService' do
     expect(members_service).to receive(:all_members)
     run_job
