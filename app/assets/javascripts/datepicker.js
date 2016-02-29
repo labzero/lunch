@@ -21,7 +21,7 @@ $(function () {
       var minDate = $wrapper.data('date-picker-min-date') ? moment($wrapper.data('date-picker-min-date')) : false;
       var filter = $wrapper.data('date-picker-filter');
       var filterOptions = $wrapper.data('date-picker-filter-options');
-        var fromLabel = $wrapper.data('date-picker-from-label');
+      var fromLabel = $wrapper.data('date-picker-from-label');
       var today = $wrapper.data('date-picker-today');
       $.each(presets, function(index, preset) {
         if (preset.start_date) {
