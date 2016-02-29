@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.2.5.1'
+gem 'rails', '4.2.5.2'
 gem 'ruby-oci8'
 
 # IF THE DB IS ACTING STRANGE, CHECK THIS BRANCH.
