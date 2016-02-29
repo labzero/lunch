@@ -8,6 +8,7 @@
 - min_date ||= false
 - date_picker_filter ||= nil
 - today = Time.zone.today
+- from_label = single_date_picker ? t('datepicker.single.from_label') : t('datepicker.range.from_label')
 - date_picker_data = { |
   :'date-picker-presets' => presets.to_json, |
   :'date-picker-open-direction' => open_direction, |
@@ -17,7 +18,8 @@
   :'date-picker-min-date' => min_date, |
   :'date-picker-today' => today, |
   :'date-picker-filter-options' => ReportsController::DATE_PICKER_FILTERS.to_json, |
-  :'date-picker-filter' => date_picker_filter }
+  :'date-picker-filter' => date_picker_filter, |
+  :'date-picker-from-label' => from_label }
 
 
 %span.input-field-container.pull-right.icon-calendar-after.datepicker-trigger{data: {:'date-picker-input-field-text' => input_field_text}}
