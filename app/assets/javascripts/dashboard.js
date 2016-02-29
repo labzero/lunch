@@ -1,5 +1,6 @@
 $(function () {
   var $quickAdvancesInputField = $('.dashboard-module-advances input');
+  var quickAdvanceRatesPromise;
 
   $quickAdvancesInputField.on('keypress', function(e){
     onlyAllowDigits(e);
@@ -56,7 +57,7 @@ $(function () {
       $amountField.on('keyup', function(e){
         addCommasToInputField(e);
       });
-      getQuickAdvanceRates();
+      showQuickAdvanceRates();
     };
   };
 
@@ -75,18 +76,25 @@ $(function () {
   };
 
   function getQuickAdvanceRates() {
-    $.get('/dashboard/quick_advance_rates', function(data) {
-      showQuickAdvanceRates(data);
-    })
+    if (!quickAdvanceRatesPromise) {
+      quickAdvanceRatesPromise = $.get('/dashboard/quick_advance_rates');
+      quickAdvanceRatesPromise.error(function() {
+        quickAdvanceRatesPromise = false;
+      });
+    }
+    return quickAdvanceRatesPromise;
   };
 
-  function showQuickAdvanceRates(data) {
-    var table = $('.dashboard-quick-advance-flyout table');
-    var tbody = table.find('tbody');
-    tbody.children().remove();
-    tbody.append($(data.html));
-    table.quickAdvanceTable(data.id);
-    Fhlb.Track.quick_advance_rate_table();
+  function showQuickAdvanceRates() {
+    getQuickAdvanceRates().success(function(data) {
+      var table = $('.dashboard-quick-advance-flyout table');
+      var tbody = table.find('tbody');
+      tbody.children().remove();
+      tbody.append($(data.html));
+      table.quickAdvanceTable(data.id);
+      Fhlb.Track.quick_advance_rate_table();
+      quickAdvanceRatesPromise = false;
+    });
   };
 
   function showQuickAdvanceClosedState() {
@@ -111,6 +119,7 @@ $(function () {
       };
     }, 30000);
     getOvernightVrc();
+    getQuickAdvanceRates();
   };
 
   function getOvernightVrc() {
