@@ -360,7 +360,7 @@ describe MAPIService do
     it_behaves_like 'a MAPI JSON REST request with Hash response', :post, 'Data to POST'
   end
 
-  describe `fix_date` do
+  describe '`fix_date`' do
     let(:field_1) { double('field') }
     let(:field_2) { double('field') }
     let(:data) { {field_1: field_1, field_2: field_2} }
