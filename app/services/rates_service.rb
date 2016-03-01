@@ -1,6 +1,6 @@
 class RatesService < MAPIService
-  COLLATERAL_TYPES = %i(standard sbc)
-  CREDIT_TYPES = %i(frc vrc 1m_libor 3m_libor 6m_libor daily_prime embedded_cap)
+  COLLATERAL_TYPES = %i(standard sbc sta)
+  CREDIT_TYPES = %i(frc vrc 1m_libor 3m_libor 6m_libor daily_prime embedded_cap sta)
   ARC_CREDIT_TYPES = %i(1m_libor 3m_libor 6m_libor daily_prime)
   HISTORICAL_FRC_TERM_MAPPINGS = {
     :'1m' => '1_month',

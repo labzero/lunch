@@ -336,6 +336,39 @@ module MAPI
             end
           end
 
+          api do
+            key :path, '/price_indication/historical/{start_date}/{end_date}/sta/sta'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve historical sta rates.'
+              key :notes, 'Returns an object containing rate data'
+              key :type, :HistoricalSTA
+              key :nickname, :HistoricalSTA
+              parameter do
+                key :paramType, :path
+                key :name, :start_date
+                key :required, true
+                key :type, :string
+                key :description, 'Start date yyyy-mm-dd for the STA historical rates.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :end_date
+                key :required, true
+                key :type, :string
+                key :description, 'End date yyyy-mm-dd for the STA historical rates.'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+              response_message do
+                key :code, 400
+                key :message, 'Invalid input'
+              end
+            end
+          end
+
           # Price Indication Historical rates for VRC, FRC, ARC
           api do
             key :path, '/price_indication/historical/{start_date}/{end_date}/{collateral_type}/{credit_type}'
@@ -641,6 +674,14 @@ module MAPI
           end
           live_data.merge( timestamp: Time.zone.now ).to_json
         end
+
+        relative_get "/price_indication/historical/:start_date/:end_date/sta/sta" do
+          MAPI::Services::Rates.init_cal_connection(settings.environment)
+          start_date      = params[:start_date].to_date
+          end_date        = params[:end_date].to_date
+          halt 400, 'Invalid date range: start_date must occur earlier than end_date or on the same day' unless start_date <= end_date
+          MAPI::Services::Rates::HistoricalSTA.historical_sta(self, start_date, end_date).to_json
+        end
                                
         # Price Indication Historical rates for VRC, FRC, ARC
         relative_get "/price_indication/historical/:start_date/:end_date/:collateral_type/:credit_type" do
@@ -655,6 +696,8 @@ module MAPI
           halt 400, "Invalid Credit type"                                             unless irdb_code[credit_type]
           MAPI::Services::Rates::PriceIndicationHistorical.price_indication_historical(self, start_date, end_date, collateral_type, credit_type).to_json
         end
+
+
       end
     end
   end
