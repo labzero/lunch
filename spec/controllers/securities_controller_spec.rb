@@ -24,6 +24,7 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:status) { double('status') }
       before { allow(member_balance_service_instance).to receive(:managed_securities).and_return(securities) }
       it_behaves_like 'a user required action', :get, :manage
+      it_behaves_like 'a controller action with an active nav setting', :manage, :securities
       it 'renders the manage view' do
         call_action
         expect(response.body).to render_template('manage')

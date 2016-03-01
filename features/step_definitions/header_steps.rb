@@ -29,8 +29,12 @@ Then(/^I should see a datestamp in the navigation header$/) do
   page.assert_selector('nav time')
 end
 
-Then(/^I should see the active state of the (reports|products|resources) nav item$/) do |nav_item|
+Then(/^I should see the active state of the (securities|advances|reports|products|resources) nav item$/) do |nav_item|
   translation = case nav_item
+  when 'securities'
+    'securities.title'
+  when 'advances'
+    'nav.secondary.advances'
   when 'reports'
     'reports.title'
   when 'products'

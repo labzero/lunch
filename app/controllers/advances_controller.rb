@@ -1,4 +1,8 @@
 class AdvancesController < ApplicationController
+
+  before_action do
+    set_active_nav(:advances)
+  end
   
   def manage_advances
     member_balances = MemberBalanceService.new(current_member_id, request)

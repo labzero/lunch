@@ -5,6 +5,7 @@ RSpec.describe ProductsController, :type => :controller do
 
   describe 'GET index' do
     it_behaves_like 'a user required action', :get, :index
+    it_behaves_like 'a controller action with an active nav setting', :index, :products
     it 'should render the index view' do
       get :index
       expect(response.body).to render_template('index')

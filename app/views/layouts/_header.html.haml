@@ -18,10 +18,10 @@
   %nav.row
     %time{datetime:@render_time.iso8601}= fhlb_datetime_standard_numeric(@render_time)
     %ul<>
-      %li<>
+      %li{class: ('active-nav-item' if active_nav == :advances)}<>
         = link_to(t('nav.secondary.advances'), advances_manage_advances_path)
       - if feature_enabled?('securities')
-        %li<>
+        %li{class: ('active-nav-item' if active_nav == :securities)}<>
           = link_to(t('securities.title'), manage_securities_path)
       %li{class: ('active-nav-item' if active_nav == :reports)}<>
         = link_to(t('reports.title'), reports_path, class: 'nav-menu')

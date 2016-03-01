@@ -19,10 +19,11 @@ RSpec.describe AdvancesController, :type => :controller do
     before do
       allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
       allow(member_balances_service_instance).to receive(:active_advances).and_return(response_advance_hash)
+      allow(response_advance_hash).to receive(:collect)
     end
     it_behaves_like 'a user required action', :get, :manage_advances
+    it_behaves_like 'a controller action with an active nav setting', :manage_advances, :advances
     it 'renders the manage_advances view' do
-      allow(response_advance_hash).to receive(:collect)
       get :manage_advances
       expect(response.body).to render_template('manage_advances')
     end
