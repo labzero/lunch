@@ -258,7 +258,7 @@ RSpec.describe DashboardController, :type => :controller do
         before do
           report_list.each do |report|
             url = double("A URL for #{report}")
-            quick_report = QuickReport.new(report_name: report, id: SecureRandom.hex)
+            quick_report = QuickReport.new(report_name: report)
             allow(controller).to receive(:reports_quick_download_path).with(quick_report).and_return(url)
             report_urls[report] = url
             reports << quick_report
