@@ -192,10 +192,12 @@ en:
       custom: Custom date range
       print: "%{start_date} - %{end_date}"
       last_30_days: Last 30 Days
+      from_label: From
     single:
       input: "As of %{date}"
       custom: Custom date
       end_of: "End of %{date}"
+      from_label: As of
   activerecord:
     attributes:
       user:

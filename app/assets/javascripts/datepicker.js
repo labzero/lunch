@@ -1,4 +1,5 @@
 $(function () {
+
   function bindDatepickers() {
     // set up all date-pickers on the page
     $('.datepicker-trigger').each(function(i, datePickerTrigger) {
@@ -20,6 +21,7 @@ $(function () {
       var minDate = $wrapper.data('date-picker-min-date') ? moment($wrapper.data('date-picker-min-date')) : false;
       var filter = $wrapper.data('date-picker-filter');
       var filterOptions = $wrapper.data('date-picker-filter-options');
+      var fromLabel = $wrapper.data('date-picker-from-label');
       var today = $wrapper.data('date-picker-today');
       $.each(presets, function(index, preset) {
         if (preset.start_date) {
@@ -53,7 +55,8 @@ $(function () {
         minDate: minDate,
         filter: filter,
         filterOptions: filterOptions,
-        today: today
+        today: today,
+        fromLabel: fromLabel
       });
       datePickerSelectionHandler($datePickerTrigger, $wrapper, presets);
       setDatePickerApplyListener($datePickerTrigger, $form);
@@ -86,7 +89,8 @@ $(function () {
       parentEl: $datePickerWrapper,
       locale: {
         customRangeLabel: options.customLabel,
-        cancelLabel: ''
+        cancelLabel: '',
+        fromLabel: options.fromLabel
       },
       opens: options.opens,
       singleDatePicker: options.singleDatePicker
