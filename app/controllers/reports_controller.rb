@@ -72,6 +72,8 @@ class ReportsController < ApplicationController
     User::Roles::ACCESS_MANAGER
   ]
 
+  INCLUSIVE_AUTHORIZATIONS = [AUTHORIZATIONS_MAPPING['signer_manager'], AUTHORIZATIONS_MAPPING['signer_entire_authority']].freeze
+
   DATE_PICKER_FILTERS = {
     end_of_month: 'endOfMonth',
     end_of_quarter: 'endOfQuarter'
@@ -985,10 +987,14 @@ class ReportsController < ApplicationController
     downloadable_report(:pdf, {authorizations_filter: @authorizations_filter.to_s}) do
       @authorizations_dropdown_options = AUTHORIZATIONS_DROPDOWN_MAPPING.collect{|key, value| [value, key]}
       @authorizations_filter_text = AUTHORIZATIONS_DROPDOWN_MAPPING[@authorizations_filter]
-      @authorizations_title = if @authorizations_filter == 'all'
+      mapped_filter = AUTHORIZATIONS_MAPPING[@authorizations_filter]
+      @authorizations_title = case @authorizations_filter
+      when 'all'
         t('reports.pages.authorizations.sub_title_all_users')
+      when 'signer_manager', 'signer_entire_authority'
+         t('reports.pages.authorizations.sub_title_inclusive_authorizations', filter: mapped_filter)
       else
-        t('reports.pages.authorizations.sub_title', filter: AUTHORIZATIONS_MAPPING[@authorizations_filter])
+        t('reports.pages.authorizations.sub_title', filter: mapped_filter)
       end
 
       @authorizations_table_data = {
@@ -1011,8 +1017,27 @@ class ReportsController < ApplicationController
         users.sort_by! { |user| [user[:surname] || '', user[:given_name] || ''] }
 
         user_roles = users.map{ |user| [user, roles_for_signers(user)] }.reject{ |_,roles| roles.empty? }
-        user_roles = user_roles.select{ |_,roles| roles.include?(AUTHORIZATIONS_MAPPING[@authorizations_filter]) } if @authorizations_filter != 'all'
+        check_for_inclusive_roles = false
+        matching_roles_array = if ['signer_manager', 'signer_entire_authority', 'all'].include?(@authorizations_filter)
+          [AUTHORIZATIONS_MAPPING[@authorizations_filter]]
+        else
+          check_for_inclusive_roles = true
+          [AUTHORIZATIONS_MAPPING[@authorizations_filter], INCLUSIVE_AUTHORIZATIONS].flatten
+        end
+        user_roles = user_roles.select{ |_,roles| (roles & matching_roles_array).any? } unless @authorizations_filter == 'all'
 
+        if check_for_inclusive_roles
+          user_roles.each do |_, roles|
+            roles.collect! do |role|
+              if INCLUSIVE_AUTHORIZATIONS.include?(role)
+                @footnote_role ||= AUTHORIZATIONS_MAPPING[@authorizations_filter].downcase.capitalize
+                [role, :footnoted]
+              else
+                role
+              end
+            end
+          end
+        end
         @authorizations_table_data[:rows] = user_roles.map{ |user,roles| {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: roles}]}}
 
         render layout: false if request.xhr?

@@ -109,6 +109,7 @@ en:
     sta_number: Settlement/Transaction Account No. %{sta_number}
     all_transactions: All Transactions
     footnote_indicator: '*'
+    footnoted_string: '%{string}*'
     attachments: Attachments
     unknown: Unknown
     last_updated: 'Last Updated: %{date}'
@@ -1515,8 +1516,10 @@ en:
         title: Authorizations
         intro_html: The following people are authorized to use the Bank's services on behalf of your institution. If you'd like to make changes to these authorizations, please fill out an <a href=%{url}>Authorization Form</a>.
         contact_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about authorizations, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
-        sub_title: Users with %{filter}
+        sub_title: Users with %{filter} Authorization
         sub_title_all_users: All Users with Authorizations
+        sub_title_inclusive_authorizations: Users with %{filter}
+        table_footnote: "* %{role} authorization included for users with Resolution and Authorization: Memeber Transactions or Etntire Authority."
       parallel_shift:
         title: Putable Advance Parallel Shift Sensitivity Analysis
         info: The valuations below are calculated using data as of %{date}
