@@ -1,4 +1,5 @@
 class MemberProcessQuickReportsJob < FhlbJob
+  queue_as :low_priority
   include DatePickerHelper
 
   def perform(member_id, period)
