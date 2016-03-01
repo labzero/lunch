@@ -1080,7 +1080,7 @@ class ReportsController < ApplicationController
     @report_name = t('reports.pages.securities_position.monthly')
     date_restriction = DATE_RESTRICTION_MAPPING[:monthly_securities_position]
     @securities_filter = params['securities_filter'] || 'all'
-    start_date = (params[:start_date] || last_month_end).to_date
+    start_date = (params[:start_date] || default_dates_hash[:last_month_end]).to_date
     min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
     @min_date = min_and_start_dates_array.first
     @month_end_date = month_restricted_start_date(min_and_start_dates_array.last)
@@ -1556,11 +1556,6 @@ class ReportsController < ApplicationController
     roles.collect! { |role| AUTHORIZATIONS_MAPPING[role] }
     roles.compact!
     roles
-  end
-
-  def last_month_end
-    today = Time.zone.today
-    today == today.end_of_month ? today.end_of_month : (today - 1.month).end_of_month
   end
 
   def min_and_start_dates(min_date_range, start_date_param=nil)

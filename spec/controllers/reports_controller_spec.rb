@@ -11,11 +11,11 @@ RSpec.describe ReportsController, :type => :controller do
     let(:default_start) do
       case default_start_selection
         when :this_month_start
-          default_dates_hash[:this_month_start]
+          controller.send(:default_dates_hash)[:this_month_start]
         when :last_month_start
-          default_dates_hash[:last_month_start]
+          controller.send(:default_dates_hash)[:last_month_start]
         when :last_month_end
-          controller.send(:last_month_end)
+          controller.send(:default_dates_hash)[:last_month_end]
         else
           raise 'Default start case not found'
       end
@@ -1124,6 +1124,7 @@ RSpec.describe ReportsController, :type => :controller do
         allow(member_balance_service_instance).to receive(:monthly_securities_position).and_return(securities_position_response)
         allow(restricted_start_date).to receive(:end_of_month).and_return(end_of_month)
         allow(controller).to receive(:month_restricted_start_date).and_return(end_of_month)
+        allow(controller).to receive(:default_dates_hash).and_return({last_month_end: end_of_month})
       }
 
       it_behaves_like 'a user required action', :get, :monthly_securities_position
@@ -1138,7 +1139,6 @@ RSpec.describe ReportsController, :type => :controller do
           get :monthly_securities_position
         end
         it 'should pass `last_month_end` to `min_and_start_dates` if no start_date param is given' do
-          allow(controller).to receive(:last_month_end).and_return(end_of_month)
           expect(controller).to receive(:min_and_start_dates).with(anything, end_of_month)
           get :monthly_securities_position
         end
@@ -2511,20 +2511,7 @@ RSpec.describe ReportsController, :type => :controller do
         expect(subject.send(:roles_for_signers, user)).to match_array([role_mappings[User::Roles::WIRE_SIGNER], role_mappings[User::Roles::SIGNER_MANAGER]])
       end
     end
-    describe 'last_month_end' do
-      let(:end_of_july) { Date.new(2015,7,31) }
-      it 'returns a date' do
-        expect(controller.send(:last_month_end)).to be_kind_of(Date)
-      end
-      it 'returns the end of last month if today is not the end of the month' do
-        allow(Time.zone).to receive(:today).and_return(end_of_july + rand(1..30).days)
-        expect(controller.send(:last_month_end)).to eq(end_of_july)
-      end
-      it 'returns today if it is the end of the month' do
-        allow(Time.zone).to receive(:today).and_return(end_of_july)
-        expect(controller.send(:last_month_end)).to eq(end_of_july)
-      end
-    end
+
     describe 'min_and_start_dates' do
       let(:min_date_range) { 18.months }
       let(:min_date) { today - min_date_range }
