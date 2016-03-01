@@ -2375,19 +2375,40 @@ RSpec.describe ReportsController, :type => :controller do
     context do
       before { allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile) }
       it 'adds a row to @credit_outstanding if there is a `mpf_credit`' do
+        profile[:credit_outstanding][:investments] = 0
         profile[:credit_outstanding][:mpf_credit] = 1
         make_request
-        expect(assigns[:credit_outstanding][:rows].length).to be(7)
+        expect(assigns[:credit_outstanding][:rows].length).to be(6)
       end
       it 'doesn\'t a row to @credit_outstanding if there is no `mpf_credit`' do
+        profile[:credit_outstanding][:investments] = 0
         profile[:credit_outstanding].delete(:mpf_credit)
+        make_request
+        expect(assigns[:credit_outstanding][:rows].length).to be(5)
+      end
+      it 'doesn\'t a row to @credit_outstanding if `mpf_credit` is zero' do
+        profile[:credit_outstanding][:investments] = 0
+        profile[:credit_outstanding][:mpf_credit] = 0
+        make_request
+        expect(assigns[:credit_outstanding][:rows].length).to be(5)
+      end
+      it 'adds a row to @credit_outstanding if there are `investments`' do
+        profile[:credit_outstanding][:mpf_credit] = 0
+        profile[:credit_outstanding][:investments] = 1
         make_request
         expect(assigns[:credit_outstanding][:rows].length).to be(6)
       end
-      it 'doesn\'t a row to @credit_outstanding if `mpf_credit` is zero' do
+      it 'doesn\'t a row to @credit_outstanding if there are no `investments`' do
         profile[:credit_outstanding][:mpf_credit] = 0
+        profile[:credit_outstanding].delete(:investments)
         make_request
-        expect(assigns[:credit_outstanding][:rows].length).to be(6)
+        expect(assigns[:credit_outstanding][:rows].length).to be(5)
+      end
+      it 'doesn\'t a row to @credit_outstanding if `investments` are zero' do
+        profile[:credit_outstanding][:mpf_credit] = 0
+        profile[:credit_outstanding][:investments] = 0
+        make_request
+        expect(assigns[:credit_outstanding][:rows].length).to be(5)
       end
       it 'adds a row to @financing_availability if there is a `mpf_credit_available`' do
         profile[:mpf_credit_available] = 1

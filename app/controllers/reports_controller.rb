@@ -1309,18 +1309,6 @@ class ReportsController < ApplicationController
               {value: t('reports.pages.account_summary.credit_outstanding.swaps_notational')},
               {value: member_profile[:credit_outstanding][:swaps_notational], type: :currency_whole}
             ]
-          },
-          {
-            columns: [
-              {value: t('reports.pages.account_summary.credit_outstanding.investments')},
-              {value: member_profile[:credit_outstanding][:investments], type: :currency_whole}
-            ]
-          },
-          {
-            columns: [
-              {value: t('reports.pages.account_summary.credit_outstanding.letters_of_credit')},
-              {value: member_profile[:credit_outstanding][:letters_of_credit], type: :currency_whole}
-            ]
           }
         ],
         footer: [
@@ -1328,6 +1316,24 @@ class ReportsController < ApplicationController
           {value: member_profile[:credit_outstanding][:total], type: :currency_whole}
         ]
       }
+
+      if member_profile[:credit_outstanding][:investments].present? && member_profile[:credit_outstanding][:investments] > 0
+        @credit_outstanding[:rows] <<
+          {
+            columns: [
+               {value: t('reports.pages.account_summary.credit_outstanding.investments')},
+               {value: member_profile[:credit_outstanding][:investments], type: :currency_whole}
+             ]
+          }
+      end
+
+      @credit_outstanding[:rows] <<
+        {
+          columns: [
+            {value: t('reports.pages.account_summary.credit_outstanding.letters_of_credit')},
+            {value: member_profile[:credit_outstanding][:letters_of_credit], type: :currency_whole}
+          ]
+        }
 
       if member_profile[:credit_outstanding][:mpf_credit].present? && member_profile[:credit_outstanding][:mpf_credit] > 0
         @credit_outstanding[:rows] << {
