@@ -149,4 +149,38 @@ module DatePickerHelper
     end
   end
 
+  def most_recent_business_day(d)
+    return d - 1.day if d.saturday?
+    return d - 2.day if d.sunday?
+    d
+  end
+
+  def min_and_start_dates(min_date_range, start_date_param=nil)
+    now = Time.zone.today
+    start_date = (start_date_param || now).to_date
+    min_date = now - min_date_range
+
+    start_date = if min_date < start_date && start_date <= now
+      start_date
+    elsif start_date > now
+      now
+    else
+      min_date
+    end
+    [min_date, start_date]
+  end
+
+  def month_restricted_start_date(start_date)
+    today = Time.zone.today
+    if start_date > today.beginning_of_month && start_date != today.end_of_month
+      (start_date - 1.month).end_of_month
+    else
+      start_date.end_of_month
+    end
+  end
+  
+  def last_month_end
+    today = Time.zone.today
+    today == today.end_of_month ? today.end_of_month : (today - 1.month).end_of_month
+  end
 end
