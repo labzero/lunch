@@ -13,6 +13,7 @@ class RestaurantListItem extends Component {
   render() {
     return (
       <li>
+        {console.log(this.props)}
         {this.props.name}
         <RestaurantDeleteButtonContainer id={this.props.id} />
       </li>

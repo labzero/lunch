@@ -9,6 +9,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import { analytics } from '../../config';
+import serialize from 'serialize-javascript';
 
 // https://analytics.google.com/
 const trackingCode =
@@ -16,7 +17,7 @@ const trackingCode =
   `ga('create','${analytics.google.trackingId}','auto');`;
 
 const generateInitialState = (initialState) =>
-  `window.__INITIAL_STATE__ = ${JSON.stringify(initialState)}`;
+  `window.__INITIAL_STATE__ = ${serialize(initialState)}`;
 
 class Html extends Component {
 
