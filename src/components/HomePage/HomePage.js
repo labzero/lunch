@@ -1,9 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import fetchRestaurantsIfNeeded from '../../actions/restaurants';
+import { fetchRestaurantsIfNeeded } from '../../actions/restaurants';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './HomePage.scss';
-import RestaurantList from '../RestaurantList';
+import RestaurantListContainer from '../../containers/RestaurantListContainer';
+import RestaurantAddForm from '../RestaurantAddForm';
 
 const title = 'Lunch';
 
@@ -28,7 +29,7 @@ class HomePage extends Component {
     return (
       <div>
         <RestaurantAddForm />
-        <RestaurantList items={this.props.items} />
+        <RestaurantListContainer />
       </div>
     );
   }

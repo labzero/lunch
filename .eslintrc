@@ -8,8 +8,8 @@
     "comma-dangle": 0,
     "key-spacing": 0,
     "no-confusing-arrow": 0,
-    "react/jsx-quotes": 0,
     "jsx-quotes": [2, "prefer-double"],
-    "max-len": [2, 120]
+    "max-len": [2, 120],
+    "react/jsx-no-bind": [2, {"ignoreRefs": true}]
   }
 }

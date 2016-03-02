@@ -26,6 +26,7 @@ Object.assign(config.development, settings);
 Object.assign(config.production, settings);
 
 Object.assign(config.development, {
+  debug: true,
   seeds: {
     directory: './db/seeds/development'
   }

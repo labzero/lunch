@@ -1,18 +1,30 @@
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { addRestaurant } from '../actions/restaurants';
+import { addRestaurant } from '../../actions/restaurants';
 
-const RestaurantAddForm = ({ dispatch }) => {
-  let input;
-  render(
-    <form>
-      <input ref={node => {input = node}} />
-      <button onClick={() => {
-        dispatch(addRestaurant(input.value));
-        input.value = '';
-      }} />
-    </form>
-  );
+class RestaurantAddForm extends Component {
+
+  static propTypes = {
+    dispatch: PropTypes.func.isRequired
+  }
+
+  handleClick = () => {
+    this.props.dispatch(addRestaurant(this._input.value));
+    this._input.value = '';
+  }
+
+  render() {
+    return (
+      <form>
+        <input ref={node => {this._input = node;}} />
+        <button type="button" onClick={this.handleClick}>Add</button>
+      </form>
+    );
+  }
 }
 
-export default connect(mapStateToProps)(RestaurantAddForm)
+function mapStateToProps() {
+  return {};
+}
+
+export default connect(mapStateToProps)(RestaurantAddForm);

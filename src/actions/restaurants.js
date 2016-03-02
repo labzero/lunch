@@ -1,19 +1,45 @@
 import fetch from '../core/fetch';
+import * as ActionTypes from '../ActionTypes';
 
-export const INVALIDATE_RESTAURANTS = 'INVALIDATE_RESTAURANTS';
 export function invalidateRestaurants() {
-  return { type: INVALIDATE_RESTAURANTS };
+  return { type: ActionTypes.INVALIDATE_RESTAURANTS };
 }
 
-export const REQUEST_RESTAURANTS = 'REQUEST_RESTAURANTS';
+export function postRestaurant(obj) {
+  return {
+    type: ActionTypes.POST_RESTAURANT,
+    restaurant: obj
+  };
+}
+
+export function restaurantPosted(obj) {
+  return {
+    type: ActionTypes.RESTAURANT_POSTED,
+    restaurant: obj
+  };
+}
+
+export function deleteRestaurant(key) {
+  return {
+    type: ActionTypes.DELETE_RESTAURANT,
+    key
+  };
+}
+
+export function restaurantDeleted(key) {
+  return {
+    type: ActionTypes.RESTAURANT_DELETED,
+    key
+  };
+}
+
 export function requestRestaurants() {
-  return { type: REQUEST_RESTAURANTS };
+  return { type: ActionTypes.REQUEST_RESTAURANTS };
 }
 
-export const RECEIVE_RESTAURANTS = 'RECEIVE_RESTAURANTS';
 export function receiveRestaurants(json) {
   return {
-    type: RECEIVE_RESTAURANTS,
+    type: ActionTypes.RECEIVE_RESTAURANTS,
     items: json
   };
 }
@@ -38,7 +64,7 @@ function shouldFetchRestaurants(state) {
   return items.didInvalidate;
 }
 
-export default function fetchRestaurantsIfNeeded() {
+export function fetchRestaurantsIfNeeded() {
   // Note that the function also receives getState()
   // which lets you choose what to dispatch next.
 
@@ -52,5 +78,29 @@ export default function fetchRestaurantsIfNeeded() {
     }
     // Let the calling code know there's nothing to wait for.
     return Promise.resolve();
+  };
+}
+
+export function addRestaurant(name) {
+  return (dispatch) => {
+    dispatch(postRestaurant());
+    return fetch('/api/restaurants', {
+      method: 'post',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name })
+    }).then(response => response.json())
+      .then(json => dispatch(restaurantPosted(json)));
+  };
+}
+
+export function removeRestaurant(key) {
+  return (dispatch) => {
+    dispatch(deleteRestaurant(key));
+    return fetch(`/api/restaurants/${key}`, {
+      method: 'delete'
+    }).then(() => dispatch(restaurantDeleted(key)));
   };
 }

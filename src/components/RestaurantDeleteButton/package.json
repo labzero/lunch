@@ -1,0 +1,6 @@
+{
+  "name": "RestaurantDeleteButton",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./RestaurantDeleteButton.js"
+}
