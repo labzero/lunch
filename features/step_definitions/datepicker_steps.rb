@@ -15,6 +15,10 @@ Then(/^I should see the datepicker preset for "(.*?)"$/) do |preset|
   page.assert_selector('.ranges li', text: text)
 end
 
+Then(/^I should not see the datepicker preset for "(.*?)"$/) do |preset|
+  page.assert_no_selector('.ranges li', text: preset)
+end
+
 When(/^I choose the "(.*?)" preset in the datepicker$/) do |preset|
   text = get_datepicker_preset_label(preset)
   page.first('.daterangepicker .ranges li', text: text).click
@@ -165,9 +169,9 @@ When(/^that today's date is the (last day of last quarter|first day of this quar
 end
 
 When(/^that today's date is "(.*?)"$/) do |date|
-  today = date.to_date
-  allow(Time.zone).to receive(:today).and_return(today)
-  allow(Time.zone.now).to receive(:to_date).and_return(today)
+  now = Time.zone.now
+  today = date.to_datetime.change(hour: now.hour, min: now.min, sec: now.sec)
+  Timecop.travel(today)
 end
 
 def get_datepicker_preset_label(preset)

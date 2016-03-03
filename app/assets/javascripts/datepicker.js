@@ -62,7 +62,6 @@ $(function () {
       setDatePickerApplyListener($datePickerTrigger, $form);
       setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
       if (filter !== undefined) {
-        disablePresets($datePickerTrigger, filter, filterOptions, today);
         if (singleDatePicker) {
           $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(){
             filterDates(filter, filterOptions);
@@ -219,23 +218,6 @@ $(function () {
         return oldResults;
       };
       pickerPrototype.updateCalendars.fhlbModified = true;
-    };
-  };
-
-  function disablePresets($picker, filter, filterOptions, today) {
-    var picker = $picker.data('daterangepicker');
-    var today = moment(today);
-    var endOfMonth = moment(today).endOf('month'); // clone so that `endOf` does not mutate original `date`
-    switch (filter) {
-      case filterOptions['end_of_month']:
-        if (today !== endOfMonth) {
-          $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
-        };
-        break;
-      case filterOptions['end_of_quarter']:
-        $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
-        $(picker.container.find('.ranges li')[1]).addClass('disabled'); // 'End of {month}'
-        break;
     };
   };
 

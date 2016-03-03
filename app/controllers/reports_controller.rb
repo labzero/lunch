@@ -1114,7 +1114,7 @@ class ReportsController < ApplicationController
     report_download_name = "monthly-securities-position-#{@securities_filter}-#{@month_end_date}"
     downloadable_report(nil, {securities_filter: params['securities_filter'], start_date: params['start_date']}, report_download_name) do
       @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
-      @picker_presets = date_picker_presets(@month_end_date, nil, ReportConfiguration.date_restrictions(:monthly_securities_position))
+      @picker_presets = date_picker_presets(@month_end_date, nil, ReportConfiguration.date_restrictions(:monthly_securities_position), nil, [:today])
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(MONTHLY_SECURITIES_WEB_FLAGS)
         @monthly_securities_position = {securities:[]}

@@ -50,7 +50,7 @@ module DatePickerHelper
     {start_date: start_date, end_date: end_date}
   end
 
-  def date_picker_presets(custom_start_date, custom_end_date = nil, date_history = nil, max_date = nil)
+  def date_picker_presets(custom_start_date, custom_end_date = nil, date_history = nil, max_date = nil, exclude = nil)
     min_date = Time.zone.today - date_history if date_history
     presets = if custom_end_date.nil?
       date_picker_single(custom_start_date, min_date, max_date)
@@ -62,6 +62,9 @@ module DatePickerHelper
         preset[:is_default] = true
         break
       end
+    end
+    Array.wrap(exclude).each do |id|
+      presets.delete_if { |preset| preset[:id] == id }
     end
     presets
   end
@@ -120,28 +123,33 @@ module DatePickerHelper
       {
         label: t('global.today'),
         start_date: default_dates_hash[:today],
-        end_date: default_dates_hash[:today]
+        end_date: default_dates_hash[:today],
+        id: :today
       },
       {
         label: t('datepicker.single.end_of', date: default_dates_hash[:last_month_end].strftime('%B')),
         start_date: default_dates_hash[:last_month_end],
-        end_date: default_dates_hash[:last_month_end]
+        end_date: default_dates_hash[:last_month_end],
+        id: :month_end
       },
       {
         label: t('datepicker.single.end_of', date: t("dates.quarters.#{last_quarter[:quarter]}", year: last_quarter[:year])),
         start_date: quarter_start_and_end_dates((last_quarter[:quarter]), last_quarter[:year])[:end_date],
-        end_date: quarter_start_and_end_dates((last_quarter[:quarter]), last_quarter[:year])[:end_date]
+        end_date: quarter_start_and_end_dates((last_quarter[:quarter]), last_quarter[:year])[:end_date],
+        id: :quarter_end
       },
       {
         label: t('datepicker.single.end_of', date: default_dates_hash[:last_year_start].year.to_s),
         start_date: default_dates_hash[:last_year_end],
-        end_date: default_dates_hash[:last_year_end]
+        end_date: default_dates_hash[:last_year_end],
+        id: :year_end
       },
       {
         label: t('datepicker.single.custom'),
         start_date: custom_start_date,
         end_date: custom_start_date,
-        is_custom: true
+        is_custom: true,
+        id: :custom
       }
     ].delete_if do |preset|
       (preset[:start_date] < min_date if min_date) ||
@@ -172,7 +180,7 @@ module DatePickerHelper
 
   def month_restricted_start_date(start_date)
     today = Time.zone.today
-    if start_date > today.beginning_of_month && start_date != today.end_of_month
+    if start_date >= today.beginning_of_month
       (start_date - 1.month).end_of_month
     else
       start_date.end_of_month

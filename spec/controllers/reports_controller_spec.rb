@@ -1202,6 +1202,10 @@ RSpec.describe ReportsController, :type => :controller do
             expect(assigns[:securities_filter_text]).to eq(option.first)
           end
         end
+        it 'should pass @start_date, nil, `date_restriction`, nil and `today` to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+          expect(controller).to receive(:date_picker_presets).with(anything, anything, anything, anything, [:today]).and_return(date_picker_presets)
+          get :monthly_securities_position
+        end
       end
     end
     describe 'GET forward_commitments' do
@@ -2623,9 +2627,9 @@ RSpec.describe ReportsController, :type => :controller do
           expect(controller.send(:month_restricted_start_date, start_date)).to eq(Date.new(2014,12,31))
         end
 
-        it 'returns the start_date if the start_date is the last day of this month' do
+        it 'returns the start_date of last month if the start_date is the last day of this month' do
           start_date = Date.new(2015,1,31)
-          expect(controller.send(:month_restricted_start_date, start_date)).to eq(start_date)
+          expect(controller.send(:month_restricted_start_date, start_date)).to eq((start_date - 1.month).end_of_month)
         end
       end
       describe 'when the start date occurs before the current month' do
