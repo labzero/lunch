@@ -44,15 +44,15 @@ RSpec.describe ReportConfiguration do
     expect(subject).to respond_to(:date_restrictions)
   end
 
-  describe 'the `date_restrictions` method' do    
+  describe 'the `date_restrictions` method' do
     it 'returns nil if report type not found or supported' do
     [ :capital_stock_trial_balance, :borrowing_capacity, :current_price_indications, :historical_price_indications,
-      :cash_projections, :interest_rate_resets, :securities_transactions, :authorizations, 
+      :cash_projections, :interest_rate_resets, :securities_transactions, :authorizations,
       :forward_commitments, :fake_report_type ]. each do |report_type|
         expect(subject.date_restrictions(report_type)).to eq(nil)
       end
     end
-    
+
     it 'returns matching date restrictions for each report type' do
       { capital_stock_activity: capital_stock_activity_restriction,
         settlement_transaction_account: settlement_transaction_account_restriction,
@@ -65,41 +65,41 @@ RSpec.describe ReportConfiguration do
       end
     end
   end
-  
+
   it 'responds to `date_bounds`' do
     expect(subject).to respond_to(:date_bounds)
   end
-  
+
   describe 'the `date_bounds` method' do
     let(:min_date) { Date.new(2002,1,1) }
-    let(:today) { DateTime.now.to_date }
+    let(:today) { Time.zone.today }
     let(:start_date) { 1.day.ago.to_date }
     let(:end_date) { (start_date + 2.days).to_date }
     let(:max_date) { subject.most_recent_business_day(Time.zone.today - 1.day) }
     let(:this_month_start) { subject.default_dates_hash[:this_month_start] }
     let(:last_month_start) { subject.default_dates_hash[:last_month_start] }
     let(:last_month_end) { subject.default_dates_hash[:last_month_end] }
-  
+
     it 'returns hash of nils if report type not found or supported' do
-    [ :current_price_indications, 
-      :cash_projections, 
-      :interest_rate_resets, 
-      :authorizations, 
-      :forward_commitments, 
+    [ :current_price_indications,
+      :cash_projections,
+      :interest_rate_resets,
+      :authorizations,
+      :forward_commitments,
       :fake_report_type ]. each do |report_type|
         expect(subject.date_bounds(report_type, DateTime.now, DateTime.now)).to eq(
           { min: nil, start: nil, end: nil, max: nil })
       end
     end
-    
+
     describe 'when processing the capital stock activity report' do
       let(:min_date) { subject.date_restrictions(:capital_stock_activity).ago.to_date }
-    
+
       it 'returns correct dates when nil dates supplied' do
         expect(subject.date_bounds(:capital_stock_activity, nil, nil)).to eq(
           { min: min_date, start: last_month_start, end: last_month_end, max: nil })
       end
-    
+
       it 'returns correct dates when valid dates supplied (happy path)' do
         expect(subject.date_bounds(:capital_stock_activity, start_date, end_date)).to eq(
           { min: min_date, start: start_date, end: end_date, max: nil })
@@ -110,23 +110,23 @@ RSpec.describe ReportConfiguration do
           { min: min_date, start: min_date, end: end_date, max: nil })
       end
     end
-    
+
     describe 'when processing the capital stock trial balance report' do
       it 'returns max for start date when start date is nil' do
         expect(subject.date_bounds(:capital_stock_trial_balance, nil, nil)).to eq(
           { min: min_date, start: max_date, end: nil, max: max_date })
       end
-    
+
       it 'returns min date for start date when start date comes before min date' do
         expect(subject.date_bounds(:capital_stock_trial_balance, min_date - 1.day, nil)).to eq(
           { min: min_date, start: min_date, end: nil, max: max_date })
       end
-      
+
       it 'returns max date for start date when start date comes after max date' do
         expect(subject.date_bounds(:capital_stock_trial_balance, max_date + 1.day, nil)).to eq(
           { min: min_date, start: max_date, end: nil, max: max_date })
       end
-      
+
       it 'returns supplied start date when start date is in bounds (happy path)' do
         expect(subject.date_bounds(:capital_stock_trial_balance, max_date - 5.day, nil)).to eq(
           { min: min_date, start: max_date - 5.days, end: nil, max: max_date })
@@ -138,37 +138,37 @@ RSpec.describe ReportConfiguration do
         expect(subject.date_bounds(:borrowing_capacity, nil, nil)).to eq(
           { min: nil, start: nil, end: today, max: nil })
       end
-    
+
       it 'returns min date for start date when start date comes before min date' do
-        expect(subject.date_bounds(:capital_stock_trial_balance, min_date - 1.day, nil)).to eq( 
+        expect(subject.date_bounds(:capital_stock_trial_balance, min_date - 1.day, nil)).to eq(
           { min: min_date, start: min_date, end: nil, max: max_date })
       end
-      
+
       it 'returns max date for start date when start date comes after max date' do
-        expect(subject.date_bounds(:capital_stock_trial_balance, max_date + 1.day, nil)).to eq(  
+        expect(subject.date_bounds(:capital_stock_trial_balance, max_date + 1.day, nil)).to eq(
           { min: min_date, start: max_date, end: nil, max: max_date })
-      end      
+      end
     end
-    
+
     describe 'when processing the settlement transaction account report' do
       let(:min_date) { subject.date_restrictions(:settlement_transaction_account).ago.to_date }
-      
+
       it 'returns default min, start and end dates if start and end dates are nil' do
         expect(subject.date_bounds(:settlement_transaction_account, nil, nil)).to eq(
-          { min: min_date, start: this_month_start, end: today, max: nil })    
+          { min: min_date, start: this_month_start, end: today, max: nil })
       end
-      
+
       it 'returns min date for start date when start date comes before min date' do
         expect(subject.date_bounds(:settlement_transaction_account, min_date - 1.day, nil)).to eq(
           { min: min_date, start: min_date, end: today, max: nil })
       end
-      
+
       it 'returns in bounds start and end date if supplied (happy path)' do
         expect(subject.date_bounds(:settlement_transaction_account, today, today + 1.day)).to eq(
           { min: min_date, start: today, end: today + 1.day, max: nil })
       end
-    end            
-  
+    end
+
     describe 'when processing the advances detail report' do
       let(:min_date) { subject.date_restrictions(:advances_detail).ago.to_date }
 
@@ -176,7 +176,7 @@ RSpec.describe ReportConfiguration do
         expect(subject.date_bounds(:advances_detail, nil, nil)).to eq(
           { min: min_date, start: max_date, end: nil, max: max_date })
       end
-      
+
       it 'returns min date for start date when start date comes before min date' do
         expect(subject.date_bounds(:advances_detail, min_date - 1.day, nil)).to eq(
           { min: min_date, start: min_date, end: nil, max: max_date })
@@ -185,7 +185,7 @@ RSpec.describe ReportConfiguration do
       it 'returns in bounds start date if supplied (happy path)' do
         expect(subject.date_bounds(:advances_detail, min_date + 5.days, nil)).to eq(
           { min: min_date, start: min_date + 5.days, end: nil, max: max_date })
-      end      
+      end
     end
 
     describe 'when processing the historical price indications report' do
@@ -195,32 +195,32 @@ RSpec.describe ReportConfiguration do
         expect(subject.date_bounds(:historical_price_indications, nil, nil)).to eq(
           { min: nil, start: subject.default_dates_hash[:last_30_days], end: today, max: nil })
       end
-      
+
       it 'returns in bounds start and end dates if supplied (happy path)' do
         expect(subject.date_bounds(:historical_price_indications, 6.months.ago.to_date, 3.months.ago.to_date)).to eq(
           { min: nil, start: 6.months.ago.to_date, end: 3.months.ago.to_date, max: nil })
-      end      
+      end
     end
-    
+
     describe 'when processing the securities transactions report' do
       let(:max_date) { subject.most_recent_business_day(Time.zone.today) }
-    
+
       it 'defaults start and max to the most recent business day' do
         expect(subject.date_bounds(:securities_transactions, nil, nil)).to eq(
           { min: nil, start: max_date, end: nil, max: max_date })
       end
-      
+
       it 'returns max for start date when start date comes after max date' do
         expect(subject.date_bounds(:securities_transactions, max_date + 1.day, nil)).to eq(
           { min: nil, start: max_date, end: nil, max: max_date })
       end
-    
+
       it 'returns in bounds start date if supplied (happy path)' do
         expect(subject.date_bounds(:securities_transactions, 6.months.ago.to_date, nil)).to eq(
           { min: nil, start: 6.months.ago.to_date, end: nil, max: max_date })
-      end      
+      end
     end
-    
+
     describe 'when processing the monthly securities position report' do
       let(:min_date) { subject.date_restrictions(:monthly_securities_position).ago.to_date }
       let(:start_date) { last_month_end }
@@ -228,12 +228,12 @@ RSpec.describe ReportConfiguration do
       it 'defaults start date to last month end and end date to month-restricted start' do
         expect(subject.date_bounds(:monthly_securities_position, nil, nil)).to eq(
           { min: min_date, start: start_date, end: end_date, max: nil })
-      end        
-      
+      end
+
       it 'returns min date for start date when start date comes before min date' do
         expect(subject.date_bounds(:monthly_securities_position, min_date - 1.month, nil)).to eq(
           { min: min_date, start: min_date, end: subject.month_restricted_start_date(min_date), max: nil })
       end
-    end    
+    end
   end
 end
