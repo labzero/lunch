@@ -1572,49 +1572,116 @@ RSpec.describe ReportsController, :type => :controller do
 
   describe 'GET current_price_indications' do
     let(:current_price_indications) { get :current_price_indications }
-    let(:rates_service_instance) { double('RatesService') }
-    let(:member_balances_service_instance) { double('MemberBalanceService') }
-    let(:response_cpi_hash) { double('RatesServiceHash') }
-    let(:response_sta_hash) { double('MemberBalanceServiceHash') }
-    let(:vrc_response) {{'advance_maturity' => 'Overnight/Open','overnight_fed_funds_benchmark' => 0.13,'basis_point_spread_to_benchmark' => 5,'advance_rate' => 0.18}}
-    let(:frc_response) {[{'advance_maturity' =>'1 Month','treasury_benchmark_maturity' => '3 Months','nominal_yield_of_benchmark' => 0.01,'basis_point_spread_to_benchmark' => 20,'advance_rate' => 0.21}]}
-    let(:arc_response) {[{'advance_maturity' => '1 Year','1_month_libor' => 6,'3_month_libor' => 4,'6_month_libor' => 11,'prime' => -295}]}
 
-    before do
-      allow(RatesService).to receive(:new).and_return(rates_service_instance)
-      allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
-      allow(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
-      allow(response_sta_hash).to receive(:[]).with(:rate)
-      allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'vrc').at_least(1).and_return(vrc_response)
-      allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'frc').at_least(1).and_return(frc_response)
-      allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'arc').at_least(1).and_return(arc_response)
-    end
     it_behaves_like 'a user required action', :get, :current_price_indications
     it_behaves_like 'a report that can be downloaded', :current_price_indications, [:xlsx]
     it_behaves_like 'a report with instance variables set in a before_filter', :current_price_indications
     it_behaves_like 'a controller action with an active nav setting', :current_price_indications, :reports
     it_behaves_like 'a controller action with quick advance messaging', :current_price_indications
     it 'renders the current_price_indications view' do
-      allow(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
-      allow(response_cpi_hash).to receive(:collect)
-      allow(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
       current_price_indications
       expect(response.body).to render_template('current_price_indications')
     end
-    it 'should return vrc data' do
-      current_price_indications
-      expect(assigns[:standard_vrc_data]).to eq(vrc_response)
-      expect(assigns[:sbc_vrc_data]).to eq(vrc_response)
-    end
-    it 'should return frc data' do
-      current_price_indications
-      expect(assigns[:standard_frc_data]).to eq(frc_response)
-      expect(assigns[:sbc_frc_data]).to eq(frc_response)
-    end
-    it 'should return arc data' do
-      current_price_indications
-      expect(assigns[:standard_arc_data]).to eq(arc_response)
-      expect(assigns[:sbc_arc_data]).to eq(arc_response)
+    describe 'when a job_id param is present' do
+      let(:job_status) { double('job status', destroy: nil) }
+      let(:vrc_data) {{'advance_maturity' => 'Overnight/Open','overnight_fed_funds_benchmark' => 0.13,'basis_point_spread_to_benchmark' => 5,'advance_rate' => 0.18}}
+      let(:frc_data) {[{'advance_maturity' =>'1 Month','treasury_benchmark_maturity' => '3 Months','nominal_yield_of_benchmark' => 0.01,'basis_point_spread_to_benchmark' => 20,'advance_rate' => 0.21}]}
+      let(:arc_data) {[{'advance_maturity' => '1 Year','1_month_libor' => 6,'3_month_libor' => 4,'6_month_libor' => 11,'prime' => -295}]}
+      let(:sta_data) { {rate: rand(0..99999)} }
+      let(:member_id) { rand(1..99999) }
+      let(:user_id) { rand(1..99999) }
+      let(:uuid) { double('uuid') }
+      let(:job_id) { rand(1..99999) }
+      let(:current_price_indications) { get :current_price_indications, job_id: job_id }
+
+      before do
+        allow(JobStatus).to receive(:find_by).and_return(job_status)
+        allow(job_status).to receive(:result_as_string).and_return(
+          {
+            standard_vrc_data: vrc_data,
+            sbc_vrc_data: vrc_data,
+            standard_frc_data: frc_data,
+            sbc_frc_data: frc_data,
+            standard_arc_data: arc_data,
+            sbc_arc_data: arc_data,
+            sta_data: sta_data
+          }.to_json
+        )
+      end
+      it 'returns the correct `row_value` for @sta_table_data' do
+        current_price_indications
+        expect(assigns[:sta_table_data][:row_value]).to eq(sta_data[:rate])
+      end
+      [:standard_vrc_table_data, :sbc_vrc_table_data].each do |vrc_data|
+        it "returns correctly formatted `rows` for @#{vrc_data}" do
+          current_price_indications
+          expect(assigns[vrc_data][:rows]).to eq(
+            [
+              {columns: [
+                {:value=>"Overnight/Open", :type=>nil}, {:value=>0.13, :type=>:rate}, {:value=>5, :type=>:basis_point}, {:value=>0.18, :type=>:rate}
+              ]}
+            ]
+          )
+        end
+      end
+      [:standard_frc_table_data, :sbc_frc_table_data].each do |frc_data|
+        it "returns correctly formatted `rows` for @#{frc_data}" do
+          current_price_indications
+          expect(assigns[frc_data][:rows]).to eq(
+            [
+              {columns: [
+                {:value=>"1 Month"}, {:value=>"3 Months"}, {:type=>:rate, :value=>0.01}, {:type=>:basis_point, :value=>20}, {:type=>:rate, :value=>0.21}
+              ]}
+            ]
+          )
+        end
+      end
+      it "returns correctly formatted `rows` for @standard_arc_table_data" do
+        current_price_indications
+        expect(assigns[:standard_arc_table_data][:rows]).to eq(
+          [
+            {columns: [
+              {:value=>"1 Year"}, {:type=>:basis_point, :value=>6}, {:type=>:basis_point, :value=>4}, {:type=>:basis_point, :value=>11}, {:type=>:basis_point, :value=>-295}
+            ]}
+          ]
+        )
+      end
+      it "returns correctly formatted `rows` for @sbc_arc_table_data" do
+        current_price_indications
+        expect(assigns[:sbc_arc_table_data][:rows]).to eq(
+          [
+            {columns: [
+              {:value=>"1 Year"}, {:type=>:basis_point, :value=>6}, {:type=>:basis_point, :value=>4}, {:type=>:basis_point, :value=>11}
+            ]}
+          ]
+        )
+      end
+      describe 'when the `skip_deferred_load` controller attribute is true' do
+        before do
+          controller.skip_deferred_load = true
+          allow(controller).to receive(:current_member_id).and_return(member_id)
+        end
+        it 'calls `perform_now` on the ReportCurrentPriceIndicationsJob with the current member id and the request uuid' do
+          allow(request).to receive(:uuid).and_return(uuid)
+          expect(ReportCurrentPriceIndicationsJob).to receive(:perform_now).with(member_id, uuid).and_return({})
+          current_price_indications
+        end
+      end
+      describe 'when the `skip_deferred_load` controller attribute is not true' do
+        it 'finds the proper JobStatus by job id, user id and job status' do
+          allow(controller).to receive(:current_user).and_return(double(User, id: user_id, accepted_terms?: true))
+          expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: user_id, status: JobStatus.statuses[:completed]).and_return(job_status)
+          current_price_indications
+        end
+        it 'raises an error if no JobStatus is found' do
+          allow(JobStatus).to receive(:find_by)
+          expect{current_price_indications}.to raise_error
+        end
+        it 'destroys the JobStatus' do
+          expect(job_status).to receive(:destroy)
+          current_price_indications
+        end
+      end
     end
     describe 'table data' do
       interest_day_count_key = I18n.t('reports.pages.price_indications.current.interest_day_count')
@@ -2203,11 +2270,11 @@ RSpec.describe ReportsController, :type => :controller do
           xhr :get, :authorizations, job_id: job_id
         end
       end
-      describe 'when @print_layout is true' do
+      describe 'when the `skip_deferred_load` controller attribute is true' do
         let(:make_request) { get :authorizations }
         let(:service_instance) { double('service instance')}
         before do
-          subject.instance_variable_set(:@print_layout, true)
+          controller.skip_deferred_load = true
           allow(MembersService).to receive(:new).and_return(service_instance)
         end
         it 'gets signers and users from MembersService' do

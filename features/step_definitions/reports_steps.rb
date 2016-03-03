@@ -140,6 +140,7 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
+  step 'I wait for the report to load'
 end
 
 When(/^I click the "(.*?)" column heading$/) do |column_heading|
@@ -497,10 +498,11 @@ end
 When(/^I select "(.*?)" from the authorizations filter$/) do |text|
   page.find('.report-inputs .dropdown-selection').click
   page.find('.authorizations-filter li', text: text).click
-  step %{I wait for the report to load}
 end
 
 When(/^I should only see users with the "(.*?)" role( or with inclusive roles)?$/) do |role, inclusive|
+  step %{I wait for the report to load}
+
   role_mapping = {
     'Resolution and Authorization' => I18n.t('user_roles.resolution.title'),
     'Entire Authority' => I18n.t('user_roles.entire_authority.title'),

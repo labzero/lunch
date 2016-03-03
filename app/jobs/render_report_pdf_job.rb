@@ -20,6 +20,7 @@ class RenderReportPDFJob < FhlbJob
     controller.instance_variable_set(:@inline_styles, true)
     controller.instance_variable_set(:@skip_javascript, true)
     controller.instance_variable_set(:@print_layout, true)
+    controller.skip_deferred_load = true
     controller.action_name = report_name
     controller.instance_variable_set(:@member_name, controller.session['member_name'])
     controller.instance_variable_set(:@sta_number, controller.session['sta_number'])

@@ -19,7 +19,6 @@ Scenario: Visit authorizations page from header link
 @resque-backed @jira-mem-585 @jira-mem-836 @jira-mem-1297
 Scenario: Filtering the authorization report
   Given I am on the "Authorizations" report page
-  And I wait for the report to load
   When I select "Resolution and Authorization" from the authorizations filter
   Then I should only see users with the "Resolution and Authorization" role
   When I select "Entire Authority" from the authorizations filter
@@ -44,7 +43,6 @@ Scenario: Filtering the authorization report
 @resque-backed @smoke @jira-mem-824
 Scenario: Member downloads a PDF of the Authorizations report
   Given I am on the "Authorizations" report page
-  And I wait for the report to load
   When I request a PDF
   Then I should begin downloading a file
 
@@ -52,7 +50,6 @@ Scenario: Member downloads a PDF of the Authorizations report
 Scenario: Member sees Resolution and Authorization users when filtering by a role, even though those users do not explicitly have the filtered role
   Given I am signed in as a Chaste Manhattan user
   And I am on the "Authorizations" report page
-  And I wait for the report to load
   When I select "Collateral" from the authorizations filter
   And I wait for the report to load
   Then I should see 2 authorized users
