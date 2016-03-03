@@ -1,7 +1,9 @@
 import React, { PropTypes } from 'react';
+import Geosuggest from 'react-geosuggest';
 
 const RestaurantAddForm = ({ handleClick, refCallback }) => (
   <form>
+    <Geosuggest />
     <input ref={refCallback} />
     <button type="button" onClick={handleClick}>Add</button>
   </form>

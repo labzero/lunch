@@ -35,6 +35,7 @@
     "pg": "4.5.1",
     "react": "0.14.7",
     "react-dom": "0.14.7",
+    "react-geosuggest": "^1.18.1",
     "react-redux": "^4.4.0",
     "react-router": "2.0.0-rc5",
     "react-router-redux": "^4.0.0",

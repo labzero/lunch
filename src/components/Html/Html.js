@@ -52,6 +52,7 @@ class Html extends Component {
         <div id="app" dangerouslySetInnerHTML={{ __html: this.props.body }} ></div>
         <script dangerouslySetInnerHTML={{ __html: generateInitialState(this.props.initialState) }}></script>
         <script dangerouslySetInnerHTML={{ __html: trackingCode }} ></script>
+        <script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
         <script src={this.props.entry}></script>
         <script src="https://www.google-analytics.com/analytics.js" async defer ></script>
       </body>
