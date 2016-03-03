@@ -10,9 +10,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   }
 });
 
-const RestaurantDeleteButtonContainer = connect(
+export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(RestaurantDeleteButton);
-
-export default RestaurantDeleteButtonContainer;

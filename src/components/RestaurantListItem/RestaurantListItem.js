@@ -7,14 +7,20 @@ class RestaurantListItem extends Component {
 
   static propTypes = {
     id: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired
+    name: PropTypes.string.isRequired,
+    user: PropTypes.object.isRequired
   };
 
   render() {
+    let deleteButton = null;
+    if (typeof this.props.user.id === 'number') {
+      deleteButton = <RestaurantDeleteButtonContainer id={this.props.id} />;
+    }
+
     return (
       <li>
         {this.props.name}
-        <RestaurantDeleteButtonContainer id={this.props.id} />
+        {deleteButton}
       </li>
     );
   }

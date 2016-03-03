@@ -9,8 +9,7 @@ const RestaurantAddForm = ({ handleClick, refCallback }) => (
 
 RestaurantAddForm.propTypes = {
   handleClick: PropTypes.func.isRequired,
-  refCallback: PropTypes.func.isRequired,
-  user: PropTypes.object.isRequired
+  refCallback: PropTypes.func.isRequired
 };
 
 export default RestaurantAddForm;

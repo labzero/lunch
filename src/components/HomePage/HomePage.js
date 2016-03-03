@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
 import { fetchRestaurantsIfNeeded } from '../../actions/restaurants';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './HomePage.scss';
@@ -16,7 +15,7 @@ class HomePage extends Component {
 
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
-    items: PropTypes.array.isRequired
+    user: PropTypes.object.isRequired
   };
 
   componentWillMount() {
@@ -26,9 +25,14 @@ class HomePage extends Component {
   }
 
   render() {
+    let form = null;
+    if (typeof this.props.user.id === 'number') {
+      form = <RestaurantAddFormContainer />;
+    }
+
     return (
       <div>
-        <RestaurantAddFormContainer />
+        {form}
         <RestaurantListContainer />
       </div>
     );
@@ -36,22 +40,4 @@ class HomePage extends Component {
 
 }
 
-function mapStateToProps(state) {
-  const { restaurants } = state;
-  const {
-    isFetching,
-    lastUpdated,
-    items
-  } = restaurants || {
-    isFetching: true,
-    items: []
-  };
-
-  return {
-    items,
-    isFetching,
-    lastUpdated
-  };
-}
-
-export default connect(mapStateToProps)(withStyles(HomePage, s));
+export default withStyles(HomePage, s);

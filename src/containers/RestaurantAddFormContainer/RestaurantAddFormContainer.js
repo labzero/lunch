@@ -8,18 +8,15 @@ const setNestedRef = (ref) => {
   myRef = ref;
 };
 
-const mapStateToProps = (state) => ({
-  refCallback: setNestedRef,
-  user: state.user
+const mapStateToProps = () => ({
+  refCallback: setNestedRef
 });
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = dispatch => ({
   handleClick: () => {
     dispatch(addRestaurant(myRef.value));
     myRef.value = '';
   }
 });
 
-const RestaurantAddFormContainer = connect(mapStateToProps, mapDispatchToProps)(RestaurantAddForm);
-
-export default RestaurantAddFormContainer;
+export default connect(mapStateToProps, mapDispatchToProps)(RestaurantAddForm);

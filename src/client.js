@@ -80,7 +80,7 @@ function run() {
   const { pathname, search, hash } = window.location;
   const location = `${pathname}${search}${hash}`;
 
-  const routes = makeRoutes(store);
+  const routes = makeRoutes();
 
   match({ routes, location }, (error, redirectLocation, renderProps) => {
     render(

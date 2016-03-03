@@ -1,11 +1,11 @@
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantList.scss';
-import RestaurantListItem from '../RestaurantListItem';
+import RestaurantListItemContainer from '../../containers/RestaurantListItemContainer';
 
 const RestaurantList = ({ items }) => (
   <ul>
-    {items.map(item => <RestaurantListItem key={item.id} {...item} />)}
+    {items.map(item => <RestaurantListItemContainer key={item.id} {...item} />)}
   </ul>
 );
 

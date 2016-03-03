@@ -86,6 +86,7 @@ export function addRestaurant(name) {
     dispatch(postRestaurant());
     return fetch('/api/restaurants', {
       method: 'post',
+      credentials: 'same-origin',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json'
@@ -100,6 +101,7 @@ export function removeRestaurant(key) {
   return (dispatch) => {
     dispatch(deleteRestaurant(key));
     return fetch(`/api/restaurants/${key}`, {
+      credentials: 'same-origin',
       method: 'delete'
     }).then(() => dispatch(restaurantDeleted(key)));
   };

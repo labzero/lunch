@@ -11,7 +11,7 @@ import React from 'react';
 import { IndexRoute, Route } from 'react-router';
 import fetch from './core/fetch';
 import App from './components/App';
-import HomePage from './components/HomePage';
+import HomePageContainer from './containers/HomePageContainer';
 import ContentPage from './components/ContentPage';
 import ContactPage from './components/ContactPage';
 import LoginPage from './components/LoginPage';
@@ -25,10 +25,10 @@ async function getContextComponent(location, callback) {
   callback(null, () => <ContentPage {...content} />);
 }
 
-export default (store) => (
+export default () => (
   <Route>
     <Route path="/" component={App}>
-      <IndexRoute component={HomePage} />
+      <IndexRoute component={HomePageContainer} />
       <Route path="contact" component={ContactPage} />
       <Route path="login" component={LoginPage} />
       <Route path="register" component={RegisterPage} />
