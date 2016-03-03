@@ -11,12 +11,14 @@ import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Header.scss';
 import { IndexLink } from 'react-router';
+import LoginContainer from '../../containers/LoginContainer';
 
 class Header extends Component {
 
   render() {
     return (
       <div className={s.root}>
+        <LoginContainer />
         <div className={s.container}>
           <div className={s.banner}>
             <h1 className={s.bannerTitle}>

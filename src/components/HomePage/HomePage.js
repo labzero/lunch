@@ -4,7 +4,7 @@ import { fetchRestaurantsIfNeeded } from '../../actions/restaurants';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './HomePage.scss';
 import RestaurantListContainer from '../../containers/RestaurantListContainer';
-import RestaurantAddForm from '../RestaurantAddForm';
+import RestaurantAddFormContainer from '../../containers/RestaurantAddFormContainer';
 
 const title = 'Lunch';
 
@@ -28,7 +28,7 @@ class HomePage extends Component {
   render() {
     return (
       <div>
-        <RestaurantAddForm />
+        <RestaurantAddFormContainer />
         <RestaurantListContainer />
       </div>
     );

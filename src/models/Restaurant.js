@@ -1,6 +1,6 @@
-import { bookshelf } from '../services/bookshelf';
+import Base from './Base';
 
-const Restaurant = bookshelf.Model.extend({
+const Restaurant = Base.extend({
   tableName: 'restaurants'
 });
 

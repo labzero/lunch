@@ -14,14 +14,70 @@
  */
 
 import passport from 'passport';
-import { Strategy as FacebookStrategy } from 'passport-facebook';
-import db from './db';
-import { auth as config } from '../config';
+// import { Strategy as FacebookStrategy } from 'passport-facebook';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+// import { auth as config } from '../config';
+import User from '../models/User';
+
+/**
+ * Sign in with Google.
+ */
+passport.use(new GoogleStrategy(
+  {
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: '/login/callback',
+    passReqToCallback: true
+  },
+  (req, accessToken, refreshToken, profile, done) => {
+    if (profile._json.domain === process.env.OAUTH_DOMAIN) {
+      return User.findOrCreate({ google_id: profile.id }).then(user => {
+        const userUpdates = {};
+        let doUpdates = false;
+
+        if (
+          typeof profile.displayName === 'string' &&
+          profile.displayName !== user.get('name')
+        ) {
+          userUpdates.name = profile.displayName;
+          doUpdates = true;
+        }
+        if (
+          typeof profile.emails === 'object' &&
+          profile.emails.length !== undefined
+        ) {
+          const accountEmail = profile.emails.find(email => email.type === 'account');
+          if (accountEmail !== undefined && accountEmail.value !== user.get('email')) {
+            userUpdates.email = accountEmail.value;
+            doUpdates = true;
+          }
+        }
+        if (doUpdates) {
+          return user.save(userUpdates, { patch: true }).then(updatedUser => done(null, updatedUser));
+        }
+        return done(null, user);
+      }).catch(err => done(err));
+    }
+    return done(null, false, { message: 'Please log in using your Lab Zero account.' });
+  }
+));
+
+passport.serializeUser((user, cb) => {
+  cb(null, user.id);
+});
+
+passport.deserializeUser((id, cb) => {
+  User.find({ id }).then(user => {
+    cb(null, user);
+  }).catch(err => {
+    cb(err);
+  });
+});
 
 /**
  * Sign in with Facebook.
  */
-passport.use(new FacebookStrategy({
+/* passport.use(new FacebookStrategy({
   clientID: config.facebook.id,
   clientSecret: config.facebook.secret,
   callbackURL: '/login/facebook/return',
@@ -106,6 +162,6 @@ passport.use(new FacebookStrategy({
       }
     }
   }).catch(done);
-}));
+})); */
 
 export default passport;

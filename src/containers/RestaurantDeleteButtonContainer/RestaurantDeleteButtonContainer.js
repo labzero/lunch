@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { removeRestaurant } from '../../actions/restaurants';
 import RestaurantDeleteButton from '../../components/RestaurantDeleteButton';
 
-const mapStateToProps = (state, ownProps) => ownProps;
+const mapStateToProps = null;
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   handleClick: () => {

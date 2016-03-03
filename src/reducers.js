@@ -1,9 +1,12 @@
 import * as ActionTypes from './ActionTypes';
 
 const initialState = {
-  isFetching: false,
-  didInvalidate: false,
-  items: []
+  restaurants: {
+    isFetching: false,
+    didInvalidate: false,
+    items: []
+  },
+  user: {}
 };
 
 const restaurantsMap = {
@@ -51,10 +54,15 @@ const restaurantsMap = {
   }
 };
 
-export function restaurants(state = initialState, action) {
-  const reducer = restaurantsMap[action.type];
+const userMap = {};
+
+const generateReducer = (map, initial) => (state = initial, action) => {
+  const reducer = map[action.type];
   if (reducer === undefined) {
     return state;
   }
   return reducer(state, action);
-}
+};
+
+export const restaurants = generateReducer(restaurantsMap, initialState.restaurants);
+export const user = generateReducer(userMap, initialState.user);

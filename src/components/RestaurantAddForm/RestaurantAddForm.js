@@ -1,30 +1,16 @@
-import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
-import { addRestaurant } from '../../actions/restaurants';
+import React, { PropTypes } from 'react';
 
-class RestaurantAddForm extends Component {
+const RestaurantAddForm = ({ handleClick, refCallback }) => (
+  <form>
+    <input ref={refCallback} />
+    <button type="button" onClick={handleClick}>Add</button>
+  </form>
+);
 
-  static propTypes = {
-    dispatch: PropTypes.func.isRequired
-  }
+RestaurantAddForm.propTypes = {
+  handleClick: PropTypes.func.isRequired,
+  refCallback: PropTypes.func.isRequired,
+  user: PropTypes.object.isRequired
+};
 
-  handleClick = () => {
-    this.props.dispatch(addRestaurant(this._input.value));
-    this._input.value = '';
-  }
-
-  render() {
-    return (
-      <form>
-        <input ref={node => {this._input = node;}} />
-        <button type="button" onClick={this.handleClick}>Add</button>
-      </form>
-    );
-  }
-}
-
-function mapStateToProps() {
-  return {};
-}
-
-export default connect(mapStateToProps)(RestaurantAddForm);
+export default RestaurantAddForm;

@@ -12,21 +12,20 @@ import path from 'path';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
-// import expressJwt from 'express-jwt';
+import expressJwt from 'express-jwt';
 import expressGraphQL from 'express-graphql';
-// import jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import React from 'react';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom/server';
 import { match, RouterContext } from 'react-router';
 import configureStore from './configureStore';
 import assets from './assets';
-// import { port, auth } from './config';
-import { port } from './config';
+import { port, auth } from './config';
 import makeRoutes from './routes';
 import ContextHolder from './core/ContextHolder';
 import Html from './components/Html';
-// import passport from './core/passport';
+import passport from './core/passport';
 import schema from './data/schema';
 import fetch from './core/fetch';
 
@@ -52,27 +51,27 @@ server.use(bodyParser.json());
 //
 // Authentication
 // -----------------------------------------------------------------------------
-// server.use(expressJwt({
-//   secret: auth.jwt.secret,
-//   credentialsRequired: false,
-//   /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-//   getToken: req => req.cookies.id_token,
-//   /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
-// }));
-// server.use(passport.initialize());
+server.use(expressJwt({
+  secret: auth.jwt.secret,
+  credentialsRequired: false,
+  /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+  getToken: req => req.cookies.id_token,
+  /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+}));
+server.use(passport.initialize());
 
-// server.get('/login/facebook',
-//   passport.authenticate('facebook', { scope: ['email', 'user_location'], session: false })
-// );
-// server.get('/login/facebook/return',
-//   passport.authenticate('facebook', { failureRedirect: '/login', session: false }),
-//   (req, res) => {
-//     const expiresIn = 60 * 60 * 24 * 180; // 180 days
-//     const token = jwt.sign(req.user, auth.jwt.secret, { expiresIn });
-//     res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
-//     res.redirect('/');
-//   }
-// );
+server.get('/login',
+  passport.authenticate('google', { scope: ['email', 'profile'] })
+);
+server.get('/login/callback',
+  passport.authenticate('google', { failureRedirect: '/' }),
+  (req, res) => {
+    const expiresIn = 60 * 60 * 24 * 180; // 180 days
+    const token = jwt.sign(req.user, auth.jwt.secret, { expiresIn });
+    res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
+    res.redirect('/');
+  }
+);
 
 //
 // Register API middleware
@@ -102,7 +101,10 @@ server.get('*', async (req, res, next) => {
           return;
         }
         let statusCode = 200;
-        const initialState = { restaurants: { items: all } };
+        const initialState = { restaurants: { items: all }, user: {} };
+        if (req.user) {
+          initialState.user = req.user.attributes;
+        }
         const store = configureStore(initialState);
         const data = {
           title: '',
