@@ -95,7 +95,7 @@ describe MAPI::ServiceApp do
           allow(subject).to receive(:final_securities_count_sql).with(fhlb_id, rundate).and_return(final_securities_count_sql)
           allow(subject).to receive(:fetch_hashes).with(anything, final_securities_count_sql).and_return([{'RECORDSCOUNT' => 2}])
           allow(subject).to receive(:securities_transactions_sql).with(fhlb_id, rundate, true).and_return(securities_transactions_sql)
-          allow(subject).to receive(:fetch_hashes).with(anything, securities_transactions_sql,{to_i: ["CUR_UNITS"], to_f: %w(CUR_PRINCIPAL_AMOUNT CUR_INTEREST_AMOUNT CUR_TOTAL_AMOUNT)}, true).and_return([before_hash, before_hash2])
+          allow(subject).to receive(:fetch_hashes).with(anything, securities_transactions_sql,{to_date: ['CUR_MATURITY_DATE'], to_i: ["CUR_UNITS"], to_f: %w(CUR_PRINCIPAL_AMOUNT CUR_INTEREST_AMOUNT CUR_TOTAL_AMOUNT)}, true).and_return([before_hash, before_hash2])
         end
         it "returns expected advances detail hash where value could not be nil in #{environment}" do
           allow(MAPI::ServiceApp).to receive(:environment).and_return(environment)
@@ -140,6 +140,52 @@ describe MAPI::ServiceApp do
           allow(subject).to receive(:fetch_securities_transactions).with(environment, logger, fhlb_id, rundate, false).and_return([])
           allow(subject).to receive(:previous_business_day).with(environment, logger, rundate).and_return(previous_business_day)
           expect(subject.securities_transactions(environment, logger, fhlb_id, rundate)).to eq({ final: false, transactions: [], previous_business_day: previous_business_day})
+        end
+      end
+    end
+
+    describe 'fetch_securities_transactions' do
+      let(:logger) { double('logger') }
+      let(:fhlb_id) { double('fhlb id') }
+      let(:date) { double('date') }
+      let(:final_report) { double('preliminary or final report') }
+      let(:sql) { double('securities_transactions_sql') }
+      let(:results_hash) { double('results hash') }
+      
+      describe 'in the production environment' do
+        environment = :production
+        let(:call_method) { subject.fetch_securities_transactions(environment, logger, fhlb_id, rundate, final_report) }
+        it 'calls `fetch_hashes` with the provided logger' do
+          expect(subject).to receive(:fetch_hashes).with(logger, anything, anything, anything)
+          call_method
+        end
+        it 'calls `fetch_hashes` with the appropriate sql' do
+          allow(subject).to receive(:securities_transactions_sql).with(fhlb_id, rundate, final_report).and_return(sql)
+          expect(subject).to receive(:fetch_hashes).with(anything, sql, anything, anything)
+          call_method
+        end
+        it 'calls `fetch_hashes` with the appropriate field-type matchings' do
+          expect(subject).to receive(:fetch_hashes).with(anything, anything, {to_date: ['CUR_MATURITY_DATE'], to_i: ["CUR_UNITS"], to_f: %w(CUR_PRINCIPAL_AMOUNT CUR_INTEREST_AMOUNT CUR_TOTAL_AMOUNT)}, anything)
+          call_method
+        end
+        it 'calls `fetch_hashes` with a downcase argument of true' do
+          expect(subject).to receive(:fetch_hashes).with(anything, anything, anything, true)
+          call_method
+        end
+        it 'returns the result of `fetch_hashes`' do
+          allow(subject).to receive(:fetch_hashes).and_return(results_hash)
+          expect(call_method).to eq(results_hash)
+        end
+      end
+      describe 'in an environment other than production' do
+        environment = :development
+        christmas_2015 = MAPI::Services::Member::SecuritiesTransactions::XMAS_2015
+        it "returns an empty hash if the passed date is #{christmas_2015}" do
+          expect(subject.fetch_securities_transactions(environment, logger, fhlb_id, christmas_2015, final_report)).to eq([])
+        end
+        it "returns fake securities transactions if #{christmas_2015} is not passed as the date" do
+          expect(subject).to receive(:fake).with('securities_transactions')
+          subject.fetch_securities_transactions(environment, logger, fhlb_id, date, final_report)
         end
       end
     end
