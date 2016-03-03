@@ -1,5 +1,7 @@
 namespace :service_fakes do
+  desc 'Enables all fake services.'
   task enable: ['service_fakes:mds:enable', 'service_fakes:cal:enable', 'service_fakes:pi:enable']
+  desc 'Disables all fake services.'
   task disable: ['service_fakes:mds:disable', 'service_fakes:cal:disable', 'service_fakes:pi:disable']
 
   namespace :mds do
