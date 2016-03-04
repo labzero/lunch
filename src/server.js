@@ -105,7 +105,7 @@ server.get('*', async (req, res, next) => {
         const initialState = {
           restaurants: { items: all },
           user: {},
-          flash: {},
+          flashes: [],
           latLng: {
             lat: process.env.SUGGEST_LAT,
             lng: process.env.SUGGEST_LNG

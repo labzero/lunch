@@ -6,3 +6,10 @@ export function flashError(message) {
     message
   };
 }
+
+export function expireFlash(id) {
+  return {
+    type: ActionTypes.EXPIRE_FLASH,
+    id
+  };
+}

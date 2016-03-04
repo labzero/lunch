@@ -6,7 +6,7 @@ const initialState = {
     didInvalidate: false,
     items: []
   },
-  flash: {},
+  flashes: [],
   user: {},
   latLng: {}
 };
@@ -56,13 +56,20 @@ const restaurantsMap = {
   }
 };
 
-const flashMap = {
+const flashesMap = {
   [ActionTypes.FLASH_ERROR](state, action) {
-    return Object.assign({}, state, {
-      flash: {
-        error: action.message
+    return [
+      ...state,
+      {
+        message: action.message,
+        type: 'error'
       }
-    });
+    ];
+  },
+  [ActionTypes.EXPIRE_FLASH](state, action) {
+    const newState = Array.from(state);
+    newState.splice(action.id, 1);
+    return newState;
   }
 };
 
@@ -75,6 +82,6 @@ const generateReducer = (map, initial) => (state = initial, action) => {
 };
 
 export const restaurants = generateReducer(restaurantsMap, initialState.restaurants);
-export const flash = generateReducer(flashMap, initialState.flash);
+export const flashes = generateReducer(flashesMap, initialState.flashes);
 export const user = generateReducer({}, initialState.user);
 export const latLng = generateReducer({}, initialState.latLng);

@@ -10,7 +10,7 @@
 import React, { Component, PropTypes } from 'react';
 import s from './App.scss';
 import globalCss from '../../globalCss.scss';
-import Header from '../Header';
+import HeaderContainer from '../../containers/HeaderContainer';
 import Footer from '../Footer';
 
 class App extends Component {
@@ -37,7 +37,7 @@ class App extends Component {
   render() {
     return !this.props.error ? (
       <div>
-        <Header />
+        <HeaderContainer />
         {this.props.children}
         <Footer />
       </div>

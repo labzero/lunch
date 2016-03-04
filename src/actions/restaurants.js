@@ -98,7 +98,7 @@ export function addRestaurant(name, placeId, address, lat, lng) {
       .then(response => new ApiClient(response).processResponse())
       .then(
         json => dispatch(restaurantPosted(json)),
-        err => dispatch(flashError(err))
+        err => dispatch(flashError(err.message))
       );
   };
 }

@@ -34,8 +34,8 @@ router
         lng
       }).save().then(obj => {
         res.status(201).send({ error: false, data: obj });
-      }).catch(err => {
-        const error = { message: 'Could not save new restaurant.' };
+      }).catch(() => {
+        const error = { message: 'Could not save new restaurant. Has it already been added?' };
         errorCatcher(res, error);
       });
     }
