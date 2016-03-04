@@ -6,7 +6,9 @@ const initialState = {
     didInvalidate: false,
     items: []
   },
-  user: {}
+  flash: {},
+  user: {},
+  latLng: {}
 };
 
 const restaurantsMap = {
@@ -54,7 +56,15 @@ const restaurantsMap = {
   }
 };
 
-const userMap = {};
+const flashMap = {
+  [ActionTypes.FLASH_ERROR](state, action) {
+    return Object.assign({}, state, {
+      flash: {
+        error: action.message
+      }
+    });
+  }
+};
 
 const generateReducer = (map, initial) => (state = initial, action) => {
   const reducer = map[action.type];
@@ -65,4 +75,6 @@ const generateReducer = (map, initial) => (state = initial, action) => {
 };
 
 export const restaurants = generateReducer(restaurantsMap, initialState.restaurants);
-export const user = generateReducer(userMap, initialState.user);
+export const flash = generateReducer(flashMap, initialState.flash);
+export const user = generateReducer({}, initialState.user);
+export const latLng = generateReducer({}, initialState.latLng);

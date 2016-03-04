@@ -1,5 +1,7 @@
 import fetch from '../core/fetch';
 import * as ActionTypes from '../ActionTypes';
+import ApiClient from '../core/ApiClient';
+import { flashError } from './flash.js';
 
 export function invalidateRestaurants() {
   return { type: ActionTypes.INVALIDATE_RESTAURANTS };
@@ -48,7 +50,7 @@ function fetchRestaurants() {
   return dispatch => {
     dispatch(requestRestaurants());
     return fetch('/api/restaurants')
-      .then(response => response.json())
+      .then(response => new ApiClient(response).processResponse())
       .then(json => dispatch(receiveRestaurants(json)));
   };
 }
@@ -81,7 +83,7 @@ export function fetchRestaurantsIfNeeded() {
   };
 }
 
-export function addRestaurant(name) {
+export function addRestaurant(name, placeId, address, lat, lng) {
   return (dispatch) => {
     dispatch(postRestaurant());
     return fetch('/api/restaurants', {
@@ -91,9 +93,13 @@ export function addRestaurant(name) {
         Accept: 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ name })
-    }).then(response => response.json())
-      .then(json => dispatch(restaurantPosted(json)));
+      body: JSON.stringify({ name, place_id: placeId, address, lat, lng })
+    })
+      .then(response => new ApiClient(response).processResponse())
+      .then(
+        json => dispatch(restaurantPosted(json)),
+        err => dispatch(flashError(err))
+      );
   };
 }
 

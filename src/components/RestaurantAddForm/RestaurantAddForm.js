@@ -1,17 +1,41 @@
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 import Geosuggest from 'react-geosuggest';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import s from './RestaurantAddForm.scss';
 
-const RestaurantAddForm = ({ handleClick, refCallback }) => (
-  <form>
-    <Geosuggest />
-    <input ref={refCallback} />
-    <button type="button" onClick={handleClick}>Add</button>
-  </form>
-);
+class RestaurantAddForm extends Component {
 
-RestaurantAddForm.propTypes = {
-  handleClick: PropTypes.func.isRequired,
-  refCallback: PropTypes.func.isRequired
-};
+  static propTypes = {
+    getSuggestLabel: PropTypes.func.isRequired,
+    handleSuggestSelect: PropTypes.func.isRequired,
+    latLng: PropTypes.object.isRequired
+  }
 
-export default RestaurantAddForm;
+  static contextTypes = {
+    insertCss: PropTypes.func,
+  }
+
+  componentWillMount() {
+    this.removeCss = this.context.insertCss(s);
+  }
+
+  componentWillUnmount() {
+    this.removeCss();
+  }
+
+  render() {
+    return (
+      <form>
+        <Geosuggest
+          location={{ lat: () => this.props.latLng.lat, lng: () => this.props.latLng.lng }}
+          radius="0"
+          onSuggestSelect={this.props.handleSuggestSelect}
+          getSuggestLabel={this.props.getSuggestLabel}
+        />
+      </form>
+    );
+  }
+
+}
+
+export default withStyles(RestaurantAddForm, s);

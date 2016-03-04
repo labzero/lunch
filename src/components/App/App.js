@@ -9,6 +9,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import s from './App.scss';
+import globalCss from '../../globalCss.scss';
 import Header from '../Header';
 import Footer from '../Footer';
 
@@ -24,11 +25,13 @@ class App extends Component {
   };
 
   componentWillMount() {
-    this.removeCss = this.context.insertCss(s);
+    this.removeAppCss = this.context.insertCss(s);
+    this.removeGlobalCss = this.context.insertCss(globalCss);
   }
 
   componentWillUnmount() {
-    this.removeCss();
+    this.removeAppCss();
+    this.removeGlobalCss();
   }
 
   render() {

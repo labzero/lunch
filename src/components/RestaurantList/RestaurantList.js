@@ -12,7 +12,8 @@ const RestaurantList = ({ items }) => (
 RestaurantList.propTypes = {
   items: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired
+    name: PropTypes.string.isRequired,
+    address: PropTypes.string.isRequired
   }))
 };
 

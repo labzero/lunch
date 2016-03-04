@@ -71,8 +71,16 @@ const config = {
           path.resolve(__dirname, '../src'),
         ],
         loader: 'babel-loader',
-      }, {
-        test: /\.scss$/,
+      },
+      {
+        test: /globalCss.scss$/,
+        loaders: [
+          'isomorphic-style-loader',
+          `css-loader?${DEBUG ? 'sourceMap&' : 'minimize&'}modules&localIdentName=[local]`
+        ]
+      },
+      {
+        test: /^((?!globalCss).)*\.(css|scss)$/,
         loaders: [
           'isomorphic-style-loader',
           `css-loader?${DEBUG ? 'sourceMap&' : 'minimize&'}modules&localIdentName=` +

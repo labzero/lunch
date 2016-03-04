@@ -11,40 +11,42 @@ const loggedIn = (req, res, next) => {
   }
 };
 
+const errorCatcher = (res, err) => {
+  res.status(500).json({ error: true, data: { message: err.message } });
+};
+
 router
-  .get('/', async (req, res, next) => {
-    try {
-      Restaurant.fetchAll().then(all => {
-        res.status(200).send(all);
-      });
-    } catch (err) {
-      next(err);
-    }
+  .get('/', async (req, res) => {
+    Restaurant.fetchAll().then(all => {
+      res.status(200).send({ error: false, data: all });
+    }).catch(err => errorCatcher(res, err));
   })
   .post(
     '/',
     loggedIn,
-    async (req, res, next) => {
-      try {
-        new Restaurant({ name: req.body.name }).save().then(obj => {
-          res.status(201).send(obj);
-        });
-      } catch (err) {
-        next(err);
-      }
+    async (req, res) => {
+      const { name, place_id, address, lat, lng } = req.body;
+      new Restaurant({
+        name,
+        place_id,
+        address,
+        lat,
+        lng
+      }).save().then(obj => {
+        res.status(201).send({ error: false, data: obj });
+      }).catch(err => {
+        const error = { message: 'Could not save new restaurant.' };
+        errorCatcher(res, error);
+      });
     }
   )
   .delete(
     '/:id',
     loggedIn,
-    async (req, res, next) => {
-      try {
-        new Restaurant({ id: req.params.id }).destroy().then(() => {
-          res.status(204).send();
-        });
-      } catch (err) {
-        next(err);
-      }
+    async (req, res) => {
+      new Restaurant({ id: req.params.id }).destroy().then(() => {
+        res.status(204).send({ error: false });
+      }).catch(err => errorCatcher(res, err));
     }
   );
 

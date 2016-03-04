@@ -28,6 +28,7 @@ import Html from './components/Html';
 import passport from './core/passport';
 import schema from './data/schema';
 import fetch from './core/fetch';
+import ApiClient from './core/ApiClient';
 
 const server = global.server = express();
 
@@ -91,7 +92,7 @@ server.use('/graphql', expressGraphQL(req => ({
 server.get('*', async (req, res, next) => {
   try {
     match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
-      fetch('/api/restaurants').then(all => all.json()).then(all => {
+      fetch('/api/restaurants').then(all => new ApiClient(all).processResponse()).then(all => {
         if (error) {
           throw error;
         }
@@ -101,7 +102,15 @@ server.get('*', async (req, res, next) => {
           return;
         }
         let statusCode = 200;
-        const initialState = { restaurants: { items: all }, user: {} };
+        const initialState = {
+          restaurants: { items: all },
+          user: {},
+          flash: {},
+          latLng: {
+            lat: process.env.SUGGEST_LAT,
+            lng: process.env.SUGGEST_LNG
+          }
+        };
         if (req.user) {
           initialState.user = req.user.attributes;
         }

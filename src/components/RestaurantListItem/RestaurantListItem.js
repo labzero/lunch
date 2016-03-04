@@ -8,6 +8,7 @@ class RestaurantListItem extends Component {
   static propTypes = {
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
+    address: PropTypes.string.isRequired,
     user: PropTypes.object.isRequired
   };
 
@@ -19,7 +20,8 @@ class RestaurantListItem extends Component {
 
     return (
       <li>
-        {this.props.name}
+        <h2>{this.props.name}</h2>
+        {this.props.address}
         {deleteButton}
       </li>
     );
