@@ -8,6 +8,7 @@ class RenderReportExcelJob < FhlbJob
     return if job_status.canceled?
     member = MembersService.new(controller.request).member(member_id)
     raise 'Member not found!' unless member
+    controller.skip_deferred_load = true
     controller.session['member_id'] = member_id
     controller.session['member_name'] = member[:name]
     controller.params = params

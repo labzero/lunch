@@ -49,6 +49,10 @@ RSpec.describe RenderReportExcelJob, type: :job do
       expect(reports_controller).to receive(:params=).with(params).ordered
       run_job
     end
+    it 'sets the `skip_deferred_load` controller attribute to `true`' do
+      run_job
+      expect(reports_controller.skip_deferred_load).to eq(true)
+    end
   end
 
   describe 'rendering the XLSX file' do

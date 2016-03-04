@@ -1,5 +1,5 @@
 class ReportsController < ApplicationController
-  attr_accessor :report_download_name
+  attr_accessor :report_download_name, :skip_deferred_load
   include DatePickerHelper
   include CustomFormattingHelper
   include ReportsHelper
@@ -446,36 +446,39 @@ class ReportsController < ApplicationController
 
   def current_price_indications
     @report_name = ReportConfiguration.report_title(:current_price_indications)
+    @quick_advance_message = MessageService.new.todays_quick_advance_message # Should this be deferred as well?  Right now it takes no time, but if it's ever rigged up to an external service, it might.
     downloadable_report(:xlsx) do
-      rate_service = RatesService.new(request)
-      member_balances = MemberBalanceService.new(current_member_id, request)
 
-      #sta data
-      @sta_data = member_balances.settlement_transaction_rate
-      @sta_table_data = {
-        :row_name => fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.sta_rate'), '%'),
-        :row_value => @sta_data[:rate]
-      }
+      vrc_column_headings = [
+        t('reports.pages.price_indications.current.advance_maturity'),
+        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.overnight_fed_funds_benchmark'), '%'),
+        t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'),
+        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')
+      ]
+      frc_column_headings = [
+        t('reports.pages.price_indications.current.advance_maturity'),
+        t('reports.pages.price_indications.current.treasury_benchmark_maturity'),
+        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.nominal_yield_of_benchmark'), '%'),
+        t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'),
+        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')
+      ]
+      standard_arc_column_headings = [
+        t('reports.pages.price_indications.current.advance_maturity'),
+        t('reports.pages.price_indications.current.1_month_libor_header'),
+        t('reports.pages.price_indications.current.3_month_libor_header'),
+        t('reports.pages.price_indications.current.6_month_libor_header'),
+        t('reports.pages.price_indications.current.prime_header')
+      ]
+      sbc_arc_column_headings = [
+        t('reports.pages.price_indications.current.advance_maturity'),
+        t('reports.pages.price_indications.current.1_month_libor_header'),
+        t('reports.pages.price_indications.current.3_month_libor_header'),
+        t('reports.pages.price_indications.current.6_month_libor_header')
+      ]
 
-      #vrc headers
-      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.overnight_fed_funds_benchmark'), '%'), t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'), fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')]
-      #vrc data for standard collateral
-      @standard_vrc_data = rate_service.current_price_indications('standard', 'vrc')
-      columns = @standard_vrc_data.collect do |row|
-        case row[0]
-          when 'overnight_fed_funds_benchmark', 'advance_rate'
-            type = :rate
-          when 'basis_point_spread_to_benchmark'
-            type = :basis_point
-          else
-            type = nil
-        end
-        {value: row[1], type: type}
-      end
-      rows = [{columns: columns}]
+      @sta_table_data = {}
       @standard_vrc_table_data = {
-        column_headings: column_headings,
-        rows: rows,
+        column_headings: vrc_column_headings,
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:standard][:vrc],
           t('reports.pages.price_indications.current.payment_frequency') => [
@@ -484,23 +487,8 @@ class ReportsController < ApplicationController
           ]
         }
       }
-      #vrc data for sbc collateral
-      @sbc_vrc_data = rate_service.current_price_indications('sbc', 'vrc')
-      columns = @sbc_vrc_data.collect do |row|
-        case row[0]
-          when 'overnight_fed_funds_benchmark', 'advance_rate'
-            type = :rate
-          when 'basis_point_spread_to_benchmark'
-            type = :basis_point
-          else
-            type = nil
-        end
-        {value: row[1], type: type}
-      end
-      rows = [{columns: columns}]
       @sbc_vrc_table_data = {
-        column_headings: column_headings,
-        rows: rows,
+        column_headings: vrc_column_headings,
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:sbc][:vrc],
           t('reports.pages.price_indications.current.payment_frequency') => [
@@ -509,74 +497,22 @@ class ReportsController < ApplicationController
           ]
         }
       }
-
-      #frc headers
-      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.treasury_benchmark_maturity'), fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.nominal_yield_of_benchmark'), '%'), t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'), fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')]
-      #frc data for standard collateral
-      @standard_frc_data = rate_service.current_price_indications('standard', 'frc')
-      rows = @standard_frc_data.collect do |row|
-        columns = []
-        row.each do |value|
-          if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
-            columns << {value: value[1]}
-          elsif value[0]=='basis_point_spread_to_benchmark'
-            columns << {type: :basis_point, value: value[1]}
-          else
-            columns << {type: :rate, value: value[1]}
-          end
-        end
-        {columns: columns}
-      end
       @standard_frc_table_data = {
-        column_headings: column_headings,
-        rows: rows,
+        column_headings: frc_column_headings,
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:standard][:frc],
           t('reports.pages.price_indications.current.payment_frequency') => INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:frc]
         }
       }
-      #frc data for sbc collateral
-      @sbc_frc_data = rate_service.current_price_indications('sbc', 'frc')
-      rows = @sbc_frc_data.collect do |row|
-        columns = []
-        row.each do |value|
-          if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
-            columns << {value: value[1]}
-          elsif value[0]=='basis_point_spread_to_benchmark'
-            columns << {type: :basis_point, value: value[1]}
-          else
-            columns << {type: :rate, value: value[1]}
-          end
-        end
-        {columns: columns}
-      end
       @sbc_frc_table_data = {
-        column_headings: column_headings,
-        rows: rows,
+        column_headings: frc_column_headings,
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:sbc][:frc],
           t('reports.pages.price_indications.current.payment_frequency') => INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:frc]
         }
       }
-
-      #arc headers for standard collateral
-      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor_header'), t('reports.pages.price_indications.current.3_month_libor_header'), t('reports.pages.price_indications.current.6_month_libor_header'), t('reports.pages.price_indications.current.prime_header')]
-      #arc data for standard collateral
-      @standard_arc_data = rate_service.current_price_indications('standard', 'arc')
-      rows = @standard_arc_data.collect do |row|
-        columns = []
-        row.each do |value|
-          if value[0]=='advance_maturity'
-            columns << {value: value[1]}
-          else
-            columns << {type: :basis_point, value: value[1]}
-          end
-        end
-        {columns: columns}
-      end
       @standard_arc_table_data = {
-        column_headings: column_headings,
-        rows: rows,
+        column_headings: standard_arc_column_headings,
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:standard][:arc],
           t('reports.pages.price_indications.current.interest_rate_reset') => [
@@ -593,24 +529,8 @@ class ReportsController < ApplicationController
           ]
         }
       }
-      #arc headers for sbc collateral
-      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor_header'), t('reports.pages.price_indications.current.3_month_libor_header'), t('reports.pages.price_indications.current.6_month_libor_header')]
-      #arc data for sbc collateral
-      @sbc_arc_data = rate_service.current_price_indications('sbc', 'arc')
-      rows = @sbc_arc_data.collect do |row|
-        columns = []
-        row.each do |value|
-          if value[0]=='advance_maturity'
-            columns << {value: value[1]}
-          elsif value[0]=='1_month_libor' || value[0]=='3_month_libor' || value[0]=='6_month_libor'
-            columns << {type: :basis_point, value: value[1]}
-          end
-        end
-        {columns: columns}
-      end
       @sbc_arc_table_data = {
-        column_headings: column_headings,
-        rows: rows,
+        column_headings: sbc_arc_column_headings,
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:sbc][:arc],
           t('reports.pages.price_indications.current.interest_rate_reset') => [
@@ -625,7 +545,126 @@ class ReportsController < ApplicationController
           ]
         }
       }
-      @quick_advance_message = MessageService.new.todays_quick_advance_message
+      @sta_table_data = {
+        :row_name => fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.sta_rate'), '%')
+      }
+
+      @job_status_url = false
+      @load_url = false
+      if params[:job_id] || self.skip_deferred_load
+        if self.skip_deferred_load
+          data = ReportCurrentPriceIndicationsJob.perform_now(current_member_id, request.uuid)
+        else
+          job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+          raise ActiveRecord::RecordNotFound unless job_status
+          data = JSON.parse(job_status.result_as_string).with_indifferent_access
+          job_status.destroy
+        end
+
+        #sta data
+        sta_data = data[:sta_data] || {}
+        @sta_table_data[:row_value] = sta_data[:rate]
+
+        #vrc data for standard collateral
+        standard_vrc_data = data[:standard_vrc_data] || []
+        columns = standard_vrc_data.collect do |row|
+          case row[0]
+            when 'overnight_fed_funds_benchmark', 'advance_rate'
+              type = :rate
+            when 'basis_point_spread_to_benchmark'
+              type = :basis_point
+            else
+              type = nil
+          end
+          {value: row[1], type: type}
+        end
+        rows = [{columns: columns}]
+        @standard_vrc_table_data[:rows] = rows
+        #vrc data for sbc collateral
+        sbc_vrc_data = data[:sbc_vrc_data] || []
+        columns = sbc_vrc_data.collect do |row|
+          case row[0]
+            when 'overnight_fed_funds_benchmark', 'advance_rate'
+              type = :rate
+            when 'basis_point_spread_to_benchmark'
+              type = :basis_point
+            else
+              type = nil
+          end
+          {value: row[1], type: type}
+        end
+        rows = [{columns: columns}]
+        @sbc_vrc_table_data[:rows] = rows
+
+        #frc data for standard collateral
+        standard_frc_data = data[:standard_frc_data] || []
+        rows = standard_frc_data.collect do |row|
+          columns = []
+          row.each do |value|
+            if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
+              columns << {value: value[1]}
+            elsif value[0]=='basis_point_spread_to_benchmark'
+              columns << {type: :basis_point, value: value[1]}
+            else
+              columns << {type: :rate, value: value[1]}
+            end
+          end
+          {columns: columns}
+        end
+        @standard_frc_table_data[:rows] = rows
+        #frc data for sbc collateral
+        sbc_frc_data = data[:sbc_frc_data] || []
+        rows = sbc_frc_data.collect do |row|
+          columns = []
+          row.each do |value|
+            if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
+              columns << {value: value[1]}
+            elsif value[0]=='basis_point_spread_to_benchmark'
+              columns << {type: :basis_point, value: value[1]}
+            else
+              columns << {type: :rate, value: value[1]}
+            end
+          end
+          {columns: columns}
+        end
+        @sbc_frc_table_data[:rows] = rows
+
+        #arc data for standard collateral
+        standard_arc_data = data[:standard_arc_data] || []
+        rows = standard_arc_data.collect do |row|
+          columns = []
+          row.each do |value|
+            if value[0]=='advance_maturity'
+              columns << {value: value[1]}
+            else
+              columns << {type: :basis_point, value: value[1]}
+            end
+          end
+          {columns: columns}
+        end
+        @standard_arc_table_data[:rows] = rows
+        #arc data for sbc collateral
+        sbc_arc_data = data[:sbc_arc_data] || []
+        rows = sbc_arc_data.collect do |row|
+          columns = []
+          row.each do |value|
+            if value[0]=='advance_maturity'
+              columns << {value: value[1]}
+            elsif value[0]=='1_month_libor' || value[0]=='3_month_libor' || value[0]=='6_month_libor'
+              columns << {type: :basis_point, value: value[1]}
+            end
+          end
+          {columns: columns}
+        end
+        @sbc_arc_table_data[:rows] = rows
+        render layout: false if request.try(:xhr?)
+      else
+        job_status = ReportCurrentPriceIndicationsJob.perform_later(current_member_id).job_status
+        job_status.update_attributes!(user_id: current_user.id)
+        @job_status_url = job_status_url(job_status)
+        @load_url = reports_current_price_indications_url(job_id: job_status.id)
+        [@sta_table_data, @standard_vrc_table_data, @sbc_vrc_table_data,@standard_frc_table_data, @sbc_frc_table_data, @standard_arc_table_data, @sbc_arc_table_data].each { |table| table[:deferred] = true }
+      end
     end
   end
 
@@ -1008,8 +1047,8 @@ class ReportsController < ApplicationController
       @job_status_url = false
       @load_url = false
 
-      if params[:job_id] || @print_layout
-        if @print_layout
+      if params[:job_id] || self.skip_deferred_load
+        if self.skip_deferred_load
           users = MembersService.new(request).signers_and_users(current_member_id) || []
         else
           job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
