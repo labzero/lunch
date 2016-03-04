@@ -296,7 +296,7 @@ class ReportsController < ApplicationController
 
     @picker_presets = date_picker_presets(@start_date, @end_date, ReportConfiguration.date_restrictions(:capital_stock_activity))
     report_download_name = "capital-stock-activity-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
-    downloadable_report(:xlsx, {start_date: params[:start_date], end_date: params[:end_date]}, report_download_name) do
+    downloadable_report(nil, {start_date: params[:start_date], end_date: params[:end_date]}, report_download_name) do
       if report_disabled?(CAPITAL_STOCK_ACTIVITY_WEB_FLAGS)
         @capital_stock_activity = {activities:[]}
       else

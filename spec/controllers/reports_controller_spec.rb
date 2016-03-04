@@ -128,7 +128,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a date restricted report', :capital_stock_activity, :last_month_start
       it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_activity
       it_behaves_like 'a controller action with an active nav setting', :capital_stock_activity, :reports
-      it_behaves_like 'a report that can be downloaded', :capital_stock_activity, [:xlsx]
+      it_behaves_like 'a report that can be downloaded', :capital_stock_activity, [:pdf, :xlsx]
 
       it 'should render the capital_stock_activity view' do
         capital_stock_activity
