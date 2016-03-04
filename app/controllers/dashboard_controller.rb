@@ -110,17 +110,19 @@ class DashboardController < ApplicationController
       @contacts[:cam][:image_url] = find_asset(cam_image_path) ? cam_image_path : default_image_path
     end
 
-    current_report_set = QuickReportSet.for_member(current_member_id).latest_with_reports
-    @quick_reports = {}.with_indifferent_access
-    if current_report_set.present?
-      @quick_reports_period = (current_report_set.period + '-01').to_date # covert period to date
-      current_report_set.member.quick_report_list.each do |report_name|
-        @quick_reports[report_name] = {
-          title: QUICK_REPORT_MAPPING[report_name]
-        }
-      end
-      current_report_set.reports_named(@quick_reports.keys).completed.each do |quick_report|
-        @quick_reports[quick_report.report_name][:url] = reports_quick_download_path(quick_report)
+    if feature_enabled?('quick-reports')
+      current_report_set = QuickReportSet.for_member(current_member_id).latest_with_reports
+      @quick_reports = {}.with_indifferent_access
+      if current_report_set.present?
+        @quick_reports_period = (current_report_set.period + '-01').to_date # covert period to date
+        current_report_set.member.quick_report_list.each do |report_name|
+          @quick_reports[report_name] = {
+            title: QUICK_REPORT_MAPPING[report_name]
+          }
+        end
+        current_report_set.reports_named(@quick_reports.keys).completed.each do |quick_report|
+          @quick_reports[quick_report.report_name][:url] = reports_quick_download_path(quick_report)
+        end
       end
     end
   end
