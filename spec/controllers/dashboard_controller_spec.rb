@@ -252,6 +252,19 @@ RSpec.describe DashboardController, :type => :controller do
           expect(assigns[:quick_reports][report]).to include(title: described_class::QUICK_REPORT_MAPPING[report])
         end
       end
+      context 'the feature is flipped off' do
+        before do
+          allow(controller).to receive(:feature_enabled?).with('quick-reports').and_return(false)
+        end
+        it 'does not assign @quick_reports' do
+          make_request
+          expect(assigns[:quick_reports]).to_not be_present
+        end
+        it 'does not assign @quick_reports_period' do
+          make_request
+          expect(assigns[:quick_reports_period]).to_not be_present
+        end
+      end
       context do
         let(:reports) { [] }
         let(:report_urls) { {} }

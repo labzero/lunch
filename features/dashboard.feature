@@ -41,7 +41,7 @@ Scenario: User visits report pages from the Account Overview module
   And I click on the Stock Leverage link in the account overview
   Then I should be on the "Capital Stock Position and Leverage" report page
 
-@jira-mem-1315 @local-only
+@jira-mem-1315 @local-only @flip-on-quick-reports
 Scenario: Users can download pregenreated reports
   Given I am logged in to a bank with Quick Reports
   When I visit the dashboard
