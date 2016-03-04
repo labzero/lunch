@@ -43,13 +43,13 @@
           %h2.quick-advance-preview-subheading{style: 'display: none;'}= t('dashboard.quick_advance.preview.title')
           %h2.quick-advance-capstock-subheading{style: 'display: none;'}= t('dashboard.quick_advance.capitalstock.title')
         .quick-advance-desk-closed-message-group
-          %p.quick-advance-desk-closed-message{style: "#{'display: none;' if @quick_advance_enabled || @quick_advance_status != :open}"}
+          %p.quick-advance-disabled-message{style: "#{'display: none;' if @quick_advance_enabled || @quick_advance_status != :open}"}
             = t('dashboard.quick_advance.advance_desk_unavailable_html', phone_number: service_desk_phone_number)
             = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
           %p.quick-advance-desk-closed-message{style: "#{'display: none;' if @quick_advance_status != :closed}"}
             = t('dashboard.quick_advance.advances_desk_closed')
             = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
-          %p.quick-advance-desk-closed-message{style: "#{'display: none;' if @quick_advance_status != :no_terms}"}
+          %p.quick-advance-no-terms-message{style: "#{'display: none;' if @quick_advance_status != :no_terms}"}
             = t('dashboard.quick_advance.advances_desk_no_terms')
         - if @quick_advance_status == :open && @quick_advance_message
           .quick-advance-limited-pricing-notice= t('dashboard.quick_advance.limited_pricing')
@@ -98,6 +98,18 @@
       =render layout: 'dashboard/dashboard_module_deferred', locals: {job_status_url: @recent_activity_job_status_url, load_url: @recent_activity_load_url, dashboard_module_locals: {title: t('dashboard.recent_activity.title'), data_available: true, classes: 'dashboard-module-recent-activity'}} do
         =render 'dashboard/dashboard_recent_activity', table_data: @recent_activity_data, deferred: true
   .column-3
+    - if @quick_reports.present?
+      = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_reports.title'), classes: 'dashboard-module-quick-reports'} do
+        %p= t('dashboard.quick_reports.description')
+        %h3= fhlb_date_short_alpha(@quick_reports_period)
+        %ul
+          - @quick_reports.each do |report_name, details|
+            %li
+              - if details[:url]
+                = link_to(details[:title], details[:url])
+              - else
+                = details[:title]
+        %small= t('dashboard.quick_reports.all_reports_html', url: reports_path)
     = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.contacts.title'), classes: 'dashboard-module-contact'} do
       %ul
         - if @contacts[:rm] && @contacts[:rm][:full_name]

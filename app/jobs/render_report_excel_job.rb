@@ -11,16 +11,19 @@ class RenderReportExcelJob < FhlbJob
     controller.session['member_id'] = member_id
     controller.session['member_name'] = member[:name]
     controller.params = params
+    controller.action_name = report_name
     return if job_status.canceled?
-    controller.send(report_name.to_sym)
+    controller.public_send(report_name.to_sym)
     return if job_status.canceled?
     xlsx = controller.render_to_string(template: "reports/#{report_name}", handlers: [:axlsx], formats: [:xlsx])
     file = StringIOWithFilename.new(xlsx)
     file.content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    filename ||= controller.report_download_name
     file.original_filename = "#{filename}.xlsx"
     return if job_status.canceled?
     job_status.result = file
     job_status.save!
+    file.rewind
     file
   end
 end

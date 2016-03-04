@@ -15,11 +15,17 @@
                 - next if row.is_a?(Hash)
                 - if borrowing_capacity_types.include? row[0]
                   %tr{class: "#{'detail'}"}
-                    %td.label= row[0]
+                    -if row[0].is_a?(Array)
+                      %td.label= link_to(row[0].first, row[0].last)
+                    -else
+                      %td.label= row[0]
                     %td.value= fhlb_formated_currency_unit(row[1], '$', row[3] || 0)
                 - else
                   %tr{class: "#{'footnote-row' if row[2]}"}
-                    %td.label= row[0]
+                    -if row[0].is_a?(Array)
+                      %td.label= link_to(row[0].first, row[0].last)
+                    -else
+                      %td.label= row[0]
                     %td.value= fhlb_formated_currency_unit(row[1], '$', row[3] || 0)
                 - if row[2]
                   %tr

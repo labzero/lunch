@@ -8,7 +8,6 @@ Rails.application.routes.draw do
   get '/healthy' => 'welcome#healthy'
   get '/session_status' => 'welcome#session_status'
   get '/disclaimer-reuters' => 'error#not_found', as: :disclaimer_reuters
-  get '/online-security' => 'error#not_found', as: :online_security
   get '/grid_demo' => 'welcome#grid_demo'
 
   get '/dashboard' => 'dashboard#index'
@@ -73,6 +72,9 @@ Rails.application.routes.draw do
     end
     get '/settlement-transaction-account' => 'reports#settlement_transaction_account'
     get '/todays-credit' => 'reports#todays_credit'
+    constraints Constraints::FeatureEnabled.new('quick-reports') do
+      get '/quick/download/:id' => 'quick_reports#download', as: :quick_download
+    end
   end
 
   get '/advances' => 'advances#index'
@@ -127,11 +129,9 @@ Rails.application.routes.draw do
       get 'application' => 'resources#membership_application', as: :membership_application
       scope 'application' do
         get 'commercial-savings-and-industrial' => 'resources#commercial_application', as: :commercial_application
-        constraints Constraints::FeatureEnabled.new('unfinished-membership') do
-          get 'community-development' => 'error#not_found', as: :community_development_application
-          get 'credit-union' => 'resources#credit_union_application', as: :credit_union_application
-          get 'insurance-company' => 'resources#insurance_company_application', as: :insurance_company_application
-        end
+        get 'community-development' => 'resources#community_development_application', as: :community_development_application
+        get 'credit-union' => 'resources#credit_union_application', as: :credit_union_application
+        get 'insurance-company' => 'resources#insurance_company_application', as: :insurance_company_application
       end
     end
   end

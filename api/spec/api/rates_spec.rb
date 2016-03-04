@@ -499,6 +499,26 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe 'historic sta indications' do
+    let(:start_date) {'2014-04-01'}
+    let(:end_date) {'2014-04-02'}
+    let(:historic_sta_rates) { get "rates/price_indication/historical/#{start_date}/#{end_date}/sta/sta"; JSON.parse(last_response.body).with_indifferent_access }
+    it 'throws a 400 if the start_date is later than the end_date' do
+      get "rates/price_indication/historical/#{end_date}/#{start_date}/sta/sta"
+      expect(last_response.status).to eq(400)
+    end
+    it 'calls the `historical sta` method on the MAPI::Services::Rates::PriceIndicationHistorical module' do
+      expect(MAPI::Services::Rates::HistoricalSTA).to receive(:historical_sta)
+      get "rates/price_indication/historical/#{start_date}/#{end_date}/sta/sta"
+    end
+    it 'should return historical sta data' do
+      historic_sta_rates['rates_by_date'].each do |row|
+        expect(row['date']).to be_kind_of(String)
+        expect(row['rate']).to be_kind_of(Float)
+      end
+    end
+  end
+
   describe 'price_indications_current_vrc' do
     let(:price_indications_current_vrc) { get '/rates/price_indications/current/vrc/standard'; JSON.parse(last_response.body).with_indifferent_access }
     it 'should return data relevant to each loan_term' do

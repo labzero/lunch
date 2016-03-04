@@ -1,6 +1,10 @@
 class SecuritiesController < ApplicationController
   include CustomFormattingHelper
 
+  before_action do
+    set_active_nav(:securities)
+  end
+
   def manage
     member_balances = MemberBalanceService.new(current_member_id, request)
     securities = member_balances.managed_securities

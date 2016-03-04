@@ -359,4 +359,24 @@ describe MAPIService do
   describe '`post_hash` method' do
     it_behaves_like 'a MAPI JSON REST request with Hash response', :post, 'Data to POST'
   end
+
+  describe '`fix_date`' do
+    let(:field_1) { double('field') }
+    let(:field_2) { double('field') }
+    let(:data) { {field_1: field_1, field_2: field_2} }
+    describe 'when passed a single field' do
+      it 'calls `to_date` on the data value for that field and no others' do
+        expect(field_1).to receive(:to_date)
+        expect(field_2).not_to receive(:to_date)
+        subject.fix_date(data, :field_1)
+      end
+    end
+    describe 'when passed an array of fields' do
+      it 'calls `to_date` on all of the data values for the corresponding fields' do
+        expect(field_1).to receive(:to_date)
+        expect(field_2).to receive(:to_date)
+        subject.fix_date(data, [:field_1, :field_2])
+      end
+    end
+  end
 end

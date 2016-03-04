@@ -14,6 +14,8 @@ end
 
 When(/^I click on the "(.*?)" link on the applications page$/) do |application_type|
   text = case application_type
+           when 'community development'
+             I18n.t('resources.membership.applications.charter_types.community_development')
            when 'credit union'
              I18n.t('resources.membership.applications.charter_types.credit_union')
            when 'insurance company'

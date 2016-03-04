@@ -275,9 +275,7 @@ class MemberBalanceService < MAPIService
   def letters_of_credit
     if data = get_hash(:letters_of_credit, "member/#{@member_id}/letters_of_credit")
       fix_date(data)
-      %i(maturity_date settlement_date trade_date).each do |key|
-        data[:credits].each { |credit| fix_date(credit,key) }
-      end
+      data[:credits].each { |credit| fix_date(credit, %i(maturity_date settlement_date trade_date)) }
     end
     data
   end
@@ -285,14 +283,12 @@ class MemberBalanceService < MAPIService
   def active_advances
     get_json(:active_advances, "member/#{@member_id}/active_advances")
   end
-  
-  def fix_date(data, field=:as_of_date)
-    data[field] = data[field].to_date if data && data[field]
-    data
-  end
 
   def parallel_shift
-    fix_date( get_hash(:parallel_shift, "member/#{@member_id}/parallel_shift_analysis") )
+    if data = fix_date( get_hash(:parallel_shift, "member/#{@member_id}/parallel_shift_analysis") )
+      data[:putable_advances].each { |advance| fix_date(advance, :issue_date) }
+      data
+    end
   end
 
   def current_securities_position(custody_account_type)
@@ -322,11 +318,19 @@ class MemberBalanceService < MAPIService
   end
 
   def capital_stock_trial_balance(date)
-    get_hash(:capital_stock_trial_balance, "member/#{@member_id}/capital_stock_trial_balance/#{date.iso8601}")
+    if data = get_hash(:capital_stock_trial_balance, "member/#{@member_id}/capital_stock_trial_balance/#{date.iso8601}")
+      data[:certificates].each { |certificate| fix_date(certificate, :issue_date) }
+      data
+    end
   end
 
   def interest_rate_resets
-    fix_date(get_hash(:interest_rate_resets, "/member/#{@member_id}/interest_rate_resets"), :date_processed)
+    if data = fix_date(get_hash(:interest_rate_resets, "/member/#{@member_id}/interest_rate_resets"), :date_processed)
+      data[:interest_rate_resets].each do |advance|
+        fix_date(advance, [:effective_date, :next_reset])
+      end
+      data
+    end
   end
 
   def todays_credit_activity
@@ -358,7 +362,7 @@ class MemberBalanceService < MAPIService
             activity[:instrument_type]
           end
         end
-        %i(funding_date maturity_date).each { |date_attr| fix_date(activity, date_attr) }
+        fix_date(activity, [:funding_date, :maturity_date])
         processed_data.push(activity)
       end
       processed_data

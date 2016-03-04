@@ -33,6 +33,13 @@ class DashboardController < ApplicationController
     account_overview: [MemberBalanceProfileJob, "dashboard_account_overview_url"]
   }.freeze
 
+  QUICK_REPORT_MAPPING = {
+    account_summary: I18n.t('reports.account.account_summary.title'),
+    advances_detail: I18n.t('reports.credit.advances_detail.title'),
+    borrowing_capacity: I18n.t('reports.collateral.borrowing_capacity.title'),
+    settlement_transaction_account: I18n.t('reports.account.settlement_transaction_account.title')
+  }.with_indifferent_access.freeze
+
   def index
     today = Time.zone.now.to_date
     rate_service = RatesService.new(request)
@@ -101,6 +108,22 @@ class DashboardController < ApplicationController
     if @contacts[:cam] && @contacts[:cam][:username]
       cam_image_path = "#{@contacts[:cam][:username].downcase}.jpg" 
       @contacts[:cam][:image_url] = find_asset(cam_image_path) ? cam_image_path : default_image_path
+    end
+
+    if feature_enabled?('quick-reports')
+      current_report_set = QuickReportSet.for_member(current_member_id).latest_with_reports
+      @quick_reports = {}.with_indifferent_access
+      if current_report_set.present?
+        @quick_reports_period = (current_report_set.period + '-01').to_date # covert period to date
+        current_report_set.member.quick_report_list.each do |report_name|
+          @quick_reports[report_name] = {
+            title: QUICK_REPORT_MAPPING[report_name]
+          }
+        end
+        current_report_set.reports_named(@quick_reports.keys).completed.each do |quick_report|
+          @quick_reports[quick_report.report_name][:url] = reports_quick_download_path(quick_report)
+        end
+      end
     end
   end
 
@@ -256,30 +279,36 @@ class DashboardController < ApplicationController
 
     # account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
     sta_balance = [
-      [t('dashboard.your_account.table.balance'), profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
+      [[t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
     ]
 
     credit_outstanding = [
       [t('dashboard.your_account.table.credit_outstanding'), (profile[:credit_outstanding] || {})[:total]]
     ]
 
+    leverage_title = if feature_enabled?('report-capital-stock-position-and-leverage')
+      [t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path]
+    else
+      t('dashboard.your_account.table.remaining.leverage')
+    end
+
     remaining = if profile[:total_borrowing_capacity_sbc_agency] == 0 && profile[:total_borrowing_capacity_sbc_aaa] == 0 && profile[:total_borrowing_capacity_sbc_aa] == 0
       [
         {title: t('dashboard.your_account.table.remaining.title')},
         [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
-        [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
-        [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
+        [[t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], (profile[:collateral_borrowing_capacity] || {})[:remaining]],
+        [leverage_title, (profile[:capital_stock] || {})[:remaining_leverage]]
       ]
     else
       [
         {title: t('dashboard.your_account.table.remaining.title')},
         [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
-        [t('dashboard.your_account.table.remaining.capacity'), (profile[:collateral_borrowing_capacity] || {})[:remaining]],
+        [[t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], (profile[:collateral_borrowing_capacity] || {})[:remaining]],
         [t('dashboard.your_account.table.remaining.standard'), profile[:total_borrowing_capacity_standard]],
         [t('dashboard.your_account.table.remaining.agency'), profile[:total_borrowing_capacity_sbc_agency]],
         [t('dashboard.your_account.table.remaining.aaa'), profile[:total_borrowing_capacity_sbc_aaa]],
         [t('dashboard.your_account.table.remaining.aa'), profile[:total_borrowing_capacity_sbc_aa]],
-        [t('dashboard.your_account.table.remaining.leverage'), (profile[:capital_stock] || {})[:remaining_leverage]]
+        [leverage_title, (profile[:capital_stock] || {})[:remaining_leverage]]
       ]
     end
 

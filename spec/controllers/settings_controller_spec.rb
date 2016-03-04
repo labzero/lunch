@@ -337,7 +337,7 @@ RSpec.describe SettingsController, :type => :controller do
       allow(User).to receive(:find).with(user_id.to_s).and_return(user)
       allow(user).to receive(:update_attributes!).and_return(true)
     end
-    it { should permit(:email, :given_name, :surname, :email_confirmation).for(:update_user, verb: :post, params: {id: user_id}) }
+    it { should permit(:email, :given_name, :surname, :email_confirmation).for(:update_user, verb: :post, params: {id: user_id, user: {foo: :bar}}) }
     it_behaves_like 'a resource-based authorization required method', :post, :update_user, :user, :edit?, id: user_id
     it 'assigns the user identified by `params[:id]` to @user' do
       make_request

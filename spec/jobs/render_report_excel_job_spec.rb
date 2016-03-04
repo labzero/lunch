@@ -11,7 +11,7 @@ RSpec.describe RenderReportExcelJob, type: :job do
   let(:params) { {start_date: start_date} }
   let(:run_job) { subject.perform(member_id, report_name, filename, params) }
   let(:reports_controller) { ReportsController.new }
-  let(:string_io_with_filename) { double('some StringIO instance', :'content_type=' => nil, :'original_filename=' => nil) }
+  let(:string_io_with_filename) { double('some StringIO instance', :'content_type=' => nil, :'original_filename=' => nil, :rewind => nil) }
   let(:job_status) { double('job status instance', canceled?: false, completed?: false, started!: nil, completed!: nil, :'result=' => nil, :'status=' => nil, save!: nil) }
 
   before do
@@ -91,6 +91,10 @@ RSpec.describe RenderReportExcelJob, type: :job do
     end
     it 'saves the job_status' do
       expect(job_status).to receive(:save!)
+      run_job
+    end
+    it 'rewinds the file' do
+      expect(string_io_with_filename).to receive(:rewind)
       run_job
     end
     it 'returns the file' do

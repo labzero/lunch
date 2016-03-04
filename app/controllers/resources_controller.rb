@@ -8,6 +8,12 @@ class ResourcesController < ApplicationController
       optional: [1694, 1973, 1465, 2228],
       access: [2066, 2067, 2153, 2068, 2070, 2109, 2108]
     },
+    community_development: {
+      required: [2345, 2346, 2347, 2091, 2065, 2348],
+      requested: [2349, 2136, 2160],
+      optional: [1694, 1465, 2228],
+      access: [2066, 2067, 2153, 2068, 2070, 2109, 2108]
+    },
     credit_union: {
       required: [2138, 2139, 2090, 2091, 2065, 2099, 2112, 2290],
       requested: [2127, 2136, 2160],
@@ -21,7 +27,11 @@ class ResourcesController < ApplicationController
       access: [2066, 2067, 2153, 2068, 2070, 2109, 2108]
     }
   }.freeze
-  
+
+  before_action do
+    set_active_nav(:resources)
+  end
+
   # GET
   def guides
   end
@@ -70,7 +80,7 @@ class ResourcesController < ApplicationController
         pdf_link: resources_download_path(file: :form_2136)
       }
     ]
-    
+
     @signature_card_rows = [
       {
         title: t('resources.forms.authorizations.signature_cards.member_transactions'),
@@ -372,7 +382,7 @@ class ResourcesController < ApplicationController
 
   def capital_plan
   end
-  
+
   def fee_schedules
     fees = FeesService.new(request).fee_schedules
     raise StandardError, "There has been an error and ResourcesController#fee_schedules has encountered nil. Check error logs." if fees.nil?
@@ -385,7 +395,7 @@ class ResourcesController < ApplicationController
       [:other_purposes, t('resources.fee_schedules.basis_point_per_annum', basis_point: annual_maintenance_charge_root[:other_purposes])]
     ]
     @annual_maintenance_charge_table = fee_schedule_table_hash(annual_maintenance_charge_rows)
-    
+
     # LOC - issuance fee
     issuance_fee_root = fees[:letters_of_credit][:issuance_fee]
     issuance_fee_rows = [
@@ -393,12 +403,12 @@ class ResourcesController < ApplicationController
       [:other_purposes, issuance_fee_root[:other_purposes], :currency_whole],
       [:commercial_paper, t('resources.fee_schedules.price_range', lower: fhlb_formatted_currency_whole(issuance_fee_root[:commercial_paper][:lower_limit], html: false), upper: fhlb_formatted_currency_whole(issuance_fee_root[:commercial_paper][:upper_limit], html: false))],
       [:tax_exempt_bond, t('resources.fee_schedules.price_range', lower: fhlb_formatted_currency_whole(issuance_fee_root[:tax_exempt_bond][:lower_limit], html: false), upper: fhlb_formatted_currency_whole(issuance_fee_root[:tax_exempt_bond][:upper_limit], html: false))]
-    ]    
+    ]
     @issuance_fee_table = fee_schedule_table_hash(issuance_fee_rows)
-    
+
     # LOC - draw fee
     @draw_fee_table = fee_schedule_table_hash([[:draw_fee, fees[:letters_of_credit][:draw_fee], :currency_whole]])
-    
+
     # LOC - amendment fee
     amendment_fee_root = fees[:letters_of_credit][:amendment_fee]
     amendment_fee_rows = [
@@ -407,7 +417,7 @@ class ResourcesController < ApplicationController
       [:other_purposes, amendment_fee_root[:other_purposes], :currency_whole]
     ]
     @amendment_fee_table = fee_schedule_table_hash(amendment_fee_rows)
-    
+
     # Securities Services - monthly maintenance
     monthly_maintenance_root = fees[:securities_services][:monthly_maintenance]
     monthly_maintenance_rows = [
@@ -447,7 +457,7 @@ class ResourcesController < ApplicationController
       [:special_handling, t('global.footnote_indicator')]
     ]
     @securities_services_miscellaneous_table = fee_schedule_table_hash(securities_services_miscellaneous_rows)
-    
+
     # Wire Transfer and STA - domestic outgoing wires
     domestic_outgoing_wires_root = fees[:wire_transfer_and_sta][:domestic_outgoing_wires]
     domestic_outgoing_wires_rows = [
@@ -492,6 +502,11 @@ class ResourcesController < ApplicationController
     @form_ids = APPLICATION_FORM_IDS[:commercial]
   end
 
+  # GET
+  def community_development_application
+    @form_ids = APPLICATION_FORM_IDS[:community_development]
+  end
+
   #GET
   def credit_union_application
     @form_ids = APPLICATION_FORM_IDS[:credit_union]
@@ -501,9 +516,9 @@ class ResourcesController < ApplicationController
   def insurance_company_application
     @form_ids = APPLICATION_FORM_IDS[:insurance_company]
   end
-  
+
   private
-  
+
   def fee_schedule_table_hash(rows)
     table_data = {
       rows: []
@@ -513,7 +528,7 @@ class ResourcesController < ApplicationController
         {
           columns: [
             {value: t("resources.fee_schedules.#{row.first.to_s}")},
-            {value: row[1], type: row[2]}  
+            {value: row[1], type: row[2]}
           ]
         }
       )

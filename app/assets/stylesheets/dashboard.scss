@@ -50,6 +50,9 @@ $faded-opacity: 0.4 !default;
       line-height: 1.6rem;
     }
   }
+  p:first-child {
+    margin-top: 0;
+  }
   .icon-alt-text {
     overflow: hidden;
     width: 0;
@@ -217,14 +220,16 @@ $faded-opacity: 0.4 !default;
   }
 }
 
-.quick-advance-desk-closed-message {
-  margin-bottom: 0;
-  a {
-    display: block;
-    text-transform: uppercase;
-  }
-  span {
-    white-space: nowrap;
+.quick-advance-desk-closed-message-group {
+  p {
+    margin-bottom: 0;
+    a {
+      display: block;
+      text-transform: uppercase;
+    }
+    span {
+      white-space: nowrap;
+    }
   }
 }
 
@@ -641,5 +646,25 @@ $breakdown-table-currency-width: 10px;
   }
   .alignright {
     margin-bottom: 5px;
+  }
+}
+
+.dashboard-module-quick-reports {
+  h3 {
+    @extend %typography-calendar-day;
+    text-transform: uppercase;
+    color: $medium-gray;
+    margin-bottom: 0;
+  }
+  ul {
+    list-style: none;
+    margin-top: 0;
+    padding-left: 0;
+    li {
+      margin-left: 0;
+    }
+  }
+  small {
+    color: $medium-gray;
   }
 }

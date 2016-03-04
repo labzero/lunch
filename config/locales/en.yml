@@ -109,6 +109,7 @@ en:
     sta_number: Settlement/Transaction Account No. %{sta_number}
     all_transactions: All Transactions
     footnote_indicator: '*'
+    footnoted_string: '%{string}*'
     attachments: Attachments
     unknown: Unknown
     last_updated: 'Last Updated: %{date}'
@@ -192,10 +193,12 @@ en:
       custom: Custom date range
       print: "%{start_date} - %{end_date}"
       last_30_days: Last 30 Days
+      from_label: From
     single:
       input: "As of %{date}"
       custom: Custom date
       end_of: "End of %{date}"
+      from_label: As of
   activerecord:
     attributes:
       user:
@@ -436,7 +439,7 @@ en:
       no_email: I didn't receive the email
       email_mask_failure: '*****'
     reset_email:
-      body_html: "Hi %{name},\n\nWe've received a request to reset your Member Portal password. You can choose a new password by clicking the following link.\n\n<a href=\"%{url}\">%{url}</a>\n\nYou'll be taken to a page where you can enter a new password.\n\nIf you have any questions, please feel free to contact your relationship manager.\n\nThank you,\nFHLBSF"
+      body_html: "Hi %{name},\n\nWe’ve received your password request. Please use this link to reset your password for the Member Portal:\n\n<a href=\"%{url}\">%{url}</a>\n\nFor your security, this link will expire in one hour. Contact your Access Manager or Web Support at %{phone} if you have any questions.\n\nThank you,\nFHLBank San Francisco Web Support Team"
     timeout:
       title: Request Expired
       description: Sorry, the link in your password reset email has expired.
@@ -470,6 +473,10 @@ en:
         relationship_manager: Relationship Manager
         member_services_desk: Member Services Desk
         collateral_asset_manager: Collateral Asset Manager
+    quick_reports:
+      title: Quick Reports
+      description: 'The following monthend reports are available for download:'
+      all_reports_html: '<a href="%{url}">View a list</a> of all available reports.'
     quick_advance:
       title: Quick Advance
       advance_placeholder: Enter Dollar Amount
@@ -869,7 +876,7 @@ en:
       title: Capital Plan
       summary_title: Summary of Capital Plan
       effective_april_html: "Effective April 1, 2015, the Bank amended and restated its capital plan to reduce member stock purchase requirements and make other clarifying and conforming changes.\n\nEffective August 3, 2015, the Bank reduced its activity-based stock purchase requirements, within the ranges authorized by the Bank’s Capital Plan. The activity-based stock requirement for outstanding advances was reduced from 3.0% to 2.7%, and the activity-based stock requirement for outstanding mortgage loans purchased from the member and held by the Bank was reduced from 3.0% to 0.0%."
-      members_may_request_html: "Members may request redemption of capital stock by submitting <a href='%{url}'> Notice of Redemption of Capital Stock</a> (PDF)"
+      members_may_request_html: "Members may request redemption of capital stock by submitting the <a href='%{url}'> Notice of Redemption of Capital Stock</a> (PDF)."
     investor_relations:
       title: Investor Relations
     newsroom:
@@ -1000,8 +1007,8 @@ en:
           title: "Advances and Security Agreement (FC 2117)"
           description: "This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization."
         id_2127:
-          title: Advances and Security Agreement (FC 2127)
-          description: This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization.
+          title: "Advances and Security Agreement (FC 2127)"
+          description: "This agreement defines the credit relationship between your institution and the Bank. Signatures on this document require notarization."
         id_2135:
           title: "Settlement/Transaction Account Terms and Conditions (FC 2135)"
           description:
@@ -1039,20 +1046,20 @@ en:
           title: "Authorization to Release Records: Arizona (FC 2290)"
           description: "This authorization is for Arizona institutions only. This form authorizes the Bank to obtain records and information, including examination reports, about your institution from the Arizona Department of Financial Institutions."
         id_2345:
-          title:
-          description:
+          title: "Membership Application: Forms and Exhibits Checklist: Community Development Financial Institutions (FC 2345)"
+          description: This checklist identifies all of the forms, agreements, and exhibits that must be returned to the Bank with your application.
         id_2346:
-          title:
-          description:
+          title: "Applicant Information: Community Development Financial Institutions (FC 2346)"
+          description: This form provides basic information about your organization.
         id_2347:
-          title:
-          description:
+          title: "Certificate of Applicant: Community Development Financial Institutions (FC 2347)"
+          description: "This document must be completed and signed by the person(s) authorized in the Resolution: Membership."
         id_2348:
-          title:
-          description:
+          title: "Applicant’s Bank Stock Calculation: Community Development Financial Institutions (FC 2348)"
+          description: This worksheet helps you calculate the amount of Bank capital stock your organization must purchase to become a member.
         id_2349:
-          title:
-          description:
+          title: "Advances and Security Agreement: Community Development Financial Institutions (FC 2349)"
+          description_html: "This agreement defines the credit relationship between your organization and the Bank. Signatures on this document require notarization. This agreement should be used by community development loan funds and venture capital funds that are certified by the Community Development Financial Institutions Fund of the U.S. Department of the Treasury (CDFI Fund). Privately insured credit unions that are certified by the CDFI Fund should use the %{download_link}."
   securities:
     title: Securities
     redirect:
@@ -1185,61 +1192,61 @@ en:
         summary: Displays debits and credits based on your institution's activity with the Bank. Interest earned is provided on the first business day of the following month.
         updated: Daily for current month, as of the end of the prior business day
         history: Current month to date. Prior statements are available for the previous 6 months.
-    account_summary:
-      title: Account Summary
-      freshness: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{now}. Collateral Borrowing Capacity data, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of close of business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today’s credit activity as of %{now}."
-      institution_details:
-        sta_number: 'STA No.:'
-        fhfa_number: 'FHFA No.:'
-      collateral_delivery_required: 'Collateral Status: Delivery Required'
-      financing_availability:
-        title: Financing Availability
-        footnote: 'Represents a regulatory limit on long-term advances based on call report data. The actual amount available cannot exceed the Total Financing Availability.'
-        asset_percentage: Financing Availability as % of Assets
-        maximum_term: Maximum Term
-        total_assets: Total Assets
-        total_financing_availability: Total Financing Availability
-        approved_credit: 'Approved Credit for Terms Over 5 Years*'
-        credit_outstanding: Credit Outstanding
-        forward_commitments: Forward Commitments
-        remaining_financing_availability: Remaining Financing Availability
-        mpf_credit_available: MPF Available Credit Enhancement
-      credit_outstanding:
-        title: Credit Outstanding
-        standard_advances: Standard Credit Program Advances
-        sbc_advances: Securities-Backed Credit Advances
-        swaps_credit: Swaps (credit exposure)
-        swaps_notational: Swaps (notional)
-        investments: Investments
-        letters_of_credit: Letters of Credit
-        mpf_credit: MPF Actual Credit Enhancement
-      collateral_borrowing_capacity:
-        title: Collateral Borrowing Capacity
-        standard:
-          title: Standard Credit Program*
-          total: Total Standard Credit Program Borrowing Capacity
-          remaining: Remaining Standard Credit Program Borrowing Capacity
-        sbc:
-          title: Securities-Backed Credit Program
-          total_market: Total Securities-Backed Credit Market Value
-          remaining_market: Remaining Securities-Backed Credit Market Value
-          total: Total Securities-Backed Credit Borrowing Capacity
-          remaining: Remaining Securities-Backed Credit Borrowing Capacity
-        totals:
-          title: Totals
-          total: Total Borrowing Capacity
-          remaining: Total Remaining Borrowing Capacity
-        footnote: 'If you are using whole loan collateral to meet the margin requirement for Securities-Backed Credit advances, the amount shown in "Remaining" is overstated. Please call the Members Services Desk at %{phone_number} to verify your actual remaining borrowing capacity.'
-      capital_stock:
-        title: Capital Stock Position and Leverage
-        stock_owned: Stock Owned
-        stock_requirement: Activity-Based Stock Requirement
-        stock: Remaining Stock
-        leverage: Remaining Leverage
     your_account:
       title: Your Account
     learn_more_html: <a href=%{url}>Learn more</a> about all available reports.
     pages:
+      account_summary:
+        title: Account Summary
+        freshness: "Data for Financing Availability, Credit Outstanding, and Capital Stock reflect intraday activity as of %{now}. Collateral Borrowing Capacity data, Total Market Value, and Total Borrowing Capacity data reflect collateral position as of close of business on prior business day, and Remaining Market Value and Remaining Borrowing Capacity reflect today’s credit activity as of %{now}."
+        institution_details:
+          sta_number: 'STA No.:'
+          fhfa_number: 'FHFA No.:'
+        collateral_delivery_required: 'Collateral Status: Delivery Required'
+        financing_availability:
+          title: Financing Availability
+          footnote: 'Represents a regulatory limit on long-term advances based on call report data. The actual amount available cannot exceed the Total Financing Availability.'
+          asset_percentage: Financing Availability as % of Assets
+          maximum_term: Maximum Term
+          total_assets: Total Assets
+          total_financing_availability: Total Financing Availability
+          approved_credit: 'Approved Credit for Terms Over 5 Years*'
+          credit_outstanding: Credit Outstanding
+          forward_commitments: Forward Commitments
+          remaining_financing_availability: Remaining Financing Availability
+          mpf_credit_available: MPF Available Credit Enhancement
+        credit_outstanding:
+          title: Credit Outstanding
+          standard_advances: Standard Credit Program Advances
+          sbc_advances: Securities-Backed Credit Advances
+          swaps_credit: Swaps (credit exposure)
+          swaps_notational: Swaps (notional)
+          investments: Investments
+          letters_of_credit: Letters of Credit
+          mpf_credit: MPF Actual Credit Enhancement
+        collateral_borrowing_capacity:
+          title: Collateral Borrowing Capacity
+          standard:
+            title: Standard Credit Program*
+            total: Total Standard Credit Program Borrowing Capacity
+            remaining: Remaining Standard Credit Program Borrowing Capacity
+          sbc:
+            title: Securities-Backed Credit Program
+            total_market: Total Securities-Backed Credit Market Value
+            remaining_market: Remaining Securities-Backed Credit Market Value
+            total: Total Securities-Backed Credit Borrowing Capacity
+            remaining: Remaining Securities-Backed Credit Borrowing Capacity
+          totals:
+            title: Totals
+            total: Total Borrowing Capacity
+            remaining: Total Remaining Borrowing Capacity
+          footnote: 'If you are using whole loan collateral to meet the margin requirement for Securities-Backed Credit advances, the amount shown in "Remaining" is overstated. Please call the Members Services Desk at %{phone_number} to verify your actual remaining borrowing capacity.'
+        capital_stock:
+          title: Capital Stock Position and Leverage
+          stock_owned: Stock Owned
+          stock_requirement: Activity-Based Stock Requirement
+          stock: Remaining Stock
+          leverage: Remaining Leverage
       price_indications:
         current:
           title: Current Price Indications
@@ -1329,6 +1336,10 @@ en:
           dropdown: Adjustable Rate Credit (ARC) with Embedded Cap
           standard_table_title: Standard Credit Program, Adjustable Rate Credit (ARC) Daily Prime, All Terms
           sbc_table_title: Securities-Backed  Credit, Adjustable Rate Credit (ARC) Daily Prime, All Terms
+        sta:
+          dropdown: Settlement/Transaction Acct. Rate
+          sta_table_title: STA Rates
+          notes: Published STA rate is applied to the previous business day's ending STA balance.
       capital_stock_activity:
         title: Capital Stock Activity Statement
         opening_balance_heading: "Opening balance of Class B Shares as of %{date}:"
@@ -1340,6 +1351,7 @@ en:
         shares_outstanding: Shares Outstanding
         debit_shares: "Debits: Number of Shares"
         credit_shares: "Credits: Number of Shares"
+        xlsx_worksheet_name: Capital Stock Activity
       capital_stock_trial_balance:
         title: Capital Stock Trial Balance
         no_of_shares_heading: "Total Class B Shares Outstanding at $100 per share as of %{date}:"
@@ -1351,7 +1363,7 @@ en:
         shares_outstanding: Shares Outstanding
         transaction_type: Transaction Type
         total_shares_outstanding: Total Shares Outstanding
-      borrowing_capacity_summary:
+      borrowing_capacity:
         total_borrowing_capacity_heading: "Total Borrowing Capacity:"
         remaining_borrowing_capacity_heading: "Remaining Borrowing Capacity:"
         standard_credit_program: Standard Credit Program
@@ -1508,8 +1520,10 @@ en:
         title: Authorizations
         intro_html: The following people are authorized to use the Bank's services on behalf of your institution. If you'd like to make changes to these authorizations, please fill out an <a href=%{url}>Authorization Form</a>.
         contact_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about authorizations, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
-        sub_title: Users with %{filter}
+        sub_title: Users with %{filter} Authorization
         sub_title_all_users: All Users with Authorizations
+        sub_title_inclusive_authorizations: Users with %{filter}
+        table_footnote: "* %{role} authorization included for users with Resolution and Authorization: Memeber Transactions or Etntire Authority."
       parallel_shift:
         title: Putable Advance Parallel Shift Sensitivity Analysis
         info: The valuations below are calculated using data as of %{date}
@@ -2050,7 +2064,7 @@ en:
           servicing_audit: Servicing Audit
           your_institutions_most_recent_servicing: "Your institution’s most recent servicing audit conducted by applicable government agencies and other investors, and management’s response"
           compliance: Compliance
-          information_on_your_institutions_compliance_html: "Information on your institution’s compliance with the Consumer Financial Protection Bureau’s <a href=%{url}>TILA-RESPA Integrated Disclosure rule</a>, which will become effective October 3, 2015"
+          information_on_your_institutions_compliance_html: "Information on your institution’s compliance with the Consumer Financial Protection Bureau’s <a href=%{url}>TILA-RESPA Integrated Disclosure rule</a>, which became effective October 3, 2015"
           evidence_of_authorization: Evidence of authorization to originate government loans (FHA/VA) from the applicable agency/agencies, including approval date and HUD/VA approval number
       ocn:
         title: Other Cash Needs (OCN) Advance

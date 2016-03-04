@@ -70,11 +70,13 @@ $faded-opacity: 0.4 !default;
 }
 
 .dashboard-quick-advance-flyout {
-  .quick-advance-desk-closed-message {
-    font-weight: $bold-weight;
-    margin-top: 35px;
-    a {
-      display: none;
+  .quick-advance-desk-closed-message-group {
+    p {
+      font-weight: $bold-weight;
+      margin-top: 35px;
+      a {
+        display: none;
+      }
     }
   }
   .quick-advance-last-updated-message {

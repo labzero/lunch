@@ -5,6 +5,7 @@ RSpec.describe ResourcesController, type: :controller do
   login_user
 
   describe 'GET guides' do
+    it_behaves_like 'a controller action with an active nav setting', :guides, :resources
     it_behaves_like 'a user required action', :get, :guides
     it 'should render the guides view' do
       get :guides
@@ -13,7 +14,8 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'GET business_continuity' do
-    it_behaves_like 'a user required action', :get, :guides
+    it_behaves_like 'a controller action with an active nav setting', :business_continuity, :resources
+    it_behaves_like 'a user required action', :get, :business_continuity
     it 'should render the guides view' do
       get :business_continuity
       expect(response.body).to render_template('business_continuity')
@@ -21,6 +23,7 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'GET capital_plan' do
+    it_behaves_like 'a controller action with an active nav setting', :capital_plan, :resources
     it_behaves_like 'a user required action', :get, :capital_plan
     it 'should render the capital plan view' do
       get :capital_plan
@@ -29,6 +32,7 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'GET forms' do
+    it_behaves_like 'a controller action with an active nav setting', :forms, :resources
     it_behaves_like 'a user required action', :get, :forms
     it 'should render the guides view' do
       get :forms
@@ -103,7 +107,7 @@ RSpec.describe ResourcesController, type: :controller do
       end
     end
   end
-  
+
   describe 'GET fee_schedules' do
     let(:fee_subhash) { double('a subhash of the fee schedules object', :[] => nil) }
     let(:fee_service_data) { double('the fee schedules object', :[] => fee_subhash) }
@@ -120,7 +124,8 @@ RSpec.describe ResourcesController, type: :controller do
       allow(fee_subhash).to receive(:[]).and_return(fee_subhash)
       allow(controller).to receive(:fee_schedule_table_hash)
     end
-    
+
+    it_behaves_like 'a controller action with an active nav setting', :fee_schedules, :resources
     it_behaves_like 'a user required action', :get, :fee_schedules
     it 'fetches fee schedule info from the FeeService' do
       expect(fee_service).to receive(:fee_schedules)
@@ -130,21 +135,21 @@ RSpec.describe ResourcesController, type: :controller do
       allow(fee_service).to receive(:fee_schedules).and_return(nil)
       expect{fee_schedules}.to raise_error
     end
-    
+
     describe 'letters of credit tables' do
       let(:loc_hash) { double('hash of loc data', :[] => fee_subhash) }
       before { allow(fee_service_data).to receive(:[]).with(:letters_of_credit).and_return(loc_hash) }
-      
+
       describe '@annual_maintenance_charge_table' do
         let(:annual_maintenance_charge_hash) { double('a hash of annual maintenance charge data', :[] => fee_subhash) }
-        before do 
+        before do
           allow(loc_hash).to receive(:[]).with(:annual_maintenance_charge).and_return(annual_maintenance_charge_hash)
           allow(annual_maintenance_charge_hash).to receive(:[]).with(:minimum_annual_fee).and_return(whole_dollar_amount)
           [:cip_ace, :agency_deposits, :other_purposes].each do |key|
             allow(annual_maintenance_charge_hash).to receive(:[]).with(key).and_return(basis_point)
           end
         end
-        
+
         it 'sets @annual_maintenance_charge_table to the result of passing annual_maintenance_charge_rows into the `fee_schedule_table_hash` method' do
           annual_maintenance_charge_rows = [
             [:minimum_annual_fee, whole_dollar_amount, :currency_whole],
@@ -402,6 +407,7 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   RSpec.shared_examples 'a resource membership action' do |action|
+    it_behaves_like 'a controller action with an active nav setting', action, :resources
     it_behaves_like 'a user required action', :get, action
     it "should render the #{action.to_s} view" do
       get action
@@ -410,7 +416,7 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'GET :membership_overview' do
-    it_behaves_like 'a resource membership action', :membership_application
+    it_behaves_like 'a resource membership action', :membership_overview
   end
 
   describe 'GET :membership_application' do
@@ -422,6 +428,14 @@ RSpec.describe ResourcesController, type: :controller do
     it 'sets @form_ids to the proper value' do
       get :commercial_application
       expect(assigns[:form_ids]).to eq(ResourcesController::APPLICATION_FORM_IDS[:commercial])
+    end
+  end
+
+  describe 'GET :community_development_application' do
+    it_behaves_like 'a resource membership action', :community_development_application
+    it 'sets @form_ids to the proper value' do
+      get :community_development_application
+      expect(assigns[:form_ids]).to eq(ResourcesController::APPLICATION_FORM_IDS[:community_development])
     end
   end
 
@@ -440,7 +454,7 @@ RSpec.describe ResourcesController, type: :controller do
       expect(assigns[:form_ids]).to eq(ResourcesController::APPLICATION_FORM_IDS[:insurance_company])
     end
   end
-  
+
   describe 'the `fee_schedule_table_hash` private method' do
     let(:translation) { double('I18n translation', to_s: 'foo') }
     let(:value) { double('a table cell value') }

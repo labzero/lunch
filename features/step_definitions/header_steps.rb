@@ -29,6 +29,22 @@ Then(/^I should see a datestamp in the navigation header$/) do
   page.assert_selector('nav time')
 end
 
+Then(/^I should see the active state of the (securities|advances|reports|products|resources) nav item$/) do |nav_item|
+  translation = case nav_item
+  when 'securities'
+    'securities.title'
+  when 'advances'
+    'nav.secondary.advances'
+  when 'reports'
+    'reports.title'
+  when 'products'
+    'nav.secondary.products'
+  when 'resources'
+    'nav.secondary.resources'
+  end
+  page.assert_selector('.active-nav-item a', text: I18n.t(translation), exact: true)
+end
+
 def dropdown_title_regex(dropdown)
   title = case dropdown
   when 'agreements'

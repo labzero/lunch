@@ -35,11 +35,13 @@ RSpec.describe DashboardController, :type => :controller do
     let(:empty_financing_availability_gauge) {{total: {amount: 0, display_percentage: 100, percentage: 0}}}
     let(:profile) { double('profile') }
     let(:service) { double('a service object', profile: profile, borrowing_capacity_summary: nil) }
+    let(:make_request) { get :index }
     before do
       allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
       allow(subject).to receive(:current_user_roles)
       allow_any_instance_of(MembersService).to receive(:member_contacts)
       allow(MessageService).to receive(:new).and_return(double('service instance', todays_quick_advance_message: nil))
+      allow(QuickReportSet).to receive_message_chain(:for_member, :latest_with_reports).and_return(nil)
     end
 
     it_behaves_like 'a user required action', :get, :index
@@ -226,6 +228,76 @@ RSpec.describe DashboardController, :type => :controller do
         allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_REPORT_DATA]).and_return(true)
         get :index
         expect(assigns[:borrowing_capacity]).to eq(nil)
+      end
+    end
+
+    describe 'Quick Reports module' do
+      let(:member) { Member.new(member_id) }
+      let(:report_list) { described_class::QUICK_REPORT_MAPPING.keys.sample(2) }
+      let(:quick_report_set) { double(QuickReportSet, member: member, period: '2015-03') }
+      let(:quick_reports) { double(ActiveRecord::Relation, completed: []) }
+      before do
+        allow(QuickReportSet).to receive(:for_member).with(member_id).and_return(double(ActiveRecord::Relation, latest_with_reports: quick_report_set))
+        allow(member).to receive(:quick_report_list).and_return(report_list)
+        allow(quick_report_set).to receive(:reports_named).with(report_list.collect(&:to_s)).and_return(quick_reports)
+      end
+      it 'assigns @quick_reports_period' do
+        make_request
+        expect(assigns[:quick_reports_period]).to eq(Date.new(2015, 3, 1))
+      end
+      it 'assigns @quick_reports' do
+        make_request
+        expect(assigns[:quick_reports].length).to be(report_list.length)
+        report_list.each do |report|
+          expect(assigns[:quick_reports][report]).to include(title: described_class::QUICK_REPORT_MAPPING[report])
+        end
+      end
+      context 'the feature is flipped off' do
+        before do
+          allow(controller).to receive(:feature_enabled?).with('quick-reports').and_return(false)
+        end
+        it 'does not assign @quick_reports' do
+          make_request
+          expect(assigns[:quick_reports]).to_not be_present
+        end
+        it 'does not assign @quick_reports_period' do
+          make_request
+          expect(assigns[:quick_reports_period]).to_not be_present
+        end
+      end
+      context do
+        let(:reports) { [] }
+        let(:report_urls) { {} }
+        before do
+          report_list.each do |report|
+            url = double("A URL for #{report}")
+            quick_report = QuickReport.new(report_name: report)
+            allow(controller).to receive(:reports_quick_download_path).with(quick_report).and_return(url)
+            report_urls[report] = url
+            reports << quick_report
+          end
+          allow(quick_reports).to receive(:completed).and_return(reports)
+        end
+        it 'adds a URL to @quick_reports for each report has been generated' do
+          make_request
+          reports.each do |report|
+            expect(assigns[:quick_reports][report.report_name][:url]).to be(report_urls[report.report_name])
+          end
+        end
+        it 'does not include download links for reports that have not been generated successfully' do
+         uncompleted_reports = [:foo, :bar]
+         new_report_list = report_list + uncompleted_reports
+         allow(member).to receive(:quick_report_list).and_return(new_report_list)
+         allow(quick_report_set).to receive(:reports_named).with(new_report_list.collect(&:to_s)).and_return(quick_reports)
+         make_request
+         uncompleted_reports.each do |report|
+           expect(assigns[:quick_reports][report][:url]).to be_nil
+         end
+        end
+        it 'does not include reports that are not in the members report list' do
+          make_request
+          expect(assigns[:quick_reports].keys - report_list).to eq([])
+        end
       end
     end
   end
@@ -681,13 +753,13 @@ RSpec.describe DashboardController, :type => :controller do
         end
         allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).and_return(profile_no_bc)
         table_data = {
-          sta_balance: [[I18n.t('dashboard.your_account.table.balance'), sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
+          sta_balance: [[[I18n.t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
           credit_outstanding: [[I18n.t('dashboard.your_account.table.credit_outstanding'), total]],
           remaining: [
             {title: I18n.t('dashboard.your_account.table.remaining.title')},
             [I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available],
-            [I18n.t('dashboard.your_account.table.remaining.capacity'), remaining],
-            [I18n.t('dashboard.your_account.table.remaining.leverage'), remaining_leverage]
+            [[I18n.t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], remaining],
+            [[I18n.t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path], remaining_leverage]
           ]
         }
         expect(subject).to receive(:render).with({partial: 'dashboard/dashboard_account_overview', locals: {table_data: table_data}, layout: false})
@@ -695,12 +767,31 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'renders with the correct data when there is total_borrowing_capacity_sbc_agency, total_borrowing_capacity_sbc_aaa or total_borrowing_capacity_sbc_aa' do
         table_data = {
-          sta_balance: [[I18n.t('dashboard.your_account.table.balance'), sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
+          sta_balance: [[[I18n.t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
           credit_outstanding: [[I18n.t('dashboard.your_account.table.credit_outstanding'), total]],
           remaining: [
             {title: I18n.t('dashboard.your_account.table.remaining.title')},
             [I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available],
-            [I18n.t('dashboard.your_account.table.remaining.capacity'), remaining],
+            [[I18n.t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], remaining],
+            [I18n.t('dashboard.your_account.table.remaining.standard'), total_borrowing_capacity_standard],
+            [I18n.t('dashboard.your_account.table.remaining.agency'), total_borrowing_capacity_sbc_agency],
+            [I18n.t('dashboard.your_account.table.remaining.aaa'), total_borrowing_capacity_sbc_aaa],
+            [I18n.t('dashboard.your_account.table.remaining.aa'), total_borrowing_capacity_sbc_aa],
+            [[I18n.t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path], remaining_leverage]
+          ]
+        }
+        expect(subject).to receive(:render).with({partial: 'dashboard/dashboard_account_overview', locals: {table_data: table_data}, layout: false})
+        account_overview
+      end
+      it 'renders with the correct data when the capital stock position and leverage report feature is disabled' do
+        allow(controller).to receive(:feature_enabled?).with('report-capital-stock-position-and-leverage').and_return(false)
+        table_data = {
+          sta_balance: [[[I18n.t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
+          credit_outstanding: [[I18n.t('dashboard.your_account.table.credit_outstanding'), total]],
+          remaining: [
+            {title: I18n.t('dashboard.your_account.table.remaining.title')},
+            [I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available],
+            [[I18n.t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], remaining],
             [I18n.t('dashboard.your_account.table.remaining.standard'), total_borrowing_capacity_standard],
             [I18n.t('dashboard.your_account.table.remaining.agency'), total_borrowing_capacity_sbc_agency],
             [I18n.t('dashboard.your_account.table.remaining.aaa'), total_borrowing_capacity_sbc_aaa],

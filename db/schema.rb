@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160210173455) do
+ActiveRecord::Schema.define(version: 20160220002521) do
 
   create_table "attachments", force: :cascade do |t|
     t.string   "owner_type"
@@ -54,6 +54,29 @@ ActiveRecord::Schema.define(version: 20160210173455) do
   add_index "job_statuses", ["finished_at"], name: "i_job_statuses_finished_at"
   add_index "job_statuses", ["job_id"], name: "index_job_statuses_on_job_id", unique: true
   add_index "job_statuses", ["status"], name: "index_job_statuses_on_status"
+
+  create_table "quick_report_sets", force: :cascade do |t|
+    t.integer  "member_id",            precision: 38, null: false
+    t.string   "period",     limit: 7,                null: false
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+  end
+
+  add_index "quick_report_sets", ["member_id", "period"], name: "i_qui_rep_set_mem_id_per", unique: true
+
+  create_table "quick_reports", force: :cascade do |t|
+    t.integer  "quick_report_set_id", precision: 38, null: false
+    t.string   "report_name",                        null: false
+    t.string   "report_file_name"
+    t.string   "report_content_type"
+    t.integer  "report_file_size",    precision: 38
+    t.datetime "report_updated_at"
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
+  end
+
+  add_index "quick_reports", ["quick_report_set_id", "report_name"], name: "i8819b5c0d5b2f8b28ea374879cae1", unique: true
+  add_index "quick_reports", ["report_name"], name: "i_quick_reports_report_name"
 
   create_table "users", force: :cascade do |t|
     t.string   "username",                                    default: "", null: false

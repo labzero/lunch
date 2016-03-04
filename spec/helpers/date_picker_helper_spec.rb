@@ -18,6 +18,13 @@ describe DatePickerHelper do
       expect(helper.default_dates_hash[:last_year_start]).to eq((today - 1.year).beginning_of_year)
       expect(helper.default_dates_hash[:last_year_end]).to eq((today - 1.year).end_of_year)
     end
+    it 'defaults to using today for its reference date' do
+      expect(helper.default_dates_hash[:today]).to eq(today)
+    end
+    it 'allows the reference date to be passed in' do
+      reference_date = today - 1.month
+      expect(helper.default_dates_hash(reference_date)[:today]).to eq(reference_date)
+    end
   end
 
   describe '`current_quarter` method' do
