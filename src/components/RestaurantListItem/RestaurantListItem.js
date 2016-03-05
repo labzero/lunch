@@ -15,6 +15,7 @@ class RestaurantListItem extends Component {
   render() {
     let deleteButton = null;
     if (typeof this.props.user.id === 'number') {
+      // voteButton = <RestaurantVoteButtonContainer id={this.props.id} />;
       deleteButton = <RestaurantDeleteButtonContainer id={this.props.id} />;
     }
 

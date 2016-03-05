@@ -8,7 +8,7 @@ const Restaurant = Base.extend({
   votes() { return this.hasMany(Vote); },
   virtuals: {
     votesFromToday() {
-      return this.votes().where('created_at', '>', moment().subtract(12, 'hours').toDate());
+      return this.votes().query('where', 'created_at', '>', moment().subtract(12, 'hours').toDate());
     }
   }
 });

@@ -18,7 +18,6 @@ const errorCatcher = (res, err) => {
 router
   .get('/', async (req, res) => {
     Restaurant.fetchAll({ withRelated: 'votes' }).then(all => {
-      console.log(all.at(0));
       res.status(200).send({ error: false, data: all });
     }).catch(err => errorCatcher(res, err));
   })
