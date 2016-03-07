@@ -76,7 +76,8 @@ const config = {
         test: /globalCss.scss$/,
         loaders: [
           'isomorphic-style-loader',
-          `css-loader?${DEBUG ? 'sourceMap&' : 'minimize&'}modules&localIdentName=[local]`
+          `css-loader?${DEBUG ? 'sourceMap&' : 'minimize&'}modules&localIdentName=[local]`,
+          'postcss-loader?parser=postcss-scss'
         ]
       },
       {
@@ -105,8 +106,8 @@ const config = {
 
   postcss: function plugins(bundler) {
     return [
-      require('postcss-import')({ addDependencyTo: bundler }),
-      require('precss')(),
+      require('precss')({ addDependencyTo: bundler }),
+      require('postcss-clearfix')(),
       require('autoprefixer')({ browsers: AUTOPREFIXER_BROWSERS }),
     ];
   },

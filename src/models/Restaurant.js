@@ -4,7 +4,6 @@ import Vote from './Vote';
 
 const Restaurant = Base.extend({
   tableName: 'restaurants',
-  hidden: ['name'],
   votes() { return this.hasMany(Vote); },
   virtuals: {
     votesFromToday() {
