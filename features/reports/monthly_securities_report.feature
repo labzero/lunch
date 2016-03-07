@@ -62,7 +62,7 @@ Feature: Visiting the Monthly Securities Position Report Page
     When I click the datepicker field
     And I write tomorrow's date in the datepicker start input field
     And I click the datepicker apply button
-    Then I should see a "Monthly Securities Position" report as of the last day of last month
+    Then I should see a "Monthly Securities Position" report as of the last day of last month relative to today
 
   @jira-mem-890 @jira-mem-1220
   Scenario: Member enters a date occurring after the maximum allowed date on the first day of the month
@@ -71,7 +71,13 @@ Feature: Visiting the Monthly Securities Position Report Page
     When I click the datepicker field
     And I write tomorrow's date in the datepicker start input field
     And I click the datepicker apply button
-    Then I should see a "Monthly Securities Position" report as of the last day of last month
+    Then I should see a "Monthly Securities Position" report as of the last day of last month relative to today
+
+  @jira-mem-1387
+  Scenario: Member should not see Today on the datepicker preset menu
+    Given I am on the "Monthly Securities Position" report page
+    When I click the datepicker field
+    Then I should not see the datepicker preset for "Today"
 
   @resque-backed @smoke @jira-mem-821
   Scenario: Member downloads an XLSX of the monthly securities position report

@@ -93,7 +93,7 @@ end
 
 Given(/^I am on the "(.*?)" report page$/) do |report|
   sleep_if_close_to_midnight
-  @today = Time.zone.now.to_date
+  @today = Time.zone.today
   case report
   when 'Account Summary'
     visit '/reports/account-summary'
@@ -265,7 +265,7 @@ Then(/^I should see a "(.*?)" report as of last business day$/) do |report_type|
   step %{I should see a "#{report_type}" report as of "#{most_recent_business_day(Time.zone.today - 1)}"}
 end
 
-Then(/^I should see a "(.*?)" report as of the last day of last month$/) do |report_type|
+Then(/^I should see a "(.*?)" report as of the last day of last month relative to today$/) do |report_type|
   date = (@today - 1.month).end_of_month
   step %{I should see a "#{report_type}" report as of "#{date}"}
 end
