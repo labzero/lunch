@@ -71,6 +71,25 @@ $(function () {
 
       $datePickerTrigger.data('datepicker-initialized', true);
     });
+    var $datePickerFields = $(".datepicker_input_field .input-mini");
+    $datePickerFields.keypress(function(e) {
+      Fhlb.Utils.onlyAllowDigits(e, [47]); // 47 = / (forward slash)
+    });
+
+    $datePickerFields.keyup(function(e) {
+      if ([8, 9, 13, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46].indexOf(e.which) < 0) {
+        var target = e.target;
+        var selectionStart = target.selectionStart;
+        var selectionEnd = target.selectionEnd;
+        var oldValue = target.value;
+        var newValue = oldValue.match(/[\d\/]+/);
+
+        if (newValue !== oldValue) {
+          $(target).val(newValue);
+          target.setSelectionRange(selectionStart, selectionEnd);
+        };
+      };
+    });
   };
 
   bindDatepickers();
@@ -331,23 +350,4 @@ $(function () {
     }
   };
 
-  var $datePickerFields = $(".datepicker_input_field .input-mini");
-  $datePickerFields.keypress(function(e) {
-    Fhlb.Utils.onlyAllowDigits(e, [47]); // 47 = / (forward slash)
-  });
-
-  $datePickerFields.keyup(function(e) {
-    if ([8, 9, 13, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46].indexOf(e.which) < 0) {
-      var target = e.target;
-      var selectionStart = target.selectionStart;
-      var selectionEnd = target.selectionEnd;
-      var oldValue = target.value;
-      var newValue = oldValue.match(/[\d\/]+/);
-
-      if (newValue !== oldValue) {
-        $(target).val(newValue);
-        target.setSelectionRange(selectionStart, selectionEnd);
-      };
-    };
-  });
 });

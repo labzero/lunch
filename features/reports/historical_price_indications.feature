@@ -12,7 +12,8 @@ Scenario: Visit historical price indications from header link
   Given I visit the dashboard
   When I select "Historical" from the reports dropdown
   Then I should see "Historical Price Indications"
-  And I should see a report header
+  When I wait for the report to load
+  Then I should see a report header
   And I should see a report table with multiple data rows
 
 @jira-mem-311
@@ -22,17 +23,21 @@ Scenario: Defaults to Standard Collateral Program FRC
   And I should see "Fixed Rate Credit (FRC)"
 
 @jira-mem-358
-  Scenario: Choosing an SBC credit program should select the default credit type if the current credit_type is not available in SBC programs.
-    Given I am on the "Historical Price Indications" report page
-    And I select "Adjustable Rate Credit (ARC) Daily Prime" from the credit type selector
-    When I select "Securities-Backed Credit Program" from the collateral type selector
-    Then I should see "Fixed Rate Credit (FRC)"
+Scenario: Choosing an SBC credit program should select the default credit type if the current credit_type is not available in SBC programs.
+  Given I am on the "Historical Price Indications" report page
+  And I select "Adjustable Rate Credit (ARC) Daily Prime" from the credit type selector
+  And I wait for the report to load
+  When I select "Securities-Backed Credit" from the collateral type selector
+  And I wait for the report to load
+  Then I should see "Fixed Rate Credit (FRC)"
 
 @smoke @jira-mem-318 @jira-mem-402 @jira-mem-358
 Scenario Outline: Choosing different historic price indication reports
   Given I am on the "Historical Price Indications" report page
   When I select "<collateral_type>" from the <collateral_selector> type selector
+  And I wait for the report to load
   When I select "<credit_type>" from the <credit_selector> type selector
+  And I wait for the report to load
   Then I should see "<credit_type>"
   And I should see "<table_heading>"
   Examples:
@@ -51,7 +56,8 @@ Scenario Outline: Choosing different historic price indication reports
 Scenario: Choosing sta option on historic price indication reports
   Given I am on the "Historical Price Indications" report page
   When I select "Settlement/Transaction Acct. Rate" from the collateral type selector
-  And I should see "STA Rates"
+  And I wait for the report to load
+  Then I should see "STA Rates"
 
 @jira-mem-359 @jira-mem-537
 Scenario: Custom datepicker options
