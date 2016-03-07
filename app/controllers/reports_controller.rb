@@ -100,7 +100,7 @@ class ReportsController < ApplicationController
     },
     sbc: {
       vrc: I18n.t('reports.pages.price_indications.current.actual_360'),
-      frc: I18n.t('reports.pages.price_indications.current.actual_actual'),
+      frc: I18n.t('reports.pages.price_indications.current.actual_360'),
       arc: I18n.t('reports.pages.price_indications.current.actual_360'),
       :'1m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
       :'3m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),

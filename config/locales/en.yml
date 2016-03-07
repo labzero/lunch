@@ -1299,7 +1299,7 @@ en:
           freshness: This report reflects historical price indications published at 6:00 am, not actual rates.
           availability: Historical data available varies by credit product.
         standard_credit_program: Standard Credit Program
-        sbc_program: Securities-Backed Credit
+        sbc_program: Securities-Backed Credit Program
         settlement_transaction_account: Settlement/Transaction Account (STA)
         sta_xlsx: Settlement Transaction Account
         frc:
