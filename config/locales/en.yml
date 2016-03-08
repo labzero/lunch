@@ -439,7 +439,7 @@ en:
       no_email: I didn’t receive the email
       email_mask_failure: '*****'
     reset_email:
-      body_html: "Hi %{name},\n\nWe’ve received your password request. Please use this link to reset your password for the Member Portal:\n\n<a href=\"%{url}\">%{url}</a>\n\nFor your security, this link will expire in one hour. Contact your Access Manager or Web Support at %{phone} if you have any questions.\n\nThank you,\nFHLBank San Francisco Web Support Team"
+      body_html: "Hi %{name},\n\nWe’ve received your password request. Please use this link to reset your password for the Member Portal:\n\n<a href=\"%{url}\">Reset password</a>\n\nFor your security, this link will expire in one hour. Contact your Access Manager or Web Support at %{phone} if you have any questions.\n\nThank you,\nFHLBank San Francisco Web Support Team"
     timeout:
       title: Request Expired
       description: Sorry, the link in your password reset email has expired.
