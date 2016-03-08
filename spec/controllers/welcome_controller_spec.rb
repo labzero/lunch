@@ -28,6 +28,9 @@ RSpec.describe WelcomeController, :type => :controller do
 
   describe 'GET healthy' do
     let(:make_request) { get :healthy; JSON.parse(response.body) }
+    before do
+      allow(Devise::LDAP::Connection).to receive(:admin)
+    end
     it_behaves_like 'a user not required action', :get, :healthy
     it 'returns a JSON hash' do
       expect(make_request).to be_kind_of(Hash)
