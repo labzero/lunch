@@ -269,14 +269,7 @@ p.dashboard-vrc-overnight-message {
 }
 
 .dashboard-element-loading {
-  position: relative;
-  &:after {
-    @extend %absolute-pseudoelement;
-    @extend %vertical-center;
-    @include icon-loading-ellipsis;
-    width: $ellipsis-width;
-    height: $ellipsis-height;
-  }
+  @include data-element-loading;
   span {
     display: none;
   }
