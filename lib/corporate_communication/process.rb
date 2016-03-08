@@ -161,7 +161,7 @@ class CorporateCommunication
         options = {port: port}
         if ssl
           options[:ssl] = {verify_mode: OpenSSL::SSL::VERIFY_PEER}
-          options[:ssl][:ca_file] = ENV['IMAP_CA_BUNDLE'] if ENV['IMAP_CA_BUNDLE']
+          options[:ssl][:ca_file] = ENV['IMAP_CA_BUNDLE_PATH'] if ENV['IMAP_CA_BUNDLE_PATH']
         else
           options[:ssl] = nil
         end
