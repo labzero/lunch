@@ -25,7 +25,7 @@ Scenario: Defaults to Standard Collateral Program FRC
   Scenario: Choosing an SBC credit program should select the default credit type if the current credit_type is not available in SBC programs.
     Given I am on the "Historical Price Indications" report page
     And I select "Adjustable Rate Credit (ARC) Daily Prime" from the credit type selector
-    When I select "Securities-Backed Credit" from the collateral type selector
+    When I select "Securities-Backed Credit Program" from the collateral type selector
     Then I should see "Fixed Rate Credit (FRC)"
 
 @smoke @jira-mem-318 @jira-mem-402 @jira-mem-358
@@ -36,16 +36,16 @@ Scenario Outline: Choosing different historic price indication reports
   Then I should see "<credit_type>"
   And I should see "<table_heading>"
   Examples:
-  | collateral_type          | collateral_selector | credit_type                                | credit_selector | table_heading                |
-  | Standard Credit Program  | collateral          | Adjustable Rate Credit (ARC) 1 month LIBOR | credit          | 1 mo LIBOR                   |
-  | Standard Credit Program  | collateral          | Adjustable Rate Credit (ARC) 3 month LIBOR | credit          | 3 mo LIBOR                   |
-  | Standard Credit Program  | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR                   |
-  | Standard Credit Program  | collateral          | Adjustable Rate Credit (ARC) Daily Prime   | credit          | Daily Prime                  |
-  | Standard Credit Program  | collateral          | Variable Rate Credit (VRC)                 | credit          | Variable Rate Credit (VRC)   |
-  | Securities-Backed Credit | collateral          | Adjustable Rate Credit (ARC) 1 month LIBOR | credit          | 1 mo LIBOR                   |
-  | Securities-Backed Credit | collateral          | Adjustable Rate Credit (ARC) 3 month LIBOR | credit          | 3 mo LIBOR                   |
-  | Securities-Backed Credit | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR                   |
-  | Securities-Backed Credit | collateral          | Variable Rate Credit (VRC)                 | credit          | Variable Rate Credit (VRC)   |
+  | collateral_type                  | collateral_selector | credit_type                                | credit_selector | table_heading                |
+  | Standard Credit Program          | collateral          | Adjustable Rate Credit (ARC) 1 month LIBOR | credit          | 1 mo LIBOR                   |
+  | Standard Credit Program          | collateral          | Adjustable Rate Credit (ARC) 3 month LIBOR | credit          | 3 mo LIBOR                   |
+  | Standard Credit Program          | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR                   |
+  | Standard Credit Program          | collateral          | Adjustable Rate Credit (ARC) Daily Prime   | credit          | Daily Prime                  |
+  | Standard Credit Program          | collateral          | Variable Rate Credit (VRC)                 | credit          | Variable Rate Credit (VRC)   |
+  | Securities-Backed Credit Program | collateral          | Adjustable Rate Credit (ARC) 1 month LIBOR | credit          | 1 mo LIBOR                   |
+  | Securities-Backed Credit Program | collateral          | Adjustable Rate Credit (ARC) 3 month LIBOR | credit          | 3 mo LIBOR                   |
+  | Securities-Backed Credit Program | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR                   |
+  | Securities-Backed Credit Program | collateral          | Variable Rate Credit (VRC)                 | credit          | Variable Rate Credit (VRC)   |
 
 @smoke @jira-mem-1287
 Scenario: Choosing sta option on historic price indication reports
