@@ -362,37 +362,6 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
 
-    describe 'GET borrowing_capacity' do
-      before do
-        allow(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(response_hash)
-      end
-      it_behaves_like 'a user required action', :get, :borrowing_capacity
-      it_behaves_like 'a report that can be downloaded', :borrowing_capacity, [:pdf]
-      it_behaves_like 'a report with instance variables set in a before_filter', :borrowing_capacity
-      it_behaves_like 'a controller action with an active nav setting', :borrowing_capacity, :reports
-      it 'should render the borrowing_capacity view' do
-        get :borrowing_capacity
-        expect(response.body).to render_template('borrowing_capacity')
-      end
-      it 'should raise an error if @borrowing_capacity_summary is nil' do
-        allow(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(nil)
-        expect{get :borrowing_capacity}.to raise_error(StandardError)
-      end
-      it 'should set @borrowing_capacity_summary to the hash returned from MemberBalanceService' do
-        get :borrowing_capacity
-        expect(assigns[:borrowing_capacity_summary]).to eq(response_hash)
-      end
-      it 'should set @borrowing_capacity_summary to {} if the report is disabled' do
-        expect(controller).to receive(:report_disabled?).with(ReportsController::BORROWING_CAPACITY_WEB_FLAGS).and_return(true)
-        get :borrowing_capacity
-        expect(assigns[:borrowing_capacity_summary]).to eq({})
-      end
-      it 'should set @end_date if supplied' do
-        get :borrowing_capacity, end_date: end_date
-        expect(assigns[:end_date]).to eq(end_date)
-      end
-    end
-
     describe 'GET settlement_transaction_account' do
       let(:filter) {'some filter'}
       let(:make_request) { get :settlement_transaction_account }
@@ -1570,6 +1539,138 @@ RSpec.describe ReportsController, :type => :controller do
       it 'raises an error if the MAPI endpoint returns nil' do
         allow(member_balance_service_instance).to receive(:mortgage_collateral_update).and_return(nil)
         expect{mortgage_collateral_update}.to raise_error
+      end
+    end
+  end
+
+  describe 'GET borrowing_capacity' do
+    it_behaves_like 'a user required action', :get, :borrowing_capacity
+    it_behaves_like 'a report that can be downloaded', :borrowing_capacity, [:pdf]
+    it_behaves_like 'a report with instance variables set in a before_filter', :borrowing_capacity
+    it_behaves_like 'a controller action with an active nav setting', :borrowing_capacity, :reports
+
+    let(:job_status) { double('JobStatus', update_attributes!: nil, id: nil, destroy: nil, result_as_string: nil ) }
+    let(:member_balance_service_job_instance) { double('member_balance_service_job_instance', job_status: job_status) }
+    let(:user_id) { rand(0..99999) }
+    let(:user) { double(User, id: user_id, accepted_terms?: true) }
+    let(:response_hash) { double('hash of borrowing capacity data', :[] => nil) }
+    let(:job_id) { rand(0..99999) }
+    let(:member_id) { rand(0..99999) }
+    let(:call_action) { get :borrowing_capacity }
+    let(:call_action_with_job_id) { get :borrowing_capacity, job_id: job_id }
+    let(:end_date) { Date.new(2016, 1, 1) }
+
+    RSpec.shared_examples 'a borrowing_capacity path involving a MemberBalanceServiceJob' do |job_call, deferred_job = false|
+      let(:job_response) {deferred_job ? response_hash : member_balance_service_job_instance}
+      describe "calling `#{job_call}` on the MemberBalanceServiceJob" do
+        it 'passes the member id' do
+          allow(controller).to receive(:report_disabled?).and_return(false)
+          allow(controller).to receive(:current_member_id).and_return(member_id)
+          expect(MemberBalanceServiceJob).to receive(job_call).with(member_id, any_args).and_return(job_response)
+          call_action
+        end
+        it 'passes `borrowing_capacity_summary`' do
+          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, 'borrowing_capacity_summary', any_args).and_return(job_response)
+          call_action
+        end
+        it 'passes the proper uuid' do
+          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, request.uuid, anything).and_return(job_response)
+          call_action
+        end
+        describe 'additional arguments' do
+          before { allow(ReportConfiguration).to receive(:date_bounds).and_call_original }
+          it 'passes today as the final argument if no end_date param is provided' do
+            expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, today.to_s).and_return(job_response)
+            call_action
+          end
+          it 'passes the end_date param if one is provided' do
+            expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, end_date.to_s).and_return(job_response)
+            get :borrowing_capacity, end_date: end_date
+          end
+        end
+      end
+    end
+
+    it 'should render the borrowing_capacity view' do
+      call_action
+      expect(response.body).to render_template('borrowing_capacity')
+    end
+    it 'should set @end_date if supplied' do
+      get :borrowing_capacity, end_date: end_date
+      expect(assigns[:end_date]).to eq(end_date)
+    end
+
+    describe 'when a job_id is not present and self.skip_deferred_load is false' do
+      it_behaves_like 'a borrowing_capacity path involving a MemberBalanceServiceJob', :perform_later
+
+      before { allow(MemberBalanceServiceJob).to receive(:perform_later).and_return(member_balance_service_job_instance) }
+
+      it 'updates the job status with the user\'s id' do
+        allow(controller).to receive(:current_user).and_return(user)
+        expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
+        call_action
+      end
+      it 'sets the @job_status_url' do
+        call_action
+        expect(assigns[:job_status_url]).to eq(job_status_url(job_status))
+      end
+      it 'sets the @load_url with the appropriate params' do
+        call_action
+        expect(assigns[:load_url]).to eq(reports_borrowing_capacity_url(job_id: job_status.id))
+      end
+      it 'sets @borrowing_capacity_summary[:deferred] to true' do
+        call_action
+        expect(assigns[:borrowing_capacity_summary][:deferred]).to eq(true)
+      end
+    end
+
+    describe 'job_id present' do
+      let(:parsed_response_hash) { double('parsed hash', with_indifferent_access: response_hash) }
+      before do
+        allow(JobStatus).to receive(:find_by).and_return(job_status)
+        allow(JSON).to receive(:parse).and_return(parsed_response_hash)
+      end
+      it 'finds the JobStatus by id, user_id, and status' do
+        allow(controller).to receive(:current_user).and_return(user)
+        expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: user_id, status: JobStatus.statuses[:completed]).and_return(job_status)
+        call_action_with_job_id
+      end
+      it 'raises an error if there is no job status found' do
+        allow(JobStatus).to receive(:find_by)
+        expect{call_action_with_job_id}.to raise_error
+      end
+      it 'parses the job_status string' do
+        job_status_string = double('job status string')
+        allow(job_status).to receive(:result_as_string).and_return(job_status_string)
+        expect(JSON).to receive(:parse).with(job_status_string).and_return(parsed_response_hash)
+        call_action_with_job_id
+      end
+      it 'destroys the job status' do
+        expect(job_status).to receive(:destroy)
+        call_action_with_job_id
+      end
+      it 'sets @borrowing_capacity_summary to the hash returned from the job status' do
+        call_action_with_job_id
+        expect(assigns[:borrowing_capacity_summary]).to eq(response_hash)
+      end
+      it 'sets @borrowing_capacity_summary to {} if the report is disabled' do
+        expect(controller).to receive(:report_disabled?).with(ReportsController::BORROWING_CAPACITY_WEB_FLAGS).and_return(true)
+        call_action_with_job_id
+        expect(assigns[:borrowing_capacity_summary]).to eq({})
+      end
+    end
+    describe '`skip_deferred_load` set to true' do
+      before { controller.skip_deferred_load = true }
+      it_behaves_like 'a borrowing_capacity path involving a MemberBalanceServiceJob', :perform_now, true
+
+      it 'raises an error if @borrowing_capacity_summary is nil' do
+        allow(MemberBalanceServiceJob).to receive(:perform_now)
+        expect{call_action}.to raise_error(StandardError)
+      end
+      it 'sets @borrowing_capacity_summary to the hash returned from MemberBalanceServiceJob' do
+        allow(MemberBalanceServiceJob).to receive(:perform_now).and_return(response_hash)
+        call_action
+        expect(assigns[:borrowing_capacity_summary]).to eq(response_hash)
       end
     end
   end

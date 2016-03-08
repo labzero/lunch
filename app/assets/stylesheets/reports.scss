@@ -259,6 +259,11 @@
   }
 }
 
+.report-summary-data-loading {
+  @include data-element-loading;
+  height: 45px;
+}
+
 .report-summary-date {
   white-space: nowrap;
 }

@@ -363,12 +363,25 @@ class ReportsController < ApplicationController
     @report_name = ReportConfiguration.report_title(:borrowing_capacity)
     initialize_dates(:borrowing_capacity, nil, params[:end_date])
     downloadable_report(:pdf, {end_date: @end_date.to_s}) do
-      member_balances = MemberBalanceService.new(current_member_id, request)
-      if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
-        @borrowing_capacity_summary = {}
-      else
-        @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(@end_date.to_date)
+      if params[:job_id] || self.skip_deferred_load
+        if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
+          @borrowing_capacity_summary = {}
+        elsif self.skip_deferred_load
+          @borrowing_capacity_summary = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @end_date.to_s)
+        else
+          job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+          raise ActiveRecord::RecordNotFound unless job_status
+          @borrowing_capacity_summary = JSON.parse(job_status.result_as_string).with_indifferent_access
+          job_status.destroy
+        end
         raise StandardError, "There has been an error and ReportsController#borrowing_capacity has encountered nil. Check error logs." if @borrowing_capacity_summary.nil?
+        render layout: false if request.try(:xhr?)
+      else
+        job_status = MemberBalanceServiceJob.perform_later(current_member_id, 'borrowing_capacity_summary', request.uuid, @end_date.to_s).job_status
+        job_status.update_attributes!(user_id: current_user.id)
+        @job_status_url = job_status_url(job_status)
+        @load_url = reports_borrowing_capacity_url(job_id: job_status.id)
+        @borrowing_capacity_summary = {deferred: true}
       end
     end
   end
