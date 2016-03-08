@@ -5,6 +5,7 @@
     %h1= @report_name
     = render 'reports_header_buttons', download_formats: [:xlsx]
     = render 'report_details', name: @member_name, freshness: t('reports.pages.price_indications.current.freshness', phone_number: service_desk_phone_number)
+    %p.report-date= t('reports.pages.price_indications.current.date_html', date: fhlb_date_long_alpha(@vrc_date))
     .report-intro-details= simple_format(t('reports.pages.price_indications.current.summary'))
     - if @quick_advance_message
       = render 'shared/quick_advance_message', message: @quick_advance_message

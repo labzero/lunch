@@ -526,6 +526,8 @@ describe MAPI::ServiceApp do
       expect(price_indications_current_vrc[:overnight_fed_funds_benchmark]).to be_kind_of(Float)
       expect(price_indications_current_vrc[:basis_point_spread_to_benchmark]).to be_kind_of(Numeric)
       expect(price_indications_current_vrc[:advance_rate]).to be_kind_of(Float)
+      expect(price_indications_current_vrc[:effective_date]).to be_kind_of(String)
+      expect(price_indications_current_vrc[:effective_date]).to match(/\d{4}-\d{2}-\d{2}/)
     end
     it 'invalid collateral should result in 404 error message' do
       get '/rates/price_indications/current/vrc/foo'
@@ -540,6 +542,8 @@ describe MAPI::ServiceApp do
         expect(price_indications_current_vrc[:overnight_fed_funds_benchmark]).to be_kind_of(Float)
         expect(price_indications_current_vrc[:basis_point_spread_to_benchmark]).to be_kind_of(Numeric)
         expect(price_indications_current_vrc[:advance_rate]).to be_kind_of(Float)
+        expect(price_indications_current_vrc[:effective_date]).to be_kind_of(String)
+        expect(price_indications_current_vrc[:effective_date]).to match(/\d{4}-\d{2}-\d{2}/)
       end
       it 'should return Internal Service Error, if current price indications service is unavaible', vcr: {cassette_name: 'current_price_indications_unavailable'} do
         get '/rates/price_indications/current/vrc/standard'

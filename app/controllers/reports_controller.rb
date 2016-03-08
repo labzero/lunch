@@ -591,33 +591,13 @@ class ReportsController < ApplicationController
 
         #vrc data for standard collateral
         standard_vrc_data = data[:standard_vrc_data] || []
-        columns = standard_vrc_data.collect do |row|
-          case row[0]
-            when 'overnight_fed_funds_benchmark', 'advance_rate'
-              type = :rate
-            when 'basis_point_spread_to_benchmark'
-              type = :basis_point
-            else
-              type = nil
-          end
-          {value: row[1], type: type}
-        end
-        rows = [{columns: columns}]
+        @vrc_date = standard_vrc_data['effective_date'] if standard_vrc_data.size > 0
+        rows = [{columns: parse_vrc_data(standard_vrc_data)}]
         @standard_vrc_table_data[:rows] = rows
+
         #vrc data for sbc collateral
         sbc_vrc_data = data[:sbc_vrc_data] || []
-        columns = sbc_vrc_data.collect do |row|
-          case row[0]
-            when 'overnight_fed_funds_benchmark', 'advance_rate'
-              type = :rate
-            when 'basis_point_spread_to_benchmark'
-              type = :basis_point
-            else
-              type = nil
-          end
-          {value: row[1], type: type}
-        end
-        rows = [{columns: columns}]
+        rows = [{columns: parse_vrc_data(sbc_vrc_data)}]
         @sbc_vrc_table_data[:rows] = rows
 
         #frc data for standard collateral
@@ -1614,6 +1594,30 @@ class ReportsController < ApplicationController
   end
 
   private
+  def parse_vrc_data(vrc_data)
+    return [] unless vrc_data.respond_to?(:collect)
+    rows = vrc_data.collect do |field_value|
+      row_for_vrc_entry(field_value.first, field_value.last)
+    end
+    rows.compact
+  end
+
+  def row_for_vrc_entry(vrc_field, vrc_value)
+    if vrc_field != 'effective_date'
+      case vrc_field
+      when 'overnight_fed_funds_benchmark', 'advance_rate'
+        type = :rate
+      when 'basis_point_spread_to_benchmark'
+        type = :basis_point
+      else
+        type = nil
+      end
+      {value: vrc_value, type: type}
+    else
+      nil
+    end
+  end
+
   def securities_instance_variables(securities_position, filter)
     as_of_date = securities_position[:as_of_date]
     @headings = {
