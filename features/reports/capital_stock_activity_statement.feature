@@ -117,3 +117,9 @@ Scenario: Member downloads an XLSX of the Capital Stock Activity report
   Given I am on the "Capital Stock Activity Statement" report page
   When I request an XLSX
   Then I should begin downloading a file
+
+@resque-backed @smoke @jira-mem-808
+Scenario: Member downloads a PDF of the Capital Stock Activity report
+  Given I am on the "Capital Stock Activity Statement" report page
+  When I request a PDF
+  Then I should begin downloading a file
