@@ -4,14 +4,14 @@
 %h3= t('terms.false_information.title')
 %p= t('terms.false_information.description')
 %h3= t('terms.privacy.title')
-%p= t('terms.privacy.description_html', url:'privacy_policy_path')
+%p= t('terms.privacy.description_html', url: privacy_policy_path)
 %h3= t('terms.disclaimers.title')
 .legal
   %p= t('terms.disclaimers.sources')
   %p= t('terms.disclaimers.warranty')
   %p= t('terms.disclaimers.responsibility')
 %h3= t('terms.ownership.title')
-%p= t('terms.ownership.description')
+%p= t('terms.ownership.description', this_year: Time.zone.today.year)
 %h3= t('terms.liability.title')
 .legal
   %p= t('terms.liability.liability')
