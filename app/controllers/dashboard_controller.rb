@@ -3,15 +3,15 @@ class DashboardController < ApplicationController
   include DashboardHelper
   include AssetHelper
 
-  before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform] do
+  before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform, :quick_advance_started] do
     authorize :advances, :show?
   end
 
-  before_action only: [:quick_advance_perform, :quick_advance_preview] do
+  before_action only: [:quick_advance_perform, :quick_advance_preview, :quick_advance_started] do
     advance_request_from_session(params[:id])
   end
 
-  after_action only: [:quick_advance_rates, :quick_advance_perform, :quick_advance_preview] do
+  after_action only: [:quick_advance_rates, :quick_advance_perform, :quick_advance_preview, :quick_advance_started] do
     advance_request_to_session
   end
 
@@ -130,6 +130,7 @@ class DashboardController < ApplicationController
   def quick_advance_rates
     etransact_service = EtransactAdvancesService.new(request)
     @quick_advances_active = etransact_service.etransact_active?
+    advance_request.allow_grace_period = true if @quick_advances_active
     @rate_data = advance_request.rates
 
     logger.info { '  Advance Request State: ' + advance_request.inspect }

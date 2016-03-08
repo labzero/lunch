@@ -28,6 +28,10 @@ module MAPI
           key :type, :string
           key :description, 'Maturity date.'
         end
+        property :allow_grace_period do
+          key :type, :Boolean
+          key :description, 'Should the EOD grace period be allowed for this request.'
+        end
       end
     end
   end

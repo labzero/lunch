@@ -5,6 +5,8 @@ module MAPI
         include MAPI::Shared::Utils
         include MAPI::Shared::Constants
 
+        DATETIME_FORMAT = '%Y-%m-%d%H%M'.freeze
+
         SQL = <<-EOS
             SELECT AO_TERM_BUCKET_ID, TERM_BUCKET_LABEL,
             WHOLE_LOAN_ENABLED, SBC_AGENCY_ENABLED, SBC_AAA_ENABLED, SBC_AA_ENABLED,
@@ -13,11 +15,13 @@ module MAPI
         EOS
 
         def self.appropriate_end_time(bucket, now)
-          now[:date] == override_end_date(bucket) ? override_end_time(bucket) : end_time(bucket)
+          override_time = override_end_time(bucket, now)
+          now[:date] == override_time.try(:to_date) ? override_time : end_time(bucket, now)
         end
 
         def self.trade_status(bucket, now)
-          now[:time] < appropriate_end_time(bucket, now)
+          end_time = appropriate_end_time(bucket, now)
+          end_time ? (now[:time] < end_time) : false
         end
 
         def self.loan_term(trade_status, display_status, bucket_label)
@@ -33,7 +37,7 @@ module MAPI
         end
 
         def self.value_for_term(bucket, now)
-          bucket.nil? ? BLANK_TYPES : hash_for_types(bucket, bucket_label(bucket), trade_status(bucket, now))
+          bucket.nil? ? BLANK_TYPES : hash_for_types(bucket, bucket['TERM_BUCKET_LABEL'], trade_status(bucket, now))
         end
 
         def self.display_status(bucket, type)
@@ -47,12 +51,14 @@ module MAPI
         BLANK=loan_term(false,  false, 'NotFound')
         BLANK_TYPES=hash_from_pairs( LOAN_TYPES.map{ |type| [type, BLANK] } )
 
-        def self.loan_terms(logger,environment)
-          now      = Time.zone.now
-          now_hash = { date: now.to_date, time: now.strftime('%H%M') }
-          data     = term_bucket_data(logger, environment)
+        def self.loan_terms(logger, environment, allow_grace_period=false)
+          settings = MAPI::Services::EtransactAdvances::Settings.settings(environment)
+          now = Time.zone.now
+          grace_period = allow_grace_period ? settings['end_of_day_extension'] : 0
+          now_hash = { time: now, date: now.to_date, grace_period: grace_period.to_i }
+          data = term_bucket_data(logger, environment)
           return nil if data.nil?
-          buckets = data.index_by{ |bucket| id(bucket) }
+          buckets = data.index_by{ |bucket| bucket['AO_TERM_BUCKET_ID'] }
           hash_from_pairs( LOAN_TERMS.map { |term| [term, value_for_term(buckets[term_to_id(term)], now_hash)]} )
         end
 
@@ -71,28 +77,22 @@ module MAPI
           rows
         end
 
-        def self.time(bucket, field)
-          bucket[field]
+        def self.parse_time(date, time)
+          # we need to change to a DateTime since `change` on Time doesn't support offsets
+          parsed = Time.strptime(date.to_s + time.to_s, DATETIME_FORMAT).to_datetime
+          parsed.change(offset: Time.zone.formatted_offset)
         end
 
-        def self.override_end_time(bucket)
-          time(bucket,'OVERRIDE_END_TIME')
+        def self.override_end_time(bucket, now)
+          if bucket['OVERRIDE_END_DATE'].present? && bucket['OVERRIDE_END_TIME'].present?
+            parse_time(bucket['OVERRIDE_END_DATE'], bucket['OVERRIDE_END_TIME']) + now[:grace_period].minutes
+          end
         end
 
-        def self.end_time(bucket)
-          time(bucket,'END_TIME')
-        end
-
-        def self.override_end_date(bucket)
-          bucket['OVERRIDE_END_DATE']
-        end
-
-        def self.bucket_label(bucket)
-          bucket['TERM_BUCKET_LABEL']
-        end
-
-        def self.id(bucket)
-          bucket['AO_TERM_BUCKET_ID']
+        def self.end_time(bucket, now)
+          if now[:date].present? && bucket['END_TIME'].present?
+            parse_time(now[:date], bucket['END_TIME']) + now[:grace_period].minutes
+          end
         end
       end
     end

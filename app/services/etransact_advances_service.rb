@@ -29,12 +29,12 @@ class EtransactAdvancesService < MAPIService
     String.new(signer) if signer
   end
 
-  def quick_advance_validate(member_id, amount, advance_type, advance_term, rate, check_capstock, signer, maturity_date)
+  def quick_advance_validate(member_id, amount, advance_type, advance_term, rate, check_capstock, signer, maturity_date, allow_grace_period=false)
     error_handler = calypso_error_handler(member_id)
-    get_hash(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{URI.escape(signer)}/#{maturity_date.to_date.iso8601}", &error_handler)
+    get_hash(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{URI.escape(signer)}/#{maturity_date.to_date.iso8601}", allow_grace_period: allow_grace_period, &error_handler)
   end
 
-  def quick_advance_execute(member_id, amount, advance_type, advance_term, rate, signer, maturity_date)
+  def quick_advance_execute(member_id, amount, advance_type, advance_term, rate, signer, maturity_date, allow_grace_period=false)
     error_handler = calypso_error_handler(member_id)
     body = {
       amount: amount,
@@ -42,7 +42,8 @@ class EtransactAdvancesService < MAPIService
       advance_term: advance_term,
       rate: rate,
       signer: signer,
-      maturity_date: maturity_date.to_date.iso8601
+      maturity_date: maturity_date.to_date.iso8601,
+      allow_grace_period: allow_grace_period
     }
     data = post_hash(:quick_advance_execute, "etransact_advances/execute_advance/#{member_id}", body, &error_handler)
     data[:initiated_at] = Time.zone.now.to_datetime if data
