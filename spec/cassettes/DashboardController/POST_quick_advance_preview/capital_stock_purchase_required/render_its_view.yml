@@ -33,14 +33,14 @@ http_interactions:
       X-Frame-Options:
       - SAMEORIGIN
       Server:
-      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      - WEBrick/1.3.1 (Ruby/2.2.4/2015-12-16)
       Date:
-      - Thu, 05 Nov 2015 20:07:13 GMT
+      - Tue, 08 Mar 2016 00:58:39 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Thu, 05 Nov 2015 20:07:13 GMT
+  recorded_at: Tue, 08 Mar 2016 00:58:39 GMT
 recorded_with: VCR 2.9.3

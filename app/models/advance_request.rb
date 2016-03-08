@@ -34,7 +34,7 @@ class AdvanceRequest
     :gross_pre_trade_stock_required, :gross_net_stock_required,
     :interest_day_count, :payment_on, :funding_date, :maturity_date, :initiated_at,
     :confirmation_number, :authorized_amount, :credit_max_amount, :collateral_max_amount,
-    :collateral_authorized_amount, :trade_date
+    :collateral_authorized_amount, :trade_date, :allow_grace_period
   ].freeze
   CORE_PARAMETERS = [:type, :rates, :term, :amount, :rate, :stock_choice].freeze
   PREVIEW_EXCLUDE_KEYS = [:advance_amount, :advance_rate, :advance_type, :advance_term, :status].freeze
@@ -170,6 +170,10 @@ class AdvanceRequest
     choice = choice.to_sym if choice
     raise "Unknown Stock Choice: #{choice}" if choice && !STOCK_CHOICES.include?(choice)
     @stock_choice = choice
+  end
+
+  def allow_grace_period=(allowed)
+    @allow_grace_period = !!allowed
   end
   
   def reset_stock_choice!
@@ -463,7 +467,7 @@ class AdvanceRequest
   end
 
   def perform_preview
-    response = etransact_service.quick_advance_validate(member_id, amount, type, term, rate, !stock_choice_present?, signer, maturity_date)
+    response = etransact_service.quick_advance_validate(member_id, amount, type, term, rate, !stock_choice_present?, signer, maturity_date, allow_grace_period)
     process_trade_errors(:preview, response)
     populate_attributes_from_response(response)
   end
@@ -496,7 +500,7 @@ class AdvanceRequest
   end
 
   def perform_execute
-    response = etransact_service.quick_advance_execute(member_id, total_amount, type, term, rate, signer, maturity_date)
+    response = etransact_service.quick_advance_execute(member_id, total_amount, type, term, rate, signer, maturity_date, allow_grace_period)
     process_trade_errors(:execute, response)
     populate_attributes_from_response(response)
     if no_errors_present? && LONG_ADVANCE_TERMS.include?(term)
@@ -519,6 +523,8 @@ class AdvanceRequest
             add_error(method, :collateral)
           when 'ExceedsTotalDailyLimitError'
             add_error(method, :total_daily_limit)
+          when 'DisabledProductError'
+            add_error(method, :disabled_product)
           else
             add_error(method, :unknown, status)
           end

@@ -183,7 +183,7 @@ describe MAPIService do
         call_method
       end
     end
-    it 'passes the response from `get` to `parse`' do
+    it "passes the response from `#{rest_action}` to `parse`" do
       response = double('A Response')
       allow(subject).to receive(rest_action).and_return(response)
       expect(subject).to receive(:parse).with(name, response)
@@ -194,7 +194,7 @@ describe MAPIService do
       allow(subject).to receive(:parse).and_return(result)
       expect(call_method).to be(result)
     end
-    it 'passes the error handler to `get`' do
+    it "passes the error handler to `#{rest_action}`" do
       anythings = Array.new(args.length, anything)
       allow(subject).to receive(rest_action) do |*args, &block|
         expect(block).to be(error_handler)
@@ -215,8 +215,8 @@ describe MAPIService do
     let(:endpoint) { double('An Endpoint', to_s: '/') }
     let(:name) { double('A Name') }
     let(:error_handler) { -> (name, err_str, err) { } }
-    let(:call_method) { subject.send(:"#{rest_action}_hash",name, endpoint, *args) }
-    let(:call_method_with_error_handler) { subject.send(:"#{rest_action}_hash",name, endpoint, *args, &error_handler) }
+    let(:call_method) { subject.send(:"#{rest_action}_hash", name, endpoint, *args) }
+    let(:call_method_with_error_handler) { subject.send(:"#{rest_action}_hash", name, endpoint, *args, &error_handler) }
     let(:anythings) { Array.new(args.length, anything) }
 
     it "calls `#{rest_action}_json`" do
@@ -248,7 +248,8 @@ describe MAPIService do
     let(:name) { double('A Name') }
     let(:endpoint_client) { double('An Endpoint Client', post: nil) }
     let(:response) { double('A Response') }
-    let(:call_method) { subject.get(name, endpoint) }
+    let(:params) { double('Query String Parameter Hash') }
+    let(:call_method) { subject.get(name, endpoint, params) }
 
     it_behaves_like 'a MAPI REST request', :get
 
@@ -260,6 +261,11 @@ describe MAPIService do
     it 'returns the result of the GET' do
       allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(response)
       expect(call_method).to be(response)
+    end
+    it 'passes along any supplied query string parameters' do
+      allow_any_instance_of(RestClient::Resource).to receive(:[]).with(endpoint).and_return(endpoint_client)
+      expect(endpoint_client).to receive(:get).with(params: params)
+      call_method
     end
   end
 
@@ -309,11 +315,11 @@ describe MAPIService do
   end
 
   describe '`get_json` method' do
-    it_behaves_like 'a MAPI JSON REST request', :get
+    it_behaves_like 'a MAPI JSON REST request', :get, {SecureRandom.hex => SecureRandom.hex}
   end
 
   describe '`get_hash` method' do
-    it_behaves_like 'a MAPI JSON REST request with Hash response', :get
+    it_behaves_like 'a MAPI JSON REST request with Hash response', :get, {SecureRandom.hex => SecureRandom.hex}
   end
 
   describe '`get_fake_hash` method'

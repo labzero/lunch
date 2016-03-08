@@ -6,10 +6,10 @@ describe MAPI::Services::Rates::LoanTerms do
     subject { MAPI::Services::Rates::LoanTerms }
 
     describe 'loan_terms' do
-      let(:now_time_string)         { double( 'now time as HHMM')}
-      let(:now)                     { double( 'Time.zone.now' ) }
-      let(:now_date)                { double( 'now date') }
-      let(:long_ago_date)           { double( 'long ago date' ) }
+      let(:now)                     { '2016-03-02 13:00'.to_datetime }
+      let(:now_time_string)         { now.strftime('%H%M') }
+      let(:now_date)                { now.to_date }
+      let(:long_ago_date)           { '2001-03-23'.to_date }
       let(:hash1) do
         {
             "AO_TERM_BUCKET_ID"  => 1,
@@ -51,17 +51,15 @@ describe MAPI::Services::Rates::LoanTerms do
       end
       let(:result_set) { double('Oracle Result Set', fetch_hash: nil) }
       let(:logger) { double('logger') }
+      let(:grace_period) { rand(1..10) }
+      let(:environment) { :production }
+      let(:call_method) { subject.loan_terms(logger, environment) }
       before do
-        allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
         allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
         allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
         allow(result_set).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
-        allow(now).to receive(:to_date).and_return(now_date)
-        allow(now).to receive(:strftime).with('%H%M').and_return(now_time_string)
         allow(Time.zone).to receive(:now).and_return(now)
-        allow(now_time_string).to receive(:<).with('0001').and_return(false)
-        allow(now_time_string).to receive(:<).with('2000').and_return(true)
-        allow(now_time_string).to receive(:<).with('2359').and_return(true)
+        allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return({'end_of_day_extension' => grace_period})
       end
 
       it 'should return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
@@ -126,6 +124,23 @@ describe MAPI::Services::Rates::LoanTerms do
           expect(result['2week'][type]['display_status']).to be true
           expect(result['2week'][type]['bucket_label']).to eq('2 Week')
         end
+      end
+
+      it 'fetches the eTransact settings' do
+        expect(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).with(environment)
+        call_method
+      end
+      it 'passes the grace_period into the `value_for_term`' do
+        expect(subject).to receive(:value_for_term).with(anything, include(grace_period: anything)).exactly(described_class::LOAN_TERMS.count)
+        call_method
+      end
+      it 'sets the grace_period to 0 if its not allowed' do
+        expect(subject).to receive(:value_for_term).with(anything, include(grace_period: 0)).exactly(described_class::LOAN_TERMS.count)
+        call_method
+      end
+      it 'sets the grace_period to the `end_of_day_extension` if it is allowed' do
+        expect(subject).to receive(:value_for_term).with(anything, include(grace_period: grace_period)).exactly(described_class::LOAN_TERMS.count)
+        subject.loan_terms(logger, environment, true)
       end
     end
 
@@ -211,6 +226,206 @@ describe MAPI::Services::Rates::LoanTerms do
       end
       it 'should return fake_result' do
         expect(subject.term_bucket_data_development).to eq(fake_result)
+      end
+    end
+  end
+
+  describe 'class methods' do
+    let(:now) { Time.zone.local(2016, 2, 13, 1, 23) }
+    let(:grace_period) { rand(1..10) }
+    let(:now_hash) { {date: now.to_date, grace_period: grace_period} }
+
+    describe '`appropriate_end_time`' do
+      let(:now) { '2016-02-13 00:00'.to_datetime }
+      let(:now_hash) { {date: now.to_date} }
+      let(:end_time) { double('An End Time') }
+      let(:override_end_time) { now.change({hour: 12, min: 0}) }
+      let(:bucket) { double('A Term Bucket') }
+      let(:call_method) { subject.appropriate_end_time(bucket, now_hash) }
+      before do
+        allow(Time.zone).to receive(:now).and_return(now)
+        allow(subject).to receive(:end_time).and_return(end_time)
+      end
+      it 'returns the normal end time if there is no end date override' do
+        allow(subject).to receive(:override_end_time).and_return(nil)
+        expect(call_method).to eq(end_time)
+      end
+      it 'returns the normal end time if there is an end date override but its not for today' do
+        allow(subject).to receive(:override_end_time).and_return(now - 1.day)
+        expect(call_method).to eq(end_time)
+      end
+      it 'returns the override end time if there is an end date override for today' do
+        allow(subject).to receive(:override_end_time).and_return(override_end_time)
+        expect(call_method).to eq(override_end_time)
+      end
+      it 'handles nil for the `end_time`' do
+        allow(subject).to receive(:override_end_time).and_return(nil)
+        allow(subject).to receive(:end_time).and_return(nil)
+        expect(call_method).to be_nil
+      end
+    end
+
+    describe '`override_end_time`' do
+      let(:bucket) {
+        {
+          'OVERRIDE_END_DATE' => now.to_date.to_s,
+          'OVERRIDE_END_TIME' => now.strftime('%H%M')
+        }
+      }
+      let(:call_method) { subject.override_end_time(bucket, now_hash) }
+      it 'returns the override end time + grace period' do
+        expect(call_method).to eq(now + grace_period.minutes)
+      end
+      it 'returns nil if the override end date is missing' do
+        bucket['OVERRIDE_END_DATE'] = ''
+        expect(call_method).to be_nil
+      end
+      it 'returns nil if the override end time is missing' do
+        bucket['OVERRIDE_END_TIME'] = ''
+        expect(call_method).to be_nil
+      end
+    end
+
+    describe '`end_time`' do
+      let(:bucket) {
+        {
+          'END_TIME' => now.strftime('%H%M')
+        }
+      }
+      let(:call_method) { subject.end_time(bucket, now_hash) }
+      it 'returns the end time + grace period' do
+        expect(call_method).to eq(now + grace_period.minutes)
+      end
+      it 'returns nil if the end time is missing' do
+        bucket['END_TIME'] = ''
+        expect(call_method).to be_nil
+      end
+      it 'returns nil if the current date is missing' do
+        now_hash.delete(:date)
+        expect(call_method).to be_nil
+      end
+    end
+
+    describe '`parse_time`' do
+      let(:time) { double('A Time', to_s: SecureRandom.hex) }
+      let(:date) { double('A Date', to_s: SecureRandom.hex) }
+      let(:parsed_time) { double(Time) }
+      let(:parsed_datetime) { double(DateTime) }
+      let(:call_method) { subject.parse_time(date, time) }
+      before do
+        allow(parsed_time).to receive(:to_datetime).and_return(parsed_datetime)
+      end
+      context 'duck typing' do
+        before do
+          allow(Time).to receive(:strptime).and_return(Time.zone.now)
+        end
+        it 'converts the `date` to a string' do
+          expect(date).to receive(:to_s)
+          call_method
+        end
+        it 'converts the `time` to a string' do
+          expect(time).to receive(:to_s)
+          call_method
+        end
+      end
+      it 'parses the supplied string according to the DATETIME_FORMAT' do
+        expect(Time).to receive(:strptime).with(date.to_s + time.to_s, described_class::DATETIME_FORMAT).and_return(Time.zone.now)
+        call_method
+      end
+      it 'sets the timezone on the time object' do
+        offset = double('A Timezone Offset')
+        allow(Time.zone).to receive(:formatted_offset).and_return(offset)
+        allow(Time).to receive(:strptime).and_return(parsed_time)
+        expect(parsed_datetime).to receive(:change).with(offset: offset)
+        call_method
+      end
+      it 'returns the parsed time' do
+        offset_time = double('An Offset Corrected Time')
+        allow(Time).to receive(:strptime).and_return(parsed_time)
+        allow(parsed_datetime).to receive(:change).and_return(offset_time)
+        expect(call_method).to be(offset_time)
+      end
+      {
+        Time.zone.local(2012, 2, 13, 13, 14) => ['2012-02-13', '1314'],
+        Time.zone.local(2000, 1, 1, 0, 13) => ['2000-01-01', '0013'],
+        Time.zone.local(2016, 2, 29, 1, 0) => ['2016-02-29', '0100']
+      }.each do |time, args|
+        it "parses #{args} into #{time}" do
+          expect(subject.parse_time(*args)).to eq(time)
+        end
+      end
+
+      it 'parses the time in the current `Time.zone` timezone' do
+        Time.use_zone(Time.zone.now.utc? ? 'EST' : 'UTC') do
+          time = Time.zone.local(2012, 2, 13, 13, 14)
+          expect(subject.parse_time(time.strftime('%Y-%m-%d'), time.strftime('%H%M'))).to eq(time)
+        end
+      end
+    end
+
+    describe '`value_for_term`' do
+      let(:now_hash) { double('A Now Hash') }
+      let(:bucket) { { 'TERM_BUCKET_LABEL' => double('A Bucket Label') } }
+      let(:call_method) { subject.value_for_term(bucket, now_hash) }
+      it 'returns BLANK_TYPES if the bucket is nil' do
+        expect(subject.value_for_term(nil, now_hash)).to be(described_class::BLANK_TYPES)
+      end
+      describe 'with a bucket' do
+        let(:trade_status) { double('A Trade Status') }
+        before do
+          allow(subject).to receive(:trade_status).and_return(trade_status)
+        end
+        it 'calls `trade_status` with the bucket' do
+          expect(subject).to receive(:trade_status).with(bucket, anything)
+          call_method
+        end
+        it 'calls `trade_status` with the now_hash' do
+          expect(subject).to receive(:trade_status).with(anything, now_hash)
+          call_method
+        end
+        it 'calls `hash_for_types` with the bucket' do
+          expect(subject).to receive(:hash_for_types).with(bucket, anything, anything)
+          call_method
+        end
+        it 'calls `hash_for_types` with the bucket label' do
+          expect(subject).to receive(:hash_for_types).with(anything, bucket['TERM_BUCKET_LABEL'], anything)
+          call_method
+        end
+        it 'calls `hash_for_types` with the `trade_status`' do
+          expect(subject).to receive(:hash_for_types).with(anything, anything, trade_status)
+          call_method
+        end
+      end
+    end
+
+    describe '`trade_status`' do
+      let(:now) { Time.zone.now }
+      let(:now_hash) { { time: now } }
+      let(:bucket) { double('A Bucket Hash') }
+      let(:call_method) { subject.trade_status(bucket, now_hash) }
+      it 'calls `appropriate_end_time` with the bucket' do
+        expect(subject).to receive(:appropriate_end_time).with(bucket, anything)
+        call_method
+      end
+      it 'calls `appropriate_end_time` with the now_hash' do
+        expect(subject).to receive(:appropriate_end_time).with(anything, now_hash)
+        call_method
+      end
+      it 'returns false if the `appropriate_end_time` is nil' do
+        allow(subject).to receive(:appropriate_end_time).and_return(nil)
+        expect(call_method).to be(false)
+      end
+      it 'returns true if the now_hash time is less than the `appropriate_end_time`' do
+        allow(subject).to receive(:appropriate_end_time).and_return(now + 1.minute)
+        expect(call_method).to be(true)
+      end
+      it 'returns false if the now_hash time is greater than the `appropriate_end_time`' do
+        allow(subject).to receive(:appropriate_end_time).and_return(now - 1.minute)
+        expect(call_method).to be(false)
+      end
+      it 'returns false if the now_hash time is equal to the `appropriate_end_time`' do
+        allow(subject).to receive(:appropriate_end_time).and_return(now)
+        expect(call_method).to be(false)
       end
     end
   end
