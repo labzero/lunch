@@ -105,6 +105,7 @@ $(function () {
     $datePickerEndInput.prependTo($('.daterangepicker_end_input_wrapper'));
     $datePickerStartInput.prependTo($('.daterangepicker_start_input_wrapper'));
     $([$datePickerEndInput, $datePickerStartInput]).each(function(){this.on('change', function(e) {
+      convertTwoDigitYearToFourDigitYear(e, $datePickerTrigger.data('daterangepicker'), options);
       snapToValidDate(e, $datePickerTrigger.data('daterangepicker'), options);
       $datePickerTrigger.data('daterangepicker').inputsChanged(e)});})
     $datePickerWrapper.find('.calendar, .ranges').off('mouseenter mouseleave'); // daterangepicker binds these unwanted events
@@ -280,5 +281,73 @@ $(function () {
     };
   };
 
-});
+  // converts two-digit dates to four-digit dates following the java conventions set forth here:
+  // http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html#year
+  function convertTwoDigitYearToFourDigitYear(e, picker, options) {
+    if (e.target.value.search(/(.*)\/(.*)\/(.*)/) !== -1) {
+      var dateArray = e.target.value.split("/");
+      var monthString = dateArray[0];
+      var dayString = dateArray[1];
+      var yearString = dateArray[2];
+      if (yearString === "" || isNaN(yearString)) {
+        return;
+      }
+      if (yearString.length == 2) {
+        var yearInt = parseInt(yearString);
 
+        var lowerBound = new Date();
+        lowerBound.setFullYear(lowerBound.getFullYear() - 80);
+
+        if ((1900 + yearInt) > lowerBound.getFullYear()) {
+          if (options.singleDatePicker) {
+            picker.setEndDate(monthString + "/" + dayString + "/" + (1900 + yearInt));
+          } else {
+            if ($(e.currentTarget).hasClass("daterangepicker_start_input")) {
+              picker.setStartDate(monthString + "/" + dayString + "/" + (1900 + yearInt));
+            }
+            if ($(e.currentTarget).hasClass("daterangepicker_end_input")) {
+              picker.setEndDate(monthString + "/" + dayString + "/" + (1900 + yearInt));
+            }
+          }
+          return;
+        }
+
+        var upperBound = new Date();
+        upperBound.setFullYear(upperBound.getFullYear() + 20);
+
+        if ((2000 + yearInt) < upperBound) {
+          if (options.singleDatePicker) {
+            picker.setEndDate(monthString + "/" + dayString + "/" + (2000 + yearInt));
+          } else {
+            if ($(e.currentTarget).hasClass("daterangepicker_start_input")) {
+              picker.setStartDate(monthString + "/" + dayString + "/" + (2000 + yearInt));
+            }
+            if ($(e.currentTarget).hasClass("daterangepicker_end_input")) {
+              picker.setEndDate(monthString + "/" + dayString + "/" + (2000 + yearInt));
+            }
+          }
+        }
+      }
+    }
+  };
+
+  var $datePickerFields = $(".datepicker_input_field .input-mini");
+  $datePickerFields.keypress(function(e) {
+    Fhlb.Utils.onlyAllowDigits(e, [47]); // 47 = / (forward slash)
+  });
+
+  $datePickerFields.keyup(function(e) {
+    if ([8, 9, 13, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46].indexOf(e.which) < 0) {
+      var target = e.target;
+      var selectionStart = target.selectionStart;
+      var selectionEnd = target.selectionEnd;
+      var oldValue = target.value;
+      var newValue = oldValue.match(/[\d\/]+/);
+
+      if (newValue !== oldValue) {
+        $(target).val(newValue);
+        target.setSelectionRange(selectionStart, selectionEnd);
+      };
+    };
+  });
+});

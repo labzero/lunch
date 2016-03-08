@@ -3,27 +3,14 @@ $(function () {
   var quickAdvanceRatesPromise;
 
   $quickAdvancesInputField.on('keypress', function(e){
-    onlyAllowDigits(e);
+    Fhlb.Utils.onlyAllowDigits(e);
   });
-
-  function onlyAllowDigits(e) {
-    var allowedKeycodes = [8, 13, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45]; // see http://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes for mapping
-    var keycode = e.which;
-
-    // allow digits
-    for (i = 48; i < 58; i++) {
-      allowedKeycodes.push(i);
-    };
-    if (!(allowedKeycodes.indexOf(keycode)>=0)) {
-      e.preventDefault();
-    };
-  };
 
   $quickAdvancesInputField.on('input', function(event){
     addCommasToInputField(event);
     openQuickAdvanceFlyout(event, $(this));
   });
-  
+
   $('.quick-advance-limited-pricing-notice, .dashboard-vrc-overnight-message[data-flyout-trigger], .dashboard-advances-rate[data-flyout-trigger]').on('click', function(event){
     openQuickAdvanceFlyout(event, $quickAdvancesInputField);
   });
@@ -52,7 +39,7 @@ $(function () {
       var $amountField = $('.dashboard-quick-advance-flyout input[name=amount]');
       $amountField.attr('id', 'quick-advance-amount'); // to conform to HTML5 standards and avoid duplicate ids
       $amountField.on('keypress', function(e){
-        onlyAllowDigits(e);
+        Fhlb.Utils.onlyAllowDigits(e);
       });
       $amountField.on('keyup', function(e){
         addCommasToInputField(e);
