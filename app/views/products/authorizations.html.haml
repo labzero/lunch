@@ -1,4 +1,4 @@
-.row.product-page.authorizations
+.row.product-page.product-authorizations
   .column-2x10-right
     %h1= t('products.authorizations.title')
     %ul
@@ -13,5 +13,5 @@
       %li= t('products.authorizations.send_forms_to')
       %p= t('products.authorizations.address').html_safe
     %p= t('products.authorizations.contact', operations_phone_number: fhlb_formatted_phone_number('4156162616') )
-    = link_to(t('products.authorizations.return_link'), reports_authorizations_path)
+    = link_to(t('products.authorizations.return_link'), forms_path(anchor: :authorizations))
     .last-modified= t('products.section_headings.last_modified', date: fhlb_date_short_alpha(@last_modified))
