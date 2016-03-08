@@ -5,6 +5,7 @@
 - no_wrapping ||= false
 - default_sort ||= [0, 'asc']
 - deferred = table_data[:deferred] || false
+- hide_column_headings = table_data[:hide_column_headings] || false
 - disable_auto_width = defined?(disable_auto_width) ? disable_auto_width : true
 - remaining_cells = table_data[:footer_cells]
 - unless no_wrapping
@@ -12,52 +13,57 @@
 - if deferred
   - table_class << 'table-loading'
 %table.report-table{data: {sortable: is_sortable, :'default-sort' => [default_sort], :'disable-auto-width' => disable_auto_width, :'missing-data-message' => missing_data_message}, class: table_class}
-  %thead
-    - if table_data[:table_heading]
-      %tr.table-heading-row
-        %th{data: {unsortable: true}}
-        %th{colspan: (table_data[:column_headings].length - 1), data: {unsortable: true}}= table_data[:table_heading]
-    - if table_data[:column_sub_headings].blank?
-      - if table_data[:column_headings].present?
+  - if deferred && hide_column_headings
+    %tr
+      %td.table-loading-cell= t('global.prepare_table')
+      %td.table-error-cell.icon-alert-before= t('errors.error_occurred')
+  - else
+    %thead{style: ('display: none' if hide_column_headings)}
+      - if table_data[:table_heading]
+        %tr.table-heading-row
+          %th{data: {unsortable: true}}
+          %th{colspan: (table_data[:column_headings].length - 1), data: {unsortable: true}}= table_data[:table_heading]
+      - if table_data[:column_sub_headings].blank?
+        - if table_data[:column_headings].present?
+          %tr
+          - table_data[:column_headings].each_with_index do |heading, index|
+            - unsortable = index != 0
+            - if heading.is_a?(String)
+              - title = heading
+            - else
+              - title = heading[:title]
+              - unsortable = !heading[:sortable] if heading.has_key?(:sortable)
+            %th.report-cell-narrow{data: {unsortable: unsortable}}= title
+      - else
+        %tr.table-heading-row
+          %th{data: {unsortable: true}}
+          - table_data[:column_headings].each_with_index do |heading, index|
+            %th{colspan: (table_data[:column_sub_headings].length), data: {unsortable: index != 0}}= heading
         %tr
-        - table_data[:column_headings].each_with_index do |heading, index|
-          - unsortable = index != 0
-          - if heading.is_a?(String)
-            - title = heading
-          - else
-            - title = heading[:title]
-            - unsortable = !heading[:sortable] if heading.has_key?(:sortable)
-          %th.report-cell-narrow{data: {unsortable: unsortable}}= title
-    - else
-      %tr.table-heading-row
-        %th{data: {unsortable: true}}
-        - table_data[:column_headings].each_with_index do |heading, index|
-          %th{colspan: (table_data[:column_sub_headings].length), data: {unsortable: index != 0}}= heading
-      %tr
-        %th.report-cell-narrow{data: {unsortable: true}}=  table_data[:column_sub_headings_first]
-        - table_data[:column_headings].each do
-          - table_data[:column_sub_headings].each_with_index do |sub_heading, sub_index|
-            %th.report-cell-narrow{data: {unsortable: sub_index != 0}}= sub_heading
-  %tbody
-    - if deferred
-      %tr
-        %td.table-loading-cell{colspan: table_data[:column_headings].count}= t('global.prepare_table')
-        %td.table-error-cell.icon-alert-before{colspan: table_data[:column_headings].count}= t('errors.error_occurred')
-    - elsif table_data[:rows].blank? && !is_sortable
-      %tr
-        %td.dataTables_empty{colspan: table_data[:column_headings].count}= missing_data_message
-    - else
-      - table_data[:rows].each do |row|
+          %th.report-cell-narrow{data: {unsortable: true}}=  table_data[:column_sub_headings_first]
+          - table_data[:column_headings].each do
+            - table_data[:column_sub_headings].each_with_index do |sub_heading, sub_index|
+              %th.report-cell-narrow{data: {unsortable: sub_index != 0}}= sub_heading
+    %tbody
+      - if deferred
         %tr
-          -if row[:date]
-            %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
-          - row[:columns].each do |column|
-            = render 'reports/report_cell', cell: column
-  - if table_data[:footer]
-    %tfoot
-      - table_data[:footer].each do |cell|
-        - remaining_cells = remaining_cells - 1 if remaining_cells
-        = render 'reports/report_cell', cell: cell
-      - if remaining_cells
-        - remaining_cells.times do
-          = render 'reports/report_cell', cell: {}
+          %td.table-loading-cell{colspan: table_data[:column_headings].count}= t('global.prepare_table')
+          %td.table-error-cell.icon-alert-before{colspan: table_data[:column_headings].count}= t('errors.error_occurred')
+      - elsif table_data[:rows].blank? && !is_sortable
+        %tr
+          %td.dataTables_empty{colspan: table_data[:column_headings].count}= missing_data_message
+      - else
+        - table_data[:rows].each do |row|
+          %tr
+            -if row[:date]
+              %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
+            - row[:columns].each do |column|
+              = render 'reports/report_cell', cell: column
+    - if table_data[:footer]
+      %tfoot
+        - table_data[:footer].each do |cell|
+          - remaining_cells = remaining_cells - 1 if remaining_cells
+          = render 'reports/report_cell', cell: cell
+        - if remaining_cells
+          - remaining_cells.times do
+            = render 'reports/report_cell', cell: {}

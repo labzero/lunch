@@ -75,6 +75,7 @@ When(/^I select all of last year including today$/) do
 end
 
 Then(/^I should see a report with dates for "(.*?)"$/) do |selector|
+  step 'I wait for the report to load'
   case selector
     when 'month to date'
       start_date = default_dates_hash[:this_month_start]
