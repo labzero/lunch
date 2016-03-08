@@ -20,7 +20,7 @@ en:
       confirmation_instructions:
         subject: "Confirmation instructions"
       reset_password_instructions:
-        subject: "FHLBSF Password Reset Request"
+        subject: "FHLBank San Francisco Password Reset Request"
       unlock_instructions:
         subject: "Unlock instructions"
     omniauth_callbacks:
