@@ -8,7 +8,7 @@ nodes.each do |ip, details|
 end
 
 set :ssh_options, {
-    keys: %w(~/.ssh/fhlbsf-test.pem),
+    keys: [ENV['CAP_SSH_KEY'] || '~/.ssh/fhlbsf-test.pem'],
     forward_agent: false,
     auth_methods: %w(publickey)
 }
