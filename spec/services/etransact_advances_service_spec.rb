@@ -81,6 +81,7 @@ describe EtransactAdvancesService do
       expect(call_method).to be(result)
     end
     it 'should URL encode the signer' do
+      allow(subject).to receive(:get_hash)
       expect(URI).to receive(:escape).with(signer)
       call_method
     end
