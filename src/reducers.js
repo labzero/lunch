@@ -51,7 +51,49 @@ const restaurantsMap = {
   },
   [ActionTypes.RESTAURANT_DELETED](state, action) {
     return Object.assign({}, state, {
+      isFetching: false,
       items: state.items.filter(item => item.id !== action.key)
+    });
+  },
+  [ActionTypes.POST_VOTE](state) {
+    return Object.assign({}, state, {
+      isFetching: true
+    });
+  },
+  [ActionTypes.VOTE_POSTED](state, action) {
+    return Object.assign({}, state, {
+      isFetching: false,
+      items: state.items.map(item => {
+        if (item.id === action.vote.restaurant_id) {
+          const newItem = Object.assign({}, item);
+          newItem.votes = [
+            ...item.votes,
+            action.vote
+          ];
+          return newItem;
+        }
+        return item;
+      })
+    });
+  },
+  [ActionTypes.DELETE_VOTE](state) {
+    return Object.assign({}, state, {
+      isFetching: true
+    });
+  },
+  [ActionTypes.VOTE_DELETED](state, action) {
+    return Object.assign({}, state, {
+      isFetching: false,
+      items: state.items.map(item => {
+        if (item.id === action.restaurantId) {
+          const newItem = Object.assign({}, item);
+          newItem.votes = item.votes.filter(
+            vote => vote.id !== action.id
+          );
+          return newItem;
+        }
+        return item;
+      })
     });
   }
 };

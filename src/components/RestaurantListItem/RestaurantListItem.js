@@ -18,19 +18,23 @@ class RestaurantListItem extends Component {
     let deleteButton = null;
     let voteButton = null;
     if (typeof this.props.user.id === 'number') {
-      voteButton = (
-        <div className={s.voteButtonContainer}>
-          <RestaurantVoteButtonContainer id={this.props.id} votes={this.props.votes} />
+      voteButton = <RestaurantVoteButtonContainer id={this.props.id} votes={this.props.votes} />;
+      deleteButton = (
+        <div className={s.deleteButtonContainer}>
+          <RestaurantDeleteButtonContainer id={this.props.id} />
         </div>
       );
-      deleteButton = <RestaurantDeleteButtonContainer id={this.props.id} />;
     }
 
     return (
       <li className={s.root}>
         <div className={s.header}>
           <h2 className={s.heading}>{this.props.name}</h2>
-          {voteButton}
+          <div className={s.voteButtonContainer}>
+            {this.props.votes.length} {this.props.votes.length === 1 ? 'vote' : 'votes'}
+            &nbsp;
+            {voteButton}
+          </div>
         </div>
         {this.props.address}
         {deleteButton}

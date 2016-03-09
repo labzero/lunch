@@ -1,17 +1,22 @@
 .root {
   border: 2px solid black;
+  margin-bottom: 10px;
   padding: 10px;
 }
 
 .header {
-  clear: fix;
+  clear: fix-legacy;
 }
 
 .heading {
   float: left;
-  margin-top: 0;
+  margin: 0;
 }
 
 .voteButtonContainer {
+  float: right;
+}
+
+.deleteButtonContainer {
   float: right;
 }

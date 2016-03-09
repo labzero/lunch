@@ -23,14 +23,21 @@ class RestaurantAddForm extends Component {
     this.removeCss();
   }
 
+  handleSuggestSelect(suggestion) {
+    this.props.handleSuggestSelect(suggestion, this._geosuggest);
+  }
+
   render() {
+    const boundHandleSuggestSelect = this.handleSuggestSelect.bind(this);
+
     return (
       <form>
         <Geosuggest
           location={{ lat: () => this.props.latLng.lat, lng: () => this.props.latLng.lng }}
           radius="0"
-          onSuggestSelect={this.props.handleSuggestSelect}
+          onSuggestSelect={boundHandleSuggestSelect}
           getSuggestLabel={this.props.getSuggestLabel}
+          ref={g => { this._geosuggest = g; } }
         />
       </form>
     );

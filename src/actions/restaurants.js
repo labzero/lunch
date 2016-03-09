@@ -46,6 +46,36 @@ export function receiveRestaurants(json) {
   };
 }
 
+export function postVote(id) {
+  return {
+    type: ActionTypes.POST_VOTE,
+    id
+  };
+}
+
+export function votePosted(json) {
+  return {
+    type: ActionTypes.VOTE_POSTED,
+    vote: json
+  };
+}
+
+export function deleteVote(restaurantId, id) {
+  return {
+    type: ActionTypes.DELETE_VOTE,
+    restaurantId,
+    id
+  };
+}
+
+export function voteDeleted(restaurantId, id) {
+  return {
+    type: ActionTypes.VOTE_DELETED,
+    restaurantId,
+    id
+  };
+}
+
 function fetchRestaurants() {
   return dispatch => {
     dispatch(requestRestaurants());
@@ -110,5 +140,31 @@ export function removeRestaurant(key) {
       credentials: 'same-origin',
       method: 'delete'
     }).then(() => dispatch(restaurantDeleted(key)));
+  };
+}
+
+export function addVote(id) {
+  return (dispatch) => {
+    dispatch(postVote(id));
+    return fetch(`/api/restaurants/${id}/votes`, {
+      method: 'post',
+      credentials: 'same-origin'
+    })
+      .then(response => new ApiClient(response).processResponse())
+      .then(
+        json => dispatch(votePosted(json)),
+        err => dispatch(flashError(err.message))
+      );
+  };
+}
+
+export function removeVote(restaurantId, id) {
+  return (dispatch) => {
+    dispatch(deleteVote(restaurantId, id));
+    return fetch(`/api/restaurants/${restaurantId}/votes/${id}`, {
+      credentials: 'same-origin',
+      method: 'delete'
+    })
+      .then(() => dispatch(voteDeleted(restaurantId, id)));
   };
 }

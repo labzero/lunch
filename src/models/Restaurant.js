@@ -1,15 +1,15 @@
-import moment from 'moment';
-import Base from './Base';
+import Sequelize from 'sequelize';
+import sequelize from './sequelize';
 import Vote from './Vote';
 
-const Restaurant = Base.extend({
-  tableName: 'restaurants',
-  votes() { return this.hasMany(Vote); },
-  virtuals: {
-    votesFromToday() {
-      return this.votes().query('where', 'created_at', '>', moment().subtract(12, 'hours').toDate());
-    }
-  }
-});
+const Restaurant = sequelize.define('restaurant', {
+  name: Sequelize.STRING,
+  address: Sequelize.STRING,
+  lat: Sequelize.FLOAT,
+  lng: Sequelize.FLOAT,
+  place_id: Sequelize.STRING
+}, { underscored: true });
+
+Restaurant.hasMany(Vote);
 
 export default Restaurant;

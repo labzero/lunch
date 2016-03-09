@@ -4,7 +4,7 @@ import s from './RestaurantList.scss';
 import RestaurantListItemContainer from '../../containers/RestaurantListItemContainer';
 
 const RestaurantList = ({ items }) => (
-  <ul>
+  <ul className={s.root}>
     {items.map(item => <RestaurantListItemContainer key={item.id} {...item} />)}
   </ul>
 );

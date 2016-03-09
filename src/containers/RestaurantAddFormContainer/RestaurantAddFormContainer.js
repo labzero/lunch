@@ -17,17 +17,18 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  handleSuggestSelect: (suggest) => {
-    let name = suggest.label;
+  handleSuggestSelect: (suggestion, geosuggest) => {
+    let name = suggestion.label;
     let address;
-    const { placeId, location: { lat, lng } } = suggest;
+    const { placeId, location: { lat, lng } } = suggestion;
     if (suggestCache[placeId] !== undefined) {
       name = suggestCache[placeId];
     }
-    if (suggest.gmaps !== undefined) {
-      address = suggest.gmaps.formatted_address;
+    if (suggestion.gmaps !== undefined) {
+      address = suggestion.gmaps.formatted_address;
     }
     suggestCache = [];
+    geosuggest.update('');
     dispatch(addRestaurant(name, placeId, address, lat, lng));
   }
 });

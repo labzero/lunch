@@ -31,7 +31,7 @@ passport.use(new GoogleStrategy(
   },
   (req, accessToken, refreshToken, profile, done) => {
     if (profile._json.domain === process.env.OAUTH_DOMAIN) {
-      return User.findOrCreate({ google_id: profile.id }).then(user => {
+      return User.findOrCreate({ where: { google_id: profile.id } }).spread(user => {
         const userUpdates = {};
         let doUpdates = false;
 
@@ -53,7 +53,7 @@ passport.use(new GoogleStrategy(
           }
         }
         if (doUpdates) {
-          return user.save(userUpdates, { patch: true }).then(updatedUser => done(null, updatedUser));
+          return user.update(userUpdates).then(updatedUser => done(null, updatedUser));
         }
         return done(null, user);
       }).catch(err => done(err));
@@ -67,9 +67,13 @@ passport.serializeUser((user, cb) => {
 });
 
 passport.deserializeUser((id, cb) => {
-  User.find({ id }).then(user => {
+  console.log('deserializing');
+  User.findById(id).then(user => {
+    console.log('found the user:');
+    console.log(user);
     cb(null, user);
   }).catch(err => {
+    console.log('didnt find the user');
     cb(err);
   });
 });

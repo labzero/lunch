@@ -6,7 +6,9 @@ const mapStateToProps = null;
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   handleClick: () => {
-    dispatch(removeRestaurant(ownProps.id));
+    if (confirm('Are you sure you want to delete this restaurant?')) {
+      dispatch(removeRestaurant(ownProps.id));
+    }
   }
 });
 

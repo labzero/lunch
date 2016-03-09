@@ -29,6 +29,8 @@ import passport from './core/passport';
 import schema from './data/schema';
 import fetch from './core/fetch';
 import ApiClient from './core/ApiClient';
+import contentApi from './api/content';
+import restaurantApi from './api/restaurants';
 
 const server = global.server = express();
 
@@ -68,7 +70,7 @@ server.get('/login/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     const expiresIn = 60 * 60 * 24 * 180; // 180 days
-    const token = jwt.sign(req.user, auth.jwt.secret, { expiresIn });
+    const token = jwt.sign(req.user.toJSON(), auth.jwt.secret, { expiresIn });
     res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
     res.redirect('/');
   }
@@ -77,8 +79,8 @@ server.get('/login/callback',
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
-server.use('/api/content', require('./api/content').default);
-server.use('/api/restaurants', require('./api/restaurants').default);
+server.use('/api/content', contentApi);
+server.use('/api/restaurants', restaurantApi);
 server.use('/graphql', expressGraphQL(req => ({
   schema,
   graphiql: true,
@@ -112,7 +114,7 @@ server.get('*', async (req, res, next) => {
           }
         };
         if (req.user) {
-          initialState.user = req.user.attributes;
+          initialState.user = req.user;
         }
         const store = configureStore(initialState);
         const data = {
