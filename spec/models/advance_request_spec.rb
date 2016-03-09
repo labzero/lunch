@@ -1617,7 +1617,8 @@ describe AdvanceRequest do
         'CapitalStockError' => :capital_stock,
         'CreditError' => :credit,
         'CollateralError' => :collateral,
-        'ExceedsTotalDailyLimitError' => :total_daily_limit
+        'ExceedsTotalDailyLimitError' => :total_daily_limit,
+        'DisabledProductError' => :disabled_product
       }.each do |status, code|
         it "adds an error with a code of `#{code}` if the status contains `#{status}`" do
           allow(response).to receive(:[]).with(:status).and_return([status])
