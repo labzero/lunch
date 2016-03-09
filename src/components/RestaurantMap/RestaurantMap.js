@@ -49,10 +49,10 @@ class RestaurantMap extends Component {
             >
               {this.props.items.map((item, index) => {
                 const length = item.votes.length;
-                let label;
+                let label = ' ';
                 if (item.votes.length > 9) {
                   label = '✔';
-                } else {
+                } else if (item.votes.length > 0) {
                   label = String(length);
                 }
 
