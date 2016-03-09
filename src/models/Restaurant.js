@@ -8,7 +8,12 @@ const Restaurant = sequelize.define('restaurant', {
   lat: Sequelize.FLOAT,
   lng: Sequelize.FLOAT,
   place_id: Sequelize.STRING
-}, { underscored: true });
+}, {
+  defaultScope: {
+    order: 'votes.created_at ASC, created_at DESC'
+  },
+  underscored: true
+});
 
 Restaurant.hasMany(Vote);
 

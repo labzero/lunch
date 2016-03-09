@@ -39,8 +39,8 @@ const restaurantsMap = {
     return Object.assign({}, state, {
       isFetching: false,
       items: [
-        ...state.items,
-        action.restaurant
+        action.restaurant,
+        ...state.items
       ]
     });
   },
@@ -91,6 +91,26 @@ const restaurantsMap = {
             vote => vote.id !== action.id
           );
           return newItem;
+        }
+        return item;
+      })
+    });
+  },
+  [ActionTypes.SHOW_INFO_WINDOW](state, action) {
+    return Object.assign({}, state, {
+      items: state.items.map(item => {
+        if (item.id === action.id) {
+          return Object.assign({}, item, { showInfoWindow: true });
+        }
+        return item;
+      })
+    });
+  },
+  [ActionTypes.HIDE_INFO_WINDOW](state, action) {
+    return Object.assign({}, state, {
+      items: state.items.map(item => {
+        if (item.id === action.id) {
+          return Object.assign({}, item, { showInfoWindow: false });
         }
         return item;
       })

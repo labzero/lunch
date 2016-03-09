@@ -1,17 +1,19 @@
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantVoteButton.scss';
 
-const RestaurantVoteButton = ({ votes, user, handleClick }) => {
-  let downVote = false;
-  if (votes.some(vote => vote.user_id === user.id)) {
-    downVote = true;
-  }
+class RestaurantVoteButton extends Component {
+  render() {
+    let downVote = false;
+    if (this.props.votes.some(vote => vote.user_id === this.props.user.id)) {
+      downVote = true;
+    }
 
-  return (
-    <button onClick={handleClick}>{downVote ? '-1' : '+1'}</button>
-  );
-};
+    return (
+      <button onClick={this.props.handleClick}>{downVote ? '-1' : '+1'}</button>
+    );
+  }
+}
 
 RestaurantVoteButton.propTypes = {
   handleClick: PropTypes.func.isRequired,

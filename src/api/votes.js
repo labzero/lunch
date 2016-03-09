@@ -9,8 +9,6 @@ router
     '/',
     loggedIn,
     async (req, res) => {
-      console.log('herte is the user id');
-      console.log(req.user.id);
       Vote.create({
         restaurant_id: parseInt(req.params.restaurant_id, 10),
         user_id: req.user.id

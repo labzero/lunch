@@ -29,7 +29,6 @@ router
       }, { include: [Vote] }).then(obj => {
         res.status(201).send({ error: false, data: obj });
       }).catch(err => {
-        console.log('OH NO');
         const error = { message: 'Could not save new restaurant. Has it already been added?' };
         errorCatcher(res, error);
       });
