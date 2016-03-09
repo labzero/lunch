@@ -35,6 +35,64 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
+  shared_examples 'a MemberBalanceServiceJob backed report' do |service_job_method, job_call, deferred_job = false|
+    let(:job_response) {deferred_job ? response_hash : member_balance_service_job_instance}
+    describe "calling `#{job_call}` on the MemberBalanceServiceJob" do
+      it 'passes the member id' do
+        allow(controller).to receive(:report_disabled?).and_return(false)
+        allow(controller).to receive(:current_member_id).and_return(member_id)
+        expect(MemberBalanceServiceJob).to receive(job_call).with(member_id, any_args).and_return(job_response)
+        call_action
+      end
+      it "passes `#{service_job_method}`" do
+        expect(MemberBalanceServiceJob).to receive(job_call).with(anything, service_job_method, any_args).and_return(job_response)
+        call_action
+      end
+      it 'passes the proper uuid' do
+        expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, request.uuid, anything).and_return(job_response)
+        call_action
+      end
+    end
+    if job_call == :perform_later
+      it 'updates the job status with the user\'s id' do
+        allow(controller).to receive(:current_user).and_return(user)
+        expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
+        call_action
+      end
+      it 'sets the @job_status_url' do
+        call_action
+        expect(assigns[:job_status_url]).to eq(job_status_url(job_status))
+      end
+    end
+  end
+
+  shared_examples 'a JobStatus backed report' do
+    let(:parsed_response_hash) { double('parsed hash', with_indifferent_access: response_hash) }
+    before do
+      allow(JobStatus).to receive(:find_by).and_return(job_status)
+      allow(JSON).to receive(:parse).and_return(parsed_response_hash)
+    end
+    it 'finds the JobStatus by id, user_id, and status' do
+      allow(controller).to receive(:current_user).and_return(user)
+      expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: user_id, status: JobStatus.statuses[:completed]).and_return(job_status)
+      call_action_with_job_id
+    end
+    it 'raises an error if there is no job status found' do
+      allow(JobStatus).to receive(:find_by)
+      expect{call_action_with_job_id}.to raise_error
+    end
+    it 'parses the job_status string' do
+      job_status_string = double('job status string')
+      allow(job_status).to receive(:result_as_string).and_return(job_status_string)
+      expect(JSON).to receive(:parse).with(job_status_string).and_return(parsed_response_hash)
+      call_action_with_job_id
+    end
+    it 'destroys the job status' do
+      expect(job_status).to receive(:destroy)
+      call_action_with_job_id
+    end
+  end
+
   login_user
 
   let(:today) { Time.zone.today }
@@ -514,114 +572,6 @@ RSpec.describe ReportsController, :type => :controller do
            expect(members_service).to receive(:member).exactly(:once)
            make_request
          end
-      end
-    end
-
-    describe 'GET advances_detail' do
-      it_behaves_like 'a user required action', :get, :advances_detail
-      let(:advances_detail) {double('Advances Detail object')}
-      before do
-        allow(member_balance_service_instance).to receive(:advances_details).and_return(advances_detail)
-        allow(advances_detail).to receive(:[]).with(:advances_details).and_return([])
-      end
-
-      it_behaves_like 'a report that can be downloaded', :advances_detail, [:pdf, :xlsx]
-      it_behaves_like 'a date restricted report', :advances_detail, nil, 1
-      it_behaves_like 'a report with instance variables set in a before_filter', :advances_detail
-      it_behaves_like 'a controller action with an active nav setting', :advances_detail, :reports
-
-      it 'should render the advances_detail view' do
-        get :advances_detail
-        expect(response.body).to render_template('advances_detail')
-      end
-
-      describe 'view instance variables' do
-        it 'sets @start_date to `start_date`' do
-          get :advances_detail, start_date: start_date
-          expect(assigns[:start_date]).to eq(start_date)
-        end
-        it 'should pass @as_of_date, `date_restriction` and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-          allow(controller).to receive(:date_picker_presets).with(restricted_start_date, nil, ReportsController::DATE_RESTRICTION_MAPPING[:advances_detail], max_date).and_return(picker_preset_hash)
-          get :advances_detail, start_date: start_date
-          # expect(assigns[:picker_presets]).to eq(picker_preset_hash)
-        end
-        it 'should call the method `advances_details` on a MemberBalanceService instance with the `start` argument and set @advances_detail to its result' do
-          allow(member_balance_service_instance).to receive(:advances_details).with(restricted_start_date).and_return(advances_detail)
-          get :advances_detail, start_date: start_date
-          expect(assigns[:advances_detail]).to eq(advances_detail)
-        end
-        it 'should raise an error if `advances_details` returns nil' do
-          expect(member_balance_service_instance).to receive(:advances_details).and_return(nil)
-          expect{get :advances_detail, start_date: start_date}.to raise_error
-        end
-        it 'should set @advances_detail to {} if the report is disabled' do
-          expect(controller).to receive(:report_disabled?).with(ReportsController::ADVANCES_DETAIL_WEB_FLAGS).and_return(true)
-          get :advances_detail
-          expect(assigns[:advances_detail]).to eq({})
-        end
-        it 'should sort the advances found in @advances_detail[:advances_details]' do
-          expect(advances_detail[:advances_details]).to receive(:sort!)
-          get :advances_detail
-        end
-        it 'should order the advances found in @advances_detail[:advances_details] by `trade_date` ascending' do
-          unsorted_advances = [
-            {trade_date: Time.zone.today},
-            {trade_date: Time.zone.today + 1.years},
-            {trade_date: Time.zone.today - 1.years},
-            {trade_date: Time.zone.today - 3.years}
-          ]
-          allow(advances_detail).to receive(:[]).with(:advances_details).and_return(unsorted_advances)
-          get :advances_detail
-          last_trade_date = nil
-          assigns[:advances_detail][:advances_details].each do |advance|
-            expect(advance[:trade_date]).to be >= last_trade_date if last_trade_date
-            last_trade_date = advance[:trade_date]
-          end
-        end
-        it 'should set @report_name' do
-          get :advances_detail
-          expect(assigns[:report_name]).to be_kind_of(String)
-        end
-      end
-
-      describe 'setting the `prepayment_fee_indication_notes` attribute for a given advance record' do
-        let(:advance_record) {double('Advance Record')}
-        let(:advances_array) {[advance_record]}
-        let(:prepayment_fee) {464654654}
-        before do
-          allow(advances_detail).to receive(:[]).with(:advances_details).at_least(1).and_return(advances_array)
-          allow(member_balance_service_instance).to receive(:advances_details).and_return(advances_detail)
-        end
-        it 'sets the attribute to `unavailable online` message if `notes` attribute for that record is `unavailable_online`' do
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.unavailable_online'))
-          expect(advance_record).to receive(:[]).with(:notes).and_return('unavailable_online')
-          get :advances_detail
-        end
-        it 'sets the attribute to `not applicable for vrc` message if `notes` attribute for that record is `not_applicable_to_vrc`' do
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.not_applicable_to_vrc'))
-          expect(advance_record).to receive(:[]).with(:notes).and_return('not_applicable_to_vrc')
-          get :advances_detail
-        end
-        it 'sets the attribute to `prepayment fee restructure` message if `notes` attribute for that record is `prepayment_fee_restructure`' do
-          date = Date.new(2013, 1, 1)
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.prepayment_fee_restructure_html', date: fhlb_date_standard_numeric(date)))
-          expect(advance_record).to receive(:[]).with(:structure_product_prepay_valuation_date).and_return(date)
-          allow(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
-          expect(advance_record).to receive(:[]).with(:notes).and_return('prepayment_fee_restructure')
-          get :advances_detail
-        end
-        it 'doesn\'t set the attribute if that attribute exists and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
-          expect(advance_record).to_not receive(:[]=).with(:prepayment_fee_indication_notes, anything)
-          expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
-          expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
-          get :advances_detail
-        end
-        it 'sets the attribute to equal the `not available for past dates` message if there is no value for the `prepayment_fee_indication` attribute and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.unavailable_for_past_dates'))
-          expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
-          expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(nil)
-          get :advances_detail
-        end
       end
     end
 
@@ -1543,6 +1493,166 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
+  describe 'GET advances_detail' do
+    let(:advances_detail) {double('Advances Detail object')}
+    let(:job_status) { double('JobStatus', update_attributes!: nil, id: nil, destroy: nil, result_as_string: nil ) }
+    let(:member_balance_service_job_instance) { double('member_balance_service_job_instance', job_status: job_status) }
+    let(:user_id) { rand(0..99999) }
+    let(:user) { double(User, id: user_id, accepted_terms?: true) }
+    let(:response_hash) { double('hash of advances', :[] => nil) }
+    let(:job_id) { rand(0..99999) }
+    let(:member_id) { rand(0..99999) }
+    let(:call_action) { get :advances_detail }
+    let(:call_action_with_job_id) { get :advances_detail, job_id: job_id }
+    let(:end_date) { Date.new(2016, 1, 1) }
+    before do
+      allow(advances_detail).to receive(:[]).with(:advances_details).and_return([])
+    end
+
+    it_behaves_like 'a user required action', :get, :advances_detail
+    it_behaves_like 'a report that can be downloaded', :advances_detail, [:pdf, :xlsx]
+    it_behaves_like 'a date restricted report', :advances_detail, nil, 1
+    it_behaves_like 'a report with instance variables set in a before_filter', :advances_detail
+    it_behaves_like 'a controller action with an active nav setting', :advances_detail, :reports
+    
+    it 'should render the advances_detail view' do
+      call_action
+      expect(response.body).to render_template('advances_detail')
+    end
+    describe 'view instance variables' do
+      it 'sets @report_name' do
+        call_action
+        expect(assigns[:report_name]).to eq(I18n.t('global.advances'))
+      end
+      it 'sets @start_date to `start_date`' do
+        get :advances_detail, start_date: start_date
+        expect(assigns[:start_date]).to eq(start_date)
+      end
+      it 'should pass @as_of_date, `date_restriction` and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+        allow(controller).to receive(:date_picker_presets).with(start_date, nil, ReportsController::DATE_RESTRICTION_MAPPING[:advances_detail], max_date).and_return(picker_preset_hash)
+        get :advances_detail, start_date: start_date
+        expect(assigns[:picker_presets]).to eq(picker_preset_hash)
+      end
+    end
+
+    shared_examples 'an advances detail report that passes additional arguments to the MemberBalanceServiceJob' do |job_call, deferred_job = false|
+      describe 'additional arguments' do
+        let(:job_response) {deferred_job ? response_hash : member_balance_service_job_instance}
+        it 'passes the start_date as the final argument' do
+          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, start_date.to_s).and_return(job_response)
+          get :advances_detail, start_date: start_date
+        end
+      end
+    end
+
+    describe 'when a job_id is not present and self.skip_deferred_load is false' do
+      it_behaves_like 'a MemberBalanceServiceJob backed report', 'advances_details', :perform_later
+      it_behaves_like 'an advances detail report that passes additional arguments to the MemberBalanceServiceJob', :perform_later
+
+      before { allow(MemberBalanceServiceJob).to receive(:perform_later).and_return(member_balance_service_job_instance) }
+
+      it 'sets the @load_url with the appropriate params' do
+        get :advances_detail, start_date: start_date
+        expect(assigns[:load_url]).to eq(reports_advances_url(job_id: job_status.id, start_date: start_date.to_s))
+      end
+      it 'sets @advances_detail[:deferred] to true' do
+        call_action
+        expect(assigns[:advances_detail][:deferred]).to eq(true)
+      end
+    end
+
+    shared_examples 'returning advances details data' do
+      let(:call_action_shared_example) { controller.skip_deferred_load ? call_action : call_action_with_job_id }
+      it 'sets @advances_detail to {} if the report is disabled' do
+        allow(controller).to receive(:report_disabled?).with(ReportsController::ADVANCES_DETAIL_WEB_FLAGS).and_return(true)
+        call_action_shared_example
+        expect(assigns[:advances_detail]).to eq({})
+      end
+      it 'sorts the advances found in @advances_detail[:advances_details]' do
+        expect(advances_detail[:advances_details]).to receive(:sort!)
+        call_action_shared_example
+      end
+      it 'orders the advances found in @advances_detail[:advances_details] by `trade_date` ascending' do
+        unsorted_advances = [
+          {trade_date: Time.zone.today},
+          {trade_date: Time.zone.today + 1.years},
+          {trade_date: Time.zone.today - 1.years},
+          {trade_date: Time.zone.today - 3.years}
+        ]
+        allow(advances_detail).to receive(:[]).with(:advances_details).and_return(unsorted_advances)
+        call_action_shared_example
+        last_trade_date = nil
+        assigns[:advances_detail][:advances_details].each do |advance|
+          expect(advance[:trade_date]).to be >= last_trade_date if last_trade_date
+          last_trade_date = advance[:trade_date]
+        end
+      end
+
+      describe 'setting the `prepayment_fee_indication_notes` attribute for a given advance record' do
+        let(:advance_record) {double('Advance Record')}
+        let(:advances_array) {[advance_record]}
+        let(:prepayment_fee) {464654654}
+        before do
+          allow(advances_detail).to receive(:[]).with(:advances_details).at_least(1).and_return(advances_array)
+        end
+        it 'sets the attribute to `unavailable online` message if `notes` attribute for that record is `unavailable_online`' do
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.unavailable_online'))
+          expect(advance_record).to receive(:[]).with(:notes).and_return('unavailable_online')
+          call_action_shared_example
+        end
+        it 'sets the attribute to `not applicable for vrc` message if `notes` attribute for that record is `not_applicable_to_vrc`' do
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.not_applicable_to_vrc'))
+          expect(advance_record).to receive(:[]).with(:notes).and_return('not_applicable_to_vrc')
+          call_action_shared_example
+        end
+        it 'sets the attribute to `prepayment fee restructure` message if `notes` attribute for that record is `prepayment_fee_restructure`' do
+          date = Date.new(2013, 1, 1)
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.prepayment_fee_restructure_html', date: fhlb_date_standard_numeric(date)))
+          expect(advance_record).to receive(:[]).with(:structure_product_prepay_valuation_date).and_return(date)
+          allow(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
+          expect(advance_record).to receive(:[]).with(:notes).and_return('prepayment_fee_restructure')
+          call_action_shared_example
+        end
+        it 'doesn\'t set the attribute if that attribute exists and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
+          expect(advance_record).to_not receive(:[]=).with(:prepayment_fee_indication_notes, anything)
+          expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
+          expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
+          call_action_shared_example
+        end
+        it 'sets the attribute to equal the `not available for past dates` message if there is no value for the `prepayment_fee_indication` attribute and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.unavailable_for_past_dates'))
+          expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
+          expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(nil)
+          call_action_shared_example
+        end
+      end
+    end
+
+    describe 'job_id present' do
+      before do
+        allow(JSON).to receive(:parse).and_return(double('job status response', with_indifferent_access: advances_detail))
+        allow(JobStatus).to receive(:find_by).and_return(job_status)
+      end
+      it_behaves_like 'a JobStatus backed report'
+      include_examples 'returning advances details data'
+
+      it 'raises an error if `advances_details` is nil' do
+        allow(JSON).to receive(:parse).and_return(double('job status response', with_indifferent_access: nil))
+        expect{call_action_with_job_id}.to raise_error
+      end
+    end
+    describe '`skip_deferred_load` set to true' do
+      before do
+        controller.skip_deferred_load = true
+        allow(MemberBalanceServiceJob).to receive(:perform_now).and_return(advances_detail)
+      end
+      it_behaves_like 'a MemberBalanceServiceJob backed report', 'advances_details', :perform_now, true
+      it_behaves_like 'an advances detail report that passes additional arguments to the MemberBalanceServiceJob', :perform_now, true
+      include_examples 'returning advances details data'
+    end
+
+  end
+
   describe 'GET borrowing_capacity' do
     it_behaves_like 'a user required action', :get, :borrowing_capacity
     it_behaves_like 'a report that can be downloaded', :borrowing_capacity, [:pdf]
@@ -1560,37 +1670,6 @@ RSpec.describe ReportsController, :type => :controller do
     let(:call_action_with_job_id) { get :borrowing_capacity, job_id: job_id }
     let(:end_date) { Date.new(2016, 1, 1) }
 
-    RSpec.shared_examples 'a borrowing_capacity path involving a MemberBalanceServiceJob' do |job_call, deferred_job = false|
-      let(:job_response) {deferred_job ? response_hash : member_balance_service_job_instance}
-      describe "calling `#{job_call}` on the MemberBalanceServiceJob" do
-        it 'passes the member id' do
-          allow(controller).to receive(:report_disabled?).and_return(false)
-          allow(controller).to receive(:current_member_id).and_return(member_id)
-          expect(MemberBalanceServiceJob).to receive(job_call).with(member_id, any_args).and_return(job_response)
-          call_action
-        end
-        it 'passes `borrowing_capacity_summary`' do
-          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, 'borrowing_capacity_summary', any_args).and_return(job_response)
-          call_action
-        end
-        it 'passes the proper uuid' do
-          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, request.uuid, anything).and_return(job_response)
-          call_action
-        end
-        describe 'additional arguments' do
-          before { allow(ReportConfiguration).to receive(:date_bounds).and_call_original }
-          it 'passes today as the final argument if no end_date param is provided' do
-            expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, today.to_s).and_return(job_response)
-            call_action
-          end
-          it 'passes the end_date param if one is provided' do
-            expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, end_date.to_s).and_return(job_response)
-            get :borrowing_capacity, end_date: end_date
-          end
-        end
-      end
-    end
-
     it 'should render the borrowing_capacity view' do
       call_action
       expect(response.body).to render_template('borrowing_capacity')
@@ -1600,20 +1679,27 @@ RSpec.describe ReportsController, :type => :controller do
       expect(assigns[:end_date]).to eq(end_date)
     end
 
+    shared_examples 'a borrowing capacity report that passes additional arguments to the MemberBalanceServiceJob' do |job_call, deferred_job = false|
+      describe 'additional arguments' do
+        let(:job_response) {deferred_job ? response_hash : member_balance_service_job_instance}
+        before { allow(ReportConfiguration).to receive(:date_bounds).and_call_original }
+        it 'passes today as the final argument if no end_date param is provided' do
+          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, today.to_s).and_return(job_response)
+          call_action
+        end
+        it 'passes the end_date param if one is provided' do
+          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, end_date.to_s).and_return(job_response)
+          get :borrowing_capacity, end_date: end_date
+        end
+      end
+    end
+
     describe 'when a job_id is not present and self.skip_deferred_load is false' do
-      it_behaves_like 'a borrowing_capacity path involving a MemberBalanceServiceJob', :perform_later
+      it_behaves_like 'a MemberBalanceServiceJob backed report', 'borrowing_capacity_summary', :perform_later
+      it_behaves_like 'a borrowing capacity report that passes additional arguments to the MemberBalanceServiceJob', :perform_later
 
       before { allow(MemberBalanceServiceJob).to receive(:perform_later).and_return(member_balance_service_job_instance) }
 
-      it 'updates the job status with the user\'s id' do
-        allow(controller).to receive(:current_user).and_return(user)
-        expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
-        call_action
-      end
-      it 'sets the @job_status_url' do
-        call_action
-        expect(assigns[:job_status_url]).to eq(job_status_url(job_status))
-      end
       it 'sets the @load_url with the appropriate params' do
         call_action
         expect(assigns[:load_url]).to eq(reports_borrowing_capacity_url(job_id: job_status.id))
@@ -1625,29 +1711,11 @@ RSpec.describe ReportsController, :type => :controller do
     end
 
     describe 'job_id present' do
+      it_behaves_like 'a JobStatus backed report'
       let(:parsed_response_hash) { double('parsed hash', with_indifferent_access: response_hash) }
       before do
         allow(JobStatus).to receive(:find_by).and_return(job_status)
         allow(JSON).to receive(:parse).and_return(parsed_response_hash)
-      end
-      it 'finds the JobStatus by id, user_id, and status' do
-        allow(controller).to receive(:current_user).and_return(user)
-        expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: user_id, status: JobStatus.statuses[:completed]).and_return(job_status)
-        call_action_with_job_id
-      end
-      it 'raises an error if there is no job status found' do
-        allow(JobStatus).to receive(:find_by)
-        expect{call_action_with_job_id}.to raise_error
-      end
-      it 'parses the job_status string' do
-        job_status_string = double('job status string')
-        allow(job_status).to receive(:result_as_string).and_return(job_status_string)
-        expect(JSON).to receive(:parse).with(job_status_string).and_return(parsed_response_hash)
-        call_action_with_job_id
-      end
-      it 'destroys the job status' do
-        expect(job_status).to receive(:destroy)
-        call_action_with_job_id
       end
       it 'sets @borrowing_capacity_summary to the hash returned from the job status' do
         call_action_with_job_id
@@ -1661,7 +1729,8 @@ RSpec.describe ReportsController, :type => :controller do
     end
     describe '`skip_deferred_load` set to true' do
       before { controller.skip_deferred_load = true }
-      it_behaves_like 'a borrowing_capacity path involving a MemberBalanceServiceJob', :perform_now, true
+      it_behaves_like 'a MemberBalanceServiceJob backed report', 'borrowing_capacity_summary', :perform_now, true
+      it_behaves_like 'a borrowing capacity report that passes additional arguments to the MemberBalanceServiceJob', :perform_now, true
 
       it 'raises an error if @borrowing_capacity_summary is nil' do
         allow(MemberBalanceServiceJob).to receive(:perform_now)
@@ -2157,7 +2226,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
 
-    RSpec.shared_examples 'a historical_price_indications path involving a RatesServiceJob' do |job_call, deferred_job = false|
+    RSpec.shared_examples 'a historical_price_indications report involving a RatesServiceJob' do |job_call, deferred_job = false|
       let(:job_response) {deferred_job ? response_hash : rate_service_job_instance}
       describe "calling `#{job_call}` on the RatesServiceJob" do
         it 'passes the proper uuid' do
@@ -2191,7 +2260,7 @@ RSpec.describe ReportsController, :type => :controller do
       before do
         allow(RatesServiceJob).to receive(:perform_later).and_return(rate_service_job_instance)
       end
-      it_behaves_like 'a historical_price_indications path involving a RatesServiceJob', :perform_later
+      it_behaves_like 'a historical_price_indications report involving a RatesServiceJob', :perform_later
       it 'updates the job status with the user\'s id' do
         allow(controller).to receive(:current_user).and_return(user)
         expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
@@ -2251,7 +2320,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       describe '`skip_deferred_load` set to true' do
         before { controller.skip_deferred_load = true }
-        it_behaves_like 'a historical_price_indications path involving a RatesServiceJob', :perform_now, true
+        it_behaves_like 'a historical_price_indications report involving a RatesServiceJob', :perform_now, true
       end
       describe 'credit_type of :daily_prime' do
         let(:index) {0.17564}

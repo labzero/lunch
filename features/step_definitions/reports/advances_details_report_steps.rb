@@ -5,6 +5,7 @@ Then(/^I should see advances details for last business day/) do
 end
 
 Then(/^I should see advances details for the (\d+)(?:st|rd|th) of (this|last) month$/) do |day, month|
+  step 'I wait for the report to load'
   today = Time.zone.now.to_date
   if month == 'this'
     date = Date.new(today.year, today.month, day)

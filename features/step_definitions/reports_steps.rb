@@ -271,6 +271,7 @@ Then(/^I should see a "(.*?)" report as of the last day of last month relative t
 end
 
 Then(/^I should see a "(.*?)" report as of "(.*?)"$/) do |report_type, as_of_date|
+  step 'I wait for the report to load'
   as_of_date = as_of_date.to_date
   summary_statement = case report_type
     when "Advances Detail"

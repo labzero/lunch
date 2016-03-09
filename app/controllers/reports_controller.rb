@@ -429,18 +429,22 @@ class ReportsController < ApplicationController
     initialize_dates(:advances_detail, params[:start_date])
     report_download_name = "advances-#{fhlb_report_date_numeric(@start_date)}"
     downloadable_report(nil, {start_date: @start_date.to_s}, report_download_name) do
-      member_balances = MemberBalanceService.new(current_member_id, request)
-      @advances_detail = member_balances.advances_details(@start_date)
       @report_name = t('global.advances')
-      raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
       @picker_presets = date_picker_presets(@start_date, nil, ReportConfiguration.date_restrictions(:advances_detail), @max_date)
-      if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)
-        @advances_detail = {}
-      else
-        @advances_detail = member_balances.advances_details(@start_date)
+      if params[:job_id] || self.skip_deferred_load
+        if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)
+          @advances_detail = {}
+        elsif self.skip_deferred_load
+          @advances_detail = MemberBalanceServiceJob.perform_now(current_member_id, 'advances_details', request.uuid, @start_date.to_s)
+        else
+          job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+          raise ActiveRecord::RecordNotFound unless job_status
+          @advances_detail = JSON.parse(job_status.result_as_string).with_indifferent_access
+          job_status.destroy
+        end
         raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
-        # prepayment fee indication for detail view
-        @advances_detail[:advances_details].each_with_index do |advance, i|
+
+        @advances_detail[:advances_details].to_a.each_with_index do |advance, i|
           case advance[:notes]
             when 'unavailable_online'
               @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.unavailable_online')
@@ -452,8 +456,15 @@ class ReportsController < ApplicationController
               @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.unavailable_for_past_dates') unless advance[:prepayment_fee_indication]
           end
         end
+        @advances_detail[:advances_details].to_a.sort! { |a, b| a[:trade_date] <=> b[:trade_date] }
+        render layout: false if request.try(:xhr?)
+      else
+        job_status = MemberBalanceServiceJob.perform_later(current_member_id, 'advances_details', request.uuid, @start_date.to_s).job_status
+        job_status.update_attributes!(user_id: current_user.id)
+        @job_status_url = job_status_url(job_status)
+        @load_url = reports_advances_url(job_id: job_status.id, start_date: params[:start_date])
+        @advances_detail = {deferred: true}
       end
-      @advances_detail[:advances_details].sort! { |a, b| a[:trade_date] <=> b[:trade_date] } if @advances_detail[:advances_details]
     end
   end
 
