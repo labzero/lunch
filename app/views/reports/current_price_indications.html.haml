@@ -42,6 +42,7 @@
           - if @sta_table_data[:deferred]
             %td= @sta_table_data[:row_name]
             %td.table-loading-cell{colspan: 2}= t('global.prepare_table')
+            %td.table-error-cell.icon-alert-before{colspan: 2}= t('errors.error_occurred')
           -else
             %td= @sta_table_data[:row_name]
             %td.report-cell-right.report-cell-expanding= fhlb_formatted_number(@sta_table_data[:row_value], precision: 5)

@@ -33,9 +33,7 @@
             %th.report-cell-narrow.report-cell-expanding= fhlb_add_unit_to_table_header(t('global.borrowing_capacity'), '$')
         - if deferred_load
           %tbody
-            %tr
-              %td.table-loading-cell{colspan: 7}= t('global.prepare_table')
-              %td.table-error-cell.icon-alert-before{colspan: 7}= t('errors.error_occurred')
+            = render 'deferred_table_row', colspan: 7
         - else
           - if @borrowing_capacity_summary[:standard].to_h.length > 0
             %tbody
@@ -123,9 +121,7 @@
             %th= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity.remaining_borrowing_capacity'), '$')
         - if deferred_load
           %tbody
-            %tr
-              %td.table-loading-cell{colspan: 7}= t('global.prepare_table')
-              %td.table-error-cell.icon-alert-before{colspan: 7}= t('errors.error_occurred')
+            = render 'deferred_table_row', colspan: 7
         - else
           - if @borrowing_capacity_summary[:sbc].to_h.length > 0
             %tbody

@@ -11,6 +11,7 @@ Background:
 Scenario: Visit advances details page from header link
   Given I visit the dashboard
   When I select "Advances" from the reports dropdown
+  And I wait for the report to load
   Then I should see report summary data
   And I should see a report header
   And I should see a report table with multiple data rows
@@ -20,6 +21,7 @@ Scenario: Visit advances details page from header link
 Scenario: Defaults to current advances details
   Given I visit the dashboard
   When I select "Advances" from the reports dropdown
+  And I wait for the report to load
   Then I should see advances details for last business day
 
 @jira-mem-405
