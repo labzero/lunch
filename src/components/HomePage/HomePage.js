@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { fetchRestaurantsIfNeeded } from '../../actions/restaurants';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './HomePage.scss';
+import RestaurantMapContainer from '../../containers/RestaurantMapContainer';
 import RestaurantListContainer from '../../containers/RestaurantListContainer';
 import RestaurantAddFormContainer from '../../containers/RestaurantAddFormContainer';
 
@@ -32,6 +33,7 @@ class HomePage extends Component {
 
     return (
       <div>
+        <RestaurantMapContainer />
         {form}
         <RestaurantListContainer />
       </div>

@@ -109,8 +109,8 @@ server.get('*', async (req, res, next) => {
           user: {},
           flashes: [],
           latLng: {
-            lat: process.env.SUGGEST_LAT,
-            lng: process.env.SUGGEST_LNG
+            lat: parseFloat(process.env.SUGGEST_LAT),
+            lng: parseFloat(process.env.SUGGEST_LNG)
           }
         };
         if (req.user) {
