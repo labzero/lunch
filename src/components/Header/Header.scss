@@ -9,11 +9,9 @@
 
 @import '../variables.scss';
 
-$brand-color: #61dafb;
-
 .root {
-  background: #373277;
-  color: #fff;
+  background-image: url('./header-bg.jpg');
+  background-size: cover;
 }
 
 .container {
@@ -23,7 +21,6 @@ $brand-color: #61dafb;
 }
 
 .brand {
-  color: color($brand-color lightness(+10%));
   text-decoration: none;
   font-size: 1.75em; /* ~28px */
 }
@@ -42,15 +39,17 @@ $brand-color: #61dafb;
 }
 
 .bannerTitle {
+  background: url('./lunch.png') no-repeat center;
+  background-size: contain;
+  font-size: 4em;
   margin: 0;
   padding: 10px;
-  font-weight: normal;
-  font-size: 4em;
-  line-height: 1em;
 
   a {
-    color: inherit;
-    text-decoration: inherit;
+    display: block;
+    overflow: hidden;
+    text-indent: 100%;
+    white-space: nowrap;
   }
 }
 

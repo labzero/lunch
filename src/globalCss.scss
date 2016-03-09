@@ -1,1 +1,6 @@
 @import '../node_modules/react-geosuggest/module/geosuggest.css';
+
+.geosuggest__input {
+  border: 2px solid black;
+  box-shadow: none;
+}

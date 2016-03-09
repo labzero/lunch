@@ -33,7 +33,7 @@ class RestaurantMap extends Component {
 
   render() {
     return (
-      <section style={{ height: '500px' }}>
+      <section className={s.root}>
         <GoogleMapLoader
           containerElement={
             <div

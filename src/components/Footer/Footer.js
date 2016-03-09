@@ -19,8 +19,6 @@ class Footer extends Component {
       <div className={s.root}>
         <div className={s.container}>
           <span className={s.text}>© Lab Zero</span>
-          <span className={s.spacer}>·</span>
-          <Link className={s.link} to="/">Home</Link>
         </div>
       </div>
     );
