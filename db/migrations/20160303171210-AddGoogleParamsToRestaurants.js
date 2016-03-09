@@ -3,7 +3,7 @@ const Promise = require('bluebird');
 exports.up = (queryInterface, Sequelize) => Promise.all(
   queryInterface.addColumn('restaurants', 'place_id', {
     type: Sequelize.STRING,
-    indicesType: 'UNIQUE'
+    unique: true
   }),
   queryInterface.addColumn('restaurants', 'lat', {
     type: Sequelize.FLOAT
