@@ -2,9 +2,9 @@ import React, { Component, PropTypes } from 'react';
 import RestaurantDeleteButtonContainer from '../../containers/RestaurantDeleteButtonContainer';
 import RestaurantVoteButtonContainer from '../../containers/RestaurantVoteButtonContainer';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import s from './RestaurantListItem.scss';
+import s from './Restaurant.scss';
 
-class RestaurantListItem extends Component {
+class Restaurant extends Component {
 
   static propTypes = {
     id: PropTypes.number.isRequired,
@@ -27,7 +27,7 @@ class RestaurantListItem extends Component {
     }
 
     return (
-      <li className={s.root}>
+      <div className={s.root}>
         <div className={s.header}>
           <h2 className={s.heading}>{this.props.name}</h2>
           <div className={s.voteButtonContainer}>
@@ -38,9 +38,9 @@ class RestaurantListItem extends Component {
         </div>
         {this.props.address}
         {deleteButton}
-      </li>
+      </div>
     );
   }
 }
 
-export default withStyles(RestaurantListItem, s);
+export default withStyles(Restaurant, s);

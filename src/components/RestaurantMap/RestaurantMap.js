@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { Provider } from 'react-redux';
 import ContextHolder from '../../core/ContextHolder';
-import RestaurantListItemContainer from '../../containers/RestaurantListItemContainer';
+import RestaurantContainer from '../../containers/RestaurantContainer';
 import { GoogleMapLoader, GoogleMap, Marker, InfoWindow } from 'react-google-maps';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantMap.scss';
@@ -23,7 +23,7 @@ class RestaurantMap extends Component {
         <ContextHolder context={this.context}>
           <Provider store={this.context.store}>
             <div>
-              <RestaurantListItemContainer {...item} />
+              <RestaurantContainer {...item} />
             </div>
           </Provider>
         </ContextHolder>
@@ -62,7 +62,6 @@ class RestaurantMap extends Component {
 
                 return (
                   <Marker
-                    defaultAnimation={2}
                     position={{ lat: item.lat, lng: item.lng }}
                     label={label}
                     key={index}

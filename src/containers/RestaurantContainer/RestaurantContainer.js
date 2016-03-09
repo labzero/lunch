@@ -1,9 +1,9 @@
 import { connect } from 'react-redux';
-import RestaurantListItem from '../../components/RestaurantListItem';
+import Restaurant from '../../components/Restaurant';
 
 const mapStateToProps = (state, ownProps) => {
   const { user } = state;
   return { user, ...ownProps };
 };
 
-export default connect(mapStateToProps)(RestaurantListItem);
+export default connect(mapStateToProps)(Restaurant);
