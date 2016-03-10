@@ -67,13 +67,9 @@ passport.serializeUser((user, cb) => {
 });
 
 passport.deserializeUser((id, cb) => {
-  console.log('deserializing');
   User.findById(id).then(user => {
-    console.log('found the user:');
-    console.log(user);
     cb(null, user);
   }).catch(err => {
-    console.log('didnt find the user');
     cb(err);
   });
 });

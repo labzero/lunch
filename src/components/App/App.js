@@ -12,6 +12,8 @@ import s from './App.scss';
 import globalCss from '../../globalCss.scss';
 import HeaderContainer from '../../containers/HeaderContainer';
 import Footer from '../Footer';
+import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
+import { host } from '../../config';
 
 class App extends Component {
 
@@ -27,6 +29,10 @@ class App extends Component {
   componentWillMount() {
     this.removeAppCss = this.context.insertCss(s);
     this.removeGlobalCss = this.context.insertCss(globalCss);
+    if (canUseDOM) {
+      this.socket = new window.WebSocket(`ws://${host}`);
+      this.socket.onmessage = this.props.messageReceived;
+    }
   }
 
   componentWillUnmount() {

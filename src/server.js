@@ -10,6 +10,7 @@
 import 'babel-polyfill';
 import path from 'path';
 import express from 'express';
+import { Server } from 'http';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import expressJwt from 'express-jwt';
@@ -31,8 +32,11 @@ import fetch from './core/fetch';
 import ApiClient from './core/ApiClient';
 import contentApi from './api/content';
 import restaurantApi from './api/restaurants';
+import { Server as WebSocketServer } from 'ws';
 
 const server = global.server = express();
+
+const httpServer = new Server(server);
 
 const routes = makeRoutes();
 
@@ -87,6 +91,18 @@ server.use('/graphql', expressGraphQL(req => ({
   rootValue: { request: req },
   pretty: process.env.NODE_ENV !== 'production',
 })));
+
+//
+// Register WebSockets
+// -----------------------------------------------------------------------------
+const wss = new WebSocketServer({ server: httpServer });
+wss.on('connection', (ws) => {
+  ws.on('message', message => {
+    console.log('received: %s', message);
+  });
+
+  ws.send('something');
+});
 
 //
 // Register server-side rendering middleware
@@ -152,7 +168,7 @@ server.get('*', async (req, res, next) => {
 //
 // Launch the server
 // -----------------------------------------------------------------------------
-server.listen(port, () => {
+httpServer.listen(port, () => {
   /* eslint-disable no-console */
   console.log(`The server is running at http://localhost:${port}/`);
 });

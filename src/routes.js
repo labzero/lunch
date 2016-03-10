@@ -10,7 +10,7 @@
 import React from 'react';
 import { IndexRoute, Route } from 'react-router';
 import fetch from './core/fetch';
-import App from './components/App';
+import AppContainer from './containers/AppContainer';
 import HomePageContainer from './containers/HomePageContainer';
 import ContentPage from './components/ContentPage';
 import ContactPage from './components/ContactPage';
@@ -27,7 +27,7 @@ async function getContextComponent(location, callback) {
 
 export default () => (
   <Route>
-    <Route path="/" component={App}>
+    <Route path="/" component={AppContainer}>
       <IndexRoute component={HomePageContainer} />
       <Route path="contact" component={ContactPage} />
       <Route path="login" component={LoginPage} />

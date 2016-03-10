@@ -5,7 +5,7 @@ import RestaurantContainer from '../../containers/RestaurantContainer';
 
 const RestaurantList = ({ items }) => (
   <ul className={s.root}>
-    {items.map(item => <li className={s.item}><RestaurantContainer key={item.id} {...item} /></li>)}
+    {items.map(item => <li className={s.item} key={item.id}><RestaurantContainer {...item} /></li>)}
   </ul>
 );
 
