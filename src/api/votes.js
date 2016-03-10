@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Vote from '../models/Vote';
 import { loggedIn, errorCatcher } from './ApiHelper';
+import { votePosted, voteDeleted } from '../actions/restaurants';
 
 const router = new Router({ mergeParams: true });
 
@@ -13,6 +14,8 @@ router
         restaurant_id: parseInt(req.params.restaurant_id, 10),
         user_id: req.user.id
       }).then(obj => {
+        const json = obj.toJSON();
+        req.wss.broadcast(votePosted(json));
         res.status(201).send({ error: false, data: obj });
       }).catch(() => {
         const error = { message: 'Could not vote. Did you already vote today?' };
@@ -24,7 +27,9 @@ router
     '/:id',
     loggedIn,
     async (req, res) => {
-      Vote.destroy({ where: { id: req.params.id } }).then(() => {
+      const id = parseInt(req.params.id, 10);
+      Vote.destroy({ where: { id } }).then(() => {
+        req.wss.broadcast(voteDeleted(parseInt(req.params.restaurant_id, 10), id));
         res.status(204).send({ error: false });
       }).catch(err => errorCatcher(res, err));
     }

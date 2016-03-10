@@ -140,8 +140,7 @@ export function addRestaurant(name, placeId, address, lat, lng) {
       body: JSON.stringify({ name, place_id: placeId, address, lat, lng })
     })
       .then(response => new ApiClient(response).processResponse())
-      .then(
-        json => dispatch(restaurantPosted(json)),
+      .catch(
         err => dispatch(flashError(err.message))
       );
   };
@@ -153,7 +152,7 @@ export function removeRestaurant(key) {
     return fetch(`/api/restaurants/${key}`, {
       credentials: 'same-origin',
       method: 'delete'
-    }).then(() => dispatch(restaurantDeleted(key)));
+    });
   };
 }
 
@@ -165,8 +164,7 @@ export function addVote(id) {
       credentials: 'same-origin'
     })
       .then(response => new ApiClient(response).processResponse())
-      .then(
-        json => dispatch(votePosted(json)),
+      .catch(
         err => dispatch(flashError(err.message))
       );
   };
@@ -178,7 +176,6 @@ export function removeVote(restaurantId, id) {
     return fetch(`/api/restaurants/${restaurantId}/votes/${id}`, {
       credentials: 'same-origin',
       method: 'delete'
-    })
-      .then(() => dispatch(voteDeleted(restaurantId, id)));
+    });
   };
 }

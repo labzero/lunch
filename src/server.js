@@ -81,6 +81,22 @@ server.get('/login/callback',
 );
 
 //
+// Register WebSockets
+// -----------------------------------------------------------------------------
+const wss = new WebSocketServer({ server: httpServer });
+
+wss.broadcast = data => {
+  wss.clients.forEach(client => {
+    client.send(JSON.stringify(data));
+  });
+};
+
+server.use((req, res, next) => {
+  req.wss = wss;
+  return next();
+});
+
+//
 // Register API middleware
 // -----------------------------------------------------------------------------
 server.use('/api/content', contentApi);
@@ -91,18 +107,6 @@ server.use('/graphql', expressGraphQL(req => ({
   rootValue: { request: req },
   pretty: process.env.NODE_ENV !== 'production',
 })));
-
-//
-// Register WebSockets
-// -----------------------------------------------------------------------------
-const wss = new WebSocketServer({ server: httpServer });
-wss.on('connection', (ws) => {
-  ws.on('message', message => {
-    console.log('received: %s', message);
-  });
-
-  ws.send('something');
-});
 
 //
 // Register server-side rendering middleware

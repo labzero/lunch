@@ -5,6 +5,7 @@ const mapStateToProps = null;
 
 const mapDispatchToProps = dispatch => ({
   messageReceived(event) {
+  console.log(event.data);
     try {
       const data = JSON.parse(event.data);
       dispatch(data);

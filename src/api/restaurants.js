@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Restaurant from '../models/Restaurant';
 import Vote from '../models/Vote';
 import { loggedIn, errorCatcher } from './ApiHelper';
+import { restaurantPosted, restaurantDeleted } from '../actions/restaurants';
 import voteApi from './votes';
 
 const router = new Router();
@@ -27,8 +28,10 @@ router
         lng,
         votes: []
       }, { include: [Vote] }).then(obj => {
-        res.status(201).send({ error: false, data: obj });
-      }).catch(err => {
+        const json = obj.toJSON();
+        req.wss.broadcast(restaurantPosted(json));
+        res.status(201).send({ error: false, data: json });
+      }).catch(() => {
         const error = { message: 'Could not save new restaurant. Has it already been added?' };
         errorCatcher(res, error);
       });
@@ -38,7 +41,9 @@ router
     '/:id',
     loggedIn,
     async (req, res) => {
-      Restaurant.destroy({ where: { id: req.params.id } }).then(() => {
+      const id = parseInt(req.params.id, 10);
+      Restaurant.destroy({ where: { id } }).then(() => {
+        req.wss.broadcast(restaurantDeleted(id));
         res.status(204).send({ error: false });
       }).catch(err => errorCatcher(res, err));
     }
