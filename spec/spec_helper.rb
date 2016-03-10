@@ -34,16 +34,7 @@ require 'factory_girl_rails'
 
 Dir[File.join(File.dirname(__FILE__), 'support', '*.rb')].each {|file| require file }
 
-require 'simplecov'
-require 'simplecov-rcov'
-class SimpleCov::Formatter::MergedFormatter
-  def format(result)
-     SimpleCov::Formatter::HTMLFormatter.new.format(result)
-     SimpleCov::Formatter::RcovFormatter.new.format(result)
-  end
-end
-SimpleCov.formatter = SimpleCov::Formatter::MergedFormatter
-SimpleCov.start 'rails'
+FhlbMember::Coverage.simplecov_init('rspec::app')
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
