@@ -1606,6 +1606,60 @@ en:
         total_submitted: Total Loans Submitted
         version_request: To request an expanded version of this report or to obtain a prior version, contact Collateral Services at %{phone_number}
         report_details: This report reflects the most recent data available after each MCU has been processed. Only the current report is available. An email with an expanded version of this report that includes detailed rejection and inconsistency information is sent to your institution each time an MCU is processed.
+      member_profile:
+        fhlb_id: FHLB ID
+        fhfb_id: FHFB ID
+        relationship_manager: Relationship Manager
+        collateral_asset_mananger: Collateral Asset Manager
+        credit_analyst: Credit Analyst
+        regulator: Regulator
+        collateral_status: Collateral Status
+        cqr: CQR
+        delivered: Delivered
+        not_delivered: Not Delivered
+        rhfa:
+          title: RHFA
+          limit: Limit
+          total: Total L/T Advances
+          available: Available RHFA Limit
+        advances:
+          title: Advances and MPF
+          end_of_day: End of Prior Day Advances
+          maturing_today_term: 'Maturing Today (Terms)'
+          maturing_today_on: 'Maturing Today (O/N)'
+          amortizing: Amortizing Adjustment
+          partial_prepayment: Partial Prepayment
+          scheduled_funding_today: Scheduled Funding Today
+          funding_today: Funding Today
+          repays_today: Repays Today
+          total_advances: Total Advances
+          mpf_intraday: MPF Intraday Activity
+          mpf_loan_balance: MPF SF Loan Balance
+          total_mpf: Total MPF
+          total_advances_and_mpf: Total Advances and MPF
+        credit:
+          title: Credit
+          percent_of_assets: '% of Assets'
+          max_term: 'Max. Term (months)'
+          total_assets: Total Assets
+          max_credit: 'Max. Credit (% Assets)'
+          mpf_available: 'MPF Available C/E'
+          committed_funding: 'Committed Funding (exc. MPF)'
+          regular_outstanding: Regular Outstanding
+          sbc_outstanding: SBC Outstanding
+          total_advances_outstanding: Total Advances Outstanding
+          mpf_actual_ce: 'MPF Actual C/E'
+          total_advance_and_mpf: 'Total Adv. & MPF C/E Outstanding'
+          notional_swaps: Notional Swaps
+          total_swaps: Total Swaps
+          letters_of_credit: Letters of Credit
+          unsecured_investments: 'Unsecured Inv. O/S'
+          total_credit_products: Total Credit Porducts Outstanding
+          total_credit: Total Credit
+          total_available_credit: Total Available Credit
+        sta:
+          number: 'STA No.'
+          balance: STA Balance
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
