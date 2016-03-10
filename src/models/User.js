@@ -1,10 +1,11 @@
-import Sequelize from 'sequelize';
-import sequelize from './sequelize';
+import { sequelize, DataTypes } from './db';
+import Vote from './Vote';
 
 const User = sequelize.define('user', {
-  google_id: Sequelize.STRING,
-  name: Sequelize.STRING,
-  email: Sequelize.STRING
+  google_id: DataTypes.STRING,
+  name: DataTypes.STRING,
+  email: DataTypes.STRING
 }, { underscored: true });
+User.hasMany(Vote);
 
 export default User;

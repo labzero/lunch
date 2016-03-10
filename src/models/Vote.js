@@ -1,13 +1,23 @@
 import moment from 'moment';
-import Sequelize from 'sequelize';
-import sequelize from './sequelize';
-// import Restaurant from './Restaurant';
-// import User from './User';
+import { sequelize, DataTypes } from './db';
 
 const Vote = sequelize.define('vote',
   {
-    restaurant_id: Sequelize.INTEGER,
-    user_id: Sequelize.INTEGER
+    user_id: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'user',
+        key: 'id'
+      }
+    },
+
+    restaurant_id: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'restaurant',
+        key: 'id'
+      }
+    }
   },
   {
     scopes: {
