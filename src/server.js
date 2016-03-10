@@ -8,6 +8,7 @@
  */
 
 import 'babel-polyfill';
+import Promise from 'bluebird';
 import path from 'path';
 import express from 'express';
 import { Server } from 'http';
@@ -27,8 +28,9 @@ import makeRoutes from './routes';
 import ContextHolder from './core/ContextHolder';
 import passport from './core/passport';
 import fetch from './core/fetch';
-import ApiClient from './core/ApiClient';
+import { processResponse } from './core/ApiClient';
 import restaurantApi from './api/restaurants';
+import tagApi from './api/tags';
 import { Server as WebSocketServer } from 'ws';
 import serialize from 'serialize-javascript';
 
@@ -103,6 +105,7 @@ server.use((req, res, next) => {
 // Register API middleware
 // -----------------------------------------------------------------------------
 server.use('/api/restaurants', restaurantApi);
+server.use('/api/tags', tagApi);
 
 //
 // Register server-side rendering middleware
@@ -110,56 +113,69 @@ server.use('/api/restaurants', restaurantApi);
 server.get('*', async (req, res, next) => {
   try {
     match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
-      fetch('/api/restaurants').then(all => new ApiClient(all).processResponse()).then(all => {
-        if (error) {
-          throw error;
-        }
-        if (redirectLocation) {
-          const redirectPath = `${redirectLocation.pathname}${redirectLocation.search}`;
-          res.redirect(302, redirectPath);
-          return;
-        }
-        let statusCode = 200;
-        const initialState = {
-          restaurants: { items: all },
-          user: {},
-          flashes: [],
-          latLng: {
-            lat: parseFloat(process.env.SUGGEST_LAT),
-            lng: parseFloat(process.env.SUGGEST_LNG)
-          }
-        };
-        if (req.user) {
-          initialState.user = req.user;
-        }
-        const store = configureStore(initialState);
-        const template = require('./views/index.jade');
-        const data = {
-          title: '',
-          description: '',
-          css: '',
-          body: '',
-          entry: assets.main.js,
-          initialState: serialize(initialState)
-        };
-        const css = [];
-        const context = {
-          insertCss: styles => css.push(styles._getCss()),
-          onSetTitle: value => (data.title = value),
-          onSetMeta: (key, value) => (data[key] = value),
-          onPageNotFound: () => (statusCode = 404),
-        };
-        data.body = ReactDOM.renderToString(
-          <ContextHolder context={context}>
-            <Provider store={store}>
-              <RouterContext {...renderProps} />
-            </Provider>
-          </ContextHolder>
+      if (error) {
+        throw error;
+      }
+      if (redirectLocation) {
+        const redirectPath = `${redirectLocation.pathname}${redirectLocation.search}`;
+        res.redirect(302, redirectPath);
+        return;
+      }
+      Promise.all([fetch('/api/restaurants'), fetch('/api/tags')])
+        .then(([restaurantsResponse, tagsResponse]) =>
+          Promise.all([processResponse(restaurantsResponse), processResponse(tagsResponse)])
+            .then(([restaurants, tags]) => {
+              let statusCode = 200;
+              const initialState = {
+                restaurants: {
+                  isFetching: false,
+                  didInvalidate: false,
+                  items: restaurants
+                },
+                tags: {
+                  isFetching: false,
+                  didInvalidate: false,
+                  items: tags
+                },
+                flashes: [],
+                user: {},
+                latLng: {
+                  lat: parseFloat(process.env.SUGGEST_LAT),
+                  lng: parseFloat(process.env.SUGGEST_LNG)
+                }
+              };
+              if (req.user) {
+                initialState.user = req.user;
+              }
+              const store = configureStore(initialState);
+              const template = require('./views/index.jade');
+              const data = {
+                title: '',
+                description: '',
+                css: '',
+                body: '',
+                entry: assets.main.js,
+                initialState: serialize(initialState)
+              };
+              const css = [];
+              const context = {
+                insertCss: styles => css.push(styles._getCss()),
+                onSetTitle: value => (data.title = value),
+                onSetMeta: (key, value) => (data[key] = value),
+                onPageNotFound: () => (statusCode = 404),
+              };
+              data.body = ReactDOM.renderToString(
+                <ContextHolder context={context}>
+                  <Provider store={store}>
+                    <RouterContext {...renderProps} />
+                  </Provider>
+                </ContextHolder>
+              );
+              data.css = css.join('');
+              res.status(statusCode);
+              res.send(template(data));
+            })
         );
-        data.css = css.join('');
-        res.status(statusCode)
-        res.send(template(data));
-      });
     });
   } catch (err) {
     next(err);

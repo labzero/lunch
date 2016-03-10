@@ -1,6 +1,6 @@
 import fetch from '../core/fetch';
 import * as ActionTypes from '../ActionTypes';
-import ApiClient from '../core/ApiClient';
+import { processResponse } from '../core/ApiClient';
 import { flashError } from './flash.js';
 
 export function invalidateRestaurants() {
@@ -94,7 +94,7 @@ function fetchRestaurants() {
   return dispatch => {
     dispatch(requestRestaurants());
     return fetch('/api/restaurants')
-      .then(response => new ApiClient(response).processResponse())
+      .then(response => processResponse(response))
       .then(json => dispatch(receiveRestaurants(json)));
   };
 }
@@ -139,7 +139,7 @@ export function addRestaurant(name, placeId, address, lat, lng) {
       },
       body: JSON.stringify({ name, place_id: placeId, address, lat, lng })
     })
-      .then(response => new ApiClient(response).processResponse())
+      .then(response => processResponse(response))
       .catch(
         err => dispatch(flashError(err.message))
       );
@@ -163,7 +163,7 @@ export function addVote(id) {
       method: 'post',
       credentials: 'same-origin'
     })
-      .then(response => new ApiClient(response).processResponse())
+      .then(response => processResponse(response))
       .catch(
         err => dispatch(flashError(err.message))
       );

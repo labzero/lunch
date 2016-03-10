@@ -14,7 +14,7 @@
     "no-confusing-arrow": 0,
     "jsx-quotes": [2, "prefer-double"],
     "max-len": [2, 120],
-    "react/jsx-no-bind": [2, {"ignoreRefs": true}]
+    "react/jsx-no-bind": [2, {"ignoreRefs": true}],
     "no-param-reassign": 0
   }
 }

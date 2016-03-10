@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Restaurant from '../models/Restaurant';
 import Vote from '../models/Vote';
+import Tag from '../models/Tag';
 import { loggedIn, errorCatcher } from './ApiHelper';
 import { restaurantPosted, restaurantDeleted } from '../actions/restaurants';
 import voteApi from './votes';
@@ -9,7 +10,7 @@ const router = new Router();
 
 router
   .get('/', async (req, res) => {
-    Restaurant.findAll({ include: [Vote] }).then(all => {
+    Restaurant.findAll({ include: [Vote, Tag] }).then(all => {
       res.status(200).send({ error: false, data: all });
     }).catch(err => errorCatcher(res, err));
   })
@@ -26,8 +27,9 @@ router
         address,
         lat,
         lng,
-        votes: []
-      }, { include: [Vote] }).then(obj => {
+        votes: [],
+        tags: []
+      }, { include: [Vote, Tag] }).then(obj => {
         const json = obj.toJSON();
         req.wss.broadcast(restaurantPosted(json));
         res.status(201).send({ error: false, data: json });

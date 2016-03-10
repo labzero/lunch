@@ -1,17 +1,6 @@
 import * as ActionTypes from './ActionTypes';
 
-const initialState = {
-  restaurants: {
-    isFetching: false,
-    didInvalidate: false,
-    items: []
-  },
-  flashes: [],
-  user: {},
-  latLng: {}
-};
-
-const restaurantsMap = {
+export const restaurants = {
   [ActionTypes.INVALIDATE_RESTAURANTS](state) {
     return Object.assign({}, state, {
       didInvalidate: true
@@ -118,7 +107,9 @@ const restaurantsMap = {
   }
 };
 
-const flashesMap = {
+export const tags = {};
+
+export const flashes = {
   [ActionTypes.FLASH_ERROR](state, action) {
     return [
       ...state,
@@ -135,15 +126,6 @@ const flashesMap = {
   }
 };
 
-const generateReducer = (map, initial) => (state = initial, action) => {
-  const reducer = map[action.type];
-  if (reducer === undefined) {
-    return state;
-  }
-  return reducer(state, action);
-};
+export const user = {};
 
-export const restaurants = generateReducer(restaurantsMap, initialState.restaurants);
-export const flashes = generateReducer(flashesMap, initialState.flashes);
-export const user = generateReducer({}, initialState.user);
-export const latLng = generateReducer({}, initialState.latLng);
+export const latLng = {};

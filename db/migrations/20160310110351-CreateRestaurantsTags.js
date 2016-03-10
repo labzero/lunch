@@ -1,13 +1,10 @@
 exports.up = function(queryInterface, Sequelize) {
-  return queryInterface.createTable('tags', {
-    id: {
-      allowNull: false,
-      autoIncrement: true,
-      primaryKey: true,
+  return queryInterface.createTable('restaurants_tags', {
+    restaurant_id: {
       type: Sequelize.INTEGER
     },
-    name: {
-      type: Sequelize.STRING
+    tag_id: {
+      type: Sequelize.INTEGER
     },
     created_at: {
       allowNull: false,
@@ -21,5 +18,5 @@ exports.up = function(queryInterface, Sequelize) {
 };
 
 exports.down = function(queryInterface, Sequelize) {
-  return queryInterface.dropTable('tags');
+  return queryInterface.dropTable('restaurants_tags');
 };

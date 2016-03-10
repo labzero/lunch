@@ -15,6 +15,8 @@ const Restaurant = sequelize.define('restaurant', {
   underscored: true
 });
 Restaurant.hasMany(Vote);
-Restaurant.hasMany(Tag);
+Restaurant.belongsToMany(Tag, {
+  through: 'restaurants_tags'
+});
   
 export default Restaurant;
