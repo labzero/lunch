@@ -7,23 +7,16 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Footer.scss';
-import { Link } from 'react-router';
 
-class Footer extends Component {
-
-  render() {
-    return (
-      <div className={s.root}>
-        <div className={s.container}>
-          <span className={s.text}>© Lab Zero</span>
-        </div>
-      </div>
-    );
-  }
-
-}
+const Footer = () => (
+  <div className={s.root}>
+    <div className={s.container}>
+      <span className={s.text}>© Lab Zero</span>
+    </div>
+  </div>
+);
 
 export default withStyles(Footer, s);

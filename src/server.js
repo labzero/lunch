@@ -19,20 +19,20 @@ import jwt from 'jsonwebtoken';
 import React from 'react';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom/server';
+import PrettyError from 'pretty-error';
 import { match, RouterContext } from 'react-router';
 import configureStore from './configureStore';
 import assets from './assets';
 import { port, auth } from './config';
 import makeRoutes from './routes';
 import ContextHolder from './core/ContextHolder';
-import Html from './components/Html';
 import passport from './core/passport';
 import schema from './data/schema';
 import fetch from './core/fetch';
 import ApiClient from './core/ApiClient';
-import contentApi from './api/content';
 import restaurantApi from './api/restaurants';
 import { Server as WebSocketServer } from 'ws';
+import serialize from 'serialize-javascript';
 
 const server = global.server = express();
 
@@ -99,14 +99,7 @@ server.use((req, res, next) => {
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
-server.use('/api/content', contentApi);
 server.use('/api/restaurants', restaurantApi);
-server.use('/graphql', expressGraphQL(req => ({
-  schema,
-  graphiql: true,
-  rootValue: { request: req },
-  pretty: process.env.NODE_ENV !== 'production',
-})));
 
 //
 // Register server-side rendering middleware
@@ -137,13 +130,14 @@ server.get('*', async (req, res, next) => {
           initialState.user = req.user;
         }
         const store = configureStore(initialState);
+        const template = require('./views/index.jade');
         const data = {
           title: '',
           description: '',
           css: '',
           body: '',
           entry: assets.main.js,
-          initialState
+          initialState: serialize(initialState)
         };
         const css = [];
         const context = {
@@ -160,13 +154,31 @@ server.get('*', async (req, res, next) => {
           </ContextHolder>
         );
         data.css = css.join('');
-        const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
-        res.status(statusCode).send(`<!doctype html>\n${html}`);
+        res.status(statusCode)
+        res.send(template(data));
       });
     });
   } catch (err) {
     next(err);
   }
+});
+
+//
+// Error handling
+// -----------------------------------------------------------------------------
+const pe = new PrettyError();
+pe.skipNodeFiles();
+pe.skipPackage('express');
+
+server.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+  console.log(pe.render(err)); // eslint-disable-line no-console
+  const template = require('./views/error.jade');
+  const statusCode = err.status || 500;
+  res.status(statusCode);
+  res.send(template({
+    message: err.message,
+    stack: process.env.NODE_ENV === 'production' ? '' : err.stack,
+  }));
 });
 
 //

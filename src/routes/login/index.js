@@ -7,16 +7,12 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import UserType from '../types/UserType';
+import React from 'react';
+import Login from './Login';
 
-const me = {
-  type: UserType,
-  resolve({ request }) {
-    return request.user && {
-      id: request.user.id,
-      email: request.user.email,
-    };
-  },
+export const path = '/login';
+export const action = async (state) => {
+  const title = 'Log In';
+  state.context.onSetTitle(title);
+  return <Login title={title} />;
 };
-
-export default me;

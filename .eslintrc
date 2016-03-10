@@ -4,6 +4,10 @@
   "globals": {
     "__DEV__": true
   },
+  "env": {
+    "browser": true,
+    "jest": true
+  },
   "rules": {
     "comma-dangle": 0,
     "key-spacing": 0,
