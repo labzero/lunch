@@ -1,9 +1,19 @@
 import { connect } from 'react-redux';
+import { fetchRestaurantsIfNeeded } from '../../actions/restaurants';
 import HomePage from '../../components/HomePage';
 
-function mapStateToProps(state) {
+const mapStateToProps = state => {
   const { user } = state;
   return { user };
-}
+};
 
-export default connect(mapStateToProps)(HomePage);
+const mapDispatchToProps = dispatch => ({
+  fetchRestaurantsIfNeeded() {
+    dispatch(fetchRestaurantsIfNeeded());
+  }
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(HomePage);

@@ -13,3 +13,5 @@ export const DELETE_VOTE = 'DELETE_VOTE';
 export const VOTE_DELETED = 'VOTE_DELETED';
 export const SHOW_INFO_WINDOW = 'SHOW_INFO_WINDOW';
 export const HIDE_INFO_WINDOW = 'HIDE_INFO_WINDOW';
+export const SHOW_ADD_TAG_FORM = 'SHOW_ADD_TAG_FORM';
+export const HIDE_ADD_TAG_FORM = 'HIDE_ADD_TAG_FORM';

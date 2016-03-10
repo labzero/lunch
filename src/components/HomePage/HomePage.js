@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import { fetchRestaurantsIfNeeded } from '../../actions/restaurants';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './HomePage.scss';
 import RestaurantMapContainer from '../../containers/RestaurantMapContainer';
@@ -15,14 +14,13 @@ class HomePage extends Component {
   };
 
   static propTypes = {
-    dispatch: PropTypes.func.isRequired,
-    user: PropTypes.object.isRequired
+    user: PropTypes.object.isRequired,
+    fetchRestaurantsIfNeeded: PropTypes.func.isRequired
   };
 
   componentWillMount() {
     this.context.onSetTitle(title);
-    const { dispatch } = this.props;
-    dispatch(fetchRestaurantsIfNeeded());
+    this.props.fetchRestaurantsIfNeeded();
   }
 
   render() {
@@ -32,7 +30,7 @@ class HomePage extends Component {
     }
 
     return (
-      <div>
+      <div className={s.root}>
         <RestaurantMapContainer />
         {form}
         <RestaurantListContainer />

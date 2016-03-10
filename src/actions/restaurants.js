@@ -90,6 +90,20 @@ export function hideInfoWindow(id) {
   };
 }
 
+export function showAddTagForm(id) {
+  return {
+    type: ActionTypes.SHOW_ADD_TAG_FORM,
+    id
+  };
+}
+
+export function hideAddTagForm(id) {
+  return {
+    type: ActionTypes.HIDE_ADD_TAG_FORM,
+    id
+  };
+}
+
 function fetchRestaurants() {
   return dispatch => {
     dispatch(requestRestaurants());

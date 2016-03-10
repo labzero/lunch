@@ -22,9 +22,12 @@ class RestaurantMap extends Component {
       >
         <ContextHolder context={this.context}>
           <Provider store={this.context.store}>
-            <div>
-              <RestaurantContainer {...item} />
-            </div>
+            <RestaurantContainer
+              id={item.id}
+              name={item.name}
+              address={item.address}
+              votes={item.votes}
+            />
           </Provider>
         </ContextHolder>
       </InfoWindow>

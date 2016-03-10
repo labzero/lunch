@@ -5,7 +5,18 @@ import RestaurantContainer from '../../containers/RestaurantContainer';
 
 const RestaurantList = ({ items }) => (
   <ul className={s.root}>
-    {items.map(item => <li className={s.item} key={item.id}><RestaurantContainer {...item} /></li>)}
+    {items.map(item => (
+      <li className={s.item} key={item.id}>
+        <RestaurantContainer
+          id={item.id}
+          name={item.name}
+          address={item.address}
+          votes={item.votes}
+          tags={item.tags}
+          isAddingTags={item.isAddingTags}
+        />
+      </li>
+    ))}
   </ul>
 );
 
@@ -14,7 +25,9 @@ RestaurantList.propTypes = {
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
     address: PropTypes.string.isRequired,
-    votes: PropTypes.array.isRequired
+    votes: PropTypes.array.isRequired,
+    tags: PropTypes.array.isRequired,
+    isAddingTags: PropTypes.bool
   }))
 };
 
