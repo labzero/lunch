@@ -14,7 +14,6 @@ import { Server } from 'http';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import expressJwt from 'express-jwt';
-import expressGraphQL from 'express-graphql';
 import jwt from 'jsonwebtoken';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -27,7 +26,6 @@ import { port, auth } from './config';
 import makeRoutes from './routes';
 import ContextHolder from './core/ContextHolder';
 import passport from './core/passport';
-import schema from './data/schema';
 import fetch from './core/fetch';
 import ApiClient from './core/ApiClient';
 import restaurantApi from './api/restaurants';
@@ -79,6 +77,11 @@ server.get('/login/callback',
     res.redirect('/');
   }
 );
+server.get('/logout', (req, res) => {
+  req.logout();
+  res.clearCookie('id_token');
+  res.redirect('/');
+});
 
 //
 // Register WebSockets

@@ -16,7 +16,7 @@ const Header = ({ user }) => {
   if (user.id === undefined) {
     content = <a href="/login">Log In</a>;
   } else {
-    content = <div>{user.name}</div>;
+    content = <div>{user.name} | <a href="/logout">Log Out</a></div>;
   }
 
   return (
