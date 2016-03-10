@@ -1377,6 +1377,61 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :todays_credit
       it_behaves_like 'a report with instance variables set in a before_filter', :todays_credit
       it_behaves_like 'a controller action with an active nav setting', :todays_credit, :reports
+
+      let(:exercised_advance) { {instrument_type: 'ADVANCE', status: 'EXERCISED', termination_full_partial: double('termination_full_partial'), interest_rate: double('interest_rate')} }
+      let(:exercised_lc) { {instrument_type: 'LC', status: 'EXERCISED', termination_full_partial: double('termination_full_partial'), interest_rate: double('interest_rate')} }
+      let(:terminated_advance) { {instrument_type: 'ADVANCE', termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+      let(:todays_credit_activity) { subject.todays_credit_activity }
+      let(:non_exercised_advance) { {instrument_type: 'ADVANCE', sub_product: 'Open VRC'} }
+      let(:non_exercised_activity) { {instrument_type: double('instrument_type')} }
+      let(:terminated_lc) { {instrument_type: 'LC', termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+      let(:terminated_activity_with_status) { {status: 'TERMINATED', termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+      let(:terminated_activity_without_status) { {instrument_type: double('some instrument'), termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+      it 'sets the `product_description` of an EXERCISED ADVANCE to its `termination_full_partial` value' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([exercised_advance])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq(exercised_advance[:termination_full_partial])
+      end
+      it 'sets the `interest_rate` of an EXERCISED ADVANCE to nil' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([exercised_advance])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][2][:value]).to be_nil
+      end
+      it 'sets the `interest_rate` of an EXERCISED LC to nil' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([exercised_lc])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][2][:value]).to be_nil
+      end
+      it 'sets the `product_description` of a TERMINATED ADVANCE to its `termination_full_partial` value' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([terminated_advance])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq(terminated_advance[:termination_full_partial])
+      end
+      it 'sets the `product_description` of a TERMINATED LC to its `termination_full_partial` value' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([terminated_lc])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq(terminated_lc[:termination_full_partial])
+      end
+      it 'sets the `product_description` to `TERMINATION` for TERMINATED activities that are not ADVANCEs or LCs' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([terminated_activity_with_status])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq('TERMINATION')
+      end
+      it 'sets the `product_description` to an activity\'s `instrument_type` if the activity has a `termination_par` and `termination_full_partial` but its status is not TERMINATED' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([terminated_activity_without_status])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq(terminated_activity_without_status[:instrument_type])
+      end
+      it 'sets the `product_description` of an non-EXERCISED, non-TERMINATED ADVANCE to its `instrument_type` and `sub_product`' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([non_exercised_advance])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq('ADVANCE Open VRC')
+      end
+      it 'sets the `product_description` of an non-EXERCISED, non-TERMINATED, activity to its `instrument_type` if the activity is not an ADVANCE' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([non_exercised_activity])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq(non_exercised_activity[:instrument_type])
+      end
       it 'sorts activities by funding date' do
         expect(controller).to receive(:sort_report_data).with([credit_activity], :funding_date).and_return([])
         todays_credit

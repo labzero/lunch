@@ -1547,6 +1547,30 @@ class ReportsController < ApplicationController
     rows = []
     activities = sort_report_data(activities, :funding_date)
     activities.each do |activity|
+      # Handling for Advances that have been EXERCISED
+      if (activity[:instrument_type] == 'ADVANCE' || activity[:instrument_type] == 'LC') && activity[:status] == 'EXERCISED'
+        activity[:product_description] = activity[:termination_full_partial]
+        activity[:interest_rate] = nil
+      else
+        activity[:product_description] =
+          # handling for Termination Par
+        if !activity[:termination_par].blank?
+          if !activity[:termination_full_partial].blank?
+            if activity[:instrument_type] == 'ADVANCE' || activity[:instrument_type] == 'LC'
+                         activity[:termination_full_partial]
+            elsif activity[:status] == 'TERMINATED'
+              'TERMINATION'
+            else
+              activity[:instrument_type]
+            end
+          # else - leave the product_description as-is
+          end
+        elsif activity[:instrument_type] == 'ADVANCE' && activity[:sub_product]
+          activity[:instrument_type] + ' ' + activity[:sub_product]
+        else
+          activity[:instrument_type]
+        end
+      end
       maturity_date = if activity[:instrument_type] == 'ADVANCE'
         activity[:maturity_date] || t('global.open')
       else
