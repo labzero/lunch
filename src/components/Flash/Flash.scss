@@ -2,6 +2,10 @@
   padding: .5em;
 }
 
+.error, .success {
+  color: #fff;  
+}
+
 .error {
   background: red;
 }
