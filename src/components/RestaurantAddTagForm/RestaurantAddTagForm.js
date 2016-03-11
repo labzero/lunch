@@ -1,17 +1,43 @@
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
+import Autosuggest from 'react-autosuggest';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantAddTagForm.scss';
 
-const RestaurantAddTagForm = ({ hideAddTagForm }) => (
-  <form>
-    <input />
-    <button>add</button>
-    <button type="button" onClick={hideAddTagForm}>cancel</button>
-  </form>
-);
+class RestaurantAddTagForm extends Component {
+  static propTypes = {
+    hideAddTagForm: PropTypes.func.isRequired,
+    addTagAutosuggestValue: PropTypes.string.isRequired,
+    setAddTagAutosuggestValue: PropTypes.func.isRequired,
+    tags: PropTypes.array.isRequired
+  }
 
-RestaurantAddTagForm.propTypes = {
-  hideAddTagForm: PropTypes.func.isRequired
-};
+  getSuggestionValue(suggestion) {
+    return suggestion.name;
+  }
+
+  renderSuggestion(suggestion) {
+    return <span>{suggestion.name}</span>;
+  }
+
+  render() {
+    const inputProps = {
+      value: this.props.addTagAutosuggestValue,
+      onChange: this.props.setAddTagAutosuggestValue
+    };
+
+    return (
+      <form>
+        <Autosuggest
+          suggestions={this.props.tags}
+          getSuggestionValue={this.getSuggestionValue}
+          renderSuggestion={this.renderSuggestion}
+          inputProps={inputProps}
+        />
+        <button>add</button>
+        <button type="button" onClick={this.props.hideAddTagForm}>cancel</button>
+      </form>
+    );
+  }
+}
 
 export default withStyles(RestaurantAddTagForm, s);

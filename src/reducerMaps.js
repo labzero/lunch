@@ -105,6 +105,16 @@ export const restaurants = {
       })
     });
   },
+  [ActionTypes.SET_ADD_TAG_AUTOSUGGEST_VALUE](state, action) {
+    return Object.assign({}, state, {
+      items: state.items.map(item => {
+        if (item.id === action.id) {
+          return Object.assign({}, item, { addTagAutosuggestValue: action.value });
+        }
+        return item;
+      })
+    });
+  },
   [ActionTypes.SHOW_ADD_TAG_FORM](state, action) {
     return Object.assign({}, state, {
       items: state.items.map(item => {

@@ -90,6 +90,14 @@ export function hideInfoWindow(id) {
   };
 }
 
+export function setAddTagAutosuggestValue(id, value) {
+  return {
+    type: ActionTypes.SET_ADD_TAG_AUTOSUGGEST_VALUE,
+    id,
+    value
+  };
+}
+
 export function showAddTagForm(id) {
   return {
     type: ActionTypes.SHOW_ADD_TAG_FORM,
@@ -98,9 +106,12 @@ export function showAddTagForm(id) {
 }
 
 export function hideAddTagForm(id) {
-  return {
-    type: ActionTypes.HIDE_ADD_TAG_FORM,
-    id
+  return dispatch => {
+    dispatch(setAddTagAutosuggestValue(id, ''));
+    dispatch({
+      type: ActionTypes.HIDE_ADD_TAG_FORM,
+      id
+    });
   };
 }
 
