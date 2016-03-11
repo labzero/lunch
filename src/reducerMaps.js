@@ -1,4 +1,4 @@
-import * as ActionTypes from './ActionTypes';
+import ActionTypes from './constants/ActionTypes';
 
 const isFetching = state =>
   Object.assign({}, state, {

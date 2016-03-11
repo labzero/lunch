@@ -1,5 +1,5 @@
 import fetch from '../core/fetch';
-import * as ActionTypes from '../ActionTypes';
+import ActionTypes from '../constants/ActionTypes';
 
 /* This doesn't work yet. */
 

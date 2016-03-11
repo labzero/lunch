@@ -1,4 +1,4 @@
-import * as ActionTypes from '../ActionTypes';
+import ActionTypes from '../constants/ActionTypes';
 
 export function showInfoWindow(id) {
   return {
