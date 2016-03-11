@@ -1,5 +1,10 @@
 import * as ActionTypes from './ActionTypes';
 
+const isFetching = state =>
+  Object.assign({}, state, {
+    isFetching: true
+  });
+
 export const restaurants = {
   [ActionTypes.INVALIDATE_RESTAURANTS](state) {
     return Object.assign({}, state, {
@@ -19,11 +24,7 @@ export const restaurants = {
       items: action.items
     });
   },
-  [ActionTypes.POST_RESTAURANT](state) {
-    return Object.assign({}, state, {
-      isFetching: true
-    });
-  },
+  [ActionTypes.POST_RESTAURANT]: isFetching,
   [ActionTypes.RESTAURANT_POSTED](state, action) {
     return Object.assign({}, state, {
       isFetching: false,
@@ -33,22 +34,14 @@ export const restaurants = {
       ]
     });
   },
-  [ActionTypes.DELETE_RESTAURANT](state) {
-    return Object.assign({}, state, {
-      isFetching: true
-    });
-  },
+  [ActionTypes.DELETE_RESTAURANT]: isFetching,
   [ActionTypes.RESTAURANT_DELETED](state, action) {
     return Object.assign({}, state, {
       isFetching: false,
       items: state.items.filter(item => item.id !== action.id)
     });
   },
-  [ActionTypes.POST_VOTE](state) {
-    return Object.assign({}, state, {
-      isFetching: true
-    });
-  },
+  [ActionTypes.POST_VOTE]: isFetching,
   [ActionTypes.VOTE_POSTED](state, action) {
     return Object.assign({}, state, {
       isFetching: false,
@@ -65,11 +58,7 @@ export const restaurants = {
       })
     });
   },
-  [ActionTypes.DELETE_VOTE](state) {
-    return Object.assign({}, state, {
-      isFetching: true
-    });
-  },
+  [ActionTypes.DELETE_VOTE]: isFetching,
   [ActionTypes.VOTE_DELETED](state, action) {
     return Object.assign({}, state, {
       isFetching: false,
@@ -85,11 +74,7 @@ export const restaurants = {
       })
     });
   },
-  [ActionTypes.POST_NEW_TAG_TO_RESTAURANT](state) {
-    return Object.assign({}, state, {
-      isFetching: true
-    });
-  },
+  [ActionTypes.POST_NEW_TAG_TO_RESTAURANT]: isFetching,
   [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT](state, action) {
     return Object.assign({}, state, {
       isFetching: false,
@@ -106,11 +91,7 @@ export const restaurants = {
       })
     });
   },
-  [ActionTypes.POST_TAG_TO_RESTAURANT](state) {
-    return Object.assign({}, state, {
-      isFetching: true
-    });
-  },
+  [ActionTypes.POST_TAG_TO_RESTAURANT]: isFetching,
   [ActionTypes.POSTED_TAG_TO_RESTAURANT](state, action) {
     return Object.assign({}, state, {
       isFetching: false,
@@ -127,11 +108,7 @@ export const restaurants = {
       })
     });
   },
-  [ActionTypes.DELETE_TAG_FROM_RESTAURANT](state) {
-    return Object.assign({}, state, {
-      isFetching: true
-    });
-  },
+  [ActionTypes.DELETE_TAG_FROM_RESTAURANT]: isFetching,
   [ActionTypes.DELETED_TAG_FROM_RESTAURANT](state, action) {
     return Object.assign({}, state, {
       isFetching: false,
