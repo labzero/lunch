@@ -149,18 +149,6 @@ export const restaurants = {
   },
 };
 
-const resetRestaurant = (state, action) =>
-  Object.assign({}, state, {
-    [action.id]: undefined
-  });
-
-const resetAllRestaurants = () => ({});
-
-const resetAddTagAutosuggestValue = (state, action) =>
-  Object.assign({}, state, {
-    [action.id]: Object.assign({}, state[action.id], { addTagAutosuggestValue: '' })
-  });
-
 export const flashes = {
   [ActionTypes.FLASH_ERROR](state, action) {
     return [
@@ -177,6 +165,18 @@ export const flashes = {
     return newState;
   }
 };
+
+const resetRestaurant = (state, action) =>
+  Object.assign({}, state, {
+    [action.id]: undefined
+  });
+
+const resetAllRestaurants = () => ({});
+
+const resetAddTagAutosuggestValue = (state, action) =>
+  Object.assign({}, state, {
+    [action.restaurantId]: Object.assign({}, state[action.restaurantId], { addTagAutosuggestValue: '' })
+  });
 
 export const listUi = {
   [ActionTypes.RECEIVE_RESTAURANTS]: resetAllRestaurants,

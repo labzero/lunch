@@ -30,7 +30,7 @@ class RestaurantAddTagForm extends Component {
     };
 
     return (
-      <form>
+      <form className={s.root}>
         <Autosuggest
           suggestions={this.props.tags}
           getSuggestionValue={this.getSuggestionValue}
@@ -40,8 +40,8 @@ class RestaurantAddTagForm extends Component {
           onSuggestionSelected={this.props.handleSuggestionSelected}
           shouldRenderSuggestions={this.props.shouldRenderSuggestions}
         />
-        <button type="button" onClick={this.props.addNewTagToRestaurant}>add</button>
-        <button type="button" onClick={this.props.hideAddTagForm}>cancel</button>
+        <button className={s.button} type="button" onClick={this.props.addNewTagToRestaurant}>add</button>
+        <button className={s.button} type="button" onClick={this.props.hideAddTagForm}>cancel</button>
       </form>
     );
   }

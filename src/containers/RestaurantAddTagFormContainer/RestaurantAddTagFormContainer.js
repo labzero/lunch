@@ -14,10 +14,11 @@ const mapStateToProps = (state, ownProps) => {
   const listUiItem = state.listUi[restaurant.id] || {};
   const addTagAutosuggestValue = listUiItem.addTagAutosuggestValue || '';
   const escapedValue = escapeRegexCharacters(addTagAutosuggestValue.trim());
-  const regex = new RegExp(`^${escapedValue}`, 'i');
+  const regex = new RegExp(`${escapedValue}`, 'i');
   tags = tags
     .filter(tag => !addedTags.includes(tag.id))
-    .filter(tag => regex.test(tag.name));
+    .filter(tag => regex.test(tag.name))
+    .slice(0, 10);
   const shouldRenderSuggestions = () => true;
   return {
     ...ownProps,
