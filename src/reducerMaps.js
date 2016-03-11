@@ -54,12 +54,12 @@ export const restaurants = {
       isFetching: false,
       items: state.items.map(item => {
         if (item.id === action.vote.restaurant_id) {
-          const newItem = Object.assign({}, item);
-          newItem.votes = [
-            ...item.votes,
-            action.vote
-          ];
-          return newItem;
+          return Object.assign({}, item, {
+            votes: [
+              ...item.votes,
+              action.vote
+            ]
+          });
         }
         return item;
       })
@@ -75,16 +75,78 @@ export const restaurants = {
       isFetching: false,
       items: state.items.map(item => {
         if (item.id === action.restaurantId) {
-          const newItem = Object.assign({}, item);
-          newItem.votes = item.votes.filter(
-            vote => vote.id !== action.id
-          );
-          return newItem;
+          return Object.assign({}, item, {
+            votes: item.votes.filter(
+              vote => vote.id !== action.id
+            )
+          });
         }
         return item;
       })
     });
-  }
+  },
+  [ActionTypes.POST_NEW_TAG_TO_RESTAURANT](state) {
+    return Object.assign({}, state, {
+      isFetching: true
+    });
+  },
+  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT](state, action) {
+    return Object.assign({}, state, {
+      isFetching: false,
+      items: state.items.map(item => {
+        if (item.id === action.restaurantId) {
+          return Object.assign({}, item, {
+            tags: [
+              ...item.tags,
+              action.tag.id
+            ]
+          });
+        }
+        return item;
+      })
+    });
+  },
+  [ActionTypes.POST_TAG_TO_RESTAURANT](state) {
+    return Object.assign({}, state, {
+      isFetching: true
+    });
+  },
+  [ActionTypes.POSTED_TAG_TO_RESTAURANT](state, action) {
+    return Object.assign({}, state, {
+      isFetching: false,
+      items: state.items.map(item => {
+        if (item.id === action.restaurantId) {
+          return Object.assign({}, item, {
+            tags: [
+              ...item.tags,
+              action.id
+            ]
+          });
+        }
+        return item;
+      })
+    });
+  },
+  [ActionTypes.DELETE_TAG_FROM_RESTAURANT](state) {
+    return Object.assign({}, state, {
+      isFetching: true
+    });
+  },
+  [ActionTypes.DELETED_TAG_FROM_RESTAURANT](state, action) {
+    return Object.assign({}, state, {
+      isFetching: false,
+      items: state.items.map(item => {
+        if (item.id === action.restaurantId) {
+          return Object.assign({}, item, {
+            tags: item.tags.filter(
+              tag => tag !== action.id
+            )
+          });
+        }
+        return item;
+      })
+    });
+  },
 };
 
 const resetRestaurant = (state, action) =>
@@ -93,6 +155,11 @@ const resetRestaurant = (state, action) =>
   });
 
 const resetAllRestaurants = () => ({});
+
+const resetAddTagAutosuggestValue = (state, action) =>
+  Object.assign({}, state, {
+    [action.id]: Object.assign({}, state[action.id], { addTagAutosuggestValue: '' })
+  });
 
 export const flashes = {
   [ActionTypes.FLASH_ERROR](state, action) {
@@ -115,6 +182,8 @@ export const listUi = {
   [ActionTypes.RECEIVE_RESTAURANTS]: resetAllRestaurants,
   [ActionTypes.RESTAURANT_POSTED]: resetRestaurant,
   [ActionTypes.RESTAURANT_DELETED]: resetRestaurant,
+  [ActionTypes.POSTED_TAG_TO_RESTAURANT]: resetAddTagAutosuggestValue,
+  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT]: resetAddTagAutosuggestValue,
   [ActionTypes.SET_ADD_TAG_AUTOSUGGEST_VALUE](state, action) {
     return Object.assign({}, state, {
       [action.id]: Object.assign({}, state[action.id], { addTagAutosuggestValue: action.value })
@@ -148,6 +217,15 @@ export const mapUi = {
   }
 };
 
-export const tags = {};
+export const tags = {
+  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT](state, action) {
+    return Object.assign({}, state, {
+      items: [
+        ...state.items,
+        action.tag
+      ]
+    });
+  }
+};
 export const latLng = {};
 export const user = {};

@@ -5,12 +5,13 @@ import Tag from '../models/Tag';
 import { loggedIn, errorCatcher } from './ApiHelper';
 import { restaurantPosted, restaurantDeleted } from '../actions/restaurants';
 import voteApi from './votes';
+import restaurantTagApi from './restaurantTags';
 
 const router = new Router();
 
 router
   .get('/', async (req, res) => {
-    Restaurant.findAll({ include: [Vote, Tag] }).then(all => {
+    Restaurant.findAllWithTagIds().then(all => {
       res.status(200).send({ error: false, data: all });
     }).catch(err => errorCatcher(res, err));
   })
@@ -50,6 +51,7 @@ router
       }).catch(err => errorCatcher(res, err));
     }
   )
-  .use('/:restaurant_id/votes', voteApi);
+  .use('/:restaurant_id/votes', voteApi)
+  .use('/:restaurant_id/tags', restaurantTagApi);
 
 export default router;

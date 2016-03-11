@@ -76,6 +76,54 @@ export function voteDeleted(restaurantId, id) {
   };
 }
 
+export function postNewTagToRestaurant(restaurantId, value) {
+  return {
+    type: ActionTypes.POST_NEW_TAG_TO_RESTAURANT,
+    restaurantId,
+    value
+  };
+}
+
+export function postedNewTagToRestaurant(restaurantId, tag) {
+  return {
+    type: ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT,
+    restaurantId,
+    tag
+  };
+}
+
+export function postTagToRestaurant(restaurantId, id) {
+  return {
+    type: ActionTypes.POST_TAG_TO_RESTAURANT,
+    restaurantId,
+    id
+  };
+}
+
+export function postedTagToRestaurant(restaurantId, id) {
+  return {
+    type: ActionTypes.POSTED_TAG_TO_RESTAURANT,
+    restaurantId,
+    id
+  };
+}
+
+export function deleteTagFromRestaurant(restaurantId, id) {
+  return {
+    type: ActionTypes.DELETE_TAG_FROM_RESTAURANT,
+    restaurantId,
+    id
+  };
+}
+
+export function deletedTagFromRestaurant(restaurantId, id) {
+  return {
+    type: ActionTypes.DELETED_TAG_FROM_RESTAURANT,
+    restaurantId,
+    id
+  };
+}
+
 function fetchRestaurants() {
   return dispatch => {
     dispatch(requestRestaurants());
@@ -113,16 +161,19 @@ export function fetchRestaurantsIfNeeded() {
   };
 }
 
+const credentials = 'same-origin';
+const headers = {
+  Accept: 'application/json',
+  'Content-Type': 'application/json'
+};
+
 export function addRestaurant(name, placeId, address, lat, lng) {
   return (dispatch) => {
     dispatch(postRestaurant());
     return fetch('/api/restaurants', {
       method: 'post',
-      credentials: 'same-origin',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
+      credentials,
+      headers,
       body: JSON.stringify({ name, place_id: placeId, address, lat, lng })
     })
       .then(response => processResponse(response))
@@ -136,7 +187,7 @@ export function removeRestaurant(key) {
   return (dispatch) => {
     dispatch(deleteRestaurant(key));
     return fetch(`/api/restaurants/${key}`, {
-      credentials: 'same-origin',
+      credentials,
       method: 'delete'
     });
   };
@@ -147,7 +198,7 @@ export function addVote(id) {
     dispatch(postVote(id));
     return fetch(`/api/restaurants/${id}/votes`, {
       method: 'post',
-      credentials: 'same-origin'
+      credentials
     })
       .then(response => processResponse(response))
       .catch(
@@ -160,7 +211,49 @@ export function removeVote(restaurantId, id) {
   return (dispatch) => {
     dispatch(deleteVote(restaurantId, id));
     return fetch(`/api/restaurants/${restaurantId}/votes/${id}`, {
-      credentials: 'same-origin',
+      credentials,
+      method: 'delete'
+    });
+  };
+}
+
+export function addNewTagToRestaurant(restaurantId, value) {
+  return (dispatch) => {
+    dispatch(postNewTagToRestaurant(restaurantId, value));
+    return fetch(`/api/restaurants/${restaurantId}/tags`, {
+      method: 'post',
+      credentials,
+      headers,
+      body: JSON.stringify({ name: value })
+    })
+      .then(response => processResponse(response))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
+  };
+}
+
+export function addTagToRestaurant(restaurantId, id) {
+  return (dispatch) => {
+    dispatch(postTagToRestaurant(restaurantId, id));
+    return fetch(`/api/restaurants/${restaurantId}/tags`, {
+      method: 'post',
+      credentials,
+      headers,
+      body: JSON.stringify({ id })
+    })
+      .then(response => processResponse(response))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
+  };
+}
+
+export function removeTagFromRestaurant(restaurantId, id) {
+  return (dispatch) => {
+    dispatch(deleteTagFromRestaurant(restaurantId, id));
+    return fetch(`/api/restaurants/${restaurantId}/tags/${id}`, {
+      credentials,
       method: 'delete'
     });
   };

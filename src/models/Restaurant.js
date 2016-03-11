@@ -9,8 +9,36 @@ const Restaurant = sequelize.define('restaurant', {
   lng: DataTypes.FLOAT,
   place_id: DataTypes.STRING
 }, {
+  classMethods: {
+    findAllWithTagIds: () =>
+      Restaurant
+        .findAll({
+          include: [
+            Vote,
+            {
+              model: Tag,
+              attributes: ['id'],
+              through: {
+                attributes: []
+              }
+            }
+          ]
+        })
+        .then(all =>
+          all.map(inst =>
+            Object.assign({}, inst.toJSON(), {
+              tags: inst.tags.map(tag =>
+                tag.id
+              )
+            })
+          )
+        )
+  },
   defaultScope: {
     order: 'votes.created_at ASC, created_at DESC'
+  },
+  instanceMethods: {
+    tagIds: () => this.getTags().map(tag => tag.get('id'))
   },
   underscored: true
 });

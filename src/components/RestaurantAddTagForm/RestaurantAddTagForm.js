@@ -6,9 +6,12 @@ import autosuggestTheme from './RestaurantAddTagFormAutosuggest.scss';
 
 class RestaurantAddTagForm extends Component {
   static propTypes = {
+    addNewTagToRestaurant: PropTypes.func.isRequired,
+    handleSuggestionSelected: PropTypes.func.isRequired,
     hideAddTagForm: PropTypes.func.isRequired,
     addTagAutosuggestValue: PropTypes.string.isRequired,
     setAddTagAutosuggestValue: PropTypes.func.isRequired,
+    shouldRenderSuggestions: PropTypes.func.isRequired,
     tags: PropTypes.array.isRequired
   }
 
@@ -34,8 +37,10 @@ class RestaurantAddTagForm extends Component {
           renderSuggestion={this.renderSuggestion}
           inputProps={inputProps}
           theme={autosuggestTheme}
+          onSuggestionSelected={this.props.handleSuggestionSelected}
+          shouldRenderSuggestions={this.props.shouldRenderSuggestions}
         />
-        <button>add</button>
+        <button type="button" onClick={this.props.addNewTagToRestaurant}>add</button>
         <button type="button" onClick={this.props.hideAddTagForm}>cancel</button>
       </form>
     );

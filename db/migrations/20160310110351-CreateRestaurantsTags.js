@@ -25,6 +25,12 @@ exports.up = (queryInterface, Sequelize) => queryInterface.createTable('restaura
     allowNull: false,
     type: Sequelize.DATE
   }
+}, {
+  uniqueKeys: {
+    unique: {
+      fields: ['restaurant_id', 'tag_id']
+    }
+  }
 });
 
 exports.down = queryInterface => queryInterface.dropTable('restaurants_tags');

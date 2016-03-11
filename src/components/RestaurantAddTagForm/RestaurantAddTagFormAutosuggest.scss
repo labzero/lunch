@@ -1,3 +1,15 @@
 .container {
   display: inline;
+  position: relative;
+}
+
+.suggestionsContainer {
+  background: #fff;
+  border: 1px solid black;
+  position: absolute;
+  width: 100%;
+}
+
+.suggestion {
+  cursor: pointer;
 }

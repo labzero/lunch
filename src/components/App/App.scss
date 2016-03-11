@@ -11,11 +11,15 @@
 
 /*! React Starter Kit | MIT License | https://www.reactstarterkit.com/ */
 
-@import '../variables.scss';
+@import '../styles/_variables.scss';
 
 /*
  * Base styles
  * ========================================================================== */
+
+* {
+  box-sizing: border-box;
+}
 
 html {
   background: #eee;

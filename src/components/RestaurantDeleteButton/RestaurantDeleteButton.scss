@@ -1,7 +1,7 @@
+@import '../styles/_mixins.scss';
+
 .root {
-  background: transparent;
-  border: 0;
+  @mixin plain-button;
   font-size: .5em;
-  padding: 0;
   vertical-align: bottom;
 }

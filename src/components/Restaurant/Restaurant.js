@@ -33,8 +33,12 @@ const Restaurant = ({ id, name, address, votes, tags, user, listUiItem, showAddT
   if (tags !== undefined) {
     tagsArea = (
       <div className={s.tagsArea}>
-        <ul>
-          {tags.map(tag => <li><RestaurantTagContainer key={tag.id} {...tag} /></li>)}
+        <ul className={s.tagList}>
+          {tags.map(tag => (
+            <li className={s.tagItem} key={tag}>
+              <RestaurantTagContainer restaurantId={id} id={tag} />
+            </li>
+          ))}
         </ul>
         {addTagArea}
       </div>

@@ -7,7 +7,8 @@ exports.up = function(queryInterface, Sequelize) {
       type: Sequelize.INTEGER
     },
     name: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      unique: true
     },
     created_at: {
       allowNull: false,
