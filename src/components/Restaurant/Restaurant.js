@@ -32,7 +32,7 @@ const Restaurant = ({ id, name, address, votes, tags, user, isAddingTags, showAd
   let tagsArea = null;
   if (tags !== undefined) {
     tagsArea = (
-      <div>
+      <div className={s.tagsArea}>
         <ul>
           {tags.map(tag => <li><RestaurantTagContainer key={tag.id} {...tag} /></li>)}
         </ul>
@@ -52,8 +52,10 @@ const Restaurant = ({ id, name, address, votes, tags, user, isAddingTags, showAd
         </div>
       </div>
       {address}
-      {tagsArea}
-      {deleteButton}
+      <div className={s.footer}>
+        {tagsArea}
+        {deleteButton}
+      </div>
     </div>
   );
 };

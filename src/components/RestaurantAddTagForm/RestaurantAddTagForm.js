@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import Autosuggest from 'react-autosuggest';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantAddTagForm.scss';
+import autosuggestTheme from './RestaurantAddTagFormAutosuggest.scss';
 
 class RestaurantAddTagForm extends Component {
   static propTypes = {
@@ -32,6 +33,7 @@ class RestaurantAddTagForm extends Component {
           getSuggestionValue={this.getSuggestionValue}
           renderSuggestion={this.renderSuggestion}
           inputProps={inputProps}
+          theme={autosuggestTheme}
         />
         <button>add</button>
         <button type="button" onClick={this.props.hideAddTagForm}>cancel</button>
@@ -40,4 +42,4 @@ class RestaurantAddTagForm extends Component {
   }
 }
 
-export default withStyles(RestaurantAddTagForm, s);
+export default withStyles(withStyles(RestaurantAddTagForm, autosuggestTheme), s);
