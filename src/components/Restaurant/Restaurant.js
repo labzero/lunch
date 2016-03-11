@@ -6,7 +6,7 @@ import RestaurantTagContainer from '../../containers/RestaurantTagContainer';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Restaurant.scss';
 
-const Restaurant = ({ id, name, address, votes, tags, user, isAddingTags, showAddTagForm, hideAddTagForm }) => {
+const Restaurant = ({ id, name, address, votes, tags, user, listUiItem, showAddTagForm }) => {
   const loggedIn = typeof user.id === 'number';
 
   let deleteButton = null;
@@ -22,7 +22,7 @@ const Restaurant = ({ id, name, address, votes, tags, user, isAddingTags, showAd
 
   let addTagArea = null;
   if (tags !== undefined && loggedIn) {
-    if (isAddingTags) {
+    if (listUiItem.isAddingTags) {
       addTagArea = <RestaurantAddTagFormContainer {...{ id }} />;
     } else {
       addTagArea = <button onClick={showAddTagForm}>add tag</button>;
@@ -67,7 +67,8 @@ Restaurant.propTypes = {
   user: PropTypes.object.isRequired,
   votes: PropTypes.array.isRequired,
   tags: PropTypes.array,
-  isAddingTags: PropTypes.bool
+  listUiItem: PropTypes.object.isRequired,
+  showAddTagForm: PropTypes.func.isRequired
 };
 
 export default withStyles(Restaurant, s);

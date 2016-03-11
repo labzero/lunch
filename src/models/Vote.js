@@ -8,7 +8,8 @@ const Vote = sequelize.define('vote',
       references: {
         model: 'user',
         key: 'id'
-      }
+      },
+      allowNull: false
     },
 
     restaurant_id: {
@@ -16,7 +17,8 @@ const Vote = sequelize.define('vote',
       references: {
         model: 'restaurant',
         key: 'id'
-      }
+      },
+      allowNull: false
     }
   },
   {

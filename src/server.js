@@ -142,7 +142,9 @@ server.get('*', async (req, res, next) => {
                 latLng: {
                   lat: parseFloat(process.env.SUGGEST_LAT),
                   lng: parseFloat(process.env.SUGGEST_LNG)
-                }
+                },
+                listUi: {},
+                mapUi: {}
               };
               if (req.user) {
                 initialState.user = req.user;

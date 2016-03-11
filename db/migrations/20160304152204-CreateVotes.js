@@ -10,7 +10,9 @@ exports.up = (queryInterface, Sequelize) => queryInterface.createTable('votes', 
     references: {
       model: 'restaurants',
       key: 'id'
-    }
+    },
+    allowNull: false,
+    onDelete: 'cascade'
   },
   user_id: {
     type: Sequelize.INTEGER,
@@ -18,7 +20,9 @@ exports.up = (queryInterface, Sequelize) => queryInterface.createTable('votes', 
     references: {
       model: 'users',
       key: 'id'
-    }
+    },
+    allowNull: false,
+    onDelete: 'cascade'
   }
 });
 

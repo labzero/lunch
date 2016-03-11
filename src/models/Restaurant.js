@@ -18,5 +18,5 @@ Restaurant.hasMany(Vote);
 Restaurant.belongsToMany(Tag, {
   through: 'restaurants_tags'
 });
-  
+
 export default Restaurant;

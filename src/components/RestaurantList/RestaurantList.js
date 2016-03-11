@@ -13,7 +13,6 @@ const RestaurantList = ({ items }) => (
           address={item.address}
           votes={item.votes}
           tags={item.tags}
-          isAddingTags={item.isAddingTags}
         />
       </li>
     ))}
@@ -26,8 +25,7 @@ RestaurantList.propTypes = {
     name: PropTypes.string.isRequired,
     address: PropTypes.string.isRequired,
     votes: PropTypes.array.isRequired,
-    tags: PropTypes.array.isRequired,
-    isAddingTags: PropTypes.bool
+    tags: PropTypes.array.isRequired
   }))
 };
 

@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { hideAddTagForm, setAddTagAutosuggestValue } from '../../actions/restaurants';
+import { hideAddTagForm, setAddTagAutosuggestValue } from '../../actions/listUi';
 import RestaurantAddTagForm from '../../components/RestaurantAddTagForm';
 
 const mapStateToProps = (state, ownProps) => {
@@ -7,7 +7,8 @@ const mapStateToProps = (state, ownProps) => {
   let tags = state.tags.items;
   const addedTags = restaurant.tags;
   tags = tags.filter(tag => !addedTags.includes(tag));
-  const addTagAutosuggestValue = restaurant.addTagAutosuggestValue || '';
+  const listUiItem = state.listUi[restaurant.id] || {};
+  const addTagAutosuggestValue = listUiItem.addTagAutosuggestValue || '';
   return { ...ownProps, tags, addTagAutosuggestValue };
 };
 

@@ -17,7 +17,7 @@ export default function configureStore(initialState) {
 
   for (const name in reducerMaps) {
     if (reducerMaps.hasOwnProperty(name)) {
-      reducers[name] = generateReducer(reducerMaps[name], initialState[name]);
+      reducers[name] = generateReducer(reducerMaps[name], initialState[name] || {});
     }
   }
 

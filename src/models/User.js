@@ -5,7 +5,9 @@ const User = sequelize.define('user', {
   google_id: DataTypes.STRING,
   name: DataTypes.STRING,
   email: DataTypes.STRING
-}, { underscored: true });
+}, {
+  underscored: true
+});
 User.hasMany(Vote);
 
 export default User;

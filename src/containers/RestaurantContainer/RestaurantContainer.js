@@ -1,9 +1,10 @@
 import { connect } from 'react-redux';
-import { showAddTagForm } from '../../actions/restaurants';
+import { showAddTagForm } from '../../actions/listUi';
 import Restaurant from '../../components/Restaurant';
 
 const mapStateToProps = (state, ownProps) => ({
   user: state.user,
+  listUiItem: state.listUi[ownProps.id] || {},
   ...ownProps
 });
 

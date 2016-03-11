@@ -21,17 +21,17 @@ export function restaurantPosted(obj) {
   };
 }
 
-export function deleteRestaurant(key) {
+export function deleteRestaurant(id) {
   return {
     type: ActionTypes.DELETE_RESTAURANT,
-    key
+    id
   };
 }
 
-export function restaurantDeleted(key) {
+export function restaurantDeleted(id) {
   return {
     type: ActionTypes.RESTAURANT_DELETED,
-    key
+    id
   };
 }
 
@@ -73,45 +73,6 @@ export function voteDeleted(restaurantId, id) {
     type: ActionTypes.VOTE_DELETED,
     restaurantId,
     id
-  };
-}
-
-export function showInfoWindow(id) {
-  return {
-    type: ActionTypes.SHOW_INFO_WINDOW,
-    id
-  };
-}
-
-export function hideInfoWindow(id) {
-  return {
-    type: ActionTypes.HIDE_INFO_WINDOW,
-    id
-  };
-}
-
-export function setAddTagAutosuggestValue(id, value) {
-  return {
-    type: ActionTypes.SET_ADD_TAG_AUTOSUGGEST_VALUE,
-    id,
-    value
-  };
-}
-
-export function showAddTagForm(id) {
-  return {
-    type: ActionTypes.SHOW_ADD_TAG_FORM,
-    id
-  };
-}
-
-export function hideAddTagForm(id) {
-  return dispatch => {
-    dispatch(setAddTagAutosuggestValue(id, ''));
-    dispatch({
-      type: ActionTypes.HIDE_ADD_TAG_FORM,
-      id
-    });
   };
 }
 

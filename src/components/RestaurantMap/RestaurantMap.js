@@ -61,6 +61,8 @@ class RestaurantMap extends Component {
 
                 const ref = `marker_${index}`;
 
+                const mapUiItem = this.props.mapUi[item.id] || {};
+
                 const boundHandleMarkerClick = this.props.handleMarkerClick.bind(this, item.id);
 
                 return (
@@ -71,7 +73,7 @@ class RestaurantMap extends Component {
                     title={item.name}
                     onClick={boundHandleMarkerClick}
                   >
-                    {item.showInfoWindow ? this.renderInfoWindow(ref, item) : null}
+                    {mapUiItem.showInfoWindow ? this.renderInfoWindow(ref, item) : null}
                   </Marker>
                 );
               })}
@@ -87,7 +89,8 @@ RestaurantMap.propTypes = {
   handleMarkerClick: PropTypes.func.isRequired,
   handleMarkerClose: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
-  latLng: PropTypes.object.isRequired
+  latLng: PropTypes.object.isRequired,
+  mapUi: PropTypes.object
 };
 
 export default withStyles(RestaurantMap, s);

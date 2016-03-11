@@ -6,21 +6,17 @@ const RestaurantsTags = sequelize.define('restaurants_tags', {
     references: {
       model: 'restaurant',
       key: 'id'
-    }
+    },
+    allowNull: false
   },
   tag_id: {
     type: DataTypes.INTEGER,
     references: {
       model: 'tag',
       key: 'id'
-    }
-  }
-}, {
-  classMethods: {
-    associate: function(models) {
-      // associations can be defined here
-    }
+    },
+    allowNull: false
   }
 });
 
-export default RestaurantsTags
+export default RestaurantsTags;

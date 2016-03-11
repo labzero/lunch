@@ -1,22 +1,30 @@
-exports.up = function(queryInterface, Sequelize) {
-  return queryInterface.createTable('restaurants_tags', {
-    restaurant_id: {
-      type: Sequelize.INTEGER
+exports.up = (queryInterface, Sequelize) => queryInterface.createTable('restaurants_tags', {
+  restaurant_id: {
+    type: Sequelize.INTEGER,
+    references: {
+      model: 'restaurants',
+      key: 'id'
     },
-    tag_id: {
-      type: Sequelize.INTEGER
+    allowNull: false,
+    onDelete: 'cascade'
+  },
+  tag_id: {
+    type: Sequelize.INTEGER,
+    references: {
+      model: 'tags',
+      key: 'id'
     },
-    created_at: {
-      allowNull: false,
-      type: Sequelize.DATE
-    },
-    updated_at: {
-      allowNull: false,
-      type: Sequelize.DATE
-    }
-  });
-};
+    allowNull: false,
+    onDelete: 'cascade'
+  },
+  created_at: {
+    allowNull: false,
+    type: Sequelize.DATE
+  },
+  updated_at: {
+    allowNull: false,
+    type: Sequelize.DATE
+  }
+});
 
-exports.down = function(queryInterface, Sequelize) {
-  return queryInterface.dropTable('restaurants_tags');
-};
+exports.down = queryInterface => queryInterface.dropTable('restaurants_tags');
