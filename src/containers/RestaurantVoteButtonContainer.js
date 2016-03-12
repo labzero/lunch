@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
-import { removeVote, addVote } from '../../actions/restaurants';
-import RestaurantVoteButton from '../../components/RestaurantVoteButton';
+import { removeVote, addVote } from '../actions/restaurants';
+import RestaurantVoteButton from '../components/RestaurantVoteButton';
 
 const mapStateToProps = (state, ownProps) => ({
   ...ownProps,

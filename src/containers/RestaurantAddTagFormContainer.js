@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
-import { hideAddTagForm, setAddTagAutosuggestValue } from '../../actions/listUi';
-import { addNewTagToRestaurant, addTagToRestaurant } from '../../actions/restaurants';
-import RestaurantAddTagForm from '../../components/RestaurantAddTagForm';
+import { hideAddTagForm, setAddTagAutosuggestValue } from '../actions/listUi';
+import { addNewTagToRestaurant, addTagToRestaurant } from '../actions/restaurants';
+import RestaurantAddTagForm from '../components/RestaurantAddTagForm';
 
 function escapeRegexCharacters(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

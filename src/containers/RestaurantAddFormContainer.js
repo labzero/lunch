@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
-import { addRestaurant } from '../../actions/restaurants';
-import RestaurantAddForm from '../../components/RestaurantAddForm';
+import { addRestaurant } from '../actions/restaurants';
+import RestaurantAddForm from '../components/RestaurantAddForm';
 
 // Keep a cache of terms[0] since our geosuggest library doesn't allow us to receive a label different than what is in
 // the suggest dropdown

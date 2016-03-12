@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
-import { removeTagFromRestaurant } from '../../actions/restaurants';
-import RestaurantTag from '../../components/RestaurantTag';
+import { removeTagFromRestaurant } from '../actions/restaurants';
+import RestaurantTag from '../components/RestaurantTag';
 
 const mapStateToProps = (state, ownProps) => ({
   tag: state.tags.items.find(tag =>

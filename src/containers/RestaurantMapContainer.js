@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
-import { showInfoWindow, hideInfoWindow } from '../../actions/mapUi';
-import RestaurantMap from '../../components/RestaurantMap';
+import { showInfoWindow, hideInfoWindow } from '../actions/mapUi';
+import RestaurantMap from '../components/RestaurantMap';
 
 const mapStateToProps = state => ({
   items: state.restaurants.items,

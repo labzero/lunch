@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
-import { fetchRestaurantsIfNeeded } from '../../actions/restaurants';
-import HomePage from '../../components/HomePage';
+import { fetchRestaurantsIfNeeded } from '../actions/restaurants';
+import HomePage from '../components/HomePage';
 
 const mapStateToProps = state => {
   const { user } = state;

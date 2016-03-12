@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
-import Flash from '../../components/Flash';
-import { expireFlash } from '../../actions/flash';
+import Flash from '../components/Flash';
+import { expireFlash } from '../actions/flash';
 
 const mapStateToProps = null;
 

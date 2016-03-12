@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
-import { showAddTagForm } from '../../actions/listUi';
-import Restaurant from '../../components/Restaurant';
+import { showAddTagForm } from '../actions/listUi';
+import Restaurant from '../components/Restaurant';
 
 const mapStateToProps = (state, ownProps) => ({
   user: state.user,
