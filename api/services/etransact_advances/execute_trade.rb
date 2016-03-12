@@ -462,7 +462,7 @@ module MAPI
         def self.check_enabled_product(logger, environment, type, term, response_hash, allow_grace_period=false)
           new_hash = {}
           loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(logger, environment, allow_grace_period)
-          unless loan_terms && loan_terms[type][term].with_indifferent_access['display_status']
+          unless loan_terms && loan_terms[type][term].with_indifferent_access['trade_status']
             new_hash = {
               'status' => ['DisabledProductError']
             }
