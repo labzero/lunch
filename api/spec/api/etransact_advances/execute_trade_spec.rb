@@ -702,7 +702,7 @@ describe MAPI::ServiceApp do
         expect(call_method['status']).to eq(original_status + ['DisabledProductError'])
       end
       it 'leaves status unchanged if the loan term is enabled' do
-        loan_term[:display_status] = true
+        loan_term[:trade_status] = true
         expect(call_method['status']).to eq(original_status)
       end
       it 'passes the allow_grace_period argument to `loan_terms`' do
