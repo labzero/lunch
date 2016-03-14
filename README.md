@@ -1,4 +1,4 @@
-![Lunch](https://github.com/labzero/lunch/raw/master/src/components/Header/lunch.png =250x)
+<img src="https://github.com/labzero/lunch/raw/master/src/components/Header/lunch.png" width="250" alt="Lunch">
 
 An app for groups to decide on nearby lunch options.
 
