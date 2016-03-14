@@ -14,7 +14,10 @@ const Restaurant = sequelize.define('restaurant', {
       Restaurant
         .findAll({
           include: [
-            Vote,
+            {
+              model: Vote,
+              required: false
+            },
             {
               model: Tag,
               attributes: ['id'],
@@ -42,7 +45,7 @@ const Restaurant = sequelize.define('restaurant', {
   },
   underscored: true
 });
-Restaurant.hasMany(Vote);
+Restaurant.hasMany(Vote.scope('fromToday'));
 Restaurant.belongsToMany(Tag, {
   through: 'restaurants_tags'
 });
