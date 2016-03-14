@@ -1,4 +1,4 @@
-![Lunch](https://raw.githubusercontent.com/labzero/lunch/master/src/components/Header/lunch.png)
+![Lunch](https://github.com/labzero/lunch/raw/master/src/components/Header/lunch.png)
 
 An app for groups to decide on nearby lunch options.
 
