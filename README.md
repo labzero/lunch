@@ -1,4 +1,4 @@
-<img src="https://github.com/labzero/lunch/raw/master/src/components/Header/lunch.png" width="250" alt="Lunch">
+<img src="https://github.com/labzero/lunch/raw/master/src/components/Header/lunch.png" width="500" alt="Lunch">
 
 An app for groups to decide on nearby lunch options.
 
