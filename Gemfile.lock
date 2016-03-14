@@ -14,13 +14,6 @@ GIT
       devise (>= 3.4.1)
       net-ldap (>= 0.11)
 
-GIT
-  remote: https://github.com/labzero/securid.git
-  revision: 41d8a0c469b1afa7b4038ab9c07e4e562b3aaf8e
-  branch: 0.2.4
-  specs:
-    securid (0.2.4)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -430,6 +423,7 @@ GEM
     sdoc (0.4.1)
       json (~> 1.7, >= 1.7.7)
       rdoc (~> 4.0)
+    securid (0.2.6)
     selenium-webdriver (2.45.0)
       childprocess (~> 0.5)
       multi_json (~> 1.0)
@@ -573,7 +567,7 @@ DEPENDENCIES
   sass-rails
   savon
   sdoc
-  securid!
+  securid
   selenium-webdriver
   shoulda-callback-matchers
   shoulda-matchers
