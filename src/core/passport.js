@@ -30,7 +30,7 @@ passport.use(new GoogleStrategy(
     passReqToCallback: true
   },
   (req, accessToken, refreshToken, profile, done) => {
-    if (profile._json.domain === process.env.OAUTH_DOMAIN) {
+    if (profile._json.domain === process.env.OAUTH_DOMAIN || process.env.OAUTH_DOMAIN === undefined) {
       return User.findOrCreate({ where: { google_id: profile.id } }).spread(user => {
         const userUpdates = {};
         let doUpdates = false;
