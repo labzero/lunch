@@ -77,24 +77,36 @@ $(function () {
     });
 
     $datePickerFields.keyup(function(e) {
-      if ([8, 9, 13, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46].indexOf(e.which) < 0) {
-        var target = e.target;
-        var selectionStart = target.selectionStart;
-        var selectionEnd = target.selectionEnd;
-        var oldValue = target.value;
-        var newValue = oldValue.match(/[\d\/]+/);
+      normalizeDateFormatPreservingSelection(e);
+    });
 
-        if (newValue !== oldValue) {
-          $(target).val(newValue);
-          target.setSelectionRange(selectionStart, selectionEnd);
-        };
-      };
+    $datePickerFields.change(function(e) {
+      normalizeDateFormatPreservingSelection(e);
     });
   };
 
   bindDatepickers();
 
   $('body').on('datepicker-rebind', bindDatepickers);
+
+  function normalizeDateFormatPreservingSelection(e) {
+    if ([8, 9, 13, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46].indexOf(e.which) < 0) {
+      var target = e.target;
+      var selectionStart = target.selectionStart;
+      var selectionEnd = target.selectionEnd;
+      var oldValue = target.value;
+      var newValue = oldValue.match(/[\d\/]+/);
+
+      if (newValue !== oldValue) {
+        try {
+          target.innerText = newValue;
+        } catch(_e) {
+          $(target).val(newValue);
+        };
+        target.setSelectionRange(selectionStart, selectionEnd);
+      };
+    };
+  };
 
   function initializeDatePicker($datePickerTrigger, $datePickerWrapper, options) {
     var optionsHash = {
@@ -318,16 +330,7 @@ $(function () {
         lowerBound.setFullYear(lowerBound.getFullYear() - 80);
 
         if ((1900 + yearInt) > lowerBound.getFullYear()) {
-          if (options.singleDatePicker) {
-            picker.setEndDate(monthString + "/" + dayString + "/" + (1900 + yearInt));
-          } else {
-            if ($(e.currentTarget).hasClass("daterangepicker_start_input")) {
-              picker.setStartDate(monthString + "/" + dayString + "/" + (1900 + yearInt));
-            }
-            if ($(e.currentTarget).hasClass("daterangepicker_end_input")) {
-              picker.setEndDate(monthString + "/" + dayString + "/" + (1900 + yearInt));
-            }
-          }
+          $(e.target).val(monthString + "/" + dayString + "/" + (1900 + yearInt));
           return;
         }
 
@@ -335,16 +338,7 @@ $(function () {
         upperBound.setFullYear(upperBound.getFullYear() + 20);
 
         if ((2000 + yearInt) < upperBound) {
-          if (options.singleDatePicker) {
-            picker.setEndDate(monthString + "/" + dayString + "/" + (2000 + yearInt));
-          } else {
-            if ($(e.currentTarget).hasClass("daterangepicker_start_input")) {
-              picker.setStartDate(monthString + "/" + dayString + "/" + (2000 + yearInt));
-            }
-            if ($(e.currentTarget).hasClass("daterangepicker_end_input")) {
-              picker.setEndDate(monthString + "/" + dayString + "/" + (2000 + yearInt));
-            }
-          }
+          $(e.target).val(monthString + "/" + dayString + "/" + (2000 + yearInt));
         }
       }
     }
