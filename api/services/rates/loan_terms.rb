@@ -5,7 +5,8 @@ module MAPI
         include MAPI::Shared::Utils
         include MAPI::Shared::Constants
 
-        DATETIME_FORMAT = '%Y-%m-%d%H%M'.freeze
+        DATE_FORMAT = '%Y-%m-%d'.freeze
+        DATETIME_FORMAT = "#{DATE_FORMAT}%H%M%Z".freeze
 
         SQL = <<-EOS
             SELECT AO_TERM_BUCKET_ID, TERM_BUCKET_LABEL,
@@ -78,9 +79,11 @@ module MAPI
         end
 
         def self.parse_time(date, time)
-          # we need to change to a DateTime since `change` on Time doesn't support offsets
-          parsed = Time.strptime(date.to_s + time.to_s, DATETIME_FORMAT).to_datetime
-          parsed.change(offset: Time.zone.formatted_offset)
+          if date.respond_to?(:strftime)
+            date = date.strftime(DATE_FORMAT)
+          end
+          parsed = DateTime.strptime(date.to_s + time.to_s + Time.zone.name, DATETIME_FORMAT).in_time_zone
+          parsed - parsed.period.std_offset # since DateTime.strptime does not handle DST when passed a generic time zone name
         end
 
         def self.override_end_time(bucket, now)
