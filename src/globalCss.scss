@@ -1,4 +1,9 @@
+@import '../node_modules/bootstrap/dist/css/bootstrap.css';
 @import '../node_modules/react-geosuggest/module/geosuggest.css';
+
+html {
+  font-size: 16px;
+}
 
 .geosuggest__input {
   border: 2px solid black;
