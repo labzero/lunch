@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import Vote from '../models/Vote';
+import { Vote } from '../models';
 import { loggedIn, errorCatcher } from './ApiHelper';
 import { votePosted, voteDeleted } from '../actions/restaurants';
 

@@ -1,7 +1,5 @@
 import { Router } from 'express';
-import Restaurant from '../models/Restaurant';
-import Vote from '../models/Vote';
-import Tag from '../models/Tag';
+import { Restaurant, Vote, Tag } from '../models';
 import { loggedIn, errorCatcher } from './ApiHelper';
 import { restaurantPosted, restaurantDeleted } from '../actions/restaurants';
 import voteApi from './votes';

@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import Tag from '../models/Tag';
+import { Tag } from '../models';
 import { loggedIn, errorCatcher } from './ApiHelper';
 
 const router = new Router();
 
 router
   .get('/', async (req, res) => {
-    Tag.findAll().then(all => {
+    Tag.scope('orderedByRestaurant').findAll().then(all => {
       res.status(200).send({ error: false, data: all });
     }).catch(err => errorCatcher(res, err));
   })

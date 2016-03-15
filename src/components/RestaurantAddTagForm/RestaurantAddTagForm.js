@@ -30,9 +30,10 @@ class RestaurantAddTagForm extends Component {
     };
 
     return (
-      <form className={s.root}>
+      <form className={s.root} onSubmit={this.props.addNewTagToRestaurant}>
         <Autosuggest
           suggestions={this.props.tags}
+          focusInputOnSuggestionClick={false}
           getSuggestionValue={this.getSuggestionValue}
           renderSuggestion={this.renderSuggestion}
           inputProps={inputProps}

@@ -5,12 +5,11 @@ const mapStateToProps = null;
 
 const mapDispatchToProps = dispatch => ({
   messageReceived(event) {
-  console.log(event.data);
     try {
       const data = JSON.parse(event.data);
       dispatch(data);
     } catch (SyntaxError) {
-      console.log('Couldn\'t parse message data.');
+      console.error('Couldn\'t parse message data.');
     }
   }
 });
