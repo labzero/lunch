@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import RestaurantDeleteButtonContainer from '../../containers/RestaurantDeleteButtonContainer';
+import RestaurantVoteCountContainer from '../../containers/RestaurantVoteCountContainer';
 import RestaurantVoteButtonContainer from '../../containers/RestaurantVoteButtonContainer';
 import RestaurantAddTagFormContainer from '../../containers/RestaurantAddTagFormContainer';
 import RestaurantTagContainer from '../../containers/RestaurantTagContainer';
@@ -50,7 +51,7 @@ const Restaurant = ({ id, name, address, votes, tags, user, listUiItem, showAddT
       <div className={s.header}>
         <h2 className={s.heading}>{name}</h2>
         <div className={s.voteButtonContainer}>
-          {votes.length} {votes.length === 1 ? 'vote' : 'votes'}
+          <RestaurantVoteCountContainer votes={votes} />
           &nbsp;
           {voteButton}
         </div>

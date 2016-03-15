@@ -1,0 +1,12 @@
+.root {
+  transition: color 2s linear;
+}
+
+.updated {
+  color: #f00;
+  transition: none;
+}
+
+.populated {
+  font-weight: bold;
+}

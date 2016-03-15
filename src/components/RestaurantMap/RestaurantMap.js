@@ -52,11 +52,14 @@ class RestaurantMap extends Component {
             >
               {this.props.items.map((item, index) => {
                 const length = item.votes.length;
-                let label = ' ';
+                const label = {
+                  fontWeight: 'bold',
+                  text: ' '
+                };
                 if (item.votes.length > 9) {
-                  label = '✔';
+                  label.text = '✔';
                 } else if (item.votes.length > 0) {
-                  label = String(length);
+                  label.text = String(length);
                 }
 
                 const ref = `marker_${index}`;
