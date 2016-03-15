@@ -165,12 +165,17 @@ describe MAPI::Services::Rates::LoanTerms do
       let(:connection) { double('connection') }
       let(:cursor) { double('cursor') }
       let(:logger) { double('logger') }
-      it 'should log warnings for exceptions' do
+      let(:call_method) { MAPI::Services::Rates::LoanTerms.term_bucket_data_production(logger) }
+      it 'log warnings for exceptions' do
         allow(connection).to receive(:execute).and_return(cursor)
         allow(ActiveRecord::Base).to receive(:connection).and_return(connection)
         allow(cursor).to receive(:fetch_hash).and_raise(:bad_shit)
         expect(logger).to receive(:error)
-        MAPI::Services::Rates::LoanTerms.term_bucket_data_production(logger)
+        call_method
+      end
+      it 'maps the OVERRIDE_END_DATE to a Date object' do
+        expect(subject).to receive(:fetch_hashes).with(logger, described_class::SQL, include(to_date: include('OVERRIDE_END_DATE')))
+        call_method
       end
     end
 
@@ -354,7 +359,6 @@ describe MAPI::Services::Rates::LoanTerms do
           expect(subject.parse_time(*args)).to eq(time)
         end
       end
-
       it 'parses the time in the current `Time.zone` timezone' do
         Time.use_zone(Time.zone.now.utc? ? 'EST' : 'UTC') do
           time = Time.zone.local(2012, 2, 13, 13, 14)

@@ -67,7 +67,7 @@ module MAPI
         end
 
         def self.term_bucket_data_production(logger)
-          fetch_hashes(logger, SQL)
+          fetch_hashes(logger, SQL, {to_date: ['OVERRIDE_END_DATE']})
         end
 
         def self.term_bucket_data_development
