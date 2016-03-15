@@ -34,7 +34,7 @@ const Restaurant = ({ id, name, address, votes, tags, shouldShowAddTagArea, user
   if (tags !== undefined) {
     tagsArea = (
       <div className={s.tagsArea}>
-        <ul className={s.tagList}>
+        <ul className={`${s.tagList} ${tags.length === 0 ? s.tagsListEmpty : ''}`}>
           {tags.map(tag => (
             <li className={s.tagItem} key={tag}>
               <RestaurantTagContainer restaurantId={id} id={tag} />
