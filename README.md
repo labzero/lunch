@@ -36,11 +36,30 @@ sequelize db:migrate
 sequelize db:seed --seed 20160308130212-Seeds.js
 ```
 
-## Running
+## Development server
 
+### Running
 ```bash
 npm start
 ```
+
+## Production server
+
+### Building
+```bash
+npm run build
+```
+
+### Environment variables
+Copy your production `.env` file into the newly created `build` folder.
+
+### Running
+```bash
+node build/server.js
+```
+
+### Deploying
+You can modify `tools/deploy.js` as needed to work with your deployment strategy.
 
 ## More info
 
