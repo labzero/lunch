@@ -4,6 +4,7 @@ module DatePickerHelper
     {
       this_month_start: today.beginning_of_month,
       this_month_end: today.end_of_month,
+      next_month_end: (today + 1.month).end_of_month,
       today: today,
       last_30_days: today - 1.month,
       last_month_start: today.beginning_of_month - 1.month,
@@ -186,7 +187,7 @@ module DatePickerHelper
       start_date.end_of_month
     end
   end
-  
+
   def last_month_end
     today = Time.zone.today
     today == today.end_of_month ? today.end_of_month : (today - 1.month).end_of_month
