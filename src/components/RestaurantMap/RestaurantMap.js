@@ -27,6 +27,7 @@ class RestaurantMap extends Component {
               name={item.name}
               address={item.address}
               votes={item.votes}
+              tags={item.tags}
             />
           </Provider>
         </ContextHolder>
@@ -49,6 +50,9 @@ class RestaurantMap extends Component {
             <GoogleMap
               defaultZoom={16}
               defaultCenter={this.props.latLng}
+              defaultOptions={{
+                scrollwheel: false
+              }}
             >
               {this.props.items.map((item, index) => {
                 const length = item.votes.length;

@@ -13,6 +13,7 @@ const RestaurantList = ({ items }) => (
           address={item.address}
           votes={item.votes}
           tags={item.tags}
+          shouldShowAddTagArea
         />
       </li>
     ))}

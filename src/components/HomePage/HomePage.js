@@ -33,7 +33,9 @@ class HomePage extends Component {
       <div className={s.root}>
         <RestaurantMapContainer />
         {form}
-        <RestaurantListContainer />
+        <div className={s.restaurantList}>
+          <RestaurantListContainer />
+        </div>
       </div>
     );
   }
