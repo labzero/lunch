@@ -312,17 +312,20 @@ describe MAPI::Services::Rates::LoanTerms do
     end
 
     describe '`parse_time`' do
-      let(:time) { double('A Time', to_s: SecureRandom.hex) }
-      let(:date) { double('A Date', to_s: SecureRandom.hex) }
-      let(:parsed_time) { double(Time) }
+      let(:time) { double(Time, to_s: SecureRandom.hex) }
+      let(:date) { double(Date, to_s: SecureRandom.hex) }
       let(:parsed_datetime) { double(DateTime) }
+      let(:parsed_timewithzone) { double(ActiveSupport::TimeWithZone) }
+      let(:pst) { ActiveSupport::TimeZone.new('Pacific Time (US & Canada)') }
+      let(:est) { ActiveSupport::TimeZone.new('Eastern Time (US & Canada)') }
+      let(:other_zone) { Time.zone == pst ? est : pst }
       let(:call_method) { subject.parse_time(date, time) }
       before do
-        allow(parsed_time).to receive(:to_datetime).and_return(parsed_datetime)
+        allow(parsed_datetime).to receive(:in_time_zone).and_return(parsed_timewithzone)
       end
       context 'duck typing' do
         before do
-          allow(Time).to receive(:strptime).and_return(Time.zone.now)
+          allow(DateTime).to receive(:strptime).and_return(Time.zone.now)
         end
         it 'converts the `date` to a string' do
           expect(date).to receive(:to_s)
@@ -332,23 +335,40 @@ describe MAPI::Services::Rates::LoanTerms do
           expect(time).to receive(:to_s)
           call_method
         end
+        it 'calls `strftime` on the `date` if it responds' do
+          expect(date).to receive(:strftime).with(described_class::DATE_FORMAT).and_return(date)
+          call_method
+        end
+        it 'does not call `strftime` on the `date` if it is not supported' do
+          allow(date).to receive(:respond_to?).with(:strftime).and_return(false)
+          expect(date).to_not receive(:strftime)
+          call_method
+        end
       end
       it 'parses the supplied string according to the DATETIME_FORMAT' do
-        expect(Time).to receive(:strptime).with(date.to_s + time.to_s, described_class::DATETIME_FORMAT).and_return(Time.zone.now)
+        expect(DateTime).to receive(:strptime).with(date.to_s + time.to_s + Time.zone.name, described_class::DATETIME_FORMAT).and_return(Time.zone.now)
         call_method
       end
-      it 'sets the timezone on the time object' do
-        offset = double('A Timezone Offset')
-        allow(Time.zone).to receive(:formatted_offset).and_return(offset)
-        allow(Time).to receive(:strptime).and_return(parsed_time)
-        expect(parsed_datetime).to receive(:change).with(offset: offset)
-        call_method
-      end
-      it 'returns the parsed time' do
-        offset_time = double('An Offset Corrected Time')
-        allow(Time).to receive(:strptime).and_return(parsed_time)
-        allow(parsed_datetime).to receive(:change).and_return(offset_time)
-        expect(call_method).to be(offset_time)
+      context 'DST correction algorithim' do
+        let(:dst_corrected_timewithzone) { double(ActiveSupport::TimeWithZone) }
+        let(:std_offset) { double(Numeric) }
+        let(:period) { double(TZInfo::TimezonePeriod, std_offset: std_offset) }
+        before do
+          allow(parsed_timewithzone).to receive(:period).and_return(period)
+          allow(parsed_timewithzone).to receive(:-).with(std_offset).and_return(dst_corrected_timewithzone)
+          allow(DateTime).to receive(:strptime).and_return(parsed_datetime)
+        end
+        it 'fetches the `std_offset` from the parsed TimeWithZone' do
+          expect(period).to receive(:std_offset)
+          call_method
+        end
+        it 'subtracts the `std_offset` from the parsed TimeWithZone' do
+          expect(parsed_timewithzone).to receive(:-).with(std_offset)
+          call_method
+        end
+        it 'returns the DST shifted TimeWithZone' do
+          expect(call_method).to be(dst_corrected_timewithzone)
+        end
       end
       {
         Time.zone.local(2012, 2, 13, 13, 14) => ['2012-02-13', '1314'],
@@ -360,10 +380,24 @@ describe MAPI::Services::Rates::LoanTerms do
         end
       end
       it 'parses the time in the current `Time.zone` timezone' do
-        Time.use_zone(Time.zone.now.utc? ? 'EST' : 'UTC') do
+        Time.use_zone(other_zone) do
           time = Time.zone.local(2012, 2, 13, 13, 14)
           expect(subject.parse_time(time.strftime('%Y-%m-%d'), time.strftime('%H%M'))).to eq(time)
         end
+      end
+      [[2016, 3, 15, 13, 14], [2016, 3, 15, 0, 14], [2016, 3, 15, 23, 59]].each do |time_args|
+        it "handles daylight savings time when parsing `#{time_args[0]}-#{time_args[1]}-#{time_args[2]} #{time_args[3]}:#{time_args[4]}`" do
+          Time.use_zone(other_zone) do
+            time = Time.zone.local(*time_args)
+            expect(subject.parse_time(time.strftime('%Y-%m-%d'), time.strftime('%H%M'))).to eq(time)
+          end
+        end
+      end
+      it 'parses the correctly when the `date` param is a Time object' do
+        time = Time.zone.local(2012, 2, 13, 13, 14)
+        time_minute = time.change(sec: 0)
+        time_date = time.change(hour: 0, min: 0, sec: 0)
+        expect(subject.parse_time(time_date, time.strftime('%H%M'))).to eq(time_minute)
       end
     end
 
