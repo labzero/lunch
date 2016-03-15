@@ -92,6 +92,17 @@ RSpec.describe MembersController, type: :controller do
       expect(subject.session).to_not receive(:[]=).with('member_name', anything) # did we abort early?
       expect(make_request).to redirect_to(dashboard_path)
     end
+    describe 'visiting the profile report' do
+      let(:make_request) { post :set_member, member_id: member_id, visit_profile: true }
+      it 'redirects the user to the profile report if the parameter `visit_profile` is present' do
+        make_request
+        expect(response).to redirect_to(reports_profile_path)
+      end
+      it 'stores the profile report as the sessions stored location' do
+        expect(subject).to receive(:store_location_for).with(:user, reports_profile_path)
+        make_request
+      end
+    end
   end
 
   describe 'GET terms' do
