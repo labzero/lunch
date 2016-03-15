@@ -68,11 +68,20 @@ const config = {
         },
       },
       {
-        test: /globalCss.scss$/,
+        test: /\.(png|jpg|jpeg|gif|svg)$/,
+        loader: 'url-loader',
+        query: {
+          name: DEBUG ? '[path][name].[ext]?[hash]' : '[hash].[ext]',
+          limit: 10000,
+        },
+      },
+      {
+        test: /globalCss\.scss$/,
         loaders: [
           'isomorphic-style-loader',
           `css-loader?${DEBUG ? 'sourceMap&' : 'minimize&'}modules&localIdentName=[local]`,
-          'postcss-loader?parser=postcss-scss'
+          'sass-loader',
+          'postcss-loader'
         ]
       },
       {
@@ -89,7 +98,8 @@ const config = {
             // CSS Nano http://cssnano.co/options/
             minimize: !DEBUG,
           })}`,
-          'postcss-loader?parser=postcss-scss',
+          'sass-loader',
+          'postcss-loader',
         ],
       },
       {
@@ -101,15 +111,7 @@ const config = {
         loader: 'raw-loader',
       },
       {
-        test: /\.(png|jpg|jpeg|gif|svg|woff|woff2)$/,
-        loader: 'url-loader',
-        query: {
-          name: DEBUG ? '[path][name].[ext]?[hash]' : '[hash].[ext]',
-          limit: 10000,
-        },
-      },
-      {
-        test: /\.(eot|ttf|wav|mp3)$/,
+        test: /\.(woff|woff2|eot|ttf|wav|mp3)$/,
         loader: 'file-loader',
         query: {
           name: DEBUG ? '[path][name].[ext]?[hash]' : '[hash].[ext]',
@@ -145,7 +147,6 @@ const config = {
 
   postcss(bundler) {
     return [
-      require('precss')({ addDependencyTo: bundler }),
       require('postcss-clearfix')(),
       require('autoprefixer')({ browsers: AUTOPREFIXER_BROWSERS }),
     ];

@@ -1,10 +1,10 @@
-@define-mixin plain-button {
+@mixin plain-button {
   background: none;
   border: 0;
   padding: 0;
 }
 
-@define-mixin plain-list {
+@mixin plain-list {
   list-style: none;
   padding: 0;
 }

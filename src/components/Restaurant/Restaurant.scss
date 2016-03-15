@@ -27,7 +27,7 @@
 }
 
 .tagList {
-  @mixin plain-list;
+  @include plain-list;
   display: inline-block;
 }
 
