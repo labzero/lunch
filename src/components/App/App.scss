@@ -11,6 +11,10 @@
 
 @import '../styles/_variables.scss';
 
+html {
+  background: $background-color;
+}
+
 button {
   background: #eee;
   border-radius: 5px;
