@@ -9,11 +9,11 @@ class RestaurantAddForm extends Component {
     getSuggestLabel: PropTypes.func.isRequired,
     handleSuggestSelect: PropTypes.func.isRequired,
     latLng: PropTypes.object.isRequired
-  }
+  };
 
   static contextTypes = {
     insertCss: PropTypes.func,
-  }
+  };
 
   componentWillMount() {
     this.removeCss = this.context.insertCss(s);

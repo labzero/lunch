@@ -5,7 +5,7 @@ import s from './RestaurantVoteCount.scss';
 class RestaurantVoteCount extends Component {
   static propTypes = {
     votes: PropTypes.array.isRequired
-  }
+  };
 
   componentDidUpdate() {
     this._el.classList.add(s.updated);

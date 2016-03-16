@@ -128,7 +128,9 @@
   "stylelint": {
     "extends": "stylelint-config-standard",
     "rules": {
-      "string-quotes": "single"
+      "function-url-quotes": "single",
+      "string-quotes": "single",
+      "number-leading-zero": "never"
     }
   },
   "scripts": {

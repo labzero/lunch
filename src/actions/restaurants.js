@@ -156,6 +156,7 @@ export function fetchRestaurantsIfNeeded() {
       // Dispatch a thunk from thunk!
       return dispatch(fetchRestaurants());
     }
+
     // Let the calling code know there's nothing to wait for.
     return Promise.resolve();
   };

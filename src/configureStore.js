@@ -10,6 +10,7 @@ export default function configureStore(initialState) {
     if (reducer === undefined) {
       return state;
     }
+
     return reducer(state, action);
   };
 

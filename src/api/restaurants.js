@@ -17,9 +17,14 @@ router
     '/',
     loggedIn,
     async (req, res) => {
+      // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
       const { name, place_id, lat, lng } = req.body;
+
+      // jscs:enable requireCamelCaseOrUpperCaseIdentifiers
       let { address } = req.body;
       address = address.replace(`${name}, `, '');
+
+      // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
       Restaurant.create({
         name,
         place_id,
@@ -28,6 +33,8 @@ router
         lng,
         votes: [],
         tags: []
+
+      // jscs:enable requireCamelCaseOrUpperCaseIdentifiers
       }, { include: [Vote, Tag] }).then(obj => {
         const json = obj.toJSON();
         req.wss.broadcast(restaurantPosted(json));

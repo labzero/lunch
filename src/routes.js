@@ -18,6 +18,7 @@ import NotFoundPage from './components/NotFoundPage';
 async function getContextComponent(location, callback) {
   const response = await fetch(`/api/content?path=${location.pathname}`);
   const content = await response.json();
+
   // using an arrow to pass page instance instead of page class; cb accepts class by default
   callback(null, () => <ContentPage {...content} />);
 }

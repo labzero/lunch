@@ -63,10 +63,13 @@ function run() {
 
   const unlisten = Location.listen(location => {
     const locationId = location.pathname + location.search;
+
     if (!scrollOffsets.get(locationId)) {
       scrollOffsets.set(locationId, Object.create(null));
     }
+
     currentScrollOffset = scrollOffsets.get(locationId);
+
     // Restore the scroll position if it was saved
     if (currentScrollOffset.scrollY !== undefined) {
       window.scrollTo(currentScrollOffset.scrollX, currentScrollOffset.scrollY);
@@ -93,6 +96,7 @@ function run() {
       </ContextHolder>,
       appContainer
     );
+
     // Remove the pre-rendered CSS because it's no longer used
     // after the React app is launched
     if (cssContainer) {
