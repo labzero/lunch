@@ -158,6 +158,7 @@ class DashboardController < ApplicationController
       limit_error = advance_request.errors.find {|e| e.type == :limits}
       preview_errors = advance_request.errors.select {|e| e.type == :preview }
       rate_error = advance_request.errors.find {|e| e.type == :rate}
+      other_errors = advance_request.errors - [limit_error, rate_error, *preview_errors]
 
       if limit_error.present?
         preview_success = false
@@ -169,29 +170,28 @@ class DashboardController < ApplicationController
         preview_error = true
         @error_message = rate_error.code
       else
-        collateral_error = preview_errors.find {|e| e.code == :collateral}
+        collateral_error = preview_errors.find {|e| e.code == :collateral }
+        other_preview_error = preview_errors.find {|e| e.code != :capital_stock }
         if collateral_error
           preview_success = false
           preview_error = true
-          @error_message = :collateral
+          @error_message = collateral_error.code
           @error_value = collateral_error.value
-        elsif preview_errors.find {|e| e.code == :capital_stock}
+        elsif other_preview_error
+          preview_success = false
+          preview_error = true
+          @error_message = other_preview_error.code
+          @error_value = other_preview_error.value
+        elsif other_errors.present?
+          preview_success = false
+          preview_error = true
+          @error_message = :unknown
+        else # capital stock error
           preview_success = false
           preview_error = false
           @original_amount = advance_request.amount
           @net_amount = @original_amount - @net_stock_required
           response_html = render_to_string :quick_advance_capstock, layout: false
-        else
-          preview_success = false
-          preview_error = true
-          [:capital_stock_offline, :credit, :total_daily_limit].each do |code|
-            error = preview_errors.find {|e| e.code == code}
-            if error
-              @error_message = code
-              @error_value = error.value
-              break
-            end
-          end
         end
       end
     else
