@@ -1245,15 +1245,23 @@ describe MemberBalanceService do
       allow(subject).to receive(:get_hash).and_return(nil)
       expect(call_method).to eq(nil)
     end
-    it 'returns the result of `get_hash`' do
-      allow(subject).to receive(:get_hash).and_return(statement)
-      expect(call_method).to eq(statement)
-    end
-    it 'fixes the :issue_date for each certificate' do
-      allow(subject).to receive(:get_hash).and_return(statement)
-      allow(statement).to receive(:[]).with(:certificates).and_return([certificate])
-      expect(subject).to receive(:fix_date).with(certificate, :issue_date)
-      call_method
+    context 'with a response' do
+      before do
+        allow(subject).to receive(:get_hash).and_return(statement)
+      end
+
+      it 'returns the result of `get_hash`' do
+        expect(call_method).to eq(statement)
+      end
+      it 'fixes the :issue_date for each certificate' do
+        allow(statement).to receive(:[]).with(:certificates).and_return([certificate])
+        expect(subject).to receive(:fix_date).with(certificate, :issue_date)
+        call_method
+      end
+      it 'handles the no results response' do
+        allow(statement).to receive(:[]).and_return(nil)
+        expect(call_method).to eq(statement)
+      end
     end
   end
 
