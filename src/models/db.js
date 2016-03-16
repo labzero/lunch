@@ -1,12 +1,8 @@
 import configs from '../../database.js';
-import fs from 'fs';
-import path from 'path';
 import Sequelize from 'sequelize';
 
-const basename  = path.basename(module.filename);
-const env       = process.env.NODE_ENV || 'development';
-const config    = configs[env];
-const db        = {};
+const env = process.env.NODE_ENV || 'development';
+const config = configs[env];
 export let sequelize;
 
 if (config.use_env_variable) {

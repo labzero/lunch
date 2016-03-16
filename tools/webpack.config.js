@@ -145,7 +145,7 @@ const config = {
     cachedAssets: VERBOSE,
   },
 
-  postcss(bundler) {
+  postcss() {
     return [
       require('postcss-clearfix')(),
       require('autoprefixer')({ browsers: AUTOPREFIXER_BROWSERS }),
