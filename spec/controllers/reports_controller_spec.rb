@@ -339,32 +339,36 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_trial_balance
       it_behaves_like 'a controller action with an active nav setting', :capital_stock_trial_balance, :reports
 
+      it 'calls `fhlb_report_date_numeric` with the @start_date' do
+        expect(subject).to receive(:fhlb_report_date_numeric).with(start_date)
+        call_action
+      end
       it 'renders the capital_stock_trial_balance view' do
         call_action
         expect(response.body).to render_template('capital_stock_trial_balance')
       end
-      it 'should pass @start_date and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+      it 'passes @start_date and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
         allow(controller).to receive(:most_recent_business_day).and_return(max_date)
         allow(controller).to receive(:date_picker_presets).with(start_date, nil, nil, max_date).and_return(date_picker_presets)
         get :capital_stock_trial_balance, start_date: start_date
         expect(assigns[:picker_presets]).to eq(date_picker_presets)
       end
-      it 'should assign @number_of_shares and @number_of_certificates' do
+      it 'assigns @number_of_shares and @number_of_certificates' do
         call_action
         expect(assigns[:number_of_shares]).to eq(number_of_shares)
         expect(assigns[:number_of_certificates]).to eq(number_of_certificates)
       end
-      it 'should assign @min_date a date of January 1st, 2002' do
+      it 'assigns @min_date a date of January 1st, 2002' do
         call_action
         expect(assigns[:min_date]).to eq(min_date)
       end
-      it 'should assign @start_date a date of January 1st, 2002 if the start_date param occurs before that date' do
+      it 'assigns @start_date a date of January 1st, 2002 if the start_date param occurs before that date' do
         allow(ReportConfiguration).to receive(:date_bounds).with(:capital_stock_trial_balance, anything, anything)
           .and_return({ min: min_date, start: Date.new(2002,1,1), end: end_date, max: max_date })
         get :capital_stock_trial_balance, start_date: min_date - 1.year
         expect(assigns[:start_date]).to eq(Date.new(2002,1,1))
       end
-      it 'should return capital_stock_trial_balance_table_data with with columns populated' do
+      it 'returns capital_stock_trial_balance_table_data with with columns populated' do
         call_action
         expect(assigns[:capital_stock_trial_balance_table_data][:rows][0][:columns]).to eq(table_data)
       end

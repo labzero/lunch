@@ -296,7 +296,7 @@ class ReportsController < ApplicationController
 
     @picker_presets = date_picker_presets(@start_date, @end_date, ReportConfiguration.date_restrictions(:capital_stock_activity))
     report_download_name = "capital-stock-activity-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
-    downloadable_report(nil, {start_date: params[:start_date], end_date: params[:end_date]}, report_download_name) do
+    downloadable_report(DOWNLOAD_FORMATS, {start_date: params[:start_date], end_date: params[:end_date]}, report_download_name) do
       if report_disabled?(CAPITAL_STOCK_ACTIVITY_WEB_FLAGS)
         @capital_stock_activity = {activities:[]}
       else
@@ -325,8 +325,8 @@ class ReportsController < ApplicationController
 
   def capital_stock_trial_balance
     @report_name = ReportConfiguration.report_title(:capital_stock_trial_balance)
-    report_download_name = "capital_stock_trial_balance-#{fhlb_report_date_numeric(@start_date)}"
     initialize_dates(:capital_stock_trial_balance, params[:start_date])
+    report_download_name = "capital_stock_trial_balance-#{fhlb_report_date_numeric(@start_date)}"
     downloadable_report(:xlsx, {start_date: @start_date.to_s}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
@@ -428,7 +428,7 @@ class ReportsController < ApplicationController
   def advances_detail
     initialize_dates(:advances_detail, params[:start_date])
     report_download_name = "advances-#{fhlb_report_date_numeric(@start_date)}"
-    downloadable_report(nil, {start_date: @start_date.to_s}, report_download_name) do
+    downloadable_report(DOWNLOAD_FORMATS, {start_date: @start_date.to_s}, report_download_name) do
       @report_name = t('global.advances')
       @picker_presets = date_picker_presets(@start_date, nil, ReportConfiguration.date_restrictions(:advances_detail), @max_date)
       if params[:job_id] || self.skip_deferred_load
@@ -1164,7 +1164,7 @@ class ReportsController < ApplicationController
 
     @securities_filter = params['securities_filter'] || 'all'
     report_download_name = "current-securities-position-#{@securities_filter}"
-    downloadable_report(nil, {securities_filter: params['securities_filter']}, report_download_name) do
+    downloadable_report(:xlsx, {securities_filter: params['securities_filter']}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(CURRENT_SECURITIES_POSITION_WEB_FLAG)
         @current_securities_position = {securities:[]}
@@ -1183,7 +1183,7 @@ class ReportsController < ApplicationController
     @report_name = ReportConfiguration.report_title(:monthly_securities_position)
     @month_end_date = month_restricted_start_date(@start_date)
     report_download_name = "monthly-securities-position-#{@securities_filter}-#{@month_end_date}"
-    downloadable_report(nil, {securities_filter: params['securities_filter'], start_date: params['start_date']}, report_download_name) do
+    downloadable_report(:xlsx, {securities_filter: params['securities_filter'], start_date: params['start_date']}, report_download_name) do
       @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
       @picker_presets = date_picker_presets(@month_end_date, nil, ReportConfiguration.date_restrictions(:monthly_securities_position), nil, [:today])
       member_balances = MemberBalanceService.new(current_member_id, request)
@@ -1719,7 +1719,7 @@ class ReportsController < ApplicationController
     ]
   end
 
-  def downloadable_report(formats = nil, report_download_params = {}, report_download_name = nil)
+  def downloadable_report(formats = DOWNLOAD_FORMATS, report_download_params = {}, report_download_name = nil)
     export_format = params[:export_format]
     self.report_download_name ||= report_download_name
     self.report_download_name ||= "#{action_name.to_s.gsub('_','-')}-#{fhlb_report_date_numeric(Time.zone.today)}" if action_name
