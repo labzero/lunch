@@ -1607,6 +1607,7 @@ en:
         version_request: To request an expanded version of this report or to obtain a prior version, contact Collateral Services at %{phone_number}
         report_details: This report reflects the most recent data available after each MCU has been processed. Only the current report is available. An email with an expanded version of this report that includes detailed rejection and inconsistency information is sent to your institution each time an MCU is processed.
       member_profile:
+        title: Member Profile
         fhlb_id: FHLB ID
         fhfb_id: FHFB ID
         relationship_manager: Relationship Manager
@@ -1617,6 +1618,19 @@ en:
         cqr: CQR
         delivered: Delivered
         not_delivered: Not Delivered
+        collateral:
+          title: Collateral
+        capital_stock:
+          title: Capital Stock
+          required_by_advances: Required by Advances
+          required_by_mpf: Required by MPF
+          required_by_funding: Required by Funding
+          precent_of_mav: '% of MAV'
+          capital_stock_required: Capital Stock Required
+          capital_stock_held: Capital Stock Held
+          excess_deficiency: Excess/Deficiency
+          add_advances_possible: Add. Advances Possible
+          stock_purchase_required: Stock Purchase Required
         rhfa:
           title: RHFA
           limit: Limit
@@ -1658,6 +1672,7 @@ en:
           total_credit: Total Credit
           total_available_credit: Total Available Credit
         sta:
+          title: STA
           number: 'STA No.'
           balance: STA Balance
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.

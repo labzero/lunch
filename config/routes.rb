@@ -75,8 +75,8 @@ Rails.application.routes.draw do
     constraints Constraints::FeatureEnabled.new('quick-reports') do
       get '/quick/download/:id' => 'quick_reports#download', as: :quick_download
     end
-    constraints Constraints::FeatureEnabled.new('report-member-profile') do
-      get '/member-profile' => 'reports#member_profile'
+    constraints Constraints::FeatureEnabled.new('report-profile') do
+      get '/profile' => 'reports#profile'
     end
   end
 

@@ -129,6 +129,8 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/monthly-securities-position'
   when 'Mortgage Collateral Update'
     visit '/reports/mortgage-collateral-update'
+  when 'Profile'
+    visit '/reports/profile'
   when 'Securities Services Monthly Statement'
     visit '/reports/securities-services-statement'
   when 'Securities Transactions'

@@ -148,6 +148,10 @@ class ReportsController < ApplicationController
     @min_date, @start_date, @end_date, @max_date = nil
   end
 
+  before_action only: [:profile] do
+    authorize :member_profile, :show?
+  end
+
   def index
     @reports = {
       price_indications: {
@@ -359,13 +363,37 @@ class ReportsController < ApplicationController
 
   end
 
-  def member_profile
-
+  def profile
     member_balance_service = MemberBalanceService.new(current_member_id, request)
     member_profile = member_balance_service.profile
-    member_details = member_balance_service
+    cap_stock_and_leverage = member_balance_service.capital_stock_and_leverage || {}
     members_service = MembersService.new(request)
-    contacts = members_service.member_contacts(current_member_id) || {}
+    contacts = members_service.member_contacts(current_member_id)
+    member_details = members_service.member(current_member_id) || {}
+
+    if !member_profile
+      member_profile = {
+        credit_outstanding: {},
+        collateral_borrowing_capacity: {
+          standard: {
+          },
+          sbc: {
+          }
+        },
+        capital_stock: {},
+        advances: {},
+        rhfa: {}
+      }
+    end
+
+    if !contacts
+      contacts = {
+        rm: {},
+        cam: {}
+      }
+    end
+
+    @member_name = member_details[:name]
 
     # Header info
     @member_details_table = {
@@ -409,7 +437,7 @@ class ReportsController < ApplicationController
         {
           columns: [
             {value: t('reports.pages.member_profile.collateral_status')},
-            {value: member_profile[:collateral_delivery_status] == 'Y' ? t('reports.pages.member_profile.delivered') : t('reports.pages.member_profile.not_delivered')}
+            {value: (member_profile[:collateral_delivery_status] == 'Y' ? t('reports.pages.member_profile.delivered') : t('reports.pages.member_profile.not_delivered') if member_profile[:collateral_delivery_status])}
           ]
         },
         {
@@ -421,15 +449,66 @@ class ReportsController < ApplicationController
       ]
     }
 
-    # Collateral - TODO: Break this down into the components you need for the Member Profile
-    borrowing_capacity_summary = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @end_date.to_s)
-    @collateral_table = {
-      rows: []
-    }
-
-    # Capital Stock - TODO: Rig up the calculations needed to calculate Capital Stock values.  Some can be found in the Capital Stock and Leverage report
+    # Collateral
+    initialize_dates(:borrowing_capacity, nil, params[:end_date])
+    @collateral_table = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @end_date.to_s)
     @capital_stock_table = {
-      rows: []
+      rows: [
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.required_by_advances')},
+            {value: cap_stock_and_leverage[:required_by_advances], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.required_by_mpf')},
+            {value: cap_stock_and_leverage[:required_by_mpf], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.required_by_funding')},
+            {value: cap_stock_and_leverage[:activity_based_requirement], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.precent_of_mav')},
+            {value: cap_stock_and_leverage[:mav_stock_requirement], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.capital_stock_required')},
+            {value: cap_stock_and_leverage[:minimum_requirement], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.capital_stock_held')},
+            {value: cap_stock_and_leverage[:stock_owned], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.excess_deficiency')},
+            {value: cap_stock_and_leverage[:excess_stock], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.add_advances_possible')},
+            {value: cap_stock_and_leverage[:remaining_leverage], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.stock_purchase_required')},
+            {value: cap_stock_and_leverage[:surplus_stock], type: :currency_whole}
+          ]
+        }
+      ]
     }
 
     # RHFA
