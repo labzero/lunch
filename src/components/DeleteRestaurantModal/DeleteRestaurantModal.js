@@ -11,6 +11,14 @@ class DeleteRestaurantModal extends Component {
     });
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.restaurant.name !== undefined && nextProps.restaurant.name !== this.state.restaurantName) {
+      this.setState({
+        restaurantName: nextProps.restaurant.name
+      });
+    }
+  }
+
   render() {
     return (
       <Modal show={this.props.shown} onHide={this.props.hideModal}>
