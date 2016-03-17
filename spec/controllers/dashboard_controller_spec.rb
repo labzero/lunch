@@ -504,6 +504,42 @@ RSpec.describe DashboardController, :type => :controller do
         expect(assigns[:error_value]).to eq(:collateral_error)
       end
     end
+
+    describe 'error priority' do
+      before do
+        allow(subject).to receive(:populate_advance_request_view_parameters) do
+          subject.instance_variable_set(:@original_amount, rand(10000..1000000))
+          subject.instance_variable_set(:@net_stock_required, rand(1000..9999))
+        end
+      end
+      {
+        rate: [:stale, :unknown, :settings],
+        limits: [:unknown, :high, :low],
+        preview: [
+          :unknown, :capital_stock_offline, :credit,
+          :collateral, :total_daily_limit, :disabled_product
+        ],
+        foo: [:unknown]
+      }.each do |type, errors|
+        errors.each do |error|
+          it "prioritizes #{type}:#{error} over preview:capital_stock" do
+            allow(advance_request).to receive(:errors).and_return([
+              AdvanceRequest::Error.new(type, error),
+              AdvanceRequest::Error.new(:preview, :capital_stock)
+            ])
+            make_request
+            expect(assigns[:error_message]).to be(error)
+          end
+        end
+      end
+      it 'shows capital stock gross up if there are no other errors' do
+        allow(advance_request).to receive(:errors).and_return([
+          AdvanceRequest::Error.new(:preview, :capital_stock)
+        ])
+        make_request
+        expect(response).to render_template(:quick_advance_capstock)
+      end
+    end
   end
 
   describe "POST quick_advance_perform", :vcr do
