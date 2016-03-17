@@ -319,7 +319,7 @@ class MemberBalanceService < MAPIService
 
   def capital_stock_trial_balance(date)
     if data = get_hash(:capital_stock_trial_balance, "member/#{@member_id}/capital_stock_trial_balance/#{date.iso8601}")
-      data[:certificates].each { |certificate| fix_date(certificate, :issue_date) }
+      data[:certificates].each { |certificate| fix_date(certificate, :issue_date) } if data[:certificates]
       data
     end
   end
