@@ -7,7 +7,7 @@ import RestaurantAddFormContainer from '../../containers/RestaurantAddFormContai
 
 const title = 'Lunch';
 
-class HomePage extends Component {
+export class _HomePage extends Component {
 
   static contextTypes = {
     onSetTitle: PropTypes.func.isRequired
@@ -42,6 +42,4 @@ class HomePage extends Component {
 
 }
 
-export const _HomePage = HomePage;
-
-export default withStyles(HomePage, s);
+export default withStyles(_HomePage, s);

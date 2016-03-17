@@ -27,7 +27,7 @@ const RestaurantAddTagForm = ({
       onSuggestionSelected={handleSuggestionSelected}
       shouldRenderSuggestions={shouldRenderSuggestions}
     />
-    <button className={s.button} type="button" onClick={addNewTagToRestaurant}>add</button>
+    <button className={s.button} type="button" disabled={addTagAutosuggestValue === ''} onClick={addNewTagToRestaurant}>add</button>
     <button className={s.button} type="button" onClick={hideAddTagForm}>cancel</button>
   </form>
 );

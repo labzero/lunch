@@ -7,8 +7,18 @@ import RestaurantTagContainer from '../../containers/RestaurantTagContainer';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Restaurant.scss';
 
-const Restaurant = ({ id, name, address, votes, tags, shouldShowAddTagArea, user, listUiItem, showAddTagForm }) => {
-  const loggedIn = typeof user.id === 'number';
+export const _Restaurant = ({
+  id,
+  name,
+  address,
+  votes,
+  tags,
+  shouldShowAddTagArea,
+  user,
+  listUiItem,
+  showAddTagForm
+}) => {
+  const loggedIn = user.id !== undefined;
 
   let deleteButton = null;
   let voteButton = null;
@@ -30,22 +40,6 @@ const Restaurant = ({ id, name, address, votes, tags, shouldShowAddTagArea, user
     }
   }
 
-  let tagsArea = null;
-  if (tags !== undefined) {
-    tagsArea = (
-      <div className={s.tagsArea}>
-        <ul className={`${s.tagList} ${tags.length === 0 ? s.tagsListEmpty : ''}`}>
-          {tags.map(tag => (
-            <li className={s.tagItem} key={tag}>
-              <RestaurantTagContainer restaurantId={id} id={tag} />
-            </li>
-          ))}
-        </ul>
-        {addTagArea}
-      </div>
-    );
-  }
-
   return (
     <div className={s.root}>
       <div className={s.header}>
@@ -58,14 +52,23 @@ const Restaurant = ({ id, name, address, votes, tags, shouldShowAddTagArea, user
       </div>
       {address}
       <div className={s.footer}>
-        {tagsArea}
+        <div className={s.tagsArea}>
+          <ul className={`${s.tagList} ${tags.length === 0 ? s.tagsListEmpty : ''}`}>
+            {tags.map(tag => (
+              <li className={s.tagItem} key={tag}>
+                <RestaurantTagContainer restaurantId={id} id={tag} />
+              </li>
+            ))}
+          </ul>
+          {addTagArea}
+        </div>
         {deleteButton}
       </div>
     </div>
   );
 };
 
-Restaurant.propTypes = {
+_Restaurant.propTypes = {
   id: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
   address: PropTypes.string.isRequired,
@@ -77,4 +80,4 @@ Restaurant.propTypes = {
   showAddTagForm: PropTypes.func.isRequired
 };
 
-export default withStyles(Restaurant, s);
+export default withStyles(_Restaurant, s);
