@@ -18,7 +18,7 @@
     - if @data_available
       .report-summary-data
         %h3
-          = report_summary_with_date('reports.pages.securities_services_statement.heading', fhlb_date_long_alpha(@start_date))
+          = report_summary_with_date('reports.pages.securities_services_statement.heading', fhlb_date_long_alpha(@debit_date))
         %p= fhlb_formatted_currency(@statement[:total])
       .securities-services-table-wrapper
         %h2.report-table-title= t('reports.pages.securities_services_statement.tables.maintenance')

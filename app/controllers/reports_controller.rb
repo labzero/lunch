@@ -968,6 +968,7 @@ class ReportsController < ApplicationController
       @dropdown_options      = available_reports.map{ |entry| [entry['month_year'], entry['report_end_date']] }
       @start_date            = params[:start_date].try(:to_date) || @dropdown_options[0][1]
       @dropdown_options_text = @dropdown_options.find{ |option| option[1] == @start_date }.try(:first)
+      @debit_date            = most_recent_business_day(default_dates_hash[:next_month_end])
 
       report_download_name = "securities-services-monthly-statement-#{fhlb_report_date_numeric(@start_date)}"
       downloadable_report(:pdf, {start_date: params[@start_date]}, report_download_name) do

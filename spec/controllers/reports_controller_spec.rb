@@ -106,7 +106,6 @@ RSpec.describe ReportsController, :type => :controller do
 
   before do
     allow(controller).to receive(:date_picker_presets).and_return(date_picker_presets)
-    allow(controller).to receive(:most_recent_business_day).and_return(max_date)
     allow(controller).to receive(:fhlb_report_date_numeric)
     allow(ReportConfiguration).to receive(:date_bounds).with(any_args)
       .and_return({ min: min_date, start: start_date, end: end_date, max: max_date })
@@ -708,7 +707,7 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET securities_services_statement' do
       let(:make_request) { get :securities_services_statement }
       let(:response_hash) { double('A Securities Services Statement', :'[]' => nil)}
-      let(:report_end_date) { double( 'report_end_date' ) }
+      let(:report_end_date) { Date.today + rand(10000) }
       let(:month_year) { double( 'month_year' ) }
       let(:start_date_param) { Date.today - rand(10000) }
       describe 'when statements are available' do
@@ -737,6 +736,14 @@ RSpec.describe ReportsController, :type => :controller do
         it 'should raise an error if @statement is nil' do
           expect(member_balance_service_instance).to receive(:securities_services_statement).and_return(nil)
           expect{make_request}.to raise_error(StandardError)
+        end
+        it 'set the debit date to the last business day of the next month following the end date' do
+          next_month_end = double(Date)
+          debit_date = double(Date)
+          allow(controller).to receive(:default_dates_hash).and_return({next_month_end: next_month_end})
+          allow(controller).to receive(:most_recent_business_day).with(next_month_end).and_return(debit_date)
+          make_request
+          expect(assigns[:debit_date]).to eq(debit_date)
         end
         describe 'with the report disabled' do
           before do
@@ -1518,7 +1525,7 @@ RSpec.describe ReportsController, :type => :controller do
     it_behaves_like 'a date restricted report', :advances_detail, nil, 1
     it_behaves_like 'a report with instance variables set in a before_filter', :advances_detail
     it_behaves_like 'a controller action with an active nav setting', :advances_detail, :reports
-    
+
     it 'should render the advances_detail view' do
       call_action
       expect(response.body).to render_template('advances_detail')
