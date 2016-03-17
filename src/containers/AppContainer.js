@@ -1,7 +1,9 @@
 import { connect } from 'react-redux';
 import App from '../components/App';
 
-const mapStateToProps = null;
+const mapStateToProps = state => ({
+  modals: state.modals
+});
 
 const mapDispatchToProps = dispatch => ({
   messageReceived(event) {

@@ -12,6 +12,7 @@ import s from './App.scss';
 import globalCss from '../../globalCss.scss';
 import HeaderContainer from '../../containers/HeaderContainer';
 import Footer from '../Footer';
+import DeleteRestaurantModalContainer from '../../containers/DeleteRestaurantModalContainer';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import { host } from '../../config';
 
@@ -20,6 +21,7 @@ class App extends Component {
   static propTypes = {
     children: PropTypes.element.isRequired,
     messageReceived: PropTypes.func.isRequired,
+    modals: PropTypes.object.isRequired,
     error: PropTypes.object,
   };
 
@@ -42,11 +44,17 @@ class App extends Component {
   }
 
   render() {
+    const modals = [];
+    if (this.props.modals.deleteRestaurant !== undefined) {
+      modals.push(<DeleteRestaurantModalContainer key={modals.length} />);
+    }
+
     return !this.props.error ? (
       <div>
         <HeaderContainer />
         {this.props.children}
         <Footer />
+        {modals}
       </div>
     ) : this.props.children;
   }

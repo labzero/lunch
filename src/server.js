@@ -138,6 +138,7 @@ server.get('*', async (req, res, next) => {
                   items: tags
                 },
                 flashes: [],
+                modals: {},
                 user: {},
                 latLng: {
                   lat: parseFloat(process.env.SUGGEST_LAT),

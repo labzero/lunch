@@ -37,6 +37,7 @@
     "pretty-error": "2.0.0",
     "react": "0.14.7",
     "react-autosuggest": "^3.5.1",
+    "react-bootstrap": "^0.28.3",
     "react-dom": "0.14.7",
     "react-geosuggest": "^1.18.1",
     "react-google-maps": "^4.9.1",

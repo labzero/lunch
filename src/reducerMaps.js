@@ -194,6 +194,27 @@ export const mapUi = {
   }
 };
 
+export const modals = {
+  [ActionTypes.SHOW_MODAL](state, action) {
+    return Object.assign({}, state, {
+      [action.name]: Object.assign({}, state[action.name], {
+        shown: true,
+        restaurantId: action.restaurantId
+      })
+    });
+  },
+  [ActionTypes.HIDE_MODAL](state, action) {
+    return Object.assign({}, state, {
+      [action.name]: Object.assign({}, state[action.name], { shown: false })
+    });
+  },
+  [ActionTypes.RESTAURANT_DELETED](state) {
+    return Object.assign({}, state, {
+      deleteRestaurant: Object.assign({}, state.deleteRestaurant, { shown: false })
+    });
+  }
+};
+
 export const tags = {
   [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT](state, action) {
     return Object.assign({}, state, {
