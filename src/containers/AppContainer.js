@@ -1,8 +1,9 @@
 import { connect } from 'react-redux';
 import App from '../components/App';
 
-const mapStateToProps = state => ({
-  modals: state.modals
+const mapStateToProps = (state, ownProps) => ({
+  modals: state.modals,
+  ...ownProps
 });
 
 const mapDispatchToProps = dispatch => ({

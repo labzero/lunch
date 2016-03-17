@@ -124,7 +124,10 @@
     },
     "unmockedModulePathPatterns": [
       "react",
-      "enzyme"
+      "enzyme",
+      "core-js",
+      "isomorphic-style-loader",
+      "bluebird"
     ]
   },
   "stylelint": {
