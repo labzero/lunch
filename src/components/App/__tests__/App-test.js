@@ -1,23 +1,25 @@
-jest.unmock('../../../core/ContextHolder');
 jest.unmock('../App');
 
-import ContextHolder from '../../../core/ContextHolder';
 import App from '../App';
 import React from 'react';
 import { shallow } from 'enzyme';
 
 describe('App', () => {
-  it('renders children correctly', () => {
-    const messageReceived = jest.fn();
-    const modals = {};
+  let messageReceived;
+  let modals;
 
+  beforeEach(() => {
+    messageReceived = jest.fn();
+    modals = {};
+    window.WebSocket = jest.fn();
+  });
+
+  it('renders children correctly', () => {
     const wrapper = shallow(
-      <ContextHolder context={{ insertCss: () => {} }}>
-        <App messageReceived={messageReceived} modals={modals}>
-          <div className="child" />
-        </App>
-      </ContextHolder>
-    );
+      <App messageReceived={messageReceived} modals={modals}>
+        <div className="child" />
+      </App>,
+    { context: { insertCss: () => {} } });
     expect(wrapper.contains(<div className="child" />)).toBe(true);
   });
 });

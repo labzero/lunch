@@ -8,6 +8,7 @@ class ContextHolder extends React.Component {
       insertCss: PropTypes.func,
       onSetMeta: PropTypes.func,
       onPageNotFound: PropTypes.func,
+      onSetTitle: PropTypes.func
     }),
     children: PropTypes.element.isRequired,
   };
@@ -20,7 +21,7 @@ class ContextHolder extends React.Component {
   };
 
   getChildContext() {
-    const context = this.props.context;
+    const context = this.props.context || {};
     return {
       insertCss: context.insertCss || emptyFunction,
       onSetTitle: context.onSetTitle || emptyFunction,

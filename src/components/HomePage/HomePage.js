@@ -42,4 +42,6 @@ class HomePage extends Component {
 
 }
 
+export const _HomePage = HomePage;
+
 export default withStyles(HomePage, s);
