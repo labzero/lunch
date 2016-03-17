@@ -14,6 +14,7 @@ class RenderReportPDFJob < FhlbJob
     member = MembersService.new(controller.request).member(member_id)
     raise 'Member not found!' unless member
 
+    controller.request.env['warden'] = FhlbMember::WardenProxy.new(job_status.user)
     controller.session['member_id'] = member_id
     controller.session['member_name'] = member[:name]
     controller.session['sta_number'] = member[:sta_number]
