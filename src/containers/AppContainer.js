@@ -11,7 +11,7 @@ const mapDispatchToProps = dispatch => ({
       const data = JSON.parse(event.data);
       dispatch(data);
     } catch (SyntaxError) {
-      console.error('Couldn\'t parse message data.');
+      // console.error('Couldn\'t parse message data.');
     }
   }
 });

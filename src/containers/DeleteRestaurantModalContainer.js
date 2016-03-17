@@ -18,7 +18,8 @@ const mapDispatchToProps = dispatch => ({
 const mergeProps = (stateProps, dispatchProps) => Object.assign(stateProps, dispatchProps, {
   shown: stateProps.shown && stateProps.restaurant !== undefined,
   restaurant: stateProps.restaurant || {},
-  deleteRestaurant() {
+  deleteRestaurant(event) {
+    event.preventDefault();
     dispatchProps.dispatch(removeRestaurant(stateProps.restaurant.id));
   }
 });
