@@ -3,3 +3,21 @@
   border-width: 2px 0;
   height: 500px;
 }
+
+@media only screen and (max-height: 600px) {
+  .root {
+    height: 300px;
+  }
+}
+
+@media only screen and (max-height: 500px) {
+  .root {
+    height: 250px;
+  }
+}
+
+@media only screen and (max-height: 400px) {
+  .root {
+    height: 200px;
+  }
+}

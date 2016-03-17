@@ -58,3 +58,9 @@
   width: 100%;
   z-index: 1;
 }
+
+@media only screen and (max-height: 500px) {
+  .bannerTitle {
+    font-size: 4em;
+  }
+}
