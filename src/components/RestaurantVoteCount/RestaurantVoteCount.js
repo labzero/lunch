@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantVoteCount.scss';
 
-class RestaurantVoteCount extends Component {
+export class _RestaurantVoteCount extends Component {
   static propTypes = {
     votes: PropTypes.array.isRequired
   };
@@ -21,4 +21,4 @@ class RestaurantVoteCount extends Component {
   }
 }
 
-export default withStyles(RestaurantVoteCount, s);
+export default withStyles(_RestaurantVoteCount, s);

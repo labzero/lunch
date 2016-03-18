@@ -2,4 +2,8 @@
  * @providesModule SCSSStub
  */
 
-module.exports = {};
+module.exports = {
+  populated: 'populated',
+  root: 'root',
+  updated: 'updated'
+};

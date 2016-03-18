@@ -4,7 +4,7 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantAddTagForm.scss';
 import autosuggestTheme from './RestaurantAddTagFormAutosuggest.scss';
 
-const RestaurantAddTagForm = ({
+export const _RestaurantAddTagForm = ({
   addTagAutosuggestValue,
   setAddTagAutosuggestValue,
   addNewTagToRestaurant,
@@ -17,8 +17,8 @@ const RestaurantAddTagForm = ({
     <Autosuggest
       suggestions={tags}
       focusInputOnSuggestionClick={false}
-      getSuggestionValue={RestaurantAddTagForm.getSuggestionValue}
-      renderSuggestion={RestaurantAddTagForm.renderSuggestion}
+      getSuggestionValue={_RestaurantAddTagForm.getSuggestionValue}
+      renderSuggestion={_RestaurantAddTagForm.renderSuggestion}
       inputProps={{
         value: addTagAutosuggestValue,
         onChange: setAddTagAutosuggestValue
@@ -27,14 +27,21 @@ const RestaurantAddTagForm = ({
       onSuggestionSelected={handleSuggestionSelected}
       shouldRenderSuggestions={shouldRenderSuggestions}
     />
-    <button className={s.button} type="button" disabled={addTagAutosuggestValue === ''} onClick={addNewTagToRestaurant}>add</button>
+    <button
+      className={s.button}
+      type="button"
+      disabled={addTagAutosuggestValue === ''}
+      onClick={addNewTagToRestaurant}
+    >
+      add
+    </button>
     <button className={s.button} type="button" onClick={hideAddTagForm}>cancel</button>
   </form>
 );
 
-RestaurantAddTagForm.getSuggestionValue = suggestion => suggestion.name;
-RestaurantAddTagForm.renderSuggestion = suggestion => <span>{suggestion.name}</span>;
-RestaurantAddTagForm.propTypes = {
+_RestaurantAddTagForm.getSuggestionValue = suggestion => suggestion.name;
+_RestaurantAddTagForm.renderSuggestion = suggestion => <span>{suggestion.name}</span>;
+_RestaurantAddTagForm.propTypes = {
   addNewTagToRestaurant: PropTypes.func.isRequired,
   handleSuggestionSelected: PropTypes.func.isRequired,
   hideAddTagForm: PropTypes.func.isRequired,
@@ -44,4 +51,4 @@ RestaurantAddTagForm.propTypes = {
   tags: PropTypes.array.isRequired
 };
 
-export default withStyles(withStyles(RestaurantAddTagForm, autosuggestTheme), s);
+export default withStyles(withStyles(_RestaurantAddTagForm, autosuggestTheme), s);

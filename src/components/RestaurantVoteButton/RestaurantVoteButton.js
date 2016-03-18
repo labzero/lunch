@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantVoteButton.scss';
 
-const RestaurantVoteButton = ({ votes, user, handleClick }) => {
+export const _RestaurantVoteButton = ({ votes, user, handleClick }) => {
   let downVote = false;
   if (votes.some(vote => vote.user_id === user.id)) {
     downVote = true;
@@ -13,7 +13,7 @@ const RestaurantVoteButton = ({ votes, user, handleClick }) => {
   );
 };
 
-RestaurantVoteButton.propTypes = {
+_RestaurantVoteButton.propTypes = {
   handleClick: PropTypes.func.isRequired,
   user: PropTypes.shape({
     id: PropTypes.number.isRequired
@@ -23,4 +23,4 @@ RestaurantVoteButton.propTypes = {
   })).isRequired
 };
 
-export default withStyles(RestaurantVoteButton, s);
+export default withStyles(_RestaurantVoteButton, s);
