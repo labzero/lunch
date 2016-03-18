@@ -106,7 +106,7 @@ When(/^I select the (\d+)(?:st|rd|th) member bank$/) do |num|
   @login_flag = flag_page
   dropdown = page.find('select[name=member_id]')
   dropdown.click
-  option = dropdown.find("option:nth-child(#{num.to_i})")
+  option = dropdown.find("option:nth-child(#{num.to_i+1})")
   @member_id = option.value
   option.click
   click_button(I18n.t('global.continue'))
