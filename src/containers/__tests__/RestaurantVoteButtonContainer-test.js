@@ -5,8 +5,6 @@ import RestaurantVoteButtonContainer from '../RestaurantVoteButtonContainer';
 import { removeVote, addVote } from '../../actions/restaurants';
 import RestaurantVoteButton from '../../components/RestaurantVoteButton';
 import React from 'react';
-
-// import { Provider } from 'react-redux';
 import { shallow } from 'enzyme';
 
 describe('RestaurantAddTagForm', () => {
