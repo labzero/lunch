@@ -36,7 +36,7 @@ export const _Restaurant = ({
     if (listUiItem.isAddingTags) {
       addTagArea = <RestaurantAddTagFormContainer {...{ id }} />;
     } else {
-      addTagArea = <button onClick={showAddTagForm}>add tag</button>;
+      addTagArea = <button className="btn btn-sm btn-default" onClick={showAddTagForm}>add tag</button>;
     }
   }
 

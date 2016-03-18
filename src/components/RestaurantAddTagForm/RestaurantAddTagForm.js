@@ -6,6 +6,8 @@ import autosuggestTheme from './RestaurantAddTagFormAutosuggest.scss';
 
 const returnTrue = () => true;
 
+autosuggestTheme.input = 'form-control input-sm';
+
 export const _RestaurantAddTagForm = ({
   addTagAutosuggestValue,
   setAddTagAutosuggestValue,
@@ -29,14 +31,14 @@ export const _RestaurantAddTagForm = ({
       shouldRenderSuggestions={returnTrue}
     />
     <button
-      className={s.button}
+      className={`btn btn-sm btn-primary ${s.button}`}
       type="button"
       disabled={addTagAutosuggestValue === ''}
       onClick={addNewTagToRestaurant}
     >
       add
     </button>
-    <button className={s.button} type="button" onClick={hideAddTagForm}>cancel</button>
+    <button className={`btn btn-sm btn-default ${s.button}`} type="button" onClick={hideAddTagForm}>cancel</button>
   </form>
 );
 

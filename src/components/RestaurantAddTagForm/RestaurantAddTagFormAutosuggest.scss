@@ -3,6 +3,11 @@
 .container {
   display: inline;
   position: relative;
+
+  input {
+    display: inline;
+    width: auto;
+  }
 }
 
 .suggestionsContainer {

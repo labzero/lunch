@@ -15,19 +15,6 @@ html {
   background: $background-color;
 }
 
-button {
-  background: #eee;
-  border-radius: 5px;
-
-  &:active {
-    background: #ddd;
-  }
-
-  &:disabled {
-    border: 2px solid #eee;
-  }
-}
-
 /*
  * Browser upgrade prompt
  * ========================================================================== */
