@@ -14,9 +14,14 @@ import s from './Login.scss';
 const Header = ({ user }) => {
   let content;
   if (user.id === undefined) {
-    content = <a href="/login">Log In</a>;
+    content = (<div className={s.flexContainer}><a href="/login">Log In</a></div>);
   } else {
-    content = <div>{user.name} | <a href="/logout">Log Out</a></div>;
+    content = (
+      <div className={s.flexContainer}>
+        <span>{user.name}</span>
+        <a className={s.logOut} href="/logout">Log Out</a>
+      </div>
+    );
   }
 
   return (
