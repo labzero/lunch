@@ -68,4 +68,19 @@ describe('RestaurantAddTagFormContainer', () => {
     const wrapper = shallow(<RestaurantAddTagFormContainer {...props} />, { context: { store } });
     expect(wrapper.find(RestaurantAddTagForm).first().props().tags.length).toBe(10);
   });
+
+  it('omits added tags', () => {
+    state.restaurants.items[0].tags = [1, 2, 3, 4, 5];
+    const store = createStore(() => state, state);
+    const wrapper = shallow(<RestaurantAddTagFormContainer {...props} />, { context: { store } });
+    expect(wrapper.find(RestaurantAddTagForm).first().props().tags.length).toBe(6);
+  });
+
+  it('filters by query and added tags', () => {
+    state.restaurants.items[0].tags = [4];
+    state.listUi[1] = { addTagAutosuggestValue: 'x' };
+    const store = createStore(() => state, state);
+    const wrapper = shallow(<RestaurantAddTagFormContainer {...props} />, { context: { store } });
+    expect(wrapper.find(RestaurantAddTagForm).first().props().tags.length).toBe(1);
+  });
 });
