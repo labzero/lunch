@@ -7,6 +7,7 @@ const RestaurantTag = ({ tag, removeTag, user }) => {
   if (user.id !== undefined) {
     button = <button className={s.delete} onClick={removeTag}>&times;</button>;
   }
+
   return (
     <div className={s.root}>
       {tag.name}
