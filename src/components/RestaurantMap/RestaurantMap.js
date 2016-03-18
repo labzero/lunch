@@ -3,8 +3,16 @@ import { Provider } from 'react-redux';
 import ContextHolder from '../../core/ContextHolder';
 import RestaurantContainer from '../../containers/RestaurantContainer';
 import { GoogleMapLoader, GoogleMap, Marker, InfoWindow } from 'react-google-maps';
+import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantMap.scss';
+
+let google;
+if (canUseDOM) {
+  google = window.google;
+} else {
+  google = { maps: { SymbolPath: {} } };
+}
 
 const RestaurantMap = ({ latLng, items, mapUi, handleMarkerClick, handleMarkerClose }, context) => (
   <section className={s.root}>
@@ -24,6 +32,18 @@ const RestaurantMap = ({ latLng, items, mapUi, handleMarkerClick, handleMarkerCl
             scrollwheel: false
           }}
         >
+          <Marker
+            clickable={false}
+            position={latLng}
+            icon={{
+              fillColor: 'pink',
+              fillOpacity: 1,
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 6,
+              strokeWeight: 2
+            }}
+            title="You are here"
+          />
           {items.map((item, index) => {
             const length = item.votes.length;
             const label = {
