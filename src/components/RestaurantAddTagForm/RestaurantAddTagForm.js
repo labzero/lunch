@@ -4,13 +4,14 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantAddTagForm.scss';
 import autosuggestTheme from './RestaurantAddTagFormAutosuggest.scss';
 
+const returnTrue = () => true;
+
 export const _RestaurantAddTagForm = ({
   addTagAutosuggestValue,
   setAddTagAutosuggestValue,
   addNewTagToRestaurant,
   tags,
   handleSuggestionSelected,
-  shouldRenderSuggestions,
   hideAddTagForm
 }) => (
   <form className={s.root} onSubmit={addNewTagToRestaurant}>
@@ -25,7 +26,7 @@ export const _RestaurantAddTagForm = ({
       }}
       theme={autosuggestTheme}
       onSuggestionSelected={handleSuggestionSelected}
-      shouldRenderSuggestions={shouldRenderSuggestions}
+      shouldRenderSuggestions={returnTrue}
     />
     <button
       className={s.button}
@@ -47,7 +48,6 @@ _RestaurantAddTagForm.propTypes = {
   hideAddTagForm: PropTypes.func.isRequired,
   addTagAutosuggestValue: PropTypes.string.isRequired,
   setAddTagAutosuggestValue: PropTypes.func.isRequired,
-  shouldRenderSuggestions: PropTypes.func.isRequired,
   tags: PropTypes.array.isRequired
 };
 

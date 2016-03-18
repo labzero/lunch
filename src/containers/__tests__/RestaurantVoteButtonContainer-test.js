@@ -1,26 +1,28 @@
 jest.unmock('../RestaurantVoteButtonContainer');
 jest.unmock('react-redux');
+jest.unmock('redux');
 
 import RestaurantVoteButtonContainer from '../RestaurantVoteButtonContainer';
 import { removeVote, addVote } from '../../actions/restaurants';
 import RestaurantVoteButton from '../../components/RestaurantVoteButton';
 import React from 'react';
 import { shallow } from 'enzyme';
+import { createStore } from 'redux';
+import action from '../../../test/helpers/action';
 
-describe('RestaurantAddTagForm', () => {
+describe('RestaurantVoteButtonContainer', () => {
+  const state = {
+    user: {
+      id: 1
+    }
+  };
   let store;
   let props;
 
   beforeEach(() => {
-    store = {
-      getState: () => ({
-        user: {
-          id: 1
-        }
-      }),
-      subscribe: jest.fn(),
-      dispatch: jest.fn()
-    };
+    store = createStore(() => state, state);
+    removeVote.mockImplementation(action);
+    addVote.mockImplementation(action);
   });
 
   it('adds a vote when votes are empty', () => {

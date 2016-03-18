@@ -14,7 +14,6 @@ describe('RestaurantAddTagForm', () => {
       hideAddTagForm: jest.fn(),
       addTagAutosuggestValue: '',
       setAddTagAutosuggestValue: jest.fn(),
-      shouldRenderSuggestions: jest.fn(),
       tags: []
     };
   });

@@ -127,7 +127,8 @@
       "enzyme",
       "core-js",
       "isomorphic-style-loader",
-      "bluebird"
+      "bluebird",
+      "test"
     ]
   },
   "stylelint": {

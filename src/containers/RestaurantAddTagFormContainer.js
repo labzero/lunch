@@ -19,12 +19,10 @@ const mapStateToProps = (state, ownProps) => {
     .filter(tag => !addedTags.includes(tag.id))
     .filter(tag => regex.test(tag.name))
     .slice(0, 10);
-  const shouldRenderSuggestions = () => true;
   return {
     ...ownProps,
     tags,
-    addTagAutosuggestValue,
-    shouldRenderSuggestions
+    addTagAutosuggestValue
   };
 };
 
