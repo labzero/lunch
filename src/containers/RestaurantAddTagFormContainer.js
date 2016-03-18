@@ -4,7 +4,7 @@ import { addNewTagToRestaurant, addTagToRestaurant } from '../actions/restaurant
 import RestaurantAddTagForm from '../components/RestaurantAddTagForm';
 
 function escapeRegexCharacters(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replace(/[.*+?^${}()|[\]\\]/gi, '\\$&');
 }
 
 const mapStateToProps = (state, ownProps) => {
