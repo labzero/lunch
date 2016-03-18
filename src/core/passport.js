@@ -56,7 +56,7 @@ passport.use(new GoogleStrategy(
         return done(null, user);
       }).catch(err => done(err));
     }
-    return done(null, false, { message: 'Please log in using your Lab Zero account.' });
+    return done(null, false, { message: 'Please log in using your company account.' });
   }
 ));
 
