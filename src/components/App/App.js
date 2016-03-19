@@ -33,7 +33,7 @@ class App extends Component {
     this.removeAppCss = this.context.insertCss(s);
     this.removeGlobalCss = this.context.insertCss(globalCss);
     if (canUseDOM) {
-      this.socket = new window.WebSocket(`ws://${host}`);
+      this.socket = new window.WebSocket(`ws://${window.location.host}`);
       this.socket.onmessage = this.props.messageReceived;
     }
   }

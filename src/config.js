@@ -11,7 +11,9 @@
 /* jscs:disable maximumLineLength */
 
 export const port = process.env.PORT || 3000;
-export const host = process.env.WEBSITE_HOSTNAME || `localhost:${port}`;
+export const host = process.env.WEBSITE_HOSTNAME ||
+                    `${process.env.DOCKERCLOUD_SERVICE_FQDN}:${port}` ||
+                    `localhost:${port}`;
 
 export const analytics = {
 

@@ -6,3 +6,8 @@ node_modules
 ncp-debug.log
 npm-debug.log
 .env
+.env.prod
+
+# Temp, while we set up Docker locally
+docker-cloud.yml
+deploy.sh

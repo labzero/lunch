@@ -23,6 +23,10 @@ async function copy({ watch } = {}) {
     ncp('src/public', 'build/public'),
     ncp('src/content', 'build/content'),
     ncp('package.json', 'build/package.json'),
+    ncp('.env.prod', 'build/.env'),
+    ncp('database.js', 'build/database.js'),
+    ncp('.sequelizerc', 'build/.sequelizerc'),
+    ncp('db', 'build/db')
   ]);
 
   replace({
