@@ -11,6 +11,7 @@ Background:
 Scenario: Member sees Borrowing Capacity Statement
   Given I visit the dashboard
   When I select "Borrowing Capacity" from the reports dropdown
+  And I wait for the report to load
   Then I should see report summary data
   And I should see a report header
   And I should see the "Standard Credit Program" table and "3" subtables

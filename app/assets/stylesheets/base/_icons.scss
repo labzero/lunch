@@ -187,3 +187,14 @@ $ellipsis-height: 6px !default;;
   width: $ellipsis-width;
   height: $ellipsis-height;
 }
+
+@mixin data-element-loading {
+  position: relative;
+  &:after {
+    @extend %absolute-pseudoelement;
+    @extend %vertical-center;
+    @include icon-loading-ellipsis;
+    width: $ellipsis-width;
+    height: $ellipsis-height;
+  }
+}

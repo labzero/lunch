@@ -277,7 +277,7 @@ module MAPI
           [message, payment_info]
         end
 
-        def self.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date=nil)
+        def self.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date=nil, allow_grace_period=false)
           member_id = member_id.to_i
           # Calculated values
           # True maturity date will be calculated later
@@ -298,9 +298,9 @@ module MAPI
             'maturity_date' => maturity_date
           }
 
-          data = if MAPI::Services::EtransactAdvances::ExecuteTrade::init_execute_trade_connection(app.settings.environment)
+          data = if connection = MAPI::Services::EtransactAdvances::ExecuteTrade::init_execute_trade_connection(app.settings.environment)
             begin
-              response = @@execute_trade_connection.call(:execute_trade,
+              response = connection.call(:execute_trade,
                                                          message_tag: 'executeTradeRequest',
                                                          message: message,
                                                          :soap_header => MAPI::Services::Rates::SOAP_HEADER)
@@ -318,7 +318,7 @@ module MAPI
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_capital_stock(fhlbsfresponse, response, response_hash) if check_capstock
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_credit(fhlbsfresponse, response, response_hash)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_collateral(fhlbsfresponse, response, response_hash)
-                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_enabled_product(app.logger, app.settings.environment, advance_term, advance_type, response_hash)
+                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_enabled_product(app.logger, app.settings.environment, advance_term, advance_type, response_hash, allow_grace_period)
 
                 # passed all checks
                 if response_hash['status'].blank?
@@ -459,10 +459,10 @@ module MAPI
           hash.merge(new_hash){|key, old, new| old + new }
         end
 
-        def self.check_enabled_product(logger, environment, type, term, response_hash)
+        def self.check_enabled_product(logger, environment, type, term, response_hash, allow_grace_period=false)
           new_hash = {}
-          loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(logger, environment)
-          unless loan_terms && loan_terms[type][term].with_indifferent_access['display_status']
+          loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(logger, environment, allow_grace_period)
+          unless loan_terms && loan_terms[type][term].with_indifferent_access['trade_status']
             new_hash = {
               'status' => ['DisabledProductError']
             }

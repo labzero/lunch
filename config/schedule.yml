@@ -1,2 +1,2 @@
 ProcessQuickReportsJob:
-  cron: "15 0 * * *"
+  cron: "15 0 * * * America/Los_Angeles"

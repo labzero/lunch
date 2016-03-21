@@ -1,6 +1,6 @@
 - @html_class = 'white-background'
 - @page_title = t('reports.meta_title')
-.report.report-price-indications.row
+.report.report-price-indications.row{data: {deferred: @job_status_url, 'deferred-load' => @load_url}}
   .report-header
     %h1= @report_name
     = render 'reports_header_buttons', allowed_params: [:start_date, :end_date, :historical_price_collateral_type, :historical_price_credit_type], download_formats: [:xlsx]
@@ -16,4 +16,4 @@
   .report-main-body
     %h2.report-table-title= t("reports.pages.price_indications.#{@credit_type}.#{@collateral_type}_table_title")
     = render 'reports_table_notes', notes: @table_data[:notes]
-    = render 'reports/reports_table', table_class: "#{@collateral_type}-#{@credit_type}-table", table_data: @table_data, sortable: false
+    = render 'reports/reports_table', table_class: ("#{@collateral_type}-#{@credit_type}-table" unless @table_data[:deferred]), table_data: @table_data, sortable: false

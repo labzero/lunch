@@ -15,6 +15,10 @@ Then(/^I should see the datepicker preset for "(.*?)"$/) do |preset|
   page.assert_selector('.ranges li', text: text)
 end
 
+Then(/^I should not see the datepicker preset for "(.*?)"$/) do |preset|
+  page.assert_no_selector('.ranges li', text: preset)
+end
+
 When(/^I choose the "(.*?)" preset in the datepicker$/) do |preset|
   text = get_datepicker_preset_label(preset)
   page.first('.daterangepicker .ranges li', text: text).click
@@ -71,6 +75,7 @@ When(/^I select all of last year including today$/) do
 end
 
 Then(/^I should see a report with dates for "(.*?)"$/) do |selector|
+  step 'I wait for the report to load'
   case selector
     when 'month to date'
       start_date = default_dates_hash[:this_month_start]
@@ -110,8 +115,8 @@ Then(/^I should not see available dates after the most recent business day not i
     end
   else
     # handles the case where the max allowed date occurs in the last calendar month
-    page.assert_no_selector('.fa-arrow-right') 
-  end  
+    page.assert_no_selector('.fa-arrow-right')
+  end
 end
 
 When(/^I write "(.*?)" in the datepicker (start|end) input field$/) do |date, input|
@@ -165,9 +170,9 @@ When(/^that today's date is the (last day of last quarter|first day of this quar
 end
 
 When(/^that today's date is "(.*?)"$/) do |date|
-  today = date.to_date
-  allow(Time.zone).to receive(:today).and_return(today)
-  allow(Time.zone.now).to receive(:to_date).and_return(today)
+  now = Time.zone.now
+  today = date.to_datetime.change(hour: now.hour, min: now.min, sec: now.sec)
+  Timecop.travel(today)
 end
 
 def get_datepicker_preset_label(preset)
@@ -217,8 +222,10 @@ def change_datepicker_to_month(today, month, calendar)
   end
 end
 
-def most_recent_business_day(d)
-  return d - 1.day if d.saturday?
-  return d - 2.day if d.sunday?
-  d
+When(/^I click on the datepicker (start|end) input field$/) do |input|
+  page.find("input[name=daterangepicker_#{input}]").click
+end
+
+Then(/^I should see the date "(.*?)" in the datepicker (start|end) input field/) do |date, input|
+  page.find("input[name=daterangepicker_#{input}]").value.should eq date
 end

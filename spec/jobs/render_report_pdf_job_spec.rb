@@ -77,6 +77,10 @@ RSpec.describe RenderReportPDFJob, type: :job do
       expect(reports_controller).to receive(:instance_variable_set).with(:@print_layout, true).ordered
       run_job
     end
+    it 'sets the `skip_deferred_load` controller attribute to `true`' do
+      run_job
+      expect(reports_controller.skip_deferred_load).to eq(true)
+    end
     it 'should set the controller `params` to the params supplied to the job' do
       expect(reports_controller).to receive(:params=).with(params).ordered
       run_job

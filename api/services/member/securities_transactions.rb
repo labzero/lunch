@@ -58,7 +58,7 @@ module MAPI
 
         def self.fetch_securities_transactions(environment, logger, fhlb_id, rundate, final)
           if environment == :production
-            fetch_hashes(logger, securities_transactions_sql(fhlb_id, rundate, final), {to_i: ["CUR_UNITS"], to_f: %w(CUR_PRINCIPAL_AMOUNT CUR_INTEREST_AMOUNT CUR_TOTAL_AMOUNT)}, true)
+            fetch_hashes(logger, securities_transactions_sql(fhlb_id, rundate, final), {to_date: ['CUR_MATURITY_DATE'], to_i: ["CUR_UNITS"], to_f: %w(CUR_PRINCIPAL_AMOUNT CUR_INTEREST_AMOUNT CUR_TOTAL_AMOUNT)}, true)
           else
             rundate == XMAS_2015 ? [] : fake('securities_transactions')
           end

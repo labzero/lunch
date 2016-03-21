@@ -62,7 +62,6 @@ $(function () {
       setDatePickerApplyListener($datePickerTrigger, $form);
       setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
       if (filter !== undefined) {
-        disablePresets($datePickerTrigger, filter, filterOptions, today);
         if (singleDatePicker) {
           $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(){
             filterDates(filter, filterOptions);
@@ -72,11 +71,42 @@ $(function () {
 
       $datePickerTrigger.data('datepicker-initialized', true);
     });
+    var $datePickerFields = $(".datepicker_input_field .input-mini");
+    $datePickerFields.keypress(function(e) {
+      Fhlb.Utils.onlyAllowDigits(e, [47]); // 47 = / (forward slash)
+    });
+
+    $datePickerFields.keyup(function(e) {
+      normalizeDateFormatPreservingSelection(e);
+    });
+
+    $datePickerFields.change(function(e) {
+      normalizeDateFormatPreservingSelection(e);
+    });
   };
 
   bindDatepickers();
 
   $('body').on('datepicker-rebind', bindDatepickers);
+
+  function normalizeDateFormatPreservingSelection(e) {
+    if ([8, 9, 13, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46].indexOf(e.which) < 0) {
+      var target = e.target;
+      var selectionStart = target.selectionStart;
+      var selectionEnd = target.selectionEnd;
+      var oldValue = target.value;
+      var newValue = oldValue.match(/[\d\/]+/);
+
+      if (newValue !== oldValue) {
+        try {
+          target.innerText = newValue;
+        } catch(_e) {
+          $(target).val(newValue);
+        };
+        target.setSelectionRange(selectionStart, selectionEnd);
+      };
+    };
+  };
 
   function initializeDatePicker($datePickerTrigger, $datePickerWrapper, options) {
     var optionsHash = {
@@ -106,6 +136,7 @@ $(function () {
     $datePickerEndInput.prependTo($('.daterangepicker_end_input_wrapper'));
     $datePickerStartInput.prependTo($('.daterangepicker_start_input_wrapper'));
     $([$datePickerEndInput, $datePickerStartInput]).each(function(){this.on('change', function(e) {
+      convertTwoDigitYearToFourDigitYear(e, $datePickerTrigger.data('daterangepicker'), options);
       snapToValidDate(e, $datePickerTrigger.data('daterangepicker'), options);
       $datePickerTrigger.data('daterangepicker').inputsChanged(e)});})
     $datePickerWrapper.find('.calendar, .ranges').off('mouseenter mouseleave'); // daterangepicker binds these unwanted events
@@ -222,23 +253,6 @@ $(function () {
     };
   };
 
-  function disablePresets($picker, filter, filterOptions, today) {
-    var picker = $picker.data('daterangepicker');
-    var today = moment(today);
-    var endOfMonth = moment(today).endOf('month'); // clone so that `endOf` does not mutate original `date`
-    switch (filter) {
-      case filterOptions['end_of_month']:
-        if (today !== endOfMonth) {
-          $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
-        };
-        break;
-      case filterOptions['end_of_quarter']:
-        $(picker.container.find('.ranges li')[0]).addClass('disabled'); // 'Today'
-        $(picker.container.find('.ranges li')[1]).addClass('disabled'); // 'End of {month}'
-        break;
-    };
-  };
-
   function snapToValidDate(e, picker, options){
     //  snap to maxDate or minDate if date is out of range
     var maxDate = moment(options.maxDate);
@@ -298,5 +312,36 @@ $(function () {
     };
   };
 
-});
+  // converts two-digit dates to four-digit dates following the java conventions set forth here:
+  // http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html#year
+  function convertTwoDigitYearToFourDigitYear(e, picker, options) {
+    if (e.target.value.search(/(.*)\/(.*)\/(.*)/) !== -1) {
+      var dateArray = e.target.value.split("/");
+      var monthString = dateArray[0];
+      var dayString = dateArray[1];
+      var yearString = dateArray[2];
+      if (yearString === "" || isNaN(yearString)) {
+        return;
+      }
+      if (yearString.length == 2) {
+        var yearInt = parseInt(yearString);
 
+        var lowerBound = new Date();
+        lowerBound.setFullYear(lowerBound.getFullYear() - 80);
+
+        if ((1900 + yearInt) > lowerBound.getFullYear()) {
+          $(e.target).val(monthString + "/" + dayString + "/" + (1900 + yearInt));
+          return;
+        }
+
+        var upperBound = new Date();
+        upperBound.setFullYear(upperBound.getFullYear() + 20);
+
+        if ((2000 + yearInt) < upperBound) {
+          $(e.target).val(monthString + "/" + dayString + "/" + (2000 + yearInt));
+        }
+      }
+    }
+  };
+
+});

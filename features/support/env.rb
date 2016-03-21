@@ -224,6 +224,14 @@ if ENV['CUCUMBER_INCLUDE_SAUCE_SESSION']
 end
 
 Around do |scenario, block|
+  begin
+    block.call
+  ensure
+    Timecop.return if defined?(Timecop)
+  end
+end
+
+Around do |scenario, block|
   features = {}
   feature_state = {}
   scenario.source_tag_names.each do |tag|

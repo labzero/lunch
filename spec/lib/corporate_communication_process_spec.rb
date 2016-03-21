@@ -266,7 +266,7 @@ describe CorporateCommunication::Process do
       allow(Net::IMAP).to receive(:new).and_return(connection)
       allow(ENV).to receive(:[]).with('IMAP_HOST').and_return(env_host)
       allow(ENV).to receive(:[]).with('IMAP_PORT').and_return(env_port)
-      allow(ENV).to receive(:[]).with('IMAP_CA_BUNDLE').and_return(ca_bundle)
+      allow(ENV).to receive(:[]).with('IMAP_CA_BUNDLE_PATH').and_return(ca_bundle)
       allow(ENV).to receive(:[]).with('IMAP_USERNAME').and_return(env_username)
       allow(ENV).to receive(:[]).with('IMAP_PASSWORD').and_return(env_password)
     end
@@ -308,7 +308,7 @@ describe CorporateCommunication::Process do
           expect(Net::IMAP).to receive(:new).with(anything, include(ssl: include(verify_mode: OpenSSL::SSL::VERIFY_PEER))).and_return(connection)
           call_method
         end
-        it 'sets the OpenSSL CA file to `ENV[IMAP_CA_BUNDLE`] if present' do
+        it 'sets the OpenSSL CA file to `ENV[IMAP_CA_BUNDLE_PATH`] if present' do
           expect(Net::IMAP).to receive(:new).with(anything, include(ssl: include(ca_file: ca_bundle))).and_return(connection)
           call_method
         end

@@ -1,10 +1,11 @@
 - @html_class = 'white-background'
 - @page_title = t('reports.meta_title')
-.report.report-price-indications.report-current-price-indications.row
+.report.report-price-indications.report-current-price-indications.row{data: {deferred: @job_status_url, 'deferred-load' => @load_url}}
   .report-header
     %h1= @report_name
     = render 'reports_header_buttons', download_formats: [:xlsx]
     = render 'report_details', name: @member_name, freshness: t('reports.pages.price_indications.current.freshness', phone_number: service_desk_phone_number)
+    %p.report-date= t('reports.pages.price_indications.current.date_html', date: fhlb_date_long_alpha(@vrc_date))
     .report-intro-details= simple_format(t('reports.pages.price_indications.current.summary'))
     - if @quick_advance_message
       = render 'shared/quick_advance_message', message: @quick_advance_message
@@ -36,11 +37,16 @@
     = render 'reports_table_notes', notes: @sbc_arc_table_data[:notes]
   .report-main-body
     %h2= t('reports.pages.price_indications.settlement_transaction_account')
-    %table.report-table.sta-rate-table.report-table-vertical-headers{data: {sortable: false}}
+    %table.report-table.sta-rate-table.report-table-vertical-headers{data: {sortable: false}, class: ('table-loading' if @sta_table_data[:deferred])}
       %tbody
         %tr
-          %td= @sta_table_data[:row_name]
-          %td.report-cell-right.report-cell-expanding= fhlb_formatted_number(@sta_table_data[:row_value], precision: 5)
+          - if @sta_table_data[:deferred]
+            %td= @sta_table_data[:row_name]
+            %td.table-loading-cell{colspan: 2}= t('global.prepare_table')
+            %td.table-error-cell.icon-alert-before{colspan: 2}= t('errors.error_occurred')
+          -else
+            %td= @sta_table_data[:row_name]
+            %td.report-cell-right.report-cell-expanding= fhlb_formatted_number(@sta_table_data[:row_value], precision: 5)
     %dl
       %dt= t('reports.pages.price_indications.current.interest_day_count')
       %dd= t('reports.pages.price_indications.current.actual_360')

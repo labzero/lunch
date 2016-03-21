@@ -57,7 +57,8 @@ describe EtransactAdvancesService do
     let(:check_capstock) {true}
     let(:amount) { 100 }
     let(:maturity_date) { "2016-03-11".to_date }
-    let(:call_method) {subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer, maturity_date)}
+    let(:allow_grace_period) { true }
+    let(:call_method) { subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer, maturity_date, allow_grace_period) }
     
     before do
       allow(subject).to receive(:calypso_error_handler).and_return(nil)
@@ -67,8 +68,12 @@ describe EtransactAdvancesService do
       expect(call_method).to be_kind_of(Hash)
     end
     it 'calls `get_hash`' do
-      expect(subject).to receive(:get_hash).with(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}")
+      expect(subject).to receive(:get_hash).with(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}", allow_grace_period: allow_grace_period)
       call_method
+    end
+    it 'defaults `allow_grace_period` to false' do
+      expect(subject).to receive(:get_hash).with(:quick_advance_validate, anything, allow_grace_period: false)
+      subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer, maturity_date)
     end
     it 'returns the results of `get_hash`' do
       result = double('A Result')
@@ -76,13 +81,14 @@ describe EtransactAdvancesService do
       expect(call_method).to be(result)
     end
     it 'should URL encode the signer' do
+      allow(subject).to receive(:get_hash)
       expect(URI).to receive(:escape).with(signer)
       call_method
     end
     it 'passes a `calypso_error_handler` to the `get_hash` method' do
       error_handler = -> (n, m, e) {}
       allow(subject).to receive(:calypso_error_handler).with(member_id).and_return(error_handler)
-      allow(subject).to receive(:get_hash).with(anything, anything) do |*args, &block|
+      allow(subject).to receive(:get_hash).with(anything, anything, anything) do |*args, &block|
         expect(block).to be(error_handler)
       end
       call_method
@@ -98,6 +104,7 @@ describe EtransactAdvancesService do
     let(:amount) { double('amount') }
     let(:iso_date) { double('iso8601 date') }
     let(:maturity_date) { double('date string', to_date: double('date', iso8601: iso_date)) }
+    let(:allow_grace_period) { double('Allow Grace Period') }
     let(:error_handler) { double('error handler') }
     let(:post_body) {
       {
@@ -106,12 +113,13 @@ describe EtransactAdvancesService do
         advance_term: advance_term,
         rate: advance_rate,
         signer: signer,
-        maturity_date: iso_date
+        maturity_date: iso_date,
+        allow_grace_period: allow_grace_period
       }
     }
     let(:post_response) { double('response from post_hash', :[]= => nil) }
     let(:now) { double('now') }
-    let(:call_method) {subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer, maturity_date)}
+    let(:call_method) { subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer, maturity_date, allow_grace_period) }
     
     before do
       allow(subject).to receive(:calypso_error_handler)
@@ -129,6 +137,11 @@ describe EtransactAdvancesService do
       it 'passes the body of the post request' do
         expect(subject).to receive(:post_hash).with(anything, anything, post_body)
         call_method
+      end
+      it 'defaults `allow_grace_period` to false' do
+        post_body[:allow_grace_period] = false
+        expect(subject).to receive(:post_hash).with(anything, anything, post_body)
+        subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer, maturity_date)
       end
     end
     it 'returns the result of the `post_hash` call' do

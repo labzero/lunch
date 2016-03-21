@@ -220,7 +220,7 @@ en:
               blank: You must confirm your email address.
               confirmation: Confirmation email address does not match.
             password:
-              non_atomic: You can't change a password and other attributes at the same time.
+              non_atomic: You can’t change a password and other attributes at the same time.
               intranet: Intranet users cannot change their password through the Member Portal.
               too_short:
                 one: Passwords must be at least one character long.
@@ -241,7 +241,7 @@ en:
     access_manager:
       title: Access Manager
       description_title: Access Manager
-      description: The designated individuals identify your institution's Access Manager(s), who can add and delete users, reset passwords, and lock or unlock member portal access accounts for individuals.
+      description: The designated individuals identify your institution’s Access Manager(s), who can add and delete users, reset passwords, and lock or unlock member portal access accounts for individuals.
     resolution:
       dropdown: Resolution and Authorization
       title: 'Resolution and Authorization: Member Transactions'
@@ -263,7 +263,7 @@ en:
     affordable_housing:
       title: Affordable Housing Program
       description_title: Affordable Housing Program
-      description: The designated individuals listed are authorized to exercise authority under the Bank's Affordable Housing Program and any other community investment programs, excluding extensions of credit related to these programs.
+      description: The designated individuals listed are authorized to exercise authority under the Bank’s Affordable Housing Program and any other community investment programs, excluding extensions of credit related to these programs.
     collateral:
       title: Collateral
       description_title: Collateral
@@ -319,10 +319,10 @@ en:
         success_html: The information for <strong>%{name}</strong> has been updated.
       confirm_delete:
         title: Confirm Delete User Access
-        summary_html: Are you sure you want to delete this user's access?<br>This cannot be undone.
+        summary_html: Are you sure you want to delete this user’s access?<br>This cannot be undone.
         delete_button: Delete User Access
         label: '%{field}:'
-        prompt: "Reason for deleting this user's access:"
+        prompt: "Reason for deleting this user’s access:"
         reasons:
           remove_access: No longer a web user
           left_institution: No longer with this institution
@@ -331,7 +331,7 @@ en:
         success_html: User access for <strong>%{name}</strong> has been deleted.
       reset_password:
         title: Password Reset
-        success_html: <strong>%{name}</strong>'s password has been reset.<br>An email with login instructions has been sent to this user.
+        success_html: <strong>%{name}</strong>’s password has been reset.<br>An email with login instructions has been sent to this user.
 
     password:
       title: Manage Password
@@ -361,7 +361,7 @@ en:
         save: Create PIN
         success: Your token PIN has been created.
         error_html: We were unable to create your token PIN. Please contact <a href="%{url}">Web Support</a> at %{phone_number} for further assistance.
-        pin_mismatch: PINs don't match.
+        pin_mismatch: PINs don’t match.
       reset_pin:
         title: Reset Token PIN
         description_html: If you can’t remember your 4-digit token PIN, contact <a href="%{url}">Web Support</a> before resetting it.
@@ -374,7 +374,7 @@ en:
         save: Save PIN
         success: Your token PIN has been reset.
         error_html: We were unable to reset your token PIN. Please contact <a href="%{url}">Web Support</a> at %{phone_number} for further assistance.
-        pin_mismatch: PINs don't match.
+        pin_mismatch: PINs don’t match.
       resynchronize:
         title: Synchronize Token
         description: If your token codes are no longer accepted, you may need to synchronize your token.
@@ -432,14 +432,14 @@ en:
     session_expired: For security reasons, your session expires after several minutes of inactivity.
     log_in_again: Log In Again
   forgot_password:
-    instructions: "Enter your username, and we'll email you instructions to reset your password."
+    instructions: "Enter your username, and we’ll email you instructions to reset your password."
     confirmation:
       title: Check Your Email
       description_html: "We sent an email to <strong>%{email}</strong>.\n\nClick the link in the email to reset your password."
-      no_email: I didn't receive the email
+      no_email: I didn’t receive the email
       email_mask_failure: '*****'
     reset_email:
-      body_html: "Hi %{name},\n\nWe’ve received your password request. Please use this link to reset your password for the Member Portal:\n\n<a href=\"%{url}\">%{url}</a>\n\nFor your security, this link will expire in one hour. Contact your Access Manager or Web Support at %{phone} if you have any questions.\n\nThank you,\nFHLBank San Francisco Web Support Team"
+      body_html: "Hi %{name},\n\nWe’ve received your password request. Please use this link to reset your password for the Member Portal:\n\n<a href=\"%{url}\">Reset password</a>\n\nFor your security, this link will expire in one hour. Contact your Access Manager or Web Support at %{phone} if you have any questions.\n\nThank you,\nFHLBank San Francisco Web Support Team"
     timeout:
       title: Request Expired
       description: Sorry, the link in your password reset email has expired.
@@ -461,7 +461,7 @@ en:
       xml: XML
     recent_activity:
       title: Recent Credit Activity
-      view_report_html: View your institution's <a href=%{url}>Today's Credit Activity</a> report for detailed information.
+      view_report_html: View your institution’s <a href=%{url}>Today’s Credit Activity</a> report for detailed information.
       no_activity: No recent credit activity.
     contacts:
       title: Contact
@@ -510,7 +510,7 @@ en:
         monthendorrepayment: At monthend and/or at repayment
         repayment: At repayment
         semiannualandrepayment: Semiannually and at repayment
-        footer: All advances are subject to the terms and conditions on the Bank's Credit Program, the Advances and Security Agreement with the Member, and the appropriate Advance Confirmation, as well as the Terms of Use.
+        footer: All advances are subject to the terms and conditions on the Bank’s Credit Program, the Advances and Security Agreement with the Member, and the appropriate Advance Confirmation, as well as the Terms of Use.
         axes_labels:
           standard: Standard
           securities_backed: Securities-Backed Credit
@@ -638,7 +638,7 @@ en:
           title: 'Securities-Backed Credit Program:'
         total_borrowing_capacity: Total Borrowing Capacity
         remaining_borrowing_capacity: Remaining Borrowing Capacity
-        borrowing_capacity_note_html: View your institution's <a href=%{url}>Borrowing Capacity</a> report for detailed information
+        borrowing_capacity_note_html: View your institution’s <a href=%{url}>Borrowing Capacity</a> report for detailed information
     market_overview:
       title: Market Rates
       vrc: 30-Day Standard VRC Overnight Rate (%)
@@ -677,7 +677,7 @@ en:
         regulatory_authorities: Both programs are subject to examination by regulatory authorities, including the Federal Housing Finance Agency (FHFA), and are reviewed by the Bank’s Internal Audit department.
     guides:
       title: Guides
-      intro: "The Bank's Credit and Collateral Guides contain comprehensive information about our products and services. For your convenience, recent changes to the guide are summarized below."
+      intro: "The Bank’s Credit and Collateral Guides contain comprehensive information about our products and services. For your convenience, recent changes to the guide are summarized below."
       revised_at: 'Revised: %{date}'
       view_updates: View Updates
       updates: 'Updates to the %{guide}'
@@ -693,12 +693,12 @@ en:
             -
               date: '2015-04-22'
               details:
-                - "Incorporated certain changes to the Bank's capital stock requirements that were announced in Bulletin 1470 on February 26, 2015 (page 8)."
+                - "Incorporated certain changes to the Bank’s capital stock requirements that were announced in Bulletin 1470 on February 26, 2015 (page 8)."
                 - "Adjusted the Community Financial Institution asset cap to $1,123 million for 2015 (page 11)."
                 - "Added a product profile for the new Choice LIBOR Adjustable Rate Credit Advances and made releated revisions (pages 36-37, 42, 58 and 52)."
                 - "Removed references to the Homeownership Preservation Advance, which the Bank no longer offers."
                 - "Increased the maximum term for Standby Letters of Credit to 15 years (page 44)."
-                - "Added an appendix that summarizes the Bank's wire transfer processing deadlines (page 69)."
+                - "Added an appendix that summarizes the Bank’s wire transfer processing deadlines (page 69)."
             -
               date: '2014-10-30'
               details:
@@ -722,9 +722,9 @@ en:
               date: '2014-10-30'
               details:
                 - "Adjusted the Community Financial Institution asset cap to $1,108 million for 2014 (pages 7 and 62)."
-                - "Added a new section on the Bank's Anti-Money Laundering Policy (page 18)."
+                - "Added a new section on the Bank’s Anti-Money Laundering Policy (page 18)."
                 - "Incorporated the increases in the borrowing capacities of certain securities announced in Bulletin No. 1148, dated April 8, 2014 (pages 21-25)."
-                - "Modified the Third-Party Document Custodian section to clarify the Bank's requirements when a member contracts with a document storage provider to store documents for loans pledged to the Bank (page 58)."
+                - "Modified the Third-Party Document Custodian section to clarify the Bank’s requirements when a member contracts with a document storage provider to store documents for loans pledged to the Bank (page 58)."
                 - "Incorporated the increases in the borrowing capacities of certain loan collateral types announced in Bulletin No. 1455, dated July 9, 2014 (pages 79-80)."
       collateral_review:
         title: Collateral Field Review Process
@@ -888,7 +888,7 @@ en:
       overview:
         title: Membership
         p1: The Federal Home Loan Bank of San Francisco is uniquely positioned to lend value to your enterprise and help you achieve your business objectives. We raise funds in the global capital markets and maintain a ready supply of liquidity to provide you with reliable access to low-cost funding and help you meet the diverse and ever-changing credit needs of your customers and communities.
-        p2_html: "Our <a href=%{product_url}>competitively priced products</a> are recognized as among the most cost-effective and versatile in the industry. Because the Federal Home Loan Banks' consolidated obligations are rated Aaa by Moody's Investors Service and AA+ by Standard & Poor's, the Federal Home Loan Banks are able to raise funds at rates that are close to Treasury security yields. As a member of the Bank, you'll be better positioned to:"
+        p2_html: "Our <a href=%{product_url}>competitively priced products</a> are recognized as among the most cost-effective and versatile in the industry. Because the Federal Home Loan Banks' consolidated obligations are rated Aaa by Moody’s Investors Service and AA+ by Standard & Poor’s, the Federal Home Loan Banks are able to raise funds at rates that are close to Treasury security yields. As a member of the Bank, you’ll be better positioned to:"
         benefits:
           reduce_risk: Reduce interest rate risk
           control_cost: Control your cost of funds
@@ -1041,7 +1041,7 @@ en:
           description_html: This worksheet helps you calculate the amount of Bank capital stock your institution must purchase to become a member. Please e-mail %{link} if you want the Bank to prepare an estimate of the Initial Stock Purchase Requirement. The estimate will be based on the most recent financial information available to the Bank, which may lag current data by a quarter.
         id_2228:
           title: "eTransact: SecurID Token Application (FC 2228)"
-          description: "This form must be completed by each individual who needs access to eTransact, the Bank's secure online transaction service."
+          description: "This form must be completed by each individual who needs access to eTransact, the Bank’s secure online transaction service."
         id_2290:
           title: "Authorization to Release Records: Arizona (FC 2290)"
           description: "This authorization is for Arizona institutions only. This form authorizes the Bank to obtain records and information, including examination reports, about your institution from the Arizona Department of Financial Institutions."
@@ -1116,7 +1116,7 @@ en:
     credit:
       title: Credit
       todays_credit:
-        title: Today's Credit Activity
+        title: Today’s Credit Activity
         summary: Displays advances, letters of credit and investment transactions conducted today.
       advances_detail:
         title: Advances
@@ -1141,7 +1141,7 @@ en:
         updated: Intraday for newly processed MCU data, except Market Value; other data as of the end of the prior business day
       mcu:
         title: MCU Status
-        summary: Provides data from your institution's most recently processed MCU, including information about total loans submitted, newly pledged or reported loans, rejected loans, and loans depledged or not reported. A more detailed report is emailed to your institution.
+        summary: Provides data from your institution’s most recently processed MCU, including information about total loans submitted, newly pledged or reported loans, rejected loans, and loans depledged or not reported. A more detailed report is emailed to your institution.
         updated: Intraday, after an MCU is processed
     capital_stock:
       title: Capital Stock
@@ -1182,14 +1182,14 @@ en:
       title: Your Account
       account_summary:
         title: Account Summary
-        summary: Provides a summary of your institution's Financing Availability, Credit Outstanding, Borrowing Capacity, and Capital Stock Position and Leverage.
+        summary: Provides a summary of your institution’s Financing Availability, Credit Outstanding, Borrowing Capacity, and Capital Stock Position and Leverage.
         updated: Intraday, except for Market Value and Total Borrowing Capacity, which are as of close of business on the prior business day
       authorizations:
         title: Authorizations
         summary: Provides a summary of authorizations granted to individual member users.
       settlement_transaction_account:
         title: Settlement/Transaction Account (STA)
-        summary: Displays debits and credits based on your institution's activity with the Bank. Interest earned is provided on the first business day of the following month.
+        summary: Displays debits and credits based on your institution’s activity with the Bank. Interest earned is provided on the first business day of the following month.
         updated: Daily for current month, as of the end of the prior business day
         history: Current month to date. Prior statements are available for the previous 6 months.
     your_account:
@@ -1240,7 +1240,7 @@ en:
             title: Totals
             total: Total Borrowing Capacity
             remaining: Total Remaining Borrowing Capacity
-          footnote: 'If you are using whole loan collateral to meet the margin requirement for Securities-Backed Credit advances, the amount shown in "Remaining" is overstated. Please call the Members Services Desk at %{phone_number} to verify your actual remaining borrowing capacity.'
+          footnote: 'If you are using whole loan collateral to meet the margin requirement for Securities-Backed Credit advances, the amount shown in “Remaining” is overstated. Please call the Members Services Desk at %{phone_number} to verify your actual remaining borrowing capacity.'
         capital_stock:
           title: Capital Stock Position and Leverage
           stock_owned: Stock Owned
@@ -1250,7 +1250,7 @@ en:
       price_indications:
         current:
           title: Current Price Indications
-          summary: "Variable Rate Credit advances are available from 7:00 am to 2:00 pm.\n\nAll other advances are generally available from 7:00 am to 12:00 pm."
+          summary: "Variable Rate Credit advances are available from 7:00 am to 2:00 pm.\nAll other advances are generally available from 7:00 am to 12:00 pm."
           advance_maturity: Advance Maturity
           overnight_fed_funds_benchmark: Overnight Fed Funds Benchmark
           treasury_benchmark_maturity: Treasury Benchmark Maturity
@@ -1293,13 +1293,14 @@ en:
           prime_header: Daily Prime
           sta_info: Published STA rate is applied to the previous business day’s ending STA balance.
           sta_rate: Effective Rate for Prior Business Day
-          freshness: This report reflects the price indications published at 6:00 am PT on the current business day. For current quotes, call the Member Services Desk at %{phone_number}.
+          freshness: This report reflects the price indications as of at 6:00 am PT on the current business day. For current quotes, call the Member Services Desk at %{phone_number}.
+          date_html: "<span>Date:</span> %{date}"
         historical:
           title: Historical Price Indications
           freshness: This report reflects historical price indications published at 6:00 am, not actual rates.
           availability: Historical data available varies by credit product.
         standard_credit_program: Standard Credit Program
-        sbc_program: Securities-Backed Credit
+        sbc_program: Securities-Backed Credit Program
         settlement_transaction_account: Settlement/Transaction Account (STA)
         sta_xlsx: Settlement Transaction Account
         frc:
@@ -1499,7 +1500,7 @@ en:
       securities_transactions:
         title: Securities Transactions
         info: The Securities Transaction Report is updated twice a day. The Preliminary Securities Transactions Report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm on the settlement day. The Final Securities Transactions Report reflects all transactions that have settled that day and is generally available at the end of the business day.
-        effective: Effective %{date}, a "units" column has been added to the Securities Transactions Report.
+        effective: Effective %{date}, a “units” column has been added to the Securities Transactions Report.
         preliminary: "Preliminary Report: Securities Transactions settled as of 11:30 am on %{date}"
         final: "Final Report: Securities Transactions settled as of close of business on %{date}"
         indicates_a_new_transaction_html: "*Indicates a new transaction."
@@ -1518,7 +1519,7 @@ en:
         freshness: This report is updated twice a day. The preliminary report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm. The final report reflects all transactions settled during the day and is generally available at the end of the business day.
       authorizations:
         title: Authorizations
-        intro_html: The following people are authorized to use the Bank's services on behalf of your institution. If you'd like to make changes to these authorizations, please fill out an <a href=%{url}>Authorization Form</a>.
+        intro_html: The following people are authorized to use the Bank’s services on behalf of your institution. If you’d like to make changes to these authorizations, please fill out an <a href=%{url}>Authorization Form</a>.
         contact_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about authorizations, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
         sub_title: Users with %{filter} Authorization
         sub_title_all_users: All Users with Authorizations
@@ -1527,7 +1528,7 @@ en:
       parallel_shift:
         title: Putable Advance Parallel Shift Sensitivity Analysis
         info: The valuations below are calculated using data as of %{date}
-        disclaimer: "The valuations provided to you on the Putable Advance Parallel Shift Sensitivity Analysis page are for information purposes only, are provided as an accommodation and without charge, are confidential and are intended solely for your use. The valuations do not represent the actual or indicative forms at which new (or economically equivalent) transactions could be entered into or the actual or indicative terms at which existing (or such equivalent) transactions could be liquidated, assigned or unwound. The valuations were derived using proprietary pricing models and estimates and assumptions about relevant future market conditions and other matters, all of which are subject to change without notice. Please note that the valuation estimates are from the Federal Home Loan Bank of San Francisco's perspective. Any such changes may have a material impact on the valuations provided, and valuations based on other models or different assumptions may yield materially different results. No guaranty or warranty is made as to the reasonableness of any assumptions or the accuracy or completeness of the models or market data, whether internally or externally generated. In providing the valuations on the Putable Advance Parallel Shift Sensitivity Analysis page, the Federal Home Loan Bank of San Francisco has expressly relied upon the representations and certifications made by you to the Federal Home Loan Bank of San Francisco in your Statement of Authority re: Putable Advances. Accordingly, you should not regard the valuations as advice by us in respect of your positions or as the sole basis for such positions, and you should discuss with your accountants, attorneys, investment advisors and other representatives whether and to what extent these valuations may be useful in the preparation of your financial statements, regulatory reports or otherwise. The valuations may vary significantly from the estimates we used in valuing the transaction(s) for purposes of our internal books and records and for other purposes. The Federal Home Loan Bank of San Francisco expressly disclaims any responsibility for (i) the accuracy of the models, market data input into such models or estimates used in deriving the valuations, (ii) any errors or omissions in computing or disseminating the valuations and (iii) any uses to which the valuations are put."
+        disclaimer: "The valuations provided to you on the Putable Advance Parallel Shift Sensitivity Analysis page are for information purposes only, are provided as an accommodation and without charge, are confidential and are intended solely for your use. The valuations do not represent the actual or indicative forms at which new (or economically equivalent) transactions could be entered into or the actual or indicative terms at which existing (or such equivalent) transactions could be liquidated, assigned or unwound. The valuations were derived using proprietary pricing models and estimates and assumptions about relevant future market conditions and other matters, all of which are subject to change without notice. Please note that the valuation estimates are from the Federal Home Loan Bank of San Francisco’s perspective. Any such changes may have a material impact on the valuations provided, and valuations based on other models or different assumptions may yield materially different results. No guaranty or warranty is made as to the reasonableness of any assumptions or the accuracy or completeness of the models or market data, whether internally or externally generated. In providing the valuations on the Putable Advance Parallel Shift Sensitivity Analysis page, the Federal Home Loan Bank of San Francisco has expressly relied upon the representations and certifications made by you to the Federal Home Loan Bank of San Francisco in your Statement of Authority re: Putable Advances. Accordingly, you should not regard the valuations as advice by us in respect of your positions or as the sole basis for such positions, and you should discuss with your accountants, attorneys, investment advisors and other representatives whether and to what extent these valuations may be useful in the preparation of your financial statements, regulatory reports or otherwise. The valuations may vary significantly from the estimates we used in valuing the transaction(s) for purposes of our internal books and records and for other purposes. The Federal Home Loan Bank of San Francisco expressly disclaims any responsibility for (i) the accuracy of the models, market data input into such models or estimates used in deriving the valuations, (ii) any errors or omissions in computing or disseminating the valuations and (iii) any uses to which the valuations are put."
       securities_position:
         current: Current Securities Position
         monthly: Monthly Securities Position
@@ -1564,8 +1565,8 @@ en:
         reg_id: RegID
         disclaimer:
           p1: The information on this page is provided as of the date and time indicated and is subject to change without notice. Some information may be incomplete and may be updated during the day.
-          p2: The "Market Value" shown for each security pledged to the Bank as collateral is intended solely for internal use by the Bank in calculating the Member's credit availability and is subject to change without notice. The Bank may, in its sole discretion, also provide Market Values for other securities held by the Bank on the Member's behalf. None of the Market Values provided should be used or relied upon by the Member for any purpose, and the Bank expressly disclaims any and all liability that may arise from any such use or reliance by the Member. The Bank may use data from one or more outside pricing services (which may include data providers, such as Thomson Reuters) to calculate the Market Values shown but does not independently verify the accuracy of such data and, therefore, cannot warrant or guarantee its accuracy or the accuracy of any Market Values derived therefrom. In addition, the Bank does not warrant or guarantee the accuracy of its own reporting of any such data received from any outside pricing service or of any Market Values derived therefrom. The Bank disclaims any and all liability that may arise in connection with the Bank's dissemination of any information shown herein, regardless of the cause, or for any resulting damages.
-          p3: The Bank may, in its sole discretion, provide the "Factor," "Price," "Current Par," and "Market Value" for securities held by the Bank on the Member's behalf. The Bank obtains the "Factor" and "Price" for each such security from one or more outside services and uses the "Factor" to calculate the security's "Current Par," which in turn with the "Price" is used to calculate the security's "Market Value." A blank "Factor," "Price," "Current Par or "Market Value" field means the outside service could not or did not provide the "Factor" or "Price" value to the Bank or the security does not have a "Factor" value.
+          p2: The “Market Value” shown for each security pledged to the Bank as collateral is intended solely for internal use by the Bank in calculating the Member’s credit availability and is subject to change without notice. The Bank may, in its sole discretion, also provide Market Values for other securities held by the Bank on the Member’s behalf. None of the Market Values provided should be used or relied upon by the Member for any purpose, and the Bank expressly disclaims any and all liability that may arise from any such use or reliance by the Member. The Bank may use data from one or more outside pricing services (which may include data providers, such as Thomson Reuters) to calculate the Market Values shown but does not independently verify the accuracy of such data and, therefore, cannot warrant or guarantee its accuracy or the accuracy of any Market Values derived therefrom. In addition, the Bank does not warrant or guarantee the accuracy of its own reporting of any such data received from any outside pricing service or of any Market Values derived therefrom. The Bank disclaims any and all liability that may arise in connection with the Bank’s dissemination of any information shown herein, regardless of the cause, or for any resulting damages.
+          p3: The Bank may, in its sole discretion, provide the “Factor,” “Price,” “Current Par,” and “Market Value” for securities held by the Bank on the Member’s behalf. The Bank obtains the “Factor” and “Price” for each such security from one or more outside services and uses the “Factor” to calculate the security’s “Current Par,” which in turn with the “Price” is used to calculate the security’s “Market Value.” A blank “Factor,” “Price,” “Current Par,” or “Market Value” field means the outside service could not or did not provide the “Factor” or “Price” value to the Bank or the security does not have a “Factor” value.
       forward_commitments:
         title: Forward Commitments
       capital_stock_and_leverage:
@@ -1606,7 +1607,7 @@ en:
     estimated_next_interest_payment_notice: For each FRC and ARC Advance, the Estimated Next Interest Payment provides an estimate of the interest payment amount to be debited to your Settlement/Transaction Account (STA) on the next interest payment date. These are estimates only and should not be relied upon as a final statement of the total interest payments to be debited to your STA on any interest payment date, and they are subject to change without notice. In addition, this report does not reflect any principal repayment or reduction amounts or any other amounts associated with your advances that may be debited to your STA on the next interest payment date. Estimated next interest payment amounts for some advance types are not available online.
     prepayment_fee_notice: Prepayment fee indications are not based on rates as of today. Please call %{phone_number} by 10:30 a.m. to obtain a prepayment fee indication as of today.
     merger_notice: In the event of a merger, this report may not include all advances from the acquired institution.
-    advances_and_securities_agreement_notice: Nothing in this report in any way amends, modifies, or waives the terms of your Advances and Security Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issued pursuant to that Agreement. The Bank expressly disclaims any and all liability that may arise from your institution's reliance on any information contained in, or errors or omissions made with respect to, this report. Please call Operations at %{phone_number} if you have any questions.
+    advances_and_securities_agreement_notice: Nothing in this report in any way amends, modifies, or waives the terms of your Advances and Security Agreement with the Bank or any amount due to the Bank under the term of the Confirmations issued pursuant to that Agreement. The Bank expressly disclaims any and all liability that may arise from your institution’s reliance on any information contained in, or errors or omissions made with respect to, this report. Please call Operations at %{phone_number} if you have any questions.
     data_notice: Data reflects activity as on the date and time shown above.
     refresh_notice: Refresh your browser for current information.
     pdf_footer: "%{report_name} as of %{date}"
@@ -1616,8 +1617,8 @@ en:
       title: General Information
       does_not_constitute_solicitation_html: This information does not constitute a solicitation or offer or advice (financial or otherwise) by the Bank, but is a description of generally available structures for certain products and price indications for those structures as of the time and date indicated above. This information is subject to the <a href="%{url}">Terms of Use</a> and may change without notice.
       market_data_html: Market data is generally provided by Thomson Reuters. <img src="%{picture_url}" alt="Reuters Logo"> </br>Data provided by Thomson Reuters is for information purposes only and is not intended for trading purposes. Thomson Reuters shall not be liable for any errors or delay in the content, or for any action taken in reliance on any content. The Bank may use another source of market data if necessary at its discretion.
-      same_day_pricing: Same-day pricing and/or funding for amounts up to $200 million for Variable Rate Credit advances and up to $100 million per posted maturity for all other advances with maturities up to 10 years are available according to your institution's Financing Availability, subject to market conditions. For advances with maturities greater than 10 years, same-day pricing and/or funding are subject to market execution.
-      interest_rates_on_securities_backed_credit_advances: Interest rates on Securities-Backed Credit advances may be lower than rates on advances offered under the Bank's Standard Credit Program and competitive with rates in the securities repurchase market. The price indications shown here are based on Agency MBS collateral. For rates using AAA or AA collateral, call the Member Services Desk at %{phone_number}.
+      same_day_pricing: Same-day pricing and/or funding for amounts up to $200 million for Variable Rate Credit advances and up to $100 million per posted maturity for all other advances with maturities up to 10 years are available according to your institution’s Financing Availability, subject to market conditions. For advances with maturities greater than 10 years, same-day pricing and/or funding are subject to market execution.
+      interest_rates_on_securities_backed_credit_advances: Interest rates on Securities-Backed Credit advances may be lower than rates on advances offered under the Bank’s Standard Credit Program and competitive with rates in the securities repurchase market. The price indications shown here are based on Agency MBS collateral. For rates using AAA or AA collateral, call the Member Services Desk at %{phone_number}.
       please_call_the_member_services_desk: "Please call the Member Services Desk at %{phone_number} for current quotes, additional information about other maturities and customized offerings, and pricing information on the following products:"
       callable_advance: Callable Advance
       putable_advance: Putable Advance
@@ -1627,7 +1628,7 @@ en:
       cip: Community Investment Program (CIP) advances
       advances_with_embedded_options: Advances with embedded options, including interest rate caps
       advances_with_partial_prepayment_symmetry: Advances with partial prepayment symmetry
-      reduced_prices: Reduced prices are generally available for advances under the Bank's Community Investment Cash Advance (CICA) credit programs, which include ACE, and CIP.
+      reduced_prices: Reduced prices are generally available for advances under the Bank’s Community Investment Cash Advance (CICA) credit programs, which include ACE, and CIP.
       standby_letters_of_credit: "Standby Letters of Credit (LCs) are available to assist members in facilitating residential housing finance and community lending that are eligible for the following two CICA credit programs: CIP and ACE. LCs may also be used to assist members with asset/liability management or to provide members with liquidity or other funding."
       for_advances_traded_on_or_after_january_1: "For advances traded on or after January 1, 2002, the maximum voluntary prepayment settlement amount per calendar month per member cannot exceed the greater of: (i) the amount of Bank stock owned by the member as of the last business day of the calendar month prior to the notice date or (ii) $250 million. In addition, the maximum voluntary prepayment amount for all advances is $250 million per member per business day."
       the_bank_will_provide_prepayment_fee_indications: The Bank will provide prepayment fee indications for up to 5 advances per member per business day.
@@ -1702,7 +1703,7 @@ en:
           description: "Before the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the Statement of Authority: Advances with Partial Prepayment Symmetry (PDF) signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
       callable:
         title: Callable Advance
-        description: Use the Callable Advance—with built-in prepayment options—to reduce interest rate risk and prepayment risk at minimal added cost. You may "call" (repay) the advance at predetermined dates without paying the standard prepayment fee.
+        description: Use the Callable Advance—with built-in prepayment options—to reduce interest rate risk and prepayment risk at minimal added cost. You may “call” (repay) the advance at predetermined dates without paying the standard prepayment fee.
         uses:
           fixed: Match-fund fixed rate mortgages
           short: Match-fund short-term loans
@@ -1855,18 +1856,18 @@ en:
           available: "The Bank may make available new DN Auction-Indexed Advances priced in that auction if the auction occurs as scheduled even if the new advances and the outstanding advances being repriced would total less than $100 million."
         max_term: 5 years
         interest_rate: The initial interest rate will be calculated by adding a specified spread to the initial index value. At each rate reset, the interest rate will be adjusted by adding the established spread to the new index value.
-        index: "The auction rate for System discount notes with a specified maturity (the money market weighted average all-in rate of the System discount note auction for a specified maturity, rounded to the third decimal place) as transmitted by the Office of Finance to the Bank (DN auction rate).\n\nIf a scheduled auction is cancelled, postponed, or rescheduled by the Office of Finance or does not occur for any other reason, the Bank may select an alternate repricing index and the Bank may also select an alternate rate reset date, as described below. In addition, if the Bank's request for issuance of discount notes is only partially filled in an auction, the Bank may select an alternate index for the initial index value and for the repricing index, as described below."
+        index: "The auction rate for System discount notes with a specified maturity (the money market weighted average all-in rate of the System discount note auction for a specified maturity, rounded to the third decimal place) as transmitted by the Office of Finance to the Bank (DN auction rate).\n\nIf a scheduled auction is cancelled, postponed, or rescheduled by the Office of Finance or does not occur for any other reason, the Bank may select an alternate repricing index and the Bank may also select an alternate rate reset date, as described below. In addition, if the Bank’s request for issuance of discount notes is only partially filled in an auction, the Bank may select an alternate index for the initial index value and for the repricing index, as described below."
         rate_reset: "The rate for DN Auction-Indexed Advances will be reset according to the specific maturity of the discount notes, subject to the observance of holidays by the Office of Finance (scheduled rate reset date). If a scheduled auction is cancelled, postponed, or rescheduled by the Office of Finance or does not occur as scheduled for any other reason, the Bank may select an alternate rate reset date and the Bank may also select an alternate repricing index, as described below."
         alt_initial_index: "If the Bank has made a request for issuance of System discount notes in an auction but the Bank’s request is only partially filled in the auction, then the initial index value will be an alternate index that will be an interest rate as determined by the Bank in its sole discretion."
         alt_repricing:
           description: "The Bank intends to follow these general guidelines in establishing an alternate repricing index and/or alternate rate reset date: \n\n If, on the business day immediately preceding any scheduled rate reset date, the System discount note auction for the specified maturity occurs as scheduled, the repricing index for that scheduled rate reset date will be set as follows:"
           filled: "If the Bank has made a request for issuance of System discount notes in the auction and its request is completely filled, then the repricing index will be the DN Auction-Indexed Advance rate from that auction."
           aggregate: "If the Bank has made no request for issuance of System discount notes in the auction, but the aggregate requests of all other FHLBanks in the auction for System discount notes maturing on the next scheduled rate reset date is at least partially filled in the auction, then the repricing index will be the DN Auction-Indexed Advance rate from that auction."
-          partially: "If the Bank has made a request for issuance of System discount notes in the auction but the Bank's request is only partially filled in the auction, then the repricing index will be an alternate index that will be an interest rate as determined by the Bank in its sole discretion."
+          partially: "If the Bank has made a request for issuance of System discount notes in the auction but the Bank’s request is only partially filled in the auction, then the repricing index will be an alternate index that will be an interest rate as determined by the Bank in its sole discretion."
           alt_index: "If, on the business day immediately preceding any scheduled rate reset date, the System discount note auction for the specified maturity does not occur as scheduled for any reason, then the Bank will select an alternate index for the repricing index, and the Bank may, in its sole discretion, select an alternate date for the actual rate reset date. In selecting an alternate index when the discount note auction has not occurred as scheduled for any reason, the Bank, in its sole discretion, may select as a repricing index any of the following:"
           substitute: "an interest rate from any other auction of System discount notes designated by the Office of Finance as a substitute auction for the discount note auction that did not occur; or"
           maturity: "an interest rate from any other issuance of System discount notes for the designated maturity issued by the Office of Finance on the actual rate reset date; or"
-          equal: "an interest rate equal to the Bank's estimated cost of alternate funding for the designated maturity as determined by the Bank in its sole discretion."
+          equal: "an interest rate equal to the Bank’s estimated cost of alternate funding for the designated maturity as determined by the Bank in its sole discretion."
         request_deadline: "Requests for DN Auction-Indexed Advances must be received by the Bank by noon on the business day immediately preceding the designated auction date. A member may cancel or change its request after this deadline only if the Bank agrees in writing to the cancellation or change."
         pricing_settlement: Advances will be priced on the designated auction date for settlement the following business day, subject to the observance of holidays by the Office of Finance. The Bank intends to notify all participants of the initial interest rate on the advances by 2 p.m. on the designated auction date.
         blackout: "The Bank reserves the right not to accept requests for new DN Auction-Indexed Advances priced in any auction for which the discount notes would mature during illiquid periods, as determined by the Bank, such as quarter-ends, yearends, and known holidays. Please contact your Relationship Manager for a list of the dates that may be available."
@@ -1874,9 +1875,9 @@ en:
         interest_day_count: Actual/360
         call_feature: The advance may be repaid, in full or in part, on specified call dates without a prepayment fee, provided that proper call notice is received by the Bank and the call option premium is paid.
         call_option_dates: Every scheduled rate reset date, subject to the observance of holidays by the Office of Finance
-        call_notice: "At least 5 but no more than 10 business days before a call option date. The Bank must receive the call notice by 10:30 a.m. California time. Call notice may be verbal, but the verbal notification must be confirmed in writing by the borrower and received by the Bank within 2 business days after the borrower's verbal notice. A borrower may not cancel a call notice unless the Bank agrees in writing to the cancellation."
-        call_option_premium: The present value of 5 basis points per annum for the remaining term to maturity applied against the principal amount of the advance being repaid. The Bank's cost of funds, as determined by the Bank in its sole discretion, will be used to determine present values.
-        special_notice: "The DN Auction-Indexed Advance has a risk profile that may be inappropriate for some institutions. The availability of the index to which this product is tied is subject to uncertainty, and the actual interest rate charged for this advance initially and at repricing may be based on an estimated cost of alternate funding depending on market conditions and the actual results of the System discount note auction. In addition, there is no limit to the size of the Bank's request or other FHLBanks' requests for System discount notes in the auctions, and large participation by the Bank or by other FHLBanks could increase the average cost of System discount notes sold (compared to a lower participation amount). \n\n This information is not intended as investment advice. The decision to obtain an DN Auction-Indexed Advance and the analysis of how it may fit into a borrower's financial or business strategy remain solely the borrower's responsibility."
+        call_notice: "At least 5 but no more than 10 business days before a call option date. The Bank must receive the call notice by 10:30 a.m. California time. Call notice may be verbal, but the verbal notification must be confirmed in writing by the borrower and received by the Bank within 2 business days after the borrower’s verbal notice. A borrower may not cancel a call notice unless the Bank agrees in writing to the cancellation."
+        call_option_premium: The present value of 5 basis points per annum for the remaining term to maturity applied against the principal amount of the advance being repaid. The Bank’s cost of funds, as determined by the Bank in its sole discretion, will be used to determine present values.
+        special_notice: "The DN Auction-Indexed Advance has a risk profile that may be inappropriate for some institutions. The availability of the index to which this product is tied is subject to uncertainty, and the actual interest rate charged for this advance initially and at repricing may be based on an estimated cost of alternate funding depending on market conditions and the actual results of the System discount note auction. In addition, there is no limit to the size of the Bank’s request or other FHLBanks' requests for System discount notes in the auctions, and large participation by the Bank or by other FHLBanks could increase the average cost of System discount notes sold (compared to a lower participation amount). \n\n This information is not intended as investment advice. The decision to obtain an DN Auction-Indexed Advance and the analysis of how it may fit into a borrower’s financial or business strategy remain solely the borrower’s responsibility."
       frc:
         title: Fixed Rate Credit (FRC) Advance
         description: Use the FRC Advance to achieve a wide variety of financial management goals, taking advantage of maturities up to 30 years.
@@ -1977,7 +1978,7 @@ en:
           mpf_direct_html: "%{download_link}: The Bank facilitates the purchase of jumbo fixed rate mortgage loans for concurrent sale into the secondary market through an exclusive arrangement with Redwood Trust, Inc."
         member_eligibility_html: "To participate in the MPF Program, a member must be approved as a Participating Financial Institution (PFI) by the Bank. The member must submit a <a href=%{url}>PFI Application</a> and meet the loan origination, servicing, reporting, credit, and collateral standards established for the MPF Program. Eligibility criteria include:"
         eligibility_list:
-          creditworthiness: "Overall satisfactory creditworthiness according to the Bank’s credit quality standards, including an acceptable exam rating from the member's primary regulator, a \"Well Capitalized\" PCA status, satisfactory asset quality, and positive net income in four of the most recent six quarters"
+          creditworthiness: "Overall satisfactory creditworthiness according to the Bank’s credit quality standards, including an acceptable exam rating from the member’s primary regulator, a “Well Capitalized” PCA status, satisfactory asset quality, and positive net income in four of the most recent six quarters"
           lending: Acceptable lending policies, procedures, and practices
           servicing: The ability to originate and service first-lien, one- to four-family residential mortgage loans in accordance with GSE guidelines for loans typically sold in the secondary market
           mpf_direct: For MPF Direct, the ability to manually underwrite loans in accordance with MPF Direct guidelines
@@ -1991,7 +1992,7 @@ en:
         remittance: Remittance options for MPF loans may include actual/actual, actual/actual single remittance, and scheduled/scheduled.
         training_html: "After a member is approved as a PFI, the Bank contacts the member to schedule training on MPF products, pricing, and master commitments; MPF loan delivery; use of eMPF and the MPF Guides; and MPF servicing and reporting. For MPF Direct, training on underwriting and exceptions is provided. In addition, a representative of the PFI is required to take and pass a one-hour online tutorial on MPF Pre-Closing Quality Control offered through AllRegs. For MPF Xtra, Fannie Mae Desktop Underwriter&#174; (DU&#174;) training is also required."
         ongoing: Outstanding loans sold to the Bank under the MPF Program and held by the Bank, including loans sold under the MPF Original and MPF Plus products between 2002 and 2006, remain subject to the credit enhancement requirements in effect when the loans were sold to the Bank and to the Bank’s current collateral and capital stock requirements.
-        additional_information_html: "For more information on the MPF Program, including access to the MPF guides, visit the <a href=%{url}>MPF Program website</a>.\n\n\"Mortgage Partnership Finance,\" \"MPF,\" \"MPF Xtra,\" and \"eMPF\" are registered trademarks of the Federal Home Loan Bank of Chicago."
+        additional_information_html: "For more information on the MPF Program, including access to the MPF guides, visit the <a href=%{url}>MPF Program website</a>.\n\n“Mortgage Partnership Finance,” “MPF,” “MPF Xtra,” and “eMPF” are registered trademarks of the Federal Home Loan Bank of Chicago."
       pfi:
         title: Participating Financial Institution (PFI) Application
         to_apply_html: "To apply for approval as a Participating Financial Institution (PFI) under the Mortgage Partnership Finance Program, complete the applicable forms and agreements. Before mailing the original documents to us, email a PDF of the documents to <a href=%{email}>mpf@fhlbsf.com</a> so we can review them for completeness. Once we inform you that the documents are complete, mail the original documents and all required exhibits to:"
@@ -2070,12 +2071,12 @@ en:
         title: Other Cash Needs (OCN) Advance
         description: The OCN Advance is a Variable Rate Credit (VRC) Advance option for members that, as a result of an unexpected development, need a short-term advance and either do not have a Financing Availability or have used it fully. In addition, the Bank, in its sole discretion, may fund an OCN Advance to cover the amount of any Settlement/Transaction Account (STA) overdraft.
         uses:
-          financing: To meet funding needs that exceed a member's Financing Availability
+          financing: To meet funding needs that exceed a member’s Financing Availability
         advantages:
           fund: Fund unexpected cash needs
           same_day: Same-day access if notice received by 10 a.m.
         eligibility: The Bank will determine member eligibility for an OCN Advance on a case-by-case basis. The member must identify the need for the OCN and the repayment sources.
-        maximum_ammount: "5% of member's total assets."
+        maximum_ammount: "5% of member’s total assets."
         maximum_term: "45 days"
         interest_rate: The initial interest rate is the rate set for VRC Advances on the date of funding. OCN Advances are repriced daily.
         interest_day_count: "Actual/Actual (Actual/360 for Securities-Backed Credit Program)"
@@ -2090,7 +2091,7 @@ en:
         features: "Because of the special risk characteristics of the Putable Advance, the Bank offers this product only to preapproved borrowers on an order-only basis. The actual terms and conditions of the advance are determined when the advance is made and are set forth in the Confirmation of Advance for each Putable Advance. General features of the advance are as follows:"
         eligibility_html: "Members that are well capitalized, have a consistent record of good earnings, and have minimal problem assets are generally eligible to use the Putable Advance. A %{download_link} (PDF) signed by an authorized officer must be submitted to the Bank before any transactions may be executed."
         bank_terminate: "The Bank will have the right to terminate only the entire Putable Advance (no partial terminations) on any Put Date and will provide at least 2 business days’ prior notice, by telephone and in writing by confirmed fax, using the modified following business day convention.* If the Bank exercises its right to terminate, the member must repay the entire advance on the Put Date selected by the Bank. The Bank will offer to make available replacement funding, subject to the conditions described above."
-        total_max_amount_borrow: The total maximum amount per borrower that may be available is equal to three times the borrower's current Tier 1 capital for FDIC-insured institutions, three times the borrower's current net worth for NCUA-insured institutions, or a comparable amount for other borrowers, as determined by the Bank.
+        total_max_amount_borrow: The total maximum amount per borrower that may be available is equal to three times the borrower’s current Tier 1 capital for FDIC-insured institutions, three times the borrower’s current net worth for NCUA-insured institutions, or a comparable amount for other borrowers, as determined by the Bank.
         maximum_term: 10 Years
         interest_day_count: Actual/360
         interest_payment_frequency: Quarterly and at repayment
@@ -2100,7 +2101,7 @@ en:
         special_notice: "The Putable Advance has a complex risk profile and may be an inappropriate product for some institutions. The expected maturity of the Putable Advance may contract or extend adversely to market movements, and the Bank makes no representations as to (i) the expected life of the advance or (ii) the criteria behind the exercise of the Bank’s right to terminate the Putable Advance. This information is not intended as investment advice. The decision to obtain a Putable Advance and the analysis of how it may fit into a borrower’s financial or business strategy remain solely the borrower’s responsibility.\n\nNotwithstanding any lockout period for exercising its right to terminate the Putable Advance, the Bank reserves all of its rights under the Advances and Security Agreement, including, without limitation, its right to terminate the Putable Advance and accelerate repayment of the advance and its right to liquidate collateral pledged by the borrower as security for the Putable Advance at any time upon the occurrence of an event of default described in the Advances and Security Agreement.\n\n* If the period end date falls on a non-business day, the period end date will be the first following business day, unless that day falls in the next calendar month, in which case the period end date will be the first preceding business day."
       vrc:
         title: Variable Rate Credit (VRC) Advance
-        description: Use the VRC Advance to obtain overnight funding for daily cash needs. The VRC Advance may be renewed on a daily basis at prevailing rates, at the Bank's discretion. Funds may be repaid at any time, without a fee, with 1 business day’s notice.
+        description: Use the VRC Advance to obtain overnight funding for daily cash needs. The VRC Advance may be renewed on a daily basis at prevailing rates, at the Bank’s discretion. Funds may be repaid at any time, without a fee, with 1 business day’s notice.
         uses:
           manage: Manage liquidity
           obtain: Obtain low-cost, market-rate funding
@@ -2116,7 +2117,7 @@ en:
         repayment: The Bank must receive notice of intention to repay by 2 p.m. on the preceding business day.
       sbc:
         title: Securities-Backed Credit (SBC) Program
-        description: Under the SBC Program, you can pledge your high-grade securities as collateral to the Bank. Interest rates on SBC advances may be lower than rates on advances offered under the Bank's Standard Credit Program and competitive with rates in the securities repurchase market.
+        description: Under the SBC Program, you can pledge your high-grade securities as collateral to the Bank. Interest rates on SBC advances may be lower than rates on advances offered under the Bank’s Standard Credit Program and competitive with rates in the securities repurchase market.
         uses:
           secure: Secure short- and long-term borrowings with a variety of securities collateral
           action: Access an attractive alternative to securities repurchase transactions with dealers
@@ -2136,10 +2137,10 @@ en:
           variable: Variable Rate Credit Advance
           arc: Adjustable Rate Credit (ARC) Advance
           arc_embedded: ARC Advance with Embedded Options
-        interest_rate: "Interest rates may be lower than rates on advances under the Bank's Standard Credit Program and competitive with rates in the securities repurchase market."
+        interest_rate: "Interest rates may be lower than rates on advances under the Bank’s Standard Credit Program and competitive with rates in the securities repurchase market."
         interest_day_count: Actual/360 for most credit products and 30/360 for Amortizing Advances.
         interest_payment_frequency: For fixed rate advances with terms of 180 days or less, interest is payable at maturity. For fixed rate advances with terms of more than 180 days, interest is payable semiannually and at maturity. For adjustable rate advances, interest is payable at repricing and at maturity.
-        eligible_capacity: The following table lists the eligible securities types and borrowing capacities for the SBC Program for all members except insurance companies. Not all securities of each type are eligible; please review the Bank's Collateral Guide or contact the Bank for specific eligibility information.
+        eligible_capacity: The following table lists the eligible securities types and borrowing capacities for the SBC Program for all members except insurance companies. Not all securities of each type are eligible; please review the Bank’s Collateral Guide or contact the Bank for specific eligibility information.
         column1:
           eligible_securities: Eligible Securities
           treasury:
@@ -2224,19 +2225,19 @@ en:
           bank_term_deposits: "100"
         agency_cmo_html: "Agency CMO accrual bonds (Z-tranches) with low price sensitivity are identified as those that pass the Federal Financial Institutions Examination Council (FFIEC) High Risk Security test. Agency CMO accrual bonds (Z-tranches) with high price sensitivity are identified as those that do not pass the FFIEC High Risk Security test."
         market_value: The market value for securities pledged as collateral under the SBC Program is determined by the Bank on the basis of market prices (bid side) for the same or comparable securities, if available, or as otherwise determined by the Bank. A readily available price is a precondition for acceptance of a security as collateral. This means, in general, that the security is either priced by a third-party pricing service or that its cash flow is modeled on Bloomberg or Yield Book.
-        private_label_non_mbs: If the custodian of the notes supporting a non-Agency MBS transaction is the Issuer or a related party and the notes have not been endorsed to the trustee by name, the Bank requires that the party that has control over the notes (as determined by the Bank) must have a long-term debt rating of at least BBB. The Bank will monitor the creditworthiness of the entity that has control over the notes; if the entity's credit rating falls below BBB, the Bank will require the member to substitute collateral in place of the MBS unless the underlying notes have been endorsed or delivered to the trustee.
+        private_label_non_mbs: If the custodian of the notes supporting a non-Agency MBS transaction is the Issuer or a related party and the notes have not been endorsed to the trustee by name, the Bank requires that the party that has control over the notes (as determined by the Bank) must have a long-term debt rating of at least BBB. The Bank will monitor the creditworthiness of the entity that has control over the notes; if the entity’s credit rating falls below BBB, the Bank will require the member to substitute collateral in place of the MBS unless the underlying notes have been endorsed or delivered to the trustee.
         review_ratings: The Bank will periodically re-evaluate non-Agency securities and municipal bonds to validate or establish the ratings at intervals deemed appropriate by the Bank.
         borrowing_market_securities: If a member pledges loan collateral to the Bank, the member may be able to borrow up to 100% of the current market value of its eligible securities pledged under the SBC Program by using the borrowing capacity of that loan collateral to meet its margin requirements. If a member pledges only securities collateral, the member may borrow an amount equal to the borrowing capacity assigned to its pledged securities collateral.
         bms_list:
           margin_call: The Bank manages the margin calls for SBC securities collateral on an aggregate basis for each borrower.
           additional_pledge_reason: "Loan collateral may be used to secure up to 10% of the amount of all SBC advances outstanding. The borrower will be required to pledge additional eligible securities if:"
-          falls_below: "the borrower’s borrowing capacity for securities pledged under the SBC Program falls below 90% of the current amount of the borrower's total SBC advances outstanding, or"
+          falls_below: "the borrower’s borrowing capacity for securities pledged under the SBC Program falls below 90% of the current amount of the borrower’s total SBC advances outstanding, or"
           sufficient_excess: the borrower’s loan collateral does not have sufficient excess borrowing capacity.
-          current_borrowing: When the current borrowing capacity of a borrower's SBC securities collateral falls below 90% of its SBC advances outstanding, the borrower is required to pledge additional eligible securities under the SBC Program to increase the current borrowing capacity of SBC securities collateral to 95% or greater of the total amount of the borrower’s SBC advances outstanding.
-          margin_requirement: Loan collateral that is being used to meet a borrower's margin requirement under the SBC Program is not available to collateralize other Bank credit.
+          current_borrowing: When the current borrowing capacity of a borrower’s SBC securities collateral falls below 90% of its SBC advances outstanding, the borrower is required to pledge additional eligible securities under the SBC Program to increase the current borrowing capacity of SBC securities collateral to 95% or greater of the total amount of the borrower’s SBC advances outstanding.
+          margin_requirement: Loan collateral that is being used to meet a borrower’s margin requirement under the SBC Program is not available to collateralize other Bank credit.
           not_release: The Bank will not release securities collateral pledged under the SBC Program if the borrower is using loan collateral to meet the margin requirements.
-        delivery: All securities pledged to the Bank must be delivered to the Bank's securities custodian, Citibank, N.A. (Citibank).
-        substitution: Borrowers may substitute like or better securities collateral, in the Bank's discretion, subject to the Bank's standard securities services fees.
+        delivery: All securities pledged to the Bank must be delivered to the Bank’s securities custodian, Citibank, N.A. (Citibank).
+        substitution: Borrowers may substitute like or better securities collateral, in the Bank’s discretion, subject to the Bank’s standard securities services fees.
     standby_loc:
       title: Standby Letters of Credit
       description_html: Use standby letters of credit to facilitate a variety of transactions with third parties. A <a href=%{url}>standby letter of credit</a> is an obligation of the Bank to make payment to a third party if a member or housing associate does not perform its underlying obligation to that third party.
@@ -2245,7 +2246,7 @@ en:
       description_html: Our <a href=%{url}>Mortgage Partnership Finance&reg; (MPF) Program</a> offers you access to an alternative secondary mortgage market channel for selling your residential fixed rate mortgage loans, including conventional conforming mortgage loans, eligible jumbo mortgage loans, and government-insured or government-guaranteed mortgage loans.
     community_programs:
       title: Community Programs
-      description_html: The Bank's <a href=%{url}>community programs</a> can help you foster strong, stable, and sustainable communities by providing affordable housing and economic development needs in Arizona, California, Nevada, and the other regions you serve.
+      description_html: The Bank’s <a href=%{url}>community programs</a> can help you foster strong, stable, and sustainable communities by providing affordable housing and economic development needs in Arizona, California, Nevada, and the other regions you serve.
     section_headings:
       use: Use
       uses: Uses
@@ -2318,10 +2319,10 @@ en:
       maximum_ammount: Maximum Amount
       renewal: Renewal
       repayment: Repayment
-      bank_terminate: "Bank's Right to Terminate"
+      bank_terminate: "Bank’s Right to Terminate"
     swaps:
       title: Interest Rate Swaps, Caps & Floors
-      summary_html: "At this time, the Bank is not offering stand-alone interest rate swaps, caps, and floors, <a href=%{url}>pending publication</a> of final rules by the U.S. Commodity Futures Trading Commission (CFTC) that will affect the Bank's ability to offer these products. The rules are expected to be published later this year. The following information is provided for members that have already purchases interest rate swaps, caps, and floors from the Bank."
+      summary_html: "At this time, the Bank is not offering stand-alone interest rate swaps, caps, and floors, <a href=%{url}>pending publication</a> of final rules by the U.S. Commodity Futures Trading Commission (CFTC) that will affect the Bank’s ability to offer these products. The rules are expected to be published later this year. The following information is provided for members that have already purchases interest rate swaps, caps, and floors from the Bank."
       payment:
         title: Payment
         net_payment: The Bank will determine the net payment due on the scheduled payment dates of a swap. Only the net amount due will be credited to or debited from your Settlement/ Transaction Account with the Bank.
@@ -2346,10 +2347,10 @@ en:
         fifteen_times: 0.015 times the notional amount
       early_termination:
         title: Early Termination
-        in_the_event: In the event of the early termination of an interest rate swap, cap, or floor, the Bank will calculate the required final payments in accordance with the terms of the Bank's International Swaps and Derivatives Association (ISDA) Master Agreement and related ISDA Schedule to the Master Agreement between the Bank and the member and with the terms of the Bank confirmation for that transaction.
+        in_the_event: In the event of the early termination of an interest rate swap, cap, or floor, the Bank will calculate the required final payments in accordance with the terms of the Bank’s International Swaps and Derivatives Association (ISDA) Master Agreement and related ISDA Schedule to the Master Agreement between the Bank and the member and with the terms of the Bank confirmation for that transaction.
   messages:
     meta_title: FHLB - Messages
-    description: "Welcome to your Member Portal Inbox.\n\nHere you will find an archive of the Bank's recent announcements to members.\nYou may filter these announcements by topic using the sidebar menu."
+    description: "Welcome to your Member Portal Inbox.\n\nHere you will find an archive of the Bank’s recent announcements to members.\nYou may filter these announcements by topic using the sidebar menu."
     prior: Newer
     next: Older
   contact:
@@ -2479,7 +2480,7 @@ en:
       responsibility: All users of this Website acknowledge that the material on this Website (i) does not represent investment advice; (ii) does not constitute an offer to extend credit, a grant or subsidy and (iii) does not constitute investment solicitation or an offer to buy securities. You must not rely on this Website or the information contained on this Website in making an investment decision, a credit decision or a calculation of the timing or amount of payment on debt securities or any other related information.
     ownership:
       title: Ownership and Other Intellectual Property Rights
-      description: This Website and all its pages are copyrighted by the Federal Home Loan Bank of San Francisco, © 2000 - 2015, all rights reserved. The Bank’s distinctive house rooftop logo appearing throughout this Website, including documents that can be downloaded from this Website, and the words “FHLBank San Francisco” are trademarks, whether registered or at common law, and trade names of the Bank. The Bank’s trademark, trade name, or logo cannot be used for any commercial purpose without the written consent of an authorized agent of the Bank. Except for data that (1) you create, (2) is in the public domain or (3) for which you have been given written permission by an authorized agent of the Bank, you may not copy, modify, publish, transmit, distribute, perform, display, or sell any data located on this Website.
+      description: This Website and all its pages are copyrighted by the Federal Home Loan Bank of San Francisco, © 2000 - %{this_year}, all rights reserved. The Bank’s distinctive house rooftop logo appearing throughout this Website, including documents that can be downloaded from this Website, and the words “FHLBank San Francisco” are trademarks, whether registered or at common law, and trade names of the Bank. The Bank’s trademark, trade name, or logo cannot be used for any commercial purpose without the written consent of an authorized agent of the Bank. Except for data that (1) you create, (2) is in the public domain or (3) for which you have been given written permission by an authorized agent of the Bank, you may not copy, modify, publish, transmit, distribute, perform, display, or sell any data located on this Website.
     liability:
       title: Limitation on Liability
       liability: The Bank is not liable for any errors contained in this Website, or for any direct, indirect, consequential, exemplary, incidental, special or punitive damages, including also lost profits arising from your use of (or inability to use) this Website. The Bank’s liability for damage or claims arising from your use of this Website is limited to the lesser of $100 (U.S.), or to the fullest extent permitted by law.
@@ -2526,7 +2527,7 @@ en:
       greeting: 'Hi %{given_name},'
       created_by: "An account has been created for you by your institution’s Access Manager, %{manager}."
       username: 'Your username is: %{username}.'
-      set_password: To access the FHLB Member Portal, you'll need to set your password.
+      set_password: To access the FHLB Member Portal, you’ll need to set your password.
       login_instructions: Once you have set a password, you will be redirected to the login page, where you will need to enter your username (above) and your new password.
       expiration: For your security, this link will expire in one hour.
       contact: Contact your Access Manager or Web Support at %{phone} if you have any questions.

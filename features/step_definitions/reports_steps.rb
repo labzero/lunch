@@ -1,3 +1,5 @@
+include DatePickerHelper
+
 Then(/^I should see "(.*?)" as the report page's main title$/) do |title|
   page.assert_selector('h1', text: title)
 end
@@ -91,7 +93,7 @@ end
 
 Given(/^I am on the "(.*?)" report page$/) do |report|
   sleep_if_close_to_midnight
-  @today = Time.zone.now.to_date
+  @today = Time.zone.today
   case report
   when 'Account Summary'
     visit '/reports/account-summary'
@@ -138,6 +140,7 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
   else
     raise Capybara::ExpectationNotMet, 'unknown report passed as argument'
   end
+  step 'I wait for the report to load'
 end
 
 When(/^I click the "(.*?)" column heading$/) do |column_heading|
@@ -262,18 +265,13 @@ Then(/^I should see a "(.*?)" report as of last business day$/) do |report_type|
   step %{I should see a "#{report_type}" report as of "#{most_recent_business_day(Time.zone.today - 1)}"}
 end
 
-def most_recent_business_day(d)
-  return d - 1.day if d.saturday?
-  return d - 2.day if d.sunday?
-  d
-end
-
-Then(/^I should see a "(.*?)" report as of the last day of last month$/) do |report_type|
+Then(/^I should see a "(.*?)" report as of the last day of last month relative to today$/) do |report_type|
   date = (@today - 1.month).end_of_month
   step %{I should see a "#{report_type}" report as of "#{date}"}
 end
 
 Then(/^I should see a "(.*?)" report as of "(.*?)"$/) do |report_type, as_of_date|
+  step 'I wait for the report to load'
   as_of_date = as_of_date.to_date
   summary_statement = case report_type
     when "Advances Detail"
@@ -501,10 +499,11 @@ end
 When(/^I select "(.*?)" from the authorizations filter$/) do |text|
   page.find('.report-inputs .dropdown-selection').click
   page.find('.authorizations-filter li', text: text).click
-  step %{I wait for the report to load}
 end
 
 When(/^I should only see users with the "(.*?)" role( or with inclusive roles)?$/) do |role, inclusive|
+  step %{I wait for the report to load}
+
   role_mapping = {
     'Resolution and Authorization' => I18n.t('user_roles.resolution.title'),
     'Entire Authority' => I18n.t('user_roles.entire_authority.title'),

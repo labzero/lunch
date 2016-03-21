@@ -20,19 +20,9 @@ RSpec.describe ReportsController, :type => :controller do
           raise 'Default start case not found'
       end
     end
-    if default_start_selection
-      it "should pass the `min_and_start_dates` method the correct default if the `start_date` param is not provided" do
-        expect(controller).to receive(:min_and_start_dates).with(anything, default_start)
-        get action
-      end
-    end
-    it 'should pass the `min_and_start_dates` method the `start_date` param if provided' do
-      expect(controller).to receive(:min_and_start_dates).with(anything, start_date)
+    it 'should pass the `initialize_dates` method the `start_date` param if provided' do
+      expect(controller).to receive(:initialize_dates).with(anything, start_date.to_s, any_args)
       get action, start_date: start_date
-    end
-    it 'should set @min_date to the `min_date` attribute of the `min_and_start_dates` hash' do
-      get action
-      expect(assigns[:min_date]).to eq(min_date)
     end
   end
 
@@ -45,11 +35,61 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
-  shared_examples 'a report with a @max_date' do |action|
-    it 'sets @max_date to the result of the most_recent_business_day method' do
-      allow(controller).to receive(:most_recent_business_day).with( Time.zone.today - 1.day ).and_return(max_date)
-      get action
-      expect(assigns[:max_date]).to eq(max_date)
+  shared_examples 'a MemberBalanceServiceJob backed report' do |service_job_method, job_call, deferred_job = false|
+    let(:job_response) {deferred_job ? response_hash : member_balance_service_job_instance}
+    describe "calling `#{job_call}` on the MemberBalanceServiceJob" do
+      it 'passes the member id' do
+        allow(controller).to receive(:report_disabled?).and_return(false)
+        allow(controller).to receive(:current_member_id).and_return(member_id)
+        expect(MemberBalanceServiceJob).to receive(job_call).with(member_id, any_args).and_return(job_response)
+        call_action
+      end
+      it "passes `#{service_job_method}`" do
+        expect(MemberBalanceServiceJob).to receive(job_call).with(anything, service_job_method, any_args).and_return(job_response)
+        call_action
+      end
+      it 'passes the proper uuid' do
+        expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, request.uuid, anything).and_return(job_response)
+        call_action
+      end
+    end
+    if job_call == :perform_later
+      it 'updates the job status with the user\'s id' do
+        allow(controller).to receive(:current_user).and_return(user)
+        expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
+        call_action
+      end
+      it 'sets the @job_status_url' do
+        call_action
+        expect(assigns[:job_status_url]).to eq(job_status_url(job_status))
+      end
+    end
+  end
+
+  shared_examples 'a JobStatus backed report' do
+    let(:parsed_response_hash) { double('parsed hash', with_indifferent_access: response_hash) }
+    before do
+      allow(JobStatus).to receive(:find_by).and_return(job_status)
+      allow(JSON).to receive(:parse).and_return(parsed_response_hash)
+    end
+    it 'finds the JobStatus by id, user_id, and status' do
+      allow(controller).to receive(:current_user).and_return(user)
+      expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: user_id, status: JobStatus.statuses[:completed]).and_return(job_status)
+      call_action_with_job_id
+    end
+    it 'raises an error if there is no job status found' do
+      allow(JobStatus).to receive(:find_by)
+      expect{call_action_with_job_id}.to raise_error
+    end
+    it 'parses the job_status string' do
+      job_status_string = double('job status string')
+      allow(job_status).to receive(:result_as_string).and_return(job_status_string)
+      expect(JSON).to receive(:parse).with(job_status_string).and_return(parsed_response_hash)
+      call_action_with_job_id
+    end
+    it 'destroys the job status' do
+      expect(job_status).to receive(:destroy)
+      call_action_with_job_id
     end
   end
 
@@ -61,14 +101,15 @@ RSpec.describe ReportsController, :type => :controller do
   let(:restricted_start_date) { double('a restricted date')}
   let(:end_date) { today - 1.month }
   let(:min_date) { double('min date') }
-  let(:picker_preset_hash) {double(Hash)}
-  let(:min_and_start_dates_array) { [min_date, restricted_start_date] }
+  let(:picker_preset_hash) { double('date_picker_hash')}
   let(:date_picker_presets) {double('date_picker_presets')}
 
   before do
     allow(controller).to receive(:date_picker_presets).and_return(date_picker_presets)
     allow(controller).to receive(:most_recent_business_day).and_return(max_date)
     allow(controller).to receive(:fhlb_report_date_numeric)
+    allow(ReportConfiguration).to receive(:date_bounds).with(any_args)
+      .and_return({ min: min_date, start: start_date, end: end_date, max: max_date })
   end
 
   describe 'GET index' do
@@ -120,7 +161,6 @@ RSpec.describe ReportsController, :type => :controller do
 
     before do
       allow(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
-      allow(controller).to receive(:min_and_start_dates).and_return(min_and_start_dates_array)
     end
 
     describe 'GET capital_stock_activity' do
@@ -146,11 +186,20 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a date restricted report', :capital_stock_activity, :last_month_start
       it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_activity
       it_behaves_like 'a controller action with an active nav setting', :capital_stock_activity, :reports
-      it_behaves_like 'a report that can be downloaded', :capital_stock_activity, [:xlsx]
+      it_behaves_like 'a report that can be downloaded', :capital_stock_activity, [:pdf, :xlsx]
 
       it 'should render the capital_stock_activity view' do
         capital_stock_activity
         expect(response.body).to render_template('capital_stock_activity')
+      end
+      it 'should set @capital_stock_activity' do
+        capital_stock_activity
+        expect(assigns[:capital_stock_activity]).to eq(response_hash)
+      end
+      it 'should set @capital_stock_activity to {} if the report is disabled' do
+        allow(controller).to receive(:report_disabled?).with(ReportsController::CAPITAL_STOCK_ACTIVITY_WEB_FLAGS).and_return(true)
+        capital_stock_activity
+        expect(assigns[:capital_stock_activity]).to eq({:activities=>[]})
       end
       it 'should raise an error if the service returns nil' do
         allow(member_balance_service_instance).to receive(:capital_stock_activity).and_return(nil)
@@ -223,7 +272,10 @@ RSpec.describe ReportsController, :type => :controller do
             end
           end
         end
-        it 'should set @start_date to the `start_date` attribute of the `min_and_start_dates` hash' do
+        it 'should set @start_date to a restricted start date' do
+          allow(ReportConfiguration).to receive(:date_bounds)
+            .with(:capital_stock_activity, anything, anything)
+            .and_return({ min: min_date, start: restricted_start_date, end: end_date, max: max_date })
           capital_stock_activity
           expect(assigns[:start_date]).to eq(restricted_start_date)
         end
@@ -232,13 +284,16 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[:end_date]).to eq(end_date)
         end
         it 'should set @end_date to the end of last month if no end_date param is provided' do
+          allow(ReportConfiguration).to receive(:date_bounds)
+            .with(:capital_stock_activity, anything, anything)
+            .and_return({ min: min_date, start: restricted_start_date, end: default_dates_hash[:last_month_end], max: max_date })
           capital_stock_activity
           expect(assigns[:end_date]).to eq(default_dates_hash[:last_month_end])
         end
         it 'should pass @start_date, @end_date and the `date_restriction` to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-          allow(controller).to receive(:date_picker_presets).with(restricted_start_date, end_date, ReportsController::DATE_RESTRICTION_MAPPING[:capital_stock_activity]).and_return(picker_preset_hash)
+          allow(controller).to receive(:date_picker_presets).with(restricted_start_date, end_date, ReportsController::DATE_RESTRICTION_MAPPING[:capital_stock_activity]).and_return(date_picker_presets)
           get :capital_stock_activity, start_date: start_date, end_date: end_date
-          expect(assigns[:picker_presets]).to eq(picker_preset_hash)
+          expect(assigns[:picker_presets]).to eq(date_picker_presets)
         end
       end
     end
@@ -283,16 +338,16 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a report that can be downloaded', :capital_stock_trial_balance, [:xlsx]
       it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_trial_balance
       it_behaves_like 'a controller action with an active nav setting', :capital_stock_trial_balance, :reports
-      it_behaves_like 'a report with a @max_date', :capital_stock_trial_balance
+
       it 'renders the capital_stock_trial_balance view' do
         call_action
         expect(response.body).to render_template('capital_stock_trial_balance')
       end
       it 'should pass @start_date and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
         allow(controller).to receive(:most_recent_business_day).and_return(max_date)
-        allow(controller).to receive(:date_picker_presets).with(start_date, nil, nil, max_date).and_return(picker_preset_hash)
+        allow(controller).to receive(:date_picker_presets).with(start_date, nil, nil, max_date).and_return(date_picker_presets)
         get :capital_stock_trial_balance, start_date: start_date
-        expect(assigns[:picker_presets]).to eq(picker_preset_hash)
+        expect(assigns[:picker_presets]).to eq(date_picker_presets)
       end
       it 'should assign @number_of_shares and @number_of_certificates' do
         call_action
@@ -304,8 +359,10 @@ RSpec.describe ReportsController, :type => :controller do
         expect(assigns[:min_date]).to eq(min_date)
       end
       it 'should assign @start_date a date of January 1st, 2002 if the start_date param occurs before that date' do
+        allow(ReportConfiguration).to receive(:date_bounds).with(:capital_stock_trial_balance, anything, anything)
+          .and_return({ min: min_date, start: Date.new(2002,1,1), end: end_date, max: max_date })
         get :capital_stock_trial_balance, start_date: min_date - 1.year
-        expect(assigns[:min_date]).to eq(min_date)
+        expect(assigns[:start_date]).to eq(Date.new(2002,1,1))
       end
       it 'should return capital_stock_trial_balance_table_data with with columns populated' do
         call_action
@@ -363,37 +420,6 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
 
-    describe 'GET borrowing_capacity' do
-      before do
-        allow(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(response_hash)
-      end
-      it_behaves_like 'a user required action', :get, :borrowing_capacity
-      it_behaves_like 'a report that can be downloaded', :borrowing_capacity, [:pdf]
-      it_behaves_like 'a report with instance variables set in a before_filter', :borrowing_capacity
-      it_behaves_like 'a controller action with an active nav setting', :borrowing_capacity, :reports
-      it 'should render the borrowing_capacity view' do
-        get :borrowing_capacity
-        expect(response.body).to render_template('borrowing_capacity')
-      end
-      it 'should raise an error if @borrowing_capacity_summary is nil' do
-        allow(member_balance_service_instance).to receive(:borrowing_capacity_summary).and_return(nil)
-        expect{get :borrowing_capacity}.to raise_error(StandardError)
-      end
-      it 'should set @borrowing_capacity_summary to the hash returned from MemberBalanceService' do
-        get :borrowing_capacity
-        expect(assigns[:borrowing_capacity_summary]).to eq(response_hash)
-      end
-      it 'should set @borrowing_capacity_summary to {} if the report is disabled' do
-        expect(controller).to receive(:report_disabled?).with(ReportsController::BORROWING_CAPACITY_WEB_FLAGS).and_return(true)
-        get :borrowing_capacity
-        expect(assigns[:borrowing_capacity_summary]).to eq({})
-      end
-      it 'should set @date' do
-        get :borrowing_capacity
-        expect(assigns[:date]).to eq(today)
-      end
-    end
-
     describe 'GET settlement_transaction_account' do
       let(:filter) {'some filter'}
       let(:make_request) { get :settlement_transaction_account }
@@ -430,23 +456,26 @@ RSpec.describe ReportsController, :type => :controller do
             make_request
             expect(assigns[:settlement_transaction_account]).to eq({})
           end
-          it 'should set @start_date to the `start_date` attribute of the `min_and_start_dates` hash' do
+          it 'should set @start_date to the `start_date`' do
+            allow(ReportConfiguration).to receive(:date_bounds).with(:settlement_transaction_account, start_date, anything)
+              .and_return({ min: min_date, start: start_date, end: end_date, max: max_date })
             make_request
-            expect(assigns[:start_date]).to eq(restricted_start_date)
+            expect(assigns[:start_date]).to eq(start_date)
           end
           it 'should set @end_date to the end_date param' do
             make_request_with_dates
             expect(assigns[:end_date]).to eq(end_date)
           end
           it 'should set @end_date to the end of last month if no end_date param is provided' do
+            allow(ReportConfiguration).to receive(:date_bounds).with(:settlement_transaction_account, anything, nil)
+              .and_return({ min: min_date, start: start_date, end: default_dates_hash[:last_month_end], max: max_date })
             make_request
-            get :settlement_transaction_account
-            expect(assigns[:end_date]).to eq(default_dates_hash[:today])
+            expect(assigns[:end_date]).to eq(default_dates_hash[:last_month_end])
           end
           it 'should pass @start_date, @end_date and `date_restriction` to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-            expect(controller).to receive(:date_picker_presets).with(restricted_start_date, end_date, ReportsController::DATE_RESTRICTION_MAPPING[:settlement_transaction_account]).and_return(picker_preset_hash)
+            allow(controller).to receive(:date_picker_presets).with(restricted_start_date, end_date, ReportsController::DATE_RESTRICTION_MAPPING[:settlement_transaction_account]).and_return(picker_preset_hash)
             get :settlement_transaction_account, start_date: start_date, end_date: end_date, sta_filter: filter
-            expect(assigns[:picker_presets]).to eq(picker_preset_hash)
+            expect(assigns[:picker_presets]).to eq(date_picker_presets)
           end
           it 'sets @daily_balance_key to the constant DAILY_BALANCE_KEY found in MemberBalanceService' do
             my_const = double('Some Constant')
@@ -543,114 +572,6 @@ RSpec.describe ReportsController, :type => :controller do
            expect(members_service).to receive(:member).exactly(:once)
            make_request
          end
-      end
-    end
-
-    describe 'GET advances_detail' do
-      it_behaves_like 'a user required action', :get, :advances_detail
-      let(:advances_detail) {double('Advances Detail object')}
-      before do
-        allow(member_balance_service_instance).to receive(:advances_details).and_return(advances_detail)
-        allow(advances_detail).to receive(:[]).with(:advances_details).and_return([])
-      end
-
-      it_behaves_like 'a report that can be downloaded', :advances_detail, [:pdf, :xlsx]
-      it_behaves_like 'a date restricted report', :advances_detail, nil, 1
-      it_behaves_like 'a report with instance variables set in a before_filter', :advances_detail
-      it_behaves_like 'a controller action with an active nav setting', :advances_detail, :reports
-      it_behaves_like 'a report with a @max_date', :advances_detail
-      it 'should render the advances_detail view' do
-        get :advances_detail
-        expect(response.body).to render_template('advances_detail')
-      end
-
-      describe 'view instance variables' do
-        it 'sets @start_date to the `start_date` attribute of the `min_and_start_dates` hash' do
-          get :advances_detail
-          expect(assigns[:start_date]).to eq(restricted_start_date)
-        end
-        it 'should pass @as_of_date, `date_restriction` and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-          expect(controller).to receive(:date_picker_presets).with(restricted_start_date, nil, ReportsController::DATE_RESTRICTION_MAPPING[:advances_detail], max_date).and_return(picker_preset_hash)
-          get :advances_detail, start_date: start_date
-          # expect(assigns[:picker_presets]).to eq(picker_preset_hash)
-        end
-        it 'should call the method `advances_details` on a MemberBalanceService instance with the `start` argument and set @advances_detail to its result' do
-          expect(member_balance_service_instance).to receive(:advances_details).with(restricted_start_date).and_return(advances_detail)
-          get :advances_detail, start_date: start_date
-          expect(assigns[:advances_detail]).to eq(advances_detail)
-        end
-        it 'should raise an error if `advances_details` returns nil' do
-          expect(member_balance_service_instance).to receive(:advances_details).and_return(nil)
-          expect{get :advances_detail, start_date: start_date}.to raise_error
-        end
-        it 'should set @advances_detail to {} if the report is disabled' do
-          expect(controller).to receive(:report_disabled?).with(ReportsController::ADVANCES_DETAIL_WEB_FLAGS).and_return(true)
-          get :advances_detail
-          expect(assigns[:advances_detail]).to eq({})
-        end
-        it 'should sort the advances found in @advances_detail[:advances_details]' do
-          expect(advances_detail[:advances_details]).to receive(:sort!)
-          get :advances_detail
-        end
-        it 'should order the advances found in @advances_detail[:advances_details] by `trade_date` ascending' do
-          unsorted_advances = [
-            {trade_date: Time.zone.today},
-            {trade_date: Time.zone.today + 1.years},
-            {trade_date: Time.zone.today - 1.years},
-            {trade_date: Time.zone.today - 3.years}
-          ]
-          allow(advances_detail).to receive(:[]).with(:advances_details).and_return(unsorted_advances)
-          get :advances_detail
-          last_trade_date = nil
-          assigns[:advances_detail][:advances_details].each do |advance|
-            expect(advance[:trade_date]).to be >= last_trade_date if last_trade_date
-            last_trade_date = advance[:trade_date]
-          end
-        end
-        it 'should set @report_name' do
-          get :advances_detail
-          expect(assigns[:report_name]).to be_kind_of(String)
-        end
-      end
-
-      describe 'setting the `prepayment_fee_indication_notes` attribute for a given advance record' do
-        let(:advance_record) {double('Advance Record')}
-        let(:advances_array) {[advance_record]}
-        let(:prepayment_fee) {464654654}
-        before do
-          allow(advances_detail).to receive(:[]).with(:advances_details).at_least(1).and_return(advances_array)
-          allow(member_balance_service_instance).to receive(:advances_details).and_return(advances_detail)
-        end
-        it 'sets the attribute to `unavailable online` message if `notes` attribute for that record is `unavailable_online`' do
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.unavailable_online'))
-          expect(advance_record).to receive(:[]).with(:notes).and_return('unavailable_online')
-          get :advances_detail
-        end
-        it 'sets the attribute to `not applicable for vrc` message if `notes` attribute for that record is `not_applicable_to_vrc`' do
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.not_applicable_to_vrc'))
-          expect(advance_record).to receive(:[]).with(:notes).and_return('not_applicable_to_vrc')
-          get :advances_detail
-        end
-        it 'sets the attribute to `prepayment fee restructure` message if `notes` attribute for that record is `prepayment_fee_restructure`' do
-          date = Date.new(2013, 1, 1)
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.prepayment_fee_restructure_html', date: fhlb_date_standard_numeric(date)))
-          expect(advance_record).to receive(:[]).with(:structure_product_prepay_valuation_date).and_return(date)
-          allow(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
-          expect(advance_record).to receive(:[]).with(:notes).and_return('prepayment_fee_restructure')
-          get :advances_detail
-        end
-        it 'doesn\'t set the attribute if that attribute exists and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
-          expect(advance_record).to_not receive(:[]=).with(:prepayment_fee_indication_notes, anything)
-          expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
-          expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
-          get :advances_detail
-        end
-        it 'sets the attribute to equal the `not available for past dates` message if there is no value for the `prepayment_fee_indication` attribute and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
-          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.unavailable_for_past_dates'))
-          expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
-          expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(nil)
-          get :advances_detail
-        end
       end
     end
 
@@ -1134,7 +1055,6 @@ RSpec.describe ReportsController, :type => :controller do
         allow(controller).to receive(:month_restricted_start_date).and_return(end_of_month)
         allow(controller).to receive(:default_dates_hash).and_return({last_month_end: end_of_month})
       }
-
       it_behaves_like 'a user required action', :get, :monthly_securities_position
       it_behaves_like 'a date restricted report', :monthly_securities_position, :last_month_end
       it_behaves_like 'a report with instance variables set in a before_filter', :monthly_securities_position
@@ -1143,22 +1063,9 @@ RSpec.describe ReportsController, :type => :controller do
       describe 'view instance variables' do
         let(:unprocessed_securities) { double('unprocessed securities details', length: nil) }
         let(:processed_securities) { double('processed securities details') }
-        it "should pass `#{ReportsController::DATE_RESTRICTION_MAPPING[:monthly_securities_position]}` to `min_and_start_dates`" do
-          expect(controller).to receive(:min_and_start_dates).with(ReportsController::DATE_RESTRICTION_MAPPING[:monthly_securities_position], anything)
+        it 'sets @month_end_date to end_of_month' do
           get :monthly_securities_position
-        end
-        it 'should pass `last_month_end` to `min_and_start_dates` if no start_date param is given' do
-          expect(controller).to receive(:min_and_start_dates).with(anything, end_of_month)
-          get :monthly_securities_position
-        end
-        it 'should pass the start_date param to `min_and_start_dates` if one is provided' do
-          expect(controller).to receive(:min_and_start_dates).with(anything, start_date_param)
-          get :monthly_securities_position, start_date: start_date_param
-        end
-        it 'should set @month_end_date to the value returned by `month_restricted_start_date`' do
-          allow(controller).to receive(:month_restricted_start_date).and_return(month_restricted_start_date)
-          get :monthly_securities_position
-          expect(assigns[:month_end_date]).to eq(month_restricted_start_date)
+          expect(assigns[:month_end_date]).to eq(end_of_month)
         end
         it 'sets @monthly_securities_position to the hash returned from MemberBalanceService' do
           get :monthly_securities_position
@@ -1213,6 +1120,10 @@ RSpec.describe ReportsController, :type => :controller do
             get :monthly_securities_position, securities_filter: option.last
             expect(assigns[:securities_filter_text]).to eq(option.first)
           end
+        end
+        it 'should pass @start_date, nil, `date_restriction`, nil and `today` to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+          expect(controller).to receive(:date_picker_presets).with(anything, anything, anything, anything, [:today]).and_return(date_picker_presets)
+          get :monthly_securities_position
         end
       end
     end
@@ -1582,51 +1493,373 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
+  describe 'GET advances_detail' do
+    let(:advances_detail) {double('Advances Detail object')}
+    let(:job_status) { double('JobStatus', update_attributes!: nil, id: nil, destroy: nil, result_as_string: nil ) }
+    let(:member_balance_service_job_instance) { double('member_balance_service_job_instance', job_status: job_status) }
+    let(:user_id) { rand(0..99999) }
+    let(:user) { double(User, id: user_id, accepted_terms?: true) }
+    let(:response_hash) { double('hash of advances', :[] => nil) }
+    let(:job_id) { rand(0..99999) }
+    let(:member_id) { rand(0..99999) }
+    let(:call_action) { get :advances_detail }
+    let(:call_action_with_job_id) { get :advances_detail, job_id: job_id }
+    let(:end_date) { Date.new(2016, 1, 1) }
+    before do
+      allow(advances_detail).to receive(:[]).with(:advances_details).and_return([])
+    end
+
+    it_behaves_like 'a user required action', :get, :advances_detail
+    it_behaves_like 'a report that can be downloaded', :advances_detail, [:pdf, :xlsx]
+    it_behaves_like 'a date restricted report', :advances_detail, nil, 1
+    it_behaves_like 'a report with instance variables set in a before_filter', :advances_detail
+    it_behaves_like 'a controller action with an active nav setting', :advances_detail, :reports
+    
+    it 'should render the advances_detail view' do
+      call_action
+      expect(response.body).to render_template('advances_detail')
+    end
+    describe 'view instance variables' do
+      it 'sets @report_name' do
+        call_action
+        expect(assigns[:report_name]).to eq(I18n.t('global.advances'))
+      end
+      it 'sets @start_date to `start_date`' do
+        get :advances_detail, start_date: start_date
+        expect(assigns[:start_date]).to eq(start_date)
+      end
+      it 'should pass @as_of_date, `date_restriction` and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+        allow(controller).to receive(:date_picker_presets).with(start_date, nil, ReportsController::DATE_RESTRICTION_MAPPING[:advances_detail], max_date).and_return(picker_preset_hash)
+        get :advances_detail, start_date: start_date
+        expect(assigns[:picker_presets]).to eq(picker_preset_hash)
+      end
+    end
+
+    shared_examples 'an advances detail report that passes additional arguments to the MemberBalanceServiceJob' do |job_call, deferred_job = false|
+      describe 'additional arguments' do
+        let(:job_response) {deferred_job ? response_hash : member_balance_service_job_instance}
+        it 'passes the start_date as the final argument' do
+          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, start_date.to_s).and_return(job_response)
+          get :advances_detail, start_date: start_date
+        end
+      end
+    end
+
+    describe 'when a job_id is not present and self.skip_deferred_load is false' do
+      it_behaves_like 'a MemberBalanceServiceJob backed report', 'advances_details', :perform_later
+      it_behaves_like 'an advances detail report that passes additional arguments to the MemberBalanceServiceJob', :perform_later
+
+      before { allow(MemberBalanceServiceJob).to receive(:perform_later).and_return(member_balance_service_job_instance) }
+
+      it 'sets the @load_url with the appropriate params' do
+        get :advances_detail, start_date: start_date
+        expect(assigns[:load_url]).to eq(reports_advances_url(job_id: job_status.id, start_date: start_date.to_s))
+      end
+      it 'sets @advances_detail[:deferred] to true' do
+        call_action
+        expect(assigns[:advances_detail][:deferred]).to eq(true)
+      end
+    end
+
+    shared_examples 'returning advances details data' do
+      let(:call_action_shared_example) { controller.skip_deferred_load ? call_action : call_action_with_job_id }
+      it 'sets @advances_detail to {} if the report is disabled' do
+        allow(controller).to receive(:report_disabled?).with(ReportsController::ADVANCES_DETAIL_WEB_FLAGS).and_return(true)
+        call_action_shared_example
+        expect(assigns[:advances_detail]).to eq({})
+      end
+      it 'sorts the advances found in @advances_detail[:advances_details]' do
+        expect(advances_detail[:advances_details]).to receive(:sort!)
+        call_action_shared_example
+      end
+      it 'orders the advances found in @advances_detail[:advances_details] by `trade_date` ascending' do
+        unsorted_advances = [
+          {trade_date: Time.zone.today},
+          {trade_date: Time.zone.today + 1.years},
+          {trade_date: Time.zone.today - 1.years},
+          {trade_date: Time.zone.today - 3.years}
+        ]
+        allow(advances_detail).to receive(:[]).with(:advances_details).and_return(unsorted_advances)
+        call_action_shared_example
+        last_trade_date = nil
+        assigns[:advances_detail][:advances_details].each do |advance|
+          expect(advance[:trade_date]).to be >= last_trade_date if last_trade_date
+          last_trade_date = advance[:trade_date]
+        end
+      end
+
+      describe 'setting the `prepayment_fee_indication_notes` attribute for a given advance record' do
+        let(:advance_record) {double('Advance Record')}
+        let(:advances_array) {[advance_record]}
+        let(:prepayment_fee) {464654654}
+        before do
+          allow(advances_detail).to receive(:[]).with(:advances_details).at_least(1).and_return(advances_array)
+        end
+        it 'sets the attribute to `unavailable online` message if `notes` attribute for that record is `unavailable_online`' do
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.unavailable_online'))
+          expect(advance_record).to receive(:[]).with(:notes).and_return('unavailable_online')
+          call_action_shared_example
+        end
+        it 'sets the attribute to `not applicable for vrc` message if `notes` attribute for that record is `not_applicable_to_vrc`' do
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.not_applicable_to_vrc'))
+          expect(advance_record).to receive(:[]).with(:notes).and_return('not_applicable_to_vrc')
+          call_action_shared_example
+        end
+        it 'sets the attribute to `prepayment fee restructure` message if `notes` attribute for that record is `prepayment_fee_restructure`' do
+          date = Date.new(2013, 1, 1)
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.prepayment_fee_restructure_html', date: fhlb_date_standard_numeric(date)))
+          expect(advance_record).to receive(:[]).with(:structure_product_prepay_valuation_date).and_return(date)
+          allow(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
+          expect(advance_record).to receive(:[]).with(:notes).and_return('prepayment_fee_restructure')
+          call_action_shared_example
+        end
+        it 'doesn\'t set the attribute if that attribute exists and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
+          expect(advance_record).to_not receive(:[]=).with(:prepayment_fee_indication_notes, anything)
+          expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
+          expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(prepayment_fee)
+          call_action_shared_example
+        end
+        it 'sets the attribute to equal the `not available for past dates` message if there is no value for the `prepayment_fee_indication` attribute and the `note` attribute is not `unavailable_online`, `not_applicable_to_vrc`, or `prepayment_fee_restructure`' do
+          expect(advance_record).to receive(:[]=).with(:prepayment_fee_indication_notes, I18n.t('reports.pages.advances_detail.unavailable_for_past_dates'))
+          expect(advance_record).to receive(:[]).with(:notes).and_return(nil)
+          expect(advance_record).to receive(:[]).with(:prepayment_fee_indication).and_return(nil)
+          call_action_shared_example
+        end
+      end
+    end
+
+    describe 'job_id present' do
+      before do
+        allow(JSON).to receive(:parse).and_return(double('job status response', with_indifferent_access: advances_detail))
+        allow(JobStatus).to receive(:find_by).and_return(job_status)
+      end
+      it_behaves_like 'a JobStatus backed report'
+      include_examples 'returning advances details data'
+
+      it 'raises an error if `advances_details` is nil' do
+        allow(JSON).to receive(:parse).and_return(double('job status response', with_indifferent_access: nil))
+        expect{call_action_with_job_id}.to raise_error
+      end
+    end
+    describe '`skip_deferred_load` set to true' do
+      before do
+        controller.skip_deferred_load = true
+        allow(MemberBalanceServiceJob).to receive(:perform_now).and_return(advances_detail)
+      end
+      it_behaves_like 'a MemberBalanceServiceJob backed report', 'advances_details', :perform_now, true
+      it_behaves_like 'an advances detail report that passes additional arguments to the MemberBalanceServiceJob', :perform_now, true
+      include_examples 'returning advances details data'
+    end
+
+  end
+
+  describe 'GET borrowing_capacity' do
+    it_behaves_like 'a user required action', :get, :borrowing_capacity
+    it_behaves_like 'a report that can be downloaded', :borrowing_capacity, [:pdf]
+    it_behaves_like 'a report with instance variables set in a before_filter', :borrowing_capacity
+    it_behaves_like 'a controller action with an active nav setting', :borrowing_capacity, :reports
+
+    let(:job_status) { double('JobStatus', update_attributes!: nil, id: nil, destroy: nil, result_as_string: nil ) }
+    let(:member_balance_service_job_instance) { double('member_balance_service_job_instance', job_status: job_status) }
+    let(:user_id) { rand(0..99999) }
+    let(:user) { double(User, id: user_id, accepted_terms?: true) }
+    let(:response_hash) { double('hash of borrowing capacity data', :[] => nil) }
+    let(:job_id) { rand(0..99999) }
+    let(:member_id) { rand(0..99999) }
+    let(:call_action) { get :borrowing_capacity }
+    let(:call_action_with_job_id) { get :borrowing_capacity, job_id: job_id }
+    let(:end_date) { Date.new(2016, 1, 1) }
+
+    it 'should render the borrowing_capacity view' do
+      call_action
+      expect(response.body).to render_template('borrowing_capacity')
+    end
+    it 'should set @end_date if supplied' do
+      get :borrowing_capacity, end_date: end_date
+      expect(assigns[:end_date]).to eq(end_date)
+    end
+
+    shared_examples 'a borrowing capacity report that passes additional arguments to the MemberBalanceServiceJob' do |job_call, deferred_job = false|
+      describe 'additional arguments' do
+        let(:job_response) {deferred_job ? response_hash : member_balance_service_job_instance}
+        before { allow(ReportConfiguration).to receive(:date_bounds).and_call_original }
+        it 'passes today as the final argument if no end_date param is provided' do
+          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, today.to_s).and_return(job_response)
+          call_action
+        end
+        it 'passes the end_date param if one is provided' do
+          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, end_date.to_s).and_return(job_response)
+          get :borrowing_capacity, end_date: end_date
+        end
+      end
+    end
+
+    describe 'when a job_id is not present and self.skip_deferred_load is false' do
+      it_behaves_like 'a MemberBalanceServiceJob backed report', 'borrowing_capacity_summary', :perform_later
+      it_behaves_like 'a borrowing capacity report that passes additional arguments to the MemberBalanceServiceJob', :perform_later
+
+      before { allow(MemberBalanceServiceJob).to receive(:perform_later).and_return(member_balance_service_job_instance) }
+
+      it 'sets the @load_url with the appropriate params' do
+        call_action
+        expect(assigns[:load_url]).to eq(reports_borrowing_capacity_url(job_id: job_status.id))
+      end
+      it 'sets @borrowing_capacity_summary[:deferred] to true' do
+        call_action
+        expect(assigns[:borrowing_capacity_summary][:deferred]).to eq(true)
+      end
+    end
+
+    describe 'job_id present' do
+      it_behaves_like 'a JobStatus backed report'
+      let(:parsed_response_hash) { double('parsed hash', with_indifferent_access: response_hash) }
+      before do
+        allow(JobStatus).to receive(:find_by).and_return(job_status)
+        allow(JSON).to receive(:parse).and_return(parsed_response_hash)
+      end
+      it 'sets @borrowing_capacity_summary to the hash returned from the job status' do
+        call_action_with_job_id
+        expect(assigns[:borrowing_capacity_summary]).to eq(response_hash)
+      end
+      it 'sets @borrowing_capacity_summary to {} if the report is disabled' do
+        expect(controller).to receive(:report_disabled?).with(ReportsController::BORROWING_CAPACITY_WEB_FLAGS).and_return(true)
+        call_action_with_job_id
+        expect(assigns[:borrowing_capacity_summary]).to eq({})
+      end
+    end
+    describe '`skip_deferred_load` set to true' do
+      before { controller.skip_deferred_load = true }
+      it_behaves_like 'a MemberBalanceServiceJob backed report', 'borrowing_capacity_summary', :perform_now, true
+      it_behaves_like 'a borrowing capacity report that passes additional arguments to the MemberBalanceServiceJob', :perform_now, true
+
+      it 'raises an error if @borrowing_capacity_summary is nil' do
+        allow(MemberBalanceServiceJob).to receive(:perform_now)
+        expect{call_action}.to raise_error(StandardError)
+      end
+      it 'sets @borrowing_capacity_summary to the hash returned from MemberBalanceServiceJob' do
+        allow(MemberBalanceServiceJob).to receive(:perform_now).and_return(response_hash)
+        call_action
+        expect(assigns[:borrowing_capacity_summary]).to eq(response_hash)
+      end
+    end
+  end
+
   describe 'GET current_price_indications' do
     let(:current_price_indications) { get :current_price_indications }
-    let(:rates_service_instance) { double('RatesService') }
-    let(:member_balances_service_instance) { double('MemberBalanceService') }
-    let(:response_cpi_hash) { double('RatesServiceHash') }
-    let(:response_sta_hash) { double('MemberBalanceServiceHash') }
-    let(:vrc_response) {{'advance_maturity' => 'Overnight/Open','overnight_fed_funds_benchmark' => 0.13,'basis_point_spread_to_benchmark' => 5,'advance_rate' => 0.18}}
-    let(:frc_response) {[{'advance_maturity' =>'1 Month','treasury_benchmark_maturity' => '3 Months','nominal_yield_of_benchmark' => 0.01,'basis_point_spread_to_benchmark' => 20,'advance_rate' => 0.21}]}
-    let(:arc_response) {[{'advance_maturity' => '1 Year','1_month_libor' => 6,'3_month_libor' => 4,'6_month_libor' => 11,'prime' => -295}]}
 
-    before do
-      allow(RatesService).to receive(:new).and_return(rates_service_instance)
-      allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
-      allow(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
-      allow(response_sta_hash).to receive(:[]).with(:rate)
-      allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'vrc').at_least(1).and_return(vrc_response)
-      allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'frc').at_least(1).and_return(frc_response)
-      allow(rates_service_instance).to receive(:current_price_indications).with(kind_of(String), 'arc').at_least(1).and_return(arc_response)
-    end
     it_behaves_like 'a user required action', :get, :current_price_indications
     it_behaves_like 'a report that can be downloaded', :current_price_indications, [:xlsx]
     it_behaves_like 'a report with instance variables set in a before_filter', :current_price_indications
     it_behaves_like 'a controller action with an active nav setting', :current_price_indications, :reports
     it_behaves_like 'a controller action with quick advance messaging', :current_price_indications
     it 'renders the current_price_indications view' do
-      allow(rates_service_instance).to receive(:current_price_indications).and_return(response_cpi_hash)
-      allow(response_cpi_hash).to receive(:collect)
-      allow(member_balances_service_instance).to receive(:settlement_transaction_rate).and_return(response_sta_hash)
       current_price_indications
       expect(response.body).to render_template('current_price_indications')
     end
-    it 'should return vrc data' do
-      current_price_indications
-      expect(assigns[:standard_vrc_data]).to eq(vrc_response)
-      expect(assigns[:sbc_vrc_data]).to eq(vrc_response)
-    end
-    it 'should return frc data' do
-      current_price_indications
-      expect(assigns[:standard_frc_data]).to eq(frc_response)
-      expect(assigns[:sbc_frc_data]).to eq(frc_response)
-    end
-    it 'should return arc data' do
-      current_price_indications
-      expect(assigns[:standard_arc_data]).to eq(arc_response)
-      expect(assigns[:sbc_arc_data]).to eq(arc_response)
+    describe 'when a job_id param is present' do
+      let(:job_status) { double('job status', destroy: nil) }
+      let(:vrc_data) {{'advance_maturity' => 'Overnight/Open','overnight_fed_funds_benchmark' => 0.13,'basis_point_spread_to_benchmark' => 5,'advance_rate' => 0.18,'effective_date' => '2016-01-01'}}
+      let(:frc_data) {[{'advance_maturity' =>'1 Month','treasury_benchmark_maturity' => '3 Months','nominal_yield_of_benchmark' => 0.01,'basis_point_spread_to_benchmark' => 20,'advance_rate' => 0.21}]}
+      let(:arc_data) {[{'advance_maturity' => '1 Year','1_month_libor' => 6,'3_month_libor' => 4,'6_month_libor' => 11,'prime' => -295}]}
+      let(:sta_data) { {rate: rand(0..99999)} }
+      let(:member_id) { rand(1..99999) }
+      let(:user_id) { rand(1..99999) }
+      let(:uuid) { double('uuid') }
+      let(:job_id) { rand(1..99999) }
+      let(:current_price_indications) { get :current_price_indications, job_id: job_id }
+
+      before do
+        allow(JobStatus).to receive(:find_by).and_return(job_status)
+        allow(job_status).to receive(:result_as_string).and_return(
+          {
+            standard_vrc_data: vrc_data,
+            sbc_vrc_data: vrc_data,
+            standard_frc_data: frc_data,
+            sbc_frc_data: frc_data,
+            standard_arc_data: arc_data,
+            sbc_arc_data: arc_data,
+            sta_data: sta_data
+          }.to_json
+        )
+      end
+      it 'returns the correct `row_value` for @sta_table_data' do
+        current_price_indications
+        expect(assigns[:sta_table_data][:row_value]).to eq(sta_data[:rate])
+      end
+      [:standard_vrc_table_data, :sbc_vrc_table_data].each do |vrc_data|
+        it "returns correctly formatted `rows` for @#{vrc_data}" do
+          current_price_indications
+          expect(assigns[vrc_data][:rows]).to eq(
+            [
+              {columns: [
+                {:value=>"Overnight/Open", :type=>nil}, {:value=>0.13, :type=>:rate}, {:value=>5, :type=>:basis_point}, {:value=>0.18, :type=>:rate}
+              ]}
+            ]
+          )
+        end
+      end
+      it 'return vrc date' do
+        current_price_indications
+        expect(assigns[:vrc_date]).to eq('2016-01-01')
+      end
+      [:standard_frc_table_data, :sbc_frc_table_data].each do |frc_data|
+        it "returns correctly formatted `rows` for @#{frc_data}" do
+          current_price_indications
+          expect(assigns[frc_data][:rows]).to eq(
+            [
+              {columns: [
+                {:value=>"1 Month"}, {:value=>"3 Months"}, {:type=>:rate, :value=>0.01}, {:type=>:basis_point, :value=>20}, {:type=>:rate, :value=>0.21}
+              ]}
+            ]
+          )
+        end
+      end
+      it "returns correctly formatted `rows` for @standard_arc_table_data" do
+        current_price_indications
+        expect(assigns[:standard_arc_table_data][:rows]).to eq(
+          [
+            {columns: [
+              {:value=>"1 Year"}, {:type=>:basis_point, :value=>6}, {:type=>:basis_point, :value=>4}, {:type=>:basis_point, :value=>11}, {:type=>:basis_point, :value=>-295}
+            ]}
+          ]
+        )
+      end
+      it "returns correctly formatted `rows` for @sbc_arc_table_data" do
+        current_price_indications
+        expect(assigns[:sbc_arc_table_data][:rows]).to eq(
+          [
+            {columns: [
+              {:value=>"1 Year"}, {:type=>:basis_point, :value=>6}, {:type=>:basis_point, :value=>4}, {:type=>:basis_point, :value=>11}
+            ]}
+          ]
+        )
+      end
+      describe 'when the `skip_deferred_load` controller attribute is true' do
+        before do
+          controller.skip_deferred_load = true
+          allow(controller).to receive(:current_member_id).and_return(member_id)
+        end
+        it 'calls `perform_now` on the ReportCurrentPriceIndicationsJob with the current member id and the request uuid' do
+          allow(request).to receive(:uuid).and_return(uuid)
+          expect(ReportCurrentPriceIndicationsJob).to receive(:perform_now).with(member_id, uuid).and_return({})
+          current_price_indications
+        end
+      end
+      describe 'when the `skip_deferred_load` controller attribute is not true' do
+        it 'finds the proper JobStatus by job id, user id and job status' do
+          allow(controller).to receive(:current_user).and_return(double(User, id: user_id, accepted_terms?: true))
+          expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: user_id, status: JobStatus.statuses[:completed]).and_return(job_status)
+          current_price_indications
+        end
+        it 'raises an error if no JobStatus is found' do
+          allow(JobStatus).to receive(:find_by)
+          expect{current_price_indications}.to raise_error
+        end
+        it 'destroys the JobStatus' do
+          expect(job_status).to receive(:destroy)
+          current_price_indications
+        end
+      end
     end
     describe 'table data' do
       interest_day_count_key = I18n.t('reports.pages.price_indications.current.interest_day_count')
@@ -1771,6 +2004,7 @@ RSpec.describe ReportsController, :type => :controller do
     before do
       allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
       allow(member_balances_service_instance).to receive(:securities_transactions).with(kind_of(Date)).at_least(1).and_return(response_hash)
+      allow(member_balances_service_instance).to receive(:securities_transactions).with(restricted_start_date).at_least(1).and_return(response_hash)
       allow(response_hash).to receive(:[]).with(:total_net).and_return(total_net)
       allow(response_hash).to receive(:[]).with(:final).and_return(final)
       allow(response_hash).to receive(:[]).with(:total_payment_or_principal)
@@ -1781,7 +2015,6 @@ RSpec.describe ReportsController, :type => :controller do
     it_behaves_like 'a user required action', :get, :securities_transactions
     it_behaves_like 'a report with instance variables set in a before_filter', :securities_transactions
     it_behaves_like 'a controller action with an active nav setting', :securities_transactions, :reports
-    it_behaves_like 'a report with a @max_date', :securities_transactions
     it_behaves_like 'a report that can be downloaded', :securities_transactions, [:xlsx]
     it 'can be disabled' do
       allow(subject).to receive(:report_disabled?).and_return(true)
@@ -1824,10 +2057,10 @@ RSpec.describe ReportsController, :type => :controller do
     end
     it 'should pass @start_date and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
       allow(controller).to receive(:most_recent_business_day).and_return(max_date)
-      allow(controller).to receive(:date_picker_presets).with(start_date, nil, nil, max_date).and_return(picker_preset_hash)
+      allow(controller).to receive(:date_picker_presets).with(restricted_start_date, nil, nil, max_date).and_return(date_picker_presets)
       allow(response_hash).to receive(:[]).with(:transactions).and_return(securities_transactions_response_with_new_transaction)
       get :securities_transactions, start_date: start_date
-      expect(assigns[:picker_presets]).to eq(picker_preset_hash)
+      expect(assigns[:picker_presets]).to eq(date_picker_presets)
     end
     it 'should return securities transactions data' do
       allow(response_hash).to receive(:[]).with(:transactions).and_return(securities_transactions_response)
@@ -1863,38 +2096,235 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
-  describe 'requests hitting RatesService' do
-    let(:rates_service_instance) { double('RatesService') }
-    let(:response_hash) { double('RatesServiceHash') }
+  describe 'GET historical_price_indications' do
+    it_behaves_like 'a user required action', :get, :historical_price_indications
+    it_behaves_like 'a report that can be downloaded', :historical_price_indications, [:xlsx]
+    it_behaves_like 'a report with instance variables set in a before_filter', :historical_price_indications
+    it_behaves_like 'a controller action with an active nav setting', :historical_price_indications, :reports
 
-    before do
-      allow(RatesService).to receive(:new).and_return(rates_service_instance)
-      allow(rates_service_instance).to receive(:historical_price_indications).and_return(response_hash)
-      allow(response_hash).to receive(:[]).with(:rates_by_date)
+    let(:job_status) { double('JobStatus', update_attributes!: nil, id: nil, destroy: nil, result_as_string: nil ) }
+    let(:rate_service_job_instance) { double('rate_service_job_instance', job_status: job_status) }
+    let(:user_id) { rand(0..99999) }
+    let(:user) { double(User, id: user_id, accepted_terms?: true) }
+    let(:response_hash) { double('hash of historical price indications', :[] => nil) }
+    let(:job_id) { rand(0..99999) }
+    let(:call_action) { get :historical_price_indications }
+    let(:call_action_with_job_id) { get :historical_price_indications, job_id: job_id }
+
+    it 'renders the historical_price_indications view' do
+      call_action
+      expect(response.body).to render_template('historical_price_indications')
+    end
+    it 'sets @start_date to the start_date param' do
+      get :historical_price_indications, start_date: start_date, end_date: end_date
+      expect(assigns[:start_date]).to eq(start_date)
+    end
+    it 'sets @end_date to the end_date param' do
+      get :historical_price_indications, start_date: start_date, end_date: end_date
+      expect(assigns[:end_date]).to eq(end_date)
+    end
+    it 'passes @start_date and @end_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+      expect(controller).to receive(:date_picker_presets).with(start_date, end_date).and_return(date_picker_presets)
+      get :historical_price_indications, start_date: start_date, end_date: end_date
+      expect(assigns[:picker_presets]).to eq(date_picker_presets)
+    end
+    it 'sets @collateral_type to `standard` and @collateral_type_text to the proper i18next translation for `standard` if standard is passed as the historical_price_collateral_type param' do
+      get :historical_price_indications, historical_price_collateral_type: 'standard'
+      expect(assigns[:collateral_type]).to eq('standard')
+      expect(assigns[:collateral_type_text]).to eq(I18n.t('reports.pages.price_indications.standard_credit_program'))
+    end
+    it 'sets @collateral_type to `sbc` and @collateral_type_text to the proper i18next translation for `sbc` if sbc is passed as the historical_price_collateral_type param' do
+      get :historical_price_indications, historical_price_collateral_type: 'sbc'
+      expect(assigns[:collateral_type]).to eq('sbc')
+      expect(assigns[:collateral_type_text]).to eq(I18n.t('reports.pages.price_indications.sbc_program'))
+    end
+    it 'sets @collateral_type to `standard` and @collateral_type_text to the proper i18next translation for `standard` if nothing is passed for the historical_price_collateral_type param' do
+      call_action
+      expect(assigns[:collateral_type_text]).to eq(I18n.t('reports.pages.price_indications.standard_credit_program'))
+    end
+    it 'sets @collateral_type_options to an array of arrays containing the appropriate values and labels for standard and sbc' do
+      options_array = [
+        [I18n.t('reports.pages.price_indications.standard_credit_program'), 'standard'],
+        [I18n.t('reports.pages.price_indications.sbc_program'), 'sbc'],
+        [I18n.t('reports.pages.price_indications.sta.dropdown'), 'sta']
+      ]
+      call_action
+      expect(assigns[:collateral_type_options]).to eq(options_array)
+    end
+    it 'sets @credit_type to `frc` and @credit_type_text to the proper i18next translation for `frc` if frc is passed as the historical_price_credit_type param' do
+      get :historical_price_indications, historical_price_credit_type: 'frc'
+      expect(assigns[:credit_type]).to eq('frc')
+      expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.frc.dropdown'))
+    end
+    it 'sets @credit_type to `vrc` and @credit_type_text to the proper i18next translation for `vrc` if vrc is passed as the historical_price_credit_type param' do
+      get :historical_price_indications, historical_price_credit_type: 'vrc'
+      expect(assigns[:credit_type]).to eq('vrc')
+      expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.vrc.dropdown'))
+    end
+    it 'sets @credit_type to `sta` if sta is passed as the historical_price_collateral_type param' do
+      get :historical_price_indications, historical_price_collateral_type: 'sta'
+      expect(assigns[:credit_type]).to eq('sta')
+    end
+    ['1m_libor', '3m_libor', '6m_libor', 'daily_prime'].each do |credit_type|
+      it "sets @credit_type to `#{credit_type}` and @credit_type_text to the proper i18next translation for `#{credit_type}` if #{credit_type} is passed as the historical_price_credit_type param" do
+        get :historical_price_indications, historical_price_credit_type: credit_type
+        expect(assigns[:credit_type]).to eq(credit_type)
+        expect(assigns[:credit_type_text]).to eq(I18n.t("reports.pages.price_indications.#{credit_type}.dropdown"))
+      end
+    end
+    it 'sets @credit_type to `frc` and @credit_type_text to the proper i18next translation for `frc` if nothing is passed for the historical_price_credit_type param' do
+      call_action
+      expect(assigns[:credit_type]).to eq('frc')
+      expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.frc.dropdown'))
+    end
+    it 'sets @credit_type_options to an array of arrays containing the appropriate values and labels for standard and sbc' do
+      options_array = [
+        [I18n.t('reports.pages.price_indications.frc.dropdown'), 'frc'],
+        [I18n.t('reports.pages.price_indications.vrc.dropdown'), 'vrc'],
+        [I18n.t('reports.pages.price_indications.1m_libor.dropdown'), '1m_libor'],
+        [I18n.t('reports.pages.price_indications.3m_libor.dropdown'), '3m_libor'],
+        [I18n.t('reports.pages.price_indications.6m_libor.dropdown'), '6m_libor'],
+        [I18n.t('reports.pages.price_indications.daily_prime.dropdown'), 'daily_prime']
+      ]
+      call_action
+      expect(assigns[:credit_type_options]).to eq(options_array)
+    end
+    describe '@table_data' do
+      interest_day_count_key = I18n.t('reports.pages.price_indications.current.interest_day_count')
+      payment_frequency_key = I18n.t('reports.pages.price_indications.current.payment_frequency')
+      interest_rate_reset_key = I18n.t('reports.pages.price_indications.current.interest_rate_reset')
+      describe 'the notes hash' do
+        let(:sta_notes) {
+          {I18n.t('reports.pages.price_indications.current.interest_day_count') => I18n.t('reports.pages.price_indications.current.actual_360'),
+           '' => I18n.t('reports.pages.price_indications.sta.notes')
+          }
+        }
+        collateral_types = [:standard, :sbc]
+        credit_types = [:frc, :vrc, :'1m_libor', :'3m_libor', :'6m_libor']
+        collateral_types.each do |collateral_type|
+          credit_types.each do |credit_type|
+            describe "when the collateral type is #{collateral_type} and the credit_type is #{credit_type}" do
+              it "has an #{interest_day_count_key} key with a value of #{ReportsController::INTEREST_DAY_COUNT_MAPPINGS[collateral_type][credit_type]}" do
+                get :historical_price_indications, historical_price_collateral_type: collateral_type, historical_price_credit_type: credit_type
+                expect(assigns[:table_data][:notes][interest_day_count_key]).to eq(ReportsController::INTEREST_DAY_COUNT_MAPPINGS[collateral_type][credit_type])
+              end
+              it "has an #{payment_frequency_key} key with a value of #{ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[collateral_type][credit_type]}" do
+                get :historical_price_indications, historical_price_collateral_type: collateral_type, historical_price_credit_type: credit_type
+                expect(assigns[:table_data][:notes][payment_frequency_key]).to eq(ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[collateral_type][credit_type])
+              end
+              if RatesService::ARC_CREDIT_TYPES.include?(credit_type)
+                it "has an #{interest_rate_reset_key} key with a value of #{ReportsController::INTEREST_RATE_RESET_MAPPINGS[credit_type]}" do
+                  get :historical_price_indications, historical_price_collateral_type: collateral_type, historical_price_credit_type: credit_type
+                  expect(assigns[:table_data][:notes][interest_rate_reset_key]).to eq(ReportsController::INTEREST_RATE_RESET_MAPPINGS[credit_type])
+                end
+              end
+            end
+          end
+        end
+        describe 'when the collateral type is sta' do
+          it 'has an interest_day_count key value of Actual/360' do
+            get :historical_price_indications, historical_price_collateral_type: 'sta'
+            expect((assigns[:table_data])[:notes]).to eq(sta_notes)
+          end
+        end
+      end
     end
 
-    describe 'GET historical_price_indications' do
-      it_behaves_like 'a user required action', :get, :historical_price_indications
-      it_behaves_like 'a report that can be downloaded', :historical_price_indications, [:xlsx]
-      it_behaves_like 'a report with instance variables set in a before_filter', :historical_price_indications
-      it_behaves_like 'a controller action with an active nav setting', :historical_price_indications, :reports
-      it 'renders the historical_price_indications view' do
-        expect(rates_service_instance).to receive(:historical_price_indications).and_return(response_hash)
-        get :historical_price_indications
-        expect(response.body).to render_template('historical_price_indications')
+    RSpec.shared_examples 'a historical_price_indications report involving a RatesServiceJob' do |job_call, deferred_job = false|
+      let(:job_response) {deferred_job ? response_hash : rate_service_job_instance}
+      describe "calling `#{job_call}` on the RatesServiceJob" do
+        it 'passes the proper uuid' do
+          expect(RatesServiceJob).to receive(job_call).with(anything, request.uuid, any_args).and_return(job_response)
+          call_action
+        end
+        it 'passes `historical_price_indications`' do
+          expect(RatesServiceJob).to receive(job_call).with('historical_price_indications', any_args).and_return(job_response)
+          call_action
+        end
+        describe 'additional arguments' do
+          it 'uses the string version of start_date and end_date provided in the params hash if available' do
+            expect(RatesServiceJob).to receive(job_call).with(anything, anything, start_date.to_s, end_date.to_s, anything, anything).and_return(job_response)
+            get :historical_price_indications, start_date: start_date, end_date: end_date
+          end
+          it 'uses the last 30 days to date as the date range if no params are passed' do
+            last_30_days = today - 1.month
+            allow(ReportConfiguration).to receive(:date_bounds).with(:historical_price_indications, nil, nil)
+                                            .and_return({ min: min_date, start: last_30_days, end: today, max: max_date })
+            expect(RatesServiceJob).to receive(job_call).with(anything, anything, last_30_days.to_s, today.to_s, anything, anything).and_return(job_response)
+            call_action
+          end
+          it 'passes credit_type and collateral_type' do
+            expect(RatesServiceJob).to receive(job_call).with(anything, anything, anything, anything, 'sbc', '1m_libor').and_return(job_response)
+            get :historical_price_indications, historical_price_collateral_type: 'sbc', historical_price_credit_type: '1m_libor'
+          end
+        end
       end
-      it 'should use the start_date and end_date provided in the params hash if available' do
-        expect(rates_service_instance).to receive(:historical_price_indications).with(start_date, end_date, anything, anything).and_return(response_hash)
-        get :historical_price_indications, start_date: start_date, end_date: end_date
+    end
+    describe 'when `job_id` is not present and `self.skip_deferred_load` is false' do
+      before do
+        allow(RatesServiceJob).to receive(:perform_later).and_return(rate_service_job_instance)
       end
-      it 'should use the last 30 days to date as the date range if no params are passed' do
-        last_30_days = today - 1.month
-        expect(rates_service_instance).to receive(:historical_price_indications).with(last_30_days, today, anything, anything).and_return(response_hash)
-        get :historical_price_indications
+      it_behaves_like 'a historical_price_indications report involving a RatesServiceJob', :perform_later
+      it 'updates the job status with the user\'s id' do
+        allow(controller).to receive(:current_user).and_return(user)
+        expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
+        call_action
       end
-      it 'should raise an error if @historical_price_indications is nil' do
-        expect(rates_service_instance).to receive(:historical_price_indications).and_return(nil)
-        expect{get :historical_price_indications}.to raise_error(StandardError)
+      it 'sets the @job_status_url' do
+        call_action
+        expect(assigns[:job_status_url]).to eq(job_status_url(job_status))
+      end
+      it 'sets the @load_url with the appropriate params' do
+        params = {
+          job_id: job_status.id,
+          historical_price_collateral_type: 'standard',
+          historical_price_credit_type: '6m_libor',
+          start_date: start_date.to_s,
+          end_date: end_date.to_s
+        }
+        get :historical_price_indications, start_date: start_date, end_date: end_date, historical_price_collateral_type: 'standard', historical_price_credit_type: '6m_libor'
+        expect(assigns[:load_url]).to eq(reports_historical_price_indications_url(params))
+      end
+      it 'sets @table_data[:deferred] to true' do
+        call_action
+        expect(assigns[:table_data][:deferred]).to eq(true)
+      end
+      it 'sets @table_data[:hide_column_headings] to true' do
+        call_action
+        expect(assigns[:table_data][:hide_column_headings]).to eq(true)
+      end
+    end
+
+    describe 'when there is a job id present or the controller is set to `skip_deferred_load`' do
+      let(:parsed_response_hash) { double('parsed hash', with_indifferent_access: response_hash) }
+      before do
+        allow(JobStatus).to receive(:find_by).and_return(job_status)
+        allow(JSON).to receive(:parse).and_return(parsed_response_hash)
+      end
+      describe 'job_id present' do
+        it 'finds the JobStatus by id, user_id, and status' do
+          allow(controller).to receive(:current_user).and_return(user)
+          expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: user_id, status: JobStatus.statuses[:completed]).and_return(job_status)
+          call_action_with_job_id
+        end
+        it 'raises an error if there is no job status found' do
+          allow(JobStatus).to receive(:find_by)
+          expect{call_action_with_job_id}.to raise_error
+        end
+        it 'parses the job_status string' do
+          job_status_string = double('job status string')
+          allow(job_status).to receive(:result_as_string).and_return(job_status_string)
+          expect(JSON).to receive(:parse).with(job_status_string).and_return(parsed_response_hash)
+          call_action_with_job_id
+        end
+        it 'destroys the job status' do
+          expect(job_status).to receive(:destroy)
+          call_action_with_job_id
+        end
+      end
+      describe '`skip_deferred_load` set to true' do
+        before { controller.skip_deferred_load = true }
+        it_behaves_like 'a historical_price_indications report involving a RatesServiceJob', :perform_now, true
       end
       describe 'credit_type of :daily_prime' do
         let(:index) {0.17564}
@@ -1903,117 +2333,25 @@ RSpec.describe ReportsController, :type => :controller do
         let(:basis_3Y) {-62}
         let(:basis_5Y) {189}
         let(:rates_by_term) { [
-            {:term=>'1D', :type=>'index', :value=>index, 'day_count_basis'=>'Actual/360', :pay_freq=>'Daily'},
-            {:term=>'1Y', :type=>'basis_point', :value=>basis_1Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'},
-            {:term=>'2Y', :type=>'basis_point', :value=>basis_2Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'},
-            {:term=>'3Y', :type=>'basis_point', :value=>basis_3Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'},
-            {:term=>'5Y', :type=>'basis_point', :value=>basis_5Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'}
+          {:term=>'1D', :type=>'index', :value=>index, 'day_count_basis'=>'Actual/360', :pay_freq=>'Daily'},
+          {:term=>'1Y', :type=>'basis_point', :value=>basis_1Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'},
+          {:term=>'2Y', :type=>'basis_point', :value=>basis_2Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'},
+          {:term=>'3Y', :type=>'basis_point', :value=>basis_3Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'},
+          {:term=>'5Y', :type=>'basis_point', :value=>basis_5Y, 'day_count_basis'=>'Actual/360', :pay_freq=>'Quarterly'}
         ] }
         let(:rates_by_date) { [{date: today, rates_by_term: rates_by_term}] }
         it 'adds the index value for a given date as a column before each basis_point spread per term' do
           allow(response_hash).to receive(:[]).with(:rates_by_date).and_return(rates_by_date)
           allow(response_hash).to receive(:[]=)
-          get :historical_price_indications, historical_price_collateral_type: 'standard', historical_price_credit_type: 'daily_prime'
+          get :historical_price_indications, historical_price_collateral_type: 'standard', historical_price_credit_type: 'daily_prime', job_id: job_id
           expect(assigns[:table_data][:rows][0][:columns]).to eq([{:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_1Y}, {:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_2Y}, {:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_3Y}, {:type=>:index, :value=>index}, {:type=>:basis_point, :value=>basis_5Y}])
         end
       end
-      describe "view instance variables" do
-        it 'should set @historical_price_indications' do
-          expect(rates_service_instance).to receive(:historical_price_indications).and_return(response_hash)
-          get :historical_price_indications
-          expect(assigns[:historical_price_indications]).to eq(response_hash)
-        end
-        it 'should raise an error if @historical_price_indications is nil' do
-          expect(rates_service_instance).to receive(:historical_price_indications).and_return(nil)
-          expect{get :historical_price_indications}.to raise_error(StandardError)
-        end
-        it 'should set @historical_price_indications to {} if the report is disabled' do
-          expect(controller).to receive(:report_disabled?).with(ReportsController::HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS).and_return(true)
-          get :historical_price_indications
-          expect(assigns[:historical_price_indications]).to eq({})
-        end
-        it 'should set @start_date to the start_date param' do
-          get :historical_price_indications, start_date: start_date, end_date: end_date
-          expect(assigns[:start_date]).to eq(start_date)
-        end
-        it 'should set @end_date to the end_date param' do
-          get :historical_price_indications, start_date: start_date, end_date: end_date
-          expect(assigns[:end_date]).to eq(end_date)
-        end
-        it 'should pass @start_date and @end_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
-          expect(controller).to receive(:date_picker_presets).with(start_date, end_date).and_return(picker_preset_hash)
-          get :historical_price_indications, start_date: start_date, end_date: end_date
-          expect(assigns[:picker_presets]).to eq(picker_preset_hash)
-        end
-        it 'should set @collateral_type to `standard` and @collateral_type_text to the proper i18next translation for `standard` if standard is passed as the historical_price_collateral_type param' do
-          get :historical_price_indications, historical_price_collateral_type: 'standard'
-          expect(assigns[:collateral_type]).to eq('standard')
-          expect(assigns[:collateral_type_text]).to eq(I18n.t('reports.pages.price_indications.standard_credit_program'))
-        end
-        it 'should set @collateral_type to `sbc` and @collateral_type_text to the proper i18next translation for `sbc` if sbc is passed as the historical_price_collateral_type param' do
-          get :historical_price_indications, historical_price_collateral_type: 'sbc'
-          expect(assigns[:collateral_type]).to eq('sbc')
-          expect(assigns[:collateral_type_text]).to eq(I18n.t('reports.pages.price_indications.sbc_program'))
-        end
-        it 'should set @collateral_type to `standard` and @collateral_type_text to the proper i18next translation for `standard` if nothing is passed for the historical_price_collateral_type param' do
-          get :historical_price_indications
-          expect(assigns[:collateral_type_text]).to eq(I18n.t('reports.pages.price_indications.standard_credit_program'))
-        end
-        it 'should set @collateral_type_options to an array of arrays containing the appropriate values and labels for standard and sbc' do
-          options_array = [
-              [I18n.t('reports.pages.price_indications.standard_credit_program'), 'standard'],
-              [I18n.t('reports.pages.price_indications.sbc_program'), 'sbc'],
-              [I18n.t('reports.pages.price_indications.sta.dropdown'), 'sta']
-          ]
-          get :historical_price_indications
-          expect(assigns[:collateral_type_options]).to eq(options_array)
-        end
-        it 'should set @credit_type to `frc` and @credit_type_text to the proper i18next translation for `frc` if frc is passed as the historical_price_credit_type param' do
-          get :historical_price_indications, historical_price_credit_type: 'frc'
-          expect(assigns[:credit_type]).to eq('frc')
-          expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.frc.dropdown'))
-        end
-        it 'should set @credit_type to `vrc` and @credit_type_text to the proper i18next translation for `vrc` if vrc is passed as the historical_price_credit_type param' do
-          get :historical_price_indications, historical_price_credit_type: 'vrc'
-          expect(assigns[:credit_type]).to eq('vrc')
-          expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.vrc.dropdown'))
-        end
-        it 'should set @credit_type to `sta` if sta is passed as the historical_price_collateral_type param' do
-          get :historical_price_indications, historical_price_collateral_type: 'sta'
-          expect(assigns[:credit_type]).to eq('sta')
-        end
-        ['1m_libor', '3m_libor', '6m_libor', 'daily_prime'].each do |credit_type|
-          it "should set @credit_type to `#{credit_type}` and @credit_type_text to the proper i18next translation for `#{credit_type}` if #{credit_type} is passed as the historical_price_credit_type param" do
-            get :historical_price_indications, historical_price_credit_type: credit_type
-            expect(assigns[:credit_type]).to eq(credit_type)
-            expect(assigns[:credit_type_text]).to eq(I18n.t("reports.pages.price_indications.#{credit_type}.dropdown"))
-          end
-        end
-        it 'should set @credit_type to `frc` and @credit_type_text to the proper i18next translation for `frc` if nothing is passed for the historical_price_credit_type param' do
-          get :historical_price_indications
-          expect(assigns[:credit_type]).to eq('frc')
-          expect(assigns[:credit_type_text]).to eq(I18n.t('reports.pages.price_indications.frc.dropdown'))
-        end
-        it 'should set @credit_type_options to an array of arrays containing the appropriate values and labels for standard and sbc' do
-          options_array = [
-              [I18n.t('reports.pages.price_indications.frc.dropdown'), 'frc'],
-              [I18n.t('reports.pages.price_indications.vrc.dropdown'), 'vrc'],
-              [I18n.t('reports.pages.price_indications.1m_libor.dropdown'), '1m_libor'],
-              [I18n.t('reports.pages.price_indications.3m_libor.dropdown'), '3m_libor'],
-              [I18n.t('reports.pages.price_indications.6m_libor.dropdown'), '6m_libor'],
-              [I18n.t('reports.pages.price_indications.daily_prime.dropdown'), 'daily_prime']
-          ]
-          get :historical_price_indications
-          expect(assigns[:credit_type_options]).to eq(options_array)
-        end
         describe '@table_data' do
-          interest_day_count_key = I18n.t('reports.pages.price_indications.current.interest_day_count')
-          payment_frequency_key = I18n.t('reports.pages.price_indications.current.payment_frequency')
-          interest_rate_reset_key = I18n.t('reports.pages.price_indications.current.interest_rate_reset')
           describe 'table_heading' do
             ['1m_libor', '3m_libor', '6m_libor'].each do |credit_type|
-              it "should set table_heading to the I18n translation for #{credit_type} table heading if the credit type is `#{credit_type}`" do
-                get :historical_price_indications, historical_price_credit_type: credit_type
+              it "sets table_heading to the I18n translation for #{credit_type} table heading if the credit type is `#{credit_type}`" do
+                get :historical_price_indications, historical_price_credit_type: credit_type, job_id: job_id
                 expect((assigns[:table_data])[:table_heading]).to eq(I18n.t("reports.pages.price_indications.#{credit_type}.table_heading"))
               end
             end
@@ -2025,25 +2363,25 @@ RSpec.describe ReportsController, :type => :controller do
             let(:arc_daily_prime_column_headings) {[I18n.t('global.full_dates.1_year'), I18n.t('global.full_dates.2_years'), I18n.t('global.full_dates.3_years'), I18n.t('global.full_dates.5_years')]}
             let(:sta_column_headings)  {[I18n.t('global.date'), I18n.t('advances.rate')]}
             it 'sets column_headings for the `frc` credit type' do
-              get :historical_price_indications, historical_price_credit_type: 'frc'
+              get :historical_price_indications, historical_price_credit_type: 'frc', job_id: job_id
               expect((assigns[:table_data])[:column_headings]).to eq(frc_column_headings)
             end
             it 'sets column_headings for the `vrc` credit type' do
-              get :historical_price_indications, historical_price_credit_type: 'vrc'
+              get :historical_price_indications, historical_price_credit_type: 'vrc', job_id: job_id
               expect((assigns[:table_data])[:column_headings]).to eq(vrc_column_headings)
             end
             ['1m_libor', '3m_libor', '6m_libor'].each do |credit_type|
               it "sets column_headings for the #{credit_type} credit_type" do
-                get :historical_price_indications, historical_price_credit_type: credit_type
+                get :historical_price_indications, historical_price_credit_type: credit_type, job_id: job_id
                 expect((assigns[:table_data])[:column_headings]).to eq(arc_column_headings)
               end
             end
             it 'sets column_headings for the daily_prime credit_type' do
-              get :historical_price_indications, historical_price_credit_type: 'daily_prime'
+              get :historical_price_indications, historical_price_credit_type: 'daily_prime', job_id: job_id
               expect((assigns[:table_data])[:column_headings]).to eq(arc_daily_prime_column_headings)
             end
             it 'sets column_headings for the sta collateral type' do
-              get :historical_price_indications, historical_price_collateral_type: 'sta'
+              get :historical_price_indications, historical_price_collateral_type: 'sta', job_id: job_id
               expect((assigns[:table_data])[:column_headings]).to eq(sta_column_headings)
             end
           end
@@ -2058,54 +2396,23 @@ RSpec.describe ReportsController, :type => :controller do
               allow(response_hash).to receive(:[]).with(:rates_by_date).and_return(rows)
               allow(response_hash).to receive(:[]=)
             end
-            it 'should be an array of rows, each containing a row object with a date and a column array containing objects with a type and a rate value' do
-              get :historical_price_indications, historical_price_credit_type: 'frc'
+            it 'is an array of rows, each containing a row object with a date and a column array containing objects with a type and a rate value' do
+              get :historical_price_indications, historical_price_credit_type: 'frc', job_id: job_id
               expect((assigns[:table_data])[:rows]).to eq(formatted_rows)
             end
             it 'sorts by date' do
               expect(controller).to receive(:sort_report_data).with(formatted_rows, :date)
-              get :historical_price_indications, historical_price_credit_type: 'frc'
+              get :historical_price_indications, historical_price_credit_type: 'frc', job_id: job_id
             end
-            it 'should be an array of rows of sta data, each containing a row object with a date and a column array containing objects with a type and a rate value' do
+            it 'is array of rows of sta data, each containing a row object with a date and a column array containing objects with a type and a rate value' do
               allow(response_hash).to receive(:[]).with(:rates_by_date).and_return(sta_rows)
-              get :historical_price_indications, historical_price_collateral_type: 'sta'
+              get :historical_price_indications, historical_price_collateral_type: 'sta', job_id: job_id
               expect((assigns[:table_data])[:rows]).to eq(sta_formatted_rows)
             end
-          end
-          describe 'the notes hash' do
-            let(:sta_notes) {
-              {I18n.t('reports.pages.price_indications.current.interest_day_count') => I18n.t('reports.pages.price_indications.current.actual_360'),
-               '' => I18n.t('reports.pages.price_indications.sta.notes')
-              }
-            }
-            collateral_types = [:standard, :sbc]
-            credit_types = [:frc, :vrc, :'1m_libor', :'3m_libor', :'6m_libor']
-            collateral_types.each do |collateral_type|
-              credit_types.each do |credit_type|
-                describe "when the collateral type is #{collateral_type} and the credit_type is #{credit_type}" do
-                  it "has an #{interest_day_count_key} key with a value of #{ReportsController::INTEREST_DAY_COUNT_MAPPINGS[collateral_type][credit_type]}" do
-                    get :historical_price_indications, historical_price_collateral_type: collateral_type, historical_price_credit_type: credit_type
-                    expect(assigns[:table_data][:notes][interest_day_count_key]).to eq(ReportsController::INTEREST_DAY_COUNT_MAPPINGS[collateral_type][credit_type])
-                  end
-                  it "has an #{payment_frequency_key} key with a value of #{ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[collateral_type][credit_type]}" do
-                    get :historical_price_indications, historical_price_collateral_type: collateral_type, historical_price_credit_type: credit_type
-                    expect(assigns[:table_data][:notes][payment_frequency_key]).to eq(ReportsController::INTEREST_PAYMENT_FREQUENCY_MAPPINGS[collateral_type][credit_type])
-                  end
-                  if RatesService::ARC_CREDIT_TYPES.include?(credit_type)
-                    it "has an #{interest_rate_reset_key} key with a value of #{ReportsController::INTEREST_RATE_RESET_MAPPINGS[credit_type]}" do
-                      get :historical_price_indications, historical_price_collateral_type: collateral_type, historical_price_credit_type: credit_type
-                      expect(assigns[:table_data][:notes][interest_rate_reset_key]).to eq(ReportsController::INTEREST_RATE_RESET_MAPPINGS[credit_type])
-                    end
-                  end
-                end
-              end
-            end
-            describe 'when the collateral type is sta' do
-              it 'has an interest_day_count key value of Actual/360' do
-                get :historical_price_indications, historical_price_collateral_type: 'sta'
-                expect((assigns[:table_data])[:notes]).to eq(sta_notes)
-              end
-            end
+            it 'is an empty array when the report is disabled' do
+              allow(controller).to receive(:report_disabled?).with(ReportsController::HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS).and_return(true)
+              call_action_with_job_id
+              expect(assigns[:table_data][:rows]).to eq([])
           end
         end
       end
@@ -2213,11 +2520,11 @@ RSpec.describe ReportsController, :type => :controller do
           xhr :get, :authorizations, job_id: job_id
         end
       end
-      describe 'when @print_layout is true' do
+      describe 'when the `skip_deferred_load` controller attribute is true' do
         let(:make_request) { get :authorizations }
         let(:service_instance) { double('service instance')}
         before do
-          subject.instance_variable_set(:@print_layout, true)
+          controller.skip_deferred_load = true
           allow(MembersService).to receive(:new).and_return(service_instance)
         end
         it 'gets signers and users from MembersService' do
@@ -2516,7 +2823,7 @@ RSpec.describe ReportsController, :type => :controller do
       before do
         session['member_id'] = 750
       end
-      
+
       it 'passes in the member_id and report_flags to the `report_disabled?` method on a newly created instance of MembersService and returns the response' do
         expect(MembersService).to receive(:new).and_return(member_service_instance)
         expect(member_service_instance).to receive(:report_disabled?).with(750, report_flags).and_return(response)
@@ -2633,9 +2940,9 @@ RSpec.describe ReportsController, :type => :controller do
           expect(controller.send(:month_restricted_start_date, start_date)).to eq(Date.new(2014,12,31))
         end
 
-        it 'returns the start_date if the start_date is the last day of this month' do
+        it 'returns the start_date of last month if the start_date is the last day of this month' do
           start_date = Date.new(2015,1,31)
-          expect(controller.send(:month_restricted_start_date, start_date)).to eq(start_date)
+          expect(controller.send(:month_restricted_start_date, start_date)).to eq((start_date - 1.month).end_of_month)
         end
       end
       describe 'when the start date occurs before the current month' do
@@ -2645,7 +2952,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
-    
+
     describe '`mcu_table_rows_for`' do
       let(:data_hash) { double('a data hash') }
       let(:loan_type_1) { double('a loan type') }
@@ -2656,7 +2963,7 @@ RSpec.describe ReportsController, :type => :controller do
       let(:column_data_2) { double('some more column data') }
       let(:loan_types) { [loan_type_1, loan_type_2] }
       let(:call_method) { subject.send(:mcu_table_rows_for, data_hash, loan_types) }
-      
+
       it 'calls `mcu_table_columns_for` with the proper args for each supplied loan type in the correct order' do
         allow(subject).to receive(:t).with("reports.pages.mortgage_collateral_update.#{loan_type_1}").and_return(translation_1)
         allow(subject).to receive(:t).with("reports.pages.mortgage_collateral_update.#{loan_type_2}").and_return(translation_2)
@@ -2669,7 +2976,7 @@ RSpec.describe ReportsController, :type => :controller do
         expect(call_method).to eq([{columns: column_data_1},{columns: column_data_2}])
       end
     end
-    
+
     describe '`mcu_table_columns_for`' do
       let(:data_hash) { double('a data hash', :[] => nil) }
       let(:loan_type) { double('a loan type') }
@@ -2683,7 +2990,7 @@ RSpec.describe ReportsController, :type => :controller do
         it "returns an array whose #{ordinalize(i)} member is an object with the correct loan_type #{type} value from the data hash and a type of `:number`" do
           allow(data_hash).to receive(:[]).with(:"#{loan_type}_#{type}").and_return(value)
           expect(call_method[i + 1]).to eq({value: value, type: :number})
-        end  
+        end
       end
     end
 
@@ -2970,6 +3277,79 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
+    describe '`parse_vrc_data` method' do
+      let(:vrc_fixture_data) { {'advance_maturity' => 'Overnight/Open','overnight_fed_funds_benchmark' => 0.13,'basis_point_spread_to_benchmark' => 5,'advance_rate' => 0.18,'effective_date' => '2016-01-01'} }
+      let(:vrc_entries_hash) { {
+          double('A Field') => double('A Value'),
+          double('A Field') => double('A Value'),
+          double('A Field') => double('A Value')
+      } }
+      let(:call_method) { subject.send(:parse_vrc_data, vrc_entries_hash) }
+      it 'returns correctly formatted columns' do
+        expect(subject.send(:parse_vrc_data, vrc_fixture_data)).to eq([{:value=>"Overnight/Open", :type=>nil}, {:value=>0.13, :type=>:rate}, {:value=>5, :type=>:basis_point}, {:value=>0.18, :type=>:rate}])
+      end
+      it 'calls `row_for_vrc_entry` for each field value pair in the entries hash' do
+        expect(vrc_entries_hash).to be_present
+        vrc_entries_hash.each do |field, value|
+          expect(subject).to receive(:row_for_vrc_entry).with(field, value)
+        end
+        call_method
+      end
+      it 'returns the rows generated by `row_for_vrc_entry`' do
+        expected_rows = []
+        vrc_entries_hash.each do |field, value|
+          row = double('A Row')
+          expected_rows << row
+          allow(subject).to receive(:row_for_vrc_entry).with(field, value).and_return(row)
+        end
+        expect(expected_rows).to be_present
+        expect(call_method).to eq(expected_rows)
+      end
+      it 'returns the rows and removes nil rows generated by `row_for_vrc_entry`' do
+        expected_rows = []
+        nil_field = vrc_entries_hash.to_a[1].first
+        vrc_entries_hash.each  do |field, value|
+          if field != nil_field
+            row = double('A Row')
+            expected_rows << row
+          else
+            row = nil
+          end
+          allow(subject).to receive(:row_for_vrc_entry).with(field, value).and_return(row)
+        end
+        expect(expected_rows).to be_present
+        expect(call_method).to eq(expected_rows)
+      end
+      it 'returns an empty array if all the rows are nil' do
+        allow(subject).to receive(:row_for_vrc_entry).and_return(nil)
+        expect(call_method).to eq([])
+      end
+      it 'returns an empty array if the vrc_data is an empty hash' do
+        expect(subject.send(:parse_vrc_data, {})).to eq([])
+      end
+      it 'returns an empty array if the vrc_data is nil' do
+        expect(subject.send(:parse_vrc_data, nil)).to eq([])
+      end
+    end
+    describe '`row_for_vrc_entry` method' do
+      let(:vrc_value) { double('VRC Value') }
+      let(:vrc_field) { double('VRC Field') }
+      let(:call_method) { subject.send(:row_for_vrc_entry, vrc_field, vrc_value) }
+      it 'returns nil if the field id `effective_date`' do
+        expect(subject.send(:row_for_vrc_entry, 'effective_date', vrc_value)).to eq(nil)
+      end
+      it 'returns `type` set to `:rate` if the field is `overnight_fed_funds_benchmark`' do
+        expect(subject.send(:row_for_vrc_entry, 'overnight_fed_funds_benchmark', vrc_value)).to eq({value: vrc_value, type: :rate})
+      end
+      it 'returns `type` set to `:rate` if the field is `advance_rate`' do
+        expect(subject.send(:row_for_vrc_entry, 'advance_rate', vrc_value)).to eq({value: vrc_value, type: :rate})
+      end
+      it 'returns `type` set to `:basis_point` if the field is `basis_point_spread_to_benchmark`' do
+        expect(subject.send(:row_for_vrc_entry, 'basis_point_spread_to_benchmark', vrc_value)).to eq({value: vrc_value, type: :basis_point})
+      end
+      it 'returns `type` set to `nil` if the field is not `basis_point_spread_to_benchmark`, `advance_rate`, `effective_date` or `overnight_fed_funds_benchmark`' do
+        expect(call_method).to eq({value: vrc_value, type: nil})
+      end
+    end
   end
 end
-

@@ -129,7 +129,7 @@
   }
 }
 
-.report-sta-number {
+.report-sta-number, .report-date {
   @extend %typography-subtitle;
   margin-bottom: 30px;
   span {
@@ -257,6 +257,11 @@
     float: right;
     margin-right: 0;
   }
+}
+
+.report-summary-data-loading {
+  @include data-element-loading;
+  height: 45px;
 }
 
 .report-summary-date {
@@ -821,6 +826,9 @@ td.dataTables_empty {
   }
   small {
     margin-bottom: 10px;
+  }
+  .inclusive-role-note {
+    width: 750px;
   }
 }
 

@@ -12,7 +12,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="302063F480BBCAFDF9DF394FBA8F9CB080AD1220D1D17BA23C50857A8744CA96"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       User-Agent:
@@ -33,14 +33,14 @@ http_interactions:
       X-Frame-Options:
       - SAMEORIGIN
       Server:
-      - WEBrick/1.3.1 (Ruby/2.2.2/2015-04-13)
+      - WEBrick/1.3.1 (Ruby/2.2.4/2015-12-16)
       Date:
-      - Mon, 19 Oct 2015 21:13:33 GMT
+      - Tue, 08 Mar 2016 00:58:39 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Mon, 19 Oct 2015 21:13:33 GMT
+  recorded_at: Tue, 08 Mar 2016 00:58:39 GMT
 recorded_with: VCR 2.9.3

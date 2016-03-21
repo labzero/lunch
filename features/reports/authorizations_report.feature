@@ -19,7 +19,6 @@ Scenario: Visit authorizations page from header link
 @resque-backed @jira-mem-585 @jira-mem-836 @jira-mem-1297
 Scenario: Filtering the authorization report
   Given I am on the "Authorizations" report page
-  And I wait for the report to load
   When I select "Resolution and Authorization" from the authorizations filter
   Then I should only see users with the "Resolution and Authorization" role
   When I select "Entire Authority" from the authorizations filter
@@ -52,9 +51,11 @@ Scenario: Member sees Resolution and Authorization users when filtering by a rol
   Given I am signed in as a Chaste Manhattan user
   And I am on the "Authorizations" report page
   When I select "Collateral" from the authorizations filter
+  And I wait for the report to load
   Then I should see 2 authorized users
   And I should see user "Della Duck" with the "Collateral" authorization and no "Resolution and Authorization" authorization
   And I should see user "Ronald Ruck" with the "Resolution and Authorization" footnoted authorization and no "Collateral" authorization
   When I select "Securities Services" from the authorizations filter
+  And I wait for the report to load
   Then I should see 1 authorized user
   And I should see user "Ronald Ruck" with the "Resolution and Authorization" footnoted authorization and no "Securities Services" authorization

@@ -46,9 +46,9 @@ class MAPIService
     end
   end
   
-  def get(name, endpoint, &error_handler)
+  def get(name, endpoint, params={}, &error_handler)
     begin
-      @connection[endpoint].get
+      @connection[endpoint].get params: params
     rescue RestClient::Exception => e
       warn(name, "RestClient error: #{e.class.name}:#{e.http_code}", e, &error_handler)
     rescue Errno::ECONNREFUSED => e
@@ -78,12 +78,12 @@ class MAPIService
     end
   end
   
-  def get_hash(name, endpoint, &error_handler)
-    get_json(name, endpoint, &error_handler).try(:with_indifferent_access)
+  def get_hash(name, endpoint, params={}, &error_handler)
+    get_json(name, endpoint, params, &error_handler).try(:with_indifferent_access)
   end
   
-  def get_json(name, endpoint, &error_handler)
-    parse(name, get(name, endpoint, &error_handler), &error_handler)
+  def get_json(name, endpoint, params={}, &error_handler)
+    parse(name, get(name, endpoint, params, &error_handler), &error_handler)
   end
 
   def post_hash(name, endpoint, body, &error_handler)

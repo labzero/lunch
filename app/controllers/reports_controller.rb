@@ -1,5 +1,5 @@
 class ReportsController < ApplicationController
-  attr_accessor :report_download_name
+  attr_accessor :report_download_name, :skip_deferred_load
   include DatePickerHelper
   include CustomFormattingHelper
   include ReportsHelper
@@ -87,27 +87,27 @@ class ReportsController < ApplicationController
     monthly_securities_position: 18.months,
     dividend_statement: 36.months
   }
-  
+
   INTEREST_DAY_COUNT_MAPPINGS = {
     standard: {
       vrc: I18n.t('reports.pages.price_indications.current.actual_actual'),
       frc: I18n.t('reports.pages.price_indications.current.actual_actual'),
       arc: I18n.t('reports.pages.price_indications.current.actual_360'),
-      :'1m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'), 
+      :'1m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
       :'3m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
-      :'6m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'), 
+      :'6m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
       :'daily_prime' => I18n.t('reports.pages.price_indications.current.actual_360')
     },
     sbc: {
       vrc: I18n.t('reports.pages.price_indications.current.actual_360'),
-      frc: I18n.t('reports.pages.price_indications.current.actual_actual'),
+      frc: I18n.t('reports.pages.price_indications.current.actual_360'),
       arc: I18n.t('reports.pages.price_indications.current.actual_360'),
       :'1m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
       :'3m_libor' => I18n.t('reports.pages.price_indications.current.actual_360'),
       :'6m_libor' => I18n.t('reports.pages.price_indications.current.actual_360')
     }
   }.freeze
-  
+
   INTEREST_PAYMENT_FREQUENCY_MAPPINGS = {
     standard: {
       vrc: I18n.t('reports.pages.price_indications.current.at_maturity'),
@@ -128,9 +128,9 @@ class ReportsController < ApplicationController
       :'1m_libor' => I18n.t('reports.pages.price_indications.current.at_monthend_and_at_repayment'),
       :'3m_libor' => I18n.t('reports.pages.price_indications.current.quarterly_and_at_repayment'),
       :'6m_libor' => I18n.t('reports.pages.price_indications.current.semiannually_and_at_repayment')
-    }  
+    }
   }.freeze
-  
+
   INTEREST_RATE_RESET_MAPPINGS = {
     :'1m_libor' => I18n.t('global.monthly'),
     :'3m_libor' => I18n.t('global.quarterly'),
@@ -145,6 +145,7 @@ class ReportsController < ApplicationController
   before_action do
     @member_name = current_member_name
     set_active_nav(:reports)
+    @min_date, @start_date, @end_date, @max_date = nil
   end
 
   def index
@@ -290,16 +291,12 @@ class ReportsController < ApplicationController
 
   def capital_stock_activity
     @report_name = t('reports.pages.capital_stock_activity.title')
-    date_restriction = DATE_RESTRICTION_MAPPING[:capital_stock_activity]
-    default_dates = default_dates_hash
     member_balances = MemberBalanceService.new(current_member_id, request)
-    start_date = ((params[:start_date] || default_dates[:last_month_start])).to_date
-    @end_date = ((params[:end_date] || default_dates[:last_month_end])).to_date
-    @min_date, @start_date = min_and_start_dates(date_restriction, start_date)
-    @picker_presets = date_picker_presets(@start_date, @end_date, date_restriction)
-    report_download_name = "capital-stock-activity-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
+    initialize_dates(:capital_stock_activity, params[:start_date], params[:end_date])
 
-    downloadable_report(:xlsx, {start_date: params[:start_date], end_date: params[:end_date]}, report_download_name) do
+    @picker_presets = date_picker_presets(@start_date, @end_date, ReportConfiguration.date_restrictions(:capital_stock_activity))
+    report_download_name = "capital-stock-activity-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
+    downloadable_report(nil, {start_date: params[:start_date], end_date: params[:end_date]}, report_download_name) do
       if report_disabled?(CAPITAL_STOCK_ACTIVITY_WEB_FLAGS)
         @capital_stock_activity = {activities:[]}
       else
@@ -327,12 +324,9 @@ class ReportsController < ApplicationController
   end
 
   def capital_stock_trial_balance
-    @max_date = most_recent_business_day(Time.zone.today - 1.day)
-    @min_date = Date.new(2002,1,1)
-    @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
-    @start_date = @min_date if @start_date < @min_date
-    @report_name = t('reports.pages.capital_stock_trial_balance.title')
+    @report_name = ReportConfiguration.report_title(:capital_stock_trial_balance)
     report_download_name = "capital_stock_trial_balance-#{fhlb_report_date_numeric(@start_date)}"
+    initialize_dates(:capital_stock_trial_balance, params[:start_date])
     downloadable_report(:xlsx, {start_date: @start_date.to_s}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
@@ -366,29 +360,38 @@ class ReportsController < ApplicationController
   end
 
   def borrowing_capacity
-    @date = params[:end_date] || Time.zone.now.to_date
-    @report_name = t('global.borrowing_capacity')
-    downloadable_report(:pdf, {end_date: @date.to_s}) do
-      member_balances = MemberBalanceService.new(current_member_id, request)
-      if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
-        @borrowing_capacity_summary = {}
-      else
-        @borrowing_capacity_summary = member_balances.borrowing_capacity_summary(@date.to_date)
+    @report_name = ReportConfiguration.report_title(:borrowing_capacity)
+    initialize_dates(:borrowing_capacity, nil, params[:end_date])
+    downloadable_report(:pdf, {end_date: @end_date.to_s}) do
+      if params[:job_id] || self.skip_deferred_load
+        if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
+          @borrowing_capacity_summary = {}
+        elsif self.skip_deferred_load
+          @borrowing_capacity_summary = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @end_date.to_s)
+        else
+          job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+          raise ActiveRecord::RecordNotFound unless job_status
+          @borrowing_capacity_summary = JSON.parse(job_status.result_as_string).with_indifferent_access
+          job_status.destroy
+        end
         raise StandardError, "There has been an error and ReportsController#borrowing_capacity has encountered nil. Check error logs." if @borrowing_capacity_summary.nil?
+        render layout: false if request.try(:xhr?)
+      else
+        job_status = MemberBalanceServiceJob.perform_later(current_member_id, 'borrowing_capacity_summary', request.uuid, @end_date.to_s).job_status
+        job_status.update_attributes!(user_id: current_user.id)
+        @job_status_url = job_status_url(job_status)
+        @load_url = reports_borrowing_capacity_url(job_id: job_status.id)
+        @borrowing_capacity_summary = {deferred: true}
       end
     end
   end
 
   def settlement_transaction_account
-    date_restriction = DATE_RESTRICTION_MAPPING[:settlement_transaction_account]
-    default_dates = default_dates_hash
-    start_date = ((params[:start_date] || default_dates[:this_month_start])).to_date
-    @min_date, @start_date = min_and_start_dates(date_restriction, start_date)
-    @end_date = ((params[:end_date] || default_dates[:today])).to_date
-    @report_name = t('reports.pages.settlement_transaction_account.title')
+    @report_name = ReportConfiguration.report_title(:settlement_transaction_account)
+    initialize_dates(:settlement_transaction_account, params[:start_date], params[:end_date])
     member_balances = MemberBalanceService.new(current_member_id, request)
     @daily_balance_key = MemberBalanceService::DAILY_BALANCE_KEY
-    @picker_presets = date_picker_presets(@start_date, @end_date, date_restriction)
+    @picker_presets = date_picker_presets(@start_date, @end_date, ReportConfiguration.date_restrictions(:settlement_transaction_account))
     @sta_number = MembersService.new(request).member(current_member_id).try(:[], :sta_number) unless @sta_number
     @filter_options = [
       [t('global.all'), 'all'],
@@ -423,24 +426,25 @@ class ReportsController < ApplicationController
   end
 
   def advances_detail
-    date_restriction = DATE_RESTRICTION_MAPPING[:advances_detail]
-    @max_date = most_recent_business_day(Time.zone.today - 1.day)
-    advance_start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
-    @min_date, @start_date = min_and_start_dates(date_restriction, advance_start_date)
+    initialize_dates(:advances_detail, params[:start_date])
     report_download_name = "advances-#{fhlb_report_date_numeric(@start_date)}"
     downloadable_report(nil, {start_date: @start_date.to_s}, report_download_name) do
-      member_balances = MemberBalanceService.new(current_member_id, request)
-      @advances_detail = member_balances.advances_details(@start_date)
       @report_name = t('global.advances')
-      raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
-      @picker_presets = date_picker_presets(@start_date, nil, date_restriction, @max_date)
-      if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)
-        @advances_detail = {}
-      else
-        @advances_detail = member_balances.advances_details(@start_date)
+      @picker_presets = date_picker_presets(@start_date, nil, ReportConfiguration.date_restrictions(:advances_detail), @max_date)
+      if params[:job_id] || self.skip_deferred_load
+        if report_disabled?(ADVANCES_DETAIL_WEB_FLAGS)
+          @advances_detail = {}
+        elsif self.skip_deferred_load
+          @advances_detail = MemberBalanceServiceJob.perform_now(current_member_id, 'advances_details', request.uuid, @start_date.to_s)
+        else
+          job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+          raise ActiveRecord::RecordNotFound unless job_status
+          @advances_detail = JSON.parse(job_status.result_as_string).with_indifferent_access
+          job_status.destroy
+        end
         raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
-        # prepayment fee indication for detail view
-        @advances_detail[:advances_details].each_with_index do |advance, i|
+
+        @advances_detail[:advances_details].to_a.each_with_index do |advance, i|
           case advance[:notes]
             when 'unavailable_online'
               @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.unavailable_online')
@@ -452,68 +456,63 @@ class ReportsController < ApplicationController
               @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.unavailable_for_past_dates') unless advance[:prepayment_fee_indication]
           end
         end
+        @advances_detail[:advances_details].to_a.sort! { |a, b| a[:trade_date] <=> b[:trade_date] }
+        render layout: false if request.try(:xhr?)
+      else
+        job_status = MemberBalanceServiceJob.perform_later(current_member_id, 'advances_details', request.uuid, @start_date.to_s).job_status
+        job_status.update_attributes!(user_id: current_user.id)
+        @job_status_url = job_status_url(job_status)
+        @load_url = reports_advances_url(job_id: job_status.id, start_date: params[:start_date])
+        @advances_detail = {deferred: true}
       end
-      @advances_detail[:advances_details].sort! { |a, b| a[:trade_date] <=> b[:trade_date] } if @advances_detail[:advances_details]
     end
   end
 
   def current_price_indications
-    @report_name = t('reports.pages.price_indications.current.title')
+    @report_name = ReportConfiguration.report_title(:current_price_indications)
+    @quick_advance_message = MessageService.new.todays_quick_advance_message # Should this be deferred as well?  Right now it takes no time, but if it's ever rigged up to an external service, it might.
     downloadable_report(:xlsx) do
-      rate_service = RatesService.new(request)
-      member_balances = MemberBalanceService.new(current_member_id, request)
 
-      #sta data
-      @sta_data = member_balances.settlement_transaction_rate
-      @sta_table_data = {
-        :row_name => fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.sta_rate'), '%'),
-        :row_value => @sta_data[:rate]
-      }
+      vrc_column_headings = [
+        t('reports.pages.price_indications.current.advance_maturity'),
+        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.overnight_fed_funds_benchmark'), '%'),
+        t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'),
+        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')
+      ]
+      frc_column_headings = [
+        t('reports.pages.price_indications.current.advance_maturity'),
+        t('reports.pages.price_indications.current.treasury_benchmark_maturity'),
+        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.nominal_yield_of_benchmark'), '%'),
+        t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'),
+        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')
+      ]
+      standard_arc_column_headings = [
+        t('reports.pages.price_indications.current.advance_maturity'),
+        t('reports.pages.price_indications.current.1_month_libor_header'),
+        t('reports.pages.price_indications.current.3_month_libor_header'),
+        t('reports.pages.price_indications.current.6_month_libor_header'),
+        t('reports.pages.price_indications.current.prime_header')
+      ]
+      sbc_arc_column_headings = [
+        t('reports.pages.price_indications.current.advance_maturity'),
+        t('reports.pages.price_indications.current.1_month_libor_header'),
+        t('reports.pages.price_indications.current.3_month_libor_header'),
+        t('reports.pages.price_indications.current.6_month_libor_header')
+      ]
 
-      #vrc headers
-      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.overnight_fed_funds_benchmark'), '%'), t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'), fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')]
-      #vrc data for standard collateral
-      @standard_vrc_data = rate_service.current_price_indications('standard', 'vrc')
-      columns = @standard_vrc_data.collect do |row|
-        case row[0]
-          when 'overnight_fed_funds_benchmark', 'advance_rate'
-            type = :rate
-          when 'basis_point_spread_to_benchmark'
-            type = :basis_point
-          else
-            type = nil
-        end
-        {value: row[1], type: type}
-      end
-      rows = [{columns: columns}]
+      @sta_table_data = {}
       @standard_vrc_table_data = {
-        column_headings: column_headings,
-        rows: rows,
+        column_headings: vrc_column_headings,
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:standard][:vrc],
           t('reports.pages.price_indications.current.payment_frequency') => [
             [t('reports.pages.price_indications.current.overnight'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:vrc]],
             [t('reports.pages.price_indications.current.open'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:vrc_open]]
-          ]  
+          ]
         }
       }
-      #vrc data for sbc collateral
-      @sbc_vrc_data = rate_service.current_price_indications('sbc', 'vrc')
-      columns = @sbc_vrc_data.collect do |row|
-        case row[0]
-          when 'overnight_fed_funds_benchmark', 'advance_rate'
-            type = :rate
-          when 'basis_point_spread_to_benchmark'
-            type = :basis_point
-          else
-            type = nil
-        end
-        {value: row[1], type: type}
-      end
-      rows = [{columns: columns}]
       @sbc_vrc_table_data = {
-        column_headings: column_headings,
-        rows: rows,
+        column_headings: vrc_column_headings,
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:sbc][:vrc],
           t('reports.pages.price_indications.current.payment_frequency') => [
@@ -522,74 +521,22 @@ class ReportsController < ApplicationController
           ]
         }
       }
-
-      #frc headers
-      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.treasury_benchmark_maturity'), fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.nominal_yield_of_benchmark'), '%'), t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'), fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')]
-      #frc data for standard collateral
-      @standard_frc_data = rate_service.current_price_indications('standard', 'frc')
-      rows = @standard_frc_data.collect do |row|
-        columns = []
-        row.each do |value|
-          if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
-            columns << {value: value[1]}
-          elsif value[0]=='basis_point_spread_to_benchmark'
-            columns << {type: :basis_point, value: value[1]}
-          else
-            columns << {type: :rate, value: value[1]}
-          end
-        end
-        {columns: columns}
-      end
       @standard_frc_table_data = {
-        column_headings: column_headings,
-        rows: rows,
+        column_headings: frc_column_headings,
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:standard][:frc],
           t('reports.pages.price_indications.current.payment_frequency') => INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:standard][:frc]
-        }  
+        }
       }
-      #frc data for sbc collateral
-      @sbc_frc_data = rate_service.current_price_indications('sbc', 'frc')
-      rows = @sbc_frc_data.collect do |row|
-        columns = []
-        row.each do |value|
-          if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
-            columns << {value: value[1]}
-          elsif value[0]=='basis_point_spread_to_benchmark'
-            columns << {type: :basis_point, value: value[1]}
-          else
-            columns << {type: :rate, value: value[1]}
-          end
-        end
-        {columns: columns}
-      end
       @sbc_frc_table_data = {
-        column_headings: column_headings,
-        rows: rows,
+        column_headings: frc_column_headings,
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:sbc][:frc],
           t('reports.pages.price_indications.current.payment_frequency') => INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:frc]
         }
       }
-
-      #arc headers for standard collateral
-      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor_header'), t('reports.pages.price_indications.current.3_month_libor_header'), t('reports.pages.price_indications.current.6_month_libor_header'), t('reports.pages.price_indications.current.prime_header')]
-      #arc data for standard collateral
-      @standard_arc_data = rate_service.current_price_indications('standard', 'arc')
-      rows = @standard_arc_data.collect do |row|
-        columns = []
-        row.each do |value|
-          if value[0]=='advance_maturity'
-            columns << {value: value[1]}
-          else
-            columns << {type: :basis_point, value: value[1]}
-          end
-        end
-        {columns: columns}
-      end
       @standard_arc_table_data = {
-        column_headings: column_headings,
-        rows: rows,
+        column_headings: standard_arc_column_headings,
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:standard][:arc],
           t('reports.pages.price_indications.current.interest_rate_reset') => [
@@ -606,24 +553,8 @@ class ReportsController < ApplicationController
           ]
         }
       }
-      #arc headers for sbc collateral
-      column_headings = [t('reports.pages.price_indications.current.advance_maturity'), t('reports.pages.price_indications.current.1_month_libor_header'), t('reports.pages.price_indications.current.3_month_libor_header'), t('reports.pages.price_indications.current.6_month_libor_header')]
-      #arc data for sbc collateral
-      @sbc_arc_data = rate_service.current_price_indications('sbc', 'arc')
-      rows = @sbc_arc_data.collect do |row|
-        columns = []
-        row.each do |value|
-          if value[0]=='advance_maturity'
-            columns << {value: value[1]}
-          elsif value[0]=='1_month_libor' || value[0]=='3_month_libor' || value[0]=='6_month_libor'
-            columns << {type: :basis_point, value: value[1]}
-          end
-        end
-        {columns: columns}
-      end
       @sbc_arc_table_data = {
-        column_headings: column_headings,
-        rows: rows,
+        column_headings: sbc_arc_column_headings,
         notes: {
           t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[:sbc][:arc],
           t('reports.pages.price_indications.current.interest_rate_reset') => [
@@ -635,20 +566,116 @@ class ReportsController < ApplicationController
             [t('reports.pages.price_indications.current.1_month_libor'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:'1m_libor']],
             [t('reports.pages.price_indications.current.3_month_libor'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:'3m_libor']],
             [t('reports.pages.price_indications.current.6_month_libor'), INTEREST_PAYMENT_FREQUENCY_MAPPINGS[:sbc][:'6m_libor']]
-          ]          
+          ]
         }
       }
-      @quick_advance_message = MessageService.new.todays_quick_advance_message
+      @sta_table_data = {
+        :row_name => fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.sta_rate'), '%')
+      }
+
+      @job_status_url = false
+      @load_url = false
+      if params[:job_id] || self.skip_deferred_load
+        if self.skip_deferred_load
+          data = ReportCurrentPriceIndicationsJob.perform_now(current_member_id, request.uuid)
+        else
+          job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+          raise ActiveRecord::RecordNotFound unless job_status
+          data = JSON.parse(job_status.result_as_string).with_indifferent_access
+          job_status.destroy
+        end
+
+        #sta data
+        sta_data = data[:sta_data] || {}
+        @sta_table_data[:row_value] = sta_data[:rate]
+
+        #vrc data for standard collateral
+        standard_vrc_data = data[:standard_vrc_data] || []
+        @vrc_date = standard_vrc_data['effective_date'] if standard_vrc_data.size > 0
+        rows = [{columns: parse_vrc_data(standard_vrc_data)}]
+        @standard_vrc_table_data[:rows] = rows
+
+        #vrc data for sbc collateral
+        sbc_vrc_data = data[:sbc_vrc_data] || []
+        rows = [{columns: parse_vrc_data(sbc_vrc_data)}]
+        @sbc_vrc_table_data[:rows] = rows
+
+        #frc data for standard collateral
+        standard_frc_data = data[:standard_frc_data] || []
+        rows = standard_frc_data.collect do |row|
+          columns = []
+          row.each do |value|
+            if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
+              columns << {value: value[1]}
+            elsif value[0]=='basis_point_spread_to_benchmark'
+              columns << {type: :basis_point, value: value[1]}
+            else
+              columns << {type: :rate, value: value[1]}
+            end
+          end
+          {columns: columns}
+        end
+        @standard_frc_table_data[:rows] = rows
+        #frc data for sbc collateral
+        sbc_frc_data = data[:sbc_frc_data] || []
+        rows = sbc_frc_data.collect do |row|
+          columns = []
+          row.each do |value|
+            if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
+              columns << {value: value[1]}
+            elsif value[0]=='basis_point_spread_to_benchmark'
+              columns << {type: :basis_point, value: value[1]}
+            else
+              columns << {type: :rate, value: value[1]}
+            end
+          end
+          {columns: columns}
+        end
+        @sbc_frc_table_data[:rows] = rows
+
+        #arc data for standard collateral
+        standard_arc_data = data[:standard_arc_data] || []
+        rows = standard_arc_data.collect do |row|
+          columns = []
+          row.each do |value|
+            if value[0]=='advance_maturity'
+              columns << {value: value[1]}
+            else
+              columns << {type: :basis_point, value: value[1]}
+            end
+          end
+          {columns: columns}
+        end
+        @standard_arc_table_data[:rows] = rows
+        #arc data for sbc collateral
+        sbc_arc_data = data[:sbc_arc_data] || []
+        rows = sbc_arc_data.collect do |row|
+          columns = []
+          row.each do |value|
+            if value[0]=='advance_maturity'
+              columns << {value: value[1]}
+            elsif value[0]=='1_month_libor' || value[0]=='3_month_libor' || value[0]=='6_month_libor'
+              columns << {type: :basis_point, value: value[1]}
+            end
+          end
+          {columns: columns}
+        end
+        @sbc_arc_table_data[:rows] = rows
+        render layout: false if request.try(:xhr?)
+      else
+        job_status = ReportCurrentPriceIndicationsJob.perform_later(current_member_id).job_status
+        job_status.update_attributes!(user_id: current_user.id)
+        @job_status_url = job_status_url(job_status)
+        @load_url = reports_current_price_indications_url(job_id: job_status.id)
+        [@sta_table_data, @standard_vrc_table_data, @sbc_vrc_table_data,@standard_frc_table_data, @sbc_frc_table_data, @standard_arc_table_data, @sbc_arc_table_data].each { |table| table[:deferred] = true }
+      end
     end
   end
 
   def historical_price_indications
-    rate_service = RatesService.new(request)
-    default_dates = default_dates_hash
-    @start_date = ((params[:start_date] || default_dates[:last_30_days])).to_date
-    @end_date = ((params[:end_date] || default_dates[:today])).to_date
+    initialize_dates(:historical_price_indications, params[:start_date], params[:end_date])
     @picker_presets = date_picker_presets(@start_date, @end_date)
-    
+
     @collateral_type_options = [
         [t('reports.pages.price_indications.standard_credit_program'), 'standard'],
         [t('reports.pages.price_indications.sbc_program'), 'sbc'],
@@ -702,96 +729,125 @@ class ReportsController < ApplicationController
     }
 
     downloadable_report(:xlsx, report_download_params, report_download_name) do
-      if report_disabled?(HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS)
-        @historical_price_indications = {}
-      else
-        @historical_price_indications = rate_service.historical_price_indications(@start_date, @end_date, @collateral_type, @credit_type)
-        raise StandardError, "There has been an error and ReportsController#historical_price_indications has encountered nil. Check error logs." if @historical_price_indications.nil?
-      end
-
       collateral_key = @collateral_type.to_sym
-      notes = {}
-
-      if @collateral_type == 'sta'
-        column_headings = []
-        column_sub_headings = []
-        column_headings.insert(0, I18n.t('global.date'))
-        column_headings.insert(1, I18n.t('advances.rate'))
-        rows = if @historical_price_indications[:rates_by_date]
-          @historical_price_indications[:rates_by_date].collect do |row|
-            {date: row[:date], columns: [{type: :index, value: row[:rate] }] }
-          end
-        else
-          []
-        end
-        notes = {
+      credit_key = @credit_type.to_sym
+      notes = if @collateral_type == 'sta'
+        {
           t('reports.pages.price_indications.current.interest_day_count') => t('reports.pages.price_indications.current.actual_360'),
           '' => t('reports.pages.price_indications.sta.notes')
         }
       else
-        case @credit_type.to_sym
-          when :frc
-            column_heading_keys = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.values
-            terms = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.keys
-          when :vrc
-            column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
-            terms = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.keys
-          when *RatesService::ARC_CREDIT_TYPES
-            table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading") unless @credit_type == :daily_prime
-            column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
-            terms = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.keys
-          # TODO add statement for 'embedded_cap' when it is rigged up
-        end
+        {
+          t('reports.pages.price_indications.current.interest_day_count') => INTEREST_DAY_COUNT_MAPPINGS[collateral_key][credit_key],
+          t('reports.pages.price_indications.current.interest_rate_reset') => (INTEREST_RATE_RESET_MAPPINGS[credit_key] if RatesService::ARC_CREDIT_TYPES.include?(credit_key)),
+          t('reports.pages.price_indications.current.payment_frequency') => INTEREST_PAYMENT_FREQUENCY_MAPPINGS[collateral_key][credit_key]
+        }
+      end
+      @table_data = {notes: notes}
 
-        column_headings = []
-        column_sub_headings = []
-        if (@credit_type.to_sym == :daily_prime)
-          column_heading_keys.each do |key|
-            column_headings << I18n.t("global.full_dates.#{key}")
-            column_sub_headings = [fhlb_add_unit_to_table_header(I18n.t("reports.pages.price_indications.daily_prime.benchmark_index"), '%'), I18n.t("reports.pages.price_indications.daily_prime.basis_point_spread")]
-          end
-          column_sub_headings_first =  I18n.t('global.date')
+      @job_status_url = false
+      @load_url = false
+      if params[:job_id] || self.skip_deferred_load
+        if report_disabled?(HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS)
+          data = {}
+        elsif self.skip_deferred_load
+          data = RatesServiceJob.perform_now('historical_price_indications', request.uuid, @start_date.to_s, @end_date.to_s, @collateral_type, @credit_type)
         else
-          column_heading_keys.each do |key|
-            column_headings << I18n.t("global.dates.#{key}")
-          end
-          column_headings.insert(0, I18n.t('global.date'))
+          job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+          raise ActiveRecord::RecordNotFound unless job_status
+          data = JSON.parse(job_status.result_as_string).with_indifferent_access
+          job_status.destroy
         end
+        raise StandardError, "There has been an error and ReportsController#historical_price_indications has encountered nil. Check error logs." if data.nil?
 
-        rows = if @historical_price_indications[:rates_by_date]
-          @historical_price_indications[:rates_by_date] = add_rate_objects_for_all_terms(@historical_price_indications[:rates_by_date], terms, @credit_type.to_sym)
-          if (@credit_type.to_sym == :daily_prime)
-            @historical_price_indications[:rates_by_date].collect do |row|
-              columns = []
-              # need to replicate rate data for display purposes
-              row[:rates_by_term].each_with_index do |column, i|
-                next if i == 0
-                columns <<  {type: row[:rates_by_term][0][:type].to_sym, value: row[:rates_by_term][0][:value]}
-                columns <<  {type: column[:type].to_sym, value: column[:value] }
-              end
-              {date: row[:date], columns: columns }
+        if @collateral_type == 'sta'
+          column_headings = []
+          column_sub_headings = []
+          column_headings.insert(0, I18n.t('global.date'))
+          column_headings.insert(1, I18n.t('advances.rate'))
+          rows = if data[:rates_by_date]
+            data[:rates_by_date].collect do |row|
+              {date: row[:date], columns: [{type: :index, value: row[:rate] }] }
             end
           else
-            @historical_price_indications[:rates_by_date].collect do |row|
-              {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: column[:type].to_sym, value: column[:value] } } }
-            end
+            []
           end
         else
-          []
+          case @credit_type.to_sym
+            when :frc
+              column_heading_keys = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.values
+              terms = RatesService::HISTORICAL_FRC_TERM_MAPPINGS.keys
+            when :vrc
+              column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
+              terms = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.keys
+            when *RatesService::ARC_CREDIT_TYPES
+              table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading") unless @credit_type == :daily_prime
+              column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
+              terms = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.keys
+            # TODO add statement for 'embedded_cap' when it is rigged up
+          end
+
+          column_headings = []
+          column_sub_headings = []
+          if (@credit_type.to_sym == :daily_prime)
+            column_heading_keys.each do |key|
+              column_headings << I18n.t("global.full_dates.#{key}")
+              column_sub_headings = [fhlb_add_unit_to_table_header(I18n.t("reports.pages.price_indications.daily_prime.benchmark_index"), '%'), I18n.t("reports.pages.price_indications.daily_prime.basis_point_spread")]
+            end
+            column_sub_headings_first =  I18n.t('global.date')
+          else
+            column_heading_keys.each do |key|
+              column_headings << I18n.t("global.dates.#{key}")
+            end
+            column_headings.insert(0, I18n.t('global.date'))
+          end
+
+          rows = if data[:rates_by_date]
+            data[:rates_by_date] = add_rate_objects_for_all_terms(data[:rates_by_date], terms, @credit_type.to_sym)
+            if (@credit_type.to_sym == :daily_prime)
+              data[:rates_by_date].collect do |row|
+                columns = []
+                # need to replicate rate data for display purposes
+                row[:rates_by_term].each_with_index do |column, i|
+                  next if i == 0
+                  columns <<  {type: row[:rates_by_term][0][:type].to_sym, value: row[:rates_by_term][0][:value]}
+                  columns <<  {type: column[:type].to_sym, value: column[:value] }
+                end
+                {date: row[:date], columns: columns }
+              end
+            else
+              data[:rates_by_date].collect do |row|
+                {date: row[:date], columns: row[:rates_by_term].collect {|column| {type: column[:type].to_sym, value: column[:value] } } }
+              end
+            end
+          else
+            []
+          end
         end
-        credit_key = @credit_type.to_sym
-        notes[t('reports.pages.price_indications.current.interest_day_count')] = INTEREST_DAY_COUNT_MAPPINGS[collateral_key][credit_key]
-        notes[t('reports.pages.price_indications.current.interest_rate_reset')] = INTEREST_RATE_RESET_MAPPINGS[credit_key] if RatesService::ARC_CREDIT_TYPES.include?(credit_key)
-        notes[t('reports.pages.price_indications.current.payment_frequency')] = INTEREST_PAYMENT_FREQUENCY_MAPPINGS[collateral_key][credit_key]
+        @table_data = {
+          :table_heading => table_heading,
+          :column_headings => column_headings,
+          :column_sub_headings => column_sub_headings,
+          :column_sub_headings_first => column_sub_headings_first,
+          :rows => sort_report_data(rows, :date),
+          :notes => notes
+        }
+        render layout: false if request.try(:xhr?)
+      else
+        job_status = RatesServiceJob.perform_later('historical_price_indications', request.uuid, @start_date.to_s, @end_date.to_s, @collateral_type, @credit_type).job_status
+        job_status.update_attributes!(user_id: current_user.id)
+        @job_status_url = job_status_url(job_status)
+        new_params = {
+          job_id: job_status.id,
+          historical_price_collateral_type: params[:historical_price_collateral_type],
+          historical_price_credit_type: params[:historical_price_credit_type],
+          start_date: params[:start_date],
+          end_date: params[:end_date]
+        }
+        @load_url = reports_historical_price_indications_url(new_params)
+        @table_data[:deferred] = true
+        @table_data[:hide_column_headings] = true
       end
-      @table_data = {
-        :table_heading => table_heading,
-        :column_headings => column_headings,
-        :column_sub_headings => column_sub_headings,
-        :column_sub_headings_first => column_sub_headings_first,
-        :rows => sort_report_data(rows, :date),
-        :notes => notes
-      }
     end
   end
 
@@ -902,7 +958,7 @@ class ReportsController < ApplicationController
 
   def securities_services_statement
     member_balances = MemberBalanceService.new(current_member_id, request)
-    @report_name = t('reports.securities.services_monthly.title')
+    @report_name = ReportConfiguration.report_title(:securities_services_statement)
 
     available_reports = member_balances.securities_services_statements_available
     if available_reports.empty?
@@ -927,7 +983,7 @@ class ReportsController < ApplicationController
 
   def letters_of_credit
     downloadable_report(:xlsx) do
-      @report_name = t('reports.pages.letters_of_credit.title')
+      @report_name = ReportConfiguration.report_title(:letters_of_credit)
       if report_disabled?(LETTERS_OF_CREDIT_WEB_FLAGS)
         letters_of_credit = {}
       else
@@ -962,18 +1018,11 @@ class ReportsController < ApplicationController
     end
   end
 
-  def most_recent_business_day(d)
-    return d - 1.day if d.saturday?
-    return d - 2.day if d.sunday?
-    d
-  end
-  
   def securities_transactions
-    @max_date   = most_recent_business_day(Time.zone.today)
-    @start_date = params[:start_date] ? [params[:start_date].to_date, @max_date].min : @max_date
+    initialize_dates(:securities_transactions, params[:start_date])
     report_download_name = "securities-transactions-#{fhlb_report_date_numeric(@start_date)}"
     downloadable_report(:xlsx, {start_date: params[:start_date]}, report_download_name) do
-      @report_name = t('reports.pages.securities_transactions.title')
+      @report_name = ReportConfiguration.report_title(:securities_transactions)
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
         securities_transactions = {}
@@ -1007,7 +1056,7 @@ class ReportsController < ApplicationController
 
   def authorizations
     @authorizations_filter = params['authorizations_filter'] || 'all'
-    @report_name = t('reports.account.authorizations.title')
+    @report_name = ReportConfiguration.report_title(:authorizations)
     @today = Time.zone.today
 
     downloadable_report(:pdf, {authorizations_filter: @authorizations_filter.to_s}) do
@@ -1030,8 +1079,8 @@ class ReportsController < ApplicationController
       @job_status_url = false
       @load_url = false
 
-      if params[:job_id] || @print_layout
-        if @print_layout
+      if params[:job_id] || self.skip_deferred_load
+        if self.skip_deferred_load
           users = MembersService.new(request).signers_and_users(current_member_id) || []
         else
           job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
@@ -1111,7 +1160,8 @@ class ReportsController < ApplicationController
   end
 
   def current_securities_position
-    @report_name = t('reports.pages.securities_position.current')
+    @report_name = ReportConfiguration.report_title(:current_securities_position)
+
     @securities_filter = params['securities_filter'] || 'all'
     report_download_name = "current-securities-position-#{@securities_filter}"
     downloadable_report(nil, {securities_filter: params['securities_filter']}, report_download_name) do
@@ -1128,17 +1178,14 @@ class ReportsController < ApplicationController
   end
 
   def monthly_securities_position
-    @report_name = t('reports.pages.securities_position.monthly')
-    date_restriction = DATE_RESTRICTION_MAPPING[:monthly_securities_position]
     @securities_filter = params['securities_filter'] || 'all'
-    start_date = (params[:start_date] || default_dates_hash[:last_month_end]).to_date
-    min_and_start_dates_array = min_and_start_dates(date_restriction, start_date)
-    @min_date = min_and_start_dates_array.first
-    @month_end_date = month_restricted_start_date(min_and_start_dates_array.last)
+    initialize_dates(:monthly_securities_position, params[:start_date])
+    @report_name = ReportConfiguration.report_title(:monthly_securities_position)
+    @month_end_date = month_restricted_start_date(@start_date)
     report_download_name = "monthly-securities-position-#{@securities_filter}-#{@month_end_date}"
     downloadable_report(nil, {securities_filter: params['securities_filter'], start_date: params['start_date']}, report_download_name) do
       @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
-      @picker_presets = date_picker_presets(@month_end_date, nil, date_restriction)
+      @picker_presets = date_picker_presets(@month_end_date, nil, ReportConfiguration.date_restrictions(:monthly_securities_position), nil, [:today])
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(MONTHLY_SECURITIES_WEB_FLAGS)
         @monthly_securities_position = {securities:[]}
@@ -1154,7 +1201,7 @@ class ReportsController < ApplicationController
   def forward_commitments
     downloadable_report(:xlsx) do
       member_balances = MemberBalanceService.new(current_member_id, request)
-      @report_name = t('reports.credit.forward_commitments.title')
+      @report_name = ReportConfiguration.report_title(:forward_commitments)
       if report_disabled?(FORWARD_COMMITMENTS_WEB_FLAG)
         forward_commitments = {}
       else
@@ -1243,8 +1290,7 @@ class ReportsController < ApplicationController
 
     @now = Time.zone.now
     @date = @now.to_date
-    @report_name = t('reports.pages.account_summary.title')
-
+    @report_name = ReportConfiguration.report_title(:account_summary)
     report_download_name = "account-summary-#{fhlb_report_date_numeric(@date)}"
     downloadable_report(:pdf, nil, report_download_name) do
       if report_disabled?(ACCOUNT_SUMMARY_WEB_FLAGS)
@@ -1548,6 +1594,30 @@ class ReportsController < ApplicationController
   end
 
   private
+  def parse_vrc_data(vrc_data)
+    return [] unless vrc_data.respond_to?(:collect)
+    rows = vrc_data.collect do |field_value|
+      row_for_vrc_entry(field_value.first, field_value.last)
+    end
+    rows.compact
+  end
+
+  def row_for_vrc_entry(vrc_field, vrc_value)
+    if vrc_field != 'effective_date'
+      case vrc_field
+      when 'overnight_fed_funds_benchmark', 'advance_rate'
+        type = :rate
+      when 'basis_point_spread_to_benchmark'
+        type = :basis_point
+      else
+        type = nil
+      end
+      {value: vrc_value, type: type}
+    else
+      nil
+    end
+  end
+
   def securities_instance_variables(securities_position, filter)
     as_of_date = securities_position[:as_of_date]
     @headings = {
@@ -1613,30 +1683,6 @@ class ReportsController < ApplicationController
     roles.collect! { |role| AUTHORIZATIONS_MAPPING[role] }
     roles.compact!
     roles
-  end
-
-  def min_and_start_dates(min_date_range, start_date_param=nil)
-    now = Time.zone.today
-    start_date = (start_date_param || now).to_date
-    min_date = now - min_date_range
-
-    start_date = if min_date < start_date && start_date <= now
-      start_date
-    elsif start_date > now
-      now
-    else
-      min_date
-    end
-    [min_date, start_date]
-  end
-
-  def month_restricted_start_date(start_date)
-    today = Time.zone.today
-    if start_date > today.beginning_of_month && start_date != today.end_of_month
-      (start_date - 1.month).end_of_month
-    else
-      start_date.end_of_month
-    end
   end
 
   def map_securities_transactions_column(field,value,is_new)
@@ -1811,5 +1857,13 @@ class ReportsController < ApplicationController
   def sort_report_data(data, sort_field, sort_order='asc')
     data = data.sort{|a,b| a[sort_field] <=> b[sort_field]}
     sort_order == 'asc' ? data : data.reverse
+  end
+
+  def initialize_dates(report, start_date = nil, end_date = nil)
+    date_bounds = ReportConfiguration.date_bounds(report, start_date, end_date)
+    @min_date = date_bounds[:min]
+    @start_date = date_bounds[:start]
+    @end_date = date_bounds[:end]
+    @max_date = date_bounds[:max]
   end
 end

@@ -93,3 +93,9 @@
   }
 }
 
+.product-authorizations {
+  *:not(li) > a {
+    @include typography-dropdown-selector;
+    text-transform: uppercase;
+  }
+}

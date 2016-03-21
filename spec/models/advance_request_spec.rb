@@ -566,6 +566,22 @@ describe AdvanceRequest do
     end
   end
 
+  describe '`allow_grace_period=` method' do
+    {
+      nil => false,
+      false => false,
+      true => true,
+      SecureRandom.hex => true,
+      '' => true,
+      rand(0..100) => true
+    }.each do |assigned, expected|
+      it "stores #{expected} if assigned `#{assigned}`" do
+        subject.allow_grace_period = assigned
+        expect(subject.allow_grace_period).to be(expected)
+      end
+    end
+  end
+
   describe '`initiated_at=` method' do
     let(:value) { double('A Value') }
     let(:call_method) { subject.initiated_at = value}
@@ -869,6 +885,8 @@ describe AdvanceRequest do
         when :owners
           expected_value = double('Set of Owners')
           value = double('A Value', to_set: expected_value)
+        when :allow_grace_period
+          value = true
         else
           value = double('A Value').as_null_object
         end
@@ -1353,6 +1371,7 @@ describe AdvanceRequest do
     let(:rate) { double('A Rate') }
     let(:maturity_date) { double('maturity_date') }
     let(:call_method) { subject.send(:perform_preview) }
+    let(:allow_grace_period) { double('Allow Grace Period') }
     let(:response) { double('A Quick Advance Validate Response', each: nil, :[] => []) }
 
     before do
@@ -1363,20 +1382,21 @@ describe AdvanceRequest do
       allow(subject).to receive(:amount).and_return(amount)
       allow(subject).to receive(:etransact_service).and_return(service_object)
       allow(subject).to receive(:stock_choice_present?).and_return(false)
+      allow(subject).to receive(:allow_grace_period).and_return(allow_grace_period)
       allow(service_object).to receive(:quick_advance_validate).and_return(response)
     end
 
     it 'calls `quick_advance_validate`' do
-      expect(service_object).to receive(:quick_advance_validate).with(member_id, amount, type, term, rate, anything, signer, maturity_date)
+      expect(service_object).to receive(:quick_advance_validate).with(member_id, amount, type, term, rate, anything, signer, maturity_date, allow_grace_period)
       call_method
     end
     it 'calls `quick_advance_validate` with a check stock value of `true` if `stock_choice_present?` returns false' do
-      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, true, anything, anything)
+      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, true, anything, anything, anything)
       call_method
     end
     it 'calls `quick_advance_validate` with a check stock value of `false` if `stock_choice_present?` returns true' do
       allow(subject).to receive(:stock_choice_present?).and_return(true)
-      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, false, anything, anything)
+      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, false, anything, anything, anything)
       call_method
     end
     it 'calls `process_trade_errors` with the `quick_advance_validate` response' do
@@ -1498,6 +1518,7 @@ describe AdvanceRequest do
     let(:term) { double('A Term') }
     let(:type) { double('A Type') }
     let(:rate) { double('A Rate') }
+    let(:allow_grace_period) { double('Allow Grace Period') }
     let(:call_method) { subject.send(:perform_execute) }
     let(:response) { double('A Quick Advance Execute Response', each: nil, :[] => []) }
     let(:mail_message) { double(Mail::Message, deliver_now: nil) }
@@ -1510,22 +1531,23 @@ describe AdvanceRequest do
       allow(subject).to receive(:maturity_date).and_return(maturity_date)
       allow(subject).to receive(:gross_amount).and_return(gross_amount)
       allow(subject).to receive(:etransact_service).and_return(service_object)
+      allow(subject).to receive(:allow_grace_period).and_return(allow_grace_period)
       allow(service_object).to receive(:quick_advance_execute).and_return(response)
       allow(InternalMailer).to receive(:long_term_advance).and_return(mail_message)
     end
 
     it 'calls `quick_advance_execute`' do
-      expect(service_object).to receive(:quick_advance_execute).with(member_id, anything, type, term, rate, signer, maturity_date)
+      expect(service_object).to receive(:quick_advance_execute).with(member_id, anything, type, term, rate, signer, maturity_date, allow_grace_period)
       call_method
     end
     it 'calls `quick_advance_execute` with the `amount` if no stock purchase is requested' do
       allow(subject).to receive(:purchase_stock?).and_return(false)
-      expect(service_object).to receive(:quick_advance_execute).with(anything, amount, anything, anything, anything, anything, anything)
+      expect(service_object).to receive(:quick_advance_execute).with(anything, amount, anything, anything, anything, anything, anything, anything)
       call_method
     end
     it 'calls `quick_advance_execute` with the `gross_amount` if stock purchase is requested' do
       allow(subject).to receive(:purchase_stock?).and_return(true)
-      expect(service_object).to receive(:quick_advance_execute).with(anything, gross_amount, anything, anything, anything, anything, anything)
+      expect(service_object).to receive(:quick_advance_execute).with(anything, gross_amount, anything, anything, anything, anything, anything, anything)
       call_method
     end
     it 'calls `process_trade_errors` with the `quick_advance_execute` response' do
@@ -1595,7 +1617,8 @@ describe AdvanceRequest do
         'CapitalStockError' => :capital_stock,
         'CreditError' => :credit,
         'CollateralError' => :collateral,
-        'ExceedsTotalDailyLimitError' => :total_daily_limit
+        'ExceedsTotalDailyLimitError' => :total_daily_limit,
+        'DisabledProductError' => :disabled_product
       }.each do |status, code|
         it "adds an error with a code of `#{code}` if the status contains `#{status}`" do
           allow(response).to receive(:[]).with(:status).and_return([status])

@@ -470,13 +470,15 @@ module MAPI
               halt 503, 'Internal Service Error'
             end
             response.doc.remove_namespaces!
+            fhlbsfresponseblock = response.doc.xpath('//Envelope//Body//pricingIndicationsResponse//response//Items//FhlbsfReportDataBlock')
             fhlbsfresponse = response.doc.xpath('//Envelope//Body//pricingIndicationsResponse//response//Items//FhlbsfReportDataBlock//Data//FhlbsfReportData')
             fhlbsfdatapoints = fhlbsfresponse[3].css('Table Rows TableRow Cells TableCell')
             hash = {
               'advance_maturity' => fhlbsfdatapoints[0].at_css('Text').content,
               'overnight_fed_funds_benchmark' => fhlbsfdatapoints[1].at_css('Text').content,
               'basis_point_spread_to_benchmark' => fhlbsfdatapoints[2].at_css('Text').content,
-              'advance_rate' => fhlbsfdatapoints[3].at_css('Text').content
+              'advance_rate' => fhlbsfdatapoints[3].at_css('Text').content,
+              'effective_date' => fhlbsfresponseblock.at_css('EffectiveDate').content
             }
             hash
           else
@@ -486,7 +488,8 @@ module MAPI
             'advance_maturity' => data['advance_maturity'].to_s,
             'overnight_fed_funds_benchmark' => data['overnight_fed_funds_benchmark'].to_f,
             'basis_point_spread_to_benchmark' => data['basis_point_spread_to_benchmark'].to_i,
-            'advance_rate' => data['advance_rate'].to_f
+            'advance_rate' => data['advance_rate'].to_f,
+            'effective_date' => data['effective_date'].to_date
           }
           hash.to_json
         end

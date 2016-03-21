@@ -307,7 +307,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:rate_data) { {some: 'data'} }
     let(:RatesService) {class_double(RatesService)}
     let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
-    let(:advance_request) { double(AdvanceRequest, rates: rate_data, errors: [], id: SecureRandom.uuid) }
+    let(:advance_request) { double(AdvanceRequest, rates: rate_data, errors: [], id: SecureRandom.uuid, :allow_grace_period= => nil) }
     let(:make_request) { get :quick_advance_rates }
 
     before do
@@ -350,6 +350,16 @@ RSpec.describe DashboardController, :type => :controller do
     it 'calls `advance_request_to_session`' do
       expect(subject).to receive(:render).at_least(:once).ordered
       expect(subject).to receive(:advance_request_to_session).ordered
+      make_request
+    end
+    it 'enables the grace period if called before the desk closes' do
+      allow_any_instance_of(EtransactAdvancesService).to receive(:etransact_active?).and_return(true)
+      expect(advance_request).to receive(:allow_grace_period=).with(true)
+      make_request
+    end
+    it 'does not enable the grace period if called after the desk closes' do
+      allow_any_instance_of(EtransactAdvancesService).to receive(:etransact_active?).and_return(false)
+      expect(advance_request).to_not receive(:allow_grace_period=)
       make_request
     end
   end
