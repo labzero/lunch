@@ -740,7 +740,7 @@ RSpec.describe ReportsController, :type => :controller do
         it 'set the debit date to the last business day of the next month following the end date' do
           next_month_end = double(Date)
           debit_date = double(Date)
-          allow(controller).to receive(:default_dates_hash).and_return({next_month_end: next_month_end})
+          allow(controller).to receive(:default_dates_hash).with(report_end_date).and_return({next_month_end: next_month_end})
           allow(controller).to receive(:most_recent_business_day).with(next_month_end).and_return(debit_date)
           make_request
           expect(assigns[:debit_date]).to eq(debit_date)
