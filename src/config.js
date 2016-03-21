@@ -12,7 +12,7 @@
 
 export const port = process.env.PORT || 3000;
 export const host = process.env.WEBSITE_HOSTNAME ||
-                    `${process.env.DOCKERCLOUD_SERVICE_FQDN}:${port}` ||
+                    process.env.DOCKERCLOUD_SERVICE_FQDN ? `${process.env.DOCKERCLOUD_SERVICE_FQDN}:${port}` : undefined ||
                     `localhost:${port}`;
 
 export const analytics = {
