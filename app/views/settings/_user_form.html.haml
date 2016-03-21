@@ -1,6 +1,6 @@
 = form_for(user, remote: true, validate: true) do |f|
-  = render 'shared/input_field', form_builder: f, field_name: :given_name, label: User.human_attribute_name(:given_name).capitalize, horizontal: true, html_attributes: {validate: true}
-  = render 'shared/input_field', form_builder: f, field_name: :surname, label: User.human_attribute_name(:surname).capitalize, horizontal: true, html_attributes: {validate: true}
-  = render 'shared/input_field', form_builder: f, field_name: :username, label: User.human_attribute_name(:username).capitalize, horizontal: true, html_attributes: {validate: true, disabled: !user.new_record?}
-  = render 'shared/input_field', form_builder: f, field_name: :email, label: User.human_attribute_name(:email).capitalize, horizontal: true, html_attributes: {validate: true}
-  = render 'shared/input_field', form_builder: f, field_name: :email_confirmation, label: User.human_attribute_name(:email_confirmation).capitalize, horizontal: true
+  = render 'shared/input_field', form_builder: f, field_name: :given_name, label: User.human_attribute_name(:given_name), horizontal: true, html_attributes: {validate: true}
+  = render 'shared/input_field', form_builder: f, field_name: :surname, label: User.human_attribute_name(:surname), horizontal: true, html_attributes: {validate: true}
+  = render 'shared/input_field', form_builder: f, field_name: :username, label: User.human_attribute_name(:username), horizontal: true, html_attributes: {validate: true, disabled: !user.new_record?}
+  = render 'shared/input_field', form_builder: f, field_name: :email, label: User.human_attribute_name(:email), horizontal: true, html_attributes: {validate: true}
+  = render 'shared/input_field', form_builder: f, field_name: :email_confirmation, label: User.human_attribute_name(:email_confirmation), horizontal: true

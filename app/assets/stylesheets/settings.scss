@@ -330,6 +330,9 @@
       padding-left: 1px;
       box-sizing: border-box;
     }
+    label:not(.label-error) {
+      text-transform: capitalize;
+    }
   }
 }
 
