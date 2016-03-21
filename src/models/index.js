@@ -25,13 +25,13 @@ export const Vote = sequelize.define('vote',
   },
   {
     scopes: {
-      fromToday: {
+      fromToday: () => ({
         where: {
           created_at: {
             $gt: moment().subtract(12, 'hours').toDate()
           }
         }
-      }
+      })
     },
     underscored: true
   }
@@ -120,7 +120,7 @@ export const Restaurant = sequelize.define('restaurant', {
         .findAll({
           include: [
             {
-              model: Vote,
+              model: Vote.scope('fromToday'),
               required: false
             },
             {
@@ -153,7 +153,7 @@ export const Restaurant = sequelize.define('restaurant', {
 
 /* Associations */
 
-Restaurant.hasMany(Vote.scope('fromToday'));
+Restaurant.hasMany(Vote);
 Restaurant.belongsToMany(Tag, {
   through: 'restaurants_tags'
 });
