@@ -119,7 +119,7 @@
     }
     &:hover, &.active-nav-item {
       background-color: $light-gray;
-      .nav-menu {
+      & > a {
         color: $actionable-blue;
       }
     }
