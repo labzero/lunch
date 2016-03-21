@@ -298,7 +298,7 @@ en:
         title: Account Unlocked
         success_html: Account for <strong>%{name}</strong> is unlocked.
       error:
-        title: An Error Occured
+        title: An Error Occurred
         summary: Your request could not be completed.
       create:
         title: Add New Web User
@@ -2555,7 +2555,7 @@ en:
     error_occurred: An error has occurred.
     emails:
       calypso_error:
-        subject: 'Notice: System error occured'
+        subject: 'Notice: System error occurred'
         error_class: Error Class
         error_message: Error Message
         error_inspection: Error Details
