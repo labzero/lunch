@@ -40,6 +40,9 @@
   a {
     text-decoration: none;
     color: $white;
+    &:hover {
+      text-decoration: underline;
+    }
   }
   .nav-logout a:before, .nav-member-switch a:before, .header-member-name:before {
     content: "|";
