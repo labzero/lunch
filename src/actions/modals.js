@@ -1,10 +1,10 @@
 import ActionTypes from '../constants/ActionTypes';
 
-export function showModal(name, restaurantId) {
+export function showModal(name, opts) {
   return {
     type: ActionTypes.SHOW_MODAL,
     name,
-    restaurantId
+    opts
   };
 }
 

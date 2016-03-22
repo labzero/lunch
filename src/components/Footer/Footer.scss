@@ -31,6 +31,7 @@
 }
 
 .spacer {
+  border-left: 1px solid rgba(255, 255, 255, .3);
   color: rgba(255, 255, 255, .3);
 }
 
@@ -43,7 +44,10 @@
 .link,
 .link:active,
 .link:visited {
+  background: none;
+  border: 0;
   color: rgba(255, 255, 255, .6);
+  outline: none;
   text-decoration: none;
 }
 

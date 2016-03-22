@@ -3,14 +3,16 @@ import { removeRestaurant } from '../actions/restaurants';
 import { hideModal } from '../actions/modals';
 import DeleteRestaurantModal from '../components/DeleteRestaurantModal';
 
+const modalName = 'deleteRestaurant';
+
 const mapStateToProps = state => ({
-  restaurant: state.restaurants.items.find(r => r.id === state.modals.deleteRestaurant.restaurantId),
-  shown: !!state.modals.deleteRestaurant.shown
+  restaurant: state.restaurants.items.find(r => r.id === state.modals[modalName].restaurantId),
+  shown: !!state.modals[modalName].shown
 });
 
 const mapDispatchToProps = dispatch => ({
   hideModal() {
-    dispatch(hideModal('deleteRestaurant'));
+    dispatch(hideModal(modalName));
   },
   dispatch
 });

@@ -199,7 +199,7 @@ export const modals = {
     return Object.assign({}, state, {
       [action.name]: Object.assign({}, state[action.name], {
         shown: true,
-        restaurantId: action.restaurantId
+        ...action.opts
       })
     });
   },

@@ -6,7 +6,7 @@ const mapStateToProps = null;
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   handleClick: () => {
-    dispatch(showModal('deleteRestaurant', ownProps.id));
+    dispatch(showModal('deleteRestaurant', { restaurantId: ownProps.id }));
   }
 });
 

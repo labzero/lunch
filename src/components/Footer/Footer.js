@@ -11,9 +11,11 @@ import React from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Footer.scss';
 
-const Footer = () => (
+const Footer = ({ manageTags }) => (
   <div className={s.root}>
     <div className={s.container}>
+      <button className={`${s.link} ${s.text}`} onClick={manageTags}>Manage Tags</button>
+      <span className={s.spacer}></span>
       <span className={s.text}>© Lab Zero</span>
     </div>
   </div>

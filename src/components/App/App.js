@@ -11,8 +11,9 @@ import React, { Component, PropTypes } from 'react';
 import s from './App.scss';
 import globalCss from '../../globalCss.scss';
 import HeaderContainer from '../../containers/HeaderContainer';
-import Footer from '../Footer';
+import FooterContainer from '../../containers/FooterContainer';
 import DeleteRestaurantModalContainer from '../../containers/DeleteRestaurantModalContainer';
+import TagManagerModalContainer from '../../containers/TagManagerModalContainer';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 
 class App extends Component {
@@ -52,12 +53,15 @@ class App extends Component {
     if (this.props.modals.deleteRestaurant !== undefined) {
       modals.push(<DeleteRestaurantModalContainer key={modals.length} />);
     }
+    if (this.props.modals.tagManager !== undefined) {
+      modals.push(<TagManagerModalContainer key={modals.length} />);
+    }
 
     return !this.props.error ? (
       <div>
         <HeaderContainer />
         {this.props.children}
-        <Footer />
+        <FooterContainer />
         {modals}
       </div>
     ) : this.props.children;
