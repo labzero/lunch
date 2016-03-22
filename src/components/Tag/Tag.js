@@ -1,0 +1,34 @@
+import React, { PropTypes } from 'react';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import s from './Tag.scss';
+
+export const _Tag = ({
+  name,
+  user,
+  removeTag
+}) => {
+  const loggedIn = user.id !== undefined;
+
+  let deleteButton = null;
+  if (loggedIn) {
+    deleteButton = (
+      <button className={s.button} onClick={removeTag}>&times;</button>
+    );
+  }
+
+  return (
+    <div className={s.root}>
+      {name}
+      {deleteButton}
+    </div>
+  );
+};
+
+_Tag.propTypes = {
+  id: PropTypes.number.isRequired,
+  name: PropTypes.string.isRequired,
+  user: PropTypes.object.isRequired,
+  removeTag: PropTypes.func.isRequired
+};
+
+export default withStyles(_Tag, s);

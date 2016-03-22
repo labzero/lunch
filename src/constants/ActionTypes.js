@@ -33,7 +33,9 @@ const actions = [
   'DELETE_TAG_FROM_RESTAURANT',
   'DELETED_TAG_FROM_RESTAURANT',
   'SHOW_MODAL',
-  'HIDE_MODAL'
+  'HIDE_MODAL',
+  'DELETE_TAG',
+  'TAG_DELETED'
 ];
 
 const actionMap = {};

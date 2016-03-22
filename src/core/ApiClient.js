@@ -6,3 +6,9 @@ export function processResponse(response) {
     return json.data;
   });
 }
+
+export const credentials = 'same-origin';
+export const jsonHeaders = {
+  Accept: 'application/json',
+  'Content-Type': 'application/json'
+};

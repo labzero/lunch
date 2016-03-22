@@ -1,6 +1,6 @@
 import fetch from '../core/fetch';
 import ActionTypes from '../constants/ActionTypes';
-import { processResponse } from '../core/ApiClient';
+import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
 import { flashError } from './flash.js';
 
 export function invalidateRestaurants() {
@@ -162,19 +162,13 @@ export function fetchRestaurantsIfNeeded() {
   };
 }
 
-const credentials = 'same-origin';
-const headers = {
-  Accept: 'application/json',
-  'Content-Type': 'application/json'
-};
-
 export function addRestaurant(name, placeId, address, lat, lng) {
   return (dispatch) => {
     dispatch(postRestaurant());
     return fetch('/api/restaurants', {
       method: 'post',
       credentials,
-      headers,
+      jsonHeaders,
       body: JSON.stringify({ name, place_id: placeId, address, lat, lng })
     })
       .then(response => processResponse(response))
@@ -184,10 +178,10 @@ export function addRestaurant(name, placeId, address, lat, lng) {
   };
 }
 
-export function removeRestaurant(key) {
+export function removeRestaurant(id) {
   return (dispatch) => {
-    dispatch(deleteRestaurant(key));
-    return fetch(`/api/restaurants/${key}`, {
+    dispatch(deleteRestaurant(id));
+    return fetch(`/api/restaurants/${id}`, {
       credentials,
       method: 'delete'
     });
@@ -224,7 +218,7 @@ export function addNewTagToRestaurant(restaurantId, value) {
     return fetch(`/api/restaurants/${restaurantId}/tags`, {
       method: 'post',
       credentials,
-      headers,
+      jsonHeaders,
       body: JSON.stringify({ name: value })
     })
       .then(response => processResponse(response))
@@ -240,7 +234,7 @@ export function addTagToRestaurant(restaurantId, id) {
     return fetch(`/api/restaurants/${restaurantId}/tags`, {
       method: 'post',
       credentials,
-      headers,
+      jsonHeaders,
       body: JSON.stringify({ id })
     })
       .then(response => processResponse(response))

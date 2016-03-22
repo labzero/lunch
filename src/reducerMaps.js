@@ -223,6 +223,13 @@ export const tags = {
         action.tag
       ]
     });
+  },
+  [ActionTypes.DELETE_TAG]: isFetching,
+  [ActionTypes.TAG_DELETED](state, action) {
+    return Object.assign({}, state, {
+      isFetching: false,
+      items: state.items.filter(item => item.id !== action.id)
+    });
   }
 };
 export const latLng = {};

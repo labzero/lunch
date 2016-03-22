@@ -1,0 +1,22 @@
+.list {
+  max-height: 500px;
+  overflow: auto;
+}
+
+@media only screen and (max-height: 600px) {
+  .list {
+    max-height: 400px;
+  }
+}
+
+@media only screen and (max-height: 500px) {
+  .list {
+    max-height: 300px;
+  }
+}
+
+@media only screen and (max-height: 400px) {
+  .list {
+    max-height: 200px;
+  }
+}

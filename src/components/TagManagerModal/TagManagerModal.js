@@ -1,4 +1,5 @@
 import React, { PropTypes } from 'react';
+import TagManagerContainer from '../../containers/TagManagerContainer';
 import { Modal } from 'react-bootstrap';
 
 const TagManagerModal = ({ shown, hideModal }) => (
@@ -7,7 +8,7 @@ const TagManagerModal = ({ shown, hideModal }) => (
       <Modal.Title>Tag Manager</Modal.Title>
     </Modal.Header>
     <Modal.Body>
-      Hi!
+      <TagManagerContainer />
     </Modal.Body>
   </Modal>
 );

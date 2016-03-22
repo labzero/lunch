@@ -1,0 +1,7 @@
+@import '../styles/mixins';
+
+.button {
+  @include plain-button;
+  font-size: 1.5em;
+  margin-left: .5em;
+}
