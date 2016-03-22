@@ -852,14 +852,26 @@ class ReportsController < ApplicationController
   end
 
   def cash_projections
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    if report_disabled?(CASH_PROJECTIONS_WEB_FLAGS)
-      @cash_projections = {}
-    else
-      @cash_projections = member_balances.cash_projections
-      raise StandardError, "There has been an error and ReportsController#cash_projections has encountered nil. Check error logs." if @cash_projections.nil?
+    @report_name = ReportConfiguration.report_title(:cash_projections)
+    downloadable_report(:xlsx) do
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      if report_disabled?(CASH_PROJECTIONS_WEB_FLAGS)
+        @cash_projections = {}
+      else
+        @cash_projections = member_balances.cash_projections
+        raise StandardError, "There has been an error and ReportsController#cash_projections has encountered nil. Check error logs." if @cash_projections.nil?
+      end
+      @as_of_date = @cash_projections[:as_of_date].to_date if @cash_projections[:as_of_date]
+      if @cash_projections[:projections]
+        @cash_projections[:projections].sort! do |a,b|
+          result = a[:settlement_date] <=> b[:settlement_date]
+          if result == 0
+            result = a[:cusip] <=> b[:cusip]
+          end
+          result
+        end
+      end
     end
-    @as_of_date = @cash_projections[:as_of_date].to_date if @cash_projections[:as_of_date]
   end
 
   def interest_rate_resets

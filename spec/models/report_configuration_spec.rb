@@ -15,14 +15,20 @@ RSpec.describe ReportConfiguration do
   end
 
   describe 'the `report_title` method' do
-    it 'returns nil if report type not found or supported' do
-    [ :cash_projections, :interest_rate_resets, :fake_report_type ]. each do |report_type|
-        expect(subject.report_title(report_type)).to eq(nil)
+    [
+      :interest_rate_resets, :fake_report_type
+    ].each do |report_type|
+      it "returns nil for #{report_type}" do
+        expect(subject.date_restrictions(report_type)).to eq(nil)
       end
     end
 
-    it 'returns the matching report title for each report type' do
-    { capital_stock_trial_balance: I18n.t('reports.pages.capital_stock_trial_balance.title'),
+    it 'returns nil for unknown report types' do
+      expect(subject.date_restrictions(double('A Report Type'))).to eq(nil)
+    end
+
+    {
+      capital_stock_trial_balance: I18n.t('reports.pages.capital_stock_trial_balance.title'),
       borrowing_capacity: I18n.t('global.borrowing_capacity'),
       settlement_transaction_account: I18n.t('reports.pages.settlement_transaction_account.title'),
       current_price_indications: I18n.t('reports.pages.price_indications.current.title'),
@@ -34,7 +40,10 @@ RSpec.describe ReportConfiguration do
       current_securities_position: I18n.t('reports.pages.securities_position.current'),
       monthly_securities_position: I18n.t('reports.pages.securities_position.monthly'),
       forward_commitments: I18n.t('reports.credit.forward_commitments.title'),
-      account_summary: I18n.t('reports.pages.account_summary.title') }.each do |report_type, expected_rval|
+      account_summary: I18n.t('reports.pages.account_summary.title'),
+      cash_projections: I18n.t('reports.pages.cash_projections.title')
+    }.each do |report_type, expected_rval|
+      it "returns '#{expected_rval}' report title for '#{report_type}'" do
         expect(subject.report_title(report_type)).to eq(expected_rval)
       end
     end

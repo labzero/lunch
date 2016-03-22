@@ -579,39 +579,88 @@ RSpec.describe ReportsController, :type => :controller do
     end
 
     describe 'GET cash_projections' do
+      let(:projections) { [
+        {
+          settlement_date: Time.zone.today + rand(-10..10).day,
+          cusip: SecureRandom.hex
+        },
+        {
+          settlement_date: Time.zone.today + rand(-10..10).day,
+          cusip: SecureRandom.hex
+        },
+        {
+          settlement_date: Time.zone.today + rand(-10..10).day,
+          cusip: SecureRandom.hex
+        },
+        {
+          settlement_date: Time.zone.today + rand(-10..10).day,
+          cusip: SecureRandom.hex
+        },
+        {
+          settlement_date: Time.zone.today,
+          cusip: SecureRandom.hex
+        },
+        {
+          settlement_date: Time.zone.today,
+          cusip: SecureRandom.hex
+        }
+      ].shuffle }
       let(:as_of_date) { '2014-12-12'.to_date }
-      it_behaves_like 'a user required action', :get, :cash_projections
-
-
+      let(:make_request) { get :cash_projections }
       before do
         allow(member_balance_service_instance).to receive(:cash_projections).and_return({})
       end
+
+      it_behaves_like 'a user required action', :get, :cash_projections
+      it_behaves_like 'a report that can be downloaded', :cash_projections, [:xlsx]
       it_behaves_like 'a report with instance variables set in a before_filter', :cash_projections
       it_behaves_like 'a controller action with an active nav setting', :cash_projections, :reports
+      
       describe 'view instance variables' do
         before {
+          allow(response_hash).to receive(:[])
           allow(response_hash).to receive(:[]).with(:as_of_date).and_return(as_of_date)
-          allow(member_balance_service_instance).to receive(:cash_projections).with(kind_of(Date)).and_return(response_hash)
+          allow(response_hash).to receive(:[]).with(:projections).and_return(projections)
+          allow(member_balance_service_instance).to receive(:cash_projections).and_return(response_hash)
         }
-        it 'should set @cash_projections to the hash returned from MemberBalanceService' do
-          expect(member_balance_service_instance).to receive(:cash_projections).and_return(response_hash)
-          get :cash_projections
+        it 'sets @cash_projections to the hash returned from MemberBalanceService' do
+          make_request
           expect(assigns[:cash_projections]).to eq(response_hash)
         end
-        it 'should set @cash_projections to {} if the report is disabled' do
-          expect(controller).to receive(:report_disabled?).with(ReportsController::CASH_PROJECTIONS_WEB_FLAGS).and_return(true)
-          get :cash_projections
+        it 'sets @cash_projections to {} if the report is disabled' do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::CASH_PROJECTIONS_WEB_FLAGS).and_return(true)
+          make_request
           expect(assigns[:cash_projections]).to eq({})
         end
-        it 'should set @as_of_date from the @cash_projections hash' do
-          expect(member_balance_service_instance).to receive(:cash_projections).and_return(response_hash)
-          get :cash_projections
+        it 'sets @as_of_date from the @cash_projections hash' do
+          make_request
           expect(assigns[:as_of_date]).to eq(as_of_date)
         end
-        it 'should set @as_of_date to nil if the report is disabled' do
-          expect(controller).to receive(:report_disabled?).with(ReportsController::CASH_PROJECTIONS_WEB_FLAGS).and_return(true)
-          get :cash_projections
+        it 'sets @as_of_date to nil if the report is disabled' do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::CASH_PROJECTIONS_WEB_FLAGS).and_return(true)
+          make_request
           expect(assigns[:as_of_date]).to eq(nil)
+        end
+        it 'sorts the projections by settlement date and CUSIP' do
+          make_request
+          expect(assigns[:cash_projections][:projections].count).to be >= 2
+          last_date = nil
+          last_cusip = nil
+          assigns[:cash_projections][:projections].each do |projection|
+            settlement_date = projection[:settlement_date]
+            cusip = projection[:cusip]
+            last_cusip = nil if last_date != settlement_date
+            expect(settlement_date).to be >= last_date if last_date
+            expect(cusip).to be >= last_cusip if last_cusip
+            last_cusip = cusip
+            last_date = settlement_date
+          end
+        end
+        it 'sets @report_name' do
+          name = double(String)
+          allow(ReportConfiguration).to receive(:report_title).with(:cash_projections).and_return(name)
+          make_request
+          expect(assigns[:report_name]).to eq(name)
         end
       end
     end
