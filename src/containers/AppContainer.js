@@ -3,6 +3,7 @@ import App from '../components/App';
 
 const mapStateToProps = (state, ownProps) => ({
   modals: state.modals,
+  wsPort: state.wsPort,
   ...ownProps
 });
 

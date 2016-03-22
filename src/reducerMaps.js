@@ -227,3 +227,4 @@ export const tags = {
 };
 export const latLng = {};
 export const user = {};
+export const wsPort = {};

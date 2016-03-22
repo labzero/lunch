@@ -145,7 +145,8 @@ server.get('*', async (req, res, next) => {
                   lng: parseFloat(process.env.SUGGEST_LNG)
                 },
                 listUi: {},
-                mapUi: {}
+                mapUi: {},
+                wsPort: process.env.BS_RUNNING ? port : 0
               };
               if (req.user) {
                 initialState.user = req.user;

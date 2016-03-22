@@ -15,6 +15,8 @@ export const host = process.env.WEBSITE_HOSTNAME ||
                     process.env.DOCKERCLOUD_SERVICE_FQDN ? `${process.env.DOCKERCLOUD_SERVICE_FQDN}:${port}` : undefined ||
                     `localhost:${port}`;
 
+export const wsHost = process.env.WS_HOST;
+
 export const analytics = {
 
   // https://analytics.google.com/

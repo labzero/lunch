@@ -14,7 +14,6 @@ import HeaderContainer from '../../containers/HeaderContainer';
 import Footer from '../Footer';
 import DeleteRestaurantModalContainer from '../../containers/DeleteRestaurantModalContainer';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import { host } from '../../config';
 
 class App extends Component {
 
@@ -23,6 +22,7 @@ class App extends Component {
     messageReceived: PropTypes.func.isRequired,
     modals: PropTypes.object.isRequired,
     error: PropTypes.object,
+    wsPort: PropTypes.number.isRequired
   };
 
   static contextTypes = {
@@ -33,7 +33,11 @@ class App extends Component {
     this.removeAppCss = this.context.insertCss(s);
     this.removeGlobalCss = this.context.insertCss(globalCss);
     if (canUseDOM) {
-      this.socket = new window.WebSocket(`ws://${window.location.host}`);
+      let host = window.location.host;
+      if (this.props.wsPort !== 0 && this.props.wsPort !== window.location.port) {
+        host = `${window.location.hostname}:${this.props.wsPort}`;
+      }
+      this.socket = new window.WebSocket(`ws://${host}`);
       this.socket.onmessage = this.props.messageReceived;
     }
   }
