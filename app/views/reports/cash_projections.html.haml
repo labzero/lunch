@@ -6,7 +6,7 @@
     - if @print_layout
       = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@as_of_date))
     - else
-      = render 'reports_header_buttons'
+      = render 'reports_header_buttons', download_formats: [:xlsx]
       = render 'report_details', name: @member_name, freshness: t('reports.freshness.prior_day'), availability: t('reports.availability.current')
   .report-main-body
     %section

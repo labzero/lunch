@@ -1,0 +1,45 @@
+xlsx_package.use_shared_strings = true
+workbook = xlsx_package.workbook
+workbook.styles do |styles|
+  date_format = styles.add_style format_code: 'mm/dd/yyyy'
+  integer_format = styles.add_style num_fmt: 1
+  currency_format = styles.add_style num_fmt: 2
+  coupon_format = styles.add_style format_code: "#,##0.0000"
+
+  styles = [date_format, nil, nil, nil, nil, nil, currency_format, coupon_format, date_format, currency_format, currency_format, currency_format]
+
+  workbook.add_worksheet(name: @report_name) do |sheet|
+    sheet.add_row [
+      t('common_table_headings.settlement_date'),
+      t('common_table_headings.cusip'),
+      t('common_table_headings.security_description'),
+      t('common_table_headings.custody_account_number'),
+      t('reports.pages.cash_projections.transaction_code'),
+      t('common_table_headings.pool_number'),
+      t('common_table_headings.original_par_value'),
+      t('common_table_headings.coupon_rate'),
+      t('common_table_headings.maturity_date'),
+      t('global.principal'),
+      t('global.interest'),
+      t('global.total')
+    ]
+    @cash_projections[:projections].each do |row|
+      values = [
+        row[:settlement_date],
+        row[:cusip],
+        row[:description],
+        row[:custody_account],
+        row[:transaction_code],
+        row[:pool_number],
+        row[:original_par],
+        row[:coupon_rate],
+        row[:maturity_date],
+        row[:principal],
+        row[:interest],
+        row[:total]
+      ]
+      sheet.add_row values, style: styles
+    end
+  end
+
+end
