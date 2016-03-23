@@ -553,9 +553,9 @@ RSpec.describe User, :type => :model do
     end
   end
 
-    it 'calls find_or_create_by on success' do
+    it 'calls find_or_create_by_with_retry on success' do
       allow(User).to receive(:create_ldap_user).with(member_id, creator, username, email, given_name, surname).and_return(true)
-      expect(User).to receive(:find_or_create_by).with(username: username, ldap_domain: User::LDAP_EXTRANET_DOMAIN)
+      expect(User).to receive(:find_or_create_by_with_retry).with(username: username, ldap_domain: User::LDAP_EXTRANET_DOMAIN)
       call_method
     end
 
@@ -856,12 +856,12 @@ RSpec.describe User, :type => :model do
       allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
       allow(described_class).to receive(:find_or_create_by).and_return(user)
     end
-    it 'calls `find_or_create_by` with a `username` of the entries `samaccountname`' do
-      expect(described_class).to receive(:find_or_create_by).with(hash_including(username: samaccountname))
+    it 'calls `find_or_create_by_with_retry` with a `username` of the entries `samaccountname`' do
+      expect(described_class).to receive(:find_or_create_by_with_retry).with(hash_including(username: samaccountname))
       call_method
     end
-    it 'calls `find_or_create_by` with a `ldap_domain` of where the Entry was found' do
-      expect(described_class).to receive(:find_or_create_by).with(hash_including(ldap_domain: ldap_domain))
+    it 'calls `find_or_create_by_with_retry` with a `ldap_domain` of where the Entry was found' do
+      expect(described_class).to receive(:find_or_create_by_with_retry).with(hash_including(ldap_domain: ldap_domain))
       call_method
     end
     it 'calls `Devise::LDAP::Adapter.get_ldap_domain_from_dn` to find the `ldap_domain`' do
@@ -908,15 +908,51 @@ RSpec.describe User, :type => :model do
         allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain).and_return(nil)
         expect(call_method).to be_nil
       end
-      describe 'if an LDAP domain is found fpr the username' do
-        it 'calls `find_or_create_by` with the username and LDAP domain' do
-          expect(described_class).to receive(:find_or_create_by).with({username: username, ldap_domain: ldap_domain})
+      describe 'if an LDAP domain is found for the username' do
+        it 'calls `find_or_create_by_with_retry` with the username and LDAP domain' do
+          expect(described_class).to receive(:find_or_create_by_with_retry).with({username: username, ldap_domain: ldap_domain})
           call_method
         end
-        it 'returns the result of the `find_or_create_by` call' do
-          allow(described_class).to receive(:find_or_create_by).and_return(user)
+        it 'returns the result of the `find_or_create_by_with_retry` call' do
+          allow(described_class).to receive(:find_or_create_by_with_retry).and_return(user)
           expect(call_method).to be(user)
         end
+      end
+    end
+  end
+
+  describe '`find_or_create_by_with_retry` class method' do
+    let(:arguments) { [double(Object), double(Object), double(Object)] }
+    let(:call_method) { described_class.find_or_create_by_with_retry(*arguments) }
+    let(:user) { double(described_class) }
+
+    before do
+      allow(described_class).to receive(:find_or_create_by) do |*args, &block|
+        block.call if block
+      end
+    end
+
+    it 'calls `find_or_create_by` with the supplied arguments' do
+      expect(described_class).to receive(:find_or_create_by).with(*arguments)
+      call_method
+    end
+    it 'calls `find_or_create_by` with the supplied block' do
+      expect{ |b| described_class.find_or_create_by_with_retry(*arguments, &b) }.to yield_control
+    end
+    it 'returns the result of `find_or_create_by`' do
+      allow(described_class).to receive(:find_or_create_by).and_return(user)
+      expect(call_method).to be(user)
+    end
+    context 'retrying on ActiveRecord::RecordNotUnique' do
+      before do
+        allow(described_class).to receive(:find_or_create_by).and_raise(ActiveRecord::RecordNotUnique.new('error'))
+      end
+      it 'retries the `find_or_create_by` twice on `ActiveRecord::RecordNotUnique`' do
+        expect(described_class).to receive(:find_or_create_by).twice
+        call_method rescue ActiveRecord::RecordNotUnique
+      end
+      it 'raises `ActiveRecord::RecordNotUnique` if all retries fail' do
+        expect{call_method}.to raise_error(ActiveRecord::RecordNotUnique)
       end
     end
   end
