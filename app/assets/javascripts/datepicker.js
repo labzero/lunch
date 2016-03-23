@@ -1,6 +1,7 @@
 $(function () {
 
   function bindDatepickers() {
+    var $startDate, $endDate = null;
     // set up all date-pickers on the page
     $('.datepicker-trigger').each(function(i, datePickerTrigger) {
       var $datePickerTrigger = $(datePickerTrigger);
@@ -40,16 +41,16 @@ $(function () {
         };
       });
 
-      var startDate = presets[defaultPreset].start_date;
-      var endDate = presets[defaultPreset].end_date
+      $startDate = presets[defaultPreset].start_date;
+      $endDate = presets[defaultPreset].end_date
 
       initializeDatePicker($datePickerTrigger, $wrapper, {
         ranges: ranges,
         customLabel: lastCustomLabel,
         opens: openDir,
         defaultPreset: defaultPreset,
-        startDate: startDate,
-        endDate: endDate,
+        startDate: $startDate,
+        endDate: $endDate,
         singleDatePicker: singleDatePicker,
         maxDate: maxDate,
         minDate: minDate,
@@ -60,7 +61,7 @@ $(function () {
       });
       datePickerSelectionHandler($datePickerTrigger, $wrapper, presets);
       setDatePickerApplyListener($datePickerTrigger, $form);
-      setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
+      setDatePickerPlaceholder($datePickerTrigger, $startDate, $endDate);
       if (filter !== undefined) {
         if (singleDatePicker) {
           $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(){
@@ -81,7 +82,12 @@ $(function () {
     });
 
     $datePickerFields.change(function(e) {
-      normalizeDateFormatPreservingSelection(e);
+      var target = e.target;
+      if (target.value.match(/[0-9]+\/[0-9]+\/[0-9]+/)) {
+        normalizeDateFormatPreservingSelection(e);
+      } else {
+        $(target).val((target.name == 'daterangepicker_start' ? $startDate : $endDate).format('MM/DD/YYYY'));
+      };
     });
   };
 
