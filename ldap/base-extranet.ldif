@@ -162,6 +162,35 @@ userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: quick-advance-disabled@example.com
 
+# dual-signer-required
+dn: sAMAccountName=dual-signer-required,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: User Requires Dual Signers
+sn: User Requires Dual Signers
+givenname: Dual Signer Required
+sAMAccountName: dual-signer-required
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: dual-signer-required@example.com
+
+# extra-signer
+dn: sAMAccountName=extra-signer,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet Advance Signer
+sn: Extranet Advance Signer
+givenname: Extranet Signer
+displayName: Extranet Signer
+givenName: Extranet
+sn: Signer
+sAMAccountName: extra-signer
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: extra-signer@example.com
+
 # Chaste Manhatten
 dn: CN=FHLB6,dc=extranet,dc=fhlbsf,dc=com
 cn: FHLB6
@@ -173,6 +202,7 @@ member: sAMAccountName=extra-chaste-delete,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-reset,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-norole,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-first-time,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-signer,dc=extranet,dc=fhlbsf,dc=com
 
 # Wells Faygo
 dn: CN=FHLB5,dc=extranet,dc=fhlbsf,dc=com
@@ -190,6 +220,13 @@ cn: FHLB13
 objectClass: group
 objectClass: top
 member: sAMAccountName=quick-advance-disabled,dc=extranet,dc=fhlbsf,dc=com
+
+# The Bank Requiring Dual Signers for Advances
+dn: CN=FHLB14,dc=extranet,dc=fhlbsf,dc=com
+cn: FHLB14
+objectClass: group
+objectClass: top
+member: sAMAccountName=dual-signer-required,dc=extranet,dc=fhlbsf,dc=com
 
 # FCN-MemberSite-AccessManagers group
 dn: CN=FCN-MemberSite-AccessManagers,dc=extranet,dc=fhlbsf,dc=com
@@ -226,3 +263,5 @@ member: sAMAccountName=extra-chaste-reset,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=quick-advance-disabled,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-first-time,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=dual-signer-required,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-signer,dc=extranet,dc=fhlbsf,dc=com

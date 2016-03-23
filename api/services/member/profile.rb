@@ -175,19 +175,36 @@ module MAPI
             AND TRUNC(st.stx_update_date) = (SELECT TRUNC(MAX(stx_update_date))  FROM  portfolios.sta_trans)
           SQL
 
-          fhfa_number_query = <<-SQL
-            SELECT cu_fhfb_id FROM portfolios.customers WHERE fhlb_id = #{quoted_member_id}
+          customer_signature_card_sql = <<-SQL
+            select
+              cu_fhfb_id,
+              needstwosigners
+            from
+              portfolios.customers cu
+            left join
+              signer.signaturecarddate s
+            on
+              cu.fhlb_id = s.fhlb_id
+            where
+              cu.fhlb_id = #{quoted_member_id}
           SQL
 
           if app.settings.environment == :production
             member_name = ActiveRecord::Base.connection.execute(member_name_query).fetch.try(&:first)
             sta_number = ActiveRecord::Base.connection.execute(sta_number_query).fetch.try(&:first)
-            fhfa_number = ActiveRecord::Base.connection.execute(fhfa_number_query).fetch.try(&:first)
+            customer_signature_card_data = ActiveRecord::Base.connection.execute(customer_signature_card_sql).fetch_hash
+            if customer_signature_card_data
+              fhfa_number = customer_signature_card_data['CU_FHFB_ID']
+              dual_signers_required = (customer_signature_card_data['NEEDSTWOSIGNERS'].try(:to_i) == -1)
+            end
           else
-             member = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_details.json')))[member_id.to_s]
-             member_name = member['name'] if member
-             fhfa_number = member['fhfa_number'] if member
-             sta_number = member['sta_number'] if member
+            member = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_details.json')))[member_id.to_s]
+            if member
+              member_name = member['name']
+              fhfa_number = member['fhfa_number']
+              sta_number = member['sta_number']
+              dual_signers_required = member['dual_signers_required']
+            end
           end
           
           return nil if member_name.nil?
@@ -195,7 +212,8 @@ module MAPI
           {
             name: member_name,
             fhfa_number: fhfa_number,
-            sta_number: sta_number
+            sta_number: sta_number,
+            dual_signers_required: dual_signers_required
           }
 
         end

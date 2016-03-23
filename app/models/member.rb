@@ -40,4 +40,15 @@ class Member
     DEFAULT_REPORT_LIST[report_name]
   end
 
+  def requires_dual_signers?(request=nil)
+    fetch_details(request) unless @member_details.present?
+    @member_details[:dual_signers_required]
+  end
+
+  protected
+
+  def fetch_details(request=nil)
+    @member_details = MembersService.new(request || ActionDispatch::TestRequest.new).member(id)
+  end
+
 end

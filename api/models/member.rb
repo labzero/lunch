@@ -19,7 +19,7 @@ module MAPI
         end
       end
       swagger_model :MemberDetails do
-        key :required, [:name, :fhfa_number, :sta_number]
+        key :required, [:name, :fhfa_number, :sta_number, :dual_signers_required]
         property :name do
           key :type, :string
           key :description, 'The name of the member.'
@@ -31,6 +31,10 @@ module MAPI
         property :sta_number do
           key :type, :string
           key :description, 'The Settlment/Transaction Account number of the member.'
+        end
+        property :dual_signers_required do
+          key :type, :boolean
+          key :description, 'Indicates whether this member requires multiple signers to take out advances.'
         end
       end
     end

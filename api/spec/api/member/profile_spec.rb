@@ -129,13 +129,16 @@ describe MAPI::ServiceApp do
     let(:sta_number) {SecureRandom.uuid}
     let(:sta_number_cursor) { double('STA Number Query', fetch: [sta_number])}
     let(:fhfa_number) {SecureRandom.uuid}
-    let(:fhfa_number_cursor) { double('FHFB Number Query', fetch: [fhfa_number])}
+    let(:customer_signature_card_response) { {'CU_FHFB_ID' => fhfa_number } }
+    let(:customer_signature_card_cursor) { double('customer_signature_card_cursor', fetch_hash: customer_signature_card_response)}
+    let(:dual_signers_required) {SecureRandom.uuid}
     let(:development_json) {
       {
         member_id => {
           'name' => member_name,
           'sta_number' => sta_number,
-          'fhfa_number' => fhfa_number
+          'fhfa_number' => fhfa_number,
+          'dual_signers_required' => dual_signers_required
         }
       }
     }
@@ -146,7 +149,7 @@ describe MAPI::ServiceApp do
             development_json.to_json
           end
           allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(env)
-          allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_name_cursor, sta_number_cursor, fhfa_number_cursor)
+          allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_name_cursor, sta_number_cursor, customer_signature_card_cursor)
         end
         it 'returns a 404 if the member name isn\'t found' do
           allow(member_name_cursor).to receive(:fetch).and_return(nil)
@@ -161,8 +164,14 @@ describe MAPI::ServiceApp do
           expect(last_response.status).to be(200)
         end
         it 'returns a 200 if the FHFB number isn\'t found' do
-          allow(fhfa_number_cursor).to receive(:fetch).and_return(nil)
+          allow(customer_signature_card_cursor).to receive(:fetch_hash).and_return(nil)
           development_json[member_id]['fhfa_number'] = nil
+          make_request
+          expect(last_response.status).to be(200)
+        end
+        it 'returns a 200 if the `dual_signers_required` value isn\'t found' do
+          allow(customer_signature_card_cursor).to receive(:fetch_hash).and_return(nil)
+          development_json[member_id]['dual_signers_required'] = nil
           make_request
           expect(last_response.status).to be(200)
         end
@@ -171,6 +180,23 @@ describe MAPI::ServiceApp do
             allow(File).to receive(:read).and_return({}.to_json)
             make_request
             expect(last_response.status).to be(404)
+          end
+          it 'returns the member `dual_signers_required` value' do
+            expect(member_details['dual_signers_required']).to eq(dual_signers_required)
+          end
+        end
+        if env == :production
+          it 'returns `true` for `dual_signers_required` if the `NEEDSTWOSIGNERS` value is -1' do
+            customer_signature_card_response = {'NEEDSTWOSIGNERS' => -1}
+            allow(customer_signature_card_cursor).to receive(:fetch_hash).and_return(customer_signature_card_response)
+            expect(member_details['dual_signers_required']).to eq(true)
+          end
+          [0, 1, :foo, nil, true, SecureRandom.uuid].each do |value|
+            it "returns `false` for `dual_signers_required` if the `NEEDSTWOSIGNERS` value is #{value}" do
+              customer_signature_card_response = {'NEEDSTWOSIGNERS' => value}
+              allow(customer_signature_card_cursor).to receive(:fetch_hash).and_return(customer_signature_card_response)
+              expect(member_details['dual_signers_required']).to eq(false)
+            end
           end
         end
         it 'returns the member name' do
