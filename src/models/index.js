@@ -143,7 +143,7 @@ export const Restaurant = sequelize.define('restaurant', {
         )
   },
   defaultScope: {
-    order: 'votes.created_at ASC, created_at DESC'
+    order: 'votes.created_at DESC NULLS LAST, created_at DESC'
   },
   instanceMethods: {
     tagIds: () => this.getTags().map(tag => tag.get('id'))
