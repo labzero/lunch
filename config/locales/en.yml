@@ -452,6 +452,7 @@ en:
   dashboard:
     meta_title: FHLB - Dashboard
     retrieving_data: We are retrieving this data.
+    open: Open
     actions:
       more: More
       edit: Edit
@@ -463,6 +464,15 @@ en:
       title: Recent Credit Activity
       view_report_html: View your institution’s <a href=%{url}>Today’s Credit Activity</a> report for detailed information.
       no_activity: No recent credit activity.
+      letter_of_credit: Letter of Credit
+      amended_today: Amended Today
+      terminated_today: Terminated Today
+      matures_today: Matures Today
+      matures_on: Matures on %{date}
+      expires_today: Expires Today
+      expires_on: Expires on %{date}
+      will_be_funded_on: Will be Funded on %{date}
+      in_review: In Review
     contacts:
       title: Contact
       icon_alt_text: Contact
