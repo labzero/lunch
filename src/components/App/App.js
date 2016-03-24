@@ -14,6 +14,7 @@ import HeaderContainer from '../../containers/HeaderContainer';
 import FooterContainer from '../../containers/FooterContainer';
 import DeleteRestaurantModalContainer from '../../containers/DeleteRestaurantModalContainer';
 import TagManagerModalContainer from '../../containers/TagManagerModalContainer';
+import DeleteTagModalContainer from '../../containers/DeleteTagModalContainer';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 
 class App extends Component {
@@ -55,6 +56,9 @@ class App extends Component {
     }
     if (this.props.modals.tagManager !== undefined) {
       modals.push(<TagManagerModalContainer key={modals.length} />);
+    }
+    if (this.props.modals.deleteTag !== undefined) {
+      modals.push(<DeleteTagModalContainer key={modals.length} />);
     }
 
     return !this.props.error ? (

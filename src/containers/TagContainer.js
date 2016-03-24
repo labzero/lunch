@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { removeTag } from '../actions/tags';
+import { showModal } from '../actions/modals';
 import Tag from '../components/Tag';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -9,7 +9,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   handleClick: () => {
-    dispatch(removeTag(ownProps.id));
+    dispatch(showModal('deleteTag', { tagId: ownProps.id }));
   }
 });
 

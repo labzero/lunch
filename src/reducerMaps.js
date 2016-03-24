@@ -212,6 +212,11 @@ export const modals = {
     return Object.assign({}, state, {
       deleteRestaurant: Object.assign({}, state.deleteRestaurant, { shown: false })
     });
+  },
+  [ActionTypes.TAG_DELETED](state) {
+    return Object.assign({}, state, {
+      deleteTag: Object.assign({}, state.deleteTag, { shown: false })
+    });
   }
 };
 
