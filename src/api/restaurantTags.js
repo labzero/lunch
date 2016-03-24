@@ -22,7 +22,7 @@ router
       if (req.body.name !== undefined) {
         Tag.findOrCreate({
           where: {
-            name: req.body.name.toLowerCase()
+            name: req.body.name.toLowerCase().trim()
           }
         }).spread(tag =>
           RestaurantTag.create({
