@@ -6,10 +6,15 @@ namespace :corporate_communication do
     print JSON.pretty_generate(CorporateCommunication::Process.process_email(args.file_location, args.category))
   end
 
-  desc 'Fetches and processes email found in the corporate communication inbox'
-  task :fetch_and_process => [:environment] do |task, args|
+  desc 'Fetches and processes email found in the corporate communication inboxes'
+  task :fetch_and_process, [:mapping] => [:environment] do |task, args|
     require 'corporate_communication/process'
 
-    exit(1) unless CorporateCommunication::Process.fetch_and_process_email(JSON.parse(ENV['ANNOUNCEMENT_CATEGORY_MAPPING']))
+    failure = false
+    JSON.parse(args.mapping || ENV['ANNOUNCEMENT_CATEGORY_MAPPING']).each do |username, category|
+      result = CorporateCommunication::Process.fetch_and_process_email(category, username)
+      failure ||= !result
+    end
+    fail('at least one fetch_and_process_email call failed') if failure
   end
 end
