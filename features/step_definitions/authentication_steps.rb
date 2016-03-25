@@ -311,6 +311,8 @@ def user_for_type(user_type)
     offsite_user
   when 'user with disabled quick advances'
     advances_disabled_user
+  when 'dual-signer'
+    dual_signers_required_user
   else
     raise 'unknown user type'
   end
@@ -374,6 +376,10 @@ end
 
 def first_time_user
   CustomConfig.env_config['first_time']
+end
+
+def dual_signers_required_user
+  CustomConfig.env_config['dual_signer']
 end
 
 def current_member_name

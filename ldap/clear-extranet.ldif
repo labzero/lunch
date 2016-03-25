@@ -28,10 +28,19 @@ changetype: delete
 dn: sAMAccountName=quick-advance-disabled,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
+dn: sAMAccountName=dual-signer-required,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
+
+dn: sAMAccountName=extra-signer,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
+
 dn: CN=FHLB6,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
 dn: CN=FHLB13,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
+
+dn: CN=FHLB14,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
 dn: ou=eBiz,dc=extranet,dc=fhlbsf,dc=com

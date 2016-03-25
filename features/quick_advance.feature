@@ -335,3 +335,9 @@ Scenario: Users should not be able to get an advance if the product has been dis
   When I close the quick advance flyout
   And I try and take out an advance on a disabled product
   Then I should see a quick advance error
+
+@jira-mem-1450
+Scenario: User with signer privileges does not see quick advance module if their member bank requires dual signers
+  Given I am logged in as a "dual-signer"
+  When I visit the dashboard
+  Then I should not see the quick-advance module
