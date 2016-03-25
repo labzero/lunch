@@ -65,7 +65,7 @@
      @content;
   }
 
-  &:-ms-input-placeholder {  
+  &:-ms-input-placeholder {
      @content;
   }
   &.placeholder {
@@ -98,5 +98,13 @@
     bottom: 0;
     z-index: -1;
     top: 0;
+  }
+}
+
+@mixin navigation-separator {
+  &:before {
+    content: "|";
+    display: inline-block;
+    margin: 0 15px;
   }
 }
