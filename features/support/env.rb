@@ -57,6 +57,23 @@ if !custom_host
     DatabaseCleaner.clean_with :truncation if !is_parallel || is_parallel_primary
   end
 
+  class ServiceLaunchError < RuntimeError
+  end
+
+  def port_retry
+    tries ||= 3
+    port = find_available_port
+    yield port
+  rescue ServiceLaunchError => e
+    tries = tries - 1
+    if tries <= 0
+      raise e
+    else
+      puts "#{e.message}.. retrying.."
+      retry
+    end
+  end
+
   def find_available_port
     server = TCPServer.new('127.0.0.1', 0)
     server.addr[1]
@@ -80,50 +97,52 @@ if !custom_host
         end
         out.close
         err.close
-        raise "#{name} failed to start"
+        raise ServiceLaunchError.new("#{name} failed to start")
       end
       sleep(1)
     end
   end
 
-  ldap_root = Rails.root.join('tmp', "openldap-data-#{Process.pid}")
-  ldap_port = find_available_port
-  ldap_server = File.expand_path('../../../ldap/run-server',  __FILE__) + " --port #{ldap_port} --root-dir #{ldap_root}"
-  if ENV['VERBOSE']
-    ldap_server += ' --verbose'
+  port_retry do |ldap_port|
+    ldap_root = Rails.root.join('tmp', "openldap-data-#{Process.pid}")
+    ldap_server = File.expand_path('../../../ldap/run-server',  __FILE__) + " --port #{ldap_port} --root-dir #{ldap_root}"
+    if ENV['VERBOSE']
+      ldap_server += ' --verbose'
+    end
+    puts "LDAP starting, ldap://localhost:#{ldap_port}"
+    ldap_stdin, ldap_stdout, ldap_stderr, ldap_thr = Open3.popen3(ldap_server)
+    at_exit do
+      kill_background_process(ldap_thr, ldap_stdin)
+      FileUtils.rm_rf(ldap_root)
+    end
+    check_service(ldap_port, ldap_thr, ldap_stdout, ldap_stderr, 'LDAP')
+    # we close the LDAP server's STDIN and STDOUT immediately to avoid a ruby buffer depth issue.
+    ldap_stdout.close
+    ldap_stderr.close
+    puts 'LDAP Started.'
+
+    puts `#{ldap_server} --reseed`
+    ENV['LDAP_PORT'] = ldap_port.to_s
+    ENV['LDAP_EXTRANET_PORT'] = ldap_port.to_s
   end
-  puts "LDAP starting, ldap://localhost:#{ldap_port}"
-  ldap_stdin, ldap_stdout, ldap_stderr, ldap_thr = Open3.popen3(ldap_server)
-  at_exit do
-    kill_background_process(ldap_thr, ldap_stdin)
-    FileUtils.rm_rf(ldap_root)
+
+
+  port_retry do |mapi_port|
+    puts "Starting MAPI: http://localhost:#{mapi_port}"
+    mapi_server = "rackup --port #{mapi_port} #{File.expand_path('../../../api/config.ru', __FILE__)}"
+    mapi_stdin, mapi_stdout, mapi_stderr, mapi_thr = Open3.popen3({'RACK_ENV' => 'test'}, mapi_server)
+
+    at_exit do
+      kill_background_process(mapi_thr, mapi_stdin)
+    end
+    check_service(mapi_port, mapi_thr, mapi_stdout, mapi_stderr, 'MAPI')
+
+    # we close the MAPI server's STDIN and STDOUT immediately to avoid a ruby buffer depth issue.
+    mapi_stdout.close
+    mapi_stderr.close
+    puts 'MAPI Started.'
+    ENV['MAPI_ENDPOINT'] = "http://localhost:#{mapi_port}/mapi"
   end
-  check_service(ldap_port, ldap_thr, ldap_stdout, ldap_stderr, 'LDAP')
-
-  # we close the LDAP server's STDIN and STDOUT immediately to avoid a ruby buffer depth issue.
-  ldap_stdout.close
-  ldap_stderr.close
-  puts 'LDAP Started.'
-
-  puts `#{ldap_server} --reseed`
-  ENV['LDAP_PORT'] = ldap_port.to_s
-  ENV['LDAP_EXTRANET_PORT'] = ldap_port.to_s
-
-  mapi_port = find_available_port
-  puts "Starting MAPI: http://localhost:#{mapi_port}"
-  mapi_server = "rackup --port #{mapi_port} #{File.expand_path('../../../api/config.ru', __FILE__)}"
-  mapi_stdin, mapi_stdout, mapi_stderr, mapi_thr = Open3.popen3({'RACK_ENV' => 'test'}, mapi_server)
-
-  at_exit do
-    kill_background_process(mapi_thr, mapi_stdin)
-  end
-  check_service(mapi_port, mapi_thr, mapi_stdout, mapi_stderr, 'MAPI')
-
-  # we close the MAPI server's STDIN and STDOUT immediately to avoid a ruby buffer depth issue.
-  mapi_stdout.close
-  mapi_stderr.close
-  puts 'MAPI Started.'
-  ENV['MAPI_ENDPOINT'] = "http://localhost:#{mapi_port}/mapi"
 
   verbose = ENV['VERBOSE'] # Need to remove the VERBOSE env variable due to a conflict with Resque::VerboseFormatter and ActiveJob logging
   begin
