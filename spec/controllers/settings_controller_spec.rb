@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe SettingsController, :type => :controller do
   login_user
   deny_policy(:access_manager, :show?)
-  
+
   describe 'GET index', :skip do
     it_behaves_like 'a user required action', :get, :index
     it "should render the index view" do
@@ -424,7 +424,9 @@ RSpec.describe SettingsController, :type => :controller do
     let(:current_member_id){ double('current_member_id') }
     let(:current_member_name){ double('current_member_name') }
     let(:result){ SecureRandom.hex }
+    let(:policy) { double('Policy', show?: true, lock?: true, edit?: true, reset_password?: true, delete?: false) }
     before do
+      allow(subject).to receive(:policy).with(any_args).and_return(policy)
       allow(subject).to receive(:current_member_id).and_return(current_member_id)
       allow(subject).to receive(:current_member_name).and_return(current_member_name)
       allow(User).to receive(:new).and_return(new_user)
@@ -806,13 +808,13 @@ RSpec.describe SettingsController, :type => :controller do
     let(:current_password) { SecureRandom.hex }
     let(:make_request) { put :update_password, user: { password: password, password_confirmation: password, current_password: current_password } }
     let(:user) { double('A User', save: false, :password= => nil, :password_confirmation= => nil, valid_ldap_authentication?: false, errors: double('Errors', add: nil), :accepted_terms? => true) }
-  
+
     before do
       allow(subject).to receive(:current_user).and_return(user)
     end
 
     it_behaves_like 'a user required action', :put, :update_password
-    
+
     describe 'with a valid current password' do
       before do
         allow(user).to receive(:valid_ldap_authentication?).with(current_password, kind_of(Devise::Strategies::LdapAuthenticatable)).and_return(true)
@@ -887,13 +889,15 @@ RSpec.describe SettingsController, :type => :controller do
 
   describe '`actions_for_user` private method' do
     let(:locked_status) { double('Locked Status') }
-    let(:user) { double('User', id: rand(10000..99999), locked?: locked_status) }
+    let(:user) { double('User', id: rand(10000..99999), locked?: locked_status, roles: [access_manager_read_only]) }
     let(:call_method) { subject.send(:actions_for_user, user) }
+    let(:access_manager_read_only) { double('Access Manager Read Only') }
+    let(:policy) { double('Policy', lock?: true, edit?: true, reset_password?: true, delete?: false) }
     before do
-      allow(subject).to receive(:current_user).and_return(double('Current User', id: rand(1..9999)))
+      allow(subject).to receive(:policy).with(any_args).and_return(policy)
     end
     it 'returns a hash of actions' do
-      expect(call_method).to include(:locked, :locked_disabled, :reset_disabled)
+      expect(call_method).to include(:locked, :locked_disabled, :reset_disabled, :delete_disabled, :edit_disabled)
     end
     it 'returns the user locked status in the key `locked`' do
       expect(call_method[:locked]).to be(locked_status)
@@ -905,14 +909,21 @@ RSpec.describe SettingsController, :type => :controller do
       expect(call_method[:reset_disabled]).to be(false)
     end
     describe 'if the current user is the passed user' do
+      let(:policy) { double('Policy', lock?: false, edit?: true, reset_password?: false, delete?: false) }
       before do
-        allow(subject).to receive(:current_user).and_return(user)
+        allow(subject).to receive(:policy).with(any_args).and_return(policy)
       end
       it 'returns true for `locked_disabled`' do
         expect(call_method[:locked_disabled]).to be(true)
       end
       it 'returns true for `reset_disabled`' do
         expect(call_method[:reset_disabled]).to be(true)
+      end
+      it 'returns true for `delete_disabled`' do
+        expect(call_method[:delete_disabled]).to be(true)
+      end
+      it 'returns false for `edit_disabled`' do
+        expect(call_method[:edit_disabled]).to be(false)
       end
     end
   end

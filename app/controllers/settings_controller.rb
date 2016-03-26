@@ -162,7 +162,7 @@ class SettingsController < ApplicationController
 
   # GET
   def two_factor
-    
+
   end
 
   # POST
@@ -218,7 +218,7 @@ class SettingsController < ApplicationController
     if securid.resynchronize?
       begin
         securid.resynchronize(params[:securid_pin], params[:securid_next_token])
-        status = 'success' if securid.authenticated? 
+        status = 'success' if securid.authenticated?
       rescue SecurIDService::InvalidPin => e
         status = 'invalid_pin'
       rescue SecurIDService::InvalidToken => e
@@ -251,7 +251,7 @@ class SettingsController < ApplicationController
 
   def update_expired_password
     raise 'Updating non-expired password!' unless session['password_expired']
-    
+
     current_user.password = params[:user][:password]
     current_user.password_confirmation = params[:user][:password_confirmation]
 
@@ -296,12 +296,12 @@ class SettingsController < ApplicationController
   end
 
   def actions_for_user(user)
-    is_current_user = user.id == current_user.id
     {
       locked: user.locked?,
-      locked_disabled: is_current_user,
-      reset_disabled: is_current_user,
-      delete_disabled: is_current_user
+      locked_disabled: !policy(user).lock?,
+      reset_disabled: !policy(user).reset_password?,
+      edit_disabled: !policy(user).edit?,
+      delete_disabled: !policy(user).delete?
     }
   end
 
@@ -313,5 +313,4 @@ class SettingsController < ApplicationController
                          actions: actions_for_user(user)
                      })
   end
-
 end

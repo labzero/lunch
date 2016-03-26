@@ -8,7 +8,7 @@ class AccessManagerPolicy < ApplicationPolicy
   end
 
   def show?
-    @user.roles.include?(User::Roles::ACCESS_MANAGER)
+    user.roles.include?(User::Roles::ACCESS_MANAGER) || user.roles.include?(User::Roles::ACCESS_MANAGER_READ_ONLY)
   end
 
   def edit?

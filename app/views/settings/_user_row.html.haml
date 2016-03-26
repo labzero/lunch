@@ -7,7 +7,7 @@
     - lock_text = actions[:locked] ? [t('settings.account.actions.unlock'), user_unlock_path(user)] : [t('settings.account.actions.lock'), user_lock_path(user)]
     - if actions[:locked_disabled]
       = lock_text.first
-    - else 
+    - else
       = link_to(*lock_text, remote: true, method: :post)
   %td.settings-user-actions.settings-user-reset-password
     - reset_text = t('settings.account.actions.reset_password')
@@ -15,4 +15,9 @@
       = reset_text
     - else
       = link_to(reset_text, user_reset_password_path(user), remote: true, method: :post)
-  %td.settings-user-actions.settings-user-edit= link_to(t('global.edit'), user_path(user), remote: true)
+  %td.settings-user-actions.settings-user-edit
+    - edit_text = t('global.edit')
+    - if actions[:edit_disabled]
+      = edit_text
+    - else
+      = link_to(edit_text, user_path(user), remote: true)

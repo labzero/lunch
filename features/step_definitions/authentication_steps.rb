@@ -306,6 +306,8 @@ def user_for_type(user_type)
     quick_advance_non_signer
   when 'access manager'
     access_manager
+  when 'read-only access manager'
+    read_only_access_manager
   when 'extranet user'
     extranet_user
   when 'deletable user'
@@ -351,6 +353,10 @@ end
 
 def access_manager
   CustomConfig.env_config['access_manager']
+end
+
+def read_only_access_manager
+  CustomConfig.env_config['read_only_access_manager']
 end
 
 def deletable_user
