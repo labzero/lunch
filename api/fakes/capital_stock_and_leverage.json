@@ -1,9 +1,12 @@
 {
   "stock_owned": 853700,
-  "minimum_requirement": 853700,
-  "excess_stock": 0,
+  "minimum_requirement": 853705,
+  "excess_stock": 22110,
   "surplus_stock": -128000,
-  "activity_based_requirement": 0,
+  "activity_based_requirement": 44550,
   "remaining_stock": 853700,
-  "remaining_leverage": 28456666
+  "remaining_leverage": 28456666,
+  "mav_stock_requirement": 1234,
+  "required_by_mpf": 776655,
+  "required_by_advances": 887766
 }

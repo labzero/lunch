@@ -12,7 +12,6 @@ objectClass: user
 objectClass: top
 objectClass: person
 cn: Local User
-sn: Local
 givenname: Local
 sn: User
 displayname: Local User
@@ -41,13 +40,27 @@ objectClass: user
 objectClass: top
 objectClass: person
 cn: Local Offsite User
-sn: Local Offsite User
+sn: Offsite User
 givenname: Local
 sAMAccountName: local-offsite
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 userAccountControl: 512
 mail: local-offsite@example.com
+
+# local user with extended info access
+dn: sAMAccountName=local-extended-info,dc=fhlbsf-i,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Local Extended Info User
+sn: Extended Info User
+givenname: Local
+sAMAccountName: local-extended-info
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+userAccountControl: 512
+mail: local-extended-info@example.com
 
 # FCN-MemberSite-AccessManagers-R group
 dn: CN=FCN-MemberSite-AccessManagers-R,DC=fhlbsf-i,DC=com
@@ -76,6 +89,13 @@ cn: FCN-MemberSite-Admins
 objectClass: group
 objectClass: top
 member: sAMAccountName=local,dc=fhlbsf-i,dc=com
+
+# FCN-MemberSite-ExtendedInfo-User
+dn: CN=FCN-MemberSite-ExtendedInfo-User,DC=fhlbsf-i,DC=com
+cn: FCN-MemberSite-ExtendedInfo-User
+objectClass: group
+objectClass: top
+member: sAMAccountName=local-extended-info,dc=fhlbsf-i,dc=com
 
 #dn: ou=people,dc=fhlbsf-i,dc=com
 #objectClass: organizationalUnit

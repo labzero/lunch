@@ -313,6 +313,8 @@ def user_for_type(user_type)
     advances_disabled_user
   when 'dual-signer'
     dual_signers_required_user
+  when 'extended info user'
+    extended_info
   else
     raise 'unknown user type'
   end
@@ -336,6 +338,10 @@ end
 
 def extranet_user
   CustomConfig.env_config['extranet_user']
+end
+
+def extended_info
+  CustomConfig.env_config['extended_info']
 end
 
 def access_manager

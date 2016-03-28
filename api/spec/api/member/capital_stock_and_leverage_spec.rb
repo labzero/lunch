@@ -22,7 +22,7 @@ describe MAPI::ServiceApp do
       end
     end
 
-    %i(stock_owned minimum_requirement excess_stock surplus_stock activity_based_requirement remaining_stock remaining_leverage).each do |key|
+    %i(stock_owned minimum_requirement excess_stock surplus_stock activity_based_requirement remaining_stock remaining_leverage mav_stock_requirement required_by_mpf required_by_advances).each do |key|
       it "returns a hash an integer value for the #{key} key" do
         expect(capital_stock_and_leverage[key]).to be_kind_of(Integer)
       end
@@ -34,6 +34,7 @@ describe MAPI::ServiceApp do
         {
           TOTAL_CAPITAL_STOCK: rand(90000000),
           ADVANCES_OUTS: rand(90000000),
+          MPF_UNPAID_BALANCE: rand(90000000),
           TOT_MPF: rand(90000000),
           MORTGAGE_RELATED_ASSETS: rand(90000000)
          }
@@ -66,8 +67,15 @@ describe MAPI::ServiceApp do
       it 'returns a `stock_owned` value that is equal to the TOTAL_CAPITAL_STOCK value' do
         expect(capital_stock_and_leverage[:stock_owned]).to eq(cap_stock_member_details.first[:TOTAL_CAPITAL_STOCK])
       end
+      it 'returns a `required_by_mpf` value that is equal to the MPF_UNPAID_BALANCE * MPF_PCT value' do
+        expect(capital_stock_and_leverage[:required_by_mpf]).to eq(((cap_stock_member_details.first[:MPF_UNPAID_BALANCE] * cap_stock_requirements.first[:MPF_PCT]) / 100).ceil * 100)
+      end
+      it 'returns a `mav_stock_requirement` that is equal to MORTGAGE_RELATED_ASSETS' do
+        expect(capital_stock_and_leverage[:mav_stock_requirement]).to eq(((cap_stock_member_details.first[:MORTGAGE_RELATED_ASSETS]) / 100).ceil * 100)
+      end
       describe 'values calculated with the `minimum_stock_requirement`' do
         let(:adv_and_mpf_stock_requirement) { (((cap_stock_member_details.first[:TOT_MPF] * cap_stock_requirements.first[:MPF_PCT]) + (cap_stock_member_details.first[:ADVANCES_OUTS] * cap_stock_requirements.first[:ADVANCES_PCT])) / 100).ceil * 100 }
+        let(:required_by_mpf) { ((cap_stock_member_details.first[:MPF_UNPAID_BALANCE] * cap_stock_requirements.first[:MPF_PCT]) / 100).ceil * 100 }
         describe 'the `activity_based_requirement` value' do
           it 'is equal to the `adv_and_mpf_stock_requirement`' do
             expect(capital_stock_and_leverage[:activity_based_requirement]).to eq(adv_and_mpf_stock_requirement)
@@ -127,6 +135,11 @@ describe MAPI::ServiceApp do
           describe 'the `surplus_stock` value' do
             it 'is equal to the `total_capital_stock` minus the `minimum_stock_requirement` times the cap_stock_requirements[:SURPLUS_PCT] and rounded up to the nearest 100' do
               expect(capital_stock_and_leverage[:surplus_stock]).to eq( ((cap_stock_member_details.first[:TOTAL_CAPITAL_STOCK]  - (minimum_stock_requirement * cap_stock_requirements.first[:SURPLUS_PCT])) / 100).ceil * 100 )
+            end
+          end
+          describe 'the `required_by_advances` value' do
+            it 'is equal to the `minimum_stock_requirement` - `required_by_mpf`' do
+              expect(capital_stock_and_leverage[:required_by_advances]).to eq(minimum_stock_requirement - required_by_mpf)
             end
           end
         end

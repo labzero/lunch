@@ -51,6 +51,7 @@ class User < ActiveRecord::Base
     USER_WITH_EXTERNAL_ACCESS = 'user_with_external_access'
     ACCESS_MANAGER_READ_ONLY = 'access_manager_read_only'
     ACCESS_MANAGER = 'access_manager'
+    USER_WITH_EXTENDED_INFO_ACCESS = 'user_with_extended_info_access'
     ADMIN = 'admin'
     AUTHORIZED_SIGNER = 'authorized_signer'
     SIGNER_MANAGER = 'signer_manager'
@@ -70,6 +71,7 @@ class User < ActiveRecord::Base
     'FCN-MemberSite-AccessManagers-R' => Roles::ACCESS_MANAGER_READ_ONLY,
     'FCN-MemberSite-AccessManagers' => Roles::ACCESS_MANAGER,
     'FCN-MemberSite-Admins' => Roles::ADMIN,
+    'FCN-MemberSite-ExtendedInfo-User' => Roles::USER_WITH_EXTENDED_INFO_ACCESS,
     'signer' => Roles::AUTHORIZED_SIGNER,
     'signer-manager' => Roles::SIGNER_MANAGER,
     'signer-entire-authority' => Roles::SIGNER_ENTIRE_AUTHORITY,

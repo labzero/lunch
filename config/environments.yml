@@ -49,6 +49,9 @@ default: &default
   dual_signer:
     username: <%= ENV['CUCUMBER_DUAL_SIGNER_USERNAME'] || 'dual-signer-required' %>
     password: <%= ENV['CUCUMBER_DUAL_SIGNER_PASSWORD'] || 'development' %>
+  extended_info:
+    username: <%= ENV['CUCUMBER_EXTENDED_INFO_USERNAME'] || 'local-extended-info' %>
+    password: <%= ENV['CUCUMBER_EXTENDED_INFO_PASSWORD'] || 'development' %>
   valid_password: <%= ENV['CUCUMBER_VALID_PASSWORD'] || '123Abcd3!' %>
 
 local:
