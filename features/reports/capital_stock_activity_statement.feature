@@ -123,3 +123,10 @@ Scenario: Member downloads a PDF of the Capital Stock Activity report
   Given I am on the "Capital Stock Activity Statement" report page
   When I request a PDF
   Then I should begin downloading a file
+
+@jira-mem-919
+Scenario: The datepicker handles two-digit years and prohibited characters
+  Given I am on the "Capital Stock Activity Statement" report page
+  When I click the datepicker field
+  Then I am able to enter two-digit years in the datepicker inputs
+  And I am not able to enter prohibited characters in the datepicker inputs

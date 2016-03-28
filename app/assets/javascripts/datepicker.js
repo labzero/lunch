@@ -222,20 +222,33 @@ $(function () {
         if (month === 2 || month === 5 || month === 8 || month === 11) {
           disableAllExceptEndOfMonth(lastDayOfMonth);
         } else {
-          $('.calendar.first td.available').removeClass('available').addClass('off disabled');
+          $('.calendar.first td.available').each(disableDayIterator);
         };
         break;
     };
   };
 
   function disableAllExceptEndOfMonth(day) {
+    var possibleMonthEndNodes = [];
     $('.calendar.first td.available').each(function(i){
       var $node = $(this);
       if ($node.text() != day) {
-        $node.removeClass('available');
-        $node.addClass('off disabled');
+        disableDay($node);
+      } else {
+        possibleMonthEndNodes.push($node);
       };
     });
+    possibleMonthEndNodes.pop(); // the last node is the one we want to leave enabled, the others are from other months
+    $(possibleMonthEndNodes).each(disableDayIterator);
+  };
+
+  function disableDay($node) {
+    $node.removeClass('available in-range');
+    $node.addClass('off disabled');
+  };
+
+  function disableDayIterator(index, $node) {
+    disableDay($node);
   };
 
   // monkeypatch DateRangePicker to trigger event when calendar is updated
@@ -259,6 +272,7 @@ $(function () {
     var minDate = moment(options.minDate);
     var today = moment(options.today);
     var thisMonth = moment().month();
+    var thisYear = moment().year();
     var $el = $(e.target);
     var date = moment($el.val());
     if (date > maxDate || date < minDate) {
@@ -273,15 +287,18 @@ $(function () {
     // apply filters if necessary
     if (options.singleDatePicker && options.filter !== undefined && options.filterOptions !== undefined) {
       var inputMonth = date.month();
+      var inputYear = date.year();
       var endOfMonth = moment(date).endOf('month'); // clone so that `endOf` does not mutate original `date`
       switch (options.filter) {
         // Snap to end of month
         case options.filterOptions['end_of_month']:
-          if (!date.isSame(endOfMonth, 'day') && inputMonth >= thisMonth) {
-            picker.setEndDate((date.subtract(1, 'month')).endOf('month'));
-          } else {
-            picker.setEndDate(date.endOf('month').format('MM/DD/YYYY'));
-          };
+          if (date != endOfMonth) {
+            if (endOfMonth > maxDate) {
+              date.subtract(1, 'month');
+            }
+            date.endOf('month');
+          }
+          picker.setEndDate(date);
           $el.val(date.format('MM/DD/YYYY')); // uses the mutated value of `date` set in the if/else statement above
           break;
         // Snap to end of quarter
@@ -320,6 +337,7 @@ $(function () {
       var monthString = dateArray[0];
       var dayString = dateArray[1];
       var yearString = dateArray[2];
+      var $el = $(e.target);
       if (yearString === "" || isNaN(yearString)) {
         return;
       }
@@ -330,7 +348,20 @@ $(function () {
         lowerBound.setFullYear(lowerBound.getFullYear() - 80);
 
         if ((1900 + yearInt) > lowerBound.getFullYear()) {
-          $(e.target).val(monthString + "/" + dayString + "/" + (1900 + yearInt));
+          var date = moment(monthString + "/" + dayString + "/" + (1900 + yearInt));
+          if (options.singleDatePicker) {
+            picker.setEndDate(date);
+            $el.val(date.format('MM/DD/YYYY'));
+          } else {
+            if ($(e.currentTarget).hasClass("daterangepicker_start_input")) {
+              picker.setStartDate(date);
+              $el.val(date.format('MM/DD/YYYY'));
+            }
+            if ($(e.currentTarget).hasClass("daterangepicker_end_input")) {
+              picker.setEndDate(date);
+              $el.val(date.format('MM/DD/YYYY'));
+            }
+          }
           return;
         }
 
@@ -338,7 +369,20 @@ $(function () {
         upperBound.setFullYear(upperBound.getFullYear() + 20);
 
         if ((2000 + yearInt) < upperBound) {
-          $(e.target).val(monthString + "/" + dayString + "/" + (2000 + yearInt));
+          var date = moment(monthString + "/" + dayString + "/" + (2000 + yearInt));
+          if (options.singleDatePicker) {
+            picker.setEndDate(date);
+            $el.val(date.format('MM/DD/YYYY'));
+          } else {
+            if ($(e.currentTarget).hasClass("daterangepicker_start_input")) {
+              picker.setStartDate(date);
+              $el.val(date.format('MM/DD/YYYY'));
+            }
+            if ($(e.currentTarget).hasClass("daterangepicker_end_input")) {
+              picker.setEndDate(date);
+              $el.val(date.format('MM/DD/YYYY'));
+            }
+          }
         }
       }
     }
