@@ -168,7 +168,7 @@ export function addRestaurant(name, placeId, address, lat, lng) {
     return fetch('/api/restaurants', {
       method: 'post',
       credentials,
-      jsonHeaders,
+      headers: jsonHeaders,
       body: JSON.stringify({ name, place_id: placeId, address, lat, lng })
     })
       .then(response => processResponse(response))
@@ -218,7 +218,7 @@ export function addNewTagToRestaurant(restaurantId, value) {
     return fetch(`/api/restaurants/${restaurantId}/tags`, {
       method: 'post',
       credentials,
-      jsonHeaders,
+      headers: jsonHeaders,
       body: JSON.stringify({ name: value })
     })
       .then(response => processResponse(response))
@@ -234,7 +234,7 @@ export function addTagToRestaurant(restaurantId, id) {
     return fetch(`/api/restaurants/${restaurantId}/tags`, {
       method: 'post',
       credentials,
-      jsonHeaders,
+      headers: jsonHeaders,
       body: JSON.stringify({ id })
     })
       .then(response => processResponse(response))
