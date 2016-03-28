@@ -7,7 +7,6 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import 'babel-polyfill';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { match, Router } from 'react-router';
