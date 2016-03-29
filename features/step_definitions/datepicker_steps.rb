@@ -256,6 +256,8 @@ Then(/^I am able to enter two\-digit years in the datepicker inputs?$/) do
   min_date_four_digit = min_date.strftime('%m/%d/%Y')
   max_date_two_digit = max_date.strftime('%-m/%-d/%y')
   max_date_four_digit = max_date.strftime('%m/%d/%Y')
+  existing_start_date = page.find("input[name=daterangepicker_start]").value
+  invalid_date = '1/32'
 
   step %{I write "#{min_date_two_digit}" in the datepicker start input field}
   step %{I click on the datepicker field label}
@@ -263,13 +265,21 @@ Then(/^I am able to enter two\-digit years in the datepicker inputs?$/) do
   step %{I write "#{max_date_two_digit}" in the datepicker start input field}
   step %{I click on the datepicker field label}
   step %{I should see the date "#{max_date_four_digit}" in the datepicker start input field}
+  step %{I write "#{invalid_date}" in the datepicker start input field}
+  step %{I click on the datepicker field label}
+  step %{I should see the date "#{existing_start_date}" in the datepicker start input field}
+
   if datepicker_ranged?
+    existing_end_date = page.find("input[name=daterangepicker_end]").value
     step %{I write "#{min_date_two_digit}" in the datepicker end input field}
     step %{I click on the datepicker field label}
     step %{I should see the date "#{min_date_four_digit}" in the datepicker end input field}
     step %{I write "#{max_date_two_digit}" in the datepicker end input field}
     step %{I click on the datepicker field label}
     step %{I should see the date "#{max_date_four_digit}" in the datepicker end input field}
+    step %{I write "#{invalid_date}" in the datepicker end input field}
+    step %{I click on the datepicker field label}
+    step %{I should see the date "#{existing_end_date}" in the datepicker end input field}
   end
 end
 
