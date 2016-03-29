@@ -433,7 +433,11 @@ class DashboardController < ApplicationController
                         when 'MATURED'
                           t('dashboard.recent_activity.matures_today')
                         when 'VERIFIED'
-                          t('dashboard.recent_activity.matures_on', date: fhlb_date_standard_numeric(maturity_date))
+                          if activity[:product] == 'OPEN VRC'
+                            t('dashboard.open')
+                          else
+                            t('dashboard.recent_activity.matures_on', date: fhlb_date_standard_numeric(maturity_date))
+                          end
                         when 'COLLATERAL_AUTH'
                           t('dashboard.recent_activity.will_be_funded_on', date: fhlb_date_standard_numeric(activity[:funding_date]))
                         when 'OPS_REVIEW', 'SEC_REVIEWED'
@@ -451,7 +455,11 @@ class DashboardController < ApplicationController
                             if maturity_date == Time.zone.today
                               t('dashboard.recent_activity.matures_today')
                             else
-                              t('dashboard.recent_activity.matures_on', date: maturity_date)
+                              if maturity_date
+                                t('dashboard.recent_activity.matures_on', date: maturity_date)
+                              else
+                                t('dashboard.open')
+                              end
                             end
                           else
                             if maturity_date == Time.zone.today
@@ -463,6 +471,9 @@ class DashboardController < ApplicationController
                         end
         if activity[:product_description] == "LC" || activity[:product_description] == "LC LC LC"
           activity[:product_description] = t('dashboard.recent_activity.letter_of_credit')
+        end
+        if activity[:product_description]
+          activity[:product_description] = activity[:product_description].length > 20 ? "#{activity[:product_description][0..16]}..." : activity[:product_description]
         end
         activity_data.push([activity[:product_description], activity[:current_par], maturity_date, activity[:transaction_number]])
         i += 1
