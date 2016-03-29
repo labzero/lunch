@@ -472,9 +472,6 @@ class DashboardController < ApplicationController
         if activity[:product_description] == "LC" || activity[:product_description] == "LC LC LC"
           activity[:product_description] = t('dashboard.recent_activity.letter_of_credit')
         end
-        if activity[:product_description]
-          activity[:product_description] = activity[:product_description].length > 20 ? "#{activity[:product_description][0..16]}..." : activity[:product_description]
-        end
         activity_data.push([activity[:product_description], activity[:current_par], maturity_date, activity[:transaction_number]])
         i += 1
       end
