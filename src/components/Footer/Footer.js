@@ -11,18 +11,33 @@ import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Footer.scss';
 
-const Footer = ({ manageTags }) => (
-  <div className={s.root}>
-    <div className={s.container}>
-      <button className={`${s.link} ${s.text}`} onClick={manageTags}>Manage Tags</button>
-      <span className={s.spacer}></span>
-      <span className={s.text}>© Lab Zero</span>
+const Footer = ({ user, manageTags }) => {
+  let manageTagsButton = null;
+  let manageTagsSpacer = null;
+
+  if (user.id !== undefined) {
+    manageTagsButton = (
+      <button className={`${s.link} ${s.text}`} onClick={manageTags}>
+        Manage Tags
+      </button>
+    );
+    manageTagsSpacer = <span className={s.spacer}></span>;
+  }
+
+  return (
+    <div className={s.root}>
+      <div className={s.container}>
+        {manageTagsButton}
+        {manageTagsSpacer}
+        <span className={s.text}>© Lab Zero</span>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 Footer.propTypes = {
-  manageTags: PropTypes.func.isRequired
+  manageTags: PropTypes.func.isRequired,
+  user: PropTypes.object.isRequired
 };
 
 export default withStyles(Footer, s);

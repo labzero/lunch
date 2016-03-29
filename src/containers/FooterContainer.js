@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { showModal } from '../actions/modals';
 import Footer from '../components/Footer';
 
-const mapStateToProps = null;
+const mapStateToProps = (state) => ({ user: state.user });
 
 const mapDispatchToProps = dispatch => ({
   manageTags() {
