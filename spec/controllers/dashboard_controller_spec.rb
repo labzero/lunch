@@ -1142,10 +1142,6 @@ RSpec.describe DashboardController, :type => :controller do
     context 'advances' do
       let(:termination_full_partial) { double(:termination_full_partial) }
       context 'full/partial prepayment' do
-        let(:long_description) { [{ instrument_type: 'ADVANCE', product_description: '12345678901234567890sdkjfhskdjfh' }] }
-        it 'truncates description if longer than twenty characters' do
-          expect(subject.send(:process_recent_activities, long_description).first[0]).to eq('12345678901234567...')
-        end
         let(:terminated_advance) { [{ instrument_type: 'ADVANCE',
                                       status: 'TERMINATED',
                                       termination_full_partial: termination_full_partial }] }
