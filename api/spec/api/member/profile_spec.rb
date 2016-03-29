@@ -18,7 +18,7 @@ describe MAPI::ServiceApp do
         expect(member_financial_position[key]).to be_kind_of(Float)
       end
       credit_outstanding = member_financial_position['credit_outstanding']
-      ['total', 'standard', 'sbc', 'swaps_credit', 'swaps_notational', 'mpf_credit', 'letters_of_credit', 'investments'].each do |key|
+      ['total', 'standard', 'sbc', 'swaps_credit', 'swaps_notational', 'mpf_credit', 'letters_of_credit', 'investments', 'total_advances_outstanding', 'total_credit_products_outstanding', 'total_advances_and_mpf'].each do |key|
         expect(credit_outstanding[key]).to be_kind_of(Integer)
       end
       collateral_borrowing_capacity = member_financial_position['collateral_borrowing_capacity']

@@ -174,7 +174,7 @@ module MAPI
               letters_of_credit: member_position_hash['LCS_OUTS'].to_i,
               investments: member_position_hash['UNSECURED_CREDIT'].to_i,
               total_advances_outstanding: member_position_hash['REG_ADVANCES_OUTS'].to_i + member_position_hash['SBC_ADVANCES_OUTS'].to_i,
-              total_credit_products_outstanding: member_position_hash['OTHER_CREDIT_PRODS'],
+              total_credit_products_outstanding: member_position_hash['OTHER_CREDIT_PRODS'].to_i,
               total_advances_and_mpf: member_position_hash['ADVANCES_OUTS'].to_i + member_position_hash['MPF_CE_COLLATERAL_REQ'].to_i
             },
             capital_stock: capital_stock_and_leverage,
