@@ -16,7 +16,8 @@ export const _Restaurant = ({
   shouldShowAddTagArea,
   user,
   listUiItem,
-  showAddTagForm
+  showAddTagForm,
+  showMapAndInfoWindow
 }) => {
   const loggedIn = user.id !== undefined;
 
@@ -43,7 +44,7 @@ export const _Restaurant = ({
   return (
     <div className={s.root}>
       <div className={s.header}>
-        <h2 className={s.heading}>{name}</h2>
+        <h2 className={s.heading} onClick={showMapAndInfoWindow}>{name}</h2>
         <div className={s.voteButtonContainer}>
           <RestaurantVoteCountContainer votes={votes} />
           &nbsp;
@@ -77,7 +78,8 @@ _Restaurant.propTypes = {
   tags: PropTypes.array.isRequired,
   shouldShowAddTagArea: PropTypes.bool,
   listUiItem: PropTypes.object.isRequired,
-  showAddTagForm: PropTypes.func.isRequired
+  showAddTagForm: PropTypes.func.isRequired,
+  showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
 export default withStyles(_Restaurant, s);

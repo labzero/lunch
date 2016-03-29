@@ -145,6 +145,7 @@ server.get('*', async (req, res, next) => {
                 },
                 listUi: {},
                 mapUi: {},
+                pageUi: {},
                 wsPort: process.env.BS_RUNNING ? port : 0
               };
               if (req.user) {

@@ -194,6 +194,19 @@ export const mapUi = {
   }
 };
 
+export const pageUi = {
+  [ActionTypes.SCROLL_TO_TOP](state) {
+    return Object.assign({}, state, {
+      shouldScrollToTop: true
+    });
+  },
+  [ActionTypes.SCROLLED_TO_TOP](state) {
+    return Object.assign({}, state, {
+      shouldScrollToTop: false
+    });
+  },
+};
+
 export const modals = {
   [ActionTypes.SHOW_MODAL](state, action) {
     return Object.assign({}, state, {

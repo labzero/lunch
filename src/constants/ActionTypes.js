@@ -35,7 +35,9 @@ const actions = [
   'SHOW_MODAL',
   'HIDE_MODAL',
   'DELETE_TAG',
-  'TAG_DELETED'
+  'TAG_DELETED',
+  'SCROLL_TO_TOP',
+  'SCROLLED_TO_TOP'
 ];
 
 const actionMap = {};

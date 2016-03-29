@@ -24,7 +24,9 @@ class App extends Component {
     messageReceived: PropTypes.func.isRequired,
     modals: PropTypes.object.isRequired,
     error: PropTypes.object,
-    wsPort: PropTypes.number.isRequired
+    wsPort: PropTypes.number.isRequired,
+    shouldScrollToTop: PropTypes.bool.isRequired,
+    scrolledToTop: PropTypes.func.isRequired
   };
 
   static contextTypes = {
@@ -41,6 +43,15 @@ class App extends Component {
       }
       this.socket = new window.WebSocket(`ws://${host}`);
       this.socket.onmessage = this.props.messageReceived;
+    }
+  }
+
+  componentDidUpdate() {
+    if (this.props.shouldScrollToTop) {
+      if (canUseDOM) {
+        window.scrollTo(0, 0);
+      }
+      this.props.scrolledToTop();
     }
   }
 

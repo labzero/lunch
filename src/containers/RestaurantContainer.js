@@ -1,5 +1,6 @@
 import { connect } from 'react-redux';
 import { showAddTagForm } from '../actions/listUi';
+import { showMapAndInfoWindow } from '../actions/mapUi';
 import Restaurant from '../components/Restaurant';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -11,6 +12,9 @@ const mapStateToProps = (state, ownProps) => ({
 const mapDispatchToProps = (dispatch, ownProps) => ({
   showAddTagForm() {
     dispatch(showAddTagForm(ownProps.id));
+  },
+  showMapAndInfoWindow() {
+    dispatch(showMapAndInfoWindow(ownProps.id));
   }
 });
 
