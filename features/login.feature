@@ -172,3 +172,25 @@ Scenario: User can change institutions via the link in nav header
   Then I should see dashboard modules
   When I click on the switch link in the nav
   Then I should see the member bank selector
+
+@smoke @jira-mem-1401 @flip-on-report-profile
+Scenario: Users with the extra info role and without an assigned bank can go to the member's profile from the bank selector 
+  Given I am logged out
+  And I visit the root path
+  When I fill in and submit the login form with an extended info user
+  Then I should see the member bank selector
+  And I should see the member profile button disabled
+  When I pick a bank
+  Then I should see the member profile button enabled
+  When I view the member profile from the bank selector
+  Then I see the profile report in a new window and close it
+  And I select the 1st member bank
+  Then I should see dashboard modules
+
+@jira-mem-1401 @flip-on-report-profile
+Scenario: Users without the extra info role don't see the member profile option when viewing the bank selector
+  Given I am logged out
+  And I visit the root path
+  When I fill in and submit the login form with an intranet user
+  Then I should see the member bank selector
+  And I should not see the member profile button

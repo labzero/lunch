@@ -72,12 +72,17 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     width: 100%;
   }
 
-  input[type=submit], .logout-link, .secondary-button {
+  input[type=submit], .logout-link, .secondary-button:not(.welcome-profile) {
     width: calc(50% - 10px);
   }
 
   input[type=submit] {
     float: right;
+  }
+
+  .welcome-profile {
+    width: 100%;
+    margin-top: 20px;
   }
 
   .welcome-login {

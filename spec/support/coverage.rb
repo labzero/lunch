@@ -12,6 +12,7 @@ module FhlbMember
       root_dir = File.expand_path(File.join('..', '..', '..'), __FILE__)
       SimpleCov.formatter = FhlbMember::Coverage::MergedFormatter
       SimpleCov.use_merging
+      SimpleCov.merge_timeout 86400
       SimpleCov.command_name command_name
       SimpleCov.root root_dir
       SimpleCov.coverage_dir File.join(root_dir, 'coverage')
