@@ -118,6 +118,9 @@ export const Restaurant = sequelize.define('restaurant', {
     findAllWithTagIds: () =>
       Restaurant
         .findAll({
+          attributes: {
+            include: [[sequelize.literal('COUNT(*) OVER(PARTITION BY "restaurant"."id")'), 'vote_count']]
+          },
           include: [
             {
               model: Vote.scope('fromToday'),
@@ -143,7 +146,7 @@ export const Restaurant = sequelize.define('restaurant', {
         )
   },
   defaultScope: {
-    order: 'votes.created_at DESC NULLS LAST, created_at DESC'
+    order: 'vote_count DESC, votes.created_at DESC NULLS LAST, created_at DESC'
   },
   instanceMethods: {
     tagIds: () => this.getTags().map(tag => tag.get('id'))
