@@ -119,31 +119,21 @@ export const Restaurant = sequelize.define('restaurant', {
       Restaurant
         .findAll({
           attributes: {
-            include: [[sequelize.literal('COUNT(*) OVER(PARTITION BY "restaurant"."id")'), 'vote_count']]
+            include: [
+              [sequelize.literal('COUNT(*) OVER(PARTITION BY "restaurant"."id")'), 'vote_count'],
+              [sequelize.literal(
+                'ARRAY(SELECT "tag_id" from "restaurants_tags" ' +
+                'where "restaurants_tags"."restaurant_id" = "restaurant"."id")'
+              ), 'tags']
+            ]
           },
           include: [
             {
               model: Vote.scope('fromToday'),
               required: false
-            },
-            {
-              model: Tag,
-              attributes: ['id'],
-              through: {
-                attributes: []
-              }
             }
           ]
         })
-        .then(all =>
-          all.map(inst =>
-            Object.assign({}, inst.toJSON(), {
-              tags: inst.tags.map(tag =>
-                tag.id
-              )
-            })
-          )
-        )
   },
   defaultScope: {
     order: 'vote_count DESC, votes.created_at DESC NULLS LAST, created_at DESC'
