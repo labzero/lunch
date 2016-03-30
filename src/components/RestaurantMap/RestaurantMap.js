@@ -11,7 +11,7 @@ let google;
 if (canUseDOM) {
   google = window.google;
 } else {
-  google = { maps: { SymbolPath: {} } };
+  google = { maps: { SymbolPath: {}, Marker: { MAX_ZINDEX: 1000000 } } };
 }
 
 const RestaurantMap = ({ latLng, items, mapUi, handleMarkerClick, handleMarkerClose }, context) => (
@@ -43,6 +43,7 @@ const RestaurantMap = ({ latLng, items, mapUi, handleMarkerClick, handleMarkerCl
               strokeWeight: 2
             }}
             title="You are here"
+            zIndex={0}
           />
           {items.map((item, index) => {
             const length = item.votes.length;
@@ -51,7 +52,7 @@ const RestaurantMap = ({ latLng, items, mapUi, handleMarkerClick, handleMarkerCl
               text: ' '
             };
 
-            let zIndex = item.votes.length;
+            let zIndex;
 
             if (item.votes.length > 0) {
               if (item.votes.length > 9) {
@@ -59,7 +60,12 @@ const RestaurantMap = ({ latLng, items, mapUi, handleMarkerClick, handleMarkerCl
               } else {
                 label.text = String(length);
               }
-              zIndex += items.length;
+
+              // place markers over default markers
+              // place markers higher based on vote length
+              // place markers lower based on how far down they are in the list
+              // add item length so index doesn't dip below MAX_ZINDEX
+              zIndex = google.maps.Marker.MAX_ZINDEX + item.votes.length - index + items.length;
             }
 
             const ref = `marker_${index}`;

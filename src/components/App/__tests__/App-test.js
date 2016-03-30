@@ -8,20 +8,22 @@ import { shallow } from 'enzyme';
 const context = { insertCss: () => {} };
 
 describe('App', () => {
-  let messageReceived;
-  let modals;
-  let wsPort;
+  let props;
 
   beforeEach(() => {
-    messageReceived = jest.fn();
-    modals = {};
-    wsPort = 3000;
+    props = {
+      modals: {},
+      wsPort: 3000,
+      messageReceived: jest.fn(),
+      shouldScrollToTop: false,
+      scrolledToTop: jest.fn()
+    };
     window.WebSocket = jest.fn();
   });
 
   it('renders children correctly', () => {
     const wrapper = shallow(
-      <App messageReceived={messageReceived} modals={modals} wsPort={wsPort}>
+      <App {...props}>
         <div className="child" />
       </App>,
     { context });
@@ -29,9 +31,9 @@ describe('App', () => {
   });
 
   it('adds a modal if there is data', () => {
-    modals.deleteRestaurant = { name: 'Food Barn' };
+    props.modals.deleteRestaurant = { name: 'Food Barn' };
     const wrapper = shallow(
-      <App messageReceived={messageReceived} modals={modals} wsPort={wsPort}><div /></App>,
+      <App {...props}><div /></App>,
     { context });
     expect(wrapper.find(DeleteRestaurantModalContainer).length).toBe(1);
   });
