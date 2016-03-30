@@ -830,6 +830,17 @@ td.dataTables_empty {
   .inclusive-role-note {
     width: 750px;
   }
+  .column-3 {
+    small {
+      width: auto;
+      span:first-child {
+        display: block;
+      }
+    }
+    &:first-child {
+      margin-left: 0;
+    }
+  }
 }
 
 .authorizations-table {
