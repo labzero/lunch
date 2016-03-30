@@ -32,6 +32,10 @@ describe ContactInformationHelper, type: :helper do
     it_behaves_like 'an email helper method', :membership_email, 'MEMBERSHIP_EMAIL'
   end
 
+  describe '`operations_email` method' do
+    it_behaves_like 'an email helper method', :operations_email, 'OPERATIONS_EMAIL'
+  end
+
   shared_examples 'phone number contact method' do |constant|
     it "calls `fhlb_formatted_phone_number` with the #{constant}" do
       phone_number = double('A Number')

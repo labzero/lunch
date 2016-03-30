@@ -241,45 +241,45 @@ en:
     access_manager:
       title: Access Manager
       description_title: Access Manager
-      description: The designated individuals identify your institution’s Access Manager(s), who can add and delete users, reset passwords, and lock or unlock member portal access accounts for individuals.
+      description: Your institution’s Access Manager(s), who may add and delete portal users, reset passwords, and lock or unlock portal access for individuals.
     resolution:
       dropdown: Resolution and Authorization
       title: 'Resolution and Authorization: Member Transactions'
-      description_title: 'Resolution and Authorization: Member Transactions (All transactions except Wires)'
-      description: The primary form on which you specify individuals who are authorized to execute all types of transactions with the Bank, except for wires. Must be adopted by your Board of Directors and signed by your Corporate Secretary.
+      description_title: 'Resolution and Authorization: Member Transactions (All transactions except wires)'
+      description: Individuals authorized to conduct all types of transactions, except for wires.
     entire_authority:
       dropdown: Entire Authority
       title: Entire Authority
-      description_title: Entire Authority (All transactions except Wires)
-      description: This form permits the individuals designated on the Resolution and Authorization to authorize additional officers, employees, or agents of your institution to engage in all transactions with the Bank, except for wires, and to provide instructions regarding all securities-related transactions.
+      description_title: Entire Authority (All transactions except wires)
+      description: Additional individuals authorized to conduct all types of transactions, except for wires.
     wire_transfer:
       title: Wire Transfer Services
       description_title: Wire Transfer Services
-      description: The designated individuals listed are authorized to conduct offline funds transactions by telephone. Any signer listed on this form must be listed as an authorized individual on the Resolution and Authorization.
+      description: Individuals authorized to conduct offline funds transfer transactions by telephone.
     advances:
       title: Advances
       description_title: Advances
-      description: The designated individuals listed are authorized to execute advances, letters of credit, lines of credit, and other similar extensions of credit with the Bank.
+      description: Individuals authorized to conduct credit transactions, including advances, letters of credit, lines of credit, and other similar extensions of credit.
     affordable_housing:
       title: Affordable Housing Program
       description_title: Affordable Housing Program
-      description: The designated individuals listed are authorized to exercise authority under the Bank’s Affordable Housing Program and any other community investment programs, excluding extensions of credit related to these programs.
+      description: Individuals authorized to exercise authority under the Bank’s Affordable Housing Program and any other community investment programs, excluding extensions of credit related to these programs.
     collateral:
       title: Collateral
       description_title: Collateral
-      description: The designated individuals listed are authorized to engage in collateral transactions with the Bank. Employees listed on this form are authorized to provide instructions regarding the pledging and de-pledging of securities but are not authorized to provide instructions regarding securities held in safekeeping (except to pledge those securities).
+      description: Individuals authorized to pledge and depledge securities. This form does not authorize individuals to move securities held in safekeeping except to pledge those securities.
     interest_rate_derivatives:
       title: Interest Rate Derivatives
       description_title: Interest Rate Derivatives
-      description: The designated individuals listed are authorized to engage in interest rate derivative transactions with the Bank.
+      description: Individuals authorized to conduct interest rate derivative transactions with the Bank.
     money_market:
       title: Money Market Transactions
       description_title: Money Market Transactions
-      description: The designated individuals listed are authorized to request or purchase Bank funds in unsecured money market transactions.
+      description: Individuals authorized to request or purchase Bank funds in unsecured money market transactions.
     securities:
       title: Securities Services
       description_title: Securities Services
-      description: The designated individuals listed are authorized to move securities to and from their unpledged account (safekeeping account). Employees listed on this form are authorized to provide instructions regarding the purchase and sale of unpledged securities, but are not authorized to pledge or de-pledge securities.
+      description: Individuals authorized to move securities to and from your safekeeping account and to provide instructions regarding the purchase and sale of unpledged securities. This form does not authorize individuals to pledge or depledge securities.
   settings:
     title: Settings
     save: Save
@@ -1528,8 +1528,8 @@ en:
         freshness: This report is updated twice a day. The preliminary report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm. The final report reflects all transactions settled during the day and is generally available at the end of the business day.
       authorizations:
         title: Authorizations
-        intro_html: The following people are authorized to use the Bank’s services on behalf of your institution. If you’d like to make changes to these authorizations, please fill out an <a href=%{url}>Authorization Form</a>.
-        contact_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about authorizations, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
+        intro_html: 'The following people are authorized to use the Bank’s services on behalf of your institution. If you’d like to change or add authorizations, please complete and submit an <a href="%{url}">Authorization form.</a>'
+        contact_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager with questions about authorizations.'
         sub_title: Users with %{filter} Authorization
         sub_title_all_users: All Users with Authorizations
         sub_title_inclusive_authorizations: Users with %{filter}
