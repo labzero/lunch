@@ -1,16 +1,22 @@
 $(function() {
-  if ($('.welcome form').length) {
-    var $memberProfileButton = $('.welcome form .welcome-profile');
+  var $form = $('.welcome form');
+  if ($form.length) {
+    var $memberProfileButton = $form.find('.welcome-profile');
+    var $visitProfileField = $form.find('input[name=visit_profile]');
     $('.welcome form select').change(function() {
-      $('.welcome form input[type=submit]').removeAttr('disabled');
+      $form.find('input[type=submit]').removeAttr('disabled');
       $memberProfileButton.removeAttr('disabled');
     });
     $memberProfileButton.click(function(e) {
-      $('.welcome form input[name=visit_profile').removeAttr('disabled');
-      $('.welcome form').attr('target', '_blank');
+      $visitProfileField.removeAttr('disabled');
+      $form.attr('target', '_blank');
     });
-    $('.welcome form').submit(function(e) {
-      setTimeout(function() {$('.welcome form').removeAttr('target');}, 1);
+    $form.submit(function(e) {
+      setTimeout(function() {
+        $form.removeAttr('target');
+        $visitProfileField.attr('disabled', 'disabled');
+        $form.get(0).submit();
+      }, 1);
     });
   };
 });

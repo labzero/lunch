@@ -184,8 +184,7 @@ Scenario: Users with the extra info role and without an assigned bank can go to 
   Then I should see the member profile button enabled
   When I view the member profile from the bank selector
   Then I see the profile report in a new window and close it
-  And I select the 1st member bank
-  Then I should see dashboard modules
+  And I should see dashboard modules
 
 @jira-mem-1401 @flip-on-report-profile
 Scenario: Users without the extra info role don't see the member profile option when viewing the bank selector
