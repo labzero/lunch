@@ -50,10 +50,16 @@ const RestaurantMap = ({ latLng, items, mapUi, handleMarkerClick, handleMarkerCl
               fontWeight: 'bold',
               text: ' '
             };
-            if (item.votes.length > 9) {
-              label.text = '✔';
-            } else if (item.votes.length > 0) {
-              label.text = String(length);
+
+            let zIndex = item.votes.length;
+
+            if (item.votes.length > 0) {
+              if (item.votes.length > 9) {
+                label.text = '✔';
+              } else {
+                label.text = String(length);
+              }
+              zIndex += items.length;
             }
 
             const ref = `marker_${index}`;
@@ -92,6 +98,7 @@ const RestaurantMap = ({ latLng, items, mapUi, handleMarkerClick, handleMarkerCl
                 key={index}
                 title={item.name}
                 onClick={boundHandleMarkerClick}
+                zIndex={zIndex}
               >
                 {mapUiItem.showInfoWindow ? renderInfoWindow() : null}
               </Marker>
