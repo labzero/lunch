@@ -13,4 +13,9 @@ body {
   border: 2px solid black;
   border-radius: 100px;
   box-shadow: none;
+  outline: none;
+}
+
+.geosuggest__suggests {
+  margin: 0 20px;
 }
