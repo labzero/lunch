@@ -1410,6 +1410,7 @@ en:
         closing_balance: Balance as of close of business
         debit_credit_heading: Debits/Credits
         sta_number_html: "<span>STA No.:</span> %{sta_number}"
+        excel_sheet_name: STA Statement
       advances_detail:
         title: "Advances outstanding as of close of business %{date}"
         total_current_par_heading: "Total Current Par as of %{date}"

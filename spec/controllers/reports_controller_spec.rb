@@ -432,7 +432,7 @@ RSpec.describe ReportsController, :type => :controller do
         allow(response_hash).to receive(:[]).with(:activities)
       end
       it_behaves_like 'a user required action', :get, :settlement_transaction_account
-      it_behaves_like 'a report that can be downloaded', :settlement_transaction_account, [:pdf]
+      it_behaves_like 'a report that can be downloaded', :settlement_transaction_account, [:pdf, :xlsx]
       it_behaves_like 'a date restricted report', :settlement_transaction_account, :this_month_start
       it_behaves_like 'a report with instance variables set in a before_filter', :settlement_transaction_account
       it_behaves_like 'a controller action with an active nav setting', :settlement_transaction_account, :reports
