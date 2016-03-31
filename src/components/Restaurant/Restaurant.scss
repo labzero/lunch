@@ -14,12 +14,18 @@
   cursor: pointer;
   float: left;
   font-size: 24px;
+  font-weight: bold;
   margin: 0;
 }
 
 .voteButtonContainer {
   float: right;
   margin-left: 1em;
+}
+
+.addressLink {
+  display: block;
+  margin-bottom: .25em;
 }
 
 .footer {

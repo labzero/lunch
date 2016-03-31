@@ -21,3 +21,10 @@ export function showMapAndInfoWindow(id) {
     dispatch(scrollToTop());
   };
 }
+
+export function setShowUnvoted(val) {
+  return {
+    type: ActionTypes.SET_SHOW_UNVOTED,
+    val
+  };
+}

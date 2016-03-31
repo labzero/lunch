@@ -196,12 +196,21 @@ export const mapUi = {
   [ActionTypes.RESTAURANT_DELETED]: resetRestaurant,
   [ActionTypes.SHOW_INFO_WINDOW](state, action) {
     return Object.assign({}, state, {
-      [action.id]: Object.assign({}, state[action.id], { showInfoWindow: true })
+      markers: Object.assign({}, state.markers, {
+        [action.id]: Object.assign({}, state[action.id], { showInfoWindow: true })
+      })
     });
   },
   [ActionTypes.HIDE_INFO_WINDOW](state, action) {
     return Object.assign({}, state, {
-      [action.id]: Object.assign({}, state[action.id], { showInfoWindow: false })
+      markers: Object.assign({}, state.markers, {
+        [action.id]: Object.assign({}, state[action.id], { showInfoWindow: false })
+      })
+    });
+  },
+  [ActionTypes.SET_SHOW_UNVOTED](state, action) {
+    return Object.assign({}, state, {
+      showUnvoted: action.val
     });
   }
 };

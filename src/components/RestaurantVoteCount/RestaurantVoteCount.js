@@ -13,9 +13,14 @@ export class _RestaurantVoteCount extends Component {
   }
 
   render() {
-    let voteCount = '';
+    let voteCount = null;
     if (this.props.votes.length > 0) {
-      voteCount = `${this.props.votes.length} ${this.props.votes.length === 1 ? 'vote' : 'votes'}`;
+      voteCount = (
+        <span>
+          <strong>{this.props.votes.length}</strong>
+          {this.props.votes.length === 1 ? ' vote' : ' votes'}
+        </span>
+      );
     }
 
     return (

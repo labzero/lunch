@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react';
 import { Provider } from 'react-redux';
 import ContextHolder from '../../core/ContextHolder';
 import RestaurantContainer from '../../containers/RestaurantContainer';
+import RestaurantMapSettingsContainer from '../../containers/RestaurantMapSettingsContainer';
 import { GoogleMapLoader, GoogleMap, Marker, InfoWindow } from 'react-google-maps';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
@@ -46,6 +47,10 @@ const RestaurantMap = ({ latLng, items, mapUi, handleMarkerClick, handleMarkerCl
             zIndex={0}
           />
           {items.map((item, index) => {
+            if (!mapUi.showUnvoted && item.votes.length === 0) {
+              return null;
+            }
+
             const length = item.votes.length;
             const label = {
               fontWeight: 'bold',
@@ -70,7 +75,7 @@ const RestaurantMap = ({ latLng, items, mapUi, handleMarkerClick, handleMarkerCl
 
             const ref = `marker_${index}`;
 
-            const mapUiItem = mapUi[item.id] || {};
+            const mapUiItem = mapUi.markers[item.id] || {};
 
             const boundHandleMarkerClick = handleMarkerClick.bind(this, item.id);
 
@@ -110,6 +115,9 @@ const RestaurantMap = ({ latLng, items, mapUi, handleMarkerClick, handleMarkerCl
               </Marker>
             );
           })}
+          <div className={s.mapSettingsContainer}>
+            <RestaurantMapSettingsContainer />
+          </div>
         </GoogleMap>
       }
     />

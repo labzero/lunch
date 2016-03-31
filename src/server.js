@@ -144,7 +144,10 @@ server.get('*', async (req, res, next) => {
                   lng: parseFloat(process.env.SUGGEST_LNG)
                 },
                 listUi: {},
-                mapUi: {},
+                mapUi: {
+                  markers: {},
+                  showUnvoted: true
+                },
                 pageUi: {},
                 wsPort: process.env.BS_RUNNING ? port : 0
               };

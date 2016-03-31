@@ -1,19 +1,27 @@
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantVoteButton.scss';
 
-export const _RestaurantVoteButton = ({ votes, user, handleClick }) => {
-  let downVote = false;
-  let btnClass = 'btn-primary';
-  if (votes.some(vote => vote.user_id === user.id)) {
-    downVote = true;
-    btnClass = 'btn-danger';
+class _RestaurantVoteButton extends Component {
+  componentDidUpdate() {
+    this._el.blur();
   }
 
-  return (
-    <button onClick={handleClick} className={`btn btn-sm ${btnClass}`}>{downVote ? '-1' : '+1'}</button>
-  );
-};
+  render() {
+    let downVote = false;
+    let btnClass = 'btn-primary';
+    if (this.props.votes.some(vote => vote.user_id === this.props.user.id)) {
+      downVote = true;
+      btnClass = 'btn-danger';
+    }
+
+    return (
+      <button ref={r => { this._el = r; }} onClick={this.props.handleClick} className={`btn btn-sm ${btnClass}`}>
+        {downVote ? '-1' : '+1'}
+      </button>
+    );
+  }
+}
 
 _RestaurantVoteButton.propTypes = {
   handleClick: PropTypes.func.isRequired,
