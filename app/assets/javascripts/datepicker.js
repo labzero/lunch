@@ -294,7 +294,7 @@ $(function () {
     if (options.singleDatePicker && options.filter !== undefined && options.filterOptions !== undefined) {
       var inputMonth = date.month();
       var inputYear = date.year();
-      var endOfMonth = moment(date).endOf('month'); // clone so that `endOf` does not mutate original `date`
+      var endOfMonth = moment(date).endOf('month').startOf('day'); // clone so that `endOf` does not mutate original `date`
       switch (options.filter) {
         // Snap to end of month
         case options.filterOptions['end_of_month']:

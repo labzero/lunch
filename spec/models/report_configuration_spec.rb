@@ -236,12 +236,12 @@ RSpec.describe ReportConfiguration do
       let(:end_date) { subject.month_restricted_start_date(start_date) }
       it 'defaults start date to last month end and end date to month-restricted start' do
         expect(subject.date_bounds(:monthly_securities_position, nil, nil)).to eq(
-          { min: min_date, start: start_date, end: end_date, max: nil })
+          { min: min_date, start: start_date, end: end_date, max: last_month_end })
       end
 
       it 'returns min date for start date when start date comes before min date' do
         expect(subject.date_bounds(:monthly_securities_position, min_date - 1.month, nil)).to eq(
-          { min: min_date, start: min_date, end: subject.month_restricted_start_date(min_date), max: nil })
+          { min: min_date, start: min_date, end: subject.month_restricted_start_date(min_date), max: last_month_end })
       end
     end
   end
