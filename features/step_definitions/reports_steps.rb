@@ -288,11 +288,6 @@ Then(/^I should see a "(.*?)" report as of "(.*?)"$/) do |report_type, as_of_dat
   step %{I should see "#{strip_tags(summary_statement)}"}
 end
 
-Then(/^I should see a "(.*?)" report as of the end of the last valid month$/) do |report_type|
-  end_of_month = @today == @today.end_of_month ? @today : (@today - 1.month).end_of_month
-  step %{I should see a "#{report_type}" report as of "#{end_of_month}"}
-end
-
 Then(/^I should see a "(.*?)" with data for dates between the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of (this|last) month$/) do |report_type, start_day, end_day, month|
   if month == 'this'
     start_date_obj = Date.new(@today.year, @today.month, start_day.to_i)
