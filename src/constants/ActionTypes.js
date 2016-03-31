@@ -8,6 +8,7 @@
  */
 
 const actions = [
+  'SORT_RESTAURANTS',
   'INVALIDATE_RESTAURANTS',
   'POST_RESTAURANT',
   'RESTAURANT_POSTED',

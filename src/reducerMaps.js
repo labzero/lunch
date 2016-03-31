@@ -6,6 +6,18 @@ const isFetching = state =>
   });
 
 export const restaurants = {
+  [ActionTypes.SORT_RESTAURANTS](state) {
+    return Object.assign({}, state, {
+      items: state.items.map((item, index) => {
+        item.sortIndex = index;
+        return item;
+      }).sort((a, b) => {
+        // stable sort
+        if (a.votes.length !== b.votes.length) { return b.votes.length - a.votes.length; }
+        return a.sortIndex - b.sortIndex;
+      })
+    });
+  },
   [ActionTypes.INVALIDATE_RESTAURANTS](state) {
     return Object.assign({}, state, {
       didInvalidate: true

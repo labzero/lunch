@@ -3,6 +3,10 @@ import ActionTypes from '../constants/ActionTypes';
 import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
 import { flashError } from './flash.js';
 
+export function sortRestaurants() {
+  return { type: ActionTypes.SORT_RESTAURANTS };
+}
+
 export function invalidateRestaurants() {
   return { type: ActionTypes.INVALIDATE_RESTAURANTS };
 }
