@@ -51,7 +51,7 @@ export const _Restaurant = ({
           {voteButton}
         </div>
       </div>
-      {address}
+      <a href={`https://www.google.com/maps/place/${name}, ${address}`} target="_blank">{address}</a>
       <div className={s.footer}>
         <div className={s.tagsArea}>
           <ul className={`${s.tagList} ${tags.length === 0 ? s.tagsListEmpty : ''}`}>
