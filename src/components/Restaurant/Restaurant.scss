@@ -3,6 +3,7 @@
 
 .root {
   clear: fix-legacy;
+  font-family: $font-family-base;
 }
 
 .header {
@@ -14,6 +15,7 @@
   float: left;
   font-size: 24px;
   font-weight: bold;
+  letter-spacing: -.5px;
   margin: 0;
 }
 
