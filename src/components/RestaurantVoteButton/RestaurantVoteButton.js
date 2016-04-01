@@ -2,8 +2,9 @@ import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantVoteButton.scss';
 
-class _RestaurantVoteButton extends Component {
+export class _RestaurantVoteButton extends Component {
   componentDidUpdate() {
+    // if it's focused, page scrolls to its new location once it's sorted
     this._el.blur();
   }
 
@@ -16,7 +17,11 @@ class _RestaurantVoteButton extends Component {
     }
 
     return (
-      <button ref={r => { this._el = r; }} onClick={this.props.handleClick} className={`btn btn-sm ${btnClass}`}>
+      <button
+        ref={r => { this._el = r; }}
+        onClick={this.props.handleClick}
+        className={`${s.root} btn btn-sm ${btnClass}`}
+      >
         {downVote ? '-1' : '+1'}
       </button>
     );

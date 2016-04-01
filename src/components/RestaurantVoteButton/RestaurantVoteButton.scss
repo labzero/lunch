@@ -1,0 +1,17 @@
+.root {
+  border: 2px solid #000;
+  border-radius: 50%;
+  font-size: 1.1em;
+  font-weight: bold;
+  height: 2.25em;
+  line-height: 30px;
+  padding: 0;
+  width: 2.25em;
+
+  &,
+  &:active,
+  &:focus,
+  &:active:focus {
+    outline: none;
+  }
+}

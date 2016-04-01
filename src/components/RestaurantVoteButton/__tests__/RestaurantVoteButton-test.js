@@ -4,7 +4,7 @@ import { _RestaurantVoteButton as RestaurantVoteButton } from '../RestaurantVote
 import React from 'react';
 import { shallow } from 'enzyme';
 
-describe('RestaurantAddTagForm', () => {
+describe('RestaurantVoteButton', () => {
   let props;
 
   beforeEach(() => {

@@ -9,10 +9,18 @@ body {
   font-family: Nunito;
 }
 
+a {
+  color: #88e;
+
+  &:hover {
+    color: #66e;
+  }
+}
+
 .geosuggest__input {
   border: 2px solid black;
   border-radius: 100px;
-  box-shadow: none;
+  box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .2);
   outline: none;
 }
 

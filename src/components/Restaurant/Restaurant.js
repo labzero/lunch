@@ -24,7 +24,11 @@ export const _Restaurant = ({
   let deleteButton = null;
   let voteButton = null;
   if (loggedIn) {
-    voteButton = <RestaurantVoteButtonContainer {...{ id, votes }} />;
+    voteButton = (
+      <span className={s.voteButtonContainer}>
+        <RestaurantVoteButtonContainer {...{ id, votes }} />
+      </span>
+    );
     deleteButton = (
       <div className={s.deleteButtonContainer}>
         <RestaurantDeleteButtonContainer {...{ id }} />
@@ -45,15 +49,16 @@ export const _Restaurant = ({
     <div className={s.root}>
       <div className={s.header}>
         <h2 className={s.heading} onClick={showMapAndInfoWindow}>{name}</h2>
-        <div className={s.voteButtonContainer}>
-          <RestaurantVoteCountContainer votes={votes} />
-          &nbsp;
+        <div className={s.voteContainer}>
+          <RestaurantVoteCountContainer {...{ votes }} />
           {voteButton}
         </div>
       </div>
-      <a className={s.addressLink} href={`https://www.google.com/maps/place/${name}, ${address}`} target="_blank">
-        {address}
-      </a>
+      <div className={s.addressContainer}>
+        <a className={s.addressLink} href={`https://www.google.com/maps/place/${name}, ${address}`} target="_blank">
+          {address}
+        </a>
+      </div>
       <div className={s.footer}>
         <div className={s.tagsArea}>
           <ul className={`${s.tagList} ${tags.length === 0 ? s.tagsListEmpty : ''}`}>

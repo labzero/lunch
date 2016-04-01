@@ -6,10 +6,6 @@
   font-family: $font-family-base;
 }
 
-.header {
-  clear: fix-legacy;
-}
-
 .heading {
   cursor: pointer;
   float: left;
@@ -19,13 +15,17 @@
   margin: 0;
 }
 
-.voteButtonContainer {
+.voteContainer {
   float: right;
   margin-left: 1em;
 }
 
-.addressLink {
-  display: inline-block;
+.voteButtonContainer {
+  padding-left: .5em;
+}
+
+.addressContainer {
+  clear: left;
   margin-bottom: .25em;
 }
 

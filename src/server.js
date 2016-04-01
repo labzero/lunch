@@ -30,6 +30,7 @@ import fetch from './core/fetch';
 import { processResponse } from './core/ApiClient';
 import restaurantApi from './api/restaurants';
 import tagApi from './api/tags';
+import { User } from './models';
 import { Server as WebSocketServer } from 'ws';
 import serialize from 'serialize-javascript';
 
@@ -121,9 +122,13 @@ server.get('*', async (req, res, next) => {
         return;
       }
       Promise.all([fetch('/api/restaurants'), fetch('/api/tags')])
-        .then(([restaurantsResponse, tagsResponse]) =>
-          Promise.all([processResponse(restaurantsResponse), processResponse(tagsResponse)])
-            .then(([restaurants, tags]) => {
+        .then(([restaurantsResponse, tagsResponse]) => {
+          const responseProcessors = [processResponse(restaurantsResponse), processResponse(tagsResponse)];
+          if (req.user) {
+            responseProcessors.push(User.findAll({ attributes: ['id', 'name'] }));
+          }
+          Promise.all(responseProcessors)
+            .then(([restaurants, tags, users]) => {
               let statusCode = 200;
               const initialState = {
                 restaurants: {
@@ -139,6 +144,9 @@ server.get('*', async (req, res, next) => {
                 flashes: [],
                 modals: {},
                 user: {},
+                users: {
+                  items: []
+                },
                 latLng: {
                   lat: parseFloat(process.env.SUGGEST_LAT),
                   lng: parseFloat(process.env.SUGGEST_LNG)
@@ -153,6 +161,7 @@ server.get('*', async (req, res, next) => {
               };
               if (req.user) {
                 initialState.user = req.user;
+                initialState.users.items = users;
               }
               const store = configureStore(initialState);
               const template = require('./views/index.jade');
@@ -181,8 +190,8 @@ server.get('*', async (req, res, next) => {
               data.css = css.join('');
               res.status(statusCode);
               res.send(template(data));
-            })
-        );
+            });
+        });
     });
   } catch (err) {
     next(err);

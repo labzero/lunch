@@ -1,10 +1,13 @@
 import React, { Component, PropTypes } from 'react';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantVoteCount.scss';
 
 export class _RestaurantVoteCount extends Component {
   static propTypes = {
-    votes: PropTypes.array.isRequired
+    votes: PropTypes.array.isRequired,
+    user: PropTypes.object.isRequired,
+    users: PropTypes.array.isRequired
   };
 
   componentDidUpdate() {
@@ -13,19 +16,39 @@ export class _RestaurantVoteCount extends Component {
   }
 
   render() {
-    let voteCount = null;
+    let voteCountContainer = null;
     if (this.props.votes.length > 0) {
-      voteCount = (
+      const voteCount = (
         <span>
           <strong>{this.props.votes.length}</strong>
           {this.props.votes.length === 1 ? ' vote' : ' votes'}
         </span>
       );
+
+      let tooltip;
+      if (this.props.user.id === undefined) {
+        voteCountContainer = voteCount;
+      } else {
+        tooltip = (
+          <Tooltip>{this.props.votes.map(vote => {
+            const foundUser = this.props.users.find(user => user.id === vote.user_id);
+            if (foundUser !== undefined) {
+              return <div>{foundUser.name}</div>;
+            }
+            return null;
+          })}</Tooltip>
+        );
+        voteCountContainer = (
+          <OverlayTrigger placement="top" overlay={tooltip}>
+            {voteCount}
+          </OverlayTrigger>
+        );
+      }
     }
 
     return (
       <span ref={e => { this._el = e; }} className={s.root}>
-        {voteCount}
+        {voteCountContainer}
       </span>
     );
   }
