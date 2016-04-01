@@ -804,7 +804,7 @@ class ReportsController < ApplicationController
     @filter ||= @filter_options[0][1]
     @filter_text ||= @filter_options[0][0]
     report_download_name = "settlement-transaction-account-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
-    downloadable_report(:pdf, {start_date: @start_date.to_s, end_date: @end_date.to_s, sta_filter: @filter}, report_download_name) do
+    downloadable_report([:pdf, :xlsx], {start_date: @start_date.to_s, end_date: @end_date.to_s, sta_filter: @filter}, report_download_name) do
       if report_disabled?(SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS)
         @settlement_transaction_account = {}
       else

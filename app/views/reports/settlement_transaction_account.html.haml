@@ -6,7 +6,7 @@
     - if @print_layout
       = render 'print_details', name: @member_name, date: t('datepicker.range.print', start_date: fhlb_date_standard_numeric(@start_date), end_date: fhlb_date_standard_numeric(@end_date)), filter_text: (@filter_text == t('global.all') ? t('global.all_transactions') : @filter_text)
     - else
-      = render 'reports_header_buttons', download_formats: :pdf, allowed_params: [:start_date, :end_date, :sta_filter]
+      = render 'reports_header_buttons', download_formats: [:pdf, :xlsx], allowed_params: [:start_date, :end_date, :sta_filter]
       = render 'report_details', name: @member_name, freshness: t('reports.freshness.prior_day'), availability: t('reports.availability.months', months: 6)
       %p.report-sta-number= t('reports.pages.settlement_transaction_account.sta_number_html', sta_number: @sta_number)
     .report-inputs
