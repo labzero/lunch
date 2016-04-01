@@ -36,7 +36,7 @@ module ContactInformationHelper
   def operations_phone_number
     fhlb_formatted_phone_number(OPERATIONS_PHONE_NUMBER)
   end
-  
+
   def mcu_phone_number
     fhlb_formatted_phone_number(MCU_PHONE_NUMBER)
   end

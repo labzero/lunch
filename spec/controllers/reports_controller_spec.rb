@@ -615,7 +615,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a report that can be downloaded', :cash_projections, [:xlsx]
       it_behaves_like 'a report with instance variables set in a before_filter', :cash_projections
       it_behaves_like 'a controller action with an active nav setting', :cash_projections, :reports
-      
+
       describe 'view instance variables' do
         before {
           allow(response_hash).to receive(:[])
@@ -2310,8 +2310,7 @@ RSpec.describe ReportsController, :type => :controller do
       interest_rate_reset_key = I18n.t('reports.pages.price_indications.current.interest_rate_reset')
       describe 'the notes hash' do
         let(:sta_notes) {
-          {I18n.t('reports.pages.price_indications.current.interest_day_count') => I18n.t('reports.pages.price_indications.current.actual_360'),
-           '' => I18n.t('reports.pages.price_indications.sta.notes')
+          {I18n.t('reports.pages.price_indications.current.interest_day_count') => I18n.t('reports.pages.price_indications.current.actual_360')
           }
         }
         collateral_types = [:standard, :sbc]
