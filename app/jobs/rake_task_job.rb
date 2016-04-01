@@ -1,9 +1,11 @@
 class RakeTaskJob < FhlbJob
-  def perform(task, *args)
+  def perform(task_name, *args)
     require 'rake'
     rake = Rake.application
     rake.init
     rake.load_rakefile
-    ::Rake::Task[task].execute(args)
+    task = ::Rake::Task[task_name]
+    task.reenable
+    task.invoke(*args)
   end
 end
