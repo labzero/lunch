@@ -1304,11 +1304,11 @@ en:
           prime_header: Daily Prime
           sta_info: Published STA rate is applied to the previous business day’s ending STA balance.
           sta_rate: Effective Rate for Prior Business Day
-          freshness: This report reflects the price indications as of at 6:00 am PT on the current business day. For current quotes, call the Member Services Desk at %{phone_number}.
+          freshness: This report reflects price indications as of 6:00 am PT on the current business day and the STA rate as of the end of the prior business day. For current quotes, call the Member Services Desk at %{phone_number}.
           date_html: "<span>Date:</span> %{date}"
         historical:
           title: Historical Price Indications
-          freshness: This report reflects historical price indications published at 6:00 am, not actual rates.
+          freshness: This report reflects price indications as of 6:00 am PT on the date displayed and the STA rate as of the date displayed.
           availability: Historical data available varies by credit product.
         standard_credit_program: Standard Credit Program
         sbc_program: Securities-Backed Credit Program
@@ -1606,7 +1606,7 @@ en:
         rejected: Rejected
         total_accepted: Total Loans Accepted
         total_submitted: Total Loans Submitted
-        version_request: To request an expanded version of this report or to obtain a prior version, contact Collateral Services at %{phone_number}
+        version_request: To request an expanded version of this report or to obtain a prior version, contact Collateral Services at %{phone_number}.
         report_details: This report reflects the most recent data available after each MCU has been processed. Only the current report is available. An email with an expanded version of this report that includes detailed rejection and inconsistency information is sent to your institution each time an MCU is processed.
       member_profile:
         title: Member Profile
@@ -1678,7 +1678,7 @@ en:
           number: 'STA No.'
           balance: STA Balance
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
-    accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
+    accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the Accounting Department at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
     close_of_business_processing_notice: Other data as of Close of Business on the prior business day.
     maturity_date_notice: In the event of a prepayment or other modification of the advance, the original maturity date may differ from the actual maturity date.

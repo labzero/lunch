@@ -1126,8 +1126,7 @@ class ReportsController < ApplicationController
       credit_key = @credit_type.to_sym
       notes = if @collateral_type == 'sta'
         {
-          t('reports.pages.price_indications.current.interest_day_count') => t('reports.pages.price_indications.current.actual_360'),
-          '' => t('reports.pages.price_indications.sta.notes')
+          t('reports.pages.price_indications.current.interest_day_count') => t('reports.pages.price_indications.current.actual_360')
         }
       else
         {
