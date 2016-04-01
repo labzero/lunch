@@ -34,6 +34,9 @@ changetype: delete
 dn: sAMAccountName=extra-signer,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
+dn: sAMAccountName=extra-chaste-access-read-only,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
+
 dn: CN=FHLB6,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
@@ -50,6 +53,9 @@ dn: CN=FHLB5,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
 dn: CN=FCN-MemberSite-AccessManagers,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
+
+dn: CN=FCN-MemberSite-AccessManagers-R,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
 dn: CN=FCN-MemberSite-Users,CN=Groups,OU=eBiz,DC=extranet,DC=fhlbsf,DC=com

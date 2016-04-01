@@ -147,3 +147,11 @@ Background:
     And I submit the delete user form
     Then I should see the user deleted overlay
 
+  @jira-mem-1474
+  Scenario: Read-only access managers can see non-editable list of users
+    Given I am logged in as a "read-only access manager"
+    When I visit the access manager page
+    Then I should see a list of users
+    Then I should see the lock user button disabled
+    Then I should see the reset-password user button disabled
+    Then I should see the edit user button disabled

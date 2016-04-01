@@ -179,6 +179,10 @@ Then(/^I should see a user with the an? (first name|last name|email) of "([^"]*)
   page.assert_selector(selector, text: regex, visible: true)
 end
 
+Then(/^I should see the (lock|reset-password|edit) user button disabled$/) do |type|
+  page.assert_no_selector(".settings-user-#{type} a")
+end
+
 def attribute_for_user_field(field)
   case field
   when 'email', 'email confirmation'
