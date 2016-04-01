@@ -79,7 +79,7 @@ When(/^I fill in and submit the login form with the capitalized last user$/) do
   step %{I fill in and submit the login form with username "#{first_time_user['username'].upcase}" and password "#{first_time_user['password']}" ignoring the terms of use}
 end
 
-When(/^I fill in and submit the login form with an? (expired user|extranet no role user|primary user|offsite user)$/) do |user_type|
+When(/^I fill in and submit the login form with an? (expired user|extranet no role user|primary user|offsite user|extended info user|intranet user)$/) do |user_type|
   user = user_for_type(user_type)
   step %{I fill in and submit the login form with username "#{user['username']}" and password "#{user['password']}"}
 end
@@ -106,10 +106,19 @@ When(/^I select the (\d+)(?:st|rd|th) member bank$/) do |num|
   @login_flag = flag_page
   dropdown = page.find('select[name=member_id]')
   dropdown.click
-  option = dropdown.find("option:nth-child(#{num.to_i})")
+  option = dropdown.find("option:nth-child(#{num.to_i+1})")
   @member_id = option.value
   option.click
   click_button(I18n.t('global.continue'))
+end
+
+When(/^I pick a bank$/) do
+  @login_flag = flag_page
+  dropdown = page.find('select[name=member_id]')
+  dropdown.click
+  option = dropdown.find("option:nth-child(2)")
+  @member_id = option.value
+  option.click
 end
 
 When(/^I select the "(.*?)" member bank$/) do |bank_name|
@@ -311,6 +320,10 @@ def user_for_type(user_type)
     offsite_user
   when 'user with disabled quick advances'
     advances_disabled_user
+  when 'dual-signer'
+    dual_signers_required_user
+  when 'extended info user'
+    extended_info_user
   else
     raise 'unknown user type'
   end
@@ -374,6 +387,14 @@ end
 
 def first_time_user
   CustomConfig.env_config['first_time']
+end
+
+def dual_signers_required_user
+  CustomConfig.env_config['dual_signer']
+end
+
+def extended_info_user
+  CustomConfig.env_config['extended_info']
 end
 
 def current_member_name

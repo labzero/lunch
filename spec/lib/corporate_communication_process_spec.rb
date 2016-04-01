@@ -249,7 +249,7 @@ describe CorporateCommunication::Process do
   end
 
   describe '`fetch_and_process_email` method' do
-    let(:category_mapping) { {} }
+    let(:category) { double('A Category') }
     let(:username) { double('A Username') }
     let(:env_username) { double('A Useranme from ENV') }
     let(:password) { double('A Password') }
@@ -260,7 +260,7 @@ describe CorporateCommunication::Process do
     let(:env_port) { double('A Port from ENV', to_i: double(Fixnum)) }
     let(:connection) { double(Net::IMAP, login: nil, examine: nil, uid_search: [], logout: nil, select: nil, uid_fetch: [], uid_store: nil, close: nil) }
     let(:ca_bundle) { double('CA Bundle Path') }
-    let(:call_method) { subject.fetch_and_process_email(category_mapping, username, password, host, port) }
+    let(:call_method) { subject.fetch_and_process_email(category, username, password, host, port) }
 
     before do
       allow(Net::IMAP).to receive(:new).and_return(connection)
@@ -278,7 +278,7 @@ describe CorporateCommunication::Process do
       end
 
       describe 'default parameters' do
-        let(:call_method) { subject.fetch_and_process_email(category_mapping, username, password) }
+        let(:call_method) { subject.fetch_and_process_email(category, username, password) }
         it 'defaults the host to the `ENV[IMAP_HOST]` if none is provided' do
           expect(Net::IMAP).to receive(:new).with(env_host, anything).and_return(connection)
           call_method
@@ -321,7 +321,7 @@ describe CorporateCommunication::Process do
         call_method
       end
       describe 'default parameters' do
-        let(:call_method) { subject.fetch_and_process_email(category_mapping) }
+        let(:call_method) { subject.fetch_and_process_email(category) }
         it 'defaults the username to `ENV[IMAP_USERNAME]`' do
           expect(connection).to receive(:login).with(env_username, anything)
           call_method
@@ -354,7 +354,6 @@ describe CorporateCommunication::Process do
       let(:messages) { [double(Net::IMAP::FetchData), double(Net::IMAP::FetchData), double(Net::IMAP::FetchData)] }
       let(:mail_objects) { [] }
       let(:processed_mail_objects) { [] }
-      let(:category) { double('A Category')}
       before do
         allow(connection).to receive(:uid_search).with('UNSEEN').and_return(message_uids)
         allow(connection).to receive(:uid_fetch).with(message_uids, 'RFC822').and_return(messages)
@@ -366,7 +365,6 @@ describe CorporateCommunication::Process do
           allow(Mail).to receive(:read_from_string).with(attributes['RFC822']).and_return(mail_object)
           allow(subject).to receive(:process_email).with(mail_object, anything).and_return(processed_mail)
           allow(subject).to receive(:persist_processed_email).with(processed_mail).and_return(true)
-          category_mapping[mail_object.to.first] = category
           mail_objects << mail_object
           processed_mail_objects << processed_mail
         end
@@ -378,12 +376,6 @@ describe CorporateCommunication::Process do
       it 'converts the `RFC822` messages into Mail objects' do
         messages.each_with_index do |message, i|
           expect(Mail).to receive(:read_from_string).with(message.attr['RFC822']).and_return(mail_objects[i])
-        end
-        call_method
-      end
-      it 'looks up the message category based on the To: address' do
-        mail_objects.each do |mail_object|
-          expect(category_mapping).to receive(:[]).with(mail_object.to.first)
         end
         call_method
       end
@@ -467,6 +459,53 @@ describe Rake do
     it 'calls the method `process_email` on the `CorporateCommunication::Process` module with the supplied arguments' do
       expect(CorporateCommunication::Process).to receive(:process_email).with(email_path, category)
       ::Rake::Task["corporate_communication:process"].invoke(email_path, category)
+    end
+  end
+
+  describe 'the corporate_communication:fetch_and_process task' do
+    let(:mapping) { {
+      double('A Username') => double('A Category'),
+      double('A Username') => double('A Category')
+    } }
+    let(:mapping_json) { double('Mapping JSON') }
+    let(:run_task) { ::Rake::Task["corporate_communication:fetch_and_process"].invoke(mapping_json) }
+    before do
+      Rake::Task.clear
+      load 'lib/tasks/corporate_communication.rake'
+      Rake::Task.define_task(:environment)
+      allow(CorporateCommunication::Process).to receive(:fetch_and_process_email).and_return(true)
+      allow(JSON).to receive(:parse).with(mapping_json).and_return(mapping)
+      expect(mapping.count).to be >= 2
+    end
+    it 'calls `CorporateCommunication::Process.fetch_and_process_email` once per entry in the mapping' do
+      mapping.each do |username, category|
+        expect(CorporateCommunication::Process).to receive(:fetch_and_process_email).with(category, username).and_return(true)
+      end
+      run_task
+    end
+    it 'uses the category mapping from the task arguments if present' do
+      expect(JSON).to receive(:parse).with(mapping_json).and_return(mapping)
+      ::Rake::Task["corporate_communication:fetch_and_process"].invoke(mapping_json)
+    end
+    it 'falls back to the ENV `ANNOUNCEMENT_CATEGORY_MAPPING` category mapping' do
+      expect(ENV).to receive(:[]).with('ANNOUNCEMENT_CATEGORY_MAPPING').and_return(mapping_json)
+      ::Rake::Task["corporate_communication:fetch_and_process"].invoke
+    end
+    it 'parses the category mapping as JSON' do
+      expect(JSON).to receive(:parse).with(mapping_json).and_return(mapping)
+      run_task
+    end
+    it 'exits with success if all `fetch_and_process_email` calls are successful' do
+      allow(CorporateCommunication::Process).to receive(:fetch_and_process_email).and_return(true)
+      expect{run_task}.to_not raise_error
+    end
+    it 'exits with failure if at least one `fetch_and_process_email` call fails' do
+      allow(CorporateCommunication::Process).to receive(:fetch_and_process_email).and_return(false, true)
+      expect{run_task}.to raise_error
+    end
+    it 'tries all entries in the category mapping even if some fail' do
+      expect(CorporateCommunication::Process).to receive(:fetch_and_process_email).and_return(false, *Array.new(mapping.count - 1, true)).exactly(mapping.count)
+      run_task rescue RuntimeError
     end
   end
 end

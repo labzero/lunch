@@ -92,5 +92,56 @@ RSpec.describe Member, type: :model do
         expect(subject.quick_report_params(double('A Name'))).to be_nil
       end
     end
+    describe '`requires_dual_signers?`' do
+      let(:call_method) { subject.requires_dual_signers? }
+      let(:request) { double('request object') }
+      let(:member_details) { {dual_signers_required: double('dual_signers_required')} }
+      before { allow_any_instance_of(MembersService).to receive(:member).and_return({}) }
+      describe 'when @member_details are not present' do
+        it 'fetches details with the request object it was passed' do
+          expect(subject).to receive(:fetch_details).with(request).and_call_original
+          subject.requires_dual_signers?(request)
+        end
+        it 'fetches details with no request object if none was passed' do
+          expect(subject).to receive(:fetch_details).with(nil).and_call_original
+          call_method
+        end
+      end
+      it 'does not fetch details if @member_details are present' do
+        call_method
+        expect(subject).not_to receive(:fetch_details)
+        call_method
+      end
+      it 'returns the value of `dual_signers_required` from member details' do
+        allow_any_instance_of(MembersService).to receive(:member).and_return(member_details)
+        expect(call_method).to eq(member_details[:dual_signers_required])
+      end
+    end
+  end
+
+  describe 'protected methods' do
+    describe '`fetch_details`' do
+      let(:call_method) { subject.send(:fetch_details) }
+      let(:members_service_instance) { double(MembersService, member: nil) }
+      let(:request) { double('request') }
+      let(:member_details) { double('member details') }
+      before do
+        allow(MembersService).to receive(:new).and_return(members_service_instance)
+      end
+      it 'creates a new instance of MembersService with the request it was passed' do
+        expect(MembersService).to receive(:new).with(request).and_return(members_service_instance)
+        subject.send(:fetch_details, request)
+      end
+      it 'creates a new instance of MembersService with a test request if none was passed' do
+        allow(ActionDispatch::TestRequest).to receive(:new).and_return(request)
+        expect(MembersService).to receive(:new).with(request).and_return(members_service_instance)
+        call_method
+      end
+      it 'sets @member_details to the result of calling `member` on the MembersService instance' do
+        allow(members_service_instance).to receive(:member).and_return(member_details)
+        call_method
+        expect(subject.instance_variable_get('@member_details')).to eq(member_details)
+      end
+    end
   end
 end

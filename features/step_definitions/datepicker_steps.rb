@@ -222,10 +222,72 @@ def change_datepicker_to_month(today, month, calendar)
   end
 end
 
+def datepicker_ranged?
+  page.all('.datepicker_input_field').count == 2
+end
+
+def datepicker_monthly?
+  page.all('.datepicker-wrapper[data-date-picker-filter=endOfMonth]').present?
+end
+
 When(/^I click on the datepicker (start|end) input field$/) do |input|
   page.find("input[name=daterangepicker_#{input}]").click
 end
 
 Then(/^I should see the date "(.*?)" in the datepicker (start|end) input field/) do |date, input|
   page.find("input[name=daterangepicker_#{input}]").value.should eq date
+end
+
+When(/^I click on the datepicker field label$/) do
+  page.all('.datepicker_input_field label').first.click
+end
+
+Then(/^I am able to enter two\-digit years in the datepicker inputs?$/) do
+  datepicker_wrapper = page.find('.datepicker-wrapper')
+  min_date = (datepicker_wrapper['data-date-picker-min-date'] || '1998-01-01').to_date
+  max_date = (datepicker_wrapper['data-date-picker-max-date'] || Time.zone.today).to_date
+
+  if datepicker_monthly?
+    min_date = min_date.end_of_month
+    max_date = max_date.end_of_month == max_date ? max_date : (max_date - 1.month).end_of_month
+  end
+
+  min_date_two_digit = min_date.strftime('%-m/%-d/%y')
+  min_date_four_digit = min_date.strftime('%m/%d/%Y')
+  max_date_two_digit = max_date.strftime('%-m/%-d/%y')
+  max_date_four_digit = max_date.strftime('%m/%d/%Y')
+  existing_start_date = page.find("input[name=daterangepicker_start]").value
+  invalid_date = '1/32'
+
+  step %{I write "#{min_date_two_digit}" in the datepicker start input field}
+  step %{I click on the datepicker field label}
+  step %{I should see the date "#{min_date_four_digit}" in the datepicker start input field}
+  step %{I write "#{max_date_two_digit}" in the datepicker start input field}
+  step %{I click on the datepicker field label}
+  step %{I should see the date "#{max_date_four_digit}" in the datepicker start input field}
+  step %{I write "#{invalid_date}" in the datepicker start input field}
+  step %{I click on the datepicker field label}
+  step %{I should see the date "#{existing_start_date}" in the datepicker start input field}
+
+  if datepicker_ranged?
+    existing_end_date = page.find("input[name=daterangepicker_end]").value
+    step %{I write "#{min_date_two_digit}" in the datepicker end input field}
+    step %{I click on the datepicker field label}
+    step %{I should see the date "#{min_date_four_digit}" in the datepicker end input field}
+    step %{I write "#{max_date_two_digit}" in the datepicker end input field}
+    step %{I click on the datepicker field label}
+    step %{I should see the date "#{max_date_four_digit}" in the datepicker end input field}
+    step %{I write "#{invalid_date}" in the datepicker end input field}
+    step %{I click on the datepicker field label}
+    step %{I should see the date "#{existing_end_date}" in the datepicker end input field}
+  end
+end
+
+Then(/^I am not able to enter prohibited characters in the datepicker inputs?$/) do
+  step %{I write "a1b/c1d/ffff2011qwertyuiopasdfghjkl;zxcvbnm,.!@#$%^&*()_+" in the datepicker start input field}
+  step %{I should see the date "1/1/2011" in the datepicker start input field}
+  if datepicker_ranged?
+    step %{I write "qwertyuiopasdfghjkl;zxcvbnm,.!@#$%^&*()_+a1b/c1d/ffff2011" in the datepicker end input field}
+    step %{I should see the date "1/1/2011" in the datepicker end input field}
+  end
 end

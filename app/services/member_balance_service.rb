@@ -41,12 +41,12 @@ class MemberBalanceService < MAPIService
       total_capacity = data['total_capacity']
       unused_capacity= data['unused_capacity']
       used_capacity = total_capacity - unused_capacity
-    
+
       {
           used_capacity: {absolute: used_capacity, percentage: used_capacity.fdiv(total_capacity)*100},
           unused_capacity: {absolute: unused_capacity, percentage: unused_capacity.fdiv(total_capacity)*100}
       }.with_indifferent_access
-    end 
+    end
   end
 
   def capital_stock_activity(start_date, end_date)
@@ -116,9 +116,9 @@ class MemberBalanceService < MAPIService
             row[:bc_upb] = 0
           end
         end
-        data[:net_loan_collateral] = data[:standard_credit_totals][:borrowing_capacity].to_i - data[:standard][:excluded].values.sum 
+        data[:net_loan_collateral] = data[:standard_credit_totals][:borrowing_capacity].to_i - data[:standard][:excluded].values.sum
         data[:net_plus_securities_capacity] = data[:net_loan_collateral] + data[:standard][:securities].to_i
-        data[:standard_excess_capacity] = data[:net_plus_securities_capacity].to_i - data[:standard][:utilized].values.sum 
+        data[:standard_excess_capacity] = data[:net_plus_securities_capacity].to_i - data[:standard][:utilized].values.sum
       rescue => e
         return warn(:borrowing_capacity_summary, "malformed data[:standard] hash. It returned #{data[:standard]} and threw the following error: #{e}", e)
       end
@@ -215,7 +215,7 @@ class MemberBalanceService < MAPIService
   end
 
   def profile
-    if data = get_hash(:profile, "/member/#{@member_id}/member_profile")    
+    if data = get_hash(:profile, "/member/#{@member_id}/member_profile")
       data[:used_financing_availability] = data[:collateral_borrowing_capacity][:total].to_i - data[:collateral_borrowing_capacity][:remaining].to_i
       data[:uncollateralized_financing_availability] = [data[:total_financing_available].to_i - data[:collateral_borrowing_capacity][:total].to_i, 0].max
     end
@@ -319,7 +319,7 @@ class MemberBalanceService < MAPIService
 
   def capital_stock_trial_balance(date)
     if data = get_hash(:capital_stock_trial_balance, "member/#{@member_id}/capital_stock_trial_balance/#{date.iso8601}")
-      data[:certificates].each { |certificate| fix_date(certificate, :issue_date) }
+      data[:certificates].each { |certificate| fix_date(certificate, :issue_date) } if data[:certificates]
       data
     end
   end
@@ -338,37 +338,13 @@ class MemberBalanceService < MAPIService
       processed_data = []
       data.each do |activity|
         activity = activity.with_indifferent_access
-        # Handling for Advances that have been EXERCISED
-        if (activity[:instrument_type] == 'ADVANCE' || activity[:instrument_type] == 'LC') && activity[:status] == 'EXERCISED'
-          activity[:product_description] = activity[:termination_full_partial]
-          activity[:interest_rate] = nil
-        else
-          activity[:product_description] =
-            # handling for Termination Par
-          if !activity[:termination_par].blank?
-            if !activity[:termination_full_partial].blank?
-              if activity[:instrument_type] == 'ADVANCE' || activity[:instrument_type] == 'LC'
-                           activity[:termination_full_partial]
-              elsif activity[:status] == 'TERMINATED'
-                'TERMINATION'
-              else
-                activity[:instrument_type]
-              end
-            # else - leave the product_description as-is
-            end
-          elsif activity[:instrument_type] == 'ADVANCE'
-            activity[:instrument_type] + ' ' + activity[:sub_product]
-          else
-            activity[:instrument_type]
-          end
-        end
         fix_date(activity, [:funding_date, :maturity_date])
         processed_data.push(activity)
       end
       processed_data
     end
   end
-  
+
   def mortgage_collateral_update
     fix_date(get_hash(:mortgage_collateral_update, "/member/#{@member_id}/mortgage_collateral_update"), :date_processed)
   end

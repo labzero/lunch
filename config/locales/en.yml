@@ -298,7 +298,7 @@ en:
         title: Account Unlocked
         success_html: Account for <strong>%{name}</strong> is unlocked.
       error:
-        title: An Error Occured
+        title: An Error Occurred
         summary: Your request could not be completed.
       create:
         title: Add New Web User
@@ -431,6 +431,7 @@ en:
     logged_out: You Have Been Logged Out
     session_expired: For security reasons, your session expires after several minutes of inactivity.
     log_in_again: Log In Again
+    view_profile: View Member Profile
   forgot_password:
     instructions: "Enter your username, and we’ll email you instructions to reset your password."
     confirmation:
@@ -452,6 +453,7 @@ en:
   dashboard:
     meta_title: FHLB - Dashboard
     retrieving_data: We are retrieving this data.
+    open: Open
     actions:
       more: More
       edit: Edit
@@ -463,6 +465,15 @@ en:
       title: Recent Credit Activity
       view_report_html: View your institution’s <a href=%{url}>Today’s Credit Activity</a> report for detailed information.
       no_activity: No recent credit activity.
+      letter_of_credit: Letter of Credit
+      amended_today: Amended Today
+      terminated_today: Terminated Today
+      matures_today: Matures Today
+      matures_on: Matures on %{date}
+      expires_today: Expires Today
+      expires_on: Expires on %{date}
+      will_be_funded_on: Will be Funded on %{date}
+      in_review: In Review
     contacts:
       title: Contact
       icon_alt_text: Contact
@@ -1499,8 +1510,6 @@ en:
         minimum_maintenance_charge: '*The minimum annual maintenance charge is $500.'
       securities_transactions:
         title: Securities Transactions
-        info: The Securities Transaction Report is updated twice a day. The Preliminary Securities Transactions Report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm on the settlement day. The Final Securities Transactions Report reflects all transactions that have settled that day and is generally available at the end of the business day.
-        effective: Effective %{date}, a “units” column has been added to the Securities Transactions Report.
         preliminary: "Preliminary Report: Securities Transactions settled as of 11:30 am on %{date}"
         final: "Final Report: Securities Transactions settled as of close of business on %{date}"
         indicates_a_new_transaction_html: "*Indicates a new transaction."
@@ -1524,7 +1533,7 @@ en:
         sub_title: Users with %{filter} Authorization
         sub_title_all_users: All Users with Authorizations
         sub_title_inclusive_authorizations: Users with %{filter}
-        table_footnote: "* %{role} authorization included for users with Resolution and Authorization: Memeber Transactions or Etntire Authority."
+        table_footnote: "* %{role} authorization included for users with Resolution and Authorization: Member Transactions or Entire Authority."
       parallel_shift:
         title: Putable Advance Parallel Shift Sensitivity Analysis
         info: The valuations below are calculated using data as of %{date}
@@ -1598,6 +1607,75 @@ en:
         total_submitted: Total Loans Submitted
         version_request: To request an expanded version of this report or to obtain a prior version, contact Collateral Services at %{phone_number}
         report_details: This report reflects the most recent data available after each MCU has been processed. Only the current report is available. An email with an expanded version of this report that includes detailed rejection and inconsistency information is sent to your institution each time an MCU is processed.
+      member_profile:
+        title: Member Profile
+        fhlb_id: FHLB ID
+        fhfb_id: FHFB ID
+        relationship_manager: Relationship Manager
+        collateral_asset_mananger: Collateral Asset Manager
+        credit_analyst: Credit Analyst
+        regulator: Regulator
+        collateral_status: Collateral Status
+        cqr: CQR
+        delivered: Delivered
+        not_delivered: Not Delivered
+        collateral:
+          title: Collateral
+        capital_stock:
+          title: Capital Stock
+          required_by_advances: Required by Advances
+          required_by_mpf: Required by MPF
+          required_by_funding: Required by Funding
+          precent_of_mav: '% of MAV'
+          capital_stock_required: Capital Stock Required
+          capital_stock_held: Capital Stock Held
+          excess_deficiency: Excess/Deficiency
+          add_advances_possible: Add. Advances Possible
+          stock_purchase_required: Stock Purchase Required
+        rhfa:
+          title: RHFA
+          limit: Limit
+          total: Total L/T Advances
+          available: Available RHFA Limit
+        advances:
+          title: Advances and MPF
+          end_of_day: End of Prior Day Advances
+          maturing_today_term: 'Maturing Today (Terms)'
+          maturing_today_on: 'Maturing Today (O/N)'
+          amortizing: Amortizing Adjustment
+          partial_prepayment: Partial Prepayment
+          scheduled_funding_today: Scheduled Funding Today
+          funding_today: Funding Today
+          repays_today: Repays Today
+          total_advances: Total Advances
+          mpf_intraday: MPF Intraday Activity
+          mpf_loan_balance: MPF SF Loan Balance
+          total_mpf: Total MPF
+          total_advances_and_mpf: Total Advances and MPF
+        credit:
+          title: Credit
+          percent_of_assets: '% of Assets'
+          max_term: 'Max. Term (months)'
+          total_assets: Total Assets
+          max_credit: 'Max. Credit (% Assets)'
+          mpf_available: 'MPF Available C/E'
+          committed_funding: 'Committed Funding (exc. MPF)'
+          regular_outstanding: Regular Outstanding
+          sbc_outstanding: SBC Outstanding
+          total_advances_outstanding: Total Advances Outstanding
+          mpf_actual_ce: 'MPF Actual C/E'
+          total_advance_and_mpf: 'Total Adv. & MPF C/E Outstanding'
+          notional_swaps: Notional Swaps
+          total_swaps: Total Swaps
+          letters_of_credit: Letters of Credit
+          unsecured_investments: 'Unsecured Inv. O/S'
+          total_credit_products: Total Credit Porducts Outstanding
+          total_credit: Total Credit
+          total_available_credit: Total Available Credit
+        sta:
+          title: STA
+          number: 'STA No.'
+          balance: STA Balance
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
@@ -2555,7 +2633,7 @@ en:
     error_occurred: An error has occurred.
     emails:
       calypso_error:
-        subject: 'Notice: System error occured'
+        subject: 'Notice: System error occurred'
         error_class: Error Class
         error_message: Error Message
         error_inspection: Error Details

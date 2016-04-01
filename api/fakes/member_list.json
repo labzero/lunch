@@ -11,5 +11,6 @@
   {"FHLB_ID": 10, "CP_ASSOC": "Overseas Bank"},
   {"FHLB_ID": 11, "CP_ASSOC": "Cayman Islands Holding Company"},
   {"FHLB_ID": 12, "CP_ASSOC": "The Bank With The Really Really Long Name That Requires Truncation or Expansion"},
-  {"FHLB_ID": 13, "CP_ASSOC": "The Bank With Disabled Signers"}
+  {"FHLB_ID": 13, "CP_ASSOC": "The Bank With Disabled Signers"},
+  {"FHLB_ID": 14, "CP_ASSOC": "The Bank Requiring Dual Signers for Advances"}
 ]

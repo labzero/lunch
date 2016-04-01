@@ -70,7 +70,6 @@ class DashboardController < ApplicationController
     else
       calculate_gauge_percentages({total: 0}, 0)
     end
-    
     @financing_availability_gauge = if profile[:total_financing_available]
       calculate_gauge_percentages(
         {
@@ -106,7 +105,7 @@ class DashboardController < ApplicationController
       @contacts[:rm][:image_url] = find_asset(rm_image_path) ? rm_image_path : default_image_path
     end
     if @contacts[:cam] && @contacts[:cam][:username]
-      cam_image_path = "#{@contacts[:cam][:username].downcase}.jpg" 
+      cam_image_path = "#{@contacts[:cam][:username].downcase}.jpg"
       @contacts[:cam][:image_url] = find_asset(cam_image_path) ? cam_image_path : default_image_path
     end
 
@@ -158,6 +157,7 @@ class DashboardController < ApplicationController
       limit_error = advance_request.errors.find {|e| e.type == :limits}
       preview_errors = advance_request.errors.select {|e| e.type == :preview }
       rate_error = advance_request.errors.find {|e| e.type == :rate}
+      other_errors = advance_request.errors - [limit_error, rate_error, *preview_errors]
 
       if limit_error.present?
         preview_success = false
@@ -169,29 +169,28 @@ class DashboardController < ApplicationController
         preview_error = true
         @error_message = rate_error.code
       else
-        collateral_error = preview_errors.find {|e| e.code == :collateral}
+        collateral_error = preview_errors.find {|e| e.code == :collateral }
+        other_preview_error = preview_errors.find {|e| e.code != :capital_stock }
         if collateral_error
           preview_success = false
           preview_error = true
-          @error_message = :collateral
+          @error_message = collateral_error.code
           @error_value = collateral_error.value
-        elsif preview_errors.find {|e| e.code == :capital_stock}
+        elsif other_preview_error
+          preview_success = false
+          preview_error = true
+          @error_message = other_preview_error.code
+          @error_value = other_preview_error.value
+        elsif other_errors.present?
+          preview_success = false
+          preview_error = true
+          @error_message = :unknown
+        else # capital stock error
           preview_success = false
           preview_error = false
           @original_amount = advance_request.amount
           @net_amount = @original_amount - @net_stock_required
           response_html = render_to_string :quick_advance_capstock, layout: false
-        else
-          preview_success = false
-          preview_error = true
-          [:capital_stock_offline, :credit, :total_daily_limit].each do |code|
-            error = preview_errors.find {|e| e.code == code}
-            if error
-              @error_message = code
-              @error_value = error.value
-              break
-            end
-          end
         end
       end
     else
@@ -242,7 +241,6 @@ class DashboardController < ApplicationController
         response_html = render_to_string :quick_advance_error, layout: false
       else
         advance_request.execute
-        
         if advance_request.executed?
           advance_success = true
           populate_advance_request_view_parameters
@@ -412,17 +410,70 @@ class DashboardController < ApplicationController
   def process_recent_activities(activities)
     activity_data = []
     if activities
-      activities.each_with_index do |activity, i|
+      i = 0
+      activities.each do |activity|
         break if i > 4
+        next unless activity[:instrument_type] == 'LC' ||
+                    activity[:instrument_type] == 'ADVANCE' ||
+                    activity[:instrument_type] == 'INVESTMENT'
         maturity_date = activity[:maturity_date].to_date if activity[:maturity_date]
-        maturity_date = if maturity_date == Time.zone.today
-                          t('global.today')
-                        elsif activity[:instrument_type] == 'ADVANCE' && !maturity_date
-                          t('global.open')
+        maturity_date = case activity[:status]
+                        when 'TERMINATED'
+                          if activity[:instrument_type] == 'LC'
+                            t('dashboard.recent_activity.terminated_today')
+                          elsif activity[:instrument_type] == 'ADVANCE'
+                            activity[:termination_full_partial]
+                          else
+                            fhlb_date_standard_numeric(maturity_date)
+                          end
+                        when 'INTER_AMEND_STA'
+                          t('dashboard.recent_activity.amended_today')
+                        when 'EXPIRED'
+                          t('dashboard.recent_activity.expires_today')
+                        when 'MATURED'
+                          t('dashboard.recent_activity.matures_today')
+                        when 'VERIFIED'
+                          if activity[:product] == 'OPEN VRC'
+                            t('dashboard.open')
+                          else
+                            t('dashboard.recent_activity.matures_on', date: fhlb_date_standard_numeric(maturity_date))
+                          end
+                        when 'COLLATERAL_AUTH'
+                          t('dashboard.recent_activity.will_be_funded_on', date: fhlb_date_standard_numeric(activity[:funding_date]))
+                        when 'OPS_REVIEW', 'SEC_REVIEWED'
+                          t('dashboard.recent_activity.in_review')
+                        when 'EXECUTED'
+                          t('dashboard.recent_activity.matures_on', date: maturity_date)
+                        when 'PEND_TERM'
+                          if maturity_date
+                            t('dashboard.recent_activity.matures_on', date: maturity_date)
+                          else
+                            t('dashboard.open')
+                          end
                         else
-                          fhlb_date_standard_numeric(maturity_date)
+                          if activity[:instrument_type] == 'INVESTMENT'
+                            if maturity_date == Time.zone.today
+                              t('dashboard.recent_activity.matures_today')
+                            else
+                              if maturity_date
+                                t('dashboard.recent_activity.matures_on', date: maturity_date)
+                              else
+                                t('dashboard.open')
+                              end
+                            end
+                          else
+                            if maturity_date == Time.zone.today
+                              t('global.today')
+                            else
+                              fhlb_date_standard_numeric(maturity_date)
+                            end
+                          end
                         end
+        if activity[:product_description] == "LC" || activity[:product_description] == "LC LC LC"
+          activity[:product_description] = t('dashboard.recent_activity.letter_of_credit')
+        end
         activity_data.push([activity[:product_description], activity[:current_par], maturity_date, activity[:transaction_number]])
+        i += 1
       end
     end
     activity_data

@@ -7,7 +7,7 @@ default: &default
     given_name: <%= ENV['CUCUMBER_PRIMARY_GIVEN_NAME'] || ENV['CUCUMBER_PRIMARY_USERNAME'] || 'local' %>
     bank: <%= ENV['CUCUMBER_PRIMARY_BANK'] || 'Meridian Bank, National Association' %>
   signer_advances_user:
-    username: <%= ENV['CUCUMBER_SIGNER_ADVANCES_USERNAME'] || 'local' %>
+    username: <%= ENV['CUCUMBER_SIGNER_ADVANCES_USERNAME'] || 'extra-signer' %>
     password: <%= ENV['CUCUMBER_SIGNER_ADVANCES_PASSWORD'] || 'development' %>
   non_signer_advances_user:
     username: <%= ENV['CUCUMBER_NON_SIGNER_ADVANCES_USERNAME'] || 'local-non-signer' %>
@@ -46,6 +46,12 @@ default: &default
   advances_disabled:
     username: <%= ENV['CUCUMBER_OFFSITE_USERNAME'] || 'quick-advance-disabled' %>
     password: <%= ENV['CUCUMBER_OFFSITE_PASSWORD'] || 'development' %>
+  dual_signer:
+    username: <%= ENV['CUCUMBER_DUAL_SIGNER_USERNAME'] || 'dual-signer-required' %>
+    password: <%= ENV['CUCUMBER_DUAL_SIGNER_PASSWORD'] || 'development' %>
+  extended_info:
+    username: <%= ENV['CUCUMBER_EXTENDED_INFO_USERNAME'] || 'local-extended-info' %>
+    password: <%= ENV['CUCUMBER_EXTENDED_INFO_PASSWORD'] || 'development' %>
   valid_password: <%= ENV['CUCUMBER_VALID_PASSWORD'] || '123Abcd3!' %>
 
 local:

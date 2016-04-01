@@ -1,23 +1,39 @@
 require 'rails_helper'
 
 RSpec.describe AdvancePolicy, :type => :policy do
-  let(:user) { double(User, id: double('User ID')) }
+  let(:user) { double(User, id: double('User ID'), member: nil) }
+  let(:member) { double(Member, requires_dual_signers?: nil) }
   let(:advance_request) { double(AdvanceRequest) }
 
   describe '`show?` method' do
     subject { AdvancePolicy.new(user, :advance) }
 
-    context 'for a signer' do
-      before do
-        allow(user).to receive(:roles).and_return([User::Roles::ADVANCE_SIGNER])
+    context 'for a user associated with a member' do
+      before { allow(user).to receive(:member).and_return(member) }
+
+      context 'when the member requires dual signers' do
+        before { allow(member).to receive(:requires_dual_signers?).and_return(true) }
+        it { should_not permit_action(:show) }
       end
-      it { should permit_action(:show) }
+
+      context 'when the member does not require dual signers' do
+        context 'for a signer' do
+          before do
+            allow(user).to receive(:roles).and_return([User::Roles::ADVANCE_SIGNER])
+          end
+          it { should permit_action(:show) }
+        end
+
+        context 'for a non-signer' do
+          before do
+            allow(user).to receive(:roles).and_return([])
+          end
+          it { should_not permit_action(:show) }
+        end
+      end
     end
 
-    context 'for a non-signer' do
-      before do
-        allow(user).to receive(:roles).and_return([])
-      end
+    context 'for a user not associated with a member' do
       it { should_not permit_action(:show) }
     end
   end

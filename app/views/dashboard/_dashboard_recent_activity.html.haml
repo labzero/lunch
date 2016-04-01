@@ -9,7 +9,7 @@
       - table_data.each do |row|
         %tr
           %td
-            = row[0]
+            %div.dashboard-module-content-truncated= row[0]
             %div.dashboard-module-content-light= row[2]
           %td
             = fhlb_formated_currency_unit(row[1])

@@ -118,22 +118,8 @@ Scenario: Member downloads an XLSX of the Historical Price Indications report
   Then I should begin downloading a file
 
 @jira-mem-919
-Scenario: Entering two-digit years and prohibited characters in the datepicker start field
+Scenario: The datepicker handles two-digit years and prohibited characters
   Given I am on the "Historical Price Indications" report page
   When I click the datepicker field
-  And I write "1/1/98" in the datepicker start input field
-  And I click on the datepicker end input field
-  Then I should see the date "01/01/1998" in the datepicker start input field
-  And I write "1/1/98" in the datepicker end input field
-  And I click on the datepicker start input field
-  Then I should see the date "01/01/1998" in the datepicker end input field
-  And I write "1/1/10" in the datepicker start input field
-  And I click on the datepicker end input field
-  Then I should see the date "01/01/2010" in the datepicker start input field
-  And I write "1/1/10" in the datepicker end input field
-  And I click on the datepicker start input field
-  Then I should see the date "01/01/2010" in the datepicker end input field
-  And I write "a1b/c1d/ffff2011qwertyuiopasdfghjkl;zxcvbnm,.!@#$%^&*()_+" in the datepicker start input field
-  Then I should see the date "1/1/2011" in the datepicker start input field
-  And I write "qwertyuiopasdfghjkl;zxcvbnm,.!@#$%^&*()_+a1b/c1d/ffff2011" in the datepicker end input field
-  Then I should see the date "1/1/2011" in the datepicker end input field
+  Then I am able to enter two-digit years in the datepicker inputs
+  And I am not able to enter prohibited characters in the datepicker inputs

@@ -30,6 +30,8 @@ module ReportConfiguration
       I18n.t('reports.credit.forward_commitments.title')
     when :account_summary
       I18n.t('reports.pages.account_summary.title')
+    when :cash_projections
+      I18n.t('reports.pages.cash_projections.title')
     else
       nil
     end

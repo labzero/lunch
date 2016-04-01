@@ -51,6 +51,7 @@ class User < ActiveRecord::Base
     USER_WITH_EXTERNAL_ACCESS = 'user_with_external_access'
     ACCESS_MANAGER_READ_ONLY = 'access_manager_read_only'
     ACCESS_MANAGER = 'access_manager'
+    USER_WITH_EXTENDED_INFO_ACCESS = 'user_with_extended_info_access'
     ADMIN = 'admin'
     AUTHORIZED_SIGNER = 'authorized_signer'
     SIGNER_MANAGER = 'signer_manager'
@@ -70,6 +71,7 @@ class User < ActiveRecord::Base
     'FCN-MemberSite-AccessManagers-R' => Roles::ACCESS_MANAGER_READ_ONLY,
     'FCN-MemberSite-AccessManagers' => Roles::ACCESS_MANAGER,
     'FCN-MemberSite-Admins' => Roles::ADMIN,
+    'FCN-MemberSite-ExtendedInfo-User' => Roles::USER_WITH_EXTENDED_INFO_ACCESS,
     'signer' => Roles::AUTHORIZED_SIGNER,
     'signer-manager' => Roles::SIGNER_MANAGER,
     'signer-entire-authority' => Roles::SIGNER_ENTIRE_AUTHORITY,
@@ -222,7 +224,7 @@ class User < ActiveRecord::Base
   end
 
   def self.add_extranet_user(member_id, creator, username, email, given_name=nil, surname=nil)
-    find_or_create_by(username: username, ldap_domain: LDAP_EXTRANET_DOMAIN) if create_ldap_user(member_id, creator, username, email, given_name, surname)
+    find_or_create_by_with_retry(username: username, ldap_domain: LDAP_EXTRANET_DOMAIN) if create_ldap_user(member_id, creator, username, email, given_name, surname)
   end
 
   def self.create(*args, &block)
@@ -242,7 +244,7 @@ class User < ActiveRecord::Base
   end
 
   def self.find_or_create_by_ldap_entry(entry)
-    record = self.find_or_create_by({
+    record = self.find_or_create_by_with_retry({
       username: entry[:samaccountname].try(:first),
       ldap_domain: Devise::LDAP::Adapter.get_ldap_domain_from_dn(entry.dn)
     })
@@ -255,9 +257,21 @@ class User < ActiveRecord::Base
     unless record
       username = attributes[:username]
       ldap_domain = Devise::LDAP::Adapter.get_ldap_domain(username)
-      record = self.find_or_create_by(username: username, ldap_domain: ldap_domain) if ldap_domain
+      record = self.find_or_create_by_with_retry(username: username, ldap_domain: ldap_domain) if ldap_domain
     end
     record
+  end
+
+  def self.find_or_create_by_with_retry(*args, &block)
+    tries ||= 2
+    find_or_create_by(*args, &block)
+  rescue ActiveRecord::RecordNotUnique => e
+    tries = tries - 1
+    if tries <= 0
+      raise e
+    else
+      retry
+    end
   end
 
   def self.extranet_logins

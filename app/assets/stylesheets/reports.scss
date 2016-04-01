@@ -1049,6 +1049,12 @@ td.dataTables_empty {
     a {
       @extend %typography-table-heading;
       text-transform: uppercase;
+      &.disabled {
+        color: $medium-gray;
+        &:hover {
+          text-decoration: none; 
+        }
+      }
     }
   }
   small {

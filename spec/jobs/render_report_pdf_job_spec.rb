@@ -15,8 +15,9 @@ RSpec.describe RenderReportPDFJob, type: :job do
   let(:run_job) { subject.perform(member_id, report_name, filename, params) }
   let(:reports_controller) { ReportsController.new }
   let(:wicked_pdf) { double('wicked pdf instance', pdf_from_string: pdf) }
+  let(:user) { double(User) }
   let(:string_io_with_filename) { double('some StringIO instance', :'content_type=' => nil, :'original_filename=' => nil, :rewind => nil) }
-  let(:job_status) { double('job status instance', canceled?: false, completed?: false, started!: nil, completed!: nil, :'result=' => nil, :'status=' => nil, save!: nil) }
+  let(:job_status) { double('job status instance', canceled?: false, completed?: false, started!: nil, completed!: nil, :'result=' => nil, :'status=' => nil, save!: nil, user: user) }
 
   before do
     allow(JobStatus).to receive(:find_or_create_by!).and_return(job_status)
@@ -87,6 +88,19 @@ RSpec.describe RenderReportPDFJob, type: :job do
     end
     it 'should set the layout to `print`' do
       expect(ReportsController).to receive(:layout).with('print').ordered
+      run_job
+    end
+    it 'creates a FhlbMember::WardenProxy for the job status user' do
+      expect(FhlbMember::WardenProxy).to receive(:new).with(user)
+      run_job
+    end
+    it 'adds a FhlbMember::WardenProxy to the request env' do
+      request = ActionDispatch::TestRequest.new
+      allow(ActionDispatch::TestRequest).to receive(:new).and_return(request)
+      warden = double(FhlbMember::WardenProxy)
+      allow(FhlbMember::WardenProxy).to receive(:new).with(user).and_return(warden)
+      allow(request.env).to receive(:[]=).and_call_original
+      expect(request.env).to receive(:[]=).with('warden', warden)
       run_job
     end
   end

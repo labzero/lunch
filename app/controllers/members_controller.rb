@@ -28,6 +28,7 @@ class MembersController < ApplicationController
     raise 'invalid member ID!' unless member
     session['member_id'] = member_id
     session['member_name'] = member[:name]
+    store_location_for(:user, reports_profile_path) if params[:visit_profile]
     redirect_to after_sign_in_path_for(current_user)
   end
 

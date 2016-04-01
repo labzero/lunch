@@ -14,6 +14,24 @@ module MAPI
 
           member_position_connection_string = <<-SQL
           SELECT
+          FHFB_ID,
+          CQR_RATING,
+          REPORTING_AGENCY,
+          CREDIT_ANALYST,
+          ADVANCES_OUTS_EOD,
+          (NVL(REG_ADV_MAT_TDY_TRM, 0) + NVL(SBC_MATURING_TDY_TRM, 0)) as ADVANCES_MAT_TODAY_TERM,
+          (NVL(REG_ADV_MAT_TDY_ON,0) + NVL(SBC_MATURING_TDY_ON,0)) as ADVANCES_MAT_TODAY_ON,
+          (NVL(REG_ADV_FUND_TDY,0) + NVL(SBC_ADV_FUND_TDY,0)) as SCHEDULED_FUNDING_TODAY,
+          ADVANCES_AMORTS,
+          ADVANCES_PARTIAL_PREPAY,
+          AT_ADV_FUNDING,
+          ADVANCES_REPAYS,
+          ADVANCES_OUTS,
+          OTHER_CREDIT_PRODS,
+          LT_ADV_OS,
+          RHFA_AVAILABLE_LIMIT,
+          MPF_ACTIVITY,
+          MPF_UNPAID_BALANCE,
           DELIVERY_STATUS_FLAG,
           RECOM_EXPOSURE_PCT,
           MAX_TERM,
@@ -62,7 +80,8 @@ module MAPI
              NVL(ADVANCES_PARTIAL_PREPAY, 0)) -
              (NVL(MPF_ACTIVITY, 0)  - NVL(MPF_UNPAID_BALANCE, 0))
           ) AS ADVANCES_OUTSTANDING,
-          (NVL(MPF_ACTIVITY, 0)  - NVL(MPF_UNPAID_BALANCE, 0)) as MPF_UNPAID_BALANCE,
+          (NVL(MPF_ACTIVITY, 0) + NVL(MPF_UNPAID_BALANCE, 0)) as TOTAL_MPF,
+          (NVL(MPF_ACTIVITY, 0) - NVL(MPF_UNPAID_BALANCE, 0)) as MPF_UNPAID_BALANCE,
           TOTAL_CAPITAL_STOCK,
           MRTG_RELATED_ASSETS,
           DECODE(trunc(MRTG_RELATED_ASSETS/100)  * 100,
@@ -123,6 +142,14 @@ module MAPI
             total_assets: member_position_hash['TOTAL_ASSETS'].to_i,
             approved_long_term_credit: member_position_hash['RHFA_ADVANCES_LIMIT'].to_f,
             forward_commitments: forward_commitments,
+            fhfb_id: member_position_hash['FHFB_ID'],
+            cqr_rating: member_position_hash['CQR_RATING'],
+            reporting_agency: member_position_hash['REPORTING_AGENCY'],
+            credit_analyst: member_position_hash['CREDIT_ANALYST'],
+            rhfa: {
+              total_lt: member_position_hash['LT_ADV_OS'].to_i,
+              available: member_position_hash['RHFA_AVAILABLE_LIMIT'].to_i
+            },
             collateral_borrowing_capacity: {
               total: standard_borrowing_capacity + sbc_borrowing_capacity,
               remaining: standard_borrowing_capacity_remaining + sbc_borrowing_capacity_remaining,
@@ -145,9 +172,27 @@ module MAPI
               swaps_notational: member_position_hash['SWAP_NOTIONAL_PRINCIPAL'].to_i,
               mpf_credit: member_position_hash['MPF_CE_COLLATERAL_REQ'].to_i,
               letters_of_credit: member_position_hash['LCS_OUTS'].to_i,
-              investments: member_position_hash['UNSECURED_CREDIT'].to_i
+              investments: member_position_hash['UNSECURED_CREDIT'].to_i,
+              total_advances_outstanding: member_position_hash['REG_ADVANCES_OUTS'].to_i + member_position_hash['SBC_ADVANCES_OUTS'].to_i,
+              total_credit_products_outstanding: member_position_hash['OTHER_CREDIT_PRODS'],
+              total_advances_and_mpf: member_position_hash['ADVANCES_OUTS'].to_i + member_position_hash['MPF_CE_COLLATERAL_REQ'].to_i
             },
-            capital_stock: capital_stock_and_leverage
+            capital_stock: capital_stock_and_leverage,
+            advances: {
+              end_of_prior_day: member_position_hash['ADVANCES_OUTS_EOD'].to_i,
+              maturing_today_term: member_position_hash['ADVANCES_MAT_TODAY_TERM'].to_i,
+              maturing_today_on: member_position_hash['ADVANCES_MAT_TODAY_ON'].to_i,
+              scheduled_funding_today: member_position_hash['SCHEDULED_FUNDING_TODAY'].to_i,
+              amortizing_adjustment: member_position_hash['ADVANCES_AMORTS'].to_i,
+              partial_prepayment: member_position_hash['ADVANCES_PARTIAL_PREPAY'].to_i,
+              funding_today: member_position_hash['AT_ADV_FUNDING'].to_i,
+              repay_today: member_position_hash['ADVANCES_REPAYS'].to_i,
+              mpf_intraday_activity: member_position_hash['MPF_ACTIVITY'].to_i,
+              mpf_loan_balance: member_position_hash['MPF_UNPAID_BALANCE'].to_i,
+              total_mpf: member_position_hash['TOTAL_MPF'].to_i,
+              total_advances: member_position_hash['ADVANCES_OUTS'].to_i,
+              total_advances_and_mpf: member_position_hash['ADVANCES_OUTS'].to_i + member_position_hash['MPF_ACTIVITY'].to_i + member_position_hash['MPF_UNPAID_BALANCE'].to_i
+            }
           }
         end
 
@@ -175,19 +220,36 @@ module MAPI
             AND TRUNC(st.stx_update_date) = (SELECT TRUNC(MAX(stx_update_date))  FROM  portfolios.sta_trans)
           SQL
 
-          fhfa_number_query = <<-SQL
-            SELECT cu_fhfb_id FROM portfolios.customers WHERE fhlb_id = #{quoted_member_id}
+          customer_signature_card_sql = <<-SQL
+            select
+              cu_fhfb_id,
+              needstwosigners
+            from
+              portfolios.customers cu
+            left join
+              signer.signaturecarddate s
+            on
+              cu.fhlb_id = s.fhlb_id
+            where
+              cu.fhlb_id = #{quoted_member_id}
           SQL
 
           if app.settings.environment == :production
             member_name = ActiveRecord::Base.connection.execute(member_name_query).fetch.try(&:first)
             sta_number = ActiveRecord::Base.connection.execute(sta_number_query).fetch.try(&:first)
-            fhfa_number = ActiveRecord::Base.connection.execute(fhfa_number_query).fetch.try(&:first)
+            customer_signature_card_data = ActiveRecord::Base.connection.execute(customer_signature_card_sql).fetch_hash
+            if customer_signature_card_data
+              fhfa_number = customer_signature_card_data['CU_FHFB_ID']
+              dual_signers_required = (customer_signature_card_data['NEEDSTWOSIGNERS'].try(:to_i) == -1)
+            end
           else
-             member = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_details.json')))[member_id.to_s]
-             member_name = member['name'] if member
-             fhfa_number = member['fhfa_number'] if member
-             sta_number = member['sta_number'] if member
+            member = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_details.json')))[member_id.to_s]
+            if member
+              member_name = member['name']
+              fhfa_number = member['fhfa_number']
+              sta_number = member['sta_number']
+              dual_signers_required = member['dual_signers_required']
+            end
           end
           
           return nil if member_name.nil?
@@ -195,7 +257,8 @@ module MAPI
           {
             name: member_name,
             fhfa_number: fhfa_number,
-            sta_number: sta_number
+            sta_number: sta_number,
+            dual_signers_required: dual_signers_required
           }
 
         end

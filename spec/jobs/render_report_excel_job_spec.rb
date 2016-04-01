@@ -11,8 +11,9 @@ RSpec.describe RenderReportExcelJob, type: :job do
   let(:params) { {start_date: start_date} }
   let(:run_job) { subject.perform(member_id, report_name, filename, params) }
   let(:reports_controller) { ReportsController.new }
+  let(:user) { double(User) }
   let(:string_io_with_filename) { double('some StringIO instance', :'content_type=' => nil, :'original_filename=' => nil, :rewind => nil) }
-  let(:job_status) { double('job status instance', canceled?: false, completed?: false, started!: nil, completed!: nil, :'result=' => nil, :'status=' => nil, save!: nil) }
+  let(:job_status) { double('job status instance', canceled?: false, completed?: false, started!: nil, completed!: nil, :'result=' => nil, :'status=' => nil, save!: nil, user: user) }
 
   before do
     allow(JobStatus).to receive(:find_or_create_by!).and_return(job_status)
@@ -38,20 +39,33 @@ RSpec.describe RenderReportExcelJob, type: :job do
       expect(reports_controller).to receive(report_name).ordered
       subject.perform(member_id, report_name, filename, {start_date: start_date})
     end
-    it 'should populate the session with the member details' do
+    it 'populates the session with the member details' do
       session = double('A Session', :[] => nil)
       allow(reports_controller).to receive(:session).and_return(session)
       expect(session).to receive(:[]=).with('member_id', member_id).ordered # technically we should let the order of these two vary, but RSpec doesn't have support for that
       expect(session).to receive(:[]=).with('member_name', member_name).ordered
       run_job
     end
-    it 'should set the controller `params` to the params supplied to the job' do
+    it 'sets the controller `params` to the params supplied to the job' do
       expect(reports_controller).to receive(:params=).with(params).ordered
       run_job
     end
     it 'sets the `skip_deferred_load` controller attribute to `true`' do
       run_job
       expect(reports_controller.skip_deferred_load).to eq(true)
+    end
+    it 'creates a FhlbMember::WardenProxy for the job status user' do
+      expect(FhlbMember::WardenProxy).to receive(:new).with(user)
+      run_job
+    end
+    it 'adds a FhlbMember::WardenProxy to the request env' do
+      request = ActionDispatch::TestRequest.new
+      allow(ActionDispatch::TestRequest).to receive(:new).and_return(request)
+      warden = double(FhlbMember::WardenProxy)
+      allow(FhlbMember::WardenProxy).to receive(:new).with(user).and_return(warden)
+      allow(request.env).to receive(:[]=).and_call_original
+      expect(request.env).to receive(:[]=).with('warden', warden)
+      run_job
     end
   end
 

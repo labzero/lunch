@@ -504,6 +504,42 @@ RSpec.describe DashboardController, :type => :controller do
         expect(assigns[:error_value]).to eq(:collateral_error)
       end
     end
+
+    describe 'error priority' do
+      before do
+        allow(subject).to receive(:populate_advance_request_view_parameters) do
+          subject.instance_variable_set(:@original_amount, rand(10000..1000000))
+          subject.instance_variable_set(:@net_stock_required, rand(1000..9999))
+        end
+      end
+      {
+        rate: [:stale, :unknown, :settings],
+        limits: [:unknown, :high, :low],
+        preview: [
+          :unknown, :capital_stock_offline, :credit,
+          :collateral, :total_daily_limit, :disabled_product
+        ],
+        foo: [:unknown]
+      }.each do |type, errors|
+        errors.each do |error|
+          it "prioritizes #{type}:#{error} over preview:capital_stock" do
+            allow(advance_request).to receive(:errors).and_return([
+              AdvanceRequest::Error.new(type, error),
+              AdvanceRequest::Error.new(:preview, :capital_stock)
+            ])
+            make_request
+            expect(assigns[:error_message]).to be(error)
+          end
+        end
+      end
+      it 'shows capital stock gross up if there are no other errors' do
+        allow(advance_request).to receive(:errors).and_return([
+          AdvanceRequest::Error.new(:preview, :capital_stock)
+        ])
+        make_request
+        expect(response).to render_template(:quick_advance_capstock)
+      end
+    end
   end
 
   describe "POST quick_advance_perform", :vcr do
@@ -691,6 +727,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:activity_2) { double('another activity') }
     let(:activities) { [activity_1, activity_2] }
     let(:processed_activities) { double('processed_activities') }
+
     before do
       allow(subject).to receive(:process_recent_activities)
       allow(subject).to receive(:deferred_job_data).and_return(activities)
@@ -1038,47 +1075,164 @@ RSpec.describe DashboardController, :type => :controller do
   end
 
   describe '`process_recent_activities` private method' do
-    let(:activity) { double('activity', :[] => nil) }
-    let(:activities) { [activity, activity, activity, activity, activity, activity] }
+    let(:future_date) { Time.zone.today + rand(1000) }
     let(:product_description) { double('product description') }
     let(:current_par) { double('current_par') }
     let(:maturity_date) { double('maturity date') }
-    let(:transaction_number) { double('transaction_number') }
-    let(:call_method) { controller.send(:process_recent_activities, [activity]) }
+    let(:transaction_number) { rand(100000) }
+    let(:activity) { { instrument_type: 'LC', transaction_number: transaction_number, current_par: current_par } }
+    let(:activities) { [activity, activity, activity, activity, activity, activity] }
+    let(:call_method) { controller.send(:process_recent_activities, activities) }
+    let(:process_recent_activities) { subject.send(:process_recent_activities, activity) }
+    before do
+      allow(subject).to receive(:fhlb_date_standard_numeric).and_return(future_date)
+    end
 
     it 'returns an empty array if passed nil' do
       expect(controller.send(:process_recent_activities, nil)).to eq([])
     end
-    it 'returns 5 processed activities' do
-      expect(controller.send(:process_recent_activities, activities).length).to eq(5)
-    end
     describe 'a processed activity array' do
-      it 'has a product_description in the first position' do
-        allow(activity).to receive(:[]).with(:product_description).and_return(product_description)
-        expect(call_method.first[0]).to eq(product_description)
-      end
       it 'has a current_par in the second position' do
-        allow(activity).to receive(:[]).with(:current_par).and_return(current_par)
         expect(call_method.first[1]).to eq(current_par)
       end
       it 'has a transaction_number in the fourth position' do
-        allow(activity).to receive(:[]).with(:transaction_number).and_return(transaction_number)
         expect(call_method.first[3]).to eq(transaction_number)
       end
-      describe 'the maturity_date position' do
-        it 'returns the fhlb_date_standard_numeric maturity date in the third position' do
-          allow(maturity_date).to receive(:to_date).and_return(maturity_date)
-          allow(activity).to receive(:[]).with(:maturity_date).and_return(maturity_date)
-          allow(controller).to receive(:fhlb_date_standard_numeric).with(maturity_date).and_return(maturity_date)
-          expect(call_method.first[2]).to eq(maturity_date)
+    end
+    context 'letters of credit' do
+      let(:activity) { [{ instrument_type: 'LC', product_description: 'LC' }] }
+      it 'displays `Letter of Credit` when product description is `LC` in the description' do
+        expect(process_recent_activities.first[0]).to eq(I18n.t('dashboard.recent_activity.letter_of_credit'))
+      end
+      let(:activity) { [{ instrument_type: 'LC', product_description: "LC LC LC" }] }
+      it 'displays `Letter of Credit` when product description is `LC LC LC` in the description' do
+        expect(process_recent_activities.first[0]).to eq(I18n.t('dashboard.recent_activity.letter_of_credit'))
+      end
+      context 'amended' do
+        let(:activity) { [{ instrument_type: 'LC', status: 'INTER_AMEND_STA' }] }
+        it 'displays `Amended Today` in the description' do
+          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.amended_today'))
         end
-        it "returns '#{I18n.t('global.today')}' if the maturity date is equal to today's date" do
-          allow(activity).to receive(:[]).with(:maturity_date).and_return(Time.zone.today)
-          expect(call_method.first[2]).to eq(I18n.t('global.today'))
+      end
+      context 'terminated' do
+        let(:activity) { [{ instrument_type: 'LC', status: 'TERMINATED' }] }
+        it 'displays `Terminated Today` in the description' do
+          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.terminated_today'))
         end
-        it "returns #{I18n.t('global.open')} if the activity is an advance with no maturity date" do
-          allow(activity).to receive(:[]).with(:instrument_type).and_return('ADVANCE')
-          expect(call_method.first[2]).to eq(I18n.t('global.open'))
+      end
+      context 'expired' do
+        let(:activity) { [{ instrument_type: 'LC', status: 'EXPIRED' }] }
+        it 'displays `Expires Today` in the description' do
+          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.expires_today'))
+        end
+      end
+      context 'matured' do
+        let(:activity) { [{ instrument_type: 'LC', status: 'MATURED' }] }
+        it 'displays `Matures Today` in the description' do
+          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.matures_today'))
+        end
+      end
+      context 'verified' do
+        let(:activity) { [{ instrument_type: 'LC', status: 'VERIFIED', maturity_date: future_date }] }
+        it 'displays `Matures on [Date]` in the description' do
+          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.matures_on', date: future_date))
+        end
+      end
+    end
+    context 'advances' do
+      let(:termination_full_partial) { double(:termination_full_partial) }
+      context 'full/partial prepayment' do
+        let(:terminated_advance) { [{ instrument_type: 'ADVANCE',
+                                      status: 'TERMINATED',
+                                      termination_full_partial: termination_full_partial }] }
+        it 'displays contents of `termination_full_partial` for terminated advances in description' do
+          expect(subject.send(:process_recent_activities, terminated_advance).first[2]).to eq(termination_full_partial)
+        end
+        let(:verified_advance) { [{ instrument_type: 'ADVANCE',
+                                      status: 'VERIFIED',
+                                      termination_full_partial: termination_full_partial }] }
+        it 'displays contents of `termination_full_partial` for verified advances in description' do
+          expect(subject.send(:process_recent_activities, terminated_advance).first[2]).to eq(termination_full_partial)
+        end
+        let(:advance_with_matured_status) { [{ instrument_type: 'ADVANCE',
+                                               status: 'MATURED',
+                                               termination_full_partial: termination_full_partial }] }
+        it 'displays `Matured Today` in the description' do
+          expect(subject.send(:process_recent_activities, advance_with_matured_status).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_today'))
+        end
+      end
+      context 'pending termination' do
+        let(:advance_with_pend_term_status) { [{ instrument_type: 'ADVANCE', status: 'PEND_TERM' }] }
+        it 'displays `Open` for maturity date when status is `PEND_TERM`' do
+          expect(subject.send(:process_recent_activities, advance_with_pend_term_status).first[2]).to eq(I18n.t('dashboard.open'))
+        end
+      end
+      context 'forward-funded advances' do
+        let(:forward_funded_advance) { [{ instrument_type: 'ADVANCE',
+                                          status: 'COLLATERAL_AUTH',
+                                          funding_date: future_date }] }
+        it 'displays `Will be funded on [Date]` in the description' do
+          expect(subject.send(:process_recent_activities, forward_funded_advance).first[2]).to eq(I18n.t('dashboard.recent_activity.will_be_funded_on', date: future_date))
+        end
+      end
+      context 'matured' do
+        let(:advance_matured_today) { [{ instrument_type: 'ADVANCE', status: 'MATURED' }] }
+        it 'displays `Matures Today` if status is `MATURED`' do
+          expect(subject.send(:process_recent_activities, advance_matured_today).first[2]).to eq(I18n.t("dashboard.recent_activity.matures_today"))
+        end
+      end
+      context 'executed' do
+        let(:advance_executed) { [{ instrument_type: 'ADVANCE', status: 'EXECUTED', maturity_date: future_date }] }
+        it 'displays `Matures [Date]` if status is `EXECUTED`' do
+          expect(subject.send(:process_recent_activities, advance_executed).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_on', date: future_date))
+        end
+      end
+      context 'in review' do
+        let(:advance_in_ops_review) { [{ instrument_type: 'ADVANCE', status: 'OPS_REVIEW' }] }
+        it 'displays `In Review` if status is `OPS_REVIEW`' do
+          expect(subject.send(:process_recent_activities, advance_in_ops_review).first[2]).to eq(I18n.t('dashboard.recent_activity.in_review'))
+        end
+        let(:advance_in_sec_review) { [{ instrument_type: 'ADVANCE', status: 'SEC_REVIEWED' }] }
+        it 'displays `In Review` if status is `SEC_REVIEWED`' do
+          expect(subject.send(:process_recent_activities, advance_in_sec_review).first[2]).to eq(I18n.t('dashboard.recent_activity.in_review'))
+        end
+      end
+      context 'OPEN VRC' do
+        let(:open_vrc) { [{ instrument_type: 'ADVANCE', status: 'VERIFIED', product: 'OPEN VRC' }] }
+        it 'displays `Open` for any `OPEN VRC` product' do
+          expect(subject.send(:process_recent_activities, open_vrc).first[2]).to eq(I18n.t('dashboard.open'))
+        end
+        let(:advance_in_sec_review) { [{ instrument_type: 'ADVANCE', status: 'SEC_REVIEWED' }] }
+        it 'displays `In Review` if status is `SEC_REVIEWED`' do
+          expect(subject.send(:process_recent_activities, advance_in_sec_review).first[2]).to eq(I18n.t('dashboard.recent_activity.in_review'))
+        end
+      end
+    end
+    context 'investments' do
+      let(:investment_with_matured_status) { [{ instrument_type: 'INVESTMENT', maturity_date: Time.zone.today }] }
+      it 'displays `Matured Today` for investments maturing today' do
+        expect(subject.send(:process_recent_activities, investment_with_matured_status).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_today'))
+      end
+      let(:investment_maturing_in_the_future) { [{ instrument_type: 'INVESTMENT', maturity_date: future_date }] }
+      it 'displays `Matures on [Date]` for investments maturing in the future`' do
+        expect(subject.send(:process_recent_activities, investment_maturing_in_the_future).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_on', date: future_date))
+      end
+      let(:investment_with_no_maturity_date) { [{ instrument_type: 'INVESTMENT', maturity_date: nil }] }
+      it 'displays `Open` for investments without maturing dates`' do
+        expect(subject.send(:process_recent_activities, investment_with_no_maturity_date).first[2]).to eq(I18n.t('dashboard.open'))
+      end
+    end
+    context 'other instrument types' do
+      let(:deposit) { [{ instrument_type: 'DEPOSIT' }] }
+      let(:simpletransfer) { [{ instrument_type: 'SIMPLETRANSFER' }] }
+      let(:ca) { [{ instrument_type: 'CA' }] }
+      let(:bonds) { [{ instrument_type: 'BONDS' }] }
+      let(:mm) { [{ instrument_type: 'MM' }] }
+      let(:repo) { [{ instrument_type: 'REPO' }] }
+      let(:whatever) { [{ instrument_type: 'WHATEVER' }] }
+      it 'does not return activities with any other instrument types' do
+        [deposit, simpletransfer, ca, bonds, mm, repo, whatever].each do |activity|
+          expect(subject.send(:process_recent_activities, activity)).to eq([])
         end
       end
     end

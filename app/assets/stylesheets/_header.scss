@@ -41,16 +41,17 @@
     text-decoration: none;
     color: $white;
   }
-  .nav-logout a:before, .nav-member-switch a:before, .header-member-name:before {
-    content: "|";
-    display: inline-block;
-    margin: 0 15px;
-  }
   .header-member-name {
     max-width: 300px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  .nav-member-switch, .nav-logout, .header-member-name {
+    @include navigation-separator;
+    a:hover {
+      text-decoration: underline;
+    }
   }
   .nav-settings, .nav-mail {
     font-size: 1.25rem;
@@ -119,7 +120,7 @@
     }
     &:hover, &.active-nav-item {
       background-color: $light-gray;
-      .nav-menu {
+      & > a {
         color: $actionable-blue;
       }
     }

@@ -129,6 +129,8 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/monthly-securities-position'
   when 'Mortgage Collateral Update'
     visit '/reports/mortgage-collateral-update'
+  when 'Profile'
+    visit '/reports/profile'
   when 'Securities Services Monthly Statement'
     visit '/reports/securities-services-statement'
   when 'Securities Transactions'
@@ -299,7 +301,7 @@ Then(/^I should see a "(.*?)" with data for dates between the (\d+)(?:st|rd|th) 
     start_date_obj = (Date.new(@today.year, @today.month, start_day.to_i) - 1.month)
     end_date_obj = (Date.new(@today.year, @today.month, end_day.to_i) - 1.month)
   end
-  step %{I should see a "Settlement Transaction Account Statement" with dates between "#{start_date_obj}" and "#{end_date_obj}"}
+  step %{I should see a "#{report_type}" with dates between "#{start_date_obj}" and "#{end_date_obj}"}
 end
 
 Then(/^I should see a "(.*?)" with dates between "(.*?)" and "(.*?)"$/) do |report_type, start_date, end_date|
@@ -323,38 +325,9 @@ Then(/^I should see a "(.*?)" with dates between "(.*?)" and "(.*?)"$/) do |repo
   report_dates_in_range?(start_date_obj, end_date_obj)
 end
 
-Given(/^I am showing Settlement Transaction Account activities for the last (\d+) months$/) do |month|
-  end_date = Time.zone.today
-  month = month.to_i
-  start_date = month.months.ago
-  step 'I click the datepicker field'
-  step %{I choose the "custom date range" preset in the datepicker}
-  step %{I select a start date of "#{start_date}" and an end date of "#{end_date}"}
-  step 'I click the datepicker apply button'
-  step %{I should see a "Settlement Transaction Account Statement" with dates between "#{start_date.strftime('%B %-d, %Y')}" and "#{end_date.strftime('%B %-d, %Y')}"}
-end
-
 When(/^I filter the report by "(.*?)"$/) do |text|
   page.find('.report-inputs .dropdown-selection').click
   page.find('li', text: text).click
-end
-
-Then(/^I should only see "(.*?)" rows in the Settlement Transaction Account Statement table$/) do |text|
-  if text == 'Debit' || text == 'Credit'
-    column_heading = I18n.t('reports.pages.settlement_transaction_account.debit_credit_heading')
-  else
-    column_heading = text
-  end
-  page.assert_selector('.report-table thead th', text: column_heading)
-  column_index = jquery_evaluate("$('.report-table thead th:contains(#{column_heading})').index()") + 1
-  if !page.find(".report-table tbody tr:first-child td:first-child")['class'].split(' ').include?('dataTables_empty')
-    page.all(".report-table tbody tr:not(.beginning-balance-row) td:nth-child(#{column_index})").each_with_index do |element, index|
-      next if index == 0 # this is a hack to get around Capybara's inability to handle tr:not(.beginning-balance-row, .ending-balance-row). Apparently, Capybara can only handle one `not` selector
-      expect(element.text.gsub(/\D/,'').to_f).to be > 0
-      expect(element.text[0]).to eq('(') if text == 'Debit'
-      expect(element.text[-1]).to eq(')') if text == 'Debit'
-    end
-  end
 end
 
 Then(/^I should see a (current|monthly) securities position report for (Pledged|Unpledged) Securities$/) do |report_type, filter_type|

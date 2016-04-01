@@ -150,7 +150,7 @@ class CorporateCommunication
       corp_com
     end
 
-    def self.fetch_and_process_email(category_mapping={}, username=ENV['IMAP_USERNAME'], password=ENV['IMAP_PASSWORD'], host=ENV['IMAP_HOST'], port=ENV['IMAP_PORT'])
+    def self.fetch_and_process_email(category, username=ENV['IMAP_USERNAME'], password=ENV['IMAP_PASSWORD'], host=ENV['IMAP_HOST'], port=ENV['IMAP_PORT'])
       ssl = port.to_i == 993
       result = false
 
@@ -175,7 +175,6 @@ class CorporateCommunication
           email_objects = Hash[*(emails.map { |email| [email.attr['UID'], Mail.read_from_string(email.attr['RFC822'])] }.flatten)]
 
           email_objects.each do |uid, email|
-            category = category_mapping[email.to.first]
             Rails.logger.info { "Processing '#{email.subject}', category: #{category}..." }
             processed_email = process_email(email, category)
             if self.persist_processed_email(processed_email)

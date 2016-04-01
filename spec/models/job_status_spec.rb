@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe JobStatus, :type => :model do
   it { should validate_presence_of(:job_id) }
   it { should have_attached_file(:result) }
+  it { should belong_to(:user) }
 
   let(:job_id) { 'some-job-id' }
   let(:now) { Time.zone.parse('2014-12-12') }

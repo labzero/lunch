@@ -106,7 +106,6 @@ RSpec.describe ReportsController, :type => :controller do
 
   before do
     allow(controller).to receive(:date_picker_presets).and_return(date_picker_presets)
-    allow(controller).to receive(:most_recent_business_day).and_return(max_date)
     allow(controller).to receive(:fhlb_report_date_numeric)
     allow(ReportConfiguration).to receive(:date_bounds).with(any_args)
       .and_return({ min: min_date, start: start_date, end: end_date, max: max_date })
@@ -339,32 +338,36 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a report with instance variables set in a before_filter', :capital_stock_trial_balance
       it_behaves_like 'a controller action with an active nav setting', :capital_stock_trial_balance, :reports
 
+      it 'calls `fhlb_report_date_numeric` with the @start_date' do
+        expect(subject).to receive(:fhlb_report_date_numeric).with(start_date)
+        call_action
+      end
       it 'renders the capital_stock_trial_balance view' do
         call_action
         expect(response.body).to render_template('capital_stock_trial_balance')
       end
-      it 'should pass @start_date and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
+      it 'passes @start_date and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
         allow(controller).to receive(:most_recent_business_day).and_return(max_date)
         allow(controller).to receive(:date_picker_presets).with(start_date, nil, nil, max_date).and_return(date_picker_presets)
         get :capital_stock_trial_balance, start_date: start_date
         expect(assigns[:picker_presets]).to eq(date_picker_presets)
       end
-      it 'should assign @number_of_shares and @number_of_certificates' do
+      it 'assigns @number_of_shares and @number_of_certificates' do
         call_action
         expect(assigns[:number_of_shares]).to eq(number_of_shares)
         expect(assigns[:number_of_certificates]).to eq(number_of_certificates)
       end
-      it 'should assign @min_date a date of January 1st, 2002' do
+      it 'assigns @min_date a date of January 1st, 2002' do
         call_action
         expect(assigns[:min_date]).to eq(min_date)
       end
-      it 'should assign @start_date a date of January 1st, 2002 if the start_date param occurs before that date' do
+      it 'assigns @start_date a date of January 1st, 2002 if the start_date param occurs before that date' do
         allow(ReportConfiguration).to receive(:date_bounds).with(:capital_stock_trial_balance, anything, anything)
           .and_return({ min: min_date, start: Date.new(2002,1,1), end: end_date, max: max_date })
         get :capital_stock_trial_balance, start_date: min_date - 1.year
         expect(assigns[:start_date]).to eq(Date.new(2002,1,1))
       end
-      it 'should return capital_stock_trial_balance_table_data with with columns populated' do
+      it 'returns capital_stock_trial_balance_table_data with with columns populated' do
         call_action
         expect(assigns[:capital_stock_trial_balance_table_data][:rows][0][:columns]).to eq(table_data)
       end
@@ -576,39 +579,88 @@ RSpec.describe ReportsController, :type => :controller do
     end
 
     describe 'GET cash_projections' do
+      let(:projections) { [
+        {
+          settlement_date: Time.zone.today + rand(-10..10).day,
+          cusip: SecureRandom.hex
+        },
+        {
+          settlement_date: Time.zone.today + rand(-10..10).day,
+          cusip: SecureRandom.hex
+        },
+        {
+          settlement_date: Time.zone.today + rand(-10..10).day,
+          cusip: SecureRandom.hex
+        },
+        {
+          settlement_date: Time.zone.today + rand(-10..10).day,
+          cusip: SecureRandom.hex
+        },
+        {
+          settlement_date: Time.zone.today,
+          cusip: SecureRandom.hex
+        },
+        {
+          settlement_date: Time.zone.today,
+          cusip: SecureRandom.hex
+        }
+      ].shuffle }
       let(:as_of_date) { '2014-12-12'.to_date }
-      it_behaves_like 'a user required action', :get, :cash_projections
-
-
+      let(:make_request) { get :cash_projections }
       before do
         allow(member_balance_service_instance).to receive(:cash_projections).and_return({})
       end
+
+      it_behaves_like 'a user required action', :get, :cash_projections
+      it_behaves_like 'a report that can be downloaded', :cash_projections, [:xlsx]
       it_behaves_like 'a report with instance variables set in a before_filter', :cash_projections
       it_behaves_like 'a controller action with an active nav setting', :cash_projections, :reports
+      
       describe 'view instance variables' do
         before {
+          allow(response_hash).to receive(:[])
           allow(response_hash).to receive(:[]).with(:as_of_date).and_return(as_of_date)
-          allow(member_balance_service_instance).to receive(:cash_projections).with(kind_of(Date)).and_return(response_hash)
+          allow(response_hash).to receive(:[]).with(:projections).and_return(projections)
+          allow(member_balance_service_instance).to receive(:cash_projections).and_return(response_hash)
         }
-        it 'should set @cash_projections to the hash returned from MemberBalanceService' do
-          expect(member_balance_service_instance).to receive(:cash_projections).and_return(response_hash)
-          get :cash_projections
+        it 'sets @cash_projections to the hash returned from MemberBalanceService' do
+          make_request
           expect(assigns[:cash_projections]).to eq(response_hash)
         end
-        it 'should set @cash_projections to {} if the report is disabled' do
-          expect(controller).to receive(:report_disabled?).with(ReportsController::CASH_PROJECTIONS_WEB_FLAGS).and_return(true)
-          get :cash_projections
+        it 'sets @cash_projections to {} if the report is disabled' do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::CASH_PROJECTIONS_WEB_FLAGS).and_return(true)
+          make_request
           expect(assigns[:cash_projections]).to eq({})
         end
-        it 'should set @as_of_date from the @cash_projections hash' do
-          expect(member_balance_service_instance).to receive(:cash_projections).and_return(response_hash)
-          get :cash_projections
+        it 'sets @as_of_date from the @cash_projections hash' do
+          make_request
           expect(assigns[:as_of_date]).to eq(as_of_date)
         end
-        it 'should set @as_of_date to nil if the report is disabled' do
-          expect(controller).to receive(:report_disabled?).with(ReportsController::CASH_PROJECTIONS_WEB_FLAGS).and_return(true)
-          get :cash_projections
+        it 'sets @as_of_date to nil if the report is disabled' do
+          allow(controller).to receive(:report_disabled?).with(ReportsController::CASH_PROJECTIONS_WEB_FLAGS).and_return(true)
+          make_request
           expect(assigns[:as_of_date]).to eq(nil)
+        end
+        it 'sorts the projections by settlement date and CUSIP' do
+          make_request
+          expect(assigns[:cash_projections][:projections].count).to be >= 2
+          last_date = nil
+          last_cusip = nil
+          assigns[:cash_projections][:projections].each do |projection|
+            settlement_date = projection[:settlement_date]
+            cusip = projection[:cusip]
+            last_cusip = nil if last_date != settlement_date
+            expect(settlement_date).to be >= last_date if last_date
+            expect(cusip).to be >= last_cusip if last_cusip
+            last_cusip = cusip
+            last_date = settlement_date
+          end
+        end
+        it 'sets @report_name' do
+          name = double(String)
+          allow(ReportConfiguration).to receive(:report_title).with(:cash_projections).and_return(name)
+          make_request
+          expect(assigns[:report_name]).to eq(name)
         end
       end
     end
@@ -704,7 +756,7 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET securities_services_statement' do
       let(:make_request) { get :securities_services_statement }
       let(:response_hash) { double('A Securities Services Statement', :'[]' => nil)}
-      let(:report_end_date) { double( 'report_end_date' ) }
+      let(:report_end_date) { Date.today + rand(10000) }
       let(:month_year) { double( 'month_year' ) }
       let(:start_date_param) { Date.today - rand(10000) }
       describe 'when statements are available' do
@@ -733,6 +785,14 @@ RSpec.describe ReportsController, :type => :controller do
         it 'should raise an error if @statement is nil' do
           expect(member_balance_service_instance).to receive(:securities_services_statement).and_return(nil)
           expect{make_request}.to raise_error(StandardError)
+        end
+        it 'set the debit date to the last business day of the next month following the end date' do
+          next_month_end = double(Date)
+          debit_date = double(Date)
+          allow(controller).to receive(:default_dates_hash).with(report_end_date).and_return({next_month_end: next_month_end})
+          allow(controller).to receive(:most_recent_business_day).with(next_month_end).and_return(debit_date)
+          make_request
+          expect(assigns[:debit_date]).to eq(debit_date)
         end
         describe 'with the report disabled' do
           before do
@@ -1289,7 +1349,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
-    describe 'GET interest_rate_resets', :skip do
+    describe 'GET interest_rate_resets' do
       let(:rates_service_instance) { double('RatesService') }
       let(:response_hash) { double('RatesServiceHash') }
       let(:effective_date) { double('effective_date') }
@@ -1366,6 +1426,61 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :todays_credit
       it_behaves_like 'a report with instance variables set in a before_filter', :todays_credit
       it_behaves_like 'a controller action with an active nav setting', :todays_credit, :reports
+
+      let(:exercised_advance) { {instrument_type: 'ADVANCE', status: 'EXERCISED', termination_full_partial: double('termination_full_partial'), interest_rate: double('interest_rate')} }
+      let(:exercised_lc) { {instrument_type: 'LC', status: 'EXERCISED', termination_full_partial: double('termination_full_partial'), interest_rate: double('interest_rate')} }
+      let(:terminated_advance) { {instrument_type: 'ADVANCE', termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+      let(:todays_credit_activity) { subject.todays_credit_activity }
+      let(:non_exercised_advance) { {instrument_type: 'ADVANCE', sub_product: 'Open VRC'} }
+      let(:non_exercised_activity) { {instrument_type: double('instrument_type')} }
+      let(:terminated_lc) { {instrument_type: 'LC', termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+      let(:terminated_activity_with_status) { {status: 'TERMINATED', termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+      let(:terminated_activity_without_status) { {instrument_type: double('some instrument'), termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+      it 'sets the `product_description` of an EXERCISED ADVANCE to its `termination_full_partial` value' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([exercised_advance])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq(exercised_advance[:termination_full_partial])
+      end
+      it 'sets the `interest_rate` of an EXERCISED ADVANCE to nil' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([exercised_advance])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][2][:value]).to be_nil
+      end
+      it 'sets the `interest_rate` of an EXERCISED LC to nil' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([exercised_lc])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][2][:value]).to be_nil
+      end
+      it 'sets the `product_description` of a TERMINATED ADVANCE to its `termination_full_partial` value' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([terminated_advance])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq(terminated_advance[:termination_full_partial])
+      end
+      it 'sets the `product_description` of a TERMINATED LC to its `termination_full_partial` value' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([terminated_lc])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq(terminated_lc[:termination_full_partial])
+      end
+      it 'sets the `product_description` to `TERMINATION` for TERMINATED activities that are not ADVANCEs or LCs' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([terminated_activity_with_status])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq('TERMINATION')
+      end
+      it 'sets the `product_description` to an activity\'s `instrument_type` if the activity has a `termination_par` and `termination_full_partial` but its status is not TERMINATED' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([terminated_activity_without_status])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq(terminated_activity_without_status[:instrument_type])
+      end
+      it 'sets the `product_description` of an non-EXERCISED, non-TERMINATED ADVANCE to its `instrument_type` and `sub_product`' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([non_exercised_advance])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq('ADVANCE Open VRC')
+      end
+      it 'sets the `product_description` of an non-EXERCISED, non-TERMINATED, activity to its `instrument_type` if the activity is not an ADVANCE' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([non_exercised_activity])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq(non_exercised_activity[:instrument_type])
+      end
       it 'sorts activities by funding date' do
         expect(controller).to receive(:sort_report_data).with([credit_activity], :funding_date).and_return([])
         todays_credit
@@ -1514,7 +1629,7 @@ RSpec.describe ReportsController, :type => :controller do
     it_behaves_like 'a date restricted report', :advances_detail, nil, 1
     it_behaves_like 'a report with instance variables set in a before_filter', :advances_detail
     it_behaves_like 'a controller action with an active nav setting', :advances_detail, :reports
-    
+
     it 'should render the advances_detail view' do
       call_action
       expect(response.body).to render_template('advances_detail')
@@ -2629,6 +2744,261 @@ RSpec.describe ReportsController, :type => :controller do
               make_request
               expect(assigns[:authorizations_table_data][:rows]).to satisfy { |rows| !rows.find {|row| [user_etransact[:display_name], user_no_roles[:display_name]].include?(row[:columns].first[:value]) } }
             end
+          end
+        end
+      end
+    end
+  end
+
+  describe 'GET profile' do
+    allow_policy :member_profile, :show?
+    let(:member_id) {6}
+    let(:make_request) { get :profile }
+    let(:profile) { MemberBalanceService.new(member_id, ActionDispatch::TestRequest.new).profile }
+    let(:contacts) { double('some contact') }
+    let(:member_name) { double('A Name') }
+    let(:response_hash) { double('hash of borrowing capacity data', :[] => nil) }
+    let(:member_details) { {name: member_name} }
+    let(:cam_username) { 'cam' }
+    let(:rm_username) { 'rm' }
+    let(:total_lt) { double('total lt') }
+    let(:available) { double('available') }
+    let(:rhfa) { double('rhfa', :[] => nil)  }
+    let(:approved_long_term_credit) { double('approved long term credit') }
+    let(:advances) { double('advances', :[] => nil) }
+    let(:cam_full_name) { double('cam full name') }
+    let(:rm_full_name) { double('rm full name') }
+    let(:credit_outstanding) { double('credit_outstanding', :[] => nil) }
+    let(:sta_number) { double('An STA Number') }
+    let(:member_profile_response) { {collateral_delivery_status: 'Y', rhfa: rhfa, approved_long_term_credit: approved_long_term_credit, advances: advances, credit_outstanding: credit_outstanding} }
+
+    before do
+      allow(subject).to receive(:current_member_id).and_return(member_id)
+      allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member_details)
+      allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(contacts)
+      allow(contacts).to receive(:[]).with(:cam).and_return({username: cam_username})
+      allow(contacts).to receive(:[]).with(:rm).and_return({username: rm_username})
+      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile)
+      allow(MemberBalanceServiceJob).to receive(:perform_now).and_return(response_hash)
+    end
+
+    it_behaves_like 'a report with instance variables set in a before_filter', :profile
+    it_behaves_like 'a controller action with an active nav setting', :profile, :reports
+    it_behaves_like 'a user required action', :get, :profile
+    it_behaves_like 'an authorization required method', :get, :profile, :member_profile, :show?
+    it 'should render the profile view' do
+      make_request
+      expect(response.body).to render_template('profile')
+    end
+    it 'assigns @member_name' do
+      make_request
+      expect(assigns[:member_name]).to be(member_name)
+    end
+    it 'assigns @member_details_table' do
+      make_request
+      expect(assigns[:member_details_table]).to include(:rows)
+    end
+    it 'sets @collateral_table to the hash returned from MemberBalanceServiceJob' do
+      make_request
+      expect(assigns[:collateral_table]).to eq(response_hash)
+    end
+    it 'assigns @capital_stock_table' do
+      make_request
+      expect(assigns[:capital_stock_table]).to include(:rows)
+    end
+    it 'assigns @rhfa_table' do
+      make_request
+      expect(assigns[:rhfa_table]).to include(:rows)
+    end
+    it 'assigns @advances_and_mpf_table' do
+      make_request
+      expect(assigns[:advances_and_mpf_table]).to include(:rows)
+    end
+    it 'assigns @credit_table' do
+      make_request
+      expect(assigns[:credit_table]).to include(:rows)
+    end
+    it 'assigns @sta_table' do
+      make_request
+      expect(assigns[:sta_table]).to include(:rows)
+    end
+    describe '`@member_details_table`' do
+      let(:fhfb_id) { double('fhfb id') }
+      let(:credit_analyst) { double('credit analyst') }
+      let(:reporting_agency) { double('reporting agency') }
+      let(:cqr_rating) { double('cqr rating') }
+      let(:member_profile_response_details) { { collateral_delivery_status: 'Y', rhfa: rhfa, approved_long_term_credit: approved_long_term_credit, advances: advances, credit_outstanding: credit_outstanding, fhfb_id: fhfb_id, credit_analyst: credit_analyst, reporting_agency: reporting_agency, cqr_rating: cqr_rating } }
+      before do
+        allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(member_profile_response_details)
+        allow(contacts).to receive(:[]).with(:cam).and_return({full_name: cam_full_name})
+        allow(contacts).to receive(:[]).with(:rm).and_return({full_name: rm_full_name})
+      end
+      it 'sets @member_details_table with correct values from member_id' do
+        make_request
+        expect(assigns[:member_details_table][:rows][0][:columns].last[:value]).to eq(member_id)
+      end
+      it 'sets @member_details_table with correct values from fhfb_id' do
+        make_request
+        expect(assigns[:member_details_table][:rows][1][:columns].last[:value]).to eq(fhfb_id)
+      end
+      it 'sets @member_details_table with correct values from rm_full_name' do
+        make_request
+        expect(assigns[:member_details_table][:rows][2][:columns].last[:value]).to eq(rm_full_name)
+      end
+      it 'sets @member_details_table with correct values from cam_full_name' do
+        make_request
+        expect(assigns[:member_details_table][:rows][3][:columns].last[:value]).to eq(cam_full_name)
+      end
+      it 'sets @member_details_table with correct values from credit_analyst' do
+        make_request
+        expect(assigns[:member_details_table][:rows][4][:columns].last[:value]).to eq(credit_analyst)
+      end
+      it 'sets @member_details_table with correct values from reporting_agency' do
+        make_request
+        expect(assigns[:member_details_table][:rows][5][:columns].last[:value]).to eq(reporting_agency)
+      end
+      it 'sets @member_details_table with correct values from collateral_delivery_status' do
+        make_request
+        expect(assigns[:member_details_table][:rows][6][:columns].last[:value]).to eq('Delivered')
+      end
+      it 'sets @member_details_table with correct values from cqr_rating' do
+        make_request
+        expect(assigns[:member_details_table][:rows][7][:columns].last[:value]).to eq(cqr_rating)
+       end
+    end
+    describe '`@capital_stock_table`' do
+      let(:value) { double('A Value') }
+      let(:capital_stock_and_leverage_response) { {}.with_indifferent_access }
+      before do
+        allow_any_instance_of(MemberBalanceService).to receive(:capital_stock_and_leverage).and_return(capital_stock_and_leverage_response)
+      end
+      [:required_by_advances, :required_by_mpf, :activity_based_requirement, :mav_stock_requirement, :minimum_requirement, :stock_owned, :excess_stock, :remaining_leverage, :surplus_stock].each_with_index do |key, i|
+        it "sets @capital_stock_table row #{i} to the value found in the capital stock leverage response for key #{key}" do
+          capital_stock_and_leverage_response[key] = value
+          make_request
+          expect(assigns[:capital_stock_table][:rows][i][:columns].last[:value]).to eq(value)
+        end
+      end
+    end
+    describe '`@advances_and_mpf_table`' do
+      let(:value) { double('A Value') }
+      let(:advances_response) { {}.with_indifferent_access }
+      before do
+        allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(member_profile_response)
+        member_profile_response[:advances] = advances_response
+      end
+      [:end_of_prior_day, :maturing_today_term, :maturing_today_on, :amortizing_adjustment, :partial_prepayment, :scheduled_funding_today, :funding_today, :repay_today, :total_advances, :mpf_intraday_activity, :mpf_loan_balance, :total_mpf, :total_advances_and_mpf].each_with_index do |key, i|
+        it "sets @advances_and_mpf_table row #{i} to the value found in the profile response for key #{key}" do
+          advances_response[key] = value
+          make_request
+          expect(assigns[:advances_and_mpf_table][:rows][i][:columns].last[:value]).to eq(value)
+        end
+      end
+    end
+    describe '`@credit_table`' do
+      let(:value) { double('A Value') }
+      let(:credit_outstanding_response) { {}.with_indifferent_access }
+      before do
+        allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(member_profile_response)
+        member_profile_response[:credit_outstanding] = credit_outstanding_response
+      end
+      [:financing_percentage, :maximum_term, :total_assets, :total_financing_available, :mpf_credit_available, :forward_commitments, :standard, :sbc, :total_advances_outstanding, :mpf_credit, :total_advances_and_mpf, :swaps_notational, :swaps_credit, :letters_of_credit, :investments, :total_credit_products_outstanding, :total, :remaining_financing_available].each_with_index do |key, i|
+        it "sets @credit_table row #{i} to the value found in the profile response for key #{key}" do
+          if i < 6 or i == 17
+            member_profile_response[key] = value
+          else
+            credit_outstanding_response[key] = value
+          end
+          make_request
+          expect(assigns[:credit_table][:rows][i][:columns].last[:value]).to eq(value)
+        end
+      end
+    end
+    describe '`@rhfa_table`' do
+      before do
+        allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(member_profile_response)
+        allow(member_profile_response[:rhfa]).to receive(:[]).with(:total_lt).and_return(total_lt)
+        allow(member_profile_response[:rhfa]).to receive(:[]).with(:available).and_return(available)
+      end
+      it 'sets @rhfa_table with correct values from approved_long_term_credit' do
+        make_request
+        expect(assigns[:rhfa_table][:rows][0][:columns].last[:value]).to eq(approved_long_term_credit)
+      end
+      it 'sets @rhfa_table with correct values from total_lt' do
+        make_request
+        expect(assigns[:rhfa_table][:rows][1][:columns].last[:value]).to eq(total_lt)
+      end
+      it 'sets @rhfa_table with correct values from available' do
+        make_request
+        expect(assigns[:rhfa_table][:rows][2][:columns].last[:value]).to eq(available)
+      end
+    end
+    describe '`@sta_table`' do
+      let(:sta_balance) { double('sta_balance') }
+      before do
+        allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return({sta_number: sta_number}.with_indifferent_access)
+        allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(member_profile_response)
+      end
+      it 'sets @sta_table with correct values from sta_number' do
+        make_request
+        expect(assigns[:sta_table][:rows][0][:columns].last[:value]).to eq(sta_number)
+      end
+      it 'sets @sta_table with correct values from sta_balance' do
+        member_profile_response[:sta_balance] = sta_balance
+        make_request
+        expect(assigns[:sta_table][:rows][1][:columns].last[:value]).to eq(sta_balance)
+      end
+    end
+    describe 'MemberBalanceService failures' do
+      describe 'the member profile could not be found' do
+        before do
+          allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
+          make_request
+        end
+        %w(rhfa_table advances_and_mpf_table credit_table).each do |instance_var|
+          it "should assign nil values to all columns found in @#{instance_var}" do
+            assigns[instance_var.to_sym][:rows].each do |row|
+              expect(row[:columns].last[:value]).to be_nil
+            end
+          end
+        end
+        it 'should assign nil values to all columns found in @member_details_table' do
+          assigns[:member_details_table][:rows][1..-1].each do |row|
+            expect(row[:columns].last[:value]).to be_nil
+          end
+        end
+      end
+      describe 'the capital_stock_and_leverage could not be found' do
+        before do
+          allow_any_instance_of(MemberBalanceService).to receive(:capital_stock_and_leverage).and_return(nil)
+          make_request
+        end
+        it 'should assign nil values to all columns found in @capital_stock_table' do
+          assigns[:capital_stock_table][:rows].each do |row|
+            expect(row[:columns].last[:value]).to be_nil
+          end
+        end
+      end
+    end
+    describe 'MembersService failures' do
+      describe 'the member details could not be found' do
+        before do
+          allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
+          make_request
+        end
+        it 'should not assign @member_name' do
+          expect(assigns[member_name]).to be_nil
+        end
+      end
+      describe 'the member contacts could not be found' do
+        before do
+          allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(nil)
+          allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
+          make_request
+        end
+        it 'should assign nil values to all columns found in @member_details_table' do
+          assigns[:member_details_table][:rows][1..-1].each do |row|
+            expect(row[:columns].last[:value]).to be_nil
           end
         end
       end

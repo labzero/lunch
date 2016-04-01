@@ -148,6 +148,10 @@ class ReportsController < ApplicationController
     @min_date, @start_date, @end_date, @max_date = nil
   end
 
+  before_action only: [:profile] do
+    authorize :member_profile, :show?
+  end
+
   def index
     @reports = {
       price_indications: {
@@ -296,7 +300,7 @@ class ReportsController < ApplicationController
 
     @picker_presets = date_picker_presets(@start_date, @end_date, ReportConfiguration.date_restrictions(:capital_stock_activity))
     report_download_name = "capital-stock-activity-#{fhlb_report_date_numeric(@start_date)}-to-#{fhlb_report_date_numeric(@end_date)}"
-    downloadable_report(nil, {start_date: params[:start_date], end_date: params[:end_date]}, report_download_name) do
+    downloadable_report(DOWNLOAD_FORMATS, {start_date: params[:start_date], end_date: params[:end_date]}, report_download_name) do
       if report_disabled?(CAPITAL_STOCK_ACTIVITY_WEB_FLAGS)
         @capital_stock_activity = {activities:[]}
       else
@@ -325,8 +329,8 @@ class ReportsController < ApplicationController
 
   def capital_stock_trial_balance
     @report_name = ReportConfiguration.report_title(:capital_stock_trial_balance)
-    report_download_name = "capital_stock_trial_balance-#{fhlb_report_date_numeric(@start_date)}"
     initialize_dates(:capital_stock_trial_balance, params[:start_date])
+    report_download_name = "capital_stock_trial_balance-#{fhlb_report_date_numeric(@start_date)}"
     downloadable_report(:xlsx, {start_date: @start_date.to_s}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
@@ -357,6 +361,395 @@ class ReportsController < ApplicationController
       @capital_stock_trial_balance_table_data = { column_headings: column_headings, rows: certificates, footer: footer }
     end
 
+  end
+
+  def profile
+    member_balance_service = MemberBalanceService.new(current_member_id, request)
+    member_profile = member_balance_service.profile
+    cap_stock_and_leverage = member_balance_service.capital_stock_and_leverage || {}
+    members_service = MembersService.new(request)
+    contacts = members_service.member_contacts(current_member_id)
+    member_details = members_service.member(current_member_id) || {}
+
+    if !member_profile
+      member_profile = {
+        credit_outstanding: {},
+        collateral_borrowing_capacity: {
+          standard: {
+          },
+          sbc: {
+          }
+        },
+        capital_stock: {},
+        advances: {},
+        rhfa: {}
+      }
+    end
+
+    if !contacts
+      contacts = {
+        rm: {},
+        cam: {}
+      }
+    end
+
+    @member_name = member_details[:name]
+
+    # Header info
+    @member_details_table = {
+      rows: [
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.fhlb_id')},
+            {value: current_member_id}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.fhfb_id')},
+            {value: member_profile[:fhfb_id]}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.relationship_manager')},
+            {value: contacts[:rm][:full_name]}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.collateral_asset_mananger')},
+            {value: contacts[:cam][:full_name]}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit_analyst')},
+            {value: member_profile[:credit_analyst]}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.regulator')},
+            {value: member_profile[:reporting_agency]}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.collateral_status')},
+            {value: (member_profile[:collateral_delivery_status] == 'Y' ? t('reports.pages.member_profile.delivered') : t('reports.pages.member_profile.not_delivered') if member_profile[:collateral_delivery_status])}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.cqr')},
+            {value: member_profile[:cqr_rating]}
+          ]
+        }
+      ]
+    }
+
+    # Collateral
+    initialize_dates(:borrowing_capacity, nil, params[:end_date])
+    @collateral_table = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @end_date.to_s)
+    @capital_stock_table = {
+      rows: [
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.required_by_advances')},
+            {value: cap_stock_and_leverage[:required_by_advances], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.required_by_mpf')},
+            {value: cap_stock_and_leverage[:required_by_mpf], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.required_by_funding')},
+            {value: cap_stock_and_leverage[:activity_based_requirement], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.precent_of_mav')},
+            {value: cap_stock_and_leverage[:mav_stock_requirement], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.capital_stock_required')},
+            {value: cap_stock_and_leverage[:minimum_requirement], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.capital_stock_held')},
+            {value: cap_stock_and_leverage[:stock_owned], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.excess_deficiency')},
+            {value: cap_stock_and_leverage[:excess_stock], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.add_advances_possible')},
+            {value: cap_stock_and_leverage[:remaining_leverage], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.capital_stock.stock_purchase_required')},
+            {value: cap_stock_and_leverage[:surplus_stock], type: :currency_whole}
+          ]
+        }
+      ]
+    }
+
+    # RHFA
+    @rhfa_table = {
+      rows: [
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.rhfa.limit')},
+            {value: member_profile[:approved_long_term_credit], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.rhfa.total')},
+            {value: member_profile[:rhfa][:total_lt], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.rhfa.available')},
+            {value:  member_profile[:rhfa][:available], type: :currency_whole}
+          ]
+        }
+      ]
+    }
+
+    # Advances and MPF
+    @advances_and_mpf_table = {
+      rows: [
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.advances.end_of_day')},
+            {value: member_profile[:advances][:end_of_prior_day], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.advances.maturing_today_term')},
+            {value: member_profile[:advances][:maturing_today_term], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.advances.maturing_today_on')},
+            {value: member_profile[:advances][:maturing_today_on], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.advances.amortizing')},
+            {value: member_profile[:advances][:amortizing_adjustment], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.advances.partial_prepayment')},
+            {value: member_profile[:advances][:partial_prepayment], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.advances.scheduled_funding_today')},
+            {value: member_profile[:advances][:scheduled_funding_today], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.advances.funding_today')},
+            {value: member_profile[:advances][:funding_today], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.advances.repays_today')},
+            {value: member_profile[:advances][:repay_today], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.advances.total_advances')},
+            {value: member_profile[:advances][:total_advances], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.advances.mpf_intraday')},
+            {value: member_profile[:advances][:mpf_intraday_activity], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.advances.mpf_loan_balance')},
+            {value: member_profile[:advances][:mpf_loan_balance], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.advances.total_mpf')},
+            {value: member_profile[:advances][:total_mpf], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.advances.total_advances_and_mpf')},
+            {value: member_profile[:advances][:total_advances_and_mpf], type: :currency_whole}
+          ]
+        }
+      ]
+    }
+
+    # Credit
+    @credit_table = {
+      rows: [
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.percent_of_assets')},
+            {value: member_profile[:financing_percentage], type: :percentage}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.max_term')},
+            {value: member_profile[:maximum_term], type: :number}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.total_assets')},
+            {value: member_profile[:total_assets], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.max_credit')},
+            {value: member_profile[:total_financing_available], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.mpf_available')},
+            {value: member_profile[:mpf_credit_available], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.committed_funding')},
+            {value: member_profile[:forward_commitments], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.regular_outstanding')},
+            {value: member_profile[:credit_outstanding][:standard], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.sbc_outstanding')},
+            {value: member_profile[:credit_outstanding][:sbc], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.total_advances_outstanding')},
+            {value: member_profile[:credit_outstanding][:total_advances_outstanding], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.mpf_actual_ce')},
+            {value: member_profile[:credit_outstanding][:mpf_credit], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.total_advance_and_mpf')},
+            {value: member_profile[:credit_outstanding][:total_advances_and_mpf], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.notional_swaps')},
+            {value: member_profile[:credit_outstanding][:swaps_notational], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.total_swaps')},
+            {value: member_profile[:credit_outstanding][:swaps_credit], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.letters_of_credit')},
+            {value: member_profile[:credit_outstanding][:letters_of_credit], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.unsecured_investments')},
+            {value: member_profile[:credit_outstanding][:investments], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.total_credit_products')},
+            {value: member_profile[:credit_outstanding][:total_credit_products_outstanding], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.total_credit')},
+            {value: member_profile[:credit_outstanding][:total], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.credit.total_available_credit')},
+            {value: member_profile[:remaining_financing_available], type: :currency_whole}
+          ]
+        }
+      ]
+    }
+
+    # STA
+    @sta_table = {
+      rows: [
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.sta.number')},
+            {value: members_service.member(current_member_id).try(:[], :sta_number)}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.sta.balance')},
+            {value: member_profile[:sta_balance], type: :currency_whole}
+          ]
+        }
+      ]
+    }
   end
 
   def borrowing_capacity
@@ -428,7 +821,7 @@ class ReportsController < ApplicationController
   def advances_detail
     initialize_dates(:advances_detail, params[:start_date])
     report_download_name = "advances-#{fhlb_report_date_numeric(@start_date)}"
-    downloadable_report(nil, {start_date: @start_date.to_s}, report_download_name) do
+    downloadable_report(DOWNLOAD_FORMATS, {start_date: @start_date.to_s}, report_download_name) do
       @report_name = t('global.advances')
       @picker_presets = date_picker_presets(@start_date, nil, ReportConfiguration.date_restrictions(:advances_detail), @max_date)
       if params[:job_id] || self.skip_deferred_load
@@ -852,14 +1245,26 @@ class ReportsController < ApplicationController
   end
 
   def cash_projections
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    if report_disabled?(CASH_PROJECTIONS_WEB_FLAGS)
-      @cash_projections = {}
-    else
-      @cash_projections = member_balances.cash_projections
-      raise StandardError, "There has been an error and ReportsController#cash_projections has encountered nil. Check error logs." if @cash_projections.nil?
+    @report_name = ReportConfiguration.report_title(:cash_projections)
+    downloadable_report(:xlsx) do
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      if report_disabled?(CASH_PROJECTIONS_WEB_FLAGS)
+        @cash_projections = {}
+      else
+        @cash_projections = member_balances.cash_projections
+        raise StandardError, "There has been an error and ReportsController#cash_projections has encountered nil. Check error logs." if @cash_projections.nil?
+      end
+      @as_of_date = @cash_projections[:as_of_date].to_date if @cash_projections[:as_of_date]
+      if @cash_projections[:projections]
+        @cash_projections[:projections].sort! do |a,b|
+          result = a[:settlement_date] <=> b[:settlement_date]
+          if result == 0
+            result = a[:cusip] <=> b[:cusip]
+          end
+          result
+        end
+      end
     end
-    @as_of_date = @cash_projections[:as_of_date].to_date if @cash_projections[:as_of_date]
   end
 
   def interest_rate_resets
@@ -968,6 +1373,7 @@ class ReportsController < ApplicationController
       @dropdown_options      = available_reports.map{ |entry| [entry['month_year'], entry['report_end_date']] }
       @start_date            = params[:start_date].try(:to_date) || @dropdown_options[0][1]
       @dropdown_options_text = @dropdown_options.find{ |option| option[1] == @start_date }.try(:first)
+      @debit_date            = most_recent_business_day(default_dates_hash(@start_date)[:next_month_end])
 
       report_download_name = "securities-services-monthly-statement-#{fhlb_report_date_numeric(@start_date)}"
       downloadable_report(:pdf, {start_date: params[@start_date]}, report_download_name) do
@@ -1164,7 +1570,7 @@ class ReportsController < ApplicationController
 
     @securities_filter = params['securities_filter'] || 'all'
     report_download_name = "current-securities-position-#{@securities_filter}"
-    downloadable_report(nil, {securities_filter: params['securities_filter']}, report_download_name) do
+    downloadable_report(:xlsx, {securities_filter: params['securities_filter']}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(CURRENT_SECURITIES_POSITION_WEB_FLAG)
         @current_securities_position = {securities:[]}
@@ -1183,7 +1589,7 @@ class ReportsController < ApplicationController
     @report_name = ReportConfiguration.report_title(:monthly_securities_position)
     @month_end_date = month_restricted_start_date(@start_date)
     report_download_name = "monthly-securities-position-#{@securities_filter}-#{@month_end_date}"
-    downloadable_report(nil, {securities_filter: params['securities_filter'], start_date: params['start_date']}, report_download_name) do
+    downloadable_report(:xlsx, {securities_filter: params['securities_filter'], start_date: params['start_date']}, report_download_name) do
       @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
       @picker_presets = date_picker_presets(@month_end_date, nil, ReportConfiguration.date_restrictions(:monthly_securities_position), nil, [:today])
       member_balances = MemberBalanceService.new(current_member_id, request)
@@ -1546,6 +1952,30 @@ class ReportsController < ApplicationController
     rows = []
     activities = sort_report_data(activities, :funding_date)
     activities.each do |activity|
+      # Handling for Advances that have been EXERCISED
+      if (activity[:instrument_type] == 'ADVANCE' || activity[:instrument_type] == 'LC') && activity[:status] == 'EXERCISED'
+        activity[:product_description] = activity[:termination_full_partial]
+        activity[:interest_rate] = nil
+      else
+        activity[:product_description] =
+          # handling for Termination Par
+        if !activity[:termination_par].blank?
+          if !activity[:termination_full_partial].blank?
+            if activity[:instrument_type] == 'ADVANCE' || activity[:instrument_type] == 'LC'
+                         activity[:termination_full_partial]
+            elsif activity[:status] == 'TERMINATED'
+              'TERMINATION'
+            else
+              activity[:instrument_type]
+            end
+          # else - leave the product_description as-is
+          end
+        elsif activity[:instrument_type] == 'ADVANCE' && activity[:sub_product]
+          activity[:instrument_type] + ' ' + activity[:sub_product]
+        else
+          activity[:instrument_type]
+        end
+      end
       maturity_date = if activity[:instrument_type] == 'ADVANCE'
         activity[:maturity_date] || t('global.open')
       else
@@ -1719,7 +2149,7 @@ class ReportsController < ApplicationController
     ]
   end
 
-  def downloadable_report(formats = nil, report_download_params = {}, report_download_name = nil)
+  def downloadable_report(formats = DOWNLOAD_FORMATS, report_download_params = {}, report_download_name = nil)
     export_format = params[:export_format]
     self.report_download_name ||= report_download_name
     self.report_download_name ||= "#{action_name.to_s.gsub('_','-')}-#{fhlb_report_date_numeric(Time.zone.today)}" if action_name
