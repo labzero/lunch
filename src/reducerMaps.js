@@ -280,6 +280,7 @@ export const tagUi = {
   },
   [ActionTypes.HIDE_TAG_FILTER_FORM](state) {
     return Object.assign({}, state, {
+      autosuggestValue: '',
       filterFormShown: false
     });
   },
@@ -304,6 +305,9 @@ export const tagFilters = {
   },
   [ActionTypes.REMOVE_TAG_FILTER](state, action) {
     return state.filter(tagFilter => tagFilter !== action.id);
+  },
+  [ActionTypes.HIDE_TAG_FILTER_FORM]() {
+    return [];
   }
 };
 
