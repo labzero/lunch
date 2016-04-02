@@ -287,6 +287,23 @@ export const tagUi = {
     return Object.assign({}, state, {
       autosuggestValue: action.value
     });
+  },
+  [ActionTypes.ADD_TAG_FILTER](state) {
+    return Object.assign({}, state, {
+      autosuggestValue: ''
+    });
+  }
+};
+
+export const tagFilters = {
+  [ActionTypes.ADD_TAG_FILTER](state, action) {
+    return [
+      ...state,
+      action.id
+    ];
+  },
+  [ActionTypes.REMOVE_TAG_FILTER](state, action) {
+    return state.filter(tagFilter => tagFilter !== action.id);
   }
 };
 
@@ -294,4 +311,3 @@ export const latLng = {};
 export const user = {};
 export const users = {};
 export const wsPort = {};
-export const tagFilters = {};

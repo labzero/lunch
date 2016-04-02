@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import { generateTagList } from '../helpers/TagAutosuggestHelper';
 import { showTagFilterForm, hideTagFilterForm, setTagFilterAutosuggestValue } from '../actions/tagUi';
+import { addTagFilter, removeTagFilter } from '../actions/tagFilters';
 import TagFilterForm from '../components/TagFilterForm';
 
 const mapStateToProps = (state, ownProps) => {
@@ -31,6 +32,9 @@ const mapDispatchToProps = dispatch => ({
   handleSuggestionSelected(event, { suggestion }) {
     dispatch(addTagFilter(suggestion.id));
   },
+  removeTagFilter(id) {
+    dispatch(removeTagFilter(id));
+  }
 });
 
 export default connect(

@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import Autosuggest from 'react-autosuggest';
+import TagContainer from '../../containers/TagContainer';
 import { getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './TagFilterForm.scss';
@@ -19,7 +20,8 @@ export const _TagFilterForm = ({
   tagUi,
   handleSuggestionSelected,
   showTagFilterForm,
-  hideTagFilterForm
+  hideTagFilterForm,
+  removeTagFilter
 }) => {
   let filterForm;
   let showButton;
@@ -39,7 +41,10 @@ export const _TagFilterForm = ({
           onSuggestionSelected={handleSuggestionSelected}
           shouldRenderSuggestions={returnTrue}
         />
-        {addedTags.map(tag => <Tag />)}
+        {addedTags.map(tag => {
+          const boundRemoveTagFilter = removeTagFilter.bind(undefined, tag);
+          return <TagContainer key={`tagFilter_${tag}`} id={tag} showDelete onDeleteClicked={boundRemoveTagFilter} />;
+        })}
         <button className={`btn btn-sm btn-default ${s.button}`} type="button" onClick={hideTagFilterForm}>
           Cancel
         </button>
@@ -55,6 +60,7 @@ export const _TagFilterForm = ({
 
 _TagFilterForm.propTypes = {
   handleSuggestionSelected: PropTypes.func.isRequired,
+  removeTagFilter: PropTypes.func.isRequired,
   showTagFilterForm: PropTypes.func.isRequired,
   hideTagFilterForm: PropTypes.func.isRequired,
   autosuggestValue: PropTypes.string.isRequired,
