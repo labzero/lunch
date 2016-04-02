@@ -282,6 +282,11 @@ export const tagUi = {
     return Object.assign({}, state, {
       filterFormShown: false
     });
+  },
+  [ActionTypes.SET_TAG_FILTER_AUTOSUGGEST_VALUE](state, action) {
+    return Object.assign({}, state, {
+      autosuggestValue: action.value
+    });
   }
 };
 

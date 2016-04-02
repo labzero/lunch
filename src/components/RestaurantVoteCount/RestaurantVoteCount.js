@@ -33,7 +33,7 @@ export class _RestaurantVoteCount extends Component {
           <Tooltip>{this.props.votes.map(vote => {
             const foundUser = this.props.users.find(user => user.id === vote.user_id);
             if (foundUser !== undefined) {
-              return <div>{foundUser.name}</div>;
+              return <div key={`restaurantVote_${vote.id}`}>{foundUser.name}</div>;
             }
             return null;
           })}</Tooltip>
