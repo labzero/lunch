@@ -38,6 +38,8 @@ const actions = [
   'HIDE_MODAL',
   'DELETE_TAG',
   'TAG_DELETED',
+  'SHOW_TAG_FILTER_FORM',
+  'HIDE_TAG_FILTER_FORM',
   'SCROLL_TO_TOP',
   'SCROLLED_TO_TOP'
 ];

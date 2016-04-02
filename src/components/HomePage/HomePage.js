@@ -4,6 +4,7 @@ import s from './HomePage.scss';
 import RestaurantMapContainer from '../../containers/RestaurantMapContainer';
 import RestaurantListContainer from '../../containers/RestaurantListContainer';
 import RestaurantAddFormContainer from '../../containers/RestaurantAddFormContainer';
+import TagFilterFormContainer from '../../containers/TagFilterFormContainer';
 
 const title = 'Lunch';
 
@@ -24,15 +25,16 @@ export class _HomePage extends Component {
   }
 
   render() {
-    let form = null;
+    let restaurantAddForm = null;
     if (typeof this.props.user.id === 'number') {
-      form = <RestaurantAddFormContainer />;
+      restaurantAddForm = <RestaurantAddFormContainer />;
     }
 
     return (
       <div className={s.root}>
         <RestaurantMapContainer />
-        {form}
+        {restaurantAddForm}
+        <TagFilterFormContainer />
         <div className={s.restaurantList}>
           <RestaurantListContainer />
         </div>

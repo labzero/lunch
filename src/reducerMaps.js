@@ -272,7 +272,21 @@ export const tags = {
   }
 };
 
+export const tagUi = {
+  [ActionTypes.SHOW_TAG_FILTER_FORM](state) {
+    return Object.assign({}, state, {
+      filterFormShown: true
+    });
+  },
+  [ActionTypes.HIDE_TAG_FILTER_FORM](state) {
+    return Object.assign({}, state, {
+      filterFormShown: false
+    });
+  }
+};
+
 export const latLng = {};
 export const user = {};
 export const users = {};
 export const wsPort = {};
+export const tagFilters = {};

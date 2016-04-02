@@ -1,5 +1,7 @@
+@import '../../styles/_variables.scss';
+
 .root {
-  border: 2px solid #000;
+  border: $default-border;
   border-radius: 50%;
   font-size: 1.1em;
   font-weight: bold;

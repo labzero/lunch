@@ -1,5 +1,6 @@
-@import '../node_modules/bootstrap/dist/css/bootstrap.css';
-@import '../node_modules/react-geosuggest/module/geosuggest.css';
+@import '../../node_modules/bootstrap/dist/css/bootstrap.css';
+@import '../../node_modules/react-geosuggest/module/geosuggest.css';
+@import './_variables.scss';
 
 html {
   font-size: 16px;
@@ -18,7 +19,7 @@ a {
 }
 
 .geosuggest__input {
-  border: 2px solid black;
+  border: $default-border;
   border-radius: 100px;
   box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .2);
   outline: none;

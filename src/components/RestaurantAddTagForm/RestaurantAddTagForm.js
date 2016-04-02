@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import Autosuggest from 'react-autosuggest';
+import { getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantAddTagForm.scss';
 import autosuggestTheme from './RestaurantAddTagFormAutosuggest.scss';
@@ -20,8 +21,8 @@ export const _RestaurantAddTagForm = ({
     <Autosuggest
       suggestions={tags}
       focusInputOnSuggestionClick={false}
-      getSuggestionValue={_RestaurantAddTagForm.getSuggestionValue}
-      renderSuggestion={_RestaurantAddTagForm.renderSuggestion}
+      getSuggestionValue={getSuggestionValue}
+      renderSuggestion={renderSuggestion}
       inputProps={{
         value: addTagAutosuggestValue,
         onChange: setAddTagAutosuggestValue
@@ -42,8 +43,6 @@ export const _RestaurantAddTagForm = ({
   </form>
 );
 
-_RestaurantAddTagForm.getSuggestionValue = suggestion => suggestion.name;
-_RestaurantAddTagForm.renderSuggestion = suggestion => <span>{suggestion.name}</span>;
 _RestaurantAddTagForm.propTypes = {
   addNewTagToRestaurant: PropTypes.func.isRequired,
   handleSuggestionSelected: PropTypes.func.isRequired,

@@ -9,7 +9,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import s from './App.scss';
-import globalCss from '../../globalCss.scss';
+import globalCss from '../../styles/globalCss.scss';
 import HeaderContainer from '../../containers/HeaderContainer';
 import FooterContainer from '../../containers/FooterContainer';
 import DeleteRestaurantModalContainer from '../../containers/DeleteRestaurantModalContainer';

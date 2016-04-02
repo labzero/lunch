@@ -1,11 +1,8 @@
 import { connect } from 'react-redux';
 import { hideAddTagForm, setAddTagAutosuggestValue } from '../actions/listUi';
 import { addNewTagToRestaurant, addTagToRestaurant } from '../actions/restaurants';
+import { generateTagList } from '../helpers/TagAutosuggestHelper';
 import RestaurantAddTagForm from '../components/RestaurantAddTagForm';
-
-function escapeRegexCharacters(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/gi, '\\$&');
-}
 
 const mapStateToProps = (state, ownProps) => {
   const restaurant = state.restaurants.items.find(r => r.id === ownProps.id);
@@ -13,12 +10,7 @@ const mapStateToProps = (state, ownProps) => {
   const addedTags = restaurant.tags;
   const listUiItem = state.listUi[restaurant.id] || {};
   const addTagAutosuggestValue = listUiItem.addTagAutosuggestValue || '';
-  const escapedValue = escapeRegexCharacters(addTagAutosuggestValue.trim());
-  const regex = new RegExp(`${escapedValue}`, 'i');
-  tags = tags
-    .filter(tag => !addedTags.includes(tag.id))
-    .filter(tag => regex.test(tag.name))
-    .slice(0, 10);
+  tags = generateTagList(tags, addedTags, addTagAutosuggestValue);
   return {
     ...ownProps,
     tags,

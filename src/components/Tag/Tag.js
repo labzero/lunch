@@ -4,15 +4,13 @@ import s from './Tag.scss';
 
 export const _Tag = ({
   name,
-  user,
-  handleClick
+  showDelete,
+  onDeleteClicked
 }) => {
-  const loggedIn = user.id !== undefined;
-
   let deleteButton = null;
-  if (loggedIn) {
+  if (showDelete) {
     deleteButton = (
-      <button className={s.button} onClick={handleClick}>&times;</button>
+      <button className={s.button} onClick={onDeleteClicked}>&times;</button>
     );
   }
 
@@ -25,10 +23,9 @@ export const _Tag = ({
 };
 
 _Tag.propTypes = {
-  id: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
-  user: PropTypes.object.isRequired,
-  handleClick: PropTypes.func.isRequired
+  showDelete: PropTypes.bool.isRequired,
+  onDeleteClicked: PropTypes.func.isRequired
 };
 
 export default withStyles(_Tag, s);

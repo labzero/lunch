@@ -1,7 +1,15 @@
-@import '../styles/mixins';
+@import '../../styles/_mixins.scss';
+
+.root {
+  background: #ddd;
+  color: #666;
+  font-size: .75em;
+  line-height: 1;
+  margin-right: .5em;
+  padding: .25em;
+}
 
 .button {
   @include plain-button;
-  font-size: 1.5em;
   margin-left: .5em;
 }

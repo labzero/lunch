@@ -3,7 +3,7 @@ import RestaurantDeleteButtonContainer from '../../containers/RestaurantDeleteBu
 import RestaurantVoteCountContainer from '../../containers/RestaurantVoteCountContainer';
 import RestaurantVoteButtonContainer from '../../containers/RestaurantVoteButtonContainer';
 import RestaurantAddTagFormContainer from '../../containers/RestaurantAddTagFormContainer';
-import RestaurantTagContainer from '../../containers/RestaurantTagContainer';
+import TagContainer from '../../containers/TagContainer';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Restaurant.scss';
 
@@ -17,7 +17,9 @@ export const _Restaurant = ({
   user,
   listUiItem,
   showAddTagForm,
-  showMapAndInfoWindow
+  showMapAndInfoWindow,
+  removeTag,
+  showTagDelete
 }) => {
   const loggedIn = user.id !== undefined;
 
@@ -62,11 +64,14 @@ export const _Restaurant = ({
       <div className={s.footer}>
         <div className={s.tagsArea}>
           <ul className={`${s.tagList} ${tags.length === 0 ? s.tagsListEmpty : ''}`}>
-            {tags.map(tag => (
-              <li className={s.tagItem} key={tag}>
-                <RestaurantTagContainer restaurantId={id} id={tag} />
-              </li>
-            ))}
+            {tags.map(tag => {
+              const boundRemoveTag = removeTag.bind(undefined, tag);
+              return (
+                <li className={s.tagItem} key={`restaurantTag_${tag}`}>
+                  <TagContainer id={tag} showDelete={showTagDelete} onDeleteClicked={boundRemoveTag} />
+                </li>
+              );
+            })}
           </ul>
           {addTagArea}
         </div>
@@ -86,7 +91,9 @@ _Restaurant.propTypes = {
   shouldShowAddTagArea: PropTypes.bool,
   listUiItem: PropTypes.object.isRequired,
   showAddTagForm: PropTypes.func.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired
+  showMapAndInfoWindow: PropTypes.func.isRequired,
+  removeTag: PropTypes.func.isRequired,
+  showTagDelete: PropTypes.bool.isRequired
 };
 
 export default withStyles(_Restaurant, s);

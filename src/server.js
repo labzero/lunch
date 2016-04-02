@@ -156,6 +156,8 @@ server.get('*', async (req, res, next) => {
                   markers: {},
                   showUnvoted: true
                 },
+                tagFilters: [],
+                tagUi: {},
                 pageUi: {},
                 wsPort: process.env.BS_RUNNING ? port : 0
               };
