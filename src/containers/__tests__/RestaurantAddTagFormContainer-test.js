@@ -1,4 +1,5 @@
 jest.unmock('../RestaurantAddTagFormContainer');
+jest.unmock('../../helpers/TagAutosuggestHelper');
 jest.unmock('react-redux');
 jest.unmock('redux');
 

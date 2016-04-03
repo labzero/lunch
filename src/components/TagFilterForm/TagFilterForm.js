@@ -46,9 +46,8 @@ export class _TagFilterForm extends Component {
           {this.props.addedTags.map(tag => {
             const boundRemoveTagFilter = this.props.removeTagFilter.bind(undefined, tag);
             return (
-              <div className={s.tagContainer}>
+              <div className={s.tagContainer} key={`tagFilter_${tag}`}>
                 <TagContainer
-                  key={`tagFilter_${tag}`}
                   id={tag}
                   showDelete
                   onDeleteClicked={boundRemoveTagFilter}

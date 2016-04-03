@@ -19,7 +19,9 @@ describe('Restaurant', () => {
       shouldShowAddTagArea: true,
       listUiItem: {},
       showAddTagForm: jest.fn(),
-      showMapAndInfoWindow: jest.fn()
+      showMapAndInfoWindow: jest.fn(),
+      showTagDelete: true,
+      removeTag: jest.fn()
     };
   });
 
