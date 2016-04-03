@@ -18,8 +18,11 @@ import makeRoutes from './routes';
 import Location from './core/Location';
 import ContextHolder from './core/ContextHolder';
 import { addEventListener, removeEventListener } from './core/DOMUtils';
+import ReconnectingWebSocket from 'reconnectingwebsocket';
 
 const initialState = window.__INITIAL_STATE__;
+
+window.ReconnectingWebSocket = ReconnectingWebSocket;
 
 const store = configureStore(initialState);
 
