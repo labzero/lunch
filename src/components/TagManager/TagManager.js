@@ -11,14 +11,12 @@ const TagManager = ({ tags, showDelete, handleDeleteClicked }) => (
 
         return (
           <li className={s.item} key={item.id}>
-            <span className={s.tagContainer}>
-              <TagContainer
-                id={item.id}
-                name={item.name}
-                showDelete={showDelete}
-                onDeleteClicked={boundHandleDeleteClicked}
-              />
-            </span>
+            <TagContainer
+              id={item.id}
+              name={item.name}
+              showDelete={showDelete}
+              onDeleteClicked={boundHandleDeleteClicked}
+            />
           </li>
         );
       })}

@@ -1,4 +1,4 @@
-import React, { PropTypes } from 'react';
+import React, { PropTypes, Component } from 'react';
 import Autosuggest from 'react-autosuggest';
 import TagContainer from '../../containers/TagContainer';
 import { getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
@@ -6,57 +6,77 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './TagFilterForm.scss';
 import autosuggestTheme from './TagFilterFormAutosuggest.scss';
 
-autosuggestTheme.input = 'form-control input-sm';
+autosuggestTheme.input = 'form-control';
 
 const returnTrue = () => true;
 
 const preventDefault = event => event.preventDefault();
 
-export const _TagFilterForm = ({
-  autosuggestValue,
-  setAutosuggestValue,
-  addedTags,
-  tags,
-  tagUi,
-  handleSuggestionSelected,
-  showTagFilterForm,
-  hideTagFilterForm,
-  removeTagFilter
-}) => {
-  let filterForm;
-  let showButton;
-  if (tagUi.filterFormShown) {
-    filterForm = (
-      <form className={s.form} onSubmit={preventDefault}>
-        <Autosuggest
-          suggestions={tags}
-          focusInputOnSuggestionClick={false}
-          getSuggestionValue={getSuggestionValue}
-          renderSuggestion={renderSuggestion}
-          inputProps={{
-            value: autosuggestValue,
-            onChange: setAutosuggestValue
-          }}
-          theme={autosuggestTheme}
-          onSuggestionSelected={handleSuggestionSelected}
-          shouldRenderSuggestions={returnTrue}
-        />
-        {addedTags.map(tag => {
-          const boundRemoveTagFilter = removeTagFilter.bind(undefined, tag);
-          return <TagContainer key={`tagFilter_${tag}`} id={tag} showDelete onDeleteClicked={boundRemoveTagFilter} />;
-        })}
-        <button className={`btn btn-sm btn-default ${s.button}`} type="button" onClick={hideTagFilterForm}>
-          Cancel
-        </button>
-      </form>
-    );
-  } else {
-    showButton = <button onClick={showTagFilterForm}>Filter by tags</button>;
+export class _TagFilterForm extends Component {
+  componentDidUpdate(prevProps) {
+    if (this.props.tagUi.filterFormShown !== prevProps.tagUi.filterFormShown && this.props.tagUi.filterFormShown) {
+      this._autosuggestInput.focus();
+    }
   }
-  return (
-    <div className={s.root}>{showButton}{filterForm}</div>
-  );
-};
+
+  render() {
+    let filterForm;
+    let showButton;
+    if (this.props.tagUi.filterFormShown) {
+      const setAutosuggestInput = i => {
+        this._autosuggestInput = i;
+      };
+
+      filterForm = (
+        <form className={s.form} onSubmit={preventDefault}>
+          <Autosuggest
+            suggestions={this.props.tags}
+            focusInputOnSuggestionClick={false}
+            getSuggestionValue={getSuggestionValue}
+            renderSuggestion={renderSuggestion}
+            inputProps={{
+              value: this.props.autosuggestValue,
+              onChange: this.props.setAutosuggestValue,
+              ref: setAutosuggestInput
+            }}
+            theme={autosuggestTheme}
+            onSuggestionSelected={this.props.handleSuggestionSelected}
+            shouldRenderSuggestions={returnTrue}
+          />
+          {this.props.addedTags.map(tag => {
+            const boundRemoveTagFilter = this.props.removeTagFilter.bind(undefined, tag);
+            return (
+              <div className={s.tagContainer}>
+                <TagContainer
+                  key={`tagFilter_${tag}`}
+                  id={tag}
+                  showDelete
+                  onDeleteClicked={boundRemoveTagFilter}
+                />
+              </div>
+            );
+          })}
+          <button
+            className="btn btn-default"
+            type="button"
+            onClick={this.props.hideTagFilterForm}
+          >
+            cancel
+          </button>
+        </form>
+      );
+    } else {
+      showButton = (
+        <button className="btn btn-default" onClick={this.props.showTagFilterForm}>
+          filter tags
+        </button>
+      );
+    }
+    return (
+      <div className={s.root}>{showButton}{filterForm}</div>
+    );
+  }
+}
 
 _TagFilterForm.propTypes = {
   handleSuggestionSelected: PropTypes.func.isRequired,

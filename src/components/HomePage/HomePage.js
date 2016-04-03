@@ -33,8 +33,10 @@ export class _HomePage extends Component {
     return (
       <div className={s.root}>
         <RestaurantMapContainer />
-        {restaurantAddForm}
-        <TagFilterFormContainer />
+        <section className={s.forms}>
+          {restaurantAddForm}
+          <TagFilterFormContainer />
+        </section>
         <div className={s.restaurantList}>
           <RestaurantListContainer />
         </div>

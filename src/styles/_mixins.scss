@@ -11,7 +11,7 @@
 }
 
 @mixin autosuggest-container {
-  display: inline;
+  display: inline-block;
   position: relative;
 
   input {

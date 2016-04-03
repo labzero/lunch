@@ -21,6 +21,10 @@
   }
 }
 
-.tagContainer {
+.item {
   font-size: 2em;
+
+  > * {
+    display: inline-block;
+  }
 }

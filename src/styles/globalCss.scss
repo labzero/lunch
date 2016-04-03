@@ -28,3 +28,9 @@ a {
 .geosuggest__suggests {
   margin: 0 20px;
 }
+
+@media (max-width: 640px) {
+  .geosuggest {
+    width: 100%;
+  }
+}
