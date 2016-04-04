@@ -14,7 +14,6 @@
     "dotenv": "^2.0.0",
     "eventemitter3": "1.2.0",
     "express": "4.13.4",
-    "express-force-ssl": "^0.3.1",
     "express-graphql": "0.4.13",
     "express-jwt": "3.3.0",
     "fastclick": "1.0.6",

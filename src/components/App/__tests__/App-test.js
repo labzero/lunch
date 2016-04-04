@@ -18,7 +18,7 @@ describe('App', () => {
       shouldScrollToTop: false,
       scrolledToTop: jest.fn()
     };
-    window.ReconnectingWebSocket = jest.fn();
+    window.WebSocket = jest.fn();
   });
 
   it('renders children correctly', () => {
