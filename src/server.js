@@ -35,6 +35,7 @@ import { Server as WebSocketServer } from 'ws';
 import serialize from 'serialize-javascript';
 
 const server = global.server = express();
+server.enable('trust proxy');
 
 const httpServer = new Server(server);
 
@@ -112,6 +113,13 @@ server.use('/api/tags', tagApi);
 // -----------------------------------------------------------------------------
 server.get('*', async (req, res, next) => {
   try {
+    if (
+      process.env.NODE_ENV === 'production' &&
+      req.headers['x-forwarded-proto'] &&
+      req.headers['x-forwarded-proto'] === 'http'
+    ) {
+      res.redirect(`https://${req.headers.host}${req.url}`);
+    }
     match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
       if (error) {
         throw error;
