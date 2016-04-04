@@ -168,6 +168,7 @@ server.get('*', async (req, res, next) => {
               const store = configureStore(initialState);
               const template = require('./views/index.jade');
               const data = {
+                apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
                 title: '',
                 description: '',
                 css: '',

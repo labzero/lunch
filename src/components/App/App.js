@@ -41,7 +41,11 @@ class App extends Component {
       if (this.props.wsPort !== 0 && this.props.wsPort !== window.location.port) {
         host = `${window.location.hostname}:${this.props.wsPort}`;
       }
-      this.socket = new window.ReconnectingWebSocket(`ws://${host}`);
+      let protocol = 'ws:';
+      if (window.location.protocol === 'https:') {
+        protocol = 'wss:';
+      }
+      this.socket = new window.ReconnectingWebSocket(`${protocol}//${host}`);
       this.socket.onmessage = this.props.messageReceived;
     }
   }

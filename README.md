@@ -20,6 +20,10 @@ For `GOOGLE_CLIENT_*` env variables:
 - For local development:
   - Enter `http://localhost:3000` and `http://localhost:3001` as authorized JavaScript origins
   - Enter `http://localhost:3000/login/callback` and `http://localhost:3001/login/callback` as authorized redirect URIs
+- Add your deployment target(s) as additional origins/redirect URIs.
+- Go back to the Credentials section and create an API key.
+  - Choose "Browser key".
+  - Optionally limit requests to certain referrers.
 
 #### Database
 

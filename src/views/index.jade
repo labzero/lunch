@@ -18,5 +18,5 @@ html(class="no-js", lang="")
         window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;
         ga('create','#{trackingId}','auto');ga('send','pageview')
       script(src="https://www.google-analytics.com/analytics.js", async=true, defer=true)
-    script(src="https://maps.googleapis.com/maps/api/js?libraries=places")
+    script(src="https://maps.googleapis.com/maps/api/js?key=#{apikey}&libraries=places")
     script(src=entry)
