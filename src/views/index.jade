@@ -10,6 +10,7 @@ html(class="no-js", lang="")
     link(rel="apple-touch-icon", href="apple-touch-icon.png")
     style#css!= css
   body
+    noscript xfp: #{xfp}
     #app!= body
     script.
       window.__INITIAL_STATE__ = !{initialState};

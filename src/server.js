@@ -177,6 +177,7 @@ server.get('*', async (req, res, next) => {
               const template = require('./views/index.jade');
               const data = {
                 apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
+                xfp: req.headers['x-forwarded-proto'],
                 title: '',
                 description: '',
                 css: '',
