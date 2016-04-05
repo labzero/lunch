@@ -1002,6 +1002,8 @@ class ReportsController < ApplicationController
               columns << {value: value[1]}
             elsif value[0]=='basis_point_spread_to_benchmark'
               columns << {type: :basis_point, value: value[1]}
+            elsif value[0] == 'effective_date'
+              next
             else
               columns << {type: :rate, value: value[1]}
             end
@@ -1018,6 +1020,8 @@ class ReportsController < ApplicationController
               columns << {value: value[1]}
             elsif value[0]=='basis_point_spread_to_benchmark'
               columns << {type: :basis_point, value: value[1]}
+            elsif value[0] == 'effective_date'
+              next
             else
               columns << {type: :rate, value: value[1]}
             end
@@ -1033,6 +1037,8 @@ class ReportsController < ApplicationController
           row.each do |value|
             if value[0]=='advance_maturity'
               columns << {value: value[1]}
+            elsif value[0] == 'effective_date'
+              next
             else
               columns << {type: :basis_point, value: value[1]}
             end

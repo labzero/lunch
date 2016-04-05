@@ -1,6 +1,8 @@
 module MAPI
   module Shared
     module Utils
+      CACHE_KEY_SEPARATOR = '.'.freeze
+      CACHE_KEY_BASE = ['mapi', 'cache'].join(CACHE_KEY_SEPARATOR).freeze
       extend ActiveSupport::Concern
 
       module ClassMethods
@@ -69,6 +71,14 @@ module MAPI
 
         def percentage_to_decimal_rate(rate)
           rate.to_f / 100.0 if rate
+        end
+
+        def request_cache(request, key)
+          cache_key = ([CACHE_KEY_BASE] + Array.wrap(key)).join(CACHE_KEY_SEPARATOR)
+          unless request.env.has_key?(cache_key)
+            request.env[cache_key] = yield
+          end
+          request.env[cache_key]
         end
       end
     end

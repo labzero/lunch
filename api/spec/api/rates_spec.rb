@@ -478,6 +478,77 @@ describe MAPI::ServiceApp do
     end
   end
 
+  fakeable_method 'is_limited_pricing_day? class method' do
+    let(:request) { double(Sinatra::Request) }
+    let(:date) { Time.zone.today }
+    let(:call_method) { subject.is_limited_pricing_day?(app, date) }
+
+    before do
+      allow(app).to receive(:request).and_return(request)
+      allow(subject).to receive(:request_cache).and_yield
+    end
+
+    it 'caches the response in the request keyed by date' do
+      expect(subject).to receive(:request_cache).with(request, ['is_limited_pricing_day', date.to_s]).and_return([])
+      call_method
+    end
+    it 'returns true if today is a limited pricing day' do
+      allow(subject).to receive(:request_cache).and_return([date])
+      expect(call_method).to be(true)
+    end
+    it 'returns false if today is not a limited pricing day' do
+      allow(subject).to receive(:request_cache).and_return([date + 1.day])
+      expect(call_method).to be(false)
+    end
+
+    production_only vcr: {cassette_name: 'calendar_mds_service'} do
+      let(:calendar_service) { subject.init_cal_connection(environment) }
+
+      it 'initializes the calendar service connection' do
+        expect(subject).to receive(:init_cal_connection).with(environment)
+        call_method
+      end
+      it 'calls the calendar service to get the limited pricing holiday information' do
+        expect(calendar_service).to receive(:call).with(:get_holiday, include(message_tag: 'holidayRequest', soap_header: MAPI::Services::Rates::SOAP_HEADER )).and_call_original
+        call_method
+      end
+      it 'only checks for holidays on today' do
+        today_str = date.strftime('%F')
+        expect(calendar_service).to receive(:call).with(:get_holiday, include(message: {'v1:endDate' => today_str, 'v1:startDate' => today_str})).and_call_original
+        call_method
+      end
+      it 'raises an error if the calendar service could not be reached' do
+        allow(calendar_service).to receive(:call).and_raise(Savon::Error)
+        expect{call_method}.to raise_error(RuntimeError)
+      end
+      it 'the request_cache block returns the dates from the service' do
+        expected = ['2015-04-03', '2016-03-25', '2017-04-14', '2018-03-30'].collect(&:to_date)
+        result = []
+        allow(subject).to receive(:request_cache) do |*args, &block|
+          result = block.call
+        end
+        call_method
+        expect(result).to match(expected)
+      end
+    end
+
+    excluding_production do
+      it 'fetches data from the fakes' do
+        expect(subject).to receive(:fake).with('limited_pricing_days').and_return([])
+        call_method
+      end
+      it 'the request_cache block returns the dates from the fakes' do
+        expected = ['2016-04-04', '2016-04-05', '2015-04-03', '2016-03-25', '2017-04-14', '2018-03-30'].collect(&:to_date)
+        result = []
+        allow(subject).to receive(:request_cache) do |*args, &block|
+          result = block.call
+        end
+        call_method
+        expect(result).to match(expected)
+      end
+    end
+  end
+
   describe 'historic price indications' do
     let(:start_date) {'2014-04-01'}
     let(:end_date) {'2014-04-02'}
@@ -561,11 +632,21 @@ describe MAPI::ServiceApp do
         expect(frc['nominal_yield_of_benchmark']).to be_kind_of(Float)
         expect(frc['basis_point_spread_to_benchmark']).to be_kind_of(Numeric)
         expect(frc['advance_rate']).to be_kind_of(Float)
+        expect(frc['effective_date']).to match(/\d{4}-\d{2}-\d{2}/)
       end
     end
     it 'invalid collateral should result in 404 error message' do
       get '/rates/price_indications/current/frc/foo'
       expect(last_response.status).to eq(404)
+    end
+    it 'checks if the effective_date is a limited pricing day' do
+      today = Time.zone.today
+      expect(subject).to receive(:is_limited_pricing_day?).with(anything, today).exactly(10)
+      price_indications_current_frc
+    end
+    it 'does not return rates for products whose effective_date is a limited pricing day' do
+      allow(subject).to receive(:is_limited_pricing_day?).and_return(true, false, true, false, true, true, true, true, false, false)
+      expect(price_indications_current_frc.length).to be(4)
     end
     describe 'in the production environment' do
       before do
@@ -578,6 +659,7 @@ describe MAPI::ServiceApp do
           expect(frc['nominal_yield_of_benchmark']).to be_kind_of(Float)
           expect(frc['basis_point_spread_to_benchmark']).to be_kind_of(Numeric)
           expect(frc['advance_rate']).to be_kind_of(Float)
+          expect(frc['effective_date']).to match(/\d{4}-\d{2}-\d{2}/)
         end
       end
       it 'should return Internal Service Error, if current price indications service is unavaible', vcr: {cassette_name: 'current_price_indications_unavailable'} do
@@ -588,31 +670,42 @@ describe MAPI::ServiceApp do
   end
 
   describe 'price_indications_current_arc' do
-    let(:price_indications_current_frc) { get '/rates/price_indications/current/arc/standard'; JSON.parse(last_response.body) }
+    let(:price_indications_current_arc) { get '/rates/price_indications/current/arc/standard'; JSON.parse(last_response.body) }
     it 'should return data relevant to each loan_term' do
-      price_indications_current_frc.each do |arc|
+      price_indications_current_arc.each do |arc|
         expect(arc['advance_maturity']).to be_kind_of(String)
         expect(arc['1_month_libor']).to be_kind_of(Numeric)
         expect(arc['3_month_libor']).to be_kind_of(Numeric)
         expect(arc['6_month_libor']).to be_kind_of(Numeric)
         expect(arc['prime']).to be_kind_of(Numeric)
+        expect(arc['effective_date']).to match(/\d{4}-\d{2}-\d{2}/)
       end
     end
     it 'invalid collateral should result in 404 error message' do
       get '/rates/price_indications/current/arc/foo'
       expect(last_response.status).to eq(404)
     end
+    it 'checks if the effective_date is a limited pricing day' do
+      today = Time.zone.today
+      expect(subject).to receive(:is_limited_pricing_day?).with(anything, today).exactly(7)
+      price_indications_current_arc
+    end
+    it 'does not return rates for products whose effective_date is a limited pricing day' do
+      allow(subject).to receive(:is_limited_pricing_day?).and_return(true, false, true, false, true, true, true, true)
+      expect(price_indications_current_arc.length).to be(2)
+    end
     describe 'in the production environment' do
       before do
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
       end
       it 'should return data relevant to each loan_term', vcr: {cassette_name: 'current_price_indications_arc'} do
-        price_indications_current_frc.each do |arc|
+        price_indications_current_arc.each do |arc|
           expect(arc['advance_maturity']).to be_kind_of(String)
           expect(arc['1_month_libor']).to be_kind_of(Numeric)
           expect(arc['3_month_libor']).to be_kind_of(Numeric)
           expect(arc['6_month_libor']).to be_kind_of(Numeric)
           expect(arc['prime']).to be_kind_of(Numeric)
+          expect(arc['effective_date']).to match(/\d{4}-\d{2}-\d{2}/)
         end
       end
       it 'should return Internal Service Error, if current price indications service is unavaible', vcr: {cassette_name: 'current_price_indications_unavailable'} do
