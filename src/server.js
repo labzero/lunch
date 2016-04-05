@@ -56,6 +56,17 @@ server.use(cookieParser());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(bodyParser.json());
 
+// UNSAFE AND TEMPORARY: ELB doesn't pass X-Forwarded-Proto for a TCP proxy.
+// spoof it as https if we don't receive it from the non-SSL HTTP proxy.
+if (process.env.NODE_ENV === 'production') {
+  server.use((req, res, next) => {
+    if (req.headers['x-forwarded-proto'] === undefined) {
+      req.headers['x-forwarded-proto'] = 'https';
+      next();
+    }
+  });
+}
+
 //
 // Authentication
 // -----------------------------------------------------------------------------
