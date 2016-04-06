@@ -64,6 +64,11 @@ const config = {
           ],
           plugins: [
             'transform-runtime',
+            ...DEBUG ? [] : [
+              'transform-react-remove-prop-types',
+              'transform-react-constant-elements',
+              'transform-react-inline-elements',
+            ],
           ],
         },
       },
@@ -186,7 +191,7 @@ const clientConfig = extend(true, {}, config, {
     // https://webpack.github.io/docs/list-of-plugins.html#occurrenceorderplugin
     new webpack.optimize.OccurenceOrderPlugin(true),
 
-    ...(DEBUG ? [] : [
+    ...DEBUG ? [] : [
 
       // Search for equal or similar files and deduplicate them in the output
       // https://webpack.github.io/docs/list-of-plugins.html#dedupeplugin
@@ -204,7 +209,7 @@ const clientConfig = extend(true, {}, config, {
       // A plugin for a more aggressive chunk merging strategy
       // https://webpack.github.io/docs/list-of-plugins.html#aggressivemergingplugin
       new webpack.optimize.AggressiveMergingPlugin(),
-    ]),
+    ],
   ],
 
   // Choose a developer tool to enhance debugging
