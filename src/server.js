@@ -181,7 +181,8 @@ server.get('*', async (req, res, next) => {
               const template = require('./views/index.jade');
               const data = {
                 apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
-                xfp: req.headers['x-forwarded-proto'],
+                privateKeyPath,
+                certificatePath,
                 title: '',
                 description: '',
                 css: '',
@@ -206,8 +207,8 @@ server.get('*', async (req, res, next) => {
               data.css = css.join('');
               res.status(statusCode);
               res.send(template(data));
-            });
-        });
+            }).catch(err => next(err));
+        }).catch(err => next(err));
     });
   } catch (err) {
     next(err);
