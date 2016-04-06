@@ -180,7 +180,7 @@ server.get('*', async (req, res, next) => {
           const data = {
             apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
             title: '',
-            description: '',
+            description: 'An app for groups to decide on nearby lunch options.',
             css: '',
             body: '',
             entry: assets.main.js,
