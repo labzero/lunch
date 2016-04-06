@@ -116,6 +116,36 @@
       "stage-0"
     ]
   },
+  "eslintConfig": {
+    "parser": "babel-eslint",
+    "extends": "airbnb",
+    "globals": {
+      "__DEV__": true
+    },
+    "env": {
+      "browser": true,
+      "jest": true
+    },
+    "rules": {
+      "comma-dangle": 0,
+      "key-spacing": 0,
+      "no-confusing-arrow": 0,
+      "jsx-quotes": [2, "prefer-double"],
+      "max-len": [2, 120],
+      "react/jsx-no-bind": [2, {"ignoreRefs": true}],
+      "no-param-reassign": 0
+    }
+  },
+  "jscsConfig": {
+    "preset": "airbnb",
+    "excludeFiles": ["build/**", "node_modules/**"],
+    "validateQuoteMarks": null,
+    "disallowSpacesInsideTemplateStringPlaceholders": null,
+    "maximumLineLength": 120,
+    "requireCamelCaseOrUpperCaseIdentifiers": {"ignoreProperties": true},
+    "requirePaddingNewLinesAfterBlocks": null,
+    "requireTrailingComma": null
+  },
   "jest": {
     "rootDir": "./src",
     "testPathDirs": [
