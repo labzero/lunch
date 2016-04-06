@@ -183,9 +183,7 @@ server.get('*', async (req, res, next) => {
             description: 'An app for groups to decide on nearby lunch options.',
             css: '',
             body: '',
-
-            // protocol is stripped out inexplicably. add it again.
-            root: `${req.protocol}:${req.protocol}://${req.get('host')}`,
+            root: `${req.protocol}://${req.get('host')}`,
             entry: assets.main.js,
             initialState: serialize(initialState)
           };
