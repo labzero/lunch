@@ -17,6 +17,10 @@ export const host = process.env.WEBSITE_HOSTNAME ||
 
 export const wsHost = process.env.WS_HOST;
 
+export const httpsPort = process.env.HTTPS_PORT || 443;
+export const privateKeyPath = process.env.HTTPS_PRIVATEKEY || 'cert/server.key';
+export const certificatePath = process.env.HTTPS_CERTIFICATE || 'cert/server.crt';
+
 export const analytics = {
 
   // https://analytics.google.com/

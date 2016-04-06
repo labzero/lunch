@@ -10,7 +10,10 @@
 import Promise from 'bluebird';
 import path from 'path';
 import express from 'express';
-import { Server } from 'http';
+import fs from 'fs';
+import { Server as HttpServer } from 'http';
+import { Server as HttpsServer } from 'https';
+import forceSSL from 'express-force-ssl';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import expressJwt from 'express-jwt';
@@ -22,7 +25,7 @@ import PrettyError from 'pretty-error';
 import { match, RouterContext } from 'react-router';
 import configureStore from './configureStore';
 import assets from './assets';
-import { port, auth } from './config';
+import { port, httpsPort, auth, privateKeyPath, certificatePath } from './config';
 import makeRoutes from './routes';
 import ContextHolder from './core/ContextHolder';
 import passport from './core/passport';
@@ -35,10 +38,15 @@ import { Server as WebSocketServer } from 'ws';
 import serialize from 'serialize-javascript';
 
 const server = global.server = express();
-server.enable('trust proxy');
 
-const httpServer = new Server(server);
-
+const httpServer = new HttpServer(server);
+let httpsServer;
+if (process.env.NODE_ENV === 'production') {
+  const key = fs.readFileSync(privateKeyPath);
+  const cert = fs.readFileSync(certificatePath);
+  httpsServer = new HttpsServer({ key, cert }, server);
+  server.use(forceSSL);
+}
 const routes = makeRoutes();
 
 //
@@ -55,17 +63,6 @@ server.use(express.static(path.join(__dirname, 'public')));
 server.use(cookieParser());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(bodyParser.json());
-
-// UNSAFE AND TEMPORARY: ELB doesn't pass X-Forwarded-Proto for a TCP proxy.
-// spoof it as https if we don't receive it from the non-SSL HTTP proxy.
-if (process.env.NODE_ENV === 'production') {
-  server.use((req, res, next) => {
-    if (req.headers['x-forwarded-proto'] === undefined) {
-      req.headers['x-forwarded-proto'] = 'https';
-      next();
-    }
-  });
-}
 
 //
 // Authentication
@@ -100,7 +97,7 @@ server.get('/logout', (req, res) => {
 //
 // Register WebSockets
 // -----------------------------------------------------------------------------
-const wss = new WebSocketServer({ server: httpServer });
+const wss = new WebSocketServer({ server: httpsServer === undefined ? httpServer : httpsServer });
 
 wss.broadcast = data => {
   wss.clients.forEach(client => {
@@ -124,13 +121,6 @@ server.use('/api/tags', tagApi);
 // -----------------------------------------------------------------------------
 server.get('*', async (req, res, next) => {
   try {
-    if (
-      process.env.NODE_ENV === 'production' &&
-      req.headers['x-forwarded-proto'] &&
-      req.headers['x-forwarded-proto'] === 'http'
-    ) {
-      res.redirect(`https://${req.headers.host}${req.url}`);
-    }
     match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
       if (error) {
         throw error;
@@ -246,3 +236,8 @@ httpServer.listen(port, () => {
   /* eslint-disable no-console */
   console.log(`The server is running at http://localhost:${port}/`);
 });
+if (httpsServer !== undefined) {
+  httpsServer.listen(httpsPort, () => {
+    console.log(`The HTTPS server is running at https://localhost:${port}`);
+  });
+}
