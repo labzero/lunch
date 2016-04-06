@@ -1,6 +1,6 @@
 <img src="https://github.com/labzero/lunch/raw/master/src/components/Header/lunch.png" width="500" alt="Lunch">
 
-An app for groups to decide on nearby lunch options.
+An app for groups to decide on nearby lunch options. [Read the blog post about it!](https://labzero.com/people/blog/lunch-search-no-longer-to-sate-your-hunger)
 
 ## Setup
 
