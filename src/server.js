@@ -26,7 +26,7 @@ import PrettyError from 'pretty-error';
 import { match, RouterContext } from 'react-router';
 import configureStore from './configureStore';
 import assets from './assets';
-import { port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } from './config';
+import { port, httpsPort, host, auth, selfSigned, privateKeyPath, certificatePath } from './config';
 import makeRoutes from './routes';
 import ContextHolder from './core/ContextHolder';
 import passport from './core/passport';
@@ -183,6 +183,7 @@ server.get('*', async (req, res, next) => {
             description: 'An app for groups to decide on nearby lunch options.',
             css: '',
             body: '',
+            root: `//${req.get('host')}`,
             entry: assets.main.js,
             initialState: serialize(initialState)
           };
