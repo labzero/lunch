@@ -25,7 +25,7 @@ import PrettyError from 'pretty-error';
 import { match, RouterContext } from 'react-router';
 import configureStore from './configureStore';
 import assets from './assets';
-import { port, httpsPort, auth, privateKeyPath, certificatePath } from './config';
+import { port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } from './config';
 import makeRoutes from './routes';
 import ContextHolder from './core/ContextHolder';
 import passport from './core/passport';
@@ -42,6 +42,9 @@ const server = global.server = express();
 const httpServer = new HttpServer(server);
 let httpsServer;
 if (process.env.NODE_ENV === 'production') {
+  if (selfSigned) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  }
   const key = fs.readFileSync(privateKeyPath);
   const cert = fs.readFileSync(certificatePath);
   httpsServer = new HttpsServer({ key, cert }, server);
