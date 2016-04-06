@@ -1,15 +1,15 @@
 import React, { PropTypes } from 'react';
 import TagManagerContainer from '../../containers/TagManagerContainer';
-import { Modal } from 'react-bootstrap';
+import { Modal, ModalHeader, ModalTitle, ModalBody } from 'react-bootstrap';
 
 const TagManagerModal = ({ shown, hideModal }) => (
   <Modal show={shown} onHide={hideModal}>
-    <Modal.Header closeButton>
-      <Modal.Title>Tag Manager</Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
+    <ModalHeader closeButton>
+      <ModalTitle>Tag Manager</ModalTitle>
+    </ModalHeader>
+    <ModalBody>
       <TagManagerContainer />
-    </Modal.Body>
+    </ModalBody>
   </Modal>
 );
 

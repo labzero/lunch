@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import FlipMove from 'react-flip-move';
-import Scroll from 'react-scroll';
+import { Element as ScrollElement } from 'react-scroll';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantList.scss';
 import RestaurantContainer from '../../containers/RestaurantContainer';
@@ -10,7 +10,7 @@ const RestaurantList = ({ items }) => (
     <FlipMove staggerDelayBy={40} staggerDurationBy={40}>
       {items.map(item => (
         <li className={s.item} key={`restaurantListItem_${item.id}`}>
-          <Scroll.Element name={`restaurantListItem_${item.id}`}>
+          <ScrollElement name={`restaurantListItem_${item.id}`}>
             <RestaurantContainer
               id={item.id}
               name={item.name}
@@ -19,7 +19,7 @@ const RestaurantList = ({ items }) => (
               tags={item.tags}
               shouldShowAddTagArea
             />
-          </Scroll.Element>
+          </ScrollElement>
         </li>
       ))}
     </FlipMove>

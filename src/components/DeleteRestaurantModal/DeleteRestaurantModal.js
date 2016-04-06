@@ -1,5 +1,5 @@
 import React, { PropTypes, Component } from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, ModalBody, ModalFooter, Button } from 'react-bootstrap';
 
 class DeleteRestaurantModal extends Component {
   state = {};
@@ -22,15 +22,15 @@ class DeleteRestaurantModal extends Component {
   render() {
     return (
       <Modal show={this.props.shown} onHide={this.props.hideModal}>
-        <Modal.Body>
+        <ModalBody>
           Are you sure you want to delete {this.state.restaurantName}?
-        </Modal.Body>
-        <Modal.Footer>
+        </ModalBody>
+        <ModalFooter>
           <form onSubmit={this.props.deleteRestaurant}>
             <Button type="button" bsSize="small" onClick={this.props.hideModal}>Cancel</Button>
             <Button type="submit" autoFocus bsSize="small" bsStyle="primary">Delete</Button>
           </form>
-        </Modal.Footer>
+        </ModalFooter>
       </Modal>
     );
   }
