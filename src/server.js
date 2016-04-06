@@ -13,6 +13,7 @@ import express from 'express';
 import fs from 'fs';
 import { Server as HttpServer } from 'http';
 import { Server as HttpsServer } from 'https';
+import compression from 'compression';
 import forceSSL from 'express-force-ssl';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
@@ -60,6 +61,7 @@ global.navigator.userAgent = global.navigator.userAgent || 'all';
 //
 // Register Node.js middleware
 // -----------------------------------------------------------------------------
+server.use(compression());
 server.use(express.static(path.join(__dirname, 'public')));
 server.use(cookieParser());
 server.use(bodyParser.urlencoded({ extended: true }));
