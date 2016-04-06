@@ -175,6 +175,34 @@ module MAPI
         hash
       end
 
+      def self.is_limited_pricing_day?(app, date)
+        date = date.to_date
+        cached_dates = request_cache(app.request, ['is_limited_pricing_day', date.to_s]) do
+          dates = []
+          if connection = self.init_cal_connection(app.settings.environment)
+            message = {'v1:endDate' => date.strftime('%F') , 'v1:startDate' => date.strftime('%F') }
+            begin
+              response = connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER )
+            rescue Savon::Error => error
+              raise 'Internal Service Error: the holiday calendar service could not be reached'
+            end
+            response.doc.remove_namespaces!
+            holiday_type = response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')
+            holiday_type.each do |row|
+              if row.css('businessCenter').text == 'FHLBSF Special Pricing Day'
+                row.css('days day date').map do |holiday|
+                  dates.push(holiday.content)
+                end
+              end
+            end
+          else
+            dates = fake('limited_pricing_days')
+          end
+          dates.collect(&:to_date)
+        end
+        cached_dates.include?(date)
+      end
+
       def self.registered(app)
         service_root '/rates', app
         swagger_api_root :rates do
@@ -473,16 +501,19 @@ module MAPI
             fhlbsfresponseblock = response.doc.xpath('//Envelope//Body//pricingIndicationsResponse//response//Items//FhlbsfReportDataBlock')
             fhlbsfresponse = response.doc.xpath('//Envelope//Body//pricingIndicationsResponse//response//Items//FhlbsfReportDataBlock//Data//FhlbsfReportData')
             fhlbsfdatapoints = fhlbsfresponse[3].css('Table Rows TableRow Cells TableCell')
+            effective_date = fhlbsfresponseblock.at_css('EffectiveDate').content.to_date
             hash = {
               'advance_maturity' => fhlbsfdatapoints[0].at_css('Text').content,
               'overnight_fed_funds_benchmark' => fhlbsfdatapoints[1].at_css('Text').content,
               'basis_point_spread_to_benchmark' => fhlbsfdatapoints[2].at_css('Text').content,
               'advance_rate' => fhlbsfdatapoints[3].at_css('Text').content,
-              'effective_date' => fhlbsfresponseblock.at_css('EffectiveDate').content
+              'effective_date' => effective_date
             }
             hash
           else
-            MAPI::Services::Rates.fake('rates_current_price_indications_vrc')
+            hash = MAPI::Services::Rates.fake('rates_current_price_indications_vrc')
+            hash['effective_date'] = Time.zone.today
+            hash
           end
           hash = {
             'advance_maturity' => data['advance_maturity'].to_s,
@@ -517,6 +548,8 @@ module MAPI
             response.doc.remove_namespaces!
             fhlbsfresponse = response.doc.xpath('//Envelope//Body//pricingIndicationsResponse//response//Items//FhlbsfReportDataBlock//Data//FhlbsfReportData')
             fhlbsfdatapoints = fhlbsfresponse[3].css('Table Rows TableRow Cells')
+            fhlbsfresponseblock = response.doc.xpath('//Envelope//Body//pricingIndicationsResponse//response//Items//FhlbsfReportDataBlock')
+            effective_date = fhlbsfresponseblock.at_css('EffectiveDate').content.to_date
             hash = fhlbsfdatapoints.collect do |fhlbsfdatapoint|
               result = fhlbsfdatapoint.css('TableCell')
               {
@@ -524,12 +557,16 @@ module MAPI
                 'treasury_benchmark_maturity' => result[1].at_css('Text').content,
                 'nominal_yield_of_benchmark' => result[2].at_css('Text').content,
                 'basis_point_spread_to_benchmark' => result[3].at_css('Text').content,
-                'advance_rate' => result[4].at_css('Text').content
+                'advance_rate' => result[4].at_css('Text').content,
+                'effective_date' => effective_date
               }
             end
             hash
           else
-            MAPI::Services::Rates.fake('rates_current_price_indications_frc')
+            MAPI::Services::Rates.fake('rates_current_price_indications_frc').collect do |rate|
+              rate['effective_date'] = Time.zone.today
+              rate
+            end
           end
           data_formatted = []
           data.each do |row|
@@ -538,9 +575,11 @@ module MAPI
               'treasury_benchmark_maturity' => row['treasury_benchmark_maturity'].to_s,
               'nominal_yield_of_benchmark' => row['nominal_yield_of_benchmark'].to_f,
               'basis_point_spread_to_benchmark' => row['basis_point_spread_to_benchmark'].to_i,
-              'advance_rate' => row['advance_rate'].to_f
+              'advance_rate' => row['advance_rate'].to_f,
+              'effective_date' => row['effective_date'].to_date
             }
-            data_formatted.push(hash)
+            limited_pricing = MAPI::Services::Rates.is_limited_pricing_day?(self, hash['effective_date'])
+            data_formatted.push(hash) unless limited_pricing
           end
           data_formatted.to_json
         end
@@ -568,6 +607,8 @@ module MAPI
             response.doc.remove_namespaces!
             fhlbsfresponse = response.doc.xpath('//Envelope//Body//pricingIndicationsResponse//response//Items//FhlbsfReportDataBlock//Data//FhlbsfReportData')
             fhlbsfdatapoints = fhlbsfresponse[3].css('Table Rows TableRow Cells')
+            fhlbsfresponseblock = response.doc.xpath('//Envelope//Body//pricingIndicationsResponse//response//Items//FhlbsfReportDataBlock')
+            effective_date = fhlbsfresponseblock.at_css('EffectiveDate').content.to_date
             hash = fhlbsfdatapoints.collect do |fhlbsfdatapoint|
               result = fhlbsfdatapoint.css('TableCell')
               {
@@ -575,12 +616,16 @@ module MAPI
                 '1_month_libor' =>  result[1].at_css('Text').content,
                 '3_month_libor' =>  result[2].at_css('Text').content,
                 '6_month_libor' =>  result[3].at_css('Text').content,
-                'prime' =>  params[:collateral] == 'standard' ? result[4].at_css('Text').content : 0
+                'prime' =>  params[:collateral] == 'standard' ? result[4].at_css('Text').content : 0,
+                'effective_date' => effective_date
               }
             end
             hash
           else
-            MAPI::Services::Rates.fake('rates_current_price_indications_arc')
+            MAPI::Services::Rates.fake('rates_current_price_indications_arc').collect do |rate|
+              rate['effective_date'] = Time.zone.today
+              rate
+            end
           end
           data_formatted = []
           data.each do |row|
@@ -589,9 +634,11 @@ module MAPI
                 '1_month_libor' => row['1_month_libor'].to_i,
                 '3_month_libor' => row['3_month_libor'].to_i,
                 '6_month_libor' => row['6_month_libor'].to_i,
-                'prime' => row['prime'].to_i
+                'prime' => row['prime'].to_i,
+                'effective_date' => row['effective_date'].to_date
             }
-            data_formatted.push(hash)
+            limited_pricing = MAPI::Services::Rates.is_limited_pricing_day?(self, hash['effective_date'])
+            data_formatted.push(hash) unless limited_pricing
           end
           data_formatted.to_json
         end

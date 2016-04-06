@@ -1873,9 +1873,9 @@ RSpec.describe ReportsController, :type => :controller do
     end
     describe 'when a job_id param is present' do
       let(:job_status) { double('job status', destroy: nil) }
-      let(:vrc_data) {{'advance_maturity' => 'Overnight/Open','overnight_fed_funds_benchmark' => 0.13,'basis_point_spread_to_benchmark' => 5,'advance_rate' => 0.18,'effective_date' => '2016-01-01'}}
-      let(:frc_data) {[{'advance_maturity' =>'1 Month','treasury_benchmark_maturity' => '3 Months','nominal_yield_of_benchmark' => 0.01,'basis_point_spread_to_benchmark' => 20,'advance_rate' => 0.21}]}
-      let(:arc_data) {[{'advance_maturity' => '1 Year','1_month_libor' => 6,'3_month_libor' => 4,'6_month_libor' => 11,'prime' => -295}]}
+      let(:vrc_data) {{'advance_maturity' => 'Overnight/Open','overnight_fed_funds_benchmark' => 0.13,'basis_point_spread_to_benchmark' => 5,'advance_rate' => 0.18, 'effective_date' => '2016-01-01'}}
+      let(:frc_data) {[{'advance_maturity' =>'1 Month','treasury_benchmark_maturity' => '3 Months','nominal_yield_of_benchmark' => 0.01,'basis_point_spread_to_benchmark' => 20,'advance_rate' => 0.21, 'effective_date' => '2016-01-01'}]}
+      let(:arc_data) {[{'advance_maturity' => '1 Year','1_month_libor' => 6,'3_month_libor' => 4,'6_month_libor' => 11,'prime' => -295, 'effective_date' => '2016-01-01'}]}
       let(:sta_data) { {rate: rand(0..99999)} }
       let(:member_id) { rand(1..99999) }
       let(:user_id) { rand(1..99999) }
