@@ -26,7 +26,8 @@ async function copy({ watch } = {}) {
     ncp('.env.prod', 'build/.env'),
     ncp('database.js', 'build/database.js'),
     ncp('.sequelizerc', 'build/.sequelizerc'),
-    ncp('db', 'build/db')
+    ncp('db', 'build/db'),
+    ncp('cert', 'build/cert')
   ]);
 
   await fs.writeFile('./build/package.json', JSON.stringify({
