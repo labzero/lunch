@@ -229,7 +229,7 @@ server.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   res.status(statusCode);
   res.send(template({
     message: err.message,
-    stack: process.env.NODE_ENV === 'production' ? '' : err.stack,
+    stack: /* process.env.NODE_ENV === 'production' ? '' : */ err.stack,
   }));
 });
 
