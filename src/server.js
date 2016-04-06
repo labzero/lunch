@@ -29,11 +29,9 @@ import { port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } fr
 import makeRoutes from './routes';
 import ContextHolder from './core/ContextHolder';
 import passport from './core/passport';
-import fetch from './core/fetch';
-import { processResponse } from './core/ApiClient';
 import restaurantApi from './api/restaurants';
 import tagApi from './api/tags';
-import { User } from './models';
+import { Restaurant, Tag, User } from './models';
 import { Server as WebSocketServer } from 'ws';
 import serialize from 'serialize-javascript';
 
@@ -133,81 +131,76 @@ server.get('*', async (req, res, next) => {
         res.redirect(302, redirectPath);
         return;
       }
-      Promise.all([fetch('/api/restaurants'), fetch('/api/tags')])
-        .then(([restaurantsResponse, tagsResponse]) => {
-          const responseProcessors = [processResponse(restaurantsResponse), processResponse(tagsResponse)];
+      const finds = [Restaurant.findAllWithTagIds(), Tag.scope('orderedByRestaurant').findAll()];
+      if (req.user) {
+        finds.push(User.findAll({ attributes: ['id', 'name'] }));
+      }
+      Promise.all(finds)
+        .then(([restaurants, tags, users]) => {
+          let statusCode = 200;
+          const initialState = {
+            restaurants: {
+              isFetching: false,
+              didInvalidate: false,
+              items: restaurants.map(r => r.toJSON())
+            },
+            tags: {
+              isFetching: false,
+              didInvalidate: false,
+              items: tags.map(t => t.toJSON())
+            },
+            flashes: [],
+            modals: {},
+            user: {},
+            users: {
+              items: []
+            },
+            latLng: {
+              lat: parseFloat(process.env.SUGGEST_LAT),
+              lng: parseFloat(process.env.SUGGEST_LNG)
+            },
+            listUi: {},
+            mapUi: {
+              markers: {},
+              showUnvoted: true
+            },
+            tagFilters: [],
+            tagUi: {},
+            pageUi: {},
+            wsPort: process.env.BS_RUNNING ? port : 0
+          };
           if (req.user) {
-            responseProcessors.push(User.findAll({ attributes: ['id', 'name'] }));
+            initialState.user = req.user;
+            initialState.users.items = users.map(u => u.toJSON());
           }
-          Promise.all(responseProcessors)
-            .then(([restaurants, tags, users]) => {
-              let statusCode = 200;
-              const initialState = {
-                restaurants: {
-                  isFetching: false,
-                  didInvalidate: false,
-                  items: restaurants
-                },
-                tags: {
-                  isFetching: false,
-                  didInvalidate: false,
-                  items: tags
-                },
-                flashes: [],
-                modals: {},
-                user: {},
-                users: {
-                  items: []
-                },
-                latLng: {
-                  lat: parseFloat(process.env.SUGGEST_LAT),
-                  lng: parseFloat(process.env.SUGGEST_LNG)
-                },
-                listUi: {},
-                mapUi: {
-                  markers: {},
-                  showUnvoted: true
-                },
-                tagFilters: [],
-                tagUi: {},
-                pageUi: {},
-                wsPort: process.env.BS_RUNNING ? port : 0
-              };
-              if (req.user) {
-                initialState.user = req.user;
-                initialState.users.items = users;
-              }
-              const store = configureStore(initialState);
-              const template = require('./views/index.jade');
-              const data = {
-                apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
-                privateKeyPath,
-                certificatePath,
-                title: '',
-                description: '',
-                css: '',
-                body: '',
-                entry: assets.main.js,
-                initialState: serialize(initialState)
-              };
-              const css = [];
-              const context = {
-                insertCss: styles => css.push(styles._getCss()),
-                onSetTitle: value => (data.title = value),
-                onSetMeta: (key, value) => (data[key] = value),
-                onPageNotFound: () => (statusCode = 404),
-              };
-              data.body = ReactDOM.renderToString(
-                <ContextHolder context={context}>
-                  <Provider store={store}>
-                    <RouterContext {...renderProps} />
-                  </Provider>
-                </ContextHolder>
-              );
-              data.css = css.join('');
-              res.status(statusCode);
-              res.send(template(data));
-            }).catch(err => next(err));
+          const store = configureStore(initialState);
+          const template = require('./views/index.jade');
+          const data = {
+            apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
+            title: '',
+            description: '',
+            css: '',
+            body: '',
+            entry: assets.main.js,
+            initialState: serialize(initialState)
+          };
+          const css = [];
+          const context = {
+            insertCss: styles => css.push(styles._getCss()),
+            onSetTitle: value => (data.title = value),
+            onSetMeta: (key, value) => (data[key] = value),
+            onPageNotFound: () => (statusCode = 404),
+          };
+          data.body = ReactDOM.renderToString(
+            <ContextHolder context={context}>
+              <Provider store={store}>
+                <RouterContext {...renderProps} />
+              </Provider>
+            </ContextHolder>
+          );
+          data.css = css.join('');
+          res.status(statusCode);
+          res.send(template(data));
         }).catch(err => next(err));
     });
   } catch (err) {
