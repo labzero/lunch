@@ -241,6 +241,6 @@ httpServer.listen(port, () => {
 });
 if (httpsServer !== undefined) {
   httpsServer.listen(httpsPort, () => {
-    console.log(`The HTTPS server is running at https://localhost:${port}`);
+    console.log(`The HTTPS server is running at https://localhost:${httpsPort}`);
   });
 }
