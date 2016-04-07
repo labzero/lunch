@@ -1,0 +1,76 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'bundler'
+require 'optparse'
+require 'rack/test'
+require 'irb'
+require 'irb/completion'
+
+Bundler.setup # don't auto require all gems
+
+require 'dotenv'
+Dotenv.load File.expand_path('../../.env', __dir__)
+
+options = {}
+
+OptionParser.new do |opt|
+  opt.banner = "Usage: #{$0} [options]"
+  opt.on("-e", "--environment=name", String,
+          "Specifies the environment to run this console under (test/development/production).",
+          "Default: development") { |v| options[:environment] = v.strip }
+  opt.parse!(ARGV)
+end
+
+ARGV.clear
+ENV['RACK_ENV'] = options[:environment] if options[:environment]
+ENV['RACK_ENV'] = ENV['RAILS_ENV'] if !ENV['RACK_ENV'] && ENV['RAILS_ENV']
+ENV['RACK_ENV'] ||= 'development'
+ENV['MAPI'] = 'true'
+puts "Loading MAPI #{ENV['RACK_ENV']} environment"
+
+require_relative '../mapi'
+
+module MAPI
+  module Console
+    include Rack::Test::Methods
+
+    def app
+      MAPI::ServiceApp
+    end
+
+    def get_json(*args, &block)
+      JSON.parse(get(*args, &block).body)
+    end
+
+    def post_json(*args, &block)
+      JSON.parse(post(*args, &block).body)
+    end
+
+    def put_json(*args, &block)
+      JSON.parse(put(*args, &block).body)
+    end
+
+    def delete_json(*args, &block)
+      JSON.parse(delete(*args, &block).body)
+    end
+
+    def head_json(*args, &block)
+      JSON.parse(head(*args, &block).body)
+    end
+
+    def patch_json(*args, &block)
+      JSON.parse(patch(*args, &block).body)
+    end
+
+    def options_json(*args, &block)
+      JSON.parse(options(*args, &block).body)
+    end
+  end
+end
+
+include MAPI::Console
+
+current_session.header('Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"")
+
+IRB.start
