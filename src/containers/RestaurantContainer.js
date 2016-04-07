@@ -1,13 +1,13 @@
 import { connect } from 'react-redux';
 import { removeTagFromRestaurant } from '../actions/restaurants';
-import { showAddTagForm } from '../actions/listUi';
 import { showMapAndInfoWindow } from '../actions/mapUi';
+import { showAddTagForm, showEditNameForm, setEditNameFormValue } from '../actions/listUi';
 import Restaurant from '../components/Restaurant';
 
 const mapStateToProps = (state, ownProps) => ({
   user: state.user,
   listUiItem: state.listUi[ownProps.id] || {},
-  showTagDelete: state.user.id !== undefined,
+  shouldShowTagDelete: state.user.id !== undefined,
   ...ownProps
 });
 
@@ -17,6 +17,10 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   },
   showMapAndInfoWindow() {
     dispatch(showMapAndInfoWindow(ownProps.id));
+  },
+  showEditNameForm() {
+    dispatch(setEditNameFormValue(ownProps.id, ownProps.name));
+    dispatch(showEditNameForm(ownProps.id));
   },
   removeTag(id) {
     dispatch(removeTagFromRestaurant(ownProps.id, id));

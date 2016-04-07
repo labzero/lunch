@@ -13,6 +13,26 @@
   font-weight: bold;
   letter-spacing: -.5px;
   margin: 0;
+
+  &:hover {
+    .tools {
+      display: inline;
+    }
+  }
+}
+
+.tools {
+  color: #ccc;
+  display: none;
+  font-size: .8em;
+}
+
+.tool {
+  margin-left: .25em;
+
+  &:hover {
+    color: #999;
+  }
 }
 
 .voteContainer {

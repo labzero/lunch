@@ -3,6 +3,7 @@ import RestaurantDeleteButtonContainer from '../../containers/RestaurantDeleteBu
 import RestaurantVoteCountContainer from '../../containers/RestaurantVoteCountContainer';
 import RestaurantVoteButtonContainer from '../../containers/RestaurantVoteButtonContainer';
 import RestaurantAddTagFormContainer from '../../containers/RestaurantAddTagFormContainer';
+import RestaurantNameFormContainer from '../../containers/RestaurantNameFormContainer';
 import TagContainer from '../../containers/TagContainer';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Restaurant.scss';
@@ -14,17 +15,19 @@ export const _Restaurant = ({
   votes,
   tags,
   shouldShowAddTagArea,
+  shouldShowCrosshairs,
+  shouldShowTagDelete,
   user,
   listUiItem,
   showAddTagForm,
+  showEditNameForm,
   showMapAndInfoWindow,
-  removeTag,
-  showTagDelete
+  removeTag
 }) => {
   const loggedIn = user.id !== undefined;
 
-  let deleteButton = null;
-  let voteButton = null;
+  let deleteButton;
+  let voteButton;
   if (loggedIn) {
     voteButton = (
       <span className={s.voteButtonContainer}>
@@ -38,7 +41,7 @@ export const _Restaurant = ({
     );
   }
 
-  let addTagArea = null;
+  let addTagArea;
   if (shouldShowAddTagArea && loggedIn) {
     if (listUiItem.isAddingTags) {
       addTagArea = <RestaurantAddTagFormContainer {...{ id }} />;
@@ -47,10 +50,43 @@ export const _Restaurant = ({
     }
   }
 
+  let nameArea;
+  if (listUiItem.isEditingName) {
+    nameArea = <RestaurantNameFormContainer id={id} name={name} shouldShowCrosshairs={shouldShowCrosshairs} />;
+  } else {
+    let crosshairs;
+    if (shouldShowCrosshairs) {
+      crosshairs = (
+        <button onClick={showMapAndInfoWindow} className={`glyphicon glyphicon-screenshot ${s.tool}`}>
+        </button>
+      );
+    }
+
+    let editButton;
+    if (user.id !== undefined) {
+      editButton = (
+        <button onClick={showEditNameForm} className={`glyphicon glyphicon-pencil ${s.tool}`}>
+        </button>
+      );
+    }
+
+    nameArea = (
+      <h2 className={s.heading}>
+        <span onClick={showMapAndInfoWindow}>
+          {name}
+        </span>
+        <span className={s.tools}>
+          {crosshairs}
+          {editButton}
+        </span>
+      </h2>
+    );
+  }
+
   return (
     <div className={s.root}>
       <div className={s.header}>
-        <h2 className={s.heading} onClick={showMapAndInfoWindow}>{name}</h2>
+        {nameArea}
         <div className={s.voteContainer}>
           <RestaurantVoteCountContainer {...{ votes }} />
           {voteButton}
@@ -68,7 +104,7 @@ export const _Restaurant = ({
               const boundRemoveTag = removeTag.bind(undefined, tag);
               return (
                 <li className={s.tagItem} key={`restaurantTag_${tag}`}>
-                  <TagContainer id={tag} showDelete={showTagDelete} onDeleteClicked={boundRemoveTag} />
+                  <TagContainer id={tag} showDelete={shouldShowTagDelete} onDeleteClicked={boundRemoveTag} />
                 </li>
               );
             })}
@@ -89,11 +125,13 @@ _Restaurant.propTypes = {
   votes: PropTypes.array.isRequired,
   tags: PropTypes.array.isRequired,
   shouldShowAddTagArea: PropTypes.bool,
+  shouldShowCrosshairs: PropTypes.bool,
   listUiItem: PropTypes.object.isRequired,
   showAddTagForm: PropTypes.func.isRequired,
+  showEditNameForm: PropTypes.func.isRequired,
   showMapAndInfoWindow: PropTypes.func.isRequired,
   removeTag: PropTypes.func.isRequired,
-  showTagDelete: PropTypes.bool.isRequired
+  shouldShowTagDelete: PropTypes.bool.isRequired
 };
 
 export default withStyles(_Restaurant, s);

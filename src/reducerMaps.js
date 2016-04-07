@@ -187,6 +187,21 @@ export const listUi = {
     return Object.assign({}, state, {
       [action.id]: Object.assign({}, state[action.id], { isAddingTags: false })
     });
+  },
+  [ActionTypes.SET_EDIT_NAME_FORM_VALUE](state, action) {
+    return Object.assign({}, state, {
+      [action.id]: Object.assign({}, state[action.id], { editNameFormValue: action.value })
+    });
+  },
+  [ActionTypes.SHOW_EDIT_NAME_FORM](state, action) {
+    return Object.assign({}, state, {
+      [action.id]: Object.assign({}, state[action.id], { isEditingName: true })
+    });
+  },
+  [ActionTypes.HIDE_EDIT_NAME_FORM](state, action) {
+    return Object.assign({}, state, {
+      [action.id]: Object.assign({}, state[action.id], { isEditingName: false })
+    });
   }
 };
 
