@@ -4,6 +4,7 @@ import RestaurantVoteCountContainer from '../../containers/RestaurantVoteCountCo
 import RestaurantVoteButtonContainer from '../../containers/RestaurantVoteButtonContainer';
 import RestaurantAddTagFormContainer from '../../containers/RestaurantAddTagFormContainer';
 import RestaurantNameFormContainer from '../../containers/RestaurantNameFormContainer';
+import { DropdownButton, MenuItem } from 'react-bootstrap';
 import TagContainer from '../../containers/TagContainer';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Restaurant.scss';
@@ -111,7 +112,18 @@ export const _Restaurant = ({
           </ul>
           {addTagArea}
         </div>
-        {deleteButton}
+        <DropdownButton
+          id={`restaurantDropdown_${id}`}
+          title=""
+          bsRole="toggle"
+          noCaret
+          className="glyphicon glyphicon-option-horizontal"
+        >
+          <MenuItem>
+            { /* deleteButton */ }
+            Hello.
+          </MenuItem>
+        </DropdownButton>
       </div>
     </div>
   );
