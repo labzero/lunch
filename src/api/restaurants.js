@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Restaurant, Vote, Tag } from '../models';
 import { loggedIn, errorCatcher } from './ApiHelper';
-import { restaurantPosted, restaurantDeleted } from '../actions/restaurants';
+import { restaurantPosted, restaurantDeleted, restaurantPatched } from '../actions/restaurants';
 import voteApi from './votes';
 import restaurantTagApi from './restaurantTags';
 
@@ -41,6 +41,22 @@ router
         res.status(201).send({ error: false, data: json });
       }).catch(() => {
         const error = { message: 'Could not save new restaurant. Has it already been added?' };
+        errorCatcher(res, error);
+      });
+    }
+  )
+  .patch(
+    '/:id',
+    loggedIn,
+    async (req, res) => {
+      const id = parseInt(req.params.id, 10);
+      const { name } = req.body;
+      Restaurant.update({ name }, { fields: ['name'], where: { id }, returning: true }).spread((count, rows) => {
+        const json = { name: rows[0].toJSON().name };
+        req.wss.broadcast(restaurantPatched(id, json));
+        res.status(200).send({ error: false, data: json });
+      }).catch(() => {
+        const error = { message: 'Could not update restaurant.' };
         errorCatcher(res, error);
       });
     }

@@ -32,8 +32,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
-  addNewTagToRestaurant(event) {
-    event.preventDefault();
+  addNewTagToRestaurant() {
     dispatchProps.dispatch(addNewTagToRestaurant(ownProps.id, stateProps.addTagAutosuggestValue));
   }
 });

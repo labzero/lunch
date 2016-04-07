@@ -39,6 +39,22 @@ export function restaurantDeleted(id) {
   };
 }
 
+export function patchRestaurant(id, obj) {
+  return {
+    type: ActionTypes.PATCH_RESTAURANT,
+    id,
+    restaurant: obj
+  };
+}
+
+export function restaurantPatched(id, obj) {
+  return {
+    type: ActionTypes.RESTAURANT_PATCHED,
+    id,
+    fields: obj
+  };
+}
+
 export function requestRestaurants() {
   return { type: ActionTypes.REQUEST_RESTAURANTS };
 }
@@ -167,13 +183,14 @@ export function fetchRestaurantsIfNeeded() {
 }
 
 export function addRestaurant(name, placeId, address, lat, lng) {
+  const payload = { name, place_id: placeId, address, lat, lng };
   return (dispatch) => {
-    dispatch(postRestaurant());
+    dispatch(postRestaurant(payload));
     return fetch('/api/restaurants', {
       method: 'post',
       credentials,
       headers: jsonHeaders,
-      body: JSON.stringify({ name, place_id: placeId, address, lat, lng })
+      body: JSON.stringify(payload)
     })
       .then(response => processResponse(response))
       .catch(
@@ -189,6 +206,23 @@ export function removeRestaurant(id) {
       credentials,
       method: 'delete'
     });
+  };
+}
+
+export function changeRestaurantName(id, value) {
+  const payload = { name: value };
+  return dispatch => {
+    dispatch(patchRestaurant(id, payload));
+    return fetch(`/api/restaurants/${id}`, {
+      credentials,
+      headers: jsonHeaders,
+      method: 'PATCH',
+      body: JSON.stringify(payload)
+    })
+      .then(response => processResponse(response))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
   };
 }
 

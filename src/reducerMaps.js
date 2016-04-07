@@ -53,6 +53,18 @@ export const restaurants = {
       items: state.items.filter(item => item.id !== action.id)
     });
   },
+  [ActionTypes.PATCH_RESTAURANT]: isFetching,
+  [ActionTypes.RESTAURANT_PATCHED](state, action) {
+    return Object.assign({}, state, {
+      isFetching: false,
+      items: state.items.map(item => {
+        if (item.id === action.id) {
+          return Object.assign({}, item, action.fields);
+        }
+        return item;
+      })
+    });
+  },
   [ActionTypes.POST_VOTE]: isFetching,
   [ActionTypes.VOTE_POSTED](state, action) {
     return Object.assign({}, state, {
@@ -169,6 +181,7 @@ const resetAddTagAutosuggestValue = (state, action) =>
 
 export const listUi = {
   [ActionTypes.RECEIVE_RESTAURANTS]: resetAllRestaurants,
+  [ActionTypes.RESTAURANT_PATCHED]: resetRestaurant,
   [ActionTypes.RESTAURANT_POSTED]: resetRestaurant,
   [ActionTypes.RESTAURANT_DELETED]: resetRestaurant,
   [ActionTypes.POSTED_TAG_TO_RESTAURANT]: resetAddTagAutosuggestValue,
