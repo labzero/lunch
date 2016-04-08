@@ -1,11 +1,14 @@
 @import '../../styles/_mixins.scss';
 @import '../../styles/_variables.scss';
 
+.root {
+  vertical-align: bottom;
+}
+
 .toggle {
   @include plain-button;
   line-height: 1;
   padding: 0 .5em;
-  vertical-align: bottom;
 
   &:hover {
     background: none;

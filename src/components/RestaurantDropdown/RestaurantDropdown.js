@@ -24,6 +24,7 @@ const RestaurantDropdown = ({ id, listUiItem, showMapAndInfoWindow, showEditName
       title=""
       bsRole="toggle"
       pullRight
+      className={s.root}
     >
       <DropdownToggle bsRole="toggle" noCaret className={s.toggle}>
         <Glyphicon glyph="option-horizontal" />
