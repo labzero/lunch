@@ -1,10 +1,9 @@
 import React, { PropTypes } from 'react';
-import RestaurantDeleteButtonContainer from '../../containers/RestaurantDeleteButtonContainer';
 import RestaurantVoteCountContainer from '../../containers/RestaurantVoteCountContainer';
 import RestaurantVoteButtonContainer from '../../containers/RestaurantVoteButtonContainer';
 import RestaurantAddTagFormContainer from '../../containers/RestaurantAddTagFormContainer';
 import RestaurantNameFormContainer from '../../containers/RestaurantNameFormContainer';
-import { DropdownButton, MenuItem } from 'react-bootstrap';
+import RestaurantDropdownContainer from '../../containers/RestaurantDropdownContainer';
 import TagContainer from '../../containers/TagContainer';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Restaurant.scss';
@@ -16,70 +15,51 @@ export const _Restaurant = ({
   votes,
   tags,
   shouldShowAddTagArea,
-  shouldShowCrosshairs,
-  shouldShowTagDelete,
+  shouldShowDropdown,
   user,
   listUiItem,
   showAddTagForm,
-  showEditNameForm,
   showMapAndInfoWindow,
   removeTag
 }) => {
   const loggedIn = user.id !== undefined;
 
-  let deleteButton;
   let voteButton;
+  let addTagArea;
+  let dropdown;
   if (loggedIn) {
     voteButton = (
       <span className={s.voteButtonContainer}>
         <RestaurantVoteButtonContainer {...{ id, votes }} />
       </span>
     );
-    deleteButton = (
-      <div className={s.deleteButtonContainer}>
-        <RestaurantDeleteButtonContainer {...{ id }} />
-      </div>
-    );
-  }
-
-  let addTagArea;
-  if (shouldShowAddTagArea && loggedIn) {
-    if (listUiItem.isAddingTags) {
-      addTagArea = <RestaurantAddTagFormContainer {...{ id }} />;
-    } else {
-      addTagArea = <button className="btn btn-sm btn-default" onClick={showAddTagForm}>add tag</button>;
+    if (shouldShowAddTagArea) {
+      if (listUiItem.isAddingTags) {
+        addTagArea = <RestaurantAddTagFormContainer {...{ id }} />;
+      } else {
+        addTagArea = <button className="btn btn-sm btn-default" onClick={showAddTagForm}>add tag</button>;
+      }
+    }
+    if (shouldShowDropdown) {
+      dropdown = (
+        <div className={s.dropdownContainer}>
+          <RestaurantDropdownContainer id={id} />
+        </div>
+      );
     }
   }
 
   let nameArea;
-  if (listUiItem.isEditingName) {
-    nameArea = <RestaurantNameFormContainer id={id} name={name} shouldShowCrosshairs={shouldShowCrosshairs} />;
-  } else {
-    let crosshairs;
-    if (shouldShowCrosshairs) {
-      crosshairs = (
-        <button onClick={showMapAndInfoWindow} className={`glyphicon glyphicon-screenshot ${s.tool}`}>
-        </button>
-      );
-    }
-
-    let editButton;
-    if (user.id !== undefined) {
-      editButton = (
-        <button onClick={showEditNameForm} className={`glyphicon glyphicon-pencil ${s.tool}`}>
-        </button>
-      );
-    }
-
+  if (listUiItem.isEditingName && shouldShowDropdown) {
     nameArea = (
-      <h2 className={s.heading}>
-        <span onClick={showMapAndInfoWindow}>
-          {name}
-        </span>
-        <span className={s.tools}>
-          {crosshairs}
-          {editButton}
-        </span>
+      <span className={s.restaurantNameFormContainer}>
+        <RestaurantNameFormContainer id={id} name={name} />
+      </span>
+    );
+  } else {
+    nameArea = (
+      <h2 className={s.heading} onClick={showMapAndInfoWindow}>
+        <span>{name}</span>
       </h2>
     );
   }
@@ -105,25 +85,14 @@ export const _Restaurant = ({
               const boundRemoveTag = removeTag.bind(undefined, tag);
               return (
                 <li className={s.tagItem} key={`restaurantTag_${tag}`}>
-                  <TagContainer id={tag} showDelete={shouldShowTagDelete} onDeleteClicked={boundRemoveTag} />
+                  <TagContainer id={tag} showDelete={loggedIn} onDeleteClicked={boundRemoveTag} />
                 </li>
               );
             })}
           </ul>
           {addTagArea}
         </div>
-        <DropdownButton
-          id={`restaurantDropdown_${id}`}
-          title=""
-          bsRole="toggle"
-          noCaret
-          className="glyphicon glyphicon-option-horizontal"
-        >
-          <MenuItem>
-            { /* deleteButton */ }
-            Hello.
-          </MenuItem>
-        </DropdownButton>
+        {dropdown}
       </div>
     </div>
   );
@@ -137,13 +106,11 @@ _Restaurant.propTypes = {
   votes: PropTypes.array.isRequired,
   tags: PropTypes.array.isRequired,
   shouldShowAddTagArea: PropTypes.bool,
-  shouldShowCrosshairs: PropTypes.bool,
+  shouldShowDropdown: PropTypes.bool,
   listUiItem: PropTypes.object.isRequired,
   showAddTagForm: PropTypes.func.isRequired,
-  showEditNameForm: PropTypes.func.isRequired,
   showMapAndInfoWindow: PropTypes.func.isRequired,
   removeTag: PropTypes.func.isRequired,
-  shouldShowTagDelete: PropTypes.bool.isRequired
 };
 
 export default withStyles(_Restaurant, s);

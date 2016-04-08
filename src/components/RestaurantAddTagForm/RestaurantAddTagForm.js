@@ -33,7 +33,7 @@ export const _RestaurantAddTagForm = ({
     />
     <button
       className={`btn btn-sm btn-primary ${s.button}`}
-      type="button"
+      type="submit"
       disabled={addTagAutosuggestValue === ''}
       onClick={addNewTagToRestaurant}
     >

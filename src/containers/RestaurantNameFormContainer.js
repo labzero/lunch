@@ -21,7 +21,8 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
-  changeRestaurantName() {
+  changeRestaurantName(event) {
+    event.preventDefault();
     dispatchProps.dispatch(changeRestaurantName(ownProps.id, stateProps.editNameFormValue));
   }
 });

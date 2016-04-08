@@ -18,7 +18,7 @@ const RestaurantList = ({ items }) => (
               votes={item.votes}
               tags={item.tags}
               shouldShowAddTagArea
-              shouldShowCrosshairs
+              shouldShowDropdown
             />
           </ScrollElement>
         </li>

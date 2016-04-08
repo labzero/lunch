@@ -9,30 +9,19 @@
 .heading {
   cursor: pointer;
   float: left;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
   letter-spacing: -.5px;
   margin: 0;
+  min-height: 30px;
 
-  &:hover {
-    .tools {
-      display: inline;
-    }
+  span {
+    display: block;
   }
 }
 
-.tools {
-  color: #ccc;
-  display: none;
-  font-size: .8em;
-}
-
-.tool {
-  margin-left: .25em;
-
-  &:hover {
-    color: #999;
-  }
+.restaurantNameFormContainer {
+  display: inline-block;
 }
 
 .voteContainer {
@@ -71,7 +60,9 @@
   margin-right: .5em;
 }
 
-.deleteButtonContainer {
+.dropdownContainer {
   float: right;
+  height: 30px;
+  line-height: 30px;
   margin-left: 1em;
 }

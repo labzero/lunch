@@ -10,10 +10,23 @@ const RestaurantNameForm = ({
 }) => (
   <form className={s.root}>
     <span className={s.inputContainer}>
-      <input className="form-control" value={editNameFormValue} onChange={setEditNameFormValue} />
+      <input className="form-control input-sm" value={editNameFormValue} onChange={setEditNameFormValue} />
     </span>
-    <button type="button" className={`btn btn-primary ${s.button}`} onClick={changeRestaurantName}>ok</button>
-    <button type="button" className={`btn btn-default ${s.button}`} onClick={hideEditNameForm}>cancel</button>
+    <button
+      type="submit"
+      className={`btn btn-primary btn-sm ${s.button}`}
+      onClick={changeRestaurantName}
+      disabled={editNameFormValue === ''}
+    >
+      ok
+    </button>
+    <button
+      type="button"
+      className={`btn btn-default btn-sm ${s.button}`}
+      onClick={hideEditNameForm}
+    >
+      cancel
+    </button>
   </form>
 );
 
