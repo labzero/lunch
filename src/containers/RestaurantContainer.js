@@ -1,13 +1,12 @@
 import { connect } from 'react-redux';
 import { removeTagFromRestaurant } from '../actions/restaurants';
-import { showAddTagForm } from '../actions/listUi';
 import { showMapAndInfoWindow } from '../actions/mapUi';
+import { showAddTagForm } from '../actions/listUi';
 import Restaurant from '../components/Restaurant';
 
 const mapStateToProps = (state, ownProps) => ({
   user: state.user,
   listUiItem: state.listUi[ownProps.id] || {},
-  showTagDelete: state.user.id !== undefined,
   ...ownProps
 });
 
