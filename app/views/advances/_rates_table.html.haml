@@ -1,0 +1,32 @@
+- loading ||= false
+- fixed_rate_row_span = advance_terms.length - 2
+- selected_type ||= nil
+- selected_term ||= nil
+- advance_terms.each_with_index do |advance_term, i|
+  %tr{class: "#{'add-advance-table-label-row' if i == 0 || i == 2}"}
+    -if i == 0
+      %td.add-advance-table-horz-axes-label{rowspan: 2}
+        .add-advance-cell-wrapper
+          %span= t('dashboard.quick_advance.table.axes_labels.variable_rate')
+    -if i == 2
+      %td.add-advance-table-horz-axes-label{rowspan: fixed_rate_row_span}
+        .add-advance-cell-wrapper
+          %span= t('dashboard.quick_advance.table.axes_labels.fixed_rate')
+    -advance_types.each_with_index do |advance_type, j|
+      - if j == 0
+        %td.row-label{class: ('cell-selected' if selected_term == advance_term)}
+          .add-advance-cell-wrapper= t("dashboard.quick_advance.table.axes_labels.#{advance_term}")
+      - unless loading
+        - rate = rate_data[advance_type][advance_term]
+        - advance_rate = rate[:rate].to_f
+        - cell_selected = advance_type == selected_type && advance_term == selected_term
+        %td.add-advance-rate-cell.selectable-cell{data: {'advance-type' => advance_type, 'advance-term' => advance_term, 'advance-rate' => fhlb_formatted_number(advance_rate, precision: 2, html: false)}, class: ["#{'disabled-cell' if !add_advances_active || rate[:disabled]} #{'cell-selected' if cell_selected}"]}
+          .add-advance-cell-wrapper
+            - unless rate[:disabled]
+              = fhlb_formatted_number(advance_rate, precision: 2)
+              = render 'shared/tooltip', tooltip_data: make_quick_advance_tooltip_data( rate, advance_term )
+            - else
+              = t('global.missing_value')
+      - if loading && i == 0 && j == 0
+        %td.add-advance-table-loading-cell{rowspan: advance_terms.length, colspan: advance_types.length}
+          %span= t("dashboard.retrieving_data")

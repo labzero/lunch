@@ -11,6 +11,7 @@
 - html_attributes ||= {}
 - error ||= false
 - horizontal ||= false
+- field_value ||= nil
 - html = capture_haml do
   - if label
     - label_classes = []
@@ -26,7 +27,7 @@
     - if form_builder
       = form_builder.send field_type, field_name, {placeholder: placeholder, class: field_class, data: field_data}.merge(html_attributes)
     - else
-      %input{{placeholder: placeholder, class: field_class, data: field_data, name: field_name, id: field_id, type: field_type}.merge(html_attributes)}
+      %input{{placeholder: placeholder, class: field_class, data: field_data, name: field_name, id: field_id, type: field_type, value: field_value}.merge(html_attributes)}
     %label.label-error
       = error.join("\n") if error
 - if horizontal

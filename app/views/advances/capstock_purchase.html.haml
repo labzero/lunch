@@ -1,0 +1,40 @@
+= render layout: 'add_advance', title: t('advances.add_advance.title') do
+  = form_for(:advance_request, url: advances_preview_path, html: {method: :post, class: 'add-advance-form'}) do |f|
+    = f.hidden_field(:id)
+    .add-advance-capstock
+      %p.add-advance-action-message= t('dashboard.quick_advance.preview.initiate')
+      .add-advance-body
+        .add-advance-icon-section.icon-error-before
+          %p= t('dashboard.quick_advance.capitalstock.intro')
+          = render 'shared/radio_button', id: 'continue_transaction', name: 'stock_choice', checked: true, text: t('dashboard.quick_advance.capitalstock.continue_transaction'), value: :continue
+          .add-advance-summary
+            %dl.large_dl
+              %dt= t('dashboard.quick_advance.capitalstock.original') +':'
+              %dd= fhlb_formatted_currency(@advance_amount, precision: 0)
+              %dt= t('dashboard.quick_advance.capitalstock.stock') +':'
+              %dd= fhlb_formatted_currency(@net_stock_required, precision: 0)
+              %dt= t('dashboard.quick_advance.capitalstock.net') +':'
+              %dd= fhlb_formatted_currency(@net_amount, precision: 0)
+            %dl.large_dl
+              %dt= t('dashboard.quick_advance.capitalstock.cumulative') +':'
+              %dd= fhlb_formatted_currency(@cumulative_stock_required, precision: 0)
+            %label.label-radio-no-padding= t('dashboard.quick_advance.capitalstock.debit_sta_html', amount: fhlb_formatted_currency(@cumulative_stock_required, precision: 0))
+          = render 'shared/radio_button', id: 'increase_transaction', name: 'stock_choice', checked: false, text: t('dashboard.quick_advance.capitalstock.increase_transaction'), value: :purchase
+          .add-advance-summary
+            %dl.large_dl
+              %dt= t('dashboard.quick_advance.capitalstock.new') +':'
+              %dd= fhlb_formatted_currency(@gross_amount, precision: 0)
+              %dt= t('dashboard.quick_advance.capitalstock.stock') +':'
+              %dd= fhlb_formatted_currency(@gross_net_stock_required, precision: 0)
+              %dt= t('dashboard.quick_advance.capitalstock.net') +':'
+              %dd= fhlb_formatted_currency(@advance_amount, precision: 0)
+            %dl.large_dl
+              %dt= t('dashboard.quick_advance.capitalstock.cumulative') +':'
+              %dd= fhlb_formatted_currency(@gross_cumulative_stock_required, precision: 0)
+            %label.label-radio-no-padding= t('dashboard.quick_advance.capitalstock.debit_sta_html', amount: fhlb_formatted_currency(@gross_cumulative_stock_required, precision: 0))
+      .advances-actions
+        = link_to(t('global.cancel'), advances_manage_path, class: 'secondary-button cancel-advance')
+        = link_to(t('global.edit'), advances_select_rate_path(advance_request: {id: @advance_request_id}), class: 'secondary-button edit-advance-button')
+        = f.submit({class: ['primary-button initiate-add-advance active'], value: t('dashboard.quick_advance.buttons.continue')})
+      %small
+        %p.add-advances-footer= t('dashboard.quick_advance.capitalstock.footer')

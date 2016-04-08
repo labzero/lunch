@@ -10,7 +10,8 @@ Background:
 @smoke @jira-mem-535
 Scenario: Visit  Manage Advances Page from header link
   Given I visit the dashboard
-  When I click on the advances link in the header
+  When I hover on the advances link in the header
+  And I click on the manage advances link in the header
   Then I should see active advances data
   And I should see a advances table with multiple data rows
   And I should see the "Trade Date" column values in "descending" order

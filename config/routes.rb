@@ -80,8 +80,15 @@ Rails.application.routes.draw do
     end
   end
 
-  get '/advances' => 'advances#index'
-  get '/advances/manage-advances' => 'advances#manage_advances'
+  scope 'advances', as: 'advances' do
+    get '/' => 'advances#index'
+    get '/manage' => 'advances#manage'
+    get '/select-rate' => 'advances#select_rate'
+    get '/fetch-rates' => 'advances#fetch_rates'
+    post  '/preview' => 'advances#preview'
+    post '/perform' => 'advances#perform'
+  end
+
 
   scope 'settings', as: :settings do
     get    '/'                         => 'error#not_found'

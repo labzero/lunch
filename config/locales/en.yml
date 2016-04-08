@@ -113,6 +113,8 @@ en:
     attachments: Attachments
     unknown: Unknown
     last_updated: 'Last Updated: %{date}'
+    page_meta_title: 'FHLB - %{title}'
+    defined_term: '%{term}:'
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -1712,15 +1714,22 @@ en:
       for_advances_traded_on_or_after_january_1: "For advances traded on or after January 1, 2002, the maximum voluntary prepayment settlement amount per calendar month per member cannot exceed the greater of: (i) the amount of Bank stock owned by the member as of the last business day of the calendar month prior to the notice date or (ii) $250 million. In addition, the maximum voluntary prepayment amount for all advances is $250 million per member per business day."
       the_bank_will_provide_prepayment_fee_indications: The Bank will provide prepayment fee indications for up to 5 advances per member per business day.
   advances:
-    quick_advnance:
+    quick_advance:
       title: Quick Advance
     add_advance:
-      title: Add an Advance
+      title: Add Advance
+      nav: New Advance
+      preview: Preview Advance
     manage_advances:
       title: Manage Advances
-    add_new: Add New
     status: Status
     rate: Rate (%)
+    actions:
+      preview: Preview Advance
+      submit: Submit Advance
+      another_advance: Get Another Advance
+    messages:
+      completing_advance: Please wait while we complete your advance. This may take about 30 seconds.
   products:
     products_summary:
       nav_title: Products Summary

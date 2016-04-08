@@ -1,0 +1,7 @@
+= render layout: 'add_advance', title: t('advances.add_advance.title') do
+  .add-advance-preview.add-advance-error
+    .add-advance-body
+      .add-advance-icon-section.icon-error-before
+        = yield
+    .advances-actions
+      = link_to(t('dashboard.quick_advance.buttons.rates'), advances_select_rate_path, class: 'primary-button edit-advance-button icon-arrow-left-before add-advance-error-button')

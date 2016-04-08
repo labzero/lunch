@@ -863,7 +863,7 @@ class ReportsController < ApplicationController
 
   def current_price_indications
     @report_name = ReportConfiguration.report_title(:current_price_indications)
-    @quick_advance_message = MessageService.new.todays_quick_advance_message # Should this be deferred as well?  Right now it takes no time, but if it's ever rigged up to an external service, it might.
+    @limited_pricing_message = MessageService.new.todays_quick_advance_message # Should this be deferred as well?  Right now it takes no time, but if it's ever rigged up to an external service, it might.
     downloadable_report(:xlsx) do
 
       vrc_column_headings = [

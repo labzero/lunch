@@ -347,3 +347,7 @@ end
 Then(/^I should see a quick advance error$/) do
   step %{I should see an "advance unavailable" error}
 end
+
+Then(/^I should see a quick advances disabled message$/) do
+  page.assert_selector('.quick-advance-disabled-message', text(I18n.t('advance_desk_unavailable', phone_number: service_desk_phone_number)))
+end
