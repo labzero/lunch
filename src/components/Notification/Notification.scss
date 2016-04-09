@@ -1,0 +1,19 @@
+@import '../../styles/_mixins.scss';
+@import '../../styles/_variables.scss';
+
+.root {
+  background: #fff;
+  border: $default-border;
+  box-shadow: 0 0 20px rgba(0, 0, 0, .25);
+  padding: .5em;
+}
+
+.close {
+  @include plain-button;
+  float: right;
+  font-size: 1.25em;
+  line-height: .5;
+  margin: -5px -5px 0 0;
+  outline: none;
+  padding: 5px;
+}

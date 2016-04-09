@@ -69,7 +69,7 @@ export const _Restaurant = ({
       <div className={s.header}>
         {nameArea}
         <div className={s.voteContainer}>
-          <RestaurantVoteCountContainer {...{ votes }} />
+          <RestaurantVoteCountContainer {...{ votes, id }} />
           {voteButton}
         </div>
       </div>

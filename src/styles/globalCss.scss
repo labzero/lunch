@@ -34,3 +34,23 @@ a {
     width: 100%;
   }
 }
+
+.notification {
+  &-enter {
+    opacity: 0;
+    transition: opacity .25s;
+
+    &-active {
+      opacity: 1;
+    }
+  }
+
+  &-leave {
+    opacity: 1;
+    transition: opacity 1s;
+
+    &-active {
+      opacity: 0;
+    }
+  }
+}
