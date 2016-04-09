@@ -18,10 +18,11 @@ export function postRestaurant(obj) {
   };
 }
 
-export function restaurantPosted(obj) {
+export function restaurantPosted(obj, userId) {
   return {
     type: ActionTypes.RESTAURANT_POSTED,
-    restaurant: obj
+    restaurant: obj,
+    userId
   };
 }
 

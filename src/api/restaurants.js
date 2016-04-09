@@ -37,7 +37,7 @@ router
       // jscs:enable requireCamelCaseOrUpperCaseIdentifiers
       }, { include: [Vote, Tag] }).then(obj => {
         const json = obj.toJSON();
-        req.wss.broadcast(restaurantPosted(json));
+        req.wss.broadcast(restaurantPosted(json, req.user.id));
         res.status(201).send({ error: false, data: json });
       }).catch(() => {
         const error = { message: 'Could not save new restaurant. Has it already been added?' };

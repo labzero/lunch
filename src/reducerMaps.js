@@ -176,6 +176,14 @@ export const notifications = {
       actionType: realAction.type
     };
     switch (notification.actionType) {
+      case ActionTypes.RESTAURANT_POSTED: {
+        const { userId, restaurant } = realAction;
+        notification.vals = {
+          userId,
+          restaurantId: restaurant.id
+        };
+        break;
+      }
       case ActionTypes.VOTE_POSTED: {
         const { user_id, restaurant_id } = realAction.vote;
         notification.vals = {

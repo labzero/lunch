@@ -1,9 +1,16 @@
 import React, { Component, PropTypes } from 'react';
 import ActionTypes from '../../constants/ActionTypes';
+import NotificationContentRestaurantPosted from '../NotificationContentRestaurantPosted';
 import NotificationContentVotePosted from '../NotificationContentVotePosted';
 import NotificationContentVoteDeleted from '../NotificationContentVoteDeleted';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Notification.scss';
+
+const contentMap = {
+  [ActionTypes.RESTAURANT_POSTED]: NotificationContentRestaurantPosted,
+  [ActionTypes.VOTE_POSTED]: NotificationContentVotePosted,
+  [ActionTypes.VOTE_DELETED]: NotificationContentVoteDeleted
+};
 
 class Notification extends Component {
 
@@ -11,7 +18,7 @@ class Notification extends Component {
     expireNotification: PropTypes.func.isRequired,
     noRender: PropTypes.bool,
     actionType: PropTypes.string.isRequired,
-    dict: PropTypes.object.isRequired
+    contentProps: PropTypes.object.isRequired
   };
 
   componentDidMount() {
@@ -26,22 +33,11 @@ class Notification extends Component {
     if (this.props.noRender) {
       return false;
     }
-    let content;
-    switch (this.props.actionType) {
-      case ActionTypes.VOTE_POSTED: {
-        content = <NotificationContentVotePosted {...this.props.dict} />;
-        break;
-      }
-      case ActionTypes.VOTE_DELETED: {
-        content = <NotificationContentVoteDeleted {...this.props.dict} />;
-        break;
-      }
-      default: break;
-    }
+    const Content = contentMap[this.props.actionType];
     return (
       <div className={s.root}>
         <button className={s.close} onClick={this.props.expireNotification}>&times;</button>
-        {content}
+        <Content {...this.props.contentProps} />
       </div>
     );
   }

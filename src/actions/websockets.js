@@ -9,23 +9,22 @@ const sort = dispatch => {
   sortTimeout = setTimeout(dispatch.bind(undefined, sortRestaurants()), 1000);
 };
 
-const dispatchThenSort = data => dispatch => {
+const dispatchSortNotify = data => dispatch => {
+  dispatch(data);
+  sort(dispatch);
+  dispatch(notify(data));
+};
+
+const notifyDispatchSort = data => dispatch => {
+  dispatch(notify(data));
   dispatch(data);
   sort(dispatch);
 };
 
 const actionMap = {
-  [ActionTypes.RESTAURANT_POSTED]: dispatchThenSort,
-  [ActionTypes.VOTE_POSTED]: data => dispatch => {
-    dispatch(notify(data));
-    dispatch(data);
-    sort(dispatch);
-  },
-  [ActionTypes.VOTE_DELETED]: data => dispatch => {
-    dispatch(notify(data));
-    dispatch(data);
-    sort(dispatch);
-  },
+  [ActionTypes.RESTAURANT_POSTED]: dispatchSortNotify,
+  [ActionTypes.VOTE_POSTED]: notifyDispatchSort,
+  [ActionTypes.VOTE_DELETED]: notifyDispatchSort,
 };
 
 export function messageReceived(payload) {
