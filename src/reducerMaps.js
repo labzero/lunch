@@ -1,4 +1,5 @@
 import ActionTypes from './constants/ActionTypes';
+import uuid from 'node-uuid';
 
 const isFetching = state =>
   Object.assign({}, state, {
@@ -164,6 +165,54 @@ export const flashes = {
     const newState = Array.from(state);
     newState.splice(action.id, 1);
     return newState;
+  }
+};
+
+const tpl = (strings, ...keys) =>
+  dict => {
+    const result = [strings[0]];
+    keys.forEach((key, i) => {
+      result.push(dict[key], strings[i + 1]);
+    });
+    return result.join('');
+  };
+
+export const notifications = {
+  [ActionTypes.NOTIFY](state, action) {
+    const { realAction } = action;
+    const notification = {
+      id: uuid.v1()
+    };
+    switch (realAction.type) {
+      case ActionTypes.VOTE_POSTED: {
+        const { user_id, restaurant_id } = realAction.vote;
+        notification.tpl = tpl`${'user'} voted for ${'restaurant'}.`;
+        notification.vals = {
+          userId: user_id,
+          restaurantId: restaurant_id
+        };
+        break;
+      }
+      case ActionTypes.VOTE_DELETED: {
+        const { userId, restaurantId } = realAction;
+        notification.tpl = tpl`${'user'} downvoted ${'restaurant'}.`;
+        notification.vals = {
+          userId,
+          restaurantId
+        };
+        break;
+      }
+      default: {
+        return state;
+      }
+    }
+    return [
+      ...state.slice(-3),
+      notification
+    ];
+  },
+  [ActionTypes.EXPIRE_NOTIFICATION](state, action) {
+    return state.filter(n => n.id !== action.id);
   }
 };
 

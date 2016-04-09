@@ -9,10 +9,28 @@
 
 /*! React Starter Kit | MIT License | https://www.reactstarterkit.com/ */
 
+@import '../../styles/_mixins.scss';
 @import '../../styles/_variables.scss';
 
 html {
   background: $background-color;
+}
+
+.notifications {
+  @include plain-list;
+  bottom: 0;
+  position: fixed;
+  margin: 1em;
+  max-width: 300px;
+  transition: height .5s;
+}
+
+.notificationContainer {
+  display: inline-block;
+
+  &:not(:first-child) {
+    margin-top: 1em;
+  }
 }
 
 /*

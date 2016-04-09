@@ -5,6 +5,7 @@ import s from './RestaurantVoteCount.scss';
 
 export class _RestaurantVoteCount extends Component {
   static propTypes = {
+    id: PropTypes.number.isRequired,
     votes: PropTypes.array.isRequired,
     user: PropTypes.object.isRequired,
     users: PropTypes.array.isRequired
@@ -30,7 +31,7 @@ export class _RestaurantVoteCount extends Component {
         voteCountContainer = voteCount;
       } else {
         tooltip = (
-          <Tooltip>{this.props.votes.map(vote => {
+          <Tooltip id={`voteCountTooltip_${this.props.id}`}>{this.props.votes.map(vote => {
             const foundUser = this.props.users.find(user => user.id === vote.user_id);
             if (foundUser !== undefined) {
               return <div key={`restaurantVote_${vote.id}`}>{foundUser.name}</div>;

@@ -29,7 +29,7 @@ router
     async (req, res) => {
       const id = parseInt(req.params.id, 10);
       Vote.destroy({ where: { id } }).then(() => {
-        req.wss.broadcast(voteDeleted(parseInt(req.params.restaurant_id, 10), id));
+        req.wss.broadcast(voteDeleted(parseInt(req.params.restaurant_id, 10), req.user.id, id));
         res.status(204).send({ error: false });
       }).catch(err => errorCatcher(res, err));
     }

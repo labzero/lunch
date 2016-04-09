@@ -88,10 +88,11 @@ export function deleteVote(restaurantId, id) {
   };
 }
 
-export function voteDeleted(restaurantId, id) {
+export function voteDeleted(restaurantId, userId, id) {
   return {
     type: ActionTypes.VOTE_DELETED,
     restaurantId,
+    userId,
     id
   };
 }

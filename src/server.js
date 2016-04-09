@@ -152,6 +152,7 @@ server.get('*', async (req, res, next) => {
               items: tags.map(t => t.toJSON())
             },
             flashes: [],
+            notifications: [],
             modals: {},
             user: {},
             users: {
