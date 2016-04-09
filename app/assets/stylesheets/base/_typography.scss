@@ -75,6 +75,12 @@
   font-weight: $light-weight;
 }
 
+@mixin typography-horizontal-axis-label {
+  text-transform: uppercase;
+  font-size: .8rem;
+  font-weight: $light-weight;
+}
+
 @mixin typography-table-heading {
   font-size: 0.8667rem;
   font-weight: $semibold-weight;
@@ -269,6 +275,10 @@
 
 %typography-table-annotation {
   @include typography-table-annotation;
+}
+
+%typography-horizontal-axis-label {
+  @include typography-horizontal-axis-label;
 }
 
 %typography-table-heading {

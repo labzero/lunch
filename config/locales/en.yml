@@ -115,6 +115,8 @@ en:
     last_updated: 'Last Updated: %{date}'
     page_meta_title: 'FHLB - %{title}'
     defined_term: '%{term}:'
+    authorizations: Authorizations
+    letters_of_credit: Lettters of Credit
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -1385,8 +1387,8 @@ en:
         market_value: Market Value
         total_borrowing_capacity: Total Borrowing Capacity
         standard_credit: Covered by Standard Credit
-        remaining_market_value: Market Value Remaining
-        remaining_borrowing_capacity: Borrowing Capacity Remaining
+        remaining_market_value: Excess
+        remaining_borrowing_capacity: Total
         bc_upb: BC/UPB
         net_loan_collateral: Net Loan Collateral Borrowing Capacity
         remaining_capacity: Remaining Borrowing Capacity
@@ -1612,18 +1614,25 @@ en:
         report_details: This report reflects the most recent data available after each MCU has been processed. Only the current report is available. An email with an expanded version of this report that includes detailed rejection and inconsistency information is sent to your institution each time an MCU is processed.
       member_profile:
         title: Member Profile
-        fhlb_id: FHLB ID
-        fhfb_id: FHFB ID
-        relationship_manager: Relationship Manager
-        collateral_asset_mananger: Collateral Asset Manager
-        credit_analyst: Credit Analyst
-        regulator: Regulator
-        collateral_status: Collateral Status
-        cqr: CQR
+        fhlb_id: 'FHLB ID:'
+        fhfb_id: 'FHFB ID:'
+        fhfa_number: 'FHFA No.:'
+        relationship_manager: 'Relationship Manager:'
+        collateral_asset_mananger: 'Collateral Asset Manager:'
+        credit_analyst: 'Credit Analyst:'
+        regulator: 'Regulator:'
+        collateral_status: 'Collateral Status:'
+        cqr: 'CQR:'
         delivered: Delivered
         not_delivered: Not Delivered
+        excess: Excess
+        total: Total
+        market_value: Market Value
+        borrowing_capacity: Borrowing Capacity
         collateral:
           title: Collateral
+          regular_collateral: Regular Collateral
+          sbc: SBC Collateral
         capital_stock:
           title: Capital Stock
           required_by_advances: Required by Advances
@@ -1679,6 +1688,7 @@ en:
           title: STA
           number: 'STA No.'
           balance: STA Balance
+          date: STA Date
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
     accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the Accounting Department at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.

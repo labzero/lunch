@@ -31,6 +31,14 @@ module MAPI
           key :type, :string
           key :description, 'The phone number of the contact.'
         end
+        property :first_name do
+          key :type, :string
+          key :description, 'The first name of the contact.'
+        end
+        property :last_name do
+          key :type, :string
+          key :description, 'The last name of the contact.'
+        end
       end
     end
   end

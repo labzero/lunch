@@ -2789,81 +2789,45 @@ RSpec.describe ReportsController, :type => :controller do
       make_request
       expect(response.body).to render_template('profile')
     end
-    it 'assigns @member_name' do
+    it 'assigns `@member_name`' do
       make_request
       expect(assigns[:member_name]).to be(member_name)
     end
-    it 'assigns @member_details_table' do
-      make_request
-      expect(assigns[:member_details_table]).to include(:rows)
-    end
-    it 'sets @collateral_table to the hash returned from MemberBalanceServiceJob' do
+    it 'sets `@collateral_table` to the hash returned from MemberBalanceServiceJob' do
       make_request
       expect(assigns[:collateral_table]).to eq(response_hash)
     end
-    it 'assigns @capital_stock_table' do
+    it 'assigns `@capital_stock_table`' do
       make_request
       expect(assigns[:capital_stock_table]).to include(:rows)
     end
-    it 'assigns @rhfa_table' do
+    it 'assigns `@rhfa_table`' do
       make_request
       expect(assigns[:rhfa_table]).to include(:rows)
     end
-    it 'assigns @advances_and_mpf_table' do
+    it 'assigns `@advances_table`' do
       make_request
-      expect(assigns[:advances_and_mpf_table]).to include(:rows)
+      expect(assigns[:advances_table]).to include(:rows)
     end
-    it 'assigns @credit_table' do
+    it 'assigns `@rhfa_table`' do
       make_request
-      expect(assigns[:credit_table]).to include(:rows)
+      expect(assigns[:rhfa_table]).to include(:rows)
+    end
+    it 'assigns `@credit_tables[0]`' do
+      make_request
+      expect(assigns[:credit_tables][0]).to include(:rows)
+    end
+    it 'assigns `@credit_tables[1]`' do
+      make_request
+      expect(assigns[:credit_tables][1]).to include(:rows)
+    end
+    it 'assigns `@credit_tables[2]`' do
+      make_request
+      expect(assigns[:credit_tables][2]).to include(:rows)
     end
     it 'assigns @sta_table' do
       make_request
       expect(assigns[:sta_table]).to include(:rows)
-    end
-    describe '`@member_details_table`' do
-      let(:fhfb_id) { double('fhfb id') }
-      let(:credit_analyst) { double('credit analyst') }
-      let(:reporting_agency) { double('reporting agency') }
-      let(:cqr_rating) { double('cqr rating') }
-      let(:member_profile_response_details) { { collateral_delivery_status: 'Y', rhfa: rhfa, approved_long_term_credit: approved_long_term_credit, advances: advances, credit_outstanding: credit_outstanding, fhfb_id: fhfb_id, credit_analyst: credit_analyst, reporting_agency: reporting_agency, cqr_rating: cqr_rating } }
-      before do
-        allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(member_profile_response_details)
-        allow(contacts).to receive(:[]).with(:cam).and_return({full_name: cam_full_name})
-        allow(contacts).to receive(:[]).with(:rm).and_return({full_name: rm_full_name})
-      end
-      it 'sets @member_details_table with correct values from member_id' do
-        make_request
-        expect(assigns[:member_details_table][:rows][0][:columns].last[:value]).to eq(member_id)
-      end
-      it 'sets @member_details_table with correct values from fhfb_id' do
-        make_request
-        expect(assigns[:member_details_table][:rows][1][:columns].last[:value]).to eq(fhfb_id)
-      end
-      it 'sets @member_details_table with correct values from rm_full_name' do
-        make_request
-        expect(assigns[:member_details_table][:rows][2][:columns].last[:value]).to eq(rm_full_name)
-      end
-      it 'sets @member_details_table with correct values from cam_full_name' do
-        make_request
-        expect(assigns[:member_details_table][:rows][3][:columns].last[:value]).to eq(cam_full_name)
-      end
-      it 'sets @member_details_table with correct values from credit_analyst' do
-        make_request
-        expect(assigns[:member_details_table][:rows][4][:columns].last[:value]).to eq(credit_analyst)
-      end
-      it 'sets @member_details_table with correct values from reporting_agency' do
-        make_request
-        expect(assigns[:member_details_table][:rows][5][:columns].last[:value]).to eq(reporting_agency)
-      end
-      it 'sets @member_details_table with correct values from collateral_delivery_status' do
-        make_request
-        expect(assigns[:member_details_table][:rows][6][:columns].last[:value]).to eq('Delivered')
-      end
-      it 'sets @member_details_table with correct values from cqr_rating' do
-        make_request
-        expect(assigns[:member_details_table][:rows][7][:columns].last[:value]).to eq(cqr_rating)
-       end
     end
     describe '`@capital_stock_table`' do
       let(:value) { double('A Value') }
@@ -2871,45 +2835,160 @@ RSpec.describe ReportsController, :type => :controller do
       before do
         allow_any_instance_of(MemberBalanceService).to receive(:capital_stock_and_leverage).and_return(capital_stock_and_leverage_response)
       end
-      [:required_by_advances, :required_by_mpf, :activity_based_requirement, :mav_stock_requirement, :minimum_requirement, :stock_owned, :excess_stock, :remaining_leverage, :surplus_stock].each_with_index do |key, i|
-        it "sets @capital_stock_table row #{i} to the value found in the capital stock leverage response for key #{key}" do
+      [ :required_by_advances,
+        :required_by_mpf,
+        :activity_based_requirement,
+        :mav_stock_requirement,
+        :minimum_requirement,
+        :stock_owned,
+        :excess_stock,
+        :remaining_leverage,
+        :surplus_stock ].each_with_index do |key, i|
+        it "sets `@capital_stock_table` row #{i} to the value found in the capital stock leverage response for key #{key}" do
           capital_stock_and_leverage_response[key] = value
           make_request
           expect(assigns[:capital_stock_table][:rows][i][:columns].last[:value]).to eq(value)
         end
       end
     end
-    describe '`@advances_and_mpf_table`' do
+    describe '`@advances_table`' do
       let(:value) { double('A Value') }
       let(:advances_response) { {}.with_indifferent_access }
       before do
         allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(member_profile_response)
         member_profile_response[:advances] = advances_response
       end
-      [:end_of_prior_day, :maturing_today_term, :maturing_today_on, :amortizing_adjustment, :partial_prepayment, :scheduled_funding_today, :funding_today, :repay_today, :total_advances, :mpf_intraday_activity, :mpf_loan_balance, :total_mpf, :total_advances_and_mpf].each_with_index do |key, i|
-        it "sets @advances_and_mpf_table row #{i} to the value found in the profile response for key #{key}" do
+      [ :end_of_prior_day,
+        :maturing_today_term,
+        :maturing_today_on,
+        :amortizing_adjustment,
+        :partial_prepayment,
+        :scheduled_funding_today,
+        :funding_today,
+        :repay_today ].each_with_index do |key, i|
+        it "sets `@advances_table` row #{i} to the value found in the profile response for key #{key}" do
           advances_response[key] = value
           make_request
-          expect(assigns[:advances_and_mpf_table][:rows][i][:columns].last[:value]).to eq(value)
+          expect(assigns[:advances_table][:rows][i][:columns].last[:value]).to eq(value)
+        end
+
+        it "sets `@advances_table` total row" do
+          advances_response[:total_advances] = value
+          make_request
+          expect(assigns[:advances_table][:footer].last[:value]).to eq(value)
         end
       end
     end
-    describe '`@credit_table`' do
+    describe '`@mpf_table`' do
+      let(:value) { double('A Value') }
+      let(:advances_response) { {}.with_indifferent_access }
+      before do
+        allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(member_profile_response)
+        member_profile_response[:advances] = advances_response
+      end
+      [ :mpf_intraday_activity, :mpf_loan_balance ].each_with_index do |key, i|
+        it "sets `@mpf_table` row #{i} to the value found in the profile response for key #{key}" do
+          advances_response[key] = value
+          make_request
+          expect(assigns[:mpf_table][:rows][i][:columns].last[:value]).to eq(value)
+        end
+      end
+      it "sets `@mpf_table` total row" do
+        advances_response[:total_mpf] = value
+        make_request
+        expect(assigns[:mpf_table][:footer].last[:value]).to eq(value)
+      end
+    end
+    describe '`@advances_and_mpf_totals`' do
+      let(:value) { double('A Value') }
+      let(:advances_response) { {}.with_indifferent_access }
+      before do
+        allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(member_profile_response)
+        member_profile_response[:advances] = advances_response
+      end
+      it "sets `@advances_and_mpf_totals` total row" do
+        advances_response[:total_advances_and_mpf] = value
+        make_request
+        expect(assigns[:advances_and_mpf_totals][:footer].last[:value]).to eq(value)
+      end
+    end
+    context 'credit' do
       let(:value) { double('A Value') }
       let(:credit_outstanding_response) { {}.with_indifferent_access }
       before do
         allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(member_profile_response)
         member_profile_response[:credit_outstanding] = credit_outstanding_response
       end
-      [:financing_percentage, :maximum_term, :total_assets, :total_financing_available, :mpf_credit_available, :forward_commitments, :standard, :sbc, :total_advances_outstanding, :mpf_credit, :total_advances_and_mpf, :swaps_notational, :swaps_credit, :letters_of_credit, :investments, :total_credit_products_outstanding, :total, :remaining_financing_available].each_with_index do |key, i|
-        it "sets @credit_table row #{i} to the value found in the profile response for key #{key}" do
-          if i < 6 or i == 17
+      describe '`@credit_tables[0]`' do
+        [ :financing_percentage,
+          :maximum_term,
+          :total_assets,
+          :total_financing_available ].each_with_index do |key, i|
+          it "sets `@credit_tables[0]` row #{i} to the value found in the profile response for key #{key}" do
             member_profile_response[key] = value
-          else
-            credit_outstanding_response[key] = value
+            make_request
+            expect(assigns[:credit_tables][0][:rows][i][:columns].last[:value]).to eq(value)
           end
+        end
+      end
+      describe '`@credit_tables[1]`' do
+        before do
+          [ :mpf_credit_available,
+            :forward_commitments ].each_with_index do |key, i|
+            member_profile_response[key] = value
+          end
+        end
+        [ :mpf_credit_available,
+          :forward_commitments ].each_with_index do |key, i|
+          it "sets `@credit_tables[1]` row #{i} to the value found in the profile response for key #{key}" do
+            member_profile_response[key] = value
+            make_request
+            expect(assigns[:credit_tables][1][:rows][i][:columns].last[:value]).to eq(value)
+          end
+        end
+        [ :standard,
+          :sbc ].each_with_index do |key, i|
+          it "sets `@credit_tables[1]` row #{i} to the value found in the credit outstanding response for key #{key}" do
+            credit_outstanding_response[key] = value
+            make_request
+            expect(assigns[:credit_tables][1][:rows][i][:columns].last[:value]).to eq(value)
+          end
+          it "sets `@credit_tables[1]` total row" do
+            credit_outstanding_response[:total_advances_and_mpf] = value
+            make_request
+            expect(assigns[:credit_tables][1][:footer].last[:value]).to eq(value)
+          end
+        end
+      end
+      describe '`@credit_tables[2]`' do
+        [ :swaps_notational,
+          :swaps_credit,
+          :letters_of_credit,
+          :investments ].each_with_index do |key, i|
+          it "sets `@credit_tables[2]` row #{i} to the value found in the profile response for key #{key}" do
+            credit_outstanding_response[key] = value
+            make_request
+            expect(assigns[:credit_tables][2][:rows][i][:columns].last[:value]).to eq(value)
+          end
+          it "sets `@credit_tables[2]` total row" do
+            credit_outstanding_response[:total_credit_products_outstanding] = value
+            make_request
+            expect(assigns[:credit_tables][2][:footer].last[:value]).to eq(value)
+          end
+        end
+      end
+      describe '`@total_credit_table`' do
+        it "sets the total" do
+          credit_outstanding_response[:total] = value
           make_request
-          expect(assigns[:credit_table][:rows][i][:columns].last[:value]).to eq(value)
+          expect(assigns[:total_credit_table][:footer].last[:value]).to eq(value)
+        end
+      end
+      describe '`@total_available_credit_table`' do
+        it "sets the total" do
+          member_profile_response[:remaining_financing_available] = value
+          make_request
+          expect(assigns[:total_available_credit_table][:footer].last[:value]).to eq(value)
         end
       end
     end
@@ -2919,15 +2998,15 @@ RSpec.describe ReportsController, :type => :controller do
         allow(member_profile_response[:rhfa]).to receive(:[]).with(:total_lt).and_return(total_lt)
         allow(member_profile_response[:rhfa]).to receive(:[]).with(:available).and_return(available)
       end
-      it 'sets @rhfa_table with correct values from approved_long_term_credit' do
+      it 'sets `@rhfa_table` with correct values from approved_long_term_credit' do
         make_request
         expect(assigns[:rhfa_table][:rows][0][:columns].last[:value]).to eq(approved_long_term_credit)
       end
-      it 'sets @rhfa_table with correct values from total_lt' do
+      it 'sets `@rhfa_table` with correct values from total_lt' do
         make_request
         expect(assigns[:rhfa_table][:rows][1][:columns].last[:value]).to eq(total_lt)
       end
-      it 'sets @rhfa_table with correct values from available' do
+      it 'sets `@rhfa_table` with correct values from available' do
         make_request
         expect(assigns[:rhfa_table][:rows][2][:columns].last[:value]).to eq(available)
       end
@@ -2938,11 +3017,11 @@ RSpec.describe ReportsController, :type => :controller do
         allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return({sta_number: sta_number}.with_indifferent_access)
         allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(member_profile_response)
       end
-      it 'sets @sta_table with correct values from sta_number' do
+      it 'sets `@sta_table` with correct values from sta_number' do
         make_request
         expect(assigns[:sta_table][:rows][0][:columns].last[:value]).to eq(sta_number)
       end
-      it 'sets @sta_table with correct values from sta_balance' do
+      it 'sets `@sta_table` with correct values from sta_balance' do
         member_profile_response[:sta_balance] = sta_balance
         make_request
         expect(assigns[:sta_table][:rows][1][:columns].last[:value]).to eq(sta_balance)
@@ -2954,16 +3033,18 @@ RSpec.describe ReportsController, :type => :controller do
           allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
           make_request
         end
-        %w(rhfa_table advances_and_mpf_table credit_table).each do |instance_var|
-          it "should assign nil values to all columns found in @#{instance_var}" do
+        %w(rhfa_table advances_table advances_and_mpf_totals mpf_table total_credit_table total_available_credit_table sta_table).each do |instance_var|
+          it "should assign nil values to all columns found in `@#{instance_var}`" do
             assigns[instance_var.to_sym][:rows].each do |row|
               expect(row[:columns].last[:value]).to be_nil
             end
           end
         end
-        it 'should assign nil values to all columns found in @member_details_table' do
-          assigns[:member_details_table][:rows][1..-1].each do |row|
-            expect(row[:columns].last[:value]).to be_nil
+        3.times do |i|
+          it "should assign nil values to all columns found in `@credit_tables[#{i}]`" do
+            assigns[:credit_tables][i][:rows].each do |row|
+              expect(row[:columns].last[:value]).to be_nil
+            end
           end
         end
       end
@@ -2972,7 +3053,7 @@ RSpec.describe ReportsController, :type => :controller do
           allow_any_instance_of(MemberBalanceService).to receive(:capital_stock_and_leverage).and_return(nil)
           make_request
         end
-        it 'should assign nil values to all columns found in @capital_stock_table' do
+        it 'should assign nil values to all columns found in `@capital_stock_table`' do
           assigns[:capital_stock_table][:rows].each do |row|
             expect(row[:columns].last[:value]).to be_nil
           end
@@ -2994,11 +3075,6 @@ RSpec.describe ReportsController, :type => :controller do
           allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(nil)
           allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
           make_request
-        end
-        it 'should assign nil values to all columns found in @member_details_table' do
-          assigns[:member_details_table][:rows][1..-1].each do |row|
-            expect(row[:columns].last[:value]).to be_nil
-          end
         end
       end
     end

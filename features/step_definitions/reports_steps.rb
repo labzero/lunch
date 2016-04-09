@@ -62,6 +62,10 @@ Then(/^I should see (\d+) report tables with multiple data rows$/) do |count|
   end
 end
 
+Then(/^I should see (\d+) report tables$/) do |count|
+  page.assert_selector('.report-table', count: count)
+end
+
 Then(/^I should see a loading report table$/) do
   page.assert_selector('.report-table.table-loading', visible: true)
 end

@@ -1063,7 +1063,7 @@ td.dataTables_empty {
       &.disabled {
         color: $medium-gray;
         &:hover {
-          text-decoration: none; 
+          text-decoration: none;
         }
       }
     }
@@ -1221,6 +1221,85 @@ td.dataTables_empty {
   }
 }
 
+.report-profile {
+  h2 {
+    @extend %typography-section-title;
+    margin-top: 0;
+  }
+
+  .date-time {
+    font-weight: $semibold-weight
+  }
+  dl {
+    @extend %clearfix;
+    margin: 0;
+  }
+  dt, dd {
+    @extend %typography-subtitle;
+    float: left;
+  }
+  dt {
+    clear: both;
+    color: $medium-gray;
+  }
+  ul {
+    margin: 0;
+    padding-left: 0;
+    list-style-type: none;
+  }
+  li {
+    @extend %typography-subtitle;
+  }
+  section {
+    margin-bottom: 0;
+  }
+  .horizontal-axis-label {
+    @extend %typography-horizontal-axis-label;
+    float: left;
+    margin-bottom: 10px;
+  }
+  .market-value {
+    margin-left: 135px;
+  }
+  .borrowing-capacity {
+    margin-left: 100px;
+  }
+  table {
+    border: 0;
+    margin-bottom: 20px !important;
+    tbody, tfoot, thead {
+      td, th {
+        padding: 5px;
+      }
+    }
+    tbody {
+      td:first-child {
+        @extend %typography-table-heading;
+        background-color: $light-gray;
+      }
+    }
+    tbody, thead {
+      td, th {
+        border-left: 1px solid $light-blue;
+        border-top: 1px solid $light-blue;
+      }
+      th.cutout {
+        border-top: 0;
+        border-left: 0;
+        background-color: $white;
+      }
+    }
+    tfoot {
+      td:first-child {
+        border-right: 0;
+      }
+    }
+  }
+  .sta .report-cell-narrow {
+    text-align: right;
+  }
+}
+
 @media print {
   .account-summary-report .report-table:not(.account-summary-collateral-totals) tbody td:first-child,
   .account-summary-report tfoot,
@@ -1321,7 +1400,7 @@ td.dataTables_empty {
       border: none;
       min-width: 0 !important;
     }
-    thead + tbody tr:nth-child(even), &.table-dividend-summary tbody tr:nth-child(even), &.securities-services-table tr:nth-child(even) { 
+    thead + tbody tr:nth-child(even), &.table-dividend-summary tbody tr:nth-child(even), &.securities-services-table tr:nth-child(even) {
       background-color: transparent;
     }
     tbody td {
@@ -1362,8 +1441,8 @@ td.dataTables_empty {
       border-bottom: 1px solid $light-gray;
     }
   }
-  .report-sub-table, 
-  .sbc-borrowing-capacity-tables .report-sub-table, 
+  .report-sub-table,
+  .sbc-borrowing-capacity-tables .report-sub-table,
   .standard-credit-borrowing-capacity-tables .report-sub-table {
     width: 50%;
     clear: both;
@@ -1439,7 +1518,7 @@ td.dataTables_empty {
     margin-bottom: 50px;
   }
   .sbc-borrowing-capacity-tables, .securities-services-table-wrapper {
-    page-break-inside: avoid; 
+    page-break-inside: avoid;
   }
 
   .report-securities-services-statement {

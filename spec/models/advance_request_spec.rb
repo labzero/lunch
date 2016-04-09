@@ -5,7 +5,7 @@ describe AdvanceRequest do
     let(:type) { double('A Type') }
     let(:code) { double('A Code') }
     let(:value) { double('A Value') }
-    
+
     subject { described_class.new(type, code, value) }
 
     describe 'initializer' do
@@ -485,7 +485,7 @@ describe AdvanceRequest do
         allow(subject).to receive(:transform_amount).with(amount, attr).and_return(transformed_amount)
         allow(subject).to receive(:transform_amount).with(nil, attr).and_return(nil)
       end
-      
+
       if attr == :amount
         it 'resets the `stock_choice` attr via the `reset_stock_choice!` method if the new amount differs from the old amount' do
           expect(subject).to receive(:reset_stock_choice!)
@@ -680,7 +680,7 @@ describe AdvanceRequest do
     it 'returns false if the `old_rate` matches the `rate`' do
       allow(subject).to receive(:old_rate).and_return(rate)
       allow(subject).to receive(:rate).and_return(rate)
-      expect(call_method).to be(false)      
+      expect(call_method).to be(false)
     end
   end
 
@@ -710,7 +710,7 @@ describe AdvanceRequest do
           allow(subject).to receive(:type).and_return(type)
           expect(call_method).to eq(I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed'))
         end
-      end   
+      end
     end
     describe 'when `type` is anything else' do
       it 'returns the `type` value directly' do
@@ -865,7 +865,7 @@ describe AdvanceRequest do
       call_method
     end
     (described_class::READONLY_ATTRS + described_class::REQUEST_PARAMETERS + described_class::CORE_PARAMETERS + [:id] - described_class::SERIALIZATION_EXCLUDE_ATTRS).each do |key|
-      it "assings the value found under `#{key}` to the attribute `#{key}`" do
+      it "assigns the value found under `#{key}` to the attribute `#{key}`" do
         case key
         when :type
           value = :aa
@@ -1062,7 +1062,7 @@ describe AdvanceRequest do
       end
     end
   end
-  
+
   describe '`redis_key` class method' do
     it 'joins the class name and the supplied `id`' do
       id = SecureRandom.uuid
@@ -1071,7 +1071,7 @@ describe AdvanceRequest do
   end
 
   describe '`redis_value` class method' do
-    let(:id) { SecureRandom.uuid } 
+    let(:id) { SecureRandom.uuid }
     let(:call_method) { described_class.redis_value(id) }
     it 'contrcuts a new `Redis::Value` using the key from `redis_key`' do
       key = double('A Redis Key')
@@ -1151,7 +1151,7 @@ describe AdvanceRequest do
     let(:rate_data) { double('rate_data', :[]= => nil, :[] => nil) }
     let(:rates) { double('rates', :[] => double('term rates', :[] => rate_data)) }
     let(:call_method) { subject.send(:notify_if_rate_bands_exceeded) }
-    
+
     before do
       allow(request).to receive(:uuid).and_return(request_uuid)
       allow(InternalMailer).to receive(:exceeds_rate_band).and_return(mail_message)
@@ -1159,7 +1159,7 @@ describe AdvanceRequest do
       allow(rate_data).to receive(:dup).and_return(rate_data)
     end
     describe 'when a rate is disabled' do
-      before do 
+      before do
         allow(rate_data).to receive(:[]).with(:disabled).and_return(true)
         allow(rate_data).to receive(:[]).with(:rate_band_info).and_return(rate_band_info)
         allow(rate_data).to receive(:[]).with(:end_of_day).and_return(false)
@@ -1171,7 +1171,7 @@ describe AdvanceRequest do
         call_method
       end
       it 'sends the `exceeds_rate_band` email if a rate is disabled and has exceeded its maximum threshold' do
-        allow(rate_band_info).to receive(:[]).with(:max_threshold_exceeded).and_return(true)        
+        allow(rate_band_info).to receive(:[]).with(:max_threshold_exceeded).and_return(true)
         allow(InternalMailer).to receive(:exceeds_rate_band).with(rate_data, request_uuid, signer).and_return(mail_message)
         expect(mail_message).to receive(:deliver_now)
         call_method
@@ -1253,7 +1253,7 @@ describe AdvanceRequest do
     let(:type) { double('An Error Type') }
     let(:code) { double('An Error Code') }
     let(:error) { double(described_class::Error) }
-    
+
     it 'adds a new error to the errors array' do
       value = double('An Error Value')
       allow(described_class::Error).to receive(:new).with(type, code, value).and_return(error)
@@ -1271,7 +1271,7 @@ describe AdvanceRequest do
   describe '`no_errors_present?` protected method' do
     let(:errors) { double('An Error Array') }
     let(:call_method) { subject.send(:no_errors_present?) }
-    
+
     before do
       subject.instance_variable_set(:@errors, errors)
     end
@@ -1302,7 +1302,7 @@ describe AdvanceRequest do
       end
     end
   end
-  
+
   describe '`populate_attributes_from_response` protected method' do
     let(:response_hash) { {} }
     let(:value) { double('A Value') }

@@ -11,6 +11,4 @@ Background:
 Scenario: Visit profile report page page from the url
   Given I visit the dashboard
   When I am on the "Profile" report page
-  Then I should see 7 report tables with multiple data rows
-
-
+  Then I should see 12 report tables

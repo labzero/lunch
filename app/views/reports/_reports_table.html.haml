@@ -56,11 +56,4 @@
               %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
             - row[:columns].each do |column|
               = render 'reports/report_cell', cell: column
-    - if table_data[:footer]
-      %tfoot
-        - table_data[:footer].each do |cell|
-          - remaining_cells = remaining_cells - 1 if remaining_cells
-          = render 'reports/report_cell', cell: cell
-        - if remaining_cells
-          - remaining_cells.times do
-            = render 'reports/report_cell', cell: {}
+    =render 'reports/report_footer', footer: table_data[:footer], remaining_cells: remaining_cells

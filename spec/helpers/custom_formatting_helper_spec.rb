@@ -123,7 +123,7 @@ describe CustomFormattingHelper do
       expect(helper.fhlb_date_short_alpha(nil)).to eq(I18n.t('global.missing_value'))
     end
   end
-  
+
   describe '`fhlb_formatted_phone_number` method' do
     it 'returns nil if it is not passed a phone number' do
       expect(helper.fhlb_formatted_phone_number(nil)).to be_nil
@@ -233,7 +233,7 @@ describe CustomFormattingHelper do
       allow(intermediary_3).to receive(:+).with('*' * matches[4].length).and_return(intermediary_4)
       allow(intermediary_4).to receive(:+).with(matches[5]).and_return(masked_email)
       allow(email).to receive(:match).and_return(matches)
-      
+
       expect(helper.mask_email(email)).to be(masked_email)
     end
     describe 'with fixtures' do
@@ -253,4 +253,42 @@ describe CustomFormattingHelper do
     end
   end
 
+  let(:first_name) { 'Robert' }
+  let(:last_name) { 'Johnson' }
+  let(:first_initial) { 'R.' }
+  let(:properly_formatted_name) { 'R. Johnson' }
+
+  describe '`fhlb_first_intial_last_name` method' do
+    it 'returns empty string if first and last names are nil' do
+      expect(helper.fhlb_first_intial_last_name(nil, nil)).to eq(nil)
+      expect(helper.fhlb_first_intial_last_name(nil)).to eq(nil)
+      expect(helper.fhlb_first_intial_last_name).to eq(nil)
+    end
+
+    it 'returns just the last name if the first name is missing' do
+      expect(helper.fhlb_first_intial_last_name(nil, last_name)).to eq(last_name)
+    end
+
+    it 'returns the first initial and last name for a two word name' do
+      expect(helper.fhlb_first_intial_last_name(first_name, last_name)).to eq(properly_formatted_name)
+    end
+
+    it 'returns just the first initial if the last name is missing' do
+      expect(helper.fhlb_first_intial_last_name(first_name)).to eq(first_initial)
+    end
+  end
+
+  describe '`fhlb_initials_from_full_name` method' do
+    it 'returns empty string for nil' do
+      expect(helper.fhlb_initials_from_full_name(nil)).to eq('')
+    end
+
+    it 'returns proper initials for a variety of names' do
+      expect(helper.fhlb_initials_from_full_name('Prince')).to eq('P')
+      expect(helper.fhlb_initials_from_full_name('Robert Johnson')).to eq('RJ')
+      expect(helper.fhlb_initials_from_full_name('Vince Di Bona')).to eq('VDB')
+      expect(helper.fhlb_initials_from_full_name("Martin O'Malley")).to eq('MO')
+      expect(helper.fhlb_initials_from_full_name("    Tula does the @#}$%^&*()     Hula from Hawaii  ")).to eq('TDT@HFH')
+    end
+  end
 end

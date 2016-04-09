@@ -152,6 +152,8 @@ class ReportsController < ApplicationController
     authorize :member_profile, :show?
   end
 
+  layout 'no_chrome', only: [:profile]
+
   def index
     @reports = {
       price_indications: {
@@ -364,15 +366,16 @@ class ReportsController < ApplicationController
   end
 
   def profile
-    member_balance_service = MemberBalanceService.new(current_member_id, request)
-    member_profile = member_balance_service.profile
+    @current_member_id = current_member_id
+    member_balance_service = MemberBalanceService.new(@current_member_id, request)
+    @member_profile = member_balance_service.profile
     cap_stock_and_leverage = member_balance_service.capital_stock_and_leverage || {}
     members_service = MembersService.new(request)
-    contacts = members_service.member_contacts(current_member_id)
-    member_details = members_service.member(current_member_id) || {}
+    @contacts = members_service.member_contacts(@current_member_id)
+    @member_details = members_service.member(@current_member_id) || {}
 
-    if !member_profile
-      member_profile = {
+    if !@member_profile
+      @member_profile = {
         credit_outstanding: {},
         collateral_borrowing_capacity: {
           standard: {
@@ -386,72 +389,16 @@ class ReportsController < ApplicationController
       }
     end
 
-    if !contacts
-      contacts = {
+    if !@contacts
+      @contacts = {
         rm: {},
         cam: {}
       }
     end
 
-    @member_name = member_details[:name]
-
-    # Header info
-    @member_details_table = {
-      rows: [
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.fhlb_id')},
-            {value: current_member_id}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.fhfb_id')},
-            {value: member_profile[:fhfb_id]}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.relationship_manager')},
-            {value: contacts[:rm][:full_name]}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.collateral_asset_mananger')},
-            {value: contacts[:cam][:full_name]}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.credit_analyst')},
-            {value: member_profile[:credit_analyst]}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.regulator')},
-            {value: member_profile[:reporting_agency]}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.collateral_status')},
-            {value: (member_profile[:collateral_delivery_status] == 'Y' ? t('reports.pages.member_profile.delivered') : t('reports.pages.member_profile.not_delivered') if member_profile[:collateral_delivery_status])}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.cqr')},
-            {value: member_profile[:cqr_rating]}
-          ]
-        }
-      ]
-    }
-
-    # Collateral
     initialize_dates(:borrowing_capacity, nil, params[:end_date])
     @collateral_table = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @end_date.to_s)
+
     @capital_stock_table = {
       rows: [
         {
@@ -511,229 +458,237 @@ class ReportsController < ApplicationController
       ]
     }
 
-    # RHFA
     @rhfa_table = {
       rows: [
         {
           columns: [
             {value: t('reports.pages.member_profile.rhfa.limit')},
-            {value: member_profile[:approved_long_term_credit], type: :currency_whole}
+            {value: @member_profile[:approved_long_term_credit], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.rhfa.total')},
-            {value: member_profile[:rhfa][:total_lt], type: :currency_whole}
+            {value: @member_profile[:rhfa][:total_lt], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.rhfa.available')},
-            {value:  member_profile[:rhfa][:available], type: :currency_whole}
+            {value:  @member_profile[:rhfa][:available], type: :currency_whole}
           ]
         }
       ]
     }
 
-    # Advances and MPF
-    @advances_and_mpf_table = {
+    @advances_table = {
       rows: [
         {
           columns: [
             {value: t('reports.pages.member_profile.advances.end_of_day')},
-            {value: member_profile[:advances][:end_of_prior_day], type: :currency_whole}
+            {value: @member_profile[:advances][:end_of_prior_day], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.advances.maturing_today_term')},
-            {value: member_profile[:advances][:maturing_today_term], type: :currency_whole}
+            {value: @member_profile[:advances][:maturing_today_term], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.advances.maturing_today_on')},
-            {value: member_profile[:advances][:maturing_today_on], type: :currency_whole}
+            {value: @member_profile[:advances][:maturing_today_on], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.advances.amortizing')},
-            {value: member_profile[:advances][:amortizing_adjustment], type: :currency_whole}
+            {value: @member_profile[:advances][:amortizing_adjustment], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.advances.partial_prepayment')},
-            {value: member_profile[:advances][:partial_prepayment], type: :currency_whole}
+            {value: @member_profile[:advances][:partial_prepayment], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.advances.scheduled_funding_today')},
-            {value: member_profile[:advances][:scheduled_funding_today], type: :currency_whole}
+            {value: @member_profile[:advances][:scheduled_funding_today], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.advances.funding_today')},
-            {value: member_profile[:advances][:funding_today], type: :currency_whole}
+            {value: @member_profile[:advances][:funding_today], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.advances.repays_today')},
-            {value: member_profile[:advances][:repay_today], type: :currency_whole}
+            {value: @member_profile[:advances][:repay_today], type: :currency_whole}
           ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.advances.total_advances')},
-            {value: member_profile[:advances][:total_advances], type: :currency_whole}
-          ]
-        },
+        }
+      ],
+      footer: [
+        {value: t('reports.pages.member_profile.advances.total_advances')},
+        {value: @member_profile[:advances][:total_advances], type: :currency_whole}
+      ]
+    }
+
+    @mpf_table = {
+      rows: [
         {
           columns: [
             {value: t('reports.pages.member_profile.advances.mpf_intraday')},
-            {value: member_profile[:advances][:mpf_intraday_activity], type: :currency_whole}
+            {value: @member_profile[:advances][:mpf_intraday_activity], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.advances.mpf_loan_balance')},
-            {value: member_profile[:advances][:mpf_loan_balance], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.advances.total_mpf')},
-            {value: member_profile[:advances][:total_mpf], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.advances.total_advances_and_mpf')},
-            {value: member_profile[:advances][:total_advances_and_mpf], type: :currency_whole}
+            {value: @member_profile[:advances][:mpf_loan_balance], type: :currency_whole}
           ]
         }
+      ],
+      footer: [
+        {value: t('reports.pages.member_profile.advances.total_mpf')},
+        {value: @member_profile[:advances][:total_mpf], type: :currency_whole}
       ]
     }
 
-    # Credit
-    @credit_table = {
+    empty_table_defaults = {
+      column_headings: [], rows: []
+    }
+
+    @advances_and_mpf_totals = {
+      footer: [
+        {value: t('reports.pages.member_profile.advances.total_advances_and_mpf')},
+        {value: @member_profile[:advances][:total_advances_and_mpf], type: :currency_whole}
+      ]
+    }.merge(empty_table_defaults)
+
+    @credit_tables = []
+    @credit_tables[0] = {
       rows: [
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.percent_of_assets')},
-            {value: member_profile[:financing_percentage], type: :percentage}
+            {value: @member_profile[:financing_percentage], type: :percentage}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.max_term')},
-            {value: member_profile[:maximum_term], type: :number}
+            {value: @member_profile[:maximum_term], type: :number}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.total_assets')},
-            {value: member_profile[:total_assets], type: :currency_whole}
+            {value: @member_profile[:total_assets], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.max_credit')},
-            {value: member_profile[:total_financing_available], type: :currency_whole}
+            {value: @member_profile[:total_financing_available], type: :currency_whole}
           ]
-        },
+        }
+      ]
+    }
+    @credit_tables[1] = {
+      rows: [
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.mpf_available')},
-            {value: member_profile[:mpf_credit_available], type: :currency_whole}
+            {value: @member_profile[:mpf_credit_available], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.committed_funding')},
-            {value: member_profile[:forward_commitments], type: :currency_whole}
+            {value: @member_profile[:forward_commitments], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.regular_outstanding')},
-            {value: member_profile[:credit_outstanding][:standard], type: :currency_whole}
+            {value: @member_profile[:credit_outstanding][:standard], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.sbc_outstanding')},
-            {value: member_profile[:credit_outstanding][:sbc], type: :currency_whole}
+            {value: @member_profile[:credit_outstanding][:sbc], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.total_advances_outstanding')},
-            {value: member_profile[:credit_outstanding][:total_advances_outstanding], type: :currency_whole}
+            {value: @member_profile[:credit_outstanding][:total_advances_outstanding], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.mpf_actual_ce')},
-            {value: member_profile[:credit_outstanding][:mpf_credit], type: :currency_whole}
+            {value: @member_profile[:credit_outstanding][:mpf_credit], type: :currency_whole}
           ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.credit.total_advance_and_mpf')},
-            {value: member_profile[:credit_outstanding][:total_advances_and_mpf], type: :currency_whole}
-          ]
-        },
+        }
+      ],
+      footer: [
+        {value: t('reports.pages.member_profile.credit.total_advance_and_mpf')},
+        {value: @member_profile[:credit_outstanding][:total_advances_and_mpf], type: :currency_whole}
+      ]
+    }
+    @credit_tables[2] = {
+      rows: [
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.notional_swaps')},
-            {value: member_profile[:credit_outstanding][:swaps_notational], type: :currency_whole}
+            {value: @member_profile[:credit_outstanding][:swaps_notational], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.total_swaps')},
-            {value: member_profile[:credit_outstanding][:swaps_credit], type: :currency_whole}
+            {value: @member_profile[:credit_outstanding][:swaps_credit], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.letters_of_credit')},
-            {value: member_profile[:credit_outstanding][:letters_of_credit], type: :currency_whole}
+            {value: @member_profile[:credit_outstanding][:letters_of_credit], type: :currency_whole}
           ]
         },
         {
           columns: [
             {value: t('reports.pages.member_profile.credit.unsecured_investments')},
-            {value: member_profile[:credit_outstanding][:investments], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.credit.total_credit_products')},
-            {value: member_profile[:credit_outstanding][:total_credit_products_outstanding], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.credit.total_credit')},
-            {value: member_profile[:credit_outstanding][:total], type: :currency_whole}
-          ]
-        },
-        {
-          columns: [
-            {value: t('reports.pages.member_profile.credit.total_available_credit')},
-            {value: member_profile[:remaining_financing_available], type: :currency_whole}
+            {value: @member_profile[:credit_outstanding][:investments], type: :currency_whole}
           ]
         }
+      ],
+      footer: [
+        {value: t('reports.pages.member_profile.credit.total_credit_products')},
+        {value: @member_profile[:credit_outstanding][:total_credit_products_outstanding], type: :currency_whole}
       ]
     }
+    @total_credit_table = {
+      footer: [
+        {value: t('reports.pages.member_profile.credit.total_credit')},
+        {value: @member_profile[:credit_outstanding][:total], type: :currency_whole}
+      ]
+    }.merge(empty_table_defaults)
 
-    # STA
+    @total_available_credit_table = {
+      footer: [
+        {value: t('reports.pages.member_profile.credit.total_available_credit')},
+        {value: @member_profile[:remaining_financing_available], type: :currency_whole}
+      ]
+    }.merge(empty_table_defaults)
+
     @sta_table = {
       rows: [
         {
@@ -745,7 +700,13 @@ class ReportsController < ApplicationController
         {
           columns: [
             {value: t('reports.pages.member_profile.sta.balance')},
-            {value: member_profile[:sta_balance], type: :currency_whole}
+            {value: @member_profile[:sta_balance], type: :currency_whole}
+          ]
+        },
+        {
+          columns: [
+            {value: t('reports.pages.member_profile.sta.date')},
+            {value: @member_profile[:sta_update_date], type: :date}
           ]
         }
       ]
