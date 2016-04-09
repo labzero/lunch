@@ -1,4 +1,7 @@
 import React, { Component, PropTypes } from 'react';
+import ActionTypes from '../../constants/ActionTypes';
+import NotificationContentVotePosted from '../NotificationContentVotePosted';
+import NotificationContentVoteDeleted from '../NotificationContentVoteDeleted';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Notification.scss';
 
@@ -6,8 +9,9 @@ class Notification extends Component {
 
   static propTypes = {
     expireNotification: PropTypes.func.isRequired,
-    message: PropTypes.string,
-    noRender: PropTypes.bool
+    noRender: PropTypes.bool,
+    actionType: PropTypes.string.isRequired,
+    dict: PropTypes.object.isRequired
   };
 
   componentDidMount() {
@@ -22,10 +26,22 @@ class Notification extends Component {
     if (this.props.noRender) {
       return false;
     }
+    let content;
+    switch (this.props.actionType) {
+      case ActionTypes.VOTE_POSTED: {
+        content = <NotificationContentVotePosted {...this.props.dict} />;
+        break;
+      }
+      case ActionTypes.VOTE_DELETED: {
+        content = <NotificationContentVoteDeleted {...this.props.dict} />;
+        break;
+      }
+      default: break;
+    }
     return (
       <div className={s.root}>
         <button className={s.close} onClick={this.props.expireNotification}>&times;</button>
-        {this.props.message}
+        {content}
       </div>
     );
   }

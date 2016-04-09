@@ -8,11 +8,15 @@ const mapStateToProps = (state, ownProps) => {
     return { noRender: true };
   }
   const dict = {
-    user: vals.userId ? state.users.items.find(u => u.id === vals.userId).name : undefined,
+    loggedIn: state.user.id !== undefined,
     restaurant: vals.restaurantId ? state.restaurants.items.find(r => r.id === vals.restaurantId).name : undefined
   };
+  if (dict.loggedIn) {
+    dict.user = vals.userId ? state.users.items.find(u => u.id === vals.userId).name : undefined;
+  }
   return {
-    message: ownProps.tpl(dict)
+    actionType: ownProps.actionType,
+    dict
   };
 };
 

@@ -168,25 +168,16 @@ export const flashes = {
   }
 };
 
-const tpl = (strings, ...keys) =>
-  dict => {
-    const result = [strings[0]];
-    keys.forEach((key, i) => {
-      result.push(dict[key], strings[i + 1]);
-    });
-    return result.join('');
-  };
-
 export const notifications = {
   [ActionTypes.NOTIFY](state, action) {
     const { realAction } = action;
     const notification = {
-      id: uuid.v1()
+      id: uuid.v1(),
+      actionType: realAction.type
     };
-    switch (realAction.type) {
+    switch (notification.actionType) {
       case ActionTypes.VOTE_POSTED: {
         const { user_id, restaurant_id } = realAction.vote;
-        notification.tpl = tpl`${'user'} voted for ${'restaurant'}.`;
         notification.vals = {
           userId: user_id,
           restaurantId: restaurant_id
@@ -195,7 +186,6 @@ export const notifications = {
       }
       case ActionTypes.VOTE_DELETED: {
         const { userId, restaurantId } = realAction;
-        notification.tpl = tpl`${'user'} downvoted ${'restaurant'}.`;
         notification.vals = {
           userId,
           restaurantId
