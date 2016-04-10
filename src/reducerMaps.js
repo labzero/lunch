@@ -169,54 +169,6 @@ export const flashes = {
 };
 
 export const notifications = {
-  [ActionTypes.NOTIFY](state, action) {
-    const { realAction } = action;
-    const notification = {
-      id: uuid.v1(),
-      actionType: realAction.type
-    };
-    switch (notification.actionType) {
-      case ActionTypes.RESTAURANT_POSTED: {
-        const { userId, restaurant } = realAction;
-        notification.vals = {
-          userId,
-          restaurantId: restaurant.id
-        };
-        break;
-      }
-      case ActionTypes.RESTAURANT_DELETED: {
-        const { userId, id } = realAction;
-        notification.vals = {
-          userId,
-          restaurantId: id
-        };
-        break;
-      }
-      case ActionTypes.VOTE_POSTED: {
-        const { user_id, restaurant_id } = realAction.vote;
-        notification.vals = {
-          userId: user_id,
-          restaurantId: restaurant_id
-        };
-        break;
-      }
-      case ActionTypes.VOTE_DELETED: {
-        const { userId, restaurantId } = realAction;
-        notification.vals = {
-          userId,
-          restaurantId
-        };
-        break;
-      }
-      default: {
-        return state;
-      }
-    }
-    return [
-      ...state.slice(-3),
-      notification
-    ];
-  },
   [ActionTypes.EXPIRE_NOTIFICATION](state, action) {
     return state.filter(n => n.id !== action.id);
   }
@@ -398,3 +350,80 @@ export const latLng = {};
 export const user = {};
 export const users = {};
 export const wsPort = {};
+
+export default {
+  [ActionTypes.NOTIFY](state, action) {
+    const { realAction } = action;
+    const notification = {
+      actionType: realAction.type
+    };
+    switch (notification.actionType) {
+      case ActionTypes.RESTAURANT_POSTED: {
+        const { userId, restaurant } = realAction;
+        notification.vals = {
+          userId,
+          restaurantId: restaurant.id
+        };
+        break;
+      }
+      case ActionTypes.RESTAURANT_DELETED: {
+        const { userId, id } = realAction;
+        notification.vals = {
+          userId,
+          restaurantId: id
+        };
+        break;
+      }
+      case ActionTypes.RESTAURANT_RENAMED: {
+        const { id, fields, userId } = realAction;
+        notification.vals = {
+          userId,
+          restaurantId: id,
+          newName: fields.name
+        };
+        break;
+      }
+      case ActionTypes.VOTE_POSTED: {
+        const { user_id, restaurant_id } = realAction.vote;
+        notification.vals = {
+          userId: user_id,
+          restaurantId: restaurant_id
+        };
+        break;
+      }
+      case ActionTypes.VOTE_DELETED: {
+        const { userId, restaurantId } = realAction;
+        notification.vals = {
+          userId,
+          restaurantId
+        };
+        break;
+      }
+      default: {
+        return state;
+      }
+    }
+    if (notification.vals.userId === state.user.id) {
+      return state;
+    }
+    notification.id = uuid.v1();
+    notification.contentProps = {
+      loggedIn: state.user.id !== undefined,
+      restaurant: notification.vals.restaurantId ?
+        state.restaurants.items.find(r => r.id === notification.vals.restaurantId).name :
+        undefined,
+      newName: notification.vals.newName
+    };
+    if (notification.contentProps.loggedIn) {
+      notification.contentProps.user = notification.vals.userId ?
+        state.users.items.find(u => u.id === notification.vals.userId).name :
+        undefined;
+    }
+    return Object.assign({}, state, {
+      notifications: [
+        ...state.notifications.slice(-3),
+        notification
+      ]
+    });
+  }
+};

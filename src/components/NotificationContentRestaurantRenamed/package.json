@@ -1,0 +1,6 @@
+{
+  "name": "NotificationContentRestaurantRenamed",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./NotificationContentRestaurantRenamed.js"
+}

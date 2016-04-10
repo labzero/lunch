@@ -29,6 +29,7 @@ const notifyDispatchSort = data => dispatch => {
 const actionMap = {
   [ActionTypes.RESTAURANT_POSTED]: dispatchSortNotify,
   [ActionTypes.RESTAURANT_DELETED]: notifyDispatch,
+  [ActionTypes.RESTAURANT_RENAMED]: notifyDispatchSort,
   [ActionTypes.VOTE_POSTED]: notifyDispatchSort,
   [ActionTypes.VOTE_DELETED]: notifyDispatchSort,
 };

@@ -3,10 +3,11 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from '../NotificationContent/NotificationContent.scss';
 
 const NotificationContentRestaurantPosted = ({ loggedIn, user, restaurant, showMapAndInfoWindow }) => {
+  const restaurantEl = <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurant}</b>;
   if (loggedIn) {
-    return <span><b>{user}</b> added <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurant}</b>.</span>;
+    return <span><b>{user}</b> added {restaurantEl}.</span>;
   }
-  return <span><b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurant}</b> was added.</span>;
+  return <span>{restaurantEl} was added.</span>;
 };
 
 NotificationContentRestaurantPosted.propTypes = {

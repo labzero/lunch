@@ -49,11 +49,12 @@ export function renameRestaurant(id, obj) {
   };
 }
 
-export function restaurantRenamed(id, obj) {
+export function restaurantRenamed(id, obj, userId) {
   return {
     type: ActionTypes.RESTAURANT_RENAMED,
     id,
-    fields: obj
+    fields: obj,
+    userId
   };
 }
 

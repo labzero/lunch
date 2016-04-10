@@ -3,14 +3,15 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from '../NotificationContent/NotificationContent.scss';
 
 const NotificationContentVoteDeleted = ({ loggedIn, user, restaurant, showMapAndInfoWindow }) => {
+  const restaurantEl = <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurant}</b>;
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b> downvoted <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurant}</b>.
+        <b>{user}</b> downvoted {restaurantEl}.
       </span>
     );
   }
-  return <span><b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurant}</b> was downvoted.</span>;
+  return <span>{restaurantEl} was downvoted.</span>;
 };
 
 NotificationContentVoteDeleted.propTypes = {
