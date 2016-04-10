@@ -9,10 +9,11 @@ export function deleteTag(id) {
   };
 }
 
-export function tagDeleted(id) {
+export function tagDeleted(id, userId) {
   return {
     type: ActionTypes.TAG_DELETED,
-    id
+    id,
+    userId
   };
 }
 

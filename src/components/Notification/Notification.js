@@ -8,6 +8,7 @@ import VoteDeleted from './NotificationContent/VoteDeleted';
 import PostedNewTagToRestaurant from './NotificationContent/PostedNewTagToRestaurant';
 import PostedTagToRestaurant from './NotificationContent/PostedTagToRestaurant';
 import DeletedTagFromRestaurant from './NotificationContent/DeletedTagFromRestaurant';
+import TagDeleted from './NotificationContent/TagDeleted';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Notification.scss';
 
@@ -19,7 +20,8 @@ const contentMap = {
   [ActionTypes.VOTE_DELETED]: VoteDeleted,
   [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT]: PostedNewTagToRestaurant,
   [ActionTypes.POSTED_TAG_TO_RESTAURANT]: PostedTagToRestaurant,
-  [ActionTypes.DELETED_TAG_FROM_RESTAURANT]: DeletedTagFromRestaurant
+  [ActionTypes.DELETED_TAG_FROM_RESTAURANT]: DeletedTagFromRestaurant,
+  [ActionTypes.TAG_DELETED]: TagDeleted
 };
 
 class Notification extends Component {

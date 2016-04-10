@@ -427,6 +427,14 @@ export default {
         };
         break;
       }
+      case ActionTypes.TAG_DELETED: {
+        const { userId, id } = realAction;
+        notification.vals = {
+          userId,
+          tagId: id
+        };
+        break;
+      }
       default: {
         return state;
       }
