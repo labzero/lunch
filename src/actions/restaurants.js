@@ -108,11 +108,12 @@ export function postNewTagToRestaurant(restaurantId, value) {
   };
 }
 
-export function postedNewTagToRestaurant(restaurantId, tag) {
+export function postedNewTagToRestaurant(restaurantId, tag, userId) {
   return {
     type: ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT,
     restaurantId,
-    tag
+    tag,
+    userId
   };
 }
 
@@ -124,27 +125,30 @@ export function postTagToRestaurant(restaurantId, id) {
   };
 }
 
-export function postedTagToRestaurant(restaurantId, id) {
+export function postedTagToRestaurant(restaurantId, id, userId) {
   return {
     type: ActionTypes.POSTED_TAG_TO_RESTAURANT,
     restaurantId,
-    id
+    id,
+    userId
   };
 }
 
-export function deleteTagFromRestaurant(restaurantId, id) {
+export function deleteTagFromRestaurant(restaurantId, id, userId) {
   return {
     type: ActionTypes.DELETE_TAG_FROM_RESTAURANT,
     restaurantId,
-    id
+    id,
+    userId
   };
 }
 
-export function deletedTagFromRestaurant(restaurantId, id) {
+export function deletedTagFromRestaurant(restaurantId, id, userId) {
   return {
     type: ActionTypes.DELETED_TAG_FROM_RESTAURANT,
     restaurantId,
-    id
+    id,
+    userId
   };
 }
 

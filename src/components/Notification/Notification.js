@@ -1,19 +1,25 @@
 import React, { Component, PropTypes } from 'react';
 import ActionTypes from '../../constants/ActionTypes';
-import NotificationContentRestaurantPosted from '../NotificationContentRestaurantPosted';
-import NotificationContentRestaurantDeleted from '../NotificationContentRestaurantDeleted';
-import NotificationContentRestaurantRenamed from '../NotificationContentRestaurantRenamed';
-import NotificationContentVotePosted from '../NotificationContentVotePosted';
-import NotificationContentVoteDeleted from '../NotificationContentVoteDeleted';
+import RestaurantPosted from './NotificationContent/RestaurantPosted';
+import RestaurantDeleted from './NotificationContent/RestaurantDeleted';
+import RestaurantRenamed from './NotificationContent/RestaurantRenamed';
+import VotePosted from './NotificationContent/VotePosted';
+import VoteDeleted from './NotificationContent/VoteDeleted';
+import PostedNewTagToRestaurant from './NotificationContent/PostedNewTagToRestaurant';
+import PostedTagToRestaurant from './NotificationContent/PostedTagToRestaurant';
+import DeletedTagFromRestaurant from './NotificationContent/DeletedTagFromRestaurant';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Notification.scss';
 
 const contentMap = {
-  [ActionTypes.RESTAURANT_POSTED]: NotificationContentRestaurantPosted,
-  [ActionTypes.RESTAURANT_DELETED]: NotificationContentRestaurantDeleted,
-  [ActionTypes.RESTAURANT_RENAMED]: NotificationContentRestaurantRenamed,
-  [ActionTypes.VOTE_POSTED]: NotificationContentVotePosted,
-  [ActionTypes.VOTE_DELETED]: NotificationContentVoteDeleted
+  [ActionTypes.RESTAURANT_POSTED]: RestaurantPosted,
+  [ActionTypes.RESTAURANT_DELETED]: RestaurantDeleted,
+  [ActionTypes.RESTAURANT_RENAMED]: RestaurantRenamed,
+  [ActionTypes.VOTE_POSTED]: VotePosted,
+  [ActionTypes.VOTE_DELETED]: VoteDeleted,
+  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT]: PostedNewTagToRestaurant,
+  [ActionTypes.POSTED_TAG_TO_RESTAURANT]: PostedTagToRestaurant,
+  [ActionTypes.DELETED_TAG_FROM_RESTAURANT]: DeletedTagFromRestaurant
 };
 
 class Notification extends Component {

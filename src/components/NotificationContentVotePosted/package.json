@@ -1,6 +1,0 @@
-{
-  "name": "NotificationContentVotePosted",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./NotificationContentVotePosted.js"
-}

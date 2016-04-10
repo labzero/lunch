@@ -1,9 +1,9 @@
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import s from '../NotificationContent/NotificationContent.scss';
+import s from '../NotificationContent.scss';
 
-const NotificationContentRestaurantRenamed = ({ loggedIn, user, restaurant, newName, showMapAndInfoWindow }) => {
-  const oldNameEl = <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurant}</b>;
+const RestaurantRenamed = ({ loggedIn, user, restaurantName, newName, showMapAndInfoWindow }) => {
+  const oldNameEl = <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurantName}</b>;
   const newNameEl = <b className={s.clickable} onClick={showMapAndInfoWindow}>{newName}</b>;
   if (loggedIn) {
     return (
@@ -15,12 +15,12 @@ const NotificationContentRestaurantRenamed = ({ loggedIn, user, restaurant, newN
   return <span>{oldNameEl} was renamed to {newNameEl}.</span>;
 };
 
-NotificationContentRestaurantRenamed.propTypes = {
+RestaurantRenamed.propTypes = {
   loggedIn: PropTypes.bool.isRequired,
   user: PropTypes.string,
-  restaurant: PropTypes.string.isRequired,
+  restaurantName: PropTypes.string.isRequired,
   newName: PropTypes.string.isRequired,
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
-export default withStyles(NotificationContentRestaurantRenamed, s);
+export default withStyles(RestaurantRenamed, s);

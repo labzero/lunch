@@ -362,6 +362,7 @@ export default {
         const { userId, restaurant } = realAction;
         notification.vals = {
           userId,
+          restaurant,
           restaurantId: restaurant.id
         };
         break;
@@ -399,6 +400,33 @@ export default {
         };
         break;
       }
+      case ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT: {
+        const { userId, restaurantId, tag } = realAction;
+        notification.vals = {
+          userId,
+          restaurantId,
+          tag
+        };
+        break;
+      }
+      case ActionTypes.POSTED_TAG_TO_RESTAURANT: {
+        const { userId, restaurantId, id } = realAction;
+        notification.vals = {
+          userId,
+          restaurantId,
+          tagId: id
+        };
+        break;
+      }
+      case ActionTypes.DELETED_TAG_FROM_RESTAURANT: {
+        const { userId, restaurantId, id } = realAction;
+        notification.vals = {
+          userId,
+          restaurantId,
+          tagId: id
+        };
+        break;
+      }
       default: {
         return state;
       }
@@ -406,12 +434,23 @@ export default {
     if (notification.vals.userId === state.user.id) {
       return state;
     }
+    let restaurantName;
+    if (notification.vals.restaurant) {
+      restaurantName = notification.vals.restaurant.name;
+    } else if (notification.vals.restaurantId) {
+      restaurantName = state.restaurants.items.find(r => r.id === notification.vals.restaurantId).name;
+    }
+    let tagName;
+    if (notification.vals.tag) {
+      tagName = notification.vals.tag.name;
+    } else if (notification.vals.tagId) {
+      tagName = state.tags.items.find(t => t.id === notification.vals.tagId).name;
+    }
     notification.id = uuid.v1();
     notification.contentProps = {
       loggedIn: state.user.id !== undefined,
-      restaurant: notification.vals.restaurantId ?
-        state.restaurants.items.find(r => r.id === notification.vals.restaurantId).name :
-        undefined,
+      restaurantName,
+      tagName,
       newName: notification.vals.newName
     };
     if (notification.contentProps.loggedIn) {

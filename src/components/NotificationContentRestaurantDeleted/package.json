@@ -1,6 +1,0 @@
-{
-  "name": "NotificationContentRestaurantDeleted",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./NotificationContentRestaurantDeleted.js"
-}

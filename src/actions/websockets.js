@@ -9,6 +9,11 @@ const sort = dispatch => {
   sortTimeout = setTimeout(dispatch.bind(undefined, sortRestaurants()), 1000);
 };
 
+const dispatchNotify = data => dispatch => {
+  dispatch(notify(data));
+  dispatch(data);
+};
+
 const notifyDispatch = data => dispatch => {
   dispatch(notify(data));
   dispatch(data);
@@ -32,6 +37,9 @@ const actionMap = {
   [ActionTypes.RESTAURANT_RENAMED]: notifyDispatchSort,
   [ActionTypes.VOTE_POSTED]: notifyDispatchSort,
   [ActionTypes.VOTE_DELETED]: notifyDispatchSort,
+  [ActionTypes.POSTED_TAG_TO_RESTAURANT]: dispatchNotify,
+  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT]: dispatchNotify,
+  [ActionTypes.DELETED_TAG_FROM_RESTAURANT]: dispatchNotify,
 };
 
 export function messageReceived(payload) {
