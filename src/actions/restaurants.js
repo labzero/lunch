@@ -33,10 +33,11 @@ export function deleteRestaurant(id) {
   };
 }
 
-export function restaurantDeleted(id) {
+export function restaurantDeleted(id, userId) {
   return {
     type: ActionTypes.RESTAURANT_DELETED,
-    id
+    id,
+    userId
   };
 }
 

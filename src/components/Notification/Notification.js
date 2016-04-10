@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import ActionTypes from '../../constants/ActionTypes';
 import NotificationContentRestaurantPosted from '../NotificationContentRestaurantPosted';
+import NotificationContentRestaurantDeleted from '../NotificationContentRestaurantDeleted';
 import NotificationContentVotePosted from '../NotificationContentVotePosted';
 import NotificationContentVoteDeleted from '../NotificationContentVoteDeleted';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
@@ -8,6 +9,7 @@ import s from './Notification.scss';
 
 const contentMap = {
   [ActionTypes.RESTAURANT_POSTED]: NotificationContentRestaurantPosted,
+  [ActionTypes.RESTAURANT_DELETED]: NotificationContentRestaurantDeleted,
   [ActionTypes.VOTE_POSTED]: NotificationContentVotePosted,
   [ActionTypes.VOTE_DELETED]: NotificationContentVoteDeleted
 };

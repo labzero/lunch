@@ -184,6 +184,14 @@ export const notifications = {
         };
         break;
       }
+      case ActionTypes.RESTAURANT_DELETED: {
+        const { userId, id } = realAction;
+        notification.vals = {
+          userId,
+          restaurantId: id
+        };
+        break;
+      }
       case ActionTypes.VOTE_POSTED: {
         const { user_id, restaurant_id } = realAction.vote;
         notification.vals = {

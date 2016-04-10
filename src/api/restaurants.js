@@ -67,7 +67,7 @@ router
     async (req, res) => {
       const id = parseInt(req.params.id, 10);
       Restaurant.destroy({ where: { id } }).then(() => {
-        req.wss.broadcast(restaurantDeleted(id));
+        req.wss.broadcast(restaurantDeleted(id, req.user.id));
         res.status(204).send({ error: false });
       }).catch(err => errorCatcher(res, err));
     }
