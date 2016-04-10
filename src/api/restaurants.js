@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Restaurant, Vote, Tag } from '../models';
 import { loggedIn, errorCatcher } from './ApiHelper';
-import { restaurantPosted, restaurantDeleted, restaurantPatched } from '../actions/restaurants';
+import { restaurantPosted, restaurantDeleted, restaurantRenamed } from '../actions/restaurants';
 import voteApi from './votes';
 import restaurantTagApi from './restaurantTags';
 
@@ -53,7 +53,7 @@ router
       const { name } = req.body;
       Restaurant.update({ name }, { fields: ['name'], where: { id }, returning: true }).spread((count, rows) => {
         const json = { name: rows[0].toJSON().name };
-        req.wss.broadcast(restaurantPatched(id, json));
+        req.wss.broadcast(restaurantRenamed(id, json));
         res.status(200).send({ error: false, data: json });
       }).catch(() => {
         const error = { message: 'Could not update restaurant.' };

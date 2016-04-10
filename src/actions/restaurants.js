@@ -41,17 +41,17 @@ export function restaurantDeleted(id, userId) {
   };
 }
 
-export function patchRestaurant(id, obj) {
+export function renameRestaurant(id, obj) {
   return {
-    type: ActionTypes.PATCH_RESTAURANT,
+    type: ActionTypes.RENAME_RESTAURANT,
     id,
     restaurant: obj
   };
 }
 
-export function restaurantPatched(id, obj) {
+export function restaurantRenamed(id, obj) {
   return {
-    type: ActionTypes.RESTAURANT_PATCHED,
+    type: ActionTypes.RESTAURANT_RENAMED,
     id,
     fields: obj
   };
@@ -215,7 +215,7 @@ export function removeRestaurant(id) {
 export function changeRestaurantName(id, value) {
   const payload = { name: value };
   return dispatch => {
-    dispatch(patchRestaurant(id, payload));
+    dispatch(renameRestaurant(id, payload));
     return fetch(`/api/restaurants/${id}`, {
       credentials,
       headers: jsonHeaders,
