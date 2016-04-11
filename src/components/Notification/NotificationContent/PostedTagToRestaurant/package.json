@@ -1,6 +1,6 @@
 {
-  "name": "PostedNewTagToRestaurant",
+  "name": "PostedTagToRestaurant",
   "version": "0.0.0",
   "private": true,
-  "main": "./PostedNewTagToRestaurant.js"
+  "main": "./PostedTagToRestaurant.js"
 }

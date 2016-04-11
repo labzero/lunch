@@ -9,7 +9,7 @@ const returnTrue = () => true;
 
 autosuggestTheme.input = 'form-control input-sm';
 
-class _RestaurantAddTagForm extends Component {
+export class _RestaurantAddTagForm extends Component {
   componentDidMount() {
     this._input.focus();
   }

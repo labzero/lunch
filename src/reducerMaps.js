@@ -203,10 +203,9 @@ export const notifications = {
         break;
       }
       case ActionTypes.VOTE_POSTED: {
-        const { user_id, restaurant_id } = realAction.vote;
         notification.vals = {
-          userId: user_id,
-          restaurantId: restaurant_id
+          userId: realAction.vote.user_id,
+          restaurantId: realAction.vote.restaurant_id
         };
         break;
       }

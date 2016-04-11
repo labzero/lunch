@@ -16,7 +16,8 @@ describe('App', () => {
       wsPort: 3000,
       messageReceived: jest.fn(),
       shouldScrollToTop: false,
-      scrolledToTop: jest.fn()
+      scrolledToTop: jest.fn(),
+      notifications: []
     };
     window.ReconnectingWebSocket = jest.fn();
   });

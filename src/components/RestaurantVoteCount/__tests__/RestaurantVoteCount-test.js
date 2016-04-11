@@ -9,6 +9,7 @@ describe('RestaurantAddTagForm', () => {
 
   beforeEach(() => {
     props = {
+      id: 1,
       votes: [],
       user: {},
       users: []
