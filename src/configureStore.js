@@ -1,7 +1,7 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import { routerReducer } from 'react-router-redux';
 import thunkMiddleware from 'redux-thunk';
-import base, * as reducerMaps from './reducerMaps';
+import * as reducerMaps from './reducerMaps';
 
 // Add the reducer to your store on the `routing` key
 export default function configureStore(initialState) {
@@ -17,23 +17,16 @@ export default function configureStore(initialState) {
   const reducers = {};
 
   for (const name in reducerMaps) {
-    if (reducerMaps.hasOwnProperty(name) && name !== 'default') {
+    if (reducerMaps.hasOwnProperty(name)) {
       reducers[name] = generateReducer(reducerMaps[name], initialState[name] || {});
     }
   }
 
-  const combinedReducers = combineReducers({
-    ...reducers,
-    routing: routerReducer
-  });
-
-  const baseReducer = generateReducer(base, initialState);
-
-  const wrappedCombinedReducers = (state, action) =>
-    combinedReducers(baseReducer(state, action), action);
-
   return createStore(
-    wrappedCombinedReducers,
+    combineReducers({
+      ...reducers,
+      routing: routerReducer
+    }),
     initialState,
     applyMiddleware(thunkMiddleware)
   );

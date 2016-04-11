@@ -28,7 +28,8 @@ class Notification extends Component {
 
   static propTypes = {
     expireNotification: PropTypes.func.isRequired,
-    actionType: PropTypes.string.isRequired,
+    noRender: PropTypes.bool,
+    actionType: PropTypes.string,
     contentProps: PropTypes.object.isRequired
   };
 
@@ -41,6 +42,9 @@ class Notification extends Component {
   }
 
   render() {
+    if (this.props.noRender) {
+      return false;
+    }
     const Content = contentMap[this.props.actionType];
     return (
       <div className={s.root}>
