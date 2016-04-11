@@ -38,9 +38,9 @@ import { Restaurant, Tag, User, WhitelistEmail, Decision } from './models';
 import { Server as WebSocketServer } from 'ws';
 import serialize from 'serialize-javascript';
 
-const server = global.server = express();
+const app = express();
 
-const httpServer = new HttpServer(server);
+const httpServer = new HttpServer(app);
 let httpsServer;
 if (process.env.NODE_ENV === 'production') {
   if (selfSigned) {
@@ -48,8 +48,8 @@ if (process.env.NODE_ENV === 'production') {
   }
   const key = fs.readFileSync(privateKeyPath);
   const cert = fs.readFileSync(certificatePath);
-  httpsServer = new HttpsServer({ key, cert }, server);
-  server.use(forceSSL);
+  httpsServer = new HttpsServer({ key, cert }, app);
+  app.use(forceSSL);
 }
 const routes = makeRoutes();
 
@@ -63,28 +63,28 @@ global.navigator.userAgent = global.navigator.userAgent || 'all';
 //
 // Register Node.js middleware
 // -----------------------------------------------------------------------------
-server.use(compression());
-server.use(express.static(path.join(__dirname, 'public')));
-server.use(cookieParser());
-server.use(bodyParser.urlencoded({ extended: true }));
-server.use(bodyParser.json());
+app.use(compression());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 //
 // Authentication
 // -----------------------------------------------------------------------------
-server.use(expressJwt({
+app.use(expressJwt({
   secret: auth.jwt.secret,
   credentialsRequired: false,
   /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
   getToken: req => req.cookies.id_token,
   /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 }));
-server.use(passport.initialize());
+app.use(passport.initialize());
 
-server.get('/login',
+app.get('/login',
   passport.authenticate('google', { scope: ['email', 'profile'] })
 );
-server.get('/login/callback',
+app.get('/login/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     const expiresIn = 60 * 60 * 24 * 180; // 180 days
@@ -93,7 +93,7 @@ server.get('/login/callback',
     res.redirect('/');
   }
 );
-server.get('/logout', (req, res) => {
+app.get('/logout', (req, res) => {
   req.logout();
   res.clearCookie('id_token');
   res.redirect('/');
@@ -110,7 +110,7 @@ wss.broadcast = data => {
   });
 };
 
-server.use((req, res, next) => {
+app.use((req, res, next) => {
   req.wss = wss;
   return next();
 });
@@ -118,15 +118,15 @@ server.use((req, res, next) => {
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
-server.use('/api/restaurants', restaurantApi);
-server.use('/api/tags', tagApi);
-server.use('/api/decisions', decisionApi);
-server.use('/api/whitelistEmails', whitelistEmailApi);
+app.use('/api/restaurants', restaurantApi);
+app.use('/api/tags', tagApi);
+app.use('/api/decisions', decisionApi);
+app.use('/api/whitelistEmails', whitelistEmailApi);
 
 //
 // Register server-side rendering middleware
 // -----------------------------------------------------------------------------
-server.get('*', async (req, res, next) => {
+app.get('*', async (req, res, next) => {
   try {
     match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
       if (error) {
@@ -240,7 +240,7 @@ const pe = new PrettyError();
 pe.skipNodeFiles();
 pe.skipPackage('express');
 
-server.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   console.log(pe.render(err)); // eslint-disable-line no-console
   const template = require('./views/error.jade');
   const statusCode = err.status || 500;
