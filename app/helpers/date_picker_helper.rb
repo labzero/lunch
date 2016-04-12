@@ -166,9 +166,4 @@ module DatePickerHelper
       start_date.end_of_month
     end
   end
-
-  def last_month_end
-    today = Time.zone.today
-    today == today.end_of_month ? today.end_of_month : (today - 1.month).end_of_month
-  end
 end

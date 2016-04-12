@@ -2829,6 +2829,10 @@ RSpec.describe ReportsController, :type => :controller do
       make_request
       expect(assigns[:sta_table]).to include(:rows)
     end
+    it 'assigns @contacts' do
+      make_request
+      expect(assigns[:contacts]).to be(contacts)
+    end
     describe '`@capital_stock_table`' do
       let(:value) { double('A Value') }
       let(:capital_stock_and_leverage_response) { {}.with_indifferent_access }
@@ -3034,14 +3038,14 @@ RSpec.describe ReportsController, :type => :controller do
           make_request
         end
         %w(rhfa_table advances_table advances_and_mpf_totals mpf_table total_credit_table total_available_credit_table sta_table).each do |instance_var|
-          it "should assign nil values to all columns found in `@#{instance_var}`" do
+          it "assigns nil values to all columns found in `@#{instance_var}`" do
             assigns[instance_var.to_sym][:rows].each do |row|
               expect(row[:columns].last[:value]).to be_nil
             end
           end
         end
         3.times do |i|
-          it "should assign nil values to all columns found in `@credit_tables[#{i}]`" do
+          it "assigns nil values to all columns found in `@credit_tables[#{i}]`" do
             assigns[:credit_tables][i][:rows].each do |row|
               expect(row[:columns].last[:value]).to be_nil
             end
@@ -3053,7 +3057,7 @@ RSpec.describe ReportsController, :type => :controller do
           allow_any_instance_of(MemberBalanceService).to receive(:capital_stock_and_leverage).and_return(nil)
           make_request
         end
-        it 'should assign nil values to all columns found in `@capital_stock_table`' do
+        it 'assigns nil values to all columns found in `@capital_stock_table`' do
           assigns[:capital_stock_table][:rows].each do |row|
             expect(row[:columns].last[:value]).to be_nil
           end
@@ -3066,8 +3070,8 @@ RSpec.describe ReportsController, :type => :controller do
           allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
           make_request
         end
-        it 'should not assign @member_name' do
-          expect(assigns[member_name]).to be_nil
+        it 'does not assign @member_name' do
+          expect(assigns[:member_name]).to be_nil
         end
       end
       describe 'the member contacts could not be found' do
@@ -3075,6 +3079,9 @@ RSpec.describe ReportsController, :type => :controller do
           allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(nil)
           allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
           make_request
+        end
+        it 'assigns an empty @contacts' do
+          expect(assigns[:contacts]).to eq({rm: {}, cam: {}})
         end
       end
     end
