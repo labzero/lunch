@@ -1238,6 +1238,9 @@ td.dataTables_empty {
     @extend %typography-subtitle;
     float: left;
   }
+  dd {
+    margin-left: 20px;
+  }
   dt {
     clear: both;
     color: $medium-gray;
@@ -1253,20 +1256,20 @@ td.dataTables_empty {
   section {
     margin-bottom: 0;
   }
-  .horizontal-axis-label {
+  .report-profile-horizontal-axis-label {
     @extend %typography-horizontal-axis-label;
     float: left;
     margin-bottom: 10px;
   }
-  .market-value {
+  .report-profile-market-value {
     margin-left: 135px;
   }
-  .borrowing-capacity {
+  .report-profile-borrowing-capacity {
     margin-left: 100px;
   }
   table {
     border: 0;
-    margin-bottom: 20px !important;
+    margin-bottom: 20px;
     tbody, tfoot, thead {
       td, th {
         padding: 5px;
@@ -1283,7 +1286,7 @@ td.dataTables_empty {
         border-left: 1px solid $light-blue;
         border-top: 1px solid $light-blue;
       }
-      th.cutout {
+      th.report-profile-table-cutout {
         border-top: 0;
         border-left: 0;
         background-color: $white;
@@ -1295,13 +1298,16 @@ td.dataTables_empty {
       }
     }
   }
-  .sta .report-cell-narrow {
+  .report-profile-sta tr td:last-child {
     text-align: right;
   }
 }
 
 @media print {
-  .account-summary-report .report-table:not(.account-summary-collateral-totals) tbody td:first-child,
+  .page-footer {
+    display: none;
+  }
+
   .account-summary-report tfoot,
   .account-summary-collateral-totals tbody td {
     color: $print-color;
@@ -1343,6 +1349,7 @@ td.dataTables_empty {
   }
   .report {
     color: $print-color;
+
     h1 {
       @include typography-print-header;
       float: none;
@@ -1538,6 +1545,99 @@ td.dataTables_empty {
     }
     .report-cell-expanding {
       white-space: normal;
+    }
+  }
+
+  .report-profile {
+    color: $print-color;
+    h2 {
+      @include typography-print-subheader;
+      margin-bottom: 5px;
+    }
+    dt, dd  {
+      @include typography-print-details;
+      color: inherit;
+    }
+    .report-profile-info-and-navigation {
+      margin-bottom: 20px;
+      .report-profile-contact-info {
+        margin-left: -80px;
+      }
+      .report-profile-navigation, .report-profile-cqr {
+        display: none;
+      }
+    }
+    .report-profile-data {
+      .column-3 {
+        width: 190px;
+      }
+      .column-3-span-2 {
+        width: 430px;
+      }
+      .report-table {
+        margin-bottom: 10px;
+        tbody {
+          tr {
+            &:first-child {
+              td {
+                border-top: 1px solid $print-color;
+              }
+            }
+            &:last-child {
+              td {
+                border-bottom: 1px solid $print-color;
+              }
+            }
+          }
+          td {
+            background-color: transparent;
+            border-left: none;
+            border-right: none;
+            border-top: 2px solid $light-gray;
+            &:first-child {
+              color: inherit;
+              @include typography-print-table-cell;
+              font-weight: bold;
+            }
+          }
+          .report-cell-right {
+            @include typography-print-table-cell;
+          }
+        }
+        thead {
+          th {
+            text-align: left;
+            border: 0;
+          }
+        }
+        tfoot {
+          color: inherit;
+          td {
+            border-top: 1px solid $print-color;
+            @include typography-print-table-total;
+          }
+        }
+      }
+      .report-profile-capital-stock-advances-mpf {
+        div:last-child {
+          width: 220px;
+        }
+      }
+      .report-profile-standard-credit-borrowing-capacity {
+        tr th, td {
+          border: 0;
+        }
+      }
+      .report-profile-horizontal-axis-label {
+        margin-bottom: 0;
+        @include typography-print-horizontal-axis-label;
+      }
+      .report-profile-market-value {
+        margin-left: 100px;
+      }
+      .report-profile-borrowing-capacity {
+        margin-left: 86px;
+      }
     }
   }
 }

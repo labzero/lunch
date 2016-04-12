@@ -222,6 +222,12 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-print-horizontal-axis-label {
+  text-transform: uppercase;
+  font-size: .6rem;
+  font-weight: $light-weight;
+}
+
 @mixin typography-footnote {
   font-size: 0.6667rem;
   font-weight: $normal-weight;
@@ -399,6 +405,10 @@
 
 %typography-print-details {
   @include typography-print-details;
+}
+
+%typography-print-horizontal-axis-label {
+  @include typography-print-horizontal-axis-label;
 }
 
 %typography-footnote {
