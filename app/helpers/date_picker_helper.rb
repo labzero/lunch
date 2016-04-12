@@ -88,21 +88,6 @@ module DatePickerHelper
         end_date: default_dates_hash[:today]
       },
       {
-        label: t('datepicker.range.date_to_current', date: t("dates.quarters.#{current_quarter[:quarter]}", year: current_quarter[:year])),
-        start_date: quarter_start_and_end_dates((current_quarter[:quarter]), current_quarter[:year])[:start_date],
-        end_date: default_dates_hash[:today]
-      },
-      {
-        label: t("dates.quarters.#{last_quarter[:quarter]}", year: last_quarter[:year]),
-        start_date: quarter_start_and_end_dates(last_quarter[:quarter], last_quarter[:year])[:start_date],
-        end_date: quarter_start_and_end_dates(last_quarter[:quarter], last_quarter[:year])[:end_date]
-      },
-      {
-        label: t('datepicker.range.date_to_current', date: default_dates_hash[:this_year_start].year),
-        start_date: default_dates_hash[:this_year_start],
-        end_date: default_dates_hash[:today]
-      },
-      {
         label: default_dates_hash[:last_year_start].year.to_s + ' ',
         start_date: default_dates_hash[:last_year_start],
         end_date: default_dates_hash[:last_year_end]
