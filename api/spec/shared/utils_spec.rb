@@ -6,6 +6,8 @@ end
 
 describe MAPI::Shared::Utils::ClassMethods do
   subject { MAPISharedUtils }
+  let(:exception_message) { SecureRandom.hex }
+  let(:exception) { RuntimeError.new(exception_message) }
   describe 'fetch_hash' do
     let(:logger)        { double('logger') }
     let(:sql)           { double('sql') }
@@ -26,8 +28,8 @@ describe MAPI::Shared::Utils::ClassMethods do
       expect(call_method).to eq({})
     end
     it 'logs an error for exceptions' do
-      allow(sql_response).to receive(:fetch_hash).and_raise(:exception)
-      expect(logger).to receive(:error)
+      allow(sql_response).to receive(:fetch_hash).and_raise(exception)
+      expect(logger).to receive(:error).with(exception_message)
       call_method
     end
   end
@@ -70,8 +72,8 @@ describe MAPI::Shared::Utils::ClassMethods do
       expect(subject.fetch_hashes(logger, sql, {}, true)).to eq([])
     end
     it 'logs an error for exceptions' do
-      allow(cursor).to receive(:fetch_hash).and_raise(:exception)
-      expect(logger).to receive(:error)
+      allow(cursor).to receive(:fetch_hash).and_raise(exception)
+      expect(logger).to receive(:error).with(exception_message)
       subject.fetch_hashes(logger, sql)
     end
   end
@@ -105,8 +107,8 @@ describe MAPI::Shared::Utils::ClassMethods do
 
     it 'logs an error for exceptions' do
       allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
-      allow(cursor).to receive(:fetch).and_raise(:exception)
-      expect(logger).to receive(:error)
+      allow(cursor).to receive(:fetch).and_raise(exception)
+      expect(logger).to receive(:error).with(exception_message)
       subject.fetch_objects(logger, sql)
     end
   end

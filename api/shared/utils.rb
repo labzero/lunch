@@ -22,7 +22,7 @@ module MAPI
           begin
             ActiveRecord::Base.connection.execute(sql).try(:fetch_hash) || {}
           rescue => e
-            logger.error(:fetch_hash, e.message)
+            logger.error(e.message)
             nil
           end
         end
@@ -46,7 +46,7 @@ module MAPI
             end
             results
           rescue => e
-            logger.error(:fetch_hashes, e.message)
+            logger.error(e.message)
             nil
           end
         end
@@ -60,7 +60,7 @@ module MAPI
             end
             results
           rescue => e
-            logger.error(:fetch_objects, e.message)
+            logger.error(e.message)
             nil
           end
         end
