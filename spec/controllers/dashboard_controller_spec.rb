@@ -1138,10 +1138,16 @@ RSpec.describe DashboardController, :type => :controller do
           expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.matures_on', date: future_date))
         end
       end
+      let(:letter_of_credit_with_unknown_status) { [{ instrument_type: 'LC',
+                                             status: 'FOO',
+                                             maturity_date: Time.zone.today }] }
+      it 'displays `Today` as the event for an advance of an unknown status with a maturity date of today' do
+        expect(subject.send(:process_recent_activities, letter_of_credit_with_unknown_status).first[2]).to eq(I18n.t('global.today'))
+      end
     end
     context 'advances' do
-      let(:termination_full_partial) { double(:termination_full_partial) }
-      context 'full/partial prepayment' do
+      context 'full' do
+        let(:termination_full_partial) { double(:termination_full_partial, to_s: 'FULL PREPAYMENT') }
         let(:terminated_advance) { [{ instrument_type: 'ADVANCE',
                                       status: 'TERMINATED',
                                       termination_full_partial: termination_full_partial }] }
@@ -1160,11 +1166,62 @@ RSpec.describe DashboardController, :type => :controller do
         it 'displays `Matured Today` in the description' do
           expect(subject.send(:process_recent_activities, advance_with_matured_status).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_today'))
         end
+        let(:advance_with_unknown_status) { [{ instrument_type: 'ADVANCE',
+                                               status: 'FOO',
+                                               maturity_date: Time.zone.today }] }
+        it 'displays `Today` as the event for an advance of an unknown status with a maturity date of today' do
+          expect(subject.send(:process_recent_activities, advance_with_unknown_status).first[2]).to eq(I18n.t('global.today'))
+        end
+      end
+      context 'partial prepayment' do
+        let(:termination_full_partial) { 'PARTIAL PREPAYMENT' }
+        let(:amount_paid) { double(Float) }
+        let(:partial_vrc_advance) { [{
+          instrument_type: 'ADVANCE',
+          sub_product: 'VRC - WL',
+          termination_full_partial: termination_full_partial,
+          termination_par: amount_paid
+        }] }
+        let(:partial_frc_advance) { [{
+          instrument_type: 'ADVANCE',
+          sub_product: 'FRC - Wholeloan',
+          termination_full_partial: termination_full_partial,
+          termination_par: amount_paid
+        }] }
+        let(:prepayment_event) { I18n.t('dashboard.recent_activity.partial_prepayment') }
+        let(:repayment_event) { I18n.t('dashboard.recent_activity.partial_repayment') }
+        it 'displays partial repayment for the event of a partially paid VRC advances' do
+          expect(subject.send(:process_recent_activities, partial_vrc_advance).first[2]).to eq(repayment_event)
+        end
+        it 'displays partial repayment for the event of a partially paid FRC advances' do
+          expect(subject.send(:process_recent_activities, partial_frc_advance).first[2]).to eq(prepayment_event)
+        end
+        it 'displays the `termination_par` as the amount for partial payments' do
+          results = subject.send(:process_recent_activities, [partial_vrc_advance, partial_frc_advance].flatten)
+          expect(results.length).to be(2)
+          results.each do |activity|
+            expect(activity[1]).to be(amount_paid)
+          end
+        end
+        ['Foo VRC BAR', 'VRC FOO', 'BAR VRC'].each do |sub_product|
+          it 'treats an advance with a sub product containing the word VRC as a VRC product' do
+            partial_vrc_advance.first[:sub_product] = sub_product
+            expect(subject.send(:process_recent_activities, partial_vrc_advance).first[2]).to eq(repayment_event)
+          end
+        end
+        it 'treats an advance with a sub product containing VRC but not as a word as a non-VRC product' do
+            partial_frc_advance.first[:sub_product] = 'FOOVRCBAR'
+            expect(subject.send(:process_recent_activities, partial_frc_advance).first[2]).to eq(prepayment_event)
+          end
       end
       context 'pending termination' do
         let(:advance_with_pend_term_status) { [{ instrument_type: 'ADVANCE', status: 'PEND_TERM' }] }
-        it 'displays `Open` for maturity date when status is `PEND_TERM`' do
+        it 'displays `Open` for maturity date when status is `PEND_TERM` and there is no maturity date' do
           expect(subject.send(:process_recent_activities, advance_with_pend_term_status).first[2]).to eq(I18n.t('dashboard.open'))
+        end
+        let(:advance_with_maturity_and_pend_term_status) { [{ instrument_type: 'ADVANCE', status: 'PEND_TERM', maturity_date: future_date }] }
+        it 'displays `Matures On` for the maturity date when status is `PEND_TERM` and there is a maturity date' do
+          expect(subject.send(:process_recent_activities, advance_with_maturity_and_pend_term_status).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_on', date: future_date))
         end
       end
       context 'forward-funded advances' do
@@ -1220,6 +1277,12 @@ RSpec.describe DashboardController, :type => :controller do
       let(:investment_with_no_maturity_date) { [{ instrument_type: 'INVESTMENT', maturity_date: nil }] }
       it 'displays `Open` for investments without maturing dates`' do
         expect(subject.send(:process_recent_activities, investment_with_no_maturity_date).first[2]).to eq(I18n.t('dashboard.open'))
+      end
+      let(:investment_terminated) { [{instrument_type: 'INVESTMENT', status: 'TERMINATED', maturity_date: future_date}] }
+      it 'displays the maturity date for the event when the investment is TERMINATED' do
+        formatted_date = SecureRandom.hex
+        allow(controller).to receive(:fhlb_date_standard_numeric).with(future_date).and_return(formatted_date)
+        expect(subject.send(:process_recent_activities, investment_terminated).first[2]).to eq(formatted_date)
       end
     end
     context 'other instrument types' do

@@ -12,6 +12,12 @@ module MAPI
         end
       end
       swagger_model :CreditActivityObject do
+        key :required, [
+          :transaction_number, :current_par, :interest_rate, :funding_date,
+          :maturity_date, :product_description, :instrument_type, :status,
+          :termination_par, :termination_fee, :termination_full_partial,
+          :termination_date, :product, :sub_product
+        ]
         property :transaction_number do
           key :type, :string
           key :description, 'The transaction number for the activity'
@@ -55,6 +61,11 @@ module MAPI
         property :termination_full_partial do
           key :type, :string
           key :description, 'A string signifying whether the repayment of the terminated activity was full or partial'
+        end
+        property :termination_date do
+          key :type, :string
+          key :format, :date
+          key :description, 'The date the termination event occured.'
         end
         property :product do
           key :type, :string

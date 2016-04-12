@@ -338,7 +338,7 @@ class MemberBalanceService < MAPIService
       processed_data = []
       data.each do |activity|
         activity = activity.with_indifferent_access
-        fix_date(activity, [:funding_date, :maturity_date])
+        fix_date(activity, [:funding_date, :maturity_date, :termination_date])
         processed_data.push(activity)
       end
       processed_data

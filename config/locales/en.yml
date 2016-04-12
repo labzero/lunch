@@ -478,6 +478,8 @@ en:
       expires_on: Expires on %{date}
       will_be_funded_on: Will be Funded on %{date}
       in_review: In Review
+      partial_prepayment: Partial Prepayment
+      partial_repayment: Partial Repayment
     contacts:
       title: Contact
       icon_alt_text: Contact
