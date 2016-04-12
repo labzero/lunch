@@ -156,7 +156,7 @@ describe DatePickerHelper do
         expect(helper.date_picker_presets(start_date, nil, nil, nil, [:today]).first[:id]).to eq(:month_end)
       end
       it 'should return the result of `date_picker_single` and remove today and month_end hash' do
-        expect(helper.date_picker_presets(start_date, nil, nil, nil, [:today, :month_end]).first[:id]).to eq(:quarter_end)
+        expect(helper.date_picker_presets(start_date, nil, nil, nil, [:today, :month_end]).first[:id]).to eq(:year_end)
       end
     end
   end

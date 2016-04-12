@@ -119,12 +119,6 @@ module DatePickerHelper
         id: :month_end
       },
       {
-        label: t('datepicker.single.end_of', date: t("dates.quarters.#{last_quarter[:quarter]}", year: last_quarter[:year])),
-        start_date: quarter_start_and_end_dates((last_quarter[:quarter]), last_quarter[:year])[:end_date],
-        end_date: quarter_start_and_end_dates((last_quarter[:quarter]), last_quarter[:year])[:end_date],
-        id: :quarter_end
-      },
-      {
         label: t('datepicker.single.end_of', date: default_dates_hash[:last_year_start].year.to_s),
         start_date: default_dates_hash[:last_year_end],
         end_date: default_dates_hash[:last_year_end],
