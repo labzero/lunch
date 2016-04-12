@@ -81,12 +81,13 @@ Rails.application.routes.draw do
   end
 
   scope 'advances', as: 'advances' do
-    get '/' => 'advances#index'
     get '/manage' => 'advances#manage'
-    get '/select-rate' => 'advances#select_rate'
-    get '/fetch-rates' => 'advances#fetch_rates'
-    post  '/preview' => 'advances#preview'
-    post '/perform' => 'advances#perform'
+    constraints Constraints::FeatureEnabled.new('add-advance') do
+      get '/select-rate' => 'advances#select_rate'
+      get '/fetch-rates' => 'advances#fetch_rates'
+      post  '/preview' => 'advances#preview'
+      post '/perform' => 'advances#perform'
+    end
   end
 
 

@@ -1,4 +1,4 @@
-@jira-mem-1353
+@jira-mem-1353 @flip-on-add-advance
 Feature: Adding an Advance
   As a user
   I want to use the Add Advance flow
