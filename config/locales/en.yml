@@ -555,7 +555,7 @@ en:
         rates: View Current Rates
       preview:
         title: Initiate Advance
-        intro: Please review the details below. If everything looks correct, enter your SecurID credentials below and then click “Initiate Advance.” If not, click “Back.”
+        intro: Please review the details below. If everything looks correct, enter your SecurID credentials and then click “Initiate Advance.” If not, click “Back.”
         elevated_intro: Please review the details below. If everything looks correct, click “Initiate Advance.” If not, click “Back.”
         lock_rate: This rate is locked for 60 seconds.
         initiate: Please wait while we initiate your advance. This may take about 30 seconds.
@@ -1729,17 +1729,19 @@ en:
     quick_advance:
       title: Quick Advance
     add_advance:
-      title: Add Advance
-      nav: New Advance
-      preview: Preview Advance
+      titles:
+        add: Add Advance
+        preview: Review Advance
+        complete: Advance Completed
+      nav: Add Advance
     manage_advances:
       title: Manage Advances
     status: Status
     rate: Rate (%)
     actions:
-      preview: Preview Advance
+      preview: Review Advance
       submit: Submit Advance
-      another_advance: Get Another Advance
+      another_advance: Add Another Advance
     messages:
       completing_advance: Please wait while we complete your advance. This may take about 30 seconds.
   products:

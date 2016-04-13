@@ -13,7 +13,7 @@ Then(/^I should see the (reports|resources|products) dropdown$/) do |dropdown|
   report_menu.parent.assert_selector('.nav-dropdown', visible: true)
 end
 
-When(/^I click on the (agreements|amortizing|arc|arc embedded|auction indexed|authorizations|callable|capital plan|collateral|choice libor|credit|fee schedules|forms|frc|frc embedded|guides|knockout|mortgage partnership finance|other cash needs|products summary|putable|reports|securities|securities backed credit|variable rate credit|membership|applications|manage advances|new advance) link in the header$/) do |link|
+When(/^I click on the (agreements|amortizing|arc|arc embedded|auction indexed|authorizations|callable|capital plan|collateral|choice libor|credit|fee schedules|forms|frc|frc embedded|guides|knockout|mortgage partnership finance|other cash needs|products summary|putable|reports|securities|securities backed credit|variable rate credit|membership|applications|manage advances|add advance) link in the header$/) do |link|
   page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
 end
 
@@ -87,7 +87,7 @@ def dropdown_title_regex(dropdown)
     I18n.t('advances.manage_advances.title')
   when 'mortgage partnership finance'
     I18n.t('products.advances.mpf.title')
-  when 'new advance'
+  when 'add advance'
     I18n.t('advances.add_advance.nav')
   when 'other cash needs'
     I18n.t('products.advances.ocn.title')

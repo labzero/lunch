@@ -16,7 +16,7 @@ Scenario: Cannot navigate to the select rate page if I am not an advance-signer
 Scenario: Visit the select rate page if I am an advance-signer
   Given I visit the dashboard
   When I hover on the advances link in the header
-  And I click on the new advance link in the header
+  And I click on the add advance link in the header
   Then I should see the add advance rate table
 
 Scenario: Cancelling an advance
