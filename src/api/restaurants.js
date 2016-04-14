@@ -4,14 +4,40 @@ import { loggedIn, errorCatcher } from './ApiHelper';
 import { restaurantPosted, restaurantDeleted, restaurantRenamed } from '../actions/restaurants';
 import voteApi from './votes';
 import restaurantTagApi from './restaurantTags';
+import request from 'request';
 
 const router = new Router();
+const apikey = process.env.GOOGLE_SERVER_APIKEY;
 
 router
   .get('/', async (req, res) => {
     Restaurant.findAllWithTagIds().then(all => {
       res.status(200).send({ error: false, data: all });
     }).catch(err => errorCatcher(res, err));
+  })
+  .get('/:id/place_url', async (req, res, next) => {
+    Restaurant.findById(parseInt(req.params.id, 10)).then(r => {
+      request(`https://maps.googleapis.com/maps/api/place/details/json?key=${apikey}&placeid=${r.place_id}`,
+        (error, response, body) => {
+          if (!error && response.statusCode === 200) {
+            const json = JSON.parse(body);
+            if (json.status !== 'OK') {
+              next(json);
+            } else {
+              if (json.result && json.result.url) {
+                res.redirect(json.result.url);
+              } else {
+                res.redirect(`https://www.google.com/maps/place/${r.name}, ${r.address}`);
+              }
+            }
+          } else {
+            next(error);
+          }
+        }
+      );
+    }).catch(err => {
+      next(err);
+    });
   })
   .post(
     '/',

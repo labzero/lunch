@@ -132,11 +132,9 @@ export const Restaurant = sequelize.define('restaurant', {
               model: Vote.scope('fromToday'),
               required: false
             }
-          ]
+          ],
+          order: 'vote_count DESC, votes.created_at DESC NULLS LAST, name ASC'
         })
-  },
-  defaultScope: {
-    order: 'vote_count DESC, votes.created_at DESC NULLS LAST, name ASC'
   },
   instanceMethods: {
     tagIds: () => this.getTags().map(tag => tag.get('id'))
