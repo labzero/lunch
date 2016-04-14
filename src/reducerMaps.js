@@ -6,9 +6,9 @@ const isFetching = state =>
     isFetching: true
   });
 
-export const restaurants = {
-  [ActionTypes.SORT_RESTAURANTS](state) {
-    return Object.assign({}, state, {
+export const restaurants = new Map([
+  [ActionTypes.SORT_RESTAURANTS, state =>
+    Object.assign({}, state, {
       items: state.items.map((item, index) => {
         item.sortIndex = index;
         return item;
@@ -17,46 +17,46 @@ export const restaurants = {
         if (a.votes.length !== b.votes.length) { return b.votes.length - a.votes.length; }
         return a.sortIndex - b.sortIndex;
       })
-    });
-  },
-  [ActionTypes.INVALIDATE_RESTAURANTS](state) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.INVALIDATE_RESTAURANTS, state =>
+    Object.assign({}, state, {
       didInvalidate: true
-    });
-  },
-  [ActionTypes.REQUEST_RESTAURANTS](state) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.REQUEST_RESTAURANTS, state =>
+    Object.assign({}, state, {
       isFetching: true,
       didInvalidate: false
-    });
-  },
-  [ActionTypes.RECEIVE_RESTAURANTS](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.RECEIVE_RESTAURANTS, (state, action) =>
+    Object.assign({}, state, {
       isFetching: false,
       didInvalidate: false,
       items: action.items
-    });
-  },
-  [ActionTypes.POST_RESTAURANT]: isFetching,
-  [ActionTypes.RESTAURANT_POSTED](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.POST_RESTAURANT, isFetching],
+  [ActionTypes.RESTAURANT_POSTED, (state, action) =>
+    Object.assign({}, state, {
       isFetching: false,
       items: [
         action.restaurant,
         ...state.items
       ]
-    });
-  },
-  [ActionTypes.DELETE_RESTAURANT]: isFetching,
-  [ActionTypes.RESTAURANT_DELETED](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.DELETE_RESTAURANT, isFetching],
+  [ActionTypes.RESTAURANT_DELETED, (state, action) =>
+    Object.assign({}, state, {
       isFetching: false,
       items: state.items.filter(item => item.id !== action.id)
-    });
-  },
-  [ActionTypes.RENAME_RESTAURANT]: isFetching,
-  [ActionTypes.RESTAURANT_RENAMED](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.RENAME_RESTAURANT, isFetching],
+  [ActionTypes.RESTAURANT_RENAMED, (state, action) =>
+    Object.assign({}, state, {
       isFetching: false,
       items: state.items.map(item => {
         if (item.id === action.id) {
@@ -64,11 +64,11 @@ export const restaurants = {
         }
         return item;
       })
-    });
-  },
-  [ActionTypes.POST_VOTE]: isFetching,
-  [ActionTypes.VOTE_POSTED](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.POST_VOTE, isFetching],
+  [ActionTypes.VOTE_POSTED, (state, action) =>
+    Object.assign({}, state, {
       isFetching: false,
       items: state.items.map(item => {
         if (item.id === action.vote.restaurant_id) {
@@ -81,11 +81,11 @@ export const restaurants = {
         }
         return item;
       })
-    });
-  },
-  [ActionTypes.DELETE_VOTE]: isFetching,
-  [ActionTypes.VOTE_DELETED](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.DELETE_VOTE, isFetching],
+  [ActionTypes.VOTE_DELETED, (state, action) =>
+    Object.assign({}, state, {
       isFetching: false,
       items: state.items.map(item => {
         if (item.id === action.restaurantId) {
@@ -97,11 +97,11 @@ export const restaurants = {
         }
         return item;
       })
-    });
-  },
-  [ActionTypes.POST_NEW_TAG_TO_RESTAURANT]: isFetching,
-  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.POST_NEW_TAG_TO_RESTAURANT, isFetching],
+  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT, (state, action) =>
+    Object.assign({}, state, {
       isFetching: false,
       items: state.items.map(item => {
         if (item.id === action.restaurantId) {
@@ -114,11 +114,11 @@ export const restaurants = {
         }
         return item;
       })
-    });
-  },
-  [ActionTypes.POST_TAG_TO_RESTAURANT]: isFetching,
-  [ActionTypes.POSTED_TAG_TO_RESTAURANT](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.POST_TAG_TO_RESTAURANT, isFetching],
+  [ActionTypes.POSTED_TAG_TO_RESTAURANT, (state, action) =>
+    Object.assign({}, state, {
       isFetching: false,
       items: state.items.map(item => {
         if (item.id === action.restaurantId) {
@@ -131,11 +131,11 @@ export const restaurants = {
         }
         return item;
       })
-    });
-  },
-  [ActionTypes.DELETE_TAG_FROM_RESTAURANT]: isFetching,
-  [ActionTypes.DELETED_TAG_FROM_RESTAURANT](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.DELETE_TAG_FROM_RESTAURANT, isFetching],
+  [ActionTypes.DELETED_TAG_FROM_RESTAURANT, (state, action) =>
+    Object.assign({}, state, {
       isFetching: false,
       items: state.items.map(item => {
         if (item.id === action.restaurantId) {
@@ -147,29 +147,27 @@ export const restaurants = {
         }
         return item;
       })
-    });
-  },
-};
+    })
+  ]
+]);
 
-export const flashes = {
-  [ActionTypes.FLASH_ERROR](state, action) {
-    return [
+export const flashes = new Map([
+  [ActionTypes.FLASH_ERROR, (state, action) =>
+    [
       ...state,
       {
         message: action.message,
         type: 'error'
       }
-    ];
-  },
-  [ActionTypes.EXPIRE_FLASH](state, action) {
-    const newState = Array.from(state);
-    newState.splice(action.id, 1);
-    return newState;
-  }
-};
+    ]
+  ],
+  [ActionTypes.EXPIRE_FLASH, (state, action) =>
+    Array.from(state).splice(action.id, 1)
+  ]
+]);
 
-export const notifications = {
-  [ActionTypes.NOTIFY](state, action) {
+export const notifications = new Map([
+  [ActionTypes.NOTIFY, (state, action) => {
     const { realAction } = action;
     const notification = {
       actionType: realAction.type,
@@ -260,11 +258,11 @@ export const notifications = {
       ...state.slice(-3),
       notification
     ];
-  },
-  [ActionTypes.EXPIRE_NOTIFICATION](state, action) {
-    return state.filter(n => n.id !== action.id);
-  }
-};
+  }],
+  [ActionTypes.EXPIRE_NOTIFICATION, (state, action) =>
+    state.filter(n => n.id !== action.id)
+  ]
+]);
 
 const resetRestaurant = (state, action) =>
   Object.assign({}, state, {
@@ -276,119 +274,117 @@ const resetAddTagAutosuggestValue = (state, action) =>
     [action.restaurantId]: Object.assign({}, state[action.restaurantId], { addTagAutosuggestValue: '' })
   });
 
-export const listUi = {
-  [ActionTypes.RECEIVE_RESTAURANTS]() {
-    return {};
-  },
-  [ActionTypes.RESTAURANT_RENAMED]: resetRestaurant,
-  [ActionTypes.RESTAURANT_POSTED]: resetRestaurant,
-  [ActionTypes.RESTAURANT_DELETED]: resetRestaurant,
-  [ActionTypes.POSTED_TAG_TO_RESTAURANT]: resetAddTagAutosuggestValue,
-  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT]: resetAddTagAutosuggestValue,
-  [ActionTypes.SET_ADD_TAG_AUTOSUGGEST_VALUE](state, action) {
-    return Object.assign({}, state, {
+export const listUi = new Map([
+  [ActionTypes.RECEIVE_RESTAURANTS, () => {}],
+  [ActionTypes.RESTAURANT_RENAMED, resetRestaurant],
+  [ActionTypes.RESTAURANT_POSTED, resetRestaurant],
+  [ActionTypes.RESTAURANT_DELETED, resetRestaurant],
+  [ActionTypes.POSTED_TAG_TO_RESTAURANT, resetAddTagAutosuggestValue],
+  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT, resetAddTagAutosuggestValue],
+  [ActionTypes.SET_ADD_TAG_AUTOSUGGEST_VALUE, (state, action) =>
+    Object.assign({}, state, {
       [action.id]: Object.assign({}, state[action.id], { addTagAutosuggestValue: action.value })
-    });
-  },
-  [ActionTypes.SHOW_ADD_TAG_FORM](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.SHOW_ADD_TAG_FORM, (state, action) =>
+    Object.assign({}, state, {
       [action.id]: Object.assign({}, state[action.id], { isAddingTags: true })
-    });
-  },
-  [ActionTypes.HIDE_ADD_TAG_FORM](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.HIDE_ADD_TAG_FORM, (state, action) =>
+    Object.assign({}, state, {
       [action.id]: Object.assign({}, state[action.id], { isAddingTags: false })
-    });
-  },
-  [ActionTypes.SET_EDIT_NAME_FORM_VALUE](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.SET_EDIT_NAME_FORM_VALUE, (state, action) =>
+    Object.assign({}, state, {
       [action.id]: Object.assign({}, state[action.id], { editNameFormValue: action.value })
-    });
-  },
-  [ActionTypes.SHOW_EDIT_NAME_FORM](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.SHOW_EDIT_NAME_FORM, (state, action) =>
+    Object.assign({}, state, {
       [action.id]: Object.assign({}, state[action.id], { isEditingName: true })
-    });
-  },
-  [ActionTypes.HIDE_EDIT_NAME_FORM](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.HIDE_EDIT_NAME_FORM, (state, action) =>
+    Object.assign({}, state, {
       [action.id]: Object.assign({}, state[action.id], { isEditingName: false })
-    });
-  }
-};
+    })
+  ]
+]);
 
-export const mapUi = {
-  [ActionTypes.RECEIVE_RESTAURANTS]() {
-    return {
+export const mapUi = new Map([
+  [ActionTypes.RECEIVE_RESTAURANTS, () =>
+    ({
       markers: {},
       showUnvoted: true
-    };
-  },
-  [ActionTypes.RESTAURANT_POSTED]: resetRestaurant,
-  [ActionTypes.RESTAURANT_DELETED]: resetRestaurant,
-  [ActionTypes.SHOW_INFO_WINDOW](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.RESTAURANT_POSTED, resetRestaurant],
+  [ActionTypes.RESTAURANT_DELETED, resetRestaurant],
+  [ActionTypes.SHOW_INFO_WINDOW, (state, action) =>
+    Object.assign({}, state, {
       markers: Object.assign({}, state.markers, {
         [action.id]: Object.assign({}, state[action.id], { showInfoWindow: true })
       })
-    });
-  },
-  [ActionTypes.HIDE_INFO_WINDOW](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.HIDE_INFO_WINDOW, (state, action) =>
+    Object.assign({}, state, {
       markers: Object.assign({}, state.markers, {
         [action.id]: Object.assign({}, state[action.id], { showInfoWindow: false })
       })
-    });
-  },
-  [ActionTypes.SET_SHOW_UNVOTED](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.SET_SHOW_UNVOTED, (state, action) =>
+    Object.assign({}, state, {
       showUnvoted: action.val
-    });
-  }
-};
+    })
+  ]
+]);
 
-export const pageUi = {
-  [ActionTypes.SCROLL_TO_TOP](state) {
-    return Object.assign({}, state, {
+export const pageUi = new Map([
+  [ActionTypes.SCROLL_TO_TOP, state =>
+    Object.assign({}, state, {
       shouldScrollToTop: true
-    });
-  },
-  [ActionTypes.SCROLLED_TO_TOP](state) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.SCROLLED_TO_TOP, state =>
+    Object.assign({}, state, {
       shouldScrollToTop: false
-    });
-  },
-};
+    })
+  ],
+]);
 
-export const modals = {
-  [ActionTypes.SHOW_MODAL](state, action) {
-    return Object.assign({}, state, {
+export const modals = new Map([
+  [ActionTypes.SHOW_MODAL, (state, action) =>
+    Object.assign({}, state, {
       [action.name]: Object.assign({}, state[action.name], {
         shown: true,
         ...action.opts
       })
-    });
-  },
-  [ActionTypes.HIDE_MODAL](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.HIDE_MODAL, (state, action) =>
+    Object.assign({}, state, {
       [action.name]: Object.assign({}, state[action.name], { shown: false })
-    });
-  },
-  [ActionTypes.RESTAURANT_DELETED](state) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.RESTAURANT_DELETED, state =>
+    Object.assign({}, state, {
       deleteRestaurant: Object.assign({}, state.deleteRestaurant, { shown: false })
-    });
-  },
-  [ActionTypes.TAG_DELETED](state) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.TAG_DELETED, state =>
+    Object.assign({}, state, {
       deleteTag: Object.assign({}, state.deleteTag, { shown: false })
-    });
-  }
-};
+    })
+  ]
+]);
 
-export const tags = {
-  [ActionTypes.POSTED_TAG_TO_RESTAURANT](state, action) {
-    return Object.assign({}, state, {
+export const tags = new Map([
+  [ActionTypes.POSTED_TAG_TO_RESTAURANT, (state, action) =>
+    Object.assign({}, state, {
       items: state.items.map(item => {
         if (item.id === action.id) {
           return Object.assign({}, item, {
@@ -397,18 +393,18 @@ export const tags = {
         }
         return item;
       })
-    });
-  },
-  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT, (state, action) =>
+    Object.assign({}, state, {
       items: [
         ...state.items,
         action.tag
       ]
-    });
-  },
-  [ActionTypes.DELETED_TAG_FROM_RESTAURANT](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.DELETED_TAG_FROM_RESTAURANT, (state, action) =>
+    Object.assign({}, state, {
       items: state.items.map(item => {
         if (item.id === action.id) {
           return Object.assign({}, item, {
@@ -417,57 +413,55 @@ export const tags = {
         }
         return item;
       })
-    });
-  },
-  [ActionTypes.DELETE_TAG]: isFetching,
-  [ActionTypes.TAG_DELETED](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.DELETE_TAG, isFetching],
+  [ActionTypes.TAG_DELETED, (state, action) =>
+    Object.assign({}, state, {
       isFetching: false,
       items: state.items.filter(item => item.id !== action.id)
-    });
-  }
-};
+    })
+  ]
+]);
 
-export const tagUi = {
-  [ActionTypes.SHOW_TAG_FILTER_FORM](state) {
-    return Object.assign({}, state, {
+export const tagUi = new Map([
+  [ActionTypes.SHOW_TAG_FILTER_FORM, state =>
+    Object.assign({}, state, {
       filterFormShown: true
-    });
-  },
-  [ActionTypes.HIDE_TAG_FILTER_FORM](state) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.HIDE_TAG_FILTER_FORM, state =>
+    Object.assign({}, state, {
       autosuggestValue: '',
       filterFormShown: false
-    });
-  },
-  [ActionTypes.SET_TAG_FILTER_AUTOSUGGEST_VALUE](state, action) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.SET_TAG_FILTER_AUTOSUGGEST_VALUE, (state, action) =>
+    Object.assign({}, state, {
       autosuggestValue: action.value
-    });
-  },
-  [ActionTypes.ADD_TAG_FILTER](state) {
-    return Object.assign({}, state, {
+    })
+  ],
+  [ActionTypes.ADD_TAG_FILTER, state =>
+    Object.assign({}, state, {
       autosuggestValue: ''
-    });
-  }
-};
+    })
+  ]
+]);
 
-export const tagFilters = {
-  [ActionTypes.ADD_TAG_FILTER](state, action) {
-    return [
+export const tagFilters = new Map([
+  [ActionTypes.ADD_TAG_FILTER, (state, action) =>
+    [
       ...state,
       action.id
-    ];
-  },
-  [ActionTypes.REMOVE_TAG_FILTER](state, action) {
-    return state.filter(tagFilter => tagFilter !== action.id);
-  },
-  [ActionTypes.HIDE_TAG_FILTER_FORM]() {
-    return [];
-  }
-};
+    ]
+  ],
+  [ActionTypes.REMOVE_TAG_FILTER, (state, action) =>
+    state.filter(tagFilter => tagFilter !== action.id)
+  ],
+  [ActionTypes.HIDE_TAG_FILTER_FORM, () => []]
+]);
 
-export const latLng = {};
-export const user = {};
-export const users = {};
-export const wsPort = {};
+export const latLng = new Map();
+export const user = new Map();
+export const users = new Map();
+export const wsPort = new Map();

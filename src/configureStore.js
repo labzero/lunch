@@ -6,7 +6,7 @@ import * as reducerMaps from './reducerMaps';
 // Add the reducer to your store on the `routing` key
 export default function configureStore(initialState) {
   const generateReducer = (map, initial) => (state = initial, action) => {
-    const reducer = map[action.type];
+    const reducer = map.get(action.type);
     if (reducer === undefined) {
       return state;
     }
