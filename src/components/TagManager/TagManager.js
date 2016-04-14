@@ -10,13 +10,16 @@ const TagManager = ({ tags, showDelete, handleDeleteClicked }) => (
         const boundHandleDeleteClicked = handleDeleteClicked.bind(undefined, item.id);
 
         return (
-          <li className={s.item} key={item.id}>
-            <TagContainer
-              id={item.id}
-              name={item.name}
-              showDelete={showDelete}
-              onDeleteClicked={boundHandleDeleteClicked}
-            />
+          <li key={item.id}>
+            <span className={s.tagContainer}>
+              <TagContainer
+                id={item.id}
+                name={item.name}
+                showDelete={showDelete}
+                onDeleteClicked={boundHandleDeleteClicked}
+              />
+            </span>
+            ({item.restaurant_count})
           </li>
         );
       })}

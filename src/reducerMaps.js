@@ -387,12 +387,36 @@ export const modals = {
 };
 
 export const tags = {
+  [ActionTypes.POSTED_TAG_TO_RESTAURANT](state, action) {
+    return Object.assign({}, state, {
+      items: state.items.map(item => {
+        if (item.id === action.id) {
+          return Object.assign({}, item, {
+            restaurant_count: parseInt(item.restaurant_count, 10) + 1
+          });
+        }
+        return item;
+      })
+    });
+  },
   [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT](state, action) {
     return Object.assign({}, state, {
       items: [
         ...state.items,
         action.tag
       ]
+    });
+  },
+  [ActionTypes.DELETED_TAG_FROM_RESTAURANT](state, action) {
+    return Object.assign({}, state, {
+      items: state.items.map(item => {
+        if (item.id === action.id) {
+          return Object.assign({}, item, {
+            restaurant_count: parseInt(item.restaurant_count, 10) - 1
+          });
+        }
+        return item;
+      })
     });
   },
   [ActionTypes.DELETE_TAG]: isFetching,
