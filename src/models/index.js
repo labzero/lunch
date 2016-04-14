@@ -24,6 +24,15 @@ export const Vote = sequelize.define('vote',
     }
   },
   {
+    classMethods: {
+      recentForRestaurantAndUser: (restaurantId, userId) =>
+        Vote.scope('fromToday').count({
+          where: {
+            user_id: userId,
+            restaurant_id: restaurantId
+          }
+        })
+    },
     scopes: {
       fromToday: () => ({
         where: {

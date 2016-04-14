@@ -10,17 +10,24 @@ router
     '/',
     loggedIn,
     async (req, res) => {
-      Vote.create({
-        restaurant_id: parseInt(req.params.restaurant_id, 10),
-        user_id: req.user.id
-      }).then(obj => {
-        const json = obj.toJSON();
-        req.wss.broadcast(votePosted(json));
-        res.status(201).send({ error: false, data: obj });
-      }).catch(() => {
+      const restaurantId = parseInt(req.params.restaurant_id, 10);
+      return Vote.recentForRestaurantAndUser(restaurantId, req.user.id).then(count => {
+        if (count === 0) {
+          return Vote.create({
+            restaurant_id: restaurantId,
+            user_id: req.user.id
+          }).then(obj => {
+            const json = obj.toJSON();
+            req.wss.broadcast(votePosted(json));
+            res.status(201).send({ error: false, data: obj });
+          }).catch(() => {
+            const error = { message: 'Could not vote. Did you already vote today?' };
+            errorCatcher(res, error);
+          });
+        }
         const error = { message: 'Could not vote. Did you already vote today?' };
-        errorCatcher(res, error);
-      });
+        return errorCatcher(res, error);
+      }).catch(err => errorCatcher(res, err));
     }
   )
   .delete(
