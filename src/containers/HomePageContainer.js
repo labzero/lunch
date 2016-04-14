@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { fetchRestaurantsIfNeeded } from '../actions/restaurants';
+import { fetchRestaurantsIfNeeded, invalidateRestaurants } from '../actions/restaurants';
 import HomePage from '../components/HomePage';
 
 const mapStateToProps = state => {
@@ -10,6 +10,9 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   fetchRestaurantsIfNeeded() {
     dispatch(fetchRestaurantsIfNeeded());
+  },
+  invalidateRestaurants() {
+    dispatch(invalidateRestaurants());
   }
 });
 

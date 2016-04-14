@@ -162,14 +162,14 @@ function fetchRestaurants() {
 }
 
 function shouldFetchRestaurants(state) {
-  const items = state.restaurants.items;
-  if (!items) {
+  const restaurants = state.restaurants;
+  if (!restaurants.items) {
     return true;
   }
-  if (items.isFetching) {
+  if (restaurants.isFetching) {
     return false;
   }
-  return items.didInvalidate;
+  return restaurants.didInvalidate;
 }
 
 export function fetchRestaurantsIfNeeded() {

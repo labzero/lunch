@@ -271,15 +271,15 @@ const resetRestaurant = (state, action) =>
     [action.id]: undefined
   });
 
-const resetAllRestaurants = () => ({});
-
 const resetAddTagAutosuggestValue = (state, action) =>
   Object.assign({}, state, {
     [action.restaurantId]: Object.assign({}, state[action.restaurantId], { addTagAutosuggestValue: '' })
   });
 
 export const listUi = {
-  [ActionTypes.RECEIVE_RESTAURANTS]: resetAllRestaurants,
+  [ActionTypes.RECEIVE_RESTAURANTS]() {
+    return {};
+  },
   [ActionTypes.RESTAURANT_RENAMED]: resetRestaurant,
   [ActionTypes.RESTAURANT_POSTED]: resetRestaurant,
   [ActionTypes.RESTAURANT_DELETED]: resetRestaurant,
@@ -318,7 +318,12 @@ export const listUi = {
 };
 
 export const mapUi = {
-  [ActionTypes.RECEIVE_RESTAURANTS]: resetAllRestaurants,
+  [ActionTypes.RECEIVE_RESTAURANTS]() {
+    return {
+      markers: {},
+      showUnvoted: true
+    };
+  },
   [ActionTypes.RESTAURANT_POSTED]: resetRestaurant,
   [ActionTypes.RESTAURANT_DELETED]: resetRestaurant,
   [ActionTypes.SHOW_INFO_WINDOW](state, action) {

@@ -16,12 +16,20 @@ export class _HomePage extends Component {
 
   static propTypes = {
     user: PropTypes.object.isRequired,
-    fetchRestaurantsIfNeeded: PropTypes.func.isRequired
+    fetchRestaurantsIfNeeded: PropTypes.func.isRequired,
+    invalidateRestaurants: PropTypes.func.isRequired
   };
 
   componentWillMount() {
     this.context.onSetTitle(title);
     this.props.fetchRestaurantsIfNeeded();
+  }
+
+  componentDidMount() {
+    setInterval(() => {
+      this.props.invalidateRestaurants();
+      this.props.fetchRestaurantsIfNeeded();
+    }, 1000 * 60 * 60 * 6);
   }
 
   render() {
