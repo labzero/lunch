@@ -37,7 +37,6 @@ After setting up your environment:
 npm install
 npm install -g sequelize-cli
 sequelize db:migrate
-sequelize db:seed --seed seeds.js
 ```
 
 ## Development server
