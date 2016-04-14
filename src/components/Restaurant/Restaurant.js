@@ -74,7 +74,7 @@ export const _Restaurant = ({
         </div>
       </div>
       <div className={s.addressContainer}>
-        <a className={s.addressLink} href={`https://www.google.com/maps/place/${name}, ${address}`} target="_blank">
+        <a className={s.addressLink} href={`/api/restaurants/${id}/place_url`} target="_blank">
           {address}
         </a>
       </div>
