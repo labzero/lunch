@@ -4,7 +4,7 @@
   .report-header
     %h1= @report_name
     = render 'reports_header_buttons', download_formats: [:xlsx]
-    = render 'report_details', name: @member_name, freshness: t('reports.freshness.prior_day'), availability: t('reports.availability.months', months: 12)
+    = render 'report_details', name: @member_name, freshness: t('reports.freshness.prior_day'), availability: t('reports.capital_stock.trial_balance.history')
     .report-inputs
       = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_capital_stock_trial_balance_url, single_date_picker: true, presets: @picker_presets, min_date: @min_date
   .report-main-body
@@ -18,4 +18,4 @@
       %p= t('reports.certificate_count', count: fhlb_formatted_number(@number_of_certificates, html: false))
     %h2.report-table-title= t('reports.pages.capital_stock_trial_balance.table_title')
     =render 'reports/reports_table', table_data: @capital_stock_trial_balance_table_data, sortable: false, disable_auto_width: false, no_wrapping: true
-    %small= t('reports.accuracy_notice_html', url: '#', phone_number: fhlb_formatted_phone_number('4156162634'), phone_number_alt: fhlb_formatted_phone_number('4156162913'))
+    %small= t('reports.capital_stock.trial_balance.accuracy_notice_html', url: accounting_email, phone_number: accounting_phone_number)

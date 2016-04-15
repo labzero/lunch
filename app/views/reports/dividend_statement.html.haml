@@ -50,4 +50,4 @@
           %td.report-cell-right= fhlb_formatted_currency(@dividend_statement[:total_dividend])
     %h2.report-table-title= t('reports.pages.dividend_statement.details')
     = render 'reports/reports_table', table_data: @dividend_statement_details, table_class: 'table-dividend-details', no_wrapping: true
-    %small= t('reports.accuracy_notice_html', url: '#', phone_number: fhlb_formatted_phone_number('4156162634'), phone_number_alt: fhlb_formatted_phone_number('4156162913'))
+    %small= t('reports.accuracy_notice_html', url: accounting_email, phone_number: accounting_phone_number)

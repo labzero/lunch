@@ -1168,6 +1168,8 @@ en:
       trial_balance:
         title: Capital Stock Trial Balance
         summary: This report shows all shares owned as of a specific day and is updated at the end of each business day.
+        history: Historical data is available as of January 1, 2002.
+        accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If you have any questions regarding this report or for Capital Stock Trial Balance data prior to January 1, 2002, please contact the <a href="%{url}">Accounting Department</a> at %{phone_number}.
       capital_stock_and_leverage:
         title: Capital Stock Position and Leverage Statement
         summary: Includes stock owned, minimum and activity-based stock requirements, stock excess/deficiency, surplus stock, remaining stock, and remaining leverage.
@@ -1692,7 +1694,7 @@ en:
           balance: STA Balance
           date: STA Date
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
-    accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the Accounting Department at %{phone_number} or %{phone_number_alt}.
+    accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If you have any questions regarding this report, please contact the <a href="%{url}">Accounting Department</a> at %{phone_number}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
     close_of_business_processing_notice: Other data as of Close of Business on the prior business day.
     maturity_date_notice: In the event of a prepayment or other modification of the advance, the original maturity date may differ from the actual maturity date.

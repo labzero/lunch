@@ -23,4 +23,4 @@
       %p= t('reports.share_count', count: fhlb_formatted_number(@capital_stock_activity[:end_balance], html: false))
     %h2.report-table-title= t('reports.pages.capital_stock_activity.table_title')
     =render 'reports/reports_table', table_data: @capital_stock_activity_table_data, sortable: true, disable_auto_width: false, no_wrapping: true
-    %small= t('reports.accuracy_notice_html', phone_number: fhlb_formatted_phone_number('4156162634'), phone_number_alt: fhlb_formatted_phone_number('4156162913'))
+    %small= t('reports.accuracy_notice_html', url: accounting_email, phone_number: accounting_phone_number)

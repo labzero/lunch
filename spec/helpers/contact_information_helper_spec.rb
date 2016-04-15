@@ -35,6 +35,9 @@ describe ContactInformationHelper, type: :helper do
   describe '`operations_email` method' do
     it_behaves_like 'an email helper method', :operations_email, 'OPERATIONS_EMAIL'
   end
+  describe '`accounting_email` method' do
+    it_behaves_like 'an email helper method', :accounting_email, 'ACCOUNTING_EMAIL'
+  end
 
   shared_examples 'phone number contact method' do |constant|
     it "calls `fhlb_formatted_phone_number` with the #{constant}" do
@@ -80,5 +83,13 @@ describe ContactInformationHelper, type: :helper do
       expect(helper).to respond_to(:mcu_phone_number)
     end
     include_examples 'phone number contact method', 'MCU_PHONE_NUMBER'
+  end
+  
+  describe '`accounting_phone_number` method' do
+    let(:call_method) { helper.accounting_phone_number }
+    it 'responds to `accounting_phone_number`' do
+      expect(helper).to respond_to(:accounting_phone_number)
+    end
+    include_examples 'phone number contact method', 'ACCOUNTING_PHONE_NUMBER'
   end
 end
