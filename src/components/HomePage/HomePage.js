@@ -45,10 +45,9 @@ export class _HomePage extends Component {
           {restaurantAddForm}
           <TagFilterFormContainer />
         </section>
-        {/*
         <div className={s.restaurantList}>
           <RestaurantListContainer />
-        </div> */}
+        </div>
       </div>
     );
   }

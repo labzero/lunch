@@ -1,9 +1,12 @@
 import { getRestaurantIds, getRestaurantEntities, getRestaurantById } from './restaurants';
 import { getVoteEntities, getVoteById } from './votes';
 import { getTags } from './tags';
+import { getTagFilters } from './tagFilters';
 import { getUserId, getUserById } from './users';
 import { getMapUi } from './mapUi';
 import { createSelector } from 'reselect';
+
+const makeWrapper = selector => state => props => selector(state, props);
 
 export const getUserByVoteId = (state, voteId) => getUserById(state, getVoteById(state, voteId).user_id);
 
@@ -36,4 +39,16 @@ export const getAllOrUnvoted = createSelector(
   (restaurantIds, restaurantEntities, mapUi) => restaurantIds.filter(id =>
     mapUi.showUnvoted || (!mapUi.showUnvoted && restaurantEntities[id].votes.length > 0)
   )
+);
+
+export const getFilteredRestaurants = createSelector(
+  [getRestaurantIds, getTagFilters, makeWrapper(getRestaurantById)],
+  (restaurantIds, tagFilters, boundGetRestaurantById) => {
+    if (tagFilters.length === 0) { return restaurantIds; }
+    return restaurantIds.filter(id =>
+      tagFilters.every(tagFilter =>
+        boundGetRestaurantById(id).tags.includes(tagFilter)
+      )
+    );
+  }
 );
