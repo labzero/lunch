@@ -1,4 +1,5 @@
 import ActionTypes from './constants/ActionTypes';
+import update from 'react-addons-update';
 import uuid from 'node-uuid';
 
 const isFetching = state =>
@@ -9,13 +10,18 @@ const isFetching = state =>
 export const restaurants = new Map([
   [ActionTypes.SORT_RESTAURANTS, state =>
     Object.assign({}, state, {
-      items: state.items.map((item, index) => {
-        item.sortIndex = index;
-        return item;
-      }).sort((a, b) => {
-        // stable sort
-        if (a.votes.length !== b.votes.length) { return b.votes.length - a.votes.length; }
-        return a.sortIndex - b.sortIndex;
+      items: update(state.items, {
+        result: {
+          $set: state.items.result.map((id, index) => {
+            const item = state.items.entities.restaurants[id];
+            item.sortIndex = index;
+            return item;
+          }).sort((a, b) => {
+            // stable sort
+            if (a.votes.length !== b.votes.length) { return b.votes.length - a.votes.length; }
+            return a.sortIndex - b.sortIndex;
+          }).map(item => item.id)
+        }
       })
     })
   ],
@@ -67,22 +73,25 @@ export const restaurants = new Map([
     })
   ],
   [ActionTypes.POST_VOTE, isFetching],
-  [ActionTypes.VOTE_POSTED, (state, action) =>
-    Object.assign({}, state, {
-      isFetching: false,
-      items: state.items.map(item => {
-        if (item.id === action.vote.restaurant_id) {
-          return Object.assign({}, item, {
-            votes: [
-              ...item.votes,
-              action.vote
-            ]
-          });
+  [ActionTypes.VOTE_POSTED, (state, action) => Object.assign({}, state, {
+    isFetching: false,
+    items: update(state.items, {
+      entities: {
+        restaurants: {
+          [action.vote.restaurant_id]: {
+            votes: {
+              $push: [action.vote.id]
+            }
+          }
+        },
+        $merge: {
+          votes: {
+            [action.vote.id]: action.vote
+          }
         }
-        return item;
-      })
+      }
     })
-  ],
+  })],
   [ActionTypes.DELETE_VOTE, isFetching],
   [ActionTypes.VOTE_DELETED, (state, action) =>
     Object.assign({}, state, {
