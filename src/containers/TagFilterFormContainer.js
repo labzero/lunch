@@ -1,21 +1,25 @@
 import { connect } from 'react-redux';
-import { generateTagList } from '../helpers/TagAutosuggestHelper';
+import { getTagUi } from '../selectors/tagUi';
+import { getTagFilters } from '../selectors/tagFilters';
+import { makeGetTagList } from '../selectors';
 import { showTagFilterForm, hideTagFilterForm, setTagFilterAutosuggestValue } from '../actions/tagUi';
 import { addTagFilter, removeTagFilter } from '../actions/tagFilters';
 import TagFilterForm from '../components/TagFilterForm';
 
-const mapStateToProps = (state, ownProps) => {
-  const tagUi = state.tagUi;
-  let tags = state.tags.items;
-  const addedTags = state.tagFilters;
-  const autosuggestValue = state.tagUi.autosuggestValue || '';
-  tags = generateTagList(tags, addedTags, autosuggestValue);
-  return {
-    ...ownProps,
-    addedTags,
-    tags,
-    autosuggestValue,
-    tagUi
+const mapStateToProps = () => {
+  const getTagList = makeGetTagList();
+  return (state, ownProps) => {
+    const tagUi = getTagUi(state);
+    const addedTags = getTagFilters(state);
+    const autosuggestValue = tagUi.autosuggestValue || '';
+    const tags = getTagList(state, { addedTags, autosuggestValue });
+    return {
+      ...ownProps,
+      addedTags,
+      tags,
+      autosuggestValue,
+      tagUi
+    };
   };
 };
 

@@ -3,11 +3,13 @@ import { makeGetRestaurantVotesForUser } from '../selectors';
 import { removeVote, addVote } from '../actions/restaurants';
 import RestaurantVoteButton from '../components/RestaurantVoteButton';
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = () => {
   const getRestaurantVotesForUser = makeGetRestaurantVotesForUser();
-  const props = { restaurantId: ownProps.id, userId: state.user.id };
-  return {
-    userVotes: getRestaurantVotesForUser(state, props)
+  return (state, ownProps) => {
+    const props = { restaurantId: ownProps.id, userId: state.user.id };
+    return {
+      userVotes: getRestaurantVotesForUser(state, props)
+    };
   };
 };
 
