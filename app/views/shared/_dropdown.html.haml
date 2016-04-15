@@ -3,6 +3,9 @@
 - default_text ||= ''
 - dropdown_options ||= []
 - classes ||= []
+- classes = Array.wrap(classes)
+- if dropdown_options.length <= 1
+  - classes << 'single-item-dropdown'
 - calculate_width ||= nil
 .input-field-container.icon-chevron-after.single-choice-dropdown.dropdown{class: classes, :'data-dropdown-calc-width' => calculate_width}
   = select_tag(dropdown_name, options_for_select(dropdown_options, default_value))

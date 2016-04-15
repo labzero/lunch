@@ -359,10 +359,13 @@ When(/^I request an XLSX$/) do
 end
 
 def export_report(format)
+  single_item_dropdown = page.all('.report-header-buttons .dropdown.single-item-dropdown')
   jquery_execute("$('body').on('reportDownloadStarted', function(){$('body').addClass('report-download-started')})")
   page.find(".report-header-buttons .dropdown-selection").click
-  page.find('.report-header-buttons .dropdown li', text: format, visible: true).click
-  click_button(I18n.t('dashboard.actions.download'))
+  unless single_item_dropdown.present?
+    page.find('.report-header-buttons .dropdown li', text: format, visible: true).click
+    click_button(I18n.t('dashboard.actions.download'))
+  end
 end
 
 When(/^I click on the view cell for the first (advance|cash projection|security)/) do |report_type|

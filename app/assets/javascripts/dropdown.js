@@ -4,7 +4,9 @@ $(function(){
   var $dropdown;
 
   function bindDropdowns() {
-    $dropdown = $('.dropdown');
+    $allDropdowns = $('.dropdown');
+    $dropdown = $allDropdowns.filter(':not(.single-item-dropdown)');
+    $splitButtonSingleItemDropdowns = $allDropdowns.filter('.single-item-dropdown.split-button-right');
 
     $dropdown.filter('[data-dropdown-calc-width]').each(function() {
       var $this = $(this);
@@ -39,6 +41,11 @@ $(function(){
 
       // mark this dropdown as initialized
       $this.data('dropdown-initialized', true);
+    });
+
+    $splitButtonSingleItemDropdowns.click(function(event) {
+      var $target = $(event.currentTarget);
+      $target.siblings('button:only-of-type').click();
     });
   };
 

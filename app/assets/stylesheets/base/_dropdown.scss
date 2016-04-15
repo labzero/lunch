@@ -7,6 +7,12 @@
   select {
     display: none;
   }
+  &.single-item-dropdown {
+    &:after {
+      display: none;
+      padding: 0;
+    }
+  }
   &.single-choice-dropdown {
     &:after {
       @extend %very-small-icon-font;
@@ -43,6 +49,7 @@
   li {
     @extend %truncate-text;
     padding: 0px 0 3px 10px;
+    cursor: default;
     &:first-child {
       padding-top: 5px;
     }
@@ -61,4 +68,11 @@
   vertical-align: middle;
   width: (3 * $grid-column-width) + (2 * $gutter-width);
   padding-right: 35px;
+  cursor: default;
+  .single-item-dropdown & {
+    padding-right: 10px;
+  }
+  .single-item-dropdown.split-button-right & {
+    cursor: pointer;
+  }
 }
