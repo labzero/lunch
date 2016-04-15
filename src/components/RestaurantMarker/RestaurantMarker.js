@@ -54,10 +54,6 @@ export const RestaurantMarker = ({
         <Provider store={context.store}>
           <RestaurantContainer
             id={restaurant.id}
-            name={restaurant.name}
-            address={restaurant.address}
-            votes={restaurant.votes}
-            tags={restaurant.tags}
           />
         </Provider>
       </ContextHolder>

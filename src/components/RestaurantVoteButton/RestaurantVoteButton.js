@@ -9,10 +9,8 @@ export class _RestaurantVoteButton extends Component {
   }
 
   render() {
-    let downVote = false;
     let btnClass = 'btn-primary';
-    if (this.props.votes.some(vote => vote.user_id === this.props.user.id)) {
-      downVote = true;
+    if (this.props.userVotes.length > 0) {
       btnClass = 'btn-danger';
     }
 
@@ -22,7 +20,7 @@ export class _RestaurantVoteButton extends Component {
         onClick={this.props.handleClick}
         className={`${s.root} btn btn-sm ${btnClass}`}
       >
-        {downVote ? '-1' : '+1'}
+        {this.props.userVotes.length > 0 ? '-1' : '+1'}
       </button>
     );
   }
@@ -30,12 +28,7 @@ export class _RestaurantVoteButton extends Component {
 
 _RestaurantVoteButton.propTypes = {
   handleClick: PropTypes.func.isRequired,
-  user: PropTypes.shape({
-    id: PropTypes.number.isRequired
-  }).isRequired,
-  votes: PropTypes.arrayOf(PropTypes.shape({
-    user_id: PropTypes.number.isRequired
-  })).isRequired
+  userVotes: PropTypes.array.isRequired
 };
 
 export default withStyles(_RestaurantVoteButton, s);

@@ -1,0 +1,6 @@
+{
+  "name": "TooltipUser",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./TooltipUser.js"
+}

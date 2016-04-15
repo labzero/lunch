@@ -13,21 +13,16 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-const mapDispatchToProps = dispatch => ({
-  dispatch
-});
-
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
+const mapDispatchToProps = (dispatch, ownProps) => ({
   handleMarkerClick() {
-    dispatchProps.dispatch(showInfoWindow(ownProps.id));
+    dispatch(showInfoWindow(ownProps.id));
   },
   handleMarkerClose() {
-    dispatchProps.dispatch(hideInfoWindow(ownProps.id));
+    dispatch(hideInfoWindow(ownProps.id));
   }
 });
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
+  mapDispatchToProps
 )(RestaurantMarker);

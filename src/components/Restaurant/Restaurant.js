@@ -9,11 +9,7 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Restaurant.scss';
 
 export const _Restaurant = ({
-  id,
-  name,
-  address,
-  votes,
-  tags,
+  restaurant,
   shouldShowAddTagArea,
   shouldShowDropdown,
   user,
@@ -30,12 +26,12 @@ export const _Restaurant = ({
   if (loggedIn) {
     voteButton = (
       <span className={s.voteButtonContainer}>
-        <RestaurantVoteButtonContainer {...{ id, votes }} />
+        <RestaurantVoteButtonContainer id={restaurant.id} />
       </span>
     );
     if (shouldShowAddTagArea) {
       if (listUiItem.isAddingTags) {
-        addTagArea = <RestaurantAddTagFormContainer {...{ id }} />;
+        addTagArea = <RestaurantAddTagFormContainer id={restaurant.id} />;
       } else {
         addTagArea = <button className="btn btn-sm btn-default" onClick={showAddTagForm}>add tag</button>;
       }
@@ -43,7 +39,7 @@ export const _Restaurant = ({
     if (shouldShowDropdown) {
       dropdown = (
         <div className={s.dropdownContainer}>
-          <RestaurantDropdownContainer id={id} />
+          <RestaurantDropdownContainer id={restaurant.id} />
         </div>
       );
     }
@@ -53,13 +49,13 @@ export const _Restaurant = ({
   if (listUiItem.isEditingName && shouldShowDropdown) {
     nameArea = (
       <span className={s.restaurantNameFormContainer}>
-        <RestaurantNameFormContainer id={id} name={name} />
+        <RestaurantNameFormContainer id={restaurant.id} name={restaurant.name} />
       </span>
     );
   } else {
     nameArea = (
       <h2 className={s.heading} onClick={showMapAndInfoWindow}>
-        <span>{name}</span>
+        <span>{restaurant.name}</span>
       </h2>
     );
   }
@@ -69,23 +65,23 @@ export const _Restaurant = ({
       <div className={s.header}>
         {nameArea}
         <div className={s.voteContainer}>
-          <RestaurantVoteCountContainer {...{ votes, id }} />
+          <RestaurantVoteCountContainer id={restaurant.id} />
           {voteButton}
         </div>
       </div>
       <div className={s.addressContainer}>
-        <a className={s.addressLink} href={`/api/restaurants/${id}/place_url`} target="_blank">
-          {address}
+        <a className={s.addressLink} href={`/api/restaurants/${restaurant.id}/place_url`} target="_blank">
+          {restaurant.address}
         </a>
       </div>
       <div className={s.footer}>
         <div className={s.tagsArea}>
-          <ul className={`${s.tagList} ${tags.length === 0 ? s.tagsListEmpty : ''}`}>
-            {tags.map(tag => {
-              const boundRemoveTag = removeTag.bind(undefined, tag);
+          <ul className={`${s.tagList} ${restaurant.tags.length === 0 ? s.tagsListEmpty : ''}`}>
+            {restaurant.tags.map(tagId => {
+              const boundRemoveTag = removeTag.bind(undefined, tagId);
               return (
-                <li className={s.tagItem} key={`restaurantTag_${tag}`}>
-                  <TagContainer id={tag} showDelete={loggedIn} onDeleteClicked={boundRemoveTag} />
+                <li className={s.tagItem} key={`restaurantTag_${tagId}`}>
+                  <TagContainer id={tagId} showDelete={loggedIn} onDeleteClicked={boundRemoveTag} />
                 </li>
               );
             })}
@@ -99,12 +95,8 @@ export const _Restaurant = ({
 };
 
 _Restaurant.propTypes = {
-  id: PropTypes.number.isRequired,
-  name: PropTypes.string.isRequired,
-  address: PropTypes.string.isRequired,
+  restaurant: PropTypes.object.isRequired,
   user: PropTypes.object.isRequired,
-  votes: PropTypes.array.isRequired,
-  tags: PropTypes.array.isRequired,
   shouldShowAddTagArea: PropTypes.bool,
   shouldShowDropdown: PropTypes.bool,
   listUiItem: PropTypes.object.isRequired,

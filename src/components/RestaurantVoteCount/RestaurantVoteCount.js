@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import TooltipUserContainer from '../../containers/TooltipUserContainer';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantVoteCount.scss';
 
@@ -7,8 +8,7 @@ export class _RestaurantVoteCount extends Component {
   static propTypes = {
     id: PropTypes.number.isRequired,
     votes: PropTypes.array.isRequired,
-    user: PropTypes.object.isRequired,
-    users: PropTypes.array.isRequired
+    user: PropTypes.object.isRequired
   };
 
   componentDidUpdate() {
@@ -31,13 +31,9 @@ export class _RestaurantVoteCount extends Component {
         voteCountContainer = voteCount;
       } else {
         tooltip = (
-          <Tooltip id={`voteCountTooltip_${this.props.id}`}>{this.props.votes.map(vote => {
-            const foundUser = this.props.users.find(user => user.id === vote.user_id);
-            if (foundUser !== undefined) {
-              return <div key={`restaurantVote_${vote.id}`}>{foundUser.name}</div>;
-            }
-            return null;
-          })}</Tooltip>
+          <Tooltip id={`voteCountTooltip_${this.props.id}`}>{this.props.votes.map(voteId =>
+            <TooltipUserContainer key={`voteCountTooltipUser_${voteId}`} voteId={voteId} />
+          )}</Tooltip>
         );
         voteCountContainer = (
           <OverlayTrigger placement="top" overlay={tooltip}>
