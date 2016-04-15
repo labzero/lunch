@@ -104,11 +104,6 @@ export const restaurants = new Map([
                 $splice: [[state.items.entities.restaurants[action.restaurantId].votes.indexOf(action.id), 1]]
               }
             }
-          },
-          votes: {
-            $merge: {
-              [action.id]: undefined
-            }
           }
         }
       })
@@ -152,15 +147,16 @@ export const restaurants = new Map([
   [ActionTypes.DELETED_TAG_FROM_RESTAURANT, (state, action) =>
     Object.assign({}, state, {
       isFetching: false,
-      items: state.items.map(item => {
-        if (item.id === action.restaurantId) {
-          return Object.assign({}, item, {
-            tags: item.tags.filter(
-              tag => tag !== action.id
-            )
-          });
+      items: update(state.items, {
+        entities: {
+          restaurants: {
+            [action.restaurantId]: {
+              tags: {
+                $splice: [[state.items.entities.restaurants[action.restaurantId].tags.indexOf(action.id), 1]]
+              }
+            }
+          }
         }
-        return item;
       })
     })
   ]
@@ -420,13 +416,20 @@ export const tags = new Map([
   ],
   [ActionTypes.DELETED_TAG_FROM_RESTAURANT, (state, action) =>
     Object.assign({}, state, {
-      items: state.items.map(item => {
-        if (item.id === action.id) {
-          return Object.assign({}, item, {
-            restaurant_count: parseInt(item.restaurant_count, 10) - 1
-          });
+      isFetching: false,
+      items: update(state.items, {
+        entities: {
+          tags: {
+            [action.restaurantId]: {
+              tags: {
+                $merge: {
+                  restaurant_count:
+                    parseInt(state.items.entities.tags[action.restaurantId].tags.restaurant_count, 10) - 1
+                }
+              }
+            }
+          }
         }
-        return item;
       })
     })
   ],
