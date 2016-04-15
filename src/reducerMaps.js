@@ -84,8 +84,8 @@ export const restaurants = new Map([
             }
           }
         },
-        $merge: {
-          votes: {
+        votes: {
+          $merge: {
             [action.vote.id]: action.vote
           }
         }
@@ -96,15 +96,21 @@ export const restaurants = new Map([
   [ActionTypes.VOTE_DELETED, (state, action) =>
     Object.assign({}, state, {
       isFetching: false,
-      items: state.items.map(item => {
-        if (item.id === action.restaurantId) {
-          return Object.assign({}, item, {
-            votes: item.votes.filter(
-              vote => vote.id !== action.id
-            )
-          });
+      items: update(state.items, {
+        entities: {
+          restaurants: {
+            [action.restaurantId]: {
+              votes: {
+                $splice: [[state.items.entities.restaurants[action.restaurantId].votes.indexOf(action.id), 1]]
+              }
+            }
+          },
+          votes: {
+            $merge: {
+              [action.id]: undefined
+            }
+          }
         }
-        return item;
       })
     })
   ],

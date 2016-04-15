@@ -19,6 +19,7 @@ export default function configureStore(initialState) {
   initialState.restaurants.items = normalize(initialState.restaurants.items, arrayOf(schemas.restaurant));
   initialState.tags.items = normalize(initialState.tags.items, arrayOf(schemas.tag));
   initialState.users.items = normalize(initialState.users.items, arrayOf(schemas.user));
+  initialState.restaurants.items.entities.votes = initialState.restaurants.items.entities.votes || {};
 
   const reducers = {};
 
