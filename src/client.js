@@ -15,7 +15,7 @@ import configureStore from './configureStore';
 import { render } from 'react-dom';
 import FastClick from 'fastclick';
 import makeRoutes from './routes';
-import Location from './core/Location';
+import history from './core/history';
 import ContextHolder from './core/ContextHolder';
 import { addEventListener, removeEventListener } from './core/DOMUtils';
 import ReconnectingWebSocket from 'reconnectingwebsocket';
@@ -28,7 +28,7 @@ window.ReconnectingWebSocket = ReconnectingWebSocket;
 const store = configureStore(initialState);
 
 // Create an enhanced history that syncs navigation events with the store
-const history = syncHistoryWithStore(Location, store);
+const syncedHistory = syncHistoryWithStore(history, store);
 
 let cssContainer = document.getElementById('css');
 const appContainer = document.getElementById('app');
@@ -64,7 +64,7 @@ function run() {
   // Make taps on links and buttons work fast on mobiles
   FastClick.attach(document.body);
 
-  const unlisten = Location.listen(location => {
+  const unlisten = history.listen(location => {
     const locationId = location.pathname + location.search;
 
     if (!scrollOffsets.get(locationId)) {
@@ -92,7 +92,7 @@ function run() {
     render(
       <ContextHolder context={context}>
         <Provider store={store}>
-          <Router {...renderProps} history={history}>
+          <Router {...renderProps} history={syncedHistory}>
             {routes}
           </Router>
         </Provider>
