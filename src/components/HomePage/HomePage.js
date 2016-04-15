@@ -41,13 +41,13 @@ export class _HomePage extends Component {
     return (
       <div className={s.root}>
         <RestaurantMapContainer />
-        <section className={s.forms}>
+        {/* <section className={s.forms}>
           {restaurantAddForm}
           <TagFilterFormContainer />
         </section>
         <div className={s.restaurantList}>
           <RestaurantListContainer />
-        </div>
+        </div> */}
       </div>
     );
   }

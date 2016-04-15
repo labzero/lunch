@@ -1,5 +1,7 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import { routerReducer } from 'react-router-redux';
+import { normalize, arrayOf } from 'normalizr';
+import * as schemas from './schemas';
 import thunkMiddleware from 'redux-thunk';
 import * as reducerMaps from './reducerMaps';
 
@@ -13,6 +15,9 @@ export default function configureStore(initialState) {
 
     return reducer(state, action);
   };
+
+  initialState.restaurants.items = normalize(initialState.restaurants.items, arrayOf(schemas.restaurant));
+  initialState.tags.items = normalize(initialState.tags.items, arrayOf(schemas.tag));
 
   const reducers = {};
 

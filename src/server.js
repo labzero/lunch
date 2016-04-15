@@ -176,8 +176,6 @@ server.get('*', async (req, res, next) => {
             initialState.user = req.user;
             initialState.users.items = users.map(u => u.toJSON());
           }
-          const store = configureStore(initialState);
-          const template = require('./views/index.jade');
           const data = {
             apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
             title: '',
@@ -195,6 +193,7 @@ server.get('*', async (req, res, next) => {
             onSetMeta: (key, value) => (data[key] = value),
             onPageNotFound: () => (statusCode = 404),
           };
+          const store = configureStore(initialState);
           data.body = ReactDOM.renderToString(
             <ContextHolder context={context}>
               <Provider store={store}>
@@ -203,6 +202,7 @@ server.get('*', async (req, res, next) => {
             </ContextHolder>
           );
           data.css = css.join('');
+          const template = require('./views/index.jade');
           res.status(statusCode);
           res.send(template(data));
         }).catch(err => next(err));
