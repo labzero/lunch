@@ -28,4 +28,4 @@ _Tag.propTypes = {
   onDeleteClicked: PropTypes.func.isRequired
 };
 
-export default withStyles(_Tag, s);
+export default withStyles(s)(_Tag);

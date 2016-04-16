@@ -1,8 +1,11 @@
-jest.unmock('../DeleteRestaurantModal');
+/* eslint-env mocha */
+/* eslint-disable padded-blocks, no-unused-expressions */
 
-import DeleteRestaurantModal from '../DeleteRestaurantModal';
+import DeleteRestaurantModal from './DeleteRestaurantModal';
 import { Modal } from 'react-bootstrap';
+import { expect } from 'chai';
 import React from 'react';
+import sinon from 'sinon';
 import { shallow } from 'enzyme';
 
 describe('DeleteRestaurantModal', () => {
@@ -12,8 +15,8 @@ describe('DeleteRestaurantModal', () => {
     props = {
       restaurantName: 'Food Barn',
       shown: true,
-      hideModal: jest.fn(),
-      deleteRestaurant: jest.fn()
+      hideModal: sinon.mock(),
+      deleteRestaurant: sinon.mock()
     };
   });
 
@@ -21,6 +24,6 @@ describe('DeleteRestaurantModal', () => {
     const wrapper = shallow(
       <DeleteRestaurantModal {...props} />
     );
-    expect(wrapper.find(Modal.Body).render().text()).toEqual('Are you sure you want to delete Food Barn?');
+    expect(wrapper.find(Modal.Body).render().text()).to.eq('Are you sure you want to delete Food Barn?');
   });
 });

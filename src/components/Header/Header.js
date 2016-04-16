@@ -40,4 +40,4 @@ Header.propTypes = {
   flashes: PropTypes.array.isRequired
 };
 
-export default withStyles(Header, s);
+export default withStyles(s)(Header);

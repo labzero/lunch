@@ -22,4 +22,4 @@ TagManagerItem.propTypes = {
   handleDeleteClicked: PropTypes.func.isRequired
 };
 
-export default withStyles(TagManagerItem, s);
+export default withStyles(s)(TagManagerItem);

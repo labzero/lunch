@@ -16,4 +16,4 @@ EmailWhitelistItem.propTypes = {
   handleDeleteClicked: PropTypes.func.isRequired
 };
 
-export default withStyles(EmailWhitelistItem, s);
+export default withStyles(s)(EmailWhitelistItem);

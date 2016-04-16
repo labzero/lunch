@@ -18,4 +18,4 @@ PostedTagToRestaurant.propTypes = {
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
-export default withStyles(PostedTagToRestaurant, s);
+export default withStyles(s)(PostedTagToRestaurant);

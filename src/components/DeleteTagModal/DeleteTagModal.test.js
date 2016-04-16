@@ -1,8 +1,11 @@
-jest.unmock('../DeleteTagModal');
+/* eslint-env mocha */
+/* eslint-disable padded-blocks, no-unused-expressions */
 
 import DeleteTagModal from '../DeleteTagModal';
 import { Modal } from 'react-bootstrap';
 import React from 'react';
+import sinon from 'sinon';
+import { expect } from 'chai';
 import { shallow } from 'enzyme';
 
 describe('DeleteTagModal', () => {
@@ -12,8 +15,8 @@ describe('DeleteTagModal', () => {
     props = {
       tagName: 'gross',
       shown: true,
-      hideModal: jest.fn(),
-      deleteTag: jest.fn()
+      hideModal: sinon.mock(),
+      deleteTag: sinon.mock()
     };
   });
 
@@ -21,6 +24,6 @@ describe('DeleteTagModal', () => {
     const wrapper = shallow(
       <DeleteTagModal {...props} />
     );
-    expect(wrapper.find(Modal.Body).render().text()).toContain('Are you sure you want to delete the "gross" tag?');
+    expect(wrapper.find(Modal.Body).render().text()).to.contain('Are you sure you want to delete the "gross" tag?');
   });
 });

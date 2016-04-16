@@ -21,4 +21,4 @@ VotePosted.propTypes = {
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
-export default withStyles(VotePosted, s);
+export default withStyles(s)(VotePosted);

@@ -19,4 +19,4 @@ RestaurantDeleted.propTypes = {
   restaurantName: PropTypes.string.isRequired
 };
 
-export default withStyles(RestaurantDeleted, s);
+export default withStyles(s)(RestaurantDeleted);

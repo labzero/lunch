@@ -40,4 +40,4 @@ class ContentPage extends Component {
 
 }
 
-export default withStyles(ContentPage, s);
+export default withStyles(s)(ContentPage);

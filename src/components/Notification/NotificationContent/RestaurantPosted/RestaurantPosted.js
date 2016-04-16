@@ -17,4 +17,4 @@ RestaurantPosted.propTypes = {
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
-export default withStyles(RestaurantPosted, s);
+export default withStyles(s)(RestaurantPosted);

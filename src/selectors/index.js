@@ -1,4 +1,4 @@
-
+import { mock } from 'mocktail';
 import { getRestaurantIds, getRestaurantEntities, getRestaurantById } from './restaurants';
 import { getVoteEntities, getVoteById } from './votes';
 import { getTags } from './tags';

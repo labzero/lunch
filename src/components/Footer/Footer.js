@@ -67,4 +67,4 @@ Footer.propTypes = {
   openEmailWhitelist: PropTypes.func.isRequired
 };
 
-export default withStyles(Footer, s);
+export default withStyles(s)(Footer);

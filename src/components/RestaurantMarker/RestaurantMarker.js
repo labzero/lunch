@@ -83,7 +83,7 @@ InnerRestaurantMarker.propTypes = {
   handleMarkerClick: PropTypes.func.isRequired
 };
 
-const StyledRestaurantMarker = withStyles(InnerRestaurantMarker, s);
+const StyledRestaurantMarker = withStyles(s)(InnerRestaurantMarker);
 
 const RestaurantMarker = ({
   ...props

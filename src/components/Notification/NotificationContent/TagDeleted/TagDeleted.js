@@ -16,4 +16,4 @@ TagDeleted.propTypes = {
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
-export default withStyles(TagDeleted, s);
+export default withStyles(s)(TagDeleted);

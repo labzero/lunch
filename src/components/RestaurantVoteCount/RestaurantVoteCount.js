@@ -55,4 +55,4 @@ export class _RestaurantVoteCount extends Component {
   }
 }
 
-export default withStyles(_RestaurantVoteCount, s);
+export default withStyles(s)(_RestaurantVoteCount);

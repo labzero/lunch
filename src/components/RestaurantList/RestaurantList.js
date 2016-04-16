@@ -27,4 +27,4 @@ RestaurantList.propTypes = {
   ids: PropTypes.array.isRequired
 };
 
-export default withStyles(RestaurantList, s);
+export default withStyles(s)(RestaurantList);

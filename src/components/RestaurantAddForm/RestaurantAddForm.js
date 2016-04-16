@@ -48,4 +48,4 @@ class RestaurantAddForm extends Component {
 
 }
 
-export default withStyles(RestaurantAddForm, s);
+export default withStyles(s)(RestaurantAddForm);

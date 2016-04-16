@@ -21,4 +21,4 @@ VoteDeleted.propTypes = {
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
-export default withStyles(VoteDeleted, s);
+export default withStyles(s)(VoteDeleted);

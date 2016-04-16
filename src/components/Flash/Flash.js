@@ -22,4 +22,4 @@ class Flash extends Component {
 
 }
 
-export default withStyles(Flash, s);
+export default withStyles(s)(Flash);

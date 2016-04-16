@@ -22,4 +22,4 @@ EmailWhitelist.propTypes = {
   setEmailWhitelistInputValue: PropTypes.func.isRequired
 };
 
-export default withStyles(EmailWhitelist, s);
+export default withStyles(s)(EmailWhitelist);

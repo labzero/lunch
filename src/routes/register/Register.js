@@ -9,23 +9,22 @@
 
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import s from './Login.scss';
+import s from './Register.scss';
 
-const Login = ({ user }) => {
-  let content = <div />;
-  if (user.id === undefined) {
-    content = (
-      <div className={s.root}>
-        <div className={s.flexContainer}><a href="/login">Log In</a></div>
+const title = 'New User Registration';
+
+function Register(props, context) {
+  context.setTitle(title);
+  return (
+    <div className={s.root}>
+      <div className={s.container}>
+        <h1>{title}</h1>
+        <p>...</p>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
-  return content;
-};
+Register.contextTypes = { setTitle: PropTypes.func.isRequired };
 
-Login.propTypes = {
-  user: PropTypes.object.isRequired
-};
-
-export default withStyles(s)(Login);
+export default withStyles(s)(Register);

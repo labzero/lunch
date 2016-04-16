@@ -1,8 +1,10 @@
-jest.unmock('../ModalSection');
+/* eslint-env mocha */
+/* eslint-disable padded-blocks, no-unused-expressions */
 
-import ModalSection from '../ModalSection';
-import DeleteRestaurantModalContainer from '../../../containers/DeleteRestaurantModalContainer';
+import ModalSection from './ModalSection';
+import DeleteRestaurantModalContainer from '../../containers/DeleteRestaurantModalContainer';
 import React from 'react';
+import { expect } from 'chai';
 import { shallow } from 'enzyme';
 
 const context = { insertCss: () => {} };
@@ -14,7 +16,6 @@ describe('ModalSection', () => {
     props = {
       modals: {}
     };
-    window.ReconnectingWebSocket = jest.fn();
   });
 
   it('adds a modal if there is data', () => {
@@ -22,6 +23,6 @@ describe('ModalSection', () => {
     const wrapper = shallow(
       <ModalSection {...props}><div /></ModalSection>,
     { context });
-    expect(wrapper.find(DeleteRestaurantModalContainer).length).toBe(1);
+    expect(wrapper.find(DeleteRestaurantModalContainer).length).to.eq(1);
   });
 });

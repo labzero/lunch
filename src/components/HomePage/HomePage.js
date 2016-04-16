@@ -54,4 +54,4 @@ export class _HomePage extends Component {
 
 }
 
-export default withStyles(_HomePage, s);
+export default withStyles(s)(_HomePage);

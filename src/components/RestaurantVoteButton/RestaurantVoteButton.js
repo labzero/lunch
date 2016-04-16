@@ -31,4 +31,4 @@ _RestaurantVoteButton.propTypes = {
   userVotes: PropTypes.array.isRequired
 };
 
-export default withStyles(_RestaurantVoteButton, s);
+export default withStyles(s)(_RestaurantVoteButton);

@@ -59,4 +59,4 @@ _RestaurantAddTagForm.propTypes = {
   tags: PropTypes.array.isRequired
 };
 
-export default withStyles(withStyles(_RestaurantAddTagForm, autosuggestTheme), s);
+export default withStyles(autosuggestTheme, s)(_RestaurantAddTagForm);

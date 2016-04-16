@@ -30,4 +30,4 @@ RestaurantDecision.propTypes = {
   loggedIn: PropTypes.bool.isRequired
 };
 
-export default withStyles(RestaurantDecision, s);
+export default withStyles(s)(RestaurantDecision);

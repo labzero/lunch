@@ -71,4 +71,4 @@ RestaurantDropdown.propTypes = {
   decide: PropTypes.func.isRequired
 };
 
-export default withStyles(RestaurantDropdown, s);
+export default withStyles(s)(RestaurantDropdown);

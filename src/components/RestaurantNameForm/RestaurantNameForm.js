@@ -49,4 +49,4 @@ RestaurantNameForm.propTypes = {
   hideEditNameForm: PropTypes.func.isRequired,
 };
 
-export default withStyles(RestaurantNameForm, s);
+export default withStyles(s)(RestaurantNameForm);

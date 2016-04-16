@@ -56,4 +56,4 @@ class Notification extends Component {
 
 }
 
-export default withStyles(Notification, s);
+export default withStyles(s)(Notification);

@@ -16,4 +16,4 @@ RestaurantMapSettings.propTypes = {
   setShowUnvoted: PropTypes.func.isRequired
 };
 
-export default withStyles(RestaurantMapSettings, s);
+export default withStyles(s)(RestaurantMapSettings);

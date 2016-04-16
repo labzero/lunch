@@ -82,4 +82,4 @@ class RestaurantMap extends Component {
   }
 }
 
-export default withStyles(RestaurantMap, s);
+export default withStyles(s)(RestaurantMap);

@@ -15,4 +15,4 @@ TagManager.propTypes = {
   tags: PropTypes.arrayOf(PropTypes.number).isRequired,
 };
 
-export default withStyles(TagManager, s);
+export default withStyles(s)(TagManager);

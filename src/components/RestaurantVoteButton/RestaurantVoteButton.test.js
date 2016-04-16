@@ -1,7 +1,10 @@
-jest.unmock('../RestaurantVoteButton');
+/* eslint-env mocha */
+/* eslint-disable padded-blocks, no-unused-expressions */
 
-import { _RestaurantVoteButton as RestaurantVoteButton } from '../RestaurantVoteButton';
+import { _RestaurantVoteButton as RestaurantVoteButton } from './RestaurantVoteButton';
 import React from 'react';
+import sinon from 'sinon';
+import { expect } from 'chai';
 import { shallow } from 'enzyme';
 
 describe('RestaurantVoteButton', () => {
@@ -9,7 +12,7 @@ describe('RestaurantVoteButton', () => {
 
   beforeEach(() => {
     props = {
-      handleClick: jest.fn(),
+      handleClick: sinon.mock(),
       userVotes: []
     };
   });
@@ -18,6 +21,6 @@ describe('RestaurantVoteButton', () => {
     props.userVotes.push({ id: 1 });
 
     const wrapper = shallow(<RestaurantVoteButton {...props} />);
-    expect(wrapper.text()).toEqual('-1');
+    expect(wrapper.text()).to.eq('-1');
   });
 });

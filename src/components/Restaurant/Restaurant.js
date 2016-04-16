@@ -107,4 +107,4 @@ _Restaurant.propTypes = {
   removeTag: PropTypes.func.isRequired,
 };
 
-export default withStyles(_Restaurant, s);
+export default withStyles(s)(_Restaurant);

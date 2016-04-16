@@ -24,4 +24,4 @@ NotificationList.propTypes = {
   notifications: PropTypes.array.isRequired
 };
 
-export default withStyles(NotificationList, s);
+export default withStyles(s)(NotificationList);
