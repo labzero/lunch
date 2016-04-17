@@ -1,39 +1,18 @@
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './TagManager.scss';
-import TagContainer from '../../containers/TagContainer';
+import TagManagerItemContainer from '../../containers/TagManagerItemContainer';
 
-const TagManager = ({ tags, showDelete, handleDeleteClicked }) => (
+const TagManager = ({ tags }) => (
   <div className={s.root}>
     <ul className={s.list}>
-      {tags.map(item => {
-        const boundHandleDeleteClicked = handleDeleteClicked.bind(undefined, item.id);
-
-        return (
-          <li key={item.id}>
-            <span className={s.tagContainer}>
-              <TagContainer
-                id={item.id}
-                name={item.name}
-                showDelete={showDelete}
-                onDeleteClicked={boundHandleDeleteClicked}
-              />
-            </span>
-            ({item.restaurant_count})
-          </li>
-        );
-      })}
+      {tags.map(id => <TagManagerItemContainer id={id} key={`tagManagerItem_${id}`} />)}
     </ul>
   </div>
 );
 
 TagManager.propTypes = {
-  tags: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired
-  })),
-  showDelete: PropTypes.bool.isRequired,
-  handleDeleteClicked: PropTypes.func.isRequired
+  tags: PropTypes.arrayOf(PropTypes.number).isRequired,
 };
 
 export default withStyles(TagManager, s);

@@ -1,19 +1,11 @@
 import { connect } from 'react-redux';
-import { showModal } from '../actions/modals';
+import { getTagIds } from '../selectors/tags';
 import TagManager from '../components/TagManager';
 
 const mapStateToProps = state => ({
-  tags: state.tags.items,
-  showDelete: state.user.id !== undefined
-});
-
-const mapDispatchToProps = dispatch => ({
-  handleDeleteClicked(id) {
-    dispatch(showModal('deleteTag', { tagId: id }));
-  }
+  tags: getTagIds(state)
 });
 
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  mapStateToProps
 )(TagManager);

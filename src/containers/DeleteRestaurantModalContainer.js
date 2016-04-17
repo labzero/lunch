@@ -7,7 +7,7 @@ import DeleteRestaurantModal from '../components/DeleteRestaurantModal';
 const modalName = 'deleteRestaurant';
 
 const mapStateToProps = state => ({
-  restaurant: getRestaurantById(state, { restaurantId: state.modals[modalName].restaurantId }),
+  restaurant: getRestaurantById(state, state.modals[modalName].restaurantId),
   shown: !!state.modals[modalName].shown
 });
 
