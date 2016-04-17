@@ -1,6 +1,8 @@
 import ActionTypes from './constants/ActionTypes';
 import { getRestaurantIds, getRestaurantById } from './selectors/restaurants';
 import { getTagIds, getTagById } from './selectors/tags';
+import * as schemas from './schemas';
+import { normalize, arrayOf } from 'normalizr';
 import update from 'react-addons-update';
 import uuid from 'node-uuid';
 
@@ -11,8 +13,8 @@ const isFetching = state =>
 
 export const restaurants = new Map([
   [ActionTypes.SORT_RESTAURANTS, state =>
-    Object.assign({}, state, {
-      items: update(state.items, {
+    update(state, {
+      items: {
         result: {
           $set: state.items.result.map((id, index) => {
             const item = state.items.entities.restaurants[id];
@@ -24,7 +26,7 @@ export const restaurants = new Map([
             return a.sortIndex - b.sortIndex;
           }).map(item => item.id)
         }
-      })
+      }
     })
   ],
   [ActionTypes.INVALIDATE_RESTAURANTS, state =>
@@ -42,7 +44,7 @@ export const restaurants = new Map([
     Object.assign({}, state, {
       isFetching: false,
       didInvalidate: false,
-      items: action.items
+      items: normalize(action.items, arrayOf(schemas.restaurant))
     })
   ],
   [ActionTypes.POST_RESTAURANT, isFetching],
@@ -80,41 +82,50 @@ export const restaurants = new Map([
   ],
   [ActionTypes.RENAME_RESTAURANT, isFetching],
   [ActionTypes.RESTAURANT_RENAMED, (state, action) =>
-    Object.assign({}, state, {
-      isFetching: false,
-      items: state.items.map(item => {
-        if (item.id === action.id) {
-          return Object.assign({}, item, action.fields);
-        }
-        return item;
-      })
-    })
-  ],
-  [ActionTypes.POST_VOTE, isFetching],
-  [ActionTypes.VOTE_POSTED, (state, action) => Object.assign({}, state, {
-    isFetching: false,
-    items: update(state.items, {
-      entities: {
-        restaurants: {
-          [action.vote.restaurant_id]: {
-            votes: {
-              $push: [action.vote.id]
-            }
-          }
-        },
-        votes: {
-          $merge: {
-            [action.vote.id]: action.vote
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      items: {
+        entities: {
+          [action.id]: {
+            $merge: action.fields
           }
         }
       }
     })
-  })],
+  ],
+  [ActionTypes.POST_VOTE, isFetching],
+  [ActionTypes.VOTE_POSTED, (state, action) =>
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      items: {
+        entities: {
+          restaurants: {
+            [action.vote.restaurant_id]: {
+              votes: {
+                $push: [action.vote.id]
+              }
+            }
+          },
+          votes: {
+            $merge: {
+              [action.vote.id]: action.vote
+            }
+          }
+        }
+      }
+    })
+  ],
   [ActionTypes.DELETE_VOTE, isFetching],
   [ActionTypes.VOTE_DELETED, (state, action) =>
-    Object.assign({}, state, {
-      isFetching: false,
-      items: update(state.items, {
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      items: {
         entities: {
           restaurants: {
             [action.restaurantId]: {
@@ -124,7 +135,7 @@ export const restaurants = new Map([
             }
           }
         }
-      })
+      }
     })
   ],
   [ActionTypes.POST_NEW_TAG_TO_RESTAURANT, isFetching],
