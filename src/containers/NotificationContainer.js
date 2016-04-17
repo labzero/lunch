@@ -1,4 +1,7 @@
 import { connect } from 'react-redux';
+import { getRestaurantById } from '../selectors/restaurants';
+import { getTagById } from '../selectors/tags';
+import { getUserById } from '../selectors/users';
 import { expireNotification } from '../actions/notifications';
 import { showMapAndInfoWindow } from '../actions/mapUi';
 import Notification from '../components/Notification';
@@ -15,13 +18,13 @@ const mapStateToProps = () => {
       if (vals.restaurant) {
         restaurantName = vals.restaurant.name;
       } else if (vals.restaurantId) {
-        restaurantName = state.restaurants.items.find(r => r.id === vals.restaurantId).name;
+        restaurantName = getRestaurantById(state, vals).name;
       }
       let tagName;
       if (vals.tag) {
         tagName = vals.tag.name;
       } else if (vals.tagId) {
-        tagName = state.tags.items.find(t => t.id === vals.tagId).name;
+        tagName = getTagById(state, vals).name;
       }
       contentProps = {
         loggedIn: state.user.id !== undefined,
@@ -30,7 +33,7 @@ const mapStateToProps = () => {
         newName: vals.newName
       };
       if (contentProps.loggedIn) {
-        contentProps.user = vals.userId ? state.users.items.find(u => u.id === vals.userId).name : undefined;
+        contentProps.user = vals.userId ? getUserById(state, vals).name : undefined;
       }
     }
     return {

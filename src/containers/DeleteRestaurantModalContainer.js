@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { getRestaurantById } from '../selectors/restaurants';
 import { removeRestaurant } from '../actions/restaurants';
 import { hideModal } from '../actions/modals';
 import DeleteRestaurantModal from '../components/DeleteRestaurantModal';
@@ -6,7 +7,7 @@ import DeleteRestaurantModal from '../components/DeleteRestaurantModal';
 const modalName = 'deleteRestaurant';
 
 const mapStateToProps = state => ({
-  restaurant: state.restaurants.items.find(r => r.id === state.modals[modalName].restaurantId),
+  restaurant: getRestaurantById(state, { restaurantId: state.modals[modalName].restaurantId }),
   shown: !!state.modals[modalName].shown
 });
 
@@ -18,8 +19,7 @@ const mapDispatchToProps = dispatch => ({
 });
 
 const mergeProps = (stateProps, dispatchProps) => Object.assign(stateProps, dispatchProps, {
-  shown: stateProps.shown && stateProps.restaurant !== undefined,
-  restaurant: stateProps.restaurant || {},
+  restaurantName: stateProps.restaurant.name,
   deleteRestaurant(event) {
     event.preventDefault();
     dispatchProps.dispatch(removeRestaurant(stateProps.restaurant.id));

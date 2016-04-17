@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { getRestaurants } from '../selectors/restaurants';
 import { addRestaurant } from '../actions/restaurants';
 import { scroller } from 'react-scroll';
 import RestaurantAddForm from '../components/RestaurantAddForm';
@@ -15,7 +16,7 @@ const mapStateToProps = state => ({
     }
     return suggest.description;
   },
-  restaurants: state.restaurants.items
+  restaurants: getRestaurants(state)
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -35,7 +36,7 @@ const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, 
     }
     suggestCache = [];
     geosuggest.update('');
-    const existingRestaurant = stateProps.restaurants.find(restaurant => restaurant.place_id === placeId);
+    const existingRestaurant = stateProps.restaurants.find(r => r.place_id === placeId);
     if (existingRestaurant === undefined) {
       dispatchProps.dispatch(addRestaurant(name, placeId, address, lat, lng));
     } else {

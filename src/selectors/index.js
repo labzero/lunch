@@ -1,3 +1,4 @@
+import { makeWrapper } from './helpers';
 import { getRestaurantIds, getRestaurantEntities, getRestaurantById } from './restaurants';
 import { getVoteEntities, getVoteById } from './votes';
 import { getTags } from './tags';
@@ -5,8 +6,6 @@ import { getTagFilters } from './tagFilters';
 import { getUserId, getUserById } from './users';
 import { getMapUi } from './mapUi';
 import { createSelector } from 'reselect';
-
-const makeWrapper = selector => state => props => selector(state, props);
 
 export const getUserByVoteId = (state, voteId) => getUserById(state, getVoteById(state, voteId).user_id);
 

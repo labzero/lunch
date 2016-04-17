@@ -1,12 +1,14 @@
 import { connect } from 'react-redux';
+import { getRestaurantById } from '../selectors/restaurants';
+import { getListUiItemForId } from '../selectors/listUi';
 import { showModal } from '../actions/modals';
 import { showMapAndInfoWindow } from '../actions/mapUi';
 import { showEditNameForm, setEditNameFormValue } from '../actions/listUi';
 import RestaurantDropdown from '../components/RestaurantDropdown';
 
 const mapStateToProps = (state, ownProps) => ({
-  restaurant: state.restaurants.items.find(restaurant => restaurant.id === ownProps.id),
-  listUiItem: state.listUi[ownProps.id] || {},
+  restaurant: getRestaurantById(state, ownProps.id),
+  listUiItem: getListUiItemForId(state, ownProps.id),
   ...ownProps
 });
 

@@ -23,7 +23,7 @@ export class _RestaurantAddTagForm extends Component {
           getSuggestionValue={getSuggestionValue}
           renderSuggestion={renderSuggestion}
           inputProps={{
-            value: this.props.addTagAutosuggestValue,
+            value: this.props.autosuggestValue,
             onChange: this.props.setAddTagAutosuggestValue,
             ref: i => { this._input = i; }
           }}
@@ -34,7 +34,7 @@ export class _RestaurantAddTagForm extends Component {
         <button
           className={`btn btn-sm btn-primary ${s.button}`}
           type="submit"
-          disabled={this.props.addTagAutosuggestValue === ''}
+          disabled={this.props.autosuggestValue === ''}
         >
           add
         </button>
@@ -54,7 +54,7 @@ _RestaurantAddTagForm.propTypes = {
   addNewTagToRestaurant: PropTypes.func.isRequired,
   handleSuggestionSelected: PropTypes.func.isRequired,
   hideAddTagForm: PropTypes.func.isRequired,
-  addTagAutosuggestValue: PropTypes.string.isRequired,
+  autosuggestValue: PropTypes.string.isRequired,
   setAddTagAutosuggestValue: PropTypes.func.isRequired,
   tags: PropTypes.array.isRequired
 };

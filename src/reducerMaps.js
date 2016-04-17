@@ -1,4 +1,6 @@
 import ActionTypes from './constants/ActionTypes';
+import { getRestaurantIds, getRestaurantById } from './selectors/restaurants';
+import { getTagIds, getTagById } from './selectors/tags';
 import update from 'react-addons-update';
 import uuid from 'node-uuid';
 
@@ -45,19 +47,35 @@ export const restaurants = new Map([
   ],
   [ActionTypes.POST_RESTAURANT, isFetching],
   [ActionTypes.RESTAURANT_POSTED, (state, action) =>
-    Object.assign({}, state, {
-      isFetching: false,
-      items: [
-        action.restaurant,
-        ...state.items
-      ]
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      items: {
+        result: {
+          $unshift: [action.restaurant.id]
+        },
+        entities: {
+          restaurants: {
+            $merge: {
+              [action.restaurant.id]: action.restaurant
+            }
+          }
+        }
+      }
     })
   ],
   [ActionTypes.DELETE_RESTAURANT, isFetching],
   [ActionTypes.RESTAURANT_DELETED, (state, action) =>
-    Object.assign({}, state, {
-      isFetching: false,
-      items: state.items.filter(item => item.id !== action.id)
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      items: {
+        result: {
+          $splice: [[getRestaurantIds({ restaurants: state }).indexOf(action.id), 1]]
+        }
+      }
     })
   ],
   [ActionTypes.RENAME_RESTAURANT, isFetching],
@@ -101,7 +119,7 @@ export const restaurants = new Map([
           restaurants: {
             [action.restaurantId]: {
               votes: {
-                $splice: [[state.items.entities.restaurants[action.restaurantId].votes.indexOf(action.id), 1]]
+                $splice: [[getRestaurantById({ restaurants: state }, action.restaurantId).votes.indexOf(action.id), 1]]
               }
             }
           }
@@ -111,53 +129,59 @@ export const restaurants = new Map([
   ],
   [ActionTypes.POST_NEW_TAG_TO_RESTAURANT, isFetching],
   [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT, (state, action) =>
-    Object.assign({}, state, {
-      isFetching: false,
-      items: state.items.map(item => {
-        if (item.id === action.restaurantId) {
-          return Object.assign({}, item, {
-            tags: [
-              ...item.tags,
-              action.tag.id
-            ]
-          });
-        }
-        return item;
-      })
-    })
-  ],
-  [ActionTypes.POST_TAG_TO_RESTAURANT, isFetching],
-  [ActionTypes.POSTED_TAG_TO_RESTAURANT, (state, action) =>
-    Object.assign({}, state, {
-      isFetching: false,
-      items: state.items.map(item => {
-        if (item.id === action.restaurantId) {
-          return Object.assign({}, item, {
-            tags: [
-              ...item.tags,
-              action.id
-            ]
-          });
-        }
-        return item;
-      })
-    })
-  ],
-  [ActionTypes.DELETE_TAG_FROM_RESTAURANT, isFetching],
-  [ActionTypes.DELETED_TAG_FROM_RESTAURANT, (state, action) =>
-    Object.assign({}, state, {
-      isFetching: false,
-      items: update(state.items, {
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      items: {
         entities: {
           restaurants: {
             [action.restaurantId]: {
               tags: {
-                $splice: [[state.items.entities.restaurants[action.restaurantId].tags.indexOf(action.id), 1]]
+                $push: [action.tag.id]
               }
             }
           }
         }
-      })
+      }
+    })
+  ],
+  [ActionTypes.POST_TAG_TO_RESTAURANT, isFetching],
+  [ActionTypes.POSTED_TAG_TO_RESTAURANT, (state, action) =>
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      items: {
+        entities: {
+          restaurants: {
+            [action.restaurantId]: {
+              tags: {
+                $push: [action.id]
+              }
+            }
+          }
+        }
+      }
+    })
+  ],
+  [ActionTypes.DELETE_TAG_FROM_RESTAURANT, isFetching],
+  [ActionTypes.DELETED_TAG_FROM_RESTAURANT, (state, action) =>
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      items: {
+        entities: {
+          restaurants: {
+            [action.restaurantId]: {
+              tags: {
+                $splice: [[getRestaurantById({ restaurants: state }, action.restaurantId).tags.indexOf(action.id), 1]]
+              }
+            }
+          }
+        }
+      }
     })
   ]
 ]);
@@ -369,11 +393,13 @@ export const pageUi = new Map([
 
 export const modals = new Map([
   [ActionTypes.SHOW_MODAL, (state, action) =>
-    Object.assign({}, state, {
-      [action.name]: Object.assign({}, state[action.name], {
-        shown: true,
-        ...action.opts
-      })
+    update(state, {
+      $merge: {
+        [action.name]: {
+          shown: true,
+          ...action.opts
+        }
+      }
     })
   ],
   [ActionTypes.HIDE_MODAL, (state, action) =>
@@ -395,49 +421,66 @@ export const modals = new Map([
 
 export const tags = new Map([
   [ActionTypes.POSTED_TAG_TO_RESTAURANT, (state, action) =>
-    Object.assign({}, state, {
-      items: state.items.map(item => {
-        if (item.id === action.id) {
-          return Object.assign({}, item, {
-            restaurant_count: parseInt(item.restaurant_count, 10) + 1
-          });
-        }
-        return item;
-      })
-    })
-  ],
-  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT, (state, action) =>
-    Object.assign({}, state, {
-      items: [
-        ...state.items,
-        action.tag
-      ]
-    })
-  ],
-  [ActionTypes.DELETED_TAG_FROM_RESTAURANT, (state, action) =>
-    Object.assign({}, state, {
-      isFetching: false,
-      items: update(state.items, {
+    update(state, {
+      items: {
         entities: {
           tags: {
-            [action.restaurantId]: {
-              tags: {
-                $merge: {
-                  restaurant_count:
-                    parseInt(state.items.entities.tags[action.restaurantId].tags.restaurant_count, 10) - 1
-                }
+            [action.id]: {
+              restaurant_count: {
+                $set: parseInt(getTagById({ tags: state }, action.id).restaurant_count, 10) + 1
               }
             }
           }
         }
-      })
+      }
+    })
+  ],
+  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT, (state, action) =>
+    update(state, {
+      items: {
+        result: {
+          $push: [action.tag.id]
+        },
+        entities: {
+          tags: {
+            $merge: {
+              [action.tag.id]: action.tag
+            }
+          }
+        }
+      }
+    })
+  ],
+  [ActionTypes.DELETED_TAG_FROM_RESTAURANT, (state, action) =>
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      items: {
+        entities: {
+          tags: {
+            [action.id]: {
+              $merge: {
+                restaurant_count:
+                  parseInt(state.items.entities.tags[action.id].restaurant_count, 10) - 1
+              }
+            }
+          }
+        }
+      }
     })
   ],
   [ActionTypes.DELETE_TAG, isFetching],
   [ActionTypes.TAG_DELETED, (state, action) =>
-    Object.assign({}, state, {
-      isFetching: false,
-      items: state.items.filter(item => item.id !== action.id)
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      items: {
+        result: {
+          $splice: [[getTagIds({ tags: state }).indexOf(action.id), 1]]
+        }
+      }
     })
   ]
 ]);

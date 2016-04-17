@@ -1,20 +1,24 @@
 import { connect } from 'react-redux';
+import { getRestaurantById } from '../selectors/restaurants';
+import { getListUiItemForId } from '../selectors/listUi';
+import { makeGetTagList } from '../selectors';
 import { hideAddTagForm, setAddTagAutosuggestValue } from '../actions/listUi';
 import { addNewTagToRestaurant, addTagToRestaurant } from '../actions/restaurants';
-import { generateTagList } from '../helpers/TagAutosuggestHelper';
 import RestaurantAddTagForm from '../components/RestaurantAddTagForm';
 
-const mapStateToProps = (state, ownProps) => {
-  const restaurant = state.restaurants.items.find(r => r.id === ownProps.id);
-  let tags = state.tags.items;
-  const addedTags = restaurant.tags;
-  const listUiItem = state.listUi[restaurant.id] || {};
-  const addTagAutosuggestValue = listUiItem.addTagAutosuggestValue || '';
-  tags = generateTagList(tags, addedTags, addTagAutosuggestValue);
-  return {
-    ...ownProps,
-    tags,
-    addTagAutosuggestValue
+const mapStateToProps = () => {
+  const getTagList = makeGetTagList();
+  return (state, ownProps) => {
+    const restaurant = getRestaurantById(state, ownProps.id);
+    const addedTags = restaurant.tags;
+    const listUiItem = getListUiItemForId(state, ownProps.id);
+    const autosuggestValue = listUiItem.addTagAutosuggestValue || '';
+    const tags = getTagList(state, { addedTags, autosuggestValue });
+    return {
+      ...ownProps,
+      tags,
+      autosuggestValue
+    };
   };
 };
 
@@ -34,7 +38,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
   addNewTagToRestaurant(event) {
     event.preventDefault();
-    dispatchProps.dispatch(addNewTagToRestaurant(ownProps.id, stateProps.addTagAutosuggestValue));
+    dispatchProps.dispatch(addNewTagToRestaurant(ownProps.id, stateProps.autosuggestValue));
   }
 });
 
