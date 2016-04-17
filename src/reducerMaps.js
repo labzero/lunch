@@ -88,8 +88,10 @@ export const restaurants = new Map([
       },
       items: {
         entities: {
-          [action.id]: {
-            $merge: action.fields
+          restaurants: {
+            [action.id]: {
+              $merge: action.fields
+            }
           }
         }
       }
