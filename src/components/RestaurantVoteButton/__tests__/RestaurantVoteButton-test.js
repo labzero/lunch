@@ -10,13 +10,12 @@ describe('RestaurantVoteButton', () => {
   beforeEach(() => {
     props = {
       handleClick: jest.fn(),
-      user: { id: 1 },
-      votes: []
+      userVotes: []
     };
   });
 
   it('renders -1 when user has already voted', () => {
-    props.votes.push({ user_id: 1 });
+    props.userVotes.push({ id: 1 });
 
     const wrapper = shallow(<RestaurantVoteButton {...props} />);
     expect(wrapper.text()).toEqual('-1');

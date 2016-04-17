@@ -12,7 +12,7 @@ describe('RestaurantAddTagForm', () => {
       addNewTagToRestaurant: jest.fn(),
       handleSuggestionSelected: jest.fn(),
       hideAddTagForm: jest.fn(),
-      addTagAutosuggestValue: '',
+      autosuggestValue: '',
       setAddTagAutosuggestValue: jest.fn(),
       tags: []
     };

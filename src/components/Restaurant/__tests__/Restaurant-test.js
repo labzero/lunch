@@ -10,17 +10,17 @@ describe('Restaurant', () => {
 
   beforeEach(() => {
     props = {
-      id: 1,
-      name: 'Food Barn',
-      address: '1234',
-      user: { id: 1 },
-      votes: [],
-      tags: [],
+      restaurant: {
+        tags: []
+      },
       shouldShowAddTagArea: true,
+      shouldShowDropdown: true,
+      user: {
+        id: 1
+      },
       listUiItem: {},
       showAddTagForm: jest.fn(),
       showMapAndInfoWindow: jest.fn(),
-      showTagDelete: true,
       removeTag: jest.fn()
     };
   });

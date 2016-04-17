@@ -4,7 +4,11 @@ import { removeVote, addVote } from '../actions/restaurants';
 import RestaurantVoteButton from '../components/RestaurantVoteButton';
 
 const mapStateToProps = () => {
+  console.log('here is mgrv');
+  console.log(makeGetRestaurantVotesForUser);
   const getRestaurantVotesForUser = makeGetRestaurantVotesForUser();
+  console.log('here is grv');
+  console.log(getRestaurantVotesForUser);
   return (state, ownProps) => {
     const props = { restaurantId: ownProps.id, userId: state.user.id };
     return {

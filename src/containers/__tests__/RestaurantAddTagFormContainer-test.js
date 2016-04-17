@@ -1,13 +1,27 @@
 jest.unmock('../RestaurantAddTagFormContainer');
 jest.unmock('../../helpers/TagAutosuggestHelper');
+jest.unmock('../../schemas');
 jest.unmock('react-redux');
 jest.unmock('redux');
+jest.unmock('normalizr');
+
+jest.doMock('../../selectors', () => {
+  return {
+    yeah: 'boiiii'
+  };
+});
 
 import RestaurantAddTagFormContainer from '../RestaurantAddTagFormContainer';
 import RestaurantAddTagForm from '../../components/RestaurantAddTagForm';
+import * as schemas from '../../schemas';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { createStore } from 'redux';
+import { normalize, arrayOf } from 'normalizr';
+import something from '../../selectors';
+
+console.log('here SOMETHING is')
+console.log(something);
 
 describe('RestaurantAddTagFormContainer', () => {
   let state;
@@ -17,13 +31,13 @@ describe('RestaurantAddTagFormContainer', () => {
     state = {
       listUi: {},
       restaurants: {
-        items: [{
+        items: normalize([{
           id: 1,
           tags: []
-        }]
+        }], arrayOf(schemas.restaurant))
       },
       tags: {
-        items: [{
+        items: normalize([{
           id: 1,
           name: 'take out'
         }, {
@@ -56,7 +70,7 @@ describe('RestaurantAddTagFormContainer', () => {
         }, {
           id: 11,
           name: 'chain'
-        }]
+        }], arrayOf(schemas.tag))
       }
     };
     props = {
@@ -71,14 +85,14 @@ describe('RestaurantAddTagFormContainer', () => {
   });
 
   it('omits added tags', () => {
-    state.restaurants.items[0].tags = [1, 2, 3, 4, 5];
+    state.restaurants.items.entities.restaurants['1'].tags = [1, 2, 3, 4, 5];
     const store = createStore(() => state, state);
     const wrapper = shallow(<RestaurantAddTagFormContainer {...props} />, { context: { store } });
     expect(wrapper.find(RestaurantAddTagForm).first().props().tags.length).toBe(6);
   });
 
   it('filters by query and added tags', () => {
-    state.restaurants.items[0].tags = [4];
+    state.restaurants.items.entities.restaurants['1'].tags = [4];
     state.listUi[1] = { addTagAutosuggestValue: 'x' };
     const store = createStore(() => state, state);
     const wrapper = shallow(<RestaurantAddTagFormContainer {...props} />, { context: { store } });

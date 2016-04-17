@@ -24,6 +24,7 @@ export const makeGetTagList = () =>
   createSelector(
     [getTags, getAddedTags, getAutosuggestValue],
     (allTags, addedTags, autosuggestValue) => {
+      console.log('making tag list');
       const escapedValue = escapeRegexCharacters(autosuggestValue.trim());
       const regex = new RegExp(`${escapedValue}`, 'i');
       return allTags
