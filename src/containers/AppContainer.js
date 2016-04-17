@@ -7,7 +7,6 @@ const mapStateToProps = (state, ownProps) => ({
   modals: state.modals,
   wsPort: state.wsPort,
   shouldScrollToTop: state.pageUi.shouldScrollToTop || false,
-  notifications: state.notifications,
   ...ownProps
 });
 

@@ -15,8 +15,7 @@ import FooterContainer from '../../containers/FooterContainer';
 import DeleteRestaurantModalContainer from '../../containers/DeleteRestaurantModalContainer';
 import TagManagerModalContainer from '../../containers/TagManagerModalContainer';
 import DeleteTagModalContainer from '../../containers/DeleteTagModalContainer';
-import NotificationContainer from '../../containers/NotificationContainer';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import NotificationListContainer from '../../containers/NotificationListContainer';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 
 class App extends Component {
@@ -28,8 +27,7 @@ class App extends Component {
     error: PropTypes.object,
     wsPort: PropTypes.number.isRequired,
     shouldScrollToTop: PropTypes.bool.isRequired,
-    scrolledToTop: PropTypes.func.isRequired,
-    notifications: PropTypes.array.isRequired
+    scrolledToTop: PropTypes.func.isRequired
   };
 
   static contextTypes = {
@@ -84,19 +82,7 @@ class App extends Component {
         <HeaderContainer />
         {this.props.children}
         <FooterContainer />
-        <ul className={s.notifications}>
-          <ReactCSSTransitionGroup
-            transitionName="notification"
-            transitionEnterTimeout={250}
-            transitionLeaveTimeout={1000}
-          >
-          {this.props.notifications.map(notification =>
-            <li className={s.notificationContainer} key={`notification_${notification.id}`}>
-              <NotificationContainer {...notification} />
-            </li>
-          )}
-          </ReactCSSTransitionGroup>
-        </ul>
+        <NotificationListContainer />
         {modals}
       </div>
     ) : this.props.children;
