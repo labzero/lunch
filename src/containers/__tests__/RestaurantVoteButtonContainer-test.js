@@ -1,6 +1,7 @@
 jest.unmock('../RestaurantVoteButtonContainer');
 jest.unmock('react-redux');
 jest.unmock('redux');
+jest.unmock('normalizr');
 
 import RestaurantVoteButtonContainer from '../RestaurantVoteButtonContainer';
 import { removeVote, addVote } from '../../actions/restaurants';
@@ -9,6 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { createStore } from 'redux';
 import action from '../../../test/helpers/action';
+import { makeGetRestaurantVotesForUser } from '../../selectors';
 
 describe('RestaurantVoteButtonContainer', () => {
   const state = {
@@ -26,9 +28,7 @@ describe('RestaurantVoteButtonContainer', () => {
   });
 
   it('adds a vote when votes are empty', () => {
-    props = {
-      votes: []
-    };
+    makeGetRestaurantVotesForUser.mockImplementation(() => () => ([]));
 
     const wrapper = shallow(<RestaurantVoteButtonContainer {...props} />, { context: { store } });
     wrapper.find(RestaurantVoteButton).first().props().handleClick();
@@ -36,12 +36,10 @@ describe('RestaurantVoteButtonContainer', () => {
   });
 
   it('removes a vote when user has voted', () => {
-    props = {
-      votes: [{
-        restaurant_id: 1,
-        user_id: 1
-      }]
-    };
+    makeGetRestaurantVotesForUser.mockImplementation(() => () => ([{
+      restaurant_id: 1,
+      user_id: 1
+    }]));
 
     const wrapper = shallow(<RestaurantVoteButtonContainer {...props} />, { context: { store } });
     wrapper.find(RestaurantVoteButton).first().props().handleClick();
