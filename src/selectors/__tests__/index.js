@@ -1,5 +1,4 @@
 jest.unmock('..');
-jest.unmock('../helpers');
 jest.unmock('reselect');
 
 import { getTags } from '../tags';

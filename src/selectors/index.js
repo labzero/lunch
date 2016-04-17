@@ -1,5 +1,5 @@
-import { makeWrapper } from './helpers';
-import { getRestaurantIds, getRestaurantEntities, getRestaurantById } from './restaurants';
+
+import { getRestaurantState, getRestaurantIds, getRestaurantEntities, getRestaurantById } from './restaurants';
 import { getVoteEntities, getVoteById } from './votes';
 import { getTags } from './tags';
 import { getTagFilters } from './tagFilters';
@@ -41,12 +41,12 @@ export const getAllOrUnvoted = createSelector(
 );
 
 export const getFilteredRestaurants = createSelector(
-  [getRestaurantIds, getTagFilters, makeWrapper(getRestaurantById)],
-  (restaurantIds, tagFilters, boundGetRestaurantById) => {
+  [getRestaurantIds, getTagFilters, getRestaurantEntities],
+  (restaurantIds, tagFilters, restaurantEntities) => {
     if (tagFilters.length === 0) { return restaurantIds; }
     return restaurantIds.filter(id =>
       tagFilters.every(tagFilter =>
-        boundGetRestaurantById(id).tags.includes(tagFilter)
+        restaurantEntities[id].tags.includes(tagFilter)
       )
     );
   }

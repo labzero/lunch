@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect';
 
+export const getRestaurantState = state => state.restaurants;
 export const getRestaurantIds = state => state.restaurants.items.result;
 export const getRestaurantEntities = state => state.restaurants.items.entities.restaurants;
 export const getRestaurantById = (state, props) =>
