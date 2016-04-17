@@ -9,11 +9,11 @@
 
 import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import s from './ErrorPage.scss';
+import s from './NotFoundPage.scss';
 
-const title = 'Error';
+const title = 'Page Not Found';
 
-class ErrorPage extends Component {
+class NotFoundPage extends Component {
 
   static contextTypes = {
     onSetTitle: PropTypes.func.isRequired,
@@ -22,17 +22,18 @@ class ErrorPage extends Component {
 
   componentWillMount() {
     this.context.onSetTitle(title);
+    this.context.onPageNotFound();
   }
 
   render() {
     return (
       <div>
         <h1>{title}</h1>
-        <p>Sorry, an critical error occurred on this page.</p>
+        <p>Sorry, but the page you were trying to view does not exist.</p>
       </div>
     );
   }
 
 }
 
-export default withStyles(ErrorPage, s);
+export default withStyles(NotFoundPage, s);

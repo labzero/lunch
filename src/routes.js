@@ -13,7 +13,7 @@ import fetch from './core/fetch';
 import AppContainer from './containers/AppContainer';
 import HomePageContainer from './containers/HomePageContainer';
 import ContentPage from './components/ContentPage';
-import ErrorPage from './components/ErrorPage';
+import NotFoundPage from './components/NotFoundPage';
 
 async function getContextComponent(location, callback) {
   const response = await fetch(`/api/content?path=${location.pathname}`);
@@ -30,6 +30,6 @@ export default () => (
       <Route path="about" getComponent={getContextComponent} />
       <Route path="privacy" getComponent={getContextComponent} />
     </Route>
-    <Route path="*" component={ErrorPage} />
+    <Route path="*" component={NotFoundPage} />
   </Route>
 );
