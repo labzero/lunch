@@ -11,7 +11,7 @@ const apikey = process.env.GOOGLE_SERVER_APIKEY;
 
 router
   .get('/', async (req, res) => {
-    Restaurant.findAllWithTagIds().then(all => {
+    Restaurant.scope('withTagIds').findAll().then(all => {
       res.status(200).send({ error: false, data: all });
     }).catch(err => errorCatcher(res, err));
   })

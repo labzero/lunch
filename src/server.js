@@ -133,7 +133,7 @@ server.get('*', async (req, res, next) => {
         res.redirect(302, redirectPath);
         return;
       }
-      const finds = [Restaurant.findAllWithTagIds(), Tag.scope('orderedByRestaurant').findAll()];
+      const finds = [Restaurant.scope('withTagIds').findAll(), Tag.scope('orderedByRestaurant').findAll()];
       if (req.user) {
         finds.push(User.findAll({ attributes: ['id', 'name'] }));
       }
