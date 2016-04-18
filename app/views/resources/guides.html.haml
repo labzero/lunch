@@ -5,13 +5,13 @@
   .resource-guides
     .resource-guide
       %h2= t('resources.guides.credit.title')
-      %small= t('resources.guides.revised_at', date: fhlb_date_long_alpha(Date.new(2015, 4, 22)))
+      %small= t('resources.guides.revised_at', date: fhlb_date_long_alpha(Date.new(2016, 4, 27)))
       = link_to_download_resource(t('global.view_pdf'), resources_download_path(file: :creditguide))
       = link_to(t('resources.guides.view_updates'), '#credit-guide-updates')
 
     .resource-guide
       %h2= t('resources.guides.collateral.title')
-      %small= t('resources.guides.revised_at', date: fhlb_date_long_alpha(Date.new(2015, 4, 22)))
+      %small= t('resources.guides.revised_at', date: fhlb_date_long_alpha(Date.new(2016, 4, 27)))
       = link_to_download_resource(t('global.view_pdf'), resources_download_path(file: :collateralguide))
       = link_to(t('resources.guides.view_updates'), '#collateral-guide-updates')
 
@@ -24,13 +24,13 @@
         - title = t("resources.guides.#{guide}.title")
         %a{name: "#{guide}-guide-updates"}
         %h2= t('resources.guides.updates', guide: title)
-        %h3= t('resources.guides.upcoming', guide: title)
-        %ul
-          - t("resources.guides.#{guide}.updates.upcoming").each do |update|
-            %li= I18n.interpolate(update, url: corporate_communications_path(category: :products)).html_safe
         - t("resources.guides.#{guide}.updates.revisions").each do |revision|
           %h3= t('resources.guides.revision', guide: title, date: fhlb_date_long_alpha(revision[:date]))
           %p= t('resources.guides.replace', guide: title)
           %ul
             - revision[:details].each do |detail|
-              %li= detail
+              %li= detail[:description]
+              - if detail[:details].present?
+                %ul
+                  - detail[:details].each do |detail|
+                    %li= detail[:description]

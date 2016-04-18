@@ -694,7 +694,7 @@ en:
         regulatory_authorities: Both programs are subject to examination by regulatory authorities, including the Federal Housing Finance Agency (FHFA), and are reviewed by the Bank’s Internal Audit department.
     guides:
       title: Guides
-      intro: "The Bank’s Credit and Collateral Guides contain comprehensive information about our products and services. For your convenience, recent changes to the guide are summarized below."
+      intro: "The Bank’s Credit and Collateral Guides contain comprehensive information about our products and services. For your convenience, recent changes to the guides are summarized below."
       revised_at: 'Revised: %{date}'
       view_updates: View Updates
       updates: 'Updates to the %{guide}'
@@ -708,20 +708,37 @@ en:
             - "Please refer to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
           revisions:
             -
+              date: '2016-04-07'
+              details:
+                -
+                  description: "Incorporated certain changes to the Bank’s capital stock requirements that were announced in Bulletin No. 1480 on June 16, 2015 (page 7)."
+                -
+                  description: "Clarified the requirements for reporting any breach of MPF representations or warranties (page 9)."
+                -
+                  description: "Adjusted the Community Financial Institution asset cap to $1,128 million for 2016 (page 10)."
+                -
+                  description: "Updated the Mortgage Partnership Finance® Program product description (pages 39-40). (“Mortgage Partnership Finance” is a registered trademark of the Federal Home Loan Bank of Chicago.)"
+                -
+                  description: "Updated the product descriptions of the following community programs: Affordable Housing Program, Individual Development and Empowerment Account Program, Workforce Initiative Subsidy for Homeownership Program, and Access to Housing and Economic Assistance for Development Program (pages 48-55)."
+                -
+                  description: "Removed references to the DN Auction-Indexed Advance, which the Bank no longer offers."
+                -
+                  description: "Removed references to stand-alone Interest Rate Swaps, Caps, and Floors, which the Bank no longer offers."
+            -
               date: '2015-04-22'
               details:
-                - "Incorporated certain changes to the Bank’s capital stock requirements that were announced in Bulletin 1470 on February 26, 2015 (page 8)."
-                - "Adjusted the Community Financial Institution asset cap to $1,123 million for 2015 (page 11)."
-                - "Added a product profile for the new Choice LIBOR Adjustable Rate Credit Advances and made releated revisions (pages 36-37, 42, 58 and 52)."
-                - "Removed references to the Homeownership Preservation Advance, which the Bank no longer offers."
-                - "Increased the maximum term for Standby Letters of Credit to 15 years (page 44)."
-                - "Added an appendix that summarizes the Bank’s wire transfer processing deadlines (page 69)."
-            -
-              date: '2014-10-30'
-              details:
-                - "Added the Mortgage Partnership Finance Program to the list of products the Bank currently offers and incorporated several revisions related to that program (pages 6, 9, 12, 22, 44-45)."
-                - "Adjusted the Community Financial Institution asset cap to $1,108 million for 2014 (page 11)."
-                - "Revised the description of prepayment fees for callable and putable advances (page 17)."
+                -
+                  description: "Incorporated certain changes to the Bank’s capital stock requirements that were announced in Bulletin 1470 on February 26, 2015 (page 8)."
+                -
+                  description: "Adjusted the Community Financial Institution asset cap to $1,123 million for 2015 (page 11)."
+                -
+                  description: "Added a product profile for the new Choice LIBOR Adjustable Rate Credit Advances and made related revisions (pages 36-37, 42, 48 and 52)."
+                -
+                  description: "Removed references to the Homeownership Preservation Advance, which the Bank no longer offers."
+                -
+                  description: "Increased the maximum term for Standby Letters of Credit to 15 years (page 44)."
+                -
+                  description: "Added an appendix that summarizes the Bank’s wire transfer processing deadlines (page 69)."
       collateral:
         title: Collateral Guide
         updates:
@@ -729,20 +746,44 @@ en:
             - "Please refer to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
           revisions:
             -
+              date: '2016-04-07'
+              details:
+                -
+                  description: "Added information on eligible members and what types of collateral they can pledge (pages 6-7)."
+                -
+                  description: "Adjusted the Community Financial Institution asset cap to $1,128 million for 2016 (pages 7 and 64)."
+                -
+                  description: "Eliminated the option to submit data on a quarterly basis under specific identification pledging. For loans pledged under specific identification, all data must be submitted on a monthly basis."
+                -
+                  description: "Incorporated the decreases in the borrowing capacities of certain securities as announced in Bulletin No. 1482, dated June 23, 2015 (pages 22-26)."
+                -
+                  description: "For non-depository Community Development Financial Institutions (CDFIs):"
+                  details:
+                    -
+                      description: "Revised the Eligible Securities: Borrowing Capacity Table III to include non-depository CDFIs (pages 26-27)."
+                    -
+                      description: "Clarified mortgage loan participation requirements (page 48)."
+                    -
+                      description: "Added a separate loan collateral borrowing capacity table (page 82)."
+                    -
+                      description: "Added Appendix B (page 99)."
+                -
+                  description: "Updated the list of ineligible mortgage loans (page 49)."
+                -
+                  description: "Increased loan collateral borrowing capacities for insurance company members (page 82)."
+                -
+                  description: "Updated the Field Review Discount Table (pages 94-96)."
+            -
               date: '2015-04-22'
               details:
-                - "Adjusted the Community Financial Institution asset cap to $1,123 million for 2015 (pages 7 and 62)."
-                - "Updated the list of ineligible loans (page 48)."
-                - "Clarified that members pledging mortgage loans under blanket lien with summary reporting are required to submit loan portfolio reports or other documentation every six months to support the Blanket Lien Collateral Eligibility Questionnaire or the Blanket Lien Collateral Certification (page 70)."
-                - "Updated the field review discount table (pages 91-93)."
-            -
-              date: '2014-10-30'
-              details:
-                - "Adjusted the Community Financial Institution asset cap to $1,108 million for 2014 (pages 7 and 62)."
-                - "Added a new section on the Bank’s Anti-Money Laundering Policy (page 18)."
-                - "Incorporated the increases in the borrowing capacities of certain securities announced in Bulletin No. 1148, dated April 8, 2014 (pages 21-25)."
-                - "Modified the Third-Party Document Custodian section to clarify the Bank’s requirements when a member contracts with a document storage provider to store documents for loans pledged to the Bank (page 58)."
-                - "Incorporated the increases in the borrowing capacities of certain loan collateral types announced in Bulletin No. 1455, dated July 9, 2014 (pages 79-80)."
+                -
+                  description: "Adjusted the Community Financial Institution asset cap to $1,123 million for 2015 (pages 7 and 62)."
+                -
+                  description: "Updated the list of ineligible loans (page 48)."
+                -
+                  description: "Clarified that members pledging mortgage loans under blanket lien with summary reporting are required to submit loan portfolio reports or other documentation every six months to support the Blanket Lien Collateral Eligibility Questionnaire or the Blanket Lien Collateral Certification (page 70)."
+                -
+                  description: "Updated the field review discount table (pages 91-93)."
       collateral_review:
         title: Collateral Field Review Process
     fee_schedules:
