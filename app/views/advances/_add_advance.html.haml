@@ -1,0 +1,7 @@
+- title ||= t('advances.add_advance.title')
+- @page_title = t('global.page_meta_title', title: title)
+.advances.row
+  .add-advance-loading-overlay
+  %h1= title
+  .advances-add
+    = yield

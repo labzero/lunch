@@ -93,7 +93,7 @@ module MAPI
 
           member_sta_cursor_string = <<-SQL
             SELECT
-            STX_CURRENT_LEDGER_BALANCE
+            STX_CURRENT_LEDGER_BALANCE, STX_UPDATE_DATE
             FROM PORTFOLIOS.STA e, PORTFOLIOS.STA_TRANS f
             WHERE e.STA_ACCOUNT_TYPE = 1
             AND  f.STA_ID = e.STA_ID AND e.fhlb_id = #{quoted_member_id}
@@ -126,6 +126,7 @@ module MAPI
 
           {
             sta_balance: member_sta_hash['STX_CURRENT_LEDGER_BALANCE'].to_f,
+            sta_update_date: member_sta_hash['STX_UPDATE_DATE'].nil? ? nil : member_sta_hash['STX_UPDATE_DATE'].to_date,
             total_financing_available: total_financing_available,
             remaining_financing_available: remaining_financing_available,
             mpf_credit_available: mpf_credit_available,
@@ -174,7 +175,7 @@ module MAPI
               letters_of_credit: member_position_hash['LCS_OUTS'].to_i,
               investments: member_position_hash['UNSECURED_CREDIT'].to_i,
               total_advances_outstanding: member_position_hash['REG_ADVANCES_OUTS'].to_i + member_position_hash['SBC_ADVANCES_OUTS'].to_i,
-              total_credit_products_outstanding: member_position_hash['OTHER_CREDIT_PRODS'],
+              total_credit_products_outstanding: member_position_hash['OTHER_CREDIT_PRODS'].to_i,
               total_advances_and_mpf: member_position_hash['ADVANCES_OUTS'].to_i + member_position_hash['MPF_CE_COLLATERAL_REQ'].to_i
             },
             capital_stock: capital_stock_and_leverage,
@@ -211,7 +212,7 @@ module MAPI
           sta_number_query = <<-SQL
             SELECT
             sta.sta_account_number
-            FROM 
+            FROM
             portfolios.sta sta,
             portfolios.sta_trans st
             where sta.fhlb_id = #{quoted_member_id}
@@ -251,7 +252,7 @@ module MAPI
               dual_signers_required = member['dual_signers_required']
             end
           end
-          
+
           return nil if member_name.nil?
 
           {
@@ -283,7 +284,7 @@ module MAPI
           if app.settings.environment == :production
             # Collateral Asset Manager
             cam_query = <<-SQL
-              select customer_master_id as fhlb_id, cs_user_id as username,  user_first_name || ' ' || user_last_name as full_name, email as email
+              select customer_master_id as fhlb_id, cs_user_id as username,  user_first_name || ' ' || user_last_name as full_name, email as email, user_first_name as first_name, user_last_name as last_name
               from fhlbown.customer_profile@colaprod_link p, fhlbown.v_cs_user_profile@colaprod_link c
               Where c.cs_user_id = p.collateral_analyst and customer_master_id = #{quoted_member_id}
             SQL
@@ -291,7 +292,7 @@ module MAPI
 
             # Relationship Manager
             rm_query = <<-SQL
-              select c.fhlb_id, MR_FIRST || ' ' || MR_LAST as full_name, MR_PHONE as phone_number, MR_EMAIL as email
+              select c.fhlb_id, MR_FIRST || ' ' || MR_LAST as full_name, MR_PHONE as phone_number, MR_EMAIL as email, MR_FIRST as first_name, MR_LAST as last_name
               from PORTFOLIOS.CUSTOMERS C, PORTFOLIOS.MARKETING_REPS R
               where R.MR_INITIALS = C.CU_MARKETING_REP and fhlb_id = #{quoted_member_id}
             SQL
@@ -307,11 +308,15 @@ module MAPI
             rm[:username] = matches.captures.first.downcase
           end
           rm[:phone_number] = rm['phone_number'] || rm['PHONE_NUMBER']
+          rm[:first_name] = rm['first_name'] || rm['FIRST_NAME']
+          rm[:last_name] = rm['last_name'] || rm['LAST_NAME']
 
           cam[:email] = cam['email'] || cam['EMAIL']
           cam[:full_name] = cam['full_name'] || cam['FULL_NAME']
           cam[:username] = cam['username'] || cam['USERNAME']
           cam[:username] = cam[:username].downcase if cam[:username]
+          cam[:first_name] = cam['first_name'] || cam['FIRST_NAME']
+          cam[:last_name] = cam['last_name'] || cam['LAST_NAME']
 
           {
             cam: cam,

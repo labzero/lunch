@@ -80,8 +80,16 @@ Rails.application.routes.draw do
     end
   end
 
-  get '/advances' => 'advances#index'
-  get '/advances/manage-advances' => 'advances#manage_advances'
+  scope 'advances', as: 'advances' do
+    get '/manage' => 'advances#manage'
+    constraints Constraints::FeatureEnabled.new('add-advance') do
+      get '/select-rate' => 'advances#select_rate'
+      get '/fetch-rates' => 'advances#fetch_rates'
+      post  '/preview' => 'advances#preview'
+      post '/perform' => 'advances#perform'
+    end
+  end
+
 
   scope 'settings', as: :settings do
     get    '/'                         => 'error#not_found'

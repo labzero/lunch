@@ -16,7 +16,7 @@
   },
   {
     "tradeID": 387183,
-    "amount": 1000000.0,
+    "amount": 10000000.0,
     "rate": 0.0022,
     "fundingDate": "2015-08-04-07:00",
     "maturityDate": "2015-09-03-07:00",
@@ -26,6 +26,7 @@
     "terminationPar": 5000000.0,
     "terminationFee": 0,
     "terminationFullPartial": "PARTIAL PREPAYMENT",
+    "terminationDate": "4/7/2016 12:00:00 AM",
     "product": "FX CONSTANT FRC",
     "subProduct": "FRC - Wholeloan"
   },

@@ -65,9 +65,6 @@ Scenario: Custom datepicker options
   When I click the datepicker field
   Then I should see the datepicker preset for "month to date"
   And I should see the datepicker preset for "last month"
-  And I should see the datepicker preset for "current quarter to date"
-  And I should see the datepicker preset for "last quarter"
-  And I should see the datepicker preset for "year to date"
   And I should see the datepicker preset for "last year"
   And I should see the datepicker preset for "custom date range"
 
@@ -82,18 +79,6 @@ Scenario: Choosing different presets in the datepicker
   And I choose the "last month" preset in the datepicker
   And I click the datepicker apply button
   Then I should see a report with dates for "last month"
-  When I click the datepicker field
-  And I choose the "current quarter to date" preset in the datepicker
-  And I click the datepicker apply button
-  Then I should see a report with dates for "current quarter to date"
-  When I click the datepicker field
-  And I choose the "last quarter" preset in the datepicker
-  And I click the datepicker apply button
-  Then I should see a report with dates for "last quarter"
-  When I click the datepicker field
-  And I choose the "year to date" preset in the datepicker
-  And I click the datepicker apply button
-  Then I should see a report with dates for "year to date"
   When I click the datepicker field
   And I choose the "last year" preset in the datepicker
   And I click the datepicker apply button

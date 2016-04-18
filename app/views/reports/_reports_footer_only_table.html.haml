@@ -1,0 +1,5 @@
+- table_class ||= nil
+- table_class = Array.wrap(table_class)
+- remaining_cells = table_data[:footer_cells]
+%table.report-table{class: table_class}
+  =render 'reports/report_footer', footer: table_data[:footer], remaining_cells: remaining_cells

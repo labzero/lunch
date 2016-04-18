@@ -1,7 +1,66 @@
+%add-advance-bordered-section-styling {
+  border: 1px solid $light-blue;
+  border-radius: $default-border-radius;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+%add-advance-cell-selected {
+  color: $white;
+  .add-advance-cell-wrapper {
+    @include pseudo-background-cover($actionable-blue);
+  }
+}
+
+@mixin add-advance-cell-hovered {
+  color: $white;
+  .add-advance-cell-wrapper {
+    @include pseudo-background-cover($brand-blue);
+  }
+  &.disabled-cell {
+    .add-advance-cell-wrapper {
+      @include pseudo-background-cover($light-gray);
+    }
+    color: inherit;
+    cursor: auto;
+  }
+}
+
+%add-advance-row-label {
+  border-right: 1px solid $light-blue;
+  text-transform: capitalize;
+  cursor: auto;
+  .add-advance-cell-wrapper {
+    @include pseudo-background-cover($light-gray);
+  }
+}
+
+.add-advance-cell-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
 .advances {
+  position: relative; // for the `.add-advance-action-message` background to fade out rest of content
   h1 {
     @extend %typography-page-title;
     margin: 32px 0 17px;
+  }
+}
+
+.add-advance-limited-pricing-message {
+  position: relative;
+  margin: 15px 0;
+  padding-left: 50px;
+  border-top: 1px solid $actionable-blue;
+  border-bottom: 1px solid $actionable-blue;
+  &:before {
+    color: $actionable-blue;
+    position: absolute;
+    left: 0;
+    top: 15px;
+    font-size: 30px;
+    line-height: 30px;
   }
 }
 
@@ -29,4 +88,503 @@
 
 .manage-advances-table {
   width: 940px;
+}
+
+.add-advance-form {
+  input[name="advance_request[amount]"] {
+    width: 260px;
+  }
+}
+
+.advances-actions {
+  text-align: right;
+  .primary-button, .secondary-button {
+    width: 220px;
+    margin-left: 16px;
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}
+
+.add-advance-loading-overlay {
+  position: absolute;
+  z-index: 2;
+  display: none;
+  background: rgba(255,255,255, 0.6);
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.add-advance-action-message {
+  position: relative;
+  z-index: 2;
+  display: none;
+  padding-left: $spinner-size + 20px;
+  &:before {
+    @extend %absolute-pseudoelement;
+    @extend %vertical-center;
+    @include icon-loading;
+    left: 0;
+  }
+}
+
+.add-advance-confirmation {
+  .advances-actions {
+    text-align: left;
+  }
+}
+
+.add-advance-limited-pricing-notice {
+  @extend %typography-dashboard-gauge-label;
+  @extend %link-style;
+  margin-top: 10px;
+  text-transform: uppercase;
+}
+
+.add-advance-rates-body {
+  .add-advance-icon-section {
+    @extend %clearfix;
+    overflow: visible;
+    position: relative;
+    &:before {
+      position: absolute;
+      top: 1rem;
+      left: 0;
+      font-size: 30px;
+      color: $alert-red;
+      .add-advance-confirmation & {
+        color: $approval-green;
+      }
+    }
+  }
+  .loading & {
+    p {
+      display: none;
+    }
+    .add-advance-icon-section {
+      &:before {
+        @include icon-loading;
+        content: '';
+      }
+    }
+    .add-advance-summary {
+      opacity: $faded-opacity;
+    }
+    .label-radio {
+      opacity: $faded-opacity;
+    }
+    table {
+      opacity: $faded-opacity;
+    }
+  }
+}
+
+.advances-add {
+  width: 700px;
+  .advance-rates-table {
+    .add-advance-cell-wrapper:hover {
+      z-index: 2;
+    }
+    td {
+      cursor: pointer;
+      &:hover {
+        z-index: 2;
+        .tooltip {
+          display: block;
+        }
+      }
+    }
+  }
+  .icon-dollar-before:before {
+    @extend %dashboard-module-advances-icon-dollar;
+  }
+  .input-field-container {
+    input {
+      @extend %dashboard-module-advances-input;
+    }
+  }
+  table {
+    @extend %typography-paragraph-tight;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+    thead {
+      tr:first-child {
+        th {
+          font-size: 0.7333rem; // leaving this as a one-off typography style until we receive confirmation of this design
+          height: 20px;
+        }
+      }
+    }
+    tbody {
+      background: $light-gray; // fix for IE11 incongruity in the way height is measured for cells with rowspan
+    }
+    td, th {
+      border: 1px solid $light-blue;
+      height: 30px;
+      line-height: 30px;
+      box-sizing: border-box;
+      &.cell-selected {
+        @extend %add-advance-cell-selected;
+      }
+      &.cell-hovered {
+        @include add-advance-cell-hovered;
+      }
+    }
+    th {
+      @extend %typography-table-heading;
+      color: $white;
+      .add-advance-cell-wrapper {
+        @include pseudo-background-cover($medium-gray);
+      }
+      &:first-child {
+        color: $text-color;
+        .add-advance-cell-wrapper {
+          @include pseudo-background-cover($secondary-gray);
+        }
+      }
+    }
+    td {
+      @extend %typography-table-cell;
+      &:first-child {
+        .add-advance-cell-wrapper {
+          @include pseudo-background-cover($light-gray);
+        }
+      }
+      &:not(:first-child) {
+        width: 110px;
+      }
+      &:nth-child(2) {
+        border-right: 1px solid $dark-gray;
+      }
+      .tooltip {
+        @extend %inverted-tooltip;
+        margin-top: 10px;
+        box-sizing: border-box;
+        z-index: 2;
+        .tooltip-pair {
+          overflow: hidden;
+          margin-bottom: 5px;
+          line-height: normal;
+          padding: 0 5px;
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+        span:first-child {
+          font-size: 0.8rem;
+          margin-right: 5px;
+        }
+        span:last-child {
+          font-size: 0.8667rem;
+        }
+      }
+      &.add-advance-table-loading-cell {
+        @extend %typography-default-text;
+        background: $white;
+        border-right: 1px solid $light-blue;
+        vertical-align: top;
+        padding-top: 30px;
+        cursor: default;
+        span {
+          position: relative;
+          display: inline-block;
+          height: $spinner-size;
+          line-height: $spinner-size;
+          padding-left: $spinner-size + 20px;
+          &:before {
+            @extend %absolute-pseudoelement;
+            @include icon-loading;
+            left: 0;
+          }
+        }
+      }
+    }
+    tr {
+      td {
+        .add-advance-cell-wrapper {
+          @include pseudo-background-cover($lightest-blue);
+        }
+      }
+      td:first-child {
+        @extend %add-advance-row-label;
+        &.cell-selected, &.row-label.cell-selected {
+          @extend %add-advance-cell-selected;
+        }
+        &.cell-hovered {
+          @include add-advance-cell-hovered;
+        }
+      }
+      &:nth-child(odd) {
+        td {
+          .add-advance-cell-wrapper {
+            @include pseudo-background-cover($white);
+          }
+          &.disabled-cell {
+            .add-advance-cell-wrapper {
+              @include pseudo-background-cover($light-gray);
+            }
+          }
+          &.cell-selected, &.cell-selected.selectable-cell {
+            @extend %add-advance-cell-selected;
+          }
+          &.cell-hovered {
+            @include add-advance-cell-hovered;
+          }
+        }
+        td:first-child {
+          .add-advance-cell-wrapper {
+            @include pseudo-background-cover($light-gray);
+          }
+          &.cell-selected {
+            @extend %add-advance-cell-selected;
+          }
+          &.cell-hovered {
+            @include add-advance-cell-hovered;
+          }
+        }
+      }
+      &:nth-child(2) {
+        td {
+          border-bottom: 1px solid $dark-gray;
+        }
+      }
+      &:first-child {
+        th:first-child {
+          border: none;
+          .add-advance-cell-wrapper {
+            @include pseudo-background-cover;
+          }
+        }
+      }
+    }
+    // special styling to accommodate labels for axes
+    tr.add-advance-table-label-row {
+      td.row-label {
+        @extend %add-advance-row-label;
+        &.cell-selected {
+          @extend %add-advance-cell-selected;
+        }
+        &.cell-hovered {
+          @include add-advance-cell-hovered;
+        }
+      }
+      td:nth-child(3):not(.add-advance-table-loading-cell) {
+        border-right: 1px solid $dark-gray;
+      }
+      &:first-child {
+        .add-advance-table-horz-axes-label {
+          border-bottom: 1px solid $dark-gray;
+        }
+      }
+    }
+  }
+}
+
+.add-advance-body {
+  .add-advance-icon-section {
+    @extend %clearfix;
+    position: relative;
+    padding-left: 60px;
+    &:before {
+      position: absolute;
+      top: 1rem;
+      left: 0;
+      font-size: 30px;
+      color: $alert-red;
+      .add-advance-confirmation & {
+        color: $approval-green;
+      }
+    }
+  }
+  fieldset {
+    @extend %add-advance-bordered-section-styling;
+    background: $light-gray;
+    p {
+      margin: 0 0 10px 0;
+    }
+    .securid-form-link-wrapper {
+      clear: both;
+    }
+    a {
+      text-transform: uppercase;
+    }
+    .input-field-container {
+      display: block;
+      margin-bottom: 10px;
+      input {
+        padding-left: 10px;
+        padding-right: 10px;
+        &[name=securid_pin] {
+          width: 55px;
+        }
+        &[name=securid_token] {
+          width: 85px;
+        }
+      }
+    }
+    .form-error {
+      margin-bottom: 10px;
+      display: none;
+      clear: both;
+    }
+    .loading & {
+      display: none;
+    }
+  }
+  dl{
+    float: none;
+    margin: 0.5rem 0 1rem;
+  }
+  .large_dl {
+    width: 400px;
+    dt {
+      width: auto;
+      margin-right: 10px;
+    }
+  }
+  dt {
+    @extend %typography-graph-data;
+    color: $medium-gray;
+    float: left;
+    text-align: left;
+    width: 250px;
+    overflow: hidden;
+    clear: left;
+    &.add-advance-updated-rate {
+      color: $alert-orange;
+    }
+  }
+  dd {
+    @extend %typography-graph-data;
+    @extend %clearfix;
+    text-align: left;
+    p {
+      @extend %typography-graph-data;
+      color: $alert-orange;
+      margin: 0;
+    }
+  }
+  .loading & {
+    p {
+      display: none;
+    }
+    .add-advance-summary p:first-child {
+      display: block;
+      color: $text-color;
+    }
+    .add-advance-updated-rate {
+      @extend %typography-graph-data;
+      color: $medium-gray;
+    }
+    .add-advance-icon-section {
+      &:before {
+        @include icon-loading;
+        content: '';
+      }
+    }
+    .add-advance-summary {
+      opacity: $faded-opacity;
+    }
+    .label-radio {
+      opacity: $faded-opacity;
+    }
+    input {
+      opacity: $faded-opacity;
+    }
+    table {
+      opacity: $faded-opacity;
+    }
+  }
+}
+
+.add-advance-confirmation .add-advance-body {
+  &:before {
+    color: $approval-green;
+  }
+}
+
+.add-advance-summary {
+  @extend %clearfix;
+  padding-left: 60px;
+  padding-bottom: 30px;
+  p {
+    @extend %typography-confirmation-label;
+    margin: 0.5rem 0 0;
+  }
+}
+
+.add-advance-table-horz-axes-label {
+  width: 20px;
+  vertical-align: top;
+  padding-top: 8px;
+  span {
+    line-height: 1;
+    vertical-align: top;
+    display: inline-block;
+    font-size: 0.7333rem; // leaving this as a one-off typography style until we receive confirmation of this design
+  }
+}
+
+.add-advance-confirmation-button {
+  @extend %horizontal-center;
+  position: relative;
+}
+
+.add-advances-footer, .rate-advances-footer {
+  @extend %typography-footer;
+  padding-top: 40px;
+}
+
+.add-advance-rates-body {
+  .add-advance-icon-section {
+    @extend %clearfix;
+    overflow: visible;
+    position: relative;
+    &:before {
+      position: absolute;
+      top: 1rem;
+      left: 0;
+      font-size: 30px;
+      color: $alert-red;
+      .add-advance-confirmation & {
+        color: $approval-green;
+      }
+    }
+  }
+  .loading & {
+    p {
+      display: none;
+    }
+    .add-advance-icon-section {
+      &:before {
+        @include icon-loading;
+        content: '';
+      }
+    }
+    .add-advance-summary {
+      opacity: $faded-opacity;
+    }
+    .label-radio {
+      opacity: $faded-opacity;
+    }
+    table {
+      opacity: $faded-opacity;
+    }
+  }
+}
+
+.add-advance-capstock {
+  .add-advance-body {
+    @extend %add-advance-bordered-section-styling;
+  }
+}
+
+.add-advance-preview {
+  .add-advance-summary {
+    @extend %add-advance-bordered-section-styling;
+  }
 }

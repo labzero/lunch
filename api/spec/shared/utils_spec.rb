@@ -6,6 +6,8 @@ end
 
 describe MAPI::Shared::Utils::ClassMethods do
   subject { MAPISharedUtils }
+  let(:exception_message) { SecureRandom.hex }
+  let(:exception) { RuntimeError.new(exception_message) }
   describe 'fetch_hash' do
     let(:logger)        { double('logger') }
     let(:sql)           { double('sql') }
@@ -26,8 +28,8 @@ describe MAPI::Shared::Utils::ClassMethods do
       expect(call_method).to eq({})
     end
     it 'logs an error for exceptions' do
-      allow(sql_response).to receive(:fetch_hash).and_raise(:exception)
-      expect(logger).to receive(:error)
+      allow(sql_response).to receive(:fetch_hash).and_raise(exception)
+      expect(logger).to receive(:error).with(exception_message)
       call_method
     end
   end
@@ -70,8 +72,8 @@ describe MAPI::Shared::Utils::ClassMethods do
       expect(subject.fetch_hashes(logger, sql, {}, true)).to eq([])
     end
     it 'logs an error for exceptions' do
-      allow(cursor).to receive(:fetch_hash).and_raise(:exception)
-      expect(logger).to receive(:error)
+      allow(cursor).to receive(:fetch_hash).and_raise(exception)
+      expect(logger).to receive(:error).with(exception_message)
       subject.fetch_hashes(logger, sql)
     end
   end
@@ -105,8 +107,8 @@ describe MAPI::Shared::Utils::ClassMethods do
 
     it 'logs an error for exceptions' do
       allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
-      allow(cursor).to receive(:fetch).and_raise(:exception)
-      expect(logger).to receive(:error)
+      allow(cursor).to receive(:fetch).and_raise(exception)
+      expect(logger).to receive(:error).with(exception_message)
       subject.fetch_objects(logger, sql)
     end
   end
@@ -153,6 +155,52 @@ describe MAPI::Shared::Utils::ClassMethods do
     }.each do |rate, transformed_rate|
       it "converts `#{rate}` to `#{transformed_rate}`" do
         expect(subject.percentage_to_decimal_rate(rate)).to eq(transformed_rate)
+      end
+    end
+  end
+
+  describe '`request_cache` method' do
+    let(:environment) { {} }
+    let(:request) { double(Sinatra::Request, env: environment) }
+    let(:key) { SecureRandom.hex }
+    let(:full_key) { [MAPI::Shared::Utils::CACHE_KEY_BASE, key].join(MAPI::Shared::Utils::CACHE_KEY_SEPARATOR) }
+    let(:block_value) { double('A Value') }
+    let(:block) { Proc.new { block_value } }
+    let(:call_method) { subject.request_cache(request, key, &block) }
+
+    it 'joins the key with the CACHE_KEY_BASE' do
+      expect(environment).to receive(:[]=).with(full_key, anything)
+      call_method
+    end
+    it 'handles an array of key segments being passed for the key' do
+      other_key = SecureRandom.hex
+      full_other_key = [MAPI::Shared::Utils::CACHE_KEY_BASE, key, other_key].join(MAPI::Shared::Utils::CACHE_KEY_SEPARATOR)
+      expect(environment).to receive(:[]=).with(full_other_key, anything)
+      subject.request_cache(request, [key, other_key], &block)
+    end
+    it 'returns the value for the supplied key if found in the request environment' do
+      cached_value = double('A Value')
+      environment[full_key] = cached_value
+      expect(call_method).to be(cached_value)
+    end
+    it 'does not call the supplied block if the supplied key is found in the request environment' do
+      environment[full_key] = true
+      expect{ |b| subject.request_cache(request, key, &b) }.to_not yield_control
+    end
+    it 'does not call the supplied block if the supplied key is found in the request environment and its value is false' do
+      environment[full_key] = false
+      expect{ |b| subject.request_cache(request, key, &b) }.to_not yield_control
+    end
+    describe 'if the key does not exist in the cache' do
+      it 'yields to the provided block' do
+        expect{ |b| subject.request_cache(request, key, &b) }.to yield_control
+      end
+      it 'stores the blocks result in the request environment under the supplied key' do
+        expect(environment).to receive(:[]=).with(full_key, block_value)
+        call_method
+      end
+      it 'returns the blocks result' do
+        expect(call_method).to be(block_value)
       end
     end
   end

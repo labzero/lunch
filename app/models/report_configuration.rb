@@ -90,10 +90,10 @@ module ReportConfiguration
       start_date = start_date_param ? [start_date_param.to_date, max_date].min : max_date
       { min: nil, start: start_date, end: nil, max: max_date }
     when :monthly_securities_position
-      start_date = (start_date_param || last_month_end).to_date
+      start_date = (start_date_param || default_dates_hash[:last_month_end]).to_date
       min_date, start_date = min_and_start_dates(date_restrictions(:monthly_securities_position), start_date)
       end_date = month_restricted_start_date(start_date)
-      { min: min_date, start: start_date, end: end_date, max: nil }
+      { min: min_date, start: start_date, end: end_date, max: default_dates_hash[:last_month_end] }
     else
       { min: nil, start: nil, end: nil, max: nil }
     end

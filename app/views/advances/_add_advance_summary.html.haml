@@ -1,0 +1,50 @@
+- advance_number ||= nil
+- stock ||= nil
+- preview ||= nil
+- trade_date ||= nil
+- old_rate ||= nil
+- rate_changed ||= nil
+.add-advance-summary
+  - if advance_number
+    %dl
+      %dt= t('global.defined_term', term: t('common_table_headings.advance_number'))
+      %dd= advance_number
+  %dl
+    %dt= t('global.defined_term', term: t('dashboard.quick_advance.field_headings.advance_amount'))
+    %dd= fhlb_formatted_currency(advance_amount, precision: 0)
+    - if stock && stock > 0
+      %dt= t('global.defined_term', term: t('dashboard.quick_advance.field_headings.cumulative'))
+      %dd= fhlb_formatted_currency(stock, precision: 0)
+  %dl
+    %dt= t('global.defined_term', term: t('dashboard.quick_advance.field_headings.description'))
+    %dd= advance_description || t('global.missing_value')
+    %dt= t('global.defined_term', term: t('dashboard.quick_advance.field_headings.program'))
+    %dd= advance_program || t('global.missing_value')
+    %dt= t('global.defined_term', term: t('dashboard.quick_advance.field_headings.collateral_type'))
+    %dd= advance_type || t('global.missing_value')
+  %dl
+    %dt= t('global.defined_term', term: t('dashboard.quick_advance.field_headings.advance_term'))
+    %dd= advance_term || t('global.missing_value')
+    - if rate_changed
+      %dt= t('global.defined_term', term: t('dashboard.quick_advance.field_headings.advance_rate'))
+      %dd
+        %p= fhlb_formatted_percentage(advance_rate, 2) || t('global.missing_value')
+        %p= t('dashboard.quick_advance.error.updated_rate', old_rate: fhlb_formatted_percentage(old_rate, 2), new_rate: fhlb_formatted_percentage(advance_rate, 2))
+    - else
+      %dt= t('global.defined_term', term: t('dashboard.quick_advance.field_headings.advance_rate'))
+      %dd= fhlb_formatted_percentage(advance_rate, 2) || t('global.missing_value')
+  %dl
+    %dt= t('global.defined_term', term: t('dashboard.quick_advance.field_headings.interest_day_count'))
+    %dd= human_interest_day_count || t('global.missing_value')
+    %dt= t('global.defined_term', term: t('dashboard.quick_advance.field_headings.payment_on'))
+    %dd= human_payment_on || t('global.missing_value')
+  %dl
+    - if trade_date
+      %dt= t('global.defined_term', term: t('dashboard.quick_advance.field_headings.trade_date'))
+      %dd= fhlb_date_standard_numeric(trade_date)
+    %dt= t('global.defined_term', term: t('dashboard.quick_advance.field_headings.funding_date'))
+    %dd= fhlb_date_standard_numeric(funding_date)
+    %dt= t('global.defined_term', term: t('dashboard.quick_advance.field_headings.maturity_date'))
+    %dd= (advance_raw_term.to_sym == :open ? t('dashboard.quick_advance.table.axes_labels.open') : fhlb_date_standard_numeric(maturity_date)) if advance_raw_term
+  - if stock && preview
+    %label.label-radio-no-padding= t('dashboard.quick_advance.field_headings.debit_sta_html', amount: fhlb_formatted_currency(stock, precision: 0))

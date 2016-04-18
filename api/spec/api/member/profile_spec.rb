@@ -17,8 +17,9 @@ describe MAPI::ServiceApp do
       %w(sta_balance financing_percentage approved_long_term_credit).each do |key|
         expect(member_financial_position[key]).to be_kind_of(Float)
       end
+      expect(member_financial_position['sta_update_date']).to be_kind_of(String)
       credit_outstanding = member_financial_position['credit_outstanding']
-      ['total', 'standard', 'sbc', 'swaps_credit', 'swaps_notational', 'mpf_credit', 'letters_of_credit', 'investments'].each do |key|
+      ['total', 'standard', 'sbc', 'swaps_credit', 'swaps_notational', 'mpf_credit', 'letters_of_credit', 'investments', 'total_advances_outstanding', 'total_credit_products_outstanding', 'total_advances_and_mpf'].each do |key|
         expect(credit_outstanding[key]).to be_kind_of(Integer)
       end
       collateral_borrowing_capacity = member_financial_position['collateral_borrowing_capacity']
@@ -55,7 +56,8 @@ describe MAPI::ServiceApp do
           data['DELIVERY_STATUS_FLAG'] = SecureRandom.uuid
           data
         end
-        let(:some_sta_data) {{"STX_CURRENT_LEDGER_BALANCE"=> rand(1..1000000)}}
+        let(:some_sta_data) {{ "STX_CURRENT_LEDGER_BALANCE"=> rand(1..1000000),
+                               "STX_UPDATE_DATE"=> Time.zone.today.to_s }}
         before do
           allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
           allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_position_result, member_sta_result)
@@ -83,6 +85,7 @@ describe MAPI::ServiceApp do
             expect(member_financial_position[key]).to eq(some_financial_data[value_key])
           end
           expect(member_financial_position['sta_balance']).to eq(some_sta_data['STX_CURRENT_LEDGER_BALANCE'])
+          expect(member_financial_position['sta_update_date']).to eq(some_sta_data['STX_UPDATE_DATE'])
           expect(member_financial_position['mpf_credit_available']).to eq(some_financial_data['RECOM_EXPOSURE'] - (some_financial_data['CREDIT_OUTSTANDING'] + some_financial_data['COMMITTED_FUND_LESS_MPF'] + some_financial_data['AVAILABLE_CREDIT']))
           expect(member_financial_position['collateral_borrowing_capacity']['total']).to eq(some_financial_data['REG_BORR_CAP'] + some_financial_data['SBC_BORR_CAP'])
           expect(member_financial_position['collateral_borrowing_capacity']['remaining']).to eq(some_financial_data['EXCESS_REG_BORR_CAP'] + some_financial_data['EXCESS_SBC_BORR_CAP'])

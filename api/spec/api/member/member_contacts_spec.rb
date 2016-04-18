@@ -10,14 +10,18 @@ describe MAPI::ServiceApp do
       {
         "username" => double('cam username', downcase: downcased_username),
         "full_name" => double('cam full name'),
-        "email" => double('cam email address')
+        "email" => double('cam email address'),
+        "first_name" => double('cam first name'),
+        "last_name" => double('cam last name')
       }
     }
     let(:rm) {
       {
         "full_name" => double('rm full name'),
         "email" => double('rm email', match: nil),
-        "phone_number" => double('rm phone number')
+        "phone_number" => double('rm phone number'),
+        "first_name" => double('rm first name'),
+        "last_name" => double('rm last name')
       }
     }
 
@@ -48,7 +52,7 @@ describe MAPI::ServiceApp do
         end
         %w(cam rm).each do |contact|
           describe "the `#{contact}` hash" do
-            %w(full_name email).each do |attr|
+            %w(full_name email first_name last_name).each do |attr|
               it "has an `#{attr}` attribute" do
                 result_set = contact == 'cam' ? cam : rm
                 expect(member_contacts[contact.to_sym][attr.to_sym]).to eq(result_set[attr])
@@ -76,7 +80,9 @@ describe MAPI::ServiceApp do
           let(:rm) {
             {
               "full_name" => double('rm full name'),
-              "phone_number" => double('rm phone number')
+              "phone_number" => double('rm phone number'),
+              "first_name" => double('rm first name'),
+              "last_name" => double('rm last name')
             }
           }
           before do
@@ -99,10 +105,10 @@ describe MAPI::ServiceApp do
             end
           end
           it 'returns an empty `rm` object' do
-            expect(member_contacts[:rm]).to eq({"email"=>nil, "full_name"=>nil, "phone_number"=>nil})
+            expect(member_contacts[:rm]).to eq({"email"=>nil, "full_name"=>nil, "phone_number"=>nil, "first_name"=>nil, "last_name"=>nil})
           end
           it 'returns an empty `cam` object' do
-            expect(member_contacts[:cam]).to eq({"email"=>nil, "full_name"=>nil, "username"=>nil})
+            expect(member_contacts[:cam]).to eq({"email"=>nil, "full_name"=>nil, "username"=>nil, "first_name"=>nil, "last_name"=>nil})
           end
         end
       end

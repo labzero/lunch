@@ -62,6 +62,10 @@ Then(/^I should see (\d+) report tables with multiple data rows$/) do |count|
   end
 end
 
+Then(/^I should see (\d+) report tables$/) do |count|
+  page.assert_selector('.report-table', count: count)
+end
+
 Then(/^I should see a loading report table$/) do
   page.assert_selector('.report-table.table-loading', visible: true)
 end
@@ -286,11 +290,6 @@ Then(/^I should see a "(.*?)" report as of "(.*?)"$/) do |report_type, as_of_dat
   end
   expect(page.find(".datepicker-trigger input").value).to eq(I18n.t('datepicker.single.input', date: fhlb_date_standard_numeric(as_of_date)))
   step %{I should see "#{strip_tags(summary_statement)}"}
-end
-
-Then(/^I should see a "(.*?)" report as of the end of the last valid month$/) do |report_type|
-  end_of_month = @today == @today.end_of_month ? @today : (@today - 1.month).end_of_month
-  step %{I should see a "#{report_type}" report as of "#{end_of_month}"}
 end
 
 Then(/^I should see a "(.*?)" with data for dates between the (\d+)(?:st|rd|th) through the (\d+)(?:st|rd|th) of (this|last) month$/) do |report_type, start_day, end_day, month|

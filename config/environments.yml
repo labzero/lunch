@@ -28,6 +28,9 @@ default: &default
   resetable:
     username: <%= ENV['CUCUMBER_RESETABLE_USERNAME'] || 'extra-chaste-reset' %>
     password: <%= ENV['CUCUMBER_RESETABLE_PASSWORD'] || 'development' %>
+  read_only_access_manager:
+    username: <%= ENV['CUCUMBER_ACCESS_MANAGER_READ_USERNAME'] || 'extra-chaste-access-read-only' %>
+    password: <%= ENV['CUCUMBER_ACCESS_MANAGER_READ_PASSWORD'] || 'development' %>
   expired:
     username: <%= ENV['CUCUMBER_EXPIRED_USERNAME'] || 'extra-expired' %>
     password: <%= ENV['CUCUMBER_EXPIRED_PASSWORD'] || 'development' %>

@@ -15,8 +15,10 @@ objectClass: user
 objectClass: top
 objectClass: person
 cn: Extranet User
-sn: Extranet
+sn: User
 sAMAccountName: extra
+givenName: Extranet
+displayName: Extranet User
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: extra@example.com
@@ -30,6 +32,9 @@ objectClass: person
 cn: Extranet Password User
 sn: Extranet Password
 sAMAccountName: extra-password
+givenName: Extranet Password
+sn: User
+displayName: Extranet Password User
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: extra-password@example.com
@@ -43,6 +48,9 @@ objectClass: person
 cn: Extranet Expired Password User
 sn: Extranet Expired Password
 sAMAccountName: extra-expired
+givenName: Extranet Expired Password
+sn: User
+displayName: Extranet Expired Password User
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: extra-expired@example.com
@@ -119,6 +127,20 @@ sAMAccountName: extra-chaste-reset
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: chaste-reset@example.com
+
+# local user with read-only settings access
+dn: sAMAccountName=extra-chaste-access-read-only,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet User Read Only Access Manager - Chaste Manhatten
+displayName: Chaste Read
+givenName: Chaste
+sn: Read
+sAMAccountName: extra-chaste-access-read-only
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: chaste-read@example.com
 
 # extra-wells user
 dn: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
@@ -200,9 +222,18 @@ member: sAMAccountName=extra-chaste,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-delete,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-reset,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-chaste-read-only-settings,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-norole,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-first-time,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-signer,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-chaste-access-read-only,dc=extranet,dc=fhlbsf,dc=com
+
+# FCN-MemberSite-AccessManagers-R group
+dn: CN=FCN-MemberSite-AccessManagers-R,dc=extranet,dc=fhlbsf,dc=com
+cn: FCN-MemberSite-AccessManagers-R
+objectClass: group
+objectClass: top
+member: sAMAccountName=extra-chaste-access-read-only,dc=extranet,dc=fhlbsf,dc=com
 
 # Wells Faygo
 dn: CN=FHLB5,dc=extranet,dc=fhlbsf,dc=com
@@ -260,8 +291,10 @@ member: sAMAccountName=extra-chaste,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-delete,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-reset,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-chaste-read-only-settings,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=quick-advance-disabled,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-first-time,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=dual-signer-required,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-signer,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-chaste-access-read-only,dc=extranet,dc=fhlbsf,dc=com

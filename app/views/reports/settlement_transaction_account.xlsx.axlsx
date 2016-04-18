@@ -1,0 +1,59 @@
+xlsx_package.use_shared_strings = true
+workbook = xlsx_package.workbook
+workbook.styles do |styles|
+  date_format = styles.add_style format_code: 'mm/dd/yyyy'
+  currency_format = styles.add_style num_fmt: 2
+  interest_format = styles.add_style
+  styles = [date_format, nil, nil, interest_format, currency_format, currency_format, currency_format]
+  types = [nil, :string, :string, nil, nil, nil, nil]
+
+  workbook.add_worksheet(name: t('reports.pages.settlement_transaction_account.excel_sheet_name')) do |sheet|
+    sheet.add_row [
+      t('global.date'),
+      t('global.reference_number'),
+      t('common_table_headings.description'),
+      fhlb_add_unit_to_table_header(t('global.rates'), '%'),
+      fhlb_add_unit_to_table_header(t('global.debits'), '$'),
+      fhlb_add_unit_to_table_header(t('global.credits'), '$'),
+      fhlb_add_unit_to_table_header(t('global.balance'), '$')
+    ]
+
+    if @show_ending_balance
+      sheet.add_row [
+        @settlement_transaction_account[:end_date],
+        nil,
+        t('reports.pages.settlement_transaction_account.closing_balance'),
+        nil,
+        nil,
+        nil,
+        @settlement_transaction_account[:end_balance]
+        ], style: styles, types: types
+    end
+
+    if @settlement_transaction_account[:activities]
+      @settlement_transaction_account[:activities].each do |activity|
+        sheet.add_row [
+          activity[:trans_date],
+          activity[:refnumber],
+          activity[:descr],
+          activity[:rate],
+          activity[:debit],
+          activity[:credit],
+          activity[:balance]
+        ], style: styles, types: types
+      end
+    end
+
+    if @settlement_transaction_account[:start_balance]
+      sheet.add_row [
+        @settlement_transaction_account[:start_date],
+        nil,
+        t('global.beginning_balance'),
+        nil,
+        nil,
+        nil,
+        @settlement_transaction_account[:start_balance]
+      ], style: styles, types: types
+    end
+  end
+end

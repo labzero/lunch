@@ -474,6 +474,7 @@ describe MAPI::ServiceApp do
       expect(activity[:termination_par]).to be_nil
       expect(activity[:termination_fee]).to be_nil
       expect(activity[:termination_full_partial]).to be_nil
+      expect(activity[:termination_date]).to be_nil
       expect(activity[:product]).to eq('LC')
       expect(activity[:sub_product]).to eq('LC')
     end
@@ -551,6 +552,18 @@ describe MAPI::ServiceApp do
             todays_credit_activity
           end
         end
+        it 'parses the `terminationDate` into a Date' do
+          allow(activity).to receive(:[]).with('terminationDate').and_return(attribute)
+          expect(DateTime).to receive(:strptime).with(attribute, '%m/%d/%Y').and_return(double(DateTime, to_date: nil))
+          todays_credit_activity
+        end
+        it 'includes the parsed terminationDate in the activity response' do
+          value = double(Date)
+          allow(activity).to receive(:[]).with('status').and_return(MAPI::Services::Member::TradeActivity::TODAYS_CREDIT_ARRAY.first)
+          allow(activity).to receive(:[]).with('terminationDate').and_return(attribute)
+          allow(DateTime).to receive(:strptime).with(attribute, anything).and_return(double(DateTime, to_date: value))
+          expect(todays_credit_activity.first[:termination_date]).to be(value)
+        end
       end
     end
 
@@ -623,6 +636,18 @@ describe MAPI::ServiceApp do
             allow(activity).to receive(:at_css).with(date_attribute.last).and_return(double('xml node', content: attribute))
             todays_credit_activity
           end
+        end
+        it 'parses the `terminationDate` into a Date' do
+          allow(activity).to receive(:at_css).with('terminationDate').and_return(double('xml node', content: attribute))
+          expect(DateTime).to receive(:strptime).with(attribute, '%m/%d/%Y').and_return(double(DateTime, to_date: nil))
+          todays_credit_activity
+        end
+        it 'includes the parsed terminationDate in the activity response' do
+          value = double(Date)
+          allow(activity).to receive(:at_css).with('status').and_return(double('xml node', content: MAPI::Services::Member::TradeActivity::TODAYS_CREDIT_ARRAY.first))
+          allow(activity).to receive(:at_css).with('terminationDate').and_return(double('xml node', content: attribute))
+          allow(DateTime).to receive(:strptime).with(attribute, anything).and_return(double(DateTime, to_date: value))
+          expect(todays_credit_activity.first[:termination_date]).to be(value)
         end
       end
     end

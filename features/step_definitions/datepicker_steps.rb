@@ -83,15 +83,6 @@ Then(/^I should see a report with dates for "(.*?)"$/) do |selector|
     when 'last month'
       start_date = default_dates_hash[:last_month_start]
       end_date = default_dates_hash[:last_month_end]
-    when 'current quarter to date'
-      start_date = quarter_start_and_end_dates((current_quarter[:quarter]), current_quarter[:year])[:start_date]
-      end_date = default_dates_hash[:today]
-    when 'last quarter'
-      start_date = quarter_start_and_end_dates(last_quarter[:quarter], last_quarter[:year])[:start_date]
-      end_date = quarter_start_and_end_dates(last_quarter[:quarter], last_quarter[:year])[:end_date]
-    when 'year to date'
-      start_date = default_dates_hash[:this_year_start]
-      end_date = default_dates_hash[:today]
     when 'last year'
       start_date = default_dates_hash[:last_year_start]
       end_date = default_dates_hash[:last_year_end]
@@ -181,12 +172,6 @@ def get_datepicker_preset_label(preset)
       I18n.t('datepicker.range.date_to_current', date: default_dates_hash[:this_month_start].to_date.strftime('%B'))
     when 'last month'
       default_dates_hash[:last_month_start].to_date.strftime('%B')
-    when 'current quarter to date'
-      I18n.t('datepicker.range.date_to_current', date: I18n.t("dates.quarters.#{current_quarter[:quarter]}", year: current_quarter[:year]))
-    when 'last quarter'
-      I18n.t("dates.quarters.#{last_quarter[:quarter]}", year: last_quarter[:year])
-    when 'year to date'
-      I18n.t('datepicker.range.date_to_current', date: default_dates_hash[:this_year_start].year)
     when 'last year'
       default_dates_hash[:last_year_start].year.to_s
     when 'custom date range'

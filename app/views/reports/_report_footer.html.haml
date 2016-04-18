@@ -1,0 +1,8 @@
+- if footer
+  %tfoot
+    - footer.each do |cell|
+      - remaining_cells = remaining_cells - 1 if remaining_cells
+      = render 'reports/report_cell', cell: cell
+    - if remaining_cells
+      - remaining_cells.times do
+        = render 'reports/report_cell', cell: {}

@@ -19,7 +19,15 @@
     %time{datetime:@render_time.iso8601}= fhlb_datetime_standard_numeric(@render_time)
     %ul<>
       %li{class: ('active-nav-item' if active_nav == :advances)}<>
-        = link_to(t('nav.secondary.advances'), advances_manage_advances_path)
+        = link_to(t('nav.secondary.advances'), '#', class: 'nav-menu')
+        .nav-dropdown
+          .nav-dropdown-row
+            .nav-dropdown-column
+              %h2= t('nav.secondary.advances')
+              %ul
+                - if feature_enabled?('add-advance') && policy(:advance).show?
+                  %li= link_to(t('advances.add_advance.nav'), advances_select_rate_path)
+                %li= link_to(t('advances.manage_advances.title'), advances_manage_path)
       - if feature_enabled?('securities')
         %li{class: ('active-nav-item' if active_nav == :securities)}<>
           = link_to(t('securities.title'), manage_securities_path)

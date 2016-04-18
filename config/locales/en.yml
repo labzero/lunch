@@ -113,6 +113,10 @@ en:
     attachments: Attachments
     unknown: Unknown
     last_updated: 'Last Updated: %{date}'
+    page_meta_title: 'FHLB - %{title}'
+    defined_term: '%{term}:'
+    authorizations: Authorizations
+    letters_of_credit: Lettters of Credit
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -241,45 +245,45 @@ en:
     access_manager:
       title: Access Manager
       description_title: Access Manager
-      description: The designated individuals identify your institution’s Access Manager(s), who can add and delete users, reset passwords, and lock or unlock member portal access accounts for individuals.
+      description: Your institution’s Access Manager(s), who may add and delete portal users, reset passwords, and lock or unlock portal access for individuals.
     resolution:
       dropdown: Resolution and Authorization
       title: 'Resolution and Authorization: Member Transactions'
-      description_title: 'Resolution and Authorization: Member Transactions (All transactions except Wires)'
-      description: The primary form on which you specify individuals who are authorized to execute all types of transactions with the Bank, except for wires. Must be adopted by your Board of Directors and signed by your Corporate Secretary.
+      description_title: 'Resolution and Authorization: Member Transactions (All transactions except wires)'
+      description: Individuals authorized to conduct all types of transactions, except for wires.
     entire_authority:
       dropdown: Entire Authority
       title: Entire Authority
-      description_title: Entire Authority (All transactions except Wires)
-      description: This form permits the individuals designated on the Resolution and Authorization to authorize additional officers, employees, or agents of your institution to engage in all transactions with the Bank, except for wires, and to provide instructions regarding all securities-related transactions.
+      description_title: Entire Authority (All transactions except wires)
+      description: Additional individuals authorized to conduct all types of transactions, except for wires.
     wire_transfer:
       title: Wire Transfer Services
       description_title: Wire Transfer Services
-      description: The designated individuals listed are authorized to conduct offline funds transactions by telephone. Any signer listed on this form must be listed as an authorized individual on the Resolution and Authorization.
+      description: Individuals authorized to conduct offline funds transfer transactions by telephone.
     advances:
       title: Advances
       description_title: Advances
-      description: The designated individuals listed are authorized to execute advances, letters of credit, lines of credit, and other similar extensions of credit with the Bank.
+      description: Individuals authorized to conduct credit transactions, including advances, letters of credit, lines of credit, and other similar extensions of credit.
     affordable_housing:
       title: Affordable Housing Program
       description_title: Affordable Housing Program
-      description: The designated individuals listed are authorized to exercise authority under the Bank’s Affordable Housing Program and any other community investment programs, excluding extensions of credit related to these programs.
+      description: Individuals authorized to exercise authority under the Bank’s Affordable Housing Program and any other community investment programs, excluding extensions of credit related to these programs.
     collateral:
       title: Collateral
       description_title: Collateral
-      description: The designated individuals listed are authorized to engage in collateral transactions with the Bank. Employees listed on this form are authorized to provide instructions regarding the pledging and de-pledging of securities but are not authorized to provide instructions regarding securities held in safekeeping (except to pledge those securities).
+      description: Individuals authorized to pledge and depledge securities. This form does not authorize individuals to move securities held in safekeeping except to pledge those securities.
     interest_rate_derivatives:
       title: Interest Rate Derivatives
       description_title: Interest Rate Derivatives
-      description: The designated individuals listed are authorized to engage in interest rate derivative transactions with the Bank.
+      description: Individuals authorized to conduct interest rate derivative transactions with the Bank.
     money_market:
       title: Money Market Transactions
       description_title: Money Market Transactions
-      description: The designated individuals listed are authorized to request or purchase Bank funds in unsecured money market transactions.
+      description: Individuals authorized to request or purchase Bank funds in unsecured money market transactions.
     securities:
       title: Securities Services
       description_title: Securities Services
-      description: The designated individuals listed are authorized to move securities to and from their unpledged account (safekeeping account). Employees listed on this form are authorized to provide instructions regarding the purchase and sale of unpledged securities, but are not authorized to pledge or de-pledge securities.
+      description: Individuals authorized to move securities to and from your safekeeping account and to provide instructions regarding the purchase and sale of unpledged securities. This form does not authorize individuals to pledge or depledge securities.
   settings:
     title: Settings
     save: Save
@@ -474,6 +478,8 @@ en:
       expires_on: Expires on %{date}
       will_be_funded_on: Will be Funded on %{date}
       in_review: In Review
+      partial_prepayment: Partial Prepayment
+      partial_repayment: Partial Repayment
     contacts:
       title: Contact
       icon_alt_text: Contact
@@ -1304,11 +1310,11 @@ en:
           prime_header: Daily Prime
           sta_info: Published STA rate is applied to the previous business day’s ending STA balance.
           sta_rate: Effective Rate for Prior Business Day
-          freshness: This report reflects the price indications as of at 6:00 am PT on the current business day. For current quotes, call the Member Services Desk at %{phone_number}.
+          freshness: This report reflects price indications as of 6:00 am PT on the current business day and the STA rate as of the end of the prior business day. For current quotes, call the Member Services Desk at %{phone_number}.
           date_html: "<span>Date:</span> %{date}"
         historical:
           title: Historical Price Indications
-          freshness: This report reflects historical price indications published at 6:00 am, not actual rates.
+          freshness: This report reflects price indications as of 6:00 am PT on the date displayed and the STA rate as of the date displayed.
           availability: Historical data available varies by credit product.
         standard_credit_program: Standard Credit Program
         sbc_program: Securities-Backed Credit Program
@@ -1383,8 +1389,8 @@ en:
         market_value: Market Value
         total_borrowing_capacity: Total Borrowing Capacity
         standard_credit: Covered by Standard Credit
-        remaining_market_value: Market Value Remaining
-        remaining_borrowing_capacity: Borrowing Capacity Remaining
+        remaining_market_value: Excess
+        remaining_borrowing_capacity: Total
         bc_upb: BC/UPB
         net_loan_collateral: Net Loan Collateral Borrowing Capacity
         remaining_capacity: Remaining Borrowing Capacity
@@ -1410,6 +1416,7 @@ en:
         closing_balance: Balance as of close of business
         debit_credit_heading: Debits/Credits
         sta_number_html: "<span>STA No.:</span> %{sta_number}"
+        excel_sheet_name: STA Statement
       advances_detail:
         title: "Advances outstanding as of close of business %{date}"
         total_current_par_heading: "Total Current Par as of %{date}"
@@ -1528,8 +1535,8 @@ en:
         freshness: This report is updated twice a day. The preliminary report reflects the transactions that have settled as of 11:30 am and is generally available at approximately 1:00 pm. The final report reflects all transactions settled during the day and is generally available at the end of the business day.
       authorizations:
         title: Authorizations
-        intro_html: The following people are authorized to use the Bank’s services on behalf of your institution. If you’d like to make changes to these authorizations, please fill out an <a href=%{url}>Authorization Form</a>.
-        contact_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager for questions about authorizations, and contact <a href="%{web_support_url}">Web Support</a> or call %{web_support_phone_number} for questions about website authorizations.'
+        intro_html: 'The following people are authorized to use the Bank’s services on behalf of your institution. If you’d like to change or add authorizations, please complete and submit an <a href="%{url}">Authorization form.</a>'
+        contact_html: 'Contact <a href="%{operations_url}">Operations</a> or call %{operations_phone_number} or your Relationship Manager with questions about authorizations.'
         sub_title: Users with %{filter} Authorization
         sub_title_all_users: All Users with Authorizations
         sub_title_inclusive_authorizations: Users with %{filter}
@@ -1605,22 +1612,29 @@ en:
         rejected: Rejected
         total_accepted: Total Loans Accepted
         total_submitted: Total Loans Submitted
-        version_request: To request an expanded version of this report or to obtain a prior version, contact Collateral Services at %{phone_number}
+        version_request: To request an expanded version of this report or to obtain a prior version, contact Collateral Services at %{phone_number}.
         report_details: This report reflects the most recent data available after each MCU has been processed. Only the current report is available. An email with an expanded version of this report that includes detailed rejection and inconsistency information is sent to your institution each time an MCU is processed.
       member_profile:
         title: Member Profile
-        fhlb_id: FHLB ID
-        fhfb_id: FHFB ID
-        relationship_manager: Relationship Manager
-        collateral_asset_mananger: Collateral Asset Manager
-        credit_analyst: Credit Analyst
-        regulator: Regulator
-        collateral_status: Collateral Status
-        cqr: CQR
+        fhlb_id: 'FHLB ID:'
+        fhfb_id: 'FHFB ID:'
+        fhfa_number: 'FHFA No.:'
+        relationship_manager: 'Relationship Manager:'
+        collateral_asset_mananger: 'Collateral Asset Manager:'
+        credit_analyst: 'Credit Analyst:'
+        regulator: 'Regulator:'
+        collateral_status: 'Collateral Status:'
+        cqr: 'CQR:'
         delivered: Delivered
         not_delivered: Not Delivered
+        excess: Excess
+        total: Total
+        market_value: Market Value
+        borrowing_capacity: Borrowing Capacity
         collateral:
           title: Collateral
+          regular_collateral: Regular Collateral
+          sbc: SBC Collateral
         capital_stock:
           title: Capital Stock
           required_by_advances: Required by Advances
@@ -1676,8 +1690,9 @@ en:
           title: STA
           number: 'STA No.'
           balance: STA Balance
+          date: STA Date
     change_notice: The information contained in this statement is derived from a variety of sources and is subject to change without notice. The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but you must independently verify the accuracy of any information presented here. If there are any questions regarding this statement, please contact Operations at %{phone_number}.
-    accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the <a href=%{url}>Accounting Department</a> at %{phone_number} or %{phone_number_alt}.
+    accuracy_notice_html: The Federal Home Loan Bank of San Francisco seeks to keep this information up-to-date and accurate, but we cannot guarantee and do not warrant that the information is accurate, complete, or current. Please independently verify the accuracy of any information presented here. If there are any questions regarding this report, please contact the Accounting Department at %{phone_number} or %{phone_number_alt}.
     intraday_processing_notice: Loan collateral data reflects intraday processing of Mortgage Collateral Updates.
     close_of_business_processing_notice: Other data as of Close of Business on the prior business day.
     maturity_date_notice: In the event of a prepayment or other modification of the advance, the original maturity date may differ from the actual maturity date.
@@ -1711,15 +1726,22 @@ en:
       for_advances_traded_on_or_after_january_1: "For advances traded on or after January 1, 2002, the maximum voluntary prepayment settlement amount per calendar month per member cannot exceed the greater of: (i) the amount of Bank stock owned by the member as of the last business day of the calendar month prior to the notice date or (ii) $250 million. In addition, the maximum voluntary prepayment amount for all advances is $250 million per member per business day."
       the_bank_will_provide_prepayment_fee_indications: The Bank will provide prepayment fee indications for up to 5 advances per member per business day.
   advances:
-    quick_advnance:
+    quick_advance:
       title: Quick Advance
     add_advance:
-      title: Add an Advance
+      title: Add Advance
+      nav: New Advance
+      preview: Preview Advance
     manage_advances:
       title: Manage Advances
-    add_new: Add New
     status: Status
     rate: Rate (%)
+    actions:
+      preview: Preview Advance
+      submit: Submit Advance
+      another_advance: Get Another Advance
+    messages:
+      completing_advance: Please wait while we complete your advance. This may take about 30 seconds.
   products:
     products_summary:
       nav_title: Products Summary

@@ -48,7 +48,7 @@
               %td.report-cell-narrow= row[:advance_number]
               %td.report-cell-narrow= row[:advance_type]
               %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:current_par]) if row[:current_par]
-              %td.report-cell-narrow= row[:interest_rate]
+              %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:interest_rate], precision: 2)
               %td.report-cell-narrow= row[:next_interest_pay_date].blank? ? '-' : fhlb_date_standard_numeric(row[:next_interest_pay_date])
               %td.report-cell-narrow.report-cell-right= fhlb_formatted_number(row[:accrued_interest], precision: 2) if row[:accrued_interest]
               %td.report-cell-narrow.report-cell-right= row[:estimated_next_interest_payment].blank? ? '-' : fhlb_formatted_number(row[:estimated_next_interest_payment], precision: 2)

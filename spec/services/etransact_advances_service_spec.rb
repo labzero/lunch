@@ -413,6 +413,68 @@ describe EtransactAdvancesService do
     end
   end
 
+  describe '`etransact_status`' do
+    let(:status_object) { double('status object') }
+    let(:member_id) { SecureRandom.uuid }
+    let(:call_method) {subject.etransact_status(member_id, status_object)}
+    let(:members_service) { double('members service instance', quick_advance_enabled_for_member?: false) }
+
+    before do
+      allow(subject).to receive(:etransact_active?)
+      allow(subject).to receive(:has_terms?)
+      allow(MembersService).to receive(:new).and_return(members_service)
+    end
+
+    it 'should call EtransactAdvancesService#status if no status object is provided' do
+      expect(subject).to receive(:status)
+      subject.etransact_status(false)
+    end
+    it 'should not call EtransactAdvancesService#status if a status object is provided' do
+      expect(subject).to_not receive(:status)
+      call_method
+    end
+    it 'should use the supplied status object when calling `etransact_active?`' do
+      expect(subject).to receive(:etransact_active?).with(status_object)
+      call_method
+    end
+    it 'should use the supplied status object when calling `has_terms?`' do
+      expect(subject).to receive(:has_terms?).with(status_object)
+      call_method
+    end
+    it 'calls `quick_advance_enabled_for_member?` on the MembersService instance with the supplied member_id' do
+      expect(members_service).to receive(:quick_advance_enabled_for_member?).with(member_id)
+      call_method
+    end
+
+    describe 'when etransact is active' do
+      before { allow(subject).to receive(:etransact_active?).and_return(true) }
+      describe 'when etransact has terms' do
+        before { allow(subject).to receive(:has_terms?).and_return(true) }
+        describe 'when etransact is enabled for a member' do
+          it 'returns :open' do
+            allow(members_service).to receive(:quick_advance_enabled_for_member?).and_return(true)
+            expect(call_method).to eq(:open)
+          end
+        end
+        describe 'when etransact is disabled for a member' do
+          it 'returns :disabled_for_member' do
+            expect(call_method).to eq(:disabled_for_member)
+          end
+        end
+      end
+      describe 'when etransact does not have terms' do
+        it 'returns :no_terms' do
+          expect(call_method).to eq(:no_terms)
+        end
+      end
+    end
+    describe 'when etransact is not active' do
+      it 'returns a value of :closed' do
+        expect(call_method).to eq(:closed)
+      end
+    end
+  end
+
   describe 'days_until' do
     let(:today) { Time.zone.today }
     it 'should map today to 0' do

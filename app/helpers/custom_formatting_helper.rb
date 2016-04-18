@@ -1,7 +1,7 @@
 module CustomFormattingHelper
   include ActionView::Helpers::TagHelper
   include ActionView::Helpers::NumberHelper
-  
+
   def fhlb_formatted_currency(number, options={})
     options.reverse_update({html: true, negative_format: '%u(%n)', force_unit: false})
     return nil if number.nil? && options[:optional_number]
@@ -124,4 +124,16 @@ module CustomFormattingHelper
     end
   end
 
+  def fhlb_first_intial_last_name(first_name=nil, last_name=nil)
+    first_initial = first_name[0] if first_name && first_name.length > 0
+    return last_name unless first_initial
+    "#{first_initial}. #{last_name}".rstrip
+  end
+
+  def fhlb_initials_from_full_name(full_name)
+    return '' unless full_name
+    tokens = full_name.strip.split(/\s+/m).compact
+    return '' unless tokens.size > 0
+    tokens.map {|t| t.first.upcase }.join
+  end
 end

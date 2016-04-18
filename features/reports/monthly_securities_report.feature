@@ -53,7 +53,7 @@ Scenario: Member enters a date occurring after the maximum allowed date
   When I click the datepicker field
   And I write tomorrow's date in the datepicker start input field
   And I click the datepicker apply button
-  Then I should see a "Monthly Securities Position" report as of the end of the last valid month
+  Then I should see a "Monthly Securities Position" report as of the last day of last month relative to today
 
 @jira-mem-890 @jira-mem-1220
 Scenario: Member enters a date occurring after the maximum allowed date on the last day of the month

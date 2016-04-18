@@ -1,0 +1,26 @@
+- button_text = @rate_changed ? t('dashboard.quick_advance.buttons.new_rate') : t('dashboard.quick_advance.buttons.initiate')
+= render layout: 'add_advance', title: t('advances.add_advance.title') do
+  = form_for(:advance_request, url: advances_perform_path, html: {method: :post, class: 'perform-advance-form', data: {securid_status: @securid_status}}) do |f|
+    = f.hidden_field(:id)
+    .add-advance-preview
+      %p.add-advance-action-message= t('advances.messages.completing_advance')
+      .add-advance-body
+        .add-advance-instructions
+          - if @session_elevated
+            %p= t('dashboard.quick_advance.preview.elevated_intro')
+          - else
+            %p= t('dashboard.quick_advance.preview.intro')
+          %p= t('dashboard.quick_advance.preview.lock_rate')
+        = render 'add_advance_summary', preview: true, advance_amount: @total_amount, advance_description: @advance_description, advance_program: @advance_program, advance_type: @advance_type, advance_rate: @advance_rate, rate_changed: @rate_changed, old_rate: @old_rate, human_interest_day_count: @human_interest_day_count, human_payment_on: @human_payment_on, advance_term: @advance_term, advance_raw_term: @advance_raw_term, funding_date: @funding_date, maturity_date: @maturity_date, stock: @stock
+        - unless @session_elevated
+          %fieldset.securid-form
+            %p= t('dashboard.quick_advance.securid.intro')
+            = render 'shared/securid_fields'
+            .securid-form-link-wrapper
+              = link_to(t('dashboard.quick_advance.securid.help'), settings_two_factor_path)
+      .advances-actions
+        = link_to(t('global.cancel'), advances_manage_path, class: 'secondary-button cancel-advance')
+        = link_to(t('global.edit'), advances_select_rate_path(advance_request: {id: @advance_request_id}), class: 'secondary-button edit-advance-button')
+        = f.submit({class: ["primary-button confirm-add-advance #{'active' if @session_elevated}"], value: button_text, disabled: !@session_elevated})
+      %small
+        %p.add-advances-footer= t('dashboard.quick_advance.preview.footer', bank_name: @current_member_name)

@@ -1321,7 +1321,7 @@ describe MemberBalanceService do
     end
     it 'fixes the :funding_date and :maturity_date for each activity' do
       allow(subject).to receive(:get_json).and_return([non_exercised_activity, terminated_activity_without_status, terminated_lc])
-      expect(subject).to receive(:fix_date).with(anything, [:funding_date, :maturity_date]).exactly(3)
+      expect(subject).to receive(:fix_date).with(anything, [:funding_date, :maturity_date, :termination_date]).exactly(3)
       todays_credit_activity
     end
   end

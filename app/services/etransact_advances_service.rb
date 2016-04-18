@@ -121,6 +121,27 @@ class EtransactAdvancesService < MAPIService
     @settings ||= get_hash(:settings, 'etransact_advances/settings')
   end
 
+  def etransact_status(member_id, status_object=nil)
+    enabled_for_member = MembersService.new(request).quick_advance_enabled_for_member?(member_id)
+    status_object = self.status unless status_object
+    etransact_active = self.etransact_active?(status_object)
+    etransact_has_terms = self.has_terms?(status_object)
+    # Priority Order: Closed, No Terms, Disabled, Open
+    if etransact_active
+      if etransact_has_terms
+        if enabled_for_member
+          :open
+        else
+          :disabled_for_member
+        end
+      else
+        :no_terms
+      end
+    else
+      :closed
+    end
+  end
+
   protected
 
   def days_until(date)

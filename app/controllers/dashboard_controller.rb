@@ -89,7 +89,7 @@ class DashboardController < ApplicationController
       nil
     end
 
-    @quick_advance_message = MessageService.new.todays_quick_advance_message
+    @limited_pricing_message = MessageService.new.todays_quick_advance_message
     @quick_advance_enabled = members_service.quick_advance_enabled_for_member?(current_member_id)
     etransact_status = etransact_service.status
     quick_advance_open = etransact_service.etransact_active?(etransact_status)
@@ -416,63 +416,75 @@ class DashboardController < ApplicationController
         next unless activity[:instrument_type] == 'LC' ||
                     activity[:instrument_type] == 'ADVANCE' ||
                     activity[:instrument_type] == 'INVESTMENT'
+        amount = activity[:current_par]
+        description = activity[:product_description]
+        transaction_number = activity[:transaction_number]
         maturity_date = activity[:maturity_date].to_date if activity[:maturity_date]
-        maturity_date = case activity[:status]
-                        when 'TERMINATED'
-                          if activity[:instrument_type] == 'LC'
-                            t('dashboard.recent_activity.terminated_today')
-                          elsif activity[:instrument_type] == 'ADVANCE'
-                            activity[:termination_full_partial]
-                          else
-                            fhlb_date_standard_numeric(maturity_date)
-                          end
-                        when 'INTER_AMEND_STA'
-                          t('dashboard.recent_activity.amended_today')
-                        when 'EXPIRED'
-                          t('dashboard.recent_activity.expires_today')
-                        when 'MATURED'
-                          t('dashboard.recent_activity.matures_today')
-                        when 'VERIFIED'
-                          if activity[:product] == 'OPEN VRC'
-                            t('dashboard.open')
-                          else
-                            t('dashboard.recent_activity.matures_on', date: fhlb_date_standard_numeric(maturity_date))
-                          end
-                        when 'COLLATERAL_AUTH'
-                          t('dashboard.recent_activity.will_be_funded_on', date: fhlb_date_standard_numeric(activity[:funding_date]))
-                        when 'OPS_REVIEW', 'SEC_REVIEWED'
-                          t('dashboard.recent_activity.in_review')
-                        when 'EXECUTED'
-                          t('dashboard.recent_activity.matures_on', date: maturity_date)
-                        when 'PEND_TERM'
-                          if maturity_date
-                            t('dashboard.recent_activity.matures_on', date: maturity_date)
-                          else
-                            t('dashboard.open')
-                          end
-                        else
-                          if activity[:instrument_type] == 'INVESTMENT'
-                            if maturity_date == Time.zone.today
-                              t('dashboard.recent_activity.matures_today')
-                            else
-                              if maturity_date
-                                t('dashboard.recent_activity.matures_on', date: maturity_date)
-                              else
-                                t('dashboard.open')
-                              end
-                            end
-                          else
-                            if maturity_date == Time.zone.today
-                              t('global.today')
-                            else
-                              fhlb_date_standard_numeric(maturity_date)
-                            end
-                          end
-                        end
-        if activity[:product_description] == "LC" || activity[:product_description] == "LC LC LC"
-          activity[:product_description] = t('dashboard.recent_activity.letter_of_credit')
+        event = case activity[:status]
+        when 'TERMINATED'
+          if activity[:instrument_type] == 'LC'
+            t('dashboard.recent_activity.terminated_today')
+          elsif activity[:instrument_type] == 'ADVANCE'
+            activity[:termination_full_partial]
+          else
+            fhlb_date_standard_numeric(maturity_date)
+          end
+        when 'INTER_AMEND_STA'
+          t('dashboard.recent_activity.amended_today')
+        when 'EXPIRED'
+          t('dashboard.recent_activity.expires_today')
+        when 'MATURED'
+          t('dashboard.recent_activity.matures_today')
+        when 'VERIFIED'
+          if activity[:product] == 'OPEN VRC'
+            t('dashboard.open')
+          else
+            t('dashboard.recent_activity.matures_on', date: fhlb_date_standard_numeric(maturity_date))
+          end
+        when 'COLLATERAL_AUTH'
+          t('dashboard.recent_activity.will_be_funded_on', date: fhlb_date_standard_numeric(activity[:funding_date]))
+        when 'OPS_REVIEW', 'SEC_REVIEWED'
+          t('dashboard.recent_activity.in_review')
+        when 'EXECUTED'
+          t('dashboard.recent_activity.matures_on', date: maturity_date)
+        when 'PEND_TERM'
+          if maturity_date
+            t('dashboard.recent_activity.matures_on', date: maturity_date)
+          else
+            t('dashboard.open')
+          end
+        else
+          if activity[:instrument_type] == 'INVESTMENT'
+            if maturity_date == Time.zone.today
+              t('dashboard.recent_activity.matures_today')
+            else
+              if maturity_date
+                t('dashboard.recent_activity.matures_on', date: maturity_date)
+              else
+                t('dashboard.open')
+              end
+            end
+          else
+            if maturity_date == Time.zone.today
+              t('global.today')
+            else
+              fhlb_date_standard_numeric(maturity_date)
+            end
+          end
         end
-        activity_data.push([activity[:product_description], activity[:current_par], maturity_date, activity[:transaction_number]])
+        if activity[:termination_full_partial] == 'PARTIAL PREPAYMENT'
+          event = if activity[:sub_product].match(/(^|\s)VRC($|\s)/)
+            t('dashboard.recent_activity.partial_repayment')
+          else
+            t('dashboard.recent_activity.partial_prepayment')
+          end
+          amount = activity[:termination_par]
+          date = activity[:termination_date]
+        end
+        if activity[:product_description] == "LC" || activity[:product_description] == "LC LC LC"
+          description = t('dashboard.recent_activity.letter_of_credit')
+        end
+        activity_data.push([description, amount, event, transaction_number])
         i += 1
       end
     end
