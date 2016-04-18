@@ -457,6 +457,7 @@ class ReportsController < ApplicationController
         }
       ]
     }
+    @capital_stock_table[:rows].each { |row| row[:columns][1][:options] = { force_unit: true }}
 
     @rhfa_table = {
       rows: [
@@ -480,6 +481,7 @@ class ReportsController < ApplicationController
         }
       ]
     }
+    @rhfa_table[:rows].each { |row| row[:columns][1][:options] = { force_unit: true }}
 
     @advances_table = {
       rows: [
@@ -534,9 +536,10 @@ class ReportsController < ApplicationController
       ],
       footer: [
         {value: t('reports.pages.member_profile.advances.total_advances')},
-        {value: @member_profile[:advances][:total_advances], type: :currency_whole}
+        {value: @member_profile[:advances][:total_advances], type: :currency_whole, options: { force_unit: true }}
       ]
     }
+    @advances_table[:rows].each { |row| row[:columns][1][:options] = { force_unit: true }}
 
     @mpf_table = {
       rows: [
@@ -555,9 +558,10 @@ class ReportsController < ApplicationController
       ],
       footer: [
         {value: t('reports.pages.member_profile.advances.total_mpf')},
-        {value: @member_profile[:advances][:total_mpf], type: :currency_whole}
+        {value: @member_profile[:advances][:total_mpf], type: :currency_whole, options: { force_unit: true }}
       ]
     }
+    @mpf_table[:rows].each { |row| row[:columns][1][:options] = { force_unit: true }}
 
     empty_table_defaults = {
       column_headings: [], rows: []
@@ -566,7 +570,7 @@ class ReportsController < ApplicationController
     @advances_and_mpf_totals = {
       footer: [
         {value: t('reports.pages.member_profile.advances.total_advances_and_mpf')},
-        {value: @member_profile[:advances][:total_advances_and_mpf], type: :currency_whole}
+        {value: @member_profile[:advances][:total_advances_and_mpf], type: :currency_whole, options: { force_unit: true }}
       ]
     }.merge(empty_table_defaults)
 
@@ -599,6 +603,10 @@ class ReportsController < ApplicationController
         }
       ]
     }
+    @credit_tables[0][:rows].each do |row|
+      type = row[:columns][1][:type]
+      row[:columns][1][:options] = { force_unit: true } if type == :currency_whole || type == :percentage
+    end
     @credit_tables[1] = {
       rows: [
         {
@@ -640,9 +648,10 @@ class ReportsController < ApplicationController
       ],
       footer: [
         {value: t('reports.pages.member_profile.credit.total_advance_and_mpf')},
-        {value: @member_profile[:credit_outstanding][:total_advances_and_mpf], type: :currency_whole}
+        {value: @member_profile[:credit_outstanding][:total_advances_and_mpf], type: :currency_whole, options: { force_unit: true }}
       ]
     }
+    @credit_tables[1][:rows].each { |row| row[:columns][1][:options] = { force_unit: true }}
     @credit_tables[2] = {
       rows: [
         {
@@ -672,20 +681,21 @@ class ReportsController < ApplicationController
       ],
       footer: [
         {value: t('reports.pages.member_profile.credit.total_credit_products')},
-        {value: @member_profile[:credit_outstanding][:total_credit_products_outstanding], type: :currency_whole}
+        {value: @member_profile[:credit_outstanding][:total_credit_products_outstanding], type: :currency_whole, options: { force_unit: true }}
       ]
     }
+    @credit_tables[2][:rows].each { |row| row[:columns][1][:options] = { force_unit: true }}
     @total_credit_table = {
       footer: [
         {value: t('reports.pages.member_profile.credit.total_credit')},
-        {value: @member_profile[:credit_outstanding][:total], type: :currency_whole}
+        {value: @member_profile[:credit_outstanding][:total], type: :currency_whole, options: { force_unit: true }}
       ]
     }.merge(empty_table_defaults)
 
     @total_available_credit_table = {
       footer: [
         {value: t('reports.pages.member_profile.credit.total_available_credit')},
-        {value: @member_profile[:remaining_financing_available], type: :currency_whole}
+        {value: @member_profile[:remaining_financing_available], type: :currency_whole, options: { force_unit: true }}
       ]
     }.merge(empty_table_defaults)
 
@@ -700,7 +710,7 @@ class ReportsController < ApplicationController
         {
           columns: [
             {value: t('reports.pages.member_profile.sta.balance')},
-            {value: @member_profile[:sta_balance], type: :currency_whole}
+            {value: @member_profile[:sta_balance], type: :currency_whole, options: { force_unit: true }}
           ]
         },
         {
