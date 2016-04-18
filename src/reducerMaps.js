@@ -6,9 +6,26 @@ import { normalize, arrayOf } from 'normalizr';
 import update from 'react-addons-update';
 import uuid from 'node-uuid';
 
+const setOrMerge = (target, key, obj) => {
+  if (target[key] === undefined) {
+    return update(target, {
+      [key]: {
+        $set: obj
+      }
+    });
+  }
+  return update(target, {
+    [key]: {
+      $merge: obj
+    }
+  });
+};
+
 const isFetching = state =>
-  Object.assign({}, state, {
-    isFetching: true
+  update(state, {
+    $merge: {
+      isFetching: true
+    }
   });
 
 export const restaurants = new Map([
@@ -30,21 +47,27 @@ export const restaurants = new Map([
     })
   ],
   [ActionTypes.INVALIDATE_RESTAURANTS, state =>
-    Object.assign({}, state, {
-      didInvalidate: true
+    update(state, {
+      $merge: {
+        didInvalidate: true
+      }
     })
   ],
   [ActionTypes.REQUEST_RESTAURANTS, state =>
-    Object.assign({}, state, {
-      isFetching: true,
-      didInvalidate: false
+    update(state, {
+      $merge: {
+        isFetching: true,
+        didInvalidate: false
+      }
     })
   ],
   [ActionTypes.RECEIVE_RESTAURANTS, (state, action) =>
-    Object.assign({}, state, {
-      isFetching: false,
-      didInvalidate: false,
-      items: normalize(action.items, arrayOf(schemas.restaurant))
+    update(state, {
+      $merge: {
+        isFetching: false,
+        didInvalidate: false,
+        items: normalize(action.items, arrayOf(schemas.restaurant))
+      }
     })
   ],
   [ActionTypes.POST_RESTAURANT, isFetching],
@@ -312,21 +335,6 @@ export const notifications = new Map([
   ]
 ]);
 
-const setOrMerge = (target, key, obj) => {
-  if (target[key] === undefined) {
-    return update(target, {
-      [key]: {
-        $set: obj
-      }
-    });
-  }
-  return update(target, {
-    [key]: {
-      $merge: obj
-    }
-  });
-};
-
 const resetRestaurant = (state, action) =>
   update(state, {
     $merge: {
@@ -390,35 +398,41 @@ export const mapUi = new Map([
   [ActionTypes.RESTAURANT_POSTED, resetRestaurant],
   [ActionTypes.RESTAURANT_DELETED, resetRestaurant],
   [ActionTypes.SHOW_INFO_WINDOW, (state, action) =>
-    Object.assign({}, state, {
-      markers: Object.assign({}, state.markers, {
-        [action.id]: Object.assign({}, state[action.id], { showInfoWindow: true })
-      })
+    update(state, {
+      markers: {
+        $apply: target => setOrMerge(target, action.id, { showInfoWindow: true })
+      }
     })
   ],
   [ActionTypes.HIDE_INFO_WINDOW, (state, action) =>
-    Object.assign({}, state, {
-      markers: Object.assign({}, state.markers, {
-        [action.id]: Object.assign({}, state[action.id], { showInfoWindow: false })
-      })
+    update(state, {
+      markers: {
+        $apply: target => setOrMerge(target, action.id, { showInfoWindow: false })
+      }
     })
   ],
   [ActionTypes.SET_SHOW_UNVOTED, (state, action) =>
-    Object.assign({}, state, {
-      showUnvoted: action.val
+    update(state, {
+      $merge: {
+        showUnvoted: action.val
+      }
     })
   ]
 ]);
 
 export const pageUi = new Map([
   [ActionTypes.SCROLL_TO_TOP, state =>
-    Object.assign({}, state, {
-      shouldScrollToTop: true
+    update(state, {
+      $merge: {
+        shouldScrollToTop: true
+      }
     })
   ],
   [ActionTypes.SCROLLED_TO_TOP, state =>
-    Object.assign({}, state, {
-      shouldScrollToTop: false
+    update(state, {
+      $merge: {
+        shouldScrollToTop: false
+      }
     })
   ],
 ]);
@@ -435,18 +449,18 @@ export const modals = new Map([
     })
   ],
   [ActionTypes.HIDE_MODAL, (state, action) =>
-    Object.assign({}, state, {
-      [action.name]: Object.assign({}, state[action.name], { shown: false })
+    update(state, {
+      $apply: target => setOrMerge(target, action.name, { shown: false })
     })
   ],
   [ActionTypes.RESTAURANT_DELETED, state =>
-    Object.assign({}, state, {
-      deleteRestaurant: Object.assign({}, state.deleteRestaurant, { shown: false })
+    update(state, {
+      $apply: target => setOrMerge(target, 'deleteRestaurant', { shown: false })
     })
   ],
   [ActionTypes.TAG_DELETED, state =>
-    Object.assign({}, state, {
-      deleteTag: Object.assign({}, state.deleteTag, { shown: false })
+    update(state, {
+      $apply: target => setOrMerge(target, 'deleteTag', { shown: false })
     })
   ]
 ]);
@@ -519,24 +533,32 @@ export const tags = new Map([
 
 export const tagUi = new Map([
   [ActionTypes.SHOW_TAG_FILTER_FORM, state =>
-    Object.assign({}, state, {
-      filterFormShown: true
+    update(state, {
+      $merge: {
+        filterFormShown: true
+      }
     })
   ],
   [ActionTypes.HIDE_TAG_FILTER_FORM, state =>
-    Object.assign({}, state, {
-      autosuggestValue: '',
-      filterFormShown: false
+    update(state, {
+      $merge: {
+        autosuggestValue: '',
+        filterFormShown: false
+      }
     })
   ],
   [ActionTypes.SET_TAG_FILTER_AUTOSUGGEST_VALUE, (state, action) =>
-    Object.assign({}, state, {
-      autosuggestValue: action.value
+    update(state, {
+      $merge: {
+        autosuggestValue: action.value
+      }
     })
   ],
   [ActionTypes.ADD_TAG_FILTER, state =>
-    Object.assign({}, state, {
-      autosuggestValue: ''
+    update(state, {
+      $merge: {
+        autosuggestValue: ''
+      }
     })
   ]
 ]);
