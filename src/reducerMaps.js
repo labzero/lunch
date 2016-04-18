@@ -312,14 +312,33 @@ export const notifications = new Map([
   ]
 ]);
 
+const setOrMerge = (target, key, obj) => {
+  if (target[key] === undefined) {
+    return update(target, {
+      [key]: {
+        $set: obj
+      }
+    });
+  }
+  return update(target, {
+    [key]: {
+      $merge: obj
+    }
+  });
+};
+
 const resetRestaurant = (state, action) =>
-  Object.assign({}, state, {
-    [action.id]: undefined
+  update(state, {
+    $merge: {
+      [action.id]: {
+        $set: {}
+      }
+    }
   });
 
 const resetAddTagAutosuggestValue = (state, action) =>
-  Object.assign({}, state, {
-    [action.restaurantId]: Object.assign({}, state[action.restaurantId], { addTagAutosuggestValue: '' })
+  update(state, {
+    $apply: target => setOrMerge(target, action.restaurantId, { addTagAutosuggestValue: '' })
   });
 
 export const listUi = new Map([
@@ -330,33 +349,33 @@ export const listUi = new Map([
   [ActionTypes.POSTED_TAG_TO_RESTAURANT, resetAddTagAutosuggestValue],
   [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT, resetAddTagAutosuggestValue],
   [ActionTypes.SET_ADD_TAG_AUTOSUGGEST_VALUE, (state, action) =>
-    Object.assign({}, state, {
-      [action.id]: Object.assign({}, state[action.id], { addTagAutosuggestValue: action.value })
+    update(state, {
+      $apply: target => setOrMerge(target, action.id, { addTagAutosuggestValue: action.value })
     })
   ],
   [ActionTypes.SHOW_ADD_TAG_FORM, (state, action) =>
-    Object.assign({}, state, {
-      [action.id]: Object.assign({}, state[action.id], { isAddingTags: true })
+    update(state, {
+      $apply: target => setOrMerge(target, action.id, { isAddingTags: true })
     })
   ],
   [ActionTypes.HIDE_ADD_TAG_FORM, (state, action) =>
-    Object.assign({}, state, {
-      [action.id]: Object.assign({}, state[action.id], { isAddingTags: false })
+    update(state, {
+      $apply: target => setOrMerge(target, action.id, { isAddingTags: false })
     })
   ],
   [ActionTypes.SET_EDIT_NAME_FORM_VALUE, (state, action) =>
-    Object.assign({}, state, {
-      [action.id]: Object.assign({}, state[action.id], { editNameFormValue: action.value })
+    update(state, {
+      $apply: target => setOrMerge(target, action.id, { editNameFormValue: action.value })
     })
   ],
   [ActionTypes.SHOW_EDIT_NAME_FORM, (state, action) =>
-    Object.assign({}, state, {
-      [action.id]: Object.assign({}, state[action.id], { isEditingName: true })
+    update(state, {
+      $apply: target => setOrMerge(target, action.id, { isEditingName: true })
     })
   ],
   [ActionTypes.HIDE_EDIT_NAME_FORM, (state, action) =>
-    Object.assign({}, state, {
-      [action.id]: Object.assign({}, state[action.id], { isEditingName: false })
+    update(state, {
+      $apply: target => setOrMerge(target, action.id, { isEditingName: false })
     })
   ]
 ]);
