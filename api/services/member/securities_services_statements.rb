@@ -93,19 +93,19 @@ module MAPI
 
         def self.available_statements_sql(fhlb_id)
           <<-SQL
-          SELECT DISTINCT SSX_BTC_DATE as report_end_date, to_char(ssx_btc_date, 'Month') || ' ' || to_char(ssx_btc_date, 'YYYY') as month_year
+          SELECT DISTINCT SSX_BTC_DATE as report_end_date
           FROM SAFEKEEPING.SECURITIES_FEES_STMT_WEB WHERE FHLB_ID = #{fhlb_id}
           ORDER BY SSX_BTC_DATE DESC
           SQL
         end
 
         def self.available_statements(logger, env, fhlb_id)
-          if env == :production
+          statements = if env == :production
             fetch_hashes(logger, available_statements_sql(fhlb_id), {}, true)
           else
             fake('securities_services_statements_available')
-          end.tap do |statements|
-            statements.each{ |statement| statement['report_end_date'] = dateify(statement['report_end_date']) }
+          end.each do |statement|
+            statement['report_end_date'] = dateify(statement['report_end_date'])
           end
         end
 
@@ -122,7 +122,14 @@ module MAPI
         end
 
         def self.statement(logger, env, fhlb_id, report_date)
-          from_db = env == :production ? fetch_hashes(logger,statement_sql(fhlb_id, report_date), MAP_VALUES) : fake('securities_services_statements')
+          if env == :production
+            from_db = fetch_hashes(logger,statement_sql(fhlb_id, report_date), MAP_VALUES)
+          else
+            from_db = fake('securities_services_statements')
+            statement = from_db.first
+            statement['SSX_BTC_DATE'] = report_date
+            statement['STA_CHARGE_DATE'] = report_date + 1.month
+          end
           from_db = from_db.map{ |record| multi_level_transform(record, MAP_KEYS) }
           from_db.empty? ? {} : from_db.first
         end

@@ -708,13 +708,12 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET securities_services_statement' do
       let(:make_request) { get :securities_services_statement }
       let(:response_hash) { double('A Securities Services Statement', :'[]' => nil)}
-      let(:report_end_date) { Date.today + rand(10000) }
-      let(:month_year) { double( 'month_year' ) }
+      let(:report_end_date) { '2015-03-21'.to_date }
       let(:start_date_param) { Date.today - rand(10000) }
       describe 'when statements are available' do
         before do
-          allow(member_balance_service_instance).to receive(:securities_services_statements_available).and_return([{'month_year' => month_year, 'report_end_date' => report_end_date}])
-          allow(member_balance_service_instance).to receive(:securities_services_statement).with(report_end_date).and_return([response_hash])
+          allow(member_balance_service_instance).to receive(:securities_services_statements_available).and_return([{'report_end_date' => report_end_date}])
+          allow(member_balance_service_instance).to receive(:securities_services_statement).with(report_end_date).and_return(response_hash)
           allow(response_hash).to receive(:[]).with(:securities_fees).and_return([{}])
           allow(response_hash).to receive(:[]).with(:transaction_fees).and_return([{}])
         end
@@ -728,7 +727,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'should assign `@statement` to the result of calling MemberBalanceService.securities_services_statement' do
           make_request
-          expect(assigns[:statement]).to eq([response_hash])
+          expect(assigns[:statement]).to eq(response_hash)
         end
         it 'assigns @data_available a value of true' do
           make_request
@@ -738,13 +737,15 @@ RSpec.describe ReportsController, :type => :controller do
           expect(member_balance_service_instance).to receive(:securities_services_statement).and_return(nil)
           expect{make_request}.to raise_error(StandardError)
         end
-        it 'set the debit date to the last business day of the next month following the end date' do
-          next_month_end = double(Date)
+        it 'set the debit date to the debit date found in the statement' do
           debit_date = double(Date)
-          allow(controller).to receive(:default_dates_hash).with(report_end_date).and_return({next_month_end: next_month_end})
-          allow(controller).to receive(:most_recent_business_day).with(next_month_end).and_return(debit_date)
+          allow(response_hash).to receive(:[]).with(:debit_date).and_return(debit_date)
           make_request
           expect(assigns[:debit_date]).to eq(debit_date)
+        end
+        it 'sets @dropdown_options to the dates and names of the available statements' do
+          make_request
+          expect(assigns[:dropdown_options]).to eq([[ 'March 2015', report_end_date]])
         end
         describe 'with the report disabled' do
           before do
@@ -757,6 +758,10 @@ RSpec.describe ReportsController, :type => :controller do
           it 'should set @start_date if the report is disabled' do
             make_request
             expect(assigns[:start_date]).to eq(report_end_date)
+          end
+          it 'sets @debit_date to nil if the report is disabled' do
+            make_request
+            expect(assigns[:debit_date]).to be_nil
           end
         end
       end

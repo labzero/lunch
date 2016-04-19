@@ -1346,18 +1346,19 @@ class ReportsController < ApplicationController
       @data_available = false
     else
       @data_available        = true
-      @dropdown_options      = available_reports.map{ |entry| [entry['month_year'], entry['report_end_date']] }
+      @dropdown_options      = available_reports.map{ |entry| [entry['report_end_date'].strftime('%B %Y'), entry['report_end_date']] }
       @start_date            = params[:start_date].try(:to_date) || @dropdown_options[0][1]
       @dropdown_options_text = @dropdown_options.find{ |option| option[1] == @start_date }.try(:first)
-      @debit_date            = most_recent_business_day(default_dates_hash(@start_date)[:next_month_end])
 
       report_download_name = "securities-services-monthly-statement-#{fhlb_report_date_numeric(@start_date)}"
       downloadable_report(:pdf, {start_date: params[@start_date]}, report_download_name) do
         if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
           @statement = {}
+          @debit_date = nil
         else
           @statement = member_balances.securities_services_statement(@start_date)
           raise StandardError, "There has been an error and ReportsController#securities_services_statement has encountered nil. Check error logs." if @statement.nil?
+          @debit_date = @statement[:debit_date]
         end
       end
     end

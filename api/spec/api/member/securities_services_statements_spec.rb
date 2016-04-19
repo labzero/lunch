@@ -8,6 +8,10 @@ describe MAPI::ServiceApp do
     let(:fhlb_id){ double('fhlb_id') }
     let(:date){ double('date') }
 
+    before do
+      allow(date).to receive(:+).and_return(date)
+    end
+
     describe 'multi_level_merge' do
       it 'should work on the simple case' do
         result = {}
@@ -29,11 +33,11 @@ describe MAPI::ServiceApp do
             account_maintenance: { total: 100.0 },
             certifications: {total:0.0, cost: 40.0, count: 0},
             contact: {city: "OAKLAND", name: "UNITED BUSINESS BANK, F.S.B.", state: "CA", zip: "94621-1447"},
-            debit_date: "30-JAN-15",
+            debit_date: "2015-01-30",
             handling: {total: 0.0, count: 0, cost: 40.0},
             income_disbursement: {total: 195.0, cost: 5.0, count: 39},
             member_id: 129,
-            month_ending: "31-DEC-14",
+            month_ending: "2014-12-31",
             pledge_status_change: {total: 0.0, cost: 10.0, count: 0},
             research: {total: 0.0, count: 0, cost: 40.0},
             securities_fees: {dtc:       {cost: 2.5,  count: 19, total: 47.5},
@@ -72,7 +76,7 @@ describe MAPI::ServiceApp do
         allow(subject).to receive(:available_statements_sql).with(fhlb_id).and_return(available_statements_sql)
         allow(subject).to receive(:statement_sql).with(fhlb_id, date).and_return(statement_sql)
         allow(subject).to receive(:fetch_hashes).with(logger, available_statements_sql, {}, true).and_return(available_statements_hashes)
-        allow(available_statements_hashes).to receive(:each)
+        allow(available_statements_hashes).to receive(:each).and_return(available_statements_hashes)
         allow(subject).to receive(:fetch_hashes).with(logger, statement_sql, subject::MAP_VALUES).and_return([statement_hash])
         allow(subject).to receive(:multi_level_transform).with(statement_hash, subject::MAP_KEYS).and_return(transformed_statement_hash)
       end
@@ -100,13 +104,13 @@ describe MAPI::ServiceApp do
           let(:available_statements){ double('available_statements') }
           it 'should return available_statements_records' do
             allow(subject).to receive(:fake).with('securities_services_statements_available').and_return(available_statements)
-            allow(available_statements).to receive(:each)
+            allow(available_statements).to receive(:each).and_return(available_statements)
             expect(subject.available_statements(logger, env, fhlb_id)).to eq(available_statements)
           end
         end
 
         describe 'statement' do
-          let(:statement_hash){ double('statement_hash', with_indifferent_access: indifferent_hash) }
+          let(:statement_hash){ double('statement_hash', with_indifferent_access: indifferent_hash, :[]= => nil) }
           let(:indifferent_hash){ double('indifferent_hash') }
           let(:fixup_hash){ double('fixup_hash') }
           let(:transformed_hash){ double('transformed_hash') }
