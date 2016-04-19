@@ -267,7 +267,13 @@ RSpec.describe ReportsController, :type => :controller do
         [{type: nil,     value: certificate_sequence, classes: [:'report-cell-narrow']},
          {type: :date,   value: issue_date,           classes: [:'report-cell-narrow']},
          {type: nil,     value: transaction_type,     classes: [:'report-cell-narrow']},
-         {type: :number, value: shares_outstanding,   classes: [:'report-cell-narrow']}]
+         {type: :number, value: shares_outstanding,   classes: [:'report-cell-narrow', :'report-cell-right']}]
+      end
+      let(:footer_data)  do
+        [
+          {value: I18n.t('reports.pages.capital_stock_trial_balance.total_shares_outstanding'), colspan: 3},
+          {value: number_of_shares, type: :number, classes: [:'report-cell-narrow', :'report-cell-right']}
+        ]
       end
       let(:min_date) { Date.new(2002,1,1) }
       let(:call_action) { get :capital_stock_trial_balance }
@@ -312,6 +318,10 @@ RSpec.describe ReportsController, :type => :controller do
       it 'returns capital_stock_trial_balance_table_data with with columns populated' do
         call_action
         expect(assigns[:capital_stock_trial_balance_table_data][:rows][0][:columns]).to eq(table_data)
+      end
+      it 'returns capital_stock_trial_balance_table_data with the footer populated' do
+        call_action
+        expect(assigns[:capital_stock_trial_balance_table_data][:footer]).to eq(footer_data)
       end
       it 'sorts certificates by sequence number' do
         sequence = rand(100000..999999)

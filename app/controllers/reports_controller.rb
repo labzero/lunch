@@ -354,11 +354,11 @@ class ReportsController < ApplicationController
         { columns: [{value: certificate[:certificate_sequence], type: nil,     classes: [:'report-cell-narrow']},
                     {value: certificate[:issue_date],           type: :date,   classes: [:'report-cell-narrow']},
                     {value: certificate[:transaction_type],     type: nil,     classes: [:'report-cell-narrow']},
-                    {value: certificate[:shares_outstanding],   type: :number, classes: [:'report-cell-narrow']}] }
+                    {value: certificate[:shares_outstanding],   type: :number, classes: [:'report-cell-narrow', :'report-cell-right']}] }
       end
       footer = [
         {value: t('reports.pages.capital_stock_trial_balance.total_shares_outstanding'), colspan: 3},
-        {value: summary[:number_of_shares], type: :number, classes: [:'report-cell-narrow']}
+        {value: summary[:number_of_shares], type: :number, classes: [:'report-cell-narrow', :'report-cell-right']}
       ]
       @capital_stock_trial_balance_table_data = { column_headings: column_headings, rows: certificates, footer: footer }
     end
