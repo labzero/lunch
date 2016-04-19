@@ -2517,13 +2517,14 @@ RSpec.describe ReportsController, :type => :controller do
 
   describe 'GET authorizations' do
     it_behaves_like 'a user required action', :get, :authorizations
-    it_behaves_like 'a report that can be downloaded', :authorizations, [:pdf]
+    it_behaves_like 'a report that can be downloaded', :authorizations, [:pdf, :xlsx]
     it_behaves_like 'a report with instance variables set in a before_filter', :authorizations
     it_behaves_like 'a controller action with an active nav setting', :authorizations, :reports
     describe 'view instance variables' do
       let(:member_service_instance) {double('MembersService')}
       let(:user_no_roles) {{display_name: 'User With No Roles', roles: [], surname: 'With No Roles', given_name: 'User'}}
       let(:user_etransact) {{display_name: 'Etransact User', roles: [User::Roles::ETRANSACT_SIGNER], surname: 'User', given_name: 'Etransact'}}
+      let(:signer_manager) { [User::Roles::SIGNER_MANAGER] }
       let(:user_a) { {display_name: 'R&A User', roles: [User::Roles::SIGNER_MANAGER], given_name: 'R&A', surname: 'User'} }
       let(:user_b) { {display_name: 'Collateral User', roles: [User::Roles::COLLATERAL_SIGNER], given_name: 'Collateral', surname: 'User'} }
       let(:user_c) { {display_name: 'Wire Lady', roles: [User::Roles::WIRE_SIGNER], given_name: 'Wire', surname: 'Lady'} }
@@ -2555,6 +2556,11 @@ RSpec.describe ReportsController, :type => :controller do
           expect(option.last).to be_kind_of(String)
         end
       end
+      it 'sets @authorizations_dropdown_mapping to the `authorizations_filter` param' do
+        get :authorizations
+        expect(assigns[:authorizations_dropdown_mapping]).to eq(ReportsController::AUTHORIZATIONS_DROPDOWN_MAPPING)
+      end
+
       describe 'when not passed a Job ID' do
         let(:job) { double('MemberSignersAndUsersJob', job_status: job_status) }
         let(:make_request) { get :authorizations }
@@ -2637,6 +2643,7 @@ RSpec.describe ReportsController, :type => :controller do
           end
         end
       end
+
       describe '`@authorizations_table_data`' do
         it 'returns a hash with `column_headings`' do
           get :authorizations
@@ -2726,6 +2733,12 @@ RSpec.describe ReportsController, :type => :controller do
               expect(assigns[:authorizations_table_data][:rows]).to satisfy { |rows| !rows.find {|row| [user_etransact[:display_name], user_no_roles[:display_name]].include?(row[:columns].first[:value]) } }
             end
           end
+          it 'assigns `@authorizations_table_data[:raw_roles]` to `user_roles`' do
+            allow(signers_and_users).to receive(:map).and_return(signers_and_users)
+            allow(signers_and_users).to receive(:reject).and_return(signers_and_users)
+            get :authorizations, job_id: job_id
+            expect(assigns[:authorizations_table_data][:raw_roles]).to eq(signers_and_users)
+          end
         end
       end
     end
@@ -2752,7 +2765,6 @@ RSpec.describe ReportsController, :type => :controller do
     let(:credit_outstanding) { double('credit_outstanding', :[] => nil) }
     let(:sta_number) { double('An STA Number') }
     let(:member_profile_response) { {collateral_delivery_status: 'Y', rhfa: rhfa, approved_long_term_credit: approved_long_term_credit, advances: advances, credit_outstanding: credit_outstanding} }
-
     before do
       allow(subject).to receive(:current_member_id).and_return(member_id)
       allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member_details)
@@ -3319,12 +3331,6 @@ RSpec.describe ReportsController, :type => :controller do
     end
     describe '`roles_for_signers` method' do
       let(:role_mappings) { ReportsController::AUTHORIZATIONS_MAPPING }
-      it 'returns an array containing the I18n translation of the roles for a given user' do
-        role_mappings.each_key do |role|
-          user = {:roles => [role]}
-          expect(subject.send(:roles_for_signers, user)).to eq([role_mappings[role]])
-        end
-      end
       it 'returns an empty array a given user has no roles' do
         role_mappings.each_key do |role|
           user = {:roles => []}
@@ -3335,12 +3341,12 @@ RSpec.describe ReportsController, :type => :controller do
         roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER]
         sorted_roles = roles.sort_by {|role| described_class::AUTHORIZATIONS_ORDER.index(role)}
         user = {:roles => roles}
-        expect(subject.send(:roles_for_signers, user)).to eq(sorted_roles.collect {|role| role_mappings[role]})
+        expect(subject.send(:roles_for_signers, user)).to eq(sorted_roles.collect {|role| role})
       end
       it 'hides roles that are implied by a higher role' do
         roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::SIGNER_MANAGER]
         user = {:roles => roles}
-        expect(subject.send(:roles_for_signers, user)).to match_array([role_mappings[User::Roles::WIRE_SIGNER], role_mappings[User::Roles::SIGNER_MANAGER]])
+        expect(subject.send(:roles_for_signers, user)).to match_array([User::Roles::WIRE_SIGNER, User::Roles::SIGNER_MANAGER])
       end
     end
 

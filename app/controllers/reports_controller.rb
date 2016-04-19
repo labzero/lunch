@@ -40,7 +40,7 @@ class ReportsController < ApplicationController
     User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title')
   }
 
-  AUTHORIZATIONS_ROLE_UP = [
+  AUTHORIZATIONS_ROLL_UP = [
     User::Roles::ADVANCE_SIGNER,
     User::Roles::AFFORDABILITY_SIGNER,
     User::Roles::COLLATERAL_SIGNER,
@@ -1443,22 +1443,21 @@ class ReportsController < ApplicationController
     @report_name = ReportConfiguration.report_title(:authorizations)
     @today = Time.zone.today
 
-    downloadable_report(:pdf, {authorizations_filter: @authorizations_filter.to_s}) do
-      @authorizations_dropdown_options = AUTHORIZATIONS_DROPDOWN_MAPPING.collect{|key, value| [value, key]}
-      @authorizations_filter_text = AUTHORIZATIONS_DROPDOWN_MAPPING[@authorizations_filter]
+    downloadable_report([:pdf, :xlsx], {authorizations_filter: @authorizations_filter.to_s}) do
+      @authorizations_dropdown_mapping = AUTHORIZATIONS_DROPDOWN_MAPPING
+      @authorizations_dropdown_options = @authorizations_dropdown_mapping.collect{|key, value| [value, key]}
+      @authorizations_filter_text = @authorizations_dropdown_mapping[@authorizations_filter]
       mapped_filter = AUTHORIZATIONS_MAPPING[@authorizations_filter]
       @authorizations_title = case @authorizations_filter
       when 'all'
         t('reports.pages.authorizations.sub_title_all_users')
       when 'signer_manager', 'signer_entire_authority'
-         t('reports.pages.authorizations.sub_title_inclusive_authorizations', filter: mapped_filter)
+        t('reports.pages.authorizations.sub_title_inclusive_authorizations', filter: mapped_filter)
       else
         t('reports.pages.authorizations.sub_title', filter: mapped_filter)
       end
 
-      @authorizations_table_data = {
-        :column_headings => [t('user_roles.user.title'), @report_name]
-      }
+      @authorizations_table_data = { :column_headings => [t('user_roles.user.title'), @report_name] }
 
       @job_status_url = false
       @load_url = false
@@ -1475,7 +1474,11 @@ class ReportsController < ApplicationController
 
         users.sort_by! { |user| [user[:surname] || '', user[:given_name] || ''] }
 
-        user_roles = users.map{ |user| [user, roles_for_signers(user)] }.reject{ |_,roles| roles.empty? }
+        user_roles = users.map do |user|
+          processed_roles = roles_for_signers(user)
+          [user, processed_roles.collect { |role| AUTHORIZATIONS_MAPPING[role] }, processed_roles]
+        end.reject{ |_,roles| roles.empty? }
+
         check_for_inclusive_roles = false
         matching_roles_array = if ['signer_manager', 'signer_entire_authority', 'all'].include?(@authorizations_filter)
           [AUTHORIZATIONS_MAPPING[@authorizations_filter]]
@@ -1483,10 +1486,13 @@ class ReportsController < ApplicationController
           check_for_inclusive_roles = true
           [AUTHORIZATIONS_MAPPING[@authorizations_filter], INCLUSIVE_AUTHORIZATIONS].flatten
         end
-        user_roles = user_roles.select{ |_,roles| (roles & matching_roles_array).any? } unless @authorizations_filter == 'all'
-
+        filtered_user_roles = if @authorizations_filter == 'all'
+          user_roles
+        else
+          user_roles.select{ |_,roles| (roles & matching_roles_array).any? }
+        end
         if check_for_inclusive_roles
-          user_roles.each do |_, roles|
+          filtered_user_roles.each do |_, roles|
             roles.collect! do |role|
               if INCLUSIVE_AUTHORIZATIONS.include?(role)
                 @footnote_role ||= AUTHORIZATIONS_MAPPING[@authorizations_filter].downcase.capitalize
@@ -1497,8 +1503,10 @@ class ReportsController < ApplicationController
             end
           end
         end
-        @authorizations_table_data[:rows] = user_roles.map{ |user,roles| {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: roles}]}}
-
+        @authorizations_table_data[:rows] = filtered_user_roles.map do |user,roles|
+          {columns: [ { type: nil, value: user[:display_name]}, { type: :list, value: roles }]}
+        end
+        @authorizations_table_data[:raw_roles] = user_roles
         render layout: false if request.xhr?
       else
         job_status = MemberSignersAndUsersJob.perform_later(current_member_id).job_status
@@ -2084,11 +2092,11 @@ class ReportsController < ApplicationController
   def roles_for_signers(signer)
     roles = signer[:roles]
     if roles.include?(User::Roles::SIGNER_ENTIRE_AUTHORITY) || roles.include?(User::Roles::SIGNER_MANAGER)
-      roles = roles - AUTHORIZATIONS_ROLE_UP
+      roles = roles - AUTHORIZATIONS_ROLL_UP
     end
     roles.delete(User::Roles::ETRANSACT_SIGNER)
     roles.sort_by! { |role| AUTHORIZATIONS_ORDER.index(role) || 0 }
-    roles.collect! { |role| AUTHORIZATIONS_MAPPING[role] }
+    roles.collect! { |role| AUTHORIZATIONS_MAPPING.keys.include?(role) ? role : nil }
     roles.compact!
     roles
   end

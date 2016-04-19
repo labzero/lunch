@@ -1585,6 +1585,7 @@ en:
         sub_title_all_users: All Users with Authorizations
         sub_title_inclusive_authorizations: Users with %{filter}
         table_footnote: "* %{role} authorization included for users with Resolution and Authorization: Member Transactions or Entire Authority."
+        xlsx_column_marker: X
       parallel_shift:
         title: Putable Advance Parallel Shift Sensitivity Analysis
         info: The valuations below are calculated using data as of %{date}
