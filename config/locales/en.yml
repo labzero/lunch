@@ -117,6 +117,7 @@ en:
     defined_term: '%{term}:'
     authorizations: Authorizations
     letters_of_credit: Lettters of Credit
+    enter: Enter
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -1785,6 +1786,7 @@ en:
       preview: Review Advance
       submit: Submit Advance
       another_advance: Add Another Advance
+      view: View rate options
     messages:
       completing_advance: Please wait while we complete your advance. This may take about 30 seconds.
   products:

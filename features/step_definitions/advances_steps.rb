@@ -279,3 +279,11 @@ end
 When(/^the add advance rate has changed$/) do
   # implement code to ensure rate is displayed as having changed
 end
+
+Then(/^there should be no rate selected$/) do
+  page.assert_no_selector('.cell-selected')
+end
+
+When(/^I click on the dashboard module limited pricing notice$/) do
+  page.find('.dashboard-module-limited-pricing-notice').click
+end

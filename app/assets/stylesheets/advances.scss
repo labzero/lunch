@@ -48,7 +48,7 @@
   }
 }
 
-.add-advance-limited-pricing-message {
+.limited-pricing-message {
   position: relative;
   margin: 15px 0;
   padding-left: 50px;
@@ -307,6 +307,11 @@
       td {
         .add-advance-cell-wrapper {
           @include pseudo-background-cover($lightest-blue);
+        }
+        &.disabled-cell {
+          .add-advance-cell-wrapper {
+            @include pseudo-background-cover($light-gray);
+          }
         }
       }
       td:first-child {

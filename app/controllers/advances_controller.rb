@@ -71,6 +71,12 @@ class AdvancesController < ApplicationController
     etransact_service = EtransactAdvancesService.new(request)
     @limited_pricing_message = MessageService.new.todays_quick_advance_message
     @etransact_status = etransact_service.etransact_status(current_member_id)
+    advance_params = params[:advance_request]
+    if advance_params
+      advance_request.type = advance_params[:type] unless advance_params[:type].blank?
+      advance_request.term = advance_params[:term] unless advance_params[:term].blank?
+      advance_request.amount = advance_params[:amount] unless advance_params[:amount].blank?
+    end
     @advance_request_id = advance_request.id
     @selected_amount = advance_request.amount
     @selected_type = advance_request.type

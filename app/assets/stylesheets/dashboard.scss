@@ -218,6 +218,26 @@ $faded-opacity: 0.4 !default;
   table, .initiate-quick-advance, .rate-advances-footer, .quick-advance-rates {
     display: none;
   }
+  .etransact-status-message {
+    a {
+      display: block;
+      text-transform: uppercase;
+    }
+    span {
+      white-space: nowrap;
+    }
+  }
+  .etransact-status-message-closed {
+    display: none;
+  }
+  .primary-button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .limited-pricing-message {
+    margin-top: 15px;
+    padding-top: 15px;
+  }
 }
 
 .quick-advance-desk-closed-message-group {
@@ -233,11 +253,12 @@ $faded-opacity: 0.4 !default;
   }
 }
 
-.quick-advance-limited-pricing-notice {
+.quick-advance-limited-pricing-notice, .dashboard-module-limited-pricing-notice {
   @extend %typography-dashboard-gauge-label;
   @extend %link-style;
   margin-top: 10px;
   text-transform: uppercase;
+  display: inline-block;
 }
 
 .quick-advance-limited-pricing-notice, .dashboard-vrc-overnight-message[data-flyout-trigger], .dashboard-advances-rate[data-flyout-trigger] {
@@ -248,23 +269,35 @@ $faded-opacity: 0.4 !default;
   display: none;
 }
 
-p.dashboard-vrc-overnight-message {
-  font-weight: $semibold-weight;
-  margin-bottom: 5px;
+.dashboard-vrc-overnight-message[data-flyout-trigger], .dashboard-advances-rate[data-flyout-trigger] {
+  cursor: pointer;
+}
+
+p.dashboard-vrc-overnight-message, .dashboard-module-add-advance-link {
+  @extend %typography-dashboard-gauge-label;
   color: $actionable-blue;
+}
+
+p.dashboard-vrc-overnight-message {
+  margin-bottom: 0;
+  display: none;
 }
 
 .dashboard-advances-rate {
   font-weight: $extralight-weight;
   font-size: 5rem;
   line-height: 1;
-  margin-bottom: -17px; // UGH. Design doesn't account for descender spacing
   min-height: 75px;
+  color: $actionable-blue;
+  margin: 5px 0 10px;
   span {
     vertical-align: top;
     font-size: 3rem;
     display: inline-block;
     margin-top: 3px;
+  }
+  &.dashboard-element-loading {
+    margin: 0;
   }
 }
 

@@ -90,7 +90,7 @@ Then(/^I should be on the quick advance stock purchase screen$/) do
 end
 
 When(/^I click on the View Recent Price Indications link$/) do
-  page.find('.quick-advance-desk-closed-message a', text: I18n.t('dashboard.quick_advance.advances_desk_closed_link').upcase ).click
+  page.find('.etransact-status-message a', text: I18n.t('dashboard.quick_advance.advances_desk_closed_link').upcase ).click
 end
 
 Then(/^I should see the quick advance table$/) do
@@ -182,6 +182,8 @@ When(/^the quick advance rate has changed$/) do
 end
 
 When(/^the desk has closed$/) do
+  expect(EtransactAdvancesService).to receive(:new).and_return(double('service', etransact_status: :closed))
+  # allow_any_instance_of(EtransactAdvancesService).to receive(:etransact_status).and_return(:closed)
   # implement code to ensure desk has closed
 end
 
@@ -190,11 +192,7 @@ When(/^there is limited pricing today$/) do
 end
 
 When (/^I click on the link to view limited pricing information$/) do
-  page.find('.quick-advance-limited-pricing-notice').click
-end
-
-Then (/^I should see the limited pricing information message$/) do
-  page.assert_selector('.quick-advance-limited-pricing-message', visible: true)
+  page.find('.add-advance-limited-pricing-notice').click
 end
 
 Then(/^I should not see a preview of the quick advance$/) do
@@ -346,6 +344,10 @@ end
 
 Then(/^I should see a quick advance error$/) do
   step %{I should see an "advance unavailable" error}
+end
+
+Then(/^I should not see the quick-advance module$/) do
+  page.assert_no_selector('.dashboard-module-advances')
 end
 
 Then(/^I should see a quick advances disabled message$/) do

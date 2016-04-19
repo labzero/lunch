@@ -1,4 +1,5 @@
 require 'rails_helper'
+include CustomFormattingHelper
 
 RSpec.describe DashboardController, :type => :controller do
   login_user
@@ -36,6 +37,8 @@ RSpec.describe DashboardController, :type => :controller do
     let(:profile) { double('profile') }
     let(:service) { double('a service object', profile: profile, borrowing_capacity_summary: nil) }
     let(:make_request) { get :index }
+    let(:etransact_status) { double('some status') }
+    let(:etransact_service) { double('etransact service', etransact_status: etransact_status) }
     before do
       allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
       allow(subject).to receive(:current_user_roles)
@@ -92,31 +95,48 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(assigns[:current_overnight_vrc]).to be_kind_of(Float)
     end
-    it 'should assign @quick_advance_status' do
-      get :index
-      expect(assigns[:quick_advance_status]).to be_present
+    describe 'when the `add-advance` feature is enabled' do
+      before do
+        allow(controller).to receive(:feature_enabled?).and_call_original
+        allow(controller).to receive(:feature_enabled?).with('add-advance').and_return(true)
+      end
+      it 'assigns @etransact_status from the value returned by the `EtransactAdvancesService#etransact_status` instance method' do
+        allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+        get :index
+        expect(assigns[:etransact_status]).to eq(etransact_status)
+      end
     end
-    it 'should assign @quick_advance_status to `:open` if the desk is enabled and we have terms' do
-      get :index
-      expect(assigns[:quick_advance_status]).to eq(:open)
-    end
-    it 'should assign @quick_advance_status to `:no_terms` if the desk is enabled and we have no terms' do
-      allow_any_instance_of(EtransactAdvancesService).to receive(:has_terms?).and_return(false)
-      get :index
-      expect(assigns[:quick_advance_status]).to eq(:no_terms)
-    end
-    it 'should assign @quick_advance_status to `:open` if the desk is disabled' do
-      allow_any_instance_of(EtransactAdvancesService).to receive(:etransact_active?).and_return(false)
-      get :index
-      expect(assigns[:quick_advance_status]).to eq(:closed)
-    end
-    it 'sets @advance_terms' do
-      get :index
-      expect(assigns[:advance_terms]).to eq(AdvanceRequest::ADVANCE_TERMS)
-    end
-    it 'sets @advance_types' do
-      get :index
-      expect(assigns[:advance_types]).to eq(AdvanceRequest::ADVANCE_TYPES)
+    describe 'when the `add-advance` feature is disabled' do
+      before do
+        allow(controller).to receive(:feature_enabled?).and_call_original
+        allow(controller).to receive(:feature_enabled?).with('add-advance').and_return(false)
+      end
+      it 'should assign @quick_advance_status' do
+        get :index
+        expect(assigns[:quick_advance_status]).to be_present
+      end
+      it 'should assign @quick_advance_status to `:open` if the desk is enabled and we have terms' do
+        get :index
+        expect(assigns[:quick_advance_status]).to eq(:open)
+      end
+      it 'should assign @quick_advance_status to `:no_terms` if the desk is enabled and we have no terms' do
+        allow_any_instance_of(EtransactAdvancesService).to receive(:has_terms?).and_return(false)
+        get :index
+        expect(assigns[:quick_advance_status]).to eq(:no_terms)
+      end
+      it 'should assign @quick_advance_status to `:open` if the desk is disabled' do
+        allow_any_instance_of(EtransactAdvancesService).to receive(:etransact_active?).and_return(false)
+        get :index
+        expect(assigns[:quick_advance_status]).to eq(:closed)
+      end
+      it 'sets @advance_terms' do
+        get :index
+        expect(assigns[:advance_terms]).to eq(AdvanceRequest::ADVANCE_TERMS)
+      end
+      it 'sets @advance_types' do
+        get :index
+        expect(assigns[:advance_types]).to eq(AdvanceRequest::ADVANCE_TYPES)
+      end
     end
     it 'should assign @financing_availability_gauge' do
       get :index
@@ -254,6 +274,7 @@ RSpec.describe DashboardController, :type => :controller do
       end
       context 'the feature is flipped off' do
         before do
+          allow(controller).to receive(:feature_enabled?).and_call_original
           allow(controller).to receive(:feature_enabled?).with('quick-reports').and_return(false)
         end
         it 'does not assign @quick_reports' do

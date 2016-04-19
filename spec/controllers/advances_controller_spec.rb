@@ -97,7 +97,7 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:message_service_instance) { double('service instance', todays_quick_advance_message: nil) }
     let(:etransact_service_instance) { double('service instance', etransact_status: nil, etransact_active?: nil) }
     let(:make_request) { get :select_rate }
-    let(:advance_request) { double(AdvanceRequest, amount: advance_amount, type: advance_type, term: advance_term, id: advance_id, :allow_grace_period= => nil) }
+    let(:advance_request) { double(AdvanceRequest, amount: advance_amount, type: advance_type, term: advance_term, id: advance_id, :allow_grace_period= => nil, :type= => nil, :term= => nil, :amount= => nil) }
 
     before do
       allow(MessageService).to receive(:new).and_return(message_service_instance)
@@ -153,6 +153,20 @@ RSpec.describe AdvancesController, :type => :controller do
       allow(etransact_service_instance).to receive(:etransact_active?).and_return(false)
       expect(advance_request).not_to receive(:allow_grace_period=)
       make_request
+    end
+    describe 'when there are advance_request parameters passed' do
+      it 'assigns the advance_request `type` when present' do
+        expect(advance_request).to receive(:type=).with(advance_type.to_s)
+        get :select_rate, advance_request: {type: advance_type}
+      end
+      it 'assigns the advance_request `term` when present' do
+        expect(advance_request).to receive(:term=).with(advance_term.to_s)
+        get :select_rate, advance_request: {term: advance_term}
+      end
+      it 'assigns the advance_request `amount` when present' do
+        expect(advance_request).to receive(:amount=).with(advance_amount.to_s)
+        get :select_rate, advance_request: {amount: advance_amount}
+      end
     end
   end
 

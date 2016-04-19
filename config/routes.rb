@@ -12,11 +12,13 @@ Rails.application.routes.draw do
 
   get '/dashboard' => 'dashboard#index'
 
-  get '/dashboard/quick_advance_rates' => 'dashboard#quick_advance_rates'
+  constraints Constraints::FeatureDisabled.new('add-advance') do
+    get '/dashboard/quick_advance_rates' => 'dashboard#quick_advance_rates'
 
-  post '/dashboard/quick_advance_preview' => 'dashboard#quick_advance_preview'
+    post '/dashboard/quick_advance_preview' => 'dashboard#quick_advance_preview'
 
-  post '/dashboard/quick_advance_perform' => 'dashboard#quick_advance_perform'
+    post '/dashboard/quick_advance_perform' => 'dashboard#quick_advance_perform'
+  end
 
   get '/dashboard/current_overnight_vrc' => 'dashboard#current_overnight_vrc'
 

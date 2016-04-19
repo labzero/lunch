@@ -65,7 +65,7 @@ Scenario: 2 year rates should be missing due to override_end_date/override_end_t
   And I should see a blacked out value for the "2year" term with a type of "aaa" on the add advance page
   And I should see a blacked out value for the "2year" term with a type of "agency" on the add advance page
 
-Scenario: Preview rate from Quick Advance flyout table
+Scenario: Preview rate from the Add Advance rate table
   Given I am on the "Add Advance" advances page
   And I enter an amount into the add advance amount field
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
@@ -92,7 +92,7 @@ Scenario: Check the interest payment frequencies for various term/type
   When I click on the initiate advance button on the add advance page
   Then I should see an advance interest payment frequency of "maturity"
 
-Scenario: Go back to rate table from preview in Quick Advance flyout
+Scenario: Go back to rate table from preview
   Given I am on the "Add Advance" advances page
   And I enter an amount into the add advance amount field
   And I select the rate with a term of "2week" and a type of "aaa" on the add advance page
@@ -103,14 +103,14 @@ Scenario: Go back to rate table from preview in Quick Advance flyout
   And I should see the selected state for the cell with a term of "2week" and a type of "aaa" on the add advance page
   And I should not see a preview of the advance
 
-Scenario: Users with insufficient funds for Quick Advance get an error
+Scenario: Users with insufficient funds for an advance get an error
   Given I am on the "Add Advance" advances page
   When I enter "100001" into the add advance amount field
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
   When I click on the initiate advance button on the add advance page
   Then I should see an "insufficient financing availability" advance error with amount 100001 and type "whole"
 
-Scenario: Users with insufficient collateral for Quick Advance get an error
+Scenario: Users with insufficient collateral for an advance get an error
   Given I am on the "Add Advance" advances page
   When I enter "100002" into the add advance amount field
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
@@ -233,3 +233,13 @@ Scenario: Users who wait too long to perform an advance can still execute the ad
   And I wait for 70 seconds
   When I confirm an added advance with a rate that remains unchanged
   Then I should see confirmation number for the added advance
+
+Scenario: User sees an unavailable message if online advances are disabled for their bank
+  Given I am logged in as a "user with disabled quick advances"
+  When I am on the "Add Advance" advances page
+  Then I should see an add advances disabled message
+
+Scenario: User sees a message if there are no rates being returned from the etransact service
+  Given I visit the dashboard when etransact "has no terms"
+  When I am on the "Add Advance" advances page
+  Then I should see a no terms message

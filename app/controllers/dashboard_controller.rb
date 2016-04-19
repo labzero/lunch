@@ -90,14 +90,18 @@ class DashboardController < ApplicationController
     end
 
     @limited_pricing_message = MessageService.new.todays_quick_advance_message
-    @quick_advance_enabled = members_service.quick_advance_enabled_for_member?(current_member_id)
-    etransact_status = etransact_service.status
-    quick_advance_open = etransact_service.etransact_active?(etransact_status)
-    quick_advance_terms = etransact_service.has_terms?(etransact_status)
-    @quick_advance_status = (quick_advance_open ? (quick_advance_terms ? :open : :no_terms) : :closed)
-    # TODO replace this with the timestamp from the cached quick advance rates timestamp
-    date = DateTime.now - 2.hours
-    @quick_advance_last_updated = date.strftime("%d %^b %Y, %l:%M %p")
+    if feature_enabled?('add-advance')
+      @etransact_status = etransact_service.etransact_status(current_member_id)
+    else
+      @quick_advance_enabled = members_service.quick_advance_enabled_for_member?(current_member_id)
+      etransact_status = etransact_service.status
+      quick_advance_open = etransact_service.etransact_active?(etransact_status)
+      quick_advance_terms = etransact_service.has_terms?(etransact_status)
+      @quick_advance_status = (quick_advance_open ? (quick_advance_terms ? :open : :no_terms) : :closed)
+      # TODO replace this with the timestamp from the cached quick advance rates timestamp
+      date = DateTime.now - 2.hours
+      @quick_advance_last_updated = date.strftime("%d %^b %Y, %l:%M %p")
+    end
     @contacts = members_service.member_contacts(current_member_id) || {}
     default_image_path = 'placeholder-usericon.svg'
     if @contacts[:rm] && @contacts[:rm][:username]
@@ -260,7 +264,7 @@ class DashboardController < ApplicationController
   def current_overnight_vrc
     etransact_service = EtransactAdvancesService.new(request)
     response = RatesService.new(request).current_overnight_vrc || {}
-    response[:quick_advances_active] = etransact_service.etransact_active?
+    response[:etransact_active] = etransact_service.etransact_active?
     response[:rate] = fhlb_formatted_number(response[:rate], precision: 2, html: false) if response[:rate]
     render json: response
   end
