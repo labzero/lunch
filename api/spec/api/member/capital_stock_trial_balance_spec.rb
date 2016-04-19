@@ -14,8 +14,8 @@ describe MAPI::ServiceApp do
         let(:capital_stock_trial_balance) do
           {
               "fhlb_id" => 8976,
-              "number_of_shares" => 40035,
-              "number_of_certificates" => 2,
+              "number_of_shares" => 40040,
+              "number_of_certificates" => 3,
               "certificates" => certificates
           }
         end
@@ -37,9 +37,18 @@ describe MAPI::ServiceApp do
               transaction_type: "Repurchase"
           }.with_indifferent_access
         end
-        let(:certificates) { [certificate1, certificate2] }
+        let(:certificate3) do
+          {
+              certificate_sequence: "00225",
+              class: "B",
+              issue_date: "26-MAR-1984",
+              shares_outstanding: 5,
+              transaction_type: "undefined"
+          }.with_indifferent_access
+        end
+        let(:certificates) { [certificate1, certificate2, certificate3] }
         let(:certificates_sql) { double('certificates_sql') }
-        let(:closing_balance) { [{"fhlb_id" => 8976, "number_of_shares" => 40035, "number_of_certificates" => 2}] }
+        let(:closing_balance) { [{"fhlb_id" => 8976, "number_of_shares" => 40040, "number_of_certificates" => 3}] }
         let(:closing_balance_sql) { double('closing_balance_sql') }
         let(:date) { double('date') }
         let(:fhlb_id) { double('fhlb_id') }

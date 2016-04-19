@@ -323,35 +323,60 @@ RSpec.describe ReportsController, :type => :controller do
         call_action
         expect(assigns[:capital_stock_trial_balance_table_data][:footer]).to eq(footer_data)
       end
-      it 'sorts certificates by sequence number' do
-        sequence = rand(100000..999999)
-        certificate_1 = {
-          certificate_sequence: sequence + rand(100..1000),
-          issue_date:           issue_date,
-          transaction_type:     transaction_type,
-          shares_outstanding:   shares_outstanding,
+      describe 'certificate details' do
+        let(:sequence) { rand(100000..999999) }
+        let(:certificate_1) {
+          {
+            certificate_sequence: sequence + rand(100..1000),
+            issue_date:           issue_date,
+            transaction_type:     transaction_type,
+            shares_outstanding:   shares_outstanding,
+          }
         }
-        certificate_2 = {
-          certificate_sequence: sequence,
-          issue_date:           issue_date,
-          transaction_type:     transaction_type,
-          shares_outstanding:   shares_outstanding,
+        let(:certificate_2) {
+          {
+            certificate_sequence: sequence,
+            issue_date:           issue_date,
+            transaction_type:     transaction_type,
+            shares_outstanding:   shares_outstanding,
+          }
         }
-        certificate_3 = {
-          certificate_sequence: sequence - rand(100..1000),
-          issue_date:           issue_date,
-          transaction_type:     transaction_type,
-          shares_outstanding:   shares_outstanding,
+        let(:certificate_3) {
+          {
+            certificate_sequence: sequence - rand(100..1000),
+            issue_date:           issue_date,
+            transaction_type:     transaction_type,
+            shares_outstanding:   shares_outstanding,
+          }
         }
-        summary = {
-          certificates: [certificate_2, certificate_1, certificate_3],
-          number_of_shares: number_of_shares,
-          number_of_certificates: number_of_certificates
+        let(:certificate_4) {
+          {
+            certificate_sequence: sequence + rand(1001..2000),
+            issue_date:           issue_date,
+            transaction_type:     'undefined',
+            shares_outstanding:   shares_outstanding,
+          }
         }
-        allow(member_balances_service_instance).to receive(:capital_stock_trial_balance).and_return(summary)
-        get :capital_stock_trial_balance
-        assigned_certificates = assigns[:capital_stock_trial_balance_table_data][:rows].collect {|row| row[:columns].first[:value]}
-        expect(assigned_certificates).to eq([certificate_3[:certificate_sequence], certificate_2[:certificate_sequence], certificate_1[:certificate_sequence]])
+        let(:summary) {
+          {
+            certificates: [certificate_2, certificate_1, certificate_3, certificate_4],
+            number_of_shares: number_of_shares,
+            number_of_certificates: number_of_certificates
+          }
+        }
+        before do
+          allow(member_balances_service_instance).to receive(:capital_stock_trial_balance).and_return(summary)
+        end
+        it 'sorts certificates by sequence number' do
+          get :capital_stock_trial_balance
+          assigned_certificates = assigns[:capital_stock_trial_balance_table_data][:rows].collect {|row| row[:columns].first[:value]}
+          expect(assigned_certificates).to eq([certificate_3[:certificate_sequence], certificate_2[:certificate_sequence], certificate_1[:certificate_sequence], certificate_4[:certificate_sequence]])
+        end
+        it 'converts certificates with a transaction type of `undefiend` to the missing value string' do
+          summary[:certificates] = [certificate_4]
+          get :capital_stock_trial_balance
+          expect(assigns[:capital_stock_trial_balance_table_data][:rows][0][:columns][2][:value]).to eq(I18n.t('global.missing_value'))
+        end
       end
       RSpec.shared_examples 'a capital stock trial balance report with no data' do
         it 'returns an empty array for @capital_stock_trial_balance_table_data[:rows]' do

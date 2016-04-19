@@ -351,6 +351,7 @@ class ReportsController < ApplicationController
                          t('reports.pages.capital_stock_trial_balance.shares_outstanding')]
       summary[:certificates] = sort_report_data(summary[:certificates], :certificate_sequence)
       certificates = summary[:certificates].map do |certificate|
+        certificate[:transaction_type] = t('global.missing_value') if certificate[:transaction_type] == 'undefined'
         { columns: [{value: certificate[:certificate_sequence], type: nil,     classes: [:'report-cell-narrow']},
                     {value: certificate[:issue_date],           type: :date,   classes: [:'report-cell-narrow']},
                     {value: certificate[:transaction_type],     type: nil,     classes: [:'report-cell-narrow']},
