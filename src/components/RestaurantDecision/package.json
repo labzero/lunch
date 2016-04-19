@@ -1,0 +1,6 @@
+{
+  "name": "RestaurantDecision",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./RestaurantDecision.js"
+}

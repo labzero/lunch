@@ -580,3 +580,4 @@ export const latLng = new Map();
 export const user = new Map();
 export const users = new Map();
 export const wsPort = new Map();
+export const decision = new Map();

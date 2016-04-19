@@ -1,0 +1,17 @@
+@import '../../styles/_mixins.scss';
+
+.root {
+  @include plain-button;
+  color: transparent;
+  outline: none;
+  -webkit-text-stroke: 1px rgba(0, 0, 0, .25);
+
+  &:hover {
+    -webkit-text-stroke-color: rgba(0, 0, 0, .5);
+  }
+}
+
+.decided {
+  color: yellow;
+  -webkit-text-stroke-color: #000;
+}
