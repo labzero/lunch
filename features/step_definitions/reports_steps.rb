@@ -468,7 +468,12 @@ Then(/^I should see a security that is indicated as a new transaction$/) do
 end
 
 When(/^I cancel the report download from the flyout$/) do
+  jquery_execute("$('body').on('reportDownloadCanceled', function(){$('body').addClass('report-download-canceled')})")
   page.find('.cancel-report-download', text: /#{I18n.t('global.cancel_download')}/i).click
+end
+
+Then(/^the report download should be canceled$/) do
+  page.assert_selector('body.report-download-canceled')
 end
 
 When(/^I select "(.*?)" from the authorizations filter$/) do |text|

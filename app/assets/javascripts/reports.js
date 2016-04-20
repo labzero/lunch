@@ -18,7 +18,7 @@ $(function () {
         dataType: 'json',
         data    : $(this).serialize(),
         success : function( data, status, xhr ) {
-          jobCancelUrl = data.jobCancelUrl;
+          jobCancelUrl = data.job_cancel_url;
           checkDownloadJobStatus(data.job_status_url);
         },
         error   : function( xhr, status, err ) {
@@ -30,6 +30,10 @@ $(function () {
     if ($deferredReport.length == 1) {
       checkDeferredJobStatus($deferredReport, $deferredReport.data('deferred'), $deferredReport.data('deferred-load'));
     };
+
+    $('.cancel-report-download').on('click', function(){
+      cancelDownloadJob();
+    });
   };
 
   bindReport();
@@ -39,10 +43,11 @@ $(function () {
     $('.flyout').addClass('flyout-loading-message');
   };
 
-  $('.cancel-report-download').on('click', function(){
+  function cancelDownloadJob() {
+    $reportForm.trigger('reportDownloadCanceled', {job_cancel_url: jobCancelUrl});
     $.get(jobCancelUrl);
     clearTimeout(jobStatusTimer);
-  });
+  };
 
   function checkDownloadJobStatus(url) {
     $.get(url)
