@@ -208,17 +208,7 @@
   }
   table {
     @extend %typography-paragraph-tight;
-    width: 100%;
     text-align: center;
-    margin-bottom: 20px;
-    thead {
-      tr:first-child {
-        th {
-          font-size: 0.7333rem; // leaving this as a one-off typography style until we receive confirmation of this design
-          height: 20px;
-        }
-      }
-    }
     tbody {
       background: $light-gray; // fix for IE11 incongruity in the way height is measured for cells with rowspan
     }
@@ -253,12 +243,6 @@
         .add-advance-cell-wrapper {
           @include pseudo-background-cover($light-gray);
         }
-      }
-      &:not(:first-child) {
-        width: 110px;
-      }
-      &:nth-child(2) {
-        border-right: 1px solid $dark-gray;
       }
       .tooltip {
         @extend %inverted-tooltip;
@@ -352,11 +336,6 @@
           }
         }
       }
-      &:nth-child(2) {
-        td {
-          border-bottom: 1px solid $dark-gray;
-        }
-      }
       &:first-child {
         th:first-child {
           border: none;
@@ -375,14 +354,6 @@
         }
         &.cell-hovered {
           @include add-advance-cell-hovered;
-        }
-      }
-      td:nth-child(3):not(.add-advance-table-loading-cell) {
-        border-right: 1px solid $dark-gray;
-      }
-      &:first-child {
-        .add-advance-table-horz-axes-label {
-          border-bottom: 1px solid $dark-gray;
         }
       }
     }
@@ -541,6 +512,9 @@
 
 .add-advances-footer, .rate-advances-footer {
   @extend %typography-footer;
+}
+
+.rate-advances-footer {
   padding-top: 40px;
 }
 
@@ -591,5 +565,73 @@
 .add-advance-preview {
   .add-advance-summary {
     @extend %add-advance-bordered-section-styling;
+  }
+}
+
+.advance-rates-table-wrapper {
+  border: 1px solid $light-blue;
+  border-radius: $default-border-radius;
+  margin-bottom: 20px;
+  &[data-active-term-type="vrc"] {
+    tbody {
+      tr.vrc-rates {
+        display: table-row;
+      }
+    }
+    .advance-rates-table-toggle span[data-active-term-type="vrc"] {
+      color: $actionable-blue;
+    }
+  }
+  &[data-active-term-type="frc"] {
+    tbody {
+      tr.frc-rates {
+        display: table-row;
+      }
+    }
+    .advance-rates-table-toggle span[data-active-term-type="frc"] {
+      color: $actionable-blue;
+    }
+  }
+}
+
+.advance-rates-table-toggle {
+  padding: 10px 20px;
+  border-bottom: 1px solid $light-blue;
+  span {
+    @extend %typography-header-nav;
+    cursor: pointer;
+    &:last-child {
+      margin-left: 30px;
+    }
+    &.active {
+      color: $actionable-blue;
+    }
+  }
+}
+
+.advance-rates-table {
+  margin: 25px auto;
+  width: calc(100% - 40px);
+  table-layout: fixed;
+  tbody {
+    tr {
+      display: none;
+    }
+  }
+  thead {
+    tr {
+      th:first-child {
+        border: none;
+      }
+      &:first-child {
+        th {
+          @extend %typography-header-nav;
+          border: none;
+          color: $medium-gray;
+          text-transform: uppercase;
+          text-align: left;
+        }
+      }
+    }
   }
 }

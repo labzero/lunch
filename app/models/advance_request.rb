@@ -235,6 +235,17 @@ class AdvanceRequest
     end
   end
 
+  def term_type
+    case term
+    when :overnight, :open
+      :vrc
+    when nil
+      nil
+    else
+      :frc
+    end
+  end
+
   def human_interest_day_count
     case interest_day_count
     when nil       then nil

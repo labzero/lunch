@@ -4,15 +4,9 @@
 - selected_term ||= nil
 - rate_data ||= nil
 - advance_terms.each_with_index do |advance_term, i|
-  %tr{class: "#{'add-advance-table-label-row' if i == 0 || i == 2}"}
-    -if i == 0
-      %td.add-advance-table-horz-axes-label{rowspan: 2}
-        .add-advance-cell-wrapper
-          %span= t('dashboard.quick_advance.table.axes_labels.variable_rate')
-    -if i == 2
-      %td.add-advance-table-horz-axes-label{rowspan: fixed_rate_row_span}
-        .add-advance-cell-wrapper
-          %span= t('dashboard.quick_advance.table.axes_labels.fixed_rate')
+  - classes = (i == 0 || i == 1) ? ['vrc-rates'] : ['frc-rates']
+  - classes << 'add-advance-table-label-row' if i == 0 || i == 2
+  %tr{class: classes}
     -advance_types.each_with_index do |advance_type, j|
       - rate = rate_data[advance_type][advance_term] if rate_data
       - rate_disabled = rate[:disabled] if rate

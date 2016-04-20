@@ -738,6 +738,23 @@ describe AdvanceRequest do
     end
   end
 
+  describe '`term_type` method' do
+    let(:call_method) { subject.term_type }
+    [:open, :overnight].each do |term|
+      it "returns `:vrc` when the `term` is `#{term}`" do
+        allow(subject).to receive(:term).and_return(term)
+        expect(call_method).to eq(:vrc)
+      end
+    end
+    it 'returns nil when `term` is nil' do
+      expect(call_method).to be_nil
+    end
+    it 'returns `:frc` when the `term` is anything else' do
+      allow(subject).to receive(:term).and_return(double('A Term'))
+      expect(call_method).to eq(:frc)
+    end
+  end
+
   describe '`human_type` method' do
     let(:call_method) { subject.human_type }
     {

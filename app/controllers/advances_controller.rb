@@ -81,6 +81,7 @@ class AdvancesController < ApplicationController
     @selected_amount = advance_request.amount
     @selected_type = advance_request.type
     @selected_term = advance_request.term
+    @active_term_type = advance_request.term_type || :vrc
     advance_request.allow_grace_period = true if etransact_service.etransact_active?
   end
 

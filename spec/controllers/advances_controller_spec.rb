@@ -94,10 +94,11 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:advance_amount) { double('amount') }
     let(:advance_type) { double('type') }
     let(:advance_term) { double('term') }
+    let(:advance_term_type) { double('advance_term_type') }
     let(:message_service_instance) { double('service instance', todays_quick_advance_message: nil) }
     let(:etransact_service_instance) { double('service instance', etransact_status: nil, etransact_active?: nil) }
     let(:make_request) { get :select_rate }
-    let(:advance_request) { double(AdvanceRequest, amount: advance_amount, type: advance_type, term: advance_term, id: advance_id, :allow_grace_period= => nil, :type= => nil, :term= => nil, :amount= => nil) }
+    let(:advance_request) { double(AdvanceRequest, amount: advance_amount, type: advance_type, term: advance_term, term_type: advance_term_type, id: advance_id, :allow_grace_period= => nil, :type= => nil, :term= => nil, :amount= => nil) }
 
     before do
       allow(MessageService).to receive(:new).and_return(message_service_instance)
@@ -143,6 +144,15 @@ RSpec.describe AdvancesController, :type => :controller do
     it 'sets @selected_term' do
       make_request
       expect(assigns[:selected_term]).to eq(advance_term)
+    end
+    it 'sets @active_term_type from the advance request' do
+      make_request
+      expect(assigns[:active_term_type]).to eq(advance_term_type)
+    end
+    it 'sets @active_term_type to `:vrc` if the term_type of the advance request is nil' do
+      allow(advance_request).to receive(:term_type)
+      make_request
+      expect(assigns[:active_term_type]).to eq(:vrc)
     end
     it 'enables the grace period if called before the desk closes' do
       allow(etransact_service_instance).to receive(:etransact_active?).and_return(true)

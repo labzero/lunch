@@ -1779,10 +1779,13 @@ en:
         preview: Review Advance
         complete: Advance Completed
       nav: Add Advance
+      terms: 'All advances are subject to the terms and conditions of the Bank’s Credit Program, the Advances and Security Agreement with the Member, and the appropriate advance confirmation, as well as the Terms of Use.'
     manage_advances:
       title: Manage Advances
     status: Status
     rate: Rate (%)
+    vrc_rates: VRC Rates
+    frc_rates: FRC Rates
     actions:
       preview: Review Advance
       submit: Submit Advance

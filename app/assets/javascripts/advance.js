@@ -61,7 +61,7 @@ $(function () {
       var $this = $(this);
       if (!$this.hasClass('disabled-cell')) {
         $('.advance-rates-table td, .advance-rates-table th').removeClass('cell-selected cell-hovered');
-        var col = getColumnIndex($this);
+        var col = $this.index();
         $this.addClass('cell-selected').closest('tr').find('td.row-label').addClass('cell-selected');
         $($rateTable.find('tr.add-advance-column-labels th')[col]).addClass('cell-selected');
       };
@@ -71,7 +71,7 @@ $(function () {
     // Hover behavior
     $rateTableCells.hover( function(){
       var $this = $(this);
-      var col = getColumnIndex($this);
+      var col = $this.index();
       if (!$this.hasClass('cell-selected') && $this.hasClass('selectable-cell')) {
         $this.toggleClass('cell-hovered').closest('tr').find('td.row-label').toggleClass('cell-hovered');
         $($rateTable.find('tr.add-advance-column-labels th')[col]).toggleClass('cell-hovered');
@@ -79,18 +79,10 @@ $(function () {
     });
   };
 
-  function getColumnIndex($cell) {
-    if ($cell.closest('tr').hasClass('add-advance-table-label-row')) {
-      return $cell.index() - 1;
-    } else {
-      return $cell.index();
-    };
-  };
-
   function selectColumnLabelIfRatePreSelected() {
     var $selectedCell = $rateTable.find('td.cell-selected.selectable-cell');
     if ($selectedCell.length) {
-      var col = getColumnIndex($selectedCell);
+      var col = $selectedCell.index();
       $($rateTable.find('tr.add-advance-column-labels th')[col]).addClass('cell-selected');
     };
   };
@@ -142,6 +134,17 @@ $(function () {
       return false
     } else {
       showAddAdvanceLoadingState();
+    };
+  });
+
+  // Rate Table Toggle Behavior
+  var $rateTableWrapper = $('.advance-rates-table-wrapper');
+  $('.advance-rates-table-toggle span').on('click', function(e) {
+    var selectedTermType = $(this).data('active-term-type');
+    if ($rateTableWrapper.attr('data-active-term-type') !== selectedTermType) {
+      $rateTableWrapper.attr('data-active-term-type', selectedTermType);
+      $rateTable.find('td, th').removeClass('cell-selected');
+      validateForm();
     };
   });
 });
