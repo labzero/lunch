@@ -50,7 +50,8 @@ class CorporateCommunication
 
       images = []
       body.xpath('//img/@src').each do |image_url|
-        image_details = process_email_image(image_url)
+        next if image_url.content =~ /\Acid:/
+        image_details = process_email_image(image_url.content)
         image_url.content = "cid:#{image_details[:fingerprint]}"
         images << image_details
       end

@@ -1,0 +1,29 @@
+Date: Tue, 19 Apr 2016 16:02:53 -0700
+From: test@example.com
+To: test@example.com
+Message-ID: <5716b91d9a88e_15e373ff96d05e2088503f@example.local.mail>
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+ boundary="--==_mimepart_5716b82da64ff_15e373ff96d05e20884975";
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+
+----==_mimepart_5716b82da64ff_15e373ff96d05e20884975
+Content-Type: text/html;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+Test! <img src="cid:test_id"> <img src="http://contentz.mkt1700.com/ra/2015/26686/01/47821594/10940443_Corp_announce.gif"> <img src="http://open.mkt1700.com/open/log/49906787/ODkwNzA0NTc0OQS2/0/Nzg0Mjc4MzkxS0/1/3"> <a target="_blank" href="http://links.mkt1700.com/ctt?kn=5&amp;ms=NDk5MDY3ODcS1&amp;r=ODkwNzA0NTc0OQS2&amp;b=0&amp;j=Nzg0Mjc4MzkxS0&amp;mt=1&amp;rt=3" name="fhlbsf_com_cofi_monthly_m">
+----==_mimepart_5716b82da64ff_15e373ff96d05e20884975
+Content-Type: image/gif;
+ charset=UTF-8;
+ filename=1x1.GIF
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename=1x1.GIF
+content-id: <test_id>
+
+R0lGODlhAQABAIABAP8AAP///yH5BAEAAAEALAAAAAABAAEAAAICRAEAOw==
+
+----==_mimepart_5716b82da64ff_15e373ff96d05e20884975--

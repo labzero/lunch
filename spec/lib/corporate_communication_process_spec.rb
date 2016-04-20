@@ -13,7 +13,7 @@ describe CorporateCommunication::Process do
       let(:processed_image) { double('A Processed Image') }
 
       before do
-        allow(subject).to receive(:process_email_image).with(/\Ahttp:\/\/contentz.mkt1700.com\//).and_return(processed_image)
+        allow(subject).to receive(:process_email_image).and_return(processed_image)
         allow(processed_image).to receive(:[]).with(:fingerprint).and_return(SecureRandom.hex)
       end
 
@@ -25,17 +25,7 @@ describe CorporateCommunication::Process do
       end
     end
 
-    describe 'with a rich email' do
-      let(:email_path) { File.join(Rails.root + 'spec' + 'fixtures' + 'corp_com_fixture.txt') }
-      include_examples 'process_email_html'
-
-      it 'moves the `style` element from the email\'s `head` node into its `body` node' do
-        expect(call_method[:html]).to include('<style type="text/css">')
-      end
-      it 'prepends the styles contained in the style node with `.corporate-communication-detail-reset`' do
-        expect(call_method[:html]).to include('.corporate-communication-detail-reset a')
-        expect(call_method[:html]).to include('.corporate-communication-detail-reset p')
-      end
+    shared_examples 'process_email_html images' do
       it 'replaces the images with CID references' do
         expect(call_method[:html]).to match(/src=["']?cid:#{processed_image[:fingerprint]}["']?/)
       end
@@ -48,9 +38,34 @@ describe CorporateCommunication::Process do
       end
     end
 
+    describe 'with a rich email' do
+      let(:email_path) { File.join(Rails.root + 'spec' + 'fixtures' + 'corp_com_fixture.txt') }
+      include_examples 'process_email_html'
+      include_examples 'process_email_html images'
+
+      it 'moves the `style` element from the email\'s `head` node into its `body` node' do
+        expect(call_method[:html]).to include('<style type="text/css">')
+      end
+      it 'prepends the styles contained in the style node with `.corporate-communication-detail-reset`' do
+        expect(call_method[:html]).to include('.corporate-communication-detail-reset a')
+        expect(call_method[:html]).to include('.corporate-communication-detail-reset p')
+      end
+    end
+
     describe 'with a basic email' do
       let(:email_path) { File.join(Rails.root + 'spec' + 'fixtures' + 'corp_com_no_style.txt') }
       include_examples 'process_email_html'
+    end
+
+    describe 'with an email containing CIDs' do
+      let(:email_path) { File.join(Rails.root + 'spec' + 'fixtures' + 'corp_com_cid.txt') }
+      include_examples 'process_email_html'
+      include_examples 'process_email_html images'
+      
+      it 'skips the CIDs' do
+        expect(subject).to_not receive(:process_email_image).with('cid:test_id')
+        call_method
+      end
     end
   end
 
