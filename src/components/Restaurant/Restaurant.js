@@ -56,7 +56,7 @@ export const _Restaurant = ({
   } else {
     let decisionArea;
     if (restaurant.votes.length > 0) {
-      decisionArea = <RestaurantDecisionContainer />;
+      decisionArea = <RestaurantDecisionContainer id={restaurant.id} />;
     }
 
     nameArea = (

@@ -576,8 +576,32 @@ export const tagFilters = new Map([
   [ActionTypes.HIDE_TAG_FILTER_FORM, () => []]
 ]);
 
+export const decision = new Map([
+  [ActionTypes.POST_DECISION, isFetching],
+  [ActionTypes.DECISION_POSTED, (state, action) =>
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      inst: {
+        $set: action.decision
+      }
+    })
+  ],
+  [ActionTypes.DELETE_DECISION, isFetching],
+  [ActionTypes.DECISION_DELETED, (state) =>
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      inst: {
+        $set: null
+      }
+    })
+  ]
+]);
+
 export const latLng = new Map();
 export const user = new Map();
 export const users = new Map();
 export const wsPort = new Map();
-export const decision = new Map();

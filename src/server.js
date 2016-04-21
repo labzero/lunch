@@ -32,6 +32,7 @@ import ContextHolder from './core/ContextHolder';
 import passport from './core/passport';
 import restaurantApi from './api/restaurants';
 import tagApi from './api/tags';
+import decisionApi from './api/decisions';
 import { Restaurant, Tag, User, Decision } from './models';
 import { Server as WebSocketServer } from 'ws';
 import serialize from 'serialize-javascript';
@@ -118,6 +119,7 @@ server.use((req, res, next) => {
 // -----------------------------------------------------------------------------
 server.use('/api/restaurants', restaurantApi);
 server.use('/api/tags', tagApi);
+server.use('/api/decisions', decisionApi);
 
 //
 // Register server-side rendering middleware

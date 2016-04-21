@@ -2,16 +2,22 @@
 
 .root {
   @include plain-button;
-  color: transparent;
+  color: rgba(0, 0, 0, .15);
   outline: none;
-  -webkit-text-stroke: 1px rgba(0, 0, 0, .25);
 
   &:hover {
-    -webkit-text-stroke-color: rgba(0, 0, 0, .5);
+    color: rgba(0, 0, 0, .5);
   }
+}
+
+.loggedOut {
+  cursor: default;
 }
 
 .decided {
   color: yellow;
-  -webkit-text-stroke-color: #000;
+  text-shadow: 1px 1px 1px #000,
+               1px -1px 1px #000,
+               -1px -1px 1px #000,
+               -1px 1px 1px #000;
 }

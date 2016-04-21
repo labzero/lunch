@@ -1,42 +1,40 @@
 import { Router } from 'express';
-import { Vote } from '../models';
+import { Decision } from '../models';
 import { loggedIn, errorCatcher } from './ApiHelper';
-import { votePosted, voteDeleted } from '../actions/restaurants';
+import { decisionPosted, decisionDeleted } from '../actions/decisions';
 
-const router = new Router({ mergeParams: true });
+const router = new Router();
 
 router
   .post(
     '/',
     loggedIn,
     async (req, res) => {
-      const restaurantId = parseInt(req.params.restaurant_id, 10);
-      return Vote.recentForRestaurantAndUser(restaurantId, req.user.id).then(count => {
-        if (count === 0) {
-          return Vote.create({
-            restaurant_id: restaurantId,
-            user_id: req.user.id
+      const restaurantId = parseInt(req.body.restaurant_id, 10);
+      try {
+        return Decision.scope('fromToday').destroy({ where: {} }).then(() =>
+          Decision.create({
+            restaurant_id: restaurantId
           }).then(obj => {
             const json = obj.toJSON();
-            req.wss.broadcast(votePosted(json));
+            req.wss.broadcast(decisionPosted(json));
             res.status(201).send({ error: false, data: obj });
           }).catch(() => {
-            const error = { message: 'Could not vote. Did you already vote today?' };
+            const error = { message: 'Could not save decision.' };
             errorCatcher(res, error);
-          });
-        }
-        const error = { message: 'Could not vote. Did you already vote today?' };
-        return errorCatcher(res, error);
-      }).catch(err => errorCatcher(res, err));
+          })
+        ).catch(err => errorCatcher(res, err));
+      } catch (err) {
+        return errorCatcher(res, err);
+      }
     }
   )
   .delete(
-    '/:id',
+    '/',
     loggedIn,
     async (req, res) => {
-      const id = parseInt(req.params.id, 10);
-      Vote.destroy({ where: { id } }).then(() => {
-        req.wss.broadcast(voteDeleted(parseInt(req.params.restaurant_id, 10), req.user.id, id));
+      Decision.scope('fromToday').destroy({ where: {} }).then(() => {
+        req.wss.broadcast(decisionDeleted(req.user.id));
         res.status(204).send({ error: false });
       }).catch(err => errorCatcher(res, err));
     }
