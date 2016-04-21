@@ -395,28 +395,14 @@ $breakdown-table-currency-width: 10px;
   }
 }
 
-.dashboard-module-market {
-  @extend %dashboard-module-chromeless;
-  .dashboard-module-content, header {
-    padding-bottom: 0;
-  }
-}
-
 .dashboard-market-graph-toggle {
   @extend %typography-table-heading;
-  text-align: right;
+  margin-bottom: 10px;
   a {
     &.active {
       @extend %undo-link-style;
       cursor: default;
       color: $text-color;
-    }
-    &:first-child {
-      padding-right: 10px;
-      border-right: 1px solid $secondary-gray;
-    }
-    &:last-child {
-      padding-left: 10px;
     }
   }
 }
