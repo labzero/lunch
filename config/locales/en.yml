@@ -1846,7 +1846,7 @@ en:
           title: Interest Day Count
           count: 30/360
         principal_and_interest_payment_frequency:
-          title: Principle and Interest Payment Frequency
+          title: Principal and Interest Payment Frequency
           frequency: Monthly and at repayment
         amortization_schedule:
           title: Amortization Schedule
@@ -2227,7 +2227,7 @@ en:
           fund: Fund unexpected cash needs
           same_day: Same-day access if notice received by 10 a.m.
         eligibility: The Bank will determine member eligibility for an OCN Advance on a case-by-case basis. The member must identify the need for the OCN and the repayment sources.
-        maximum_ammount: "5% of member’s total assets."
+        maximum_ammount: "5% of member’s total assets"
         maximum_term: "45 days"
         interest_rate: The initial interest rate is the rate set for VRC Advances on the date of funding. OCN Advances are repriced daily.
         interest_day_count: "Actual/Actual (Actual/360 for Securities-Backed Credit Program)"
@@ -2289,9 +2289,9 @@ en:
           arc: Adjustable Rate Credit (ARC) Advance
           arc_embedded: ARC Advance with Embedded Options
         interest_rate: "Interest rates may be lower than rates on advances under the Bank’s Standard Credit Program and competitive with rates in the securities repurchase market."
-        interest_day_count: Actual/360 for most credit products and 30/360 for Amortizing Advances.
+        interest_day_count: Actual/360 for most credit products and 30/360 for Amortizing Advances
         interest_payment_frequency: For fixed rate advances with terms of 180 days or less, interest is payable at maturity. For fixed rate advances with terms of more than 180 days, interest is payable semiannually and at maturity. For adjustable rate advances, interest is payable at repricing and at maturity.
-        eligible_capacity: The following table lists the eligible securities types and borrowing capacities for the SBC Program for all members except insurance companies. Not all securities of each type are eligible; please review the Bank’s Collateral Guide or contact the Bank for specific eligibility information.
+        eligible_capacity: The following table lists the eligible securities types and borrowing capacities for the SBC Program for commercial banks, credit unions, savings institutions, and industrial loan companies. The tables for insurance companies and non-depository community development financial institutions can be found in the Collateral Guide. Not all securities of each type are eligible; please review the Collateral Guide or contact the Bank for specific eligibility information.
         column1:
           eligible_securities: Eligible Securities
           treasury:
@@ -2307,8 +2307,8 @@ en:
             gnma: GNMA Home Equity Conversion Mortgage (HECM) MBS Passthrough Securities
             agency_cmo: Agency CMOs (FHLMC, FNMA, GNMA)
             gnma_hecm: GNMA HECM Real Estate Mortgage Investment Conduit (REMIC) Securities
-            agency_cmo_low_html: "Agency CMO Accrual Bonds (Z-tranches) with low price sensitivity<sup>1</sup>"
-            agency_cmo_high_html: "Agency CMO Accrual Bonds (Z-tranches) with high price sensitivity<sup>1</sup>"
+            agency_cmo_low: "Agency CMO Accrual Bonds (Z-tranches) with low price sensitivity"
+            agency_cmo_high: "Agency CMO Accrual Bonds (Z-tranches) with high price sensitivity"
             structured_notes: Structured Notes
             index_notes: "Index Amortization Notes (P.S.A. Linked Notes)"
             small_business: Small Business Administration Pools
@@ -2414,6 +2414,7 @@ en:
       remittance: Remittance Options
       training: Training
     common_key_features:
+      agency_cmo_accrual_bonds: "Agency CMO Accrual Bonds (Z-Tranches)"
       availability: Availability
       borrowing_market_securities: "100% Borrowing on the Market Value of Securities"
       delivery: Delivery
@@ -2433,7 +2434,7 @@ en:
       review_ratings: Review of Ratings
       substitution: Substitution
       term: Term
-      termination_option: Termination option
+      termination_option: Termination Option
       termination_option_date: Termination Option Date
       termination_option_notice: Termination Option Notice
       alternate_initial_index: Alternate Initial Index

@@ -75,10 +75,10 @@
             %td= t('products.advances.sbc.column1.agency.gnma_hecm')
             %td= t('products.advances.sbc.column2.agency.gnma_hecm')
           %tr.nested-row
-            %td= t('products.advances.sbc.column1.agency.agency_cmo_low_html')
+            %td= t('products.advances.sbc.column1.agency.agency_cmo_low')
             %td= t('products.advances.sbc.column2.agency.agency_cmo_low')
           %tr.nested-row
-            %td= t('products.advances.sbc.column1.agency.agency_cmo_high_html')
+            %td= t('products.advances.sbc.column1.agency.agency_cmo_high')
             %td= t('products.advances.sbc.column2.agency.agency_cmo_high')
           %tr.nested-row
             %td= t('products.advances.sbc.column1.agency.structured_notes')
@@ -98,6 +98,9 @@
           %tr.nested-row
             %td= t('products.advances.sbc.column1.agency.fdic')
             %td= t('products.advances.sbc.column2.agency.fdic')
+          %tr.nested-row
+            %td= t('products.advances.sbc.column1.agency.ncua')
+            %td= t('products.advances.sbc.column2.agency.ncua')
           %tr
             %td= t('products.advances.sbc.column1.public.title')
             %td
@@ -152,9 +155,10 @@
           %tr
             %td= t('products.advances.sbc.column1.bank_term_deposits')
             %td= t('products.advances.sbc.column2.bank_term_deposits')
-      %small= t('products.advances.sbc.agency_cmo_html')
     %h3= t('products.common_key_features.market_value')
     %p= t('products.advances.sbc.market_value')
+    %h3= t('products.common_key_features.agency_cmo_accrual_bonds')
+    %p= t('products.advances.sbc.agency_cmo_html')
     %h3= t('products.common_key_features.private_label_non_mbs')
     %p= t('products.advances.sbc.private_label_non_mbs')
     %h3= t('products.common_key_features.review_ratings')
@@ -175,3 +179,4 @@
     %p= t('products.advances.sbc.delivery')
     %h3= t('products.common_key_features.substitution')
     %p= t('products.advances.sbc.substitution')
+    .last-modified= t('products.section_headings.last_modified', date: fhlb_date_short_alpha(@last_modified))
