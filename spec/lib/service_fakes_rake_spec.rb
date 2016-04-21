@@ -41,7 +41,7 @@ describe Rake do
         end
         it 'raises an error if `FhlbMember::Services::Fakes.use_fake_service` returns false' do
           allow(FhlbMember::Services::Fakes).to receive(:use_fake_service).and_return(false)
-          expect{run_task}.to raise_error
+          expect{run_task}.to raise_error(/`rake service_fakes:#{service}:#{switch}` was unsuccessful/)
         end
       end
     end

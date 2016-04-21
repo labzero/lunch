@@ -17,7 +17,10 @@ RSpec.describe DashboardController, :type => :controller do
       end
 
       it 'logs at the `info` log level' do
-        expect(subject.logger).to receive(:info).exactly(:twice)
+        allow(subject.logger).to receive(:info).and_call_original
+        expect(subject.logger).to receive(:info).with(no_args) do |*args, &block|
+          expect(block.call).to match(/Exception: /i)
+        end.exactly(:once)
         make_request rescue exception
       end
       it 'puts the advance_request as JSON in the log' do
@@ -1346,7 +1349,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'raises an exception when the request is not XHR' do
       allow(request).to receive(:xhr?).and_return(false)
-      expect{call_method}.to raise_exception
+      expect{call_method}.to raise_exception(/Invalid request/)
     end
     it 'raises an ArgumentError if no `recent_activity_job_id` param is passed' do
       allow(params).to receive(:[])

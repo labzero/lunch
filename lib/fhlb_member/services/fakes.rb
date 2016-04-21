@@ -18,7 +18,13 @@ module FhlbMember
         end
         enable = enable ? 'true' : 'false'
         response = service_data[0].call(service_data[1], message_tag: service_data[2], message: {'v1:request' => enable}, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
-        response.doc.remove_namespaces!.xpath(service_data[3]).children.first.content == enable
+        raise "no response from `#{service}" unless response
+        raise "malformed response from `#{service}" unless response.doc
+        result_nodes = response.doc.remove_namespaces!.xpath(service_data[3])
+        raise "malformed response from `#{service}" unless result_nodes 
+        response_node = result_nodes.children.first
+        raise "malformed response from `#{service}" unless response_node 
+        response_node.content == enable
       end
 
       module Private

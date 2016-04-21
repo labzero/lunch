@@ -549,7 +549,7 @@ RSpec.describe SettingsController, :type => :controller do
       expect(assigns[:user]).to be(user)
     end
     it 'rejects unknown reasons' do
-      expect {delete :delete_user, id: user_id, reason: 'foo'}.to raise_error
+      expect {delete :delete_user, id: user_id, reason: 'foo'}.to raise_error(ActiveRecord::RecordInvalid)
     end
     {
       'remove_access' => 'No longer a web user',
@@ -788,7 +788,7 @@ RSpec.describe SettingsController, :type => :controller do
         session['password_expired'] = false
       end
       it 'raises an error' do
-        expect{make_request}.to raise_error
+        expect{make_request}.to raise_error(/non-expired password/)
       end
     end
     describe 'if save is unsuccessful' do

@@ -29,10 +29,10 @@ RSpec.describe CorporateCommunicationsController, :type => :controller do
       end
     end
     it 'should raise an error if the passed category argument is not valid' do
-      expect{get :category, category: 'asdffsd'}.to raise_error
+      expect{get :category, category: 'asdffsd'}.to raise_error("invalid category")
     end
     it 'should raise an error if nothing is passed as a category argument' do
-      expect{get :category}.to raise_error
+      expect{get :category}.to raise_error(ActionController::UrlGenerationError)
     end
     it 'should return true if the number of messages is zero' do
       allow(MessageService).to receive(:new).and_return(message_service_instance)

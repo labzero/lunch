@@ -34,7 +34,7 @@ describe PaperclipAttachmentAsString do
     it 'should delete the Tempfile if an exception occurs' do
       expect(tempfile).to receive(:unlink)
       allow(tempfile).to receive(:read).and_raise('some error')
-      expect{call_method}.to raise_error
+      expect{call_method}.to raise_error('some error')
     end
     it 'should copy the stored file to the Tempfile' do
       expect(result).to receive(:copy_to_local_file).with(:original, tempfile.path)

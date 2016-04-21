@@ -138,13 +138,13 @@ describe CustomFormattingHelper do
       expect(helper.fhlb_formatted_phone_number('1234567890', '6789')).to eq('(123) 456-7890, ext. 6789')
     end
     it 'raises an exception if fewer than 10 digits are supplied' do
-      expect {helper.fhlb_formatted_phone_number('123456789')}.to raise_error
+      expect {helper.fhlb_formatted_phone_number('123456789')}.to raise_error(ArgumentError)
     end
     it 'raises an exception if more than 11 digits are supplied' do
-      expect {helper.fhlb_formatted_phone_number('123456789012')}.to raise_error
+      expect {helper.fhlb_formatted_phone_number('123456789012')}.to raise_error(ArgumentError)
     end
     it 'raises an exception if 11 digits are supplied and the first is not a 1' do
-      expect {helper.fhlb_formatted_phone_number('21234567890')}.to raise_error
+      expect {helper.fhlb_formatted_phone_number('21234567890')}.to raise_error(ArgumentError)
     end
     it 'removes non-digit characters from the supplied string' do
       expect(helper.fhlb_formatted_phone_number('123-456 7890', '67a89')).to eq('(123) 456-7890, ext. 6789')

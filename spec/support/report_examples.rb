@@ -42,7 +42,7 @@ RSpec.shared_examples 'a JobStatus backed report' do
   end
   it 'raises an error if there is no job status found' do
     allow(JobStatus).to receive(:find_by)
-    expect{call_action_with_job_id}.to raise_error
+    expect{call_action_with_job_id}.to raise_error(ActiveRecord::RecordNotFound)
   end
   it 'parses the job_status string' do
     job_status_string = double('job status string')

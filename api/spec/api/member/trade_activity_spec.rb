@@ -62,11 +62,11 @@ describe MAPI::ServiceApp do
       end
       it 'should return Internal Service Error, if trade service is unavailable', vcr: {cassette_name: 'trade_activity_service_unavailable'} do
         allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
-        expect{call_method}.to raise_error
+        expect{call_method}.to raise_error(Savon::HTTPError)
       end
       it 'should return Internal Service Error, if trade service is unavailable for large members', vcr: {cassette_name: 'trade_activity_service_unavailable'} do
         allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(true)
-        expect{call_method}.to raise_error
+        expect{call_method}.to raise_error(Savon::HTTPError)
       end
     end
     %w(development test production).each do |env|

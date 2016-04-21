@@ -93,6 +93,7 @@ class CorporateCommunication
     end
 
     def self.process_email(email, category=nil)
+      raise ArgumentError.new('email must not be nil') if email.nil?
       body_parts = process_email_html(email)
       attachments = process_email_attachments(email)
       { 

@@ -106,7 +106,7 @@ RSpec.describe ApplicationController, :type => :controller do
       end
       it 'raises an error if there is no member_id in the session and the current user is not an intranet user' do
         allow(user).to receive(:ldap_domain).and_return('extranet')
-        expect{call_method}.to raise_error
+        expect{call_method}.to raise_error(/Sign in error/)
       end
     end
 

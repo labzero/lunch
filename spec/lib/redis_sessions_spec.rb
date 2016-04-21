@@ -90,7 +90,7 @@ RSpec.describe Rack::Session::Redis do
         end
         it 'raise an error if the persistance fails' do
           allow(subject).to receive(:persist_session).and_return('ERR')
-          expect{call_method}.to raise_error
+          expect{call_method}.to raise_error(/Session collision/)
         end
         it 'returns the new SID and session' do
           expect(call_method).to eq([new_sid, new_session])

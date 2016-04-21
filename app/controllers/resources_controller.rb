@@ -520,6 +520,7 @@ class ResourcesController < ApplicationController
   private
 
   def fee_schedule_table_hash(rows)
+    raise ArgumentError.new('`rows` must not be nil') if rows.nil?
     table_data = {
       rows: []
     }

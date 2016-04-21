@@ -824,7 +824,7 @@ RSpec.describe User, :type => :model do
       end
       it 'raises an error if the Entry doesn\'t have an `objectclass` of `user`' do
         allow(ldap_entry).to receive(:[]).with(:objectclass).and_return(['foo'])
-        expect{call_method}.to raise_error
+        expect{call_method}.to raise_error(/Net::LDAP::Entry must have an objectClass of `user`/i)
       end
       it 'calls `super` with a `username` of the Entry\'s `samaccountname`' do
         expect(described_class.superclass).to receive(:create).with(hash_including(username: samaccountname))

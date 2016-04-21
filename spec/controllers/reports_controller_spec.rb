@@ -1394,7 +1394,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'raises an error if the MAPI endpoint returns nil' do
         allow(member_balance_service_instance).to receive(:interest_rate_resets).and_return(nil)
-        expect{interest_rate_resets}.to raise_error
+        expect{interest_rate_resets}.to raise_error(StandardError)
       end
     end
     describe 'GET todays_credit' do
@@ -1496,7 +1496,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'raises an error if the MAPI endpoint returns nil' do
         allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return(nil)
-        expect{todays_credit}.to raise_error
+        expect{todays_credit}.to raise_error(StandardError)
       end
     end
 
@@ -1585,7 +1585,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'raises an error if the MAPI endpoint returns nil' do
         allow(member_balance_service_instance).to receive(:mortgage_collateral_update).and_return(nil)
-        expect{mortgage_collateral_update}.to raise_error
+        expect{mortgage_collateral_update}.to raise_error(StandardError)
       end
     end
   end
@@ -1735,7 +1735,7 @@ RSpec.describe ReportsController, :type => :controller do
 
       it 'raises an error if `advances_details` is nil' do
         allow(JSON).to receive(:parse).and_return(double('job status response', with_indifferent_access: nil))
-        expect{call_action_with_job_id}.to raise_error
+        expect{call_action_with_job_id}.to raise_error(StandardError)
       end
     end
     describe '`skip_deferred_load` set to true' do
@@ -1950,7 +1950,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'raises an error if no JobStatus is found' do
           allow(JobStatus).to receive(:find_by)
-          expect{current_price_indications}.to raise_error
+          expect{current_price_indications}.to raise_error(ActiveRecord::RecordNotFound)
         end
         it 'destroys the JobStatus' do
           expect(job_status).to receive(:destroy)
@@ -2405,7 +2405,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'raises an error if there is no job status found' do
           allow(JobStatus).to receive(:find_by)
-          expect{call_action_with_job_id}.to raise_error
+          expect{call_action_with_job_id}.to raise_error(ActiveRecord::RecordNotFound)
         end
         it 'parses the job_status string' do
           job_status_string = double('job status string')
@@ -3107,7 +3107,7 @@ RSpec.describe ReportsController, :type => :controller do
 
     it 'raises an error if the report is disabled' do
       allow(controller).to receive(:report_disabled?).with(ReportsController::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true)
-      expect {make_request}.to raise_error
+      expect {make_request}.to raise_error(/Report Disabled/)
     end
     it 'assigns @report_name' do
       make_request

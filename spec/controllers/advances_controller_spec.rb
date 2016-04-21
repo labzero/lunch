@@ -17,7 +17,10 @@ RSpec.describe AdvancesController, :type => :controller do
       end
 
       it 'logs at the `info` log level' do
-        expect(subject.logger).to receive(:info).exactly(3)
+        allow(subject.logger).to receive(:info).and_call_original
+        expect(subject.logger).to receive(:info).with(no_args) do |*args, &block|
+          expect(block.call).to match(/Exception: /i)
+        end.exactly(:twice)
         make_request
       end
       it 'puts the advance_request as JSON in the log' do

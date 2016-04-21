@@ -133,7 +133,7 @@ RSpec.describe ResourcesController, type: :controller do
     end
     it 'raises an error if the FeeService returns nil' do
       allow(fee_service).to receive(:fee_schedules).and_return(nil)
-      expect{fee_schedules}.to raise_error
+      expect{fee_schedules}.to raise_error(StandardError)
     end
 
     describe 'letters of credit tables' do
@@ -468,7 +468,7 @@ RSpec.describe ResourcesController, type: :controller do
       allow(subject).to receive(:t)
     end
     it 'raises an error if passed nil' do
-      expect{subject.send(:fee_schedule_table_hash, nil)}.to raise_error
+      expect{subject.send(:fee_schedule_table_hash, nil)}.to raise_error(ArgumentError)
     end
     it 'returns a hash with a :rows attribute that is an array' do
       expect(call_method[:rows]).to be_kind_of(Array)

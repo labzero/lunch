@@ -13,7 +13,7 @@ RSpec.describe RenderReportExcelJob, type: :job do
   let(:reports_controller) { ReportsController.new }
   let(:user) { double(User) }
   let(:string_io_with_filename) { double('some StringIO instance', :'content_type=' => nil, :'original_filename=' => nil, :rewind => nil) }
-  let(:job_status) { double('job status instance', canceled?: false, completed?: false, started!: nil, completed!: nil, :'result=' => nil, :'status=' => nil, save!: nil, user: user) }
+  let(:job_status) { double('job status instance', canceled?: false, completed?: false, started!: nil, completed!: nil, failed!: nil, :'result=' => nil, :'status=' => nil, save!: nil, user: user) }
 
   before do
     allow(JobStatus).to receive(:find_or_create_by!).and_return(job_status)
@@ -31,7 +31,7 @@ RSpec.describe RenderReportExcelJob, type: :job do
 
   it 'should raise an exception if the member can\'t be found' do
     allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(nil)
-    expect {run_job}.to raise_error
+    expect {subject.perform_without_rescue(member_id, report_name, filename, params)}.to raise_error(/Member not found/)
   end
 
   describe 'before calling the report action' do

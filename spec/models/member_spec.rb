@@ -9,10 +9,10 @@ RSpec.describe Member, type: :model do
       expect(member.instance_variable_get(:@id)).to eq(id)
     end
     it 'raises an error if a nil ID is provided' do
-      expect{described_class.new(nil)}.to raise_error
+      expect{described_class.new(nil)}.to raise_error(ArgumentError)
     end
     it 'raises an error if a false ID is provided' do
-      expect{described_class.new(false)}.to raise_error
+      expect{described_class.new(false)}.to raise_error(ArgumentError)
     end
   end
   describe 'instance methods' do

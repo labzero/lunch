@@ -149,7 +149,7 @@ describe CorporateCommunication::Process do
       call_method
     end
     it 'throws an error if it was passed nil' do
-      expect{subject.process_email(nil)}.to raise_error
+      expect{subject.process_email(nil)}.to raise_error(ArgumentError)
     end
     it 'returns a hash with the result of `process_email_html`' do
       expect(call_method[:body]).to be(email_body)
@@ -516,7 +516,7 @@ describe Rake do
     end
     it 'exits with failure if at least one `fetch_and_process_email` call fails' do
       allow(CorporateCommunication::Process).to receive(:fetch_and_process_email).and_return(false, true)
-      expect{run_task}.to raise_error
+      expect{run_task}.to raise_error(/fetch_and_process_email call failed/)
     end
     it 'tries all entries in the category mapping even if some fail' do
       expect(CorporateCommunication::Process).to receive(:fetch_and_process_email).and_return(false, *Array.new(mapping.count - 1, true)).exactly(mapping.count)

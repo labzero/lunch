@@ -13,7 +13,7 @@ describe FhlbMember::Services::Fakes do
 
   describe '`use_fake_service` method' do
     it 'raises an error if it is passed an unknown service' do
-      expect{subject.use_fake_service(:foo, true)}.to raise_error
+      expect{subject.use_fake_service(:foo, true)}.to raise_error(/service is invalid/)
     end
     RSpec.shared_examples 'a faked service switch' do |service, xpath, connection|
       let(:call_method) { subject.use_fake_service(service, true) }
@@ -38,19 +38,19 @@ describe FhlbMember::Services::Fakes do
       end
       it 'raises an error if there is no response from the call to `mds_connection`' do
         allow(service_connection).to receive(:call).and_return(nil)
-        expect{call_method}.to raise_error
+        expect{call_method}.to raise_error(/no response/)
       end
       it 'raises an error if the response has no `doc`' do
         allow(service_response).to receive(:doc).and_return(nil)
-        expect{call_method}.to raise_error
+        expect{call_method}.to raise_error(/malformed response/)
       end
       it "raises an error if the response doc has no node at the `#{xpath}` xpath" do
         allow(service_response.doc.remove_namespaces!).to receive(:xpath).with(xpath).and_return(nil)
-        expect{call_method}.to raise_error
+        expect{call_method}.to raise_error(/malformed response/)
       end
       it 'raises an error if the response node set is empty' do
         allow(node_set).to receive(:children).and_return([])
-        expect{call_method}.to raise_error
+        expect{call_method}.to raise_error(/malformed response/)
       end
     end
 
