@@ -14,10 +14,14 @@
   cursor: default;
 }
 
-.decided {
-  color: yellow;
-  text-shadow: 1px 1px 1px #000,
-               1px -1px 1px #000,
-               -1px -1px 1px #000,
-               -1px 1px 1px #000;
+.decided {  
+  text-shadow: 1px 1px 0 #000,
+               1px -1px 0 #000,
+               -1px -1px 0 #000,
+               -1px 1px 0 #000;
+
+  &,
+  &:hover {
+    color: pink;
+  }
 }

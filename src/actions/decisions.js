@@ -42,9 +42,5 @@ export const removeDecision = () => dispatch => {
   fetch('/api/decisions', {
     credentials,
     method: 'delete'
-  })
-    .then(response => processResponse(response))
-    .catch(
-      err => dispatch(flashError(err.message))
-    );
+  });
 };

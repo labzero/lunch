@@ -39,16 +39,24 @@ Restaurant.addScope('withTagIds', {
         where "all_decisions"."restaurant_id" = "restaurant"."id"
         and "all_decisions"."created_at" >= CURRENT_DATE - INTERVAL \'4 weeks\')`),
       'all_decision_count']
-    ]
+    ],
+    exclude: ['updated_at']
   },
   include: [
     {
       model: Vote.scope('fromToday'),
-      required: false
+      required: false,
+      attributes: ['id', 'user_id', 'restaurant_id', 'created_at']
+    },
+    {
+      model: Decision.scope('fromToday'),
+      required: false,
+      attributes: ['id']
     }
   ],
   order:
-    `vote_count DESC,
+    `decisions.id NULLS LAST,
+    vote_count DESC,
     all_decision_count ASC,
     votes.created_at DESC NULLS LAST,
     all_vote_count DESC,

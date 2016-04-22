@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { getDecision } from '../selectors/decisions';
-import { decide } from '../actions/decisions';
+import { decide, removeDecision } from '../actions/decisions';
 import RestaurantDecision from '../components/RestaurantDecision';
 
 const mapStateToProps = (state, ownProps) => {
@@ -12,13 +12,22 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = dispatch => ({
+  dispatch
+});
+
+const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
   handleClick() {
-    dispatch(decide(ownProps.id));
-  }
+    if (stateProps.decided) {
+      dispatchProps.dispatch(removeDecision());
+    } else {
+      dispatchProps.dispatch(decide(ownProps.id));
+    }
+  },
 });
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
+  mergeProps
 )(RestaurantDecision);
