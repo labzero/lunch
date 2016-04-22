@@ -54,15 +54,10 @@ export const _Restaurant = ({
       </span>
     );
   } else {
-    let decisionArea;
-    if (restaurant.votes.length > 0) {
-      decisionArea = <RestaurantDecisionContainer id={restaurant.id} />;
-    }
-
     nameArea = (
       <h2 className={s.heading}>
         <span onClick={showMapAndInfoWindow}>{restaurant.name}</span>
-        {decisionArea}
+        <RestaurantDecisionContainer id={restaurant.id} />
       </h2>
     );
   }
