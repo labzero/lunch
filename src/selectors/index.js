@@ -33,11 +33,11 @@ export const makeGetTagList = () =>
     }
   );
 
-export const getAllOrUnvoted = createSelector(
+export const getMapItems = createSelector(
   [getRestaurantIds, getRestaurantEntities, getMapUi],
   (restaurantIds, restaurantEntities, mapUi) => restaurantIds.filter(id =>
     mapUi.showUnvoted || (!mapUi.showUnvoted && restaurantEntities[id].votes.length > 0)
-  )
+  ).map(id => ({ id, lat: restaurantEntities[id].lat, lng: restaurantEntities[id].lng }))
 );
 
 export const getFilteredRestaurants = createSelector(

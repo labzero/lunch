@@ -1,9 +1,9 @@
 import { connect } from 'react-redux';
-import { getAllOrUnvoted } from '../selectors';
+import { getMapItems } from '../selectors';
 import RestaurantMap from '../components/RestaurantMap';
 
 const mapStateToProps = state => ({
-  items: getAllOrUnvoted(state),
+  items: getMapItems(state),
   mapUi: state.mapUi,
   latLng: state.latLng
 });
