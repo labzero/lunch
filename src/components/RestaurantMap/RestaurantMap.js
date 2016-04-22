@@ -6,11 +6,9 @@ import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantMap.scss';
 
-let google;
+let google = { maps: { SymbolPath: {} } };
 if (canUseDOM) {
-  google = window.google;
-} else {
-  google = { maps: { SymbolPath: {} } };
+  google = window.google || google;
 }
 
 const RestaurantMap = ({ latLng, items }) => (

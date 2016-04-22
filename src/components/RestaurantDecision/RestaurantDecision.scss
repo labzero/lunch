@@ -1,0 +1,27 @@
+@import '../../styles/_mixins.scss';
+
+.root {
+  @include plain-button;
+  color: rgba(0, 0, 0, .15);
+  outline: none;
+
+  &:hover {
+    color: rgba(0, 0, 0, .5);
+  }
+}
+
+.loggedOut {
+  cursor: default;
+}
+
+.decided {  
+  text-shadow: 1px 1px 0 #000,
+               1px -1px 0 #000,
+               -1px -1px 0 #000,
+               -1px 1px 0 #000;
+
+  &,
+  &:hover {
+    color: pink;
+  }
+}

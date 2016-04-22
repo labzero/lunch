@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import RestaurantVoteCountContainer from '../../containers/RestaurantVoteCountContainer';
 import RestaurantVoteButtonContainer from '../../containers/RestaurantVoteButtonContainer';
+import RestaurantDecisionContainer from '../../containers/RestaurantDecisionContainer';
 import RestaurantAddTagFormContainer from '../../containers/RestaurantAddTagFormContainer';
 import RestaurantNameFormContainer from '../../containers/RestaurantNameFormContainer';
 import RestaurantDropdownContainer from '../../containers/RestaurantDropdownContainer';
@@ -54,8 +55,9 @@ export const _Restaurant = ({
     );
   } else {
     nameArea = (
-      <h2 className={s.heading} onClick={showMapAndInfoWindow}>
-        <span>{restaurant.name}</span>
+      <h2 className={s.heading}>
+        <span onClick={showMapAndInfoWindow}>{restaurant.name}</span>
+        <RestaurantDecisionContainer id={restaurant.id} />
       </h2>
     );
   }

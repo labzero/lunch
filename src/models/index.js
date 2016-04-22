@@ -1,167 +1,83 @@
-import { sequelize, DataTypes } from './db';
-import moment from 'moment';
+import { sequelize } from './db';
+import Vote from './Vote';
+import User from './User';
+import RestaurantTag from './RestaurantTag';
+import Tag from './Tag';
+import Restaurant from './Restaurant';
+import Decision from './Decision';
 
-/* Vote */
-
-export const Vote = sequelize.define('vote',
-  {
-    user_id: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'user',
-        key: 'id'
-      },
-      allowNull: false
-    },
-
-    restaurant_id: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'restaurant',
-        key: 'id'
-      },
-      allowNull: false
+Tag.addScope('orderedByRestaurant', {
+  distinct: 'id',
+  attributes: [
+    'id',
+    'name',
+    [sequelize.fn('count', sequelize.col('restaurants_tags.restaurant_id')), 'restaurant_count']
+  ],
+  include: [
+    {
+      attributes: [],
+      model: RestaurantTag,
+      required: false
     }
-  },
-  {
-    classMethods: {
-      recentForRestaurantAndUser: (restaurantId, userId) =>
-        Vote.scope('fromToday').count({
-          where: {
-            user_id: userId,
-            restaurant_id: restaurantId
-          }
-        })
-    },
-    scopes: {
-      fromToday: () => ({
-        where: {
-          created_at: {
-            $gt: moment().subtract(12, 'hours').toDate()
-          }
-        }
-      })
-    },
-    underscored: true
-  }
-);
-
-/* User */
-
-export const User = sequelize.define('user', {
-  google_id: DataTypes.STRING,
-  name: DataTypes.STRING,
-  email: DataTypes.STRING
-}, {
-  underscored: true
+  ],
+  group: ['tag.id'],
+  order: 'restaurant_count DESC'
 });
 
-/* RestaurantTag */
-
-export const RestaurantTag = sequelize.define('restaurants_tags', {
-  restaurant_id: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: 'restaurant',
-      key: 'id'
-    },
-    allowNull: false,
-    onDelete: 'cascade'
+Restaurant.addScope('withTagIds', {
+  attributes: {
+    include: [
+      [sequelize.literal('COUNT(*) OVER(PARTITION BY "restaurant"."id")'), 'vote_count'],
+      [sequelize.literal(`ARRAY(SELECT "tag_id" from "restaurants_tags"
+        where "restaurants_tags"."restaurant_id" = "restaurant"."id")`),
+      'tags'],
+      [sequelize.literal(`(SELECT COUNT(*) from "votes" as "all_votes"
+        where "all_votes"."restaurant_id" = "restaurant"."id"
+        and "all_votes"."created_at" >= CURRENT_DATE - INTERVAL \'4 weeks\')`),
+      'all_vote_count'],
+      [sequelize.literal(`(SELECT COUNT(*) from "decisions" as "all_decisions"
+        where "all_decisions"."restaurant_id" = "restaurant"."id"
+        and "all_decisions"."created_at" >= CURRENT_DATE - INTERVAL \'4 weeks\')`),
+      'all_decision_count']
+    ],
+    exclude: ['updated_at']
   },
-  tag_id: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: 'tag',
-      key: 'id'
+  include: [
+    {
+      model: Vote.scope('fromToday'),
+      required: false,
+      attributes: ['id', 'user_id', 'restaurant_id', 'created_at']
     },
-    allowNull: false,
-    onDelete: 'cascade'
-  }
-}, {
-  uniqueKeys: {
-    unique: {
-      fields: ['restaurant_id', 'tag_id']
+    {
+      model: Decision.scope('fromToday'),
+      required: false,
+      attributes: ['id']
     }
-  },
-  underscored: true
+  ],
+  order:
+    `decisions.id NULLS LAST,
+    vote_count DESC,
+    all_decision_count ASC,
+    votes.created_at DESC NULLS LAST,
+    all_vote_count DESC,
+    name ASC`
 });
-RestaurantTag.removeAttribute('id');
-
-/* Tag */
-
-export const Tag = sequelize.define('tag', {
-  name: DataTypes.STRING
-}, {
-  scopes: {
-    orderedByRestaurant: {
-      distinct: 'id',
-      attributes: [
-        'id',
-        'name',
-        [sequelize.fn('count', sequelize.col('restaurants_tags.restaurant_id')), 'restaurant_count']
-      ],
-      include: [
-        {
-          attributes: [],
-          model: RestaurantTag,
-          required: false
-        }
-      ],
-      group: ['tag.id'],
-      order: 'restaurant_count DESC'
-    }
-  },
-  underscored: true
-});
-
-/* Restaurant */
-
-export const Restaurant = sequelize.define('restaurant', {
-  name: DataTypes.STRING,
-  address: DataTypes.STRING,
-  lat: DataTypes.FLOAT,
-  lng: DataTypes.FLOAT,
-  place_id: DataTypes.STRING
-}, {
-  classMethods: {
-    findAllWithTagIds: () =>
-      Restaurant
-        .findAll({
-          attributes: {
-            include: [
-              [sequelize.literal('COUNT(*) OVER(PARTITION BY "restaurant"."id")'), 'vote_count'],
-              [sequelize.literal(
-                'ARRAY(SELECT "tag_id" from "restaurants_tags" ' +
-                'where "restaurants_tags"."restaurant_id" = "restaurant"."id")'
-              ), 'tags']
-            ]
-          },
-          include: [
-            {
-              model: Vote.scope('fromToday'),
-              required: false
-            }
-          ],
-          order: 'vote_count DESC, votes.created_at DESC NULLS LAST, name ASC'
-        })
-  },
-  instanceMethods: {
-    tagIds: () => this.getTags().map(tag => tag.get('id'))
-  },
-  underscored: true
-});
-
-/* Associations */
 
 Restaurant.hasMany(Vote);
+Restaurant.hasMany(Decision);
 Restaurant.belongsToMany(Tag, {
   through: 'restaurants_tags'
 });
 Restaurant.hasMany(RestaurantTag);
+
 User.hasMany(Vote);
+
 Tag.belongsToMany(Restaurant, {
   through: 'restaurants_tags'
 });
 Tag.hasMany(RestaurantTag);
+
 RestaurantTag.belongsTo(Restaurant);
 RestaurantTag.belongsTo(Tag);
+
+export { Vote, User, RestaurantTag, Tag, Restaurant, Decision };

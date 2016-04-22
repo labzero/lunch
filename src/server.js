@@ -32,7 +32,8 @@ import ContextHolder from './core/ContextHolder';
 import passport from './core/passport';
 import restaurantApi from './api/restaurants';
 import tagApi from './api/tags';
-import { Restaurant, Tag, User } from './models';
+import decisionApi from './api/decisions';
+import { Restaurant, Tag, User, Decision } from './models';
 import { Server as WebSocketServer } from 'ws';
 import serialize from 'serialize-javascript';
 
@@ -118,6 +119,7 @@ server.use((req, res, next) => {
 // -----------------------------------------------------------------------------
 server.use('/api/restaurants', restaurantApi);
 server.use('/api/tags', tagApi);
+server.use('/api/decisions', decisionApi);
 
 //
 // Register server-side rendering middleware
@@ -133,12 +135,16 @@ server.get('*', async (req, res, next) => {
         res.redirect(302, redirectPath);
         return;
       }
-      const finds = [Restaurant.findAllWithTagIds(), Tag.scope('orderedByRestaurant').findAll()];
+      const finds = [
+        Restaurant.scope('withTagIds').findAll(),
+        Tag.scope('orderedByRestaurant').findAll(),
+        Decision.scope('fromToday').findOne()
+      ];
       if (req.user) {
         finds.push(User.findAll({ attributes: ['id', 'name'] }));
       }
       Promise.all(finds)
-        .then(([restaurants, tags, users]) => {
+        .then(([restaurants, tags, decision, users]) => {
           let statusCode = 200;
           const initialState = {
             restaurants: {
@@ -150,6 +156,11 @@ server.get('*', async (req, res, next) => {
               isFetching: false,
               didInvalidate: false,
               items: tags.map(t => t.toJSON())
+            },
+            decision: {
+              isFetching: false,
+              didInvalidate: false,
+              inst: decision === null ? decision : decision.toJSON()
             },
             flashes: [],
             notifications: [],
