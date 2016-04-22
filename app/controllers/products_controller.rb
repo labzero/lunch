@@ -20,11 +20,6 @@ class ProductsController < ApplicationController
   end
 
   # GET
-  def auction_indexed
-    @last_modified = Date.new(2011, 4, 1)
-  end
-
-  # GET
   def authorizations
     @last_modified = Date.new(2015, 10, 1)
   end

@@ -6,8 +6,6 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
       I18n.t('products.advances.arc_embedded.title')
     when 'amortizing'
       I18n.t('products.advances.amortizing.title')
-    when 'auction indexed'
-      I18n.t('products.advances.auction_indexed.title')
     when 'frc'
       I18n.t('products.advances.frc.title')
     when 'frc embedded'
@@ -41,7 +39,7 @@ Then(/^I should see the pfi page$/) do
 end
 
 
-When(/^I click on the (arc embedded|frc|frc embedded|arc|amortizing|choice libor|auction indexed|knockout|putable|other cash needs|mortgage partnership finance) link in the products advances dropdown$/) do |link|
+When(/^I click on the (arc embedded|frc|frc embedded|arc|amortizing|choice libor|knockout|putable|other cash needs|mortgage partnership finance) link in the products advances dropdown$/) do |link|
   page.find('.page-header .products-dropdown a', text: dropdown_title_regex(link), exact: true).click
 end
 

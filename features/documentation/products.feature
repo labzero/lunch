@@ -47,12 +47,6 @@ Feature: Products Page
     When I click on the choice libor link in the products advances dropdown
     Then I should see the "choice libor" product page
 
-  @smoke @jira-mem-850
-  Scenario: Member navigates to the auction indexed product page
-    Given I hover on the products link in the header
-    When I click on the auction indexed link in the products advances dropdown
-    Then I should see the "auction indexed" product page
-
   @smoke @jira-mem-851
   Scenario: Member navigates to the knockout product page
     Given I hover on the products link in the header

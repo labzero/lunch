@@ -163,7 +163,6 @@ Rails.application.routes.draw do
       get 'callable' => 'products#callable', as: :callable
       get 'choice-libor' => 'products#choice_libor', as: :choice_libor
       get 'community-investment-program' => 'error#not_found', as: :cip
-      get 'auction-indexed' => 'products#auction_indexed', as: :auction_indexed
       get 'fixed-rate-credit' => 'products#frc', as: :frc
       get 'frc-embedded' => 'products#frc_embedded', as: :frc_embedded
       get 'knockout' => 'products#knockout', as: :knockout
