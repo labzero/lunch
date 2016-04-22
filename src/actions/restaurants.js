@@ -1,10 +1,15 @@
 import fetch from '../core/fetch';
 import ActionTypes from '../constants/ActionTypes';
+import { getDecision } from '../selectors/decisions';
 import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
 import { flashError } from './flash.js';
 
 export function sortRestaurants() {
-  return { type: ActionTypes.SORT_RESTAURANTS };
+  return (dispatch, getState) =>
+    dispatch({
+      type: ActionTypes.SORT_RESTAURANTS,
+      decision: getDecision(getState())
+    });
 }
 
 export function invalidateRestaurants() {

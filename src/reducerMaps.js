@@ -29,19 +29,27 @@ const isFetching = state =>
   });
 
 export const restaurants = new Map([
-  [ActionTypes.SORT_RESTAURANTS, state =>
+  [ActionTypes.SORT_RESTAURANTS, (state, action) =>
     update(state, {
       items: {
         result: {
-          $set: state.items.result.map((id, index) => {
-            const item = state.items.entities.restaurants[id];
-            item.sortIndex = index;
-            return item;
-          }).sort((a, b) => {
-            // stable sort
-            if (a.votes.length !== b.votes.length) { return b.votes.length - a.votes.length; }
-            return a.sortIndex - b.sortIndex;
-          }).map(item => item.id)
+          $apply: result => {
+            const sortIndexes = {};
+            result.forEach((id, index) => {
+              sortIndexes[id] = index;
+            });
+            return result.sort((a, b) => {
+              if (action.decision.restaurant_id === a) { return -1; }
+              if (action.decision.restaurant_id === b) { return 1; }
+              const restaurantA = getRestaurantById({ restaurants: state }, a);
+              const restaurantB = getRestaurantById({ restaurants: state }, b);
+              // stable sort
+              if (restaurantA.votes.length !== restaurantB.votes.length) {
+                return restaurantB.votes.length - restaurantA.votes.length;
+              }
+              return sortIndexes[a] - sortIndexes[b];
+            });
+          }
         }
       }
     })
