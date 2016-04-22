@@ -1406,6 +1406,8 @@ en:
         title: Capital Stock Activity Statement
         opening_balance_heading: "Opening balance of Class B Shares as of %{date}:"
         closing_balance_heading: "Closing balance of Class B Shares as of %{date}:"
+        opening_balance_heading_without_data: "Opening balance of Class B Shares:"
+        closing_balance_heading_without_data: "Closing balance of Class B Shares:"
         table_title: Class B stock at $100 per share
         certificate_sequence: Certificate Sequence
         issue_date: Issue Date
@@ -1456,6 +1458,8 @@ en:
         title: Settlement/Transaction Account (STA) Statement
         opening_balance_heading: "Beginning balance of as of %{date}:"
         closing_balance_heading: "Balance as of close of business %{date}:"
+        opening_balance_heading_without_data: "Beginning balance:"
+        closing_balance_heading_without_data: "Balance:"
         table_title: Settlement/Transaction Account (STA) Detail
         closing_balance: Balance as of close of business
         debit_credit_heading: Debits/Credits
@@ -1487,6 +1491,9 @@ en:
         total_net_header: "Total Net Amount as of close of business %{date}:"
         total_principal: "Total Principal as of close of business %{date}:"
         total_interest: "Total Interest as of close of business %{date}:"
+        total_net_header_without_data: "Total Net Amount:"
+        total_principal_without_data: "Total Principal:"
+        total_interest_without_data: "Total Interest:"
         settlement_date: Settlement Date
         transaction_code: Transaction Code
         coupon_rate: Coupon Rate
@@ -1552,6 +1559,7 @@ en:
       letters_of_credit:
         title: Letters of Credit
         total_current_par_summary: 'Total Current Amount as of close of business on %{date}:'
+        total_current_par_summary_without_data: 'Total Current Amount:'
         headers:
           lc_number: LC Number
           current_amount: Current Amount
@@ -1604,18 +1612,27 @@ en:
           total_original_par_heading: "Total Original Par as of %{date}:"
           total_current_par_heading: "Total Current Par as of %{date}:"
           total_market_value_heading: "Total Market Value as of %{date}:"
+          total_original_par_heading_without_data: "Total Original Par:"
+          total_current_par_heading_without_data: "Total Current Par:"
+          total_market_value_heading_without_data: "Total Market Value:"
           table_heading: "%{n} Securities as of %{date}"
           total: Totals
         pledged_securities:
           total_original_par_heading: "Total Original Par for all Pledged Securities as of %{date}:"
           total_current_par_heading: "Total Current Par for all Pledged Securities as of %{date}:"
           total_market_value_heading: "Total Market Value for all Pledged Securities as of %{date}:"
+          total_original_par_heading_without_data: "Total Original Par for all Pledged Securities:"
+          total_current_par_heading_without_data: "Total Current Par for all Pledged Securities:"
+          total_market_value_heading_without_data: "Total Market Value for all Pledged Securities:"
           table_heading: "%{n} Pledged Securities as of %{date}"
           total: Pledged Totals
         unpledged_securities:
           total_original_par_heading: "Total Original Par for all Unpledged Securities as of %{date}:"
           total_current_par_heading: "Total Current Par for all Unpledged Securities as of %{date}:"
           total_market_value_heading: "Total Market Value for all Unpledged Securities as of %{date}:"
+          total_original_par_heading_without_data: "Total Original Par for all Unpledged Securities:"
+          total_current_par_heading_without_data: "Total Current Par for all Unpledged Securities:"
+          total_market_value_heading_without_data: "Total Market Value for all Unpledged Securities:"
           table_heading: "%{n} Unpledged Securities as of %{date}"
           total: Unpledged Totals
         security_pledge_type: Security Pledge Type

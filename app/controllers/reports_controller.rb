@@ -2037,12 +2037,13 @@ class ReportsController < ApplicationController
   def securities_instance_variables(securities_position, filter)
     as_of_date = securities_position[:as_of_date]
     @headings = {
-      total_original_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_original_par_heading", fhlb_date_long_alpha(as_of_date)),
-      total_current_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_current_par_heading", fhlb_date_long_alpha(as_of_date)),
-      total_market_value: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_market_value_heading", fhlb_date_long_alpha(as_of_date)),
-      table_heading: t("reports.pages.securities_position.#{filter}_securities.table_heading", n: securities_position[:securities].length, date: fhlb_date_long_alpha(as_of_date)),
+
+      total_original_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_original_par_heading", fhlb_date_long_alpha(as_of_date), missing_data_message: "reports.pages.securities_position.#{filter}_securities.total_original_par_heading_without_data"),
+      total_current_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_current_par_heading", fhlb_date_long_alpha(as_of_date), missing_data_message: "reports.pages.securities_position.#{filter}_securities.total_current_par_heading_without_data"),
+      total_market_value: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_market_value_heading", fhlb_date_long_alpha(as_of_date), missing_data_message: "reports.pages.securities_position.#{filter}_securities.total_market_value_heading_without_data"),
       footer_total: t("reports.pages.securities_position.#{filter}_securities.total")
     }
+    @headings[:table_heading] = as_of_date ? t("reports.pages.securities_position.#{filter}_securities.table_heading", n: securities_position[:securities].length, date: fhlb_date_long_alpha(as_of_date)) : ""
     @securities_filter_options = [
       [t('reports.pages.securities_position.filter.all'), 'all'],
       [t('reports.pages.securities_position.filter.pledged'), 'pledged'],
