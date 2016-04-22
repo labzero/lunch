@@ -1805,11 +1805,10 @@ en:
           reduce: reduce interest rate, basis, and prepayment risks
           liquidity: meet liquidity needs
           broaden_products: broaden product lines
-          promote: promote affordable housing, job creation and economic development
+          promote: promote affordable housing, job creation, and economic development
         customize: We can customize our credit products to meet your funding or hedging requirements. We offer flexible cash flows and payment options, as well as different combinations of fixed and adjustable rate features and prepayment options, including partial prepayment symmetry.
         product_list:
-          intro: "Find out more about the advantages, features, and requirements of each of our credit products:"
-        stand_alone_html: At this time, the Bank is not offering stand-alone interest rate swaps, caps, and floors to members. For more information, see <a href=%{url}>Interest Rate Swaps, Caps & Floors</a>.
+          intro: "Find out more about the advantages, features, and requirements of our credit products:"
     authorizations:
       title: Authorization Forms Instructions
       on_file: The Bank must have the original, signed authorization forms on file.
@@ -2394,10 +2393,10 @@ en:
       description_html: Use standby letters of credit to facilitate a variety of transactions with third parties. A <a href=%{url}>standby letter of credit</a> is an obligation of the Bank to make payment to a third party if a member or housing associate does not perform its underlying obligation to that third party.
     mpf_program:
       title: Mortgage Partnership Finance (MPF) Program
-      description_html: Our <a href=%{url}>Mortgage Partnership Finance&reg; (MPF) Program</a> offers you access to an alternative secondary mortgage market channel for selling your residential fixed rate mortgage loans, including conventional conforming mortgage loans, eligible jumbo mortgage loans, and government-insured or government-guaranteed mortgage loans.
+      description_html: Our <a href=%{url}>Mortgage Partnership Finance&reg; (MPF&reg;) Program</a> offers you access to an alternative secondary market channel for selling your residential fixed rate mortgage loans, including conventional conforming mortgage loans, eligible jumbo mortgage loans, and government-insured or government-guaranteed mortgage loans. (“Mortgage Partnership Finance” and “MPF” are registered trademarks of the Federal Home Loan Bank of Chicago.)
     community_programs:
       title: Community Programs
-      description_html: The Bank’s <a href=%{url}>community programs</a> can help you foster strong, stable, and sustainable communities by providing affordable housing and economic development needs in Arizona, California, Nevada, and the other regions you serve.
+      description_html: The Bank’s <a href=%{url}>community programs</a> can help you foster strong, stable, and sustainable communities by providing support for affordable housing and economic development needs in Arizona, California, Nevada, and the other regions you serve.
     section_headings:
       use: Use
       uses: Uses

@@ -30,8 +30,6 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
       I18n.t('products.advances.sbc.title')
     when 'mortgage partnership finance'
       I18n.t('products.advances.mpf.title')
-    when 'swaps'
-      I18n.t('products.swaps.title')
     else
       raise 'unknown product page'
   end
@@ -49,10 +47,6 @@ end
 
 When(/^I click on the pfi link$/) do
   click_link('PFI Application')
-end
-
-When(/^I click on the swaps link$/) do
-  click_link('Interest Rate Swaps, Caps & Floors')
 end
 
 Then(/^I should see at least one pfi form to download$/) do
