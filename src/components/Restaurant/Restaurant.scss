@@ -2,8 +2,14 @@
 @import '../../styles/_mixins.scss';
 
 .root {
+  background: rgba(255, 255, 255, .9);
+  border: $default-border;
+  border-radius: 10px;
+  box-shadow: inset -3px -3px 5px rgba(128, 0, 0, .2);
   clear: fix-legacy;
   font-family: $font-family-base;
+  margin-bottom: 10px;
+  padding: 10px;
 }
 
 .heading {

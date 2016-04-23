@@ -6,10 +6,8 @@ let sortTimeout;
 
 const sort = dispatch => {
   clearTimeout(sortTimeout);
-  const sortRestaurantsHash = sortRestaurants();
-  console.log(sortRestaurantsHash);
   sortTimeout = setTimeout(() => {
-    dispatch(sortRestaurantsHash);
+    dispatch(sortRestaurants());
   }, 1000);
 };
 

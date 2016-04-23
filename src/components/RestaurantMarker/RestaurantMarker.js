@@ -24,10 +24,10 @@ const InnerRestaurantMarker = ({
   const length = restaurant.votes.length;
   let label = '';
 
-  let zIndex;
+  let zIndex = baseZIndex;
 
   if (restaurant.votes.length > 0) {
-    if (restaurant.votes.length > 9) {
+    if (restaurant.votes.length > 99) {
       label = '✔';
     } else {
       label = String(length);
@@ -44,10 +44,15 @@ const InnerRestaurantMarker = ({
       + baseZIndex;
   }
 
+  if (showInfoWindow) {
+    zIndex += zIndex;
+  }
+
   const ref = `marker_${index}`;
 
   const renderInfoWindow = () => (
     <div
+      className={s.infoWindow}
       key={`infoWindow_${ref}`}
       onCloseclick={handleMarkerClose}
     >
@@ -64,11 +69,13 @@ const InnerRestaurantMarker = ({
       key={index}
       title={restaurant.name}
       onClick={handleMarkerClick}
-      className={s.root}
+      className={`${s.root} ${restaurant.votes.length > 0 ? s.voted : ''}`}
       style={{ zIndex }}
     >
       {showInfoWindow ? renderInfoWindow() : null}
-      {label}
+      <span className={s.label}>
+        {label}
+      </span>
     </div>
   );
 };

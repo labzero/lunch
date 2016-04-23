@@ -39,8 +39,10 @@ export const restaurants = new Map([
               sortIndexes[id] = index;
             });
             return result.sort((a, b) => {
-              if (action.decision.restaurant_id === a) { return -1; }
-              if (action.decision.restaurant_id === b) { return 1; }
+              if (action.decision !== null) {
+                if (action.decision.restaurant_id === a) { return -1; }
+                if (action.decision.restaurant_id === b) { return 1; }
+              }
               const restaurantA = getRestaurantById({ restaurants: state }, a);
               const restaurantB = getRestaurantById({ restaurants: state }, b);
               // stable sort

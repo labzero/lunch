@@ -4,7 +4,55 @@
   background: pink;
   border: $default-border;
   border-radius: 50%;
-  height: 20px;
-  margin: -10px;
-  width: 20px;
+  font-size: 14px;
+  height: 15px;
+  margin: -7.5px;
+  position: relative;
+  text-align: center;
+  width: 15px;
+}
+
+.voted {
+  border-bottom: none;
+  box-shadow: inset 0px 2px 4px white;
+  height: 26px;
+  margin: -40px -13px;
+  width: 26px;
+
+  &:before, &:after {
+    border-style: solid;
+    content: '';
+    margin-top: -8px;
+    position: absolute;
+    top: 100%;
+    height: 0;
+    width: 0;
+  }
+
+  &:before {
+    border-width: 22px 12px 0 12px;
+    border-color: black transparent transparent transparent;
+    left: -1px;
+  }
+
+  &:after {
+    border-width: 18px 10px 0 10px;
+    border-color: pink transparent transparent transparent;
+    left: 1px;
+  }
+}
+
+.label {
+  font-weight: bold;
+  line-height: 26px;
+  position: relative;
+  z-index: 1;
+}
+
+.infoWindow {
+  bottom: 100%;
+  margin-left: -150px;
+  position: absolute;
+  text-align: left;
+  width: 300px;
 }
