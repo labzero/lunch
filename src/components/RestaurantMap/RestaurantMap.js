@@ -21,18 +21,10 @@ const RestaurantMap = ({ latLng, items }, context) => (
       }}
     >
       <div
-        clickable={false}
         lat={latLng.lat}
         lng={latLng.lng}
-        icon={{
-          fillColor: 'pink',
-          fillOpacity: 1,
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 6,
-          strokeWeight: 2
-        }}
+        className={s.center}
         title="You are here"
-        zIndex={0}
       />
       {items.map((item, index) =>
         <RestaurantMarkerContainer

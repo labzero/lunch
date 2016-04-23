@@ -2,14 +2,14 @@ import { connect } from 'react-redux';
 import { getRestaurantById } from '../selectors/restaurants';
 import { showInfoWindow, hideInfoWindow } from '../actions/mapUi';
 import { getMarkerSettingsForId } from '../selectors/mapUi';
-import { RestaurantMarker } from '../components/RestaurantMarker';
+import RestaurantMarker from '../components/RestaurantMarker';
 
 const mapStateToProps = (state, ownProps) => {
-  const { index, baseZIndex, mapHolderRef } = ownProps;
+  const { index, baseZIndex, mapHolderRef, context } = ownProps;
   return {
     restaurant: getRestaurantById(state, ownProps.id),
     showInfoWindow: getMarkerSettingsForId(state, ownProps.id).showInfoWindow || false,
-    index, baseZIndex, mapHolderRef
+    index, baseZIndex, mapHolderRef, context
   };
 };
 
