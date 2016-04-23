@@ -63,7 +63,7 @@ const RestaurantDropdown = ({
 RestaurantDropdown.propTypes = {
   id: PropTypes.number.isRequired,
   listUiItem: PropTypes.object.isRequired,
-  decision: PropTypes.object.isRequired,
+  decision: PropTypes.object,
   showMapAndInfoWindow: PropTypes.func.isRequired,
   showEditNameForm: PropTypes.func.isRequired,
   deleteRestaurant: PropTypes.func.isRequired,
