@@ -45,6 +45,7 @@ export const restaurants = new Map([
               }
               const restaurantA = getRestaurantById({ restaurants: state }, a);
               const restaurantB = getRestaurantById({ restaurants: state }, b);
+
               // stable sort
               if (restaurantA.votes.length !== restaurantB.votes.length) {
                 return restaurantB.votes.length - restaurantA.votes.length;

@@ -27,7 +27,8 @@
 .center {
   position: relative;
 
-  &:before, &:after {
+  &::before,
+  &::after {
     background: red;
     content: '';
     height: 3px;
@@ -36,11 +37,11 @@
     width: 16px;
   }
 
-  &:before {
+  &::before {
     transform: rotate(45deg);
   }
 
-  &:after {
+  &::after {
     transform: rotate(135deg);
   }
 }

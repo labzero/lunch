@@ -15,8 +15,7 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
-  handleMarkerClick(event) {
-    // event.stopPropagation();
+  handleMarkerClick() {
     if (stateProps.showInfoWindow) {
       dispatchProps.dispatch(hideInfoWindow(ownProps.id));
     } else {

@@ -28,6 +28,7 @@ class RestaurantMap extends Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.center !== undefined) {
       this.props.clearCenter();
+
       // offset by infowindow height after recenter
       setTimeout(() => {
         this.map.panBy(0, -100);
