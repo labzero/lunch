@@ -10,16 +10,16 @@ let suggestCache = {};
 
 const mapStateToProps = state => ({
   latLng: state.latLng,
+  restaurants: getRestaurants(state)
+});
+
+const mapDispatchToProps = dispatch => ({
   getSuggestLabel: (suggest) => {
     if (suggest.terms !== undefined && suggest.terms.length > 0) {
       suggestCache[suggest.place_id] = suggest.terms[0].value;
     }
     return suggest.description;
   },
-  restaurants: getRestaurants(state)
-});
-
-const mapDispatchToProps = dispatch => ({
   dispatch
 });
 
