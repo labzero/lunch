@@ -9,22 +9,31 @@ import Restaurant from '../components/Restaurant';
 const mapStateToProps = (state, ownProps) => ({
   restaurant: getRestaurantById(state, ownProps.id),
   user: state.user,
-  listUiItem: getListUiItemForId(state, ownProps.id)
+  listUiItem: getListUiItemForId(state, ownProps.id),
+  ...ownProps
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   showAddTagForm() {
     dispatch(showAddTagForm(ownProps.id));
   },
-  showMapAndInfoWindow() {
-    dispatch(showMapAndInfoWindow(ownProps.id));
-  },
   removeTag(id) {
     dispatch(removeTagFromRestaurant(ownProps.id, id));
+  },
+  dispatch
+});
+
+const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
+  showMapAndInfoWindow() {
+    dispatchProps.dispatch(showMapAndInfoWindow(ownProps.id, {
+      lat: stateProps.restaurant.lat,
+      lng: stateProps.restaurant.lng
+    }));
   }
 });
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
+  mergeProps
 )(Restaurant);

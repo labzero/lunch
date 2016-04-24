@@ -19,6 +19,7 @@ import Location from './core/Location';
 import ContextHolder from './core/ContextHolder';
 import { addEventListener, removeEventListener } from './core/DOMUtils';
 import ReconnectingWebSocket from 'reconnectingwebsocket';
+import {} from 'element-closest';
 
 const initialState = window.__INITIAL_STATE__;
 

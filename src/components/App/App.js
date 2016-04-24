@@ -54,7 +54,10 @@ class App extends Component {
   componentDidUpdate() {
     if (this.props.shouldScrollToTop) {
       if (canUseDOM) {
-        window.scrollTo(0, 0);
+        // defeat bootstrap menu close by using timeout
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+        });
       }
       this.props.scrolledToTop();
     }

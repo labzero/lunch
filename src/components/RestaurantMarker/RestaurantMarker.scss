@@ -1,45 +1,19 @@
 @import '../../styles/_variables.scss';
 
 .root {
+  font-size: 14px;
+  position: relative;
+}
+
+.marker {
   background: pink;
   border: $default-border;
   border-radius: 50%;
-  font-size: 14px;
+  cursor: pointer;
   height: 15px;
   margin: -7.5px;
-  position: relative;
   text-align: center;
   width: 15px;
-}
-
-.voted {
-  border-bottom: none;
-  box-shadow: inset 0px 2px 4px white;
-  height: 26px;
-  margin: -40px -13px;
-  width: 26px;
-
-  &:before, &:after {
-    border-style: solid;
-    content: '';
-    margin-top: -8px;
-    position: absolute;
-    top: 100%;
-    height: 0;
-    width: 0;
-  }
-
-  &:before {
-    border-width: 22px 12px 0 12px;
-    border-color: black transparent transparent transparent;
-    left: -1px;
-  }
-
-  &:after {
-    border-width: 18px 10px 0 10px;
-    border-color: pink transparent transparent transparent;
-    left: 1px;
-  }
 }
 
 .label {
@@ -51,8 +25,76 @@
 
 .infoWindow {
   bottom: 100%;
-  margin-left: -150px;
+  margin-bottom: 37px;
+  min-width: 300px;
   position: absolute;
   text-align: left;
-  width: 300px;
+  transform: translateX(-50%);
+
+  &:before, &:after {
+    border-style: solid;
+    content: '';
+    left: 50%;
+    margin-top: -12px;
+    position: absolute;
+    top: 100%;
+    height: 0;
+    width: 0;
+  }
+
+  &:before {
+    border-width: 40px 8px 0 8px;
+    border-color: black transparent transparent transparent;
+    margin-left: -8px;
+  }
+
+  &:after {
+    border-width: 32px 6px 0 6px;
+    border-color: #fcc transparent transparent transparent;
+    margin-left: -6px;
+  }
+}
+
+.voted {
+  .marker {
+    border-bottom: none;
+    box-shadow: inset 0px 2px 4px white;
+    height: 26px;
+    margin: -40px -13px;
+    width: 26px;
+
+    &:before, &:after {
+      border-style: solid;
+      content: '';
+      margin-top: -8px;
+      position: absolute;
+      top: 100%;
+      height: 0;
+      width: 0;
+    }
+
+    &:before {
+      border-width: 22px 12px 0 12px;
+      border-color: black transparent transparent transparent;
+      left: -12px;
+    }
+
+    &:after {
+      border-width: 18px 10px 0 10px;
+      border-color: pink transparent transparent transparent;
+      left: -10px;
+    }
+  }
+
+  .infoWindow {
+    margin-bottom: 5px;
+
+    &:before {
+      border-top-width: 16px;
+    }
+
+    &:after {
+      border-top-width: 12px;
+    }
+  }
 }

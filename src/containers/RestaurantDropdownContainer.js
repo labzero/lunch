@@ -16,9 +16,6 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  showMapAndInfoWindow() {
-    dispatch(showMapAndInfoWindow(ownProps.id));
-  },
   deleteRestaurant: () => {
     dispatch(showModal('deleteRestaurant', { restaurantId: ownProps.id }));
   },
@@ -35,6 +32,12 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, st
   showEditNameForm() {
     dispatchProps.dispatch(setEditNameFormValue(ownProps.id, stateProps.restaurant.name));
     dispatchProps.dispatch(showEditNameForm(ownProps.id));
+  },
+  showMapAndInfoWindow() {
+    dispatchProps.dispatch(showMapAndInfoWindow(ownProps.id, {
+      lat: stateProps.restaurant.lat,
+      lng: stateProps.restaurant.lng
+    }));
   }
 });
 

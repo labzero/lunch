@@ -409,6 +409,9 @@ export const mapUi = new Map([
   [ActionTypes.RESTAURANT_DELETED, resetRestaurant],
   [ActionTypes.SHOW_INFO_WINDOW, (state, action) =>
     update(state, {
+      center: {
+        $set: action.latLng
+      },
       markers: {
         $apply: target => setOrMerge(target, action.id, { showInfoWindow: true })
       }
@@ -421,10 +424,31 @@ export const mapUi = new Map([
       }
     })
   ],
+  [ActionTypes.HIDE_ALL_INFO_WINDOWS, state =>
+    update(state, {
+      markers: {
+        $apply: markers => {
+          for (const i in markers) {
+            if (markers.hasOwnProperty(i)) {
+              markers[i].showInfoWindow = false;
+            }
+          }
+          return markers;
+        }
+      }
+    })
+  ],
   [ActionTypes.SET_SHOW_UNVOTED, (state, action) =>
     update(state, {
       $merge: {
         showUnvoted: action.val
+      }
+    })
+  ],
+  [ActionTypes.CLEAR_CENTER, state =>
+    update(state, {
+      center: {
+        $set: undefined
       }
     })
   ]

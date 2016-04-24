@@ -13,7 +13,11 @@ export class _RestaurantVoteCount extends Component {
 
   componentDidUpdate() {
     this._el.classList.add(s.updated);
-    setTimeout(() => this._el.classList.remove(s.updated), 100);
+    this.timeout = setTimeout(() => this._el.classList.remove(s.updated), 100);
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.timeout);
   }
 
   render() {

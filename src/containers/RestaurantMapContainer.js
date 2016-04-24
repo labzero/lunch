@@ -1,13 +1,26 @@
 import { connect } from 'react-redux';
+import { clearCenter, hideAllInfoWindows } from '../actions/mapUi';
 import { getMapItems } from '../selectors';
 import RestaurantMap from '../components/RestaurantMap';
 
 const mapStateToProps = state => ({
   items: getMapItems(state),
-  mapUi: state.mapUi,
-  latLng: state.latLng
+  center: state.mapUi.center,
+  latLng: state.latLng,
+});
+
+const mapDispatchToProps = dispatch => ({
+  clearCenter() {
+    dispatch(clearCenter());
+  },
+  mapClicked({ event }) {
+    if (!event.target.closest('[data-marker]')) {
+      dispatch(hideAllInfoWindows());
+    }
+  }
 });
 
 export default connect(
-  mapStateToProps
+  mapStateToProps,
+  mapDispatchToProps
 )(RestaurantMap);

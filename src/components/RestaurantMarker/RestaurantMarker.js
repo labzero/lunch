@@ -17,14 +17,21 @@ const InnerRestaurantMarker = ({
   restaurant,
   index,
   baseZIndex,
-  handleMarkerClose,
   handleMarkerClick,
   showInfoWindow
 }) => {
   const length = restaurant.votes.length;
   let label = '';
 
-  let zIndex = baseZIndex;
+  // place markers over default markers
+  // place markers higher based on vote length
+  // place markers lower based on how far down they are in the list
+  // add item length so index doesn't dip below MAX_ZINDEX
+  const zIndex =
+      google.maps.Marker.MAX_ZINDEX
+      + restaurant.votes.length
+      - index
+      + baseZIndex;
 
   if (restaurant.votes.length > 0) {
     if (restaurant.votes.length > 99) {
@@ -32,20 +39,6 @@ const InnerRestaurantMarker = ({
     } else {
       label = String(length);
     }
-
-    // place markers over default markers
-    // place markers higher based on vote length
-    // place markers lower based on how far down they are in the list
-    // add item length so index doesn't dip below MAX_ZINDEX
-    zIndex =
-      google.maps.Marker.MAX_ZINDEX
-      + restaurant.votes.length
-      - index
-      + baseZIndex;
-  }
-
-  if (showInfoWindow) {
-    zIndex += zIndex;
   }
 
   const ref = `marker_${index}`;
@@ -53,8 +46,8 @@ const InnerRestaurantMarker = ({
   const renderInfoWindow = () => (
     <div
       className={s.infoWindow}
+      style={{ zIndex: zIndex * 2 }}
       key={`infoWindow_${ref}`}
-      onCloseclick={handleMarkerClose}
     >
       <RestaurantContainer
         id={restaurant.id}
@@ -63,19 +56,21 @@ const InnerRestaurantMarker = ({
   );
 
   return (
-    <div
-      lat={restaurant.lat}
-      lng={restaurant.lng}
-      key={index}
-      title={restaurant.name}
-      onClick={handleMarkerClick}
-      className={`${s.root} ${restaurant.votes.length > 0 ? s.voted : ''}`}
-      style={{ zIndex }}
-    >
+    <div className={`${s.root} ${restaurant.votes.length > 0 ? s.voted : ''}`} data-marker>
       {showInfoWindow ? renderInfoWindow() : null}
-      <span className={s.label}>
-        {label}
-      </span>
+      <div
+        lat={restaurant.lat}
+        lng={restaurant.lng}
+        key={index}
+        title={restaurant.name}
+        onClick={handleMarkerClick}
+        className={s.marker}
+        style={{ zIndex }}
+      >
+        <span className={s.label}>
+          {label}
+        </span>
+      </div>
     </div>
   );
 };
@@ -85,8 +80,7 @@ InnerRestaurantMarker.propTypes = {
   index: PropTypes.number.isRequired,
   baseZIndex: PropTypes.number.isRequired,
   showInfoWindow: PropTypes.bool.isRequired,
-  handleMarkerClick: PropTypes.func.isRequired,
-  handleMarkerClose: PropTypes.func.isRequired
+  handleMarkerClick: PropTypes.func.isRequired
 };
 
 const StyledRestaurantMarker = withStyles(InnerRestaurantMarker, s);
