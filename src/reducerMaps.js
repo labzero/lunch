@@ -636,6 +636,8 @@ export const decision = new Map([
   ]
 ]);
 
+export const whitelistEmails = new Map();
+
 export const latLng = new Map();
 export const user = new Map();
 export const users = new Map();

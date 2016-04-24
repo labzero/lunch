@@ -1,0 +1,6 @@
+{
+  "name": "EmailWhitelistItem",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./EmailWhitelistItem.js"
+}
