@@ -12,23 +12,16 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Login.scss';
 
 const Header = ({ user }) => {
-  let content;
+  let content = <div />;
   if (user.id === undefined) {
-    content = (<div className={s.flexContainer}><a href="/login">Log In</a></div>);
-  } else {
     content = (
-      <div className={s.flexContainer}>
-        <span>{user.name}</span>
-        <a className={s.logOut} href="/logout">Log Out</a>
+      <div className={s.root}>
+        <div className={s.flexContainer}><a href="/login">Log In</a></div>
       </div>
     );
   }
 
-  return (
-    <div className={s.root}>
-      {content}
-    </div>
-  );
+  return content;
 };
 
 Header.propTypes = {

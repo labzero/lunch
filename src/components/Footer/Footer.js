@@ -12,8 +12,9 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Footer.scss';
 
 const Footer = ({ user, manageTags }) => {
-  let manageTagsButton = null;
-  let manageTagsSpacer = null;
+  let manageTagsButton;
+  let manageTagsSpacer;
+  let logoutSection;
 
   if (user.id !== undefined) {
     manageTagsButton = (
@@ -22,10 +23,20 @@ const Footer = ({ user, manageTags }) => {
       </button>
     );
     manageTagsSpacer = <span className={s.spacer}></span>;
+    logoutSection = (
+      <div className={s.container}>
+        <span className={s.text}>
+          {user.name}
+        </span>
+        <span className={s.spacer}></span>
+        <a className={s.link} href="/logout">Log Out</a>
+      </div>
+    );
   }
 
   return (
     <div className={s.root}>
+      {logoutSection}
       <div className={s.container}>
         {manageTagsButton}
         {manageTagsSpacer}
