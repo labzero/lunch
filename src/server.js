@@ -33,6 +33,7 @@ import passport from './core/passport';
 import restaurantApi from './api/restaurants';
 import tagApi from './api/tags';
 import decisionApi from './api/decisions';
+import whitelistEmailApi from './api/whitelistEmails';
 import { Restaurant, Tag, User, WhitelistEmail, Decision } from './models';
 import { Server as WebSocketServer } from 'ws';
 import serialize from 'serialize-javascript';
@@ -120,6 +121,7 @@ server.use((req, res, next) => {
 server.use('/api/restaurants', restaurantApi);
 server.use('/api/tags', tagApi);
 server.use('/api/decisions', decisionApi);
+server.use('/api/whitelistEmails', whitelistEmailApi);
 
 //
 // Register server-side rendering middleware

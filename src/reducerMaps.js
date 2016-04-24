@@ -1,6 +1,7 @@
 import ActionTypes from './constants/ActionTypes';
 import { getRestaurantIds, getRestaurantById } from './selectors/restaurants';
 import { getTagIds, getTagById } from './selectors/tags';
+import { getWhitelistEmailIds } from './selectors/whitelistEmails';
 import * as schemas from './schemas';
 import { normalize, arrayOf } from 'normalizr';
 import update from 'react-addons-update';
@@ -636,7 +637,38 @@ export const decision = new Map([
   ]
 ]);
 
-export const whitelistEmails = new Map();
+export const whitelistEmails = new Map([
+  [ActionTypes.DELETE_WHITELIST_EMAIL, isFetching],
+  [ActionTypes.WHITELIST_EMAIL_DELETED, (state, action) =>
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      items: {
+        result: {
+          $splice: [[getWhitelistEmailIds({ whitelistEmails: state }).indexOf(action.id), 1]]
+        }
+      }
+    })
+  ],
+  [ActionTypes.POST_WHITELIST_EMAIL, isFetching],
+  [ActionTypes.WHITELIST_EMAIL_POSTED, (state, action) =>
+    update(state, {
+      items: {
+        result: {
+          $push: [action.whitelistEmail.id]
+        },
+        entities: {
+          tags: {
+            $merge: {
+              [action.whitelistEmail.id]: action.whitelistEmail
+            }
+          }
+        }
+      }
+    })
+  ]
+]);
 
 export const latLng = new Map();
 export const user = new Map();
