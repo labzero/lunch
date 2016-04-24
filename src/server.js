@@ -189,6 +189,7 @@ server.get('*', async (req, res, next) => {
             tagFilters: [],
             tagUi: {},
             pageUi: {},
+            whitelistEmailUi: {},
             wsPort: process.env.BS_RUNNING ? port : 0
           };
           if (req.user) {

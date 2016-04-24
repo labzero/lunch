@@ -3,10 +3,10 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './EmailWhitelist.scss';
 import EmailWhitelistItemContainer from '../../containers/EmailWhitelistItemContainer';
 
-const EmailWhitelist = ({ whitelistEmails }) => (
+const EmailWhitelist = ({ inputValue, whitelistEmails, addWhitelistEmail, setEmailWhitelistInputValue }) => (
   <div className={s.root}>
-    <form>
-      <input type="email" />
+    <form onSubmit={addWhitelistEmail}>
+      <input type="email" onChange={setEmailWhitelistInputValue} value={inputValue} />
       <button>add</button>
     </form>
     <ul className={s.list}>
@@ -16,7 +16,10 @@ const EmailWhitelist = ({ whitelistEmails }) => (
 );
 
 EmailWhitelist.propTypes = {
+  inputValue: PropTypes.string,
   whitelistEmails: PropTypes.arrayOf(PropTypes.number).isRequired,
+  addWhitelistEmail: PropTypes.func.isRequired,
+  setEmailWhitelistInputValue: PropTypes.func.isRequired
 };
 
 export default withStyles(EmailWhitelist, s);

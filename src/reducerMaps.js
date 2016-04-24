@@ -670,6 +670,16 @@ export const whitelistEmails = new Map([
   ]
 ]);
 
+export const whitelistEmailUi = new Map([
+  [ActionTypes.SET_EMAIL_WHITELIST_INPUT_VALUE, (state, action) =>
+    update(state, {
+      inputValue: {
+        $set: action.value
+      }
+    })
+  ]
+]);
+
 export const latLng = new Map();
 export const user = new Map();
 export const users = new Map();
