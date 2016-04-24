@@ -138,7 +138,7 @@ server.get('*', async (req, res, next) => {
         return;
       }
       const finds = [
-        Restaurant.scope('withTagIds').findAll(),
+        Restaurant.findAllWithTagIds(),
         Tag.scope('orderedByRestaurant').findAll(),
         Decision.scope('fromToday').findOne()
       ];
