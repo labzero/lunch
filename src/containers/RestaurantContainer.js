@@ -23,14 +23,16 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
-  showMapAndInfoWindow() {
-    dispatchProps.dispatch(showMapAndInfoWindow(ownProps.id, {
-      lat: stateProps.restaurant.lat,
-      lng: stateProps.restaurant.lng
-    }));
-  }
-});
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  return Object.assign({}, stateProps, dispatchProps, {
+    showMapAndInfoWindow() {
+      dispatchProps.dispatch(showMapAndInfoWindow(ownProps.id, {
+        lat: stateProps.restaurant.lat,
+        lng: stateProps.restaurant.lng
+      }));
+    }
+  });
+};
 
 export default connect(
   mapStateToProps,

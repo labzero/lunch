@@ -1,10 +1,11 @@
 import { connect } from 'react-redux';
+import { getListUiItemForId } from '../selectors/listUi';
 import { changeRestaurantName } from '../actions/restaurants';
 import { hideEditNameForm, setEditNameFormValue } from '../actions/listUi';
 import RestaurantNameForm from '../components/RestaurantNameForm';
 
 const mapStateToProps = (state, ownProps) => {
-  const listUiItem = state.listUi[ownProps.id] || {};
+  const listUiItem = getListUiItemForId(state, ownProps.id);
   return {
     editNameFormValue: listUiItem.editNameFormValue || ''
   };
