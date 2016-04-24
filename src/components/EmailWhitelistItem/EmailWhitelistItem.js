@@ -6,6 +6,7 @@ const EmailWhitelistItem = ({ whitelistEmail, handleDeleteClicked }) => (
   <li>
     <span className={s.tagContainer}>
       {whitelistEmail.email}
+      <button onClick={handleDeleteClicked}>&times;</button>
     </span>
   </li>
 );

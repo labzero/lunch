@@ -7,7 +7,7 @@ const EmailWhitelist = ({ inputValue, whitelistEmails, addWhitelistEmail, setEma
   <div className={s.root}>
     <form onSubmit={addWhitelistEmail}>
       <input type="email" onChange={setEmailWhitelistInputValue} value={inputValue} />
-      <button>add</button>
+      <button disabled={inputValue === ''}>add</button>
     </form>
     <ul className={s.list}>
       {whitelistEmails.map(id => <EmailWhitelistItemContainer id={id} key={`emailWhitelistItem_${id}`} />)}
