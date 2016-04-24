@@ -40,6 +40,11 @@ const Footer = ({ user, manageTags }) => {
       <div className={s.container}>
         {manageTagsButton}
         {manageTagsSpacer}
+        <span className={s.spacer}></span>
+        <span className={s.text}>
+          <a className={s.link} href="https://github.com/labzero/lunch" target="_blank">GitHub</a>
+        </span>
+        <span className={s.spacer}></span>
         <span className={s.text}>
           ©
           <a className={s.link} href="https://labzero.com" target="_blank">Lab Zero</a>
