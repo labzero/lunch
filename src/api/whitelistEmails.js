@@ -16,7 +16,7 @@ router
         req.wss.broadcast(whitelistEmailPosted(json, req.user.id));
         res.status(201).send({ error: false, data: json });
       }).catch(() => {
-        const error = { message: 'Could add email to whitelist.' };
+        const error = { message: 'Could not add email to whitelist. Is it already added?' };
         errorCatcher(res, error);
       });
     }

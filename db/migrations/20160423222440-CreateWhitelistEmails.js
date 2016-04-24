@@ -6,7 +6,8 @@ exports.up = (queryInterface, Sequelize) => queryInterface.createTable('whitelis
   },
   email: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true
   },
   created_at: {
     allowNull: false,

@@ -659,11 +659,7 @@ export const whitelistEmails = new Map([
           $push: [action.whitelistEmail.id]
         },
         entities: {
-          whitelistEmails: {
-            $merge: {
-              [action.whitelistEmail.id]: action.whitelistEmail
-            }
-          }
+          $apply: target => setOrMerge(target, 'whitelistEmails', { [action.whitelistEmail.id]: action.whitelistEmail })
         }
       }
     })

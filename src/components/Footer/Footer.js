@@ -50,10 +50,7 @@ const Footer = ({ user, manageTags, openEmailWhitelist }) => {
         {manageTagsSpacer}
         {emailWhitelistButton}
         {emailWhitelistSpacer}
-        <span className={s.spacer}></span>
-        <span className={s.text}>
-          <a className={s.link} href="https://github.com/labzero/lunch" target="_blank">GitHub</a>
-        </span>
+        <a className={s.link} href="https://github.com/labzero/lunch" target="_blank">GitHub</a>
         <span className={s.spacer}></span>
         <span className={s.text}>
           ©
