@@ -63,7 +63,8 @@ const Footer = ({ user, manageTags, openEmailWhitelist }) => {
 
 Footer.propTypes = {
   manageTags: PropTypes.func.isRequired,
-  user: PropTypes.object.isRequired
+  user: PropTypes.object.isRequired,
+  openEmailWhitelist: PropTypes.func.isRequired
 };
 
 export default withStyles(Footer, s);
