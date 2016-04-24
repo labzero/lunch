@@ -33,7 +33,7 @@ import passport from './core/passport';
 import restaurantApi from './api/restaurants';
 import tagApi from './api/tags';
 import decisionApi from './api/decisions';
-import { Restaurant, Tag, User, Decision } from './models';
+import { Restaurant, Tag, User, WhitelistEmail, Decision } from './models';
 import { Server as WebSocketServer } from 'ws';
 import serialize from 'serialize-javascript';
 
@@ -142,9 +142,10 @@ server.get('*', async (req, res, next) => {
       ];
       if (req.user) {
         finds.push(User.findAll({ attributes: ['id', 'name'] }));
+        finds.push(WhitelistEmail.findAll({ attributes: ['id', 'email'] }));
       }
       Promise.all(finds)
-        .then(([restaurants, tags, decision, users]) => {
+        .then(([restaurants, tags, decision, users, whitelistEmails]) => {
           let statusCode = 200;
           const initialState = {
             restaurants: {
@@ -169,6 +170,11 @@ server.get('*', async (req, res, next) => {
             users: {
               items: []
             },
+            whitelistEmails: {
+              isFetching: false,
+              didInvalidate: false,
+              items: []
+            },
             latLng: {
               lat: parseFloat(process.env.SUGGEST_LAT),
               lng: parseFloat(process.env.SUGGEST_LNG)
@@ -186,6 +192,7 @@ server.get('*', async (req, res, next) => {
           if (req.user) {
             initialState.user = req.user;
             initialState.users.items = users.map(u => u.toJSON());
+            initialState.whitelistEmails.items = whitelistEmails.map(w => w.toJSON());
           }
           const data = {
             apikey: process.env.GOOGLE_CLIENT_APIKEY || '',

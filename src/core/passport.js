@@ -15,7 +15,7 @@
 
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { User } from '../models';
+import { User, WhitelistEmail } from '../models';
 
 /**
  * Sign in with Google.
@@ -28,35 +28,43 @@ passport.use(new GoogleStrategy(
     passReqToCallback: true
   },
   (req, accessToken, refreshToken, profile, done) => {
-    if (profile._json.domain === process.env.OAUTH_DOMAIN || process.env.OAUTH_DOMAIN === undefined) {
-      return User.findOrCreate({ where: { google_id: profile.id } }).spread(user => {
-        const userUpdates = {};
-        let doUpdates = false;
+    if (
+      typeof profile.emails === 'object' &&
+      profile.emails.length !== undefined
+    ) {
+      const accountEmail = profile.emails.find(email => email.type === 'account');
+      return WhitelistEmail.findAll().then(whitelistEmails => {
+        if (whitelistEmails.map(we => we.get('email').toLowerCase()).indexOf(accountEmail.toLowerCase()) > -1 ||
+            profile._json.domain === process.env.OAUTH_DOMAIN ||
+            process.env.OAUTH_DOMAIN === undefined) {
+          return User.findOrCreate({ where: { google_id: profile.id } }).spread(user => {
+            const userUpdates = {};
+            let doUpdates = false;
 
-        if (
-          typeof profile.displayName === 'string' &&
-          profile.displayName !== user.get('name')
-        ) {
-          userUpdates.name = profile.displayName;
-          doUpdates = true;
+            if (
+              typeof profile.displayName === 'string' &&
+              profile.displayName !== user.get('name')
+            ) {
+              userUpdates.name = profile.displayName;
+              doUpdates = true;
+            }
+
+            if (accountEmail !== undefined && accountEmail.value !== user.get('email')) {
+              userUpdates.email = accountEmail.value;
+              doUpdates = true;
+            }
+
+            if (doUpdates) {
+              return user.update(userUpdates).then(updatedUser => done(null, updatedUser));
+            }
+
+            return done(null, user);
+          }).catch(err => done(err));
         }
-        if (
-          typeof profile.emails === 'object' &&
-          profile.emails.length !== undefined
-        ) {
-          const accountEmail = profile.emails.find(email => email.type === 'account');
-          if (accountEmail !== undefined && accountEmail.value !== user.get('email')) {
-            userUpdates.email = accountEmail.value;
-            doUpdates = true;
-          }
-        }
-        if (doUpdates) {
-          return user.update(userUpdates).then(updatedUser => done(null, updatedUser));
-        }
-        return done(null, user);
+        return done(null, false, { message: 'Please log in using your Lab Zero account.' });
       }).catch(err => done(err));
     }
-    return done(null, false, { message: 'Please log in using your Lab Zero account.' });
+    return done(null, false, { message: 'No email provided.' });
   }
 ));
 

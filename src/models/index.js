@@ -1,6 +1,7 @@
 import { sequelize } from './db';
 import Vote from './Vote';
 import User from './User';
+import WhitelistEmail from './WhitelistEmail';
 import RestaurantTag from './RestaurantTag';
 import Tag from './Tag';
 import Restaurant from './Restaurant';
@@ -80,4 +81,4 @@ Tag.hasMany(RestaurantTag);
 RestaurantTag.belongsTo(Restaurant);
 RestaurantTag.belongsTo(Tag);
 
-export { Vote, User, RestaurantTag, Tag, Restaurant, Decision };
+export { Vote, User, WhitelistEmail, RestaurantTag, Tag, Restaurant, Decision };

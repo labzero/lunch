@@ -11,9 +11,11 @@ import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Footer.scss';
 
-const Footer = ({ user, manageTags }) => {
+const Footer = ({ user, manageTags, openEmailWhitelist }) => {
   let manageTagsButton;
   let manageTagsSpacer;
+  let emailWhitelistButton;
+  let emailWhitelistSpacer;
   let logoutSection;
 
   if (user.id !== undefined) {
@@ -23,6 +25,12 @@ const Footer = ({ user, manageTags }) => {
       </button>
     );
     manageTagsSpacer = <span className={s.spacer}></span>;
+    emailWhitelistButton = (
+      <button className={`${s.link} ${s.text}`} onClick={openEmailWhitelist}>
+        Email Whitelist
+      </button>
+    );
+    emailWhitelistSpacer = <span className={s.spacer}></span>;
     logoutSection = (
       <div className={s.container}>
         <span className={s.text}>
@@ -40,6 +48,8 @@ const Footer = ({ user, manageTags }) => {
       <div className={s.container}>
         {manageTagsButton}
         {manageTagsSpacer}
+        {emailWhitelistButton}
+        {emailWhitelistSpacer}
         <span className={s.spacer}></span>
         <span className={s.text}>
           <a className={s.link} href="https://github.com/labzero/lunch" target="_blank">GitHub</a>

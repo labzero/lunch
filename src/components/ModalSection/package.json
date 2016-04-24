@@ -1,0 +1,6 @@
+{
+  "name": "ModalSection",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./ModalSection.js"
+}

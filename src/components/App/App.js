@@ -12,10 +12,8 @@ import s from './App.scss';
 import globalCss from '../../styles/globalCss.scss';
 import HeaderContainer from '../../containers/HeaderContainer';
 import FooterContainer from '../../containers/FooterContainer';
-import DeleteRestaurantModalContainer from '../../containers/DeleteRestaurantModalContainer';
-import TagManagerModalContainer from '../../containers/TagManagerModalContainer';
-import DeleteTagModalContainer from '../../containers/DeleteTagModalContainer';
 import NotificationListContainer from '../../containers/NotificationListContainer';
+import ModalSectionContainer from '../../containers/ModalSectionContainer';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 
 class App extends Component {
@@ -23,7 +21,6 @@ class App extends Component {
   static propTypes = {
     children: PropTypes.element.isRequired,
     messageReceived: PropTypes.func.isRequired,
-    modals: PropTypes.object.isRequired,
     error: PropTypes.object,
     wsPort: PropTypes.number.isRequired,
     shouldScrollToTop: PropTypes.bool.isRequired,
@@ -69,24 +66,13 @@ class App extends Component {
   }
 
   render() {
-    const modals = [];
-    if (this.props.modals.deleteRestaurant !== undefined) {
-      modals.push(<DeleteRestaurantModalContainer key={modals.length} />);
-    }
-    if (this.props.modals.tagManager !== undefined) {
-      modals.push(<TagManagerModalContainer key={modals.length} />);
-    }
-    if (this.props.modals.deleteTag !== undefined) {
-      modals.push(<DeleteTagModalContainer key={modals.length} />);
-    }
-
     return !this.props.error ? (
       <div>
         <HeaderContainer />
         {this.props.children}
         <FooterContainer />
         <NotificationListContainer />
-        {modals}
+        <ModalSectionContainer />
       </div>
     ) : this.props.children;
   }

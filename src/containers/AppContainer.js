@@ -4,7 +4,6 @@ import { scrolledToTop } from '../actions/pageUi';
 import App from '../components/App';
 
 const mapStateToProps = (state, ownProps) => ({
-  modals: state.modals,
   wsPort: state.wsPort,
   shouldScrollToTop: state.pageUi.shouldScrollToTop || false,
   ...ownProps
