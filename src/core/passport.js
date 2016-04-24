@@ -34,7 +34,7 @@ passport.use(new GoogleStrategy(
     ) {
       const accountEmail = profile.emails.find(email => email.type === 'account');
       return WhitelistEmail.findAll().then(whitelistEmails => {
-        if (whitelistEmails.map(we => we.get('email').toLowerCase()).indexOf(accountEmail.toLowerCase()) > -1 ||
+        if (whitelistEmails.map(we => we.get('email').toLowerCase()).indexOf(accountEmail.value.toLowerCase()) > -1 ||
             profile._json.domain === process.env.OAUTH_DOMAIN ||
             process.env.OAUTH_DOMAIN === undefined) {
           return User.findOrCreate({ where: { google_id: profile.id } }).spread(user => {
