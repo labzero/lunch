@@ -61,7 +61,7 @@ class DashboardController < ApplicationController
       total_borrowing_capacity = borrowing_capacity[:total_borrowing_capacity]
       guage = {
         total: total_borrowing_capacity,
-        mortgages: borrowing_capacity[:standard_credit_totals][:borrowing_capacity],
+        mortgages: borrowing_capacity[:net_plus_securities_capacity],
         aa: borrowing_capacity[:sbc][:collateral][:aa][:total_borrowing_capacity],
         aaa: borrowing_capacity[:sbc][:collateral][:aaa][:total_borrowing_capacity],
         agency: borrowing_capacity[:sbc][:collateral][:agency][:total_borrowing_capacity]

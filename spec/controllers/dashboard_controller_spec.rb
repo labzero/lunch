@@ -42,6 +42,19 @@ RSpec.describe DashboardController, :type => :controller do
     let(:make_request) { get :index }
     let(:etransact_status) { double('some status') }
     let(:etransact_service) { double('etransact service', etransact_status: etransact_status) }
+    let(:borrowing_capacity_hash) do
+      {
+        total_borrowing_capacity: double('total_borrowing_capacity'),
+        net_plus_securities_capacity: double('net_plus_securities_capacity'),
+        sbc: {
+          collateral: {
+            aa: {total_borrowing_capacity: double('aa total_borrowing_capacity')},
+            aaa: {total_borrowing_capacity: double('aaa total_borrowing_capacity')},
+            agency: {total_borrowing_capacity: double('agency total_borrowing_capacity')}
+          }
+        }
+      }
+    end
     before do
       allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
       allow(subject).to receive(:current_user_roles)
@@ -85,6 +98,19 @@ RSpec.describe DashboardController, :type => :controller do
     it 'should have the expected keys in @borrowing_capacity_gauge' do
       get :index
       expect(assigns[:borrowing_capacity_gauge]).to include(:total, :mortgages, :aa, :aaa, :agency)
+    end
+    it 'passes the correct borrowing capacity values to `calculate_gauge_percentages` method' do
+      allow(subject).to receive(:calculate_gauge_percentages) # to allow for `calculate_gauge_percentages` of @financing_availability_gauge
+      allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).and_return(borrowing_capacity_hash)
+      guage_argument_hash = {
+        total: borrowing_capacity_hash[:total_borrowing_capacity],
+        mortgages: borrowing_capacity_hash[:net_plus_securities_capacity],
+        aa: borrowing_capacity_hash[:sbc][:collateral][:aa][:total_borrowing_capacity],
+        aaa: borrowing_capacity_hash[:sbc][:collateral][:aaa][:total_borrowing_capacity],
+        agency: borrowing_capacity_hash[:sbc][:collateral][:agency][:total_borrowing_capacity]
+      }
+      expect(subject).to receive(:calculate_gauge_percentages).with(guage_argument_hash, :total)
+      get :index
     end
     it 'should call MemberBalanceService.borrowing_capacity_summary with the current date' do
       expect_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).with(Time.zone.now.to_date).and_call_original
