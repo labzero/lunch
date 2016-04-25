@@ -189,7 +189,11 @@ app.get('*', async (req, res, next) => {
               showUnvoted: true
             },
             tagFilters: [],
-            tagUi: {},
+            tagExclusions: [],
+            tagUi: {
+              filterForm: {},
+              exclusionForm: {}
+            },
             pageUi: {},
             whitelistEmailUi: {},
             wsPort: process.env.BS_RUNNING ? port : 0

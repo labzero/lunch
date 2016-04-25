@@ -2,7 +2,11 @@
 
 .root {
   display: inline-block;
-  margin-right: .5em;
+  margin-right: 1em;
+
+  &:last-child {
+    margin-right: 0;
+  }
 
   button {
     border: $default-border;

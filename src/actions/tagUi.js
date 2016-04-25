@@ -14,3 +14,18 @@ export function setTagFilterAutosuggestValue(value) {
     value
   };
 }
+
+export function showTagExclusionForm() {
+  return { type: ActionTypes.SHOW_TAG_EXCLUSION_FORM };
+}
+
+export function hideTagExclusionForm() {
+  return { type: ActionTypes.HIDE_TAG_EXCLUSION_FORM };
+}
+
+export function setTagExclusionAutosuggestValue(value) {
+  return {
+    type: ActionTypes.SET_TAG_EXCLUSION_AUTOSUGGEST_VALUE,
+    value
+  };
+}

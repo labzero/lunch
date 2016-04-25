@@ -5,7 +5,8 @@ import s from './Tag.scss';
 export const _Tag = ({
   name,
   showDelete,
-  onDeleteClicked
+  onDeleteClicked,
+  exclude
 }) => {
   let deleteButton = null;
   if (showDelete) {
@@ -15,7 +16,7 @@ export const _Tag = ({
   }
 
   return (
-    <div className={s.root}>
+    <div className={`${s.root} ${exclude ? s.exclude : ''}`}>
       {name}
       {deleteButton}
     </div>
@@ -25,7 +26,8 @@ export const _Tag = ({
 _Tag.propTypes = {
   name: PropTypes.string.isRequired,
   showDelete: PropTypes.bool.isRequired,
-  onDeleteClicked: PropTypes.func.isRequired
+  onDeleteClicked: PropTypes.func.isRequired,
+  exclude: PropTypes.bool
 };
 
 export default withStyles(s)(_Tag);

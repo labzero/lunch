@@ -2,6 +2,7 @@ import { getRestaurantIds, getRestaurantEntities, getRestaurantById } from './re
 import { getVoteEntities, getVoteById } from './votes';
 import { getTags } from './tags';
 import { getTagFilters } from './tagFilters';
+import { getTagExclusions } from './tagExclusions';
 import { getUserId, getUserById } from './users';
 import { getMapUi } from './mapUi';
 import { createSelector } from 'reselect';
@@ -40,13 +41,14 @@ export const getMapItems = createSelector(
 );
 
 export const getFilteredRestaurants = createSelector(
-  [getRestaurantIds, getTagFilters, getRestaurantEntities],
-  (restaurantIds, tagFilters, restaurantEntities) => {
-    if (tagFilters.length === 0) { return restaurantIds; }
+  [getRestaurantIds, getTagFilters, getTagExclusions, getRestaurantEntities],
+  (restaurantIds, tagFilters, tagExclusions, restaurantEntities) => {
+    if (tagFilters.length === 0 && tagExclusions.length === 0) { return restaurantIds; }
     return restaurantIds.filter(id =>
-      tagFilters.every(tagFilter =>
-        restaurantEntities[id].tags.includes(tagFilter)
-      )
+      (tagFilters.length === 0 || tagFilters.every(tagFilter =>
+        restaurantEntities[id].tags.includes(tagFilter))) &&
+      (tagExclusions.length === 0 || tagExclusions.every(tagExclusion =>
+        !restaurantEntities[id].tags.includes(tagExclusion)))
     );
   }
 );

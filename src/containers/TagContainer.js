@@ -13,7 +13,10 @@ const mapStateToProps = () => {
     } else {
       name = ownProps.name;
     }
-    return { name };
+    return {
+      name,
+      exclude: ownProps.exclude
+    };
   };
 };
 

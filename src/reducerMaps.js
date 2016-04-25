@@ -570,30 +570,75 @@ export const tags = new Map([
 export const tagUi = new Map([
   [ActionTypes.SHOW_TAG_FILTER_FORM, state =>
     update(state, {
-      $merge: {
-        filterFormShown: true
+      filterForm: {
+        $merge: {
+          shown: true
+        }
       }
     })
   ],
   [ActionTypes.HIDE_TAG_FILTER_FORM, state =>
     update(state, {
-      $merge: {
-        autosuggestValue: '',
-        filterFormShown: false
+      filterForm: {
+        $merge: {
+          autosuggestValue: '',
+          shown: false
+        }
       }
     })
   ],
   [ActionTypes.SET_TAG_FILTER_AUTOSUGGEST_VALUE, (state, action) =>
     update(state, {
-      $merge: {
-        autosuggestValue: action.value
+      filterForm: {
+        $merge: {
+          autosuggestValue: action.value
+        }
       }
     })
   ],
   [ActionTypes.ADD_TAG_FILTER, state =>
     update(state, {
-      $merge: {
-        autosuggestValue: ''
+      filterForm: {
+        $merge: {
+          autosuggestValue: ''
+        }
+      }
+    })
+  ],
+  [ActionTypes.SHOW_TAG_EXCLUSION_FORM, state =>
+    update(state, {
+      exclusionForm: {
+        $merge: {
+          shown: true
+        }
+      }
+    })
+  ],
+  [ActionTypes.HIDE_TAG_EXCLUSION_FORM, state =>
+    update(state, {
+      exclusionForm: {
+        $merge: {
+          autosuggestValue: '',
+          shown: false
+        }
+      }
+    })
+  ],
+  [ActionTypes.SET_TAG_EXCLUSION_AUTOSUGGEST_VALUE, (state, action) =>
+    update(state, {
+      exclusionForm: {
+        $merge: {
+          autosuggestValue: action.value
+        }
+      }
+    })
+  ],
+  [ActionTypes.ADD_TAG_EXCLUSION, state =>
+    update(state, {
+      exclusionForm: {
+        $merge: {
+          autosuggestValue: ''
+        }
       }
     })
   ]
@@ -607,9 +652,22 @@ export const tagFilters = new Map([
     ]
   ],
   [ActionTypes.REMOVE_TAG_FILTER, (state, action) =>
-    state.filter(tagFilter => tagFilter !== action.id)
+    state.filter(t => t !== action.id)
   ],
   [ActionTypes.HIDE_TAG_FILTER_FORM, () => []]
+]);
+
+export const tagExclusions = new Map([
+  [ActionTypes.ADD_TAG_EXCLUSION, (state, action) =>
+    [
+      ...state,
+      action.id
+    ]
+  ],
+  [ActionTypes.REMOVE_TAG_EXCLUSION, (state, action) =>
+    state.filter(t => t !== action.id)
+  ],
+  [ActionTypes.HIDE_TAG_EXCLUSION_FORM, () => []]
 ]);
 
 export const decision = new Map([

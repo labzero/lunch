@@ -14,20 +14,20 @@ const preventDefault = event => event.preventDefault();
 
 export class _TagFilterForm extends Component {
   componentDidUpdate(prevProps) {
-    if (this.props.tagUi.filterFormShown !== prevProps.tagUi.filterFormShown && this.props.tagUi.filterFormShown) {
+    if (this.props.tagUiForm.shown !== prevProps.tagUiForm.shown && this.props.tagUiForm.shown) {
       this._autosuggestInput.focus();
     }
   }
 
   render() {
-    let filterForm;
+    let form;
     let showButton;
-    if (this.props.tagUi.filterFormShown) {
+    if (this.props.tagUiForm.shown) {
       const setAutosuggestInput = i => {
         this._autosuggestInput = i;
       };
 
-      filterForm = (
+      form = (
         <form className={s.form} onSubmit={preventDefault}>
           <Autosuggest
             suggestions={this.props.tags}
@@ -35,6 +35,7 @@ export class _TagFilterForm extends Component {
             getSuggestionValue={getSuggestionValue}
             renderSuggestion={renderSuggestion}
             inputProps={{
+              placeholder: this.props.exclude ? 'exclude' : 'filter',
               value: this.props.autosuggestValue,
               onChange: this.props.setAutosuggestValue,
               ref: setAutosuggestInput
@@ -44,13 +45,14 @@ export class _TagFilterForm extends Component {
             shouldRenderSuggestions={returnTrue}
           />
           {this.props.addedTags.map(tag => {
-            const boundRemoveTagFilter = this.props.removeTagFilter.bind(undefined, tag);
+            const boundRemoveTag = this.props.removeTag.bind(undefined, tag);
             return (
-              <div className={s.tagContainer} key={`tagFilter_${tag}`}>
+              <div className={s.tagContainer} key={this.props.exclude ? `tagExclusion_${tag}` : `tagFilter_${tag}`}>
                 <TagContainer
                   id={tag}
                   showDelete
-                  onDeleteClicked={boundRemoveTagFilter}
+                  onDeleteClicked={boundRemoveTag}
+                  exclude={this.props.exclude}
                 />
               </div>
             );
@@ -58,7 +60,7 @@ export class _TagFilterForm extends Component {
           <button
             className="btn btn-default"
             type="button"
-            onClick={this.props.hideTagFilterForm}
+            onClick={this.props.hideForm}
           >
             cancel
           </button>
@@ -66,13 +68,13 @@ export class _TagFilterForm extends Component {
       );
     } else {
       showButton = (
-        <button className="btn btn-default" onClick={this.props.showTagFilterForm}>
+        <button className="btn btn-default" onClick={this.props.showForm}>
           {this.props.exclude ? 'exclude tags' : 'filter by tag'}
         </button>
       );
     }
     return (
-      <div className={s.root}>{showButton}{filterForm}</div>
+      <div className={s.root}>{showButton}{form}</div>
     );
   }
 }
@@ -80,14 +82,14 @@ export class _TagFilterForm extends Component {
 _TagFilterForm.propTypes = {
   exclude: PropTypes.bool,
   handleSuggestionSelected: PropTypes.func.isRequired,
-  removeTagFilter: PropTypes.func.isRequired,
-  showTagFilterForm: PropTypes.func.isRequired,
-  hideTagFilterForm: PropTypes.func.isRequired,
+  removeTag: PropTypes.func.isRequired,
+  showForm: PropTypes.func.isRequired,
+  hideForm: PropTypes.func.isRequired,
   autosuggestValue: PropTypes.string.isRequired,
   setAutosuggestValue: PropTypes.func.isRequired,
   addedTags: PropTypes.array.isRequired,
   tags: PropTypes.array.isRequired,
-  tagUi: PropTypes.object.isRequired
+  tagUiForm: PropTypes.object.isRequired
 };
 
 export default withStyles(s)(withStyles(autosuggestTheme)(_TagFilterForm));
