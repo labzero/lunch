@@ -2272,6 +2272,7 @@ class ReportsController < ApplicationController
   end
 
   def sort_report_data(data, sort_field, sort_order='asc')
+    return data unless data
     data = data.sort{|a,b| a[sort_field] <=> b[sort_field]}
     sort_order == 'asc' ? data : data.reverse
   end

@@ -3703,6 +3703,9 @@ RSpec.describe ReportsController, :type => :controller do
       let(:item_2) { {foo: 1} }
       let(:item_3) { {foo: 15} }
       let(:data) { [item_1, item_2, item_3] }
+      it 'returns nil if passed no data' do
+        expect(controller.send(:sort_report_data, nil, :foo)).to eq(nil)
+      end
       it 'returns an empty array if it is passed an empty array as the first argument' do
         expect(controller.send(:sort_report_data, [], :foo)).to eq([])
       end
