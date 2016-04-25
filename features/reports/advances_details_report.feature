@@ -30,7 +30,6 @@ Scenario: Viewing historic advances details
   When I click the datepicker field
   And I choose the "custom date" preset in the datepicker
   And I select the 14th of "last month" in the single datepicker calendar
-  And I click the datepicker apply button
   Then I should see advances details for the 14th of last month
 
 @jira-mem-405
