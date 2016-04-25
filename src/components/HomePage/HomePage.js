@@ -44,6 +44,7 @@ export class _HomePage extends Component {
         <section className={s.forms}>
           {restaurantAddForm}
           <TagFilterFormContainer />
+          <TagFilterFormContainer exclude />
         </section>
         <div className={s.restaurantList}>
           <RestaurantListContainer />

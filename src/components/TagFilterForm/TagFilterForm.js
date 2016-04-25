@@ -67,7 +67,7 @@ export class _TagFilterForm extends Component {
     } else {
       showButton = (
         <button className="btn btn-default" onClick={this.props.showTagFilterForm}>
-          filter tags
+          {this.props.exclude ? 'exclude tags' : 'filter by tag'}
         </button>
       );
     }
@@ -78,6 +78,7 @@ export class _TagFilterForm extends Component {
 }
 
 _TagFilterForm.propTypes = {
+  exclude: PropTypes.bool,
   handleSuggestionSelected: PropTypes.func.isRequired,
   removeTagFilter: PropTypes.func.isRequired,
   showTagFilterForm: PropTypes.func.isRequired,

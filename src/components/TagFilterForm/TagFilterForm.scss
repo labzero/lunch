@@ -1,7 +1,8 @@
 @import '../../styles/_variables.scss';
 
 .root {
-  margin: 1em auto;
+  display: inline-block;
+  margin-right: .5em;
 
   button {
     border: $default-border;
