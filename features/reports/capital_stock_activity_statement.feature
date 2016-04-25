@@ -49,7 +49,6 @@ Scenario: Member chooses the current month to date preset on Capital Stock Activ
   And I click the datepicker field
   When I choose the "month to date" preset in the datepicker
   Then I should see no calendar
-  When I click the datepicker apply button
   Then I should see a "Capital Stock Activity Statement" for the current month to date
 
 @smoke
@@ -58,7 +57,6 @@ Scenario: Member chooses the last month preset on Capital Stock Activity Stateme
   And I click the datepicker field
   When I choose the "last month" preset in the datepicker
   Then I should see no calendar
-  When I click the datepicker apply button
   Then I should see a "Capital Stock Activity Statement" for the last month
 
 @smoke

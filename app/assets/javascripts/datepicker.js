@@ -172,7 +172,6 @@ $(function () {
     $datePickerWrapper.find('.ranges ul li').each(function(index, label) {
       var $label = $(label);
       $(label).on('click', function(event){
-        event.stopPropagation();
         if (!$label.hasClass('disabled')) {
           $('.ranges ul li').removeClass('active');
           $label.addClass('active');
