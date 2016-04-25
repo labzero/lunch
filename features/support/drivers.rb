@@ -80,6 +80,33 @@ if defined?(Capybara)
                                    :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.chrome(caps))
   end
 
+  Capybara.register_driver :sauce_ie_10_win8 do |app|
+    caps = base_opts.merge({:platform => 'Windows 8', :version => '10'})
+
+    Capybara::Selenium::Driver.new(app,
+                                   :browser => :remote,
+                                   :url => SAUCE_CONNECT_URL,
+                                   :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.internet_explorer(caps))
+  end
+
+  Capybara.register_driver :sauce_ie_11_win81 do |app|
+    caps = base_opts.merge({:platform => 'Windows 8.1', :version => '11'})
+
+    Capybara::Selenium::Driver.new(app,
+                                   :browser => :remote,
+                                   :url => SAUCE_CONNECT_URL,
+                                   :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.internet_explorer(caps))
+  end
+
+  Capybara.register_driver :sauce_ie_11_win10 do |app|
+    caps = base_opts.merge({:platform => 'Windows 10', :version => '11'})
+
+    Capybara::Selenium::Driver.new(app,
+                                   :browser => :remote,
+                                   :url => SAUCE_CONNECT_URL,
+                                   :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.internet_explorer(caps))
+  end
+
   Capybara.register_driver :rack_test do |app|
     Capybara::RackTest::Driver.new(app, follow_redirects: true, respect_data_method: true)
   end
