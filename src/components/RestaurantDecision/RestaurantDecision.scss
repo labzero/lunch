@@ -2,11 +2,14 @@
 
 .root {
   @include plain-button;
-  color: rgba(0, 0, 0, .15);
-  outline: none;
+  @include image-replace;
+  background: url('./checkmark.svg') center no-repeat;
+  height: 30px;
+  opacity: .15;
+  width: 30px;
 
   &:hover {
-    color: rgba(0, 0, 0, .5);
+    opacity: .5;
   }
 }
 
@@ -15,14 +18,10 @@
 }
 
 .decided {
-  text-shadow:
-    1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000,
-    -1px 1px 0 #000;
+  background: url('./checkmark-decided.svg') center no-repeat;
 
   &,
   &:hover {
-    color: pink;
+    opacity: 1;
   }
 }

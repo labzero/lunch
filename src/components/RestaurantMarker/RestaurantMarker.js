@@ -15,6 +15,7 @@ if (canUseDOM) {
 
 const InnerRestaurantMarker = ({
   restaurant,
+  decided,
   index,
   baseZIndex,
   handleMarkerClick,
@@ -33,12 +34,10 @@ const InnerRestaurantMarker = ({
       - index
       + baseZIndex;
 
-  if (restaurant.votes.length > 0) {
-    if (restaurant.votes.length > 99) {
-      label = '✔';
-    } else {
-      label = String(length);
-    }
+  if (restaurant.votes.length > 99 || decided) {
+    label = '✔';
+  } else if (restaurant.votes.length > 0) {
+    label = String(length);
   }
 
   const ref = `marker_${index}`;
@@ -56,7 +55,7 @@ const InnerRestaurantMarker = ({
   );
 
   return (
-    <div className={`${s.root} ${restaurant.votes.length > 0 ? s.voted : ''}`} data-marker>
+    <div className={`${s.root} ${restaurant.votes.length > 0 || decided ? s.voted : ''}`} data-marker>
       {showInfoWindow ? renderInfoWindow() : null}
       <div
         lat={restaurant.lat}
@@ -77,6 +76,7 @@ const InnerRestaurantMarker = ({
 
 InnerRestaurantMarker.propTypes = {
   restaurant: PropTypes.object.isRequired,
+  decided: PropTypes.bool.isRequired,
   index: PropTypes.number.isRequired,
   baseZIndex: PropTypes.number.isRequired,
   showInfoWindow: PropTypes.bool.isRequired,

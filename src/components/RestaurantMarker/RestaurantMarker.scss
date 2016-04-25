@@ -12,6 +12,7 @@
   cursor: pointer;
   height: 15px;
   margin: -7.5px;
+  position: relative;
   text-align: center;
   width: 15px;
 }
@@ -78,13 +79,13 @@
     &::before {
       border-width: 22px 12px 0 12px;
       border-color: black transparent transparent transparent;
-      left: -12px;
+      left: -1px;
     }
 
     &::after {
       border-width: 18px 10px 0 10px;
       border-color: pink transparent transparent transparent;
-      left: -10px;
+      left: 1px;
     }
   }
 

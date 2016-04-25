@@ -110,7 +110,6 @@
     "react-transform-hmr": "^1.0.4",
     "redbox-react": "^1.2.2",
     "sass-loader": "^3.2.0",
-    "scut": "^1.4.0",
     "sinon": "^2.0.0-pre",
     "stylelint": "^6.0.3",
     "stylelint-config-standard": "^6.0.0",
@@ -160,10 +159,16 @@
           "ignoreRefs": true
         }
       ],
+      "react/jsx-first-prop-new-line": 0,
+      "react/require-render-return": 0,
+      "jsx-a11y/aria-role": 0,
+      "jsx-a11y/img-has-alt": 0,
+      "jsx-a11y/img-redundant-alt": 0,
       "no-restricted-syntax": [2, "DebuggerStatement", "LabeledStatement", "WithStatement"],
       "no-underscore-dangle": 0,
       "no-param-reassign": 0,
-      "global-require": 0
+      "global-require": 0,
+      "import/no-unresolved": 0
     }
   },
   "jscsConfig": {

@@ -1,6 +1,7 @@
 @mixin plain-button {
   background: none;
   border: 0;
+  outline: none;
   padding: 0;
 }
 
@@ -32,4 +33,11 @@
 @mixin autosuggest-suggestion {
   cursor: pointer;
   padding: 0 .25em;
+}
+
+@mixin image-replace {
+  text-indent: 102%;
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 0;
 }
