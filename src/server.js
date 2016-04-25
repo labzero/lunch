@@ -25,7 +25,9 @@ import ReactDOM from 'react-dom/server';
 import PrettyError from 'pretty-error';
 import { match, RouterContext } from 'react-router';
 import configureStore from './configureStore';
+/* eslint-disable import/no-unresolved */
 import assets from './assets';
+/* eslint-enable import/no-unresolved */
 import { port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } from './config';
 import makeRoutes from './routes';
 import ContextHolder from './core/ContextHolder';

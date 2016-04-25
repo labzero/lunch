@@ -89,4 +89,4 @@ _TagFilterForm.propTypes = {
   tagUi: PropTypes.object.isRequired
 };
 
-export default withStyles(autosuggestTheme, s)(_TagFilterForm);
+export default withStyles(s)(withStyles(autosuggestTheme)(_TagFilterForm));

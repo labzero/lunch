@@ -1,8 +1,10 @@
 import { sequelize, DataTypes } from './db';
 
 const WhitelistEmail = sequelize.define('whitelist_email', {
-  email: DataTypes.STRING,
-  unique: true
+  email: {
+    type: DataTypes.STRING,
+    unique: true
+  }
 }, {
   underscored: true
 });

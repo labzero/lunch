@@ -11,14 +11,14 @@ const RestaurantDecision = ({ id, votes, decided, loggedIn, handleClick }) => {
 
   return ((loggedIn && votes.length > 0) || decided) &&
     (
-      <OverlayTrigger placement="top" overlay={tooltip}>
-        <button
-          onClick={handleClick}
-          className={`${s.root} ${loggedIn ? '' : s.loggedOut} ${decided ? s.decided : ''}`}
-        >
-          ✔
-        </button>
-      </OverlayTrigger>
+    <OverlayTrigger placement="top" overlay={tooltip}>
+      <button
+        onClick={handleClick}
+        className={`${s.root} ${loggedIn ? '' : s.loggedOut} ${decided ? s.decided : ''}`}
+      >
+        ✔
+      </button>
+    </OverlayTrigger>
     ) || <div />;
 };
 
