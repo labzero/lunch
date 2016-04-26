@@ -731,6 +731,13 @@ export const whitelistEmailUi = new Map([
         $set: action.value
       }
     })
+  ],
+  [ActionTypes.WHITELIST_EMAIL_POSTED, state =>
+    update(state, {
+      inputValue: {
+        $set: ''
+      }
+    })
   ]
 ]);
 
