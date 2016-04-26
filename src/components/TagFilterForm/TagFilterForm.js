@@ -28,7 +28,7 @@ export class _TagFilterForm extends Component {
       };
 
       form = (
-        <form className={s.form} onSubmit={preventDefault}>
+        <form className={s.form} onSubmit={this.props.addByName}>
           <Autosuggest
             suggestions={this.props.tags}
             focusInputOnSuggestionClick={false}

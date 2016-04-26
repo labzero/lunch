@@ -35,6 +35,10 @@
   padding: 0 .25em;
 }
 
+@mixin autosuggest-suggestion-focused {
+  background: pink;
+}
+
 @mixin image-replace {
   text-indent: 102%;
   white-space: nowrap;

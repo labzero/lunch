@@ -23,13 +23,19 @@ const mapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  handleSuggestionSelected(event, { suggestion }) {
+  handleSuggestionSelected(event, { suggestion, method }) {
+    if (method === 'enter') {
+      event.preventDefault();
+    }
     dispatch(addTagToRestaurant(ownProps.id, suggestion.id));
   },
   hideAddTagForm() {
     dispatch(hideAddTagForm(ownProps.id));
   },
-  setAddTagAutosuggestValue(event, { newValue }) {
+  setAddTagAutosuggestValue(event, { newValue, method }) {
+    if (method === 'up' || method === 'down') {
+      return;
+    }
     dispatch(setAddTagAutosuggestValue(ownProps.id, newValue));
   },
   dispatch

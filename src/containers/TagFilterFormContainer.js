@@ -55,14 +55,20 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
       dispatch(hideTagFilterForm());
     }
   },
-  setAutosuggestValue(event, { newValue }) {
+  setAutosuggestValue(event, { newValue, method }) {
+    if (method === 'up' || method === 'down') {
+      return;
+    }
     if (ownProps.exclude) {
       dispatch(setTagExclusionAutosuggestValue(newValue));
     } else {
       dispatch(setTagFilterAutosuggestValue(newValue));
     }
   },
-  handleSuggestionSelected(event, { suggestion }) {
+  handleSuggestionSelected(event, { suggestion, method }) {
+    if (method === 'enter') {
+      event.preventDefault();
+    }
     if (ownProps.exclude) {
       dispatch(addTagExclusion(suggestion.id));
     } else {
@@ -75,10 +81,26 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     } else {
       dispatch(removeTagFilter(id));
     }
+  },
+  dispatch
+});
+
+const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
+  addByName(event) {
+    event.preventDefault();
+    const tag = stateProps.tags.find(t => t.name === stateProps.autosuggestValue);
+    if (tag !== undefined) {
+      if (ownProps.exclude) {
+        dispatchProps.dispatch(addTagExclusion(tag.id));
+      } else {
+        dispatchProps.dispatch(addTagFilter(tag.id));
+      }
+    }
   }
 });
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
+  mergeProps
 )(TagFilterForm);

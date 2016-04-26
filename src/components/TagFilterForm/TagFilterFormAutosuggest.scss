@@ -18,3 +18,7 @@
 .suggestion {
   @include autosuggest-suggestion;
 }
+
+.suggestionFocused {
+  @include autosuggest-suggestion-focused;
+}

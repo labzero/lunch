@@ -11,7 +11,7 @@ export const _Tag = ({
   let deleteButton = null;
   if (showDelete) {
     deleteButton = (
-      <button className={s.button} onClick={onDeleteClicked}>&times;</button>
+      <button type="button" className={s.button} onClick={onDeleteClicked}>&times;</button>
     );
   }
 

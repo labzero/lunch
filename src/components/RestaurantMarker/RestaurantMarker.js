@@ -6,11 +6,9 @@ import RestaurantContainer from '../../containers/RestaurantContainer';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantMarker.scss';
 
-let google;
+let google = { maps: { Marker: { MAX_ZINDEX: 1000000 } } };
 if (canUseDOM) {
-  google = window.google;
-} else {
-  google = { maps: { Marker: { MAX_ZINDEX: 1000000 } } };
+  google = window.google || google;
 }
 
 const InnerRestaurantMarker = ({
