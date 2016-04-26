@@ -23,12 +23,23 @@
     .column-1
       %h2 Below you'll find the secondary layout type.  One slim left column and a much wider right column.
   .row
-    .column-2-left
+    .column-2x10-left
       %h3 sub-nav
       %ul
         %li List item 1
         %li List item 2
         %li List item 3
-    .column-2-right
+    .column-2x10-right
       %h2 I'm the secondary header for this right-hand section
       %p Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+  .row
+    .column-4x8-left
+      %h3 I'm the teriarty header for this left-hand column
+      %p Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    .column-4x8-right
+      %h2 I'm the secondary header for this right-hand section
+      %form
+        %fieldset
+          = render 'shared/input_field', icon: :dollar, placeholder: 'Placeholder Text', label: "A Label"
+          = render 'shared/input_field', field_value: 'Foo', label: "An Error Label", error: ['OH NOZ!']
+          %button.primary-button Submit
