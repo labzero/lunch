@@ -49,8 +49,10 @@ class ReportsController < ApplicationController
     User::Roles::SECURITIES_SIGNER
   ]
 
+  AUTHORIZATIONS_ALL = 'all'.freeze
+
   AUTHORIZATIONS_DROPDOWN_MAPPING = {
-    'all' => I18n.t('user_roles.all_authorizations'),
+    AUTHORIZATIONS_ALL => I18n.t('user_roles.all_authorizations'),
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.dropdown'),
     User::Roles::SIGNER_ENTIRE_AUTHORITY => I18n.t('user_roles.entire_authority.dropdown'),
     User::Roles::ADVANCE_SIGNER => I18n.t('user_roles.advances.title'),
@@ -1439,7 +1441,7 @@ class ReportsController < ApplicationController
   end
 
   def authorizations
-    @authorizations_filter = params['authorizations_filter'] || 'all'
+    @authorizations_filter = params['authorizations_filter'] || AUTHORIZATIONS_ALL
     @report_name = ReportConfiguration.report_title(:authorizations)
     @today = Time.zone.today
 
@@ -1449,9 +1451,9 @@ class ReportsController < ApplicationController
       @authorizations_filter_text = @authorizations_dropdown_mapping[@authorizations_filter]
       mapped_filter = AUTHORIZATIONS_MAPPING[@authorizations_filter]
       @authorizations_title = case @authorizations_filter
-      when 'all'
+      when AUTHORIZATIONS_ALL
         t('reports.pages.authorizations.sub_title_all_users')
-      when 'signer_manager', 'signer_entire_authority'
+      when User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY
         t('reports.pages.authorizations.sub_title_inclusive_authorizations', filter: mapped_filter)
       else
         t('reports.pages.authorizations.sub_title', filter: mapped_filter)
@@ -1480,13 +1482,13 @@ class ReportsController < ApplicationController
         end.reject{ |_,roles| roles.empty? }
 
         check_for_inclusive_roles = false
-        matching_roles_array = if ['signer_manager', 'signer_entire_authority', 'all'].include?(@authorizations_filter)
+        matching_roles_array = if [User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER, AUTHORIZATIONS_ALL].include?(@authorizations_filter)
           [AUTHORIZATIONS_MAPPING[@authorizations_filter]]
         else
           check_for_inclusive_roles = true
           [AUTHORIZATIONS_MAPPING[@authorizations_filter], INCLUSIVE_AUTHORIZATIONS].flatten
         end
-        filtered_user_roles = if @authorizations_filter == 'all'
+        filtered_user_roles = if @authorizations_filter == AUTHORIZATIONS_ALL
           user_roles
         else
           user_roles.select{ |_,roles| (roles & matching_roles_array).any? }

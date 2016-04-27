@@ -2532,7 +2532,7 @@ RSpec.describe ReportsController, :type => :controller do
       let(:user_e) { {display_name: 'No Given Name', roles: [User::Roles::WIRE_SIGNER], given_name: nil, surname: 'Given'} }
       let(:user_f) { {display_name: 'Entire Authority User', roles: [User::Roles::SIGNER_ENTIRE_AUTHORITY], given_name: 'Entire Authority', surname: 'User'} }
       let(:signers_and_users) {[user_no_roles, user_etransact, user_a, user_b, user_c, user_d, user_e, user_f]}
-      let(:roles) {['all', User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::AFFORDABILITY_SIGNER, User::Roles::COLLATERAL_SIGNER, User::Roles::MONEYMARKET_SIGNER, User::Roles::DERIVATIVES_SIGNER, User::Roles::SECURITIES_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER, User::Roles::ETRANSACT_SIGNER]}
+      let(:roles) {[described_class::AUTHORIZATIONS_ALL, User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::AFFORDABILITY_SIGNER, User::Roles::COLLATERAL_SIGNER, User::Roles::MONEYMARKET_SIGNER, User::Roles::DERIVATIVES_SIGNER, User::Roles::SECURITIES_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER, User::Roles::ETRANSACT_SIGNER]}
       let(:role_translations) {[t('user_roles.all_authorizations'), t('user_roles.resolution.dropdown'), t('user_roles.entire_authority.dropdown'), t('user_roles.affordable_housing.title'), t('user_roles.collateral.title'), t('user_roles.money_market.title'), t('user_roles.interest_rate_derivatives.title'), t('user_roles.securities.title'), t('user_roles.wire_transfer.title'), t('user_roles.access_manager.title'), t('user_roles.etransact.title')]}
       let(:job_id) {rand(1000..10000)}
       let(:job_status) { double('A Job Status', result_as_string: '[]', destroy: nil, id: job_id, update_attributes!: nil) }
@@ -2546,7 +2546,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'sets @authorization_filter to `all` if no `authorizations_filter` param is provided' do
         get :authorizations
-        expect(assigns[:authorizations_filter]).to eq('all')
+        expect(assigns[:authorizations_filter]).to eq(described_class::AUTHORIZATIONS_ALL)
       end
       it 'sets @authorizations_dropdown_options to an array containing dropdown names and values' do
         get :authorizations
@@ -2569,7 +2569,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'sets @job_status_url' do
           url = double('A URL')
-          allow(subject).to receive(:reports_authorizations_url).with(job_id: job_id, authorizations_filter: 'all').and_return(url)
+          allow(subject).to receive(:reports_authorizations_url).with(job_id: job_id, authorizations_filter: described_class::AUTHORIZATIONS_ALL).and_return(url)
           make_request
           expect(assigns[:load_url]).to eq(url)
         end
@@ -2710,6 +2710,19 @@ RSpec.describe ReportsController, :type => :controller do
                 expect(assigns[:authorizations_table_data][:rows][2][:columns].last[:value]).to include([signer_manager, :footnoted])
               end
             end
+            describe 'when the filtered role is wire signers' do
+              before { get :authorizations, :authorizations_filter => User::Roles::WIRE_SIGNER, job_id: job_id }
+              it 'does not set the @footnote_role' do
+                expect(assigns[:footnote_role]).to_not be_present
+              end
+              it 'does not mark any users as footnoted' do
+                entire_authority = ReportsController::AUTHORIZATIONS_MAPPING[User::Roles::SIGNER_ENTIRE_AUTHORITY]
+                signer_manager = ReportsController::AUTHORIZATIONS_MAPPING[User::Roles::SIGNER_MANAGER]
+                expect(assigns[:authorizations_table_data][:rows][0][:columns].last[:value]).to_not include(:footnoted)
+                expect(assigns[:authorizations_table_data][:rows][1][:columns].last[:value]).to_not include(:footnoted)
+                expect(assigns[:authorizations_table_data][:rows][2][:columns].last[:value]).to_not include(:footnoted)
+              end
+            end
             it 'only contains collateral signers, signer managers and signer entire authority if authorizations_filter is set to COLLATERAL_SIGNER' do
               get :authorizations, :authorizations_filter => User::Roles::COLLATERAL_SIGNER, job_id: job_id
               expect(assigns[:authorizations_table_data][:rows].length).to eq(3)
@@ -2718,14 +2731,12 @@ RSpec.describe ReportsController, :type => :controller do
               expect(assigns[:authorizations_table_data][:rows][2][:columns].first[:value]).to eq(user_a[:display_name])
               expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.collateral.title')])
             end
-            it 'only contains wire signers, signer managers and signer entire authority  if authorizations_filter is set to WIRE_SIGNER' do
+            it 'only contains wire signers if authorizations_filter is set to WIRE_SIGNER' do
               get :authorizations, :authorizations_filter => User::Roles::WIRE_SIGNER, job_id: job_id
-              expect(assigns[:authorizations_table_data][:rows].length).to eq(5)
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(3)
               expect(assigns[:authorizations_table_data][:rows][0][:columns].first[:value]).to eq(user_d[:display_name])
               expect(assigns[:authorizations_table_data][:rows][1][:columns].first[:value]).to eq(user_e[:display_name])
               expect(assigns[:authorizations_table_data][:rows][2][:columns].first[:value]).to eq(user_c[:display_name])
-              expect(assigns[:authorizations_table_data][:rows][3][:columns].first[:value]).to eq(user_f[:display_name])
-              expect(assigns[:authorizations_table_data][:rows][4][:columns].first[:value]).to eq(user_a[:display_name])
               expect(assigns[:authorizations_table_data][:rows][0][:columns].last[:value]).to eq([I18n.t('user_roles.wire_transfer.title')])
             end
             it 'ignores users with no role or the eTransact role' do
