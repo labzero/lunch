@@ -29,6 +29,7 @@ class FhlbJob < ActiveJob::Base
     Rails.logger.warn "#{self.class.name}##{job_id} raised an exception: #{err}"
     Rails.logger.debug "BACKTRACE: #{err.backtrace.join("\n")}"
     job_status.failed!
+    nil
   end
 
   def self.queue

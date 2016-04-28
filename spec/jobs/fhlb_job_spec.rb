@@ -65,6 +65,10 @@ RSpec.describe FhlbJob, type: :job do
         expect(job_status).to receive(:failed!)
         base_instance.perform_with_rescue
       end
+      it 'returns nil' do
+        allow(job_status).to receive(:failed!).and_return(double('Status Change Result'))
+        expect(base_instance.perform_with_rescue).to be(nil)
+      end
     end
   end
 
