@@ -517,6 +517,12 @@ class ResourcesController < ApplicationController
     @form_ids = APPLICATION_FORM_IDS[:insurance_company]
   end
 
+  def token
+    docusign = DocusignService.new(request).get_url('member_token_request', current_user, current_member_id)
+    raise StandardError, "There has been an error and ResourcesController#token has encountered nil. Check error logs." if docusign.nil?
+    @link = docusign[:link]
+  end
+
   private
 
   def fee_schedule_table_hash(rows)

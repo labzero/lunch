@@ -10,4 +10,8 @@ class UsersService < MAPIService
     end
   end
 
+  def user_details(user_email)
+    get_hash(:user_details, "customers/#{user_email}/")
+  end
+
 end

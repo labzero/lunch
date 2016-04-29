@@ -33,4 +33,25 @@ RSpec.describe UsersService, :type => :service do
       expect(user_roles).to be_kind_of(Array)
     end
   end
+
+  describe '`user_details` method'  do
+    let(:email) { SecureRandom.hex }
+    let(:call_method) {subject.user_details(email)}
+    let(:response) { double(Hash) }
+    it_should_behave_like 'a MAPI backed service object method', :user_details, :user_email
+
+    describe 'end point access' do
+      before do
+        allow(subject).to receive(:get_hash).with(:user_details, anything).and_return(response)
+      end
+
+      it 'calls the `get_hash` method with the proper method name' do
+        expect(subject).to receive(:get_hash).with(:user_details, "customers/#{email}/")
+        call_method
+      end
+      it 'returns the results of `get_hash`' do
+        expect(call_method).to be(response)
+      end
+    end
+  end
 end

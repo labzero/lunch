@@ -131,6 +131,9 @@ This is a summary of the options supported in our .env files:
 * `LOG_LEVEL`: Set to a valid log level to control what granularity of logging occurs. Defaults to `info`.
 * `NEW_RELIC_LICENSE_KEY`: The license key to use for New Relic.
 * `GA_TRACKING_ID`: The google analytics tracking id to use for event tracking.
+* `DOCUSIGN_POWERFORM_ENDPOINT`: Docusign website
+* `DOCUSIGN_POWERFORM_PATH`: Docusign Powerform Path
+* `DOCUSIGN_POWERFORMS`: Hash of Docusign Powerform IDs
 
 
 ## Running the Tests
