@@ -91,12 +91,6 @@ module DatePickerHelper
         label: default_dates_hash[:last_year_start].year.to_s + ' ',
         start_date: default_dates_hash[:last_year_start],
         end_date: default_dates_hash[:last_year_end]
-      },
-      {
-        label: t('datepicker.range.custom'),
-        start_date: custom_start_date,
-        end_date: custom_end_date,
-        is_custom: true
       }
     ].delete_if do |preset|
       (preset[:start_date] < min_date if min_date) ||
@@ -123,13 +117,6 @@ module DatePickerHelper
         start_date: default_dates_hash[:last_year_end],
         end_date: default_dates_hash[:last_year_end],
         id: :year_end
-      },
-      {
-        label: t('datepicker.single.custom'),
-        start_date: custom_start_date,
-        end_date: custom_start_date,
-        is_custom: true,
-        id: :custom
       }
     ].delete_if do |preset|
       (preset[:start_date] < min_date if min_date) ||

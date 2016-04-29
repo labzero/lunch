@@ -64,7 +64,6 @@ end
 
 When(/^I select all of last year including today$/) do
   step 'I choose the "month to date preset" in the datepicker'
-  step  'I choose the "custom date range" in the datepicker'
   calendar = page.find(".daterangepicker .calendar.left")
   day = @today.day
   target_month = (@today - 1.year).strftime("%b %Y")
@@ -95,7 +94,6 @@ end
 Then(/^I should not see available dates after the most recent business day not including today/) do
   max_allowed_date = most_recent_business_day(@today - 1.day)
   if max_allowed_date.month == @today.month
-    step %{I choose the "custom date" preset in the datepicker}
     calendar = page.find(".daterangepicker .calendar.single")
     change_datepicker_to_month(@today, @today.strftime("%b %Y"), calendar)
     day = @today.mday
@@ -174,10 +172,6 @@ def get_datepicker_preset_label(preset)
       default_dates_hash[:last_month_start].to_date.strftime('%B')
     when 'last year'
       default_dates_hash[:last_year_start].year.to_s
-    when 'custom date range'
-      I18n.t('datepicker.range.custom')
-    when 'custom date'
-      I18n.t('datepicker.single.custom')
     else
       raise 'unknown preset for date picker'
   end
