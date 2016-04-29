@@ -59,8 +59,8 @@ Restaurant.findAllWithTagIds = () =>
     order:
       `decisions.id NULLS LAST,
       vote_count DESC,
-      all_decision_count ASC,
       votes.created_at DESC NULLS LAST,
+      all_decision_count ASC,
       all_vote_count DESC,
       name ASC`
   });

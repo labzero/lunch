@@ -33,6 +33,7 @@ class RestaurantAddForm extends Component {
     return (
       <form>
         <Geosuggest
+          autoActivateFirstSuggest
           location={{ lat: () => this.props.latLng.lat, lng: () => this.props.latLng.lng }}
           radius="0"
           onSuggestSelect={boundHandleSuggestSelect}
