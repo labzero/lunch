@@ -18,7 +18,8 @@ const Vote = sequelize.define('vote',
         model: 'restaurant',
         key: 'id'
       },
-      allowNull: false
+      allowNull: false,
+      onDelete: 'cascade'
     }
   },
   {
