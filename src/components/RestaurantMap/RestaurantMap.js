@@ -29,6 +29,13 @@ class RestaurantMap extends Component {
     mapClicked: PropTypes.func.isRequired,
   };
 
+  componentDidMount() {
+    this._root.addEventListener('touchmove', event => {
+      // prevent window from scrolling
+      event.preventDefault();
+    });
+  }
+
   componentWillReceiveProps(nextProps) {
     if (nextProps.center !== undefined) {
       this.props.clearCenter();
@@ -68,7 +75,7 @@ class RestaurantMap extends Component {
     }
 
     return (
-      <section className={s.root}>
+      <section className={s.root} ref={r => { this._root = r; }}>
         <GoogleMap
           defaultZoom={16}
           defaultCenter={this.props.latLng}
