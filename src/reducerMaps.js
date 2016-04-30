@@ -235,6 +235,26 @@ export const restaurants = new Map([
         }
       }
     })
+  ],
+  [ActionTypes.TAG_DELETED, (state, action) =>
+    update(state, {
+      items: {
+        entities: {
+          restaurants: {
+            $apply: r => {
+              for (const i in r) {
+                if (r.hasOwnProperty(i) && r[i].tags.indexOf(action.id) > -1) {
+                  r[i].tags = update(r[i].tags, {
+                    $splice: [[r[i].tags.indexOf(action.id), 1]]
+                  });
+                }
+              }
+              return r;
+            }
+          }
+        }
+      }
+    })
   ]
 ]);
 

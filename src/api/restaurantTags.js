@@ -30,6 +30,7 @@ router
             tag_id: tag.id
           }).then(() => {
             const json = tag.toJSON();
+            json.restaurant_count = 1;
             req.wss.broadcast(postedNewTagToRestaurant(restaurantId, json, req.user.id));
             res.status(201).send({ error: false, data: json });
           }).catch(alreadyAddedError)

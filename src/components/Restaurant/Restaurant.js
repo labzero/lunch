@@ -2,10 +2,10 @@ import React, { PropTypes } from 'react';
 import RestaurantVoteCountContainer from '../../containers/RestaurantVoteCountContainer';
 import RestaurantVoteButtonContainer from '../../containers/RestaurantVoteButtonContainer';
 import RestaurantDecisionContainer from '../../containers/RestaurantDecisionContainer';
+import RestaurantTagListContainer from '../../containers/RestaurantTagListContainer';
 import RestaurantAddTagFormContainer from '../../containers/RestaurantAddTagFormContainer';
 import RestaurantNameFormContainer from '../../containers/RestaurantNameFormContainer';
 import RestaurantDropdownContainer from '../../containers/RestaurantDropdownContainer';
-import TagContainer from '../../containers/TagContainer';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Restaurant.scss';
 
@@ -13,14 +13,11 @@ export const _Restaurant = ({
   restaurant,
   shouldShowAddTagArea,
   shouldShowDropdown,
-  user,
+  loggedIn,
   listUiItem,
   showAddTagForm,
   showMapAndInfoWindow,
-  removeTag
 }) => {
-  const loggedIn = user.id !== undefined;
-
   let voteButton;
   let addTagArea;
   let dropdown;
@@ -78,16 +75,7 @@ export const _Restaurant = ({
       </div>
       <div className={s.footer}>
         <div className={s.tagsArea}>
-          <ul className={`${s.tagList} ${restaurant.tags.length === 0 ? s.tagsListEmpty : ''}`}>
-            {restaurant.tags.map(tagId => {
-              const boundRemoveTag = removeTag.bind(undefined, tagId);
-              return (
-                <li className={s.tagItem} key={`restaurantTag_${tagId}`}>
-                  <TagContainer id={tagId} showDelete={loggedIn} onDeleteClicked={boundRemoveTag} />
-                </li>
-              );
-            })}
-          </ul>
+          <RestaurantTagListContainer id={restaurant.id} />
           {addTagArea}
         </div>
         {dropdown}
@@ -98,13 +86,12 @@ export const _Restaurant = ({
 
 _Restaurant.propTypes = {
   restaurant: PropTypes.object.isRequired,
-  user: PropTypes.object.isRequired,
+  loggedIn: PropTypes.bool.isRequired,
   shouldShowAddTagArea: PropTypes.bool,
   shouldShowDropdown: PropTypes.bool,
   listUiItem: PropTypes.object.isRequired,
   showAddTagForm: PropTypes.func.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired,
-  removeTag: PropTypes.func.isRequired,
+  showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
 export default withStyles(s)(_Restaurant);

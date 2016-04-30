@@ -1,0 +1,16 @@
+@import '../../styles/_mixins.scss';
+
+.root {
+  @include plain-list;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.empty {
+  display: block;
+}
+
+.tagItem {
+  display: inline-block;
+  margin-right: .5em;
+}

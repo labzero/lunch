@@ -13,3 +13,8 @@ export const getRestaurants = createSelector(
   [getRestaurantIds, getRestaurantEntities],
   (restaurantIds, restaurantEntities) => restaurantIds.map(id => restaurantEntities[id])
 );
+
+export const getTagsForRestaurant = createSelector(
+  [getRestaurantById],
+  (restaurant) => restaurant.tags
+);

@@ -18,9 +18,7 @@ describe('Restaurant', () => {
       },
       shouldShowAddTagArea: true,
       shouldShowDropdown: true,
-      user: {
-        id: 1
-      },
+      loggedIn: true,
       listUiItem: {},
       showAddTagForm: sinon.mock(),
       showMapAndInfoWindow: sinon.mock(),

@@ -1,5 +1,4 @@
 @import '../../styles/_variables.scss';
-@import '../../styles/_mixins.scss';
 
 .root {
   background: rgba(255, 255, 255, .9);
@@ -51,21 +50,6 @@
 
 .tagsArea {
   float: left;
-}
-
-.tagList {
-  @include plain-list;
-  display: inline-block;
-  font-size: 16px;
-}
-
-.tagsListEmpty {
-  display: block;
-}
-
-.tagItem {
-  display: inline-block;
-  margin-right: .5em;
 }
 
 .dropdownContainer {
