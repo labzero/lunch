@@ -357,6 +357,21 @@ export const notifications = new Map([
         };
         break;
       }
+      case ActionTypes.DECISION_POSTED: {
+        const { userId, decision } = realAction;
+        notification.vals = {
+          userId,
+          restaurantId: decision.restaurant_id
+        };
+        break;
+      }
+      case ActionTypes.DECISION_DELETED: {
+        const { userId } = realAction;
+        notification.vals = {
+          userId
+        };
+        break;
+      }
       default: {
         return state;
       }

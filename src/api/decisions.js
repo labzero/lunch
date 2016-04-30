@@ -17,7 +17,7 @@ router
             restaurant_id: restaurantId
           }).then(obj => {
             const json = obj.toJSON();
-            req.wss.broadcast(decisionPosted(json));
+            req.wss.broadcast(decisionPosted(json, req.user.id));
             res.status(201).send({ error: false, data: obj });
           }).catch(() => {
             const error = { message: 'Could not save decision.' };

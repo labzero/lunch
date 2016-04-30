@@ -8,9 +8,10 @@ export const postDecision = (restaurantId) => ({
   restaurantId
 });
 
-export const decisionPosted = (decision) => ({
+export const decisionPosted = (decision, userId) => ({
   type: ActionTypes.DECISION_POSTED,
-  decision
+  decision,
+  userId
 });
 
 export const deleteDecision = () => ({
