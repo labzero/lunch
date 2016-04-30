@@ -40,9 +40,9 @@ export const restaurants = new Map([
               sortIndexes[id] = index;
             });
             return result.sort((a, b) => {
-              if (action.newlyAdded !== undefined) {
-                if (a === action.newlyAdded) { return -1; }
-                if (b === action.newlyAdded) { return 1; }
+              if (action.newlyAdded !== undefined && action.user.id === action.newlyAdded.userId) {
+                if (a === action.newlyAdded.id) { return -1; }
+                if (b === action.newlyAdded.id) { return 1; }
               }
               if (action.decision !== null) {
                 if (action.decision.restaurant_id === a) { return -1; }
@@ -406,7 +406,10 @@ export const listUi = new Map([
   [ActionTypes.RESTAURANT_POSTED, (state, action) =>
     resetRestaurant(update(state, {
       newlyAdded: {
-        $set: action.restaurant.id
+        $set: {
+          id: action.restaurant.id,
+          userId: action.userId
+        }
       }
     }), action)
   ],

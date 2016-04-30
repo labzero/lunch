@@ -2,6 +2,7 @@ import fetch from '../core/fetch';
 import ActionTypes from '../constants/ActionTypes';
 import { getDecision } from '../selectors/decisions';
 import { getNewlyAdded } from '../selectors/listUi';
+import { getCurrentUser } from '../selectors/user';
 import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
 import { flashError } from './flash.js';
 
@@ -11,7 +12,8 @@ export function sortRestaurants() {
     return dispatch({
       type: ActionTypes.SORT_RESTAURANTS,
       decision: getDecision(state),
-      newlyAdded: getNewlyAdded(state)
+      newlyAdded: getNewlyAdded(state),
+      user: getCurrentUser(state)
     });
   };
 }
