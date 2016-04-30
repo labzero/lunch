@@ -40,6 +40,10 @@ export const restaurants = new Map([
               sortIndexes[id] = index;
             });
             return result.sort((a, b) => {
+              if (action.newlyAdded !== undefined) {
+                if (a === action.newlyAdded) { return -1; }
+                if (b === action.newlyAdded) { return 1; }
+              }
               if (action.decision !== null) {
                 if (action.decision.restaurant_id === a) { return -1; }
                 if (action.decision.restaurant_id === b) { return 1; }
@@ -364,7 +368,13 @@ const resetAddTagAutosuggestValue = (state, action) =>
 export const listUi = new Map([
   [ActionTypes.RECEIVE_RESTAURANTS, () => {}],
   [ActionTypes.RESTAURANT_RENAMED, resetRestaurant],
-  [ActionTypes.RESTAURANT_POSTED, resetRestaurant],
+  [ActionTypes.RESTAURANT_POSTED, (state, action) =>
+    resetRestaurant(update(state, {
+      newlyAdded: {
+        $set: action.restaurant.id
+      }
+    }), action)
+  ],
   [ActionTypes.RESTAURANT_DELETED, resetRestaurant],
   [ActionTypes.POSTED_TAG_TO_RESTAURANT, resetAddTagAutosuggestValue],
   [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT, resetAddTagAutosuggestValue],

@@ -1,15 +1,19 @@
 import fetch from '../core/fetch';
 import ActionTypes from '../constants/ActionTypes';
 import { getDecision } from '../selectors/decisions';
+import { getNewlyAdded } from '../selectors/listUi';
 import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
 import { flashError } from './flash.js';
 
 export function sortRestaurants() {
-  return (dispatch, getState) =>
-    dispatch({
+  return (dispatch, getState) => {
+    const state = getState();
+    return dispatch({
       type: ActionTypes.SORT_RESTAURANTS,
-      decision: getDecision(getState())
+      decision: getDecision(state),
+      newlyAdded: getNewlyAdded(state)
     });
+  };
 }
 
 export function invalidateRestaurants() {
