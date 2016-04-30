@@ -6,6 +6,7 @@ import RestaurantMap from '../components/RestaurantMap';
 const mapStateToProps = state => ({
   items: getMapItems(state),
   center: state.mapUi.center,
+  tempMarker: state.mapUi.tempMarker,
   latLng: state.latLng,
 });
 

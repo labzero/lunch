@@ -453,6 +453,26 @@ export const mapUi = new Map([
         $set: undefined
       }
     })
+  ],
+  [ActionTypes.CREATE_TEMP_MARKER, (state, action) =>
+    update(state, {
+      center: {
+        $set: action.result.latLng
+      },
+      tempMarker: {
+        $set: action.result
+      }
+    })
+  ],
+  [ActionTypes.CLEAR_TEMP_MARKER, state =>
+    update(state, {
+      center: {
+        $set: undefined
+      },
+      tempMarker: {
+        $set: undefined
+      }
+    })
   ]
 ]);
 

@@ -25,6 +25,20 @@
   }
 }
 
+.tempMarker {
+  left: -9.5px;
+  position: relative;
+  top: -9.5px;
+}
+
+@keyframes dash {
+  to { stroke-dashoffset: -6; }
+}
+
+.tempMarkerCircle {
+  animation: dash 1s infinite linear;
+}
+
 .center {
   position: relative;
 

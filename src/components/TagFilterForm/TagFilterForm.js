@@ -10,8 +10,6 @@ autosuggestTheme.input = 'form-control';
 
 const returnTrue = () => true;
 
-const preventDefault = event => event.preventDefault();
-
 export class _TagFilterForm extends Component {
   componentDidUpdate(prevProps) {
     if (this.props.tagUiForm.shown !== prevProps.tagUiForm.shown && this.props.tagUiForm.shown) {
@@ -81,6 +79,7 @@ export class _TagFilterForm extends Component {
 
 _TagFilterForm.propTypes = {
   exclude: PropTypes.bool,
+  addByName: PropTypes.func.isRequired,
   handleSuggestionSelected: PropTypes.func.isRequired,
   removeTag: PropTypes.func.isRequired,
   showForm: PropTypes.func.isRequired,

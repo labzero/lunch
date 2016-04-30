@@ -20,7 +20,11 @@ class RestaurantMap extends Component {
   static propTypes = {
     items: PropTypes.array.isRequired,
     latLng: PropTypes.object.isRequired,
-    center: PropTypes.object,
+    center: PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired
+    }),
+    tempMarker: PropTypes.object,
     clearCenter: PropTypes.func.isRequired,
     mapClicked: PropTypes.func.isRequired,
   };
@@ -29,10 +33,12 @@ class RestaurantMap extends Component {
     if (nextProps.center !== undefined) {
       this.props.clearCenter();
 
-      // offset by infowindow height after recenter
-      setTimeout(() => {
-        this.map.panBy(0, -100);
-      });
+      if (nextProps.tempMarker === undefined) {
+        // offset by infowindow height after recenter
+        setTimeout(() => {
+          this.map.panBy(0, -100);
+        });
+      }
     }
   }
 
@@ -40,6 +46,26 @@ class RestaurantMap extends Component {
     const setMap = ({ map }) => {
       this.map = map;
     };
+
+    const tempMarkers = [];
+    if (this.props.tempMarker !== undefined) {
+      tempMarkers.push(
+        <div className={s.tempMarker} key="tempMarker" {...this.props.tempMarker.latLng}>
+          <svg viewBox="-2 -2 19 19" width="19" height="19">
+            <circle
+              className={s.tempMarkerCircle}
+              strokeWidth="2"
+              stroke="#000"
+              fill="transparent"
+              strokeDasharray="2.95, 2.95"
+              r="7.5"
+              cx="7.5"
+              cy="7.5"
+            />
+          </svg>
+        </div>
+      );
+    }
 
     return (
       <section className={s.root}>
@@ -61,6 +87,7 @@ class RestaurantMap extends Component {
             className={s.center}
             title="You are here"
           />
+          {tempMarkers}
           {this.props.items.map((item, index) =>
             <RestaurantMarkerContainer
               lat={item.lat}

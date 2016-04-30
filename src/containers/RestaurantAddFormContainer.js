@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import { getRestaurants } from '../selectors/restaurants';
 import { addRestaurant } from '../actions/restaurants';
+import { createTempMarker, clearTempMarker } from '../actions/mapUi';
 import { scroller } from 'react-scroll';
 import RestaurantAddForm from '../components/RestaurantAddForm';
 
@@ -19,6 +20,20 @@ const mapDispatchToProps = dispatch => ({
       suggestCache[suggest.place_id] = suggest.terms[0].value;
     }
     return suggest.description;
+  },
+  createTempMarker: (result) => {
+    const location = result.geometry.location;
+    const marker = {
+      label: suggestCache[location.place_id],
+      latLng: {
+        lat: location.lat(),
+        lng: location.lng()
+      }
+    };
+    dispatch(createTempMarker(marker));
+  },
+  clearTempMarker: () => {
+    dispatch(clearTempMarker());
   },
   dispatch
 });
@@ -42,6 +57,7 @@ const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, 
     } else {
       scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`, true, undefined, -20);
     }
+    dispatchProps.dispatch(clearTempMarker());
   }
 });
 

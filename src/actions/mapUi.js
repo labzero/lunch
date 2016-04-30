@@ -28,6 +28,19 @@ export function hideAllInfoWindows() {
   };
 }
 
+export function createTempMarker(result) {
+  return {
+    type: ActionTypes.CREATE_TEMP_MARKER,
+    result
+  };
+}
+
+export function clearTempMarker() {
+  return {
+    type: ActionTypes.CLEAR_TEMP_MARKER
+  };
+}
+
 export function showMapAndInfoWindow(id, latLng) {
   return dispatch => {
     dispatch(showInfoWindow(id, latLng));
