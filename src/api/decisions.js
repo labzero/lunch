@@ -33,8 +33,9 @@ router
     '/',
     loggedIn,
     async (req, res) => {
+      const restaurantId = parseInt(req.body.restaurant_id, 10);
       Decision.scope('fromToday').destroy({ where: {} }).then(() => {
-        req.wss.broadcast(decisionDeleted(req.user.id));
+        req.wss.broadcast(decisionDeleted(restaurantId, req.user.id));
         res.status(204).send({ error: false });
       }).catch(err => errorCatcher(res, err));
     }

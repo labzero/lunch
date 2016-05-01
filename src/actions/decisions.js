@@ -1,5 +1,6 @@
 import fetch from '../core/fetch';
 import ActionTypes from '../constants/ActionTypes';
+import { getDecision } from '../selectors/decisions';
 import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
 import { flashError } from './flash.js';
 
@@ -14,12 +15,14 @@ export const decisionPosted = (decision, userId) => ({
   userId
 });
 
-export const deleteDecision = () => ({
-  type: ActionTypes.DELETE_DECISION
+export const deleteDecision = restaurantId => ({
+  type: ActionTypes.DELETE_DECISION,
+  restaurantId
 });
 
-export const decisionDeleted = (userId) => ({
+export const decisionDeleted = (restaurantId, userId) => ({
   type: ActionTypes.DECISION_DELETED,
+  restaurantId,
   userId
 });
 
@@ -38,10 +41,14 @@ export const decide = (restaurantId) => dispatch => {
     );
 };
 
-export const removeDecision = () => dispatch => {
-  dispatch(deleteDecision());
-  fetch('/api/decisions', {
+export const removeDecision = () => (dispatch, getState) => {
+  const restaurantId = getDecision(getState()).restaurant_id;
+  const payload = { restaurant_id: restaurantId };
+  dispatch(deleteDecision(restaurantId));
+  fetch('/api/decisions/', {
     credentials,
-    method: 'delete'
+    headers: jsonHeaders,
+    method: 'delete',
+    body: JSON.stringify(payload)
   });
 };

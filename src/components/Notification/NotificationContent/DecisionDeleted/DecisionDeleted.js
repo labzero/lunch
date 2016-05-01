@@ -2,20 +2,23 @@ import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from '../NotificationContent.scss';
 
-const DecisionDeleted = ({ loggedIn, user }) => {
+const DecisionDeleted = ({ loggedIn, user, restaurantName, showMapAndInfoWindow }) => {
+  const restaurantEl = <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurantName}</b>;
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b> cancelled the decision.
+        <b>{user}</b> cancelled the decision for {restaurantEl}.
       </span>
     );
   }
-  return <span>The decision was cancelled.</span>;
+  return <span>The decision for {restaurantEl} was cancelled.</span>;
 };
 
 DecisionDeleted.propTypes = {
   loggedIn: PropTypes.bool.isRequired,
-  user: PropTypes.string
+  user: PropTypes.string,
+  restaurantName: PropTypes.string.isRequired,
+  showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
 export default withStyles(s)(DecisionDeleted);

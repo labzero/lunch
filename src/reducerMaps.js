@@ -148,6 +148,9 @@ export const restaurants = new Map([
             [action.vote.restaurant_id]: {
               votes: {
                 $push: [action.vote.id]
+              },
+              all_vote_count: {
+                $apply: count => parseInt(count, 10) + 1
               }
             }
           },
@@ -172,6 +175,9 @@ export const restaurants = new Map([
             [action.restaurantId]: {
               votes: {
                 $splice: [[getRestaurantById({ restaurants: state }, action.restaurantId).votes.indexOf(action.id), 1]]
+              },
+              all_vote_count: {
+                $apply: count => parseInt(count, 10) - 1
               }
             }
           }
@@ -255,7 +261,37 @@ export const restaurants = new Map([
         }
       }
     })
-  ]
+  ],
+  [ActionTypes.DECISION_POSTED, (state, action) =>
+    update(state, {
+      items: {
+        entities: {
+          restaurants: {
+            [action.decision.restaurant_id]: {
+              all_decision_count: {
+                $apply: count => parseInt(count, 10) + 1
+              }
+            }
+          }
+        }
+      }
+    })
+  ],
+  [ActionTypes.DECISION_DELETED, (state, action) =>
+    update(state, {
+      items: {
+        entities: {
+          restaurants: {
+            [action.restaurantId]: {
+              all_decision_count: {
+                $apply: count => parseInt(count, 10) - 1
+              }
+            }
+          }
+        }
+      }
+    })
+  ],
 ]);
 
 export const flashes = new Map([
@@ -366,9 +402,10 @@ export const notifications = new Map([
         break;
       }
       case ActionTypes.DECISION_DELETED: {
-        const { userId } = realAction;
+        const { restaurantId, userId } = realAction;
         notification.vals = {
-          userId
+          userId,
+          restaurantId
         };
         break;
       }
