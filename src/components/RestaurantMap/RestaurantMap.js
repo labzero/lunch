@@ -25,8 +25,10 @@ class RestaurantMap extends Component {
       lng: PropTypes.number.isRequired
     }),
     tempMarker: PropTypes.object,
+    newlyAddedRestaurant: PropTypes.object,
     clearCenter: PropTypes.func.isRequired,
     mapClicked: PropTypes.func.isRequired,
+    showNewlyAddedInfoWindow: PropTypes.func.isRequired
   };
 
   componentDidMount() {
@@ -46,6 +48,12 @@ class RestaurantMap extends Component {
           this.map.panBy(0, -100);
         });
       }
+    }
+  }
+
+  componentDidUpdate() {
+    if (this.props.newlyAddedRestaurant !== undefined) {
+      this.props.showNewlyAddedInfoWindow();
     }
   }
 

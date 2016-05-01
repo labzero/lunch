@@ -455,15 +455,27 @@ export const mapUi = new Map([
       showUnvoted: true
     })
   ],
-  [ActionTypes.RESTAURANT_POSTED, resetRestaurant],
+  [ActionTypes.RESTAURANT_POSTED, (state, action) =>
+    resetRestaurant(update(state, {
+      newlyAdded: {
+        $set: {
+          id: action.restaurant.id,
+          userId: action.userId
+        }
+      }
+    }), action)
+  ],
   [ActionTypes.RESTAURANT_DELETED, resetRestaurant],
   [ActionTypes.SHOW_INFO_WINDOW, (state, action) =>
     update(state, {
       center: {
-        $set: action.latLng
+        $set: {
+          lat: action.restaurant.lat,
+          lng: action.restaurant.lng
+        }
       },
       markers: {
-        $apply: target => setOrMerge(target, action.id, { showInfoWindow: true })
+        $apply: target => setOrMerge(target, action.restaurant.id, { showInfoWindow: true })
       }
     })
   ],
@@ -518,6 +530,13 @@ export const mapUi = new Map([
         $set: undefined
       },
       tempMarker: {
+        $set: undefined
+      }
+    })
+  ],
+  [ActionTypes.CLEAR_MAP_UI_NEWLY_ADDED, state =>
+    update(state, {
+      newlyAdded: {
         $set: undefined
       }
     })

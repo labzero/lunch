@@ -15,17 +15,11 @@ const mapStateToProps = () => {
         return { noRender: true };
       }
       let restaurantName;
-      let latLng;
       if (vals.restaurant) {
         restaurantName = vals.restaurant.name;
-        latLng = vals.restaurant.latLng;
       } else if (vals.restaurantId) {
         const restaurant = getRestaurantById(state, vals.restaurantId);
         restaurantName = restaurant.name;
-        latLng = {
-          lat: restaurant.lat,
-          lng: restaurant.lng
-        };
       }
       let tagName;
       if (vals.tag) {
@@ -36,7 +30,6 @@ const mapStateToProps = () => {
       contentProps = {
         loggedIn: state.user.id !== undefined,
         restaurantName,
-        latLng,
         tagName,
         newName: vals.newName
       };
@@ -62,7 +55,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, st
   contentProps: {
     ...stateProps.contentProps,
     showMapAndInfoWindow() {
-      dispatchProps.dispatch(showMapAndInfoWindow(ownProps.vals.restaurantId, stateProps.contentProps.latLng));
+      dispatchProps.dispatch(showMapAndInfoWindow(ownProps.vals.restaurantId));
     }
   }
 });

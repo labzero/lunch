@@ -1,4 +1,5 @@
 import ActionTypes from '../constants/ActionTypes';
+import { getRestaurantById } from '../selectors/restaurants';
 import { scrollToTop } from './pageUi';
 
 export function clearCenter() {
@@ -7,11 +8,10 @@ export function clearCenter() {
   };
 }
 
-export function showInfoWindow(id, latLng) {
+export function showInfoWindow(restaurant) {
   return {
     type: ActionTypes.SHOW_INFO_WINDOW,
-    id,
-    latLng
+    restaurant
   };
 }
 
@@ -41,9 +41,15 @@ export function clearTempMarker() {
   };
 }
 
-export function showMapAndInfoWindow(id, latLng) {
-  return dispatch => {
-    dispatch(showInfoWindow(id, latLng));
+export function clearNewlyAdded() {
+  return {
+    type: ActionTypes.CLEAR_MAP_UI_NEWLY_ADDED
+  };
+}
+
+export function showMapAndInfoWindow(id) {
+  return (dispatch, getState) => {
+    dispatch(showInfoWindow(getRestaurantById(getState(), id)));
     dispatch(scrollToTop());
   };
 }
