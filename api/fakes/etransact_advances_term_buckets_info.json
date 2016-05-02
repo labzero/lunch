@@ -1,7 +1,7 @@
 [
      {"AO_TERM_BUCKET_ID": 1,
     "TERM_BUCKET_LABEL": "Open and O/N",
-    "WHOLE_LOAN_ENABLED": "N",
+    "WHOLE_LOAN_ENABLED": "Y",
     "SBC_AGENCY_ENABLED": "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED": "Y",

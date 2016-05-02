@@ -166,11 +166,11 @@ describe AdvanceRequest do
       end
       it 'raises an error if fetching the settings fails' do
         allow(subject).to receive_message_chain(:etransact_service, :settings).and_return(nil)
-        expect{call_method}.to raise_error
+        expect{call_method}.to raise_error(/no RateTimeout setting found/i)
       end
       it 'raises an error if no timeout is found in the settings' do
         allow(settings).to receive(:[]).with(:rate_timeout).and_return(nil)
-        expect{call_method}.to raise_error
+        expect{call_method}.to raise_error(/no RateTimeout setting found/i)
       end
       it 'retrives the timeout setting from the settings hash' do
         expect(settings).to receive(:[]).with(:rate_timeout).and_return(timeout).at_least(1)
@@ -209,7 +209,11 @@ describe AdvanceRequest do
       expect(call_method).to be(floated_rate)
     end
     it 'raises an error if the rate is not found' do
-      expect{subject.rate_for(double('A Bad Term'), double('A Bad Type'))}.to raise_error
+      bad_term = double('A Bad Term')
+      allow(bad_term).to receive(:to_sym).and_return(bad_term)
+      bad_type = double('A Bad Type')
+      allow(bad_type).to receive(:to_sym).and_return(bad_type)
+      expect{subject.rate_for(bad_term, bad_type)}.to raise_error(/rate not found/i)
     end
   end
 
@@ -313,7 +317,11 @@ describe AdvanceRequest do
       expect(call_method).to be(maturity_date_to_date)
     end
     it 'raises an error if the rate is not found' do
-      expect{subject.maturity_date_for(double('A Bad Term'), double('A Bad Type'))}.to raise_error
+      bad_term = double('A Bad Term')
+      allow(bad_term).to receive(:to_sym).and_return(bad_term)
+      bad_type = double('A Bad Type')
+      allow(bad_type).to receive(:to_sym).and_return(bad_type)
+      expect{subject.maturity_date_for(bad_term, bad_type)}.to raise_error(/rate not found/i)
     end
   end
 
@@ -402,6 +410,7 @@ describe AdvanceRequest do
 
       before do
         stub_const("#{described_class.name}::#{allowed_values_const_name}", allowed_values)
+        allow(allowed_values).to receive(:include?).and_return(false)
         allow(allowed_values).to receive(:include?).with(sym_value).and_return(true)
         allow(subject).to receive(:maturity_date_for!).with(term, type)
         allow(subject).to receive(:rate_for!).with(term, type)
@@ -414,10 +423,10 @@ describe AdvanceRequest do
       it "checks that the `#{attr}` is an allowed #{attr}" do
         stub_const("#{described_class.name}::#{allowed_values_const_name}", allowed_values)
         allow(allowed_values).to receive(:include?).with(sym_value).and_return(false)
-        expect{call_method}.to raise_error
+        expect{call_method}.to raise_error(/Unknown Advance #{attr}/i)
       end
       it 'raises an error if passed `nil`' do
-        expect{subject.send("#{attr}=", nil)}.to raise_error
+        expect{subject.send("#{attr}=", nil)}.to raise_error(ArgumentError)
       end
       it "stores the #{attr}" do
         call_method
@@ -442,7 +451,7 @@ describe AdvanceRequest do
       end
       describe 'when both `term` and `type` are present' do
         let(:term) { double('A Term') }
-        let(:type) { double('A Tyoe') }
+        let(:type) { double('A Type') }
         before do
           allow(subject).to receive(:term).and_return(term)
           allow(subject).to receive(:type).and_return(type)
@@ -554,7 +563,7 @@ describe AdvanceRequest do
     it 'checks that the `stock_choice` is an allowed stock_choice}' do
       stub_const("#{described_class.name}::STOCK_CHOICES", allowed_values)
       allow(allowed_values).to receive(:include?).with(sym_value).and_return(false)
-      expect{call_method}.to raise_error
+      expect{call_method}.to raise_error(/Unknown Stock Choice/i)
     end
     it 'supports being set to `nil`' do
       subject.stock_choice = nil
@@ -738,6 +747,23 @@ describe AdvanceRequest do
     end
   end
 
+  describe '`term_type` method' do
+    let(:call_method) { subject.term_type }
+    [:open, :overnight].each do |term|
+      it "returns `:vrc` when the `term` is `#{term}`" do
+        allow(subject).to receive(:term).and_return(term)
+        expect(call_method).to eq(:vrc)
+      end
+    end
+    it 'returns nil when `term` is nil' do
+      expect(call_method).to be_nil
+    end
+    it 'returns `:frc` when the `term` is anything else' do
+      allow(subject).to receive(:term).and_return(double('A Term'))
+      expect(call_method).to eq(:frc)
+    end
+  end
+
   describe '`human_type` method' do
     let(:call_method) { subject.human_type }
     {
@@ -898,12 +924,12 @@ describe AdvanceRequest do
     end
     it 'raises an error if it encounters an unknown attribute' do
       hash[double('An Unknown Key').as_null_object] = double('A Value')
-      expect{call_method}.to raise_error
+      expect{call_method}.to raise_error(/unknown attribute/i)
     end
     described_class::SERIALIZATION_EXCLUDE_ATTRS.each do |attr|
       it 'raises an error if it encounters an excluded attribute' do
         hash[attr] = double('A Value')
-        expect{call_method}.to raise_error
+        expect{call_method}.to raise_error(/illegal attribute/i)
       end
     end
     it 'converts the rates to an indifferent access hash' do
@@ -1717,7 +1743,7 @@ describe AdvanceRequest do
     end
     ['-1000.0', '123abc.0', '123abc123', '000000.11', '#$#11,,0231', 100.01].each do |bad_amount|
       it "handles a real world invalid amount: #{bad_amount}" do
-        expect{subject.send(:transform_amount, bad_amount, field_name)}.to raise_error
+        expect{subject.send(:transform_amount, bad_amount, field_name)}.to raise_error(ArgumentError)
       end
     end
     it 'converts the value to a float' do
@@ -1746,7 +1772,7 @@ describe AdvanceRequest do
 
     shared_examples 'no service requests' do
       it 'raises an error' do
-        expect{call_method}.to raise_error
+        expect{call_method}.to raise_error(AASM::InvalidTransition)
       end
       it 'does not call `perform_execute`' do
         expect(subject).to_not receive(:perform_execute)

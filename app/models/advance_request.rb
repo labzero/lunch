@@ -96,7 +96,11 @@ class AdvanceRequest
   end
 
   def rate_for(term, type)
-    rates[type.to_sym][term.to_sym][:rate].to_f
+    rates_for_type = rates[type.to_sym]
+    raise "Rate not found for type: #{type}" if rates_for_type.nil?
+    rates_for_term = rates_for_type[term.to_sym]
+    raise "Rate not found for term: #{term}" if rates_for_term.nil?
+    rates_for_term[:rate].to_f
   end
 
   def rate_for!(term, type)
@@ -104,7 +108,11 @@ class AdvanceRequest
   end
 
   def maturity_date_for(term, type)
-    rates[type.to_sym][term.to_sym][:maturity_date].try(:to_date)
+    rates_for_type = rates[type.to_sym]
+    raise "Rate not found for type: #{type}" if rates_for_type.nil?
+    rates_for_term = rates_for_type[term.to_sym]
+    raise "Rate not found for term: #{term}" if rates_for_term.nil?
+    rates_for_term[:maturity_date].try(:to_date)
   end
 
   def maturity_date_for!(term, type)
@@ -134,7 +142,7 @@ class AdvanceRequest
 
   def term=(term)
     term = term.try(:to_sym)
-    raise "Unknown Advance Term: #{term}" unless ADVANCE_TERMS.include?(term)
+    raise ArgumentError.new("Unknown Advance Term: #{term}") unless ADVANCE_TERMS.include?(term)
     old_term = @term
     @term = term
     if old_term != term && type
@@ -146,7 +154,7 @@ class AdvanceRequest
 
   def type=(type)
     type = type.try(:to_sym)
-    raise "Unknown Advance Type: #{type}" unless ADVANCE_TYPES.include?(type)
+    raise ArgumentError.new("Unknown Advance Type: #{type}") unless ADVANCE_TYPES.include?(type)
     old_type = @type
     @type = type
     if old_type != type && term
@@ -232,6 +240,17 @@ class AdvanceRequest
       nil
     else
       I18n.t('dashboard.quick_advance.frc_title')
+    end
+  end
+
+  def term_type
+    case term
+    when :overnight, :open
+      :vrc
+    when nil
+      nil
+    else
+      :frc
     end
   end
 
@@ -538,7 +557,7 @@ class AdvanceRequest
   def transform_amount(amount, field)
     if amount
       if (amount.respond_to?(:match) && !amount.match(VALID_AMOUNT)) || (amount.respond_to?(:floor) && amount.floor != amount)
-        raise "Invalid #{field.titleize}: #{amount}"
+        raise ArgumentError.new("Invalid #{field.titleize}: #{amount}")
       end
       transformed_amount = amount
       transformed_amount = transformed_amount.dup if transformed_amount.duplicable?

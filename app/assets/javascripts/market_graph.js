@@ -14,7 +14,7 @@ $(function () {
   graphElement.highcharts({
     chart: {
       type: 'area',
-      spacing: [0, 0, 0, 5],
+      spacing: [0, 0, 0, 0],
       style: {
         overflow: 'visible'
       }

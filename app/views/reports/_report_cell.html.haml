@@ -1,15 +1,16 @@
+- cell[:options] ||= {}
 - classes = [:'report-cell-right', :'report-cell-narrow']
 - case cell[:type]
 - when :basis_point, :number
-  - value = fhlb_formatted_number(cell[:value])
+  - value = fhlb_formatted_number(cell[:value], cell[:options])
 - when :index
-  - value = fhlb_formatted_number(cell[:value], precision: 5)
+  - value = fhlb_formatted_number(cell[:value], { precision: 5 }.merge(cell[:options]))
 - when :rate, :shares_fractional
-  - value = fhlb_formatted_number(cell[:value], precision: 2)
+  - value = fhlb_formatted_number(cell[:value], { precision: 2 }.merge(cell[:options]))
 - when :currency
-  - value = fhlb_formatted_currency(cell[:value])
+  - value = fhlb_formatted_currency(cell[:value], cell[:options])
 - when :currency_whole
-  - value = fhlb_formatted_currency(cell[:value], precision: 0)
+  - value = fhlb_formatted_currency(cell[:value], { precision: 0 }.merge(cell[:options]))
 - when :percentage
   - value = fhlb_formatted_percentage(cell[:value])
 - when :months

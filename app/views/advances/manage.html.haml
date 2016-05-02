@@ -1,6 +1,6 @@
 - @html_class = 'white-background'
 - @page_title = t('global.page_meta_title', title: t('advances.manage_advances.title'))
-.advances.row
+.advances.row.report{data: {deferred: @job_status_url, 'deferred-load' => @load_url}}
   .advances-header
     %h1= t('advances.manage_advances.title')
   .advances-main-body

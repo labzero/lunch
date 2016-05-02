@@ -15,13 +15,12 @@
     %p= t('products.products_summary.advances.product_list.intro')
     %ul.credit-product-list
       %li= link_to(t('products.advances.arc.title'), arc_path)
+      %li= link_to(t('products.advances.arc_embedded.product_page_title'), arc_embedded_path)
       %li= link_to(t('products.advances.ace'), 'http://fhlbsf.com/community/credit/ace-profile.aspx')
       %li= link_to(t('products.advances.amortizing.title'), amortizing_path)
-      %li= link_to(t('products.advances.arc_embedded.product_page_title'), arc_embedded_path)
       %li= link_to(t('products.advances.callable.title'), callable_path)
       %li= link_to(t('products.advances.choice_libor.title'), choice_libor_path)
       %li= link_to(t('products.advances.cip'), 'http://www.fhlbsf.com/community/credit/cip-profile.aspx')
-      %li= link_to(t('products.advances.auction_indexed.title'), auction_indexed_path)
       %li= link_to(t('products.advances.frc.title'), frc_path)
       %li= link_to(t('products.advances.frc_embedded.product_page_title'), frc_embedded_path)
       %li= link_to(t('products.advances.knockout.title'), knockout_path)
@@ -29,7 +28,6 @@
       %li= link_to(t('products.advances.putable.title'), putable_path)
       %li= link_to(t('products.advances.sbc.title'), sbc_path)
       %li= link_to(t('products.advances.vrc.title'), vrc_path)
-    %p= t('products.products_summary.advances.stand_alone_html', url: product_swaps_path)
     %h2= t('products.standby_loc.title')
     %p= t('products.standby_loc.description_html', url: 'http://fhlbsf.com/community/credit/lc-profile.aspx')
     %a{name: 'mpf_program'}

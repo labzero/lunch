@@ -1,51 +1,41 @@
-= render layout: 'add_advance', title: t('advances.add_advance.title') do
-  - case @etransact_status
-    - when :open
-      = form_for(:advance_request, as: :advance_request, url: advances_preview_path, html: {method: :post, class: 'add-advance-form'}) do |f|
-        = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_name: 'advance_request[amount]', field_value: fhlb_formatted_number(@selected_amount, optional_number: true, html: false)
-        = f.hidden_field(:type)
-        = f.hidden_field(:term)
-        = f.hidden_field(:id)
-        - if @limited_pricing_message
-          .add-advance-limited-pricing-message.icon-info-before
-            = simple_format(@limited_pricing_message)
-            %p= t('dashboard.quick_advance.deadline')
-        %p.add-advance-action-message= t('dashboard.quick_advance.preview.initiate')
-        .add-advance-instructions
-          %p= t('dashboard.quick_advance.advance_instruction')
+= render layout: 'add_advance', title: t('advances.add_advance.titles.add') do
+  = render layout: 'shared/etransact_status_message', locals: {etransact_status: @etransact_status} do
+    = form_for(:advance_request, as: :advance_request, url: advances_preview_path, html: {method: :post, class: 'add-advance-form'}) do |f|
+      = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_name: 'advance_request[amount]', field_value: fhlb_formatted_number(@selected_amount, optional_number: true, html: false)
+      = f.hidden_field(:type)
+      = f.hidden_field(:term)
+      = f.hidden_field(:id)
+      - if @limited_pricing_message
+        .limited-pricing-message.icon-info-before
+          = simple_format(@limited_pricing_message)
+          %p= t('dashboard.quick_advance.deadline')
+      %p.add-advance-action-message= t('dashboard.quick_advance.preview.initiate')
+      .add-advance-instructions
+        %p= t('dashboard.quick_advance.advance_instruction')
+      .advance-rates-table-wrapper{data: {active_term_type: @active_term_type}}
+        .advance-rates-table-toggle
+          %span{data: {active_term_type: :vrc}}= t('advances.vrc_rates')
+          %span{data: {active_term_type: :frc}}= t('advances.frc_rates')
         %table.advance-rates-table{data: {fetch_rates_url: advances_fetch_rates_path({advance_request: {id: @advance_request_id}})}}
           %thead
             %tr
-              %th{colspan: 2}
               %th
-                .add-advance-cell-wrapper= t('dashboard.quick_advance.table.axes_labels.standard')
-              %th{colspan: 3}
-                .add-advance-cell-wrapper= t('dashboard.quick_advance.table.axes_labels.securities_backed')
+              %th= t('dashboard.quick_advance.table.axes_labels.standard')
+              %th{colspan: 3}= t('dashboard.quick_advance.table.axes_labels.securities_backed')
             %tr.add-advance-column-labels
-              %th{colspan: 2}
-                .add-advance-cell-wrapper= t('dashboard.quick_advance.table.term')
-              %th{class: ('cell-selected' if @selected_type == :whole)}
+              %th
+              %th
                 .add-advance-cell-wrapper= t('dashboard.quick_advance.table.whole_loan')
-              %th{class: ('cell-selected' if @selected_type == :agency)}
+              %th
                 .add-advance-cell-wrapper= t('dashboard.quick_advance.table.agency')
-              %th{class: ('cell-selected' if @selected_type == :aaa)}
+              %th
                 .add-advance-cell-wrapper= t('dashboard.quick_advance.table.aaa')
-              %th{class: ('cell-selected' if @selected_type == :aa)}
+              %th
                 .add-advance-cell-wrapper= t('dashboard.quick_advance.table.aa')
           %tbody
             = render 'rates_table', advance_terms: @advance_terms, advance_types: @advance_types, loading: true, selected_type: @selected_type, selected_term: @selected_term
-        .advances-actions
-          - disabled = !(@selected_amount.present? && @selected_term.present? && @selected_type.present?)
-          = link_to(t('global.cancel'), advances_manage_path, class: 'secondary-button cancel-advance')
-          = f.submit({disabled: disabled, class: ["primary-button initiate-add-advance #{'active' unless disabled}"], value: t('advances.actions.preview')})
-    - when :no_terms
-      .etransact-status-message
-        = t('dashboard.quick_advance.advances_desk_no_terms')
-    - when :disabled_for_member
-      .etransact-status-message
-        = t('dashboard.quick_advance.advance_desk_unavailable_html', phone_number: service_desk_phone_number)
-        = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
-    - when :closed
-      .etransact-status-message
-        = t('dashboard.quick_advance.advances_desk_closed')
-        = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
+      .advances-actions
+        = link_to(t('global.cancel'), advances_manage_path, class: 'secondary-button cancel-advance')
+        = f.submit({disabled: true, class: ["primary-button initiate-add-advance"], value: t('advances.actions.preview')})
+      %small
+        %p.add-advances-footer= t('advances.add_advance.terms')

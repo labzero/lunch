@@ -359,10 +359,13 @@ When(/^I request an XLSX$/) do
 end
 
 def export_report(format)
+  single_item_dropdown = page.all('.report-header-buttons .dropdown.single-item-dropdown')
   jquery_execute("$('body').on('reportDownloadStarted', function(){$('body').addClass('report-download-started')})")
   page.find(".report-header-buttons .dropdown-selection").click
-  page.find('.report-header-buttons .dropdown li', text: format, visible: true).click
-  click_button(I18n.t('dashboard.actions.download'))
+  unless single_item_dropdown.present?
+    page.find('.report-header-buttons .dropdown li', text: format, visible: true).click
+    click_button(I18n.t('dashboard.actions.download'))
+  end
 end
 
 When(/^I click on the view cell for the first (advance|cash projection|security)/) do |report_type|
@@ -465,7 +468,12 @@ Then(/^I should see a security that is indicated as a new transaction$/) do
 end
 
 When(/^I cancel the report download from the flyout$/) do
+  jquery_execute("$('body').on('reportDownloadCanceled', function(){$('body').addClass('report-download-canceled')})")
   page.find('.cancel-report-download', text: /#{I18n.t('global.cancel_download')}/i).click
+end
+
+Then(/^the report download should be canceled$/) do
+  page.assert_selector('body.report-download-canceled')
 end
 
 When(/^I select "(.*?)" from the authorizations filter$/) do |text|
@@ -544,7 +552,11 @@ end
 
 Then(/^I should see a report for the last entry from the month year dropdown$/) do
   element = page.find('.report-filter .dropdown li:last-child', visible: false)
-  step %{I should see a report for "#{element['data-dropdown-value']}"}
+  # this logic is not 100% rock solid, but it should work in most cases. Really it should
+  # use the debit date from that report's debit_date field, however getting that into the
+  # report is tricky.
+  debit_date = most_recent_business_day(element['data-dropdown-value'].to_date + 1.month)
+  step %{I should see a report for "#{debit_date}"}
 end
 
 Then(/^I should be on the "(.*?)" report page$/) do |report|

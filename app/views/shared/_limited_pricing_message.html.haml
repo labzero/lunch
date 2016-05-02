@@ -1,3 +1,4 @@
-.quick-advance-limited-pricing-message.icon-info-before
+- additional_class ||= nil
+.limited-pricing-message.icon-info-before{class: additional_class}
   = simple_format(message)
   %p= t('dashboard.quick_advance.deadline')

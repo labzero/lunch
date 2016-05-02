@@ -39,16 +39,6 @@
   width: ($grid-column-width * 8) + ($gutter-width * 7);
 }
 
-.column-2-left {
-  @extend %column;
-  width: ($grid-column-width * 2) + $gutter-width;
-}
-
-.column-2-right {
-  @extend %column;
-  width: ($grid-column-width * 10) + ($gutter-width * 9);
-}
-
 .column-4x8-left {
   @extend %column;
   width: ($grid-column-width * 4) + ($gutter-width * 3);

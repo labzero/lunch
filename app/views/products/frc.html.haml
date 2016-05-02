@@ -5,11 +5,11 @@
     %h1= t('products.advances.frc.title')
     %p= t('products.advances.frc.description')
     %h2= t('products.section_headings.uses')
-    %ul.key-uses-list
+    %ul
       - uses.each do |use|
         %li= t("products.advances.frc.uses.#{use}")
     %h2= t('products.section_headings.advantages')
-    %ul.key-advantages-list
+    %ul
       - advantages.each do |advantage|
         %li= t("products.advances.frc.advantages.#{advantage}")
     %h2= t('products.section_headings.features')

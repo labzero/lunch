@@ -40,7 +40,7 @@ class ReportsController < ApplicationController
     User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title')
   }
 
-  AUTHORIZATIONS_ROLE_UP = [
+  AUTHORIZATIONS_ROLL_UP = [
     User::Roles::ADVANCE_SIGNER,
     User::Roles::AFFORDABILITY_SIGNER,
     User::Roles::COLLATERAL_SIGNER,
@@ -351,14 +351,15 @@ class ReportsController < ApplicationController
                          t('reports.pages.capital_stock_trial_balance.shares_outstanding')]
       summary[:certificates] = sort_report_data(summary[:certificates], :certificate_sequence)
       certificates = summary[:certificates].map do |certificate|
+        certificate[:transaction_type] = t('global.missing_value') if certificate[:transaction_type] == 'undefined'
         { columns: [{value: certificate[:certificate_sequence], type: nil,     classes: [:'report-cell-narrow']},
                     {value: certificate[:issue_date],           type: :date,   classes: [:'report-cell-narrow']},
                     {value: certificate[:transaction_type],     type: nil,     classes: [:'report-cell-narrow']},
-                    {value: certificate[:shares_outstanding],   type: :number, classes: [:'report-cell-narrow']}] }
+                    {value: certificate[:shares_outstanding],   type: :number, classes: [:'report-cell-narrow', :'report-cell-right']}] }
       end
       footer = [
         {value: t('reports.pages.capital_stock_trial_balance.total_shares_outstanding'), colspan: 3},
-        {value: summary[:number_of_shares], type: :number, classes: [:'report-cell-narrow']}
+        {value: summary[:number_of_shares], type: :number, classes: [:'report-cell-narrow', :'report-cell-right']}
       ]
       @capital_stock_trial_balance_table_data = { column_headings: column_headings, rows: certificates, footer: footer }
     end
@@ -457,6 +458,7 @@ class ReportsController < ApplicationController
         }
       ]
     }
+    @capital_stock_table[:rows].each { |row| row[:columns][1][:options] = { force_unit: true }}
 
     @rhfa_table = {
       rows: [
@@ -480,6 +482,7 @@ class ReportsController < ApplicationController
         }
       ]
     }
+    @rhfa_table[:rows].each { |row| row[:columns][1][:options] = { force_unit: true }}
 
     @advances_table = {
       rows: [
@@ -534,9 +537,10 @@ class ReportsController < ApplicationController
       ],
       footer: [
         {value: t('reports.pages.member_profile.advances.total_advances')},
-        {value: @member_profile[:advances][:total_advances], type: :currency_whole}
+        {value: @member_profile[:advances][:total_advances], type: :currency_whole, options: { force_unit: true }}
       ]
     }
+    @advances_table[:rows].each { |row| row[:columns][1][:options] = { force_unit: true }}
 
     @mpf_table = {
       rows: [
@@ -555,9 +559,10 @@ class ReportsController < ApplicationController
       ],
       footer: [
         {value: t('reports.pages.member_profile.advances.total_mpf')},
-        {value: @member_profile[:advances][:total_mpf], type: :currency_whole}
+        {value: @member_profile[:advances][:total_mpf], type: :currency_whole, options: { force_unit: true }}
       ]
     }
+    @mpf_table[:rows].each { |row| row[:columns][1][:options] = { force_unit: true }}
 
     empty_table_defaults = {
       column_headings: [], rows: []
@@ -566,7 +571,7 @@ class ReportsController < ApplicationController
     @advances_and_mpf_totals = {
       footer: [
         {value: t('reports.pages.member_profile.advances.total_advances_and_mpf')},
-        {value: @member_profile[:advances][:total_advances_and_mpf], type: :currency_whole}
+        {value: @member_profile[:advances][:total_advances_and_mpf], type: :currency_whole, options: { force_unit: true }}
       ]
     }.merge(empty_table_defaults)
 
@@ -599,6 +604,10 @@ class ReportsController < ApplicationController
         }
       ]
     }
+    @credit_tables[0][:rows].each do |row|
+      type = row[:columns][1][:type]
+      row[:columns][1][:options] = { force_unit: true } if type == :currency_whole || type == :percentage
+    end
     @credit_tables[1] = {
       rows: [
         {
@@ -640,9 +649,10 @@ class ReportsController < ApplicationController
       ],
       footer: [
         {value: t('reports.pages.member_profile.credit.total_advance_and_mpf')},
-        {value: @member_profile[:credit_outstanding][:total_advances_and_mpf], type: :currency_whole}
+        {value: @member_profile[:credit_outstanding][:total_advances_and_mpf], type: :currency_whole, options: { force_unit: true }}
       ]
     }
+    @credit_tables[1][:rows].each { |row| row[:columns][1][:options] = { force_unit: true }}
     @credit_tables[2] = {
       rows: [
         {
@@ -672,20 +682,21 @@ class ReportsController < ApplicationController
       ],
       footer: [
         {value: t('reports.pages.member_profile.credit.total_credit_products')},
-        {value: @member_profile[:credit_outstanding][:total_credit_products_outstanding], type: :currency_whole}
+        {value: @member_profile[:credit_outstanding][:total_credit_products_outstanding], type: :currency_whole, options: { force_unit: true }}
       ]
     }
+    @credit_tables[2][:rows].each { |row| row[:columns][1][:options] = { force_unit: true }}
     @total_credit_table = {
       footer: [
         {value: t('reports.pages.member_profile.credit.total_credit')},
-        {value: @member_profile[:credit_outstanding][:total], type: :currency_whole}
+        {value: @member_profile[:credit_outstanding][:total], type: :currency_whole, options: { force_unit: true }}
       ]
     }.merge(empty_table_defaults)
 
     @total_available_credit_table = {
       footer: [
         {value: t('reports.pages.member_profile.credit.total_available_credit')},
-        {value: @member_profile[:remaining_financing_available], type: :currency_whole}
+        {value: @member_profile[:remaining_financing_available], type: :currency_whole, options: { force_unit: true }}
       ]
     }.merge(empty_table_defaults)
 
@@ -700,7 +711,7 @@ class ReportsController < ApplicationController
         {
           columns: [
             {value: t('reports.pages.member_profile.sta.balance')},
-            {value: @member_profile[:sta_balance], type: :currency_whole}
+            {value: @member_profile[:sta_balance], type: :currency_whole, options: { force_unit: true }}
           ]
         },
         {
@@ -1336,18 +1347,19 @@ class ReportsController < ApplicationController
       @data_available = false
     else
       @data_available        = true
-      @dropdown_options      = available_reports.map{ |entry| [entry['month_year'], entry['report_end_date']] }
+      @dropdown_options      = available_reports.map{ |entry| [entry['report_end_date'].strftime('%B %Y'), entry['report_end_date']] }
       @start_date            = params[:start_date].try(:to_date) || @dropdown_options[0][1]
       @dropdown_options_text = @dropdown_options.find{ |option| option[1] == @start_date }.try(:first)
-      @debit_date            = most_recent_business_day(default_dates_hash(@start_date)[:next_month_end])
 
       report_download_name = "securities-services-monthly-statement-#{fhlb_report_date_numeric(@start_date)}"
       downloadable_report(:pdf, {start_date: params[@start_date]}, report_download_name) do
         if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
           @statement = {}
+          @debit_date = nil
         else
           @statement = member_balances.securities_services_statement(@start_date)
           raise StandardError, "There has been an error and ReportsController#securities_services_statement has encountered nil. Check error logs." if @statement.nil?
+          @debit_date = @statement[:debit_date]
         end
       end
     end
@@ -1431,22 +1443,21 @@ class ReportsController < ApplicationController
     @report_name = ReportConfiguration.report_title(:authorizations)
     @today = Time.zone.today
 
-    downloadable_report(:pdf, {authorizations_filter: @authorizations_filter.to_s}) do
-      @authorizations_dropdown_options = AUTHORIZATIONS_DROPDOWN_MAPPING.collect{|key, value| [value, key]}
-      @authorizations_filter_text = AUTHORIZATIONS_DROPDOWN_MAPPING[@authorizations_filter]
+    downloadable_report([:pdf, :xlsx], {authorizations_filter: @authorizations_filter.to_s}) do
+      @authorizations_dropdown_mapping = AUTHORIZATIONS_DROPDOWN_MAPPING
+      @authorizations_dropdown_options = @authorizations_dropdown_mapping.collect{|key, value| [value, key]}
+      @authorizations_filter_text = @authorizations_dropdown_mapping[@authorizations_filter]
       mapped_filter = AUTHORIZATIONS_MAPPING[@authorizations_filter]
       @authorizations_title = case @authorizations_filter
       when 'all'
         t('reports.pages.authorizations.sub_title_all_users')
       when 'signer_manager', 'signer_entire_authority'
-         t('reports.pages.authorizations.sub_title_inclusive_authorizations', filter: mapped_filter)
+        t('reports.pages.authorizations.sub_title_inclusive_authorizations', filter: mapped_filter)
       else
         t('reports.pages.authorizations.sub_title', filter: mapped_filter)
       end
 
-      @authorizations_table_data = {
-        :column_headings => [t('user_roles.user.title'), @report_name]
-      }
+      @authorizations_table_data = { :column_headings => [t('user_roles.user.title'), @report_name] }
 
       @job_status_url = false
       @load_url = false
@@ -1463,7 +1474,11 @@ class ReportsController < ApplicationController
 
         users.sort_by! { |user| [user[:surname] || '', user[:given_name] || ''] }
 
-        user_roles = users.map{ |user| [user, roles_for_signers(user)] }.reject{ |_,roles| roles.empty? }
+        user_roles = users.map do |user|
+          processed_roles = roles_for_signers(user)
+          [user, processed_roles.collect { |role| AUTHORIZATIONS_MAPPING[role] }, processed_roles]
+        end.reject{ |_,roles| roles.empty? }
+
         check_for_inclusive_roles = false
         matching_roles_array = if ['signer_manager', 'signer_entire_authority', 'all'].include?(@authorizations_filter)
           [AUTHORIZATIONS_MAPPING[@authorizations_filter]]
@@ -1471,10 +1486,13 @@ class ReportsController < ApplicationController
           check_for_inclusive_roles = true
           [AUTHORIZATIONS_MAPPING[@authorizations_filter], INCLUSIVE_AUTHORIZATIONS].flatten
         end
-        user_roles = user_roles.select{ |_,roles| (roles & matching_roles_array).any? } unless @authorizations_filter == 'all'
-
+        filtered_user_roles = if @authorizations_filter == 'all'
+          user_roles
+        else
+          user_roles.select{ |_,roles| (roles & matching_roles_array).any? }
+        end
         if check_for_inclusive_roles
-          user_roles.each do |_, roles|
+          filtered_user_roles.each do |_, roles|
             roles.collect! do |role|
               if INCLUSIVE_AUTHORIZATIONS.include?(role)
                 @footnote_role ||= AUTHORIZATIONS_MAPPING[@authorizations_filter].downcase.capitalize
@@ -1485,8 +1503,10 @@ class ReportsController < ApplicationController
             end
           end
         end
-        @authorizations_table_data[:rows] = user_roles.map{ |user,roles| {columns: [{type: nil, value: user[:display_name]}, {type: :list, value: roles}]}}
-
+        @authorizations_table_data[:rows] = filtered_user_roles.map do |user,roles|
+          {columns: [ { type: nil, value: user[:display_name]}, { type: :list, value: roles }]}
+        end
+        @authorizations_table_data[:raw_roles] = user_roles
         render layout: false if request.xhr?
       else
         job_status = MemberSignersAndUsersJob.perform_later(current_member_id).job_status
@@ -2017,12 +2037,13 @@ class ReportsController < ApplicationController
   def securities_instance_variables(securities_position, filter)
     as_of_date = securities_position[:as_of_date]
     @headings = {
-      total_original_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_original_par_heading", fhlb_date_long_alpha(as_of_date)),
-      total_current_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_current_par_heading", fhlb_date_long_alpha(as_of_date)),
-      total_market_value: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_market_value_heading", fhlb_date_long_alpha(as_of_date)),
-      table_heading: t("reports.pages.securities_position.#{filter}_securities.table_heading", n: securities_position[:securities].length, date: fhlb_date_long_alpha(as_of_date)),
+
+      total_original_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_original_par_heading", fhlb_date_long_alpha(as_of_date), missing_data_message: "reports.pages.securities_position.#{filter}_securities.total_original_par_heading_without_data"),
+      total_current_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_current_par_heading", fhlb_date_long_alpha(as_of_date), missing_data_message: "reports.pages.securities_position.#{filter}_securities.total_current_par_heading_without_data"),
+      total_market_value: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_market_value_heading", fhlb_date_long_alpha(as_of_date), missing_data_message: "reports.pages.securities_position.#{filter}_securities.total_market_value_heading_without_data"),
       footer_total: t("reports.pages.securities_position.#{filter}_securities.total")
     }
+    @headings[:table_heading] = as_of_date ? t("reports.pages.securities_position.#{filter}_securities.table_heading", n: securities_position[:securities].length, date: fhlb_date_long_alpha(as_of_date)) : ""
     @securities_filter_options = [
       [t('reports.pages.securities_position.filter.all'), 'all'],
       [t('reports.pages.securities_position.filter.pledged'), 'pledged'],
@@ -2072,11 +2093,11 @@ class ReportsController < ApplicationController
   def roles_for_signers(signer)
     roles = signer[:roles]
     if roles.include?(User::Roles::SIGNER_ENTIRE_AUTHORITY) || roles.include?(User::Roles::SIGNER_MANAGER)
-      roles = roles - AUTHORIZATIONS_ROLE_UP
+      roles = roles - AUTHORIZATIONS_ROLL_UP
     end
     roles.delete(User::Roles::ETRANSACT_SIGNER)
     roles.sort_by! { |role| AUTHORIZATIONS_ORDER.index(role) || 0 }
-    roles.collect! { |role| AUTHORIZATIONS_MAPPING[role] }
+    roles.collect! { |role| AUTHORIZATIONS_MAPPING.keys.include?(role) ? role : nil }
     roles.compact!
     roles
   end
@@ -2251,6 +2272,7 @@ class ReportsController < ApplicationController
   end
 
   def sort_report_data(data, sort_field, sort_order='asc')
+    return data unless data
     data = data.sort{|a,b| a[sort_field] <=> b[sort_field]}
     sort_order == 'asc' ? data : data.reverse
   end

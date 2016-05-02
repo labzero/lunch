@@ -1,4 +1,5 @@
 require 'rails_helper'
+include CustomFormattingHelper
 
 RSpec.describe DashboardController, :type => :controller do
   login_user
@@ -16,7 +17,10 @@ RSpec.describe DashboardController, :type => :controller do
       end
 
       it 'logs at the `info` log level' do
-        expect(subject.logger).to receive(:info).exactly(:twice)
+        allow(subject.logger).to receive(:info).and_call_original
+        expect(subject.logger).to receive(:info).with(no_args) do |*args, &block|
+          expect(block.call).to match(/Exception: /i)
+        end.exactly(:once)
         make_request rescue exception
       end
       it 'puts the advance_request as JSON in the log' do
@@ -36,6 +40,21 @@ RSpec.describe DashboardController, :type => :controller do
     let(:profile) { double('profile') }
     let(:service) { double('a service object', profile: profile, borrowing_capacity_summary: nil) }
     let(:make_request) { get :index }
+    let(:etransact_status) { double('some status') }
+    let(:etransact_service) { double('etransact service', etransact_status: etransact_status) }
+    let(:borrowing_capacity_hash) do
+      {
+        total_borrowing_capacity: double('total_borrowing_capacity'),
+        net_plus_securities_capacity: double('net_plus_securities_capacity'),
+        sbc: {
+          collateral: {
+            aa: {total_borrowing_capacity: double('aa total_borrowing_capacity')},
+            aaa: {total_borrowing_capacity: double('aaa total_borrowing_capacity')},
+            agency: {total_borrowing_capacity: double('agency total_borrowing_capacity')}
+          }
+        }
+      }
+    end
     before do
       allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
       allow(subject).to receive(:current_user_roles)
@@ -80,6 +99,19 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(assigns[:borrowing_capacity_gauge]).to include(:total, :mortgages, :aa, :aaa, :agency)
     end
+    it 'passes the correct borrowing capacity values to `calculate_gauge_percentages` method' do
+      allow(subject).to receive(:calculate_gauge_percentages) # to allow for `calculate_gauge_percentages` of @financing_availability_gauge
+      allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).and_return(borrowing_capacity_hash)
+      guage_argument_hash = {
+        total: borrowing_capacity_hash[:total_borrowing_capacity],
+        mortgages: borrowing_capacity_hash[:net_plus_securities_capacity],
+        aa: borrowing_capacity_hash[:sbc][:collateral][:aa][:total_borrowing_capacity],
+        aaa: borrowing_capacity_hash[:sbc][:collateral][:aaa][:total_borrowing_capacity],
+        agency: borrowing_capacity_hash[:sbc][:collateral][:agency][:total_borrowing_capacity]
+      }
+      expect(subject).to receive(:calculate_gauge_percentages).with(guage_argument_hash, :total)
+      get :index
+    end
     it 'should call MemberBalanceService.borrowing_capacity_summary with the current date' do
       expect_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).with(Time.zone.now.to_date).and_call_original
       get :index
@@ -92,31 +124,48 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(assigns[:current_overnight_vrc]).to be_kind_of(Float)
     end
-    it 'should assign @quick_advance_status' do
-      get :index
-      expect(assigns[:quick_advance_status]).to be_present
+    describe 'when the `add-advance` feature is enabled' do
+      before do
+        allow(controller).to receive(:feature_enabled?).and_call_original
+        allow(controller).to receive(:feature_enabled?).with('add-advance').and_return(true)
+      end
+      it 'assigns @etransact_status from the value returned by the `EtransactAdvancesService#etransact_status` instance method' do
+        allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+        get :index
+        expect(assigns[:etransact_status]).to eq(etransact_status)
+      end
     end
-    it 'should assign @quick_advance_status to `:open` if the desk is enabled and we have terms' do
-      get :index
-      expect(assigns[:quick_advance_status]).to eq(:open)
-    end
-    it 'should assign @quick_advance_status to `:no_terms` if the desk is enabled and we have no terms' do
-      allow_any_instance_of(EtransactAdvancesService).to receive(:has_terms?).and_return(false)
-      get :index
-      expect(assigns[:quick_advance_status]).to eq(:no_terms)
-    end
-    it 'should assign @quick_advance_status to `:open` if the desk is disabled' do
-      allow_any_instance_of(EtransactAdvancesService).to receive(:etransact_active?).and_return(false)
-      get :index
-      expect(assigns[:quick_advance_status]).to eq(:closed)
-    end
-    it 'sets @advance_terms' do
-      get :index
-      expect(assigns[:advance_terms]).to eq(AdvanceRequest::ADVANCE_TERMS)
-    end
-    it 'sets @advance_types' do
-      get :index
-      expect(assigns[:advance_types]).to eq(AdvanceRequest::ADVANCE_TYPES)
+    describe 'when the `add-advance` feature is disabled' do
+      before do
+        allow(controller).to receive(:feature_enabled?).and_call_original
+        allow(controller).to receive(:feature_enabled?).with('add-advance').and_return(false)
+      end
+      it 'should assign @quick_advance_status' do
+        get :index
+        expect(assigns[:quick_advance_status]).to be_present
+      end
+      it 'should assign @quick_advance_status to `:open` if the desk is enabled and we have terms' do
+        get :index
+        expect(assigns[:quick_advance_status]).to eq(:open)
+      end
+      it 'should assign @quick_advance_status to `:no_terms` if the desk is enabled and we have no terms' do
+        allow_any_instance_of(EtransactAdvancesService).to receive(:has_terms?).and_return(false)
+        get :index
+        expect(assigns[:quick_advance_status]).to eq(:no_terms)
+      end
+      it 'should assign @quick_advance_status to `:open` if the desk is disabled' do
+        allow_any_instance_of(EtransactAdvancesService).to receive(:etransact_active?).and_return(false)
+        get :index
+        expect(assigns[:quick_advance_status]).to eq(:closed)
+      end
+      it 'sets @advance_terms' do
+        get :index
+        expect(assigns[:advance_terms]).to eq(AdvanceRequest::ADVANCE_TERMS)
+      end
+      it 'sets @advance_types' do
+        get :index
+        expect(assigns[:advance_types]).to eq(AdvanceRequest::ADVANCE_TYPES)
+      end
     end
     it 'should assign @financing_availability_gauge' do
       get :index
@@ -254,6 +303,7 @@ RSpec.describe DashboardController, :type => :controller do
       end
       context 'the feature is flipped off' do
         before do
+          allow(controller).to receive(:feature_enabled?).and_call_original
           allow(controller).to receive(:feature_enabled?).with('quick-reports').and_return(false)
         end
         it 'does not assign @quick_reports' do
@@ -1325,7 +1375,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'raises an exception when the request is not XHR' do
       allow(request).to receive(:xhr?).and_return(false)
-      expect{call_method}.to raise_exception
+      expect{call_method}.to raise_exception(/Invalid request/)
     end
     it 'raises an ArgumentError if no `recent_activity_job_id` param is passed' do
       allow(params).to receive(:[])

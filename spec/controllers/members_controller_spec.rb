@@ -15,7 +15,7 @@ RSpec.describe MembersController, type: :controller do
     end
     it 'raises an error if MemberServices.all_members returns no members' do
       expect_any_instance_of(MembersService).to receive(:all_members).and_return(nil)
-      expect{make_request}.to raise_error
+      expect{make_request}.to raise_error(/No members found/)
     end
     it 'assigns `@members` to be a list of members', :vcr do
       make_request
@@ -67,7 +67,7 @@ RSpec.describe MembersController, type: :controller do
     end
     it 'raises an error if the passed `member_id` is invalid' do
       allow(members_list).to receive(:find).and_return(nil)
-      expect{make_request}.to raise_error
+      expect{make_request}.to raise_error(/invalid member ID/)
     end
     it 'assigns `member_id` in the session' do
       allow(subject.session).to receive(:[]=)

@@ -1,3 +1,4 @@
+@flip-off-add-advance
 Feature: Making a Quick Advance
   As a user
   I want to use visit the dashboard for the FHLB Member Portal
@@ -16,7 +17,7 @@ Scenario: Do not see dashboard quick advance module if I am not an advance-signe
 Scenario: See dashboard quick advance module if I am an advance-signer
   When I visit the dashboard
   Then I should see a dollar amount field
-  And I should see an advance rate.
+  And I should see an advance rate
 
 @jira-mem-924
 Scenario: Quick Advance flyout opens with commas in the amount field

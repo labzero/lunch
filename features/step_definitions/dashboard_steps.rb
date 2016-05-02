@@ -25,12 +25,22 @@ Then(/^I should see a dollar amount field$/) do
   mod.assert_selector('input')
 end
 
-Then(/^I should not see the quick-advance module$/) do
+Then(/^I should see a dollar amount field in the add advance module$/) do
+  mod = page.find('.dashboard-module', :text => I18n.t('advances.add_advance.titles.add'))
+  mod.assert_selector('input')
+end
+
+Then(/^I should not see the add-advance module$/) do
   page.assert_no_selector('.dashboard-module-advances')
 end
 
-Then(/^I should see an advance rate\.$/) do
+Then(/^I should see an advance rate$/) do
   mod = page.find('.dashboard-module', :text => I18n.t('dashboard.quick_advance.title'))
+  mod.assert_selector('.dashboard-advances-rate', :text => /\d+\.\d+\%/)
+end
+
+Then(/^I should see an advance rate in the dashboard advance module$/) do
+  mod = page.find('.dashboard-module', :text => I18n.t('advances.add_advance.titles.add'))
   mod.assert_selector('.dashboard-advances-rate', :text => /\d+\.\d+\%/)
 end
 
@@ -96,6 +106,34 @@ end
 
 Then(/^I should see a list of downloadedable quick reports$/) do
   page.assert_selector('.dashboard-module-quick-reports ul a[href]', minimum: 1)
+end
+
+When(/^I visit the dashboard when etransact "(.*?)"$/) do |status|
+  case status
+    when 'is closed'
+      allow_any_instance_of(EtransactAdvancesService).to receive(:etransact_status).and_return(:closed)
+    when 'has limited pricing'
+      allow_any_instance_of(MessageService).to receive(:todays_quick_advance_message).and_return('A test message')
+    when 'has no terms'
+      allow_any_instance_of(EtransactAdvancesService).to receive(:etransact_status).and_return(:no_terms)
+  end
+  step 'I visit the dashboard'
+end
+
+Then (/^I should see the limited pricing information message$/) do
+  page.assert_selector('.limited-pricing-message', visible: true)
+end
+
+Then(/^I should see an add advances disabled message$/) do
+  page.assert_selector('.etransact-status-message p', text: strip_tags(I18n.t('dashboard.quick_advance.advance_desk_unavailable_html', phone_number: service_desk_phone_number)))
+end
+
+Then(/^I should see a no terms message$/) do
+  page.assert_selector('.etransact-status-message p', text: I18n.t('dashboard.quick_advance.advances_desk_no_terms'))
+end
+
+When(/^I click on the view rate options link in the dashboard module$/) do
+  page.find('.dashboard-module-add-advance-link').click
 end
 
 def get_module_by_section(section)

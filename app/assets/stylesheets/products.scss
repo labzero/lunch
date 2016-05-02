@@ -1,8 +1,5 @@
 .product-page {
   @extend %info-page-style;
-  .key_uses_list, .key_advantages_list {
-    padding-left: 0;
-  }
   .term, .definition {
     display: inline;
   }
@@ -27,7 +24,7 @@
   }
 }
 
-.credit-product-list, .key-uses-list, .key-advantages-list {
+.credit-product-list {
   list-style: none;
 }
 

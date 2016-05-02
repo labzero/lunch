@@ -16,7 +16,7 @@ Scenario: Cannot navigate to the select rate page if I am not an advance-signer
 Scenario: Visit the select rate page if I am an advance-signer
   Given I visit the dashboard
   When I hover on the advances link in the header
-  And I click on the new advance link in the header
+  And I click on the add advance link in the header
   Then I should see the add advance rate table
 
 Scenario: Cancelling an advance
@@ -37,10 +37,11 @@ Scenario: Add advance input field adds commas to input field
 Scenario: Add advance tooltips and selecting a rate
   Given I am on the "Add Advance" advances page
   And I enter an amount into the add advance amount field
-  When I hover on the cell with a term of "2week" and a type of "whole" on the add advance page
-  Then I should see the add advance table tooltip for the cell with a term of "2week" and a type of "whole" on the add advance page
   When I hover on the cell with a term of "open" and a type of "agency" on the add advance page
   Then I should see the add advance table tooltip for the cell with a term of "open", a type of "agency" and a maturity date of "Open" on the add advance page
+  When I click to toggle to the frc rates
+  And I hover on the cell with a term of "2week" and a type of "whole" on the add advance page
+  Then I should see the add advance table tooltip for the cell with a term of "2week" and a type of "whole" on the add advance page
   When I see the unselected state for the cell with a term of "2week" and a type of "whole" on the add advance page
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
   Then I should see the selected state for the cell with a term of "2week" and a type of "whole" on the add advance page
@@ -48,26 +49,30 @@ Scenario: Add advance tooltips and selecting a rate
 
 Scenario: Certain rates should be missing due to black out dates
   Given I am on the "Add Advance" advances page
-  And I enter an amount into the add advance amount field
+  When I enter an amount into the add advance amount field
+  And I click to toggle to the frc rates
   Then I should see a blacked out value for the "3week" term with a type of "aaa" on the add advance page
 
 Scenario: Certain rates should be missing due to rate bands
   Given I am on the "Add Advance" advances page
-  And I enter an amount into the add advance amount field
+  When I enter an amount into the add advance amount field
+  And I click to toggle to the frc rates
   Then I should see a blacked out value for the "2year" term with a type of "aa" on the add advance page
   And I should see a blacked out value for the "3year" term with a type of "aa" on the add advance page
 
 Scenario: 2 year rates should be missing due to override_end_date/override_end_time
   Given I am on the "Add Advance" advances page
-  And I enter an amount into the add advance amount field
+  When I enter an amount into the add advance amount field
+  And I click to toggle to the frc rates
   Then I should see a blacked out value for the "2year" term with a type of "whole" on the add advance page
   And I should see a blacked out value for the "2year" term with a type of "aa" on the add advance page
   And I should see a blacked out value for the "2year" term with a type of "aaa" on the add advance page
   And I should see a blacked out value for the "2year" term with a type of "agency" on the add advance page
 
-Scenario: Preview rate from Quick Advance flyout table
+Scenario: Preview rate from the Add Advance rate table
   Given I am on the "Add Advance" advances page
   And I enter an amount into the add advance amount field
+  And I click to toggle to the frc rates
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
   When I click on the initiate advance button on the add advance page
   Then I should not see the add advance rate table
@@ -76,6 +81,7 @@ Scenario: Preview rate from Quick Advance flyout table
 Scenario: Check the interest payment frequencies for various term/type
   Given I am on the "Add Advance" advances page
   And I enter an amount into the add advance amount field
+  And I click to toggle to the frc rates
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
   When I click on the initiate advance button on the add advance page
   Then I should see an advance interest payment frequency of "monthendorrepayment"
@@ -88,13 +94,15 @@ Scenario: Check the interest payment frequencies for various term/type
   When I click on the initiate advance button on the add advance page
   Then I should see an advance interest payment frequency of "repayment"
   When I click on the edit button for the add advance preview
+  And I click to toggle to the vrc rates
   And I select the rate with a term of "overnight" and a type of "aa" on the add advance page
   When I click on the initiate advance button on the add advance page
   Then I should see an advance interest payment frequency of "maturity"
 
-Scenario: Go back to rate table from preview in Quick Advance flyout
+Scenario: Go back to rate table from preview
   Given I am on the "Add Advance" advances page
   And I enter an amount into the add advance amount field
+  And I click to toggle to the frc rates
   And I select the rate with a term of "2week" and a type of "aaa" on the add advance page
   And I click on the initiate advance button on the add advance page
   Then I should not see the add advance rate table
@@ -103,16 +111,18 @@ Scenario: Go back to rate table from preview in Quick Advance flyout
   And I should see the selected state for the cell with a term of "2week" and a type of "aaa" on the add advance page
   And I should not see a preview of the advance
 
-Scenario: Users with insufficient funds for Quick Advance get an error
+Scenario: Users with insufficient funds for an advance get an error
   Given I am on the "Add Advance" advances page
   When I enter "100001" into the add advance amount field
+  And I click to toggle to the frc rates
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
   When I click on the initiate advance button on the add advance page
   Then I should see an "insufficient financing availability" advance error with amount 100001 and type "whole"
 
-Scenario: Users with insufficient collateral for Quick Advance get an error
+Scenario: Users with insufficient collateral for an advance get an error
   Given I am on the "Add Advance" advances page
   When I enter "100002" into the add advance amount field
+  And I click to toggle to the frc rates
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
   When I click on the initiate advance button on the add advance page
   Then I should see an "insufficient collateral" advance error with amount 100002 and type "whole"
@@ -120,6 +130,7 @@ Scenario: Users with insufficient collateral for Quick Advance get an error
 Scenario: Users get an error if their requested advance would push FHLB over its total daily limit for web advances
   Given I am on the "Add Advance" advances page
   When I enter "100003" into the add advance amount field
+  And I click to toggle to the frc rates
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
   When I click on the initiate advance button on the add advance page
   Then I should see an "advance unavailable" advance error with amount 100003 and type "whole"
@@ -127,6 +138,7 @@ Scenario: Users get an error if their requested advance would push FHLB over its
 Scenario: User sees collateral limit error if advance causes both collateral and capital stock limits error
   Given I am on the "Add Advance" advances page
   When I enter "100006" into the add advance amount field
+  And I click to toggle to the frc rates
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
   When I click on the initiate advance button on the add advance page
   Then I should see an "insufficient collateral" advance error with amount 100006 and type "whole"
@@ -134,6 +146,7 @@ Scenario: User sees collateral limit error if advance causes both collateral and
 Scenario: Users gets an error if advance causes per-term cumulative amount to exceed limit
   Given I am on the "Add Advance" advances page
   When I enter "1000000000000" into the add advance amount field
+  And I click to toggle to the frc rates
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
   When I click on the initiate advance button on the add advance page
   Then I should see an "advance unavailable" advance error with amount 1000000000000 and type "whole"
@@ -188,6 +201,7 @@ Scenario: User backs out of an advance requiring a capital stock purchase and th
   Then I should see the cumulative stock purchase on the add advance preview screen
   When I click on the edit button for the add advance preview
   And I enter "1000131" into the add advance amount field
+  And I click to toggle to the frc rates
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
   And I click on the initiate advance button on the add advance page
   Then I should be on the add advance stock purchase screen
@@ -233,3 +247,30 @@ Scenario: Users who wait too long to perform an advance can still execute the ad
   And I wait for 70 seconds
   When I confirm an added advance with a rate that remains unchanged
   Then I should see confirmation number for the added advance
+
+Scenario: User sees an unavailable message if online advances are disabled for their bank
+  Given I am logged in as a "user with disabled quick advances"
+  When I am on the "Add Advance" advances page
+  Then I should see an add advances disabled message
+
+Scenario: User sees a message if there are no rates being returned from the etransact service
+  Given I visit the dashboard when etransact "has no terms"
+  When I am on the "Add Advance" advances page
+  Then I should see a no terms message
+
+@jira-mem-1457
+Scenario: User switches between VRC and FRC rates on the rate table
+  Given I am on the "Add Advance" advances page
+  And I enter an amount into the add advance amount field
+  When I select the rate with a term of "open" and a type of "agency" on the add advance page
+  Then I should see the selected state for the cell with a term of "open" and a type of "agency" on the add advance page
+  And the initiate advance button should be active on the add advance page
+  When I click to toggle to the frc rates
+  Then I see the deactivated state for the initiate advance button on the add advance page
+  And I should not see any rates selected
+  When I select the rate with a term of "2week" and a type of "whole" on the add advance page
+  Then I should see the selected state for the cell with a term of "2week" and a type of "whole" on the add advance page
+  And the initiate advance button should be active on the add advance page
+  When I click to toggle to the vrc rates
+  Then I see the deactivated state for the initiate advance button on the add advance page
+  And I should not see any rates selected

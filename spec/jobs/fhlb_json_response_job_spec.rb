@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe FhlbJsonResponseJob, type: :job do
 
   describe '`perform_with_json_result`' do
-    let(:job_status) { double(JobStatus, canceled?: false, :result= => nil, :status= => nil, :no_download= => nil, save!: nil, started!: nil, completed?: nil, completed!: nil) }
+    let(:job_status) { double(JobStatus, canceled?: false, :result= => nil, :status= => nil, :no_download= => nil, save!: nil, started!: nil, completed?: nil, completed!: nil, failed!: nil) }
     let(:args) { double('arguments') }
     let(:block) { double('a block of code') }
     let(:run_job) { subject.perform(args, block) }
@@ -28,7 +28,7 @@ RSpec.describe FhlbJsonResponseJob, type: :job do
 
     it 'raises an error if `perform_without_json_result` returns nil' do
       allow(subject).to receive(:perform_without_json_result).and_return(nil)
-      expect{run_job}.to raise_error
+      expect{subject.perform_without_rescue(args, block)}.to raise_error(/encountered nil/)
     end
 
     it 'creates a `StringIOWithFilename` with the JSON serialized results of the service call' do

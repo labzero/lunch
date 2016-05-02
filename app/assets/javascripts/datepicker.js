@@ -59,7 +59,6 @@ $(function () {
         today: today,
         fromLabel: fromLabel
       });
-      datePickerSelectionHandler($datePickerTrigger, $wrapper, presets);
       setDatePickerApplyListener($datePickerTrigger, $form);
       setDatePickerPlaceholder($datePickerTrigger, $startDate, $endDate);
       if (filter !== undefined) {
@@ -152,44 +151,7 @@ $(function () {
     $($datePickerWrapper.find('.ranges li')[options.defaultPreset]).click(); // default to "Last Month" when first opening
     if (options.singleDatePicker) {
       $datePickerWrapper.find('.ranges').show(); // always show the pre-selected tabs (daterangepicker.js hides these when set with the option singleDatePicker
-      $datePickerWrapper.find('.calendar').off('click.daterangepicker', 'td.available'); // remove daterangepicker's event handling so that we can force user to click 'apply' button when selecting custom date
-      $datePickerWrapper.find('.calendar').on('click.daterangepicker', 'td.available', function(event){
-        var $target = $(event.target);
-        event.stopPropagation();
-        event.preventDefault();
-        // set start and end dates to this date
-        var monthAndYear = $target.closest('table').find('th.month').text();
-        var day = $target.text();
-        var selectedDate = new Date(monthAndYear + ' ' + day);
-        $datePickerTrigger.data('daterangepicker').setStartDate(selectedDate);
-        $datePickerTrigger.data('daterangepicker').setEndDate(selectedDate);
-      });
     }
-  };
-
-  // Choosing a preset label shouldn't close the datepicker until the apply button is pressed
-  function datePickerSelectionHandler($datePickerTrigger, $datePickerWrapper, presets){
-    $datePickerWrapper.find('.ranges ul li').each(function(index, label) {
-      var $label = $(label);
-      $(label).on('click', function(event){
-        event.stopPropagation();
-        if (!$label.hasClass('disabled')) {
-          $('.ranges ul li').removeClass('active');
-          $label.addClass('active');
-          if (presets[index]) {
-            var preset = presets[index];
-            if (!preset.is_custom) {
-              if (preset.start_date) {
-                $datePickerTrigger.data('daterangepicker').setStartDate(preset.start_date);
-              };
-              if (preset.end_date) {
-                $datePickerTrigger.data('daterangepicker').setEndDate(preset.end_date);
-              };
-            };
-          };
-        };
-      });
-    });
   };
 
   // accessing the start and end dates once the apply button is pressed

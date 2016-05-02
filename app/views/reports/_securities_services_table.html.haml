@@ -3,10 +3,10 @@
     - rows.each do |pair|
       - key, i18n_key, line_item, footnote = pair
       - record = if data.present? && data.has_key?(key)
-        - data[key] 
+        - data[key]
       - else
         - {total: nil, count: nil, cost: nil}
       %tr
         %td= t("reports.pages.securities_services_statement.headers.#{i18n_key}", footnote: footnote)
-        %td.report-cell-expanding= securities_services_line_item("reports.pages.securities_services_statement.line_items.#{line_item}", fhlb_formatted_number(record[:count], html: false), {cost: fhlb_formatted_currency(record[:cost], html: false)})
+        %td.report-cell-expanding= securities_services_line_item("reports.pages.securities_services_statement.line_items.#{line_item}", fhlb_formatted_number(record[:count], html: false), substitutions: {cost: fhlb_formatted_currency(record[:cost], html: false)})
         %td.report-cell-right= fhlb_formatted_currency(record[:total])

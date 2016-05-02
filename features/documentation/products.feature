@@ -47,12 +47,6 @@ Feature: Products Page
     When I click on the choice libor link in the products advances dropdown
     Then I should see the "choice libor" product page
 
-  @smoke @jira-mem-850
-  Scenario: Member navigates to the auction indexed product page
-    Given I hover on the products link in the header
-    When I click on the auction indexed link in the products advances dropdown
-    Then I should see the "auction indexed" product page
-
   @smoke @jira-mem-851
   Scenario: Member navigates to the knockout product page
     Given I hover on the products link in the header
@@ -88,7 +82,7 @@ Feature: Products Page
     Given I hover on the products link in the header
     When I click on the securities backed credit link in the header
     Then I should see the "securities backed credit" product page
-    
+
   @smoke @jira-mem-853
   Scenario: Member navigates to the mortgage partnership finance product page
     Given I hover on the products link in the header
@@ -107,12 +101,3 @@ Feature: Products Page
   Scenario: Member sees forms on the pfi page
     Given I am on the pfi page
     Then I should see at least one pfi form to download
-
-  @smoke @jira-mem-1149
-  Scenario: Member navigates to the interest rate swaps caps and floors page
-    Given I hover on the products link in the header
-    When I click on the products summary link in the header
-    Then I should see the "products summary" product page
-    When I click on the swaps link
-    Then I should see the "swaps" product page
-

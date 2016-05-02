@@ -6,8 +6,6 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
       I18n.t('products.advances.arc_embedded.title')
     when 'amortizing'
       I18n.t('products.advances.amortizing.title')
-    when 'auction indexed'
-      I18n.t('products.advances.auction_indexed.title')
     when 'frc'
       I18n.t('products.advances.frc.title')
     when 'frc embedded'
@@ -30,8 +28,6 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
       I18n.t('products.advances.sbc.title')
     when 'mortgage partnership finance'
       I18n.t('products.advances.mpf.title')
-    when 'swaps'
-      I18n.t('products.swaps.title')
     else
       raise 'unknown product page'
   end
@@ -43,16 +39,12 @@ Then(/^I should see the pfi page$/) do
 end
 
 
-When(/^I click on the (arc embedded|frc|frc embedded|arc|amortizing|choice libor|auction indexed|knockout|putable|other cash needs|mortgage partnership finance) link in the products advances dropdown$/) do |link|
+When(/^I click on the (arc embedded|frc|frc embedded|arc|amortizing|choice libor|knockout|putable|other cash needs|mortgage partnership finance) link in the products advances dropdown$/) do |link|
   page.find('.page-header .products-dropdown a', text: dropdown_title_regex(link), exact: true).click
 end
 
 When(/^I click on the pfi link$/) do
   click_link('PFI Application')
-end
-
-When(/^I click on the swaps link$/) do
-  click_link('Interest Rate Swaps, Caps & Floors')
 end
 
 Then(/^I should see at least one pfi form to download$/) do

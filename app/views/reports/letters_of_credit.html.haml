@@ -8,7 +8,7 @@
   .report-main-body
     .report-summary-data
       %h3
-        = report_summary_with_date('reports.pages.letters_of_credit.total_current_par_summary', fhlb_date_long_alpha(@as_of_date))
+        = report_summary_with_date('reports.pages.letters_of_credit.total_current_par_summary', fhlb_date_long_alpha(@as_of_date), missing_data_message: 'reports.pages.letters_of_credit.total_current_par_summary_without_data')
       %p= fhlb_formatted_currency_whole(@total_current_par, force_unit: true)
     = render 'reports/reports_table', table_class: 'letters-of-credit-table', table_data: @loc_table_data, sortable: false
     %small

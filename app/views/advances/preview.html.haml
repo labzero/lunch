@@ -1,5 +1,5 @@
 - button_text = @rate_changed ? t('dashboard.quick_advance.buttons.new_rate') : t('dashboard.quick_advance.buttons.initiate')
-= render layout: 'add_advance', title: t('advances.add_advance.title') do
+= render layout: 'add_advance', locals: { title: t('advances.add_advance.titles.preview') } do
   = form_for(:advance_request, url: advances_perform_path, html: {method: :post, class: 'perform-advance-form', data: {securid_status: @securid_status}}) do |f|
     = f.hidden_field(:id)
     .add-advance-preview

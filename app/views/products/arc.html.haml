@@ -1,4 +1,4 @@
-- uses = %w(fund manage reduce lock shorten)
+- uses = %w(finance fund manage reduce lock shorten)
 - advantages = %w(indices maturities financing)
 - interest = %w(libor prime maturity indices)
 .row.product-page
@@ -6,11 +6,11 @@
     %h1= t('products.advances.arc.title')
     %p= t('products.advances.arc.description')
     %h2= t('products.section_headings.uses')
-    %ul.key-uses-list
+    %ul
       - uses.each do |use|
         %li= t("products.advances.arc.uses.#{use}")
     %h2= t('products.section_headings.advantages')
-    %ul.key-advantages-list
+    %ul
       - advantages.each do |advantage|
         %li= t("products.advances.arc.advantages.#{advantage}")
     %h2= t('products.section_headings.features')

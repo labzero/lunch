@@ -35,64 +35,6 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
-  shared_examples 'a MemberBalanceServiceJob backed report' do |service_job_method, job_call, deferred_job = false|
-    let(:job_response) {deferred_job ? response_hash : member_balance_service_job_instance}
-    describe "calling `#{job_call}` on the MemberBalanceServiceJob" do
-      it 'passes the member id' do
-        allow(controller).to receive(:report_disabled?).and_return(false)
-        allow(controller).to receive(:current_member_id).and_return(member_id)
-        expect(MemberBalanceServiceJob).to receive(job_call).with(member_id, any_args).and_return(job_response)
-        call_action
-      end
-      it "passes `#{service_job_method}`" do
-        expect(MemberBalanceServiceJob).to receive(job_call).with(anything, service_job_method, any_args).and_return(job_response)
-        call_action
-      end
-      it 'passes the proper uuid' do
-        expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, request.uuid, anything).and_return(job_response)
-        call_action
-      end
-    end
-    if job_call == :perform_later
-      it 'updates the job status with the user\'s id' do
-        allow(controller).to receive(:current_user).and_return(user)
-        expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
-        call_action
-      end
-      it 'sets the @job_status_url' do
-        call_action
-        expect(assigns[:job_status_url]).to eq(job_status_url(job_status))
-      end
-    end
-  end
-
-  shared_examples 'a JobStatus backed report' do
-    let(:parsed_response_hash) { double('parsed hash', with_indifferent_access: response_hash) }
-    before do
-      allow(JobStatus).to receive(:find_by).and_return(job_status)
-      allow(JSON).to receive(:parse).and_return(parsed_response_hash)
-    end
-    it 'finds the JobStatus by id, user_id, and status' do
-      allow(controller).to receive(:current_user).and_return(user)
-      expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: user_id, status: JobStatus.statuses[:completed]).and_return(job_status)
-      call_action_with_job_id
-    end
-    it 'raises an error if there is no job status found' do
-      allow(JobStatus).to receive(:find_by)
-      expect{call_action_with_job_id}.to raise_error
-    end
-    it 'parses the job_status string' do
-      job_status_string = double('job status string')
-      allow(job_status).to receive(:result_as_string).and_return(job_status_string)
-      expect(JSON).to receive(:parse).with(job_status_string).and_return(parsed_response_hash)
-      call_action_with_job_id
-    end
-    it 'destroys the job status' do
-      expect(job_status).to receive(:destroy)
-      call_action_with_job_id
-    end
-  end
-
   login_user
 
   let(:today) { Time.zone.today }
@@ -325,7 +267,13 @@ RSpec.describe ReportsController, :type => :controller do
         [{type: nil,     value: certificate_sequence, classes: [:'report-cell-narrow']},
          {type: :date,   value: issue_date,           classes: [:'report-cell-narrow']},
          {type: nil,     value: transaction_type,     classes: [:'report-cell-narrow']},
-         {type: :number, value: shares_outstanding,   classes: [:'report-cell-narrow']}]
+         {type: :number, value: shares_outstanding,   classes: [:'report-cell-narrow', :'report-cell-right']}]
+      end
+      let(:footer_data)  do
+        [
+          {value: I18n.t('reports.pages.capital_stock_trial_balance.total_shares_outstanding'), colspan: 3},
+          {value: number_of_shares, type: :number, classes: [:'report-cell-narrow', :'report-cell-right']}
+        ]
       end
       let(:min_date) { Date.new(2002,1,1) }
       let(:call_action) { get :capital_stock_trial_balance }
@@ -371,35 +319,64 @@ RSpec.describe ReportsController, :type => :controller do
         call_action
         expect(assigns[:capital_stock_trial_balance_table_data][:rows][0][:columns]).to eq(table_data)
       end
-      it 'sorts certificates by sequence number' do
-        sequence = rand(100000..999999)
-        certificate_1 = {
-          certificate_sequence: sequence + rand(100..1000),
-          issue_date:           issue_date,
-          transaction_type:     transaction_type,
-          shares_outstanding:   shares_outstanding,
+      it 'returns capital_stock_trial_balance_table_data with the footer populated' do
+        call_action
+        expect(assigns[:capital_stock_trial_balance_table_data][:footer]).to eq(footer_data)
+      end
+      describe 'certificate details' do
+        let(:sequence) { rand(100000..999999) }
+        let(:certificate_1) {
+          {
+            certificate_sequence: sequence + rand(100..1000),
+            issue_date:           issue_date,
+            transaction_type:     transaction_type,
+            shares_outstanding:   shares_outstanding,
+          }
         }
-        certificate_2 = {
-          certificate_sequence: sequence,
-          issue_date:           issue_date,
-          transaction_type:     transaction_type,
-          shares_outstanding:   shares_outstanding,
+        let(:certificate_2) {
+          {
+            certificate_sequence: sequence,
+            issue_date:           issue_date,
+            transaction_type:     transaction_type,
+            shares_outstanding:   shares_outstanding,
+          }
         }
-        certificate_3 = {
-          certificate_sequence: sequence - rand(100..1000),
-          issue_date:           issue_date,
-          transaction_type:     transaction_type,
-          shares_outstanding:   shares_outstanding,
+        let(:certificate_3) {
+          {
+            certificate_sequence: sequence - rand(100..1000),
+            issue_date:           issue_date,
+            transaction_type:     transaction_type,
+            shares_outstanding:   shares_outstanding,
+          }
         }
-        summary = {
-          certificates: [certificate_2, certificate_1, certificate_3],
-          number_of_shares: number_of_shares,
-          number_of_certificates: number_of_certificates
+        let(:certificate_4) {
+          {
+            certificate_sequence: sequence + rand(1001..2000),
+            issue_date:           issue_date,
+            transaction_type:     'undefined',
+            shares_outstanding:   shares_outstanding,
+          }
         }
-        allow(member_balances_service_instance).to receive(:capital_stock_trial_balance).and_return(summary)
-        get :capital_stock_trial_balance
-        assigned_certificates = assigns[:capital_stock_trial_balance_table_data][:rows].collect {|row| row[:columns].first[:value]}
-        expect(assigned_certificates).to eq([certificate_3[:certificate_sequence], certificate_2[:certificate_sequence], certificate_1[:certificate_sequence]])
+        let(:summary) {
+          {
+            certificates: [certificate_2, certificate_1, certificate_3, certificate_4],
+            number_of_shares: number_of_shares,
+            number_of_certificates: number_of_certificates
+          }
+        }
+        before do
+          allow(member_balances_service_instance).to receive(:capital_stock_trial_balance).and_return(summary)
+        end
+        it 'sorts certificates by sequence number' do
+          get :capital_stock_trial_balance
+          assigned_certificates = assigns[:capital_stock_trial_balance_table_data][:rows].collect {|row| row[:columns].first[:value]}
+          expect(assigned_certificates).to eq([certificate_3[:certificate_sequence], certificate_2[:certificate_sequence], certificate_1[:certificate_sequence], certificate_4[:certificate_sequence]])
+        end
+        it 'converts certificates with a transaction type of `undefiend` to the missing value string' do
+          summary[:certificates] = [certificate_4]
+          get :capital_stock_trial_balance
+          expect(assigns[:capital_stock_trial_balance_table_data][:rows][0][:columns][2][:value]).to eq(I18n.t('global.missing_value'))
+        end
       end
       RSpec.shared_examples 'a capital stock trial balance report with no data' do
         it 'returns an empty array for @capital_stock_trial_balance_table_data[:rows]' do
@@ -756,13 +733,12 @@ RSpec.describe ReportsController, :type => :controller do
     describe 'GET securities_services_statement' do
       let(:make_request) { get :securities_services_statement }
       let(:response_hash) { double('A Securities Services Statement', :'[]' => nil)}
-      let(:report_end_date) { Date.today + rand(10000) }
-      let(:month_year) { double( 'month_year' ) }
+      let(:report_end_date) { '2015-03-21'.to_date }
       let(:start_date_param) { Date.today - rand(10000) }
       describe 'when statements are available' do
         before do
-          allow(member_balance_service_instance).to receive(:securities_services_statements_available).and_return([{'month_year' => month_year, 'report_end_date' => report_end_date}])
-          allow(member_balance_service_instance).to receive(:securities_services_statement).with(report_end_date).and_return([response_hash])
+          allow(member_balance_service_instance).to receive(:securities_services_statements_available).and_return([{'report_end_date' => report_end_date}])
+          allow(member_balance_service_instance).to receive(:securities_services_statement).with(report_end_date).and_return(response_hash)
           allow(response_hash).to receive(:[]).with(:securities_fees).and_return([{}])
           allow(response_hash).to receive(:[]).with(:transaction_fees).and_return([{}])
         end
@@ -776,7 +752,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'should assign `@statement` to the result of calling MemberBalanceService.securities_services_statement' do
           make_request
-          expect(assigns[:statement]).to eq([response_hash])
+          expect(assigns[:statement]).to eq(response_hash)
         end
         it 'assigns @data_available a value of true' do
           make_request
@@ -786,13 +762,15 @@ RSpec.describe ReportsController, :type => :controller do
           expect(member_balance_service_instance).to receive(:securities_services_statement).and_return(nil)
           expect{make_request}.to raise_error(StandardError)
         end
-        it 'set the debit date to the last business day of the next month following the end date' do
-          next_month_end = double(Date)
+        it 'set the debit date to the debit date found in the statement' do
           debit_date = double(Date)
-          allow(controller).to receive(:default_dates_hash).with(report_end_date).and_return({next_month_end: next_month_end})
-          allow(controller).to receive(:most_recent_business_day).with(next_month_end).and_return(debit_date)
+          allow(response_hash).to receive(:[]).with(:debit_date).and_return(debit_date)
           make_request
           expect(assigns[:debit_date]).to eq(debit_date)
+        end
+        it 'sets @dropdown_options to the dates and names of the available statements' do
+          make_request
+          expect(assigns[:dropdown_options]).to eq([[ 'March 2015', report_end_date]])
         end
         describe 'with the report disabled' do
           before do
@@ -805,6 +783,10 @@ RSpec.describe ReportsController, :type => :controller do
           it 'should set @start_date if the report is disabled' do
             make_request
             expect(assigns[:start_date]).to eq(report_end_date)
+          end
+          it 'sets @debit_date to nil if the report is disabled' do
+            make_request
+            expect(assigns[:debit_date]).to be_nil
           end
         end
       end
@@ -1412,7 +1394,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'raises an error if the MAPI endpoint returns nil' do
         allow(member_balance_service_instance).to receive(:interest_rate_resets).and_return(nil)
-        expect{interest_rate_resets}.to raise_error
+        expect{interest_rate_resets}.to raise_error(StandardError)
       end
     end
     describe 'GET todays_credit' do
@@ -1514,7 +1496,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'raises an error if the MAPI endpoint returns nil' do
         allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return(nil)
-        expect{todays_credit}.to raise_error
+        expect{todays_credit}.to raise_error(StandardError)
       end
     end
 
@@ -1603,7 +1585,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'raises an error if the MAPI endpoint returns nil' do
         allow(member_balance_service_instance).to receive(:mortgage_collateral_update).and_return(nil)
-        expect{mortgage_collateral_update}.to raise_error
+        expect{mortgage_collateral_update}.to raise_error(StandardError)
       end
     end
   end
@@ -1753,7 +1735,7 @@ RSpec.describe ReportsController, :type => :controller do
 
       it 'raises an error if `advances_details` is nil' do
         allow(JSON).to receive(:parse).and_return(double('job status response', with_indifferent_access: nil))
-        expect{call_action_with_job_id}.to raise_error
+        expect{call_action_with_job_id}.to raise_error(StandardError)
       end
     end
     describe '`skip_deferred_load` set to true' do
@@ -1968,7 +1950,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'raises an error if no JobStatus is found' do
           allow(JobStatus).to receive(:find_by)
-          expect{current_price_indications}.to raise_error
+          expect{current_price_indications}.to raise_error(ActiveRecord::RecordNotFound)
         end
         it 'destroys the JobStatus' do
           expect(job_status).to receive(:destroy)
@@ -2423,7 +2405,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'raises an error if there is no job status found' do
           allow(JobStatus).to receive(:find_by)
-          expect{call_action_with_job_id}.to raise_error
+          expect{call_action_with_job_id}.to raise_error(ActiveRecord::RecordNotFound)
         end
         it 'parses the job_status string' do
           job_status_string = double('job status string')
@@ -2535,13 +2517,14 @@ RSpec.describe ReportsController, :type => :controller do
 
   describe 'GET authorizations' do
     it_behaves_like 'a user required action', :get, :authorizations
-    it_behaves_like 'a report that can be downloaded', :authorizations, [:pdf]
+    it_behaves_like 'a report that can be downloaded', :authorizations, [:pdf, :xlsx]
     it_behaves_like 'a report with instance variables set in a before_filter', :authorizations
     it_behaves_like 'a controller action with an active nav setting', :authorizations, :reports
     describe 'view instance variables' do
       let(:member_service_instance) {double('MembersService')}
       let(:user_no_roles) {{display_name: 'User With No Roles', roles: [], surname: 'With No Roles', given_name: 'User'}}
       let(:user_etransact) {{display_name: 'Etransact User', roles: [User::Roles::ETRANSACT_SIGNER], surname: 'User', given_name: 'Etransact'}}
+      let(:signer_manager) { [User::Roles::SIGNER_MANAGER] }
       let(:user_a) { {display_name: 'R&A User', roles: [User::Roles::SIGNER_MANAGER], given_name: 'R&A', surname: 'User'} }
       let(:user_b) { {display_name: 'Collateral User', roles: [User::Roles::COLLATERAL_SIGNER], given_name: 'Collateral', surname: 'User'} }
       let(:user_c) { {display_name: 'Wire Lady', roles: [User::Roles::WIRE_SIGNER], given_name: 'Wire', surname: 'Lady'} }
@@ -2573,6 +2556,11 @@ RSpec.describe ReportsController, :type => :controller do
           expect(option.last).to be_kind_of(String)
         end
       end
+      it 'sets @authorizations_dropdown_mapping to the `authorizations_filter` param' do
+        get :authorizations
+        expect(assigns[:authorizations_dropdown_mapping]).to eq(ReportsController::AUTHORIZATIONS_DROPDOWN_MAPPING)
+      end
+
       describe 'when not passed a Job ID' do
         let(:job) { double('MemberSignersAndUsersJob', job_status: job_status) }
         let(:make_request) { get :authorizations }
@@ -2655,6 +2643,7 @@ RSpec.describe ReportsController, :type => :controller do
           end
         end
       end
+
       describe '`@authorizations_table_data`' do
         it 'returns a hash with `column_headings`' do
           get :authorizations
@@ -2744,6 +2733,12 @@ RSpec.describe ReportsController, :type => :controller do
               expect(assigns[:authorizations_table_data][:rows]).to satisfy { |rows| !rows.find {|row| [user_etransact[:display_name], user_no_roles[:display_name]].include?(row[:columns].first[:value]) } }
             end
           end
+          it 'assigns `@authorizations_table_data[:raw_roles]` to `user_roles`' do
+            allow(signers_and_users).to receive(:map).and_return(signers_and_users)
+            allow(signers_and_users).to receive(:reject).and_return(signers_and_users)
+            get :authorizations, job_id: job_id
+            expect(assigns[:authorizations_table_data][:raw_roles]).to eq(signers_and_users)
+          end
         end
       end
     end
@@ -2770,7 +2765,6 @@ RSpec.describe ReportsController, :type => :controller do
     let(:credit_outstanding) { double('credit_outstanding', :[] => nil) }
     let(:sta_number) { double('An STA Number') }
     let(:member_profile_response) { {collateral_delivery_status: 'Y', rhfa: rhfa, approved_long_term_credit: approved_long_term_credit, advances: advances, credit_outstanding: credit_outstanding} }
-
     before do
       allow(subject).to receive(:current_member_id).and_return(member_id)
       allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member_details)
@@ -3113,7 +3107,7 @@ RSpec.describe ReportsController, :type => :controller do
 
     it 'raises an error if the report is disabled' do
       allow(controller).to receive(:report_disabled?).with(ReportsController::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true)
-      expect {make_request}.to raise_error
+      expect {make_request}.to raise_error(/Report Disabled/)
     end
     it 'assigns @report_name' do
       make_request
@@ -3337,12 +3331,6 @@ RSpec.describe ReportsController, :type => :controller do
     end
     describe '`roles_for_signers` method' do
       let(:role_mappings) { ReportsController::AUTHORIZATIONS_MAPPING }
-      it 'returns an array containing the I18n translation of the roles for a given user' do
-        role_mappings.each_key do |role|
-          user = {:roles => [role]}
-          expect(subject.send(:roles_for_signers, user)).to eq([role_mappings[role]])
-        end
-      end
       it 'returns an empty array a given user has no roles' do
         role_mappings.each_key do |role|
           user = {:roles => []}
@@ -3353,12 +3341,12 @@ RSpec.describe ReportsController, :type => :controller do
         roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER]
         sorted_roles = roles.sort_by {|role| described_class::AUTHORIZATIONS_ORDER.index(role)}
         user = {:roles => roles}
-        expect(subject.send(:roles_for_signers, user)).to eq(sorted_roles.collect {|role| role_mappings[role]})
+        expect(subject.send(:roles_for_signers, user)).to eq(sorted_roles.collect {|role| role})
       end
       it 'hides roles that are implied by a higher role' do
         roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::SIGNER_MANAGER]
         user = {:roles => roles}
-        expect(subject.send(:roles_for_signers, user)).to match_array([role_mappings[User::Roles::WIRE_SIGNER], role_mappings[User::Roles::SIGNER_MANAGER]])
+        expect(subject.send(:roles_for_signers, user)).to match_array([User::Roles::WIRE_SIGNER, User::Roles::SIGNER_MANAGER])
       end
     end
 
@@ -3715,6 +3703,9 @@ RSpec.describe ReportsController, :type => :controller do
       let(:item_2) { {foo: 1} }
       let(:item_3) { {foo: 15} }
       let(:data) { [item_1, item_2, item_3] }
+      it 'returns nil if passed no data' do
+        expect(controller.send(:sort_report_data, nil, :foo)).to eq(nil)
+      end
       it 'returns an empty array if it is passed an empty array as the first argument' do
         expect(controller.send(:sort_report_data, [], :foo)).to eq([])
       end

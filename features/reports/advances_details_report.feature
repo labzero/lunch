@@ -30,7 +30,6 @@ Scenario: Viewing historic advances details
   When I click the datepicker field
   And I choose the "custom date" preset in the datepicker
   And I select the 14th of "last month" in the single datepicker calendar
-  And I click the datepicker apply button
   Then I should see advances details for the 14th of last month
 
 @jira-mem-405
@@ -135,13 +134,14 @@ Scenario: Member interacts with the 'report loading' flyout when downloading a P
   When I cancel the report download from the flyout
   Then I should not see the report download flyout
 
-@timing-sensitive @jira-mem-415 @jira-mem-543
+@timing-sensitive @jira-mem-415 @jira-mem-543 @jira-mem-1533
 Scenario: Member interacts with the 'report loading' flyout when downloading an XLSX of the Advance Detail report
   Given I am on the "Advances Detail" report page
   When I request an XLSX
   Then I should see the report download flyout
   When I cancel the report download from the flyout
   Then I should not see the report download flyout
+  And the report download should be canceled
 
 @resque-backed @smoke @jira-mem-415 @jira-mem-543
 Scenario: Member downloads a PDF of the Advances Detail report

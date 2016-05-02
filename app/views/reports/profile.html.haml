@@ -4,7 +4,7 @@
   .report-header
     %h1= @member_details[:name]
   .report-main-body
-    %section.report-info-and-navigation
+    %section.report-profile-info-and-navigation
       %h2= t('reports.pages.member_profile.title')
       .row
         .column-3
@@ -14,7 +14,7 @@
             %dd= @current_member_id
             %dt= t('reports.pages.member_profile.fhfa_number')
             %dd= @member_profile[:fhfb_id]
-        .column-3
+        .column-3.report-profile-contact-info
           %dl
             %dt= t('reports.pages.member_profile.relationship_manager')
             %dd= @contacts[:rm][:full_name]
@@ -26,52 +26,52 @@
             %dd= @contacts[:regulator]
             %dt= t('reports.pages.member_profile.collateral_status')
             %dd= (@member_profile[:collateral_delivery_status] == 'Y' ? t('reports.pages.member_profile.delivered') : t('reports.pages.member_profile.not_delivered') if @member_profile[:collateral_delivery_status])
-            %dt= t('reports.pages.member_profile.cqr')
-            %dd= @member_profile[:cqr_rating]
+            %dt.report-profile-cqr= t('reports.pages.member_profile.cqr')
+            %dd.report-profile-cqr= @member_profile[:cqr_rating]
         .column-3
-          %ul
+          %ul.report-profile-navigation
             %li=link_to t('global.advances'), reports_advances_path
             %li=link_to t('global.authorizations'), reports_authorizations_path
             %li=link_to t('global.borrowing_capacity'), reports_borrowing_capacity_path
             %li=link_to t('global.letters_of_credit'), reports_letters_of_credit_path
-    %section.profile-data
+    %section.report-profile-data
       .row
         .column-3-span-2
           %h2=t('reports.pages.member_profile.collateral.title')
           %section.standard-credit-borrowing-capacity-tables.report-tables-section
-            .horizontal-axis-label.market-value=t('reports.pages.member_profile.market_value')
-            .horizontal-axis-label.borrowing-capacity=t('reports.pages.member_profile.borrowing_capacity')
+            .report-profile-horizontal-axis-label.report-profile-market-value=t('reports.pages.member_profile.market_value')
+            .report-profile-horizontal-axis-label.report-profile-borrowing-capacity=t('reports.pages.member_profile.borrowing_capacity')
             %table.report-table.report-parent-table{data: {sortable: false, :'default-sort' => [[1, 'desc']], :'missing-data-message' => missing_data_message, 'disable-auto-width' => true}, class: ('table-loading' if false)}
               %thead
                 %tr
-                  %th.cutout
+                  %th.report-profile-table-cutout
                   %th=t('reports.pages.member_profile.excess')
                   %th=t('reports.pages.member_profile.total')
                   %th=t('reports.pages.member_profile.excess')
                   %th=t('reports.pages.member_profile.total')
-              - if @collateral_table[:standard].to_h.length > 0
-                %tbody
+              %tbody
+                - if @collateral_table[:standard].to_h.length > 0
                   %tr
                     %td.report-cell-narrow= t('reports.pages.member_profile.collateral.regular_collateral')
                     %td.report-cell-right
                     %td.report-cell-right
-                    %td.report-cell-right= fhlb_formatted_currency_whole(@collateral_table[:standard_excess_capacity])
-                    %td.report-cell-right= fhlb_formatted_currency_whole(@collateral_table[:standard_credit_totals][:borrowing_capacity])
+                    %td.report-cell-right= fhlb_formatted_currency_whole(@collateral_table[:standard_excess_capacity], force_unit: true)
+                    %td.report-cell-right= fhlb_formatted_currency_whole(@collateral_table[:standard_credit_totals][:borrowing_capacity], force_unit: true)
               - if @collateral_table[:sbc].to_h.length > 0
                 %tbody
                   %tr
                     %td.report-cell-narrow=t('reports.pages.member_profile.collateral.sbc')
-                    %td.report-cell-right= fhlb_formatted_currency_whole(@collateral_table[:sbc_totals][:remaining_market_value])
-                    %td.report-cell-right= fhlb_formatted_currency_whole(@collateral_table[:sbc_totals][:total_market_value])
-                    %td.report-cell-right= fhlb_formatted_currency_whole(@collateral_table[:sbc_totals][:remaining_borrowing_capacity])
-                    %td.report-cell-right= fhlb_formatted_currency_whole(@collateral_table[:sbc_totals][:total_borrowing_capacity])
+                    %td.report-cell-right= fhlb_formatted_currency_whole(@collateral_table[:sbc_totals][:remaining_market_value], force_unit: true)
+                    %td.report-cell-right= fhlb_formatted_currency_whole(@collateral_table[:sbc_totals][:total_market_value], force_unit: true)
+                    %td.report-cell-right= fhlb_formatted_currency_whole(@collateral_table[:sbc_totals][:remaining_borrowing_capacity], force_unit: true)
+                    %td.report-cell-right= fhlb_formatted_currency_whole(@collateral_table[:sbc_totals][:total_borrowing_capacity], force_unit: true)
                   -@collateral_table[:sbc][:collateral].sort{|a,b| b[0]<=>a[0]}.each do |type, value|
                     %tr
                       %td.report-cell-narrow= t("dashboard.your_account.borrowing_capacity.#{type}")
-                      %td.report-cell-right= fhlb_formatted_currency_whole(value[:remaining_market_value])
-                      %td.report-cell-right= fhlb_formatted_currency_whole(value[:total_market_value])
-                      %td.report-cell-right= fhlb_formatted_currency_whole(value[:remaining_borrowing_capacity])
-                      %td.report-cell-right= fhlb_formatted_currency_whole(value[:total_borrowing_capacity])
+                      %td.report-cell-right= fhlb_formatted_currency_whole(value[:remaining_market_value], force_unit: true)
+                      %td.report-cell-right= fhlb_formatted_currency_whole(value[:total_market_value], force_unit: true)
+                      %td.report-cell-right= fhlb_formatted_currency_whole(value[:remaining_borrowing_capacity], force_unit: true)
+                      %td.report-cell-right= fhlb_formatted_currency_whole(value[:total_borrowing_capacity], force_unit: true)
           %section
             .column-3
               %h2= t('reports.pages.member_profile.capital_stock.title')
@@ -92,4 +92,4 @@
           = render 'reports_footer_only_table', table_data: @total_available_credit_table
 
           %h2=t('reports.pages.member_profile.sta.title')
-          = render 'reports_table', sortable: false, table_data: @sta_table, table_class: 'sta'
+          = render 'reports_table', sortable: false, table_data: @sta_table, table_class: 'report-profile-sta'

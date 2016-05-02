@@ -15,7 +15,7 @@
 %table.report-table{data: {sortable: is_sortable, :'default-sort' => [default_sort], :'disable-auto-width' => disable_auto_width, :'missing-data-message' => missing_data_message}, class: table_class}
   - if deferred && hide_column_headings
     %tbody
-      = render 'deferred_table_row'
+      = render 'reports/deferred_table_row'
   - else
     %thead{style: ('display: none' if hide_column_headings)}
       - if table_data[:table_heading]
@@ -45,7 +45,7 @@
               %th.report-cell-narrow{data: {unsortable: sub_index != 0}}= sub_heading
     %tbody
       - if deferred
-        = render 'deferred_table_row', colspan: table_data[:column_headings].count
+        = render 'reports/deferred_table_row', colspan: table_data[:column_headings].count
       - elsif table_data[:rows].blank? && !is_sortable
         %tr
           %td.dataTables_empty{colspan: table_data[:column_headings].count}= missing_data_message

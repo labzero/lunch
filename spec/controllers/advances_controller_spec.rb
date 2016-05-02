@@ -17,7 +17,10 @@ RSpec.describe AdvancesController, :type => :controller do
       end
 
       it 'logs at the `info` log level' do
-        expect(subject.logger).to receive(:info).exactly(3)
+        allow(subject.logger).to receive(:info).and_call_original
+        expect(subject.logger).to receive(:info).with(no_args) do |*args, &block|
+          expect(block.call).to match(/Exception: /i)
+        end.exactly(:twice)
         make_request
       end
       it 'puts the advance_request as JSON in the log' do
@@ -32,38 +35,59 @@ RSpec.describe AdvancesController, :type => :controller do
   end
 
   describe 'GET manage_advances' do
-    let(:member_balances_service_instance) { double('MemberBalanceService') }
-    let(:response_advance_hash) { double('MemberBalanceServiceHash') }
-    let(:trade_date) { double('trade_date') }
-    let(:funding_date) { double('funding_date') }
-    let(:maturity_date) { double('maturity_date') }
-    let(:advance_number) { double('advance_number') }
-    let(:advance_type) { double('advance_type') }
-    let(:status) { double('status') }
-    let(:interest_rate) { double('interest_rate') }
-    let(:current_par) { double('current_par') }
+    let(:job_id) { SecureRandom.hex }
+    let(:job_status) { double('JobStatus', update_attributes!: nil, id: job_id, destroy: nil, result_as_string: nil ) }
+    let(:member_balance_service_job_instance) { double('member_balance_service_job_instance', job_status: job_status) }
+    let(:response_hash) { double('MemberBalanceServiceHash') }
+    let(:trade_date) { (Time.zone.today + (rand(1..10))).to_s }
+    let(:funding_date) { (Time.zone.today + (rand(1..10))).to_s }
+    let(:maturity_date) { (Time.zone.today - (rand(1..10))).to_s }
+    let(:advance_number) { SecureRandom.hex }
+    let(:advance_type) { SecureRandom.hex }
+    let(:status) { SecureRandom.hex }
+    let(:interest_rate) { rand(1..100) / 100.0 }
+    let(:current_par) { rand(10000..99999) }
+    let(:user) { controller.current_user }
+    let(:user_id) { user.id }
+    let(:member_id) { controller.current_member_id }
     let(:active_advances_response) {[{'trade_date' => trade_date, 'funding_date' => funding_date, 'maturity_date' => maturity_date, 'advance_number' => advance_number, 'advance_type' => advance_type, 'status' => status, 'interest_rate' => interest_rate, 'current_par' => current_par}]}
+    let(:call_action) { get :manage }
 
     before do
-      allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
-      allow(member_balances_service_instance).to receive(:active_advances).and_return(response_advance_hash)
-      allow(response_advance_hash).to receive(:collect)
+      allow(job_status).to receive(:result_as_string).and_return(active_advances_response.to_json)
+      allow(response_hash).to receive(:collect)
     end
     it_behaves_like 'a user required action', :get, :manage
     it_behaves_like 'a controller action with an active nav setting', :manage, :advances
     it { should use_before_filter(:set_html_class) }
     it 'renders the manage_advances view' do
-      get :manage
+      call_action
       expect(response.body).to render_template(:manage)
     end
-    it 'returns active advances data' do
-      allow(member_balances_service_instance).to receive(:active_advances).and_return(active_advances_response)
-      get :manage
-      expect(assigns[:advances_data_table][:rows][0][:columns]).to eq([{:type=>:date, :value=>trade_date}, {:type=>:date, :value=>funding_date}, {:type=>:date, :value=>maturity_date}, {:value=>advance_number}, {:value=>advance_type}, {:value=>status}, {:type=>:index, :value=>interest_rate}, {:type=>:number, :value=>current_par}])
+    describe 'when a job_id is not present' do
+      it_behaves_like 'a MemberBalanceServiceJob backed report', 'active_advances', :perform_later
+
+      before { allow(MemberBalanceServiceJob).to receive(:perform_later).and_return(member_balance_service_job_instance) }
+
+      it 'sets the @load_url with the appropriate params' do
+        call_action
+        expect(assigns[:load_url]).to eq(advances_manage_url(job_id: job_status.id))
+      end
+      it 'sets @advances_detail[:deferred] to true' do
+        call_action
+        expect(assigns[:advances_data_table][:deferred]).to eq(true)
+      end
     end
-    it 'raises an error if active_advances is nil' do
-      allow(member_balances_service_instance).to receive(:active_advances).and_return(nil)
-      expect{get :manage}.to raise_error(StandardError)
+    describe 'job_id present' do
+      let(:call_action_with_job_id) { get :manage, job_id: job_id }
+      it_behaves_like 'a JobStatus backed report'
+      before do
+        allow(JobStatus).to receive(:find_by).and_return(job_status)
+      end
+      it 'sets @advances_detail to the hash returned from the job status' do
+        call_action_with_job_id
+        expect(assigns[:advances_data_table][:rows][0][:columns]).to eq([{:type=>:date, :value=>trade_date}, {:type=>:date, :value=>funding_date}, {:type=>:date, :value=>maturity_date}, {:value=>advance_number}, {:value=>advance_type}, {:value=>status}, {:type=>:index, :value=>interest_rate}, {:type=>:number, :value=>current_par}])
+      end
     end
   end
 
@@ -73,10 +97,11 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:advance_amount) { double('amount') }
     let(:advance_type) { double('type') }
     let(:advance_term) { double('term') }
+    let(:advance_term_type) { double('advance_term_type') }
     let(:message_service_instance) { double('service instance', todays_quick_advance_message: nil) }
     let(:etransact_service_instance) { double('service instance', etransact_status: nil, etransact_active?: nil) }
     let(:make_request) { get :select_rate }
-    let(:advance_request) { double(AdvanceRequest, amount: advance_amount, type: advance_type, term: advance_term, id: advance_id, :allow_grace_period= => nil) }
+    let(:advance_request) { double(AdvanceRequest, amount: advance_amount, type: advance_type, term: advance_term, term_type: advance_term_type, id: advance_id, :allow_grace_period= => nil, :type= => nil, :term= => nil, :amount= => nil) }
 
     before do
       allow(MessageService).to receive(:new).and_return(message_service_instance)
@@ -123,6 +148,15 @@ RSpec.describe AdvancesController, :type => :controller do
       make_request
       expect(assigns[:selected_term]).to eq(advance_term)
     end
+    it 'sets @active_term_type from the advance request' do
+      make_request
+      expect(assigns[:active_term_type]).to eq(advance_term_type)
+    end
+    it 'sets @active_term_type to `:vrc` if the term_type of the advance request is nil' do
+      allow(advance_request).to receive(:term_type)
+      make_request
+      expect(assigns[:active_term_type]).to eq(:vrc)
+    end
     it 'enables the grace period if called before the desk closes' do
       allow(etransact_service_instance).to receive(:etransact_active?).and_return(true)
       expect(advance_request).to receive(:allow_grace_period=).with(true)
@@ -132,6 +166,20 @@ RSpec.describe AdvancesController, :type => :controller do
       allow(etransact_service_instance).to receive(:etransact_active?).and_return(false)
       expect(advance_request).not_to receive(:allow_grace_period=)
       make_request
+    end
+    describe 'when there are advance_request parameters passed' do
+      it 'assigns the advance_request `type` when present' do
+        expect(advance_request).to receive(:type=).with(advance_type.to_s)
+        get :select_rate, advance_request: {type: advance_type}
+      end
+      it 'assigns the advance_request `term` when present' do
+        expect(advance_request).to receive(:term=).with(advance_term.to_s)
+        get :select_rate, advance_request: {term: advance_term}
+      end
+      it 'assigns the advance_request `amount` when present' do
+        expect(advance_request).to receive(:amount=).with(advance_amount.to_s)
+        get :select_rate, advance_request: {amount: advance_amount}
+      end
     end
   end
 

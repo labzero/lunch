@@ -1,4 +1,4 @@
-= render layout: 'add_advance', title: t('advances.add_advance.title') do
+= render layout: 'add_advance' do
   = form_for(:advance_request, url: advances_preview_path, html: {method: :post, class: 'add-advance-form'}) do |f|
     = f.hidden_field(:id)
     .add-advance-capstock

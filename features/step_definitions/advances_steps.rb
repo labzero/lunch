@@ -130,13 +130,10 @@ end
 When(/^I am on the add advance preview screen$/) do
   step 'I am on the "Add Advance" advances page'
   step 'I enter an amount into the add advance amount field'
+  step 'I click to toggle to the frc rates'
   step 'I select the rate with a term of "2week" and a type of "aaa" on the add advance page'
   step 'I click on the initiate advance button on the add advance page'
 end
-
-# When(/^I click on the add advance confirm button$/) do
-#   page.find('.perform-advance-form input[type=submit]').click
-# end
 
 When(/^I confirm an added advance with a rate that changes$/) do
   step 'I enter my SecurID pin and token'
@@ -153,6 +150,7 @@ end
 Given(/^I am on the add advance stock purchase screen$/) do
   step 'I am on the "Add Advance" advances page'
   step 'I enter "1000131" into the add advance amount field'
+  step 'I click to toggle to the frc rates'
   step 'I select the rate with a term of "2week" and a type of "whole" on the add advance page'
   step 'I click on the initiate advance button on the add advance page'
   step "I should be on the add advance stock purchase screen"
@@ -172,6 +170,7 @@ end
 
 When(/^I preview a loan that doesn't require a capital stock purchase on the add advance page$/) do
   step 'I enter "999999" into the add advance amount field'
+  step 'I click to toggle to the frc rates'
   step 'I select the rate with a term of "2week" and a type of "whole" on the add advance page'
   step 'I click on the initiate advance button on the add advance page'
   step "I should see a preview of the advance"
@@ -197,6 +196,7 @@ When(/^I try to (preview|take out) an added advance on a disabled product$/) do 
   amount = mode == 'preview' ? 100004 : 100005
   step 'I am on the "Add Advance" advances page'
   step "I enter \"#{amount}\" into the add advance amount field"
+  step 'I click to toggle to the frc rates'
   step 'I select the rate with a term of "2week" and a type of "whole" on the add advance page'
   step 'I click on the initiate advance button on the add advance page'
   if mode == 'take out'
@@ -278,4 +278,20 @@ end
 
 When(/^the add advance rate has changed$/) do
   # implement code to ensure rate is displayed as having changed
+end
+
+Then(/^there should be no rate selected$/) do
+  page.assert_no_selector('.cell-selected')
+end
+
+When(/^I click on the dashboard module limited pricing notice$/) do
+  page.find('.dashboard-module-limited-pricing-notice').click
+end
+
+When(/^I click to toggle to the (frc|vrc) rates$/) do |rate_type|
+  page.find(".advance-rates-table-toggle span[data-active-term-type='#{rate_type}']").click
+end
+
+Then(/^I should not see any rates selected$/) do
+  page.assert_no_selector('.advance-rates-table .rate-selected')
 end

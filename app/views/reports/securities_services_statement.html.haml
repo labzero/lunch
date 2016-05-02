@@ -33,7 +33,7 @@
         %h2.report-table-title= t('reports.pages.securities_services_statement.tables.other')
         = render 'securities_services_table', rows: [[:income_disbursement, :disbursement, :per_item_cusip], [:pledge_status_change, :pledge_status, :per_item], [:certifications, :certifications, :per_hour, '*'], [:research, :research, :per_hour, '*'], [:handling, :handling, :per_hour, '*']], data: @statement
         .report-summary-data.report-summary-right
-          %h3= report_summary_with_date('reports.pages.securities_services_statement.footer', fhlb_date_long_alpha(@start_date), {account_number: @statement[:sta_account_number]})
+          %h3= report_summary_with_date('reports.pages.securities_services_statement.footer', fhlb_date_long_alpha(@debit_date), substitutions: {account_number: @statement[:sta_account_number]})
           %p= fhlb_formatted_currency(@statement[:total])
       %small
         %p= t('reports.pages.securities_services_statement.footnote', footnote: '*')

@@ -50,7 +50,8 @@ class CorporateCommunication
 
       images = []
       body.xpath('//img/@src').each do |image_url|
-        image_details = process_email_image(image_url)
+        next if image_url.content =~ /\Acid:/
+        image_details = process_email_image(image_url.content)
         image_url.content = "cid:#{image_details[:fingerprint]}"
         images << image_details
       end
@@ -92,6 +93,7 @@ class CorporateCommunication
     end
 
     def self.process_email(email, category=nil)
+      raise ArgumentError.new('email must not be nil') if email.nil?
       body_parts = process_email_html(email)
       attachments = process_email_attachments(email)
       { 

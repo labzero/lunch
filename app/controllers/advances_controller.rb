@@ -26,29 +26,44 @@ class AdvancesController < ApplicationController
   end
   
   def manage
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    active_advances_response = member_balances.active_advances
-    raise StandardError, "There has been an error and AdvancesController#manage_advances has encountered nil. Check error logs." if active_advances_response.nil?
     column_headings = [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), t('advances.status'), t('advances.rate'), t('common_table_headings.current_par') + ' ($)']
-    rows = active_advances_response.collect do |row|
-      columns = []
-      row.each do |value|
-        if value[0]=='interest_rate'
-          columns << {type: :index, value: value[1]}
-        elsif value[0]=='current_par'
-            columns << {type: :number, value: value[1]}
-        elsif value[0]=='trade_date' || value[0]=='funding_date' || (value[0]=='maturity_date' and value[1] != 'Open')
-          columns << {type: :date, value: value[1]}
-        else
-          columns << {value: value[1]}
-        end
-      end
-      {columns: columns}
-    end
     @advances_data_table = {
       :column_headings => column_headings,
-      :rows => rows
+      :rows => []
     }
+    if params[:job_id]
+      job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
+      raise ActiveRecord::RecordNotFound unless job_status
+      active_advances_response = JSON.parse(job_status.result_as_string).collect! {|o| o.with_indifferent_access}
+      job_status.destroy
+
+      raise StandardError, "There has been an error and AdvancesController#manage_advances has encountered nil. Check error logs." if active_advances_response.nil?
+      rows = active_advances_response.collect do |row|
+        columns = []
+        row.each do |value|
+          if value[0]=='interest_rate'
+            columns << {type: :index, value: value[1]}
+          elsif value[0]=='current_par'
+              columns << {type: :number, value: value[1]}
+          elsif value[0]=='trade_date' || value[0]=='funding_date' || (value[0]=='maturity_date' and value[1] != 'Open')
+            columns << {type: :date, value: value[1]}
+          else
+            columns << {value: value[1]}
+          end
+        end
+        {columns: columns}
+      end
+
+      @advances_data_table[:rows] = rows
+
+      render layout: false if request.xhr?
+    else
+      job_status = MemberBalanceServiceJob.perform_later(current_member_id, 'active_advances', request.uuid).job_status
+      job_status.update_attributes!(user_id: current_user.id)
+      @job_status_url = job_status_url(job_status)
+      @load_url = advances_manage_url(job_id: job_status.id)
+      @advances_data_table[:deferred] = true
+    end
   end
 
   # GET
@@ -56,10 +71,17 @@ class AdvancesController < ApplicationController
     etransact_service = EtransactAdvancesService.new(request)
     @limited_pricing_message = MessageService.new.todays_quick_advance_message
     @etransact_status = etransact_service.etransact_status(current_member_id)
+    advance_params = params[:advance_request]
+    if advance_params
+      advance_request.type = advance_params[:type] unless advance_params[:type].blank?
+      advance_request.term = advance_params[:term] unless advance_params[:term].blank?
+      advance_request.amount = advance_params[:amount] unless advance_params[:amount].blank?
+    end
     @advance_request_id = advance_request.id
     @selected_amount = advance_request.amount
     @selected_type = advance_request.type
     @selected_term = advance_request.term
+    @active_term_type = advance_request.term_type || :vrc
     advance_request.allow_grace_period = true if etransact_service.etransact_active?
   end
 

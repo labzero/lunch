@@ -30,19 +30,19 @@ $(function () {
     };
   };
 
-  function getQuickAdvanceRates() {
+  function getAdvanceRates() {
     if (!addAdvanceRatesPromise) {
       var fetchRatesUrl = $rateTable.data('fetch-rates-url');
       addAdvanceRatesPromise = $.get(fetchRatesUrl);
       addAdvanceRatesPromise.error(function() {
         addAdvanceRatesPromise = false;
       });
-    }
+    };
     return addAdvanceRatesPromise;
   };
 
-  function showQuickAdvanceRates() {
-    getQuickAdvanceRates().success(function(data) {
+  function showAdvanceRates() {
+    getAdvanceRates().success(function(data) {
       var tbody = $rateTable.find('tbody');
       tbody.children().remove();
       tbody.append($(data.html));
@@ -50,6 +50,8 @@ $(function () {
       $idField.val(data.id);
       Fhlb.Track.quick_advance_rate_table();
       addAdvanceRatesPromise = false;
+      selectColumnLabelIfRatePreSelected();
+      validateForm();
     });
   };
 
@@ -59,7 +61,7 @@ $(function () {
       var $this = $(this);
       if (!$this.hasClass('disabled-cell')) {
         $('.advance-rates-table td, .advance-rates-table th').removeClass('cell-selected cell-hovered');
-        var col = getColumnIndex($this);
+        var col = $this.index();
         $this.addClass('cell-selected').closest('tr').find('td.row-label').addClass('cell-selected');
         $($rateTable.find('tr.add-advance-column-labels th')[col]).addClass('cell-selected');
       };
@@ -69,20 +71,20 @@ $(function () {
     // Hover behavior
     $rateTableCells.hover( function(){
       var $this = $(this);
-      var col = getColumnIndex($this);
+      var col = $this.index();
       if (!$this.hasClass('cell-selected') && $this.hasClass('selectable-cell')) {
         $this.toggleClass('cell-hovered').closest('tr').find('td.row-label').toggleClass('cell-hovered');
         $($rateTable.find('tr.add-advance-column-labels th')[col]).toggleClass('cell-hovered');
-      }
+      };
     });
   };
 
-  function getColumnIndex($cell) {
-    if ($cell.closest('tr').hasClass('add-advance-table-label-row')) {
-      return $cell.index() - 1;
-    } else {
-      return $cell.index();
-    }
+  function selectColumnLabelIfRatePreSelected() {
+    var $selectedCell = $rateTable.find('td.cell-selected.selectable-cell');
+    if ($selectedCell.length) {
+      var col = $selectedCell.index();
+      $($rateTable.find('tr.add-advance-column-labels th')[col]).addClass('cell-selected');
+    };
   };
 
   function setRateFromElementData($element) {
@@ -99,7 +101,7 @@ $(function () {
 
   // Get rates only when there is a rate table
   if ($rateTable.length > 0) {
-    showQuickAdvanceRates();
+    showAdvanceRates();
   };
 
   // Perform Advance
@@ -132,6 +134,17 @@ $(function () {
       return false
     } else {
       showAddAdvanceLoadingState();
+    };
+  });
+
+  // Rate Table Toggle Behavior
+  var $rateTableWrapper = $('.advance-rates-table-wrapper');
+  $('.advance-rates-table-toggle span').on('click', function(e) {
+    var selectedTermType = $(this).data('active-term-type');
+    if ($rateTableWrapper.attr('data-active-term-type') !== selectedTermType) {
+      $rateTableWrapper.attr('data-active-term-type', selectedTermType);
+      $rateTable.find('td, th').removeClass('cell-selected');
+      validateForm();
     };
   });
 });

@@ -674,7 +674,7 @@ describe MAPI::ServiceApp do
         end
         it 'raises an error if the settings endpoint returns nil' do
           allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(nil)
-          expect{check_advance}.to raise_error
+          expect{check_advance}.to raise_error(/returned nil/i)
         end
       end
     end

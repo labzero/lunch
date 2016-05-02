@@ -1,0 +1,14 @@
+xlsx_package.use_shared_strings = true
+workbook = xlsx_package.workbook
+workbook.styles do |styles|
+  workbook.add_worksheet(name: t('reports.pages.authorizations.title')) do |sheet|
+    sheet.add_row [t('user_roles.user.title')] + @authorizations_dropdown_mapping.values
+	column_placeholders = []
+	@authorizations_dropdown_mapping.keys.size.times { column_placeholders << nil }
+    @authorizations_table_data[:raw_roles].each do |user|
+   	  row = [user[0][:display_name]] + column_placeholders
+   	  user[2].each { |role| row[@authorizations_dropdown_mapping.keys.index(role) + 1] = t('reports.pages.authorizations.xlsx_column_marker') }
+   	  sheet.add_row row
+   	end
+  end
+end

@@ -73,15 +73,12 @@ Scenario: Choosing different presets in the datepicker
   Given I am on the "Historical Price Indications" report page
   When I click the datepicker field
   And I choose the "month to date" preset in the datepicker
-  And I click the datepicker apply button
   Then I should see a report with dates for "month to date"
   When I click the datepicker field
   And I choose the "last month" preset in the datepicker
-  And I click the datepicker apply button
   Then I should see a report with dates for "last month"
   When I click the datepicker field
   And I choose the "last year" preset in the datepicker
-  And I click the datepicker apply button
   Then I should see a report with dates for "last year"
 
 @data-unavailable @jira-mem-283 @jira-mem-1053
