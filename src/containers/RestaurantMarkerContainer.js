@@ -26,10 +26,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, st
     if (stateProps.showInfoWindow) {
       dispatchProps.dispatch(hideInfoWindow(ownProps.id));
     } else {
-      dispatchProps.dispatch(showInfoWindow(ownProps.id, {
-        lat: stateProps.restaurant.lat,
-        lng: stateProps.restaurant.lng
-      }));
+      dispatchProps.dispatch(showInfoWindow(stateProps.restaurant));
     }
   }
 });
