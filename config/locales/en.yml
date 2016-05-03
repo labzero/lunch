@@ -1795,6 +1795,16 @@ en:
         complete: Advance Completed
       nav: Add Advance
       terms: 'All advances are subject to the terms and conditions of the Bank’s Credit Program, the Advances and Security Agreement with the Member, and the appropriate advance confirmation, as well as the Terms of Use.'
+      borrowing_capacity:
+        total_borrowing_capacity: 'Total Borrowing Capacity:'
+        remaining_borrowing_capacity: 'Remaining Borrowing Capacity:'
+        standard: Standard
+        sbc_agency: 'SBC: Agency'
+        sbc_aaa: 'SBC: AAA'
+        sbc_aa: 'SBC: AA'
+        remaining: 'Remaining:'
+        financing_avail: Financing Avail
+        stock_leverage: Stock Leverage
     manage_advances:
       title: Manage Advances
     status: Status

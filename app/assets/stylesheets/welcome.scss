@@ -116,13 +116,13 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
     display: block;
     color: $white;
   }
-  
+
   select {
     width: 100%;
     display: block;
     margin-bottom: 20px;
   }
-  
+
   option:disabled {
     display: none;
   }
@@ -217,3 +217,7 @@ $welcome-right-column-real-width: ((($grid-column-width * 4) + ($gutter-width * 
   }
 }
 
+.grid-demo-sidebar {
+  padding: 10px;
+  border: 1px solid $medium-gray;
+}

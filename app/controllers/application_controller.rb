@@ -54,7 +54,7 @@ class ApplicationController < ActionController::Base
   def check_password_change
     redirect_to user_expired_password_path if session['password_expired']
   end
-  
+
   def check_terms
     if current_user
       redirect_to terms_path unless current_user.accepted_terms?
@@ -141,5 +141,4 @@ class ApplicationController < ActionController::Base
     reset_session
     redirect_to(logged_out_path)
   end
-
 end
