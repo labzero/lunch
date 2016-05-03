@@ -1957,6 +1957,37 @@ RSpec.describe ReportsController, :type => :controller do
           current_price_indications
         end
       end
+      describe 'when the report is disabled' do
+        let(:be_an_empty_report) { include(rows: []) }
+        before do
+          allow(controller).to receive(:report_disabled?).with(described_class::CURRENT_PRICE_INDICATIONS_WEB_FLAGS).and_return(true)
+          current_price_indications
+        end
+        it 'sets `@standard_vrc_table_data` to an empty report' do
+          expect(assigns[:standard_vrc_table_data]).to be_an_empty_report
+        end
+        it 'sets `@sbc_vrc_table_data` to an empty report' do
+          expect(assigns[:sbc_vrc_table_data]).to be_an_empty_report
+        end
+        it 'sets `@standard_frc_table_data` to an empty report' do
+          expect(assigns[:standard_frc_table_data]).to be_an_empty_report
+        end
+        it 'sets `@sbc_frc_table_data` to an empty report' do
+          expect(assigns[:sbc_frc_table_data]).to be_an_empty_report
+        end
+        it 'sets `@standard_arc_table_data` to an empty report' do
+          expect(assigns[:standard_arc_table_data]).to be_an_empty_report
+        end
+        it 'sets `@sbc_arc_table_data` to an empty report' do
+          expect(assigns[:sbc_arc_table_data]).to be_an_empty_report
+        end
+        it 'sets `@sta_table_data` to an empty report' do
+          expect(assigns[:sta_table_data][:row_value]).to be_nil
+        end
+        it 'sets `@vrc_date` to `nil`' do
+          expect(assigns[:vrc_date]).to be_nil
+        end
+      end
     end
     describe 'table data' do
       interest_day_count_key = I18n.t('reports.pages.price_indications.current.interest_day_count')

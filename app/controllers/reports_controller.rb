@@ -11,6 +11,7 @@ class ReportsController < ApplicationController
   BORROWING_CAPACITY_WEB_FLAGS = [MembersService::COLLATERAL_REPORT_DATA]
   CAPITAL_STOCK_ACTIVITY_WEB_FLAGS = [MembersService::CURRENT_SECURITIES_POSITION, MembersService::CAPSTOCK_REPORT_BALANCE, MembersService::CAPSTOCK_REPORT_TRIAL_BALANCE]
   HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::IRDB_RATES_DATA]
+  CURRENT_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::RATE_CURRENT_STANDARD_ARC, MembersService::RATE_CURRENT_SBC_ARC, MembersService::RATE_CURRENT_STANDARD_FRC, MembersService::RATE_CURRENT_SBC_FRC, MembersService::RATE_CURRENT_STANDARD_VRC, MembersService::RATE_CURRENT_SBC_VRC]
   SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
   CASH_PROJECTIONS_WEB_FLAGS = [MembersService::CASH_PROJECTIONS_DATA]
   DIVIDEND_STATEMENT_WEB_FLAGS = [MembersService::CAPSTOCK_REPORT_DIVIDEND_TRANSACTION, MembersService::CAPSTOCK_REPORT_DIVIDEND_STATEMENT]
@@ -943,7 +944,9 @@ class ReportsController < ApplicationController
       @job_status_url = false
       @load_url = false
       if params[:job_id] || self.skip_deferred_load
-        if self.skip_deferred_load
+        if report_disabled?(CURRENT_PRICE_INDICATIONS_WEB_FLAGS)
+          data = {}
+        elsif self.skip_deferred_load
           data = ReportCurrentPriceIndicationsJob.perform_now(current_member_id, request.uuid)
         else
           job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
@@ -959,13 +962,16 @@ class ReportsController < ApplicationController
         #vrc data for standard collateral
         standard_vrc_data = data[:standard_vrc_data] || []
         @vrc_date = standard_vrc_data['effective_date'] if standard_vrc_data.size > 0
-        rows = [{columns: parse_vrc_data(standard_vrc_data)}]
-        @standard_vrc_table_data[:rows] = rows
+
+        @standard_vrc_table_data[:rows] = []
+        columns = parse_vrc_data(standard_vrc_data)
+        @standard_vrc_table_data[:rows] << {columns: columns} if columns.present?
 
         #vrc data for sbc collateral
         sbc_vrc_data = data[:sbc_vrc_data] || []
-        rows = [{columns: parse_vrc_data(sbc_vrc_data)}]
-        @sbc_vrc_table_data[:rows] = rows
+        @sbc_vrc_table_data[:rows] = []
+        columns = parse_vrc_data(sbc_vrc_data)
+        @sbc_vrc_table_data[:rows] << {columns: columns} if columns.present?
 
         #frc data for standard collateral
         standard_frc_data = data[:standard_frc_data] || []
