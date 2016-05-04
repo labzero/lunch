@@ -103,7 +103,10 @@ class DashboardController < ApplicationController
       date = DateTime.now - 2.hours
       @quick_advance_last_updated = date.strftime("%d %^b %Y, %l:%M %p")
     end
-    @contacts = members_service.member_contacts(current_member_id) || {}
+    @contacts = Rails.cache.fetch(CacheConfiguration.key(:member_contacts, current_member_id),
+                                  expires_in: CacheConfiguration.expiry(:member_contacts)) do
+      members_service.member_contacts(current_member_id) || {}
+    end
     default_image_path = 'placeholder-usericon.svg'
     if @contacts[:rm] && @contacts[:rm][:username]
       rm_image_path = "#{@contacts[:rm][:username].downcase}.jpg"
@@ -113,7 +116,6 @@ class DashboardController < ApplicationController
       cam_image_path = "#{@contacts[:cam][:username].downcase}.jpg"
       @contacts[:cam][:image_url] = find_asset(cam_image_path) ? cam_image_path : default_image_path
     end
-
     if feature_enabled?('quick-reports')
       current_report_set = QuickReportSet.for_member(current_member_id).latest_with_reports
       @quick_reports = {}.with_indifferent_access

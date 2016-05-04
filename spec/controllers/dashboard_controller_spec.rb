@@ -191,6 +191,7 @@ RSpec.describe DashboardController, :type => :controller do
         allow(contacts).to receive(:[]).with(:cam).and_return({username: cam_username})
         allow(contacts).to receive(:[]).with(:rm).and_return({username: rm_username})
         allow(subject).to receive(:find_asset)
+        allow(Rails.cache).to receive(:fetch).with(any_args).and_yield.and_return(contacts)
       end
       it 'is the result of the `members_service.member_contacts` method' do
         get :index
@@ -218,7 +219,7 @@ RSpec.describe DashboardController, :type => :controller do
         get :index
         expect(assigns[:contacts][:cam][:image_url]).to eq("#{uppercase_username.downcase}.jpg")
       end
-      it 'assigns the default image_url if the image asset does not exist for the contact' do
+      it 'assigns the default `image_url` if the image asset does not exist for the contact' do
         allow(subject).to receive(:find_asset).and_return(false)
         get :index
         expect(assigns[:contacts][:rm][:image_url]).to eq('placeholder-usericon.svg')
@@ -226,6 +227,7 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'returns {} if nil is returned from the service object' do
         allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(nil)
+        allow(Rails.cache).to receive(:fetch).with(any_args).and_yield.and_return({})
         get :index
         expect(assigns[:contacts]).to eq({})
       end
