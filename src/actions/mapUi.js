@@ -15,16 +15,9 @@ export function showInfoWindow(restaurant) {
   };
 }
 
-export function hideInfoWindow(id) {
+export function hideInfoWindow() {
   return {
-    type: ActionTypes.HIDE_INFO_WINDOW,
-    id
-  };
-}
-
-export function hideAllInfoWindows() {
-  return {
-    type: ActionTypes.HIDE_ALL_INFO_WINDOWS
+    type: ActionTypes.HIDE_INFO_WINDOW
   };
 }
 

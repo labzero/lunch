@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { clearCenter, hideAllInfoWindows, showInfoWindow, clearNewlyAdded } from '../actions/mapUi';
+import { clearCenter, hideInfoWindow, showInfoWindow, clearNewlyAdded } from '../actions/mapUi';
 import { getRestaurantById } from '../selectors/restaurants';
 import { getMapUi } from '../selectors/mapUi';
 import { getCurrentUser } from '../selectors/user';
@@ -25,7 +25,7 @@ const mapDispatchToProps = dispatch => ({
   },
   mapClicked({ event }) {
     if (!event.target.closest('[data-marker]')) {
-      dispatch(hideAllInfoWindows());
+      dispatch(hideInfoWindow());
     }
   },
   dispatch

@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { getRestaurantById } from '../selectors/restaurants';
 import { getDecision } from '../selectors/decisions';
 import { showInfoWindow, hideInfoWindow } from '../actions/mapUi';
-import { getMarkerSettingsForId } from '../selectors/mapUi';
+import { getMapUi } from '../selectors/mapUi';
 import RestaurantMarker from '../components/RestaurantMarker';
 
 const mapStateToProps = (state, ownProps) => {
@@ -12,7 +12,7 @@ const mapStateToProps = (state, ownProps) => {
   return {
     restaurant,
     decided,
-    showInfoWindow: getMarkerSettingsForId(state, ownProps.id).showInfoWindow || false,
+    showInfoWindow: getMapUi(state).infoWindowId === ownProps.id,
     ...ownProps
   };
 };
@@ -21,10 +21,10 @@ const mapDispatchToProps = (dispatch) => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
+const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, dispatchProps, {
   handleMarkerClick() {
     if (stateProps.showInfoWindow) {
-      dispatchProps.dispatch(hideInfoWindow(ownProps.id));
+      dispatchProps.dispatch(hideInfoWindow());
     } else {
       dispatchProps.dispatch(showInfoWindow(stateProps.restaurant));
     }

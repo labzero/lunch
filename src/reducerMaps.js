@@ -488,7 +488,6 @@ export const listUi = new Map([
 export const mapUi = new Map([
   [ActionTypes.RECEIVE_RESTAURANTS, () =>
     ({
-      markers: {},
       showUnvoted: true
     })
   ],
@@ -511,29 +510,15 @@ export const mapUi = new Map([
           lng: action.restaurant.lng
         }
       },
-      markers: {
-        $apply: target => setOrMerge(target, action.restaurant.id, { showInfoWindow: true })
+      infoWindowId: {
+        $set: action.restaurant.id
       }
     })
   ],
-  [ActionTypes.HIDE_INFO_WINDOW, (state, action) =>
+  [ActionTypes.HIDE_INFO_WINDOW, state =>
     update(state, {
-      markers: {
-        $apply: target => setOrMerge(target, action.id, { showInfoWindow: false })
-      }
-    })
-  ],
-  [ActionTypes.HIDE_ALL_INFO_WINDOWS, state =>
-    update(state, {
-      markers: {
-        $apply: markers => {
-          for (const i in markers) {
-            if (markers.hasOwnProperty(i)) {
-              markers[i].showInfoWindow = false;
-            }
-          }
-          return markers;
-        }
+      infoWindowId: {
+        $set: undefined
       }
     })
   ],

@@ -185,7 +185,6 @@ app.get('*', async (req, res, next) => {
             },
             listUi: {},
             mapUi: {
-              markers: {},
               showUnvoted: true
             },
             tagFilters: [],
