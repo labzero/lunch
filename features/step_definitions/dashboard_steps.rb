@@ -56,7 +56,7 @@ Then(/^I should see the "(.*?)" section in its loaded state$/) do |section|
     when 'recent activities'
       mod.assert_selector('.table-dashboard-recent-activity') unless mod.has_css?('.dashboard-module-recent-activity-no-data')
     when 'account overview'
-      mod.assert_selector('.table-dashboard-account-overview')
+      mod.assert_selector('.dashboard-account-overview-table', count: 4)
   end
 end
 
@@ -67,7 +67,7 @@ Then(/^I should see the Your Account table breakdown$/) do
 end
 
 Then(/^I should see an? "(.*?)" in the Account module/) do |component|
-  mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.title'))
+  mod = page.find('.dashboard-module', :text => I18n.t('dashboard.your_account.account_summary'))
   selector = case component
     when 'borrowing capacity gauge'
       '.dashboard-borrowing-capacity'
@@ -92,16 +92,18 @@ When(/^I am on the dashboard with the account overview in its loaded state$/) do
   step %{I should see the "account overview" section in its loaded state}
 end
 
-When(/^I click on the (STA Balance|Collateral Borrowing Capacity|Stock Leverage) link in the account overview$/) do |link|
+When(/^I click on the (STA Balance|Borrowing Capacity|Stock Leverage|Account Summary) link in the account overview$/) do |link|
   text = case link
     when 'STA Balance'
       I18n.t('dashboard.your_account.table.balance')
-    when 'Collateral Borrowing Capacity'
-      I18n.t('dashboard.your_account.table.remaining.capacity')
+    when 'Borrowing Capacity'
+      I18n.t('dashboard.your_account.borrowing_capacity.title')
     when 'Stock Leverage'
       I18n.t('dashboard.your_account.table.remaining.leverage')
+    when 'Account Summary'
+      I18n.t('reports.pages.account_summary.title')
   end
-  page.find('.table-dashboard-account-overview a', text: text, exact: true).click
+  page.find('.dashboard-module-your-account a', text: text, exact: true).click
 end
 
 Then(/^I should see a list of downloadedable quick reports$/) do
@@ -141,7 +143,7 @@ def get_module_by_section(section)
     when 'recent activities'
       I18n.t('dashboard.recent_activity.title')
     when 'account overview'
-      I18n.t('dashboard.your_account.title')
+      I18n.t('dashboard.your_account.account_summary')
     when 'quick reports'
       I18n.t('dashboard.quick_reports.title')
   end

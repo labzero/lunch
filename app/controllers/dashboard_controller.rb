@@ -42,7 +42,6 @@ class DashboardController < ApplicationController
   }.with_indifferent_access.freeze
 
   def index
-    today = Time.zone.now.to_date
     rate_service = RatesService.new(request)
     etransact_service = EtransactAdvancesService.new(request)
     member_balances = MemberBalanceService.new(current_member_id, request)
@@ -56,21 +55,6 @@ class DashboardController < ApplicationController
       data: members_service.report_disabled?(current_member_id, [MembersService::IRDB_RATES_DATA]) ? nil : rate_service.overnight_vrc
     }]
 
-    borrowing_capacity = members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_REPORT_DATA]) ? nil : member_balances.borrowing_capacity_summary(today)
-
-    @borrowing_capacity_gauge = if borrowing_capacity
-      total_borrowing_capacity = borrowing_capacity[:total_borrowing_capacity]
-      guage = {
-        total: total_borrowing_capacity,
-        mortgages: borrowing_capacity[:net_plus_securities_capacity],
-        aa: borrowing_capacity[:sbc][:collateral][:aa][:total_borrowing_capacity],
-        aaa: borrowing_capacity[:sbc][:collateral][:aaa][:total_borrowing_capacity],
-        agency: borrowing_capacity[:sbc][:collateral][:agency][:total_borrowing_capacity]
-      }
-      calculate_gauge_percentages(guage, :total)
-    else
-      calculate_gauge_percentages({total: 0}, 0)
-    end
     @financing_availability_gauge = if profile[:total_financing_available]
       calculate_gauge_percentages(
         {
@@ -280,46 +264,61 @@ class DashboardController < ApplicationController
   end
 
   def account_overview
+    today = Time.zone.now.to_date
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    members_service = MembersService.new(request)
+
+    # Borrowing Capacity Gauge
+    borrowing_capacity = member_balances.borrowing_capacity_summary(today)
+    @borrowing_capacity_gauge = calculate_borrowing_capacity_gauge(borrowing_capacity) unless members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_REPORT_DATA])
+
     profile = deferred_job_data || {}
     profile = sanitize_profile_if_endpoints_disabled(profile.with_indifferent_access)
 
-    # account_overview sub-table row format: [title, value, footnote(optional), precision(optional)]
+    # Account Overview Sub-Tables - format: [title, value, footnote(optional), precision(optional)]
+    # STA Balance Sub-Table
     sta_balance = [
       [[t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
     ]
 
+    # Credit Outstanding Sub-Table
     credit_outstanding = [
       [t('dashboard.your_account.table.credit_outstanding'), (profile[:credit_outstanding] || {})[:total]]
     ]
 
+    # Remaining Borrowing Capacity Sub-Table
+    total_standard_bc = borrowing_capacity[:net_plus_securities_capacity].to_i
+    total_agency_bc = borrowing_capacity[:sbc][:collateral][:agency][:total_borrowing_capacity].to_i
+    total_aaa_bc = borrowing_capacity[:sbc][:collateral][:aaa][:total_borrowing_capacity].to_i
+    total_aa_bc = borrowing_capacity[:sbc][:collateral][:aa][:total_borrowing_capacity].to_i
+    remaining_standard_bc = borrowing_capacity[:standard_excess_capacity].to_i
+    remaining_agency_bc = borrowing_capacity[:sbc][:collateral][:agency][:remaining_borrowing_capacity].to_i
+    remaining_aaa_bc = borrowing_capacity[:sbc][:collateral][:aaa][:remaining_borrowing_capacity].to_i
+    remaining_aa_bc = borrowing_capacity[:sbc][:collateral][:aa][:remaining_borrowing_capacity].to_i
+
+    remaining_borrowing_capacity = unless borrowing_capacity[:total_borrowing_capacity].to_i == 0
+      bc_array = [{title: t('dashboard.your_account.table.remaining_borrowing_capacity')}]
+      bc_array << [t('dashboard.your_account.table.remaining.standard'), remaining_standard_bc] unless total_standard_bc == 0
+      bc_array << [t('dashboard.your_account.table.remaining.agency'), remaining_agency_bc] unless total_agency_bc == 0
+      bc_array << [t('dashboard.your_account.table.remaining.aaa'), remaining_aaa_bc] unless total_aaa_bc == 0
+      bc_array << [t('dashboard.your_account.table.remaining.aa'), remaining_aa_bc] unless total_aa_bc == 0
+      bc_array
+    end
+
+    # Remaining Financing Availability and Stock Leverage Sub-Table
     leverage_title = if feature_enabled?('report-capital-stock-position-and-leverage')
       [t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path]
     else
       t('dashboard.your_account.table.remaining.leverage')
     end
+    other_remaining = [
+      {title: t('dashboard.your_account.table.remaining.title')},
+      [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
+      [leverage_title, (profile[:capital_stock] || {})[:remaining_leverage]]
+    ]
 
-    remaining = if profile[:total_borrowing_capacity_sbc_agency] == 0 && profile[:total_borrowing_capacity_sbc_aaa] == 0 && profile[:total_borrowing_capacity_sbc_aa] == 0
-      [
-        {title: t('dashboard.your_account.table.remaining.title')},
-        [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
-        [[t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], (profile[:collateral_borrowing_capacity] || {})[:remaining]],
-        [leverage_title, (profile[:capital_stock] || {})[:remaining_leverage]]
-      ]
-    else
-      [
-        {title: t('dashboard.your_account.table.remaining.title')},
-        [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
-        [[t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], (profile[:collateral_borrowing_capacity] || {})[:remaining]],
-        [t('dashboard.your_account.table.remaining.standard'), profile[:total_borrowing_capacity_standard]],
-        [t('dashboard.your_account.table.remaining.agency'), profile[:total_borrowing_capacity_sbc_agency]],
-        [t('dashboard.your_account.table.remaining.aaa'), profile[:total_borrowing_capacity_sbc_aaa]],
-        [t('dashboard.your_account.table.remaining.aa'), profile[:total_borrowing_capacity_sbc_aa]],
-        [leverage_title, (profile[:capital_stock] || {})[:remaining_leverage]]
-      ]
-    end
-
-    account_overview = {sta_balance: sta_balance, credit_outstanding: credit_outstanding, remaining: remaining}
-    render partial: 'dashboard/dashboard_account_overview', locals: {table_data: account_overview}, layout: false
+    @account_overview_table_data = {credit_outstanding: credit_outstanding, sta_balance: sta_balance, remaining_borrowing_capacity: remaining_borrowing_capacity, other_remaining: other_remaining}
+    render layout: false
   end
 
   private
@@ -518,5 +517,81 @@ class DashboardController < ApplicationController
       instance_variable_set("@#{name}_job_status_url", job_status_url(job_status))
       instance_variable_set("@#{name}_load_url", send(path, :"#{name}_job_id" => job_status.id))
     end
+  end
+
+  def calculate_borrowing_capacity_gauge(borrowing_capacity)
+    # Nil check sbc collateral types
+    borrowing_capacity[:sbc] = {} unless borrowing_capacity[:sbc]
+    borrowing_capacity[:sbc][:collateral] = {} unless borrowing_capacity[:sbc][:collateral]
+    borrowing_capacity[:sbc][:collateral][:agency] = {} unless borrowing_capacity[:sbc][:collateral][:agency]
+    borrowing_capacity[:sbc][:collateral][:aaa] = {} unless borrowing_capacity[:sbc][:collateral][:aaa]
+    borrowing_capacity[:sbc][:collateral][:aa] = {} unless borrowing_capacity[:sbc][:collateral][:aa]
+
+    # Totals
+    total_borrowing_capacity = borrowing_capacity[:total_borrowing_capacity].to_i
+
+    # Standard
+    total_standard_bc = borrowing_capacity[:net_plus_securities_capacity].to_i
+    remaining_standard_bc = borrowing_capacity[:standard_excess_capacity].to_i
+    used_standard_bc = total_standard_bc - remaining_standard_bc
+
+    # Agency
+    total_agency_bc = borrowing_capacity[:sbc][:collateral][:agency][:total_borrowing_capacity].to_i
+    remaining_agency_bc = borrowing_capacity[:sbc][:collateral][:agency][:remaining_borrowing_capacity].to_i
+    used_agency_bc = total_agency_bc - remaining_agency_bc
+
+    # AAA
+    total_aaa_bc = borrowing_capacity[:sbc][:collateral][:aaa][:total_borrowing_capacity].to_i
+    remaining_aaa_bc = borrowing_capacity[:sbc][:collateral][:aaa][:remaining_borrowing_capacity].to_i
+    used_aaa_bc = total_aaa_bc - remaining_aaa_bc
+
+    # AA
+    total_aa_bc = borrowing_capacity[:sbc][:collateral][:aa][:total_borrowing_capacity].to_i
+    remaining_aa_bc = borrowing_capacity[:sbc][:collateral][:aa][:remaining_borrowing_capacity].to_i
+    used_aa_bc = total_aa_bc - remaining_aa_bc
+
+    if total_borrowing_capacity != 0
+      borrowing_capacity_gauge = {
+        total: total_borrowing_capacity,
+        mortgages: total_standard_bc,
+        agency: total_agency_bc,
+        aaa: total_aaa_bc,
+        aa: total_aa_bc
+      }
+      borrowing_capacity_gauge = calculate_gauge_percentages(borrowing_capacity_gauge, :total)
+      borrowing_capacity_gauge[:mortgages][:breakdown] = {
+        total: total_standard_bc,
+        remaining: remaining_standard_bc,
+        used: used_standard_bc
+      }
+      borrowing_capacity_gauge[:mortgages][:breakdown] = calculate_gauge_percentages(borrowing_capacity_gauge[:mortgages][:breakdown], :total)
+
+      borrowing_capacity_gauge[:agency][:breakdown] = {
+        total: total_agency_bc,
+        remaining: remaining_agency_bc,
+        used: used_agency_bc
+      }
+      borrowing_capacity_gauge[:agency][:breakdown] = calculate_gauge_percentages(borrowing_capacity_gauge[:agency][:breakdown], :total)
+
+      borrowing_capacity_gauge[:aaa][:breakdown] = {
+        total: total_aaa_bc,
+        remaining: remaining_aaa_bc,
+        used: used_aaa_bc
+      }
+      borrowing_capacity_gauge[:aaa][:breakdown] = calculate_gauge_percentages(borrowing_capacity_gauge[:aaa][:breakdown], :total)
+      borrowing_capacity_gauge[:aa][:breakdown] = {
+        total: total_aa_bc,
+        remaining: remaining_aa_bc,
+        used: used_aa_bc
+      }
+      borrowing_capacity_gauge[:aa][:breakdown] = calculate_gauge_percentages(borrowing_capacity_gauge[:aa][:breakdown], :total)
+      borrowing_capacity_gauge[:total][:standard_percentage] = borrowing_capacity_gauge[:mortgages][:percentage]
+      borrowing_capacity_gauge[:total][:sbc_percentage] = (borrowing_capacity_gauge[:agency][:percentage] + borrowing_capacity_gauge[:aaa][:percentage] + borrowing_capacity_gauge[:aa][:percentage])
+    else
+      borrowing_capacity_gauge = calculate_gauge_percentages({total: 0})
+      borrowing_capacity_gauge[:total][:standard_percentage] = 0
+      borrowing_capacity_gauge[:total][:sbc_percentage] = 0
+    end
+    borrowing_capacity_gauge
   end
 end

@@ -1,0 +1,26 @@
+- borrowing_capacity_types = [t('dashboard.your_account.table.remaining.standard'), t('dashboard.your_account.table.remaining.agency'), t('dashboard.your_account.table.remaining.aaa'), t('dashboard.your_account.table.remaining.aa')]
+%table.dashboard-account-overview-table
+  - if table_data.first.is_a?(Hash) &&  table_data.first[:title]
+    %thead
+      %tr
+        %th.label{colspan: '3'}= table_data.first[:title]
+  %tbody
+    - table_data.each do |row|
+      - next if row.is_a?(Hash)
+      - if borrowing_capacity_types.include? row[0]
+        %tr{class: "#{'detail'}"}
+          -if row[0].is_a?(Array)
+            %td.label= link_to(row[0].first, row[0].last)
+          -else
+            %td.label= row[0]
+          %td.value= fhlb_formated_currency_unit(row[1], '$', row[3] || 0)
+      - else
+        %tr{class: "#{'footnote-row' if row[2]}"}
+          -if row[0].is_a?(Array)
+            %td.label= link_to(row[0].first, row[0].last)
+          -else
+            %td.label= row[0]
+          %td.value= fhlb_formated_currency_unit(row[1], '$', row[3] || 0)
+      - if row[2]
+        %tr
+          %td.footnote{colspan: 2}= row[2]

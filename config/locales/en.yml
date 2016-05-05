@@ -635,9 +635,15 @@ en:
         agency: Agency
         aaa: AAA
         aa: AA
+        used: Used
+        remaining: Remaining
+        available: Available
+        total: Total
+        standard_percentage: 'Standard: %{percentage}'
+        sbc_percentage: 'SBC: %{percentage}'
       table:
-        balance: 'STA Balance:*'
-        balance_footnote: '*as of close of business on prior business day'
+        balance: 'STA Balance:'
+        balance_footnote: '(as of close of business on prior business day)'
         credit_outstanding: 'Credit Outstanding:'
         remaining:
           title: 'Remaining:'
@@ -645,6 +651,7 @@ en:
           capacity: Collateral Borrowing Capacity
           leverage: Stock Leverage
           standard: Standard Credit Program
+          mortgages: Standard Credit Program
           agency: 'SBC: Agency'
           aaa: 'SBC: AAA'
           aa: 'SBC: AA'
@@ -652,9 +659,9 @@ en:
           title: 'Standard Program:'
         sbc_program:
           title: 'Securities-Backed Credit Program:'
-        total_borrowing_capacity: Total Borrowing Capacity
-        remaining_borrowing_capacity: Remaining Borrowing Capacity
-        borrowing_capacity_note_html: View your institution’s <a href=%{url}>Borrowing Capacity</a> report for detailed information
+        total_borrowing_capacity: 'Total Borrowing Capacity:'
+        remaining_borrowing_capacity: 'Remaining Borrowing Capacity:'
+        view_full_report_html: See more information about your account in your full <a href=%{url}>Account Summary</a> report.
     market_overview:
       title: Market Rates
       vrc: 30-Day Standard VRC Overnight Rate (%)

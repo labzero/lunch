@@ -6,7 +6,7 @@
       .dashboard-market-graph-toggle
         =link_to(t('dashboard.market_overview.vrc'), '', class: 'active')
       .dashboard-market-graph{data: {:'graph-series' => @market_overview.to_json}}
-    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.title'), classes: ['dashboard-module-your-account']} do
+    =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.your_account.account_summary'), classes: ['dashboard-module-your-account']} do
       .dashboard-financing-availability
         %h2
           = t('dashboard.your_account.financing_availability.title')
@@ -17,21 +17,7 @@
                 .gauge-section{style: "width: #{number_to_percentage(details[:display_percentage], precision: 1)};", class: key == :uncollateralized ? 'financing-availability-gauge-uncollateralized' : 'financing-availability-gauge-collateralized'}
                   .inner-gauge-section
                   = render 'shared/tooltip', tooltip_data: {t("dashboard.your_account.financing_availability.#{key}") => nil, number_to_percentage(details[:percentage], precision: 1) => nil, fhlb_formatted_currency_whole(details[:amount]) => nil}
-      - if @borrowing_capacity_gauge
-        .dashboard-borrowing-capacity
-          %h2
-            = t('dashboard.your_account.borrowing_capacity.title')
-            %span.dashboard-gauge-total= fhlb_formatted_currency_whole(@borrowing_capacity_gauge[:total][:amount])
-          .dashboard-gauge
-            - @borrowing_capacity_gauge.each do |key, details|
-              - if details[:display_percentage] > 0 && key != :total
-                .gauge-section{style: "width: #{number_to_percentage(details[:display_percentage], precision: 1)};", class: key == :mortgages ? 'borrowing-capacity-gauge-standard' : 'borrowing-capacity-gauge-sbc'}
-                  .inner-gauge-section
-                  = render 'shared/tooltip', tooltip_data: {t("dashboard.your_account.borrowing_capacity.#{key}") => nil, number_to_percentage(details[:percentage], precision: 1) => nil, fhlb_formatted_currency_whole(details[:amount]) => nil}
-      .dashboard-account-summary
-        %h2= t('dashboard.your_account.account_summary')
-        =render 'dashboard/dashboard_module_content_deferred', job_status_url: @account_overview_job_status_url, load_url: @account_overview_load_url
-        .borrowing-capacity-note= t('dashboard.your_account.table.borrowing_capacity_note_html', url: reports_borrowing_capacity_url)
+      =render 'dashboard/dashboard_module_content_deferred', job_status_url: @account_overview_job_status_url, load_url: @account_overview_load_url
   .column-3
     - if policy(:advance).show?
       - if feature_enabled?('add-advance')

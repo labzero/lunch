@@ -567,6 +567,8 @@ Then(/^I should be on the "(.*?)" report page$/) do |report|
       I18n.t('global.borrowing_capacity')
     when 'Capital Stock Position and Leverage'
       I18n.t('reports.pages.capital_stock_and_leverage.title')
+    when 'Account Summary'
+      I18n.t('reports.pages.account_summary.title')
   end
   page.assert_selector('.report h1', text: text, exact: true)
 end
