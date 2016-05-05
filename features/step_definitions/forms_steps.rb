@@ -18,3 +18,11 @@ end
 When(/^I click on the (agreements|authorizations|credit|collateral) link in the ToC$/) do |topic|
   click_link(I18n.t("resources.forms.#{topic}.title"))
 end
+
+Then(/^I should see "([^"]*)" link$/) do |arg1|
+  page.assert_selector('.resource-form-table a', text: /\A#{Regexp.quote(I18n.t('global.sign'))}\z/i, minimum: 1)
+end
+
+When(/^I click on the sign link$/) do
+  click_link(I18n.t('global.sign'))
+end

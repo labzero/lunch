@@ -151,11 +151,18 @@ class ResourcesController < ApplicationController
         form_number: 2160,
         pdf_link: resources_download_path(file: :form_2160)
       },
-      {
-        title: t('resources.forms.authorizations.website.securid'),
-        form_number: 2228,
-        pdf_link: resources_download_path(file: :form_2228)
-      }
+      if feature_enabled?('resources-token')
+        {
+          title: t('resources.forms.authorizations.website.securid'),
+          docusign_link: 'token'
+        }
+      else
+        {
+          title: t('resources.forms.authorizations.website.securid'),
+          form_number: 2228,
+          pdf_link: resources_download_path(file: :form_2228)
+        }
+      end
     ]
 
     @credit_rows = [

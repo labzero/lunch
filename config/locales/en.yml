@@ -26,6 +26,7 @@ en:
       thousand: T
       million: MM
     view: View
+    sign: Sign
     temporarily_unavailable: Temporarily Unavailable
     overnight: Overnight
     daily: Daily
