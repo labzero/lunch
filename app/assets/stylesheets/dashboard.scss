@@ -383,7 +383,7 @@ $breakdown-table-currency-width: 10px;
     .label {
       @extend %typography-footnote;
       text-transform: uppercase;
-      padding-top: 15px;
+      padding: 15px 0 0;
       border: none;
     }
     & + tbody tr:first-child td {
