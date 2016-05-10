@@ -320,7 +320,7 @@ p.dashboard-vrc-overnight-message {
   }
 }
 
-$breakdown-table-label-width: 165px;
+$breakdown-table-label-width: 155px;
 $breakdown-table-currency-width: 10px;
 .dashboard-module-your-account {
   header {
@@ -382,6 +382,7 @@ $breakdown-table-currency-width: 10px;
   thead {
     .label {
       @extend %typography-footnote;
+      color: $medium-gray;
       text-transform: uppercase;
       padding: 15px 0 0;
       border: none;
@@ -590,6 +591,7 @@ $breakdown-table-currency-width: 10px;
     &:first-child {
       @extend %typography-footnote;
       text-transform: uppercase;
+      color: $medium-gray;
     }
     &:last-child {
       @extend %typography-module-summary-data;
