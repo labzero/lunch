@@ -240,10 +240,10 @@
 }
 
 @mixin typography-module-tiny-data-label {
-  font-size: 10px;
+  font-size: 0.6667rem;
   text-transform: uppercase;
   letter-spacing: .03em;
-  font-weight: $light-weight;
+  font-weight: $normal-weight;
 }
 
 @mixin typography-module-summary-data {
