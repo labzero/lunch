@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe AdvancesController, :type => :controller do
   login_user
   before do
-    session['member_id'] = 750
+    session[described_class::SessionKeys::MEMBER_ID] = 750
   end
 
   {AASM::InvalidTransition => [AdvanceRequest.new(7, 'foo'), 'executed', :default], AASM::UnknownStateMachineError => ['message'], AASM::UndefinedState => ['foo'], AASM::NoDirectAssignmentError => ['message']}.each do |exception, args|
@@ -773,7 +773,7 @@ RSpec.describe AdvancesController, :type => :controller do
       let(:signer) { double('A Signer Name') }
       let(:call_method) { subject.send(:signer_full_name) }
       it 'returns the signer name from the session if present' do
-        session['signer_full_name'] = signer
+        session[described_class::SessionKeys::SIGNER_FULL_NAME] = signer
         expect(call_method).to be(signer)
       end
       describe 'with no signer in session' do
@@ -788,7 +788,7 @@ RSpec.describe AdvancesController, :type => :controller do
         end
         it 'sets the signer name in the session' do
           call_method
-          expect(session['signer_full_name']).to be(signer)
+          expect(session[described_class::SessionKeys::SIGNER_FULL_NAME]).to be(signer)
         end
         it 'returns the signer name' do
           expect(call_method).to be(signer)

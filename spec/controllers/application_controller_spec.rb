@@ -65,7 +65,7 @@ RSpec.describe ApplicationController, :type => :controller do
 
   describe '`after_sign_in_path_for(resource)` method' do
     let(:member_id) { rand(9999) }
-    let(:user) { double('User', member_id: nil, accepted_terms?: nil, password_expired?: false) }
+    let(:user) { double('User', member_id: nil, accepted_terms?: nil, password_expired?: false, intranet_user?: true) }
     let(:call_method) { controller.send(:after_sign_in_path_for, 'some resource') }
     before do
       allow(controller).to receive(:current_user).and_return(user)
@@ -82,7 +82,7 @@ RSpec.describe ApplicationController, :type => :controller do
       before { allow(user).to receive(:accepted_terms?).and_return(true) }
       describe 'with a member_id in the session' do
         before do
-          session['member_id'] = 750
+          session[described_class::SessionKeys::MEMBER_ID] = 750
         end
         it 'redirects to the stored location for the resource if it exists' do
           expect(controller).to receive(:stored_location_for).with('some resource')
@@ -94,18 +94,18 @@ RSpec.describe ApplicationController, :type => :controller do
           call_method
         end
       end
-      it 'sets `member_id` in the session if current_user.member_id returns a member_id' do
+      it 'sets `SessionKeys::MEMBER_ID` in the session if current_user.member_id returns a member_id' do
         allow(user).to receive(:member_id).and_return(member_id)
         call_method
-        expect(session['member_id']).to eq(member_id)
+        expect(session[described_class::SessionKeys::MEMBER_ID]).to eq(member_id)
       end
       it 'redirects to Members#select_member if the user is an intranet user' do
-        allow(user).to receive(:ldap_domain).and_return('intranet')
+        allow(user).to receive(:intranet_user?).and_return(true)
         expect(controller).to receive(:members_select_member_path)
         call_method
       end
       it 'raises an error if there is no member_id in the session and the current user is not an intranet user' do
-        allow(user).to receive(:ldap_domain).and_return('extranet')
+        allow(user).to receive(:intranet_user?).and_return(false)
         expect{call_method}.to raise_error(/Sign in error/)
       end
     end
@@ -120,7 +120,7 @@ RSpec.describe ApplicationController, :type => :controller do
       end
       it 'flags the users session as having an expired password' do
         call_method
-        expect(session['password_expired']).to be(true)
+        expect(session[described_class::SessionKeys::PASSWORD_EXPIRED]).to be(true)
       end
       it 'returns the `user_expired_password_path`' do
         expect(call_method).to eq(subject.user_expired_password_path)
@@ -130,7 +130,7 @@ RSpec.describe ApplicationController, :type => :controller do
     describe 'the password_expired session key' do
       describe 'with a value of false' do
         before do
-          session['password_expired'] = false
+          session[described_class::SessionKeys::PASSWORD_EXPIRED] = false
         end
         it 'does not call `password_expired?`' do
           expect(user).to_not receive(:password_expired?)
@@ -143,7 +143,7 @@ RSpec.describe ApplicationController, :type => :controller do
 
       describe 'with a value of true' do
         before do
-          session['password_expired'] = true
+          session[described_class::SessionKeys::PASSWORD_EXPIRED] = true
         end
         it 'does not call `password_expired?`' do
           expect(user).to_not receive(:password_expired?)
@@ -167,47 +167,47 @@ RSpec.describe ApplicationController, :type => :controller do
 
   describe '`current_member_id` method' do
     let(:member_id) { double('A Member ID') }
-    it 'should return the `member_id` from the session' do
-      session['member_id'] = member_id
+    it 'should return the `SessionKeys::MEMBER_ID` from the session' do
+      session[described_class::SessionKeys::MEMBER_ID] = member_id
       expect(controller.current_member_id).to eq(member_id)
     end
-    it 'should return nil if there is no `member_id`' do
+    it 'should return nil if there is no `SessionKeys::MEMBER_ID`' do
       expect(controller.current_member_id).to be_nil
     end
   end
 
   describe '`session_elevated?` method' do
-    it 'should return true if the session has a truthy `securid_authenticated` value' do
-      session['securid_authenticated'] = 'foo'
+    it 'should return true if the session has a truthy `SessionKeys::SECURID_AUTHENTICATED` value' do
+      session[described_class::SessionKeys::SECURID_AUTHENTICATED] = 'foo'
       expect(controller.session_elevated?).to be(true)
-      session['securid_authenticated'] = true
+      session[described_class::SessionKeys::SECURID_AUTHENTICATED] = true
       expect(controller.session_elevated?).to be(true)
     end
-    it 'should return false if the session has a falsey `securid_authenticated` value' do
+    it 'should return false if the session has a falsey `SessionKeys::SECURID_AUTHENTICATED` value' do
       expect(controller.session_elevated?).to be(false)
-      session['securid_authenticated'] = nil
+      session[described_class::SessionKeys::SECURID_AUTHENTICATED] = nil
       expect(controller.session_elevated?).to be(false)
-      session['securid_authenticated'] = false
+      session[described_class::SessionKeys::SECURID_AUTHENTICATED] = false
       expect(controller.session_elevated?).to be(false)
     end
   end
 
   describe '`session_elevate!` method' do
-    it 'sets `securid_authenticated` to true' do
+    it 'sets `SessionKeys::SECURID_AUTHENTICATED` to true' do
       controller.session_elevate!
-      expect(session['securid_authenticated']).to be(true)
+      expect(session[described_class::SessionKeys::SECURID_AUTHENTICATED]).to be(true)
     end
   end
 
   describe '`current_member_name` method' do
     let(:member_name) { double('A Member Name') }
     let(:member_id) { double('A Member ID') }
-    it 'should return the `member_name` from the session' do
-      session['member_name'] = member_name
+    it 'should return the `SessionKeys::MEMBER_NAME` from the session' do
+      session[described_class::SessionKeys::MEMBER_NAME] = member_name
       expect(controller.current_member_name).to eq(member_name)
     end
-    it 'does not fecth the member details if `member_name` is in the session' do
-      session['member_name'] = member_name
+    it 'does not fecth the member details if `SessionKeys::MEMBER_NAME` is in the session' do
+      session[described_class::SessionKeys::MEMBER_NAME] = member_name
       expect_any_instance_of(MembersService).to_not receive(:member)
       controller.current_member_name
     end
@@ -239,7 +239,7 @@ RSpec.describe ApplicationController, :type => :controller do
       expect(call_method).to be(nil)
     end
     it 'sets the users cache_key to the value stored in the session' do
-      session['cache_key'] = cache_key
+      session[described_class::SessionKeys::CACHE_KEY] = cache_key
       expect(warden_user).to receive(:cache_key=).with(cache_key)
       call_method
     end
@@ -251,21 +251,21 @@ RSpec.describe ApplicationController, :type => :controller do
     it 'sets the session cache_key to the users cache_key if unset in the session' do
       allow(warden_user).to receive(:cache_key).and_return(cache_key)
       call_method
-      expect(session['cache_key']).to be(cache_key)
+      expect(session[described_class::SessionKeys::CACHE_KEY]).to be(cache_key)
     end
     it 'does not set the session cache_key if its already set' do
-      session['cache_key'] = cache_key
+      session[described_class::SessionKeys::CACHE_KEY] = cache_key
       alternate_key = double('Another Cache Key')
       allow(warden_user).to receive(:cache_key).and_return(alternate_key)
       call_method
-      expect(session['cache_key']).to be(cache_key)
+      expect(session[described_class::SessionKeys::CACHE_KEY]).to be(cache_key)
     end
   end
 
   describe '`check_password_change` method' do
     let(:call_method) { subject.check_password_change }
     it 'redirects to the `user_expired_password_path` if the session is flagged as having an expired password' do
-      session['password_expired'] = true
+      session[described_class::SessionKeys::PASSWORD_EXPIRED] = true
       expect(subject).to receive(:redirect_to).with(subject.user_expired_password_path)
       call_method
     end
@@ -337,8 +337,8 @@ RSpec.describe ApplicationController, :type => :controller do
     end
     describe 'when there is a `current_user`' do
       before { allow(subject).to receive(:current_user).and_return(current_user) }
-      describe 'when there is a value for the session key `new_announcements_count`' do
-        before { session['new_announcements_count'] = count }
+      describe 'when there is a value for the session key `SessionKeys::NEW_ANNOUNCEMENT_COUNT`' do
+        before { session[described_class::SessionKeys::NEW_ANNOUNCEMENT_COUNT] = count }
         it 'returns the value' do
           expect(call_method).to eq(count)
         end
@@ -347,7 +347,7 @@ RSpec.describe ApplicationController, :type => :controller do
           call_method
         end
       end
-      describe 'when there is not a value for the session key `new_announcements_count`' do
+      describe 'when there is not a value for the session key `SessionKeys::NEW_ANNOUNCEMENT_COUNT`' do
         before { allow(current_user).to receive(:new_announcements_count).and_return(count) }
         it 'calls `new_announcements_count` on the user' do
           expect(current_user).to receive(:new_announcements_count)
@@ -358,7 +358,7 @@ RSpec.describe ApplicationController, :type => :controller do
         end
         it 'sets the session value for `new_announcements_count` to the one `new_announcements_count` of the current user' do
           call_method
-          expect(session['new_announcements_count']).to eq(count)
+          expect(session[described_class::SessionKeys::NEW_ANNOUNCEMENT_COUNT]).to eq(count)
         end
       end
     end
@@ -366,10 +366,10 @@ RSpec.describe ApplicationController, :type => :controller do
 
   describe '`reset_new_announcements_count`' do
     let(:call_method) { subject.reset_new_announcements_count }
-    it 'removes `new_announcements_count` from the session hash' do
-      session['new_announcements_count'] = double('count')
+    it 'removes `SessionKeys::NEW_ANNOUNCEMENT_COUNT` from the session hash' do
+      session[described_class::SessionKeys::NEW_ANNOUNCEMENT_COUNT] = double('count')
       call_method
-      expect(session).not_to have_key('new_announcements_count')
+      expect(session).not_to have_key(described_class::SessionKeys::NEW_ANNOUNCEMENT_COUNT)
     end
   end
 
@@ -391,6 +391,33 @@ RSpec.describe ApplicationController, :type => :controller do
     end
     it 'returns nil if there is no instance variable @active_nav' do
       expect(call_method).to be_nil
+    end
+  end
+
+  describe '`signer_full_name` method' do
+    let(:signer) { double('A Signer Name') }
+    let(:call_method) { subject.send(:signer_full_name) }
+    it 'returns the signer name from the session if present' do
+      session[described_class::SessionKeys::SIGNER_FULL_NAME] = signer
+      expect(call_method).to be(signer)
+    end
+    describe 'with no signer in session' do
+      let(:username) { double('A Username') }
+      before do
+        allow(subject).to receive_message_chain(:current_user, :username).and_return(username)
+        allow_any_instance_of(EtransactAdvancesService).to receive(:signer_full_name).with(username).and_return(signer)
+      end
+      it 'fetches the signer from the eTransact Service' do
+        expect_any_instance_of(EtransactAdvancesService).to receive(:signer_full_name).with(username)
+        call_method
+      end
+      it 'sets the signer name in the session' do
+        call_method
+        expect(session[described_class::SessionKeys::SIGNER_FULL_NAME]).to be(signer)
+      end
+      it 'returns the signer name' do
+        expect(call_method).to be(signer)
+      end
     end
   end
 

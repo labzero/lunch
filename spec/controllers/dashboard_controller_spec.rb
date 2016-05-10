@@ -4,7 +4,7 @@ include CustomFormattingHelper
 RSpec.describe DashboardController, :type => :controller do
   login_user
   before do
-    session['member_id'] = 750
+    session[described_class::SessionKeys::MEMBER_ID] = 750
   end
 
   let(:borrowing_capacity_summary) do
@@ -962,20 +962,6 @@ RSpec.describe DashboardController, :type => :controller do
     end
   end
 
-  RSpec.shared_examples "an advance_request method" do |method|
-    it 'should initialize the advance_request hash if it doesn\'t exist' do
-      session['advance_request'] = nil
-      subject.send(method)
-      expect(session['advance_request']).to be_kind_of(Hash)
-    end
-    it 'should not initialize the advance_request hash if it exists' do
-      hash = {}
-      session['advance_request'] = hash
-      subject.send(method)
-      expect(session['advance_request']).to equal(hash)
-    end
-  end
-
   describe '`populate_advance_request_view_parameters` method' do
     let(:call_method) { subject.send(:populate_advance_request_view_parameters) }
     let(:advance_request) { double('An AdvanceRequest').as_null_object }
@@ -1107,33 +1093,6 @@ RSpec.describe DashboardController, :type => :controller do
       it 'saves the AdvanceRequest' do
         expect(advance_request).to receive(:save)
         call_method
-      end
-    end
-  end
-
-  describe '`signer_full_name` protected method' do
-    let(:signer) { double('A Signer Name') }
-    let(:call_method) { subject.send(:signer_full_name) }
-    it 'returns the signer name from the session if present' do
-      session['signer_full_name'] = signer
-      expect(call_method).to be(signer)
-    end
-    describe 'with no signer in session' do
-      let(:username) { double('A Username') }
-      before do
-        allow(subject).to receive_message_chain(:current_user, :username).and_return(username)
-        allow_any_instance_of(EtransactAdvancesService).to receive(:signer_full_name).with(username).and_return(signer)
-      end
-      it 'fetches the signer from the eTransact Service' do
-        expect_any_instance_of(EtransactAdvancesService).to receive(:signer_full_name).with(username)
-        call_method
-      end
-      it 'sets the signer name in the session' do
-        call_method
-        expect(session['signer_full_name']).to be(signer)
-      end
-      it 'returns the signer name' do
-        expect(call_method).to be(signer)
       end
     end
   end

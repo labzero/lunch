@@ -14,16 +14,16 @@ class MAPIService
   end
 
   def request_user
-    warden_user = @request.session['warden.user.user.key']
+    warden_user = @request.session[ApplicationController::SessionKeys::WARDEN_USER]
     User.find(warden_user[0][0]) if warden_user
   end
 
   def request_member_id
-    @request.session['member_id']
+    @request.session[ApplicationController::SessionKeys::MEMBER_ID]
   end
 
   def request_member_name
-    @request.session['member_name']
+    @request.session[ApplicationController::SessionKeys::MEMBER_NAME]
   end
 
   def member_id_to_name(member_id)

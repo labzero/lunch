@@ -699,7 +699,7 @@ RSpec.describe SettingsController, :type => :controller do
     end
     describe 'with an expired password' do
       before do
-        session['password_expired'] = true
+        session[described_class::SessionKeys::PASSWORD_EXPIRED] = true
       end
       it 'renders the `expired_password` template' do
         make_request
@@ -733,7 +733,7 @@ RSpec.describe SettingsController, :type => :controller do
     let(:user) { double('A User', save: false, :password= => nil, :password_confirmation= => nil, :accepted_terms? => true) }
 
     before do
-      session['password_expired'] = true
+      session[described_class::SessionKeys::PASSWORD_EXPIRED] = true
       allow(subject).to receive(:current_user).and_return(user)
     end
 
@@ -768,7 +768,7 @@ RSpec.describe SettingsController, :type => :controller do
 
       it 'sets the `password_expired` key to false in the session' do
         make_request
-        expect(session['password_expired']).to be(false)
+        expect(session[described_class::SessionKeys::PASSWORD_EXPIRED]).to be(false)
       end
       it 'renders the `update_password_success` template' do
         make_request
@@ -785,7 +785,7 @@ RSpec.describe SettingsController, :type => :controller do
     end
     describe 'and the password was not expired' do
       before do
-        session['password_expired'] = false
+        session[described_class::SessionKeys::PASSWORD_EXPIRED] = false
       end
       it 'raises an error' do
         expect{make_request}.to raise_error(/non-expired password/)

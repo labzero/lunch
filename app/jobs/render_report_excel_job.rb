@@ -11,8 +11,8 @@ class RenderReportExcelJob < FhlbJob
 
     controller.request.env['warden'] = FhlbMember::WardenProxy.new(job_status.user)
     controller.skip_deferred_load = true
-    controller.session['member_id'] = member_id
-    controller.session['member_name'] = member[:name]
+    controller.session[ReportsController::SessionKeys::MEMBER_ID] = member_id
+    controller.session[ReportsController::SessionKeys::MEMBER_NAME] = member[:name]
     controller.params = params
     controller.action_name = report_name
     return if job_status.canceled?

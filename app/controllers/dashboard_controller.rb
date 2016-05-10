@@ -370,10 +370,6 @@ class DashboardController < ApplicationController
     @advance_request
   end
 
-  def signer_full_name
-    session['signer_full_name'] ||= EtransactAdvancesService.new(request).signer_full_name(current_user.username)
-  end
-
   def calculate_gauge_percentages(gauge_hash, excluded_keys=[])
     total = 0
     excluded_keys = Array.wrap(excluded_keys)

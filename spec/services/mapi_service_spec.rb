@@ -39,12 +39,12 @@ describe MAPIService do
     end
 
     it 'fetches the user ID from the session' do
-      expect(session).to receive(:[]).with('warden.user.user.key')
+      expect(session).to receive(:[]).with(ApplicationController::SessionKeys::WARDEN_USER)
       subject.request_user
     end
     it 'returns the User assocaited with the request' do
       user = double('A User')
-      allow(session).to receive(:[]).with('warden.user.user.key').and_return([[user_id]])
+      allow(session).to receive(:[]).with(ApplicationController::SessionKeys::WARDEN_USER).and_return([[user_id]])
       allow(User).to receive(:find).with(user_id).and_return(user)
       expect(subject.request_user).to be(user)
     end
@@ -56,7 +56,7 @@ describe MAPIService do
   describe '`request_member_id` method' do
     it 'returns the member ID assocaited with the request' do
       member_id = double('A Member ID')
-      allow(session).to receive(:[]).with('member_id').and_return(member_id)
+      allow(session).to receive(:[]).with(ApplicationController::SessionKeys::MEMBER_ID).and_return(member_id)
       expect(subject.request_member_id).to be(member_id)
     end
     it 'returns nil if no member ID is associated' do
@@ -66,7 +66,9 @@ describe MAPIService do
 
   describe '`request_member_name` method' do
     it 'returns the member name assocaited with the request' do
-      expect(subject.request).to be(request)
+      member_name = double('A Member Name')
+      allow(session).to receive(:[]).with(ApplicationController::SessionKeys::MEMBER_NAME).and_return(member_name)
+      expect(subject.request_member_name).to be(member_name)
     end
     it 'returns nil if no member name is associated' do
       expect(subject.request_member_name).to be_nil
@@ -75,9 +77,7 @@ describe MAPIService do
 
   describe '`request` method' do
     it 'returns the request bound to the service object' do
-      member_name = double('A Member Name')
-      allow(session).to receive(:[]).with('member_name').and_return(member_name)
-      expect(subject.request_member_name).to be(member_name)
+      expect(subject.request).to be(request)
     end
   end
 

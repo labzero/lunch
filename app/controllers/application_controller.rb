@@ -9,6 +9,17 @@ class ApplicationController < ActionController::Base
 
   HTTP_404_ERRORS = [ActionController::RoutingError, ActionController::UnknownController, ::AbstractController::ActionNotFound, ActiveRecord::RecordNotFound]
 
+  module SessionKeys
+    MEMBER_ID = 'member_id'.freeze
+    MEMBER_NAME = 'member_name'.freeze
+    SECURID_AUTHENTICATED = 'securid_authenticated'.freeze
+    PASSWORD_EXPIRED = 'password_expired'.freeze
+    NEW_ANNOUNCEMENT_COUNT = 'new_announcements_count'.freeze
+    SIGNER_FULL_NAME = 'signer_full_name'.freeze
+    CACHE_KEY = 'cache_key'.freeze
+    WARDEN_USER = 'warden.user.user.key'.freeze
+  end
+
   rescue_from Exception do |exception|
     case exception
     when ActionController::InvalidAuthenticityToken
@@ -27,36 +38,36 @@ class ApplicationController < ActionController::Base
   end
 
   def current_member_id
-    session['member_id']
+    session[SessionKeys::MEMBER_ID]
   end
 
   def current_member_name
-    session['member_name'] ||= MembersService.new(request).member(current_member_id).try(:[], :name) if current_member_id
-    session['member_name']
+    session[SessionKeys::MEMBER_NAME] ||= MembersService.new(request).member(current_member_id).try(:[], :name) if current_member_id
+    session[SessionKeys::MEMBER_NAME]
   end
 
   # Returns a boolean indicating if the current session has successfully gone
   # through the elevated authentication flow with SecureID.
   def session_elevated?
-    !!session['securid_authenticated']
+    !!session[SessionKeys::SECURID_AUTHENTICATED]
   end
 
   def session_elevate!
-    session['securid_authenticated'] = true
+    session[SessionKeys::SECURID_AUTHENTICATED] = true
   end
 
   def current_user
     user = super
     if user
       # we don't use the session ID here because we renew the ID during login to avoid session fixation attacks
-      user.cache_key = session['cache_key'] || SecureRandom.hex
-      session['cache_key'] ||= user.cache_key
+      user.cache_key = session[SessionKeys::CACHE_KEY] || SecureRandom.hex
+      session[SessionKeys::CACHE_KEY] ||= user.cache_key
     end
     user
   end
 
   def check_password_change
-    redirect_to user_expired_password_path if session['password_expired']
+    redirect_to user_expired_password_path if session[SessionKeys::PASSWORD_EXPIRED]
   end
 
   def check_terms
@@ -71,12 +82,12 @@ class ApplicationController < ActionController::Base
   end
 
   def new_announcements_count
-    session['new_announcements_count'] ||= current_user.new_announcements_count if current_user
-    session['new_announcements_count'] || 0
+    session[SessionKeys::NEW_ANNOUNCEMENT_COUNT] ||= current_user.new_announcements_count if current_user
+    session[SessionKeys::NEW_ANNOUNCEMENT_COUNT] || 0
   end
 
   def reset_new_announcements_count
-    session.delete('new_announcements_count')
+    session.delete(SessionKeys::NEW_ANNOUNCEMENT_COUNT)
   end
 
   def set_active_nav(name)
@@ -85,6 +96,10 @@ class ApplicationController < ActionController::Base
 
   def get_active_nav
     @active_nav
+  end
+
+  def signer_full_name
+    session[SessionKeys::SIGNER_FULL_NAME] ||= EtransactAdvancesService.new(request).signer_full_name(current_user.username)
   end
 
   alias_method_chain :authenticate_user!, :authentication_flag
@@ -99,17 +114,17 @@ class ApplicationController < ActionController::Base
     user = current_user
     # We care about the presence of the 'password_expired' key, as well as its value,
     # as we only want to check for password expiration once per session.
-    password_expired = session['password_expired']
-    password_expired = user.password_expired? unless session.has_key?('password_expired')
+    password_expired = session[SessionKeys::PASSWORD_EXPIRED]
+    password_expired = user.password_expired? unless session.has_key?(SessionKeys::PASSWORD_EXPIRED)
     if password_expired
-      session['password_expired'] = true
+      session[SessionKeys::PASSWORD_EXPIRED] = true
       user_expired_password_path
     else
-      session['member_id'] = user.member_id if !session['member_id'].present? && user && !user.member_id.nil?
+      session[SessionKeys::MEMBER_ID] = user.member_id if !session[SessionKeys::MEMBER_ID].present? && user && !user.member_id.nil?
       if user.accepted_terms?
-        if session['member_id'].present?
+        if session[SessionKeys::MEMBER_ID].present?
           stored_location_for(resource) || dashboard_path
-        elsif user && user.ldap_domain == 'intranet'
+        elsif user && user.intranet_user?
           members_select_member_path
         else
           raise 'Sign in error: Only intranet users can select a bank.  The current_user is not an intranet user but is also not associated with a member bank.'

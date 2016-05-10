@@ -267,10 +267,6 @@ class AdvancesController < ApplicationController
     @advance_request
   end
 
-  def signer_full_name
-    session['signer_full_name'] ||= EtransactAdvancesService.new(request).signer_full_name(current_user.username)
-  end
-
   def set_html_class
     @html_class = 'white-background'
   end
