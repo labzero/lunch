@@ -81,7 +81,6 @@ RSpec.describe DashboardController, :type => :controller do
     end
     before do
       allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
-      allow(subject).to receive(:current_user_roles)
       allow_any_instance_of(MembersService).to receive(:member_contacts)
       allow(MessageService).to receive(:new).and_return(double('service instance', todays_quick_advance_message: nil))
       allow(QuickReportSet).to receive_message_chain(:for_member, :latest_with_reports).and_return(nil)
@@ -92,10 +91,6 @@ RSpec.describe DashboardController, :type => :controller do
     it "renders the index view" do
       get :index
       expect(response.body).to render_template("index")
-    end
-    it 'calls `current_member_roles`' do
-      expect(subject).to receive(:current_user_roles)
-      get :index
     end
     it 'populates the deferred jobs view parameters' do
       expect(subject).to receive(:populate_deferred_jobs_view_parameters).with(DashboardController::DEFERRED_JOBS)

@@ -137,50 +137,56 @@ RSpec.describe User, :type => :model do
   end
 
   describe '`roles` method' do
-    let(:user_service) { double('user service instance') }
-    let(:ldap_role_cn) { 'FCN-MemberSite-Users' }
-    let(:ldap_role) { double('some ldap role', cn: ldap_role_cn) }
-    let(:ldap_roles) { [ldap_role] }
-    let(:signer_role) { 'signer-advances' }
-    let(:mapi_roles) { [signer_role] }
-    let(:request) { double('some request object') }
     let(:session_roles) { double('roles set from the session') }
+    let(:call_method) { subject.roles }
     before do
-      allow(subject).to receive(:ldap_groups).and_return(ldap_roles)
-      allow(UsersService).to receive(:new).and_return(user_service)
-      allow(user_service).to receive(:user_roles).and_return(mapi_roles)
+      allow(subject).to receive(:roles_lookup).and_return(session_roles)
     end
-    it 'will create an instance of UsersService with a request argument if one is provided' do
-      expect(UsersService).to receive(:new).with(request).and_return(user_service)
-      subject.roles(request)
-    end
-    it 'will create an instance of UsersService with a test request if no request argument is provided' do
-      expect(UsersService).to receive(:new).with(an_instance_of(ActionDispatch::TestRequest))
-      subject.roles
-    end
-    it 'returns an array containing roles based on the CNs it receives from LDAP' do
-      expect(subject.roles(request)).to include(User::LDAP_GROUPS_TO_ROLES[ldap_role_cn])
-    end
-    it 'returns an array containing roles based on the values it receives from the MAPI endpoint' do
-      expect(subject.roles(request)).to include(User::LDAP_GROUPS_TO_ROLES[signer_role])
-    end
-    it 'ignores any roles it receives if they do not correspond to ROLE_MAPPING' do
-      allow(subject).to receive(:ldap_groups).and_return([ldap_role, double('another ldap role', cn: 'some role we do not care about')])
-      expect(subject.roles(request).length).to eq(2)
-    end
-    it 'does not hit LDAP if its `roles` attribute already exists' do
-      expect(subject).to_not receive(:ldap_groups)
+    it 'does not look up the roles if the `roles` attribute already exists' do
+      expect(subject).to_not receive(:roles_lookup)
       subject.roles = session_roles
-      subject.roles
-    end
-    it 'returns its `roles` attribute if it exists without hitting MAPI' do
-      expect(UsersService).to_not receive(:new)
-      subject.roles = session_roles
-      subject.roles
+      call_method
     end
     it 'returns its `roles` attribute if it has already been set' do
       subject.roles = session_roles
-      expect(subject.roles).to eq(session_roles)
+      expect(call_method).to eq(session_roles)
+    end
+    it 'passes the supplied request to `roles_lookup`' do
+      request = double(ActionDispatch::Request)
+      expect(subject).to receive(:roles_lookup).with(request)
+      subject.roles(request)
+    end
+    it 'passes a dummy request to `roles_lookup` if none is provided' do
+      expect(subject).to receive(:roles_lookup).with(kind_of(ActionDispatch::TestRequest))
+      call_method
+    end
+    describe 'caching' do
+      let(:cache_key) { double('A Cache Key') }
+      let(:expiry) { double('An Expiry') }
+      it 'returns the result of `roles_lookup` if `prefixed_roles_cache_key` is not present' do
+        allow(subject).to receive(:prefixed_roles_cache_key).and_return(nil)
+        expect(call_method).to be(session_roles)
+      end
+      describe 'if `prefixed_roles_cache_key` is present' do
+        before do
+          allow(subject).to receive(:prefixed_roles_cache_key).and_return(cache_key)
+          allow(CacheConfiguration).to receive(:expiry).with(described_class::CACHE_CONTEXT_ROLES).and_return(expiry)
+        end
+        it 'calls `roles_lookup` if the cache misses' do
+          allow(Rails.cache).to receive(:fetch).and_yield
+          expect(subject).to receive(:roles_lookup)
+          call_method
+        end
+        it 'looks up the roles in the cache' do
+          expect(Rails.cache).to receive(:fetch).with(cache_key, include(expires_in: expiry))
+          call_method
+        end
+        it 'returns the result of the cache lookup' do
+          result = double('Some Roles')
+          allow(Rails.cache).to receive(:fetch).and_return(result)
+          expect(call_method).to be(result)
+        end
+      end
     end
   end
 
@@ -508,6 +514,35 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`cache_key=` method' do
+    let(:new_key) { double('New Cache Key') }
+    let(:old_key) { double('Old Cache Key') }
+    let(:call_method) { subject.cache_key = new_key }
+    it 'calls `clear_cache` if the cache key has changed' do
+      subject.cache_key = old_key
+      expect(subject).to receive(:clear_cache)
+      call_method
+    end
+    it 'does not call `clear_cache` if the cache key is the same as the new key' do
+      subject.cache_key = new_key
+      expect(subject).to_not receive(:clear_cache)
+      call_method
+    end
+    it 'sets `@cache_key` to the new key' do
+      call_method
+      expect(subject.cache_key).to be(new_key)
+    end
+    it 'calls `clear_cache` before setting the new cache key'
+  end
+
+  describe '`cache_key` method' do
+    it 'returns the value stored for the cache_key' do
+      value = double('A Value')
+      subject.cache_key = value
+      expect(subject.cache_key).to be(value)
+    end
+  end
+
   describe '`valid_ldap_authentication?` method' do
     let(:password) { double('A Password') }
     let(:strategy) { double('A Strategy', request: double('A Request')) }
@@ -710,8 +745,111 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`ldap_entry` method' do
+    let(:call_method) { subject.ldap_entry }
+    let(:ldif_entry) { double('LDIF Entry Representation') }
+    let(:entry) { double(Net::LDAP::Entry, to_ldif: ldif_entry) }
+
+    before do
+      allow_any_instance_of(User).to receive(:ldap_entry).and_call_original
+      allow(Devise::LDAP::Adapter).to receive(:get_ldap_entry).and_return(nil)
+    end
+
+    describe 'when `prefixed_cache_key` is `nil`' do
+      it 'returns the previous value if called a second time' do
+        value = call_method
+        expect(call_method).to be(value)
+      end
+      it 'returns the results of calling `super`' do
+        allow(Devise::LDAP::Adapter).to receive(:get_ldap_entry).and_return(entry)
+        expect(call_method).to be(entry)
+      end
+    end
+    describe 'when `prefixed_cache_key` is present' do
+      let(:cache_key) { double('A Cache Key') }
+      let(:expiry) { double('An Expiry') }
+      before do
+        allow(subject).to receive(:prefixed_cache_key).and_return(cache_key)
+        allow(CacheConfiguration).to receive(:expiry).with(described_class::CACHE_CONTEXT_METADATA).and_return(expiry)
+        allow(Rails.cache).to receive(:fetch).and_yield
+      end
+      it 'returns the previous value if called a second time' do
+        value = call_method
+        expect(call_method).to be(value)
+      end
+      it 'tries to fetch a cached entry' do
+        expect(Rails.cache).to receive(:fetch).with(cache_key, include(expires_in: expiry))
+        call_method
+      end
+      it 'calls `super` on a cache miss' do
+        expect(Devise::LDAP::Adapter).to receive(:get_ldap_entry)
+        call_method
+      end
+      describe 'and `super` returns an entry' do
+        before do
+          allow(Devise::LDAP::Adapter).to receive(:get_ldap_entry).and_return(entry)
+        end
+        it 'converts the cache miss entry to LDIF format' do
+          expect(entry).to receive(:to_ldif).and_return(nil)
+          call_method
+        end
+        it 'converts the LDIF entry into a `Net::LDAP::Entry`' do
+          expect(Net::LDAP::Entry).to receive(:from_single_ldif_string).with(ldif_entry)
+          call_method
+        end
+        it 'returns the `Net::LDAP::Entry` built from the cache' do
+          new_entry = double(Net::LDAP::Entry)
+          allow(Net::LDAP::Entry).to receive(:from_single_ldif_string).with(ldif_entry).and_return(new_entry)
+          expect(call_method).to be(new_entry)
+        end
+      end
+      it 'does not convert the LDIF entry if its nil' do
+        expect(Net::LDAP::Entry).to_not receive(:from_single_ldif_string)
+        call_method
+      end
+      it 'does not raise an error if `super` returns nil' do
+        expect{call_method}.to_not raise_error
+      end
+    end
+  end
+
+  describe '`clear_cache` method' do
+    [:prefixed_cache_key, :prefixed_roles_cache_key, :prefixed_groups_cache_key].each do |key_method|
+      let(:call_method) { subject.clear_cache }
+      it "deletes the `#{key_method}` cache entry" do
+        key = double('Cache Key')
+        allow(subject).to receive(key_method).and_return(key)
+        expect(Rails.cache).to receive(:delete).with(key)
+        call_method
+      end
+      it "does not delete `#{key_method}` cache entry if `#{key_method}` returns `nil`" do
+        allow(subject).to receive(key_method).and_return(nil)
+        expect(Rails.cache).to_not receive(:delete)
+        call_method
+      end
+    end
+  end
+
+  {
+    prefixed_cache_key: described_class::CACHE_CONTEXT_METADATA,
+    prefixed_roles_cache_key: described_class::CACHE_CONTEXT_ROLES,
+    prefixed_groups_cache_key: described_class::CACHE_CONTEXT_GROUPS
+  }.each do |method, context|
+    let(:call_method) { subject.send(method) }
+    describe "`#{method}` protected method" do
+      it 'returns the config from `CacheConfiguration`'
+      it 'returns `nil` if `cache_key` is `nil`' do
+        expect(call_method).to be_nil
+      end
+    end
+  end
+
   describe '`reload_ldap_entry` protected method' do
     let(:call_method) { subject.send(:reload_ldap_entry) }
+    it 'calls `clear_cache`' do
+      expect(subject).to receive(:clear_cache)
+      call_method
+    end
     it 'nils out the `@ldap_entry` instance variable' do
       subject.instance_variable_set(:@ldap_entry, double('LDAP Entry: User'))
       call_method
@@ -1011,9 +1149,44 @@ RSpec.describe User, :type => :model do
 
   describe '`ldap_groups` method' do
     let(:ldap_groups_result){ double('ldap groups result') }
-    it 'calls `Devise::LDAP::Adapter.get_groups`' do
-      allow(Devise::LDAP::Adapter).to receive(:get_groups).and_return(ldap_groups_result)
-      expect(subject.ldap_groups).to eq(ldap_groups_result)
+    let(:call_method) { subject.ldap_groups }
+    before do
+      allow(Devise::LDAP::Adapter).to receive(:get_groups).with(subject.login_with, subject.ldap_domain).and_return(ldap_groups_result)
+    end
+    it 'skips the lookup if called twice' do
+      expect(Devise::LDAP::Adapter).to receive(:get_groups).and_return(ldap_groups_result).exactly(:once)
+      call_method
+      call_method
+    end
+    describe 'when `prefixed_groups_cache_key` is not present' do
+      before do
+        allow(subject).to receive(:prefixed_groups_cache_key).and_return(nil)
+      end
+      it 'returns the result of calling `Devise::LDAP::Adapter.get_groups`' do
+        expect(call_method).to eq(ldap_groups_result)
+      end
+    end
+    describe 'when `prefixed_groups_cache_key` is present' do
+      let(:cache_key) { double('A Cache Key') }
+      let(:expiry) { double('An Expiry') }
+      before do
+        allow(CacheConfiguration).to receive(:expiry).with(described_class::CACHE_CONTEXT_GROUPS).and_return(expiry)
+        allow(subject).to receive(:prefixed_groups_cache_key).and_return(cache_key)
+      end
+      it 'checks for cached groups' do
+        expect(Rails.cache).to receive(:fetch).with(cache_key, include(expires_in: expiry))
+        call_method
+      end
+      it 'calls `Devise::LDAP::Adapter.get_groups` on a cache miss' do
+        allow(Rails.cache).to receive(:fetch).and_yield
+        expect(Devise::LDAP::Adapter).to receive(:get_groups).with(subject.login_with, subject.ldap_domain)
+        call_method
+      end
+      it 'returns the result of the cache check' do
+        result = double('A Result')
+        allow(Rails.cache).to receive(:fetch).and_return(result)
+        expect(call_method).to be(result)
+      end
     end
   end
 
@@ -1142,6 +1315,41 @@ RSpec.describe User, :type => :model do
   describe '`encrypted_password_changed?` protected method' do
     it 'returns false' do
       expect(subject.send(:encrypted_password_changed?)).to be(false)
+    end
+  end
+
+  describe '`roles_lookup` method' do
+    let(:user_service) { double('user service instance') }
+    let(:ldap_role_cn) { 'FCN-MemberSite-Users' }
+    let(:ldap_role) { double('some ldap role', cn: ldap_role_cn) }
+    let(:ldap_roles) { [ldap_role] }
+    let(:signer_role) { 'signer-advances' }
+    let(:mapi_roles) { [signer_role] }
+    let(:request) { double('some request object') }
+    let(:session_roles) { double('roles set from the session') }
+    let(:call_method) { subject.send(:roles_lookup, request) }
+    before do
+      allow(subject).to receive(:ldap_groups).and_return(ldap_roles)
+      allow(UsersService).to receive(:new).and_return(user_service)
+      allow(user_service).to receive(:user_roles).and_return(mapi_roles)
+    end
+    it 'will create an instance of UsersService with a request argument if one is provided' do
+      expect(UsersService).to receive(:new).with(request).and_return(user_service)
+      call_method
+    end
+    it 'will create an instance of UsersService with a test request if no request argument is provided' do
+      expect(UsersService).to receive(:new).with(an_instance_of(ActionDispatch::TestRequest))
+      subject.send(:roles_lookup)
+    end
+    it 'returns an array containing roles based on the CNs it receives from LDAP' do
+      expect(call_method).to include(User::LDAP_GROUPS_TO_ROLES[ldap_role_cn])
+    end
+    it 'returns an array containing roles based on the values it receives from the MAPI endpoint' do
+      expect(call_method).to include(User::LDAP_GROUPS_TO_ROLES[signer_role])
+    end
+    it 'ignores any roles it receives if they do not correspond to ROLE_MAPPING' do
+      allow(subject).to receive(:ldap_groups).and_return([ldap_role, double('another ldap role', cn: 'some role we do not care about')])
+      expect(call_method.length).to eq(2)
     end
   end
 

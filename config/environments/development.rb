@@ -45,6 +45,9 @@ Rails.application.configure do
 end
 
 if ENV['DEBUG'] == 'true'
+  require 'byebug'
+  require 'byebug/core'
+  
   def find_available_port
     server = TCPServer.new(nil, 0)
     server.addr[1]

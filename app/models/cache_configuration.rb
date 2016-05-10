@@ -6,6 +6,18 @@ module CacheConfiguration
       key_prefix: 'contacts',
       expiry: 24.hours
     },
+    user_metadata: {
+      key_prefix: "users#{SEPARATOR}ldap#{SEPARATOR}metadata",
+      expiry: 24.hours
+    },
+    user_roles: {
+      key_prefix: "users#{SEPARATOR}ldap#{SEPARATOR}roles",
+      expiry: 24.hours
+    },
+    user_groups: {
+      key_prefix: "users#{SEPARATOR}ldap#{SEPARATOR}groups",
+      expiry: 24.hours
+    },
     default: {
       key_prefix: 'default',
       expiry: 24.hours

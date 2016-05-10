@@ -46,7 +46,6 @@ class DashboardController < ApplicationController
     etransact_service = EtransactAdvancesService.new(request)
     member_balances = MemberBalanceService.new(current_member_id, request)
     members_service = MembersService.new(request)
-    current_user_roles
     populate_deferred_jobs_view_parameters(DEFERRED_JOBS)
     profile = sanitize_profile_if_endpoints_disabled(member_balances.profile)
 

@@ -45,6 +45,10 @@ class User < ActiveRecord::Base
   LDAP_LOCK_BIT = 0x2
   LDAP_PASSWORD_EXPIRATION_ATTRIBUTE = :passwordExpired
 
+  CACHE_CONTEXT_METADATA = :user_metadata
+  CACHE_CONTEXT_ROLES = :user_roles
+  CACHE_CONTEXT_GROUPS = :user_groups
+
   module Roles
     MEMBER_USER = 'member_user'
     ADVANCE_SIGNER = 'advance_signer'
@@ -91,7 +95,7 @@ class User < ActiveRecord::Base
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :ldap_authenticatable, :recoverable, :trackable, :timeoutable, case_insensitive_keys: [:username]
 
-  attr_accessor :roles, :email, :surname, :given_name, :member_id, :deletion_reason
+  attr_accessor :roles, :email, :surname, :given_name, :member_id, :deletion_reason, :cache_key
 
   after_save :save_ldap_attributes
   after_destroy :destroy_ldap_entry
@@ -158,6 +162,11 @@ class User < ActiveRecord::Base
 
   def deletion_reason_changed?
     changed.include?('deletion_reason')
+  end
+
+  def cache_key=(new_key)
+    clear_cache unless cache_key && cache_key == new_key
+    @cache_key = new_key
   end
 
   def locked?
@@ -284,16 +293,15 @@ class User < ActiveRecord::Base
 
   def roles(request = ActionDispatch::TestRequest.new)
     @roles ||= (
-      roles = []
+      key = prefixed_roles_cache_key
       Devise::LDAP::Adapter.shared_connection do
-        # Hits ldap_groups and gets an array of the CN's of all the groups the user belongs to.
-        ldap_roles = self.ldap_groups
-        roles << ldap_roles.collect{|object| object.cn} unless ldap_roles.nil?
-        # Hit the MAPI endpoint to check if user is a signer. Need request object to connect to MAPI
-        user_service = UsersService.new(request)
-        user_service_roles = user_service.user_roles(username)
-        roles << user_service_roles unless user_service_roles.nil?
-        roles.flatten.collect{ |role| LDAP_GROUPS_TO_ROLES[role] }.compact
+        if key
+          Rails.cache.fetch(key, expires_in: CacheConfiguration.expiry(CACHE_CONTEXT_ROLES)) do
+            roles_lookup(request)
+          end
+        else
+          roles_lookup(request)
+        end
       end
     )
   end
@@ -313,7 +321,14 @@ class User < ActiveRecord::Base
   end
 
   def ldap_groups
-    Devise::LDAP::Adapter.get_groups(login_with, self.ldap_domain)
+    @ldap_groups ||= (
+        key = prefixed_groups_cache_key
+        if key
+          Rails.cache.fetch(key, expires_in: CacheConfiguration.expiry(CACHE_CONTEXT_GROUPS)) { Devise::LDAP::Adapter.get_groups(login_with, self.ldap_domain) }
+        else
+          Devise::LDAP::Adapter.get_groups(login_with, self.ldap_domain)
+        end
+      )
   end
 
   def accepted_terms?
@@ -353,9 +368,41 @@ class User < ActiveRecord::Base
     self.update_attribute(:last_viewed_announcements_at, Time.zone.now)
   end
 
+  def ldap_entry
+    return @ldap_entry if @ldap_entry
+    key = prefixed_cache_key
+    if key
+      ldif = Rails.cache.fetch(key, expires_in: CacheConfiguration.expiry(CACHE_CONTEXT_METADATA)) do
+        super.try(:to_ldif)
+      end
+      @ldap_entry = Net::LDAP::Entry.from_single_ldif_string(ldif) if ldif
+    else
+      super
+    end
+  end
+
+  def clear_cache
+    [prefixed_cache_key, prefixed_roles_cache_key, prefixed_groups_cache_key].each do |key|
+      Rails.cache.delete(key) if key
+    end
+  end
+
   protected
 
+  def prefixed_cache_key
+    CacheConfiguration.key(CACHE_CONTEXT_METADATA, id, cache_key) if cache_key
+  end
+
+  def prefixed_roles_cache_key
+    CacheConfiguration.key(CACHE_CONTEXT_ROLES, id, cache_key) if cache_key
+  end
+
+  def prefixed_groups_cache_key
+    CacheConfiguration.key(CACHE_CONTEXT_GROUPS, id, cache_key) if cache_key
+  end
+
   def reload_ldap_entry
+    clear_cache
     @ldap_entry = nil
   end
 
@@ -423,6 +470,18 @@ class User < ActiveRecord::Base
     else
       raise ActiveRecord::Rollback
     end
+  end
+
+  def roles_lookup(request = ActionDispatch::TestRequest.new)
+    roles = []
+    # Hits ldap_groups and gets an array of the CN's of all the groups the user belongs to.
+    ldap_roles = self.ldap_groups
+    roles << ldap_roles.collect{|object| object.cn} unless ldap_roles.nil?
+    # Hit the MAPI endpoint to check if user is a signer. Need request object to connect to MAPI
+    user_service = UsersService.new(request)
+    user_service_roles = user_service.user_roles(username)
+    roles << user_service_roles unless user_service_roles.nil?
+    roles.flatten.collect{ |role| LDAP_GROUPS_TO_ROLES[role] }.compact
   end
 
 end
