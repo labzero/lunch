@@ -49,10 +49,10 @@ class DashboardController < ApplicationController
     populate_deferred_jobs_view_parameters(DEFERRED_JOBS)
     profile = sanitize_profile_if_endpoints_disabled(member_balances.profile)
 
-    @market_overview = [{
-      name: 'Test',
-      data: members_service.report_disabled?(current_member_id, [MembersService::IRDB_RATES_DATA]) ? nil : rate_service.overnight_vrc
-    }]
+    market_overview_data = Rails.cache.fetch(CacheConfiguration.key(:market_overview),
+                                             expires_in: CacheConfiguration.expiry(:market_overview)) { rate_service.overnight_vrc }
+    @market_overview = [{ name: 'Test',
+                          data: members_service.report_disabled?(current_member_id, [MembersService::IRDB_RATES_DATA]) ? nil : market_overview_data }]
 
     @financing_availability_gauge = if profile[:total_financing_available]
       calculate_gauge_percentages(
@@ -88,8 +88,8 @@ class DashboardController < ApplicationController
     end
     @contacts = Rails.cache.fetch(CacheConfiguration.key(:member_contacts, current_member_id),
                                   expires_in: CacheConfiguration.expiry(:member_contacts)) do
-      members_service.member_contacts(current_member_id) || {}
-    end
+      members_service.member_contacts(current_member_id)
+    end || {}
     default_image_path = 'placeholder-usericon.svg'
     if @contacts[:rm] && @contacts[:rm][:username]
       rm_image_path = "#{@contacts[:rm][:username].downcase}.jpg"

@@ -101,12 +101,45 @@ RSpec.describe DashboardController, :type => :controller do
       expect(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(profile).and_return({})
       get :index
     end
-    it "assigns @market_overview" do
-      get :index
-      expect(assigns[:market_overview]).to be_present
-      expect(assigns[:market_overview][0]).to be_present
-      expect(assigns[:market_overview][0][:name]).to be_present
-      expect(assigns[:market_overview][0][:data]).to be_present
+    describe 'market overview' do
+      let(:cache_key) { double('cache key') }
+      let(:cache_expiry) { double('cache expiry') }
+      let(:market_overview_data) { double('market overview data') }
+      let(:rates_service_instance) { double('service instance', current_overnight_vrc: nil, overnight_vrc: nil) }
+      before do
+        allow(RatesService).to receive(:new).and_return(rates_service_instance)
+        allow(rates_service_instance).to receive(:overnight_vrc).and_return(market_overview_data)
+        allow(Rails.cache).to receive(:fetch)
+        allow(CacheConfiguration).to receive(:key)
+        allow(CacheConfiguration).to receive(:expiry)
+        allow(CacheConfiguration).to receive(:key).with(:market_overview).and_return(cache_key)
+        allow(CacheConfiguration).to receive(:expiry).with(:market_overview).and_return(cache_expiry)
+      end
+      it 'assigns `@market_overview` with data from cache' do
+        allow(Rails.cache).to receive(:fetch).with(cache_key, expires_in: cache_expiry).and_yield.and_return(market_overview_data)
+        get :index
+        expect(assigns[:market_overview][0][:data]).to eq(market_overview_data)
+      end
+      describe 'cache miss' do
+        before do
+          allow(Rails.cache).to receive(:fetch).with(cache_key, expires_in: cache_expiry).and_yield
+        end
+        it 'calls `RatesService` upon cache miss' do
+          expect(rates_service_instance).to receive(:overnight_vrc)
+          get :index
+        end
+        it 'assigns `@market_overview` rate data to `nil` if the rates could not be retrieved' do
+          allow(rates_service_instance).to receive(:overnight_vrc).and_return(nil)
+          get :index
+          expect(assigns[:market_overview][0][:data]).to eq(nil)
+        end
+        it 'returns the result from the `RateService` from the block' do
+          allow(Rails.cache).to receive(:fetch).with(cache_key, expires_in: cache_expiry) do |*args, &block|
+            expect(block.call).to be(market_overview_data)
+          end
+          get :index
+        end
+      end
     end
     it 'calls `calculate_gauge_percentages` for @financing_availability_gauge'  do
       expect(subject).to receive(:calculate_gauge_percentages).once
@@ -234,11 +267,6 @@ RSpec.describe DashboardController, :type => :controller do
         expect(rate_service_instance).to receive(:current_overnight_vrc).and_return(nil)
         get :index
         expect(assigns[:current_overnight_vrc]).to eq(nil)
-      end
-      it 'should assign @market_overview rate data as nil if the rates could not be retrieved' do
-        expect(rate_service_instance).to receive(:overnight_vrc).and_return(nil)
-        get :index
-        expect(assigns[:market_overview][0][:data]).to eq(nil)
       end
     end
     describe "MemberBalanceService failures" do
