@@ -1,5 +1,5 @@
 module DatePickerHelper
-
+  include CustomFormattingHelper
   def default_dates_hash(today=Time.zone.today)
     {
       this_month_start: today.beginning_of_month,
@@ -99,29 +99,39 @@ module DatePickerHelper
   end
 
   def date_picker_single(custom_start_date, min_date, max_date)
-    [
+    date_hash = default_dates_hash
+    presets = [
       {
         label: t('global.today'),
-        start_date: default_dates_hash[:today],
-        end_date: default_dates_hash[:today],
+        start_date: date_hash[:today],
+        end_date: date_hash[:today],
         id: :today
       },
       {
-        label: t('datepicker.single.end_of', date: default_dates_hash[:last_month_end].strftime('%B')),
-        start_date: default_dates_hash[:last_month_end],
-        end_date: default_dates_hash[:last_month_end],
+        label: t('datepicker.single.end_of', date: date_hash[:last_month_end].strftime('%B')),
+        start_date: date_hash[:last_month_end],
+        end_date: date_hash[:last_month_end],
         id: :month_end
       },
       {
-        label: t('datepicker.single.end_of', date: default_dates_hash[:last_year_start].year.to_s),
-        start_date: default_dates_hash[:last_year_end],
-        end_date: default_dates_hash[:last_year_end],
+        label: t('datepicker.single.end_of', date: date_hash[:last_year_start].year.to_s),
+        start_date: date_hash[:last_year_end],
+        end_date: date_hash[:last_year_end],
         id: :year_end
       }
     ].delete_if do |preset|
       (preset[:start_date] < min_date if min_date) ||
       (preset[:start_date] > max_date if max_date)
     end
+    if max_date && max_date < date_hash[:today]
+      presets.unshift({
+        label: fhlb_date_standard_numeric(max_date),
+        start_date: max_date,
+        end_date: max_date,
+        id: :most_recent
+      })
+    end
+    presets
   end
 
   def most_recent_business_day(d)
