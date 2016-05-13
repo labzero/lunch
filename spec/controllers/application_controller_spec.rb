@@ -9,15 +9,27 @@ RSpec.describe ApplicationController, :type => :controller do
     let(:backtrace) {%w(some backtrace array returned by the error)}
     describe 'StandardError' do
       let(:error) {StandardError.new}
+      let(:call_method) { controller.send(:handle_exception, error) }
       before { allow(error).to receive(:backtrace).and_return(backtrace) }
       it 'captures all StandardErrors and displays the 500 error view' do
         expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500})
-        controller.send(:handle_exception, error)
+        call_method
       end
-      it 'rescues any exceptions raised when rendering the `error/500` view' do
-        expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500}).and_raise(error)
-        expect(controller).to receive(:render).with({:text=>error, :status=>500})
-        controller.send(:handle_exception, error)
+      describe 'rescuing exceptions raised when rendering the `error/500` view' do
+        before do
+          allow(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500}).and_raise(error)
+        end
+
+        it 'renders the error as plain text if the request is considered local' do
+          allow(Rails.configuration).to receive(:consider_all_requests_local).and_return(true)
+          expect(controller).to receive(:render).with({:text=>error, :status=>500})
+          call_method
+        end
+        it 'does not render the error if the request is consider remote' do
+          allow(Rails.configuration).to receive(:consider_all_requests_local).and_return(false)
+          expect(controller).to receive(:render).with({:text=>'Something went wrong!', :status=>500})
+          call_method
+        end
       end
     end
 
