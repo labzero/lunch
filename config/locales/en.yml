@@ -1169,7 +1169,7 @@ en:
       one: "%{count} month"
       other: "%{count} months"
     price_indications:
-      title: Price Indications
+      title: Price Indications and STA Rates
       current:
         title: Current
         summary: Reflects the price indications published at the beginning of the day; not actual prices. Actual prices are subject to change throughout the day.
