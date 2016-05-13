@@ -132,7 +132,8 @@ class ApplicationController < ActionController::Base
         render 'error/500', layout: 'error', status: 500
       end
     rescue => e
-      render text: e, status: 500
+      text = Rails.configuration.consider_all_requests_local ? e : 'Something went wrong!'
+      render text: text, status: 500
     end
   end
 
