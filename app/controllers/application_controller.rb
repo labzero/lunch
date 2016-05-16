@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
-  before_action :authenticate_user!, :check_password_change, :check_terms, :save_render_time
+  before_action :authenticate_user!, :check_password_change, :check_terms, :save_render_time, :set_default_format
   helper_method :current_member_name, :current_member_id, :new_announcements_count, :set_active_nav, :get_active_nav
 
   HTTP_404_ERRORS = [ActionController::RoutingError, ActionController::UnknownController, ::AbstractController::ActionNotFound, ActiveRecord::RecordNotFound]
@@ -161,5 +161,9 @@ class ApplicationController < ActionController::Base
   def handle_bad_csrf
     reset_session
     redirect_to(logged_out_path)
+  end
+
+  def set_default_format
+    request.format = :html unless Mime::SET.include?(request.format)
   end
 end

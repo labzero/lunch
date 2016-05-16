@@ -4,6 +4,7 @@ RSpec.describe ApplicationController, :type => :controller do
   it { should use_before_action(:check_password_change) }
   it { should use_before_action(:save_render_time) }
   it { should use_before_action(:check_terms) }
+  it { should use_before_action(:set_default_format) }
 
   describe '`handle_exception` method' do
     let(:backtrace) {%w(some backtrace array returned by the error)}
@@ -472,6 +473,25 @@ RSpec.describe ApplicationController, :type => :controller do
     it 'redirects to the logged out page' do
       expect(controller).to receive(:redirect_to).with(controller.logged_out_path)
       call_method
+    end
+  end
+
+  describe '`set_default_format` private method' do
+    let(:request) { ActionDispatch::TestRequest.new }
+    let(:call_method) { controller.send(:set_default_format) }
+    before do
+      allow(controller).to receive(:request).and_return(request)
+    end
+    it 'leaves `request.format` alone if its a known MIME type' do
+      valid_format = Mime::SET.sample
+      request.format = valid_format.to_sym
+      call_method
+      expect(request.format).to eq(valid_format)
+    end
+    it 'sets `request.format` to `:html` if its an unknown MIME type' do
+      request.format = 'Accept: */*'
+      call_method
+      expect(request.format.html?).to be(true)
     end
   end
 
