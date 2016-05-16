@@ -84,6 +84,7 @@ en:
     shares_outstanding: Shares Outstanding
     prepare_download: Please wait while we prepare your download. This may take up to 60 seconds.
     cancel_download: Cancel Download
+    download: Download
     prepare_table: Please wait while we retrieve this data.
     pin: PIN
     token: Token Code
@@ -1815,6 +1816,11 @@ en:
         stock_leverage: Stock Leverage
     manage_advances:
       title: Manage Advances
+    confirmation:
+      title: Advance Confirmation
+      in_progress: In Progress
+      not_available: Not Available Online
+      download_date: Download %{date}
     status: Status
     rate: Rate (%)
     vrc_rates: VRC Rates

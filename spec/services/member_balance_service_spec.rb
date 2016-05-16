@@ -1359,6 +1359,36 @@ describe MemberBalanceService do
     end
   end
 
+  describe 'the `advance_confirmation` method' do
+    let(:body) { double('response body') }
+    let(:headers) { double('response headers') }
+    let(:status) { double('response status') }
+    let(:response) { double('HTTP response object', status: status, headers: headers, body: body) }
+    let(:connection) { double('HTTP connection object', get: response) }
+    let(:advance_number) { rand(1000..99999) }
+    let(:confirmation_number) { rand(1000..99999) }
+    let(:call_method) { subject.advance_confirmation(advance_number, confirmation_number) }
+
+    before do
+      allow(HTTP).to receive(:auth).and_return(connection)
+    end
+
+    it 'creates an HTTP authenticated connection' do
+      expect(HTTP).to receive(:auth).with("Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"").and_return(connection)
+      call_method
+    end
+    it 'gets an HTTP response object from the connection with the proper endpoint' do
+      expect(connection).to receive(:get).with(Rails.configuration.mapi.endpoint + "/member/#{member_id}/advance_confirmation/#{advance_number}/#{confirmation_number}").and_return(response)
+      call_method
+    end
+    it 'returns the response body' do
+      expect(call_method).to eq(body)
+    end
+    it 'yields the response status, response headers, and response body to the given block if one is provided' do
+      expect{|block| subject.advance_confirmation(advance_number, confirmation_number, &block)}.to yield_with_args(status, headers, body)
+    end
+  end
+
   # Helper Methods
   def expect_capital_stock_balance_to_receive(date)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with( "member/#{member_id}/capital_stock_balance/#{date}" )

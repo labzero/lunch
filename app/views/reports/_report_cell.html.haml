@@ -26,6 +26,14 @@
           %li{data:{'list-value' => list_item}}= t('global.footnoted_string', string: list_item.first)
         -else
           %li{data:{'list-value' => list_item}}= list_item
+- when :link_list
+  - value = capture_haml do
+    %ul
+      - cell[:value].each do |list_item|
+        - if list_item.is_a?(Array)
+          %li= link_to(list_item.first, list_item.last)
+        - else
+          %li= list_item
 - else
   - value = cell[:value]
   - classes = [:'report-cell-narrow']

@@ -22,3 +22,8 @@ Scenario: No data is available to show in the Manage Advances Page
   Given I am on the "Manage Advances" advances page
   When the "Manage Advances" table has no data
   Then I should see an empty report table with No Records messaging
+
+@flip-on-advance-confirmation @jira-mem-567
+Scenario: Member sees an advance confirmation column
+  When I am on the "Manage Advances" advances page
+  Then I should see an Advance Confirmation column in the data table

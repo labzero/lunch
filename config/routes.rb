@@ -90,6 +90,9 @@ Rails.application.routes.draw do
       post  '/preview' => 'advances#preview'
       post '/perform' => 'advances#perform'
     end
+    constraints Constraints::FeatureEnabled.new('advance-confirmation') do
+      get '/confirmation' => 'advances#confirmation'
+    end
   end
 
 

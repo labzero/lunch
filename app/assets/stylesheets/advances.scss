@@ -88,6 +88,22 @@
 
 .manage-advances-table {
   width: 940px;
+  .report-cell-narrow {
+    padding-right: 10px;
+  }
+  td {
+    vertical-align: top;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  li {
+    white-space: nowrap;
+    text-transform: uppercase;
+    color: $medium-gray;
+  }
 }
 
 .add-advance-form {

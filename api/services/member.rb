@@ -315,6 +315,40 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/advance_confirmation/{advance_number}/{confirmation_number}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve Advance Confirmation as data stream for a member'
+              key :notes, 'Advance confirmation found by member_id, advance_number, confirmation_number'
+              key :description, 'Returns an advance confirmation attachment using `rack.hijack` if available to allow streaming.'
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :advance_number
+                key :required, true
+                key :type, :string
+                key :description, 'The advance number for the requested advance'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :confirmation_number
+                key :required, true
+                key :type, :string
+                key :description, 'The confirmation number for the requested advance'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
+          api do
             key :path, '/{id}/todays_advances'
             operation do
               key :method, 'GET'
@@ -962,6 +996,27 @@ module MAPI
           result.to_json
         end
 
+        # Advance Confirmation
+        relative_get '/:id/advance_confirmation/:advance_number/:confirmation_number' do
+          member_id = params[:id]
+          advance_number = params[:advance_number]
+          confirmation_number = params[:confirmation_number]
+          begin
+            advance_confirmation = MAPI::Services::Member::TradeActivity.advance_confirmation(self, member_id, advance_number, confirmation_number)
+            file_path = advance_confirmation[:file_location] if advance_confirmation
+            if file_path
+              stream = File.open(file_path, 'rb')
+              file_name = "attachment; filename=\"advance-confirmation-#{confirmation_number}.pdf\""
+              MAPI::Services::Member.stream_attachment(env["rack.hijack?"], headers, stream, File.size(file_path), 'application/pdf', file_name)
+            else
+              halt 404, 'Resource Not Found'
+            end
+          rescue Exception => error
+            logger.error error
+            halt 503, 'Internal Service Error'
+          end
+        end
+
         # Todays Advances
         relative_get '/:id/todays_advances' do
           member_id = params[:id]
@@ -1167,6 +1222,34 @@ module MAPI
           else
             app.halt 400, 'Invalid custody_account_type: must be "all", "pledged" or "unpledged"'
          end
+      end
+
+      def self.stream_attachment(hijack_available, headers, stream, file_size, content_type, file_name)
+        headers['Content-Length'] = file_size.to_s
+        headers['Content-Type'] = content_type
+        headers['Content-Disposition'] = file_name
+
+        hijack_stream_processer = lambda do |out|
+          begin
+            while !stream.eof?
+              bytes = stream.read(1024)
+              out.write(bytes)
+              out.flush
+            end
+          ensure
+            stream.close
+            out.close
+          end
+          out
+        end
+
+        if hijack_available
+          headers["rack.hijack"] = hijack_stream_processer
+        else
+          out = StringIO.new
+          hijack_stream_processer.call(out)
+          out.string
+        end
       end
       
     end
