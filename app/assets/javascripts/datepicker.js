@@ -1,7 +1,7 @@
 $(function () {
 
   function bindDatepickers() {
-    var $startDate, $endDate = null;
+    var startDate, endDate;
     // set up all date-pickers on the page
     $('.datepicker-trigger').each(function(i, datePickerTrigger) {
       var $datePickerTrigger = $(datePickerTrigger);
@@ -16,41 +16,16 @@ $(function () {
       var presets = $wrapper.data('date-picker-presets');
       var $form = $($wrapper.data('date-picker-form'));
       var ranges = {};
-      var lastCustomLabel;
-      var defaultPreset = 1;
+      var defaultPreset = -1;
       var maxDate = moment($wrapper.data('date-picker-max-date'));
       var minDate = $wrapper.data('date-picker-min-date') ? moment($wrapper.data('date-picker-min-date')) : false;
       var filter = $wrapper.data('date-picker-filter');
       var filterOptions = $wrapper.data('date-picker-filter-options');
       var fromLabel = $wrapper.data('date-picker-from-label');
       var today = $wrapper.data('date-picker-today');
-      $.each(presets, function(index, preset) {
-        if (preset.start_date) {
-          preset.start_date = moment(preset.start_date);
-        };
-        if (preset.end_date) {
-          preset.end_date = moment(preset.end_date);
-        };
-        if (!preset.is_custom) {
-          ranges[preset.label] = [preset.start_date, preset.end_date]
-        } else {
-          lastCustomLabel = preset.label;
-        };
-        if (preset.is_default) {
-          defaultPreset = index;
-        };
-      });
-
-      $startDate = presets[defaultPreset].start_date;
-      $endDate = presets[defaultPreset].end_date
-
-      initializeDatePicker($datePickerTrigger, $wrapper, {
+      var options = {
         ranges: ranges,
-        customLabel: lastCustomLabel,
         opens: openDir,
-        defaultPreset: defaultPreset,
-        startDate: $startDate,
-        endDate: $endDate,
         singleDatePicker: singleDatePicker,
         maxDate: maxDate,
         minDate: minDate,
@@ -58,9 +33,42 @@ $(function () {
         filterOptions: filterOptions,
         today: today,
         fromLabel: fromLabel
+      };
+      startDate = $wrapper.data('date-picker-start-date');
+      endDate = $wrapper.data('date-picker-end-date');
+      $.each(presets, function(index, preset) {
+        if (preset.start_date) {
+          preset.start_date = moment(preset.start_date);
+        };
+        if (preset.end_date) {
+          preset.end_date = moment(preset.end_date);
+        };
+        ranges[preset.label] = [preset.start_date, preset.end_date]
+        if (preset.is_default) {
+          defaultPreset = index;
+        };
       });
+
+      if (startDate) {
+        startDate = moment(startDate);
+      }
+
+      if (endDate) {
+        endDate = moment(endDate);
+      }
+
+      if (defaultPreset >= 0) {
+        startDate = presets[defaultPreset].start_date;
+        endDate = presets[defaultPreset].end_date;
+        options.defaultPreset = defaultPreset;
+      }
+
+      options.startDate = startDate;
+      options.endDate = endDate;
+
+      initializeDatePicker($datePickerTrigger, $wrapper, options);
       setDatePickerApplyListener($datePickerTrigger, $form);
-      setDatePickerPlaceholder($datePickerTrigger, $startDate, $endDate);
+      setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
       if (filter !== undefined) {
         if (singleDatePicker) {
           $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(){
@@ -85,7 +93,7 @@ $(function () {
       if (target.value.match(/[0-9]+\/[0-9]+\/[0-9]+/)) {
         normalizeDateFormatPreservingSelection(e);
       } else {
-        $(target).val((target.name == 'daterangepicker_start' ? $startDate : $endDate).format('MM/DD/YYYY'));
+        $(target).val((target.name == 'daterangepicker_start' ? startDate : endDate).format('MM/DD/YYYY'));
       };
     });
   };
@@ -123,7 +131,6 @@ $(function () {
       today: options.today,
       parentEl: $datePickerWrapper,
       locale: {
-        customRangeLabel: options.customLabel,
         cancelLabel: '',
         fromLabel: options.fromLabel
       },
@@ -148,7 +155,10 @@ $(function () {
 
     $datePickerWrapper.find('.daterangepicker .ranges').insertBefore($datePickerWrapper.find('.calendar.first'));
     $datePickerWrapper.find('.range_inputs').html($datePickerWrapper.find('.range_inputs').html().replace(/&nbsp;/g, '')); // get rid of whitespace added between hidden buttons
-    $($datePickerWrapper.find('.ranges li')[options.defaultPreset]).click(); // default to "Last Month" when first opening
+    $datePickerWrapper.find('.ranges li:last-child').hide(); // hide the custom range preset
+    if (options.defaultPreset) {
+      $($datePickerWrapper.find('.ranges li')[options.defaultPreset]).click(); // default to "Last Month" when first opening
+    }
     if (options.singleDatePicker) {
       $datePickerWrapper.find('.ranges').show(); // always show the pre-selected tabs (daterangepicker.js hides these when set with the option singleDatePicker
     }

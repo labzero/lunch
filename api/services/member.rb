@@ -1087,7 +1087,7 @@ module MAPI
 
         relative_get '/:id/' do
           member_id = params[:id]
-          details = MAPI::Services::Member::Profile.member_details(self, member_id)
+          details = MAPI::Services::Member::Profile.member_details(self, logger, member_id)
           if details.nil?
             logger.error 'Member not found'
             halt 404

@@ -1,0 +1,1 @@
+# The cache is initialized in config/application.rb

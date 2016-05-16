@@ -43,6 +43,8 @@ if !custom_host
   ENV['RESQUE_REDIS_URL'] ||= RedisHelper.add_url_namespace(ENV['REDIS_URL'], resque_namespace)
   flipper_namespace = ['flipper', ENV['RAILS_ENV'], 'cucumber', parallel_test_number, Process.pid].compact.join('-')
   ENV['FLIPPER_REDIS_URL'] ||= RedisHelper.add_url_namespace(ENV['REDIS_URL'], flipper_namespace)
+  cache_namespace = ['cache', ENV['RAILS_ENV'], 'cucumber', parallel_test_number, Process.pid].compact.join('-')
+  ENV['CACHE_REDIS_URL'] ||= RedisHelper.add_url_namespace(ENV['REDIS_URL'], cache_namespace)
 
   puts "Flipper initialized (#{ENV['FLIPPER_REDIS_URL']})"
 

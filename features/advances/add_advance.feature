@@ -274,3 +274,12 @@ Scenario: User switches between VRC and FRC rates on the rate table
   When I click to toggle to the vrc rates
   Then I see the deactivated state for the initiate advance button on the add advance page
   And I should not see any rates selected
+
+@jira-mem-1541
+Scenario: User sees borrowing capacity summary module in the right column for add advances (and not elsewhere)
+  Given I am on the "Add Advance" advances page
+  Then I should see the borrowing capacity summary
+  Given I am on the add advance preview screen
+  Then I should not see the borrowing capacity summary
+  Given I am on the add advance stock purchase screen
+  Then I should not see the borrowing capacity summary

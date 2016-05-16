@@ -27,7 +27,7 @@
             %dt= t('reports.pages.member_profile.collateral_status')
             %dd= (@member_profile[:collateral_delivery_status] == 'Y' ? t('reports.pages.member_profile.delivered') : t('reports.pages.member_profile.not_delivered') if @member_profile[:collateral_delivery_status])
             %dt.report-profile-cqr= t('reports.pages.member_profile.cqr')
-            %dd.report-profile-cqr= @member_profile[:cqr_rating]
+            %dd= @member_profile[:cqr_rating]
         .column-3
           %ul.report-profile-navigation
             %li=link_to t('global.advances'), reports_advances_path

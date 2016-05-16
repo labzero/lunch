@@ -45,16 +45,20 @@ class ApplicationController < ActionController::Base
     session['securid_authenticated'] = true
   end
 
-  def current_user_roles
-    return [] unless current_user
-    session['roles'] ||= current_user.roles(request)
-    current_user.roles = session['roles']
+  def current_user
+    user = super
+    if user
+      # we don't use the session ID here because we renew the ID during login to avoid session fixation attacks
+      user.cache_key = session['cache_key'] || SecureRandom.hex
+      session['cache_key'] ||= user.cache_key
+    end
+    user
   end
 
   def check_password_change
     redirect_to user_expired_password_path if session['password_expired']
   end
-  
+
   def check_terms
     if current_user
       redirect_to terms_path unless current_user.accepted_terms?
@@ -92,19 +96,20 @@ class ApplicationController < ActionController::Base
   end
 
   def after_sign_in_path_for(resource)
+    user = current_user
     # We care about the presence of the 'password_expired' key, as well as its value,
     # as we only want to check for password expiration once per session.
     password_expired = session['password_expired']
-    password_expired = current_user.password_expired? unless session.has_key?('password_expired')
+    password_expired = user.password_expired? unless session.has_key?('password_expired')
     if password_expired
       session['password_expired'] = true
       user_expired_password_path
     else
-      session['member_id'] = current_user.member_id if !session['member_id'].present? && current_user && !current_user.member_id.nil?
-      if current_user.accepted_terms?
+      session['member_id'] = user.member_id if !session['member_id'].present? && user && !user.member_id.nil?
+      if user.accepted_terms?
         if session['member_id'].present?
           stored_location_for(resource) || dashboard_path
-        elsif current_user && current_user.ldap_domain == 'intranet'
+        elsif user && user.ldap_domain == 'intranet'
           members_select_member_path
         else
           raise 'Sign in error: Only intranet users can select a bank.  The current_user is not an intranet user but is also not associated with a member bank.'
@@ -127,7 +132,8 @@ class ApplicationController < ActionController::Base
         render 'error/500', layout: 'error', status: 500
       end
     rescue => e
-      render text: e, status: 500
+      text = Rails.configuration.consider_all_requests_local ? e : 'Something went wrong!'
+      render text: text, status: 500
     end
   end
 
@@ -141,5 +147,4 @@ class ApplicationController < ActionController::Base
     reset_session
     redirect_to(logged_out_path)
   end
-
 end

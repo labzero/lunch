@@ -2,6 +2,7 @@ module MAPI
   module Services
     module Member
       module Profile
+        include MAPI::Shared::Utils
         MEMBER_LIST_QUERY = <<-SQL
           select web_adm.web_member_data.FHLB_ID, web_adm.web_member_data.CP_ASSOC
           from web_adm.web_member_data
@@ -197,11 +198,15 @@ module MAPI
           }
         end
 
-        def self.member_details(app, member_id)
+        def self.member_details(app, logger, member_id)
           quoted_member_id = ActiveRecord::Base.connection.quote(member_id)
           fhfa_number = nil
           sta_number = nil
           member_name = nil
+          member_street = nil
+          member_city = nil
+          member_state = nil
+          member_postal_code = nil
 
           member_name_query = <<-SQL
             SELECT web_adm.web_member_data.CP_ASSOC
@@ -235,6 +240,22 @@ module MAPI
               cu.fhlb_id = #{quoted_member_id}
           SQL
 
+          address_sql = <<-SQL
+            select
+              shippingstreet,
+              shippingcity,
+              shippingstate,
+              shippingpostalcode
+            from
+              crm.account acc
+            left join
+              portfolios.customers cu
+            on
+              cu.cu_fhfb_id = acc.fhfa_id__c
+            WHERE
+              cu.fhlb_id = #{quoted_member_id}
+          SQL
+
           if app.settings.environment == :production
             member_name = ActiveRecord::Base.connection.execute(member_name_query).fetch.try(&:first)
             sta_number = ActiveRecord::Base.connection.execute(sta_number_query).fetch.try(&:first)
@@ -243,6 +264,13 @@ module MAPI
               fhfa_number = customer_signature_card_data['CU_FHFB_ID']
               dual_signers_required = (customer_signature_card_data['NEEDSTWOSIGNERS'].try(:to_i) == -1)
             end
+            address_data = self.fetch_hash(logger, address_sql)
+            if address_data
+              member_street = address_data['SHIPPINGSTREET'].read()
+              member_city = address_data['SHIPPINGCITY']
+              member_state = address_data['SHIPPINGSTATE']
+              member_postal_code = address_data['SHIPPINGPOSTALCODE']
+            end
           else
             member = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_details.json')))[member_id.to_s]
             if member
@@ -250,6 +278,10 @@ module MAPI
               fhfa_number = member['fhfa_number']
               sta_number = member['sta_number']
               dual_signers_required = member['dual_signers_required']
+              member_street = member['street']
+              member_city = member['city']
+              member_state = member['state']
+              member_postal_code = member['postal_code']
             end
           end
 
@@ -259,7 +291,11 @@ module MAPI
             name: member_name,
             fhfa_number: fhfa_number,
             sta_number: sta_number,
-            dual_signers_required: dual_signers_required
+            dual_signers_required: dual_signers_required,
+            street: member_street,
+            city: member_city,
+            state: member_state,
+            postal_code: member_postal_code
           }
 
         end

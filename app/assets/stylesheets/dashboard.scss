@@ -131,6 +131,9 @@ $faded-opacity: 0.4 !default;
   .dashboard-module-temporarily-unavailable {
     display: none;
   }
+  .dashboard-module-content {
+    padding: 0;
+  }
 }
 
 .dashboard-module-content-light {
@@ -308,22 +311,6 @@ p.dashboard-vrc-overnight-message {
   }
 }
 
-.dashboard-module-your-account {
-  @extend %dashboard-module-chromeless;
-  table {
-    width: 100%;
-  }
-  header {
-    padding-bottom: 10px;
-  }
-  h2 {
-    margin: 0;
-  }
-  .dashboard-module-content > div {
-    margin-bottom: 15px;
-  }
-}
-
 .dashboard-module-advances-closed {
   .dashboard-vrc-overnight-message, .dashboard-advances-rate {
     color: $medium-gray;
@@ -333,65 +320,97 @@ p.dashboard-vrc-overnight-message {
   }
 }
 
-$breakdown-table-label-width: 195px;
+$breakdown-table-label-width: 165px;
 $breakdown-table-currency-width: 10px;
-.dashboard-account-summary {
-  table {
+.dashboard-module-your-account {
+  header {
+    padding-bottom: 10px;
+  }
+  h2 {
+    margin: 0;
+  }
+  a {
     @extend %typography-dashboard-account-summary;
-    th {
-      @extend %typography-dashboard-account-summary;
-      background: $white;
-      border-top: 1px solid $secondary-gray;
-      text-align: left;
-    }
-    th, .label, .currency, .value, .title {
-      padding: 5px 0;
-      box-sizing: border-box;
-    }
-    .title {
-      padding-bottom: 1px;
-    }
-    .label, .footnote, .title {
-      width: $breakdown-table-label-width;
-      padding-left: 10px;
-    }
-    .footnote-row td {
-      padding-bottom: 0;
-    }
-    .footnote {
+  }
+  .account-overview-note {
+    @extend %typography-dashboard-account-summary;
+    margin: 20px 20px 0 0;
+  }
+  .dashboard-module-content {
+    padding-top: 15px;
+    background: $white;
+    min-height: 201px;
+    box-sizing: border-box;
+  }
+}
+
+.dashboard-account-overview-table {
+  @extend %typography-dashboard-account-summary;
+  width: 100%;
+  border-bottom: 1px solid $secondary-gray;
+  th {
+    @extend %typography-dashboard-account-summary;
+    background: $white;
+    border-top: 1px solid $secondary-gray;
+    text-align: left;
+  }
+  th, .label, .currency, .value, .title {
+    padding: 2px 0;
+    box-sizing: border-box;
+  }
+  .title {
+    padding-bottom: 1px;
+  }
+  .label, .footnote, .title {
+    width: $breakdown-table-label-width;
+  }
+  .footnote-row td {
+    padding-bottom: 0;
+  }
+  .footnote {
+    @extend %typography-footnote;
+    padding-bottom: 5px;
+  }
+  .currency {
+    width: $breakdown-table-currency-width;
+    text-align: right;
+  }
+  .value {
+    text-align: right;
+    padding-right: 10px;
+  }
+  thead {
+    .label {
       @extend %typography-footnote;
-      padding-bottom: 5px;
+      text-transform: uppercase;
+      padding: 15px 0 0;
+      border: none;
     }
-    .currency {
-      width: $breakdown-table-currency-width;
-      text-align: right;
+    & + tbody tr:first-child td {
+      padding-top: 5px;
     }
-    .value {
-      text-align: right;
-      padding-right: 10px;
+  }
+  tbody {
+    tr:first-child {
+      td {
+        padding-top: 15px;
+      }
     }
-    .sub-table {
-      background: $white;
-      margin-top: 10px;
-      border-top: 1px solid $secondary-gray;
-      border-bottom: 1px solid $secondary-gray;
-    }
-    .detail {
-      .label {
-        padding-left: 20px;
+    tr:last-child {
+      td {
+        padding-bottom: 15px;
       }
     }
   }
-  .borrowing-capacity-note {
-    @extend %typography-dashboard-account-summary;
-    padding: 10px;
-  }
-  .dashboard-module-content {
-    margin-top: 10px;
-    padding: 20px;
-    background: $white;
-    height: 201px;
-    box-sizing: border-box;
+}
+
+.dashboard-account-overview-table:first-of-type {
+  tbody {
+    tr:first-child {
+      td {
+        padding-top: 0;
+      }
+    }
   }
 }
 
@@ -430,20 +449,17 @@ $breakdown-table-currency-width: 10px;
 
 .dashboard-gauge {
   position: relative;
-  height: 25px;
-  background: $white;
-  border-radius: 3px;
-  padding: 3px;
-  border: 1px solid $light-blue;
+  height: 30px;
   box-sizing: border-box;
+  margin: 7px 0 5px;
   .gauge-section {
     position: relative;
     height: 100%;
     float: left;
-    padding-left: 2px;
+    margin-left: 2px;
     box-sizing: border-box;
     &:first-child {
-      padding-left: 0;
+      margin-left: 0;
     }
     &:hover {
       .tooltip {
@@ -453,9 +469,9 @@ $breakdown-table-currency-width: 10px;
     }
   }
   .inner-gauge-section {
+    position: absolute;
+    bottom: 0;
     width: 100%;
-    height: 100%;
-    border-radius: 3px;
   }
   .tooltip {
     @extend %inverted-tooltip;
@@ -528,14 +544,85 @@ $breakdown-table-currency-width: 10px;
 
 .dashboard-borrowing-capacity {
   position: relative;
+  margin-bottom: 0;
+  a {
+    display: inline-block;
+    margin-top: 15px;
+  }
+  .tooltip {
+    box-sizing: border-box;
+    width: 194px;
+    padding: 8px;
+    h3 {
+      margin: 0;
+    }
+    h3, td {
+      @extend %typography-table-total;
+    }
+    td {
+      padding: 2px 2px 2px 0;
+      &:first-child {
+        @extend %typography-table-cell
+      }
+      &:last-child {
+        text-align: right;
+        padding-right: 0;
+      }
+    }
+    tbody {
+      td:nth-child(2) {
+        color: $medium-gray;
+      }
+    }
+    tfoot {
+      border-top: 1px solid $light-blue;
+    }
+    table {
+      width: 100%;
+    }
+  }
 }
 
-.borrowing-capacity-gauge-standard .inner-gauge-section {
-  background: $light-green;
+.dashboard-borrowing-capacity-total {
+  margin-top: 15px;
+  p {
+    margin: 0;
+    &:first-child {
+      @extend %typography-footnote;
+      text-transform: uppercase;
+    }
+    &:last-child {
+      @extend %typography-module-summary-data;
+      color: $actionable-blue;
+    }
+  }
 }
 
-.borrowing-capacity-gauge-sbc .inner-gauge-section {
-  background: $dark-green;
+.borrowing-capacity-gauge-standard {
+  background: $medium-blue;
+  .inner-gauge-section {
+    background: $actionable-blue;
+  }
+}
+
+.borrowing-capacity-gauge-sbc {
+  background: $lightest-green;
+  .inner-gauge-section {
+    background: $accent-green;
+  }
+}
+
+.borrowing-capacity-gauge-empty {
+  height: 100%;
+  width: 100%;
+  background: $light-blue;
+}
+
+.dashboard-guage-totals {
+  @extend %typography-table-cell;
+  span:last-child {
+    float: right;
+  }
 }
 
 .dashboard-module-reports {

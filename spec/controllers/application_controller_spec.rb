@@ -9,15 +9,27 @@ RSpec.describe ApplicationController, :type => :controller do
     let(:backtrace) {%w(some backtrace array returned by the error)}
     describe 'StandardError' do
       let(:error) {StandardError.new}
+      let(:call_method) { controller.send(:handle_exception, error) }
       before { allow(error).to receive(:backtrace).and_return(backtrace) }
       it 'captures all StandardErrors and displays the 500 error view' do
         expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500})
-        controller.send(:handle_exception, error)
+        call_method
       end
-      it 'rescues any exceptions raised when rendering the `error/500` view' do
-        expect(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500}).and_raise(error)
-        expect(controller).to receive(:render).with({:text=>error, :status=>500})
-        controller.send(:handle_exception, error)
+      describe 'rescuing exceptions raised when rendering the `error/500` view' do
+        before do
+          allow(controller).to receive(:render).with('error/500', {:layout=>"error", :status=>500}).and_raise(error)
+        end
+
+        it 'renders the error as plain text if the request is considered local' do
+          allow(Rails.configuration).to receive(:consider_all_requests_local).and_return(true)
+          expect(controller).to receive(:render).with({:text=>error, :status=>500})
+          call_method
+        end
+        it 'does not render the error if the request is consider remote' do
+          allow(Rails.configuration).to receive(:consider_all_requests_local).and_return(false)
+          expect(controller).to receive(:render).with({:text=>'Something went wrong!', :status=>500})
+          call_method
+        end
       end
     end
 
@@ -226,35 +238,39 @@ RSpec.describe ApplicationController, :type => :controller do
     end
   end
 
-  describe '`current_user_roles` method' do
-    let(:user) { double('user', :roles => nil, :roles= => nil)}
-    let(:session_roles) { [double('session roles')] }
-    let(:user_roles) { [double('user_roles')] }
-    before do
-      allow(controller).to receive(:current_user).and_return(user)
+  describe '`current_user` method' do
+    let(:cache_key) { double('A Cache Key') }
+    let(:call_method) { subject.current_user }
+    login_user
+
+    it 'returns the logged in user' do
+      expect(call_method).to be(warden_user)
     end
-    it 'returns an empty array if there is no current_user' do
-      allow(controller).to receive(:current_user).and_return(nil)
-      expect(controller.send(:current_user_roles)).to eq([])
+    it 'returns nil if there is no logged in user' do
+      sign_out :user
+      expect(call_method).to be(nil)
     end
-    it 'passes the request object to `current_user.roles` ' do
-      expect(user).to receive(:roles).with(an_instance_of(ActionController::TestRequest)).and_return(user_roles)
-      controller.send(:current_user_roles)
+    it 'sets the users cache_key to the value stored in the session' do
+      session['cache_key'] = cache_key
+      expect(warden_user).to receive(:cache_key=).with(cache_key)
+      call_method
     end
-    it 'sets `session[:roles]` to the result of current_user.roles if that session attribute does not already exist' do
-      allow(user).to receive(:roles).and_return(user_roles)
-      controller.send(:current_user_roles)
-      expect(session['roles']).to eq(user_roles)
+    it 'sets the users cache_key to a random value if no value is in the session' do
+      allow(SecureRandom).to receive(:hex).and_return(cache_key)
+      call_method
+      expect(warden_user.cache_key).to be(cache_key)
     end
-    it 'sets `current_user.roles` to the array of `session[\'roles\']`' do
-      allow(controller.session).to receive(:[]).with('roles').and_return(session_roles)
-      expect(user).to receive(:roles=).with(session_roles)
-      controller.send(:current_user_roles)
+    it 'sets the session cache_key to the users cache_key if unset in the session' do
+      allow(warden_user).to receive(:cache_key).and_return(cache_key)
+      call_method
+      expect(session['cache_key']).to be(cache_key)
     end
-    it 'does not call `current_user.roles` if `session[:roles]` already exists' do
-      session['roles'] = session_roles
-      expect(user).not_to receive(:roles)
-      controller.send(:current_user_roles)
+    it 'does not set the session cache_key if its already set' do
+      session['cache_key'] = cache_key
+      alternate_key = double('Another Cache Key')
+      allow(warden_user).to receive(:cache_key).and_return(alternate_key)
+      call_method
+      expect(session['cache_key']).to be(cache_key)
     end
   end
 

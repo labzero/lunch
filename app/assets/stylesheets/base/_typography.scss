@@ -239,6 +239,18 @@
   line-height: $tight-line-height;
 }
 
+@mixin typography-module-tiny-data-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  font-weight: $light-weight;
+}
+
+@mixin typography-module-summary-data {
+  font-size: 1.8rem;
+  font-weight: $light-weight;
+}
+
 %typography-page-title {
   @include typography-page-title;
 }
@@ -417,4 +429,12 @@
 
 %typography-badge {
   @include typography-badge;
+}
+
+%typography-module-tiny-data-label {
+  @include typography-module-tiny-data-label;
+}
+
+%typography-module-summary-data {
+  @include typography-module-summary-data;
 }

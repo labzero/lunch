@@ -295,3 +295,11 @@ end
 Then(/^I should not see any rates selected$/) do
   page.assert_no_selector('.advance-rates-table .rate-selected')
 end
+
+Then(/^I should (see|not see) the borrowing capacity summary$/) do |visible|
+  if visible == 'see'
+    page.assert_selector('.add-advance-borrowing-capacity')
+  elsif visible == 'not see'
+    page.assert_no_selector('.add-advance-borrowing-capacity')
+  end
+end

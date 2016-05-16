@@ -131,6 +131,9 @@ This is a summary of the options supported in our .env files:
 * `LOG_LEVEL`: Set to a valid log level to control what granularity of logging occurs. Defaults to `info`.
 * `NEW_RELIC_LICENSE_KEY`: The license key to use for New Relic.
 * `GA_TRACKING_ID`: The google analytics tracking id to use for event tracking.
+* `DOCUSIGN_POWERFORM_ENDPOINT`: Docusign website
+* `DOCUSIGN_POWERFORM_PATH`: Docusign Powerform Path
+* `DOCUSIGN_POWERFORMS`: Hash of Docusign Powerform IDs
 
 
 ## Running the Tests
@@ -141,4 +144,4 @@ All commits should pass `rake ci:build && cucumber` before being pushed.
 
 ## MAPI Console
 
-You can get a console in the context of the Sinatra API layer (MAPI) using the rake task `mapi:console` or by running `api/bin/console`. The console is analogous to `rails console` and has a few extra helper methods injected. If you want to route a request through MAPI, you can use `get()`, `post()`, `delete()`, `put()`, etc. There are also versions that will automatically decode the JSON response from the API for you: `get_json()`, ‘post_json()`, etc. The environment that the console runs in is controlled by `RACK_ENV` and can be overridden on the command line with `mapi:console[environment]` or `api/bin/console -e environment`.
+You can get a console in the context of the Sinatra API layer (MAPI) using the rake task `mapi:console` or by running `api/bin/console`. The console is analogous to `rails console` and has a few extra helper methods injected. If you want to route a request through MAPI, you can use `get()`, `post()`, `delete()`, `put()`, etc. There are also versions that will automatically decode the JSON response from the API for you: `get_json()`, `post_json()`, etc. The environment that the console runs in is controlled by `RACK_ENV` and can be overridden on the command line with `mapi:console[environment]` or `api/bin/console -e environment`.

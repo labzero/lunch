@@ -28,7 +28,6 @@ Scenario: Defaults to current advances details
 Scenario: Viewing historic advances details
   Given I am on the "Advances Detail" report page
   When I click the datepicker field
-  And I choose the "custom date" preset in the datepicker
   And I select the 14th of "last month" in the single datepicker calendar
   Then I should see advances details for the 14th of last month
 

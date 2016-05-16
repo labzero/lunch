@@ -6,6 +6,8 @@
 - input_field_text ||= "#{t('datepicker.single.input', date: '{replace_date}')}"
 - max_date ||= false
 - min_date ||= false
+- start_date ||= false
+- end_date ||= false
 - date_picker_filter ||= nil
 - today = Time.zone.today
 - from_label = single_date_picker ? t('datepicker.single.from_label') : t('datepicker.range.from_label')
@@ -16,6 +18,8 @@
   :'date-picker-single-date-picker' => single_date_picker.to_s, |
   :'date-picker-max-date' => max_date || today, |
   :'date-picker-min-date' => min_date, |
+  :'date-picker-start-date' => start_date || today, |
+  :'date-picker-end-date' => end_date, |
   :'date-picker-today' => today, |
   :'date-picker-filter-options' => ReportsController::DATE_PICKER_FILTERS.to_json, |
   :'date-picker-filter' => date_picker_filter, |

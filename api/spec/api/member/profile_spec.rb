@@ -134,6 +134,13 @@ describe MAPI::ServiceApp do
     let(:fhfa_number) {SecureRandom.uuid}
     let(:customer_signature_card_response) { {'CU_FHFB_ID' => fhfa_number } }
     let(:customer_signature_card_cursor) { double('customer_signature_card_cursor', fetch_hash: customer_signature_card_response)}
+    let(:address_data_response) { {'CU_FHFB_ID' => fhfa_number } }
+    let(:shippingstreetdata) { SecureRandom.uuid }
+    let(:shippingstreet) { double('shippingstreet', read: shippingstreetdata) }
+    let(:shippingcity) { SecureRandom.uuid }
+    let(:shippingstate) { SecureRandom.uuid }
+    let(:shippingpostalcode) { SecureRandom.uuid }
+    let(:address_data_response) { {'SHIPPINGSTREET' => shippingstreet, 'SHIPPINGCITY'=> shippingcity, 'SHIPPINGSTATE'=> shippingstate, 'SHIPPINGPOSTALCODE' => shippingpostalcode} }
     let(:dual_signers_required) {SecureRandom.uuid}
     let(:development_json) {
       {
@@ -141,7 +148,11 @@ describe MAPI::ServiceApp do
           'name' => member_name,
           'sta_number' => sta_number,
           'fhfa_number' => fhfa_number,
-          'dual_signers_required' => dual_signers_required
+          'dual_signers_required' => dual_signers_required,
+          'street' => shippingstreetdata,
+          'city' => shippingcity,
+          'state' => shippingstate,
+          'postal_code' => shippingpostalcode
         }
       }
     }
@@ -153,6 +164,7 @@ describe MAPI::ServiceApp do
           end
           allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(env)
           allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_name_cursor, sta_number_cursor, customer_signature_card_cursor)
+          allow(MAPI::Services::Member::Profile).to receive(:fetch_hash).and_return(address_data_response)
         end
         it 'returns a 404 if the member name isn\'t found' do
           allow(member_name_cursor).to receive(:fetch).and_return(nil)
@@ -175,6 +187,30 @@ describe MAPI::ServiceApp do
         it 'returns a 200 if the `dual_signers_required` value isn\'t found' do
           allow(customer_signature_card_cursor).to receive(:fetch_hash).and_return(nil)
           development_json[member_id]['dual_signers_required'] = nil
+          make_request
+          expect(last_response.status).to be(200)
+        end
+        it 'returns a 200 if the street isn\'t found' do
+          allow(MAPI::Services::Member::Profile).to receive(:fetch_hash).and_return(nil)
+          development_json[member_id]['street'] = nil
+          make_request
+          expect(last_response.status).to be(200)
+        end
+        it 'returns a 200 if the city isn\'t found' do
+          allow(MAPI::Services::Member::Profile).to receive(:fetch_hash).and_return(nil)
+          development_json[member_id]['city'] = nil
+          make_request
+          expect(last_response.status).to be(200)
+        end
+        it 'returns a 200 if the state isn\'t found' do
+          allow(MAPI::Services::Member::Profile).to receive(:fetch_hash).and_return(nil)
+          development_json[member_id]['state'] = nil
+          make_request
+          expect(last_response.status).to be(200)
+        end
+        it 'returns a 200 if the postal_code isn\'t found' do
+          allow(MAPI::Services::Member::Profile).to receive(:fetch_hash).and_return(nil)
+          development_json[member_id]['postal_code'] = nil
           make_request
           expect(last_response.status).to be(200)
         end
@@ -210,6 +246,18 @@ describe MAPI::ServiceApp do
         end
         it 'returns the member FHFB number' do
           expect(member_details['fhfa_number']).to eq(fhfa_number)
+        end
+        it 'returns the member street' do
+          expect(member_details['street']).to eq(shippingstreetdata)
+        end
+        it 'returns the member city' do
+          expect(member_details['city']).to eq(shippingcity)
+        end
+        it 'returns the member state' do
+          expect(member_details['state']).to eq(shippingstate)
+        end
+        it 'returns the member postal code' do
+          expect(member_details['postal_code']).to eq(shippingpostalcode)
         end
       end
     end

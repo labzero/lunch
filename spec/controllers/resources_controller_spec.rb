@@ -455,6 +455,26 @@ RSpec.describe ResourcesController, type: :controller do
     end
   end
 
+  describe 'GET token' do
+    let(:make_request) { get :token }
+    let(:docusign_service_link_subhash) { double(Hash, :[] => nil) }
+    let(:docusign_service_link) { double(Hash, :[] => docusign_service_link_subhash) }
+    let(:docusign_service) { double(DocusignService) }
+    before do
+      allow(DocusignService).to receive(:new).and_return(docusign_service)
+      allow(docusign_service).to receive(:get_url).and_return(docusign_service_link)
+    end
+    it_behaves_like 'a user required action', :get, :token
+    it 'gets link info from the DocusignService' do
+      make_request
+      expect(assigns[:link]).to eq(docusign_service_link_subhash)
+    end
+    it 'raises an error if the DocusignService returns nil' do
+      allow(docusign_service).to receive(:get_url).and_return(nil)
+      expect{make_request}.to raise_error(/encountered nil/i)
+    end
+  end
+
   describe 'the `fee_schedule_table_hash` private method' do
     let(:translation) { double('I18n translation', to_s: 'foo') }
     let(:value) { double('a table cell value') }

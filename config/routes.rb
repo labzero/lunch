@@ -147,6 +147,9 @@ Rails.application.routes.draw do
         get 'insurance-company' => 'resources#insurance_company_application', as: :insurance_company_application
       end
     end
+    constraints Constraints::FeatureEnabled.new('resources-token') do
+      get '/token' => 'resources#token'
+    end
   end
 
   scope 'products' do

@@ -18,10 +18,10 @@ Scenario: See dashboard contacts
 @smoke @jira-mem-610 @jira-mem-1126 @flip-on-recent-credit-activity
 Scenario: See required dashboard modules
   When I visit the dashboard
-  And I should see an "borrowing capacity gauge" in the Account module
   And I should see a market overview graph
   And I should see the "recent activities" section in its loaded state
   And I should see the "account overview" section in its loaded state
+  And I should see an "borrowing capacity gauge" in the Account module
 
 @data-unavailable @jira-mem-408
 Scenario: Data for Aggregate 30 Day Terms module is temporarily unavailable
@@ -35,11 +35,14 @@ Scenario: User visits report pages from the Account Overview module
   When I click on the STA Balance link in the account overview
   Then I should be on the "Settlement Transaction" report page
   When I am on the dashboard with the account overview in its loaded state
-  And I click on the Collateral Borrowing Capacity link in the account overview
+  And I click on the Borrowing Capacity link in the account overview
   Then I should be on the "Borrowing Capacity" report page
   When I am on the dashboard with the account overview in its loaded state
   And I click on the Stock Leverage link in the account overview
   Then I should be on the "Capital Stock Position and Leverage" report page
+  And I am on the dashboard with the account overview in its loaded state
+  And I click on the Account Summary link in the account overview
+  Then I should be on the "Account Summary" report page
 
 @jira-mem-1315 @local-only @flip-on-quick-reports
 Scenario: Users can download pregenreated reports

@@ -11,6 +11,7 @@ class ReportsController < ApplicationController
   BORROWING_CAPACITY_WEB_FLAGS = [MembersService::COLLATERAL_REPORT_DATA]
   CAPITAL_STOCK_ACTIVITY_WEB_FLAGS = [MembersService::CURRENT_SECURITIES_POSITION, MembersService::CAPSTOCK_REPORT_BALANCE, MembersService::CAPSTOCK_REPORT_TRIAL_BALANCE]
   HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::IRDB_RATES_DATA]
+  CURRENT_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::RATE_CURRENT_STANDARD_ARC, MembersService::RATE_CURRENT_SBC_ARC, MembersService::RATE_CURRENT_STANDARD_FRC, MembersService::RATE_CURRENT_SBC_FRC, MembersService::RATE_CURRENT_STANDARD_VRC, MembersService::RATE_CURRENT_SBC_VRC]
   SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
   CASH_PROJECTIONS_WEB_FLAGS = [MembersService::CASH_PROJECTIONS_DATA]
   DIVIDEND_STATEMENT_WEB_FLAGS = [MembersService::CAPSTOCK_REPORT_DIVIDEND_TRANSACTION, MembersService::CAPSTOCK_REPORT_DIVIDEND_STATEMENT]
@@ -49,8 +50,10 @@ class ReportsController < ApplicationController
     User::Roles::SECURITIES_SIGNER
   ]
 
+  AUTHORIZATIONS_ALL = 'all'.freeze
+
   AUTHORIZATIONS_DROPDOWN_MAPPING = {
-    'all' => I18n.t('user_roles.all_authorizations'),
+    AUTHORIZATIONS_ALL => I18n.t('user_roles.all_authorizations'),
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.dropdown'),
     User::Roles::SIGNER_ENTIRE_AUTHORITY => I18n.t('user_roles.entire_authority.dropdown'),
     User::Roles::ADVANCE_SIGNER => I18n.t('user_roles.advances.title'),
@@ -941,7 +944,9 @@ class ReportsController < ApplicationController
       @job_status_url = false
       @load_url = false
       if params[:job_id] || self.skip_deferred_load
-        if self.skip_deferred_load
+        if report_disabled?(CURRENT_PRICE_INDICATIONS_WEB_FLAGS)
+          data = {}
+        elsif self.skip_deferred_load
           data = ReportCurrentPriceIndicationsJob.perform_now(current_member_id, request.uuid)
         else
           job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
@@ -957,13 +962,16 @@ class ReportsController < ApplicationController
         #vrc data for standard collateral
         standard_vrc_data = data[:standard_vrc_data] || []
         @vrc_date = standard_vrc_data['effective_date'] if standard_vrc_data.size > 0
-        rows = [{columns: parse_vrc_data(standard_vrc_data)}]
-        @standard_vrc_table_data[:rows] = rows
+
+        @standard_vrc_table_data[:rows] = []
+        columns = parse_vrc_data(standard_vrc_data)
+        @standard_vrc_table_data[:rows] << {columns: columns} if columns.present?
 
         #vrc data for sbc collateral
         sbc_vrc_data = data[:sbc_vrc_data] || []
-        rows = [{columns: parse_vrc_data(sbc_vrc_data)}]
-        @sbc_vrc_table_data[:rows] = rows
+        @sbc_vrc_table_data[:rows] = []
+        columns = parse_vrc_data(sbc_vrc_data)
+        @sbc_vrc_table_data[:rows] << {columns: columns} if columns.present?
 
         #frc data for standard collateral
         standard_frc_data = data[:standard_frc_data] || []
@@ -1439,7 +1447,7 @@ class ReportsController < ApplicationController
   end
 
   def authorizations
-    @authorizations_filter = params['authorizations_filter'] || 'all'
+    @authorizations_filter = params['authorizations_filter'] || AUTHORIZATIONS_ALL
     @report_name = ReportConfiguration.report_title(:authorizations)
     @today = Time.zone.today
 
@@ -1449,9 +1457,9 @@ class ReportsController < ApplicationController
       @authorizations_filter_text = @authorizations_dropdown_mapping[@authorizations_filter]
       mapped_filter = AUTHORIZATIONS_MAPPING[@authorizations_filter]
       @authorizations_title = case @authorizations_filter
-      when 'all'
+      when AUTHORIZATIONS_ALL
         t('reports.pages.authorizations.sub_title_all_users')
-      when 'signer_manager', 'signer_entire_authority'
+      when User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY
         t('reports.pages.authorizations.sub_title_inclusive_authorizations', filter: mapped_filter)
       else
         t('reports.pages.authorizations.sub_title', filter: mapped_filter)
@@ -1480,13 +1488,13 @@ class ReportsController < ApplicationController
         end.reject{ |_,roles| roles.empty? }
 
         check_for_inclusive_roles = false
-        matching_roles_array = if ['signer_manager', 'signer_entire_authority', 'all'].include?(@authorizations_filter)
+        matching_roles_array = if [User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER, AUTHORIZATIONS_ALL].include?(@authorizations_filter)
           [AUTHORIZATIONS_MAPPING[@authorizations_filter]]
         else
           check_for_inclusive_roles = true
           [AUTHORIZATIONS_MAPPING[@authorizations_filter], INCLUSIVE_AUTHORIZATIONS].flatten
         end
-        filtered_user_roles = if @authorizations_filter == 'all'
+        filtered_user_roles = if @authorizations_filter == AUTHORIZATIONS_ALL
           user_roles
         else
           user_roles.select{ |_,roles| (roles & matching_roles_array).any? }

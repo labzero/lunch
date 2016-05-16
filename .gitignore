@@ -22,3 +22,4 @@ ldap/openldap-data/run/slapd.pid
 ldap/openldap-data/run/slapd.args
 config/schedule-override.yml
 /*.sublime-workspace
+.byebug_history

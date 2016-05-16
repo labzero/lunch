@@ -66,7 +66,6 @@ Scenario: Custom datepicker options
   Then I should see the datepicker preset for "month to date"
   And I should see the datepicker preset for "last month"
   And I should see the datepicker preset for "last year"
-  And I should see the datepicker preset for "custom date range"
 
 @jira-mem-359 @jira-mem-537
 Scenario: Choosing different presets in the datepicker

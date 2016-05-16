@@ -1,6 +1,6 @@
 module DashboardHelper
   TOOLTIP='dashboard.quick_advance.tooltip'
-  
+
   def make_quick_advance_tooltip_data(rate_data, advance_term)
     if advance_term.to_sym == :open
       date_formatted = t('dashboard.quick_advance.table.axes_labels.open')

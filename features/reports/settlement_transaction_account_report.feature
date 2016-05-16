@@ -23,7 +23,6 @@ And I should see a report table with multiple data rows
 Scenario: Member chooses a custom date range on the Settlement Transaction Account Statement
 Given I am on the "Settlement Transaction Account Statement" report page
 And I click the datepicker field
-When I choose the "custom date range" preset in the datepicker
 Then I should see two calendars
 When I select the 1st of "last month" in the left calendar
 And I select the 20th of "last month" in the right calendar

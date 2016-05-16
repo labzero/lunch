@@ -42,4 +42,10 @@ Scenario: Member downloads an XLSX of the Current Price Indications report
 Scenario: A message is displayed when there is limited pricing
   Given I am on the "Current Price Indications" report page
   When there is limited pricing today
-  Then I should see the limited pricing information message  
+  Then I should see the limited pricing information message
+
+@data-unavailable @jira-mem-1582
+Scenario: The Current Price Indications report has been disabled
+  Given I am on the "Current Price Indications" report page
+  When the "Current Price Indications" report has been disabled
+  Then I should see an empty report table with Data Unavailable messaging

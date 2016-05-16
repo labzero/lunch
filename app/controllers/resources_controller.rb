@@ -151,11 +151,18 @@ class ResourcesController < ApplicationController
         form_number: 2160,
         pdf_link: resources_download_path(file: :form_2160)
       },
-      {
-        title: t('resources.forms.authorizations.website.securid'),
-        form_number: 2228,
-        pdf_link: resources_download_path(file: :form_2228)
-      }
+      if feature_enabled?('resources-token')
+        {
+          title: t('resources.forms.authorizations.website.securid'),
+          docusign_link: 'token'
+        }
+      else
+        {
+          title: t('resources.forms.authorizations.website.securid'),
+          form_number: 2228,
+          pdf_link: resources_download_path(file: :form_2228)
+        }
+      end
     ]
 
     @credit_rows = [
@@ -515,6 +522,12 @@ class ResourcesController < ApplicationController
   #GET
   def insurance_company_application
     @form_ids = APPLICATION_FORM_IDS[:insurance_company]
+  end
+
+  def token
+    docusign = DocusignService.new(request).get_url('member_token_request', current_user, current_member_id)
+    raise StandardError, "There has been an error and ResourcesController#token has encountered nil. Check error logs." if docusign.nil?
+    @link = docusign[:link]
   end
 
   private

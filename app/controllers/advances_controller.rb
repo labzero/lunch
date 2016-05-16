@@ -1,4 +1,5 @@
 class AdvancesController < ApplicationController
+  include ReportsHelper
 
   before_action do
     set_active_nav(:advances)
@@ -22,9 +23,9 @@ class AdvancesController < ApplicationController
   rescue_from AASM::InvalidTransition, AASM::UnknownStateMachineError, AASM::UndefinedState, AASM::NoDirectAssignmentError do |exception|
     logger.info { 'Exception: ' + exception.to_s }
     logger.info { 'Advance Request State at Exception: ' + advance_request.to_json }
-    render :error 
+    render :error
   end
-  
+
   def manage
     column_headings = [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), t('advances.status'), t('advances.rate'), t('common_table_headings.current_par') + ' ($)']
     @advances_data_table = {
@@ -83,6 +84,7 @@ class AdvancesController < ApplicationController
     @selected_term = advance_request.term
     @active_term_type = advance_request.term_type || :vrc
     advance_request.allow_grace_period = true if etransact_service.etransact_active?
+    @profile = sanitize_profile_if_endpoints_disabled(MemberBalanceService.new(current_member_id, request).profile)
   end
 
   # GET

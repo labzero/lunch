@@ -23,6 +23,10 @@ RSpec.describe Users::SessionsController, :type => :controller do
       expect(subject.flash).to receive(:discard).with(:notice)
       make_request
     end
+    it 'clears the cached user data' do
+      expect(subject.current_user).to receive(:clear_cache)
+      make_request
+    end
   end
 
   describe 'POST create' do

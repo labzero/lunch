@@ -7,6 +7,30 @@ RSpec.describe DashboardController, :type => :controller do
     session['member_id'] = 750
   end
 
+  let(:borrowing_capacity_summary) do
+    {
+      total_borrowing_capacity: rand(1000000..9999999),
+      net_plus_securities_capacity: rand(1000000..9999999),
+      standard_excess_capacity: rand(1000000..9999999),
+      sbc: {
+        collateral: {
+          agency: {
+            remaining_borrowing_capacity: rand(1000000..9999999),
+            total_borrowing_capacity: rand(1000000..9999999)
+          },
+          aaa: {
+            remaining_borrowing_capacity: rand(1000000..9999999),
+            total_borrowing_capacity: rand(1000000..9999999)
+          },
+          aa: {
+            remaining_borrowing_capacity: rand(1000000..9999999),
+            total_borrowing_capacity: rand(1000000..9999999)
+          }
+        }
+      }
+    }
+  end
+
   it { should use_around_filter(:skip_timeout_reset) }
 
   {AASM::InvalidTransition => [AdvanceRequest.new(7, 'foo'), 'executed', :default], AASM::UnknownStateMachineError => ['message'], AASM::UndefinedState => ['foo'], AASM::NoDirectAssignmentError => ['message']}.each do |exception, args|
@@ -38,7 +62,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:member_id) {750}
     let(:empty_financing_availability_gauge) {{total: {amount: 0, display_percentage: 100, percentage: 0}}}
     let(:profile) { double('profile') }
-    let(:service) { double('a service object', profile: profile, borrowing_capacity_summary: nil) }
+    let(:service) { double('a service object', profile: profile) }
     let(:make_request) { get :index }
     let(:etransact_status) { double('some status') }
     let(:etransact_service) { double('etransact service', etransact_status: etransact_status) }
@@ -57,7 +81,6 @@ RSpec.describe DashboardController, :type => :controller do
     end
     before do
       allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
-      allow(subject).to receive(:current_user_roles)
       allow_any_instance_of(MembersService).to receive(:member_contacts)
       allow(MessageService).to receive(:new).and_return(double('service instance', todays_quick_advance_message: nil))
       allow(QuickReportSet).to receive_message_chain(:for_member, :latest_with_reports).and_return(nil)
@@ -65,13 +88,9 @@ RSpec.describe DashboardController, :type => :controller do
 
     it_behaves_like 'a user required action', :get, :index
     it_behaves_like 'a controller action with quick advance messaging', :index
-    it "should render the index view" do
+    it "renders the index view" do
       get :index
       expect(response.body).to render_template("index")
-    end
-    it 'should call `current_member_roles`' do
-      expect(subject).to receive(:current_user_roles)
-      get :index
     end
     it 'populates the deferred jobs view parameters' do
       expect(subject).to receive(:populate_deferred_jobs_view_parameters).with(DashboardController::DEFERRED_JOBS)
@@ -82,45 +101,18 @@ RSpec.describe DashboardController, :type => :controller do
       expect(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(profile).and_return({})
       get :index
     end
-    it "should assign @market_overview" do
+    it "assigns @market_overview" do
       get :index
       expect(assigns[:market_overview]).to be_present
       expect(assigns[:market_overview][0]).to be_present
       expect(assigns[:market_overview][0][:name]).to be_present
       expect(assigns[:market_overview][0][:data]).to be_present
     end
-    it "should assign @borrowing_capacity_gauge" do
-      gauge_hash = double('A Gauge Hash')
-      allow(subject).to receive(:calculate_gauge_percentages).and_return(gauge_hash)
-      get :index
-      expect(assigns[:borrowing_capacity_gauge]).to eq(gauge_hash)
-    end
-    it 'should have the expected keys in @borrowing_capacity_gauge' do
-      get :index
-      expect(assigns[:borrowing_capacity_gauge]).to include(:total, :mortgages, :aa, :aaa, :agency)
-    end
-    it 'passes the correct borrowing capacity values to `calculate_gauge_percentages` method' do
-      allow(subject).to receive(:calculate_gauge_percentages) # to allow for `calculate_gauge_percentages` of @financing_availability_gauge
-      allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).and_return(borrowing_capacity_hash)
-      guage_argument_hash = {
-        total: borrowing_capacity_hash[:total_borrowing_capacity],
-        mortgages: borrowing_capacity_hash[:net_plus_securities_capacity],
-        aa: borrowing_capacity_hash[:sbc][:collateral][:aa][:total_borrowing_capacity],
-        aaa: borrowing_capacity_hash[:sbc][:collateral][:aaa][:total_borrowing_capacity],
-        agency: borrowing_capacity_hash[:sbc][:collateral][:agency][:total_borrowing_capacity]
-      }
-      expect(subject).to receive(:calculate_gauge_percentages).with(guage_argument_hash, :total)
+    it 'calls `calculate_gauge_percentages` for @financing_availability_gauge'  do
+      expect(subject).to receive(:calculate_gauge_percentages).once
       get :index
     end
-    it 'should call MemberBalanceService.borrowing_capacity_summary with the current date' do
-      expect_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).with(Time.zone.now.to_date).and_call_original
-      get :index
-    end
-    it 'should call `calculate_gauge_percentages` for @borrowing_capacity_gauge and @financing_availability_gauge'  do
-      expect(subject).to receive(:calculate_gauge_percentages).twice
-      get :index
-    end
-    it 'should assign @current_overnight_vrc' do
+    it 'assigns @current_overnight_vrc' do
       get :index
       expect(assigns[:current_overnight_vrc]).to be_kind_of(Float)
     end
@@ -191,6 +183,7 @@ RSpec.describe DashboardController, :type => :controller do
         allow(contacts).to receive(:[]).with(:cam).and_return({username: cam_username})
         allow(contacts).to receive(:[]).with(:rm).and_return({username: rm_username})
         allow(subject).to receive(:find_asset)
+        allow(Rails.cache).to receive(:fetch).with(any_args).and_yield.and_return(contacts)
       end
       it 'is the result of the `members_service.member_contacts` method' do
         get :index
@@ -218,7 +211,7 @@ RSpec.describe DashboardController, :type => :controller do
         get :index
         expect(assigns[:contacts][:cam][:image_url]).to eq("#{uppercase_username.downcase}.jpg")
       end
-      it 'assigns the default image_url if the image asset does not exist for the contact' do
+      it 'assigns the default `image_url` if the image asset does not exist for the contact' do
         allow(subject).to receive(:find_asset).and_return(false)
         get :index
         expect(assigns[:contacts][:rm][:image_url]).to eq('placeholder-usericon.svg')
@@ -226,6 +219,7 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'returns {} if nil is returned from the service object' do
         allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(nil)
+        allow(Rails.cache).to receive(:fetch).with(any_args).and_yield.and_return({})
         get :index
         expect(assigns[:contacts]).to eq({})
       end
@@ -248,11 +242,6 @@ RSpec.describe DashboardController, :type => :controller do
       end
     end
     describe "MemberBalanceService failures" do
-      it 'should assign @borrowing_capacity_guage to a zeroed out gauge if the balance could not be retrieved' do
-        allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).and_return(nil)
-        get :index
-        expect(assigns[:borrowing_capacity_gauge]).to eq(empty_financing_availability_gauge)
-      end
       it 'should assign @financing_availability_gauge to a zeroed out gauge if there is no value for `financing_availability` in the profile' do
         allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return({credit_outstanding: {}})
         get :index
@@ -811,6 +800,7 @@ RSpec.describe DashboardController, :type => :controller do
       let(attr) { double(attr.to_s) }
     end
     let(:nested_hash) { double('hash') }
+    let(:borrowing_capacity_gauge) { double('borrowing capacity guage') }
     let(:account_overview) { get :account_overview }
     let(:profile) {
       {
@@ -828,76 +818,100 @@ RSpec.describe DashboardController, :type => :controller do
     before do
       allow(subject).to receive(:deferred_job_data)
       allow(subject).to receive(:render)
+      allow_any_instance_of(MembersService).to receive(:report_disabled?).and_return(false)
+      allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).and_return(borrowing_capacity_summary)
     end
 
     it_behaves_like 'a user required action', :get, :account_overview
     it_behaves_like 'a deferred job action', :account_overview
+    it 'renders without a layout' do
+      expect(subject).to receive(:render).with(layout: false).and_call_original
+      account_overview
+    end
     it 'checks the profile for disabled endpoints' do
       expect(subject).to receive(:sanitize_profile_if_endpoints_disabled).and_return({})
       account_overview
     end
-    describe 'rendering the `dashboard_account_overview` partial' do
+    it 'calculates the borrowing capacity gauge using the borrowing capacity hash from the service' do
+      expect(subject).to receive(:calculate_borrowing_capacity_gauge).with(borrowing_capacity_summary)
+      account_overview
+    end
+    it 'sets @borrowing_capacity_gauge to the result of `calculate_borrowing_capacity_gauge`' do
+      allow(subject).to receive(:calculate_borrowing_capacity_gauge).and_return(borrowing_capacity_gauge)
+      account_overview
+      expect(assigns[:borrowing_capacity_gauge]).to eq(borrowing_capacity_gauge)
+    end
+    it 'does not set @borrowing_capacity_gauge if the COLLATERAL_REPORT_DATA (i.e. Borrowing Capacity) report is disabled' do
+      allow_any_instance_of(MembersService).to receive(:report_disabled?).with(anything, [MembersService::COLLATERAL_REPORT_DATA]).and_return(true)
+      account_overview
+      expect(assigns[:borrowing_capacity_gauge]).to be_nil
+    end
+    describe 'the `@account_overview_table_data` instance variable' do
       before do
         allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).and_return(profile)
         allow(credit_outstanding).to receive(:[]).with(:total).and_return(total)
         allow(collateral_borrowing_capacity).to receive(:[]).with(:remaining).and_return(remaining)
         allow(capital_stock).to receive(:[]).with(:remaining_leverage).and_return(remaining_leverage)
       end
-      it 'renders with the correct data when there is no total_borrowing_capacity_sbc_agency, total_borrowing_capacity_sbc_aaa and total_borrowing_capacity_sbc_aa' do
-        profile_no_bc = profile
-        total_borrowing_capacity_keys.each do |key|
-          profile_no_bc[key] = 0
+      it 'contains the correct `credit_outstanding` data' do
+        account_overview
+        expect(assigns[:account_overview_table_data][:credit_outstanding]).to eq([[I18n.t('dashboard.your_account.table.credit_outstanding'), total]])
+      end
+      it 'contains the correct `sta_balance` data' do
+        account_overview
+        expect(assigns[:account_overview_table_data][:sta_balance]).to eq([[[I18n.t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')]])
+      end
+      describe '`remaining_borrowing_capacity` data' do
+        it 'is nil if `total_borrowing_capacity` is zero' do
+          borrowing_capacity_summary[:total_borrowing_capacity] = 0
+          allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).and_return(borrowing_capacity_summary)
+          account_overview
+          expect(assigns[:account_overview_table_data][:remaining_borrowing_capacity]).to be_nil
         end
-        allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).and_return(profile_no_bc)
-        table_data = {
-          sta_balance: [[[I18n.t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
-          credit_outstanding: [[I18n.t('dashboard.your_account.table.credit_outstanding'), total]],
-          remaining: [
-            {title: I18n.t('dashboard.your_account.table.remaining.title')},
-            [I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available],
-            [[I18n.t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], remaining],
-            [[I18n.t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path], remaining_leverage]
+        it 'contains all of the remaining borrowing capacity subtypes if they have a total borrowing capacity' do
+          bc_array = [
+            {title: I18n.t('dashboard.your_account.table.remaining_borrowing_capacity')},
+            [I18n.t('dashboard.your_account.table.remaining.standard'), borrowing_capacity_summary[:standard_excess_capacity]],
+            [I18n.t('dashboard.your_account.table.remaining.agency'), borrowing_capacity_summary[:sbc][:collateral][:agency][:remaining_borrowing_capacity]],
+            [I18n.t('dashboard.your_account.table.remaining.aaa'), borrowing_capacity_summary[:sbc][:collateral][:aaa][:remaining_borrowing_capacity]],
+            [I18n.t('dashboard.your_account.table.remaining.aa'), borrowing_capacity_summary[:sbc][:collateral][:aa][:remaining_borrowing_capacity]]
           ]
-        }
-        expect(subject).to receive(:render).with({partial: 'dashboard/dashboard_account_overview', locals: {table_data: table_data}, layout: false})
-        account_overview
+          account_overview
+          expect(assigns[:account_overview_table_data][:remaining_borrowing_capacity]).to eq(bc_array)
+        end
+        it 'does not include the `remaining_standard_bc` if the `total_standard_bc` is 0' do
+          borrowing_capacity_summary[:net_plus_securities_capacity] = 0
+          allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).and_return(borrowing_capacity_summary)
+          account_overview
+          expect(assigns[:account_overview_table_data][:remaining_borrowing_capacity]).not_to include([I18n.t('dashboard.your_account.table.remaining.standard'), borrowing_capacity_summary[:standard_excess_capacity]])
+        end
+        ['agency', 'aaa', 'aa'].each do |sbc_type|
+          it "does not include the `remaining_#{sbc_type}_bc` if the `total_#{sbc_type}_bc` is 0" do
+            borrowing_capacity_summary[:sbc][:collateral][sbc_type.to_sym][:total_borrowing_capacity] = 0
+            allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).and_return(borrowing_capacity_summary)
+            account_overview
+            expect(assigns[:account_overview_table_data][:remaining_borrowing_capacity]).not_to include([I18n.t("dashboard.your_account.table.remaining.#{sbc_type}"), borrowing_capacity_summary[:sbc][:collateral][sbc_type.to_sym][:remaining_borrowing_capacity]])
+          end
+        end
       end
-      it 'renders with the correct data when there is total_borrowing_capacity_sbc_agency, total_borrowing_capacity_sbc_aaa or total_borrowing_capacity_sbc_aa' do
-        table_data = {
-          sta_balance: [[[I18n.t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
-          credit_outstanding: [[I18n.t('dashboard.your_account.table.credit_outstanding'), total]],
-          remaining: [
+      describe '`other_remaining` data' do
+        let(:other_remaining_array) {
+          [
             {title: I18n.t('dashboard.your_account.table.remaining.title')},
-            [I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available],
-            [[I18n.t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], remaining],
-            [I18n.t('dashboard.your_account.table.remaining.standard'), total_borrowing_capacity_standard],
-            [I18n.t('dashboard.your_account.table.remaining.agency'), total_borrowing_capacity_sbc_agency],
-            [I18n.t('dashboard.your_account.table.remaining.aaa'), total_borrowing_capacity_sbc_aaa],
-            [I18n.t('dashboard.your_account.table.remaining.aa'), total_borrowing_capacity_sbc_aa],
-            [[I18n.t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path], remaining_leverage]
+            [I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available]
           ]
         }
-        expect(subject).to receive(:render).with({partial: 'dashboard/dashboard_account_overview', locals: {table_data: table_data}, layout: false})
-        account_overview
-      end
-      it 'renders with the correct data when the capital stock position and leverage report feature is disabled' do
-        allow(controller).to receive(:feature_enabled?).with('report-capital-stock-position-and-leverage').and_return(false)
-        table_data = {
-          sta_balance: [[[I18n.t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], sta_balance, I18n.t('dashboard.your_account.table.balance_footnote')],],
-          credit_outstanding: [[I18n.t('dashboard.your_account.table.credit_outstanding'), total]],
-          remaining: [
-            {title: I18n.t('dashboard.your_account.table.remaining.title')},
-            [I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available],
-            [[I18n.t('dashboard.your_account.table.remaining.capacity'), reports_borrowing_capacity_path], remaining],
-            [I18n.t('dashboard.your_account.table.remaining.standard'), total_borrowing_capacity_standard],
-            [I18n.t('dashboard.your_account.table.remaining.agency'), total_borrowing_capacity_sbc_agency],
-            [I18n.t('dashboard.your_account.table.remaining.aaa'), total_borrowing_capacity_sbc_aaa],
-            [I18n.t('dashboard.your_account.table.remaining.aa'), total_borrowing_capacity_sbc_aa],
-            [I18n.t('dashboard.your_account.table.remaining.leverage'), remaining_leverage]
-          ]
-        }
-        expect(subject).to receive(:render).with({partial: 'dashboard/dashboard_account_overview', locals: {table_data: table_data}, layout: false})
-        account_overview
+        it 'contains the correct data when the capital stock position and leverage report feature is enabled' do
+          other_remaining_array << [[I18n.t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path], remaining_leverage]
+          account_overview
+          expect(assigns[:account_overview_table_data][:other_remaining]).to eq(other_remaining_array)
+        end
+        it 'contains the correct data when the capital stock position and leverage report feature is disabled' do
+          allow(controller).to receive(:feature_enabled?).with('report-capital-stock-position-and-leverage').and_return(false)
+          other_remaining_array << [I18n.t('dashboard.your_account.table.remaining.leverage'), remaining_leverage]
+          account_overview
+          expect(assigns[:account_overview_table_data][:other_remaining]).to eq(other_remaining_array)
+        end
       end
     end
   end
@@ -1521,6 +1535,126 @@ RSpec.describe DashboardController, :type => :controller do
         it "sets the `[#{key}]` to nil" do
           expect(call_method[key]).to be_nil
         end
+      end
+    end
+  end
+
+  describe 'the `calculate_borrowing_capacity_gauge` private method' do
+    let(:borrowing_capacity_gauge) { controller.send(:calculate_borrowing_capacity_gauge, borrowing_capacity_summary) }
+    let(:breakdown_hash) { double('breakdown hash') }
+    let(:total_borrowing_capacity) { borrowing_capacity_summary[:total_borrowing_capacity] }
+    let(:total_standard_bc) { borrowing_capacity_summary[:net_plus_securities_capacity] }
+    let(:remaining_standard_bc) { borrowing_capacity_summary[:standard_excess_capacity] }
+    let(:used_standard_bc) { total_standard_bc - remaining_standard_bc }
+    let(:total_agency_bc) { borrowing_capacity_summary[:sbc][:collateral][:agency][:total_borrowing_capacity] }
+    let(:remaining_agency_bc) { borrowing_capacity_summary[:sbc][:collateral][:agency][:remaining_borrowing_capacity] }
+    let(:used_agency_bc) { total_agency_bc - remaining_agency_bc }
+    let(:total_aaa_bc) { borrowing_capacity_summary[:sbc][:collateral][:aaa][:total_borrowing_capacity] }
+    let(:remaining_aaa_bc) { borrowing_capacity_summary[:sbc][:collateral][:aaa][:remaining_borrowing_capacity] }
+    let(:used_aaa_bc) { total_aaa_bc - remaining_aaa_bc }
+    let(:total_aa_bc) { borrowing_capacity_summary[:sbc][:collateral][:aa][:total_borrowing_capacity] }
+    let(:remaining_aa_bc) { borrowing_capacity_summary[:sbc][:collateral][:aa][:remaining_borrowing_capacity] }
+    let(:used_aa_bc) { total_aa_bc - remaining_aa_bc }
+    before do
+      allow(controller).to receive(:calculate_gauge_percentages).and_call_original
+    end
+    it 'handles being passed an empty hash' do
+      expect{controller.send(:calculate_borrowing_capacity_gauge, {})}.not_to raise_exception
+    end
+    describe 'when `total_borrowing_capacity` is 0' do
+      before do
+        borrowing_capacity_summary[:total_borrowing_capacity] = 0
+        allow(controller).to receive(:calculate_gauge_percentages).and_return(total: {})
+      end
+      it 'calls `calculate_gauge_percentages` with `{total: 0}`' do
+        expect(controller).to receive(:calculate_gauge_percentages).with({total: 0}).and_return(total: {})
+        borrowing_capacity_gauge
+      end
+      ['standard_percentage', 'sbc_percentage'].each do |collateral_type|
+        it "sets `#{collateral_type}` to 0" do
+          expect(borrowing_capacity_gauge[:total][collateral_type.to_sym]).to eq(0)
+        end
+      end
+    end
+    it 'calculates the first-level gauge percentages with the totals of the collateral types' do
+      first_level_hash = {
+          total: total_borrowing_capacity,
+          mortgages: total_standard_bc,
+          agency: total_agency_bc,
+          aaa: total_aaa_bc,
+          aa: total_aa_bc
+        }
+      expect(controller).to receive(:calculate_gauge_percentages).with(first_level_hash, :total)
+      borrowing_capacity_gauge
+    end
+    [:mortgages, :agency, :aaa, :aa].each do |collateral_type|
+      describe "`#{collateral_type}` breakdown values" do
+        let(:breakdown_hash) do
+          case collateral_type
+            when :mortgages
+              {
+                total: total_standard_bc,
+                remaining: remaining_standard_bc,
+                used: used_standard_bc
+              }
+            when :agency
+              {
+                total: total_agency_bc,
+                remaining: remaining_agency_bc,
+                used: used_agency_bc
+              }
+            when :aaa
+              {
+                total: total_aaa_bc,
+                remaining: remaining_aaa_bc,
+                used: used_aaa_bc
+              }
+            when :aa
+              {
+                total: total_aa_bc,
+                remaining: remaining_aa_bc,
+                used: used_aa_bc
+              }
+          end
+        end
+        it "calls `calculate_gauge_percentages` with the proper values for the `#{collateral_type.to_s}` breakdown" do
+          expect(controller).to receive(:calculate_gauge_percentages).with(breakdown_hash, :total)
+          borrowing_capacity_gauge
+        end
+        it "sets `borrowing_capacity_gauge[#{collateral_type}][:breakdown]` to the result of calling `calculate_gauge_percentages`" do
+          allow(controller).to receive(:calculate_gauge_percentages).with(breakdown_hash, :total).and_return(breakdown_hash)
+          expect(borrowing_capacity_gauge[collateral_type][:breakdown]).to eq(breakdown_hash)
+        end
+      end
+    end
+    describe 'collateral type total percentages' do
+      let(:first_level_hash) {
+        {
+          total: total_borrowing_capacity,
+          mortgages: total_standard_bc,
+          agency: total_agency_bc,
+          aaa: total_aaa_bc,
+          aa: total_aa_bc
+        }
+      }
+      let(:bc_percentages_hash) {
+        {
+          mortgages: {percentage: rand()},
+          agency: {percentage: rand()},
+          aaa: {percentage: rand()},
+          aa: {percentage: rand()},
+          total: {}
+        }
+      }
+      before do
+        allow(controller).to receive(:calculate_gauge_percentages).with(first_level_hash, :total).and_return(bc_percentages_hash)
+      end
+      it 'sets `[:total][:standard_percentage]` to the percentage value for `mortgages` returned by `calculate_gauge_percentages`' do
+        expect(borrowing_capacity_gauge[:total][:standard_percentage]).to eq(bc_percentages_hash[:mortgages][:percentage])
+      end
+      it 'sets `[:total][:sbc_percentage]` to the sum of the percentage values for `agency`, `aaa` and `aa` returned by `calculate_gauge_percentages`' do
+        total_sbc_percentage = bc_percentages_hash[:agency][:percentage] + bc_percentages_hash[:aaa][:percentage] + bc_percentages_hash[:aa][:percentage]
+        expect(borrowing_capacity_gauge[:total][:sbc_percentage]).to eq(total_sbc_percentage)
       end
     end
   end

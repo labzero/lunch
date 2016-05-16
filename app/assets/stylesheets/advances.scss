@@ -183,7 +183,6 @@
 }
 
 .advances-add {
-  width: 700px;
   .advance-rates-table {
     .add-advance-cell-wrapper:hover {
       z-index: 2;
@@ -569,9 +568,8 @@
 }
 
 .advance-rates-table-wrapper {
-  border: 1px solid $light-blue;
-  border-radius: $default-border-radius;
-  margin-bottom: 20px;
+  @extend %add-advance-bordered-section-styling;
+  padding: 0;
   &[data-active-term-type="vrc"] {
     tbody {
       tr.vrc-rates {
@@ -609,6 +607,10 @@
   }
 }
 
+.advance-rate-table-section {
+  padding: 0;
+}
+
 .advance-rates-table {
   margin: 25px auto;
   width: calc(100% - 40px);
@@ -632,6 +634,44 @@
           text-align: left;
         }
       }
+    }
+  }
+}
+
+.add-advance-borrowing-capacity {
+  @extend %add-advance-bordered-section-styling;
+  .add-advance-borrowing-capacity-label {
+    @extend %typography-module-tiny-data-label;
+    margin: 0;
+  }
+  .remaining {
+    margin-top: 15px;
+  }
+  .report-summary-data {
+    margin-bottom: 0;
+    p {
+      @extend %typography-module-summary-data;
+      margin-bottom: 10px;
+    }
+  }
+  table {
+    width: 100%;
+    tr {
+      td, td:first-child {
+        background: $white;
+        text-align: left;
+        border: 0;
+        padding: 0;
+        height: 10px;
+        line-height: 20px;
+        width: 50%;
+      }
+      td:first-child {
+        color: $medium-gray;
+      }
+    }
+    .value {
+      text-align: right;
     }
   }
 }

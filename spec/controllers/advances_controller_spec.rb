@@ -102,6 +102,8 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:etransact_service_instance) { double('service instance', etransact_status: nil, etransact_active?: nil) }
     let(:make_request) { get :select_rate }
     let(:advance_request) { double(AdvanceRequest, amount: advance_amount, type: advance_type, term: advance_term, term_type: advance_term_type, id: advance_id, :allow_grace_period= => nil, :type= => nil, :term= => nil, :amount= => nil) }
+    let(:profile) { double('profile') }
+    let(:member_balance_service_instance) { double('member balance service instance', profile: profile) }
 
     before do
       allow(MessageService).to receive(:new).and_return(message_service_instance)
@@ -180,6 +182,12 @@ RSpec.describe AdvancesController, :type => :controller do
         expect(advance_request).to receive(:amount=).with(advance_amount.to_s)
         get :select_rate, advance_request: {amount: advance_amount}
       end
+    end
+    it 'sets `@profile`' do
+      allow(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
+      allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(profile).and_return(profile)
+      make_request
+      expect(assigns[:profile]).to eq(profile)
     end
   end
 

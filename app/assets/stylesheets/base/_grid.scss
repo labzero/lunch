@@ -65,3 +65,13 @@
     width:($grid-column-width * 10) + ($gutter-width * 8.5);
   }
 }
+
+.column-9x3-left {
+  @extend %column;
+  width: ($grid-column-width * 9) + ($gutter-width * 8);
+}
+
+.column-9x3-right {
+  @extend %column;
+  width: ($grid-column-width * 3) + ($gutter-width * 2);
+}

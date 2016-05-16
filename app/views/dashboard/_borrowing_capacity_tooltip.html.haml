@@ -1,0 +1,19 @@
+.tooltip
+  %h3= t("dashboard.your_account.table.remaining.#{key}")
+  %table
+    %tbody
+      %tr
+        %td= t('dashboard.your_account.borrowing_capacity.remaining')
+        %td= fhlb_formatted_percentage(details[:breakdown][:remaining][:percentage])
+        %td $
+        %td= fhlb_formatted_number(details[:breakdown][:remaining][:amount], html: false)
+      %tr
+        %td= t('dashboard.your_account.borrowing_capacity.used')
+        %td= fhlb_formatted_percentage(details[:breakdown][:used][:percentage])
+        %td $
+        %td= fhlb_formatted_number(details[:breakdown][:used][:amount], html: false)
+    %tfoot
+      %tr
+        %td{colspan: 2}= t('dashboard.your_account.borrowing_capacity.total')
+        %td $
+        %td= fhlb_formatted_number(details[:breakdown][:total][:amount], html: false)

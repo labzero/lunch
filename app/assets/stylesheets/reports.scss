@@ -1563,8 +1563,11 @@ td.dataTables_empty {
       .report-profile-contact-info {
         margin-left: -80px;
       }
-      .report-profile-navigation, .report-profile-cqr {
+      .report-profile-navigation {
         display: none;
+      }
+      .report-profile-cqr {
+        visibility: hidden;
       }
     }
     .report-profile-data {

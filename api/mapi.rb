@@ -24,6 +24,7 @@ require_relative 'services/member'
 require_relative 'services/etransact_advances'
 require_relative 'services/users'
 require_relative 'services/health'
+require_relative 'services/customers'
 
 require_relative 'models/member'
 require_relative 'models/etransact_advances'
@@ -60,6 +61,7 @@ require_relative 'models/member_mortgage_collateral_update'
 require_relative 'models/fee_schedules'
 require_relative 'models/member_quick_advance_flag'
 require_relative 'models/member_quick_advance_request'
+require_relative 'models/customers'
 
 require 'newrelic_rpm'
 NewRelic::Agent.add_instrumentation(File.join(__dir__, '..', 'lib', 'new_relic', 'instrumentation', '**', '*.rb')) if defined?(NewRelic::Agent)
@@ -166,6 +168,7 @@ module MAPI
     register MAPI::Services::Users
     register MAPI::Services::Health
     register MAPI::Services::Fees
+    register MAPI::Services::Customers
   end
 
   class DocApp < Sinatra::Base
@@ -213,6 +216,10 @@ module MAPI
       api do 
         key :path, '/fees'
         key :description, 'Operations about fees associated with FHLB services and procedures'
+      end
+      api do
+        key :path, '/customers'
+        key :description, 'Operations about customers'
       end
     end
 

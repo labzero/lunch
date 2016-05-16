@@ -26,6 +26,7 @@ en:
       thousand: T
       million: MM
     view: View
+    sign: Sign
     temporarily_unavailable: Temporarily Unavailable
     overnight: Overnight
     daily: Daily
@@ -195,13 +196,11 @@ en:
   datepicker:
     range:
       date_to_current: "%{date} to date"
-      custom: Custom date range
       print: "%{start_date} - %{end_date}"
       last_30_days: Last 30 Days
       from_label: From
     single:
       input: "As of %{date}"
-      custom: Custom date
       end_of: "End of %{date}"
       from_label: As of
   activerecord:
@@ -637,9 +636,15 @@ en:
         agency: Agency
         aaa: AAA
         aa: AA
+        used: Used
+        remaining: Remaining
+        available: Available
+        total: Total
+        standard_percentage: 'Standard: %{percentage}'
+        sbc_percentage: 'SBC: %{percentage}'
       table:
-        balance: 'STA Balance:*'
-        balance_footnote: '*as of close of business on prior business day'
+        balance: 'STA Balance:'
+        balance_footnote: '(as of close of business on prior business day)'
         credit_outstanding: 'Credit Outstanding:'
         remaining:
           title: 'Remaining:'
@@ -647,6 +652,7 @@ en:
           capacity: Collateral Borrowing Capacity
           leverage: Stock Leverage
           standard: Standard Credit Program
+          mortgages: Standard Credit Program
           agency: 'SBC: Agency'
           aaa: 'SBC: AAA'
           aa: 'SBC: AA'
@@ -654,9 +660,9 @@ en:
           title: 'Standard Program:'
         sbc_program:
           title: 'Securities-Backed Credit Program:'
-        total_borrowing_capacity: Total Borrowing Capacity
-        remaining_borrowing_capacity: Remaining Borrowing Capacity
-        borrowing_capacity_note_html: View your institution’s <a href=%{url}>Borrowing Capacity</a> report for detailed information
+        total_borrowing_capacity: 'Total Borrowing Capacity:'
+        remaining_borrowing_capacity: 'Remaining Borrowing Capacity:'
+        view_full_report_html: See more information about your account in your full <a href=%{url}>Account Summary</a> report.
     market_overview:
       title: Market Rates
       vrc: 30-Day Standard VRC Overnight Rate (%)
@@ -1797,6 +1803,16 @@ en:
         complete: Advance Completed
       nav: Add Advance
       terms: 'All advances are subject to the terms and conditions of the Bank’s Credit Program, the Advances and Security Agreement with the Member, and the appropriate advance confirmation, as well as the Terms of Use.'
+      borrowing_capacity:
+        total_borrowing_capacity: 'Total Borrowing Capacity:'
+        remaining_borrowing_capacity: 'Remaining Borrowing Capacity:'
+        standard: Standard
+        sbc_agency: 'SBC: Agency'
+        sbc_aaa: 'SBC: AAA'
+        sbc_aa: 'SBC: AA'
+        remaining: 'Remaining:'
+        financing_avail: Financing Avail
+        stock_leverage: Stock Leverage
     manage_advances:
       title: Manage Advances
     status: Status
