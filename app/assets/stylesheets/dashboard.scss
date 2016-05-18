@@ -741,7 +741,7 @@ $breakdown-table-currency-width: 10px;
     @extend %typography-dashboard-account-summary;
   }
   .dashboard-module-content-truncated {
-    width: 160px;
+    width: 135px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
