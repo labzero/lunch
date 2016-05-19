@@ -1568,6 +1568,10 @@ td.dataTables_empty {
       }
       .report-profile-cqr {
         visibility: hidden;
+        width: 0px;
+      }
+      .report-profile-cqr-number {
+        margin-left: 0px;
       }
     }
     .report-profile-data {
