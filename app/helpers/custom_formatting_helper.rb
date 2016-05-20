@@ -136,4 +136,23 @@ module CustomFormattingHelper
     return '' unless tokens.size > 0
     tokens.map {|t| t.first.upcase }.join
   end
+
+  def fhlb_formatted_time(time)
+    return t('global.missing_value') if time.nil?
+    time.strftime('%l:%M%p')
+  end
+
+  def fhlb_formatted_duration(duration)
+    return t('global.missing_value') if duration.nil?
+    raise ArgumentError, ":duration must be zero or greater" if duration < 0
+    if duration == 0
+      "00:00:00"
+    else
+      minutes = duration / 60
+      seconds = duration % 60
+      hours = minutes / 60
+      minutes = minutes % 60
+      "#{'%02d' % hours}:#{'%02d' % minutes}:#{'%02d' % seconds}"
+    end
+  end
 end

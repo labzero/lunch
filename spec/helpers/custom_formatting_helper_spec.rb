@@ -291,4 +291,38 @@ describe CustomFormattingHelper do
       expect(helper.fhlb_initials_from_full_name("    Tula does the @#}$%^&*()     Hula from Hawaii  ")).to eq('TDT@HFH')
     end
   end
+
+  describe '`fhlb_formatted_time` method' do
+    it 'returns the global missing value for nil' do
+      expect(helper.fhlb_formatted_time(nil)).to eq(t('global.missing_value'))
+    end
+
+    it 'formats the time' do
+      now = Time.zone.now
+      { now => now.strftime('%l:%M%p'),
+        Time.parse('1:30') => ' 1:30AM',
+        Time.parse('12:30') => '12:30PM' }.each do |raw, formatted|
+        expect(helper.fhlb_formatted_time(raw)).to eq(formatted)
+      end
+    end
+  end
+
+  describe '`fhlb_formatted_duration` method' do
+    let(:duration_under_24_hours) { rand(1..86399).seconds }
+    it 'throws an `ArgumentError` for negative values' do
+      expect { helper.fhlb_formatted_duration(0 - rand(42)) }.to raise_error(ArgumentError)
+    end
+    it 'returns a valid response for zero' do
+      expect(helper.fhlb_formatted_duration(0)).to eq("00:00:00")
+    end
+    it 'returns the global missing value for nil' do
+      expect(helper.fhlb_formatted_duration(nil)).to eq(t('global.missing_value'))
+    end
+    it 'formats the duration (under 24 hours)' do
+      expect(helper.fhlb_formatted_duration(duration_under_24_hours)).to eq(Time.at(duration_under_24_hours).utc.strftime('%H:%M:%S'))
+    end
+    it 'format the duration (over 24 hours)' do
+      expect(helper.fhlb_formatted_duration(271545)).to eq('75:25:45')
+    end
+  end
 end

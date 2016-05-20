@@ -106,7 +106,7 @@ RSpec.describe InternalMailer, :type => :mailer do
     before { allow(rate_info).to receive(:[]).with(:rate_band_info).and_return({}) }
 
     it_behaves_like 'an internal error notification email', I18n.t('errors.emails.exceeds_rate_band.subject')
-    
+
     it 'assigns @rate_info' do
       build_mail
       expect(assigns[:rate_info]).to be(rate_info)
@@ -187,6 +187,35 @@ RSpec.describe InternalMailer, :type => :mailer do
           expect(response.body).to include(target_value)
         end
       end
+  end
+
+  describe '`quick_report_status` email' do
+    completed = rand(1..499)
+    total = rand(500..999)
+    let(:start_time) { Time.zone.now }
+    let(:end_time) { start_time + rand(1..5).minutes }
+    let(:completed) { completed }
+    let(:total) { total }
+    let(:build_mail) { mail :quick_report_status, start_time, end_time, completed, total }
+
+    it_behaves_like 'an internal notification email', I18n.t('emails.quick_report_status.subject', completed: completed, total: total)
+
+    it 'assigns @start_time' do
+      build_mail
+      expect(assigns[:start_time]).to be(start_time)
+    end
+    it 'assigns @end_time' do
+      build_mail
+      expect(assigns[:end_time]).to be(end_time)
+    end
+    it 'assigns @completed' do
+      build_mail
+      expect(assigns[:completed]).to be(completed)
+    end
+    it 'assigns @total' do
+      build_mail
+      expect(assigns[:total]).to be(total)
+    end
   end
 
   describe '`user_name_from_user` protected method' do

@@ -2681,6 +2681,12 @@ en:
       contact: Contact your Access Manager or Web Support at %{phone} if you have any questions.
       sign_off_html: Thank you,<br>FHLBank San Francisco Web Support Team
       disclaimer: 'The contents of this email are intended only for the use of the individual or entity to which they are addressed and may contain information that is legally privileged, confidential, and exempt from disclosure. If you are not the intended recipient, you are hereby notified that any dissemination, distribution, or copying of this email is strictly prohibited. If you have received this email in error, please: (i) reply immediately to this email indicating that you received this communication in error, and (ii) promptly delete this email from your computer. Thank you.'
+    quick_report_status:
+      subject: 'Info: %{completed} / %{total} reports generated in batch'
+      reports_generated: 'Reports generated: %{completed} / %{total}'
+      start_time: 'Start time: %{time}'
+      end_time: 'End time: %{time}'
+      elapsed_time: 'Elapsed time: %{time}'
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."
