@@ -17,6 +17,10 @@ module MAPI
         def fake_hash(filename)
           fake(filename).with_indifferent_access
         end
+
+        def fake_hashes(filename)
+          fake(filename).collect(&:with_indifferent_access)
+        end
         
         def fetch_hash(logger, sql)
           begin
@@ -40,9 +44,7 @@ module MAPI
             results = []
             cursor  = ActiveRecord::Base.connection.execute(sql)
             while row = cursor.fetch_hash()
-              map_values.each{ |op, keys| keys.each{ |key| row[key] = row[key].try(op) } }
-              row = Hash[row.map{ |k,v| [k.downcase,v] }] if downcase_keys
-              results.push(row)
+              results.push(map_hash_values(row, map_values, downcase_keys))
             end
             results
           rescue => e
@@ -79,6 +81,23 @@ module MAPI
             request.env[cache_key] = yield
           end
           request.env[cache_key]
+        end
+
+        def should_fake?(app)
+          app.environment != :production
+        end
+
+        def map_hash_values(hash, mapping, downcase_keys=false)
+          mapping.each do |op, keys| 
+            keys.each do |key|
+              hash[key] = if op.respond_to?(:call)
+                op.call(hash[key])
+              else
+                hash[key].try(op)
+              end
+            end
+          end
+          downcase_keys ? Hash[hash.map{ |k,v| [k.downcase,v] }] : hash
         end
       end
     end

@@ -1,8 +1,5 @@
 .reports, .report, .resource, .product-page {
-  h1 {
-    @extend %typography-page-title;
-    margin: 32px 0 17px;
-  }
+  @extend %page-header;
 }
 
 .reports-table {
@@ -169,7 +166,7 @@
 }
 
 .report-main-body {
-  @extend %report-main-body;
+  @extend %page-main-body;
   small {
     span:first-child {
       @extend %typography-table-total;
@@ -302,6 +299,11 @@
 
   .report-cell-expanding {
     width: auto;
+  }
+
+  .report-cell-actions {
+    @extend %typography-table-button;
+    text-transform: uppercase;
   }
 
   .sorting, .sorting_asc, .sorting_desc {

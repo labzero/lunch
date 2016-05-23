@@ -195,6 +195,7 @@ en:
     loan_count: Loan Count
     unpaid_balance: Unpaid Balance
     status: Status
+    authorized_by: Authorized By
   datepicker:
     range:
       date_to_current: "%{date} to date"
@@ -1135,9 +1136,26 @@ en:
     manage:
       title: Manage Securities
       eligibility: Eligibility
-      authorized_by: Authorized by
       pledged: Pledged
       safekept: Safekept
+    requests:
+      title: Securities Requests
+      actions:
+        authorize: Authorize
+      columns:
+        request_id: Request ID
+        submitted_by: Submitted By
+        submitted_date: Submitted Date
+        authorization_date: Authorization Date
+      form_descriptions:
+        pledge: Securities Pledge
+        safekept: Securities Safekeeping
+        release: Securities Release
+      pending:
+        title: Requests for Authorization
+      authorized:
+        title: Authorized Requests
+        description: Authorized requests are displayed for 7 days after settlement.
   reports:
     meta_title: FHLB - Reports
     title: Reports

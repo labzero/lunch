@@ -1,0 +1,15 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.securities.row
+  .securities-header
+    %h1= t('securities.requests.title')
+  .securities-main-body
+    %section
+      %header
+        %h2= t('securities.requests.pending.title')
+        = render 'reports/reports_table', table_class: 'securities-request-table', table_data: @awaiting_authorization_requests_table, sortable: false
+    %section
+      %header
+        %h2= t('securities.requests.authorized.title')
+        %p= t('securities.requests.authorized.description')
+        = render 'reports/reports_table', table_class: 'securities-request-table', table_data: @authorized_requests_table, sortable: false

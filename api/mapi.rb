@@ -62,6 +62,7 @@ require_relative 'models/fee_schedules'
 require_relative 'models/member_quick_advance_flag'
 require_relative 'models/member_quick_advance_request'
 require_relative 'models/customers'
+require_relative 'models/securities_request'
 
 require 'newrelic_rpm'
 NewRelic::Agent.add_instrumentation(File.join(__dir__, '..', 'lib', 'new_relic', 'instrumentation', '**', '*.rb')) if defined?(NewRelic::Agent)

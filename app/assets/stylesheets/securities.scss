@@ -1,3 +1,24 @@
+.securities {
+  @extend %page-header;
+  h2 {
+    @extend %typography-section-title;
+    margin: 0 0 5px;
+  }
+  section {
+    margin-bottom: 35px;
+  }
+  header {
+    margin: 0 0 15px;
+  }
+  p {
+    margin: 5px 0 10px;
+  }
+}
+
+.securities-main-body {
+  @extend %page-main-body;
+}
+
 .manage-securities-table {
   th:nth-child(2) {
     width: 200px;

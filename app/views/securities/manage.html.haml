@@ -1,8 +1,8 @@
 - @html_class = 'white-background'
 - @page_title = t('reports.meta_title')
-.report.row
-  .report-header
+.securities.row
+  .securities-header
     %h1= t('securities.manage.title')
-  .report-main-body
+  .securities-main-body
     = render 'reports/reports_table', table_class: 'manage-securities-table', table_data: @securities_table_data, sortable: false
 

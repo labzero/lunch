@@ -35,7 +35,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it 'assigns @securities_table_data the correct column_headings' do
         call_action
-        expect(assigns[:securities_table_data][:column_headings]).to eq([I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.description'), I18n.t('common_table_headings.status'), I18n.t('securities.manage.eligibility'), I18n.t('common_table_headings.maturity_date'), I18n.t('securities.manage.authorized_by'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(I18n.t('global.borrowing_capacity'), '$')])
+        expect(assigns[:securities_table_data][:column_headings]).to eq([I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.description'), I18n.t('common_table_headings.status'), I18n.t('securities.manage.eligibility'), I18n.t('common_table_headings.maturity_date'), I18n.t('common_table_headings.authorized_by'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(I18n.t('global.borrowing_capacity'), '$')])
       end
       describe 'the `columns` array in each row of @securities_table_data[:rows]' do
         [[:cusip, 0], [:description, 1], [:eligibility, 3], [:authorized_by, 5]].each do |attr_with_index|
@@ -81,6 +81,116 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
+  describe 'GET `requests`' do
+    let(:authorized_requests) { [] }
+    let(:awaiting_authorization_requests) { [] }
+    let(:securities_requests_service) { double(SecuritiesRequestService, authorized: authorized_requests, awaiting_authorization: awaiting_authorization_requests) }
+    let(:call_action) { get :requests }
+    before do
+      allow(SecuritiesRequestService).to receive(:new).and_return(securities_requests_service)
+    end
+
+    it_behaves_like 'a user required action', :get, :requests
+    it_behaves_like 'a controller action with an active nav setting', :requests, :securities
+
+    it 'raises an error if the `authorized` securities request endpoint returns nil' do
+      allow(securities_requests_service).to receive(:authorized).and_return(nil)
+      expect{call_action}.to raise_error(/SecuritiesController#requests has encountered nil/i)
+    end
+    it 'raises an error if the `awaiting_authorization` securities request endpoint returns nil' do
+      allow(securities_requests_service).to receive(:awaiting_authorization).and_return(nil)
+      expect{call_action}.to raise_error(/SecuritiesController#requests has encountered nil/i)
+    end
+    it 'fetches the list of authorized securities requests from the service' do
+      expect(securities_requests_service).to receive(:authorized)
+      call_action
+    end
+    it 'fetches the list of securities requests awaiting authorization from the service' do
+      expect(securities_requests_service).to receive(:awaiting_authorization)
+      call_action
+    end
+    describe '`@authorized_requests_table`' do
+      it 'builds the column headers' do
+        call_action
+        expect(assigns[:authorized_requests_table][:column_headings]).to eq([
+          I18n.t('securities.requests.columns.request_id'),
+          I18n.t('common_table_headings.description'),
+          I18n.t('common_table_headings.authorized_by'),
+          I18n.t('securities.requests.columns.authorization_date'),
+          I18n.t('common_table_headings.settlement_date'),
+          I18n.t('global.actions')
+        ])
+      end
+      it 'builds a row for each entry in the `authorized` requests' do
+        3.times do
+          authorized_requests << {
+            request_id: double('Request ID'),
+            authorized_by: double('Authorized By'),
+            authorized_date: double('Authorized Date'),
+            settle_date: double('Settlement Date'),
+            form_type: double('Form Type')
+          }
+        end
+        rows = authorized_requests.collect do |request|
+          description = double('A Description')
+          allow(subject).to receive(:form_type_to_description).with(request[:form_type]).and_return(description)
+          {
+            columns: [
+              {value: request[:request_id]},
+              {value: description},
+              {value: request[:authorized_by]},
+              {value: request[:authorized_date], type: :date},
+              {value: request[:settle_date], type: :date},
+              {value: [[I18n.t('global.view'), '#']], type: :actions}
+            ]
+          }
+        end
+        call_action
+        expect(assigns[:authorized_requests_table][:rows]).to eq(rows)
+      end
+    end
+    describe '`@awaiting_authorization_requests_table`' do
+      it 'builds the column headers' do
+        call_action
+        expect(assigns[:awaiting_authorization_requests_table][:column_headings]).to eq([
+          I18n.t('securities.requests.columns.request_id'),
+          I18n.t('common_table_headings.description'),
+          I18n.t('securities.requests.columns.submitted_by'),
+          I18n.t('securities.requests.columns.submitted_date'),
+          I18n.t('common_table_headings.settlement_date'),
+          I18n.t('global.actions')
+        ])
+      end
+      it 'builds a row for each entry in the `awaiting_authorization` requests' do
+        3.times do
+          awaiting_authorization_requests << {
+            request_id: double('Request ID'),
+            submitted_by: double('Submitted By'),
+            submitted_date: double('Submitted Date'),
+            settle_date: double('Settlement Date'),
+            form_type: double('Form Type')
+          }
+        end
+        rows = awaiting_authorization_requests.collect do |request|
+          description = double('A Description')
+          allow(subject).to receive(:form_type_to_description).with(request[:form_type]).and_return(description)
+          {
+            columns: [
+              {value: request[:request_id]},
+              {value: description},
+              {value: request[:submitted_by]},
+              {value: request[:submitted_date], type: :date},
+              {value: request[:settle_date], type: :date},
+              {value: [[I18n.t('securities.requests.actions.authorize'), '#']], type: :actions}
+            ]
+          }
+        end
+        call_action
+        expect(assigns[:awaiting_authorization_requests_table][:rows]).to eq(rows)
+      end
+    end
+  end
+
   describe 'private methods' do
     describe '`custody_account_type_to_status`' do
       ['P', 'p', :P, :p].each do |custody_account_type|
@@ -97,6 +207,22 @@ RSpec.describe SecuritiesController, type: :controller do
         ['foo', 2323, :bar, nil].each do |val|
           expect(controller.send(:custody_account_type_to_status, val)).to eq(I18n.t('global.missing_value'))
         end
+      end
+    end
+
+    describe '`form_type_to_description`' do
+      {
+        'pledge_release' => 'securities.requests.form_descriptions.release',
+        'safekept_release' => 'securities.requests.form_descriptions.release',
+        'pledge_intake' => 'securities.requests.form_descriptions.pledge',
+        'safekept_intake' => 'securities.requests.form_descriptions.safekept'
+      }.each do |form_type, description_key|
+        it "returns the localization value for `#{description_key}` when passed `#{form_type}`" do
+          expect(controller.send(:form_type_to_description, form_type)).to eq(I18n.t(description_key))
+        end
+      end
+      it 'returns the localization value for `global.missing_value` when passed an unknown form type' do
+        expect(controller.send(:form_type_to_description, double(String))).to eq(I18n.t('global.missing_value'))
       end
     end
   end

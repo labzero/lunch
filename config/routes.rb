@@ -182,8 +182,9 @@ Rails.application.routes.draw do
   end
 
   constraints Constraints::FeatureEnabled.new('securities') do
-    scope 'securities' do
-      get 'manage' => 'securities#manage', as: :manage_securities
+    scope 'securities', as: :securities do
+      get 'manage' => 'securities#manage'
+      get 'requests' => 'securities#requests'
     end
   end
 

@@ -17,6 +17,7 @@ require_relative 'member/profile'
 require_relative 'member/securities_position'
 require_relative 'member/securities_transactions'
 require_relative 'member/securities_services_statements'
+require_relative 'member/securities_requests'
 require_relative 'member/settlement_transaction_account'
 require_relative 'member/signer_roles'
 require_relative 'member/trade_activity'
@@ -868,6 +869,47 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/securities/requests'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the list of securities requests for a given status'
+              key :nickname, 'getAuthorizedSecuritiesRequests'
+              key :type, :array
+              items do
+                key :'$ref', :SecuritiesRequestForm
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID to find authorized securities requests for.'
+              end
+              parameter do
+                key :paramType, :query
+                key :name, :status
+                key :required, true
+                key :type, :string
+                key :enum, %i(authorized awaiting_authorization)
+                key :description, 'Status to filter the requests by.'
+              end
+              parameter do
+                key :paramType, :query
+                key :name, :settle_start_date
+                key :type, :string
+                key :format, :date
+                key :description, 'Only return requests with a settlement date >= this date. Defaults to 100 years ago.'
+              end
+              parameter do
+                key :paramType, :query
+                key :name, :settle_end_date
+                key :type, :string
+                key :format, :date
+                key :description, 'Only return requests with a settlement date <= this date.'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -1208,6 +1250,13 @@ module MAPI
           id   = params[:id].to_i
           date = params[:date].to_date
           MAPI::Services::Member::SecuritiesServicesStatements.statement(logger, env, id, date).to_json
+        end
+
+        relative_get '/:id/securities/requests' do
+          id = params[:id].to_i
+          end_date = (params[:settle_end_date] || Time.zone.today).to_date
+          start_date = (params[:settle_start_date] || (end_date - 100.years)).to_date
+          MAPI::Services::Member::SecuritiesRequests.requests(app, id, MAPI::Services::Member::SecuritiesRequests::REQUEST_STATUS_MAPPING[params[:status]], (start_date..end_date)).to_json
         end
       end
 
