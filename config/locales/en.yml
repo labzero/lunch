@@ -1136,8 +1136,11 @@ en:
     manage:
       title: Manage Securities
       eligibility: Eligibility
+      authorized_by: Authorized by
+      all: All
       pledged: Pledged
       safekept: Safekept
+      release: Release
     requests:
       title: Securities Requests
       actions:

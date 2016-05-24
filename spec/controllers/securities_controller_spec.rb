@@ -35,10 +35,54 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it 'assigns @securities_table_data the correct column_headings' do
         call_action
-        expect(assigns[:securities_table_data][:column_headings]).to eq([I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.description'), I18n.t('common_table_headings.status'), I18n.t('securities.manage.eligibility'), I18n.t('common_table_headings.maturity_date'), I18n.t('common_table_headings.authorized_by'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(I18n.t('global.borrowing_capacity'), '$')])
+        expect(assigns[:securities_table_data][:column_headings]).to eq([{value: 'check_all', type: :checkbox, name: 'check_all'}, I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.description'), I18n.t('common_table_headings.status'), I18n.t('securities.manage.eligibility'), I18n.t('common_table_headings.maturity_date'), I18n.t('common_table_headings.authorized_by'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(I18n.t('global.borrowing_capacity'), '$')])
       end
       describe 'the `columns` array in each row of @securities_table_data[:rows]' do
-        [[:cusip, 0], [:description, 1], [:eligibility, 3], [:authorized_by, 5]].each do |attr_with_index|
+        describe 'the checkbox object at the first index' do
+          it 'has a `type` of `checkbox`' do
+            call_action
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][0][:type]).to eq(:checkbox)
+            end
+          end
+          it 'has a `name` that includes its cusip value' do
+            security[:cusip] = SecureRandom.hex
+            name = "cusip_#{security[:cusip]}"
+            allow(member_balance_service_instance).to receive(:managed_securities).and_return([security])
+            call_action
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][0][:name]).to eq(name)
+            end
+          end
+          it 'has a `value` that is its cusip value' do
+            call_action
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][0][:value]).to eq(security[:cusip])
+            end
+          end
+          it 'has `disabled` set to `false` if there is a cusip value' do
+            call_action
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][0][:disabled]).to eq(false)
+            end
+          end
+          it 'has `disabled` set to `true` if there is no cusip value' do
+            security[:cusip] = nil
+            allow(member_balance_service_instance).to receive(:managed_securities).and_return([security])
+            call_action
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][0][:disabled]).to eq(true)
+            end
+          end
+          it 'has a `data` field that includes its status' do
+            allow(controller).to receive(:custody_account_type_to_status).with(security[:custody_account_type]).and_return(status)
+            call_action
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][0][:data]).to eq({status: status})
+            end
+          end
+        end
+        [[:cusip, 1], [:description, 2], [:eligibility, 4], [:authorized_by, 6]].each do |attr_with_index|
           it "contains an object at the #{attr_with_index.last} index with the correct value for #{attr_with_index.first}" do
             call_action
             assigns[:securities_table_data][:rows].each do |row|
@@ -54,21 +98,21 @@ RSpec.describe SecuritiesController, type: :controller do
             end
           end
         end
-        it 'contains an object at the 2 index with a value of the response from the `custody_account_type_to_status` private method' do
+        it 'contains an object at the 3 index with a value of the response from the `custody_account_type_to_status` private method' do
           allow(controller).to receive(:custody_account_type_to_status).with(security[:custody_account_type]).and_return(status)
           call_action
           assigns[:securities_table_data][:rows].each do |row|
-            expect(row[:columns][2][:value]).to eq(status)
+            expect(row[:columns][3][:value]).to eq(status)
           end
         end
-        it 'contains an object at the 4 index with the correct value for :maturity_date and a type of `:date`' do
+        it 'contains an object at the 5 index with the correct value for :maturity_date and a type of `:date`' do
           call_action
           assigns[:securities_table_data][:rows].each do |row|
-            expect(row[:columns][4][:value]).to eq(security[:maturity_date])
-            expect(row[:columns][4][:type]).to eq(:date)
+            expect(row[:columns][5][:value]).to eq(security[:maturity_date])
+            expect(row[:columns][5][:type]).to eq(:date)
           end
         end
-        [[:current_par, 6], [:borrowing_capacity, 7]].each do |attr_with_index|
+        [[:current_par, 7], [:borrowing_capacity, 8]].each do |attr_with_index|
           it "contains an object at the #{attr_with_index.last} index with the correct value for #{attr_with_index.first} and a type of `:number`" do
             call_action
             assigns[:securities_table_data][:rows].each do |row|
@@ -77,6 +121,28 @@ RSpec.describe SecuritiesController, type: :controller do
             end
           end
         end
+      end
+      it 'sets @securities_table_data[:filter]' do
+        filter = {
+          name: 'securities-status-filter',
+          data: [
+            {
+              text: I18n.t('securities.manage.safekept'),
+              value: 'Safekept'
+            },
+            {
+              text: I18n.t('securities.manage.pledged'),
+              value: 'Pledged'
+            },
+            {
+              text: I18n.t('securities.manage.all'),
+              value: 'all',
+              class: 'active'
+            }
+          ]
+        }
+        call_action
+        expect(assigns[:securities_table_data][:filter]).to eq(filter)
       end
     end
   end
