@@ -12,6 +12,10 @@ describe MAPI::ServiceApp do
         allow(securities_request_module).to receive(:requests).and_return(response)
       end
 
+      it 'calls `MAPI::Services::Member::SecuritiesRequests.requests` with an instance of the MAPI::Service app `member_id` param' do
+        expect(securities_request_module).to receive(:requests).with(an_instance_of(MAPI::ServiceApp), any_args)
+        call_endpoint
+      end
       it 'calls `MAPI::Services::Member::SecuritiesRequests.requests` with the `member_id` param' do
         expect(securities_request_module).to receive(:requests).with(anything, member_id, any_args)
         call_endpoint

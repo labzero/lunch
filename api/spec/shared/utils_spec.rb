@@ -241,13 +241,14 @@ describe MAPI::Shared::Utils::ClassMethods do
   end
 
   describe '`should_fake?` method' do
-    let(:app) { double(MAPI::ServiceApp, environment: SecureRandom.hex) }
+    let(:settings) { double('settings', environment: SecureRandom.hex()) }
+    let(:app) { double(MAPI::ServiceApp, settings: settings) }
     let(:call_method) { subject.should_fake?(app) }
     it 'returns true if the `environment` is not production' do
       expect(call_method).to be(true)
     end
     it 'returns false if the `environment` is production' do
-      allow(app).to receive(:environment).and_return(:production)
+      allow(settings).to receive(:environment).and_return(:production)
       expect(call_method).to be(false)
     end
   end
