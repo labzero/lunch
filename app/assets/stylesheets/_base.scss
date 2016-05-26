@@ -48,7 +48,7 @@ body {
   }
 }
 
-%report-main-body {
+%page-main-body {
   margin-bottom: 100px;
   section {
     clear: both;
@@ -77,6 +77,13 @@ body {
         margin-bottom: 0px;
       }
     }
+  }
+}
+
+%page-header {
+  h1 {
+    @extend %typography-page-title;
+    margin: 32px 0 17px;
   }
 }
 

@@ -11,7 +11,7 @@ Given(/^I am on the "(.*?)" advances page$/) do |advances|
   @today = Time.zone.now.to_date
   case advances
     when 'Manage Advances'
-      visit '/advances/manage-advances'
+      visit '/advances/manage'
     when 'Add Advance'
       visit '/advances/select-rate'
     else
@@ -302,4 +302,8 @@ Then(/^I should (see|not see) the borrowing capacity summary$/) do |visible|
   elsif visible == 'not see'
     page.assert_no_selector('.add-advance-borrowing-capacity')
   end
+end
+
+Then(/^I should see an Advance Confirmation column in the data table$/) do
+  page.assert_selector('.manage-advances-table th', text: I18n.t('advances.confirmation.title'), exact: true)
 end

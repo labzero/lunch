@@ -158,10 +158,47 @@ module MAPI
             trade_activity = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_advances_active.json')))
             trade_activity
           end
-          data.each do |trade|
-            trade['interest_rate'] = decimal_to_percentage_rate(trade['interest_rate'])
+          data.collect! do |trade|
+            trade = trade.with_indifferent_access
+            trade[:interest_rate] = decimal_to_percentage_rate(trade[:interest_rate])
+            trade[:advance_confirmation] = []
+            trade
+          end
+          advance_numbers = data.collect { |trade| trade[:advance_number] }
+          advance_confirmations = advance_confirmation(app, member_id, advance_numbers)
+
+          advance_confirmations.each do |confirmation|
+            advance = data.find{ |trade| trade[:advance_number] == confirmation[:advance_number] }
+            advance[:advance_confirmation] << confirmation
           end
           sort_trades(data)
+        end
+
+        def self.advance_confirmation(app, member_id, advance_numbers, advance_confirmation=nil)
+          # TODO - hit the proper database once it is built. Lookup by advance_number.
+          # App included as arg for when we will need to detect environment.
+          advance_numbers = Array.wrap(advance_numbers)
+          advance_numbers.collect! do |advance_number|
+            r = Random.new(member_id.to_i + advance_number.to_i)
+            confirmations = []
+            r.rand(0..2).times do
+              fake_confirmation = {
+                confirmation_date: Time.zone.today - r.rand(1..50).days,
+                confirmation_number: r.rand(1000..999999),
+                member_id: member_id,
+                advance_number: advance_number,
+                file_location: File.join(MAPI.root, 'fakes', 'advance_confirmation.pdf')
+              }
+              confirmations << fake_confirmation
+            end
+            confirmations
+          end
+          advance_numbers = advance_numbers.compact.flatten
+          if advance_confirmation
+            advance_numbers.find{|advance| advance[:confirmation_number].to_s == advance_confirmation.to_s}
+          else
+            advance_numbers
+          end
         end
 
         def self.current_daily_total(env, instrument)

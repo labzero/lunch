@@ -3,6 +3,7 @@ module MAPI
     class ActiveAdvances
       include Swagger::Blocks
       swagger_model :ActiveAdvances do
+        key :required, [:trade_date, :funding_date, :maturity_date, :advance_number, :advance_type, :status, :interest_rate, :current_par, :trade_time, :confirmation]
         property :trade_date do
           key :type, :string
           key :format, :'date-time'
@@ -41,6 +42,37 @@ module MAPI
         property :trade_time do
           key :type, :string
           key :description, 'The time an advance was traded.'
+        end
+        property :advance_confirmation do
+          key :type, :array
+          key :description, 'An array of confirmation objects.'
+          items do
+            key :'$ref', :AdvanceConfirmationObject
+          end
+        end
+      end
+      swagger_model :AdvanceConfirmationObject do
+        property :member_id do
+          key :type, :string
+          key :description, 'The id of the member'
+          key :note, 'Used for validating download of advance confirmation attachment'
+        end
+        property :confirmation_date do
+          key :type, :string
+          key :format, :date
+          key :description, 'Date of advance confirmation'
+        end
+        property :advance_number do
+          key :type, :string
+          key :description, 'Advances number'
+        end
+        property :confirmation_number do
+          key :type, :string
+          key :description, 'Advance confirmation number'
+        end
+        property :file_location do
+          key :type, :string
+          key :description, 'A pointer to the location of the confirmation advance attachment'
         end
       end
     end

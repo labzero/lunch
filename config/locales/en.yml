@@ -59,6 +59,7 @@ en:
     beginning_balance: Beginning Balance
     messages: Announcements
     categories: Categories
+    filters: Filters
     login: Log In
     as_of: As of
     today: Today
@@ -84,6 +85,7 @@ en:
     shares_outstanding: Shares Outstanding
     prepare_download: Please wait while we prepare your download. This may take up to 60 seconds.
     cancel_download: Cancel Download
+    download: Download
     prepare_table: Please wait while we retrieve this data.
     pin: PIN
     token: Token Code
@@ -193,6 +195,7 @@ en:
     loan_count: Loan Count
     unpaid_balance: Unpaid Balance
     status: Status
+    authorized_by: Authorized By
   datepicker:
     range:
       date_to_current: "%{date} to date"
@@ -419,10 +422,10 @@ en:
         title: Community Programs
         description_html: Program announcements (including round openings, results, changes to policies and procedures) for our targeted grant and credit programs that support affordable housing and economic development; Affordable Housing Advisory Council annual reports; invitations to program workshops and webinars.
       community_works:
-        title: "Community Works Quarterly E\u2011newsletter"
+        title: "Community Works Newsletter"
         description_html: ""
       educational:
-        title: Educational and Networking Events
+        title: Events
         description_html: Invitations to educational and networking meetings and events sponsored for members by the Bank, including conferences, seminars, and webinars.
   welcome:
     meta_title: FHLB - Welcome
@@ -1134,8 +1137,28 @@ en:
       title: Manage Securities
       eligibility: Eligibility
       authorized_by: Authorized by
+      all: All
       pledged: Pledged
       safekept: Safekept
+      release: Release
+    requests:
+      title: Securities Requests
+      actions:
+        authorize: Authorize
+      columns:
+        request_id: Request ID
+        submitted_by: Submitted By
+        submitted_date: Submitted Date
+        authorization_date: Authorization Date
+      form_descriptions:
+        pledge: Securities Pledge
+        safekept: Securities Safekeeping
+        release: Securities Release
+      pending:
+        title: Requests for Authorization
+      authorized:
+        title: Authorized Requests
+        description: Authorized requests are displayed for 7 days after settlement.
   reports:
     meta_title: FHLB - Reports
     title: Reports
@@ -1169,7 +1192,7 @@ en:
       one: "%{count} month"
       other: "%{count} months"
     price_indications:
-      title: Price Indications
+      title: Price Indications and STA Rates
       current:
         title: Current
         summary: Reflects the price indications published at the beginning of the day; not actual prices. Actual prices are subject to change throughout the day.
@@ -1815,6 +1838,11 @@ en:
         stock_leverage: Stock Leverage
     manage_advances:
       title: Manage Advances
+    confirmation:
+      title: Advance Confirmation
+      in_progress: In Progress
+      not_available: Not Available Online
+      download_date: Download %{date}
     status: Status
     rate: Rate (%)
     vrc_rates: VRC Rates
@@ -2674,6 +2702,12 @@ en:
       contact: Contact your Access Manager or Web Support at %{phone} if you have any questions.
       sign_off_html: Thank you,<br>FHLBank San Francisco Web Support Team
       disclaimer: 'The contents of this email are intended only for the use of the individual or entity to which they are addressed and may contain information that is legally privileged, confidential, and exempt from disclosure. If you are not the intended recipient, you are hereby notified that any dissemination, distribution, or copying of this email is strictly prohibited. If you have received this email in error, please: (i) reply immediately to this email indicating that you received this communication in error, and (ii) promptly delete this email from your computer. Thank you.'
+    quick_report_status:
+      subject: 'Info: %{completed} / %{total} reports generated in batch'
+      reports_generated: 'Reports generated: %{completed} / %{total}'
+      start_time: 'Start time: %{time}'
+      end_time: 'End time: %{time}'
+      elapsed_time: 'Elapsed time: %{time}'
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

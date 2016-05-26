@@ -31,7 +31,7 @@ module FhlbMember
       lambda { |request| "time=#{Time.zone.now.iso8601}" },
       lambda { |request| "request_id=#{request.uuid}" },
       lambda { |request| "session_id=#{request.session.id}" },
-      lambda { |request| request.session["warden.user.user.key"].nil? ? "user_id=NONE" : "user_id=#{request.session["warden.user.user.key"][0][0]}" },
+      lambda { |request| request.session[ApplicationController::SessionKeys::WARDEN_USER].nil? ? "user_id=NONE" : "user_id=#{request.session[ApplicationController::SessionKeys::WARDEN_USER][0][0]}" },
       lambda { |request| "remote_ip=#{request.remote_ip}" }
     ]
     config.logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new(Rails.root.join('log', "#{Rails.env}.log"), 'daily'))

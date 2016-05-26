@@ -71,7 +71,7 @@ class ProductsController < ApplicationController
 
   # GET
   def sbc
-    @last_modified = Date.new(2016, 7, 1)
+    @last_modified = Date.new(2016, 4, 1)
   end
 
   # GET

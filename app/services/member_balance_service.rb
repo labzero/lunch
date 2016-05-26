@@ -352,4 +352,11 @@ class MemberBalanceService < MAPIService
   def managed_securities
     get_hash(:managed_securities, "/member/#{@member_id}/managed_securities")[:securities]
   end
+
+  def advance_confirmation(advance_number, confirmation_number, &block)
+    response = HTTP.auth("Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"").get(Rails.configuration.mapi.endpoint + "/member/#{@member_id}/advance_confirmation/#{advance_number}/#{confirmation_number}")
+    block.call(response.status, response.headers, response.body) if block
+    response.body
+  end
+
 end

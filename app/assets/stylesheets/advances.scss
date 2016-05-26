@@ -83,11 +83,28 @@
 }
 
 .advances-main-body {
-  @extend %report-main-body;
+  @extend %page-main-body;
 }
 
 .manage-advances-table {
   width: 940px;
+  .report-cell-narrow {
+    padding-right: 10px;
+  }
+  td {
+    vertical-align: top;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  li {
+    white-space: nowrap;
+    text-transform: uppercase;
+    color: $medium-gray;
+    line-height: 15px;
+  }
 }
 
 .add-advance-form {
@@ -639,10 +656,12 @@
 }
 
 .add-advance-borrowing-capacity {
+  padding: 20px 18px;
   @extend %add-advance-bordered-section-styling;
   .add-advance-borrowing-capacity-label {
     @extend %typography-module-tiny-data-label;
     margin: 0;
+    color: $medium-gray;
   }
   .remaining {
     margin-top: 15px;

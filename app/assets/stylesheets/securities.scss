@@ -1,5 +1,59 @@
-.manage-securities-table {
-  th:nth-child(2) {
-    width: 200px;
+.securities {
+  @extend %page-header;
+  h2 {
+    @extend %typography-section-title;
+    margin: 0 0 5px;
   }
+  section {
+    margin-bottom: 35px;
+  }
+  header {
+    margin: 0 0 15px;
+  }
+  p {
+    margin: 5px 0 10px;
+  }
+}
+
+.securities-main-body {
+  @extend %page-main-body;
+}
+
+.manage-securities-table {
+  th, td {
+    &:nth-child(1) {
+      vertical-align: middle;
+    }
+    &:nth-child(3) {
+      width: 200px;
+    }
+  }
+}
+
+.manage-securities-form {
+  input[type=submit] {
+    float: right;
+    color: $white;
+  }
+}
+
+.securities-status-filter {
+  float: left;
+  span {
+    margin-left: 20px;
+    cursor: pointer;
+    line-height: 27px;
+    &:first-child {
+      margin-left: 0;
+    }
+    &.active {
+      color: $actionable-blue;
+      cursor: default;
+    }
+  }
+}
+
+.manage-securities-table-actions {
+  @extend %clearfix;
+  margin-bottom: 15px;
 }

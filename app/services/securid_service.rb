@@ -1,76 +1,78 @@
-class SecurIDService
+unless defined?(SecurIDService)
+  class SecurIDService
 
-  USERNAME_PREFIX = (ENV['SECURID_USER_PREFIX'] || 'prod-').dup  # we dup the string to work around an issue with testing frozen values
+    USERNAME_PREFIX = (ENV['SECURID_USER_PREFIX'] || 'prod-').dup  # we dup the string to work around an issue with testing frozen values
 
-  def initialize(username, options={})
-    options[:test_mode] = ENV['SECURID_TEST_MODE'].to_sym if !options.has_key?(:test_mode) && ENV['SECURID_TEST_MODE']
-    @username = USERNAME_PREFIX + username
-    @session = RSA::SecurID::Session.new options
-  end
+    def initialize(username, options={})
+      options[:test_mode] = ENV['SECURID_TEST_MODE'].to_sym if !options.has_key?(:test_mode) && ENV['SECURID_TEST_MODE']
+      @username = USERNAME_PREFIX + username
+      @session = RSA::SecurID::Session.new options
+    end
 
-  # These could pretty much all be method_missing forwards, but the verbosity here helps
-  # with comprehension.
+    # These could pretty much all be method_missing forwards, but the verbosity here helps
+    # with comprehension.
 
-  def authenticate(pin, token)
-    validate_token(token)
-    validate_pin(pin)
+    def authenticate(pin, token)
+      validate_token(token)
+      validate_pin(pin)
 
-    @session.authenticate(@username, pin.to_s + token.to_s)
-  end
+      @session.authenticate(@username, pin.to_s + token.to_s)
+    end
 
-  def authenticate_without_pin(token)
-    validate_token(token)
+    def authenticate_without_pin(token)
+      validate_token(token)
 
-    @session.authenticate(@username, token.to_s)
-  end  
+      @session.authenticate(@username, token.to_s)
+    end
 
-  def change_pin(pin)
-    validate_pin(pin)
+    def change_pin(pin)
+      validate_pin(pin)
 
-    @session.change_pin(pin)
-  end
+      @session.change_pin(pin)
+    end
 
-  def cancel_pin
-    @session.cancel_pin
-  end
+    def cancel_pin
+      @session.cancel_pin
+    end
 
-  def resynchronize(pin, token)
-    validate_token(token)
-    validate_pin(pin)
+    def resynchronize(pin, token)
+      validate_token(token)
+      validate_pin(pin)
 
-    @session.resynchronize(pin.to_s + token.to_s)
-  end
+      @session.resynchronize(pin.to_s + token.to_s)
+    end
 
-  def status
-    @session.status
-  end
+    def status
+      @session.status
+    end
 
-  def resynchronize?
-    @session.resynchronize?
-  end
+    def resynchronize?
+      @session.resynchronize?
+    end
 
-  def change_pin?
-    @session.change_pin?
-  end
+    def change_pin?
+      @session.change_pin?
+    end
 
-  def authenticated?
-    @session.authenticated?
-  end
+    def authenticated?
+      @session.authenticated?
+    end
 
-  def denied?
-    @session.denied?
-  end
+    def denied?
+      @session.denied?
+    end
 
-  class InvalidToken < ArgumentError; end;
-  class InvalidPin < ArgumentError; end;
+    class InvalidToken < ArgumentError; end;
+    class InvalidPin < ArgumentError; end;
 
-  private
+    private
 
-  def validate_token(token)
-    raise InvalidToken, 'token must be 6 digits' if !token.match /\A\d{6}\z/
-  end
+    def validate_token(token)
+      raise InvalidToken, 'token must be 6 digits' if !token.match /\A\d{6}\z/
+    end
 
-  def validate_pin(pin)
-    raise InvalidPin, 'pin must be 4 digits' if !pin.match /\A\d{4}\z/
+    def validate_pin(pin)
+      raise InvalidPin, 'pin must be 4 digits' if !pin.match /\A\d{4}\z/
+    end
   end
 end

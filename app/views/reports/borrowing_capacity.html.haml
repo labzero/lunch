@@ -21,7 +21,7 @@
         %p{class: ('report-summary-data-loading' if deferred_load)}= (fhlb_formatted_currency_whole(@borrowing_capacity_summary[:remaining_borrowing_capacity], force_unit: true) unless deferred_load)
     %section.standard-credit-borrowing-capacity-tables.report-tables-section
       %h2.report-table-title= t('reports.pages.borrowing_capacity.standard_credit_program')
-      %table.report-table.report-parent-table{data: {sortable: !deferred_load, :'default-sort' => [[1, 'desc']], :'missing-data-message' => missing_data_message, 'disable-auto-width' => true}, class: ('table-loading' if deferred_load)}
+      %table.report-table.report-parent-table{data: {sortable: !deferred_load, loaded: !deferred_load, :'default-sort' => [[1, 'desc']], :'missing-data-message' => missing_data_message, 'disable-auto-width' => true}, class: ('table-loading' if deferred_load)}
         %thead
           %tr
             %th.report-cell-narrow= t('global.loan_collateral_type')

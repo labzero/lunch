@@ -35,6 +35,7 @@ RSpec.describe ProcessQuickReportsJob, type: :job do
     let(:report_set) { double(QuickReportSet, completed?: false) }
     before do
       allow(members_service).to receive(:all_members).and_return(members)
+      expect(QuickReportsWatchdogJob).to receive(:perform_later).with(members, period)
       members.each do |member|
         obj = Member.new(member[:id])
         member_objects << obj

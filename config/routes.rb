@@ -90,6 +90,9 @@ Rails.application.routes.draw do
       post  '/preview' => 'advances#preview'
       post '/perform' => 'advances#perform'
     end
+    constraints Constraints::FeatureEnabled.new('advance-confirmation') do
+      get '/confirmation' => 'advances#confirmation'
+    end
   end
 
 
@@ -179,8 +182,10 @@ Rails.application.routes.draw do
   end
 
   constraints Constraints::FeatureEnabled.new('securities') do
-    scope 'securities' do
-      get 'manage' => 'securities#manage', as: :manage_securities
+    scope 'securities', as: :securities do
+      get 'manage' => 'securities#manage'
+      get 'requests' => 'securities#requests'
+      post 'edit_release' => 'error#not_found'
     end
   end
 

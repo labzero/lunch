@@ -38,7 +38,8 @@ Scenario: Member sees active nav state when a subpage is viewed
   When I hover on the advances link in the header
   And I click on the manage advances link in the header
   Then I should see the active state of the advances nav item
-  When I click on the Securities link in the header
+  When I hover on the securities link in the header
+  And I click on the manage securities link in the header
   Then I should see the active state of the securities nav item
   When I click on the reports link in the header
   Then I should see the active state of the reports nav item

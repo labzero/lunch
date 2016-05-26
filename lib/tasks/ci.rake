@@ -13,8 +13,10 @@ namespace :ci do
   end
 
   desc 'Launch SauceConnect'
-  task :sauce_connect do
-    exec "sc -k #{ENV['SAUCE_ACCESS_KEY']} -u #{ENV['SAUCE_USERNAME']}"
+  task :sauce_connect, [:options] do |task, args|
+    cmd = "sc -k #{ENV['SAUCE_ACCESS_KEY']} -u #{ENV['SAUCE_USERNAME']}"
+    cmd = cmd + ' ' + args.options if args.options
+    exec cmd
   end
 
   namespace :cucumber do

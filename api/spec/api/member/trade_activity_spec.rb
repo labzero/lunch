@@ -3,6 +3,29 @@ require 'date'
 
 describe MAPI::ServiceApp do
   describe 'Trade Activity' do
+    describe 'the `active_advances` MAPI endpoint' do
+      let(:call_endpoint) { get "/member/#{member_id}/active_advances" }
+      let(:active_advances) { double('advances', to_json: nil) }
+
+      before do
+        allow(MAPI::Services::Member::TradeActivity).to receive(:trade_activity).and_return(active_advances)
+      end
+
+      it 'calls `MAPI::Services::Member::TradeActivity.trade_activity` with the member_id and `ADVANCE`' do
+        expect(MAPI::Services::Member::TradeActivity).to receive(:trade_activity).with(anything, member_id.to_s, 'ADVANCE')
+        call_endpoint
+      end
+      it 'returns the results as JSON' do
+        expect(active_advances).to receive(:to_json)
+        call_endpoint
+      end
+      it 'returns a 503 if there is a Savon error' do
+        allow(MAPI::Services::Member::TradeActivity).to receive(:trade_activity).and_raise(Savon::Error)
+        call_endpoint
+        expect(last_response.status).to eq(503)
+      end
+    end
+
     let(:ods_deal_structure_code) { double('ods_deal_structure_code') }
     let(:call_method) { MAPI::Services::Member::TradeActivity.trade_activity(subject, member_id, 'ADVANCE') }
     it 'should return expected advances detail hash where value could not be nil' do
@@ -21,7 +44,7 @@ describe MAPI::ServiceApp do
       before do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
       end
-      it 'should return active advances', vcr: {cassette_name: 'trade_activity_service'} do
+      it 'returns active advances', vcr: {cassette_name: 'trade_activity_service'} do
         allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
         allow(MAPI::Services::Member::TradeActivity).to receive(:get_ods_deal_structure_code).and_return(ods_deal_structure_code)
         call_method.each do |row|
@@ -33,9 +56,10 @@ describe MAPI::ServiceApp do
           expect(row['status']).to be_kind_of(String)
           expect(row['interest_rate']).to be_kind_of(Numeric)
           expect(row['current_par']).to be_kind_of(Numeric)
+          expect(row['advance_confirmation']).to be_kind_of(Array)
         end
       end
-      it 'should return active advances for large members', vcr: {cassette_name: 'trade_activity_service', :allow_playback_repeats => true} do
+      it 'returns active advances for large members', vcr: {cassette_name: 'trade_activity_service', :allow_playback_repeats => true} do
         allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(true)
         allow(MAPI::Services::Member::TradeActivity).to receive(:get_ods_deal_structure_code).and_return(ods_deal_structure_code)
         call_method.each do |row|
@@ -47,6 +71,7 @@ describe MAPI::ServiceApp do
           expect(row['status']).to be_kind_of(String)
           expect(row['interest_rate']).to be_kind_of(Numeric)
           expect(row['current_par']).to be_kind_of(Numeric)
+          expect(row['advance_confirmation']).to be_kind_of(Array)
         end
       end
       it 'should call `get_trade_activity_trades` only 1 time for small members', vcr: {cassette_name: 'trade_activity_service'} do
@@ -87,6 +112,23 @@ describe MAPI::ServiceApp do
         allow(MAPI::Services::Member::TradeActivity).to receive(:sort_trades).and_return(sorted_results)
         expect(call_method).to be(sorted_results)
       end
+      it 'calls the `advance_confirmation` method' do
+        expect(MAPI::Services::Member::TradeActivity).to receive(:advance_confirmation).and_call_original
+        call_method
+      end
+    end
+    it 'adds the `advance_confirmation` to the appropriate advance, based on `advance_number`' do
+      advance_number = rand(1000.99999)
+      advance = {
+        trade_date: Time.zone.today,
+        advance_number: advance_number,
+        interest_rate: rand()
+      }
+      confirmation = double('advance confirmation')
+      allow(confirmation).to receive(:[]).with(:advance_number).and_return(advance_number)
+      allow(JSON).to receive(:parse).and_return([advance])
+      allow(MAPI::Services::Member::TradeActivity).to receive(:advance_confirmation).and_return([confirmation])
+      expect(call_method.first[:advance_confirmation].first).to eq(confirmation)
     end
   end
 

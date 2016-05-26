@@ -23,6 +23,7 @@ gem 'jbuilder'
 # bundle exec rake doc:rails generates the API under doc/api.
 gem 'sdoc',          group: :doc
 gem 'rest-client'
+gem "http"
 gem 'securid'
 
 # For authentication/authorization

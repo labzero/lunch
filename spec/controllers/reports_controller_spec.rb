@@ -3309,7 +3309,7 @@ RSpec.describe ReportsController, :type => :controller do
       let(:method_call) {controller.send(:report_disabled?, report_flags)}
 
       before do
-        session['member_id'] = 750
+        session[described_class::SessionKeys::MEMBER_ID] = 750
       end
 
       it 'passes in the member_id and report_flags to the `report_disabled?` method on a newly created instance of MembersService and returns the response' do

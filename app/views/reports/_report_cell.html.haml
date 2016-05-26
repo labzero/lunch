@@ -1,5 +1,6 @@
 - cell[:options] ||= {}
 - classes = [:'report-cell-right', :'report-cell-narrow']
+- header_row ||= false
 - case cell[:type]
 - when :basis_point, :number
   - value = fhlb_formatted_number(cell[:value], cell[:options])
@@ -18,6 +19,9 @@
 - when :date
   - value = fhlb_date_standard_numeric(cell[:value])
   - classes = [:'report-cell-narrow']
+- when :checkbox
+  - value = capture_haml do
+    = check_box_tag(cell[:name], cell[:value], cell[:checked], {disabled: cell[:disabled], data: cell[:data]})
 - when :list
   - value = capture_haml do
     %ul
@@ -26,8 +30,23 @@
           %li{data:{'list-value' => list_item}}= t('global.footnoted_string', string: list_item.first)
         -else
           %li{data:{'list-value' => list_item}}= list_item
+- when :link_list
+  - value = capture_haml do
+    %ul
+      - cell[:value].each do |list_item|
+        - if list_item.is_a?(Array)
+          %li= link_to(list_item.first, list_item.last)
+        - else
+          %li= list_item
+- when :actions
+  - value = cell[:value].collect {|action| link_to(action.first, action.last)}.join(' ').html_safe
+  - classes = [:'report-cell-actions', :'report-cell-narrow']
 - else
   - value = cell[:value]
   - classes = [:'report-cell-narrow']
-%td{class: cell[:classes] || classes, colspan: cell[:colspan]}
-  = value
+- if header_row
+  %th{class: cell[:classes] || classes, colspan: cell[:colspan]}
+    = value
+- else
+  %td{class: cell[:classes] || classes, colspan: cell[:colspan]}
+    = value

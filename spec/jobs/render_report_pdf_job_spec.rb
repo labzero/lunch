@@ -32,22 +32,22 @@ RSpec.describe RenderReportPDFJob, type: :job do
     allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member)
   end
 
-  it 'should return nil if the job_status is `canceled`' do
+  it 'returns nil if the job_status is `canceled`' do
     allow(job_status).to receive(:canceled?).and_return(true)
     expect(run_job).to be_nil
   end
 
-  it 'should fetch the member details for the supplied member_id' do
+  it 'fetchs the member details for the supplied member_id' do
     expect_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member)
     run_job
   end
 
-  it 'should raise an exception if the member can\'t be found' do
+  it 'raises an exception if the member can\'t be found' do
     allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(nil)
     expect {subject.perform_without_rescue(member_id, report_name, filename, params)}.to raise_error(/Member not found/)
   end
 
-  it 'should render the report if the controller action didn\'t' do
+  it 'renders the report if the controller action didn\'t' do
     allow(reports_controller).to receive(:performed?).and_return(false)
     expect(reports_controller).to receive(:render_to_string).with("reports/#{report_name}").and_return(report_html)
     run_job
@@ -58,23 +58,22 @@ RSpec.describe RenderReportPDFJob, type: :job do
       expect(reports_controller).to receive(report_name).and_return([report_html]).ordered
       subject.perform(member_id, report_name, filename, {start_date: start_date})
     end
-    it 'should populate the session with the member details' do
+    it 'populates the session with the member details' do
       session = double('A Session', :[] => nil)
       allow(reports_controller).to receive(:session).and_return(session)
       expect(session).to receive(:[]=).with('member_id', member_id).ordered # technically we should let the order of these two vary, but RSpec doesn't have support for that
       expect(session).to receive(:[]=).with('member_name', member_name).ordered
-      expect(session).to receive(:[]=).with('sta_number', sta_number).ordered
       run_job
     end
-    it 'should set @inline_styles to `true`' do
+    it 'sets @inline_styles to `true`' do
       expect(reports_controller).to receive(:instance_variable_set).with(:@inline_styles, true).ordered
       run_job
     end
-    it 'should set @skip_javascript to `true`' do
+    it 'sets @skip_javascript to `true`' do
       expect(reports_controller).to receive(:instance_variable_set).with(:@skip_javascript, true).ordered
       run_job
     end
-    it 'should set @print_layout to `true`' do
+    it 'sets @print_layout to `true`' do
       expect(reports_controller).to receive(:instance_variable_set).with(:@print_layout, true).ordered
       run_job
     end
@@ -82,11 +81,11 @@ RSpec.describe RenderReportPDFJob, type: :job do
       run_job
       expect(reports_controller.skip_deferred_load).to eq(true)
     end
-    it 'should set the controller `params` to the params supplied to the job' do
+    it 'sets the controller `params` to the params supplied to the job' do
       expect(reports_controller).to receive(:params=).with(params).ordered
       run_job
     end
-    it 'should set the layout to `print`' do
+    it 'sets the layout to `print`' do
       expect(ReportsController).to receive(:layout).with('print').ordered
       run_job
     end
@@ -110,45 +109,41 @@ RSpec.describe RenderReportPDFJob, type: :job do
       expect(reports_controller).to receive(:render_to_string).with('reports/pdf_footer').and_return(footer_html).ordered
       subject.perform(member_id, report_name, {start_date: start_date})
     end
-    it 'should set @member_name to the name of the member' do
-      expect(reports_controller).to receive(:instance_variable_set).with(:@member_name, member_name).ordered
-      run_job
-    end
-    it 'should set the layout to `print_footer`' do
+    it 'sets the layout to `print_footer`' do
       expect(ReportsController).to receive(:layout).with('print_footer').ordered
       run_job
     end
   end
 
   describe 'rendering the PDF' do
-    it 'should use the generated report HTML' do
+    it 'uses the generated report HTML' do
       expect(wicked_pdf).to receive(:pdf_from_string).with(report_html, any_args)
       run_job
     end
-    it 'should use the generated footer HTML' do
+    it 'uses the generated footer HTML' do
       expect(wicked_pdf).to receive(:pdf_from_string).with(any_args, hash_including(footer: {content: footer_html}))
       run_job
     end
-    it 'should set the margins' do
+    it 'sets the margins' do
       expect(wicked_pdf).to receive(:pdf_from_string).with(any_args, hash_including(margin: {top: subject.class::MARGIN, left: subject.class::MARGIN, bottom: subject.class::MARGIN, right: subject.class::MARGIN}))
       run_job
     end
-    it 'should use the `print` media type' do
+    it 'uses the `print` media type' do
       expect(wicked_pdf).to receive(:pdf_from_string).with(any_args, hash_including(print_media_type: true))
       run_job
     end
-    it 'should disable external links' do
+    it 'disables external links' do
       expect(wicked_pdf).to receive(:pdf_from_string).with(any_args, hash_including(disable_external_links: true))
       run_job
     end
-    it 'should enable smart shrinking' do
+    it 'enables smart shrinking' do
       expect(wicked_pdf).to receive(:pdf_from_string).with(any_args, hash_including(disable_smart_shrinking: false))
       run_job
     end
   end
 
   describe 'writing the PDF to file' do
-    it 'should create an instance of StringIOWithFilename from the generated pdf' do
+    it 'creates an instance of StringIOWithFilename from the generated pdf' do
       expect(StringIOWithFilename).to receive(:new).with(pdf)
       run_job
     end

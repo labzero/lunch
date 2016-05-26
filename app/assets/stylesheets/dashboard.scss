@@ -320,7 +320,7 @@ p.dashboard-vrc-overnight-message {
   }
 }
 
-$breakdown-table-label-width: 165px;
+$breakdown-table-label-width: 155px;
 $breakdown-table-currency-width: 10px;
 .dashboard-module-your-account {
   header {
@@ -381,8 +381,8 @@ $breakdown-table-currency-width: 10px;
   }
   thead {
     .label {
-      @extend %typography-footnote;
-      text-transform: uppercase;
+      @extend %typography-module-tiny-data-label;
+      color: $medium-gray;
       padding: 15px 0 0;
       border: none;
     }
@@ -588,8 +588,8 @@ $breakdown-table-currency-width: 10px;
   p {
     margin: 0;
     &:first-child {
-      @extend %typography-footnote;
-      text-transform: uppercase;
+      @extend %typography-module-tiny-data-label;
+      color: $medium-gray;
     }
     &:last-child {
       @extend %typography-module-summary-data;
@@ -741,7 +741,7 @@ $breakdown-table-currency-width: 10px;
     @extend %typography-dashboard-account-summary;
   }
   .dashboard-module-content-truncated {
-    width: 160px;
+    width: 135px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;

@@ -238,7 +238,7 @@ class SettingsController < ApplicationController
   end
 
   def expired_password
-    if session['password_expired']
+    if session[SessionKeys::PASSWORD_EXPIRED]
       render layout: 'external'
     else
       redirect_to settings_path
@@ -250,13 +250,13 @@ class SettingsController < ApplicationController
   end
 
   def update_expired_password
-    raise 'Updating non-expired password!' unless session['password_expired']
+    raise 'Updating non-expired password!' unless session[SessionKeys::PASSWORD_EXPIRED]
 
     current_user.password = params[:user][:password]
     current_user.password_confirmation = params[:user][:password_confirmation]
 
     if current_user.save
-      session['password_expired'] = false
+      session[SessionKeys::PASSWORD_EXPIRED] = false
       @next_location = after_sign_in_path_for(current_user)
       render :update_password_success, layout: 'external'
     else

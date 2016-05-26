@@ -8,6 +8,16 @@ if defined?(Capybara)
   Capybara.javascript_driver = my_driver
   Capybara.default_wait_time = 10
 
+  if Capybara.default_driver =~ /safari/i
+    safari_port = [2000, 2001, 2020, 2109, 2222, 2310, 3001, 3030,
+      3210, 3333, 4000, 4001, 4040, 4321, 4502, 4503, 4567, 5000,
+      5001, 5050, 5555, 5432, 6000, 6001, 6060, 6666, 6543, 7000,
+      7070, 7774, 7777, 8000, 8001, 8003, 8031, 8081, 8765, 8777,
+      8888, 9000, 9001, 9080, 9090, 9876, 9877, 9999, 49221, 55001
+    ]
+    Capybara.server_port = find_available_port(safari_port)
+  end
+
   Capybara.register_driver :chrome do |app|
     Capybara::Selenium::Driver.new(app, :browser => :chrome, :switches => %w[--disable-popup-blocking])
   end
@@ -105,6 +115,24 @@ if defined?(Capybara)
                                    :browser => :remote,
                                    :url => SAUCE_CONNECT_URL,
                                    :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.internet_explorer(caps))
+  end
+
+  Capybara.register_driver :sauce_safari_9_osx_11 do |app|
+    caps = base_opts.merge({:platform => 'OS X 10.11', :version => '9.0', :screenResolution => ENV['SAUCE_SCREEN_RESOLUTION'] || '1024x768'})
+
+    Capybara::Selenium::Driver.new(app,
+                                   :browser => :remote,
+                                   :url => SAUCE_CONNECT_URL,
+                                   :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.safari(caps))
+  end
+
+  Capybara.register_driver :sauce_safari_8_osx_10 do |app|
+    caps = base_opts.merge({:platform => 'OS X 10.10', :version => '8.0'})
+
+    Capybara::Selenium::Driver.new(app,
+                                   :browser => :remote,
+                                   :url => SAUCE_CONNECT_URL,
+                                   :desired_capabilities => Selenium::WebDriver::Remote::Capabilities.safari(caps))
   end
 
   Capybara.register_driver :rack_test do |app|

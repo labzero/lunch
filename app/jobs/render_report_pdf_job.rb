@@ -15,16 +15,14 @@ class RenderReportPDFJob < FhlbJob
     raise 'Member not found!' unless member
 
     controller.request.env['warden'] = FhlbMember::WardenProxy.new(job_status.user)
-    controller.session['member_id'] = member_id
-    controller.session['member_name'] = member[:name]
-    controller.session['sta_number'] = member[:sta_number]
+    controller.session[ReportsController::SessionKeys::MEMBER_ID] = member_id
+    controller.session[ReportsController::SessionKeys::MEMBER_NAME] = member[:name]
     controller.instance_variable_set(:@inline_styles, true)
     controller.instance_variable_set(:@skip_javascript, true)
     controller.instance_variable_set(:@print_layout, true)
     controller.skip_deferred_load = true
     controller.action_name = report_name
-    controller.instance_variable_set(:@member_name, controller.session['member_name'])
-    controller.instance_variable_set(:@sta_number, controller.session['sta_number'])
+    controller.instance_variable_set(:@sta_number, member[:sta_number])
     controller.params = params
     controller.class_eval { layout 'print' }
     return if job_status.canceled?

@@ -1,9 +1,10 @@
 require 'rails_helper'
+include CustomFormattingHelper
 
 RSpec.describe AdvancesController, :type => :controller do
   login_user
   before do
-    session['member_id'] = 750
+    session[described_class::SessionKeys::MEMBER_ID] = 750
   end
 
   {AASM::InvalidTransition => [AdvanceRequest.new(7, 'foo'), 'executed', :default], AASM::UnknownStateMachineError => ['message'], AASM::UndefinedState => ['foo'], AASM::NoDirectAssignmentError => ['message']}.each do |exception, args|
@@ -34,6 +35,31 @@ RSpec.describe AdvancesController, :type => :controller do
     end
   end
 
+  describe 'GET confirmation' do
+    let(:advance_number) { rand(1000.99999).to_s }
+    let(:confirmation_number) { rand(1000.99999).to_s }
+    let(:call_method) { get :confirmation, advance_number: advance_number, confirmation_number: confirmation_number }
+    before do
+      allow_any_instance_of(MemberBalanceService).to receive(:advance_confirmation)
+    end
+    it 'renders no view' do
+      call_method
+      expect(response.body).to be_blank
+    end
+    it 'calls `advance_confirmation` on the MemberBalanceService instance with `advance_number` and `confirmation_number` params as args' do
+      expect_any_instance_of(MemberBalanceService).to receive(:advance_confirmation).with(advance_number, confirmation_number)
+      call_method
+    end
+    it 'yields the result of `advance_confirmation` to the `stream_attachment_processor`' do
+      response_double = double('some response')
+      allow_any_instance_of(MemberBalanceService).to receive(:advance_confirmation).and_yield(response_double)
+      block = lambda {|x|}
+      allow(subject).to receive(:stream_attachment_processor).and_return(block)
+      expect(block).to receive(:call).with(response_double)
+      call_method
+    end
+  end
+
   describe 'GET manage_advances' do
     let(:job_id) { SecureRandom.hex }
     let(:job_status) { double('JobStatus', update_attributes!: nil, id: job_id, destroy: nil, result_as_string: nil ) }
@@ -44,18 +70,22 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:maturity_date) { (Time.zone.today - (rand(1..10))).to_s }
     let(:advance_number) { SecureRandom.hex }
     let(:advance_type) { SecureRandom.hex }
+    let(:advance_confirmation) { SecureRandom.hex }
     let(:status) { SecureRandom.hex }
     let(:interest_rate) { rand(1..100) / 100.0 }
     let(:current_par) { rand(10000..99999) }
     let(:user) { controller.current_user }
     let(:user_id) { user.id }
     let(:member_id) { controller.current_member_id }
-    let(:active_advances_response) {[{'trade_date' => trade_date, 'funding_date' => funding_date, 'maturity_date' => maturity_date, 'advance_number' => advance_number, 'advance_type' => advance_type, 'status' => status, 'interest_rate' => interest_rate, 'current_par' => current_par}]}
+    let(:column_headings) { [I18n.t('common_table_headings.trade_date'), I18n.t('common_table_headings.funding_date'), I18n.t('common_table_headings.maturity_date'), I18n.t('common_table_headings.advance_number'), I18n.t('common_table_headings.advance_type'), I18n.t('advances.rate'), I18n.t('common_table_headings.current_par') + ' ($)'] }
+    let(:active_advances_response) {[{'trade_date' => trade_date, 'funding_date' => funding_date, 'maturity_date' => maturity_date, 'advance_number' => advance_number, 'advance_type' => advance_type, 'status' => status, 'interest_rate' => interest_rate, 'current_par' => current_par, 'advance_confirmation' => advance_confirmation}]}
     let(:call_action) { get :manage }
 
     before do
       allow(job_status).to receive(:result_as_string).and_return(active_advances_response.to_json)
       allow(response_hash).to receive(:collect)
+      allow(controller).to receive(:advance_confirmation_link_data)
+      allow(subject).to receive(:feature_enabled?).with('advance-confirmation').and_return(false)
     end
     it_behaves_like 'a user required action', :get, :manage
     it_behaves_like 'a controller action with an active nav setting', :manage, :advances
@@ -63,6 +93,10 @@ RSpec.describe AdvancesController, :type => :controller do
     it 'renders the manage_advances view' do
       call_action
       expect(response.body).to render_template(:manage)
+    end
+    it 'sets @advances_table_data[:column_headings] appropriately' do
+      call_action
+      expect(assigns[:advances_data_table][:column_headings]).to eq(column_headings)
     end
     describe 'when a job_id is not present' do
       it_behaves_like 'a MemberBalanceServiceJob backed report', 'active_advances', :perform_later
@@ -73,7 +107,7 @@ RSpec.describe AdvancesController, :type => :controller do
         call_action
         expect(assigns[:load_url]).to eq(advances_manage_url(job_id: job_status.id))
       end
-      it 'sets @advances_detail[:deferred] to true' do
+      it 'sets @advances_data_table[:deferred] to true' do
         call_action
         expect(assigns[:advances_data_table][:deferred]).to eq(true)
       end
@@ -84,9 +118,22 @@ RSpec.describe AdvancesController, :type => :controller do
       before do
         allow(JobStatus).to receive(:find_by).and_return(job_status)
       end
-      it 'sets @advances_detail to the hash returned from the job status' do
+      it 'sets @advances_data_table to the hash returned from the job status' do
         call_action_with_job_id
-        expect(assigns[:advances_data_table][:rows][0][:columns]).to eq([{:type=>:date, :value=>trade_date}, {:type=>:date, :value=>funding_date}, {:type=>:date, :value=>maturity_date}, {:value=>advance_number}, {:value=>advance_type}, {:value=>status}, {:type=>:index, :value=>interest_rate}, {:type=>:number, :value=>current_par}])
+        expect(assigns[:advances_data_table][:rows][0][:columns]).to eq([{:type=>:date, :value=>trade_date}, {:type=>:date, :value=>funding_date}, {:type=>:date, :value=>maturity_date}, {:value=>advance_number}, {:value=>advance_type}, {:type=>:index, :value=>interest_rate}, {:type=>:number, :value=>current_par}])
+      end
+      describe 'when the `advance-confirmation` feature is enabled' do
+        let(:advance_confirmation_link) { double('advance confirmation link') }
+        before { allow(subject).to receive(:feature_enabled?).with('advance-confirmation').and_return(true) }
+        it 'sets `advance_confirmation` in @advances_data_table to the result of calling `advance_confirmation_link_data`' do
+          allow(subject).to receive(:advance_confirmation_link_data).with(trade_date, advance_confirmation).and_return(advance_confirmation_link)
+          call_action_with_job_id
+          expect(assigns[:advances_data_table][:rows][0][:columns]).to include({type: :link_list, value: advance_confirmation_link})
+        end
+        it "adds #{I18n.t('advances.confirmation.title')} to @advances_data_table[:column_headings]" do
+          call_action_with_job_id
+          expect(assigns[:advances_data_table][:column_headings]).to include(I18n.t('advances.confirmation.title'))
+        end
       end
     end
   end
@@ -773,7 +820,7 @@ RSpec.describe AdvancesController, :type => :controller do
       let(:signer) { double('A Signer Name') }
       let(:call_method) { subject.send(:signer_full_name) }
       it 'returns the signer name from the session if present' do
-        session['signer_full_name'] = signer
+        session[described_class::SessionKeys::SIGNER_FULL_NAME] = signer
         expect(call_method).to be(signer)
       end
       describe 'with no signer in session' do
@@ -788,7 +835,7 @@ RSpec.describe AdvancesController, :type => :controller do
         end
         it 'sets the signer name in the session' do
           call_method
-          expect(session['signer_full_name']).to be(signer)
+          expect(session[described_class::SessionKeys::SIGNER_FULL_NAME]).to be(signer)
         end
         it 'returns the signer name' do
           expect(call_method).to be(signer)
@@ -800,6 +847,61 @@ RSpec.describe AdvancesController, :type => :controller do
       it 'sets @html_class to `white-background`' do
         subject.send(:set_html_class)
         expect(assigns[:html_class]).to eq('white-background')
+      end
+    end
+
+    describe '`advance_confirmation_link_data`' do
+      let(:past_date) { Time.zone.today - rand(1..99).days }
+      describe 'when there are no `advance_confirmations` passed' do
+        it "returns `[#{I18n.t('advances.confirmation.in_progress')}]` if the trade date is today" do
+          expect(subject.send(:advance_confirmation_link_data, Time.zone.today, [])).to eq([I18n.t('advances.confirmation.in_progress')])
+        end
+        it "returns `[#{I18n.t('advances.confirmation.not_available')}]` if the trade date is not today" do
+          expect(subject.send(:advance_confirmation_link_data, past_date, [])).to eq([I18n.t('advances.confirmation.not_available')])
+        end
+      end
+      describe 'when there is 1 `advance_confirmation` passed' do
+        let(:advance) do
+          {
+            advance_number: rand(1000..9999),
+            confirmation_number: rand(1000..9999)
+          }
+        end
+        let(:call_method) { subject.send(:advance_confirmation_link_data, past_date, [advance]) }
+        it "returns an array within an array, whose first member is `#{I18n.t('global.download')}`"  do
+          expect(call_method.first.first).to eq(I18n.t('global.download'))
+        end
+        it 'returns an array within an array, whose second member is the properly constructed `advances_confirmation_path`'  do
+          path = advances_confirmation_path(advance_number: advance[:advance_number], confirmation_number: advance[:confirmation_number])
+          expect(call_method.first.second).to eq(path)
+        end
+      end
+      describe 'when there is more than 1 `advance_confirmation` passed' do
+        advance_builder = {
+          advance_number: rand(1000..9999),
+          confirmation_number: rand(1000..9999),
+          confirmation_date: Time.zone.today - rand(1..99).days
+        }
+        let(:advances) { [advance_builder, advance_builder, advance_builder] }
+        let(:call_method) { subject.send(:advance_confirmation_link_data, past_date, advances) }
+        it 'returns a result for each advance it is passed' do
+          n = rand(1..10)
+          advances = []
+          n.times { advances << advance_builder }
+          expect(subject.send(:advance_confirmation_link_data, past_date, advances).length).to eq(n)
+        end
+        it 'returns an array of arrays, each of whose first member is the correctly dated download string' do
+          call_method.each_with_index do |result, i|
+            date = fhlb_date_standard_numeric(advances[i][:confirmation_date])
+            expect(result.first).to eq(I18n.t('advances.confirmation.download_date', date: date))
+          end
+        end
+        it 'returns an array of arrays, each of whose second member is the properly constructed `advances_confirmation_path`'  do
+          call_method.each_with_index do |result, i|
+            path = advances_confirmation_path(advance_number: advances[i][:advance_number], confirmation_number: advances[i][:confirmation_number])
+            expect(result.second).to eq(path)
+          end
+        end
       end
     end
   end

@@ -35,46 +35,51 @@ describe MAPI::Shared::Utils::ClassMethods do
   end
   
   describe 'fetch_hashes' do
-    let(:logger) { double('logger') }
+    let(:logger) { double(Logger) }
     let(:sql)    { double('sql') }
-    let(:cursor) { double('cursor') }
-    let(:hash1)  { double('hash1') }
-    let(:hash2)  { double('hash2') }
-    let(:hash3)  { double('hash3') }
-    let(:hash4)  { { "A" =>  1,    "B" => "2",   "C" => "3.0" } }
-    let(:hash5)  { { "A" => "1",   "B" => "2.0", "C" =>  3    } }
-    let(:hash6)  { { "A" => "1.0", "B" =>  2,    "C" => "3"   } }
-    let(:hash7)  { { "A" =>  1,    "B" =>  2,    "C" =>  3    } }
-    let(:hash8)  { { "a" =>  1,    "b" =>  2,    "c" =>  3    } }
+    let(:cursor) { double(OCI8::Cursor) }
+    let(:mapping) { double(Hash) }
+    let(:downcase) { double('Should Downcase') }
+    let(:hashes) { [double(Hash), double(Hash), double(Hash)]}
+    let!(:mapped_hashes) do
+      hashes.collect do |hash|
+        mapped = double(Hash)
+        allow(subject).to receive(:map_hash_values).with(hash, anything, anything).and_return(mapped)
+        mapped
+      end
+    end
+    let(:call_method) { subject.fetch_hashes(logger, sql, mapping, downcase)}
 
     before do
       allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
+      allow(cursor).to receive(:fetch_hash).and_return(*([*hashes, nil]))
     end
 
-    it 'executes a SQL query and performs fetch_hash on the resulting cursor' do
-      allow(cursor).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
-      expect(subject.fetch_hashes(logger, sql)).to eq( [hash1, hash2, hash3] )
+    it 'executes a SQL query' do
+      expect(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
+      call_method
     end
-    it 'handles the map_values parameter properly' do
-      allow(cursor).to receive(:fetch_hash).and_return(hash4, hash5, hash6, nil)
-      expect(subject.fetch_hashes(logger, sql, {to_i: %w(A B C)})).to eq( [hash7, hash7, hash7] )
+    it 'calls `fetch_hash` on the results cursor until nil is receieved' do
+      expect(cursor).to receive(:fetch_hash).and_return(*([*hashes, nil])).exactly(hashes.length + 1)
+      call_method
     end
-    it 'should honour the downcase_keys argument' do
-      allow(cursor).to receive(:fetch_hash).and_return({ 'A' => hash1}, { 'B' => hash2}, {'C' => hash3}, nil)
-      expect(subject.fetch_hashes(logger, sql, {}, true)).to eq([{'a' => hash1}, {'b' => hash2}, {'c' => hash3}])
+    it 'calls `map_hash_values` on each returned row' do
+      hashes.each do |hash|
+        expect(subject).to receive(:map_hash_values).with(hash, mapping, downcase)
+      end
+      call_method
     end
-    it 'should handle both the map_keys and downcase_keys arguments properly' do
-      allow(cursor).to receive(:fetch_hash).and_return(hash4, hash5, hash6, nil)
-      expect(subject.fetch_hashes(logger, sql, {to_i: %w(A B C)}, true)).to eq([hash8, hash8, hash8])
+    it 'returns the mapped results' do
+      expect(call_method).to eq(mapped_hashes)
     end
     it 'returns an empty array if the SQL query yields no results' do
       allow(cursor).to receive(:fetch_hash).and_return(nil)
-      expect(subject.fetch_hashes(logger, sql, {}, true)).to eq([])
+      expect(call_method).to eq([])
     end
     it 'logs an error for exceptions' do
       allow(cursor).to receive(:fetch_hash).and_raise(exception)
       expect(logger).to receive(:error).with(exception_message)
-      subject.fetch_hashes(logger, sql)
+      call_method
     end
   end
 
@@ -202,6 +207,117 @@ describe MAPI::Shared::Utils::ClassMethods do
       it 'returns the blocks result' do
         expect(call_method).to be(block_value)
       end
+    end
+  end
+
+  describe '`fake_hashes` method' do
+    let(:filename) { double('A Filename') }
+    let(:call_method) { subject.fake_hashes(filename) }
+    let(:hashes) { [double(Hash), double(Hash)] }
+    let!(:indifferent_hashes) do
+      hashes.collect do |hash|
+        indifferent = double(Hash)
+        allow(hash).to receive(:with_indifferent_access).and_return(indifferent)
+        indifferent
+      end
+    end
+    before do
+      allow(subject).to receive(:fake).with(filename).and_return(hashes)
+    end
+
+    it 'calls `fake` with the supplied filename' do
+      expect(subject).to receive(:fake).with(filename)
+      call_method
+    end
+    it 'calls `with_indifferent_access` on each hash returned from `fake`' do
+      hashes.each do |hash|
+        expect(hash).to receive(:with_indifferent_access)
+      end
+      call_method
+    end
+    it 'returns the converted hashes' do
+      expect(call_method).to eq(indifferent_hashes)
+    end
+  end
+
+  describe '`should_fake?` method' do
+    let(:app) { double(MAPI::ServiceApp, environment: SecureRandom.hex) }
+    let(:call_method) { subject.should_fake?(app) }
+    it 'returns true if the `environment` is not production' do
+      expect(call_method).to be(true)
+    end
+    it 'returns false if the `environment` is production' do
+      allow(app).to receive(:environment).and_return(:production)
+      expect(call_method).to be(false)
+    end
+  end
+
+  describe '`map_hash_values` method' do
+    let(:mapping_proc) { Proc.new() {} }
+    let(:operation) { :an_operation }
+    let(:missing_key) { SecureRandom.hex }
+    let(:unmapped_key) { SecureRandom.hex }
+    let(:procd_key) { SecureRandom.hex }
+    let(:operation_keys) { [SecureRandom.hex, SecureRandom.hex] }
+    let(:mapping) { {
+      operation => [*operation_keys, missing_key],
+      mapping_proc => [procd_key]
+    } }
+    let(:hash) { {
+      operation_keys.first => double('A Value'),
+      operation_keys.last => double('A Value'),
+      procd_key => double('A Value'),
+      unmapped_key => double('A Value')
+    } }
+    let(:upcased_hash) { {
+      SecureRandom.hex.upcase => double('A Value'),
+      SecureRandom.hex.upcase => double('A Value')
+    } }
+    let(:call_method) { subject.map_hash_values(hash, mapping, true) }
+    
+    it 'returns a new hash with the keys downcased if `downcase` is true' do
+      downcased_keys = upcased_hash.keys.collect{|x| x.downcase}
+      expect(subject.map_hash_values(upcased_hash, [], true).keys).to eq(downcased_keys)
+    end
+    it 'does not downcase the keys if `downcase` is false' do
+      expect(subject.map_hash_values(upcased_hash, [], false).keys).to eq(upcased_hash.keys)
+    end
+    it 'calls the method named in the keys of `mapping` on each key of the `hash` that is found in the mapping value for that key' do
+      operation_keys.each do |key|
+        expect(hash[key]).to receive(operation).and_return(double('A Mapped Value'))
+      end
+      call_method
+    end
+    it 'does nothing to hash keys not found in the `mapping`' do
+      expect(call_method[unmapped_key]).to be(hash[unmapped_key])
+    end
+    it 'calls `call` on any operation in the `mapping` that responds, passing in the current value of the hash for the key' do
+      expect(mapping_proc).to receive(:call).with(hash[procd_key])
+      call_method
+    end
+    it 'handles nil values in the hash' do
+      hash = {foo: nil}
+      expect{subject.map_hash_values(hash, mapping, false)}.not_to raise_error
+    end
+    it 'assigns missing keys a value of nil in the hash' do
+      operation_keys.each do |key|
+        allow(hash[key]).to receive(operation).and_return(double('A Mapped Value'))
+      end
+      expect(call_method[missing_key]).to eq(nil)
+    end
+    it 'returns the mapped hash' do
+      mapped_values = [double('A Mapped Value'), double('A Mapped Value'), double('A Mapped Value')]
+      operation_keys.each_with_index do |key, i|
+        allow(hash[key]).to receive(operation).and_return(mapped_values[i])
+      end
+      expect(mapping_proc).to receive(:call).with(hash[procd_key]).and_return(mapped_values[2])
+      expect(call_method).to eq({
+                                  operation_keys.first => mapped_values[0],
+                                  operation_keys.last => mapped_values[1],
+                                  procd_key => mapped_values[2],
+                                  unmapped_key => hash[unmapped_key],
+                                  missing_key => nil
+                                })
     end
   end
 end

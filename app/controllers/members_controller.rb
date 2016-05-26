@@ -12,7 +12,7 @@ class MembersController < ApplicationController
   end
 
   def switch_member
-    session['member_id'] = nil
+    session[SessionKeys::MEMBER_ID] = nil
     redirect_to members_select_member_path
   end
 
@@ -26,8 +26,8 @@ class MembersController < ApplicationController
     member_id = params[:member_id].to_i
     member = @members.find { |member| member[:id] == member_id }
     raise 'invalid member ID!' unless member
-    session['member_id'] = member_id
-    session['member_name'] = member[:name]
+    session[SessionKeys::MEMBER_ID] = member_id
+    session[SessionKeys::MEMBER_NAME] = member[:name]
     store_location_for(:user, reports_profile_path) if params[:visit_profile]
     redirect_to after_sign_in_path_for(current_user)
   end

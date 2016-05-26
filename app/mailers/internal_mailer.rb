@@ -23,7 +23,7 @@ class InternalMailer < ActionMailer::Base
     @user = user_name_from_user(user)
     mail(subject: I18n.t('errors.emails.stale_rate.subject'))
   end
-  
+
   def exceeds_rate_band(rate_info, request_id, user)
     @rate_info = rate_info
     @request_id = request_id
@@ -47,13 +47,21 @@ class InternalMailer < ActionMailer::Base
     mail(subject: I18n.t('emails.long_term_advance.subject', amount: fhlb_formatted_currency(@amount, html: false), term: @term))
   end
 
+  def quick_report_status(start_time, end_time, completed, total)
+    @start_time = start_time
+    @end_time = end_time
+    @completed = completed
+    @total = total
+    mail(subject: I18n.t('emails.quick_report_status.subject', completed: @completed, total: @total))
+  end
+
   protected
 
   def user_name_from_user(user)
     return user if user.is_a?(String)
 
     begin
-      name = user.display_name 
+      name = user.display_name
     rescue
       nil
     end

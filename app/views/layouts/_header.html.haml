@@ -30,7 +30,14 @@
                 %li= link_to(t('advances.manage_advances.title'), advances_manage_path)
       - if feature_enabled?('securities')
         %li{class: ('active-nav-item' if active_nav == :securities)}<>
-          = link_to(t('securities.title'), manage_securities_path)
+          = link_to(t('securities.title'), '#', class: 'nav-menu')
+          .nav-dropdown
+            .nav-dropdown-row
+              .nav-dropdown-column
+                %h2= t('securities.title')
+                %ul
+                  %li= link_to(t('securities.manage.title'), securities_manage_path)
+                  %li= link_to(t('securities.requests.title'), securities_requests_path)
       %li{class: ('active-nav-item' if active_nav == :reports)}<>
         = link_to(t('reports.title'), reports_path, class: 'nav-menu')
         .nav-dropdown

@@ -1,5 +1,7 @@
 class AdvancesController < ApplicationController
   include ReportsHelper
+  include StreamingHelper
+  include CustomFormattingHelper
 
   before_action do
     set_active_nav(:advances)
@@ -26,8 +28,14 @@ class AdvancesController < ApplicationController
     render :error
   end
 
+  def confirmation
+    render nothing: true
+    MemberBalanceService.new(current_member_id, request).advance_confirmation(params[:advance_number],params[:confirmation_number], &stream_attachment_processor(response))
+  end
+
   def manage
-    column_headings = [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), t('advances.status'), t('advances.rate'), t('common_table_headings.current_par') + ' ($)']
+    column_headings = [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), t('advances.rate'), t('common_table_headings.current_par') + ' ($)']
+    column_headings << t('advances.confirmation.title') if feature_enabled?('advance-confirmation')
     @advances_data_table = {
       :column_headings => column_headings,
       :rows => []
@@ -37,17 +45,26 @@ class AdvancesController < ApplicationController
       raise ActiveRecord::RecordNotFound unless job_status
       active_advances_response = JSON.parse(job_status.result_as_string).collect! {|o| o.with_indifferent_access}
       job_status.destroy
-
       raise StandardError, "There has been an error and AdvancesController#manage_advances has encountered nil. Check error logs." if active_advances_response.nil?
       rows = active_advances_response.collect do |row|
         columns = []
         row.each do |value|
-          if value[0]=='interest_rate'
+          key = value[0].to_sym
+          if key == :interest_rate
             columns << {type: :index, value: value[1]}
-          elsif value[0]=='current_par'
-              columns << {type: :number, value: value[1]}
-          elsif value[0]=='trade_date' || value[0]=='funding_date' || (value[0]=='maturity_date' and value[1] != 'Open')
+          elsif key == :current_par
+            columns << {type: :number, value: value[1]}
+          elsif key == :trade_date || key == :funding_date || (key == :maturity_date and value[1] != 'Open')
             columns << {type: :date, value: value[1]}
+          elsif key == :advance_confirmation
+            if feature_enabled?('advance-confirmation')
+              cell_value = advance_confirmation_link_data(row[:trade_date], value[1])
+              columns << {type: :link_list, value: cell_value}
+            else
+              next
+            end
+          elsif key == :status
+            next
           else
             columns << {value: value[1]}
           end
@@ -267,11 +284,29 @@ class AdvancesController < ApplicationController
     @advance_request
   end
 
-  def signer_full_name
-    session['signer_full_name'] ||= EtransactAdvancesService.new(request).signer_full_name(current_user.username)
-  end
-
   def set_html_class
     @html_class = 'white-background'
+  end
+
+  def advance_confirmation_link_data(trade_date, advance_confirmations)
+    today = Time.zone.today
+    trade_date = trade_date.to_date
+    case advance_confirmations.length
+    when 0
+      if trade_date == today
+        [I18n.t('advances.confirmation.in_progress')]
+      else
+        [I18n.t('advances.confirmation.not_available')]
+      end
+    when 1
+      advance = advance_confirmations.first
+      [[I18n.t('global.download'), advances_confirmation_path(advance_number: advance[:advance_number], confirmation_number: advance[:confirmation_number])]]
+    else
+      advance_confirmations.collect do |advance|
+        date = fhlb_date_standard_numeric(advance[:confirmation_date])
+        path = advances_confirmation_path(advance_number: advance[:advance_number], confirmation_number: advance[:confirmation_number])
+        [I18n.t('advances.confirmation.download_date', date: date), path]
+      end
+    end
   end
 end

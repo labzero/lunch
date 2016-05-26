@@ -256,7 +256,28 @@ describe DatePickerHelper do
         expect(preset[:start_date]).to be <= max_date
       end
     end
-
+    describe '`most_recent` preset' do
+      let(:most_recent_preset) { helper.date_picker_single(start_date, min_date, max_date).select {|preset| preset[:id] == :most_recent}.first }
+      it 'adds a preset for the `max_date` if its not today' do
+        expect(most_recent_preset).to be_present
+      end
+      it 'has the `max_date` for its `start_date`' do
+        expect(most_recent_preset[:start_date]).to be(max_date)
+      end
+      it 'has the `max_date` for its `end_date`' do
+        expect(most_recent_preset[:end_date]).to be(max_date)
+      end
+      it 'has the `max_date` for its label' do
+        formatted_max_date = double(Date)
+        allow(helper).to receive(:fhlb_date_standard_numeric).with(max_date).and_return(formatted_max_date)
+        expect(most_recent_preset[:label]).to be(formatted_max_date)
+      end
+      it 'does not add a preset for the `max_date` if its today' do
+        presets = helper.date_picker_single(start_date, min_date, Time.zone.today).each do |preset|
+          expect(preset[:id]).to_not be(:most_recent)
+        end
+      end
+    end
   end
 
 end

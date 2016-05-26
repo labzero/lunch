@@ -76,8 +76,17 @@ if !custom_host
     end
   end
 
-  def find_available_port
-    server = TCPServer.new('127.0.0.1', 0)
+  def find_available_port(port_list=nil)
+    port_list ||= [0]
+    shuffled_list = Array.wrap(port_list).shuffle.each
+    begin
+      try_port = shuffled_list.next
+      server = TCPServer.new('127.0.0.1', try_port)
+    rescue Errno::EADDRINUSE
+      retry
+    rescue StopIteration
+      raise ServiceLaunchError.new('could not find free port')
+    end
     server.addr[1]
   ensure
     server.close if server

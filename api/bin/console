@@ -6,6 +6,7 @@ require 'optparse'
 require 'rack/test'
 require 'irb'
 require 'irb/completion'
+require 'pp'
 
 Bundler.setup # don't auto require all gems
 
