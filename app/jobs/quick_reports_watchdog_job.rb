@@ -4,9 +4,9 @@ class QuickReportsWatchdogJob < FhlbJob
   POLLING_INTERVAL = 10.seconds.freeze
   TIMEOUT = 10.minutes.freeze
 
-  def perform(members, period=QuickReportSet.current_period)
+  def perform(member_ids, period=QuickReportSet.current_period)
     get_start_time
-    total = members.sum { |member| member.quick_report_list.size }
+    total = member_ids.sum { |id| Member.new(id).quick_report_list.size }
     completed = 0
     loop do
       break if (completed = QuickReportSet.for_period(period).completed.count) >= total

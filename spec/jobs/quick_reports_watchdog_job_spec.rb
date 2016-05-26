@@ -1,13 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe QuickReportsWatchdogJob, type: :job do
-  let(:now) { double(Time) }
+  let(:now) { instance_double(Time) }
   let(:total) { rand(10..100) }
   let(:completed) { rand(0..9) }
-  let(:period) { double('A Period') }
-  let(:quick_report) { double('A Quick Report') }
-  let(:member) { double('A Member', quick_report_list: Array.new(rand(1..5)) { quick_report }) }
-  let(:members) { Array.new(rand(1..5)) { member } }
+  let(:period) { instance_double('A Period') }
+  let(:member_hash) { { id: SecureRandom.hex } }
+  let(:members) { Array.new(rand(1..5)) { member_hash } }
+  let(:member) { instance_double(Member, quick_report_list: Array.new(rand(1..5)) { quick_report }) }
   let(:run_job) { subject.perform(members, period) }
   let(:quick_report_status) { double('A QuickReport Status') }
   describe 'class level behavior' do
@@ -35,22 +35,27 @@ RSpec.describe QuickReportsWatchdogJob, type: :job do
   end
   describe '`perform` method' do
     before do
-      allow(members).to receive(:sum).and_yield(member).and_return(total)
+      allow(members).to receive(:sum).and_yield(member_hash).and_return(total)
     end
-    it 'calls sum and yields' do
-      expect(members).to receive(:sum).and_yield(member)
+    it 'invokes job with an array of members' do
+      expect(subject).to receive(:perform).with(members, period)
+      run_job
+    end
+    it 'calls `sum` and yields' do
+      expect(members).to receive(:sum).and_yield(member_hash)
       run_job
     end
     it "calls sum on members' `quick_report_list`s" do
       allow(members).to receive(:sum) do |*args, &block|
-        expect(args[0].quick_report_list).to receive(:size)
+        expect(Member.class).to receive(:new).with(args[0]['id']).and_return(member)
+        expect(member.quick_report_list).to receive(:size)
         block.call
       end
       run_job
     end
     it 'returns the sum of `quick_report_list`s fromt the block' do
       allow(members).to receive(:sum) do |*args, &block|
-        expect(block.call).to eq(members.sum { |m| m.quick_report_list.size })
+        expect(block.call).to eq(members.sum { |m| Member.new(m['id']).quick_report_list.size })
       end
       run_job
     end
