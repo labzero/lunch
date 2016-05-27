@@ -283,3 +283,9 @@ Scenario: User sees borrowing capacity summary module in the right column for ad
   Then I should not see the borrowing capacity summary
   Given I am on the add advance stock purchase screen
   Then I should not see the borrowing capacity summary
+
+@jira-mem-1577
+Scenario: User navigates to the select rate page from the Manage Advances page
+  Given I am on the "Manage Advances" advances page
+  When I click the Add Advance button
+  Then I should see the add advance rate table

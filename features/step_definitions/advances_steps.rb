@@ -307,3 +307,7 @@ end
 Then(/^I should see an Advance Confirmation column in the data table$/) do
   page.assert_selector('.manage-advances-table th', text: I18n.t('advances.confirmation.title'), exact: true)
 end
+
+When(/^I click the Add Advance button$/) do
+  page.find('.advances-header-buttons a', text: I18n.t('advances.add_advance.nav').upcase, exact: true).click
+end

@@ -79,7 +79,11 @@
 
 .advances-header-buttons {
   float: right;
-  margin-top: 32px;
+  margin-top: 35px;
+  .secondary-button {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
 }
 
 .advances-main-body {
