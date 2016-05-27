@@ -3123,11 +3123,44 @@ RSpec.describe ReportsController, :type => :controller do
     end
   end
 
-  describe 'GET account_summary', :vcr do
+  describe 'GET account_summary' do
     let(:member_id) {6}
     let(:make_request) { get :account_summary }
     let(:now) { Date.new(2015, 1, 12).to_time }
-    let(:profile) {MemberBalanceService.new(member_id, ActionDispatch::TestRequest.new).profile}
+    let(:financing_percentage) { rand(0..100) / 100 }
+    let(:maximum_term) { rand(1..48) }
+    let(:total_assets) { double(Float) }
+    let(:total_financing_available) { double(Float) }
+    let(:approved_long_term_credit) { double(Float) }
+    let(:credit_outstanding) { { total: double(Float),
+                                 standard: double(Float),
+                                 sbc: double(Float),
+                                 swaps_credit: double(Float),
+                                 swaps_notational: double(Float) } }
+    let(:forward_commitments) { double(Float) }
+    let(:remaining_financing_available) { double(Float) }
+    let(:capital_stock) { { stock_owned: double(Float),
+                            activity_based_requirement: double(Float),
+                            remaining_stock: double(Float),
+                            remaining_leverage: double(Float) } }
+    let(:collateral_borrowing_capacity) { {
+      standard: { total: double(Float), remaining: double(Float) },
+      sbc: { total_market: double(Float),
+             remaining_market: double(Float),
+             total_borrowing: double(Float),
+             remaining_borrowing: double(Float) } } }
+    let(:profile) { {
+      financing_percentage: financing_percentage,
+      maximum_term: maximum_term,
+      total_assets: total_assets,
+      total_financing_available: total_financing_available,
+      approved_long_term_credit: approved_long_term_credit,
+      credit_outstanding: credit_outstanding,
+      forward_commitments: forward_commitments,
+      collateral_borrowing_capacity: collateral_borrowing_capacity,
+      capital_stock: capital_stock,
+      remaining_financing_available: remaining_financing_available,
+    } }
     let(:member_name) { double('A Name') }
     let(:sta_number) { double('STA Number') }
     let(:fhfa_number) { double('FHFA Number') }
@@ -3137,79 +3170,229 @@ RSpec.describe ReportsController, :type => :controller do
       allow(subject).to receive(:current_member_id).and_return(member_id)
       allow(Time).to receive_message_chain(:zone, :now).and_return(now)
       allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member_details)
+      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile)
     end
 
     it_behaves_like 'a report that can be downloaded', :account_summary, [:pdf]
     it_behaves_like 'a report with instance variables set in a before_filter', :account_summary
     it_behaves_like 'a controller action with an active nav setting', :account_summary, :reports
-    it 'should render the account_summary view' do
+    it 'should render the `account_summary` view' do
       make_request
       expect(response.body).to render_template('account_summary')
     end
-
-    it 'raises an error if the report is disabled' do
-      allow(controller).to receive(:report_disabled?).with(ReportsController::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true)
-      expect {make_request}.to raise_error(/Report Disabled/)
-    end
-    it 'assigns @report_name' do
+    it 'assigns `@report_name`' do
       make_request
       expect(assigns[:report_name]).to eq(I18n.t('reports.pages.account_summary.title'))
     end
-    it 'assigns @intraday_datetime' do
+    it 'assigns `@intraday_datetime`' do
       make_request
       expect(assigns[:intraday_datetime]).to eq(now)
     end
-    it 'assigns @credit_datetime' do
+    it 'assigns `@credit_datetime`' do
       make_request
       expect(assigns[:credit_datetime]).to eq(now)
     end
-    it 'assigns @collateral_notice to true if the collateral_delivery_status is `Y`' do
+    it 'assigns `@collateral_notice` to true if the collateral_delivery_status is `Y`' do
       profile[:collateral_delivery_status] = 'Y'
-      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile)
       make_request
       expect(assigns[:collateral_notice]).to be(true)
     end
-    it 'assigns @collateral_notice to false if the collateral_delivery_status is `N`' do
+    it 'assigns `@collateral_notice` to false if the collateral_delivery_status is `N`' do
       profile[:collateral_delivery_status] = 'N'
-      allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile)
       make_request
       expect(assigns[:collateral_notice]).to be(false)
     end
-    it 'assigns @sta_number' do
+    it 'assigns `@sta_number`' do
       make_request
       expect(assigns[:sta_number]).to be(sta_number)
     end
-    it 'assigns @fhfa_number' do
+    it 'assigns `@fhfa_number`' do
       make_request
       expect(assigns[:fhfa_number]).to be(fhfa_number)
     end
-    it 'assigns @member_name' do
+    it 'assigns `@member_name`' do
       make_request
       expect(assigns[:member_name]).to be(member_name)
     end
-    it 'assigns @financing_availability' do
-      make_request
-      expect(assigns[:financing_availability]).to include(:rows, :footer)
+    context 'financing availability' do
+      it 'assigns `@financing_availability`' do
+        make_request
+        expect(assigns[:financing_availability]).to include(:rows, :footer)
+      end
+      [ I18n.t('reports.pages.account_summary.financing_availability.asset_percentage'),
+        I18n.t('reports.pages.account_summary.financing_availability.maximum_term'),
+        I18n.t('reports.pages.account_summary.financing_availability.total_assets'),
+        I18n.t('reports.pages.account_summary.financing_availability.total_financing_availability'),
+        I18n.t('reports.pages.account_summary.financing_availability.approved_credit'),
+        I18n.t('reports.pages.account_summary.financing_availability.credit_outstanding'),
+        I18n.t('reports.pages.account_summary.financing_availability.forward_commitments') ].each_with_index do |column_label, row_index|
+        it "assigns the column label for row #{row_index}" do
+          make_request
+          expect(assigns[:financing_availability][:rows][row_index][:columns][0][:value]).to eq(column_label)
+        end
+      end
+      it 'assigns values in column' do
+        make_request
+        [ financing_percentage * 100,
+          maximum_term,
+          total_assets,
+          total_financing_available,
+          approved_long_term_credit,
+          credit_outstanding[:total],
+          forward_commitments ].each_with_index do |value, row_index|
+          expect(assigns[:financing_availability][:rows][row_index][:columns][1][:value]).to eq(value)
+        end
+      end
+      it 'does not assign asset percentage if it is nil' do
+        profile[:financing_percentage] = nil
+        make_request
+        expect(assigns[:financing_availability][:rows][0][:columns][1][:value]).to be(nil)
+      end
+      it 'assigns the footer label' do
+        make_request
+        expect(assigns[:financing_availability][:footer][0][:value]).to eq(
+          I18n.t('reports.pages.account_summary.financing_availability.remaining_financing_availability'))
+      end
+      it 'assigns the footer value' do
+        make_request
+        expect(assigns[:financing_availability][:footer][1][:value]).to eq(remaining_financing_available)
+      end
+      context 'MPF credit availability' do
+        let(:mpf_credit_available) { double(Float, :> => true) }
+        before do
+          profile[:mpf_credit_available] = mpf_credit_available
+        end
+        it 'assigns mpf credit avialable label if present' do
+          make_request
+          expect(assigns[:financing_availability][:rows][-2][:columns][0][:value]).to eq(
+            I18n.t('reports.pages.account_summary.financing_availability.mpf_credit_available'))
+        end
+        it 'assigns mpf credit avialable value if present' do
+          make_request
+          expect(assigns[:financing_availability][:rows][-2][:columns][1][:value]).to eq(mpf_credit_available)
+        end
+      end
     end
-    it 'assigns @credit_outstanding' do
-      make_request
-      expect(assigns[:credit_outstanding]).to include(:rows, :footer)
+    context 'credit outstanding' do
+      let(:investments) { double(Float, :> => true) }
+      let(:mpf_credit) { double(Float, :> => true) }
+      before do
+        profile[:credit_outstanding][:investments] = investments
+        profile[:credit_outstanding][:mpf_credit] = mpf_credit
+      end
+      it 'assigns @credit_outstanding' do
+        make_request
+        expect(assigns[:credit_outstanding]).to include(:rows, :footer)
+      end
+      [ I18n.t('reports.pages.account_summary.credit_outstanding.standard_advances'),
+        I18n.t('reports.pages.account_summary.credit_outstanding.sbc_advances'),
+        I18n.t('reports.pages.account_summary.credit_outstanding.swaps_credit'),
+        I18n.t('reports.pages.account_summary.credit_outstanding.swaps_notational'),
+        I18n.t('reports.pages.account_summary.credit_outstanding.investments'),
+        I18n.t('reports.pages.account_summary.credit_outstanding.letters_of_credit'),
+        I18n.t('reports.pages.account_summary.credit_outstanding.mpf_credit') ].each_with_index do |column_label, row_index|
+        it "assigns the column label for row #{row_index}" do
+          make_request
+          expect(assigns[:credit_outstanding][:rows][row_index][:columns][0][:value]).to eq(column_label)
+        end
+      end
+      it 'assigns values in column' do
+        make_request
+        [ :standard, :sbc, :swaps_credit, :swaps_notational, :investments, :letters_of_credit, :mpf_credit].each_with_index do |value, row_index|
+          expect(assigns[:credit_outstanding][:rows][row_index][:columns][1][:value]).to eq(credit_outstanding[value])
+        end
+      end
+      it 'assigns the footer label' do
+        make_request
+        expect(assigns[:credit_outstanding][:footer][0][:value]).to eq(
+          I18n.t('reports.pages.account_summary.credit_outstanding.title'))
+      end
+      it 'assigns the footer value' do
+        make_request
+        expect(assigns[:credit_outstanding][:footer][1][:value]).to eq(credit_outstanding[:total])
+      end
     end
-    it 'assigns @standard_collateral' do
-      make_request
-      expect(assigns[:standard_collateral]).to include(:rows)
+    context 'standard collateral' do
+      it 'assigns `@standard_collateral`' do
+        make_request
+        expect(assigns[:standard_collateral]).to include(:rows)
+      end
+      [ I18n.t('reports.pages.account_summary.collateral_borrowing_capacity.standard.total'),
+        I18n.t('reports.pages.account_summary.collateral_borrowing_capacity.standard.remaining')].each_with_index do |column_label, row_index|
+        it "assigns the column label for row #{row_index}" do
+          make_request
+          expect(assigns[:standard_collateral][:rows][row_index][:columns][0][:value]).to eq(column_label)
+        end
+      end
+      it 'assigns values in column' do
+        make_request
+        [ :total, :remaining ].each_with_index do |value, row_index|
+          expect(assigns[:standard_collateral][:rows][row_index][:columns][1][:value]).to eq(
+            collateral_borrowing_capacity[:standard][value])
+        end
+      end
     end
-    it 'assigns @sbc_collateral' do
-      make_request
-      expect(assigns[:sbc_collateral]).to include(:rows)
+    context 'sbc collateral' do
+      it 'assigns `@sbc_collateral`' do
+        make_request
+        expect(assigns[:sbc_collateral]).to include(:rows)
+      end
+      [ I18n.t('reports.pages.account_summary.collateral_borrowing_capacity.sbc.total_market'),
+        I18n.t('reports.pages.account_summary.collateral_borrowing_capacity.sbc.remaining_market'),
+        I18n.t('reports.pages.account_summary.collateral_borrowing_capacity.sbc.total'),
+        I18n.t('reports.pages.account_summary.collateral_borrowing_capacity.sbc.remaining') ].each_with_index do |column_label, row_index|
+        it "assigns the column label for row #{row_index}" do
+          make_request
+          expect(assigns[:sbc_collateral][:rows][row_index][:columns][0][:value]).to eq(column_label)
+        end
+      end
+      it 'assigns values in column' do
+        make_request
+        [ :total_market, :remaining_market, :total_borrowing, :remaining_borrowing ].each_with_index do |value, row_index|
+          expect(assigns[:sbc_collateral][:rows][row_index][:columns][1][:value]).to eq(collateral_borrowing_capacity[:sbc][value])
+        end
+      end
     end
-    it 'assigns @collateral_totals' do
-      make_request
-      expect(assigns[:collateral_totals]).to include(:rows)
+    context 'collateral totals' do
+      it 'assigns `@collateral_totals`' do
+        make_request
+        expect(assigns[:collateral_totals]).to include(:rows)
+      end
+      [ I18n.t('reports.pages.account_summary.collateral_borrowing_capacity.totals.total'),
+        I18n.t('reports.pages.account_summary.collateral_borrowing_capacity.totals.remaining')].each_with_index do |column_label, row_index|
+        it "assigns the column label for row #{row_index}" do
+          make_request
+          expect(assigns[:collateral_totals][:rows][row_index][:columns][0][:value]).to eq(column_label)
+        end
+      end
+      it 'assigns values in column' do
+        make_request
+        [ :total, :remaining ].each_with_index do |value, row_index|
+          expect(assigns[:collateral_totals][:rows][row_index][:columns][1][:value]).to eq(
+            collateral_borrowing_capacity[value])
+        end
+      end
     end
-    it 'assigns @capital_stock_and_leverage' do
-      make_request
-      expect(assigns[:capital_stock_and_leverage]).to include(:rows)
+    context 'capital stock and leverage' do
+      it 'assigns `@capital_stock_and_leverage`' do
+        make_request
+        expect(assigns[:capital_stock_and_leverage]).to include(:rows)
+      end
+      [ I18n.t('reports.pages.account_summary.capital_stock.stock_owned'),
+        I18n.t('reports.pages.account_summary.capital_stock.stock_requirement'),
+        I18n.t('reports.pages.account_summary.capital_stock.stock'),
+        I18n.t('reports.pages.account_summary.capital_stock.leverage') ].each_with_index do |column_label, row_index|
+        it "assigns the column label for row #{row_index}" do
+          make_request
+          expect(assigns[:capital_stock_and_leverage][:rows][row_index][:columns][0][:value]).to eq(column_label)
+        end
+      end
+      it 'assigns values in column' do
+        make_request
+        [ :stock_owned, :activity_based_requirement, :remaining_stock, :remaining_leverage ].each_with_index do |value, row_index|
+          expect(assigns[:capital_stock_and_leverage][:rows][row_index][:columns][1][:value]).to eq(capital_stock[value])
+        end
+      end
     end
     it 'assigns @date' do
       make_request
@@ -3218,6 +3401,21 @@ RSpec.describe ReportsController, :type => :controller do
     it 'assigns @now' do
       make_request
       expect(assigns[:now]).to be(now)
+    end
+    describe 'report disabled in web admin' do
+      before do
+        allow(subject).to receive(:report_disabled?).and_return(true)
+      end
+      it 'sets @collateral_notice to false' do
+        make_request
+        expect(assigns[:collateral_notice]).to be(false)
+      end
+      [ :sta_number, :fhfa_number, :member_nae ].each do |instance_var|
+        it "sets @#{instance_var} to nil" do
+          make_request
+          expect(assigns[instance_var]).to be(nil)
+        end
+      end
     end
     context do
       before { allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile) }
