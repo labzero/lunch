@@ -1,0 +1,48 @@
+- @page_title = t('global.page_meta_title', title: @title)
+.securities.row
+  .securities-header
+    %h1= @title
+  .securities-main-body.securities-release
+    .column-9x3-left
+      = form_tag(securities_submit_release_path, class: 'securities-submit-release-form') do |f|
+        %section.securities-broker-instructions
+          %h2= t('securities.release.broker_instructions')
+          .input-field-container-horizontal
+            %label{for: 'release_transaction_code'}= t('securities.release.transaction_code.label')
+            = render 'shared/dropdown', dropdown_name: 'release_transaction_code', default_value: @transaction_code_dropdown.first.last, default_text: @transaction_code_dropdown.first.first, dropdown_options: @transaction_code_dropdown
+          .input-field-container-horizontal
+            %label{for: 'release_settlement_type'}= t('securities.release.settlement_type.label')
+            = render 'shared/dropdown', dropdown_name: 'release_settlement_type', default_value: @settlement_type_dropdown.first.last, default_text: @settlement_type_dropdown.first.first, dropdown_options: @settlement_type_dropdown
+          .input-field-container-horizontal
+            %span= t('common_table_headings.trade_date')
+            = render 'shared/date_picker', form: '.manage-securities-form', single_date_picker: true
+          .input-field-container-horizontal
+            %span= t('common_table_headings.settlement_date')
+            = render 'shared/date_picker', form: '.manage-securities-form', single_date_picker: true
+        %section.securities-delivery-instructions
+          %h2= t('securities.release.delivery_instructions.label')
+          = render 'shared/dropdown', dropdown_name: 'securities_release_delivery_instructions', default_value: @delivery_instructions_dropdown.first.last, default_text: @delivery_instructions_dropdown.first.first, dropdown_options: @delivery_instructions_dropdown
+          .securities-delivery-instructions-fields{data: {'selected-delivery-instruction' => @delivery_instructions_dropdown.first.last}}
+            .securities-delivery-instructions-field.securities-delivery-instructions-field-physical
+              = render 'shared/input_field', form_builder: f, field_name: :agent_name, label: t('securities.release.delivery_instructions.agent_name'), horizontal: true
+              = render 'shared/input_field', form_builder: f, field_name: :agent_address, label: t('securities.release.delivery_instructions.agent_name'), horizontal: true
+              = render 'shared/input_field', form_builder: f, field_name: :further_credit, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true
+            .securities-delivery-instructions-field.securities-delivery-instructions-field-fed
+              .securities-fed-wire-address-fields
+                %p= t('securities.release.clearing_agent')
+                = render 'shared/input_field', form_builder: f, field_name: :fed_wire_address_part_1
+                %span /
+                = render 'shared/input_field', form_builder: f, field_name: :fed_wire_address_part_2
+              = render 'shared/input_field', form_builder: f, field_name: :aba_number, label: t('securities.release.delivery_instructions.aba'), horizontal: true
+              = render 'shared/input_field', form_builder: f, field_name: :further_credit, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true
+            .securities-delivery-instructions-field.securities-delivery-instructions-field-dtc
+              = render 'shared/input_field', form_builder: f, field_name: :participant_number, label: t('securities.release.delivery_instructions.participant_number'), horizontal: true
+              = render 'shared/input_field', form_builder: f, field_name: :further_credit, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true
+            .securities-delivery-instructions-field.securities-delivery-instructions-field-mutual-fund
+              = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_name, label: t('securities.release.delivery_instructions.mutual_fund'), horizontal: true
+              = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_account_number, label: t('securities.release.delivery_instructions.account_number'), horizontal: true
+        %section.securities-display
+          = render 'reports/reports_table', table_class: 'securities-release-table', table_data: @securities_table_data, sortable: false, disable_auto_width: true
+        .securities-actions
+          = link_to(t('global.delete'), securities_manage_path, class: 'secondary-button')
+          = submit_tag(t('securities.release.submit_authorization'), class: 'primary-button')

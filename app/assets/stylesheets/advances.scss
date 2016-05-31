@@ -1,10 +1,3 @@
-%add-advance-bordered-section-styling {
-  border: 1px solid $light-blue;
-  border-radius: $default-border-radius;
-  padding: 20px;
-  margin-bottom: 20px;
-}
-
 %add-advance-cell-selected {
   color: $white;
   .add-advance-cell-wrapper {
@@ -397,7 +390,7 @@
     }
   }
   fieldset {
-    @extend %add-advance-bordered-section-styling;
+    @extend %bordered-section;
     background: $light-gray;
     p {
       margin: 0 0 10px 0;
@@ -578,18 +571,18 @@
 
 .add-advance-capstock {
   .add-advance-body {
-    @extend %add-advance-bordered-section-styling;
+    @extend %bordered-section;
   }
 }
 
 .add-advance-preview {
   .add-advance-summary {
-    @extend %add-advance-bordered-section-styling;
+    @extend %bordered-section;
   }
 }
 
 .advance-rates-table-wrapper {
-  @extend %add-advance-bordered-section-styling;
+  @extend %bordered-section;
   padding: 0;
   &[data-active-term-type="vrc"] {
     tbody {
@@ -661,7 +654,7 @@
 
 .add-advance-borrowing-capacity {
   padding: 20px 18px;
-  @extend %add-advance-bordered-section-styling;
+  @extend %bordered-section;
   .add-advance-borrowing-capacity-label {
     @extend %typography-module-tiny-data-label;
     margin: 0;

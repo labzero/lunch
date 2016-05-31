@@ -30,7 +30,7 @@
   }
 }
 
-.manage-securities-form {
+.manage-securities-form, .securities-submit-release-form {
   input[type=submit] {
     float: right;
     color: $white;
@@ -56,4 +56,130 @@
 .manage-securities-table-actions {
   @extend %clearfix;
   margin-bottom: 15px;
+}
+
+.securities-release {
+  h2 {
+    margin-bottom: 20px;
+  }
+  section {
+    @extend %bordered-section;
+  }
+  .input-field-container {
+    width: 180px;
+  }
+  .input-field-container-horizontal {
+    display: block;
+    float: none;
+    margin: 0 0 6px;
+    label, span {
+      color: $medium-gray;
+      line-height: 30px;
+      vertical-align: top;
+      margin-right: 20px;
+    }
+  }
+}
+
+.securities-broker-instructions {
+  @extend %pseudoelement-clearfix;
+  .input-field-container-horizontal {
+    @extend %pseudoelement-clearfix;
+    width: 50%;
+    float: left;
+    text-align: right;
+    &:nth-of-type(odd) {
+      .input-field-container {
+        margin-right: 10px;
+      }
+    }
+    &:nth-of-type(even) {
+      .input-field-container {
+        margin-right: 0;
+      }
+    }
+    &:nth-of-type(3), &:nth-of-type(4) {
+      margin-bottom: 0;
+    }
+    .input-field-container {
+      text-align: left;
+    }
+  }
+}
+
+.securities-delivery-instructions {
+  @extend %pseudoelement-clearfix;
+  .input-field-container-horizontal {
+    margin-bottom: 10px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.securities-delivery-instructions-fields {
+  width: 420px;
+  float: right;
+  text-align: right;
+  &[data-selected-delivery-instruction="dtc"] {
+    .securities-delivery-instructions-field-dtc {
+      display: block;
+    }
+  }
+  &[data-selected-delivery-instruction="physical"] {
+    .securities-delivery-instructions-field-physical {
+      display: block;
+    }
+  }
+  &[data-selected-delivery-instruction="fed"] {
+    .securities-delivery-instructions-field-fed {
+      display: block;
+    }
+  }
+  &[data-selected-delivery-instruction="mutual_fund"] {
+    .securities-delivery-instructions-field-mutual-fund {
+      display: block;
+    }
+  }
+}
+
+.securities-delivery-instructions-field {
+  display: none;
+  .input-field-container-horizontal {
+    span {
+      margin-right: 0;
+    }
+  }
+}
+
+.securities-fed-wire-address-fields {
+  color: $medium-gray;
+  margin-bottom: 6px;
+  p {
+    text-align: left;
+  }
+  span:nth-of-type(2) {
+    line-height: 30px;
+    vertical-align: top;
+    margin: 0 18px;
+  }
+}
+
+.securities-release-table {
+  margin-bottom: 0;
+  th, td {
+    @include table-cell-treatment;
+    &:nth-child(1) {
+      width: 100px;
+    }
+    &:nth-child(3), &:nth-child(4) {
+      width: 150px;
+    }
+  }
+}
+
+.securities-actions {
+  .primary-button, .secondary-button {
+    padding: 7px 40px;
+  }
 }

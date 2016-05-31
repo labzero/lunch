@@ -86,6 +86,7 @@ en:
     prepare_download: Please wait while we prepare your download. This may take up to 60 seconds.
     cancel_download: Cancel Download
     download: Download
+    delete: Delete
     prepare_table: Please wait while we retrieve this data.
     pin: PIN
     token: Token Code
@@ -184,6 +185,7 @@ en:
     security_description: Security Description
     coupon_rate: Coupon Rate
     original_par_value: Original Par Value
+    original_par: Original Par
     price: Price
     price_date: Price Date
     custody_account_number: Custody Account Number
@@ -1159,6 +1161,39 @@ en:
       authorized:
         title: Authorized Requests
         description: Authorized requests are displayed for 7 days after settlement.
+    release:
+      title: Release Securities
+      add_securities: Add Securities
+      broker_instructions: Broker Instructions
+      pledge_account: Pledge Account
+      transaction_code:
+        label: Transcation Code
+        standard: Standard
+        repo: Repo
+      pledge_type: Pledge Type
+      settlement_type:
+        label: Settlement Type
+        free: Free
+        vs_payment: Vs. Payment
+      delivery_instructions:
+        label: Delivery Instructions
+        physical_securities: Physical Securities
+        fed: Fed
+        dtc: DTC
+        mutual_fund: Mutual Fund
+        internal: Internal Transfer
+        agent_name: "Receiving Bank/Agent's Name"
+        agent_address: "Receving Bank/Agent's Address"
+        further_credit: For Further Credit to Account No.
+        fed_wire_address: "Clearing Agent's Fed Wire Address:"
+        aba: ABA No.
+        participant_number: Clearing Agent's Participant No.
+        mutual_fund: Mutual Fund Company
+        account_number: Account No.
+      clearing_agent: "Clearing Agent's Fed Wire Address:"
+      further_credit: For Further Credit to Account No.
+      settlement_amount: Settlement Amount
+      submit_authorization: Submit for Authorization
   reports:
     meta_title: FHLB - Reports
     title: Reports

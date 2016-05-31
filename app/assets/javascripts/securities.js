@@ -21,4 +21,9 @@ $(function() {
       $submitButton.attr('disabled', true);
     };
   });
+
+  // Value of data attribute used in CSS to show/hide appropriate 'delivery-instructions-field'
+  $('select[name=securities_release_delivery_instructions]').on('change', function(){
+    $('.securities-delivery-instructions-fields').attr('data-selected-delivery-instruction', $(this).val());
+  });
 });
