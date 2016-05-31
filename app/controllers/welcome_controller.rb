@@ -93,8 +93,8 @@ class WelcomeController < ApplicationController
   protected
 
   def get_revision
-    revision = `cat ./REVISION 2>/dev/null`.strip
-    unless revision.empty?
+    revision = ENV['DEPLOY_REVISION']
+    unless !revision || revision.empty?
       revision
     else
       false

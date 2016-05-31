@@ -64,10 +64,12 @@ module FhlbMember
       require Rails.root.join('lib', 'redis_helper')
       require Rails.root.join('app', 'models', 'cache_configuration')
 
+
+      cache_namespace = ::CacheConfiguration::NAMESPACE + (ENV['DEPLOY_REVISION'].present? ? "-#{ENV['DEPLOY_REVISION']}" : '')
       ENV['CACHE_REDIS_URL'] ||= if ENV['REDIS_URL']
-        ::RedisHelper.add_url_namespace(ENV['REDIS_URL'], ::CacheConfiguration::NAMESPACE)
+        ::RedisHelper.add_url_namespace(ENV['REDIS_URL'], cache_namespace)
       else
-        "redis://localhost:6379/#{::CacheConfiguration::NAMESPACE}"
+        "redis://localhost:6379/#{cache_namespace}"
       end
 
       config.cache_store = :redis_store,

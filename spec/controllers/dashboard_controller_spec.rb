@@ -109,11 +109,11 @@ RSpec.describe DashboardController, :type => :controller do
       before do
         allow(RatesService).to receive(:new).and_return(rates_service_instance)
         allow(rates_service_instance).to receive(:overnight_vrc).and_return(market_overview_data)
-        allow(Rails.cache).to receive(:fetch)
         allow(CacheConfiguration).to receive(:key)
         allow(CacheConfiguration).to receive(:expiry)
         allow(CacheConfiguration).to receive(:key).with(:market_overview).and_return(cache_key)
         allow(CacheConfiguration).to receive(:expiry).with(:market_overview).and_return(cache_expiry)
+        allow(Rails.cache).to receive(:fetch).and_call_original
       end
       it 'assigns `@market_overview` with data from cache' do
         allow(Rails.cache).to receive(:fetch).with(cache_key, expires_in: cache_expiry).and_yield.and_return(market_overview_data)
@@ -145,9 +145,12 @@ RSpec.describe DashboardController, :type => :controller do
       expect(subject).to receive(:calculate_gauge_percentages).once
       get :index
     end
-    it 'assigns @current_overnight_vrc' do
+    it 'assigns @current_overnight_vrc from the cache' do
+      rate = double('A Rate')
+      allow(Rails.cache).to receive(:fetch).and_call_original
+      allow(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:overnight_vrc)).and_return({rate: rate})
       get :index
-      expect(assigns[:current_overnight_vrc]).to be_kind_of(Float)
+      expect(assigns[:current_overnight_vrc]).to be(rate)
     end
     describe 'when the `add-advance` feature is enabled' do
       before do
@@ -216,11 +219,17 @@ RSpec.describe DashboardController, :type => :controller do
         allow(contacts).to receive(:[]).with(:cam).and_return({username: cam_username})
         allow(contacts).to receive(:[]).with(:rm).and_return({username: rm_username})
         allow(subject).to receive(:find_asset)
-        allow(Rails.cache).to receive(:fetch).with(any_args).and_yield.and_return(contacts)
       end
       it 'is the result of the `members_service.member_contacts` method' do
         get :index
         expect(assigns[:contacts]).to eq(contacts)
+      end
+      it 'caches the call to the service' do
+        cached_contacts = instance_double(Hash, :[] => nil)
+        allow(Rails.cache).to receive(:fetch).and_call_original
+        allow(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:member_contacts, member_id), expires_in: CacheConfiguration.expiry(:member_contacts)).and_return(cached_contacts)
+        get :index
+        expect(assigns[:contacts]).to be(cached_contacts)
       end
       it 'contains an `image_url` for the cam' do
         allow(subject).to receive(:find_asset).with("#{cam_username}.jpg").and_return(true)
@@ -252,21 +261,8 @@ RSpec.describe DashboardController, :type => :controller do
       end
       it 'returns {} if nil is returned from the service object' do
         allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(nil)
-        allow(Rails.cache).to receive(:fetch).with(any_args).and_yield.and_return({})
         get :index
         expect(assigns[:contacts]).to eq({})
-      end
-    end
-    describe "RateService failures" do
-      let(:RatesService) {class_double(RatesService)}
-      let(:rate_service_instance) {RatesService.new(double('request', uuid: '12345'))}
-      before do
-        expect(RatesService).to receive(:new).and_return(rate_service_instance)
-      end
-      it 'should assign @current_overnight_vrc as nil if the rate could not be retrieved' do
-        expect(rate_service_instance).to receive(:current_overnight_vrc).and_return(nil)
-        get :index
-        expect(assigns[:current_overnight_vrc]).to eq(nil)
       end
     end
     describe "MemberBalanceService failures" do
@@ -773,6 +769,12 @@ RSpec.describe DashboardController, :type => :controller do
         expect(rate_service_response).to receive(:[]=).with(:rate, rate)
         get :current_overnight_vrc
       end
+    end
+    it 'caches the response' do
+      cached_response = instance_double(Hash)
+      allow(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:overnight_vrc), expires_in: CacheConfiguration.expiry(:overnight_vrc)).and_return(cached_response)
+      expect(subject).to receive(:render).with(json: cached_response).and_call_original
+      get :current_overnight_vrc
     end
   end
 

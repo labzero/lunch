@@ -19,11 +19,16 @@ unless defined?(CacheConfiguration)
         key_prefix: "users#{SEPARATOR}ldap#{SEPARATOR}groups",
         expiry: 24.hours
       },
+      overnight_vrc: {
+        key_prefix: "rates#{SEPARATOR}overnight#{SEPARATOR}vrc",
+        expiry: 30.seconds
+      },
       default: {
         key_prefix: 'default',
         expiry: 24.hours
       }
     }.freeze
+    
     def self.key(context, *key_variables)
       [config(context)[:key_prefix], *key_variables].join(SEPARATOR)
     end

@@ -66,12 +66,7 @@ class DashboardController < ApplicationController
       calculate_gauge_percentages({total: 0})
     end
 
-    current_rate = rate_service.current_overnight_vrc
-    @current_overnight_vrc = if current_rate
-      current_rate[:rate]
-    else
-      nil
-    end
+    @current_overnight_vrc = Rails.cache.fetch(CacheConfiguration.key(:overnight_vrc)).try(:[], :rate)
 
     @limited_pricing_message = MessageService.new.todays_quick_advance_message
     if feature_enabled?('add-advance')
@@ -248,10 +243,16 @@ class DashboardController < ApplicationController
   end
 
   def current_overnight_vrc
-    etransact_service = EtransactAdvancesService.new(request)
-    response = RatesService.new(request).current_overnight_vrc || {}
-    response[:etransact_active] = etransact_service.etransact_active?
-    response[:rate] = fhlb_formatted_number(response[:rate], precision: 2, html: false) if response[:rate]
+    cache_context = :overnight_vrc
+    key = CacheConfiguration.key(cache_context)
+    expiry = CacheConfiguration.expiry(cache_context)
+    response = Rails.cache.fetch(key, expires_in: expiry) do
+      etransact_service = EtransactAdvancesService.new(request)
+      details = RatesService.new(request).current_overnight_vrc || {}
+      details[:etransact_active] = etransact_service.etransact_active?
+      details[:rate] = fhlb_formatted_number(details[:rate], precision: 2, html: false) if details[:rate]
+      details
+    end
     render json: response
   end
 
