@@ -154,6 +154,9 @@
     width: 100%;
     border-bottom-right-radius: 4px;
     color: $white;
+    &[disabled] {
+      background-color: $secondary-gray;
+    }
   }
 
   .calendar-date {
