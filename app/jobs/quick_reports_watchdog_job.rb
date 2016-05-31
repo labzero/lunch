@@ -9,7 +9,7 @@ class QuickReportsWatchdogJob < FhlbJob
     total = member_ids.sum { |id| Member.new(id).quick_report_list.size }
     completed = 0
     loop do
-      break if (completed = QuickReportSet.for_period(period).completed.count) >= total
+      break if (completed = QuickReport.for_period(period).completed.count) >= total
       now = Time.zone.now
       break if now > get_start_time + TIMEOUT
       adjusted_polling_interval = POLLING_INTERVAL - (now - get_start_time)

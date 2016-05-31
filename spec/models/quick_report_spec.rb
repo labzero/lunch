@@ -39,5 +39,28 @@ RSpec.describe QuickReport, type: :model do
         expect(call_method).to be(result)
       end
     end
+    describe '`for_period`' do
+      let(:period) { '2014-04' }
+      let(:call_method) { described_class.for_period(period) }
+      it_behaves_like 'an ActiveRecord scope', :for_period
+      it 'limits the scope to only records that have an assocaition to a QuickReportSet for the provided period' do
+        expect(described_class).to receive(:joins).with(:quick_report_set).and_return(result)
+        expect(result).to receive(:where).with({quick_report_sets: {period: period}})
+        call_method
+      end
+      it 'returns the found record' do
+        allow(described_class).to receive_message_chain(:joins, :where).and_return(result)
+        expect(call_method).to be(result)
+      end
+      it 'finds the quick reports for that period' do
+        bad_report_set = QuickReportSet.create(period: '2015-01', member_id: 2)
+        bad_report_set.quick_reports.create(report_name: 'foo', report_file_name: 'foo.pdf')
+        good_report_set = QuickReportSet.create(period: period, member_id: 3)
+        good_report_set.quick_reports.create(report_name: 'foo', report_file_name: 'foo.pdf')
+        good_report_set.quick_reports.create(report_name: 'bar', report_file_name: 'bar.pdf')
+        good_report_set.quick_reports.create(report_name: 'woo', report_file_name: nil)
+        expect(call_method.all).to match(good_report_set.quick_reports)
+      end
+    end
   end
 end
