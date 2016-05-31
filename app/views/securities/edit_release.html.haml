@@ -44,5 +44,9 @@
         %section.securities-display
           = render 'reports/reports_table', table_class: 'securities-release-table', table_data: @securities_table_data, sortable: false, disable_auto_width: true
         .securities-actions
-          = link_to(t('global.delete'), securities_manage_path, class: 'secondary-button')
+          %span.secondary-button.delete-release-trigger= t('global.delete')
           = submit_tag(t('securities.release.submit_authorization'), class: 'primary-button')
+    .delete-release-flyout
+      %h2= t('securities.release.delete_request.title')
+      %button.secondary-button{data: {'flyout-action' => 'close'}}= t('securities.release.delete_request.continue')
+      = link_to(t('securities.release.delete_request.delete'), securities_manage_path, class: 'primary-button')

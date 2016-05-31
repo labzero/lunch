@@ -180,6 +180,15 @@
 
 .securities-actions {
   .primary-button, .secondary-button {
+    cursor: pointer;
     padding: 7px 40px;
   }
+}
+
+.delete-release-flyout {
+  display: none;
+}
+
+.flyout .delete-release-flyout {
+  display: block;
 }

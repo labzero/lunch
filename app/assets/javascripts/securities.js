@@ -26,4 +26,17 @@ $(function() {
   $('select[name=securities_release_delivery_instructions]').on('change', function(){
     $('.securities-delivery-instructions-fields').attr('data-selected-delivery-instruction', $(this).val());
   });
+
+  // Confirm deletion of release
+  $('.delete-release-trigger').on('click', function(e) {
+    confirmReleaseDeletion();
+  });
+
+  function confirmReleaseDeletion() {
+    $('body').flyout({
+      topContent: $('.delete-release-flyout').clone(true),
+      hideCloseButton: true
+    });
+    $('.flyout').addClass('flyout-confirmation-dialogue');
+  };
 });

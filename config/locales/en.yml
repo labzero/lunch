@@ -1194,6 +1194,10 @@ en:
       further_credit: For Further Credit to Account No.
       settlement_amount: Settlement Amount
       submit_authorization: Submit for Authorization
+      delete_request:
+        title: Delete this Release Securities request?
+        delete: Yes, Delete Request
+        continue: No, Continue
   reports:
     meta_title: FHLB - Reports
     title: Reports

@@ -106,6 +106,26 @@ When(/^I select "(.*?)" as the release delivery instructions$/) do |instructions
   page.find('.securities-delivery-instructions .dropdown li', text: text, exact: true).click
 end
 
+When(/^I click the button to delete the release$/) do
+  page.find('.delete-release-trigger').click
+end
+
+Then(/^I should see the delete release flyout dialogue$/) do
+  page.assert_selector('.flyout-confirmation-dialogue', visible: 'visible')
+end
+
+Then(/^I should not see the delete release flyout dialogue$/) do
+  page.assert_no_selector('.flyout-confirmation-dialogue', visible: 'visible')
+end
+
+When(/^I click on the button to continue with the release$/) do
+  page.find('.delete-release-flyout button', text: I18n.t('securities.release.delete_request.continue').upcase).click
+end
+
+When(/^I click on the button to delete the release$/) do
+  page.find('.delete-release-flyout a', text: I18n.t('securities.release.delete_request.delete').upcase).click
+end
+
 def delivery_instructions(text)
   case text
     when 'DTC'
