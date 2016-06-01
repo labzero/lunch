@@ -34,44 +34,56 @@ require_relative '../mapi'
 
 module MAPI
   module Console
-    include Rack::Test::Methods
+    module Methods
+      include Rack::Test::Methods
 
-    def app
-      MAPI::ServiceApp
+      def app
+        MAPI::ServiceApp
+      end
+
+      def get_json(*args, &block)
+        JSON.parse(get(*args, &block).body)
+      end
+
+      def post_json(*args, &block)
+        JSON.parse(post(*args, &block).body)
+      end
+
+      def put_json(*args, &block)
+        JSON.parse(put(*args, &block).body)
+      end
+
+      def delete_json(*args, &block)
+        JSON.parse(delete(*args, &block).body)
+      end
+
+      def head_json(*args, &block)
+        JSON.parse(head(*args, &block).body)
+      end
+
+      def patch_json(*args, &block)
+        JSON.parse(patch(*args, &block).body)
+      end
+
+      def options_json(*args, &block)
+        JSON.parse(options(*args, &block).body)
+      end
     end
-
-    def get_json(*args, &block)
-      JSON.parse(get(*args, &block).body)
-    end
-
-    def post_json(*args, &block)
-      JSON.parse(post(*args, &block).body)
-    end
-
-    def put_json(*args, &block)
-      JSON.parse(put(*args, &block).body)
-    end
-
-    def delete_json(*args, &block)
-      JSON.parse(delete(*args, &block).body)
-    end
-
-    def head_json(*args, &block)
-      JSON.parse(head(*args, &block).body)
-    end
-
-    def patch_json(*args, &block)
-      JSON.parse(patch(*args, &block).body)
-    end
-
-    def options_json(*args, &block)
-      JSON.parse(options(*args, &block).body)
+    module Savon
+      class RequestObserver
+        def notify(operation_name, builder, globals, locals)
+          globals[:log] = true
+          globals[:filters] = [:Password]
+          nil
+        end
+      end
     end
   end
 end
 
-include MAPI::Console
+include MAPI::Console::Methods
 
 current_session.header('Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"")
+Savon.observers << MAPI::Console::Savon::RequestObserver.new
 
 IRB.start
