@@ -10,8 +10,8 @@ module MAPI
 
         TODAYS_ADVANCES_ARRAY = %w(VERIFIED OPS_REVIEW OPS_VERIFIED SEC_REVIEWED SEC_REVIEW COLLATERAL_AUTH AUTH_TERM PEND_TERM)
         ACTIVE_ADVANCES_ARRAY = %w(VERIFIED OPS_REVIEW OPS_VERIFIED COLLATERAL_AUTH AUTH_TERM PEND_TERM)
-        TODAYS_CREDIT_ARRAY = TODAYS_ADVANCES_ARRAY + %w(TERMINATED EXERCISED)
-        TODAYS_CREDIT_KEYS = %w(instrumentType status terminationPar fundingDate maturityDate tradeID amount rate productDescription terminationFee terminationFullPartial product subProduct terminationDate)
+        TODAYS_CREDIT_ARRAY = TODAYS_ADVANCES_ARRAY + %w(TERMINATED EXERCISED MATURED)
+        TODAYS_CREDIT_KEYS = %w(instrumentType status terminationPar tradeDate fundingDate maturityDate tradeID amount rate productDescription terminationFee terminationFullPartial product subProduct terminationDate)
 
         def self.init_trade_connection(environment)
           if environment == :production
@@ -320,11 +320,11 @@ module MAPI
               activity['fundingDate'], activity['maturityDate'] = [today_string, today_string]
             end
           end
-
           activities.each do |activity|
             instrument_type = activity['instrumentType'].to_s if activity['instrumentType'].present?
             status = activity['status'].to_s if activity['status'].present?
             termination_par = activity['terminationPar'].to_f if activity['terminationPar'].present?
+            trade_date = Time.zone.parse(activity['tradeDate']).to_date if activity['tradeDate'].present?
             funding_date = Time.zone.parse(activity['fundingDate']).to_date if activity['fundingDate'].present?
             maturity_date = Time.zone.parse(activity['maturityDate']).to_date if activity['maturityDate'].present?
             transaction_number = activity['tradeID'].to_s if activity['tradeID'].present?
@@ -343,6 +343,7 @@ module MAPI
                 transaction_number: transaction_number,
                 current_par: current_par,
                 interest_rate: decimal_to_percentage_rate(interest_rate),
+                trade_date: trade_date,
                 funding_date: funding_date,
                 maturity_date: maturity_date,
                 product_description: product_description,

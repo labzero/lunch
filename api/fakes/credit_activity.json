@@ -1,8 +1,9 @@
 [
   {
     "tradeID": 348992,
-    "amount": 52500000010,
+    "amount": 5250000021,
     "rate": null,
+    "tradeDate": "2016-05-31-07:00",
     "fundingDate": "2014-09-03-07:00",
     "maturityDate": "2015-09-03-07:00",
     "productDescription": "LC LC LC",
@@ -15,9 +16,26 @@
     "subProduct": "LC"
   },
   {
+    "tradeID": 348991,
+    "amount": 5250010,
+    "rate": null,
+    "tradeDate": "2014-09-03-07:00",
+    "fundingDate": "2014-09-03-07:00",
+    "maturityDate": "2016-06-02-07:00",
+    "productDescription": "LC LC LC",
+    "instrumentType": "LC",
+    "status": "MATURED",
+    "terminationPar": null,
+    "terminationFee": null,
+    "terminationFullPartial": null,
+    "product": "LC",
+    "subProduct": "LC"
+  },
+  {
     "tradeID": 387183,
     "amount": 10000000.0,
     "rate": 0.0022,
+    "tradeDate": "2014-09-03-07:00",
     "fundingDate": "2015-08-04-07:00",
     "maturityDate": "2015-09-03-07:00",
     "productDescription": "ADVANCE FX CONSTANT FRC - Wholeloan",
@@ -34,6 +52,7 @@
     "tradeID": 500638,
     "amount": 100.0,
     "rate": 0.0129,
+    "tradeDate": "2014-09-03-07:00",
     "fundingDate": "2015-09-03-07:00",
     "maturityDate": null,
     "productDescription": "ADVANCE OPEN VRC VRC Open - WL",

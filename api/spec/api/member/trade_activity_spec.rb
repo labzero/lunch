@@ -491,7 +491,7 @@ describe MAPI::ServiceApp do
   describe 'Todays Credit Activity' do
     string_attributes = [['instrument_type','instrumentType'], ['status', 'status'], ['transaction_number', 'tradeID'], ['product_description', 'productDescription'], ['termination_full_partial', 'terminationFullPartial'], ['product', 'product'], ['sub_product', 'subProduct']]
     float_attributes = [['termination_par', 'terminationPar'], ['current_par', 'amount'], ['interest_rate', 'rate'], ['termination_fee', 'terminationFee']]
-    date_attributes = [['funding_date', 'fundingDate'], ['maturity_date', 'maturityDate']]
+    date_attributes = [[['trade_date', 'tradeDate'], 'funding_date', 'fundingDate'], ['maturity_date', 'maturityDate']]
 
     let(:attribute) { double('attribute') }
     let(:activity) { double('activity', :[] => nil, :[]= => nil, at_css: nil) }
@@ -508,6 +508,7 @@ describe MAPI::ServiceApp do
       expect(activity[:transaction_number]).to eq('318614')
       expect(activity[:current_par]).to eq(10600000.to_f)
       expect(activity[:interest_rate]).to be_nil
+      expect(activity[:trade_date]).to eq('2013-03-19')
       expect(activity[:funding_date]).to eq('2013-03-19')
       expect(activity[:maturity_date]).to eq('2015-09-14')
       expect(activity[:product_description]).to eq('LC LC LC')

@@ -1129,9 +1129,11 @@ RSpec.describe DashboardController, :type => :controller do
 
   describe '`process_recent_activities` private method' do
     let(:future_date) { Time.zone.today + rand(1000) }
+    let(:past_date) { Time.zone.today - rand(1..1000) }
     let(:product_description) { double('product description') }
     let(:current_par) { double('current_par') }
     let(:maturity_date) { double('maturity date') }
+    let(:trade_date) { instance_double(Date) }
     let(:transaction_number) { rand(100000) }
     let(:activity) { { instrument_type: 'LC', transaction_number: transaction_number, current_par: current_par } }
     let(:activities) { [activity, activity, activity, activity, activity, activity] }
@@ -1182,13 +1184,19 @@ RSpec.describe DashboardController, :type => :controller do
       context 'matured' do
         let(:activity) { [{ instrument_type: 'LC', status: 'MATURED' }] }
         it 'displays `Matures Today` in the description' do
-          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.matures_today'))
+          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.expires_today'))
         end
       end
       context 'verified' do
-        let(:activity) { [{ instrument_type: 'LC', status: 'VERIFIED', maturity_date: future_date }] }
-        it 'displays `Matures on [Date]` in the description' do
-          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.matures_on', date: future_date))
+        let(:activity) { [{ instrument_type: 'LC', status: 'VERIFIED', maturity_date: future_date, trade_date: Time.zone.today }] }
+        it 'displays `Expires on [Date]` in the description' do
+          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.expires_on', date: future_date))
+        end
+      end
+      context 'amended' do
+        let(:activity) { [{ instrument_type: 'LC', status: 'VERIFIED', maturity_date: future_date, trade_date: past_date }] }
+        it 'displays `Amended Today` in the description' do
+          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.amended_today'))
         end
       end
       let(:letter_of_credit_with_unknown_status) { [{ instrument_type: 'LC',
@@ -1294,6 +1302,12 @@ RSpec.describe DashboardController, :type => :controller do
       context 'executed' do
         let(:advance_executed) { [{ instrument_type: 'ADVANCE', status: 'EXECUTED', maturity_date: future_date }] }
         it 'displays `Matures [Date]` if status is `EXECUTED`' do
+          expect(subject.send(:process_recent_activities, advance_executed).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_on', date: future_date))
+        end
+      end
+      context 'verified' do
+        let(:advance_executed) { [{ instrument_type: 'ADVANCE', status: 'VERIFIED', maturity_date: future_date }] }
+        it 'displays `Matures [Date]` if status is `VERIFIED`' do
           expect(subject.send(:process_recent_activities, advance_executed).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_on', date: future_date))
         end
       end

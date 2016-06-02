@@ -421,6 +421,7 @@ class DashboardController < ApplicationController
         amount = activity[:current_par]
         description = activity[:product_description]
         transaction_number = activity[:transaction_number]
+        trade_date = activity[:trade_date].to_date if activity[:trade_date]
         maturity_date = activity[:maturity_date].to_date if activity[:maturity_date]
         event = case activity[:status]
         when 'TERMINATED'
@@ -436,10 +437,20 @@ class DashboardController < ApplicationController
         when 'EXPIRED'
           t('dashboard.recent_activity.expires_today')
         when 'MATURED'
-          t('dashboard.recent_activity.matures_today')
+          if activity[:instrument_type] == 'LC'
+            t('dashboard.recent_activity.expires_today')
+          else
+            t('dashboard.recent_activity.matures_today')
+          end
         when 'VERIFIED'
           if activity[:product] == 'OPEN VRC'
             t('dashboard.open')
+          elsif activity[:instrument_type] == 'LC'
+            if trade_date == Time.zone.today
+              t('dashboard.recent_activity.expires_on', date: fhlb_date_standard_numeric(maturity_date))
+            else
+              t('dashboard.recent_activity.amended_today')
+            end
           else
             t('dashboard.recent_activity.matures_on', date: fhlb_date_standard_numeric(maturity_date))
           end
