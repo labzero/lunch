@@ -6,7 +6,7 @@ An app for groups to decide on nearby lunch options. [Check out a live version](
 
 ### Environment variables
 
-Make a copy of `.env.sample` and name it `.env`.
+Make two copies of `.env.sample`, named `.env` and `.env.prod`.
 
 `OAUTH_DOMAIN` is optional, but it allows you to restrict logins to a specific domain (such as your company's) 
 
@@ -15,7 +15,7 @@ Make a copy of `.env.sample` and name it `.env`.
 For `GOOGLE_CLIENT_*` env variables:
 
 - Create a Google Developer app in the [console](https://console.developers.google.com/).
-- Enable the Google+ API as well as the Contacts API.
+- Enable the Google+ API, Contacts API, and Google Maps JavaScript API.
 - Go to the Credentials section and create an OAuth client ID.
 - For local development:
   - Enter `http://localhost:3000` and `http://localhost:3001` as authorized JavaScript origins
@@ -52,9 +52,6 @@ npm start
 ```bash
 npm run build
 ```
-
-### Environment variables
-Copy your production `.env` file into the newly created `build` folder.
 
 ### Running
 ```bash
