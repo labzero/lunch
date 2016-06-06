@@ -876,6 +876,28 @@ RSpec.describe DashboardController, :type => :controller do
       account_overview
       expect(assigns[:borrowing_capacity_gauge]).to be_nil
     end
+    describe 'caching' do
+      it 'caches the generated data with the session id' do
+        cache_context = :account_overview
+        expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(cache_context, controller.session.id), expires_in: CacheConfiguration.expiry(cache_context)).and_call_original
+        account_overview
+      end
+      describe 'hits' do
+        let(:cache_data) { double('Cache Data') }
+        before do
+          allow(Rails.cache).to receive(:fetch).and_return(cache_data)
+          allow(controller).to receive(:populate_account_overview_view_parameters).with(cache_data)
+        end
+        it 'skips calling MemberBalanceService if the cache hits' do
+          expect(MemberBalanceService).to_not receive(:new)
+          account_overview
+        end
+        it 'skips calling MembersService if the cache hits' do
+          expect(MembersService).to_not receive(:new)
+          account_overview
+        end
+      end
+    end
     describe 'the `@account_overview_table_data` instance variable' do
       before do
         allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).and_return(profile)
@@ -1419,6 +1441,20 @@ RSpec.describe DashboardController, :type => :controller do
     end
   end
 
+  describe '`populate_account_overview_view_parameters` private method' do
+    let(:data_hash) { {table_data: double('Some Data'), gauge_data: double('Some Data')} }
+    let(:call_method) { controller.send(:populate_account_overview_view_parameters, data_hash) }
+
+    it 'assigns `@account_overview_table_data` to the `:table_data` key from the supplied data hash' do
+      call_method
+      expect(assigns[:account_overview_table_data]).to be(data_hash[:table_data])
+    end
+    it 'assigns `@borrowing_capacity_gauge` to the `:gauge_data` key from the supplied data hash' do
+      call_method
+      expect(assigns[:borrowing_capacity_gauge]).to be(data_hash[:gauge_data])
+    end
+  end
+
   describe '`populate_deferred_jobs_view_parameters` private method' do
     let(:name) { %w(foo wizz bang bar).sample }
     let(:job_status) { double('job status', update_attributes!: nil, id: job_id) }
@@ -1431,7 +1467,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:job_status_url) { double('job status url') }
     let(:load_url) { double('load url') }
     let(:uuid) { double('uuid of request') }
-    let(:call_method) { controller.send(:populate_deferred_jobs_view_parameters, {:"#{name}" => [job_klass, path]}) }
+    let(:call_method) { controller.send(:populate_deferred_jobs_view_parameters, {:"#{name}" => {job: job_klass, load_helper: path}}) }
 
     before do
       allow(controller).to receive(:current_user).and_return(current_user)
@@ -1439,34 +1475,89 @@ RSpec.describe DashboardController, :type => :controller do
       allow(controller).to receive(:send).and_call_original
       allow(controller).to receive(:send).with(path, anything)
     end
-    describe 'calling `perform_later` on the passed job_klass' do
-      it 'passes member_id as an argument' do
-        expect(job_klass).to receive(:perform_later).with(member_id, anything).and_return(double('job instance', job_status: job_status))
+
+    shared_examples 'deferred job processing' do
+      describe 'calling `perform_later` on the passed job_klass' do
+        it 'passes member_id as an argument' do
+          expect(job_klass).to receive(:perform_later).with(member_id, anything).and_return(double('job instance', job_status: job_status))
+          call_method
+        end
+        it 'passes the uuid of the request object if one is available' do
+          allow(request).to receive(:uuid).and_return(uuid)
+          expect(job_klass).to receive(:perform_later).with(anything, uuid).and_return(double('job instance', job_status: job_status))
+          call_method
+        end
+        it 'passes nil as an argument if there is no request object' do
+          expect(job_klass).to receive(:perform_later).with(anything, nil).and_return(double('job instance', job_status: job_status))
+          call_method
+        end
+      end
+      it 'updates the job_status with the user id' do
+        expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
         call_method
       end
-      it 'passes the uuid of the request object if one is available' do
-        allow(request).to receive(:uuid).and_return(uuid)
-        expect(job_klass).to receive(:perform_later).with(anything, uuid).and_return(double('job instance', job_status: job_status))
+      it 'sets a job status url instance variable' do
+        allow(controller).to receive(:job_status_url).with(job_status).and_return(job_status_url)
+        call_method
+        expect(assigns[:"#{name}_job_status_url"]).to eq(job_status_url)
+      end
+      it 'sets a load url instance variable' do
+        allow(controller).to receive(:send).with(path, {:"#{name}_job_id" => job_id}).and_return(load_url)
+        call_method
+        expect(assigns[:"#{name}_load_url"]).to eq(load_url)
+      end
+    end
+
+    describe 'when caching options have not been provided' do
+      include_examples 'deferred job processing'
+    end
+    describe 'when caching options have been provided' do
+      let(:cache_options) { {cache_key: double('Some Key'), cache_data_handler: double('Some Handler')} }
+      let(:call_method) { controller.send(:populate_deferred_jobs_view_parameters, {:"#{name}" => {job: job_klass, load_helper: path}.merge(cache_options)}) }
+      let(:cache_data) { double('Cached Data') }
+
+      before do
+        allow(controller).to receive(:send).with(cache_options[:cache_data_handler], cache_data)
+      end
+
+      it 'gets the cache key from the `cache_key` Proc if provided' do
+        key_proc = ->() {}
+        cache_options[:cache_key] = key_proc
+        expect(key_proc).to receive(:call).with(controller)
         call_method
       end
-      it 'passes nil as an argument if there is no request object' do
-        expect(job_klass).to receive(:perform_later).with(anything, nil).and_return(double('job instance', job_status: job_status))
+      it 'fetches the data from the cache using the `cache_key`' do
+        expect(Rails.cache).to receive(:fetch).with(cache_options[:cache_key])
         call_method
       end
-    end
-    it 'updates the job_status with the user id' do
-      expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
-      call_method
-    end
-    it 'sets a job status url instance variable' do
-      allow(controller).to receive(:job_status_url).with(job_status).and_return(job_status_url)
-      call_method
-      expect(assigns[:"#{name}_job_status_url"]).to eq(job_status_url)
-    end
-    it 'sets a load url instance variable' do
-      allow(controller).to receive(:send).with(path, {:"#{name}_job_id" => job_id}).and_return(load_url)
-      call_method
-      expect(assigns[:"#{name}_load_url"]).to eq(load_url)
+      it 'skips enqueuing a job if the cache returned data' do
+        allow(Rails.cache).to receive(:fetch).and_return(cache_data)
+        expect(job_klass).to_not receive(:perform_later)
+        call_method
+      end
+      it 'enqueues a job if the cache missed' do
+        expect(job_klass).to receive(:perform_later)
+        call_method
+      end
+      describe 'and the cache hits' do
+        before do
+          allow(Rails.cache).to receive(:fetch).and_return(cache_data)
+        end
+
+        it 'calls the `cache_data_handler` Proc if provided' do
+          handler_proc = ->() {}
+          cache_options[:cache_data_handler] = handler_proc
+          expect(handler_proc).to receive(:call).with(cache_data)
+          call_method
+        end
+        it 'calls the method referenced by `cache_data_handler` if its not a Proc' do
+          expect(controller).to receive(:send).with(cache_options[:cache_data_handler], cache_data)
+          call_method
+        end
+      end
+      describe 'and the cache misses' do
+        include_examples 'deferred job processing'
+      end
     end
   end
 

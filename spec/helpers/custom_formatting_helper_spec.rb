@@ -310,7 +310,7 @@ describe CustomFormattingHelper do
   describe '`fhlb_formatted_duration` method' do
     let(:duration_under_24_hours) { rand(1..86399).seconds }
     it 'throws an `ArgumentError` for negative values' do
-      expect { helper.fhlb_formatted_duration(0 - rand(42)) }.to raise_error(ArgumentError)
+      expect { helper.fhlb_formatted_duration(0 - rand(1..42)) }.to raise_error(ArgumentError)
     end
     it 'returns a valid response for zero' do
       expect(helper.fhlb_formatted_duration(0)).to eq("00:00:00")

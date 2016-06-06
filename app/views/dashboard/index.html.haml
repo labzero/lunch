@@ -17,7 +17,10 @@
                 .gauge-section{style: "width: #{number_to_percentage(details[:display_percentage], precision: 1)};", class: key == :uncollateralized ? 'financing-availability-gauge-uncollateralized' : 'financing-availability-gauge-collateralized'}
                   .inner-gauge-section
                   = render 'shared/tooltip', tooltip_data: {t("dashboard.your_account.financing_availability.#{key}") => nil, number_to_percentage(details[:percentage], precision: 1) => nil, fhlb_formatted_currency_whole(details[:amount]) => nil}
-      =render 'dashboard/dashboard_module_content_deferred', job_status_url: @account_overview_job_status_url, load_url: @account_overview_load_url
+      - if @account_overview_job_status_url
+        = render 'dashboard/dashboard_module_content_deferred', job_status_url: @account_overview_job_status_url, load_url: @account_overview_load_url
+      - else
+        = render 'dashboard/account_overview'
   .column-3
     - if policy(:advance).show?
       - if feature_enabled?('add-advance')

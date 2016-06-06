@@ -30,8 +30,16 @@ class DashboardController < ApplicationController
 
   # {action_name: [job_klass, path_helper_as_string]}
   DEFERRED_JOBS = {
-    recent_activity: [MemberBalanceTodaysCreditActivityJob, "dashboard_recent_activity_url"],
-    account_overview: [MemberBalanceProfileJob, "dashboard_account_overview_url"]
+    recent_activity: {
+      job: MemberBalanceTodaysCreditActivityJob,
+      load_helper: :dashboard_recent_activity_url
+    },
+    account_overview: {
+      job: MemberBalanceProfileJob,
+      load_helper: :dashboard_account_overview_url,
+      cache_key: ->(controller) { CacheConfiguration.key(:account_overview, controller.session.id) },
+      cache_data_handler: :populate_account_overview_view_parameters
+    }
   }.freeze
 
   QUICK_REPORT_MAPPING = {
@@ -264,60 +272,70 @@ class DashboardController < ApplicationController
   end
 
   def account_overview
-    today = Time.zone.now.to_date
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    members_service = MembersService.new(request)
+    cache_context = :account_overview
+    cached_data = Rails.cache.fetch(CacheConfiguration.key(cache_context, session.id), expires_in: CacheConfiguration.expiry(cache_context)) do
+      today = Time.zone.now.to_date
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      members_service = MembersService.new(request)
 
-    # Borrowing Capacity Gauge
-    borrowing_capacity = member_balances.borrowing_capacity_summary(today)
-    @borrowing_capacity_gauge = calculate_borrowing_capacity_gauge(borrowing_capacity) unless members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_REPORT_DATA])
+      # Borrowing Capacity Gauge
+      borrowing_capacity = member_balances.borrowing_capacity_summary(today)
+      borrowing_capacity_gauge = calculate_borrowing_capacity_gauge(borrowing_capacity) unless members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_REPORT_DATA])
 
-    profile = deferred_job_data || {}
-    profile = sanitize_profile_if_endpoints_disabled(profile.with_indifferent_access)
+      profile = deferred_job_data || {}
+      profile = sanitize_profile_if_endpoints_disabled(profile.with_indifferent_access)
 
-    # Account Overview Sub-Tables - format: [title, value, footnote(optional), precision(optional)]
-    # STA Balance Sub-Table
-    sta_balance = [
-      [[t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
-    ]
+      # Account Overview Sub-Tables - format: [title, value, footnote(optional), precision(optional)]
+      # STA Balance Sub-Table
+      sta_balance = [
+        [[t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
+      ]
 
-    # Credit Outstanding Sub-Table
-    credit_outstanding = [
-      [t('dashboard.your_account.table.credit_outstanding'), (profile[:credit_outstanding] || {})[:total]]
-    ]
+      # Credit Outstanding Sub-Table
+      credit_outstanding = [
+        [t('dashboard.your_account.table.credit_outstanding'), (profile[:credit_outstanding] || {})[:total]]
+      ]
 
-    # Remaining Borrowing Capacity Sub-Table
-    total_standard_bc = borrowing_capacity[:net_plus_securities_capacity].to_i
-    total_agency_bc = borrowing_capacity[:sbc][:collateral][:agency][:total_borrowing_capacity].to_i
-    total_aaa_bc = borrowing_capacity[:sbc][:collateral][:aaa][:total_borrowing_capacity].to_i
-    total_aa_bc = borrowing_capacity[:sbc][:collateral][:aa][:total_borrowing_capacity].to_i
-    remaining_standard_bc = borrowing_capacity[:standard_excess_capacity].to_i
-    remaining_agency_bc = borrowing_capacity[:sbc][:collateral][:agency][:remaining_borrowing_capacity].to_i
-    remaining_aaa_bc = borrowing_capacity[:sbc][:collateral][:aaa][:remaining_borrowing_capacity].to_i
-    remaining_aa_bc = borrowing_capacity[:sbc][:collateral][:aa][:remaining_borrowing_capacity].to_i
+      # Remaining Borrowing Capacity Sub-Table
+      total_standard_bc = borrowing_capacity[:net_plus_securities_capacity].to_i
+      total_agency_bc = borrowing_capacity[:sbc][:collateral][:agency][:total_borrowing_capacity].to_i
+      total_aaa_bc = borrowing_capacity[:sbc][:collateral][:aaa][:total_borrowing_capacity].to_i
+      total_aa_bc = borrowing_capacity[:sbc][:collateral][:aa][:total_borrowing_capacity].to_i
+      remaining_standard_bc = borrowing_capacity[:standard_excess_capacity].to_i
+      remaining_agency_bc = borrowing_capacity[:sbc][:collateral][:agency][:remaining_borrowing_capacity].to_i
+      remaining_aaa_bc = borrowing_capacity[:sbc][:collateral][:aaa][:remaining_borrowing_capacity].to_i
+      remaining_aa_bc = borrowing_capacity[:sbc][:collateral][:aa][:remaining_borrowing_capacity].to_i
 
-    remaining_borrowing_capacity = unless borrowing_capacity[:total_borrowing_capacity].to_i == 0
-      bc_array = [{title: t('dashboard.your_account.table.remaining_borrowing_capacity')}]
-      bc_array << [t('dashboard.your_account.table.remaining.standard'), remaining_standard_bc] unless total_standard_bc == 0
-      bc_array << [t('dashboard.your_account.table.remaining.agency'), remaining_agency_bc] unless total_agency_bc == 0
-      bc_array << [t('dashboard.your_account.table.remaining.aaa'), remaining_aaa_bc] unless total_aaa_bc == 0
-      bc_array << [t('dashboard.your_account.table.remaining.aa'), remaining_aa_bc] unless total_aa_bc == 0
-      bc_array
+      remaining_borrowing_capacity = unless borrowing_capacity[:total_borrowing_capacity].to_i == 0
+        bc_array = [{title: t('dashboard.your_account.table.remaining_borrowing_capacity')}]
+        bc_array << [t('dashboard.your_account.table.remaining.standard'), remaining_standard_bc] unless total_standard_bc == 0
+        bc_array << [t('dashboard.your_account.table.remaining.agency'), remaining_agency_bc] unless total_agency_bc == 0
+        bc_array << [t('dashboard.your_account.table.remaining.aaa'), remaining_aaa_bc] unless total_aaa_bc == 0
+        bc_array << [t('dashboard.your_account.table.remaining.aa'), remaining_aa_bc] unless total_aa_bc == 0
+        bc_array
+      end
+
+      # Remaining Financing Availability and Stock Leverage Sub-Table
+      leverage_title = if feature_enabled?('report-capital-stock-position-and-leverage')
+        [t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path]
+      else
+        t('dashboard.your_account.table.remaining.leverage')
+      end
+      other_remaining = [
+        {title: t('dashboard.your_account.table.remaining.title')},
+        [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
+        [leverage_title, (profile[:capital_stock] || {})[:remaining_leverage]]
+      ]
+
+      account_overview_table_data = {credit_outstanding: credit_outstanding, sta_balance: sta_balance, remaining_borrowing_capacity: remaining_borrowing_capacity, other_remaining: other_remaining}
+      {
+        table_data: account_overview_table_data,
+        gauge_data: borrowing_capacity_gauge
+      }
     end
 
-    # Remaining Financing Availability and Stock Leverage Sub-Table
-    leverage_title = if feature_enabled?('report-capital-stock-position-and-leverage')
-      [t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path]
-    else
-      t('dashboard.your_account.table.remaining.leverage')
-    end
-    other_remaining = [
-      {title: t('dashboard.your_account.table.remaining.title')},
-      [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
-      [leverage_title, (profile[:capital_stock] || {})[:remaining_leverage]]
-    ]
+    populate_account_overview_view_parameters(cached_data)
 
-    @account_overview_table_data = {credit_outstanding: credit_outstanding, sta_balance: sta_balance, remaining_borrowing_capacity: remaining_borrowing_capacity, other_remaining: other_remaining}
     render layout: false
   end
 
@@ -353,6 +371,11 @@ class DashboardController < ApplicationController
     @old_rate = advance_request.old_rate
     @rate_changed = advance_request.rate_changed?
     @total_amount = advance_request.total_amount
+  end
+
+  def populate_account_overview_view_parameters(data)
+    @account_overview_table_data = data[:table_data]
+    @borrowing_capacity_gauge = data[:gauge_data]
   end
 
   def advance_request_from_session(id)
@@ -517,12 +540,24 @@ class DashboardController < ApplicationController
 
   def populate_deferred_jobs_view_parameters(jobs_hash)
     jobs_hash.each do |name, args|
-      job_klass = args.first
-      path = args.last
-      job_status = job_klass.perform_later(current_member_id, (request.uuid if defined?(request))).job_status
-      job_status.update_attributes!(user_id: current_user.id)
-      instance_variable_set("@#{name}_job_status_url", job_status_url(job_status))
-      instance_variable_set("@#{name}_load_url", send(path, :"#{name}_job_id" => job_status.id))
+      cached_data = nil
+      if cache_key = args[:cache_key]
+        cache_key = cache_key.call(self) if cache_key.respond_to?(:call)
+        cached_data = Rails.cache.fetch(cache_key)
+      end
+      unless cached_data
+        job_klass = args[:job]
+        job_status = job_klass.perform_later(current_member_id, (request.uuid if defined?(request))).job_status
+        job_status.update_attributes!(user_id: current_user.id)
+        instance_variable_set("@#{name}_job_status_url", job_status_url(job_status))
+        instance_variable_set("@#{name}_load_url", send(args[:load_helper], :"#{name}_job_id" => job_status.id))
+      else
+        if args[:cache_data_handler].respond_to?(:call)
+          args[:cache_data_handler].call(cached_data)
+        else
+          send(args[:cache_data_handler], cached_data)
+        end
+      end
     end
   end
 
