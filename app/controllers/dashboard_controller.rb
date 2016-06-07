@@ -37,7 +37,7 @@ class DashboardController < ApplicationController
     account_overview: {
       job: MemberBalanceProfileJob,
       load_helper: :dashboard_account_overview_url,
-      cache_key: ->(controller) { CacheConfiguration.key(:account_overview, controller.session.id) },
+      cache_key: ->(controller) { CacheConfiguration.key(:account_overview, controller.session.id, controller.current_member_id) },
       cache_data_handler: :populate_account_overview_view_parameters
     }
   }.freeze
@@ -273,7 +273,7 @@ class DashboardController < ApplicationController
 
   def account_overview
     cache_context = :account_overview
-    cached_data = Rails.cache.fetch(CacheConfiguration.key(cache_context, session.id), expires_in: CacheConfiguration.expiry(cache_context)) do
+    cached_data = Rails.cache.fetch(CacheConfiguration.key(cache_context, session.id, current_member_id), expires_in: CacheConfiguration.expiry(cache_context)) do
       today = Time.zone.now.to_date
       member_balances = MemberBalanceService.new(current_member_id, request)
       members_service = MembersService.new(request)

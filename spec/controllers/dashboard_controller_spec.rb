@@ -877,9 +877,9 @@ RSpec.describe DashboardController, :type => :controller do
       expect(assigns[:borrowing_capacity_gauge]).to be_nil
     end
     describe 'caching' do
-      it 'caches the generated data with the session id' do
+      it 'caches the generated data with the session id and member id' do
         cache_context = :account_overview
-        expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(cache_context, controller.session.id), expires_in: CacheConfiguration.expiry(cache_context)).and_call_original
+        expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(cache_context, controller.session.id, controller.current_member_id), expires_in: CacheConfiguration.expiry(cache_context)).and_call_original
         account_overview
       end
       describe 'hits' do
