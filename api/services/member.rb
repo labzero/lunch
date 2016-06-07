@@ -322,6 +322,10 @@ module MAPI
               key :summary, 'Retrieve Advance Confirmation as data stream for a member'
               key :notes, 'Advance confirmation found by member_id, advance_number, confirmation_number'
               key :description, 'Returns an advance confirmation attachment using `rack.hijack` if available to allow streaming.'
+              key :nickname, :getAdvanceConfirmation
+              key :type, :string
+              key :format, :byte
+              key :produces, ['application/pdf']
               parameter do
                 key :paramType, :path
                 key :name, :id

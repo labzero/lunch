@@ -44,6 +44,139 @@ describe ReportsHelper do
     end
   end
 
+  describe '`sanitize_profile_if_endpoints_disabled` private method' do
+    [:total_financing_available, :sta_balance, :total, :remaining, :capital_stock, :total].each do |attr|
+      let(attr) { double(attr.to_s) }
+    end
+    let(:profile) do
+      {
+        member_id: member_id,
+        total_financing_available: total_financing_available,
+        sta_balance: sta_balance,
+        credit_outstanding: {total: total},
+        collateral_borrowing_capacity: {
+          remaining: remaining,
+          total: double(Integer),
+          standard: {
+            remaining: double(Integer),
+            total: double(Integer)
+          },
+          sbc: {
+            total_borrowing: double(Integer),
+            remaining_borrowing: double(Integer),
+            total_market: double(Integer),
+            remaining_market: double(Integer),
+            aa: {
+              total: double(Integer),
+              remaining: double(Integer),
+              total_market: double(Integer),
+              remaining_market: double(Integer)
+            },
+            aaa: {
+              total: double(Integer),
+              remaining: double(Integer),
+              total_market: double(Integer),
+              remaining_market: double(Integer)
+            },
+            agency: {
+              total: double(Integer),
+              remaining: double(Integer),
+              total_market: double(Integer),
+              remaining_market: double(Integer)
+            }
+          }
+        },
+        capital_stock: capital_stock
+      }
+    end
+    let(:empty_profile) { {credit_outstanding: {}, collateral_borrowing_capacity: {}} }
+    let(:member_id) { double('member id') }
+    let(:call_method) { helper.send(:sanitize_profile_if_endpoints_disabled, profile) }
+
+    before do
+      allow_any_instance_of(MembersService).to receive(:report_disabled?)
+    end
+
+    it 'returns `{credit_outstanding: {}, collateral_borrowing_capacity: {}}` if nil is passed in' do
+      expect(helper.send(:sanitize_profile_if_endpoints_disabled, nil)).to eq(empty_profile)
+    end
+    it 'returns `{credit_outstanding: {}, collateral_borrowing_capacity: {}}` if an empty hash is passed in' do
+      expect(helper.send(:sanitize_profile_if_endpoints_disabled, {})).to eq(empty_profile)
+    end
+    [:total_financing_available, :sta_balance, :capital_stock, [:credit_outstanding, :total], [:collateral_borrowing_capacity, :remaining]].each do |attr|
+      if attr.is_a?(Symbol)
+        it "returns the original value of `#{attr}` if no flag is set" do
+          expect(call_method[attr]).to eq(send(attr))
+        end
+      else
+        it "returns the original value of `[#{attr.first}][#{attr.last}]` if no flag is set" do
+          expect(call_method[attr.first][attr.last]).to eq(send(attr.last))
+        end
+      end
+    end
+    it 'sets the `total_financing_available` to nil if the MembersService::FINANCING_AVAILABLE_DATA flag is set' do
+      allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::FINANCING_AVAILABLE_DATA]).and_return(true)
+      expect(call_method[:total_financing_available]).to be_nil
+    end
+    it 'sets the `sta_balance` to nil if the MembersService::STA_BALANCE_AND_RATE_DATA flag is set' do
+      allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, array_including(MembersService::STA_BALANCE_AND_RATE_DATA)).and_return(true)
+      expect(call_method[:sta_balance]).to be_nil
+    end
+    it 'sets the `sta_balance` to nil if the MembersService::STA_DETAIL_DATA flag is set' do
+      allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, array_including(MembersService::STA_DETAIL_DATA)).and_return(true)
+      expect(call_method[:sta_balance]).to be_nil
+    end
+    it 'sets the `credit_outstanding.total` to nil if the MembersService::CREDIT_OUTSTANDING_DATA flag is set' do
+      allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::CREDIT_OUTSTANDING_DATA]).and_return(true)
+      expect(call_method[:credit_outstanding][:total]).to be_nil
+    end
+    it 'sets the `capital_stock` to nil if the MembersService::FHLB_STOCK_DATA flag is set' do
+      allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::FHLB_STOCK_DATA]).and_return(true)
+      expect(call_method[:capital_stock]).to be_nil
+    end
+    describe 'the MembersService::COLLATERAL_HIGHLIGHTS_DATA flag is set' do
+      before { allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA]).and_return(true) }
+      it 'sets the `collateral_borrowing_capacity.total` to nil' do
+        expect(call_method[:collateral_borrowing_capacity][:total]).to be_nil
+      end
+      it 'sets the `collateral_borrowing_capacity.remaining` to nil' do
+        expect(call_method[:collateral_borrowing_capacity][:remaining]).to be_nil
+      end
+      it 'sets the `collateral_borrowing_capacity.standard.total` to nil' do
+        expect(call_method[:collateral_borrowing_capacity][:standard][:total]).to be_nil
+      end
+      it 'sets the `collateral_borrowing_capacity.standard.remaining` to nil' do
+        expect(call_method[:collateral_borrowing_capacity][:standard][:remaining]).to be_nil
+      end
+      it 'sets the `collateral_borrowing_capacity.sbc.total_borrowing` to nil' do
+        expect(call_method[:collateral_borrowing_capacity][:sbc][:remaining_borrowing]).to be_nil
+      end
+      it 'sets the `collateral_borrowing_capacity.sbc.remaining_borrowing` to nil' do
+        expect(call_method[:collateral_borrowing_capacity][:sbc][:remaining_borrowing]).to be_nil
+      end
+      it 'sets the `collateral_borrowing_capacity.sbc.total_market` to nil' do
+        expect(call_method[:collateral_borrowing_capacity][:sbc][:total_market]).to be_nil
+      end
+      it 'sets the `collateral_borrowing_capacity.sbc.remaining_market` to nil' do
+        expect(call_method[:collateral_borrowing_capacity][:sbc][:remaining_market]).to be_nil
+      end
+      [:aa, :aaa, :agency].each do |collateral_type|
+        it "sets the `collateral_borrowing_capacity.sbc.#{collateral_type}.total` to nil" do
+          expect(call_method[:collateral_borrowing_capacity][:sbc][collateral_type][:total]).to be_nil
+        end
+        it "sets the `collateral_borrowing_capacity.sbc.#{collateral_type}.remaining` to nil" do
+          expect(call_method[:collateral_borrowing_capacity][:sbc][collateral_type][:remaining]).to be_nil
+        end
+        it "sets the `collateral_borrowing_capacity.sbc.#{collateral_type}.total_market` to nil" do
+          expect(call_method[:collateral_borrowing_capacity][:sbc][collateral_type][:total_market]).to be_nil
+        end
+        it "sets the `collateral_borrowing_capacity.sbc.#{collateral_type}.remaining_market` to nil" do
+          expect(call_method[:collateral_borrowing_capacity][:sbc][collateral_type][:remaining_market]).to be_nil
+        end
+      end
+    end
+  end
+
   describe 'the `translation_with_span` private method' do
     let(:i18n_string) { double('an I18n key') }
     let(:span_key) { double('key') }

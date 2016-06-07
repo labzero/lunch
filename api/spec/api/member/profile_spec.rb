@@ -10,7 +10,7 @@ describe MAPI::ServiceApp do
     end
     it "should return json with expected elements type" do
       expect(member_financial_position.length).to be >= 1
-      %w(total_financing_available remaining_financing_available mpf_credit_available collateral_market_value_sbc_agency collateral_market_value_sbc_aaa collateral_market_value_sbc_aa total_borrowing_capacity_standard total_borrowing_capacity_sbc_agency total_borrowing_capacity_sbc_aaa total_borrowing_capacity_sbc_aa maximum_term total_assets forward_commitments).each do |key|
+      %w(total_financing_available remaining_financing_available mpf_credit_available maximum_term total_assets forward_commitments).each do |key|
         expect(member_financial_position[key]).to be_kind_of(Integer)
       end
       expect(member_financial_position['collateral_delivery_status']).to be_kind_of(String)
@@ -45,12 +45,20 @@ describe MAPI::ServiceApp do
       expect(last_response.status).to be(404)
     end
 
+    it 'includes the `member_id` of the member in question' do
+      expect(member_financial_position['member_id']).to eq(member_id)
+    end
+
     describe 'in the production environment' do
         let(:member_position_result) {double('Oracle Result Set', fetch: nil)}
         let(:member_sta_result) {double('Oracle Result Set', fetch: nil)}
         let(:some_financial_data) do
           data = {}
-          %w(RECOM_EXPOSURE_PCT MAX_TERM TOTAL_ASSETS RHFA_ADVANCES_LIMIT REG_ADVANCES_OUTS SBC_ADVANCES_OUTS SWAP_MARKET_OUTS SWAP_NOTIONAL_PRINCIPAL UNSECURED_CREDIT LCS_OUTS MPF_CE_COLLATERAL_REQ STX_LEDGER_BALANCE CREDIT_OUTSTANDING COMMITTED_FUND_LESS_MPF AVAILABLE_CREDIT RECOM_EXPOSURE REG_BORR_CAP SBC_BORR_CAP EXCESS_REG_BORR_CAP EXCESS_SBC_BORR_CAP_AG EXCESS_SBC_BORR_CAP_AAA EXCESS_SBC_BORR_CAP_AA EXCESS_SBC_BORR_CAP SBC_MARKET_VALUE_AG SBC_MARKET_VALUE_AAA SBC_MARKET_VALUE_AA SBC_MARKET_VALUE EXCESS_SBC_MARKET_VALUE ADVANCES_OUTSTANDING MPF_UNPAID_BALANCE TOTAL_CAPITAL_STOCK MRTG_RELATED_ASSETS MRTG_RELATED_ASSETS_round100).each do |key|
+          %w(RECOM_EXPOSURE_PCT MAX_TERM TOTAL_ASSETS RHFA_ADVANCES_LIMIT REG_ADVANCES_OUTS SBC_ADVANCES_OUTS SWAP_MARKET_OUTS SWAP_NOTIONAL_PRINCIPAL UNSECURED_CREDIT LCS_OUTS MPF_CE_COLLATERAL_REQ STX_LEDGER_BALANCE CREDIT_OUTSTANDING COMMITTED_FUND_LESS_MPF AVAILABLE_CREDIT RECOM_EXPOSURE REG_BORR_CAP SBC_BORR_CAP EXCESS_REG_BORR_CAP EXCESS_SBC_BORR_CAP_AG EXCESS_SBC_BORR_CAP_AAA EXCESS_SBC_BORR_CAP_AA EXCESS_SBC_BORR_CAP SBC_MARKET_VALUE_AG SBC_MARKET_VALUE_AAA SBC_MARKET_VALUE_AA SBC_MARKET_VALUE EXCESS_SBC_MARKET_VALUE ADVANCES_OUTSTANDING MPF_UNPAID_BALANCE TOTAL_CAPITAL_STOCK MRTG_RELATED_ASSETS MRTG_RELATED_ASSETS_round100
+            SBC_BORR_CAP_AG EXCESS_SBC_BORR_CAP_AG SBC_MARKET_VALUE_AG EXCESS_SBC_MARKET_VALUE_AG
+            SBC_BORR_CAP_AA EXCESS_SBC_BORR_CAP_AA SBC_MARKET_VALUE_AA EXCESS_SBC_MARKET_VALUE_AA
+            SBC_BORR_CAP_AAA EXCESS_SBC_BORR_CAP_AAA SBC_MARKET_VALUE_AAA EXCESS_SBC_MARKET_VALUE_AAA
+          ).each do |key|
             data[key] = rand(1..1000000)
           end
           data['DELIVERY_STATUS_FLAG'] = SecureRandom.uuid
@@ -69,13 +77,6 @@ describe MAPI::ServiceApp do
           {
             'total_financing_available' => 'RECOM_EXPOSURE',
             'remaining_financing_available' => 'AVAILABLE_CREDIT',
-            'collateral_market_value_sbc_agency' => 'SBC_MARKET_VALUE_AG',
-            'collateral_market_value_sbc_aaa' => 'SBC_MARKET_VALUE_AAA',
-            'collateral_market_value_sbc_aa' => 'SBC_MARKET_VALUE_AA',
-            'total_borrowing_capacity_standard' => 'EXCESS_REG_BORR_CAP',
-            'total_borrowing_capacity_sbc_agency' => 'EXCESS_SBC_BORR_CAP_AG',
-            'total_borrowing_capacity_sbc_aaa' => 'EXCESS_SBC_BORR_CAP_AAA',
-            'total_borrowing_capacity_sbc_aa' => 'EXCESS_SBC_BORR_CAP_AA',
             'collateral_delivery_status' => 'DELIVERY_STATUS_FLAG',
             'financing_percentage' => 'RECOM_EXPOSURE_PCT',
             'maximum_term' => 'MAX_TERM',
@@ -106,6 +107,33 @@ describe MAPI::ServiceApp do
             'investments' => 'UNSECURED_CREDIT'
           }.each do |key, value_key|
             expect(member_financial_position['credit_outstanding'][key]).to eq(some_financial_data[value_key])
+          end
+        end
+
+        {
+          'agency' => {
+            'total' => 'SBC_BORR_CAP_AG',
+            'remaining' => 'EXCESS_SBC_BORR_CAP_AG',
+            'total_market' => 'SBC_MARKET_VALUE_AG',
+            'remaining_market' => 'EXCESS_SBC_MARKET_VALUE_AG'
+          },
+          'aa' => {
+            'total' => 'SBC_BORR_CAP_AA',
+            'remaining' => 'EXCESS_SBC_BORR_CAP_AA',
+            'total_market' => 'SBC_MARKET_VALUE_AA',
+            'remaining_market' => 'EXCESS_SBC_MARKET_VALUE_AA'
+          },
+          'aaa' => {
+            'total' => 'SBC_BORR_CAP_AAA',
+            'remaining' => 'EXCESS_SBC_BORR_CAP_AAA',
+            'total_market' => 'SBC_MARKET_VALUE_AAA',
+            'remaining_market' => 'EXCESS_SBC_MARKET_VALUE_AAA'
+          }
+        }.each do |collateral_type, keys|
+          keys.each do |key, field|
+            it "returns the field `#{field}` in the JSON response under `collateral_borrowing_capacity.sbc.#{collateral_type}.#{key}`" do
+              expect(member_financial_position['collateral_borrowing_capacity']['sbc'][collateral_type][key]).to eq(some_financial_data[field])
+            end
           end
         end
 

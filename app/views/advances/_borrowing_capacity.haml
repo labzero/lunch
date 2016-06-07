@@ -9,22 +9,22 @@
     %tbody
       %tr
         %td.label=t('advances.add_advance.borrowing_capacity.standard')
-        %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:standard][:total])
+        %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:standard][:remaining])
       %tr
         %td.label=t('advances.add_advance.borrowing_capacity.sbc_agency')
-        %td.value= fhlb_formated_currency_unit(profile[:total_borrowing_capacity_sbc_agency])
+        %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:sbc][:agency][:remaining])
       %tr
         %td.label=t('advances.add_advance.borrowing_capacity.sbc_aaa')
-        %td.value= fhlb_formated_currency_unit(profile[:total_borrowing_capacity_sbc_aaa])
+        %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:sbc][:aaa][:remaining])
       %tr
         %td.label=t('advances.add_advance.borrowing_capacity.sbc_aa')
-        %td.value= fhlb_formated_currency_unit(profile[:total_borrowing_capacity_sbc_aa])
+        %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:sbc][:aa][:remaining])
   %h3.add-advance-borrowing-capacity-label.remaining=t('advances.add_advance.borrowing_capacity.remaining')
   %table
     %tbody
       %tr
         %td.label=t('advances.add_advance.borrowing_capacity.financing_avail')
-        %td.value= fhlb_formated_currency_unit(profile[:total_financing_available])
+        %td.value= fhlb_formated_currency_unit(profile[:remaining_financing_available])
       %tr
         %td.label=t('advances.add_advance.borrowing_capacity.stock_leverage')
         %td.value= fhlb_formated_currency_unit(profile[:capital_stock][:remaining_leverage])

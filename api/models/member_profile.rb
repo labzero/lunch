@@ -14,7 +14,7 @@ module MAPI
         end
       end
       swagger_model :MemberFinancialProfileSBCBorrowingCapacity do
-        key :required, [:total_borrowing, :remaining_borrowing, :total_market, :remaining_market]
+        key :required, [:total_borrowing, :remaining_borrowing, :total_market, :remaining_market, :aa, :aaa, :agency]
         property :total_borrowing do
           key :type, :integer
           key :description, 'The total securities backed borrowing capacity.'
@@ -30,6 +30,37 @@ module MAPI
         property :remaining_market do
           key :type, :integer
           key :description, 'The remaining securities backed borrowing capacity market value.'
+        end
+        property :aa do
+          key :type, :MemberFinancialProfileSBCBorrowingCapacityBreakdown
+          key :description, 'The breakdown of the AA collatreal.'
+        end
+        property :aaa do
+          key :type, :MemberFinancialProfileSBCBorrowingCapacityBreakdown
+          key :description, 'The breakdown of the AAA collatreal.'
+        end
+        property :agency do
+          key :type, :MemberFinancialProfileSBCBorrowingCapacityBreakdown
+          key :description, 'The breakdown of the Agency collatreal.'
+        end
+      end
+      swagger_model :MemberFinancialProfileSBCBorrowingCapacityBreakdown do
+        key :required, [:total, :remaining, :total_market, :remaining_market]
+        property :total do
+          key :type, :integer
+          key :description, 'The total borrowing capacity for that type of collateral.'
+        end
+        property :remaining do
+          key :type, :integer
+          key :description, 'The remaining borrowing capacity for that type of collateral.'
+        end
+        property :total_market do
+          key :type, :integer
+          key :description, 'The total borrowing capacity maket value for that type of collateral.'
+        end
+        property :remaining_market do
+          key :type, :integer
+          key :description, 'The remaining borrowing capacity market value for that type of collateral.'
         end
       end
       swagger_model :MemberFinancialProfileBorrowingCapacity do
@@ -89,9 +120,12 @@ module MAPI
       swagger_model :MemberFinancialProfile do
         key :required, [
           :sta_balance, :total_financing_available, :remaining_financing_available,
-          :mpf_credit_available, :collateral_market_value_sbc_agency, :collateral_market_value_sbc_aaa,
-          :collateral_market_value_sbc_aa
+          :mpf_credit_available, :member_id
         ]
+        property :member_id do
+          key :type, :integer
+          key :description, 'The FHLB ID of the member bank this profile is for.'
+        end
         property :sta_balance do
           key :type, :number
           key :description, 'STA balance for the member for the prior day.'
@@ -107,38 +141,6 @@ module MAPI
         property :mpf_credit_available do
           key :type, :integer
           key :description, 'The MPF credit available.'
-        end
-        property :collateral_market_value_sbc_agency do
-          key :type, :integer
-          key :description, 'The market value of the securities backed Agency collateral.'
-        end
-        property :collateral_market_value_sbc_aaa do
-          key :type, :integer
-          key :description, 'The market value of the securities backed AAA collateral.'
-        end
-        property :collateral_market_value_sbc_aa do
-          key :type, :integer
-          key :description, 'The market value of the securities backed AAA collateral.'
-        end
-        property :total_borrowing_capacity_standard do
-          key :type, :integer
-          key :description, 'The total borrowing capacity of standard collateral.'
-        end
-        property :total_borrowing_capacity_sbc_agency do
-          key :type, :integer
-          key :description, 'The total borrowing capacity of securities backed Agency collateral.'
-        end
-        property :total_borrowing_capacity_sbc_aaa do
-          key :type, :integer
-          key :description, 'The total borrowing capacity of securities backed AAA collateral.'
-        end
-        property :total_borrowing_capacity_sbc_aa do
-          key :type, :integer
-          key :description, 'The total borrowing capacity of securities backed AA collateral.'
-        end
-        property :total_borrowing_capacity_sbc_aa do
-          key :type, :integer
-          key :description, 'The total borrowing capacity of securities backed AA collateral.'
         end
         property :collateral_delivery_status do
           key :type, :string

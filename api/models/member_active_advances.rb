@@ -3,7 +3,7 @@ module MAPI
     class ActiveAdvances
       include Swagger::Blocks
       swagger_model :ActiveAdvances do
-        key :required, [:trade_date, :funding_date, :maturity_date, :advance_number, :advance_type, :status, :interest_rate, :current_par, :trade_time, :confirmation]
+        key :required, [:trade_date, :funding_date, :maturity_date, :advance_number, :advance_type, :status, :interest_rate, :current_par, :trade_time, :advance_confirmation]
         property :trade_date do
           key :type, :string
           key :format, :'date-time'

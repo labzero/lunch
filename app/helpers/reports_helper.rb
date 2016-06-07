@@ -9,29 +9,34 @@ module ReportsHelper
 
   def sanitize_profile_if_endpoints_disabled(profile)
     members_service = MembersService.new(request)
-    profile = {credit_outstanding: {}, collateral_borrowing_capacity: {}} if profile.blank?
+    return {credit_outstanding: {}, collateral_borrowing_capacity: {}} if profile.blank?
 
-    if members_service.report_disabled?(current_member_id, [MembersService::FINANCING_AVAILABLE_DATA])
+    if members_service.report_disabled?(profile[:member_id], [MembersService::FINANCING_AVAILABLE_DATA])
       profile[:total_financing_available] = nil
     end
 
-    if members_service.report_disabled?(current_member_id, [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA])
+    if members_service.report_disabled?(profile[:member_id], [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA])
       profile[:sta_balance] = nil
     end
 
-    if members_service.report_disabled?(current_member_id, [MembersService::CREDIT_OUTSTANDING_DATA])
+    if members_service.report_disabled?(profile[:member_id], [MembersService::CREDIT_OUTSTANDING_DATA])
       profile[:credit_outstanding][:total] = nil
     end
 
-    if members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_HIGHLIGHTS_DATA])
-      profile[:collateral_borrowing_capacity][:remaining] = nil
-      profile[:total_borrowing_capacity_standard] = nil
-      profile[:total_borrowing_capacity_sbc_agency] = nil
-      profile[:total_borrowing_capacity_sbc_aaa] = nil
-      profile[:total_borrowing_capacity_sbc_aa] = nil
+    if members_service.report_disabled?(profile[:member_id], [MembersService::COLLATERAL_HIGHLIGHTS_DATA])
+      nil_hash = Proc.new do |hash|
+        hash.keys.each do |key|
+          if hash[key].is_a?(Hash)
+            nil_hash.call(hash[key])
+          else
+            hash[key] = nil
+          end
+        end
+      end
+      nil_hash.call(profile[:collateral_borrowing_capacity])
     end
 
-    if members_service.report_disabled?(current_member_id, [MembersService::FHLB_STOCK_DATA])
+    if members_service.report_disabled?(profile[:member_id], [MembersService::FHLB_STOCK_DATA])
       profile[:capital_stock] = nil
     end
 

@@ -12,7 +12,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="nqD9QiWIjZDZQxthKwvvonUXEP9oqxRSzsFJXzBZBgY"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       User-Agent:
@@ -25,7 +25,7 @@ http_interactions:
       Content-Type:
       - text/html;charset=utf-8
       Content-Length:
-      - '1837'
+      - '1839'
       X-Xss-Protection:
       - 1; mode=block
       X-Content-Type-Options:
@@ -35,14 +35,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.5/2016-04-26)
       Date:
-      - Tue, 10 May 2016 19:54:30 GMT
+      - Mon, 06 Jun 2016 22:50:10 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
-      string: '{"sta_balance":90349.68,"sta_update_date":"2015-02-03","total_financing_available":199771250,"remaining_financing_available":169771250,"mpf_credit_available":15000000,"collateral_market_value_sbc_agency":3584326,"collateral_market_value_sbc_aaa":0,"collateral_market_value_sbc_aa":0,"total_borrowing_capacity_standard":82911718,"total_borrowing_capacity_sbc_agency":3405110,"total_borrowing_capacity_sbc_aaa":0,"total_borrowing_capacity_sbc_aa":0,"collateral_delivery_status":"N","financing_percentage":0.3,"maximum_term":120,"total_assets":1234567890,"approved_long_term_credit":234567890.0,"forward_commitments":0,"fhfb_id":null,"cqr_rating":null,"reporting_agency":null,"credit_analyst":null,"rhfa":{"total_lt":0,"available":0},"collateral_borrowing_capacity":{"total":126850000,"remaining":86316828,"standard":{"total":123500000,"remaining":82911718},"sbc":{"total_borrowing":3350000,"remaining_borrowing":3405110,"total_market":3584326,"remaining_market":39000}},"credit_outstanding":{"total":15000000,"standard":8555000,"sbc":4900000,"swaps_credit":0,"swaps_notational":345000,"mpf_credit":0,"letters_of_credit":1200000,"investments":2500000,"total_advances_outstanding":13455000,"total_credit_products_outstanding":0,"total_advances_and_mpf":0},"capital_stock":{"stock_owned":853700,"minimum_requirement":853705,"excess_stock":22110,"surplus_stock":-128000,"activity_based_requirement":44550,"remaining_stock":853700,"remaining_leverage":28456666,"mav_stock_requirement":1234,"required_by_mpf":776655,"required_by_advances":887766},"advances":{"end_of_prior_day":0,"maturing_today_term":0,"maturing_today_on":0,"scheduled_funding_today":0,"amortizing_adjustment":0,"partial_prepayment":0,"funding_today":0,"repay_today":0,"mpf_intraday_activity":0,"mpf_loan_balance":0,"total_mpf":0,"total_advances":0,"total_advances_and_mpf":0}}'
+      string: '{"member_id":750,"sta_balance":90349.68,"sta_update_date":"2015-02-03","total_financing_available":199771250,"remaining_financing_available":169771250,"mpf_credit_available":15000000,"collateral_delivery_status":"N","financing_percentage":0.3,"maximum_term":120,"total_assets":1234567890,"approved_long_term_credit":234567890.0,"forward_commitments":0,"fhfb_id":null,"cqr_rating":5,"reporting_agency":null,"credit_analyst":null,"rhfa":{"total_lt":0,"available":0},"collateral_borrowing_capacity":{"total":126850000,"remaining":84156718,"standard":{"total":123500000,"remaining":82911718},"sbc":{"total_borrowing":3350000,"remaining_borrowing":1245000,"total_market":3584429,"remaining_market":1328415,"aa":{"total":690000,"remaining":800000,"total_market":0,"remaining_market":853600},"aaa":{"total":1300000,"remaining":540000,"total_market":0,"remaining_market":576180},"agency":{"total":1360000,"remaining":1000000,"total_market":3584326,"remaining_market":1455129}}},"credit_outstanding":{"total":15000000,"standard":8555000,"sbc":4900000,"swaps_credit":0,"swaps_notational":345000,"mpf_credit":0,"letters_of_credit":1200000,"investments":2500000,"total_advances_outstanding":13455000,"total_credit_products_outstanding":0,"total_advances_and_mpf":0},"capital_stock":{"stock_owned":853700,"minimum_requirement":853705,"excess_stock":22110,"surplus_stock":-128000,"activity_based_requirement":44550,"remaining_stock":853700,"remaining_leverage":28456666,"mav_stock_requirement":1234,"required_by_mpf":776655,"required_by_advances":887766},"advances":{"end_of_prior_day":0,"maturing_today_term":0,"maturing_today_on":0,"scheduled_funding_today":0,"amortizing_adjustment":0,"partial_prepayment":0,"funding_today":0,"repay_today":0,"mpf_intraday_activity":0,"mpf_loan_balance":0,"total_mpf":0,"total_advances":0,"total_advances_and_mpf":0}}'
     http_version: 
-  recorded_at: Tue, 10 May 2016 19:54:30 GMT
+  recorded_at: Mon, 06 Jun 2016 22:50:10 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/disabled_reports
@@ -55,7 +55,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="nqD9QiWIjZDZQxthKwvvonUXEP9oqxRSzsFJXzBZBgY"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       User-Agent:
@@ -78,14 +78,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.5/2016-04-26)
       Date:
-      - Tue, 10 May 2016 19:54:30 GMT
+      - Mon, 06 Jun 2016 22:50:10 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: "[]"
     http_version: 
-  recorded_at: Tue, 10 May 2016 19:54:30 GMT
+  recorded_at: Mon, 06 Jun 2016 22:50:10 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/disabled_reports
@@ -98,7 +98,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="nqD9QiWIjZDZQxthKwvvonUXEP9oqxRSzsFJXzBZBgY"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       User-Agent:
@@ -121,14 +121,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.5/2016-04-26)
       Date:
-      - Tue, 10 May 2016 19:54:30 GMT
+      - Mon, 06 Jun 2016 22:50:10 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: "[]"
     http_version: 
-  recorded_at: Tue, 10 May 2016 19:54:30 GMT
+  recorded_at: Mon, 06 Jun 2016 22:50:10 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/disabled_reports
@@ -141,7 +141,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="nqD9QiWIjZDZQxthKwvvonUXEP9oqxRSzsFJXzBZBgY"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       User-Agent:
@@ -164,14 +164,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.5/2016-04-26)
       Date:
-      - Tue, 10 May 2016 19:54:30 GMT
+      - Mon, 06 Jun 2016 22:50:10 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: "[]"
     http_version: 
-  recorded_at: Tue, 10 May 2016 19:54:30 GMT
+  recorded_at: Mon, 06 Jun 2016 22:50:10 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/disabled_reports
@@ -184,7 +184,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="nqD9QiWIjZDZQxthKwvvonUXEP9oqxRSzsFJXzBZBgY"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       User-Agent:
@@ -207,14 +207,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.5/2016-04-26)
       Date:
-      - Tue, 10 May 2016 19:54:30 GMT
+      - Mon, 06 Jun 2016 22:50:10 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: "[]"
     http_version: 
-  recorded_at: Tue, 10 May 2016 19:54:30 GMT
+  recorded_at: Mon, 06 Jun 2016 22:50:10 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/disabled_reports
@@ -227,7 +227,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="nqD9QiWIjZDZQxthKwvvonUXEP9oqxRSzsFJXzBZBgY"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       User-Agent:
@@ -250,14 +250,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.5/2016-04-26)
       Date:
-      - Tue, 10 May 2016 19:54:30 GMT
+      - Mon, 06 Jun 2016 22:50:10 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: "[]"
     http_version: 
-  recorded_at: Tue, 10 May 2016 19:54:30 GMT
+  recorded_at: Mon, 06 Jun 2016 22:50:10 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/disabled_reports
@@ -270,7 +270,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="nqD9QiWIjZDZQxthKwvvonUXEP9oqxRSzsFJXzBZBgY"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       User-Agent:
@@ -293,14 +293,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.5/2016-04-26)
       Date:
-      - Tue, 10 May 2016 19:54:30 GMT
+      - Mon, 06 Jun 2016 22:50:10 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: "[]"
     http_version: 
-  recorded_at: Tue, 10 May 2016 19:54:30 GMT
+  recorded_at: Mon, 06 Jun 2016 22:50:10 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/member/750/quick_advance_flag
@@ -313,7 +313,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="nqD9QiWIjZDZQxthKwvvonUXEP9oqxRSzsFJXzBZBgY"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       User-Agent:
@@ -336,14 +336,14 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.5/2016-04-26)
       Date:
-      - Tue, 10 May 2016 19:55:15 GMT
+      - Mon, 06 Jun 2016 22:50:10 GMT
       Connection:
       - Keep-Alive
     body:
       encoding: UTF-8
       string: '{"quick_advance_enabled":true}'
     http_version: 
-  recorded_at: Tue, 10 May 2016 19:55:15 GMT
+  recorded_at: Mon, 06 Jun 2016 22:50:10 GMT
 - request:
     method: get
     uri: http://localhost:3100/mapi/etransact_advances/status
@@ -356,7 +356,7 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Token token="nqD9QiWIjZDZQxthKwvvonUXEP9oqxRSzsFJXzBZBgY"
+      - Token token="wfiZWkmv1jkASPv0MEKCOqUnl7kNs3"
       X-Request-Id:
       - ''
       User-Agent:
@@ -379,7 +379,7 @@ http_interactions:
       Server:
       - WEBrick/1.3.1 (Ruby/2.2.5/2016-04-26)
       Date:
-      - Tue, 10 May 2016 19:55:15 GMT
+      - Mon, 06 Jun 2016 22:50:10 GMT
       Connection:
       - Keep-Alive
     body:
@@ -432,5 +432,5 @@ http_interactions:
         Years"},"aa":{"trade_status":true,"display_status":true,"bucket_label":"3
         Years"}}}}'
     http_version: 
-  recorded_at: Tue, 10 May 2016 19:55:15 GMT
+  recorded_at: Mon, 06 Jun 2016 22:50:10 GMT
 recorded_with: VCR 2.9.3
