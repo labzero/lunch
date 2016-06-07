@@ -2,18 +2,23 @@ import { connect } from 'react-redux';
 import { getRestaurantById } from '../selectors/restaurants';
 import { getListUiItemForId } from '../selectors/listUi';
 import { getDecision } from '../selectors/decisions';
+import { makeGetAllDecisionCountForRestaurant } from '../selectors';
 import { showModal } from '../actions/modals';
 import { removeDecision, decide } from '../actions/decisions';
 import { showMapAndInfoWindow } from '../actions/mapUi';
 import { showEditNameForm, setEditNameFormValue } from '../actions/listUi';
 import RestaurantDropdown from '../components/RestaurantDropdown';
 
-const mapStateToProps = (state, ownProps) => ({
-  restaurant: getRestaurantById(state, ownProps.id),
-  listUiItem: getListUiItemForId(state, ownProps.id),
-  decision: getDecision(state),
-  ...ownProps
-});
+const mapStateToProps = () => {
+  const getAllDecisionCountForRestaurant = makeGetAllDecisionCountForRestaurant();
+  return (state, ownProps) => ({
+    restaurant: getRestaurantById(state, ownProps.id),
+    listUiItem: getListUiItemForId(state, ownProps.id),
+    decision: getDecision(state),
+    allDecisionCount: getAllDecisionCountForRestaurant(state, ownProps.id),
+    ...ownProps    
+  });
+};
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   deleteRestaurant: () => {

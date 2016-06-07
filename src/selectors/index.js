@@ -5,6 +5,7 @@ import { getTagFilters } from './tagFilters';
 import { getTagExclusions } from './tagExclusions';
 import { getUserId, getUserById } from './users';
 import { getMapUi } from './mapUi';
+import { getDecision } from './decisions';
 import { createSelector } from 'reselect';
 
 export const getUserByVoteId = (state, voteId) => getUserById(state, getVoteById(state, voteId).user_id);
@@ -52,3 +53,15 @@ export const getFilteredRestaurants = createSelector(
     );
   }
 );
+
+export const makeGetAllDecisionCountForRestaurant = () =>
+  createSelector(
+    [getRestaurantById, getDecision],
+    (restaurant, decision) => {
+      let currentDecisionCount = parseInt(restaurant.all_decision_count, 10);
+      if (decision.restaurant_id === restaurant.id) {
+        currentDecisionCount += 1;
+      } 
+      return currentDecisionCount;
+    }
+  );

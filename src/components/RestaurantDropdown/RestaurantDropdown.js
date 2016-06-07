@@ -7,6 +7,7 @@ const RestaurantDropdown = ({
   restaurant,
   listUiItem,
   decision,
+  allDecisionCount,
   showMapAndInfoWindow,
   showEditNameForm,
   deleteRestaurant,
@@ -71,7 +72,7 @@ const RestaurantDropdown = ({
           {restaurant.all_vote_count} vote{parseInt(restaurant.all_vote_count, 10) === 1 ? '' : 's'}
         </li>
         <li className={s.stat}>
-          {restaurant.all_decision_count} decision{parseInt(restaurant.all_decision_count, 10) === 1 ? '' : 's'}
+          {allDecisionCount} decision{parseInt(allDecisionCount, 10) === 1 ? '' : 's'}
         </li>
       </DropdownMenu>
     </Dropdown>
