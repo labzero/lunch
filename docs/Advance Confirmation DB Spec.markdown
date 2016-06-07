@@ -4,7 +4,7 @@ The goal is to have an Oracle table (or view) that provides quick and efficent a
 
 ## Advance Confirmation Documents
 
-The actual confirmation documents should be PDFs, which are stored in __Amazon's S3__ storage service. This will provide fast, efficent, and distributed access to the confirmation documents, while still protecting their sensisitve nature. The files would only be readable by privilaged access keys (one of which would be used by the Member Portal). The files would only be writable by the Calypso/backend process that generates them. The Member Portal would proxy downloads of the files to ensure that only the members in the borrowing institution with the appropriate roles would be able to download a given file.
+The actual confirmation documents should be PDFs, which are stored in __Amazon's S3__ storage service. This will provide fast, efficent, and distributed access to the confirmation documents, while still protecting their sensisitve nature. The files would only be readable by privilaged access keys (one of which would be used by the Member Portal). The files would only be writable by the operational processes (Calypso and/or some other secondary process) which generate them. The Member Portal would proxy downloads of the files to ensure that only the members in the borrowing institution with the appropriate roles would be able to download a given file.
 
 ## Advance Confirmation Table
 
